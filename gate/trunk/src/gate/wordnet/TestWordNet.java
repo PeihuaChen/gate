@@ -367,7 +367,7 @@ System.out.println(iSet);
                           get(GateConstants.WORDNET_CONFIG_FILE);
     if (null == wnMain) {
       wnMain = new IndexFileWordNetImpl();
-      wnMain.setPropertyFile(new File(wnConfigFile));
+      wnMain.setPropertyUrl(new File(wnConfigFile).toURL());
       wnMain.init();
     }
   }
