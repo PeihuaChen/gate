@@ -187,8 +187,19 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       xmlDoc.append("\""+dtdFileName+"\"");
     xmlDoc.append(">\n");
     xmlDoc.append("<source_file TYPE=\"text\"");
-    if (isSourceWritten)
-      xmlDoc.append(" SOURCE=\""+ source+ "\"");
+    if (isSourceWritten) {
+      AnnotationSet docTypeAnns = document.getAnnotations(
+        GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get("DOCTYPE");
+      if (docTypeAnns == null || docTypeAnns.isEmpty())
+        xmlDoc.append(" SOURCE=\""+ source+ "\" ");
+      else {
+        Annotation docTypeAnn = (Annotation) docTypeAnns.iterator().next();
+        if (docTypeAnn.getFeatures().get("SOURCE") == null)
+          xmlDoc.append(" SOURCE=\""+ source+ "\" ");
+        else
+          xmlDoc.append(" SOURCE=\""+ docTypeAnn.getFeatures().get("SOURCE")+ "\" ");
+      }//if no doc type annotations
+    }
     xmlDoc.append("VERSION=\"1.2\" URI=\"");
     xmlDoc.append(docId);
     xmlDoc.append("-lf\">\n");
