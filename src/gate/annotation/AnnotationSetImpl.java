@@ -105,7 +105,7 @@ implements AnnotationSet
   public int size() { return annotsById.size(); }
 
   /** Find annotations by id */
-  public Annotation get(Long id) {
+  public Annotation get(Integer id) {
     return (Annotation) annotsById.get(id);
   } // get(id)
 
@@ -196,10 +196,14 @@ implements AnnotationSet
     if(nodesByOffset == null) indexByOffset();
 
     // find existing nodes
-    Node startNode =
-      (Node) ((Object[]) nodesByOffset.getClosestMatch(start))[0];
-    Node endNode =
-      (Node) ((Object[]) nodesByOffset.getClosestMatch(end))[0];
+
+Object[] nodePair = nodesByOffset.getClosestMatch(start);
+Node startNode = null, endNode = null;
+if(nodePair != null)
+    startNode = (Node) nodePair[0];
+//      (Node) ((Object[]) nodesByOffset.getClosestMatch(start))[0];
+//    Node endNode =
+//      (Node) ((Object[]) nodesByOffset.getClosestMatch(end))[0];
 
     // if appropriate nodes don't already exist, create them
     if(startNode == null || startNode.getOffset() != start)

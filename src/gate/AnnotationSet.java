@@ -22,7 +22,7 @@ public interface AnnotationSet extends Set
 
   public boolean remove(Object o);
 
-  public Annotation get(Long id);
+  public Annotation get(Integer id);
   public AnnotationSet get(String type);
   public AnnotationSet get(Set types);
   public AnnotationSet get(String type, FeatureMap constraints);
