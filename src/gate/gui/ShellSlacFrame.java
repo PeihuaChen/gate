@@ -131,6 +131,13 @@ public class ShellSlacFrame extends MainFrame {
       fileMenu.add(new XJMenuItem(action, this));
 
     } // if
+    
+    // Open All... action - open multiple files from directory
+    corpusFiller = new CorpusFillerComponent();
+    action = new PopulateCorpusAction();
+    action.putValue(action.NAME, "Open All...");
+    action.putValue(action.SHORT_DESCRIPTION,"Create multiple documents");
+    fileMenu.add(new XJMenuItem(action, this));
 
     fileMenu.add(new XJMenuItem(new CloseSelectedDocumentAction(), this));
     fileMenu.add(new XJMenuItem(new CloseAllDocumentAction(), this));
@@ -946,4 +953,73 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class HelpAboutSlugAction extends AbstractAction
 
+  
+  /**
+   * Component used to select the options for corpus populating
+   */
+  CorpusFillerComponent corpusFiller;
+
+  class PopulateCorpusAction extends AbstractAction {
+    PopulateCorpusAction() {
+      super("Populate");
+      putValue(SHORT_DESCRIPTION,
+               "Fills this corpus with documents from a directory");
+    } // PopulateCorpusAction()
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          if(corpus == null || corpusFiller == null) return;
+          corpusFiller.setExtensions(new ArrayList());
+          corpusFiller.setEncoding("");
+          boolean answer = OkCancelDialog.showDialog(
+                                  ShellSlacFrame.this,
+                                  corpusFiller,
+                                  "Select a directory and allowed extensions");
+          if(answer){
+            URL url = null;
+            try{
+              url = new URL(corpusFiller.getUrlString());
+              java.util.List extensions = corpusFiller.getExtensions();
+              ExtensionFileFilter filter = null;
+              if(extensions == null || extensions.isEmpty()) filter = null;
+              else{
+                filter = new ExtensionFileFilter();
+                Iterator extIter = corpusFiller.getExtensions().iterator();
+                while(extIter.hasNext()){
+                  filter.addExtension((String)extIter.next());
+                }
+              }
+              corpus.populate(url, filter,
+                                corpusFiller.getEncoding(),
+                                corpusFiller.isRecurseDirectories());
+            }catch(MalformedURLException mue){
+              JOptionPane.showMessageDialog(ShellSlacFrame.this,
+                                            "Invalid URL!\n " +
+                                            "See \"Messages\" tab for details!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              mue.printStackTrace(Err.getPrintWriter());
+            }catch(IOException ioe){
+              JOptionPane.showMessageDialog(ShellSlacFrame.this,
+                                            "I/O error!\n " +
+                                            "See \"Messages\" tab for details!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            }catch(ResourceInstantiationException rie){
+              JOptionPane.showMessageDialog(ShellSlacFrame.this,
+                                            "Could not create document!\n " +
+                                            "See \"Messages\" tab for details!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              rie.printStackTrace(Err.getPrintWriter());
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    } // actionPerformed(ActionEvent e)
+  } // class PopulateCorpusAction extends AbstractAction
+  
 } // class ShellSlacFrame
