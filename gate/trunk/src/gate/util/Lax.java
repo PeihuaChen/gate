@@ -32,29 +32,29 @@ public class Lax extends org.xml.sax.helpers.DefaultHandler {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-	// LAX translates XML content into method calls on this object
-	private Vector _vecHandlers = null;
+  // LAX translates XML content into method calls on this object
+  private Vector _vecHandlers = null;
 
-	private Vector _vecTags = null;
+  private Vector _vecTags = null;
 
-	private static Class[] _caNoArgs = null;
+  private static Class[] _caNoArgs = null;
 
-	private static Class[] _caAttrList = null;
+  private static Class[] _caAttrList = null;
 
-	private static Class[] _caString = null;
+  private static Class[] _caString = null;
 
-	private LaxErrorHandler _seh = null;
+  private LaxErrorHandler _seh = null;
 
   private boolean _validatingParser = false;
 
   private boolean _namespaceAwareParser = false;
 
-	// Initialize class arrays used for reflection
-	static {
-		_caNoArgs = new Class[] {};
-		_caAttrList = new Class[] {org.xml.sax.Attributes.class};
-		_caString = new Class[] {java.lang.String.class};
-	}
+  // Initialize class arrays used for reflection
+  static {
+    _caNoArgs = new Class[] {};
+    _caAttrList = new Class[] {org.xml.sax.Attributes.class};
+    _caString = new Class[] {java.lang.String.class};
+  }
 
   /**
     * Lax default constructor
@@ -177,7 +177,7 @@ public class Lax extends org.xml.sax.helpers.DefaultHandler {
   /**
     * Call all end tag methods in the handler list
     */
-  public void endElement (String uri, String sTag, String qName)
+  public void endElement (String uri, String qName, String sTag)
                                                           throws SAXException{
     int i;
     String sEndMethodName = "end" + sTag;
@@ -345,7 +345,7 @@ public class Lax extends org.xml.sax.helpers.DefaultHandler {
   /**
     * Call all start methods for this tag.
     */
-  public void startElement (String uri, String sTag,String qName,
+  public void startElement (String uri, String qName, String sTag,
                                                             Attributes alAttrs){
 
     int i;

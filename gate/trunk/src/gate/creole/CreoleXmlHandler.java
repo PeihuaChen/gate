@@ -92,7 +92,7 @@ public class CreoleXmlHandler extends DefaultHandler {
   } // endDocument
 
   /** Called when the SAX parser encounts the beginning of an XML element */
-  public void startElement (String uri, String elementName,String qName,
+  public void startElement (String uri, String qName, String elementName,
                                                              Attributes atts){
 
     if(DEBUG) {
@@ -160,7 +160,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     * they are added to the CreoleRegister when we parsed their complete
     * metadata entries.
     */
-  public void endElement (String uri, String elementName, String qName)
+  public void endElement (String uri, String qName, String elementName)
                                                     throws GateSaxException {
     if(DEBUG) Out.prln("endElement: " + elementName);
 
