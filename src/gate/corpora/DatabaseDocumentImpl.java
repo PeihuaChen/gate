@@ -1269,6 +1269,9 @@ public class DatabaseDocumentImpl extends DocumentImpl
     this.sourceUrl = (URL)initData.get("DOC_SOURCE_URL");
     this.sourceUrlStartOffset = (Long)initData.get("DOC_SOURCE_URL_START");
     this.sourceUrlEndOffset = (Long)initData.get("DOC_SOURCE_URL_END");
+    if(initData.containsKey("DOC_STRING_CONTENT"))
+      this.setStringContent((String)initData.get("DOC_STRING_CONTENT"));
+
 
     Integer nextNodeID = (Integer)initData.get("DOC_NEXT_NODE_ID");
     if (null != nextNodeID) {
