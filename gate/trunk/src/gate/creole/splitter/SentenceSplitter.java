@@ -178,70 +178,14 @@ public class SentenceSplitter extends AbstractProcessingResource{
   public java.net.URL getTransducerURL() {
     return transducerURL;
   }
-  public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
-      v.removeElement(l);
-      statusListeners = v;
-    }
-  }
-  public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      statusListeners = v;
-    }
-  }
-
   DefaultGazetteer gazetteer;
   Transducer transducer;
   private java.net.URL transducerURL;
-  private transient Vector statusListeners;
-  private transient Vector progressListeners;
   private String encoding;
   private java.net.URL gazetteerListsURL;
   private gate.Document document;
-  protected void fireStatusChanged(String e) {
-    if (!Main.batchMode && statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
-      }
-    }
-  }
-  public synchronized void removeProgressListener(ProgressListener l) {
-    if (!Main.batchMode && progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
-      v.removeElement(l);
-      progressListeners = v;
-    }
-  }
-  public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      progressListeners = v;
-    }
-  }
-  protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
-      }
-    }
-  }
-  protected void fireProcessFinished() {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
-      }
-    }
-  }
+
+
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
@@ -271,25 +215,6 @@ public class SentenceSplitter extends AbstractProcessingResource{
   }
   public String getOutputASName() {
     return outputASName;
-  }
-
-  class CustomProgressListener implements ProgressListener{
-    CustomProgressListener(int start, int end){
-      this.start = start;
-      this.end = end;
-    }
-    public void progressChanged(int i){
-      if (!Main.batchMode)
-        fireProgressChanged(start + (end - start) * i / 100);
-    }
-
-    public void processFinished(){
-      if (!Main.batchMode)
-        fireProgressChanged(end);
-    }
-
-    int start;
-    int end;
   }
 
 

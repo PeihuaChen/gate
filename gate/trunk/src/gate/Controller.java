@@ -26,4 +26,16 @@ import gate.creole.*;
 public interface Controller extends Collection, ProcessingResource
 {
 
+//  /**
+//   * Causes this controller to execute all the contained PRs according to its
+//   * internal strategy.
+//   */
+//  public void execute();
+//
+//  /**
+//   * Causes this controller to stop its execution as soon as feasible possible.
+//   */
+//  public void interrupt();
+
+//  public boolean isInterrupted();
 } // interface Controller

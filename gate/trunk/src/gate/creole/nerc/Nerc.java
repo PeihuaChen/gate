@@ -31,7 +31,7 @@ import gate.event.*;
 /** NERC stands for Named-Entity Recognition Component. This class wraps
   * various of GATE's builtin CREOLE components to form an NE recogniser.
   */
-public class Nerc extends SerialController {
+public class Nerc extends AbstractProcessingResource {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     try{
@@ -64,7 +64,6 @@ public class Nerc extends SerialController {
       tokeniser = (DefaultTokeniser)Factory.createResource(
                     "gate.creole.tokeniser.DefaultTokeniser",
                     params, features, listeners);
-      this.add(tokeniser);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
       if (!Main.batchMode) {
         fireProgressChanged(10);
@@ -88,7 +87,6 @@ public class Nerc extends SerialController {
       gazetteer = (DefaultGazetteer)Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer",
                       params, features, listeners);
-      this.add(gazetteer);
       gazetteer.setName("Gazetteer " + System.currentTimeMillis());
       if (!Main.batchMode) {
         fireProgressChanged(50);
@@ -114,7 +112,6 @@ public class Nerc extends SerialController {
       splitter = (SentenceSplitter)Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter",
                       params, features, listeners);
-      this.add(splitter);
       splitter.setName("Splitter " + System.currentTimeMillis());
       if (!Main.batchMode) {
         fireProgressChanged(60);
@@ -139,7 +136,6 @@ public class Nerc extends SerialController {
       tagger = (POSTagger)Factory.createResource(
                       "gate.creole.POSTagger",
                       params, features, listeners);
-      this.add(tagger);
       tagger.setName("Tagger " + System.currentTimeMillis());
       if (!Main.batchMode) {
         fireProgressChanged(65);
@@ -169,7 +165,6 @@ public class Nerc extends SerialController {
         fireProgressChanged(100);
         fireProcessFinished();
       } //if
-      this.add(transducer);
       transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ResourceInstantiationException rie){
       throw rie;
@@ -351,21 +346,6 @@ public class Nerc extends SerialController {
   public gate.Document getDocument() {
     return document;
   }
-  public synchronized void removeProgressListener(ProgressListener l) {
-    if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
-      v.removeElement(l);
-      progressListeners = v;
-    }
-  }
-  public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      progressListeners = v;
-    }
-  }
-
 
 
   /** The tokeniser used by this NERC */
@@ -390,8 +370,6 @@ public class Nerc extends SerialController {
   protected java.net.URL japeGrammarURL;
   protected String encoding;
   protected gate.Document document;
-  private transient Vector progressListeners;
-  private transient Vector statusListeners;
   protected String tempAnnotationSetName = "nercAS";
   private Boolean caseSensitiveGazetteer;
   private java.net.URL splitterGazetteerURL;
@@ -400,47 +378,6 @@ public class Nerc extends SerialController {
   private java.net.URL taggerLexiconURL;
   private java.net.URL tokeniserPostprocessor;
 
-  protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
-      }
-    }
-  }
-  protected void fireProcessFinished() {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
-      }
-    }
-  }
-  public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
-      v.removeElement(l);
-      statusListeners = v;
-    }
-  }
-  public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      statusListeners = v;
-    }
-  }
-  protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
-      }
-    }
-  }
   public void setTempAnnotationSetName(String newTempAnnotationSetName) {
     tempAnnotationSetName = newTempAnnotationSetName;
   }
@@ -484,23 +421,4 @@ public class Nerc extends SerialController {
     return tokeniserPostprocessor;
   }
 
-  /**
-   * A progress listener used to convert a 0..100 interval into a smaller one
-   */
-  class CustomProgressListener implements ProgressListener{
-    CustomProgressListener(int start, int end){
-      this.start = start;
-      this.end = end;
-    }
-    public void progressChanged(int i){
-      fireProgressChanged(start + (end - start) * i / 100);
-    }
-
-    public void processFinished(){
-      fireProgressChanged(end);
-    }
-
-    int start;
-    int end;
-  }
 } // class Nerc

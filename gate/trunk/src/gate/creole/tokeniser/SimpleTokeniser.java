@@ -586,7 +586,7 @@ implements Runnable, ProcessingResource{
     else annotationSet = document.getAnnotations(annotationSetName);
 
     if (! Main.batchMode) //fire event only if needed
-      fireStatusChangedEvent(
+      fireStatusChanged(
         "Tokenising " + document.getSourceUrl().getFile() + "..."
       );
 
@@ -677,7 +677,7 @@ implements Runnable, ProcessingResource{
       }
 
       if(!Main.batchMode && (charIdx - oldCharIdx > 256)){
-        fireProgressChangedEvent((100 * charIdx )/ length );
+        fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }
 
@@ -708,42 +708,11 @@ implements Runnable, ProcessingResource{
 
     reset();
     if (! Main.batchMode) { //fire events only if needed
-      fireProcessFinishedEvent();
-      fireStatusChangedEvent("Tokenisation complete!");
+      fireProcessFinished();
+      fireStatusChanged("Tokenisation complete!");
     }//if
   } // run
 
-  //StatusReporter Implementation
-  /**    */
-  public void addStatusListener(StatusListener listener) {
-    myStatusListeners.add(listener);
-  } // addStatusListener
-
-  /**    */
-  public void removeStatusListener(StatusListener listener) {
-    myStatusListeners.remove(listener);
-  } // removeStatusListener
-
-  /**    */
-  protected void fireStatusChangedEvent(String text) {
-    Iterator listenersIter = myStatusListeners.iterator();
-    while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
-  } // fireStatusChangedEvent
-
-  /**    */
-  protected void fireProgressChangedEvent(int i) {
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).progressChanged(i);
-  } // fireProgressChangedEvent
-
-  /**    */
-  protected void fireProcessFinishedEvent() {
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).processFinished();
-  }
   /**
    * Sets the value of the <code>rulesURL</code> property which holds an URL
    * to the file containing the rules for this tokeniser.
@@ -787,40 +756,9 @@ implements Runnable, ProcessingResource{
   public String getEncoding() {
     return encoding;
   }
-  public synchronized void removeProgressListener(ProgressListener l) {
-    if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
-      v.removeElement(l);
-      progressListeners = v;
-    }
-  }
-  public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      progressListeners = v;
-    }
-  }// fireProcessFinishedEvent
-  //ProcessProgressReporter implementation ends here
-
-  /*
-  static public void main(String[] args){
-    try{
-      DefaultTokeniser dt = new DefaultTokeniser(Files.getResourceAsStream(
-                            "creole/tokeniser/DefaultTokeniser.rules"));
-      Document doc = Factory.newDocument("Germany England and France   are"
-       + "countries that use ... $$$.");
-      dt.tokenise(doc, false);
-    }catch(Exception ex){ex.printStackTrace(Err.getPrintWriter());}
-  }
-  */
 
   /**    */
   protected FeatureMap features  = null;
-  /**    */
-  protected List myProgressListeners = new LinkedList();
-  /**    */
-  protected List myStatusListeners = new LinkedList();
 
   /** the annotations et where the new annotations will be adde
    */
@@ -943,23 +881,5 @@ implements Runnable, ProcessingResource{
     ignoreTokens.add("\f");
 
   }
-  protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
-      }
-    }
-  }
-  protected void fireProcessFinished() {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
-      }
-    }
-  }/// static initializer
 
 } // class DefaultTokeniser
