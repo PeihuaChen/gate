@@ -92,10 +92,6 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(buttonsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
     setSize(400, 300);
-    nameField.setNextFocusableComponent(parametersEditor);
-    parametersEditor.setNextFocusableComponent(okBtn);
-    okBtn.setNextFocusableComponent(cancelBtn);
-    cancelBtn.setNextFocusableComponent(nameField);
     getRootPane().setDefaultButton(okBtn);
   }// protected void initGuiComponents()
 
