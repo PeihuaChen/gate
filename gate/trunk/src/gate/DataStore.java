@@ -32,10 +32,11 @@ public interface DataStore extends FeatureBearer {
   /** Get the URL for the underlying storage mechanism. */
   public URL getStorageUrl();
 
-  /** Create a new data store. <B>NOTE:</B> for some data stores
-    * creation is an system administrator task; in such cases this
-    * method will throw an UnsupportedOperationException.
-    */
+  /**
+   * Create a new data store. <B>NOTE:</B> for some data stores
+   * creation is an system administrator task; in such cases this
+   * method will throw an UnsupportedOperationException.
+   */
   public void create()
   throws PersistenceException, UnsupportedOperationException;
 
@@ -45,10 +46,11 @@ public interface DataStore extends FeatureBearer {
   /** Close the data store. */
   public void close() throws PersistenceException;
 
-  /** Delete the data store. <B>NOTE:</B> for some data stores
-    * deletion is an system administrator task; in such cases this
-    * method will throw an UnsupportedOperationException.
-    */
+  /**
+   * Delete the data store. <B>NOTE:</B> for some data stores
+   * deletion is an system administrator task; in such cases this
+   * method will throw an UnsupportedOperationException.
+   */
   public void delete()
   throws PersistenceException, UnsupportedOperationException;
 
@@ -60,15 +62,17 @@ public interface DataStore extends FeatureBearer {
   public void delete(String lrClassName, String lrId)
   throws PersistenceException;
 
-  /** Save: synchonise the in-memory image of the LR with the persistent
-    * image.
-    */
+  /**
+   * Save: synchonise the in-memory image of the LR with the persistent
+   * image.
+   */
   public void sync(LanguageResource lr) throws PersistenceException;
 
-  /** Set method for the autosaving behaviour of the data store.
-    * <B>NOTE:</B> many types of datastore have no auto-save function,
-    * in which case this will throw an UnsupportedOperationException.
-    */
+  /**
+   * Set method for the autosaving behaviour of the data store.
+   * <B>NOTE:</B> many types of datastore have no auto-save function,
+   * in which case this will throw an UnsupportedOperationException.
+   */
   public void setAutoSaving(boolean autoSaving)
   throws UnsupportedOperationException;
 
@@ -79,10 +83,11 @@ public interface DataStore extends FeatureBearer {
   public LanguageResource adopt(LanguageResource lr)
   throws PersistenceException;
 
-  /** Get a resource from the persistent store.
-    * <B>Don't use this method - use Factory.createResource with
-    * DataStore and DataStoreInstanceId parameters set instead.</B>
-    */
+  /**
+   * Get a resource from the persistent store.
+   * <B>Don't use this method - use Factory.createResource with
+   * DataStore and DataStoreInstanceId parameters set instead.</B>
+   */
   public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
   throws PersistenceException;
 

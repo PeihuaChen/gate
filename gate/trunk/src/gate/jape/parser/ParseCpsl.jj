@@ -49,7 +49,7 @@ public class ParseCpsl implements JapeConstants {
   public ParseCpsl(URL url, String encoding) throws IOException {
     this(url, encoding, new HashMap());
   }
-  
+
   /** Construct from a URL and an encoding
     */
   public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
@@ -86,7 +86,7 @@ public class ParseCpsl implements JapeConstants {
 
   /** A table of macro definitions. */
   private HashMap macrosMap;
-  
+
   URL baseURL;
   String encoding;
 
@@ -139,9 +139,9 @@ PARSER_END(ParseCpsl)
    MORE:
    {
       "\"" : IN_STRING
-   } 
- 
-//reads the contents of the string 
+   }
+
+//reads the contents of the string
    <IN_STRING> MORE :
    {
       "\\n"  { image.setLength(image.length() - 2); image.append("\n"); }
@@ -149,21 +149,21 @@ PARSER_END(ParseCpsl)
       "\\r"  { image.setLength(image.length() - 2); image.append("\r"); }
     |
       "\\t"  { image.setLength(image.length() - 2); image.append("\t"); }
-    | 
+    |
       "\\\""  { image.setLength(image.length() - 2); image.append("\""); }
     |
       < ~["\""] >  // Note that here you don't need any action.
-   } 
+   }
 
 //finishes the string
    <IN_STRING> TOKEN :
    {
-      <string : "\"" > 
+      <string : "\"" >
       {
         // image.setLength(image.length() - 1);
          matchedToken.image = image.toString();
-      } : DEFAULT 
-   } 
+      } : DEFAULT
+   }
 
 
 
@@ -172,7 +172,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <bool: "true" | "false" > }
 <DEFAULT> TOKEN: { <ident: <letter> (<letterOrDigitOrDash>)* > }
 <DEFAULT> TOKEN: {
-  <floatingPoint: 
+  <floatingPoint:
       (["0"-"9"])+ "." (["0"-"9"])* (<exponent>)? (["f","F","d","D"])?
     | "." (["0"-"9"])+ (<exponent>)? (["f","F","d","D"])?
     | (["0"-"9"])+ <exponent> (["f","F","d","D"])?
@@ -240,14 +240,14 @@ MultiPhaseTransducer MultiPhaseTransducer() :
   // spts
   (
     // sptrannies in this file
-    ( s=SinglePhaseTransducer() { 
-    	m.addPhase(s.getName(), s);
-	s.setBaseURL(baseURL);
+    ( s=SinglePhaseTransducer() {
+      m.addPhase(s.getName(), s);
+      s.setBaseURL(baseURL);
      } )+
     |
     // sptrannies in external files
     (
-      <phases> 
+      <phases>
       (
         phaseNameTok=<ident>
         {
@@ -261,14 +261,14 @@ MultiPhaseTransducer MultiPhaseTransducer() :
             }catch(MalformedURLException mue){
               throw(new ParseException("Read error " + mue.toString()));
             }
-            
+
             if(sptURL == null){
               throw(new ParseException("Resource not found: base = " + baseURL.toString() +
                                        " path = " + sptPath));
             }
 
             // construct a parser and parse it
-	    fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+      fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {
@@ -315,10 +315,10 @@ SinglePhaseTransducer SinglePhaseTransducer() :
   { t = new SinglePhaseTransducer(phaseNameTok.image); }
 
   (
-    <input> 
+    <input>
     (inputTok = <ident> {t.addInput(inputTok.image);})*
   )?
-  
+
   (
     <option>
     (
@@ -480,7 +480,7 @@ PatternElement PatternElement(LeftHandSide lhs) :
       }
     }
     |
-    pat=BasicPatternElement() 
+    pat=BasicPatternElement()
     |
     pat=ComplexPatternElement(lhs)
     // |
@@ -997,6 +997,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.16  2001/04/30 13:23:53  hamish
+// format
+//
 // Revision 1.15  2001/04/06 17:09:50  hamish
 // save of session state via serialisation prototyped
 //

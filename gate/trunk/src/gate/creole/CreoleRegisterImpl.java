@@ -50,7 +50,10 @@ public class CreoleRegisterImpl extends HashMap
   /** The parser for the CREOLE directory files */
   protected transient SAXParser parser = null;
 
-  /** Default constructor. Sets up directory files parser. */
+  /**
+   * Default constructor. Sets up directory files parser. <B>NOTE:</B>
+   * only Factory should call this method.
+   */
   public CreoleRegisterImpl() throws GateException {
 
     // initialise the various maps
@@ -417,6 +420,7 @@ public class CreoleRegisterImpl extends HashMap
     }
     return publics;
   }
+
   public synchronized void removeCreoleListener(CreoleListener l) {
     if (creoleListeners != null && creoleListeners.contains(l)) {
       Vector v = (Vector) creoleListeners.clone();
@@ -424,6 +428,7 @@ public class CreoleRegisterImpl extends HashMap
       creoleListeners = v;
     }
   }
+
   public synchronized void addCreoleListener(CreoleListener l) {
     Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
     if (!v.contains(l)) {

@@ -88,8 +88,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       label_1:
       while (true) {
         s = SinglePhaseTransducer();
-        m.addPhase(s.getName(), s);
-        s.setBaseURL(baseURL);
+      m.addPhase(s.getName(), s);
+      s.setBaseURL(baseURL);
         switch (jj_nt.kind) {
         case phase:
           ;
@@ -122,7 +122,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             }
 
             // construct a parser and parse it
-            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+      fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {
