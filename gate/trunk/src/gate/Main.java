@@ -55,6 +55,9 @@ public class Main {
     processArgs(args);
 
     // initialise the library and load user CREOLE directories
+    //remove dependency on gate.ac.uk or localhost webservers
+    Gate.setNetConnected(false);
+    Gate.setLocalWebServer(false);
     Gate.init();
     registerCreoleUrls();
 
