@@ -29,10 +29,10 @@ import edu.stanford.smi.protege.ui.*;
 public class ProtegeWrapper extends AbstractVisualResource {
 
   /** File name as string will be VR target for now */
-  private ProtegeProjectName projectFileName;
+  private ProtegeProjectName projectFileName = null;
   
   /** Should have JRootPane to show Protege in it */
-  private JRootPane protegeRootPane;
+  private JRootPane protegeRootPane = null;
     
   protected Handle myHandle;
 
@@ -69,12 +69,9 @@ public class ProtegeWrapper extends AbstractVisualResource {
     ProjectManager.getProjectManager().setRootPane(protegeRootPane);
     ProjectManager.getProjectManager().loadProject(fileName);
 
-    JMenuBar menu = protegeRootPane.getJMenuBar();
     protegeRootPane.setJMenuBar(null);
     removeToolbar(protegeRootPane);
     
-    frame.remove(protegeRootPane);
-
     JScrollPane scroll = new JScrollPane();
     add(scroll, BorderLayout.CENTER);
     scroll.getViewport().add(protegeRootPane);
@@ -88,6 +85,7 @@ public class ProtegeWrapper extends AbstractVisualResource {
     for(int i=0; i<components.length; ++i) {
       if(components[i] instanceof ProjectToolBar) {
         pane.remove((ProjectToolBar) components[i]);
+        pane.add(new JLabel(), BorderLayout.SOUTH, i);
         break;
       } // if
     } // for
