@@ -154,35 +154,39 @@ public class TestGate {
       ////////////////////////////////////////////////
       // Test bench
       ////////////////////////////////////////////////
-      // Just copy the test suite you want to activate
-//      suite.addTest(TestCreole.suite());
-//*
-      // Test suite
-      suite.addTest(TestPersist.suite());
-      suite.addTest(TestAnnotationDiff.suite());
-      suite.addTest(TestConfig.suite());
-      suite.addTest(TestBumpyStack.suite());
-      suite.addTest(TestAnnotation.suite());
-      suite.addTest(TestEmail.suite());
-      suite.addTest(TestXml.suite());
-      suite.addTest(TestHtml.suite());
-      suite.addTest(TestSgml.suite());
-      suite.addTest(TestXSchema.suite());
-      suite.addTest(TestCreole.suite());
-      suite.addTest(CookBook.suite());
-      suite.addTest(TestFiles.suite());
-      suite.addTest(TestJdk.suite());
-      suite.addTest(TestJape.suite());
-      suite.addTest(TestFSM.suite());
-      suite.addTest(TestTemplate.suite());
-      suite.addTest(TestJacl.suite());
-      suite.addTest(TestDocument.suite());
-      suite.addTest(TestRBTreeMap.suite());
-      suite.addTest(TestCorpus.suite());
-      suite.addTest(TestDB.suite());
-      suite.addTest(TestTokeniser.suite());
-      suite.addTest(TestGazetteer.suite());
-//*/
+
+      // set this true to run all tests; false to run the just one below
+      boolean allTests = false;
+
+      if(! allTests)
+         suite.addTest(TestPersist.suite());
+      else {
+        suite.addTest(TestPersist.suite());
+        suite.addTest(TestAnnotationDiff.suite());
+        suite.addTest(TestConfig.suite());
+        suite.addTest(TestBumpyStack.suite());
+        suite.addTest(TestAnnotation.suite());
+        suite.addTest(TestEmail.suite());
+        suite.addTest(TestXml.suite());
+        suite.addTest(TestHtml.suite());
+        suite.addTest(TestSgml.suite());
+        suite.addTest(TestXSchema.suite());
+        suite.addTest(TestCreole.suite());
+        suite.addTest(CookBook.suite());
+        suite.addTest(TestFiles.suite());
+        suite.addTest(TestJdk.suite());
+        suite.addTest(TestJape.suite());
+        suite.addTest(TestFSM.suite());
+        suite.addTest(TestTemplate.suite());
+        suite.addTest(TestJacl.suite());
+        suite.addTest(TestDocument.suite());
+        suite.addTest(TestRBTreeMap.suite());
+        suite.addTest(TestCorpus.suite());
+        suite.addTest(TestDB.suite());
+        suite.addTest(TestTokeniser.suite());
+        suite.addTest(TestGazetteer.suite());
+      } // if(allTests)
+
     } catch(Exception e) {
       Out.prln("can't add tests! exception = " + e);
       throw(e);
