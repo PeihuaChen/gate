@@ -268,8 +268,12 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  public abstract void sync(LanguageResource lr)
-    throws PersistenceException,SecurityException;
+  public void sync(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+
+    //4.delegate (open a new transaction)
+    _sync(lr,true);
+  }
 
 
   /**
@@ -1161,5 +1165,177 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected abstract void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException;
 
+
+  /**
+   * Save: synchonise the in-memory image of the LR with the persistent
+   * image.
+   */
+  protected void _sync(LanguageResource lr, boolean openNewTrans)
+    throws PersistenceException,SecurityException {
+
+    //0.preconditions
+    Assert.assertNotNull(lr);
+    Long lrID = (Long)lr.getLRPersistenceId();
+
+    if (false == lr instanceof Document &&
+        false == lr instanceof Corpus) {
+      //only documents and corpuses could be serialized in DB
+      throw new IllegalArgumentException("only Documents and Corpuses could "+
+                                          "be serialized in DB");
+    }
+
+    // check that this LR is one of ours (i.e. has been adopted)
+    if( null == lr.getDataStore() || false == lr.getDataStore().equals(this))
+      throw new PersistenceException(
+        "This LR is not stored in this DataStore"
+      );
+
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lrID)) {
+      throw new SecurityException("insufficient privileges");
+    }
+
+    //3. is the resource locked?
+    User lockingUser = getLockingUser(lr);
+    User currUser = this.session.getUser();
+
+    if (lockingUser != null && false == lockingUser.equals(currUser)) {
+      throw new PersistenceException("document is locked by another user and cannot be synced");
+    }
+
+
+    boolean transFailed = false;
+    try {
+      //2. autocommit should be FALSE because of LOBs
+      if (openNewTrans) {
+        beginTrans();
+      }
+
+      //3. perform changes, if anything goes wrong, rollback
+      if (lr instanceof Document) {
+        syncDocument((Document)lr);
+      }
+      else {
+        syncCorpus((Corpus)lr);
+      }
+
+      //4. done, commit
+      if (openNewTrans) {
+        commitTrans();
+      }
+    }
+    catch(PersistenceException pe) {
+      transFailed = true;
+      throw(pe);
+    }
+    finally {
+      //problems?
+      if (transFailed) {
+        rollbackTrans();
+      }
+    }
+
+    // let the world know about it
+    fireResourceWritten(
+      new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()));
+  }
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  protected User getLockingUser(LanguageResource lr)
+    throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(lr.getDataStore(),this);
+
+    //delegate
+    return getLockingUser((Long)lr.getLRPersistenceId());
+  }
+
+
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  protected User getLockingUser(Long lrID)
+  throws PersistenceException,SecurityException {
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //3. read from DB
+    PreparedStatement pstmt = null;
+    Long userID = null;
+    ResultSet rs = null;
+
+    try {
+
+      String sql = null;
+
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        sql = "   select  nvl(lr_locking_user_id,0) as user_id" +
+              "   from "+this.dbSchema+"t_lang_resource " +
+              "   where   lr_id = ?";
+      }
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+        sql = "   select  coalesce(lr_locking_user_id,0) as user_id" +
+              "   from t_lang_resource " +
+              "   where   lr_id = ?";
+      }
+      else {
+        throw new IllegalArgumentException();
+      }
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("LR not found in DB");
+      }
+
+      long result = rs.getLong("user_id");
+
+      return result == 0  ? null
+                          : this.ac.findUser(new Long(result));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get locking user from DB : ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+  }
+
+  /** helper for sync() - saves a Corpus in the database */
+  protected abstract void syncCorpus(Corpus corp)
+    throws PersistenceException,SecurityException;
+
+  /** helper for sync() - saves a Document in the database */
+  protected abstract void syncDocument(Document doc)
+    throws PersistenceException, SecurityException;
 
 }
