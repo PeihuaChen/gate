@@ -1,0 +1,105 @@
+1stBarrier Software License Agreement
+
+THIS IS A LEGAL AGREEMENT BETWEEN YOU, EITHER AN INDIVIDUAL OR AN ENTITY,
+("LICENSEE") AND JPROOF.  BY DOWNLOADING OR USING THE 1STBARRIER SOFTWARE, YOU
+AGREE TO BE BOUND BY THE TERMS AND CONDITIONS OF THIS LICENSE AGREEMENT
+("AGREEMENT").  IF YOU DO NOT AGREE TO ALL OF THE TERMS AND CONDITIONS OF THIS
+AGREEMENT, DO NOT INSTALL OR USE THE SOFTWARE.
+
+1. LICENSE
+Subject to the restrictions below, JProof grants Licensee a non-exclusive and
+non-transferable rights with respect to the 1stBarrier JProof product
+("Software") composed of software programs, related user documentation and any
+update thereof Licensee may receive from JProof.
+Licensee may:
+    (a) use the Software on any number of computers belonging to Licensee;
+    (b) make copies of the Software for backup or archival purposes;
+    (c) distribute electronic data produced by Software under Licensee's name
+and trademarks belonging to Licensee with or without notice that such data
+were produced by Software.
+
+2. RESTRICTIONS
+Unless enforcement is prohibited by applicable law, Licensee may not:
+    (a) use or copy the Software except as provided in this Agreement;
+    (b) rent, lease or transfer any other way the Software to any third party;
+    (c) modify, adapt, or translate the Software in whole or in part;
+    (d) reverse engineer, decompile, or disassemble the Software;
+    (e) publish or provide the results of any benchmark or comparison tests
+run on Software to any third party without the prior written consent of
+JProof;
+    (f) Software is not designed or licensed for use in on-line control of
+aircraft, air traffic, aircraft navigation or aircraft communications; or in
+the design, construction, operation or maintenance of any nuclear facility.
+Licensee warrants that will not use Software for these purposes.
+
+3. OWNERSHIP & COPYRIGHT
+Title, ownership rights and intellectual property rights in and to the
+Software and all copies thereof shall remain in JProof. The Software is
+copyrighted and protected by United States copyright laws and international
+treaty provisions.
+Licensee agrees:
+    (a) not to remove any copyright or other proprietary notices from the
+Software;
+    (b) to reproduce all such notices on any authorized copies Licensee makes;
+    (c) to use best efforts to prevent any unauthorized copying of the
+Software.
+
+4. LIMITED MEDIA WARRANTY
+If the Software has been delivered by JProof on physical media, JProof
+warrants the media to be free from material physical defects for a period of
+ninety (90) days after delivery by JProof. If such a defect is found, return
+the media to JProof for replacement or alternate delivery of the Software as
+JProof may select.
+
+5. EXCLUSION OF OTHER WARRANTIES
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY EXPRESS OR IMPLIED WARRANTY OF
+ANY KIND INCLUDING WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT, OR FITNESS
+FOR A PARTICULAR PURPOSE. JProof does not warrant or assume responsibility for
+the accuracy or completeness of any information, text, graphics, links or
+other items contained within the Software.
+
+6. LIMITATION OF LIABILITY
+IN NO EVENT SHALL JPROOF OR ITS SUPPLIERS BE LIABLE FOR ANY DAMAGES WHATSOEVER
+(INCLUDING, WITHOUT LIMITATION, LOST PROFITS, BUSINESS INTERRUPTION, OR LOST
+INFORMATION) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN
+IF JPROOF HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. SOME
+JURISDICTIONS PROHIBIT EXCLUSION OR LIMITATION OF LIABILITY FOR IMPLIED
+WARRANTIES OR CONSEQUENTIAL OR INCIDENTAL DAMAGES, SO THE ABOVE LIMITATION MAY
+NOT APPLY TO YOU. YOU MAY ALSO HAVE OTHER LEGAL RIGHTS THAT VARY FROM
+JURISDICTION TO JURISDICTION.
+
+IN NO EVENT WILL JPROOF'S LIABILITY TO LICENSEE OR ANY THIRD PARTY EXCEED THE
+LICENSE FEE PAID BY LICENSEE FOR THE LICENSED PRODUCT.
+
+7. TERMINATION OF THIS AGREEMENT
+This Agreement is effective until terminated. You may terminate this Agreement
+at any time by destroying all copies of Software. This Agreement will
+terminate immediately without notice from JProof if you fail to comply with
+any provision of this Agreement. Upon Termination, you must destroy all copies
+of Software.
+
+8. EXPORT REGULATIONS
+All Software and technical data delivered under this Agreement are subject to
+US export control laws and may be subject to export or import regulations in
+other countries. You agree to comply strictly with all such laws and
+regulations and acknowledge that you have the responsibility to obtain such
+licenses to export, re-export, or import as may be required after delivery to
+you.
+
+9. U.S. GOVERNMENT RESTRICTED RIGHTS
+Use, duplication, or disclosure by the U.S. Government is subject to
+restrictions set forth in this Agreement and as provided in DFARS 227.7202-1
+(a) and 227.7202-3(a) (1995), DFARS 252.227-7013 (c)(1)(ii)(Oct 1988), FAR
+12.212 (a) (1995), FAR 52.227-19 (June 1987), or FAR 52.227-14(ALT III) (June
+1987), as applicable.
+
+10. GOVERNING LAW
+Any action related to this Agreement will be governed by California law and
+controlling U.S. federal law. No choice of law rules of any jurisdiction will
+apply.
+
+11. SEVERABILITY
+If any provision of this Agreement is held to be unenforceable, this Agreement
+will remain in effect with the provision omitted, unless omission would
+frustrate the intent of the parties, in which case this Agreement will
+immediately terminate.
