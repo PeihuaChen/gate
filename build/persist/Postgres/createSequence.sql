@@ -1,5 +1,4 @@
-
- *  DDL script for PostgreSQL 7.2
+/*  DDL script for PostgreSQL 7.2
  *
  *  Copyright (c) 1998-2002, The University of Sheffield.
  *
