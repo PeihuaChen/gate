@@ -126,13 +126,19 @@ public class DocumentImpl implements Document
   } // default construction
 
   /** Construction from URL; content read over the net. */
-  public DocumentImpl(URL u) throws IOException { this(u, null, null); }
+  public DocumentImpl(URL u) throws IOException { this(u, null, null, null); }
+
+  /** Construction from URL; content read over the net. */
+  public DocumentImpl(URL u, String encoding) throws IOException {
+    this(u, encoding, null, null);
+  }
 
   /** Construction from URL and offsets. Both offsets must be
     * non-null, or they are both ignored. Content is read over the
     * net between the offsets.
     */
-  public DocumentImpl(URL u, Long start, Long end) throws IOException {
+  public DocumentImpl(URL u, String encoding, Long start, Long end)
+         throws IOException {
     // store the offsets if they're non-null
     if(start != null && end != null) {
       sourceURLOffsets = new Long[2];
@@ -144,7 +150,7 @@ public class DocumentImpl implements Document
     sourceURL = u;
 
     // get content out of the URL
-    content = new DocumentContentImpl(u, start, end);
+    content = new DocumentContentImpl(u, encoding, start, end);
   } // DocumentImpl(u,start,end)
 
   /** Construction from String */

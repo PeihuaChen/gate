@@ -26,7 +26,8 @@ public class DocumentContentImpl implements DocumentContent
   } // default construction
 
   /** Contruction from URL and offsets. */
-  public DocumentContentImpl(URL u, Long start, Long end) throws IOException
+  public DocumentContentImpl(URL u, String encoding, Long start, Long end)
+         throws IOException
   {
     BufferedReader uReader = null;
     StringBuffer buf = new StringBuffer();
@@ -37,7 +38,12 @@ public class DocumentContentImpl implements DocumentContent
       e = end.longValue();
     }
 
-    uReader = new BufferedReader(new InputStreamReader(u.openStream()));
+    if(encoding != null){
+      uReader = new BufferedReader(new InputStreamReader(u.openStream(),
+                                                         encoding));
+    }else{
+      uReader = new BufferedReader(new InputStreamReader(u.openStream()));
+    };
     while( true ) {
       int i = uReader.read();
       if(i == -1) break;
