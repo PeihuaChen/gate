@@ -763,34 +763,64 @@ public class SerialCorpusImpl extends
     if (this.dataStore != null)
       this.dataStore.addDatastoreListener(this);
 
+    //if indexed construct the manager.
     IndexDefinition  definition = (IndexDefinition) this.getFeatures().get(
-                GateConstants.CORPUS_INDEX_DEFENITION_FEATURE_KEY);
+                GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
     if (definition != null){
-      switch (definition.getIndexType()) {
-        case GateConstants.IR_LUCENE_INVFILE:
-          this.indexManager = new LuceneIndexManager(definition, this);
-          break;
+      String className = definition.getIrEngineClassName();
+      try{
+        Class aClass = Class.forName(className);
+        IREngine engine = (IREngine)aClass.newInstance();
+        this.indexManager = engine.getIndexmanager();
+        this.indexManager.setIndexDefinition(definition);
+        this.indexManager.setCorpus(this);
+      }catch(Exception e){
+        e.printStackTrace(Err.getPrintWriter());
       }
+//      switch (definition.getIndexType()) {
+//        case GateConstants.IR_LUCENE_INVFILE:
+//          this.indexManager = new LuceneIndexManager();
+//          this.indexManager.setIndexDefinition(definition);
+//          this.indexManager.setCorpus(this);
+//          break;
+//      }
+      this.addedDocs = new Vector();
+      this.removedDocs = new Vector();
+      this.changedDocs = new Vector();
     }
-    this.addedDocs = new Vector();
-    this.removedDocs = new Vector();
-    this.changedDocs = new Vector();
-
   }//readObject
 
   public void setIndexDefinition(IndexDefinition definition) {
-    this.getFeatures().put(GateConstants.CORPUS_INDEX_DEFENITION_FEATURE_KEY,
-                            definition);
-    switch (definition.getIndexType()) {
-      case GateConstants.IR_LUCENE_INVFILE:
-        this.indexManager = new LuceneIndexManager(definition, this);
-        break;
+    if (definition != null){
+      this.getFeatures().put(GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY,
+                              definition);
+
+      String className = definition.getIrEngineClassName();
+      try{
+        Class aClass = Class.forName(className);
+        IREngine engine = (IREngine)aClass.newInstance();
+        this.indexManager = engine.getIndexmanager();
+        this.indexManager.setIndexDefinition(definition);
+        this.indexManager.setCorpus(this);
+      }catch(Exception e){
+        e.printStackTrace(Err.getPrintWriter());
+      }
+//    switch (definition.getIndexType()) {
+//      case GateConstants.IR_LUCENE_INVFILE:
+//        this.indexManager = new LuceneIndexManager();
+//        this.indexManager.setIndexDefinition(definition);
+//        this.indexManager.setCorpus(this);
+//        break;
+//    }
+      this.addedDocs = new Vector();
+      this.removedDocs = new Vector();
+      this.changedDocs = new Vector();
     }
   }
 
   public IndexDefinition getIndexDefinition() {
     return (IndexDefinition) this.getFeatures().get(
-                           GateConstants.CORPUS_INDEX_DEFENITION_FEATURE_KEY);
+                           GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
   }
 
   public IndexManager getIndexManager() {
