@@ -213,7 +213,7 @@ public class MainFrame extends JFrame
   public MainFrame() {
     this(false);
   } // MainFrame
-  
+
   /**Construct the frame*/
   public MainFrame(boolean isShellSlacGIU) {
     guiRoots.add(this);
@@ -817,15 +817,15 @@ public class MainFrame extends JFrame
     if(isShellSlacGIU) {
       addComponentListener(new ComponentAdapter() {
         public void componentHidden(ComponentEvent e) {
-  
+
         }
-  
+
         public void componentMoved(ComponentEvent e) {
         }
-  
+
         public void componentResized(ComponentEvent e) {
         }
-  
+
         public void componentShown(ComponentEvent e) {
           mainSplit.setDividerLocation((double)0.0);
         }
@@ -834,15 +834,15 @@ public class MainFrame extends JFrame
     else {
       addComponentListener(new ComponentAdapter() {
         public void componentHidden(ComponentEvent e) {
-  
+
         }
-  
+
         public void componentMoved(ComponentEvent e) {
         }
-  
+
         public void componentResized(ComponentEvent e) {
         }
-  
+
         public void componentShown(ComponentEvent e) {
           leftSplit.setDividerLocation((double)0.7);
         }
@@ -1396,10 +1396,10 @@ public class MainFrame extends JFrame
                               "Gate", JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
-    
+
     return ds;
   } // createSerialDataStore()
-  
+
   /** Method is used in OpenDSAction */
   protected DataStore openSerialDataStore() {
     DataStore ds = null;
@@ -1425,10 +1425,10 @@ public class MainFrame extends JFrame
                               "Gate", JOptionPane.ERROR_MESSAGE);
       } // catch
     } // if
-  
+
     return ds;
   } // openSerialDataStore()
-  
+
 
 /*
   synchronized void showWaitDialog() {
@@ -2187,7 +2187,9 @@ public class MainFrame extends JFrame
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
             openSerialDataStore();
-          } else if(className.equals("gate.persist.OracleDataStore")) {
+          } else if(className.equals("gate.persist.OracleDataStore") ||
+                    className.equals("gate.persist.PostgresDataStore")
+                   ) {
               List dbPaths = new ArrayList();
               Iterator keyIter = reg.getConfigData().keySet().iterator();
               while (keyIter.hasNext()) {
@@ -2197,7 +2199,7 @@ public class MainFrame extends JFrame
               }
               if (dbPaths.isEmpty())
                 throw new
-                  GateRuntimeException("Oracle URL not configured in gate.xml");
+                  GateRuntimeException("JDBC URL not configured in gate.xml");
               //by default make it the first
               String storageURL = (String)dbPaths.get(0);
               if (dbPaths.size() > 1) {
