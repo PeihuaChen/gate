@@ -17,6 +17,8 @@ package gate.gui;
 import javax.swing.*;
 import java.awt.event.*;
 
+import java.util.*;
+
 import gate.*;
 import gate.creole.*;
 
@@ -32,12 +34,13 @@ class ApplicationHandle extends ResourceHandle {
 
     largeView = super.getLargeView();
     if(largeView instanceof JTabbedPane){
-      JComponent comp = new ApplicationViewer((SerialController)resource);
-      largeView.add(comp, "Design");
-      ((JTabbedPane)largeView).setSelectedComponent(comp);
+      viewer = new ApplicationViewer((SerialController)resource, project);
+      largeView.add(viewer, "Design");
+      ((JTabbedPane)largeView).setSelectedComponent(viewer);
     }
   }
 
+  ApplicationViewer viewer;
 
   class RunApplicationAction extends AbstractAction{
     public RunApplicationAction(){

@@ -114,6 +114,9 @@ class ResourceHandle{
     largeView = view;
     smallView = null;
   }
+
+  public String toString(){ return title;}
+
   JPopupMenu popup;
   String title;
   String tooltipText;
