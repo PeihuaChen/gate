@@ -180,6 +180,9 @@ create or replace package body test is
      -- features
      delete from t_feature;
      
+     -- feature keys
+     delete from t_feature_key;
+
      --annotations/sets
      delete from t_as_annotation;
      delete from t_annotation;

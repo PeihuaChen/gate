@@ -3,9 +3,12 @@ CREATE or replace FUNCTION test_remove_all_data() RETURNS boolean AS '
    BEGIN
 
      /* delete LRs */
-
+ 
      /* features */
      delete from t_feature;
+
+    /* feature keys */
+     delete from t_feature_key;
 
      /* annotations/sets */
      delete from t_as_annotation;
@@ -46,3 +49,4 @@ CREATE or replace FUNCTION test_remove_all_data() RETURNS boolean AS '
    END;
 '
 LANGUAGE 'plpgsql';
+/
