@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<CREOLE-DIRECTORY>
+  <!-- Processing Resources -->
+  <CREOLE>   
+   <RESOURCE>
+      <NAME>OLD Document Editor</NAME>
+      <CLASS>gate.gui.DocumentEditor</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
+    <!-- VR def for gate unrestricted annotation viewer -->
+    <RESOURCE>
+      <NAME>Unrestricted annotation editor</NAME>
+      <CLASS>gate.gui.UnrestrictedAnnotationEditor</CLASS>
+      <GUI>
+        <MAIN_VIEWER/>
+      </GUI>
+    </RESOURCE>
+    
+    <!-- VR def for gate annotation schema viewer -->
+    <RESOURCE>
+      <NAME>Schema annotation editor</NAME>
+      <CLASS>gate.gui.SchemaAnnotationEditor</CLASS>
+      <GUI>
+        <MAIN_VIEWER/>
+      </GUI>
+    </RESOURCE>
+    
+    <RESOURCE>
+      <NAME>Features Editor</NAME>
+      <CLASS>gate.gui.FeaturesEditor</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+  </CREOLE>
+</CREOLE-DIRECTORY>
