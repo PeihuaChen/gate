@@ -597,9 +597,7 @@ public class AccessControllerImpl
   public boolean isValidSession(Session s) {
 
     //1. do we have such session?
-    Session s1 = (Session)this.sessions.get(s.getID());
-
-    if (null == s1) {
+    if (false == this.sessions.containsKey(s.getID())) {
       return false;
     }
 
@@ -610,7 +608,7 @@ public class AccessControllerImpl
     long sessTimeoutMin = ((Long)this.sessionTimeouts.get(s.getID())).longValue();
     long currTimeMS = System.currentTimeMillis();
     //timeout is in minutes
-    long lastUsedMin = (currTimeMS-lastUsedMS)/1000*60;
+    long lastUsedMin = (currTimeMS-lastUsedMS)/(1000*60);
 
     if (lastUsedMin > sessTimeoutMin) {
       //session expired
