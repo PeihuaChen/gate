@@ -15,6 +15,8 @@
 
 package gate.wordnet;
 
+import net.didion.jwnl.dictionary.Dictionary;
+
 public class AdjectiveImpl extends WordSenseImpl
                           implements Adjective {
 
@@ -25,9 +27,10 @@ public class AdjectiveImpl extends WordSenseImpl
                       int _senseNumber,
                       int _orderInSynset,
                       boolean _isSemcor,
-                      int _adjPosition) {
+                      int _adjPosition,
+                      Dictionary _wnDict) {
 
-    super(_word,_synset,_senseNumber,_orderInSynset,_isSemcor);
+    super(_word,_synset,_senseNumber,_orderInSynset,_isSemcor, _wnDict);
     this.adjPosition = _adjPosition;
   }
 

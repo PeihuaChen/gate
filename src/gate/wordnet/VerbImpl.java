@@ -18,6 +18,7 @@ package gate.wordnet;
 import java.util.*;
 
 import junit.framework.*;
+import net.didion.jwnl.dictionary.Dictionary;
 
 public class VerbImpl extends WordSenseImpl
                       implements Verb {
@@ -29,9 +30,10 @@ public class VerbImpl extends WordSenseImpl
                   int _senseNumber,
                   int _orderInSynset,
                   boolean _isSemcor,
-                  net.didion.jwnl.data.Verb _jwVerb) {
+                  net.didion.jwnl.data.Verb _jwVerb,
+                  Dictionary _wnDict) {
 
-    super(_word,_synset,_senseNumber,_orderInSynset,_isSemcor);
+    super(_word,_synset,_senseNumber,_orderInSynset,_isSemcor, _wnDict);
 
     Assert.assertNull(_jwVerb);
 
