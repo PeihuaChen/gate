@@ -1463,10 +1463,66 @@ public class MainFrame extends JFrame
     }// actionPerformed();
   }//class LoadANNIEWithDefaultsAction
 
-  /** This class represent an action which loads ANNIE without default param*/
+  /** This class represent an action which loads ANNIE with default params*/
   class LoadANNIEWithoutDefaultsAction extends AbstractAction
-                                       implements ANNIEConstants {
+                                    implements ANNIEConstants{
     public LoadANNIEWithoutDefaultsAction() {
+      super("Without defaults");
+    }// NewAnnotDiffAction
+    public void actionPerformed(ActionEvent e) {
+      // Loads ANNIE with defaults
+      Runnable runnable = new Runnable(){
+        public void run(){
+          FeatureMap params = Factory.newFeatureMap();
+          try{
+            // Create a serial analyser
+            SerialAnalyserController sac = (SerialAnalyserController)
+                Factory.createResource("gate.creole.SerialAnalyserController",
+                                       Factory.newFeatureMap(),
+                                       Factory.newFeatureMap(),
+                                       "ANNIE_" + Gate.genSym());
+            NewResourceDialog resourceDialog = new NewResourceDialog(
+                                  MainFrame.this, "Resource parameters", true );
+            // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
+            for(int i = 0; i < PR_NAMES.length; i++){
+              //get the params for the Current PR
+              ResourceData resData = (ResourceData)Gate.getCreoleRegister().
+                                      get(PR_NAMES[i]);
+              if(resourceDialog.show(resData,
+                                     "Parameters for the new " +
+                                     resData.getName())){
+                sac.add((ProcessingResource)Factory.createResource(
+                          PR_NAMES[i],
+                          resourceDialog.getSelectedParameters()));
+              }else{
+                //the user got bored and aborted the operation
+                statusChanged("Loading cancelled! Removing traces...");
+                Iterator loadedPRsIter = new ArrayList(sac.getPRs()).iterator();
+                while(loadedPRsIter.hasNext()){
+                  Factory.deleteResource((ProcessingResource)
+                                         loadedPRsIter.next());
+                }
+                Factory.deleteResource(sac);
+                statusChanged("Loading cancelled!");
+                return;
+              }
+            }// End for
+            statusChanged("ANNIE loaded!");
+          }catch(gate.creole.ResourceInstantiationException ex){
+            ex.printStackTrace(Err.getPrintWriter());
+          }// End try
+        }// run()
+      };// End Runnable
+      Thread thread = new Thread(runnable, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }// actionPerformed();
+  }//class LoadANNIEWithoutDefaultsAction
+
+  /** This class represent an action which loads ANNIE without default param*/
+  class LoadANNIEWithoutDefaultsAction1 extends AbstractAction
+                                       implements ANNIEConstants {
+    public LoadANNIEWithoutDefaultsAction1() {
       super("Without defaults");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
