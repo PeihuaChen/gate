@@ -122,6 +122,7 @@ public class Nerc extends SerialController {
     try{
       FeatureMap params;
       try{
+        fireProgressChanged(0);
         params = Factory.newFeatureMap();
         params.put("document", document);
         params.put("annotationSetName", "nercAS");
@@ -140,12 +141,26 @@ public class Nerc extends SerialController {
       }catch(Exception e){
         throw new ExecutionException("Couldn't set parameters: " + e);
       }
+      fireProgressChanged(5);
+      ProgressListener pListener = new CustomProgressListener(5, 15);
+      tokeniser.addProgressListener(pListener);
       tokeniser.run();
       tokeniser.check();
+      tokeniser.removeProgressListener(pListener);
+
+      pListener = new CustomProgressListener(15, 25);
+      gazetteer.addProgressListener(pListener);
       gazetteer.run();
       gazetteer.check();
+      gazetteer.removeProgressListener(pListener);
+
+      pListener = new CustomProgressListener(25, 90);
+      transducer.addProgressListener(pListener);
       transducer.run();
       transducer.check();
+      transducer.removeProgressListener(pListener);
+
+
       EntitySet entitySet =
         new EntitySet(document.getSourceUrl().getFile(),
                       document,
@@ -155,6 +170,8 @@ public class Nerc extends SerialController {
                                      "Location", "Organization", "Person"}))));
 
       document.getFeatures().put("entitySet", entitySet);
+      fireProgressChanged(100);
+      fireProcessFinished();
     }catch(ExecutionException ee){
       executionException = ee;
     }
