@@ -103,8 +103,7 @@ public class Editor extends JFrame {
    */
   private void jbInit() throws Exception {
     Locale locale = new Locale("en", "GB");
-    //Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
-    Locale[] availableLocales = Locale.getAvailableLocales();
+    Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
     Arrays.sort(availableLocales, new Comparator(){
       public int compare(Object o1, Object o2){
         return ((Locale)o1).getDisplayName().compareTo(((Locale)o2).getDisplayName());
