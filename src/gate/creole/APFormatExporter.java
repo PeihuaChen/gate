@@ -113,6 +113,17 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     return exportFilePath;
   }// getDtdFileName()
 
+  /** Java bean style mutator for source */
+  public void setSource(String aSource){
+    source = aSource;
+  }// setSource();
+
+  /** Java bean style accesor for source */
+  public String getSource(){
+    return source;
+  }// getSource()
+
+
   /** Initialises the docId with documents' file name without the complete path*/
   private void initDocId(){
     String fileName = "";
@@ -146,7 +157,8 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     else
       xmlDoc.append("\""+dtdFileName+"\"");
     xmlDoc.append(">\n");
-    xmlDoc.append("<source_file TYPE=\"text\" VERSION=\"1.2\" URI=\"");
+    xmlDoc.append("<source_file TYPE=\"text\" SOURCE=\""+
+                                    source+ "\" VERSION=\"1.2\" URI=\"");
     xmlDoc.append(docId);
     xmlDoc.append("-lf\">\n");
     xmlDoc.append("  <document DOCID=\"");
@@ -262,11 +274,13 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       serializeAnEntityMention(ann);
     }// End while(anEntityIter.hasNext())
     // Write the entities attributes
+    xmlDoc.append("      <entity_attributes>\n");
     anEntityIter = anEntity.iterator();
     while(anEntityIter.hasNext()){
       Annotation ann = (Annotation)anEntityIter.next();
       serializeAnEntityAttributes(ann);
     }// End while(anEntityIter.hasNext())
+    xmlDoc.append("      </entity_attributes>\n");
     xmlDoc.append("  </entity>\n");
   }// End serializeAnEntity();
 
@@ -316,7 +330,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
   /** This method serializes an entity attribute from an Annotation*/
   private void serializeAnEntityAttributes(Annotation ann){
     if (ann == null) return;
-    xmlDoc.append("      <entity_attributes>\n");
+
     // name
     xmlDoc.append("        <name>\n");
     xmlDoc.append("          <charseq>\n");
@@ -333,7 +347,6 @@ public class APFormatExporter extends AbstractLanguageAnalyser
         "</start><end>"+(ann.getEndNode().getOffset().longValue() - 1)+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </name>\n");
-    xmlDoc.append("      </entity_attributes>\n");
   }//serializeAnEntityMention();
 
   /** Returns the next safe ID for an entity*/
@@ -358,5 +371,8 @@ public class APFormatExporter extends AbstractLanguageAnalyser
   private StringBuffer xmlDoc = null;
 
   private URL exportFilePath = null;
+
+  /** The source attribute for source*/
+  private String source = null;
 
 }// APFormatExporter
