@@ -109,6 +109,15 @@ public class OntoLexKBImpl extends AbstractLanguageResource
     lexIdMap.remove(lexId);
   }
 
+  public void remove(Object conceptId, Object lexId) {
+    Object conceptIds = lexIdMap.get(lexId);
+    if (conceptIds != null && (conceptIds instanceof List))
+      ((List) conceptIds).remove(conceptId);
+    Object lexIds = conceptIdMap.get(conceptId);
+    if (lexIds != null && (lexIds instanceof List))
+      ((List) lexIds).remove(lexId);
+  }
+
   public boolean isEmpty() {
     return conceptIdMap.isEmpty() && lexIdMap.isEmpty();
   }
