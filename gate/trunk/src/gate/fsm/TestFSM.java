@@ -47,7 +47,7 @@ public class TestFSM extends TestCase {
     batch = new Batch(japeFileStream);
 */
     Gate.init();
-    String resPath = "jape/combined/";
+    String resPath = "gate/resources/jape/combined/";
     String resName = "brian-soc-loc1.jape";
     batch = new Batch(resPath, resName);
 

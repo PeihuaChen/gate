@@ -60,7 +60,7 @@ public class TestDocument extends TestCase
     URL u = null;
     File f = null;
     try{
-      f = Files.writeTempFile(Files.getResourceAsStream(testDocument1));
+      f = Files.writeTempFile(Files.getGateResourceAsStream(testDocument1));
       u = f.toURL();
     } catch (Exception e){
       e.printStackTrace(System.err);

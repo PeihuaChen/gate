@@ -71,7 +71,7 @@ public class TestJape extends TestCase
   public void testBatch() throws JapeException, IOException {
     Corpus c = Transients.newCorpus("TestJape corpus");
     c.add(
-      Transients.newDocument(Files.getResourceAsString("texts/doc0.html"))
+      Transients.newDocument(Files.getGateResourceAsString("texts/doc0.html"))
     );
     //add some annotations on the first (only) document in corpus c
     Document doc = (Document)c.first();
@@ -98,7 +98,7 @@ public class TestJape extends TestCase
     // run the parser test
     Batch batch = null;
 //    String japeFileName = "/gate/jape/Test11.jape";
-    String japeFileName = "jape/TestABC.jape";
+    String japeFileName = "gate/resources/jape/TestABC.jape";
 //    String japeFileName = "/gate/jape/Country.jape";
     InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
@@ -129,7 +129,7 @@ public class TestJape extends TestCase
     Corpus corpus = Transients.newCorpus("Jape Corpus");
     try{
     corpus.add(Transients.newDocument(
-        Files.getResourceAsString("jape/InputTexts/" + textName)));
+        Files.getGateResourceAsString("jape/InputTexts/" + textName)));
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
     }
@@ -143,7 +143,7 @@ public class TestJape extends TestCase
     gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
     try{
       tokeniser =new gate.creole.tokeniser.DefaultTokeniser(
-        Files.getResourceAsStream("creole/tokeniser/DiTokeniser.rules"));
+        Files.getGateResourceAsStream("creole/tokeniser/DiTokeniser.rules"));
 //        Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
     }catch(IOException ioe){
       System.err.println("Cannot read the tokeniser rules!" +

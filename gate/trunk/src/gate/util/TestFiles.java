@@ -31,15 +31,15 @@ public class TestFiles extends TestCase
     String firstLine = "// testloc.jape";
 
     InputStreamReader resReader =
-      new InputStreamReader(Files.getResourceAsStream(japeResName));
+      new InputStreamReader(Files.getGateResourceAsStream(japeResName));
     BufferedReader bufResReader = new BufferedReader(resReader);
     assert(bufResReader.readLine().equals(firstLine));
     resReader.close();
 
-    String resString = Files.getResourceAsString(japeResName);
+    String resString = Files.getGateResourceAsString(japeResName);
     assert(resString.startsWith(firstLine));
 
-    byte[] resBytes = Files.getResourceAsByteArray(japeResName);
+    byte[] resBytes = Files.getGateResourceAsByteArray(japeResName);
 
     /*
     System.out.println(new String(resBytes));
@@ -61,7 +61,7 @@ public class TestFiles extends TestCase
     String japeResName = "jape/combined/testloc.jape";
     String firstLine = "// testloc.jape";
 
-    File f = Files.writeTempFile(Files.getResourceAsStream(japeResName));
+    File f = Files.writeTempFile(Files.getGateResourceAsStream(japeResName));
     BufferedReader bfr = new BufferedReader(new FileReader(f));
 
     String firstLn = bfr.readLine();
@@ -78,7 +78,8 @@ public class TestFiles extends TestCase
   public static void main(String args[]){
     TestFiles app = new TestFiles("TestFiles");
     try{
-      app.testJarFiles ();
+//      app.testJarFiles ();
+      app.testGetResources();
     }catch (Exception e){
       e.printStackTrace (System.err);
     }
@@ -102,14 +103,14 @@ public class TestFiles extends TestCase
     //open first jar file in a temporal file
     try{
 //      System.out.println(Files.getResourceAsStream(jarFilePathFirst));
-      f1 = Files.writeTempFile(Files.getResourceAsStream(jarFilePathFirst));
+      f1 = Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathFirst));
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
       System.exit(1);
     }
     //open second jar file in a temporal file
     try{
-      f2 =Files.writeTempFile(Files.getResourceAsStream(jarFilePathSecond));
+      f2 =Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathSecond));
     }catch (IOException ioe){
       ioe.printStackTrace(System.err);
       System.exit(1);
