@@ -21,8 +21,8 @@ public interface GateConstants {
   /** The name of config data files (<TT>gate.xml</TT>). */
   public static String GATE_DOT_XML = "gate.xml";
 
-  /** The name of session state data files (<TT>gate.ser</TT>). */
-  public static String GATE_DOT_SER = "gate.ser";
+  /** The name of session state data files (<TT>gate.session</TT>). */
+  public static String GATE_DOT_SER = "gate.session";
 
   /** The name of the annotation set storing original markups in a document */
   public static final String
