@@ -425,7 +425,8 @@ public class TestPersist extends TestCase
     sds.sync(persDoc);
 
     // DSR should have one member
-    assertTrue("DSR has wrong number elements", dsr.size() == 1);
+    assertTrue("DSR has wrong number elements (expected 1): " + dsr.size(),
+               dsr.size() == 1);
 
     // create and open another serial data store
     storageDir = File.createTempFile("TestPersist__", "__StorageDir");
