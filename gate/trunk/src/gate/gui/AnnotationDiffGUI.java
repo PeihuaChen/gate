@@ -17,11 +17,16 @@ package gate.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.JTable;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.plaf.FileChooserUI;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import gate.*;
@@ -227,6 +232,11 @@ public class AnnotationDiffGUI extends JFrame{
     resultsPane.add(fmeasureLenientLbl, constraints);
     fmeasureAveLbl = new JLabel("0.0000");
     resultsPane.add(fmeasureAveLbl, constraints);
+    
+    //COLMUN 6
+    constraints.gridx = 6;
+    resultsPane.add(new JButton(new HTMLExportAction()), constraints);
+    
     //Finished building the results pane
     //Add it to the dialog
     
@@ -440,6 +450,122 @@ public class AnnotationDiffGUI extends JFrame{
       fmeasureLenientLbl.setText(formatter.format(differ.getFMeasureLenient(weight)));
       fmeasureAveLbl.setText(formatter.format(differ.getFMeasureAverage(weight)));
     }
+  }
+  
+  protected class HTMLExportAction extends AbstractAction{
+    public HTMLExportAction(){
+      super("Export to HTML");
+    }
+    public void actionPerformed(ActionEvent evt){
+      JFileChooser fileChooser = MainFrame.getFileChooser();
+      File currentFile = fileChooser.getSelectedFile();
+      String nl = Strings.getNl();
+      String parent = (currentFile != null) ? currentFile.getParent() : 
+        System.getProperty("user.home");
+      String fileName = (resDoc.getSourceUrl() != null) ?
+              resDoc.getSourceUrl().getFile() :
+              resDoc.getName();
+      fileName += "_" + annTypeCombo.getSelectedItem().toString();
+      fileName += ".html";
+      fileChooser.setSelectedFile(new File(parent, fileName));
+      ExtensionFileFilter fileFilter = new ExtensionFileFilter();
+      fileFilter.addExtension(".html");
+      fileChooser.setFileFilter(fileFilter);
+      fileChooser.setAcceptAllFileFilterUsed(true);
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this);
+      if(res == JFileChooser.APPROVE_OPTION){
+        File saveFile = fileChooser.getSelectedFile();
+        try{
+          Writer fw = new BufferedWriter(new FileWriter(saveFile));
+          //write the header
+          fw.write(HEADER_1);
+          fw.write(resDoc.getName() + " " + 
+                  annTypeCombo.getSelectedItem().toString() +
+                  " annotations");
+          fw.write(HEADER_2 + nl);
+          fw.write("<H2>Annotation Diff - comparing " + 
+                  annTypeCombo.getSelectedItem().toString() +
+                  " annotations" + "</H2>");
+          fw.write("<TABLE cellpadding=\"5\" border=\"0\"");
+          fw.write(nl);
+          fw.write("<TR>" + nl);
+          fw.write("\t<TH align=\"left\">&nbsp;</TH>" + nl);
+          fw.write("\t<TH align=\"left\">Document</TH>" + nl);
+          fw.write("\t<TH align=\"left\">Annotation Set</TH>" + nl);
+          fw.write("</TR>" + nl);
+          
+          fw.write("<TR>" + nl);
+          fw.write("\t<TH align=\"left\">Key</TH>" + nl);
+          fw.write("\t<TD align=\"left\">" + keyDoc.getName() + "</TD>" + nl);
+          fw.write("\t<TD align=\"left\">" + keySet.getName() + "</TD>" + nl);
+          fw.write("</TR>" + nl);
+          fw.write("<TR>" + nl);
+          fw.write("\t<TH align=\"left\">Response</TH>" + nl);
+          fw.write("\t<TD align=\"left\">" + resDoc.getName() + "</TD>" + nl);
+          fw.write("\t<TD align=\"left\">" + resSet.getName() + "</TD>" + nl);
+          fw.write("</TR>" + nl);
+          fw.write("</TABLE>" + nl);
+          fw.write("<BR><BR><BR>" + nl);
+          //write the results
+          java.text.NumberFormat format = java.text.NumberFormat.getInstance();
+          format.setMaximumFractionDigits(4);
+          fw.write("Recall: " + format.format(differ.getRecallStrict()) + "<br>" + nl);
+          fw.write("Precision: " + format.format(differ.getPrecisionStrict()) + "<br>" + nl);
+          fw.write("F-measure: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
+          fw.write("<br>");
+          fw.write("Correct matches: " + differ.getCorrectMatches() + "<br>" + nl);
+          fw.write("Partially Correct matches: " + 
+              differ.getPartiallyCorrectMatches() + "<br>" + nl);
+          fw.write("Missing: " + differ.getMissing() + "<br>" + nl);
+          fw.write("False positives: " + differ.getSpurious() + "<br>" + nl);
+//          fw.write("<hr>" + nl);
+          //get a list of columns that need to be displayed
+          int[] cols = new int[diffTableModel.getColumnCount()];
+          int maxColIdx = -1;
+          for(int i = 0; i < cols.length; i++){
+            if(!diffTable.isColumnHidden(i)){
+              maxColIdx ++;
+              cols[maxColIdx] = i;
+            }
+          }
+          fw.write(HEADER_3 + nl + "<TR>" + nl);
+          for(int col = 0; col <= maxColIdx; col++){
+            fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(cols[col]) + 
+                    "</TH>" + nl);
+          }
+          fw.write("</TR>");
+          int rowCnt = diffTableModel.getRowCount();
+          for(int row = 0; row < rowCnt; row ++){
+            fw.write("<TR>");
+            for(int col = 0; col <= maxColIdx; col++){
+              Color bgCol = diffTableModel.getBackgroundAt(
+                      diffTable.rowViewToModel(row), 
+                      diffTable.convertColumnIndexToModel(cols[col]));
+              fw.write("\t<TD bgcolor=\"#" +
+                      Integer.toHexString(bgCol.getRGB()).substring(2) +
+                      "\">" +
+                      diffTable.getValueAt(row, cols[col]) + 
+                      "</TD>" + nl);
+            }
+            fw.write("</TR>");
+          }
+          fw.write(FOOTER);
+          fw.flush();
+          fw.close();
+          
+        }catch(IOException ioe){
+          JOptionPane.showMessageDialog(AnnotationDiffGUI.this, ioe.toString(), 
+                  "GATE", JOptionPane.ERROR_MESSAGE);
+          ioe.printStackTrace();
+        }
+      }
+    }
+    
+    static final String HEADER_1 = "<html><head><title>";
+    static final String HEADER_2 = "</title></head><body>";
+    static final String HEADER_3 = "<table cellpadding=\"0\" border=\"1\">";
+    static final String FOOTER = "</table></body></html>";
   }
   
   protected class DiffTableCellRenderer extends DefaultTableCellRenderer{
