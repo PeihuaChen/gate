@@ -339,7 +339,6 @@ jar/classpath so it's the same as registerBuiltins
         //this is an URL
         try{
           URL creoleURL = new File(aPath).toURL();
-          System.out.println("Loading CREOLE repository " + creoleURL);
           Gate.getCreoleRegister().registerDirectories(creoleURL);
         }catch(MalformedURLException mue){
           throw new GateRuntimeException(mue);
