@@ -17,38 +17,36 @@ import java.util.*;
   */
 public class Scratch
 {
+
   public boolean equals(Object other) {
     System.out.println("Scratch.equals");
-    return super.equals(other);
+    if(other instanceof Scratch) return i == ((Scratch)other).i;
+    else return false;
   } // equals
+
+  public Scratch(int i){
+    this.i = i;
+  }
 
   public static void main(String args[]) {
     Map map1 = new HashMap();
     Map map2 = new HashMap();
 
-    Scratch o1 = new Scratch();
-    Scratch o2 = new Scratch();
-    Scratch o3 = new Scratch();
+    Collection col1 = new HashSet();
+    Collection col2 = new HashSet();
 
-    map1.put("o1", o1);
-    map1.put("o2", o2);
-    map1.put("o3", o3);
+    Scratch o1 = new Scratch(1);
+    Scratch o2 = new Scratch(2);
+    Scratch o3 = new Scratch(1);
 
-    map2.put("o1", o1);
-    map2.put("o2", o2);
-    map2.put("o3", o3);
+    col1.add(o1);
+    col1.add(o2);
 
-    System.out.println(
-      "map1.values().containsAll(map2.values()): " +
-      map1.values().containsAll(map2.values())
-    );
+    col2.add(o2);
+    col2.add(o3);
 
-    map1.remove("o1");
-    System.out.println(
-      "map1.values().containsAll(map2.values()): " +
-      map1.values().containsAll(map2.values())
-    );
-
+    System.out.println(col1.containsAll(col2));
   } // main
 
+  public int i;
 } // class Scratch
