@@ -11,10 +11,10 @@
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
  * Valentin Tablan, 03/07/2000
+ * borislav popov 24/03/2002
  *
  * $Id$
  */
-
 package gate.creole.gazetteer;
 
 import java.io.*;
@@ -49,8 +49,15 @@ import gate.*;
  * will generate annotations of type Lookup having the attributes specified in
  * the definition file.
  */
-public class DefaultGazetteer extends AbstractLanguageAnalyser
-             implements ProcessingResource {
+public class DefaultGazetteer extends AbstractGazetteer {
+
+  /** Debug flag
+   */
+  private static final boolean DEBUG = false;
+
+  private static final String CLASS = "CLASS";
+
+  private static final String ONTOLOGY = "ONTOLOGY";
 
   public static final String
     DEF_GAZ_DOCUMENT_PARAMETER_NAME = "document";
@@ -67,9 +74,12 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
   public static final String
     DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME = "caseSensitive";
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
+
+  /** the linear definition of the gazetteer */
+  private LinearDefinition definition;
+
+  /** a map of nodes vs gaz lists */
+  private Map listsByNode;
 
   /** Build a gazetter using the default lists from the agte resources
    * {@see init()}
@@ -88,42 +98,22 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
         throw new ResourceInstantiationException (
               "No URL provided for gazetteer creation!");
       }
+      definition = new LinearDefinition();
+      definition.setURL(listsURL);
+      definition.load();
+      int linesCnt = definition.size();
+      listsByNode = definition.loadLists();
+      Iterator inodes = definition.iterator();
 
-      //find the number of lines
-      Reader reader = new InputStreamReader(listsURL.openStream(), encoding);
-      int linesCnt = 0;
-      BufferedReader bReader = new BufferedReader(reader);
-      String line = bReader.readLine();
-      while (line != null) {
-        linesCnt++;
-        line = bReader.readLine();
-      }
-      bReader.close();
-
-      //parse the file
-      reader = new InputStreamReader(listsURL.openStream(), encoding);
-      bReader = new BufferedReader(reader);
-      line = bReader.readLine();
-      ///String toParse = "";
-      StringBuffer toParse = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
-
-      int lineIdx = 0;
-      while (line != null) {
-        if(line.endsWith("\\")) {
-          ///toParse += line.substring(0,line.length()-1);
-          toParse.append(line.substring(0,line.length()-1));
-        } else {
-          ///toParse += line;
-          toParse.append(line);
-          fireStatusChanged("Reading " + toParse.toString());
-          fireProgressChanged(lineIdx * 100 / linesCnt);
-          lineIdx ++;
-          readList(toParse.toString(), true);
-          ///toParse = "";
-          toParse.delete(0,toParse.length());
-        }
-        line = bReader.readLine();
-      }
+      String line;
+      int nodeIdx = 0;
+      LinearNode node;
+      while (inodes.hasNext()) {
+        node = (LinearNode) inodes.next();
+        fireStatusChanged("Reading " + node.toString());
+        fireProgressChanged(++nodeIdx * 100 / linesCnt);
+        readList(node,true);
+      } // while iline
       fireProcessFinished();
     }catch(IOException ioe){
       throw new ResourceInstantiationException(ioe);
@@ -143,43 +133,36 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
    *     list will be removed from the list of phrases recognised by this
    *     gazetteer.
    */
-  void readList(String listDesc, boolean add) throws FileNotFoundException,
-                                        IOException,
-                                        GazetteerException{
+  void readList(LinearNode node, boolean add) throws GazetteerException{
     String listName, majorType, minorType, languages;
-    int firstColon = listDesc.indexOf(':');
-    int secondColon = listDesc.indexOf(':', firstColon + 1);
-    int thirdColon = listDesc.indexOf(':', secondColon + 1);
-    if(firstColon == -1){
-      throw new GazetteerException("Invalid list definition: " + listDesc);
+    if ( null == node ) {
+      throw new GazetteerException (" LinearNode node is null ");
     }
-    listName = listDesc.substring(0, firstColon);
 
-    if(secondColon == -1){
-      majorType = listDesc.substring(firstColon + 1);
-      minorType = null;
-      languages = null;
-    } else {
-      majorType = listDesc.substring(firstColon + 1, secondColon);
-      if(thirdColon == -1) {
-        minorType = listDesc.substring(secondColon + 1);
-        languages = null;
-      } else {
-        minorType = listDesc.substring(secondColon + 1, thirdColon);
-        languages = listDesc.substring(thirdColon + 1);
-      }
+    listName = node.getList();
+    majorType = node.getMajorType();
+    minorType = node.getMinorType();
+    languages = node.getLanguage();
+    GazetteerList gazList = (GazetteerList)listsByNode.get(node);
+    if (null == gazList) {
+      throw new GazetteerException("gazetteer list not found by node");
     }
-    BufferedReader listReader;
 
-    listReader = new BufferedReader(new InputStreamReader(
-                            (new URL(listsURL, listName)).openStream(), encoding));
+    Iterator iline = gazList.iterator();
 
-    Lookup lookup = new Lookup(majorType, minorType, languages);
-    String line = listReader.readLine();
-    while(null != line){
+    Lookup lookup = new Lookup(listName,majorType, minorType, languages);
+    lookup.list = node.getList();
+    if ( null != mappingDefinition){
+      MappingNode mnode = mappingDefinition.getNodeByList(lookup.list);
+      lookup.oClass = mnode.getClassID();
+      lookup.ontology = mnode.getOntologyID();
+    }//if mapping def
+
+    String line;
+    while(iline.hasNext()){
+      line = iline.next().toString();
       if(add)addLookup(line, lookup);
       else removeLookup(line, lookup);
-      line = listReader.readLine();
     }
   } // void readList(String listDesc)
 
@@ -325,18 +308,6 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
     return res;
   } // getFSMgml
 
-  //no doc required: javadoc will copy it from the interface
-  /**    */
-  public FeatureMap getFeatures(){
-    return features;
-  } // getFeatures
-
-  /**    */
-  public void setFeatures(FeatureMap features){
-    this.features = features;
-  } // setFeatures
-
-
 
   /**
    * This method runs the gazetteer. It assumes that all the needed parameters
@@ -356,7 +327,8 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    fireStatusChanged("Doing lookup in " + document.getName() + "...");
+    fireStatusChanged("Doing lookup in " +
+                           document.getName() + "...");
     String content = document.getContent().toString();
     int length = content.length();
 // >>> DAM, was
@@ -406,11 +378,13 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
           while(lookupIter.hasNext()) {
             currentLookup = (Lookup)lookupIter.next();
             fm = Factory.newFeatureMap();
-            fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
-                  currentLookup.majorType);
+            fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
+            if (null!= currentLookup.oClass && null!=currentLookup.ontology){
+              fm.put(CLASS,currentLookup.oClass);
+              fm.put(ONTOLOGY,currentLookup.ontology);
+            }
             if(null != currentLookup.minorType) {
-              fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME,
-                    currentLookup.minorType);
+              fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
               if(null != currentLookup.languages)
                 fm.put("language", currentLookup.languages);
             }
@@ -454,11 +428,13 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
             while(lookupIter.hasNext()) {
               currentLookup = (Lookup)lookupIter.next();
               fm = Factory.newFeatureMap();
-              fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
-                    currentLookup.majorType);
+              fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
+              if (null!= currentLookup.oClass && null!=currentLookup.ontology){
+                fm.put(CLASS,currentLookup.oClass);
+                fm.put(ONTOLOGY,currentLookup.ontology);
+              }
               if(null != currentLookup.minorType) {
-                fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME,
-                      currentLookup.minorType);
+                fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
                 if(null != currentLookup.languages)
                   fm.put("language", currentLookup.languages);
               }
@@ -494,11 +470,14 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
       while(lookupIter.hasNext()) {
         currentLookup = (Lookup)lookupIter.next();
         fm = Factory.newFeatureMap();
-        fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
-               currentLookup.majorType);
+        fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
+        if (null!= currentLookup.oClass && null!=currentLookup.ontology){
+          fm.put(CLASS,currentLookup.oClass);
+          fm.put(ONTOLOGY,currentLookup.ontology);
+        }
+
         if(null != currentLookup.minorType)
-          fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME,
-                 currentLookup.minorType);
+          fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
         try{
           annotationSet.add(new Long(matchedRegionStart),
                           new Long(matchedRegionEnd + 1),
@@ -514,15 +493,6 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
   } // execute
 
 
-  /**
-   * Sets the AnnotationSet that will be used at the next run for the newly
-   * produced annotations.
-   */
-  public void setAnnotationSetName(String newAnnotationSetName) {
-    annotationSetName = newAnnotationSetName;
-  }
-
-
   /** The initial state of the FSM that backs this gazetteer
    */
   FSMState initialState;
@@ -531,46 +501,11 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
    */
   Set fsmStates;
 
-  protected FeatureMap features  = null;
-
-  /** Used to store the annotation set currently being used for the newly
-   * generated annotations
-   */
-  protected String annotationSetName;
-
-  private String encoding = "UTF-8";
-
-  /**
-   * The value of this property is the URL that will be used for reading the
-   * lists dtaht define this Gazetteer
-   */
-  private java.net.URL listsURL;
-
-  /**
-   * Should this gazetteer be case sensitive. The default value is true.
-   */
-  private Boolean caseSensitive = new Boolean(true);
-
-  public void setEncoding(String newEncoding) {
-    encoding = newEncoding;
-  }
-  public String getEncoding() {
-    return encoding;
-  }
-  public void setListsURL(java.net.URL newListsURL) {
-    listsURL = newListsURL;
-  }
-  public java.net.URL getListsURL() {
-    return listsURL;
-  }
-  public void setCaseSensitive(Boolean newCaseSensitive) {
-    caseSensitive = newCaseSensitive;
-  }
-  public Boolean getCaseSensitive() {
-    return caseSensitive;
-  }
-  public String getAnnotationSetName() {
-    return annotationSetName;
+  /**lookup <br>
+   * @param singleItem a single string to be looked up by the gazetteer
+   * @return the referring Lookup object*/
+  public Lookup lookup(String singleItem) {
+    return null;
   }
 
 } // DefaultGazetteer

@@ -9,6 +9,7 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Valentin Tablan, 11/07/2000
+ *  borislav popov, 05/02/2002
  *
  *  $Id$
  */
@@ -17,10 +18,10 @@ package gate.creole.gazetteer;
 
 /**
  * Used to describe a type of lookup annotations. A lookup is described by a
- * major type a minor type and a list of languages.
+ * major type a minor type and a list of languages. Added members are :
+ * ontologyClass and list.
  * All these values are strings (the list of languages is a string and it is
  * intended to represesnt a comma separated list).
- *
  */
 public class Lookup implements java.io.Serializable {
 
@@ -34,38 +35,56 @@ public class Lookup implements java.io.Serializable {
    *
    * @param major
    * @param minor
-   * @param languages
+   * @param theLanguages
    */
-  public Lookup(String major, String minor, String languages){
+  public Lookup(String theList, String major, String minor, String theLanguages){
     majorType = major;
     minorType = minor;
-    this.languages = languages;
+    languages = theLanguages;
+    list = theList;
   }
 
-  /**
-   * Tha major type for this lookup, e.g. "Organisation"
-   *
-   */
+  /** Tha major type for this lookup, e.g. "Organisation" */
   public String majorType;
-  /**
-   * The minor type for this lookup, e.g. "Company"
-   *
-   */
+
+  /** The minor type for this lookup, e.g. "Company"  */
   public String minorType;
-  /**
-   * The languages for this lookup, e.g. "English, French"
-   *
-   */
+
+  /** The languages for this lookup, e.g. "English, French" */
   public String languages;
 
-  /**
-   * Returns a string representation of this lookup in the format
-   * majorType.minorType
-   *
-   */
+  /** the ontology class of this lookup according to the mapping between
+   *  list and ontology */
+  public String oClass;
+
+  /**  the ontology ID */
+  public String ontology;
+
+  /** the list represented by this lookup*/
+  public String list;
+
+  /**Returns a string representation of this lookup in the format
+   * majorType.minorType */
   public String toString(){
-    if(null == minorType) return majorType;
-    else return majorType + "." + minorType;
+    StringBuffer b = new StringBuffer();
+    b.append(list);
+    b.append(".");
+    b.append(majorType);
+    b.append(".");
+    if (null != minorType) {
+      b.append(minorType);
+      if (null!= languages) {
+        b.append(".");
+        b.append(languages);
+      }//if
+    }//if
+    if (null!=ontology && null!=oClass){
+      b.append("|");
+      b.append(ontology);
+      b.append(":");
+      b.append(oClass);
+    }
+    return b.toString();
   }
 
   /**
