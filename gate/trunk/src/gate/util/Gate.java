@@ -69,7 +69,6 @@ public class Gate
       gateAcUkReachable = false;
     }
 
-
   } // init()
 
   /** Is access to the GATE internal server available? */

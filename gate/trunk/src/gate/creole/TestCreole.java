@@ -21,15 +21,18 @@ import gate.util.*;
 public class TestCreole extends TestCase
 {
   /** Construction */
-  public TestCreole(String name) { super(name); }
+  public TestCreole(String name) throws GateException { super(name); }
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** Initialise the creole register */
+  static {
+    Gate.initCreoleRegister();
+  } // static initialisation
+
   /** Fixture set up */
   public void setUp() throws Exception {
-    Gate.init();
-    Gate.initCreoleRegister();
   } // setUp
 
   /** Test resource registration */
@@ -62,14 +65,13 @@ public class TestCreole extends TestCase
     if (Gate.isGateHomeReachable())
       reg.addDirectory(
         new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/creole.xml")
-
       );
     else if (Gate.isGateAcUkReachable())
       reg.addDirectory(
         new URL("http://www.gate.ac.uk/tests/creole.xml")
       );
     else
-      throw new LazyProgrammerException("Derwent and www.gate.ac.uk are not reachable");
+      throw new GateException("Derwent and www.gate.ac.uk are not reachable");
 
     reg.registerDirectories();
 
