@@ -105,7 +105,7 @@ public class TestHtml extends TestCase
     //*/
 
     // graphic visualisation
-    /*
+    //*
     if (docFormat != null){
         docFormat.unpackMarkup (doc);
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
@@ -113,7 +113,7 @@ public class TestHtml extends TestCase
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
     }
-    */
+    //*/
   } // testSomething()
 
   class AnnotationSetTableModel extends gate.gui.SortedTableModel{
