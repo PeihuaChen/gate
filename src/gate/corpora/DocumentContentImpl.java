@@ -71,6 +71,12 @@ public class DocumentContentImpl implements DocumentContent
     );
   } // getContent(start, end)
 
+  /** Returns the Stiung representing the content in case of a textual document.
+    * NOTE: this is a temporary solution until we have a more generic one.
+    */
+  public String getString(){
+    return content;
+  }
   /** The size of this content (e.g. character length for textual
     * content).
     */
@@ -100,10 +106,6 @@ public class DocumentContentImpl implements DocumentContent
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
-  /**<Valy>For testing...</Valy>*/
-  public String toString(){
-    return content;
-  }
 
   /** Just for now - later we have to cater for different types of
     * content.

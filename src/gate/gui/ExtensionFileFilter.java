@@ -12,6 +12,9 @@ import javax.swing.filechooser.*;
 import java.io.*;
 import java.util.*;
 
+/**
+* This class 
+*/
 public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter{
 
   public ExtensionFileFilter() {

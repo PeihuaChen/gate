@@ -78,6 +78,11 @@ public interface AnnotationSet extends Set, Cloneable
   /** Get the name of this set. */
   public String getName();
 
+  /** Get a set of java.lang.String objects representing all the annotation
+    * types present in this annotation set.
+    */
+  public Set getAllTypes();
+
   /** Get the document this set is attached to. */
   public Document getDocument();
 
