@@ -176,7 +176,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
           sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset);
         getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
       } catch(IOException e) {
-        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
+        e.printStackTrace();
+//        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
 
       if(preserveOriginalContent.booleanValue() && content != null) {
@@ -1395,12 +1396,18 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
           if(includeNamespace) {
             strBuff.append("gate:");
           }
-          strBuff.append(key);
+//          strBuff.append(key);
+          // replace non XML chars in attribute name
+          strBuff.append(
+            filterNonXmlChars(replaceCharsWithEntities(key.toString())));
           strBuff.append("=\"");
         }
         else {
           strBuff.append(" ");
-          strBuff.append(key);
+//          strBuff.append(key);
+          // replace non XML chars in attribute name
+          strBuff.append(
+            filterNonXmlChars(replaceCharsWithEntities(key.toString())));
           strBuff.append("=\"");
         }
         if (java.util.Collection.class.isAssignableFrom(value.getClass())){
@@ -1410,13 +1417,19 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
             if (!(String.class.isAssignableFrom(item.getClass()) ||
                   Number.class.isAssignableFrom(item.getClass())))
                   continue;
-            strBuff.append(item);
+//            strBuff.append(item);
+            // replace non XML chars in collection item
+            strBuff.append(
+              filterNonXmlChars(replaceCharsWithEntities(item.toString())));
             strBuff.append(";");
           }// End while
           if (strBuff.charAt(strBuff.length()-1) == ';')
             strBuff.deleteCharAt(strBuff.length()-1);
         }else{
-          strBuff.append(value);
+//          strBuff.append(value);
+          // replace non XML chars in attribute value
+          strBuff.append(
+            filterNonXmlChars(replaceCharsWithEntities(value.toString())));
         }// End if
         strBuff.append("\"");
       }// End if
