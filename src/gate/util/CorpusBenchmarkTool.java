@@ -437,7 +437,7 @@ public class CorpusBenchmarkTool {
         params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
         FeatureMap features = Factory.newFeatureMap();
-        Gate.setHiddenAttribute(features, true);
+//        Gate.setHiddenAttribute(features, true);
 
         // create the document
         Document doc = (Document) Factory.createResource(
@@ -531,7 +531,7 @@ public class CorpusBenchmarkTool {
         features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
         features.put(DataStore.LR_ID_FEATURE_NAME, docID);
         FeatureMap hparams = Factory.newFeatureMap();
-        Gate.setHiddenAttribute(hparams, true);
+//        Gate.setHiddenAttribute(hparams, true);
 
         persDoc = (Document) Factory.createResource(
                                     "gate.corpora.DocumentImpl",
@@ -659,7 +659,7 @@ public class CorpusBenchmarkTool {
         features.put(DataStore.LR_ID_FEATURE_NAME, docID);
 
         FeatureMap hparams = Factory.newFeatureMap();
-        Gate.setHiddenAttribute(hparams, true);
+//        Gate.setHiddenAttribute(hparams, true);
 
 
         persDoc = (Document) Factory.createResource(
@@ -778,7 +778,7 @@ public class CorpusBenchmarkTool {
       params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
       FeatureMap hparams = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(hparams, true);
+//      Gate.setHiddenAttribute(hparams, true);
 
       // create the document
       try {
