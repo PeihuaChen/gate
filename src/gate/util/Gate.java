@@ -59,6 +59,9 @@ public class Gate
 
     // init the creole register
     initCreoleRegister();
+
+    // init the data store register
+    initDataStoreRegister();
   } // init()
 
   /** Initialise the CREOLE register. */
@@ -81,6 +84,11 @@ public class Gate
     // register the resources that are actually in gate.jar
     creoleRegister.registerBuiltins();
   } // initCreoleRegister
+
+  /** Initialise the DataStore register. */
+  public static void initDataStoreRegister() {
+    dataStoreRegister = new DataStoreRegister();
+  } // initDataStoreRegister()
 
   /** Reads config data (<TT>gate.xml</TT> files). */
   public static void initConfigData() throws GateException {
@@ -293,5 +301,13 @@ public class Gate
 
   /** Get the CREOLE register. */
   public static CreoleRegister getCreoleRegister() { return creoleRegister; }
+
+  /** The DataStore register */
+  private static DataStoreRegister dataStoreRegister = null;
+
+  /** Get the DataStore register. */
+  public static DataStoreRegister getDataStoreRegister() {
+    return dataStoreRegister;
+  } // getDataStoreRegister
 
 } // class Gate
