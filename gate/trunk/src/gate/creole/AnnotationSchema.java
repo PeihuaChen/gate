@@ -42,9 +42,6 @@ public class AnnotationSchema extends AbstractLanguageResource{
   /** A map between JAva types and XSchema */
   private static Map java2xSchemaMap;
 
-  /** Parser for the XSchema source files */
-  private static DocumentBuilder xmlParser;
-
   /** This sets up two Maps between XSchema types and their coresponding
     * Java types + a DOM xml parser
     */
@@ -70,26 +67,6 @@ public class AnnotationSchema extends AbstractLanguageResource{
     java2xSchemaMap.put(Double.class.getName(),   "double");
     java2xSchemaMap.put(Short.class.getName(),    "short");
     java2xSchemaMap.put(Byte.class.getName(),     "byte");
-
-    // Get an XML parser
-    try {
-      // Get a parser factory.
-      DocumentBuilderFactory domBuilderFactory =
-                                          DocumentBuilderFactory.newInstance();
-      // Set up the factory to create the appropriate type of parser
-      // A non validating one
-      domBuilderFactory.setValidating(false);
-      // A non namesapace aware one
-      domBuilderFactory.setNamespaceAware(true);
-
-      // Create the DOM parser
-      xmlParser = domBuilderFactory.newDocumentBuilder();
-
-    } catch(ParserConfigurationException e) {
-      throw new ResourceInstantiationException(
-        "Couldn't create annotation schema parser: " + e
-      );
-    }//End try
   } //setUpStaticData
 
   /** The name of the annotation */
@@ -140,18 +117,22 @@ public class AnnotationSchema extends AbstractLanguageResource{
     */
   public Resource init() throws ResourceInstantiationException {
     // set up the static data if it's not there already
-    if(xSchema2JavaMap == null || java2xSchemaMap == null || xmlParser == null)
+    if(xSchema2JavaMap == null || java2xSchemaMap == null)
       setUpStaticData();
 
     // parse the XML file if we have its URL
-    if(xmlFileUrl != null)
-      fromXSchema(xmlFileUrl);
+    if(xmlFileUrl != null) fromXSchema(xmlFileUrl);
 
     return this;
   } // init()
 
   /** The xml file URL of the resource */
   protected URL xmlFileUrl;
+
+  /**
+   * The namepsace used in the xml file
+   */
+  protected Namespace namespace;
 
   /** Set method for the resource xml file URL */
   public void setXmlFileUrl(URL xmlFileUrl) { this.xmlFileUrl = xmlFileUrl; }
@@ -163,68 +144,31 @@ public class AnnotationSchema extends AbstractLanguageResource{
     * @param anXSchemaURL the URL where to find the XSchema file
     */
   public void fromXSchema(URL anXSchemaURL)
-  throws ResourceInstantiationException {
-    try {
-      // Parse the document and create the DOM structure
-      org.w3c.dom.Document dom =
-                xmlParser.parse(anXSchemaURL.toString());
-      org.jdom.Document jDom = buildJdomFromDom(dom);
-      // don't need dom anymore
-      dom = null;
-      // Use JDOM
-      workWithJDom(jDom);
-    } catch (SAXException e){
-      throw new ResourceInstantiationException(
-        "couldn't parse annotation schema file: " + e
-      );
-    } catch (IOException e) {
-      throw new ResourceInstantiationException(
-        "couldn't open annotation schema file: " + e
-      );
-    }// End try
+              throws ResourceInstantiationException {
+    org.jdom.Document jDom = null;
+    SAXBuilder saxBuilder = new SAXBuilder(false);
+    try{
+      jDom = saxBuilder.build(anXSchemaURL);
+    }catch(JDOMException je){
+      throw new ResourceInstantiationException(je);
+    }
+    workWithJDom(jDom);
   } // fromXSchema
 
   /** Creates an AnnotationSchema object from an XSchema file
     * @param anXSchemaInputStream the Input Stream containing the XSchema file
     */
   public void fromXSchema(InputStream anXSchemaInputStream)
-  throws ResourceInstantiationException
-  {
-    try {
-      // Parse the document and create the DOM structure
-      org.w3c.dom.Document dom =
-                xmlParser.parse(anXSchemaInputStream);
-      org.jdom.Document jDom = buildJdomFromDom(dom);
-      // don't need dom anymore
-      dom = null;
-      // Use JDOM
-      workWithJDom(jDom);
-    } catch (SAXException e){
-      throw new ResourceInstantiationException(
-        "couldn't parse annotation schema stream: " + e
-      );
-    } catch (IOException e) {
-      throw new ResourceInstantiationException(
-        "couldn't open annotation schema stream: " + e
-      );
-    }// End try
-  } // end fromXSchema
-
-  /** This method builds a JDom structure from a W3C Dom one.Of course that can
-    * be considered a waist of time, but a JDOM structure is more flexible than
-    * a DOM one.
-    * @param aDom W3C dom structure
-    * @return {@link  org.jdom.Document}
-    */
-  private org.jdom.Document buildJdomFromDom(org.w3c.dom.Document aDom){
+              throws ResourceInstantiationException {
     org.jdom.Document jDom = null;
-    // Create a new jDOM BUILDER
-    DOMBuilder jDomBuilder = new DOMBuilder();
-    // Create a JDOM structure from the dom one
-    jDom = jDomBuilder.build(aDom);
-    // Don't need dom anymore, but we don't decide that here.
-    return jDom;
-  } // buildJdomFromDom
+    SAXBuilder saxBuilder = new SAXBuilder(false);
+    try{
+      jDom = saxBuilder.build(anXSchemaInputStream);
+    }catch(JDOMException je){
+      throw new ResourceInstantiationException(je);
+    }
+    workWithJDom(jDom);
+  } // end fromXSchema
 
   /** This method uses the JDom structure for our XSchema needs. What it does is
     * to add semantics to the XML elements defined in XSchema. In the end we need
@@ -236,8 +180,9 @@ public class AnnotationSchema extends AbstractLanguageResource{
   private void workWithJDom(org.jdom.Document jDom){
     // Use the jDom structure the way we want
     org.jdom.Element rootElement = jDom.getRootElement();
+    namespace = rootElement.getNamespace();
     // get all children elements from the rootElement
-    List rootElementChildrenList = rootElement.getChildren("element");
+    List rootElementChildrenList = rootElement.getChildren("element", namespace);
     Iterator rootElementChildrenIterator = rootElementChildrenList.iterator();
     while (rootElementChildrenIterator.hasNext()){
       org.jdom.Element childElement =
@@ -256,9 +201,11 @@ public class AnnotationSchema extends AbstractLanguageResource{
     if (annotationName == null)
         annotationName = "UnknownElement";
     // See if this element has a complexType element inside it
-    org.jdom.Element complexTypeElement = anElement.getChild("complexType");
+    org.jdom.Element complexTypeElement = anElement.getChild("complexType",
+                                                             namespace);
     if (complexTypeElement != null){
-      List complexTypeCildrenList = complexTypeElement.getChildren("attribute");
+      List complexTypeCildrenList = complexTypeElement.getChildren("attribute",
+                                                                   namespace);
       Iterator complexTypeCildrenIterator = complexTypeCildrenList.iterator();
       if (complexTypeCildrenIterator.hasNext())
         featureSchemaSet = new HashSet();
@@ -307,12 +254,14 @@ public class AnnotationSchema extends AbstractLanguageResource{
 
     // Let's check if it has a simpleType element inside
     org.jdom.Element simpleTypeElement  =
-                                  anAttributeElement.getChild("simpleType");
+                                  anAttributeElement.getChild("simpleType",
+                                                              namespace);
 
     // If it has (!= null) then check to see if it has a restrictionElement
     if (simpleTypeElement != null) {
       org.jdom.Element restrictionElement =
-                              simpleTypeElement.getChild("restriction");
+                              simpleTypeElement.getChild("restriction",
+                                                         namespace);
       if (restrictionElement != null) {
         // Get the type attribute for restriction element
         featureType = restrictionElement.getAttributeValue("base");
@@ -328,7 +277,8 @@ public class AnnotationSchema extends AbstractLanguageResource{
 
         // Check to see if there are any enumeration elements inside
         List enumerationElementChildrenList =
-                                 restrictionElement.getChildren("enumeration");
+                                 restrictionElement.getChildren("enumeration",
+                                                                namespace);
         Iterator enumerationChildrenIterator =
                                 enumerationElementChildrenList.iterator();
 
