@@ -27,6 +27,7 @@ import gate.annotation.*;
 import gate.creole.*;
 import gate.persist.*;
 import gate.security.*;
+import gate.security.SecurityException;
 import gate.event.*;
 
 /** Provides static methods for the creation of Resources.
@@ -182,8 +183,10 @@ public abstract class Factory {
           ResourceInstantiationException("No instance id for " + resClass);
       try {
         res = dataStore.getLr(resClass.getName(), instanceId);
-      } catch(PersistenceException e) {
-        throw new ResourceInstantiationException("Bad read from DB: " + e);
+      } catch(PersistenceException pe) {
+        throw new ResourceInstantiationException("Bad read from DB: " + pe);
+      } catch(SecurityException se) {
+        throw new ResourceInstantiationException("Insufficient permissions: " + se);
       }
       resData.addInstantiation(res);
       if(features != null){

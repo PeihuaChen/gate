@@ -290,9 +290,27 @@ public class DatabaseDocumentImpl extends DocumentImpl
     */
   public AnnotationSet getAnnotations() {
 
-    //read from DB
+    //1. read from DB
     _getAnnotations(null);
 
+    //2. is there such set in the DB?
+    if (null == this.defaultAnnots) {
+      //create a DatabaseAnnotationSetImpl
+      //NOTE: we create the set and then delegate to the super mehtod, otherwise
+      //the super mehtod will create AnnotationSetImpl instead of DatabaseAnnotationSetImpl
+      //which will not work with DatabaseDocumentImpl
+      AnnotationSet aset = new DatabaseAnnotationSetImpl(this);
+
+      //set internal member
+      this.defaultAnnots = aset;
+
+      //3. fire events
+      fireAnnotationSetAdded(new DocumentEvent(this,
+                                                DocumentEvent.ANNOTATION_SET_ADDED,
+                                                null));
+    }
+
+    //4. delegate
     return super.getAnnotations();
   } // getAnnotations()
 
@@ -307,11 +325,22 @@ public class DatabaseDocumentImpl extends DocumentImpl
     _getAnnotations(name);
 
     //2. is there such set in the DB?
-    if (null != name &&
-        false == this.namedAnnotSets.keySet().contains(name)) {
+    if (false == this.namedAnnotSets.keySet().contains(name)) {
       //add the set name to the list with the recently created sets
-      //the set itself will be created by the super method
       this.addedAnotationSets.add(name);
+
+      //create a DatabaseAnnotationSetImpl
+      //NOTE: we create the set and then delegate to the super mehtod, otherwise
+      //the super mehtod will create AnnotationSetImpl instead of DatabaseAnnotationSetImpl
+      //which will not work with DatabaseDocumentImpl
+      AnnotationSet aset = new DatabaseAnnotationSetImpl(this,name);
+
+      //add to internal collection
+      this.namedAnnotSets.put(name,aset);
+
+      //3. fire events
+      DocumentEvent evt = new DocumentEvent(this, DocumentEvent.ANNOTATION_SET_ADDED, name);
+      fireAnnotationSetAdded(evt);
     }
 
     //3. delegate
