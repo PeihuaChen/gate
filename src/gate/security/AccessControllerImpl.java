@@ -32,12 +32,26 @@ public class AccessControllerImpl implements AccessController {
   private Connection  jdbcConn;
   private URL         jdbcURL;
 
+  private Vector      users;
+  private Vector      groups;
+
+  private HashMap     usersByID;
+  private HashMap     usersByName;
+
+  private HashMap     groupsByID;
+  private HashMap     groupsByName;
 
   /** --- */
   public AccessControllerImpl() {
 
     sessions = new HashMap();
     keepAliveTimes = new HashMap();
+
+    usersByID =  new HashMap();
+    usersByName=  new HashMap();
+
+    groupsByID = new HashMap();
+    groupsByName = new HashMap();
   }
 
   /** --- */
@@ -46,6 +60,7 @@ public class AccessControllerImpl implements AccessController {
 
     Assert.assertNotNull(url);
 
+    //1. get connection to the database
     try {
       jdbcConn = DBHelper.connect(url);
 
@@ -58,6 +73,9 @@ public class AccessControllerImpl implements AccessController {
       throw new PersistenceException("cannot locate JDBC driver ["+ clse.getMessage() +"]");
     }
 
+    //2. initialize group/user collections
+    throw new MethodNotImplementedException();
+
   }
 
   /** --- */
@@ -69,30 +87,59 @@ public class AccessControllerImpl implements AccessController {
 
   /** --- */
   public Group findGroup(String name)
-    throws PersistenceException{
+    throws PersistenceException,SecurityException{
 
-    throw new MethodNotImplementedException();
+    Group grp = (Group)this.groupsByName.get(name);
+
+    if (null == grp) {
+      throw new SecurityException("No such group");
+    }
+    else {
+      return grp;
+    }
+
   }
 
   /** --- */
   public Group findGroup(Long id)
-    throws PersistenceException {
+    throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    Group grp = (Group)this.groupsByID.get(id);
+
+    if (null == grp) {
+      throw new SecurityException("No such group");
+    }
+    else {
+      return grp;
+    }
   }
 
   /** --- */
   public User findUser(String name)
-    throws PersistenceException{
+    throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    User usr = (User)this.usersByName.get(name);
+
+    if (null == usr) {
+      throw new SecurityException("No such user");
+    }
+    else {
+      return usr;
+    }
   }
 
   /** --- */
   public User findUser(Long id)
-    throws PersistenceException {
+    throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    User usr = (User)this.usersByID.get(id);
+
+    if (null == usr) {
+      throw new SecurityException("No such user");
+    }
+    else {
+      return usr;
+    }
   }
 
   /** --- */
@@ -113,7 +160,32 @@ public class AccessControllerImpl implements AccessController {
   public Group createGroup(String name)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    Assert.assertNotNull(name);
+
+    //1. create group in DB
+    CallableStatement stmt = null;
+    Long new_id;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.create_group(?,?)} ");
+      stmt.setString(1,name);
+      //numbers generated from Oracle sequences are BIGINT
+      stmt.registerOutParameter(2,java.sql.Types.BIGINT);
+      stmt.execute();
+      new_id = new Long(stmt.getLong(1));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get a timestamp from DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //2. create GroupImpl for the new group and put in collections
+    // users list is empty
+    GroupImpl grp = new GroupImpl(new_id,name,new Vector(),this,this.jdbcConn);
+
+    this.groupsByID.put(new_id,grp);
+    this.groupsByName.put(new_id,grp);
+
+    return grp;
   }
 
   /** --- */
@@ -186,7 +258,29 @@ public class AccessControllerImpl implements AccessController {
     throw new MethodNotImplementedException();
   }
 
-  /* implementation private methods */
+  /** --- */
+/*  public void setGroupName(Group grp, String newName, Session s)
+    throws PersistenceException, SecurityException {
 
-//  private
+    CallableStatement stmt = null;
+
+    try {
+      //first check the session and then check whether the user is member of the group
+      if (isValidSession(s) == false) {
+        throw new SecurityException("invalid session supplied");
+      }
+
+      stmt = this.jdbcConn.prepareCall("{ call security.set_group_name(?,?)} ");
+      stmt.setLong(1,grp.getID().longValue());
+      stmt.setString(2,newName);
+      stmt.execute();
+      //release stmt???
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
+    }
+
+  }
+*/
+
 }

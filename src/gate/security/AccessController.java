@@ -91,4 +91,9 @@ public interface AccessController {
   public void close()
     throws PersistenceException, SecurityException;
 
+  /** --- */
+//  public void setGroupName(Group o, String newName, Session s)
+//    throws PersistenceException, SecurityException;
+
+
 }
