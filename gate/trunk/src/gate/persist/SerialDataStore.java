@@ -161,6 +161,18 @@ extends AbstractFeatureBearer implements DataStore {
     if(! storageDir.canRead()) {
       throw new PersistenceException("Can't read " + storageDir);
     }
+
+    //check storage directory is a Gate datastore
+    List names = Arrays.asList(storageDir.list());
+    Iterator namesIter = names.iterator();
+    while(namesIter.hasNext()){
+      String name = (String)namesIter.next();
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(name);
+      if(rData == null){
+        throw new PersistenceException("Invalid storage directory: " +
+                                       name + " is not a valid Gate type");
+      }
+    }
   } // open()
 
   /** Close the data store. */
