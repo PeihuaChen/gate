@@ -159,6 +159,19 @@
       <ICON>controller.gif</ICON>
     </RESOURCE>
 
+    <!-- Protege project name -->
+    <RESOURCE>
+      <NAME>Protege project</NAME>
+      <CLASS>gate.creole.ProtegeProjectName</CLASS>
+      <COMMENT>Protege project file name</COMMENT>
+      <INTERFACE>gate.ProtegeProject</INTERFACE>
+      <PARAMETER 
+      	NAME="projectName"
+        DEFAULT=""
+        COMMENT="Protege project file name">java.lang.String</PARAMETER>
+      <ICON>lr.gif</ICON>
+    </RESOURCE>
+    
   </CREOLE>
 
   <!-- Processing Resources -->
@@ -618,6 +631,16 @@
       <GUI TYPE="large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    
+    <!-- VR Protege -->
+    <RESOURCE>
+      <NAME>Protege</NAME>
+      <CLASS>gate.gui.ProtegeWrapper</CLASS>
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.ProtegeProject</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
 
