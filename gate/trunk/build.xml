@@ -207,7 +207,7 @@
   <target name="run">
     <echo message="Using JVM at ${java.home}, tools.jar at ${tools.jar.path}."/>
     <condition property="mac.dock.name.option"
-               value="-Xdock:name=&quot;GATE 3.0&quot;">
+               value="-Xdock:name=GATE 3.0">
       <os family="mac"/>
     </condition>
     <condition property="mac.dock.name.option"
