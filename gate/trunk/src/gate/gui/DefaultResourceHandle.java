@@ -131,7 +131,8 @@ public class DefaultResourceHandle implements ResourceHandle {
     /* Not so fancy hardcoded views build */
     popup = new JPopupMenu();
     popup.add(new CloseAction());
-    if(resource instanceof Resource){
+    if(resource instanceof Resource &&
+       !Gate.isApplication((Resource)resource) ){
       popup.addSeparator();
       popup.add(new ReloadAction());
     }
@@ -375,12 +376,13 @@ public class DefaultResourceHandle implements ResourceHandle {
             FeatureMap features = Factory.newFeatureMap();
             features.put("gate.HIDDEN", "true");
             features.put("gate.NAME", resource.getFeatures().get("gate.NAME"));
-            Factory.deleteResource((Resource)resource);
+            Resource oldRes = (Resource)resource;
             resource = Factory.createResource(resource.getClass().getName(),
                                               (FeatureMap)resource.getFeatures().
                                                           get("gate.PARAMETERS"),
                                               features, listeners);
             resource.getFeatures().remove("gate.HIDDEN");
+            Factory.deleteResource(oldRes);
 
 
             largeView.removeAll();

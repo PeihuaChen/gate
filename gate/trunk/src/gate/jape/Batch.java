@@ -60,13 +60,6 @@ implements JapeConstants {
   /** Create non-initialised instance (private, used in main). */
   private Batch() { }
 
-  /** A serializable listener */
-  class SerialStatusListener implements StatusListener, Serializable {
-    public void statusChanged(String text){
-      fireStatusChangedEvent(text);
-    }
-  }; // SerialStatusListener
-
   /** Create a fully initialised instance.
     * <P><CODE>japeFileName</CODE>: the name of a .jape or .ser transducer
     * file. This may be an absolute path, or may a .jar
@@ -76,8 +69,24 @@ implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null)
-      transducer.addStatusListener(new SerialStatusListener());
+    if(transducer != null){
+      transducer.addStatusListener(new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
+
+      transducer.addProgressListener(new ProgressListener(){
+        public void progressChanged(int value){
+          fireProgressChanged(value);
+        }
+
+        public void processFinished(){
+          fireProcessFinished();
+        }
+      });
+    }
+
   } // full init constructor
 
   public Batch(URL url, String encoding, StatusListener sListener)
@@ -87,8 +96,23 @@ implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null)
-      transducer.addStatusListener(new SerialStatusListener());
+    if(transducer != null){
+      transducer.addStatusListener(new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
+
+      transducer.addProgressListener(new ProgressListener(){
+        public void progressChanged(int value){
+          fireProgressChanged(value);
+        }
+
+        public void processFinished(){
+          fireProcessFinished();
+        }
+      });
+    }
   } // full init constructor
 
 
@@ -171,10 +195,15 @@ implements JapeConstants {
     try {
       gate.jape.parser.ParseCpsl parser =
         new gate.jape.parser.ParseCpsl(japeURL, encoding);
-      StatusListener listener = new SerialStatusListener();
+
+      StatusListener listener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
       parser.addStatusListener(listener);
       transducer = parser.MultiPhaseTransducer();
-      transducer.removeStatusListener(listener);
+      parser.removeStatusListener(listener);
     } catch (gate.jape.parser.ParseException e) {
       throw new
         JapeException("Batch: error parsing transducer: " + e.getMessage());
@@ -309,6 +338,7 @@ implements JapeConstants {
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
     transducer.transduce(doc, inputAS, outputAS);
+
   } // transduce(doc)
 
   /** Process a single text. */
@@ -489,36 +519,25 @@ implements JapeConstants {
     if(verbose) Out.println("Batch: " + mess);
   } // message
 
-  //StatusReporter Implementation
-
-  public void addStatusListener(StatusListener listener){
-    myStatusListeners.add(listener);
-  }
-
-  public void removeStatusListener(StatusListener listener){
-    myStatusListeners.remove(listener);
-  }
-
-  protected void fireStatusChangedEvent(String text){
-    Iterator listenersIter = myStatusListeners.iterator();
-    while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
-  }
-
-  //ProcessProgressReporter implementation
-
-  public void addProcessProgressListener(ProgressListener listener){
-    transducer.addProcessProgressListener(listener);
-  }
-
-  public void removeProcessProgressListener(ProgressListener listener){
-    transducer.removeProcessProgressListener(listener);
-  }
   public void setFeatures(gate.FeatureMap newFeatures) {
     features = newFeatures;
   }
   public gate.FeatureMap getFeatures() {
     return features;
+  }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
   }
 
   //ProcessProgressReporter implementation ends here
@@ -529,10 +548,51 @@ implements JapeConstants {
   /** Path to the resources tree */
 //  private String resPath = null;
 
-  private transient List myProgressListeners = new LinkedList();
 
-  private transient List myStatusListeners = new LinkedList();
   private gate.FeatureMap features;
+  private transient Vector progressListeners;
+  private transient Vector statusListeners;
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
 
   /*
   private void writeObject(ObjectOutputStream oos) throws IOException {

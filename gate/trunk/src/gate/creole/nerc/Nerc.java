@@ -40,9 +40,17 @@ public class Nerc extends SerialController {
       //create all the componets
       FeatureMap params;
       FeatureMap features;
+      Map listeners = new HashMap();
+      listeners.put("gate.event.StatusListener", new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
+
       ResourceData rData;
 
       //tokeniser
+      fireStatusChanged("Creating a tokeniser");
       params = Factory.newFeatureMap();
       rData = (ResourceData)Gate.getCreoleRegister().get(
               "gate.creole.tokeniser.DefaultTokeniser");
@@ -54,11 +62,14 @@ public class Nerc extends SerialController {
       features = Factory.newFeatureMap();
       features.put("gate.HIDDEN", "true");
       tokeniser = (DefaultTokeniser)Factory.createResource(rData.getClassName(),
-                                                           params, features);
+                                                           params, features,
+                                                           listeners);
       this.add(tokeniser);
       tokeniser.getFeatures().put("gate.NAME", "Tokeniser " + System.currentTimeMillis());
+      fireProgressChanged(10);
 
       //gazetteer
+      fireStatusChanged("Creating a gazetteer");
       params = Factory.newFeatureMap();
       rData = (ResourceData)Gate.getCreoleRegister().get(
               "gate.creole.gazetteer.DefaultGazetteer");
@@ -69,12 +80,19 @@ public class Nerc extends SerialController {
       if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
       features = Factory.newFeatureMap();
       features.put("gate.HIDDEN", "true");
+
+      listeners.put("gate.event.ProgressListener",
+                    new CustomProgressListener(11, 50));
+
       gazetteer = (DefaultGazetteer)Factory.createResource(rData.getClassName(),
-                                                           params, features);
+                                                           params, features,
+                                                           listeners);
       this.add(gazetteer);
       gazetteer.getFeatures().put("gate.NAME", "Gazetteer " + System.currentTimeMillis());
+      fireProgressChanged(50);
 
       //transducer
+      fireStatusChanged("Creating a Jape transducer");
       params = Factory.newFeatureMap();
       rData = (ResourceData)Gate.getCreoleRegister().get(
               "gate.creole.Transducer");
@@ -85,8 +103,13 @@ public class Nerc extends SerialController {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features = Factory.newFeatureMap();
       features.put("gate.HIDDEN", "true");
+      listeners.put("gate.event.ProgressListener",
+                    new CustomProgressListener(11, 50));
       transducer = (Transducer)Factory.createResource(rData.getClassName(),
-                                                      params, features);
+                                                      params, features,
+                                                      listeners);
+      fireProgressChanged(100);
+      fireProcessFinished();
       this.add(transducer);
       transducer.getFeatures().put("gate.NAME", "Transducer " + System.currentTimeMillis());
     }catch(ParameterException pe){
@@ -165,6 +188,20 @@ public class Nerc extends SerialController {
   public gate.corpora.DocumentImpl getDocument() {
     return document;
   }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
 
 
 
@@ -185,4 +222,64 @@ public class Nerc extends SerialController {
   private String encoding;
   private String annotationSetName;
   private gate.corpora.DocumentImpl document;
+  private transient Vector progressListeners;
+  private transient Vector statusListeners;
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+
+  class CustomProgressListener implements ProgressListener{
+    CustomProgressListener(int start, int end){
+      this.start = start;
+      this.end = end;
+    }
+    public void progressChanged(int i){
+      fireProgressChanged(start + (end - start) * i / 100);
+    }
+
+    public void processFinished(){
+      fireProgressChanged(end);
+    }
+
+    int start;
+    int end;
+  }
 } // class Nerc
