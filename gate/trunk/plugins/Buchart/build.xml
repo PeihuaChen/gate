@@ -16,6 +16,12 @@
 <!-- Update this to point at your installation of GATE -->
 <property name="gate_home" location="../.."/>
 
+<!-- If you use the Sun compiler for your JAPE grammars, fill in the correct
+path to your tools.jar here.  If you don't know what this means, leave it alone
+-->
+<!--<path id="tools-jar" location="w:/jdk-1.5.0/lib/tools.jar" />-->
+<path id="tools-jar" />
+
 <!-- If you are wanting to use your own installation of SWI prolog then
      change this so that it points to the jpl.jar file in that distribution -->
 <fileset id="jpl-jar" file="./lib/jpl.jar"/>
@@ -36,6 +42,7 @@
 	<path id="use-path">
 		<fileset refid="jpl-jar"/>
 		<fileset refid="gate-jar"/>
+        <path refid="tools-jar" />
 		<fileset id="gate-libs" dir="${gate_home}/lib">
 			<include name="*.jar"/>
 			<include name="*.zip"/>
@@ -48,6 +55,7 @@
 	<path id="use-path">
 		<fileset refid="jpl-jar"/>
 		<fileset refid="gate-jar"/>
+        <path refid="tools-jar" />
 	</path>
 </target>
 
