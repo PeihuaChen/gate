@@ -28,11 +28,13 @@ depend:
 	./makejdepend.sh ../src/gate >Makefile.dep
 
 test:
-	./jdk.sh java -Djava.compiler=none ${CP} junit.textui.TestRunner gate.TestGate
+	./jdk.sh java -Djava.compiler=none -classpath gate.jar \
+	  junit.textui.TestRunner gate.TestGate
 
 jar:
-	cd ../classes && \
-	../build/jdk.sh jar cvf ../build/gate.jar gate
+	rm -f gate.jar
+	cd ../classes && ../build/jdk.sh jar cvf ../build/gate.jar gate
+	./addjars.sh gate.jar ../lib/*.jar ../lib/*.zip
 
 docs:
 	./jdk.sh \
@@ -54,6 +56,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.18  2000/02/21 15:32:58  hamish
+# gate.jar now includes lib/*.jar/zip; make tests uses gate.jar
+#
 # Revision 1.17  2000/02/18 16:04:00  hamish
 # made cookbook source a .txt
 #
