@@ -53,7 +53,7 @@ public class TestGate
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    suite.addTest(TestFiles.suite());       ///*
+    suite.addTest(TestFiles.suite());       /*
     suite.addTest(TestXml.suite());
     suite.addTest(TestJdk.suite());
     suite.addTest(TestJape.suite());
@@ -65,7 +65,7 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());	    //*/
+    suite.addTest(TestDB.suite());	    */
 
     return suite;
   } // suite
