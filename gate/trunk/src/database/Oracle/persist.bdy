@@ -129,15 +129,10 @@ create or replace package body persist is
   
      --0. get encoding ID if any, otherwise create a new
      -- entry in T_DOC_ENCODING
-     select count(enc_id)
-     into cnt
+     select count(enc_id),enc_id
+     into   cnt,l_encoding_id
      from   t_doc_encoding
-     where  enc_name = l_encoding;
-
-       select count(enc_id),enc_id
-       into   cnt,l_encoding_id
-       from   t_doc_encoding
-       where  enc_name = l_encoding;         
+     where  enc_name = l_encoding;         
      
      if (l_encoding_id is null) then
        --oops new encoding
