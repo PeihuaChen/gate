@@ -1,10 +1,11 @@
 defineVars
-A ==> [-a-z0-9]
+#A ==> [-a-z0-9]
+A ==> [abcdefghijklmnopqrstuvwxyz0123456789-]
 V ==> [aeiou]
 VI ==> [aeiouy]
 C ==> [bcdfghjklmnpqrstvwxyz]
 CX ==> [bcdfghjklmnpqrstvwxz]
-CX2 ==> "bb" OR "cc" OR "dd" OR "ff" OR "gg" OR "hh" OR "jj" OR "kk" OR "ll" OR "mm" OR "nn" OR "pp" OR "qq" OR "rr"  OR "ss" OR "tt" OR "vv" OR "ww" OR "xx" OR "zz"
+CX2 ==> "bb" OR "cc" OR "dd" OR "ff" OR "gg" OR "hh" OR "jj" OR "kk" OR "ll" OR "mm" OR "nn" OR "pp" OR "qq" OR "rr" OR "ss" OR "tt" OR "vv" OR "ww" OR "xx" OR "zz"
 CX2S ==> "ff" OR "ss" OR "zz"
 S ==> "s" OR "x" OR "ch" OR "sh"
 PRE ==> "be" OR "ex" OR "in" OR "mis" OR "pre" OR "pro" OR "re"
@@ -246,7 +247,7 @@ defineRules
 "eying"  ==> irreg_stem("eye","ing")
 "facsimileing"  ==> irreg_stem("facsimile","ing")
 "fallen"  ==> irreg_stem("fall","en")
-"fed"  ==> irreg_stem("feed","ed")
+#"fed"  ==> irreg_stem("feed","ed")
 "feed"  ==> irreg_stem("fee","ed")
 "fell"  ==> irreg_stem("fall","ed")
 "felt"  ==> irreg_stem("feel","ed")
@@ -410,7 +411,7 @@ defineRules
 "lain"  ==> irreg_stem("lie","en")
 "lassoed"  ==> irreg_stem("lasso","ed")
 "laurel"{EDING}  ==> semi_reg_stem(0,"")
-"lay"  ==> irreg_stem("lie","ed")
+#"lay"  ==> irreg_stem("lie","ed")
 "leant"  ==> irreg_stem("lean","ed")
 "leapt"  ==> irreg_stem("leap","ed")
 "learnt"  ==> irreg_stem("learn","ed")
@@ -473,7 +474,7 @@ defineRules
 "outwent"  ==> irreg_stem("outgo","ed")
 "outwore"  ==> irreg_stem("outwear","ed")
 "outworn"  ==> irreg_stem("outwear","en")
-"outwrought"  ==> irreg_stem("outwk","ed")
+#"outwrought"  ==> irreg_stem("outwk","ed")
 "overbidden"  ==> irreg_stem("overbid","en")
 "overblew"  ==> irreg_stem("overblow","ed")
 "overblown"  ==> irreg_stem("overblow","en")
@@ -493,7 +494,7 @@ defineRules
 "overhanging"  ==> irreg_stem("overhang","ing")
 "overheard"  ==> irreg_stem("overhear","ed")
 "overhung"  ==> irreg_stem("overhang","ed")
-"overlaid"  ==> irreg_stem("overlay","ed")
+#"overlaid"  ==> irreg_stem("overlay","ed")
 "overlain"  ==> irreg_stem("overlie","en")
 "overlay"  ==> irreg_stem("overlie","ed")
 "overlies"  ==> irreg_stem("overlie","s")
@@ -787,7 +788,7 @@ defineRules
 "undergone"  ==> irreg_stem("undergo","en")
 "underlaid"  ==> irreg_stem("underlay","ed")
 "underlain"  ==> irreg_stem("underlie","en")
-"underlay"  ==> irreg_stem("underlie","ed")
+#"underlay"  ==> irreg_stem("underlie","ed")
 "underlies"  ==> irreg_stem("underlie","s")
 "underlying"  ==> irreg_stem("underlie","ing")
 "underpaid"  ==> irreg_stem("underpay","ed")
@@ -978,7 +979,7 @@ defineRules
 "dilettantes"  ==> irreg_stem("dilettante","s")
 "dilettanti"  ==> irreg_stem("dilettante","s")
 "divertimenti"  ==> irreg_stem("divertimento","s")
-"does"  ==> irreg_stem("doe","s") 
+#"does"  ==> irreg_stem("doe","s") 
 "dogteeth"  ==> irreg_stem("dogtooth","s")
 "dormice"  ==> irreg_stem("dormouse","s")
 "dryades"  ==> irreg_stem("dryad","s")
@@ -1246,15 +1247,15 @@ defineRules
 "trecking"  ==> irreg_stem("trek","ing")
 ("adher" OR "ador" OR "attun" OR "bast" OR "bor" OR "bronz" OR "can" OR "centr" OR "cit" OR "compet" OR "complet" OR "concret" OR "condon" OR "contraven" OR "conven" OR "cran" OR "delet" OR "delineat" OR "dop" OR "drap" OR "dron" OR "escap" OR "excit" OR "fort" OR "gazett" OR "grop" OR "hon" OR "ignit" OR "ignor" OR "incit" OR "interven" OR "inton" OR "invit" OR "landscap" OR "manoeuvr" OR "nauseat" OR "normalis" OR "outmanoeuvr" OR "overaw" OR "permeat" OR "persever" OR "por" OR "postpon" OR "prun" OR "recit" OR "reshap" OR "rop" OR "shap" OR "shor" OR "snor" OR "ston" OR "wip"){ESEDING}  ==> semi_reg_stem(0,"e")
 ("ape" OR "appall" OR "augur" OR "belong" OR "berth" OR "burr" OR "conquer" OR "egg" OR "enroll" OR "enthrall" OR "forestall" OR "froth" OR "fulfill" OR "install" OR "instill" OR "lacquer" OR "martyr" OR "mouth" OR "murmur" OR "pivot" OR "preceed" OR "prolong" OR "purr" OR "quell" OR "recall" OR "refill" OR "remill" OR "resell" OR "retell" OR "smooth" OR "throng" OR "twang" OR "unearth"){EDING}  ==> semi_reg_stem(0,"")
-"canvases"  ==> irreg_stem("canvas","s")
-"carcases"  ==> irreg_stem("carcas","s")
-"lenses"  ==> irreg_stem("lens","s")
-"nappies"  ==> irreg_stem("nappy","s") 
-"schizophrenia"  ==> irreg_stem("schizophrenia","s")
-(({A}*"metre") OR ({A}*"litre") OR ({A}+"ette") OR "acre" OR "Aussie" OR "bronze" OR "budgie" OR "burnurn" OR "canoe" OR "carriageway" OR "catastrophe" OR "centre" OR "cill" OR "cliche" OR "commie" OR "coolie" OR "curie" OR "demesne" OR "employee" OR "evacuee" OR "fibre" OR "foe" OR "headache" OR "horde" OR "magpie" OR "manoeuvre" OR "moggie" OR "moustache" OR "movie" OR "nightie" OR "oboe" OR "programme" OR "queue" OR "sabre" OR "shoe" OR "sloe" OR "sortie" OR "taste" OR "theatre" OR "timbre" OR "titre" OR "umbrella" OR "utopia" OR "wiseacre" OR "woe")"s"  ==> stem(1,"","s")
-(({A}+"itis") OR "abdomen" OR "achimenes" OR "acumen" OR "Afrikaans" OR "alibi" OR "alkali" OR "amnesia" OR "anaesthesia" OR "aphis" OR "aria" OR "asbestos" OR "asphyxia" OR "atlas" OR "axis" OR "bedclothes" OR "begonia" OR "bias" OR "bikini" OR "calyptopis" OR "cannula" OR "cantharides" OR "canvas" OR "caries" OR "chas" OR "chamois" OR "chaos" OR "chili" OR "chinchilla" OR "Christmas" OR "confetti" OR "contretemps" OR "cornucopia" OR "corps" OR "cosmos" OR "cupola" OR "cyclamen" OR "dais" OR "debris" OR "diabetes" OR "diphtheria" OR "dysphagia" OR "encyclopaedia" OR "ennui" OR "escallonia" OR "ethos" OR "extremis" OR "fella" OR "ferris" OR "flotilla" OR "formula" OR "forsythia" OR "gallows" OR "ganglia" OR "gardenia" OR "gas" OR "gasworks" OR "gondola" OR "grata" OR "guerrilla" OR "haemophilia" OR "hors" OR "hovis" OR "hustings" OR "hysteria" OR "inertia" OR "innards" OR "iris" OR "isosceles" OR "khaki" OR "koala" OR "lens" OR "macaroni" OR "manilla" OR "mania" OR "mantis" OR "maquis" OR "martini" OR "matins" OR "memorabilia" OR "metropolis" OR "minutiae" OR "molasses" OR "morphia" OR "mortis" OR "neurasthenia" OR "normoglycaemia" OR "nostalgia" OR "omen" OR "pantometria" OR "parabola" OR "paraphernalia" OR "pastis" OR "patella" OR "patens"!  OR "pathos" OR "patois" OR "pectoris" OR "pelvis" OR "peninsula" OR "phantasmagoria" OR "pharos" OR "plumbites" OR "pneumonia" OR "polyuria" OR "portcullis" OR "pyrexia" OR "regalia" OR "rhinoceros" OR "safari" OR "salami" OR "sari" OR "saturnalia" OR "series" OR "spaghetti" OR "specimen" OR "species" OR "submatrices" OR "subtopia" OR "suburbia" OR "syphilis" OR "tares" OR "taxi" OR "tennis" OR "toccata" OR "trellis" OR "tripos" OR "turps" OR "tutti" OR "umbrella" OR "utopia" OR "villa")  ==> null_stem()
-("accoutrements" OR "aerodynamics" OR "aeronautics" OR "aesthetics" OR "algae" OR "amends" OR "ammonia" OR "ancients" OR "annals" OR "antics" OR "arrears" OR "assizes" OR "auspices" OR "backwoods" OR "bacteria" OR "banns" OR "barracks" OR "baths" OR "battlements" OR "bellows" OR "belongings" OR "billiards" OR "binoculars" OR "bitters" OR "blandishments" OR "bleachers" OR "blinkers" OR "blues" OR "breeches" OR "brussels" OR "clothes" OR "clutches" OR "commons" OR "confines" OR "contents" OR "credentials" OR "crossbones" OR "crossroads" OR "curia" OR "damages" OR "dealings" OR "dentures" OR "depths" OR "devotions" OR "diggings" OR "doings" OR "downs" OR "droppings" OR "dues" OR "dynamics" OR "earnings" OR "eatables" OR "eaves" OR "economics" OR "electrodynamics" OR "electronics" OR "entrails" OR "environs" OR "equities" OR "ethics" OR "eugenics" OR "filings" OR "finances" OR "folks" OR "footlights" OR "fumes" OR "furnishings" OR "genitals" OR "goggles" OR "goods" OR "grits" OR "groceries" OR "grounds" OR "handcuffs" OR "headquarters" OR "histrionics" OR "hostilities" OR "humanities" OR "hydraulics" OR "hysterics" OR "illuminations" OR "innings" OR "italics" OR "jeans" OR "jitters" OR "kinetics" OR "knickers" OR "kudos" OR "la! titudes" OR "leggings" OR "likes" OR "linguistics" OR "lodgings" OR "loggerheads" OR "mains" OR "manners" OR "mathematics" OR "means" OR "measles" OR "media" OR "memoirs" OR "metaphysics" OR "mews" OR "mockers" OR "morals" OR "motions" OR "munitions" OR "news" OR "nutria" OR "nylons" OR "oats" OR "odds" OR "oils" OR "oilskins" OR "optics" OR "orthodontics" OR "outskirts" OR "overalls" OR "overtones" OR "pants" OR "pantaloons" OR "papers" OR "paras" OR "paratroops" OR "particulars" OR "pediatrics" OR "phonemics" OR "phonetics" OR "physics" OR "pincers" OR "plastics" OR "politics" OR "proceeds" OR "proceedings" OR "prospects" OR "provinces" OR "provisions" OR "pyjamas" OR "races" OR "rations" OR "ravages" OR "refreshments" OR "regards" OR "reinforcements" OR "remains" OR "respects" OR "returns" OR "riches" OR "rights" OR "savings" OR "schizophrenia" OR "scissors" OR "seconds" OR "semantics" OR "senses" OR "shades" OR "shallows" OR "shambles" OR "shares" OR "shivers" OR "shorts" OR "singles" OR "skittles" OR "slacks" OR "soundings" OR "specifics" OR "spectacles" OR "spoils" OR "stamens" OR "statics" OR "statistics" OR "stratums" OR "summons" OR "supplies" OR "surroundings" OR "suspenders" OR "takings" OR "teens" OR "telecommunications" OR "tent! erhooks" OR "thanks" OR "theatricals" OR "thermos" OR "thermodynamics" OR "tights" OR "toils" OR "tops" OR "trades" OR "trappings" OR "travels" OR "troops" OR "tropics" OR "trousers" OR "tweeds" OR "underpants" OR "vapours" OR "vicissitudes" OR "vitals" OR "volumes" OR "wages" OR "wanderings" OR "wares" OR "waters" OR "whereabouts" OR "whites" OR "winnings" OR "withers" OR "woollens" OR "workings" OR "writings" OR "yes")  ==> null_stem()
-("boatie" OR "bonhomie" OR "clippie" OR "creepie" OR "dearie" OR "droppie" OR "gendarmerie" OR "girlie" OR "goalie" OR "haddie" OR "kookie" OR "kyrie" OR "lambie" OR "lassie" OR "marie" OR "menagerie" OR "pettie" OR "reverie" OR "snottie" OR "sweetie")"s"  ==> stem(1,"","s")
+#"canvases"  ==> irreg_stem("canvas","s")
+#"carcases"  ==> irreg_stem("carcas","s")
+#"lenses"  ==> irreg_stem("lens","s")
+#"nappies"  ==> irreg_stem("nappy","s") 
+#"schizophrenia"  ==> irreg_stem("schizophrenia","s")
+#(({A}*"metre") OR ({A}*"litre") OR ({A}+"ette") OR "acre" OR "Aussie" OR "bronze" OR "budgie" OR "burnurn" OR "canoe" OR "carriageway" OR "catastrophe" OR #"centre" OR "cill" OR "cliche" OR "commie" OR "coolie" OR "curie" OR "demesne" OR "employee" OR "evacuee" OR "fibre" OR "foe" OR "headache" OR "horde" OR #"magpie" OR "manoeuvre" OR "moggie" OR "moustache" OR "movie" OR "nightie" OR "oboe" OR "programme" OR "queue" OR "sabre" OR "shoe" OR "sloe" OR "sortie" OR #"taste" OR "theatre" OR "timbre" OR "titre" OR "umbrella" OR "utopia" OR "wiseacre" OR "woe")"s"  ==> stem(1,"","s")
+#(({A}+"itis") OR "abdomen" OR "achimenes" OR "acumen" OR "Afrikaans" OR "alibi" OR "alkali" OR "amnesia" OR "anaesthesia" OR "aphis" OR "aria" OR "asbestos" #OR "asphyxia" OR "atlas" OR "axis" OR "bedclothes" OR "begonia" OR "bias" OR "bikini" OR "calyptopis" OR "cannula" OR "cantharides" OR "canvas" OR "caries" #OR "chas" OR "chamois" OR "chaos" OR "chili" OR "chinchilla" OR "Christmas" OR "confetti" OR "contretemps" OR "cornucopia" OR "corps" OR "cosmos" OR #"cupola" #OR "cyclamen" OR "dais" OR "debris" OR "diabetes" OR "diphtheria" OR "dysphagia" OR "encyclopaedia" OR "ennui" OR "escallonia" OR "ethos" OR "extremis" OR #"fella" OR "ferris" OR "flotilla" OR "formula" OR "forsythia" OR "gallows" OR "ganglia" OR "gardenia" OR "gas" OR "gasworks" OR "gondola" OR "grata" OR #"guerrilla" OR "haemophilia" OR "hors" OR "hovis" OR "hustings" OR "hysteria" OR "inertia" OR "innards" OR "iris" OR "isosceles" OR "khaki" OR "koala" OR #"lens" OR "macaroni" OR "manilla" OR "mania" OR "mantis" OR "maquis" OR "martini" OR #"matins" OR "memorabilia" OR "metropolis" OR "minutiae" OR "molasses" #OR #"morphia" OR "mortis" OR "neurasthenia" OR "normoglycaemia" OR "nostalgia" OR "omen" OR "pantometria" OR "parabola" OR "paraphernalia" OR "pastis" OR #"patella" OR "patens"!  OR "pathos" OR "patois" OR "pectoris" OR "pelvis" OR "peninsula" OR "phantasmagoria" OR "pharos" OR "plumbites" OR "pneumonia" OR #"polyuria" OR "portcullis" OR "pyrexia" OR "regalia" OR "rhinoceros" OR "safari" OR "salami" OR "sari" OR "saturnalia" OR "series" OR "spaghetti" OR #"specimen" OR "species" OR "submatrices" OR "subtopia" OR "suburbia" OR "syphilis" OR "tares" OR "taxi" OR "tennis" OR "toccata" OR "trellis" OR "tripos" OR #"turps" OR "tutti" OR "umbrella" OR "utopia" OR "villa")  ==> null_stem()
+#("accoutrements" OR "aerodynamics" OR "aeronautics" OR "aesthetics" OR "algae" OR "amends" OR "ammonia" OR "ancients" OR "annals" OR "antics" OR "arrears" OR "assizes" OR "auspices" OR "backwoods" OR "bacteria" OR "banns" OR "barracks" OR "baths" OR "battlements" OR "bellows" OR "belongings" OR "billiards" OR "binoculars" OR "bitters" OR "blandishments" OR "bleachers" OR "blinkers" OR "blues" OR "breeches" OR "brussels" OR "clothes" OR "clutches" OR "commons" OR "confines" OR "contents" OR "credentials" OR "crossbones" OR "crossroads" OR "curia" OR "damages" OR "dealings" OR "dentures" OR "depths" OR "devotions" OR "diggings" OR "doings" OR "downs" OR "droppings" OR "dues" OR "dynamics" OR "earnings" OR "eatables" OR "eaves" OR "economics" OR "electrodynamics" OR "electronics" OR "entrails" OR "environs" OR "equities" OR "ethics" OR "eugenics" OR "filings" OR "finances" OR "folks" OR "footlights" OR "fumes" OR "furnishings" OR "genitals" OR "goggles" OR "goods" OR "grits" OR "groceries" OR "grounds" OR "hand#cuffs" OR "headquarters" OR "histrionics" OR "hostilities" OR "humanities" OR "hydraulics" OR "hysterics" OR "illuminations" OR "innings" OR "italics" OR "jeans" OR "jitters" OR "kinetics" OR "knickers" OR "kudos" OR "la! titudes" OR "leggings" OR "likes" OR "linguistics" OR "lodgings" OR "loggerheads" OR "mains" OR "manners" OR "mathematics" OR "means" OR "measles" OR "media" OR "memoirs" OR "metaphysics" OR "mews" OR "mockers" OR "morals" OR "motions" OR "munitions" OR "news" OR "nutria" OR "nylons" OR "oats" OR "odds" OR "oils" OR "oilskins" OR "optics" OR "orthodontics" OR "outskirts" OR "overalls" OR "overtones" OR "pants" OR "pantaloons" OR "papers" OR "paras" OR "paratroops" OR "particulars" OR "pediatrics" OR "phonemics" OR "phonetics" OR "physics" OR "pincers" OR "plastics" OR "politics" OR "proceeds" OR "proceedings" OR "prospects" OR "provinces" OR "provisions" OR "pyjamas" OR "races" OR "rations" OR "ravages" OR "refreshments" OR "regards" OR "reinforcements" OR "remains" OR "respects" OR "return#s" OR "riches" OR "rights" OR "savings" OR "schizophrenia" OR "scissors" OR "seconds" OR "semantics" OR "senses" OR "shades" OR "shallows" OR "shambles" OR "shares" OR "shivers" OR "shorts" OR "singles" OR "skittles" OR "slacks" OR "soundings" OR "specifics" OR "spectacles" OR "spoils" OR "stamens" OR "statics" OR "statistics" OR "stratums" OR "summons" OR "supplies" OR "surroundings" OR "suspenders" OR "takings" OR "teens" OR "telecommunications" OR "tent! erhooks" OR "thanks" OR "theatricals" OR "thermos" OR "thermodynamics" OR "tights" OR "toils" OR "tops" OR "trades" OR "trappings" OR "travels" OR "troops" OR "tropics" OR "trousers" OR "tweeds" OR "underpants" OR "vapours" OR "vicissitudes" OR "vitals" OR "volumes" OR "wages" OR "wanderings" OR "wares" OR "waters" OR "whereabouts" OR "whites" OR "winnings" OR "withers" OR "woollens" OR "workings" OR "writings" OR "yes")  ==> null_stem()
+#("boatie" OR "bonhomie" OR "clippie" OR "creepie" OR "dearie" OR "droppie" OR "gendarmerie" OR "girlie" OR "goalie" OR "haddie" OR "kookie" OR "kyrie" OR "lambie" OR "lassie" OR "marie" OR "menagerie" OR "pettie" OR "reverie" OR "snottie" OR "sweetie")"s"  ==> stem(1,"","s")
 	
 //Additions from PENN treebank 
 
@@ -1373,6 +1374,7 @@ defineRules
 {A}+"s"                    ==> stem(1,"","s")
 
 
+
 {CX}+"ed"                  ==> null_stem()
 {PRE}*{C}{V}"nged"         ==> stem(2,"","ed")
 {A}+"icked"                ==> stem(2,"","ed")
@@ -1380,8 +1382,8 @@ defineRules
 {PRE}{C}+{V}"lled"         ==> stem(3,"","ed")
 {A}*{C}+{V}"lled"          ==> stem(2,"","ed")
 {A}*{C}"ined"              ==> stem(1,"","ed")
-{A}*{C}{V}[npwx]"ed"       ==> stem(2,"","ed")
 {A}*{C}{V}{CX2}"ed"        ==> stem(3,"","ed")
+{A}*{C}{V}[npwx]"ed"       ==> stem(2,"","ed")
 {A}+{C}"ied"               ==> stem(3,"y","ed")
 {A}*"qu"{V}{C}"ed"         ==> stem(1,"","ed")
 {A}+"u"{V}"ded"            ==> stem(1,"","ed")
@@ -1439,11 +1441,11 @@ defineRules
 {A}+[eo]"ring"             ==> stem(3,"","ing")
 {A}+"ing"                  ==> stem(3,"e","ing")
 
-"'d"  ==> irreg_stem("have","ed") 
+#"'d"  ==> irreg_stem("have","ed") 
 "'ll"  ==> irreg_stem("will","")
 "'m"  ==> irreg_stem("be","")
 "'re"  ==> irreg_stem("be","")
-"'s"  ==> irreg_stem("be","s")
+#"'s"  ==> irreg_stem("be","s")
 "'ve"  ==> irreg_stem("have","")
 
 
