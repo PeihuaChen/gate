@@ -174,6 +174,8 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
    * @param lookup the description of the annotation to be added when this
    *     phrase is recognised
    */
+// >>> DAM, was
+/*
   public void addLookup(String text, Lookup lookup) {
     Character currentChar;
     FSMState currentState = initialState;
@@ -200,12 +202,44 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
     //Out.println(text + "|" + lookup.majorType + "|" + lookup.minorType);
 
   } // addLookup
+*/
+// >>> DAM: TransArray optimization
+  public void addLookup(String text, Lookup lookup) {
+    char currentChar;
+    FSMState currentState = initialState;
+    FSMState nextState;
+    Lookup oldLookup;
+    boolean isSpace;
+
+    for(int i = 0; i< text.length(); i++) {
+        currentChar = text.charAt(i);
+        isSpace = Character.isWhitespace(currentChar);
+        if(isSpace) currentChar = ' ';
+        else currentChar = (caseSensitive.booleanValue()) ?
+                          currentChar :
+                          Character.toUpperCase(currentChar) ;
+      nextState = currentState.next(currentChar);
+      if(nextState == null){
+        nextState = new FSMState(this);
+        currentState.put(currentChar, nextState);
+        if(isSpace) nextState.put(' ',nextState);
+      }
+      currentState = nextState;
+    } //for(int i = 0; i< text.length(); i++)
+
+    currentState.addLookup(lookup);
+    //Out.println(text + "|" + lookup.majorType + "|" + lookup.minorType);
+
+  } // addLookup
+// >>> DAM, end
 
   /** Removes one phrase to the list of phrases recognised by this gazetteer
    *
    * @param text the phrase to be removed
    * @param lookup the description of the annotation associated to this phrase
    */
+// >>> DAM, was
+/*
   public void removeLookup(String text, Lookup lookup) {
     Character currentChar;
     FSMState currentState = initialState;
@@ -223,7 +257,24 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
     } //for(int i = 0; i< text.length(); i++)
     currentState.removeLookup(lookup);
   } // removeLookup
+*/
+// >>> DAM: TransArray optimization
+  public void removeLookup(String text, Lookup lookup) {
+    char currentChar;
+    FSMState currentState = initialState;
+    FSMState nextState;
+    Lookup oldLookup;
 
+    for(int i = 0; i< text.length(); i++) {
+        currentChar = text.charAt(i);
+        if(Character.isWhitespace(currentChar)) currentChar = ' ';
+        nextState = currentState.next(currentChar);
+        if(nextState == null) return;//nothing to remove
+        currentState = nextState;
+    } //for(int i = 0; i< text.length(); i++)
+    currentState.removeLookup(lookup);
+  } // removeLookup
+// >>> DAM, end
 
   /** Returns a string representation of the deterministic FSM graph using
    * GML.
@@ -294,7 +345,13 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
                            document.getSourceUrl().getFile() + "...");
     String content = document.getContent().toString();
     int length = content.length();
+// >>> DAM, was
+/*
     Character currentChar;
+*/
+// >>> DAM: TransArray optimization
+    char currentChar;
+// >>> DAM, end
     FSMState currentState = initialState;
     FSMState nextState;
     FSMState lastMatchingState = null;
@@ -305,6 +362,8 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
     FeatureMap fm;
     Lookup currentLookup;
 
+// >>> DAM, was
+/*
     while(charIdx < length) {
       if(Character.isWhitespace(content.charAt(charIdx)))
         currentChar = new Character(' ');
@@ -312,6 +371,16 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
                          new Character(content.charAt(charIdx)) :
                          new Character(Character.toUpperCase(
                                        content.charAt(charIdx)));
+*/
+// >>> DAM: TransArray optimization
+    while(charIdx < length) {
+      currentChar = content.charAt(charIdx);
+      if(Character.isWhitespace(currentChar))
+        currentChar = ' ';
+      else currentChar = (caseSensitive.booleanValue()) ?
+                         currentChar :
+                         Character.toUpperCase(currentChar);
+// >>> DAM, end
       nextState = currentState.next(currentChar);
       if(nextState == null) {
         //the matching stopped
@@ -456,3 +525,94 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
   }
 
 } // DefaultGazetteer
+
+// >>> DAM: TransArray optimization, new charMap implementation
+interface Iter
+{
+    public boolean hasNext();
+    public char next();
+} // iter class
+
+/**
+ * class implementing the map using binary serach by char as key
+ * to retrive the coresponding object.
+ */
+class charMap
+{
+    char[] itemsKeys = null;
+    Object[] itemsObjs = null;
+
+    /**
+     * resize the containers by one leavaing empty elemant at position 'index'
+     */
+    void resize(int index)
+    {
+        int newsz = itemsKeys.length + 1;
+        char[] tempKeys = new char[newsz];
+        Object[] tempObjs = new Object[newsz];
+        int i;
+        for (i= 0; i < index; i++)
+        {
+            tempKeys[i] = itemsKeys[i];
+            tempObjs[i] = itemsObjs[i];
+        }
+        for (i= index+1; i < newsz; i++)
+        {
+            tempKeys[i] = itemsKeys[i-1];
+            tempObjs[i] = itemsObjs[i-1];
+        }
+
+        itemsKeys = tempKeys;
+        itemsObjs = tempObjs;
+    } // resize
+
+/**
+ * get the object from the map using the char key
+ */
+    Object get(char key)
+    {
+        if (itemsKeys == null) return null;
+        int index = Arrays.binarySearch(itemsKeys, key);
+        if (index<0)
+            return null;
+        return itemsObjs[index];
+    }
+/**
+ * put the object into the char map using the chat as the key
+ */
+    Object put(char key, Object value)
+    {
+        if (itemsKeys == null)
+        {
+            itemsKeys = new char[1];
+            itemsKeys[0] = key;
+            itemsObjs = new Object[1];
+            itemsObjs[0] = value;
+            return value;
+        }// if first time
+        int index = Arrays.binarySearch(itemsKeys, key);
+        if (index<0)
+        {
+            index = ~index;
+            resize(index);
+            itemsKeys[index] = key;
+            itemsObjs[index] = value;
+        }
+        return itemsObjs[index];
+    } // put
+/**
+ * the keys itereator
+ * /
+    public Iter iter()
+    {
+        return new Iter()
+        {
+            int counter = 0;
+            public boolean hasNext() {return counter < itemsKeys.length;}
+            public char next() { return itemsKeys[counter];}
+        };
+    } // iter()
+ */
+
+} // class charMap
+// >>> DAM, end, new charMap instead MAP for transition function in the FSMState
