@@ -474,10 +474,11 @@ public class Main {
             System.exit(STATUS_ERROR);
           }
           Gate.setSiteConfigFile(f);
-          Out.prln(
-            "Initialisation file " + optionString +
-            " recorded for initialisation"
-          );
+          if(DEBUG)
+	    Out.prln(
+	      "Initialisation file " + optionString +
+	      " recorded for initialisation"
+	    );
           break;
         // -e runs the CorpusBenchmarkTool (e for evaluate)
         case 'e':
