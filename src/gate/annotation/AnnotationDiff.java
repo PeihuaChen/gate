@@ -15,20 +15,19 @@
 
 package gate.annotation;
 
-import java.util.*;
 import java.awt.*;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 import java.text.NumberFormat;
-import java.awt.event.*;
+import java.util.*;
+
 import javax.swing.*;
 import javax.swing.table.*;
 
-import gate.util.*;
-import gate.annotation.*;
 import gate.*;
-import gate.gui.*;
-import gate.swing.*;
 import gate.creole.*;
-import java.beans.*;
+import gate.swing.XJTable;
+import gate.util.*;
 
 /**
   * This class compare two annotation sets on annotation type given by the
