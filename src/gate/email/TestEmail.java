@@ -62,6 +62,9 @@ public class TestEmail extends TestCase
           );
 
     docFormat.unpackMarkup (doc,"DocumentContent");
+    // Verfy if all annotations from the default annotation set are consistent
+    gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
+
   } // testUnpackMarkup()
 
   public static void main(String[] args) {

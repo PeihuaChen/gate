@@ -60,7 +60,6 @@ public class TestSgml extends TestCase
     doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 
-//    doc = gate.Factory.newDocument(new URL("file:///d:/tmp/Learner/wui2fn08.cls.sgm"));
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     //*
@@ -74,6 +73,8 @@ public class TestSgml extends TestCase
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.unpackMarkup (doc,"DocumentContent");
+    // Verfy if all annotations from the default annotation set are consistent
+    gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
   }// testSgml
 
   /** Test suite routine for the test runner */

@@ -60,7 +60,7 @@ public class TestHtml extends TestCase
     markupElementsMap.put ("a","link");
     */
   doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
-//doc = gate.Factory.newDocument(new URL("file:///d:/tmp/home.html"));
+// doc = gate.Factory.newDocument(new URL("http://www"));
 
    // get the docFormat that deals with it.
    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
@@ -74,6 +74,8 @@ public class TestHtml extends TestCase
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.unpackMarkup (doc,"DocumentContent");
+
+    gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
 /*
     // Save it as XML
     File xmlFile = null;
@@ -87,7 +89,17 @@ public class TestHtml extends TestCase
     writer.close();
 */
   } // testUnpackMarkup()
-
+//*
+  public static void main(String[] args){
+    try{
+      Gate.init();
+      TestHtml test = new TestHtml("gicu");
+      test.testUnpackMarkup();
+    } catch (Exception e){
+      e.printStackTrace(System.out);
+    }
+  }
+//*/
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestHtml.class);

@@ -140,13 +140,12 @@ public class XmlDocumentHandler extends HandlerBase{
                                 markupElementsMap.get(obj.getElemName());
           if (annotationType != null)
             basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
-        }
+        }// End if
       }catch (gate.util.InvalidOffsetException e){
-        //e.printStackTrace(Err.getPrintWriter());
-        throw new GateSaxException(e);
-      }
-    }// while
-  }
+        Err.prln("Error creating an annot :" + obj + " Discarded...");
+      }// End try
+    }// End while
+  }// endDocument();
 
   /**
     * This method is called when the SAX parser encounts the beginning of an

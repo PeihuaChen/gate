@@ -47,7 +47,7 @@ public class TestJape extends TestCase
   /** Test using the large "combined" grammar from the gate/resources
     * tree.
     */
-  public void _testCombined() throws IOException, GateException {
+  public void _testCombined() throws IOException, GateException, Exception {
     DoTestBigGrammar("AveShort");
 
     /*
@@ -134,7 +134,7 @@ public class TestJape extends TestCase
     // Out.println(defaultAS);
   } // testBatch()
 
-  public void DoTestBigGrammar(String textName) throws GateException {
+  public void DoTestBigGrammar(String textName) throws GateException, Exception{
     long startCorpusLoad = 0, startCorpusTokenization = 0,
          startGazeteerLoad = 0, startLookup = 0,
          startJapeFileOpen = 0, startCorpusTransduce = 0,
@@ -183,6 +183,8 @@ public class TestJape extends TestCase
       //use the default anotation set
       tokeniser.setAnnotationSetName(null);
       tokeniser.run();
+      // Verfy if all annotations from the default annotation set are consistent
+      gate.corpora.TestDocument.verifyNodeIdConsistency(currentDoc);
     }
 
     startJapeFileOpen = System.currentTimeMillis();
@@ -210,6 +212,8 @@ public class TestJape extends TestCase
         currentDoc = (Document)docIter.next();
         gazeteer.setDocument(currentDoc);
         gazeteer.run();
+        // Verfy if all annotations from the default annotation set are consistent
+        gate.corpora.TestDocument.verifyNodeIdConsistency(currentDoc);
       }
     } catch(ResourceInstantiationException re) {
       Err.println("Cannot read the gazeteer lists!" +
