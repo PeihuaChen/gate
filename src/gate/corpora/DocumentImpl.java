@@ -323,28 +323,44 @@ extends AbstractLanguageResource implements Document{
     StringBuffer xmlContent = new StringBuffer("");
     // Add xml header
     xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-//      xmlContent.append("<?xml version=\"1.0\" ?>\n");
     // Add the root element
-    xmlContent.append("<GateDocument" +
-        featuresToXml(this.getFeatures()) + ">\n");
+    xmlContent.append("<GateDocument>\n");
+    xmlContent.append("<!-- The document's features-->\n\n");
+    xmlContent.append("<GateDocumentFeatures>\n");
+    xmlContent.append(featuresToXml(this.getFeatures()));
+    xmlContent.append("</GateDocumentFeatures>\n");
+    xmlContent.append("<!-- The document content area with serialized nodes -->\n\n");
     // Add plain text element
     xmlContent.append("<TextWithNodes>");
     xmlContent.append("<![CDATA[");
-    xmlContent.append(textWithNodes(this.getContent().toString(),
-                                              this.getAnnotations()));
+    xmlContent.append(textWithNodes(this.getContent().toString()));
     xmlContent.append("]]>");
     xmlContent.append("</TextWithNodes>\n");
-    // Save the AnnotationSet element
+    // Serialize as XML all document's annotation sets
+    // Serialize the default AnnotationSet
+    xmlContent.append("<!-- The default annotation set -->\n\n");
     xmlContent.append(annotationSetToXml(this.getAnnotations()));
+    // Serialize all others AnnotationSets
+    // namedAnnotSets is a Map containing all other named Annotation Sets.
+    if (namedAnnotSets != null){
+      Iterator iter = namedAnnotSets.values().iterator();
+      while(iter.hasNext()){
+        AnnotationSet annotSet = (AnnotationSet) iter.next();
+        xmlContent.append("<!-- Named annotation set -->\n\n");
+        // Serialize it as XML
+        xmlContent.append(annotationSetToXml(annotSet));
+      }// End while
+    }// End if
     // Add the end of GateDocument
     xmlContent.append("</GateDocument>");
     // return the XmlGateDocument
     return xmlContent.toString();
   }// toXml
 
-  /** This method saves a FeatureMap as XML attributes.
+  /** This method saves a FeatureMap as XML elements.
     * @ param aFeatureMap the feature map that has to be saved as XML.
-    * @ return a String like this: feat1="val1" feat2="val2" ...
+    * @ return a String like this: <Feature><Name>[[CDATA...]]</Name>
+    * <Value>[[CDATA...]]</Value></Feature><Feature>...</Feature>
     */
   private String featuresToXml(FeatureMap aFeatureMap){
     StringBuffer str = new StringBuffer("");
@@ -356,34 +372,45 @@ extends AbstractLanguageResource implements Document{
     while(keyIterator.hasNext()){
       Object key = keyIterator.next();
       Object value = aFeatureMap.get(key);
-      str.append(" " + key + "=\"" + value + "\"");
+      str.append("<Feature><Name><![CDATA[" + key +
+               "]]></Name><Value><![CDATA["+ value + "]]></Value></Feature>\n");
     }// end While
-
     return str.toString();
   }//featuresToXml
 
   /** This method creates Node XML elements and inserts them at the
-    * corresponding offset inside the text.
+    * corresponding offset inside the text. Nodes are created from the default
+    * annotation set, as well as from all existing named annotation sets.
     * @param aText The text representing the document's plain text.
-    * @param AnnotationSet The annotation set containing the nodes that must
-    * be inserted into the text.
     * @return The text with empty <Node id="NodeId"/> elements.
     */
-  private String textWithNodes(String aText, AnnotationSet anAnnotationSet){
+  private String textWithNodes(String aText){
 
     if (aText == null) return new String("");
-    if (anAnnotationSet == null) return aText;
 
     StringBuffer textWithNodes = new StringBuffer(aText);
-    Set offsetsSet = new TreeSet();
+    Set offsetsSet = new HashSet();
 
-    // Construct the id2Offset map from the AnnotSet
-    Iterator annotSetIter = anAnnotationSet.iterator();
+    // Construct the id2Offset map from the doc's default Annot Set
+    Iterator annotSetIter = this.getAnnotations().iterator();
     while (annotSetIter.hasNext()){
       Annotation annot = (Annotation) annotSetIter.next();
       offsetsSet.add(annot.getStartNode().getOffset());
       offsetsSet.add(annot.getEndNode().getOffset());
     }// end While
+    // Get the nodes from all other named annotation sets.
+    if (namedAnnotSets != null){
+      Iterator iter = namedAnnotSets.values().iterator();
+      while(iter.hasNext()){
+        AnnotationSet annotSet = (AnnotationSet) iter.next();
+        Iterator iter2 = annotSet.iterator();
+        while(iter2.hasNext()){
+          Annotation annotTmp = (Annotation) iter2.next();
+          offsetsSet.add(annotTmp.getStartNode().getOffset());
+          offsetsSet.add(annotTmp.getEndNode().getOffset());
+        }// End while
+      }// End while
+    }// End if
 
     // Iterate through all nodes from anAnnotSet and transform them to
     // XML elements. Then insert those elements at the node's offset into the
@@ -396,8 +423,8 @@ extends AbstractLanguageResource implements Document{
     // Iterate the list in reverse order and make the modifications
     while (keyIter.hasPrevious()){
       Long offset = (Long) keyIter.previous();
-      String strNode = "]]><Node id=\"" + offset + "\"/><![CDATA[";
       int offsetValue = offset.intValue();
+      String strNode = "]]><Node id=\"" + offsetValue + "\"/><![CDATA[";
       textWithNodes.insert(offsetValue,strNode);
     }// end while
     return textWithNodes.toString();
@@ -411,12 +438,14 @@ extends AbstractLanguageResource implements Document{
   private String annotationSetToXml(AnnotationSet anAnnotationSet){
     StringBuffer str = new StringBuffer("");
 
-    str.append("<AnnotationSet>\n");
     if (anAnnotationSet == null){
+      str.append("<AnnotationSet>\n");
       str.append("</AnnotationSet>\n");
       return str.toString();
     }// End if
-
+    if (anAnnotationSet.getName() == null)
+      str.append("<AnnotationSet>\n");
+    else str.append("<AnnotationSet Name=\"" + anAnnotationSet.getName() + "\" >\n");
     // Iterate through AnnotationSet and save each Annotation as XML
     Iterator iterator = anAnnotationSet.iterator();
     while (iterator.hasNext()){
@@ -424,7 +453,7 @@ extends AbstractLanguageResource implements Document{
       str.append("<Annotation " + "Type=\"" + annot.getType() +
                   "\" StartNode=\"" + annot.getStartNode().getOffset() +
                    "\" EndNode=\"" + annot.getEndNode().getOffset() + "\">\n");
-      str.append("<Features" + featuresToXml(annot.getFeatures()) + "/>\n");
+      str.append(featuresToXml(annot.getFeatures()));
       str.append("</Annotation>\n");
     }// End while
 

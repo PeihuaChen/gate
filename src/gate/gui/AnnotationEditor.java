@@ -1677,7 +1677,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                 stylesTreeModel.insertNodeInto(typeNode, node, i);
               }
             } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
-System.out.println("Remove an annotation of type " + type +" from set " + setName + "!");
+
 //              tData.annotations.remove(ann);
               if(tData.getVisible()){
                 //update the annotations table
@@ -1703,7 +1703,6 @@ System.out.println("Remove an annotation of type " + type +" from set " + setNam
                           textPane.getStyle("default"), true);
               }//if(tData.getVisible())
               if(tData.annotations.isEmpty()){
-System.out.println("No more annotations of type " + type +"!");
                 //no more annotations of this type -> delete the node
                 //first find the set
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode)
