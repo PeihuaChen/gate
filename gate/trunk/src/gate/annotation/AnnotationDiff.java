@@ -479,12 +479,11 @@ public class AnnotationDiff extends AbstractVisualResource{
   protected void doDiff( java.util.List aKeyAnnotList,
                      java.util.List aResponseAnnotList){
 
+    int responseSize = aResponseAnnotList.size();
+
     // If one of the annotation sets is null then is no point in doing the diff.
     if (aKeyAnnotList == null || aResponseAnnotList == null)
       return;
-
-    int actual = aResponseAnnotList.size();
-    int possible = aKeyAnnotList.size();
 
     diffSet = new HashSet();
     // Iterate throught all elements from keyList and find those in the response
@@ -588,18 +587,31 @@ public class AnnotationDiff extends AbstractVisualResource{
 
     // CALCULATE ALL (NLP) MEASURES like
     // Precistion, Recall and FalsePositive
-    if (actual != 0){
+    int possible =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
+                    typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
+                    typeCounter[MISSING_TYPE]; // this comes from Key
 
-      precisionStrict =  (double)typeCounter[CORRECT_TYPE]/actual;
-      precisionLenient = (double)(typeCounter[CORRECT_TYPE] +
-                                  typeCounter[PARTIALLY_CORRECT_TYPE])/actual;
-      precisionAverage = (double)(precisionStrict + precisionLenient) / 2;
+    int actual =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
+                  typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
+                  typeCounter[SPURIOUS_TYPE]; // this comes from Resp
+
+    if (actual != responseSize)
+      Err.prln("WARNING: The response size(" + responseSize +
+      ") is not the same as the computed value of" +
+    " actual(Correct[resp or key]+Partial[resp]+Spurious[resp]=" + actual +")");
+
+    if (actual != 0){
+      precisionStrict =  ((double)typeCounter[CORRECT_TYPE])/((double)actual);
+      precisionLenient = ((double)(typeCounter[CORRECT_TYPE] +
+                         typeCounter[PARTIALLY_CORRECT_TYPE]))/((double)actual);
+      precisionAverage = ((double)(precisionStrict + precisionLenient)) /
+                                                                  ((double) 2);
     }// End if
     if (possible != 0){
-      recallStrict = (double)typeCounter[CORRECT_TYPE]/possible;
-      recallLenient = (double) (typeCounter[CORRECT_TYPE] +
-                                typeCounter[PARTIALLY_CORRECT_TYPE])/possible;
-      recallAverage = (double) (recallStrict + recallLenient) / 2;
+      recallStrict = ((double)typeCounter[CORRECT_TYPE])/((double)possible);
+      recallLenient = ((double)(typeCounter[CORRECT_TYPE] +
+                       typeCounter[PARTIALLY_CORRECT_TYPE]))/((double)possible);
+      recallAverage = ((double)(recallStrict + recallLenient)) / ((double)2);
     }// End if
 
 
@@ -609,15 +621,13 @@ public class AnnotationDiff extends AbstractVisualResource{
                                       annotationTypeForFalsePositive).size();
     if (no != 0){
       // No error here: the formula is the opposite to recall or precission
-      falsePositiveStrict = (double) (typeCounter[SPURIOUS_TYPE] +
-                                      typeCounter[PARTIALLY_CORRECT_TYPE]) / no;
-      falsePositiveLenient = (double) typeCounter[SPURIOUS_TYPE] / no;
-      falsePositiveAverage = (double) (falsePositiveStrict +
-                                                    falsePositiveLenient) / 2 ;
-
+     falsePositiveStrict = ((double)(typeCounter[SPURIOUS_TYPE] +
+                             typeCounter[PARTIALLY_CORRECT_TYPE])) /((double)no);
+     falsePositiveLenient = ((double)typeCounter[SPURIOUS_TYPE]) /((double) no);
+     falsePositiveAverage = ((double)(falsePositiveStrict +
+                                           falsePositiveLenient))/((double)2) ;
 
     }// End if
-
   }// doDiff
 
   /** Decide what type is the keyAnnotation (DEFAULT_TYPE or MISSING,) */
