@@ -39,6 +39,7 @@ import guk.im.*;
 
 public class MainFrame extends JFrame {
 
+  MainFrame myself = null;
   JMenuBar menuBar;
   JSplitPane mainSplit;
   JSplitPane leftSplit;
@@ -56,6 +57,7 @@ public class MainFrame extends JFrame {
   DefaultMutableTreeNode lrRoot;
   DefaultMutableTreeNode prRoot;
   DefaultMutableTreeNode dsRoot;
+  DefaultMutableTreeNode toolsRoot = null;
 
   Splash splash;
   JTextArea logArea;
@@ -78,9 +80,10 @@ public class MainFrame extends JFrame {
   NewDSAction newDSAction;
   OpenDSAction openDSAction;
   HelpAboutAction helpAboutAction;
-
+  NewAnnotDiffAction newAnnotDiffAction = null;
   /**Construct the frame*/
   public MainFrame() {
+    myself = this;
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
     initGuiComponents();
@@ -96,6 +99,7 @@ public class MainFrame extends JFrame {
     newDSAction = new NewDSAction();
     openDSAction = new OpenDSAction();
     helpAboutAction = new HelpAboutAction();
+    newAnnotDiffAction = new NewAnnotDiffAction();
   }
 
   protected void initGuiComponents(){
@@ -333,6 +337,8 @@ public class MainFrame extends JFrame {
       parent = lrRoot;
     }else if(handle instanceof PRHandle){
       parent = prRoot;
+    }else if (handle instanceof AnnotDiffHandle){
+      parent = toolsRoot;
     }
     DefaultMutableTreeNode node = null;
     if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
@@ -471,6 +477,16 @@ public class MainFrame extends JFrame {
       dsRoot.add(new DefaultMutableTreeNode(handle));
     }
 
+    // TOOLS
+    handle = new ResourceHandle("Tools", currentProject);
+    handle.setSmallIcon(new ImageIcon(
+           getClass().getResource("/gate/resources/img/genericPr.gif")));
+    toolsRoot = new DefaultMutableTreeNode(handle, true);
+    popup = new JPopupMenu();
+    popup.add(newAnnotDiffAction);
+    handle.setPopup(popup);
+    projectTreeRoot.add(toolsRoot);
+
     projectTreeModel.nodeStructureChanged(projectTreeRoot);
 
 
@@ -499,6 +515,21 @@ public class MainFrame extends JFrame {
       }
     }
   }
+
+  class NewAnnotDiffAction extends AbstractAction{
+    public NewAnnotDiffAction(){
+      super("New AnnotDiff",new ImageIcon(MainFrame.class.getResource("/gate/resources/img/genericPr.gif")));
+
+    }// NewAnnotDiffAction
+    public void actionPerformed(ActionEvent e){
+      AnnotDiffHandle handle = new AnnotDiffHandle(myself);
+      handle.setTooltipText("<html><b>Tool:</b> " +
+                            "Cristi" + "</html>");
+      toolsRoot.add(new DefaultMutableTreeNode(handle, false));
+      projectTreeModel.nodeStructureChanged(toolsRoot);
+      projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(toolsRoot)));
+    }// actionPerformed();
+  }//class NewAnnotDiffAction
 
   class NewApplicationAction extends AbstractAction{
     public NewApplicationAction(){

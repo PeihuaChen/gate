@@ -35,6 +35,8 @@ import gate.*;
  * popup menu for right click events, etc.
  */
 class ResourceHandle{
+  public ResourceHandle(){}
+
   public ResourceHandle(Resource resource, ProjectData project){
     this.resource = resource;
     this.title = (String)resource.getFeatures().get("NAME");
