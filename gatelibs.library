@@ -19,6 +19,7 @@
     <path>[lib/postgres6.5-jdbc1.2.jar]</path>
     <path>[lib/SunXmlParser.jar]</path>
     <path>[lib/jdom.jar]</path>
+    <path>[lib/GnuGetOpt.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
