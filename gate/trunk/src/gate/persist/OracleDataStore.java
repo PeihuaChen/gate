@@ -1927,9 +1927,8 @@ System.out.println();
       _syncFeatures(doc);
     }
 
-
-    //3. [optional] sync Annotations
-//    throw new MethodNotImplementedException();
+    //5. [optional] sync Annotations
+    _syncAnnotations(doc);
   }
 
   private void _syncLR(Long lrID, String newName)
@@ -2043,21 +2042,51 @@ System.out.println();
 
     //0. preconditions
     Assert.assertNotNull(doc);
-    Assert.assertTrue(doc instanceof DatabaseDataStore);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
     Assert.assertNotNull(doc.getLRPersistenceId());
     Assert.assertEquals(((DatabaseDataStore)doc.getDataStore()).getDatabaseID(),
                       this.getDatabaseID());
 
-    //1. iterate all the annotation sets
-    Iterator itSets = doc.getNamedAnnotationSets().values().iterator();
-    while (itSets.hasNext()) {
-      AnnotationSet aset = (AnnotationSet)itSets.next();
-//      aset.
+
+    //1. default
+    EventAwareAnnotationSet eas = (EventAwareAnnotationSet)doc.getAnnotations();
+
+    Collection anns = null;
+    anns = eas.getAddedAnnotationIDs();
+    if (anns.size()>0) {
+        //add code
     }
 
-    //2. the default aset
+    anns = eas.getRemovedAnnotationIDs();
+    if (anns.size()>0) {
+        //add code
+    }
 
-    throw new MethodNotImplementedException();
+    anns = eas.getChangedAnnotationIDs();
+    if (anns.size()>0) {
+        //add code
+    }
+
+    //2. iterate all the annotation sets
+    Iterator itSets = doc.getNamedAnnotationSets().values().iterator();
+    while (itSets.hasNext()) {
+      EventAwareAnnotationSet aset = (EventAwareAnnotationSet)itSets.next();
+
+      anns = aset.getAddedAnnotationIDs();
+      if (anns.size()>0) {
+        //add code
+      }
+
+      anns = aset.getRemovedAnnotationIDs();
+      if (anns.size()>0) {
+        //add code
+      }
+
+      anns = aset.getChangedAnnotationIDs();
+      if (anns.size()>0) {
+        //add code
+      }
+    }
   }
 
 
