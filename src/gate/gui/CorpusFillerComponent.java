@@ -151,8 +151,6 @@ public class CorpusFillerComponent extends JPanel {
         }
       }
     });
-
-
   }
 
   /**
@@ -179,10 +177,16 @@ public class CorpusFillerComponent extends JPanel {
   }
 
 
+  /**
+   * Gets the current list of permitted extensions
+   */
   public java.util.List getExtensions() {
     return extensions;
   }
 
+  /**
+   * Test code
+   */
   static public void main(String[] args){
     try{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -197,18 +201,48 @@ public class CorpusFillerComponent extends JPanel {
     frame.setResizable(false);
     frame.setVisible(true);
   }
+
+  /**
+   * Should the directory parsed recursively?
+   */
   public void setRecurseDirectories(boolean recurseDirectories) {
     recurseCheckBox.setSelected(recurseDirectories);
   }
 
+  /**
+   * Should the directory parsed recursively?
+   */
   public boolean isRecurseDirectories() {
     return recurseCheckBox.isSelected();
   }
 
+  /**
+   * The text field for the directory URL
+   */
   JTextField urlTextField;
+
+  /**
+   * The buttons that opens the file chooser
+   */
   JButton filerBtn;
+
+  /**
+   * The text field for the permitted extensions
+   */
   JTextField extensionsTextField;
+
+  /**
+   * The buton that opens the list editor for the extensions
+   */
   JButton listEditBtn;
+
+  /**
+   * The checkbox for recurse directories
+   */
   JCheckBox recurseCheckBox;
+
+  /**
+   * The list of permitted extensions.
+   */
   private java.util.List extensions;
 }
