@@ -174,19 +174,23 @@ jar/classpath so it's the same as registerBuiltins
       );
     }
     configProcessor.parseConfigFile(configStream, configUrl);
+
     // parse the user's config file (if it exists)
-    String userConfigName =
-      System.getProperty("user.home") + Strings.getFileSep() + gateDotXml;
+    String userConfigName = getUserConfigFile();
+    File userConfigFile = null;
+    URL userConfigUrl = null;
     if(DEBUG) { Out.prln("loading user config from " + userConfigName); }
     configStream = null;
     boolean userConfigExists = true;
     try {
-      configStream = new FileInputStream(userConfigName);
+      userConfigFile = new File(userConfigName);
+      configStream = new FileInputStream(userConfigFile);
+      userConfigUrl = userConfigFile.toURL();
     } catch(IOException e) {
       userConfigExists = false;
     }
     if(userConfigExists)
-      configProcessor.parseConfigFile(configStream, configUrl);
+      configProcessor.parseConfigFile(configStream, userConfigUrl);
     if(DEBUG) {
       Out.prln(
         "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
@@ -450,7 +454,7 @@ jar/classpath so it's the same as registerBuiltins
   /** Get the DataStore register. */
   public static DataStoreRegister getDataStoreRegister() {
     return dataStoreRegister;
-  }
+  } // getDataStoreRegister
 
   /**
    * Sets the {@link Executable} currently under execution.
@@ -471,8 +475,7 @@ jar/classpath so it's the same as registerBuiltins
       }
       currentExecutable = executable;
     }
-  }
-
+  } // setExecutable
 
   /**
    * Returns the curently set executable.
@@ -480,7 +483,7 @@ jar/classpath so it's the same as registerBuiltins
    */
   public synchronized static gate.Executable getExecutable() {
     return currentExecutable;
-  } // getDataStoreRegister
+  } // getExecutable
 
   /**
    * Returns a new unique string
@@ -490,8 +493,84 @@ jar/classpath so it's the same as registerBuiltins
                                          toUpperCase());
     for(int i = buff.length(); i <= 4; i++) buff.insert(0, '0');
     return buff.toString();
-  } // getDataStoreRegister
+  } // genSym
 
+  /** GATE development environment configuration data (stored in gate.xml). */
+  private static Map gateConfig = new HashMap();
 
+  /** Name of the XML element for GATE development environment config data. */
+  private static String gateConfigElement = "GATECONFIG";
+
+  /**
+   * Gate the name of the XML element for GATE development environment
+   * config data.
+   */
+  public static String getGateConfigElement() { return gateConfigElement; }
+
+  /** Shorthand for local newline */
+  private static String nl = Strings.getNl();
+
+  /** An empty config data file. */
+  private static String emptyConfigFile =
+    "<?xml version=\"1.0\"?>" + nl +
+    "<!-- " + gateDotXml + ": GATE configuration data -->" + nl +
+    "<GATE>" + nl +
+    "" + nl +
+    "<!-- NOTE: the next line may be overwritten by the GUI!!! -->" + nl +
+    "<" + gateConfigElement + "/>" + nl +
+    "" + nl +
+    "</GATE>" + nl;
+
+  /**
+   * Get an empty config file. <B>NOTE:</B> this method is intended only
+   * for use by the test suite.
+   */
+  public static String getEmptyConfigFile() { return emptyConfigFile; }
+
+  /**
+   * Get the GATE development environment configuration data
+   * (initialised from <TT>gate.xml</TT>).
+   */
+  public static Map getGateConfig() { return gateConfig; }
+
+  /**
+   * Update the GATE development environment configuration data in the
+   * user's <TT>gate.xml</TT> file (create one if it doesn't exist).
+   */
+  public static void writeGateConfig() throws GateException {
+    // the user's config file
+    String configFileName = getUserConfigFile();
+    File configFile = new File(configFileName);
+
+    // create if not there, then update
+    try {
+      // if the file doesn't exist, create one with an empty GATECONFIG
+      if(! configFile.exists()) {
+        FileWriter writer = new FileWriter(configFile);
+        writer.write(emptyConfigFile);
+        writer.close();
+      }
+
+      // update the config element of the file
+      Files.updateXmlElement(
+        new File(configFileName), gateConfigElement, gateConfig
+      );
+
+    } catch(IOException e) {
+      throw new GateException(
+        "problem writing user " + gateDotXml + ": " + nl + e.toString()
+      );
+    }
+  } // writeGateConfig
+
+  /**
+   * Get the name of the user's <TT>gate.xml</TT> config file (this
+   * doesn't guarantee that file exists!).
+   */
+  public static String getUserConfigFile() {
+    String userConfigName =
+      System.getProperty("user.home") + Strings.getFileSep() + gateDotXml;
+    return userConfigName;
+  } // getUserConfigFile
 
 } // class Gate

@@ -72,7 +72,15 @@ public class ConfigDataProcessor
     String nl = Strings.getNl();
 
     // create a handler for the config file and parse it
+    String configString = null; // for debug messages
     try {
+      if(DEBUG) {
+        File configFile = new File(configUrl.getFile());
+        if(configFile.exists())
+          configString = Files.getString(configUrl.getFile());
+        else
+          configString = configUrl.toString();
+      }
       DefaultHandler handler = new ConfigXmlHandler(configUrl);
       parser.parse(configStream, handler);
       if(DEBUG) {
@@ -82,9 +90,11 @@ public class ConfigDataProcessor
         );
       }
     } catch (IOException e) {
-      throw(new GateException("Config data error on "+configUrl+": "+nl+e));
+      Out.prln("conf file:"+nl+configString+nl);
+      throw(new GateException("Config data error 1 on "+configUrl+": "+nl+e));
     } catch (SAXException e) {
-      throw(new GateException("Config data error on "+configUrl+": "+nl+e));
+      Out.prln("conf file:"+nl+configString+nl);
+      throw(new GateException("Config data error 2 on "+configUrl+": "+nl+e));
     }
 
   } // parseConfigFile
