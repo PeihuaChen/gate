@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<library>
+  <!--JBuilder Library Definition File-->
+  <fullname>gatelibs</fullname>
+  <class>
+    <path>[lib/gnu-regexp-1.0.8.jar]</path>
+    <path>[lib/graph_drawing.jar]</path>
+    <path>[lib/guk.jar]</path>
+    <path>[lib/jacl.jar]</path>
+    <path>[lib/JavaCC.zip]</path>
+    <path>[lib/javacompiler.jar]</path>
+    <path>[lib/jaxp.jar]</path>
+    <path>[lib/jgl3.1.0.jar]</path>
+    <path>[lib/jigsaw.jar]</path>
+    <path>[lib/junit.jar]</path>
+    <path>[lib/orajdbc2.zip]</path>
+    <path>[lib/oro.jar]</path>
+    <path>[lib/postgres6.5-jdbc1.2.jar]</path>
+    <path>[lib/SunXmlParser.jar]</path>
+  </class>
+</library>
+
