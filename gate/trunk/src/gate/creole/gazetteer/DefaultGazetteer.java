@@ -55,10 +55,6 @@ public class DefaultGazetteer extends AbstractGazetteer {
    */
   private static final boolean DEBUG = false;
 
-  private static final String CLASS = "CLASS";
-
-  private static final String ONTOLOGY = "ONTOLOGY";
-
   public static final String
     DEF_GAZ_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -371,8 +367,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
             fm = Factory.newFeatureMap();
             fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
             if (null!= currentLookup.oClass && null!=currentLookup.ontology){
-              fm.put(CLASS,currentLookup.oClass);
-              fm.put(ONTOLOGY,currentLookup.ontology);
+              fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
+              fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
             }
             if(null != currentLookup.minorType) {
               fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
@@ -421,8 +417,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
               fm = Factory.newFeatureMap();
               fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
               if (null!= currentLookup.oClass && null!=currentLookup.ontology){
-                fm.put(CLASS,currentLookup.oClass);
-                fm.put(ONTOLOGY,currentLookup.ontology);
+                fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
+                fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
               }
               if(null != currentLookup.minorType) {
                 fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
@@ -463,8 +459,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
         fm = Factory.newFeatureMap();
         fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
         if (null!= currentLookup.oClass && null!=currentLookup.ontology){
-          fm.put(CLASS,currentLookup.oClass);
-          fm.put(ONTOLOGY,currentLookup.ontology);
+          fm.put(LOOKUP_CLASS_FEATURE_NAME,currentLookup.oClass);
+          fm.put(LOOKUP_ONTOLOGY_FEATURE_NAME,currentLookup.ontology);
         }
 
         if(null != currentLookup.minorType)
