@@ -110,6 +110,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
       Javac.loadClasses(actionClasses);
     }catch(Exception e){
       Err.prln("Compile error:\n" + e.getMessage());
+//e.printStackTrace();
     }
 
     //build the finite state machine transition graph
