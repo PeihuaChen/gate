@@ -379,12 +379,16 @@ public class TestPR extends TestCase
                      storageDir.toExternalForm());
 
     //get LR id
-    String lr_id_feature_map = (String)ds.getLrIds
+    String lrId = (String)ds.getLrIds
                                 ("gate.corpora.DocumentImpl").get(0);
 
     // get the document from data store
-    Document document =
-      (Document) ds.getLr("gate.corpora.DocumentImpl", lr_id_feature_map);
+    FeatureMap features = Factory.newFeatureMap();
+    features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
+    Document document = (Document) Factory.createResource(
+                                      "gate.corpora.DocumentImpl",
+                                      features);
     // get annotation set
     AnnotationSet annotSet = document.getAnnotations();
     // get the annotation set from the first processed document
@@ -561,11 +565,14 @@ public class TestPR extends TestCase
     ds = Factory.openDataStore("gate.persist.SerialDataStore",
                                storageDir.toExternalForm());
     //get LR id
-    lr_id_feature_map = (String)ds.getLrIds
-                                ("gate.corpora.DocumentImpl").get(0);
+    lrId = (String)ds.getLrIds("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
-    document =
-      (Document) ds.getLr("gate.corpora.DocumentImpl", lr_id_feature_map);
+    features = Factory.newFeatureMap();
+    features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
+    document = (Document) Factory.createResource(
+                                      "gate.corpora.DocumentImpl",
+                                      features);
     // get annotation set
     annotSet = document.getAnnotations();
 
@@ -743,11 +750,14 @@ public class TestPR extends TestCase
     ds = Factory.openDataStore("gate.persist.SerialDataStore",
                                storageDir.toExternalForm());
     //get LR id
-    lr_id_feature_map = (String)ds.getLrIds
-                                ("gate.corpora.DocumentImpl").get(0);
+    lrId = (String)ds.getLrIds("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
-    document =
-      (Document) ds.getLr("gate.corpora.DocumentImpl", lr_id_feature_map);
+    features = Factory.newFeatureMap();
+    features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
+    Document doc = (Document) Factory.createResource(
+                                "gate.corpora.DocumentImpl",
+                                features);
     // get annotation set
     annotSet = document.getAnnotations();
     // get the annotation set from the third processed document
