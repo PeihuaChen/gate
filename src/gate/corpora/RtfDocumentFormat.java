@@ -68,12 +68,11 @@ public class RtfDocumentFormat extends TextualDocumentFormat{
     // NOTE that RTF Kit works only with Systled Document interface
     StyledDocument styledDoc = new DefaultStyledDocument();
 
-    // get an Input stream from the gate document
-    InputStream in = new ByteArrayInputStream(
-                                         doc.getContent().toString().getBytes()
-                                         );
-
     try {
+      // get an Input stream from the gate document
+      InputStream in = (doc.getSourceUrl() == null) ?
+         (new ByteArrayInputStream(doc.getContent().toString().getBytes())) :
+          doc.getSourceUrl().openStream();
       aRtfEditorkit.read(in, styledDoc, 0);
       // replace the document content with the one without markups
       doc.setContent(new DocumentContentImpl(

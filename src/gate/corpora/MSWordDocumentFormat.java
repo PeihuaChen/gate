@@ -69,15 +69,16 @@ public class MSWordDocumentFormat extends DocumentFormat{
                                      throws DocumentFormatException{
     //get the original file
     URL fileURL = doc.getSourceUrl();
+    if(fileURL == null) throw new DocumentFormatException(
+    "Unpacking MS Word files requires an URL to the original content!");
+    
     //parse the original file into a text
     String extractedContent = null;
 
     //Implement the MSWord unpacking.
     try {
       // get an Input stream from the gate document
-      InputStream in = new ByteArrayInputStream(
-                                           doc.getContent().toString().getBytes()
-                                           );
+      InputStream in = fileURL.openStream();
 
       // create a MSWord Text Extractor
       WordExtractor extractor = new WordExtractor();
