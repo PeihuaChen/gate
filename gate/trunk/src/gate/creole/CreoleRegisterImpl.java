@@ -2,14 +2,14 @@
  *  CreoleRegisterImpl.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- * 
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- * 
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 1/Sept/2000
  *
  *  $Id$
@@ -47,7 +47,37 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   /** The set of CREOLE directories (URLs). */
   private Set directories = new HashSet();
 
-  /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
+  /** The parser for the CREOLE directory files */
+  private SAXParser parser = null;
+
+  /** Default constructor. Sets up directory files parser. */
+  public CreoleRegisterImpl() throws GateException {
+
+    // construct a SAX parser for parsing the CREOLE directory files
+    try {
+      // Get a parser factory.
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+
+      // Set up the factory to create the appropriate type of parser:
+      // non validating one
+      saxParserFactory.setValidating(false);
+      // non namespace aware one
+      saxParserFactory.setNamespaceAware(false);
+
+      // create the parser
+      parser = saxParserFactory.newSAXParser();
+    } catch (SAXException e) {
+      if(DEBUG) Out.println(e);
+      throw(new GateException(e));
+    } catch (ParserConfigurationException e) {
+      if(DEBUG) Out.println(e);
+      throw(new GateException(e));
+    }
+  } // default constructor
+
+  /** Add a CREOLE directory URL to the register and to the GATE classloader.
+    * The directory is <B>not</B> registered.
+    */
   public void addDirectory(URL directoryUrl) {
     directories.add(directoryUrl);
   } // addDirectory
@@ -59,8 +89,9 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 
   /** Register all the CREOLE directories that we know of.
     * The <CODE>creole.xml</CODE> files
-    * at the URLs are parsed, and <CODE>CreoleData</CODE> objects added
+    * at the URLs are parsed, and <CODE>ResourceData</CODE> objects added
     * to the register.
+    * URLs for resource JAR files are added to the GATE class loader.
     */
   public void registerDirectories() throws GateException {
     Iterator iter = directories.iterator();
@@ -75,71 +106,72 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     * file at the URL is parsed, and <CODE>CreoleData</CODE> objects added
     * to the register. If the directory URL has not yet been added it
     * is now added.
+    * URLs for resource JAR files are added to the GATE class loader.
     */
   public void registerDirectories(URL directoryUrl) throws GateException {
     // add the URL (may overwrite an existing one; who cares)
     directories.add(directoryUrl);
 
-    // if the URL ends in creole.xml, pass it directly to the parser;
-    // else add creole.xml and pass it
+    // directory URLs shouldn't include "creole.xml"
     String urlName = directoryUrl.toExternalForm().toLowerCase();
-    if(! urlName.endsWith("creole.xml")) {
-      boolean needSlash = false;
-      if(! urlName.endsWith("/")) needSlash = true;
-      try {
-        directoryUrl =
-          new URL(urlName + ((needSlash) ? "/creole.xml" : "creole.xml"));
-      } catch(MalformedURLException e) {
-        if(DEBUG) Out.println(e);
-        throw(new GateException(e));
-      }
+    if(urlName.endsWith("creole.xml")) {
+      throw new GateException(
+        "CREOLE directory URLs should point to the parent location of " +
+        "the creole.xml file, not the file itself; bad URL was: " + urlName
+      );
     }
 
+    // create a URL for the creole.xml file, based on the directory URL
+    URL directoryXmlFileUrl = directoryUrl;
+    String separator = "/";
+    if(urlName.endsWith(separator)) separator = "";
     try {
-      parseDirectory(directoryUrl.openStream());
+      directoryXmlFileUrl = new URL(urlName + separator + "creole.xml");
+    } catch(MalformedURLException e) {
+      throw(new GateException("bad creole.xml URL, based on " + urlName));
+    }
+
+    // parse the directory file
+    try {
+      parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
     } catch(IOException e) {
-      if(DEBUG) System.out.println(e);
-      throw(new GateException(e));
+      throw(new GateException("couldn't open creole.xml: " + e.toString()));
     }
   } // registerDirectories(URL)
 
-  /** Parse a directory file (represented as an open, adding
+  /** Parse a directory file (represented as an open stream), adding
     * resource data objects to the CREOLE register as they occur.
+    * If the resource is from a URL then that location is passed (otherwise
+    * null).
     */
-  protected void parseDirectory(InputStream directoryStream)
+  protected void parseDirectory(InputStream directoryStream, URL directoryUrl)
   throws GateException
   {
-    // construct a parser for the directory file and parse it.
-    // this will create ResourceData entries in this
-    SAXParser parser = null;
+    // create a handler for the directory file and parse it;
+    // this will create ResourceData entries in the register
     try {
-      // Get a parser factory.
-      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
-      // Set up the factory to create the appropriate type of parser:
-      // non validating one
-      saxParserFactory.setValidating(false);
-      // non namespace aware one
-      saxParserFactory.setNamespaceAware(false);
-
-      // create the parser
-      parser = saxParserFactory.newSAXParser();
-
-      // use it
-      HandlerBase handler = new CreoleXmlHandler(this);
+      HandlerBase handler = new CreoleXmlHandler(this, directoryUrl);
+      //URL resUrl =
+      //  Gate.getClassLoader().getSystemResource("gate/resources/creole/creole.xml");
+      //Out.prln(resUrl.toExternalForm());
+      //Out.prln(resUrl.toString());
+      //parser.parse(resUrl.toExternalForm(), handler);*/
       parser.parse(directoryStream, handler);
-
-	  } catch (IOException e) {
+      if(DEBUG) {
+        Out.prln(
+          "done parsing " +
+          ((directoryUrl == null) ? "null" : directoryUrl.toString())
+        );
+      }
+      //parser.parse("http://gate.ac.uk/creole/creole.xml", handler);
+    } catch (IOException e) {
       throw(new GateException(e));
-	  } catch (SAXException e) {
-      if(DEBUG) Out.println(e);
-      throw(new GateException(e));
-	  } catch (ParserConfigurationException e) {
-      if(DEBUG) Out.println(e);
+    } catch (SAXException e) {
+      if(DEBUG) Out.println(e.toString());
       throw(new GateException(e));
     }
 
-  } // registerDirectories
+  } // parseDirectory
 
   /** Register resources that are built in to the GATE distribution.
     * These resources are described by the <TT>creole.xml</TT> file in
@@ -147,7 +179,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     */
   public void registerBuiltins() throws GateException {
     try {
-      parseDirectory(Files.getGateResourceAsStream("creole/creole.xml"));
+      parseDirectory(Files.getGateResourceAsStream("creole/creole.xml"), null);
     } catch(IOException e) {
       if(DEBUG) System.out.println(e);
       throw(new GateException(e));
