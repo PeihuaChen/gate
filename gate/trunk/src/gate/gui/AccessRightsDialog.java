@@ -44,19 +44,19 @@ public class AccessRightsDialog {
     group.add(wr_gw);
     gr_gw.setSelected(true);
 
+    panel1.add(wr_gw);
+    panel1.add(Box.createHorizontalStrut(30));
     panel1.add(gr_gw);
     panel1.add(Box.createHorizontalStrut(30));
     panel1.add(gr_ow);
     panel1.add(Box.createHorizontalStrut(30));
     panel1.add(or_ow);
     panel1.add(Box.createHorizontalStrut(30));
-    panel1.add(wr_gw);
-    panel1.add(Box.createHorizontalStrut(30));
 
     return
       OkCancelDialog.showDialog(parentComponent,
                                 panel1,
-                                "Please choose LR access rights");
+                                "Choose access mode");
 
   }
 
