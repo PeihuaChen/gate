@@ -68,6 +68,9 @@ public class ProtegeWrapper extends AbstractVisualResource {
 
     ProjectManager.getProjectManager().setRootPane(protegeRootPane);
     ProjectManager.getProjectManager().loadProject(fileName);
+
+    JMenuBar menu = protegeRootPane.getJMenuBar();
+    protegeRootPane.setJMenuBar(null);
     frame.remove(protegeRootPane);
 
     JScrollPane scroll = new JScrollPane();
