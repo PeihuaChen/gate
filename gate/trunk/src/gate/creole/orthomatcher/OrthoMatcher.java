@@ -1111,7 +1111,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
     if (s2.indexOf(" ") > 0)
       return false;
 
-    Out.prln("Acronym: Matching " + s1 + "and " + s2);
+    //Out.prln("Acronym: Matching " + s1 + "and " + s2);
     StringBuffer acronym_s1 = new StringBuffer("");
     StringBuffer acronymDot_s1 = new StringBuffer("");
 
@@ -1123,8 +1123,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
       acronymDot_s1.append(".");
     }
 
-    Out.prln("Acronym dot: To Match " + acronymDot_s1 + "and " + s2);
-    Out.prln("Result: " + matchRule1(acronymDot_s1.toString(),s2,caseSensitive));
+    //Out.prln("Acronym dot: To Match " + acronymDot_s1 + "and " + s2);
+    //Out.prln("Result: " + matchRule1(acronymDot_s1.toString(),s2,caseSensitive));
 
     if (matchRule1(acronym_s1.toString(),s2,caseSensitive) ||
         matchRule1(acronymDot_s1.toString(),s2,caseSensitive) )
