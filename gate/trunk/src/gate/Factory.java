@@ -610,7 +610,7 @@ public abstract class Factory {
   {
     FeatureMap parameterValues = newFeatureMap();
     parameterValues.put("name", name);
-    parameterValues.put("features", Factory.newFeatureMap());
+//    parameterValues.put("features", Factory.newFeatureMap());
     return (Corpus) createResource("gate.corpora.CorpusImpl", parameterValues);
   } // newCorpus
 

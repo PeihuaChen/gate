@@ -37,6 +37,9 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public CorpusImpl() {
   } // Construction
 
+  public CorpusImpl(String name) {
+    setName(name);
+  } // Construction
 
   /** The data store this LR lives in. */
   protected transient DataStore dataStore;
