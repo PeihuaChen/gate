@@ -14,9 +14,13 @@ PKGS=	gate gate.util gate.annotation gate.corpora
 CP=	-classpath \
 ../classes:../lib/junit.jar
 SP=	-sourcepath ../src
-COMPILE=./jdk.sh -s -g:none javac -Xstdout -O -d ../classes $(SP) $(CP)
+COMPILE=./jdk.sh -s -g:none javac -Xdepend -Xstdout -O \
+-d ../classes $(SP) $(CP)
 
-all: classes
+# having the main test class as first target, and -Xdepend in the
+# javac options, means that most classes get compiled by a single call
+# to javac
+all: ../classes/gate/TestGate.class classes
 
 include Makefile.dep
 
@@ -41,6 +45,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.11  2000/02/15 13:52:46  hamish
+# added -Xdepend and TestGate.class target
+#
 # Revision 1.10  2000/02/11 14:59:37  hamish
 # added corpora pkg
 #
