@@ -176,7 +176,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
         getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
       } catch(IOException e) {
         e.printStackTrace();
-//        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
+        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
 
       if(preserveOriginalContent.booleanValue() && content != null) {
