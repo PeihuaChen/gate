@@ -43,7 +43,7 @@ public class JapeGUI extends JFrame {
   private void jbInit() throws Exception {
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
-    textViewPane = new JPanel(new BorderLayout());
+    textViewPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     northBox = Box.createHorizontalBox();
     this.getContentPane().setLayout(borderLayout1);
     statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -110,14 +110,14 @@ public class JapeGUI extends JFrame {
     northBox.add(runBtn, null);
     this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
     centerTabPane.add(textViewPane, "Text View");
-    textViewPane.add(textViewScroll, BorderLayout.CENTER);
-    textViewPane.add(typesPanel, BorderLayout.SOUTH);
+    textViewPane.add(textViewScroll, JSplitPane.TOP);
+    textViewPane.add(typesPanel, JSplitPane.BOTTOM);
     centerTabPane.add(tableViewScroll, "Table View");
     textViewScroll.getViewport().add(text, null);
     setSize(800,600);
     validate();
-    textViewScroll.setPreferredSize(new Dimension(textViewPane.getSize().width,
-                                    textViewPane.getSize().height - 30));
+//    textViewScroll.setPreferredSize(new Dimension(textViewPane.getSize().width,
+//                                    textViewPane.getSize().height - 30));
     japeFilter = new ExtensionFileFilter();
     japeFilter.addExtension("jape");
     japeFilter.setDescription(".jape Files");
@@ -199,44 +199,72 @@ public class JapeGUI extends JFrame {
   }
 
   void runBtn_actionPerformed(ActionEvent e) {
-    if(corpus.isEmpty() || grammarFile == null) return;
-
+    startCorpusLoad = 0;
+    startCorpusTokenization = 0;
+    startJapeFileOpen = 0;
+    startCorpusTransduce = 0;
+    endProcess = 0;
+    Calendar calendar = new GregorianCalendar();
+    if(corpus.isEmpty() || grammarFile == null){
+      statusBar.setText("Missing corpus or grammar!");
+      return;
+    }
+    startCorpusLoad = calendar.getTime().getTime();
     if(corpusIsDirty){
+      statusBar.setText("Reloading the corpus...");
       corpus.clear();
+      int progress = 0;
+      int fileCnt = corpusFiles.size();
       Iterator filesIter = corpusFiles.iterator();
       try{
         while(filesIter.hasNext()){
+              progressBar.setValue(progress++/fileCnt);
               corpus.add(Transients.newDocument(
                                     ((File)filesIter.next()).toURL()));
+              progressBar.setValue(progress/fileCnt);
             }
       }catch(java.net.MalformedURLException mue){
+        progressBar.setValue(0);
+        statusBar.setText(mue.toString());
         mue.printStackTrace(System.err);
       }catch(IOException ioe){
+        progressBar.setValue(0);
+        statusBar.setText(ioe.toString());
         ioe.printStackTrace(System.err);
       }
-
+      progressBar.setValue(0);
     }
     //tokenize all documents
+    startCorpusTokenization = calendar.getTime().getTime();
+    statusBar.setText("Tokenizing all the documents...");
+    int progress = 0;
+    int docCnt = corpus.size();
     Iterator docIter = corpus.iterator();
     while(docIter.hasNext()){
+      progressBar.setValue(progress++/docCnt);
       currentDoc = (Document)docIter.next();
       tokenize(currentDoc);
+      progressBar.setValue(progress/docCnt);
     }
     //do the jape stuff
-
+    progressBar.setValue(0);
+    startJapeFileOpen = calendar.getTime().getTime();
     try{
+      statusBar.setText("Opening Jape grammar...");
       InputStream japeFileStream = new FileInputStream(grammarFile);
       if(japeFileStream == null)
         throw new JapeException("couldn't open " + grammarFile.getName());
-    //  Batch batch = new Batch(japeFileStream);
       Batch batch = new Batch(grammarFile.getAbsolutePath());
+      statusBar.setText("Transducing the corpus...");
+      startCorpusTransduce = calendar.getTime().getTime();
       batch.transduce(corpus);
+      endProcess = calendar.getTime().getTime();
     }catch(FileNotFoundException fnfe){
       fnfe.printStackTrace(System.err);
     }catch(JapeException je){
       je.printStackTrace(System.err);
     }
-
+//    statusBar.setText("");
     //select the first document
     docIter = corpus.iterator();
     if(docIter.hasNext()){
@@ -436,7 +464,7 @@ public class JapeGUI extends JFrame {
   JMenuBar jMenuBar1 = new JMenuBar();
 
   Box westBox;
-  JPanel textViewPane;
+  JSplitPane textViewPane;
   Box northBox;
   Box southBox;
 
@@ -475,4 +503,7 @@ public class JapeGUI extends JFrame {
   JTable tableView;
   JScrollPane tableViewScroll = new JScrollPane();
   javax.swing.table.TableModel tm;
+  long startCorpusLoad = 0, startCorpusTokenization = 0,
+       startJapeFileOpen = 0, startCorpusTransduce = 0,
+       endProcess = 0;
 }
