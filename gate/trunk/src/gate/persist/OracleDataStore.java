@@ -22,9 +22,13 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.event.*;
+import gate.security.*;
 
 
 public class OracleDataStore extends JDBCDataStore {
+
+  private static final int ORACLE_TRUE = 1;
+  private static final int ORACLE_FALSE = 0;
 
   public OracleDataStore() {
   }
@@ -75,20 +79,27 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Long lrID, Long SessionID)
-    throws PersistenceException, SecurityException{
+  public boolean canReadLR(Long lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException{
+
+    //first check the session and then check whether the user is member of the group
+//    if (this.ac.isValidSession(s) == false) {
+//      throw new SecurityException("invalid session supplied");
+//    }
 
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.has_access(?,?,?,?)} ");
-//      stmt.setLong(1,);
+      stmt = this.jdbcConn.prepareCall("{ call security.has_access_to_lr(?,?,?,?)} ");
+      stmt.setLong(1,lrID.longValue());
+      stmt.setLong(2,s.getUser().getID().longValue());
+      stmt.setLong(3,s.getGroup().getID().longValue());
 
       stmt.registerOutParameter(4,java.sql.Types.INTEGER);
       stmt.execute();
       int result = stmt.getInt(4);
 
-      return false;
+      return (ORACLE_TRUE == result);
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
@@ -98,8 +109,8 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Long lrID, Long SessionID)
-    throws PersistenceException, SecurityException{
+  public boolean canWriteLR(Long lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException{
 
     throw new MethodNotImplementedException();
   }
