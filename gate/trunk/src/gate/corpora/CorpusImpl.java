@@ -380,7 +380,7 @@ public class CorpusImpl extends AbstractLanguageResource
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1113142759053898456L;
   private transient Vector corpusListeners;
-  private transient java.util.List documentsList;
+  protected transient java.util.List documentsList;
 
 
   protected void fireDocumentAdded(CorpusEvent e) {
