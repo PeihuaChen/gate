@@ -1820,7 +1820,7 @@ public class MainFrame extends JFrame
         int y = (screenSize.height - height)/2;
         pluginManager.setLocation(x, y);
       }
-      pluginManager.show();
+      pluginManager.setVisible(true);
     }
   }
   
