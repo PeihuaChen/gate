@@ -103,7 +103,8 @@ public class BootStrapDialog extends JDialog{
     resourceType = (String)resourceTypesComboBox.getSelectedItem();
     resourceInterfaces = this.getSelectedInterfaces();
 
-    Thread thread = new Thread(new CreateResourceRunner());
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                               new CreateResourceRunner());
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
   }//doCreateResource();

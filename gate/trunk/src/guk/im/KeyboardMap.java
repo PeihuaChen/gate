@@ -44,7 +44,8 @@ public class KeyboardMap implements Runnable{
     this.handler = handler;
     this.state = state;
     jobs = Collections.synchronizedList(new ArrayList());
-    myThread = new Thread(this);
+    myThread = new Thread(Thread.currentThread().getThreadGroup(),
+                          this);
     myThread.start();
   }
 

@@ -72,7 +72,8 @@ public class WaitDialog extends JWindow implements Runnable {
     setLocation(loc);
 */
     stop = false;
-    Thread thread = new Thread(this);
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                               this);
     thread.setPriority(Thread.MAX_PRIORITY);
     thread.start();
     show();
@@ -96,7 +97,8 @@ public class WaitDialog extends JWindow implements Runnable {
                 loc.y + (frame.getSize().height - getSize().height) /2);
 */
     stop = false;
-    Thread thread = new Thread(this);
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                               this);
     thread.setPriority(Thread.MAX_PRIORITY);
     thread.start();
     show();
