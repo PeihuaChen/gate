@@ -46,6 +46,7 @@ public class SessionImpl implements Session {
     this.user = usr;
     this.group = grp;
     this.timeout = timeout;
+    this.isPrivileged = isPrivileged;
   }
 
   /* Session interface */
