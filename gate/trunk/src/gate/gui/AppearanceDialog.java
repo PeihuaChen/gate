@@ -146,13 +146,39 @@ public class AppearanceDialog extends JDialog {
   }// show(Component[] targets)
 
 
-  protected void setUIDefaults(Object[] keys, Object value) {
+  protected static void setUIDefaults(Object[] keys, Object value) {
     for(int i = 0; i < keys.length; i++){
       UIManager.put(keys[i], value);
     }
   }// setUIDefaults(Object[] keys, Object value)
 
+  /**
+   * Updates the Swing defaults table with the provided font to be used for the
+   * text components
+   */
+  public static void setTextComponentsFont(Font textComponentsFont){
+    setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
+  }
 
+  /**
+   * Updates the Swing defaults table with the provided font to be used for the
+   * menu components
+   */
+  public static void setMenuComponentsFont(Font menuComponentsFont){
+    setUIDefaults(menuKeys, new FontUIResource(menuComponentsFont));
+  }
+
+  /**
+   * Updates the Swing defaults table with the provided font to be used for
+   * various compoents that neither text or menu components
+   */
+  public static void setComponentsFont(Font componentsFont){
+    setUIDefaults(componentsKeys, new FontUIResource(componentsFont));
+  }
+
+  /**
+   * Test code
+   */
   public static void main(String[] args) {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -247,9 +273,9 @@ public class AppearanceDialog extends JDialog {
     }
 
     public void actionPerformed(ActionEvent evt) {
-      setUIDefaults(menuKeys, new FontUIResource(menusFont));
-      setUIDefaults(componentsKeys, new FontUIResource(componentsFont));
-      setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
+      setMenuComponentsFont(menusFont);
+      setComponentsFont(componentsFont);
+      setTextComponentsFont(textComponentsFont);
       SwingUtilities.updateComponentTreeUI(AppearanceDialog.this);
       for(int i = 0; i< targets.length; i++){
         if(targets[i] instanceof Window) {

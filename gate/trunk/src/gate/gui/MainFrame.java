@@ -206,7 +206,6 @@ public class MainFrame extends JFrame
     resourcesTreeRoot.add(datastoresRoot);
     resourcesTreeModel = new DefaultTreeModel(resourcesTreeRoot, true);
 
-//    newApplicationAction = new NewApplicationAction();
     newDSAction = new NewDSAction();
     openDSAction = new OpenDSAction();
     helpAboutAction = new HelpAboutAction();
@@ -278,6 +277,7 @@ public class MainFrame extends JFrame
     leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                resourcesTreeScroll, lowerPane);
 
+    leftSplit.setResizeWeight((double)0.7);
 
     // Create a new logArea and redirect the Out and Err output to it.
     logArea = new LogArea();
@@ -742,10 +742,19 @@ public class MainFrame extends JFrame
       }
     });
 
+    addComponentListener(new ComponentAdapter() {
+      public void componentHidden(ComponentEvent e) {
 
-    this.addComponentListener(new ComponentAdapter() {
+      }
+
+      public void componentMoved(ComponentEvent e) {
+      }
+
+      public void componentResized(ComponentEvent e) {
+      }
+
       public void componentShown(ComponentEvent e) {
-        leftSplit.setDividerLocation(0.7);
+        leftSplit.setDividerLocation((double)0.7);
       }
     });
 
@@ -1933,9 +1942,9 @@ public class MainFrame extends JFrame
 
           }else{
             JOptionPane.showMessageDialog(
-                            MainFrame.this,
-                            "Support for this type of datastores is not implemenented!\n",
-                            "Gate", JOptionPane.ERROR_MESSAGE);
+                MainFrame.this,
+                "Support for this type of datastores is not implemenented!\n",
+                "Gate", JOptionPane.ERROR_MESSAGE);
           }
         }
       } else {

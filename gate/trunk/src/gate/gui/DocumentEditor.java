@@ -294,6 +294,7 @@ public class DocumentEditor extends AbstractVisualResource
     }
   }//public static void main(String[] args)
 
+
   /**
    * Initialises all the listeners that this component has to register with
    * other classes.

@@ -27,6 +27,7 @@ import javax.swing.event.*;
 import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.Dimension;
+import java.awt.Component;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -80,7 +81,9 @@ public class SerialControllerEditor extends AbstractVisualResource
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 
-    Box topBox = Box.createHorizontalBox();
+    JPanel topBox = new JPanel();
+    topBox.setLayout(new BoxLayout(topBox, BoxLayout.X_AXIS));
+    topBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     loadedPRsTableModel = new LoadedPRsTableModel();
     loadedPRsTable = new XJTable();
@@ -170,16 +173,24 @@ public class SerialControllerEditor extends AbstractVisualResource
         if(corpusCombo.getModel().getSize() > 1) corpusCombo.setSelectedIndex(1);
         else corpusCombo.setSelectedIndex(0);
       }
-      Box horBox = Box.createHorizontalBox();
+      JPanel horBox = new JPanel();
+      horBox.setLayout(new BoxLayout(horBox, BoxLayout.X_AXIS));
+      horBox.setAlignmentX(Component.LEFT_ALIGNMENT);
       horBox.add(new JLabel("Corpus:"));
       horBox.add(Box.createHorizontalStrut(5));
       horBox.add(corpusCombo);
       horBox.add(Box.createHorizontalGlue());
       add(horBox);
+      JLabel warningLbl = new JLabel(
+        "<HTML>The <b>corpus</b> and <b>document</b> parameters are not " +
+        "available as they are automatically set by the controller!</HTML>");
+      warningLbl.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+      add(warningLbl);
     }
 
     parametersPanel = new JPanel();
     parametersPanel.setLayout(new BoxLayout(parametersPanel, BoxLayout.Y_AXIS));
+    parametersPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
     parametersBorder = BorderFactory.createTitledBorder(
                                       BorderFactory.createEtchedBorder(),
                                       "No selected processing resource");
@@ -193,8 +204,14 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     add(Box.createVerticalStrut(5));
     add(Box.createVerticalGlue());
-    add(new JButton(runAction));
-    add(Box.createVerticalGlue());
+    JPanel horBox = new JPanel();
+    horBox.setLayout(new BoxLayout(horBox, BoxLayout.X_AXIS));
+    horBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    horBox.add(Box.createHorizontalGlue());
+    horBox.add(new JButton(runAction));
+    horBox.add(Box.createHorizontalStrut(10));
+    add(horBox);
+    add(Box.createVerticalStrut(10));
 
     addMenu = new JMenu("Add");
     removeMenu = new JMenu("Remove");

@@ -81,8 +81,14 @@ public class ResourceRenderer extends JLabel
         setBackground(((JList)ownerComponent).getSelectionBackground());
       }
     }else{
-      setForeground(ownerComponent.getForeground());
-      setBackground(ownerComponent.getBackground());
+      if(ownerComponent instanceof JTable){
+        JTable table = (JTable)ownerComponent;
+        setForeground(ownerComponent.getForeground());
+        setBackground(ownerComponent.getBackground());
+      }else{
+        setForeground(ownerComponent.getForeground());
+        setBackground(ownerComponent.getBackground());
+      }
     }
 
     setFont(ownerComponent.getFont());
