@@ -198,6 +198,13 @@ public class OracleDataStore extends JDBCDataStore {
    * image.
    */
   public void sync(LanguageResource lr) throws PersistenceException {
+
+    // check that this LR is one of ours (i.e. has been adopted)
+    if( null == lr.getDataStore() || false == lr.getDataStore().equals(this))
+      throw new PersistenceException(
+        "This LR is not stored in this DataStore"
+      );
+
     throw new MethodNotImplementedException();
   }
 
@@ -526,9 +533,14 @@ public class OracleDataStore extends JDBCDataStore {
 
     //add all anotations
     //1. default
-    AnnotationSet aset = new DatabaseAnnotationSetImpl(doc.getAnnotations());
-    //dbDoc.
+    dbDoc.getAnnotations().addAll(doc.getAnnotations());
     //2. named
+    Iterator itNamed = doc.getNamedAnnotationSets().values().iterator();
+    while (itNamed.hasNext()){
+      AnnotationSet currSet = (AnnotationSet)itNamed.next();
+      //add them all to the DBAnnotationSet
+      dbDoc.getAnnotations(currSet.getName()).addAll(currSet);
+    }
 
     return dbDoc;
   }
@@ -1445,6 +1457,58 @@ public class OracleDataStore extends JDBCDataStore {
     return fm;
   }
 
+
+  /** --- */
+  public String readDatabaseID() throws PersistenceException{
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String  result = null;
+
+    //1. read from DB
+    try {
+      String sql = " select par_value_string " +
+                   " from  "+Gate.DB_OWNER+".t_parameter " +
+                   " where  par_value_key = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setString(1,DBHelper.DB_PARAMETER_GUID);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("Can't read database parameter ["+
+                                          DBHelper.DB_PARAMETER_GUID+"]");
+      }
+      result = rs.getString(1);
+    }
+    catch(SQLException sqle) {
+        throw new PersistenceException("Can't read database parameter ["+
+                                          DBHelper.DB_PARAMETER_GUID+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+      return result;
+  }
+
+
+  public boolean equals(Object obj) {
+
+    if (false == obj instanceof OracleDataStore) {
+      return false;
+    }
+
+    OracleDataStore db2 = (OracleDataStore)obj;
+
+    if (false == this.getDatabaseID().equals(db2.getDatabaseID())) {
+      return false;
+    }
+
+    return true;
+  }
 
 
 }
