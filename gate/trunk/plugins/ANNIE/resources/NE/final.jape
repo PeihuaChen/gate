@@ -434,13 +434,13 @@ Priority: 100
 (
  ({Street}
   (SPACE)?
-  {Token.string == ","})? (SPACE)*
+  {Token.string == ","})? (SPACE)? (SPACE)?
  ({TempLocation} 
  (SPACE)? 
- ({Token.string == ","})? (SPACE)*
+ ({Token.string == ","})? (SPACE)? (SPACE)?
  )+
  ({Postcode})
- ({Token.string == ","})? (SPACE)*
+ ({Token.string == ","})? (SPACE)? (SPACE)?
  ({TempLocation})*
 )
 :address
@@ -631,7 +631,9 @@ Priority: 5
 ( 
  {Token.category == NNP}
  ((SPACE|{Token.string == "-"})
-  {Token.category == NNP})*
+  {Token.category == NNP})?
+ (SPACE {Token.category == NNP})?
+ (SPACE {Token.category == NNP})?
 ):unknown
  (SPACE)
 (
