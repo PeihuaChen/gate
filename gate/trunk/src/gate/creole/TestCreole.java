@@ -494,9 +494,7 @@ public class TestCreole extends TestCase
   public void testFactory() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
-    params.put(
-      "sourceUrlName",
-      Gate.getUrl("tests/doc0.html").toExternalForm()
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html")
     );
     Resource res =
       Factory.createResource("gate.corpora.DocumentImpl", params);

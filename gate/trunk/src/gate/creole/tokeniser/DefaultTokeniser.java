@@ -118,7 +118,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     Reader rulesReader;
     try{
       if(rulesURL != null){
-        rulesReader = new InputStreamReader((new URL(rulesURL)).openStream());
+        rulesReader = new InputStreamReader(rulesURL.openStream());
       }else if(rulesResourceName != null){
         rulesReader = new InputStreamReader(
                     Files.getGateResourceAsStream(rulesResourceName));
@@ -730,14 +730,14 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    *
    * @param newRulesURL
    */
-  public void setRulesURL(String newRulesURL) {
+  public void setRulesURL(java.net.URL newRulesURL) {
     rulesURL = newRulesURL;
   }
   /**
    * Gets the value of the {@link #rulesURL} property hich holds an URL to the file containing the rules for this tokeniser.
    *
    */
-  public String getRulesURL() {
+  public java.net.URL getRulesURL() {
     return rulesURL;
   }
   /**    */
@@ -835,7 +835,6 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    * This property holds an URL to the file containing the rules for this tokeniser
    *
    */
-  protected String rulesURL = null;
 
   /**    */
   static protected String defaultResourceName =
@@ -845,6 +844,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    */
   protected gate.Document document;
   private String rulesResourceName;
+  private java.net.URL rulesURL;
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}

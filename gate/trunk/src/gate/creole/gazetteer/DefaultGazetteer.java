@@ -68,16 +68,12 @@ public class DefaultGazetteer extends AbstractProcessingResource
   public Resource init()throws ResourceInstantiationException{
     try{
       initialState = new FSMState(this);
+      if(listsURL == null){
+        throw new ResourceInstantiationException (
+              "No URL provided for gazetteer creation!");
+      }
 
-      if(listsURLStr == null){
-        String defaultListsURLStr =
-          this.getClass().getResource(
-                          Files.getResourcePath() +
-                          "/creole/gazeteer/default/lists.def"
-          ).toExternalForm();
-        mainURL = new URL(defaultListsURLStr);
-      }else mainURL = new URL(listsURLStr);
-      Reader reader = new InputStreamReader(mainURL.openStream(), encoding);
+      Reader reader = new InputStreamReader(listsURL.openStream(), encoding);
 
       BufferedReader bReader = new BufferedReader(reader);
       String line = bReader.readLine();
@@ -148,7 +144,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
     BufferedReader listReader;
 
     listReader = new BufferedReader(new InputStreamReader(
-                            (new URL(mainURL, listName)).openStream(), encoding));
+                            (new URL(listsURL, listName)).openStream(), encoding));
 
     Lookup lookup = new Lookup(majorType, minorType, languages);
     String line = listReader.readLine();
@@ -371,15 +367,9 @@ public class DefaultGazetteer extends AbstractProcessingResource
    *
    * @param newListsURLStr
    */
-  public void setListsURLStr(String newListsURLStr) {
-    listsURLStr = newListsURLStr;
-  }
   /**
    * Gets the URL used for reading the lists of this Gazetteer
    */
-  public String getListsURLStr() {
-    return listsURLStr;
-  }
   /**
    * Sets the document to be processed by the next run
    */
@@ -423,18 +413,6 @@ public class DefaultGazetteer extends AbstractProcessingResource
 
   protected FeatureMap features  = null;
 
-  /**
-   * The value of this property is the URL that will be used for reading the lists dtaht define this Gazetteer
-   *
-   */
-  protected String listsURLStr = null;
-
-  /**
-   * The URL used while parsing the lists. It points to the main file that
-   * refers to the files containing the actual lists.
-   */
-  protected URL mainURL = null;
-
   /** Used to store the document currently being parsed
    */
   protected Document document;
@@ -449,6 +427,13 @@ public class DefaultGazetteer extends AbstractProcessingResource
   /**    */
   private transient Vector statusListeners;
   private String encoding = "UTF-8";
+
+  /**
+   * The value of this property is the URL that will be used for reading the
+   * lists dtaht define this Gazetteer
+   */
+  private java.net.URL listsURL;
+
   /**    */
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
@@ -500,6 +485,12 @@ public class DefaultGazetteer extends AbstractProcessingResource
   }
   public String getEncoding() {
     return encoding;
+  }
+  public void setListsURL(java.net.URL newListsURL) {
+    listsURL = newListsURL;
+  }
+  public java.net.URL getListsURL() {
+    return listsURL;
   }
 
 } // DefaultGazetteer

@@ -76,7 +76,7 @@ public class RtfDocumentFormat extends TextualDocumentFormat
       throw new DocumentFormatException(e);
     } catch (IOException e){
       throw new DocumentFormatException("I/O exception for " +
-                                                doc.getSourceUrlName(),e);
+                                        doc.getSourceUrl().toExternalForm(),e);
     }
   } // unpackMarkup(doc)
 

@@ -141,7 +141,9 @@ extends AbstractLanguageResource implements Document, StatusReporter
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
+
     // set up the source URL and create the content
+/*
     if(sourceUrl == null && sourceUrlName != null)
       try {
         sourceUrl = new URL(sourceUrlName);
@@ -151,11 +153,30 @@ extends AbstractLanguageResource implements Document, StatusReporter
       } catch(IOException e) {
         throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
+*/
+    if(sourceUrl == null){
+      if(stringContent == null)
+      {
+        throw new ResourceInstantiationException(
+          "Either the sourceURL (was null) or the stringContent (was null)" +
+          "has to be set in order to construct a Gate document!");
+      }
+      content = new DocumentContentImpl(stringContent);
+    }else{
+      try {
+        content = new DocumentContentImpl(
+          sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset
+        );
+      } catch(IOException e) {
+        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
+      }
+    }
 
+/*
     // record the source URL name in case we only got the URL itself
     if(sourceUrlName == null && sourceUrl != null)
       sourceUrlName = sourceUrl.toExternalForm();
-
+*/
     // set up a DocumentFormat if markup unpacking required
     if(isMarkupAware()) {
       DocumentFormat docFormat =
@@ -171,7 +192,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
         }
       } catch(DocumentFormatException e) {
         throw new ResourceInstantiationException(
-          "Couldn't unpack markup in document " + sourceUrlName + e
+          "Couldn't unpack markup in document " + sourceUrl.toExternalForm() + e
         );
       }
     } // if markup aware
@@ -190,14 +211,10 @@ extends AbstractLanguageResource implements Document, StatusReporter
   /** Get method for the document's URL name (i.e. the string that
     * describes the URL).
     */
-  public String getSourceUrlName() { return sourceUrlName; }
 
   /** Set method for the document's URL name (i.e. the string that
     * describes the URL).
-    */
-  public void setSourceUrlName(String sourceUrlName) {
-    this.sourceUrlName = sourceUrlName;
-  } // setSourceUrlName
+    */// setSourceUrlName
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document.
@@ -487,7 +504,6 @@ extends AbstractLanguageResource implements Document, StatusReporter
   protected URL sourceUrl;
 
   /** The document's URL name. */
-  protected String sourceUrlName;
 
   /** The content of the document */
   protected DocumentContent content;
@@ -518,6 +534,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
   private transient Vector statusListeners;
   private transient Vector documentListeners;
   private transient Vector gateListeners;
+  private String stringContent;
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
@@ -551,7 +568,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
     if(nextNodeId != doc.nextNodeId) return false;
     if(! check(sourceUrl, doc.sourceUrl)) return false;
     if(! check(sourceUrlStartOffset, doc.sourceUrlStartOffset)) return false;
-    if(! check(sourceUrlName, doc.sourceUrlName)) return false;
+//    if(! check(sourceUrlName, doc.sourceUrlName)) return false;
     if(! check(sourceUrlEndOffset, doc.sourceUrlEndOffset)) return false;
 
     return true;
@@ -576,8 +593,8 @@ extends AbstractLanguageResource implements Document, StatusReporter
     memberCode =
       (sourceUrlStartOffset == null) ? 0 : sourceUrlStartOffset.hashCode();
     code += memberCode;
-    memberCode = (sourceUrlName == null) ? 0 : sourceUrlName.hashCode();
-    code += memberCode;
+//    memberCode = (sourceUrlName == null) ? 0 : sourceUrlName.hashCode();
+//    code += memberCode;
     memberCode =
       (sourceUrlEndOffset == null) ? 0 : sourceUrlEndOffset.hashCode();
     code += memberCode;
@@ -599,7 +616,7 @@ Out.prln("hashcode: " + code);
     s.append("  nextNodeId:" + nextNodeId + n);
     s.append("  sourceUrl:" + sourceUrl + n);
     s.append("  sourceUrlStartOffset:" + sourceUrlStartOffset + n);
-    s.append("  sourceUrlName:" + sourceUrlName + n);
+//    s.append("  sourceUrlName:" + sourceUrlName + n);
     s.append("  sourceUrlEndOffset:" + sourceUrlEndOffset + n);
     s.append(n);
 
@@ -660,6 +677,9 @@ Out.prln("hashcode: " + code);
         ((GateListener) listeners.elementAt(i)).processGateEvent(e);
       }
     }
+  }
+  public void setStringContent(String newStringContent) {
+    stringContent = newStringContent;
   }
 
 } // class DocumentImpl

@@ -82,6 +82,7 @@ public class TestControllers extends TestCase
     //create a default gazetteer
     params = Factory.newFeatureMap();
     params.put("document", doc);
+    params.put("listsURL", new URL("gate:/creole/gazeteer/default/lists.def"));
     ProcessingResource gaz = (ProcessingResource) Factory.createResource(
       "gate.creole.gazetteer.DefaultGazetteer", params
     );
