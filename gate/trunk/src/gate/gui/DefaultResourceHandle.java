@@ -137,7 +137,6 @@ public class DefaultResourceHandle implements ResourceHandle {
       popup.add(new SaveToAction());
       if(resource instanceof gate.corpora.DocumentImpl) {
         popup.add(new SaveAsXmlAction());
-//        popup.add(new TestDocumentAction());
         try{
           FeatureMap params = Factory.newFeatureMap();
           params.put("document", resource);
@@ -342,47 +341,6 @@ public class DefaultResourceHandle implements ResourceHandle {
       }
     }
   }//class SaveToAction extends AbstractAction
-
-// SELF test for documents
-  /** This class must be removed after a while. It is here to test multiple node
-   *  ID generation
-   */
-/*  class TestDocumentAction extends AbstractAction {
-    public TestDocumentAction(){
-      super("Test node IDs generation");
-    }
-    public void actionPerformed(ActionEvent e){
-      Map offests2NodeId = null;
-      AnnotationSet annotSet = ((gate.Document)resource).getAnnotations();
-      offests2NodeId = new HashMap();
-      Iterator iter = annotSet.iterator();
-      while(iter.hasNext()){
-        Annotation annot = (Annotation) iter.next();
-        if (offests2NodeId.containsKey(annot.getStartNode().getOffset())){
-           if (!annot.getStartNode().getId().equals(
-                (Integer) offests2NodeId.get(annot.getStartNode().getOffset()))){
-             Err.prln("Found two different node IDs for the same offset("+
-             annot.getStartNode().getOffset()+ ").\n" +
-             "START NODE is buggy for annotation(" + annot+ ")");
-             Out.prln();
-           }// End if
-        }// End if
-        if (offests2NodeId.containsKey(annot.getEndNode().getOffset())){
-           if (!annot.getEndNode().getId().equals(
-                (Integer) offests2NodeId.get(annot.getEndNode().getOffset()))){
-             Err.prln("Found two different node IDs for the same offset("+
-             annot.getEndNode().getOffset()+ ").\n" +
-             "END NODE is buggy for annotation(" + annot+ ")");
-             Out.prln();
-           }// End if
-        }// End if
-        offests2NodeId.put(annot.getStartNode().getOffset(),annot.getStartNode().getId());
-        offests2NodeId.put(annot.getEndNode().getOffset(),annot.getEndNode().getId());
-    }// End while
-  }//public void actionPerformed(ActionEvent e)
-}//class TestDocumentAction
-*/
-
 
   class ReloadAction extends AbstractAction {
     ReloadAction() {
