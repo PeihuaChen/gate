@@ -210,15 +210,16 @@ public class SerialCorpusImpl extends
    * otherwise an InvalidArgumentException will be thrown.
    * An implementation for this method is provided as a static method at
    * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * @param encoding the encoding to be used for reading the documents
    * @param recurseDirectories should the directory be parsed recursively?. If
    * <tt>true</tt> all the files from the provided directory and all its
    * children directories (on as many levels as necessary) will be picked if
    * accepted by the filter otherwise the children directories will be ignored.
    */
-  public void populate(URL directory, FileFilter filter,
+  public void populate(URL directory, FileFilter filter, String encoding,
                        boolean recurseDirectories)
               throws IOException, ResourceInstantiationException{
-    CorpusImpl.populate(this, directory, filter, recurseDirectories);
+    CorpusImpl.populate(this, directory, filter, encoding, recurseDirectories);
   }
 
 
