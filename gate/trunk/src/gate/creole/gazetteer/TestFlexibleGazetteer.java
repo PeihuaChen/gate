@@ -57,6 +57,13 @@ public class TestFlexibleGazetteer extends TestCase {
         (gate.creole.tokeniser.DefaultTokeniser) Factory.createResource(
         "gate.creole.tokeniser.DefaultTokeniser");
 
+    gate.creole.splitter.SentenceSplitter splitter =
+        (gate.creole.splitter.SentenceSplitter) Factory.createResource(
+        "gate.creole.splitter.SentenceSplitter");
+
+    gate.creole.POSTagger tagger = (gate.creole.POSTagger) Factory.createResource(
+        "gate.creole.POSTagger");
+
     // Get a morphological analyser, again just use all the default settings.
     gate.creole.morph.Morph morphologicalAnalyser=
         (gate.creole.morph.Morph) Factory.createResource(
@@ -85,6 +92,10 @@ public class TestFlexibleGazetteer extends TestCase {
     // tokeniser and the analyser to doc, and run each of them in turn.
     tokeniser.setDocument(doc);
     tokeniser.execute();
+    splitter.setDocument(doc);
+    splitter.execute();
+    tagger.setDocument(doc);
+    tagger.execute();
     morphologicalAnalyser.setDocument(doc);
     morphologicalAnalyser.execute();
     flexGaz.setDocument(doc);
