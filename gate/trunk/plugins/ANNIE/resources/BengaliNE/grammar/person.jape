@@ -6,6 +6,7 @@ Rule:	City
 Priority: 50
 (
  {Lookup.majorType == "name", Lookup.minorType == "forename"} 
+ ({SpaceToken})+
  {Lookup.majorType == "name", Lookup.minorType == "surname"}
 )
 :person -->

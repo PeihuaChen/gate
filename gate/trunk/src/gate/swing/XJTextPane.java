@@ -43,6 +43,8 @@ public class XJTextPane extends JTextPane {
       public void propertyChange(PropertyChangeEvent e) {
         if(e.getPropertyName().equals("UI")){
           updateStyle();
+        }else if(e.getPropertyName().equals("document")){
+          updateStyle();
         }
       }
     });
