@@ -1201,7 +1201,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                                               boolean hasFocus){
       removeAll();
       //the text pane needs to be sized for modelToView() to work
-//      textComponent.setSize(Integer.MAX_VALUE, Integer.MAX_VALUE);
+      textComponent.setSize(10, 10);
       if(value instanceof DefaultMutableTreeNode){
         TypeData nData = (TypeData)
                               ((DefaultMutableTreeNode)value).getUserObject();
