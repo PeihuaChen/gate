@@ -55,7 +55,7 @@ public class TestSgml extends TestCase
     */
 
     doc = gate.Factory.newDocument(Gate.getUrl("tests/sgml/Hds.sgm"));
-
+//    doc = gate.Factory.newDocument(new URL("file:///d:/tmp/Learner/wui2fn08.cls.sgm"));
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     //*

@@ -176,6 +176,8 @@ public class TestXml extends TestCase
     anElement2StringMap.put("s","\n");
 
     doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
+ //doc = gate.Factory.newDocument(new URL("file:///d:/tmp/gateResource.xml"));
+
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );

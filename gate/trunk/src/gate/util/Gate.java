@@ -32,6 +32,8 @@ public class Gate
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  private static FeatureMap params =  null;
+
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
     // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"
@@ -67,6 +69,9 @@ public class Gate
 
     // init the data store register
     initDataStoreRegister();
+
+    // bring into the system the Default Annotations
+    initDefaultAnnotationSchemas();
   } // init()
 
   /** Initialise the CREOLE register. */
@@ -94,6 +99,83 @@ public class Gate
   public static void initDataStoreRegister() {
     dataStoreRegister = new DataStoreRegister();
   } // initDataStoreRegister()
+
+    /** Brings into the system, the default AnnotationSchemas. */
+  public static void initDefaultAnnotationSchemas(){
+    params = Factory.newFeatureMap();
+    // add Percent Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                            "/gate/resources/creole/schema/PercentSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    // add Identifier Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                        "/gate/resources/creole/schema/IdentifierSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    // add Person Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                             "/gate/resources/creole/schema/PersonSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    // add Organization Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                       "/gate/resources/creole/schema/OrganizationSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    // add Location Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                           "/gate/resources/creole/schema/LocationSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    try{
+      // add Date Schema
+      params.put("xmlFileUrl",Gate.class.getResource(
+                             "/gate/resources/creole/schema/DateSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    // add Money Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                             "/gate/resources/creole/schema/MoneySchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+
+    // add Address Schema
+    try{
+      params.put("xmlFileUrl",Gate.class.getResource(
+                           "/gate/resources/creole/schema/AddressSchema.xml"));
+      Factory.createResource("gate.creole.AnnotationSchema", params);
+    } catch (ResourceInstantiationException e){
+      e.printStackTrace(Err.getPrintWriter());
+    }// End try/catch
+ }//initDefaultAnnotationSchemas
+
 
   /** Reads config data (<TT>gate.xml</TT> files). */
   public static void initConfigData() throws GateException {
