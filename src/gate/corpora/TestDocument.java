@@ -49,7 +49,23 @@ public class TestDocument extends TestCase
   } // setUp
 
   /** Get the name of the test server */
-  public static String getTestServerName() { return testServer; }
+  public static String getTestServerName() {
+    if(testServer != null) return testServer;
+    else{
+      try{
+        Gate.init();
+      } catch (GateException e){
+        e.printStackTrace(System.err);
+      }
+      if (Gate.isGateHomeReachable())
+        testServer = "http://derwent.dcs.shef.ac.uk/gate.ac.uk/";
+      else if (Gate.isGateAcUkReachable())
+        testServer = "http://www.gate.ac.uk/";
+      else throw new
+        LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+      return testServer;
+    }
+  }
 
   /** Test ordering */
   public void testCompareTo() throws Exception{

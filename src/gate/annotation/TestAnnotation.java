@@ -34,7 +34,9 @@ public class TestAnnotation extends TestCase
 
   /** Fixture set up */
   public void setUp() throws IOException, InvalidOffsetException {
-    doc1 = new DocumentImpl(TestDocument.getTestServerName() + "doc0.html");
+    String server = TestDocument.getTestServerName();
+    assertNotNull(server);
+    doc1 = new DocumentImpl(server + "doc0.html");
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
@@ -57,7 +59,7 @@ public class TestAnnotation extends TestCase
     basicAS.add(new Long(10), new Long(20), "T1", fm);    // 4
     basicAS.add(new Long(15), new Long(40), "T1", fm);    // 5
     basicAS.add(new Long(15), new Long(40), "T3", fm);    // 6
-    basicAS.add(new Long(15), new Long(40), "T1", fm);    // 7 
+    basicAS.add(new Long(15), new Long(40), "T1", fm);    // 7
 
     fm = new SimpleFeatureMapImpl();
     fm.put("pos", "JJ");
@@ -71,6 +73,7 @@ public class TestAnnotation extends TestCase
 
     // System.out.println(basicAS);
   } // setUp
+
 
   /** Test indexing by offset */
   public void testOffsetIndex() throws InvalidOffsetException {
@@ -120,7 +123,7 @@ public class TestAnnotation extends TestCase
       threwUp = true;
     }
     if(! threwUp) fail("Should have thrown InvalidOffsetException");
-    threwUp = false;   
+    threwUp = false;
     try {
       as.add(new Long(1), new Long(-1), "T", emptyFeatureMap);
     } catch (InvalidOffsetException e) {
@@ -213,7 +216,7 @@ public class TestAnnotation extends TestCase
       assertEquals(20, endNode.getOffset().longValue());    // end offset
     }
 
-  } // testTypeIndex() 
+  } // testTypeIndex()
 
   /** Test the annotations set add method that uses existing nodes */
   public void testAddWithNodes() throws IOException, InvalidOffsetException {
@@ -280,7 +283,7 @@ public class TestAnnotation extends TestCase
     AnnotationSet asBuf;
     Integer newId;
     FeatureMap fm = new SimpleFeatureMapImpl();
-    Annotation a;         
+    Annotation a;
     Node startNode;
     Node endNode;
 
@@ -297,9 +300,9 @@ public class TestAnnotation extends TestCase
     asBuf = basicAS.get("T1", constraints, new Long(12));
     assertEquals(2, asBuf.size());
     asBuf = basicAS.get("T1", constraints, new Long(10));
-    assertEquals(1, asBuf.size()); 
+    assertEquals(1, asBuf.size());
     asBuf = basicAS.get("T1", constraints, new Long(11));
-    assertEquals(2, asBuf.size()); 
+    assertEquals(2, asBuf.size());
     asBuf = basicAS.get("T1", constraints, new Long(9));
     assertEquals(1, asBuf.size());
 
@@ -350,7 +353,7 @@ public class TestAnnotation extends TestCase
 
     basicAS.removeAll(basicAS);
     assertEquals(null, basicAS.get());
-    assertEquals(null, basicAS.get("T1")); 
+    assertEquals(null, basicAS.get("T1"));
     assertEquals(null, basicAS.get(new Integer(0)));
   } // testRemove()
 
@@ -416,7 +419,7 @@ public class TestAnnotation extends TestCase
     Annotation[] annotArray =
       (Annotation[]) basicAS.toArray(new Annotation[0]);
     Object[] annotObjectArray = basicAS.toArray();
-    assertEquals(11, annotArray.length); 
+    assertEquals(11, annotArray.length);
     assertEquals(11, annotObjectArray.length);
 
     SortedSet sortedAnnots = new TreeSet(basicAS);
@@ -437,7 +440,7 @@ public class TestAnnotation extends TestCase
     assert(! basicAS.contains(a1));
     assert(! basicAS.containsAll(a1a2));
 
-    basicAS.addAll(a1a2); 
+    basicAS.addAll(a1a2);
     assert(basicAS.contains(a2));
     assert(basicAS.containsAll(a1a2));
 
@@ -516,4 +519,23 @@ public class TestAnnotation extends TestCase
     return new TestSuite(TestAnnotation.class);
   } // suite
 
+  /** Test get with offset and no annotation starting at given offset */
+  public void testGap() throws InvalidOffsetException {
+    AnnotationSet as = basicAS;
+    as.clear();
+    as.add(new Long(0), new Long(10), "foo", null);
+    as.add(new Long(15), new Long(20), "foo", null);
+    assert(!as.get(new Long(12)).isEmpty());
+  }
+
+  public static void main(String[] args){
+    try{
+      TestAnnotation testAnnot = new TestAnnotation("");
+      testAnnot.setUp();
+      testAnnot.testGap();
+      testAnnot.tearDown();
+    }catch(Throwable t){
+      t.printStackTrace();
+    }
+  }
 } // class TestAnnotation
