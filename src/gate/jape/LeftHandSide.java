@@ -148,7 +148,7 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
     return buf.toString();
   } // toString
 
-//needed by FSM
+  /** Get the constraint group */
   public ConstraintGroup getConstraintGroup(){
     return constraintGroup;
   }
@@ -157,6 +157,9 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
 
 
 // $Log$
+// Revision 1.3  2000/05/02 16:54:26  hamish
+// comment
+//
 // Revision 1.2  2000/04/14 18:02:46  valyt
 // Added some gate.fsm classes
 // added some accessor function in old jape classes
