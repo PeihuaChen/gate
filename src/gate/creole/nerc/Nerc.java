@@ -50,8 +50,11 @@ public class Nerc extends SerialController {
       //tokeniser
       fireStatusChanged("Creating a tokeniser");
       params = Factory.newFeatureMap();
-      if(tokeniserRulesURL != null) params.put("rulesURL",
+      if(tokeniserRulesURL != null) params.put("tokeniserRulesURL",
                                                tokeniserRulesURL);
+      if(tokeniserPostprocessor != null) params.put("transducerGrammarURL",
+                                               tokeniserPostprocessor);
+
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
       features = Factory.newFeatureMap();
@@ -362,6 +365,7 @@ public class Nerc extends SerialController {
   private java.net.URL splitterGrammarURL;
   private java.net.URL taggerRulesURL;
   private java.net.URL taggerLexiconURL;
+  private java.net.URL tokeniserPostprocessor;
 
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
@@ -439,6 +443,12 @@ public class Nerc extends SerialController {
   }
   public java.net.URL getTaggerLexiconURL() {
     return taggerLexiconURL;
+  }
+  public void setTokeniserPostprocessor(java.net.URL tokeniserPostprocessor) {
+    this.tokeniserPostprocessor = tokeniserPostprocessor;
+  }
+  public java.net.URL getTokeniserPostprocessor() {
+    return tokeniserPostprocessor;
   }
 
   /**
