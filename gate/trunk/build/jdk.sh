@@ -23,6 +23,7 @@ USAGE2="(special options are ones containing e.g. ':' and are used verbatim)"
 # what are we running on?
 case `uname -a` in
   CYGWIN*) SYS=cygwin ;;
+  Linux*) SYS=linux ;;
   *) SYS=unix ;;
 esac
 
@@ -58,6 +59,9 @@ then
 #  JAVABASE2='w:\\jdk\\jdk1.2'
 #  JAVABASE=//w/apps/jdk1.2.2
 #  JAVABASE1='w:\apps\jdk1.2.2'
+elif [ $SYS=linux ]
+then
+  JAVABASE=$JAVA_HOME
 elif [ $SYS=unix ] 
 then
   JAVABASE=/usr/local/pkg/jdk/jdk1.2fcs
