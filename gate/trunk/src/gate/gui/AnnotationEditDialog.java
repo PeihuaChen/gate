@@ -60,6 +60,8 @@ public class AnnotationEditDialog extends JDialog {
   JButton okButton = null;
   JButton cancelButton = null;
 
+  FeaturesEditor featuresEditor;
+
   /** Constructs an AnnotationEditDialog
     * @param aFram the parent frame of this dialog
     * @param anAnnotationSchema object from which this dialog configures
@@ -146,7 +148,8 @@ public class AnnotationEditDialog extends JDialog {
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     featuresTable.setModel(new FeaturesTableModel(new HashSet()));
     featuresTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-    featuresTable.setDefaultEditor(java.lang.Object.class, new FeaturesEditor());
+    featuresEditor = new FeaturesEditor();
+    featuresTable.setDefaultEditor(java.lang.Object.class, featuresEditor);
     featuresTableScroll = new JScrollPane(featuresTable);
 
     Box box = Box.createVerticalBox();
@@ -224,12 +227,14 @@ public class AnnotationEditDialog extends JDialog {
 
     okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        featuresEditor.stopCellEditing();
         doOk();
       }
     });
 
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        requestFocus();
         doCancel();
       }
     });
@@ -335,8 +340,9 @@ public class AnnotationEditDialog extends JDialog {
     super.show();
     if (buttonPressed == CANCEL)
       return null;
-    else
+    else{
       return responseMap;
+    }
   }// show()
 
   /** This method displays the AnnotationEditDialog in creating mode*/
@@ -519,7 +525,15 @@ public class AnnotationEditDialog extends JDialog {
      JComboBox cb = null;
      JTextField tf = null;
 
-    public FeaturesEditor(){}
+    public FeaturesEditor(){
+/*
+      addFocusListener(new FocusAdapter() {
+        public void focusLost(FocusEvent e) {
+          fireEditingStopped();
+        }
+      });
+      */
+    }
 
     public Component getTableCellEditorComponent(JTable table,
                                              Object value,
