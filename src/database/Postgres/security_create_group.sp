@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION security_create_group(varchar) RETURNS int4 AS '
    DECLARE
       p_grp_name alias for $1;
       cnt int4;
-      x_duplicate_group_name varchar = ''x_duplicate_group_name'';
+      x_duplicate_group_name constant varchar := ''x_duplicate_group_name'';
 
    BEGIN
       select count(grp_name)

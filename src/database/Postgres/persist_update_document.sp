@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION persist_update_document(int4,varchar,int4,int4,boolea
       p_is_mrk_aware alias for $5;
 
       cnt int4;
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
 

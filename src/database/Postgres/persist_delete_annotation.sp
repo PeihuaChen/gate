@@ -20,9 +20,9 @@ CREATE OR REPLACE FUNCTION persist_delete_annotation(int4,int4) RETURNS boolean 
       p_ann_local_id alias for $2;
 
       l_ann_global_id int4;
-      x_invalid_annotation varchar = ''x_invalid_annotation'';
+      x_invalid_annotation constant varchar := ''x_invalid_annotation'';
 
-      C_FEATURE_OWNER_ANNOTATION  int4 =  3;
+      C_FEATURE_OWNER_ANNOTATION  constant int4 :=  3;
 
    BEGIN
       /* 0. get the global ID */

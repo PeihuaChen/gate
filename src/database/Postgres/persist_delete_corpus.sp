@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION persist_delete_corpus(int4) RETURNS boolean AS '
       p_lr_id alias for $1;
       l_corp_id int4;
 
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* 0. get corp id */

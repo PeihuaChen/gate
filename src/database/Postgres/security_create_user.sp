@@ -18,7 +18,8 @@ CREATE OR REPLACE FUNCTION security_create_user(varchar,varchar) RETURNS int4 AS
       p_usr_name alias for $1;
       p_usr_pass alias for $2;
       cnt int4;
-      x_duplicate_user_name varchar = ''x_duplicate_user_name'';
+
+      x_duplicate_user_name constant varchar := ''x_duplicate_user_name'';
 
    BEGIN
       select count(usr_login)

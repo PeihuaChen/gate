@@ -20,8 +20,8 @@ CREATE OR REPLACE FUNCTION persist_unlock_lr(int4,int4) RETURNS boolean AS '
       p_usr_id    alias for $2;
       l_locking_user_id int4;
 
-      x_invalid_lr varchar = ''x_invalid_lr'';
-      C_ADMIN_USER_ID int2 = 0;
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
+      C_ADMIN_USER_ID constant int2 := 0;
 
    BEGIN
       /* 1. get the locking user if any */

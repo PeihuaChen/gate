@@ -21,10 +21,10 @@ CREATE OR REPLACE FUNCTION security_is_valid_security_data(int2,int4,int4) RETUR
       p_group_id alias for $2;
       p_user_id alias for $3;
 
-      C_PERM_WR_GW int2 = 1;
-      C_PERM_GR_GW int2 = 2;
-      C_PERM_GR_OW int2 = 3;
-      C_PERM_OR_OW int2 = 4;
+      C_PERM_WR_GW constant int2 := 1;
+      C_PERM_GR_GW constant int2 := 2;
+      C_PERM_GR_OW constant int2 := 3;
+      C_PERM_OR_OW constant int2 := 4;
 
    BEGIN
 

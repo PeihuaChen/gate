@@ -23,11 +23,11 @@ CREATE OR REPLACE FUNCTION persist_lock_lr(int4,int4,int4) RETURNS boolean AS '
       l_can_write_lr boolean;
       l_locking_user_id int4;
 
-      C_READ_ACCESS int2 = 0;
-      C_WRITE_ACCESS int2 = 1;
+      C_READ_ACCESS constant int2 := 0;
+      C_WRITE_ACCESS constant int2 := 1;
 
-      x_insufficient_privileges varchar = ''x_insufficient_privileges'';
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_insufficient_privileges constant varchar := ''x_insufficient_privileges'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* 1. check if the user has write access to the LR */

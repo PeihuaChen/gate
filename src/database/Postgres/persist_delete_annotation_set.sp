@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION persist_delete_annotation_set(int4,varchar) RETURNS b
       p_set_name     alias for $2;
       l_as_id number int4;
 
-      x_invalid_annotation_set varchar = ''x_invalid_annotation_set'';
+      x_invalid_annotation_set constant varchar := ''x_invalid_annotation_set'';
 
    BEGIN
       /* 1. get aset ID */

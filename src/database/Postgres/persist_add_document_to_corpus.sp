@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boo
       l_corp_id int4;
       l_doc_id  int4;
 
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* 1. get the doc_id */
