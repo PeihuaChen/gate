@@ -140,6 +140,30 @@ public class NameBearerHandle implements Handle,
   public Action getCloseAction(){
     return new CloseAction();
   }
+
+  /** Fill Protege save, save as and save in format actions */
+  private void fillProtegeActions(JPopupMenu popup) {
+    Action action;
+    
+    popup.addSeparator();
+
+    action = new edu.stanford.smi.protege.action.SaveProject();
+    action.putValue(action.NAME, "Save Protege"); 
+    action.putValue(action.SHORT_DESCRIPTION, "Save protege project"); 
+    // Add Save Protege action
+    popup.add(action);
+
+    action = new edu.stanford.smi.protege.action.SaveAsProject();
+    action.putValue(action.NAME, "Save Protege As..."); 
+    action.putValue(action.SHORT_DESCRIPTION, "Save protege project as"); 
+    // Add Save as... Protege action
+    popup.add(action);
+
+    action = new edu.stanford.smi.protege.action.ChangeProjectStorageFormat();
+    // Add Save in format... Protege action
+    popup.add(action);
+  } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
+
   protected void buildViews() {
     //build the popup
     popup = new JPopupMenu();
@@ -174,6 +198,9 @@ public class NameBearerHandle implements Handle,
         popup.addSeparator();
         popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
       }
+      if (target instanceof gate.creole.ProtegeProjectName){
+        fillProtegeActions(popup);
+      }// End if
     }else if(target instanceof Controller){
       //Applications
       popup.addSeparator();
