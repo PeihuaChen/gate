@@ -24,4 +24,7 @@ public interface EventAwareDocument extends EventAwareLanguageResource {
 
   public Collection getLoadedAnnotationSets();
 
+  public Collection getRemovedAnnotationSets();
+
+  public Collection getAddedAnnotationSets();
 }
