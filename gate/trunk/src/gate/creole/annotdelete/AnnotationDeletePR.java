@@ -70,8 +70,14 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
     /* Niraj */
     Map matchesMap = null;
-    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                                                  DOCUMENT_COREF_FEATURE_NAME);
+    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    if(!(matchesMapObject instanceof Map)) {
+      // no need to do anything
+      // and return
+      return;
+    }
+
+    matchesMap = (Map) matchesMapObject;
     /* End */
 
     //first clear the default set, which cannot be removed
