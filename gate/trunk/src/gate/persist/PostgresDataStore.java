@@ -25,6 +25,7 @@ import gate.security.*;
 import gate.security.SecurityException;
 import gate.util.*;
 import gate.corpora.*;
+import gate.*;
 
 public class PostgresDataStore extends JDBCDataStore {
 
@@ -142,11 +143,12 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
+/*  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
     throws PersistenceException,gate.security.SecurityException {
 
     throw new MethodNotImplementedException();
   }
+*/
 
   /**
    * Try to acquire exlusive lock on a resource from the persistent store.
@@ -224,6 +226,88 @@ public class PostgresDataStore extends JDBCDataStore {
     }
 
     return lockSucceeded;
+  }
+
+  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
+    throws PersistenceException,SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+    throws PersistenceException,SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  protected Document createDocument(Document doc,SecurityInfo secInfo)
+    throws PersistenceException,SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+
+
+  /**
+   *  helper for adopt()
+   *  never call directly
+   */
+  protected Long createLR(String lrType,
+                          String lrName,
+                          SecurityInfo si,
+                          Long lrParentID)
+    throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrName);
+
+    //1. check the session
+//    if (this.ac.isValidSession(s) == false) {
+//      throw new SecurityException("invalid session provided");
+//    }
+
+    //2. create a record in DB
+    PreparedStatement pstmt = null;
+    ResultSet rset = null;
+
+    try {
+      String sql = " select persist_create_lr(?,?,?,?,?,?) ";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,si.getUser().getID().longValue());
+      pstmt.setLong(2,si.getGroup().getID().longValue());
+      pstmt.setString(3,lrType);
+      pstmt.setString(4,lrName);
+      pstmt.setInt(5,si.getAccessMode());
+      if (null == lrParentID) {
+        pstmt.setNull(6,java.sql.Types.INTEGER);
+      }
+      else {
+        pstmt.setLong(6,lrParentID.longValue());
+      }
+
+      pstmt.execute();
+      rset = pstmt.getResultSet();
+      if (false == rset.next()) {
+        throw new PersistenceException("empty result set");
+      }
+
+      Long result =  new Long(rset.getLong("1"));
+
+      return result;
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR_TYPE:
+          throw new PersistenceException("can't create LR [step 3] in DB, invalid LR Type");
+        default:
+          throw new PersistenceException(
+                "can't create LR [step 3] in DB : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(rset);
+      DBHelper.cleanup(pstmt);
+    }
   }
 
 }
