@@ -816,7 +816,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
         return this.contentChanged;
       case EventAwareLanguageResource.RES_FEATURES:
         return this.featuresChanged;
-      case EventAwareLanguageResource.DOC_NAME:
+      case EventAwareLanguageResource.RES_NAME:
         return this.nameChanged;
       case EventAwareLanguageResource.DOC_MAIN:
         return this.documentChanged;
