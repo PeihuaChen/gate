@@ -144,8 +144,8 @@ class DefaultResourceHandle implements ResourceHandle{
     if(resource instanceof LanguageResource){
       popup.add(new SaveAction());
       popup.add(new SaveToAction());
-      popup.add(new SaveAsXmlAction());
       if(resource instanceof gate.corpora.DocumentImpl){
+        popup.add(new SaveAsXmlAction());
         try{
           FeatureMap params = Factory.newFeatureMap();
           params.put("document", resource);

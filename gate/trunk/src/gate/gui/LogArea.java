@@ -45,6 +45,9 @@ public class LogArea extends JTextPane {
   /** This fields defines the copy  behaviour*/
   protected CopyAction copyAction = null;
 
+  /** This fields defines the clear all  behaviour*/
+  protected ClearAllAction clearAllAction = null;
+
   /** Constructs a LogArea object and captures the output from Err and Out*/
   public LogArea(){
     thisLogArea = this;
@@ -67,10 +70,12 @@ public class LogArea extends JTextPane {
     popup = new JPopupMenu();
     selectAllAction = new SelectAllAction();
     copyAction = new CopyAction();
+    clearAllAction = new ClearAllAction();
 
     popup.add(selectAllAction);
     popup.add(copyAction);
-
+    popup.addSeparator();
+    popup.add(clearAllAction);
     initListeners();
   }// LogArea
 
@@ -108,6 +113,21 @@ public class LogArea extends JTextPane {
     }// actionPerformed();
   }// End class CopyAction
 
+  /** Inner class that defines the behaviour of clear all action.*/
+  protected class ClearAllAction extends AbstractAction{
+    public ClearAllAction(){
+      super("Clear all");
+    }// ClearAllAction
+
+    public void actionPerformed(ActionEvent e){
+      try{
+        thisLogArea.getDocument().remove(0,thisLogArea.getDocument().getLength());
+      } catch (BadLocationException e1){
+        e1.printStackTrace(Err.getPrintWriter());
+      }// End try
+    }// actionPerformed();
+  }// End class ClearAllAction
+
   /** Inner class that defines the behaviour of a OutputStream that writes to
    *  the LogArea
    */
@@ -143,7 +163,10 @@ public class LogArea extends JTextPane {
       // Insert it in the log Area
       try{
           synchronized(styledDoc){
-            styledDoc.insertString(0,String.valueOf(c),style);
+            Rectangle place = modelToView(styledDoc.getLength());
+            if(place != null)
+              scrollRectToVisible(place);
+            styledDoc.insertString(styledDoc.getLength(),String.valueOf(c),style);
           }// End synchronize
       } catch(BadLocationException e){
         e.printStackTrace(Err.getPrintWriter());
@@ -157,7 +180,10 @@ public class LogArea extends JTextPane {
       // Insert the string to the log area
       try{
           synchronized(styledDoc){
-            styledDoc.insertString( 0,
+            Rectangle place = modelToView(styledDoc.getLength());
+            if(place != null)
+              scrollRectToVisible(place);
+            styledDoc.insertString( styledDoc.getLength(),
                                     new String(data,offset,length),
                                     style);
           } // End synchronize
