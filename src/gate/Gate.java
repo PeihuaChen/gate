@@ -76,7 +76,7 @@ public class Gate implements GateConstants
   public static final String URI = "http://www.gate.ac.uk";
 
   /** Minimum version of JDK we support */
-  protected static final String MIN_JDK_VERSION = "1.4";
+  protected static final String MIN_JDK_VERSION = "1.4.1";
 
   /** Get the minimum supported version of the JDK */
   public static String getMinJdkVersion() { return MIN_JDK_VERSION; }
