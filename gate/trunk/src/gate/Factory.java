@@ -443,7 +443,7 @@ public abstract class Factory {
    * string) to listener (of the type declared by the key).
    * @param resource the resource that listeners will be registered to.
    */
-  protected static void setResourceListeners(Resource resource, Map listeners)
+  public static void setResourceListeners(Resource resource, Map listeners)
   throws
     IntrospectionException, InvocationTargetException,
     IllegalAccessException, GateException
@@ -484,7 +484,7 @@ public abstract class Factory {
    * (as a string) to listener (of the type declared by the key).
    * @param resource the resource that listeners will be removed from.
    */
-  protected static void removeResourceListeners(
+  public static void removeResourceListeners(
     Resource resource, Map listeners
   ) throws
     IntrospectionException, InvocationTargetException,
