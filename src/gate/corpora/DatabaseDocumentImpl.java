@@ -659,7 +659,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   /** Generate and return the next annotation ID */
   public Integer getNextAnnotationId() {
-
+/*
     //1.try to get ID fromt he pool
     if (DEBUG) {
       Out.println(">>> get annID called...");
@@ -672,7 +672,18 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     }
 
     return this.sequencePool[this.poolMarker++];
+*/
+    return super.getNextAnnotationId();
   } // getNextAnnotationId
+
+
+  public void setNextAnnotationId(int aNextAnnotationId){
+
+    //if u get this exception then u definitely don't have an idea what u're doing
+    throw new UnsupportedOperationException("Annotation IDs cannot be changed in " +
+                                            "database stores");
+  }// setNextAnnotationId();
+
 
   private void fillSequencePool() {
 
@@ -712,13 +723,6 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
       }
     }
-  }
-
-
-
-  public Integer getNextNodeId() {
-    //throw new MethodNotImplementedException();
-    return super.getNextNodeId();
   }
 
   public boolean isDocumentChanged(int changeType) {
