@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Set these paths appropriately
+
+BIN=/usr/local/clactools/TreeTagger/bin
+CMD=/usr/local/clactools/TreeTagger/cmd
+LIB=/usr/local/clactools/TreeTagger/lib
+
+TAGGER=${BIN}/tree-tagger
+ABBR_LIST=${LIB}/german-abbreviations
+PARFILE=${LIB}/german.par
+FILTER=${CMD}/filter-german-tags
+
+cat $* |
+# tagging
+$TAGGER $PARFILE -token -lemma -sgml | 
+# error correction
+$FILTER
+
