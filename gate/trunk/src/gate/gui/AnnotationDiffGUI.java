@@ -310,11 +310,15 @@ public class AnnotationDiffGUI extends JFrame{
           List keySetNames = new ArrayList();
           keySets.add(keyDoc.getAnnotations());
           keySetNames.add("[Default set]");
-          Iterator setIter = keyDoc.getNamedAnnotationSets().keySet().iterator();
-          while(setIter.hasNext()){
-            String name = (String)setIter.next();
-            keySetNames.add(name);
-            keySets.add(keyDoc.getAnnotations(name));
+
+          if(keyDoc.getNamedAnnotationSets() != null) {
+            Iterator setIter = keyDoc.getNamedAnnotationSets().keySet().
+                               iterator();
+            while (setIter.hasNext()) {
+              String name = (String) setIter.next();
+              keySetNames.add(name);
+              keySets.add(keyDoc.getAnnotations(name));
+            }
           }
           keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
           if(!keySetNames.isEmpty())keySetCombo.setSelectedIndex(0);
@@ -334,11 +338,14 @@ public class AnnotationDiffGUI extends JFrame{
           List resSetNames = new ArrayList();
           resSets.add(resDoc.getAnnotations());
           resSetNames.add("[Default set]");
-          Iterator setIter = resDoc.getNamedAnnotationSets().keySet().iterator();
-          while(setIter.hasNext()){
-            String name = (String)setIter.next();
-            resSetNames.add(name);
-            resSets.add(resDoc.getAnnotations(name));
+          if(resDoc.getNamedAnnotationSets() != null) {
+            Iterator setIter = resDoc.getNamedAnnotationSets().keySet().
+                               iterator();
+            while (setIter.hasNext()) {
+              String name = (String) setIter.next();
+              resSetNames.add(name);
+              resSets.add(resDoc.getAnnotations(name));
+            }
           }
           resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
           if(!resSetNames.isEmpty())resSetCombo.setSelectedIndex(0);
