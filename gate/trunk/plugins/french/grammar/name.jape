@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson
+Input: Token Lookup Title FirstPerson TreeTaggerToken
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ Macro: FIRSTNAMEAMBIG
 
 
 
-Macro: UPPER
+Macro: UPPERTAG
 (
  ({TreeTaggerToken.category == NAM}
 )
@@ -66,6 +66,16 @@ Macro: UPPER
   {TreeTaggerToken.category == NAM}
  )?
 )
+
+Macro: UPPER
+(
+ ({Token.orth == upperInitial}
+)
+ ({Token.string == "-"}
+  {Token.orth == upperInitial}
+ )?
+)
+
 
 Macro: PERSONENDING
 (
