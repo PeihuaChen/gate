@@ -130,7 +130,7 @@ public class DBHelper {
 
     if (DEBUG) {
       DatabaseMetaData meta = conn.getMetaData();
-      gate.util.Out.println(
+      gate.util.Err.println(
             "JDBC driver name=["+meta.getDriverName() +
             "] version=["+ meta.getDriverVersion() +"]");
     }
