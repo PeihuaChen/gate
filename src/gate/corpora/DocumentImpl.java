@@ -646,16 +646,17 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 
     // Create a dumping annotation set on the document. It will be used for
     // dumping annotations...
-    AnnotationSet dumpingSet = new AnnotationSetImpl((Document) this);
+//    AnnotationSet dumpingSet = new AnnotationSetImpl((Document) this);
+    List dumpingList = new ArrayList(originalMarkupsAnnotSet.size());
 
     // This set will be constructed inside this method. If is not empty, the
     // annotation contained will be lost.
-    if (!dumpingSet.isEmpty()){
+/*    if (!dumpingSet.isEmpty()){
       Out.prln("WARNING: The dumping annotation set was not empty."+
       "All annotation it contained were lost.");
       dumpingSet.clear();
     }// End if
-
+*/
     StatusListener sListener = (StatusListener)
                                gate.gui.MainFrame.getListeners().
                                get("gate.event.StatusListener");
@@ -664,7 +665,8 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     // First add all annotation from the original markups
     if(sListener != null)
       sListener.statusChanged("Constructing the dumping annotation set.");
-    dumpingSet.addAll(originalMarkupsAnnotSet);
+//    dumpingSet.addAll(originalMarkupsAnnotSet);
+    dumpingList.addAll(originalMarkupsAnnotSet);
     // Then take all the annotations from aSourceAnnotationSet and verify if
     // they can be inserted safely into the dumpingSet. Where not possible,
     // report.
@@ -672,9 +674,10 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       Iterator iter = aSourceAnnotationSet.iterator();
       while (iter.hasNext()){
         Annotation currentAnnot = (Annotation) iter.next();
-        if(insertsSafety(dumpingSet,currentAnnot)){
-          dumpingSet.add(currentAnnot);
-        }else if (crossedOverAnnotation != null){
+        if(insertsSafety(dumpingList,currentAnnot)){
+//          dumpingSet.add(currentAnnot);
+          dumpingList.add(currentAnnot);
+        }else if (crossedOverAnnotation != null && DEBUG){
           try {
             Out.prln("Warning: Annotations were found to violate the " +
             "crossed over condition: \n" +
@@ -701,6 +704,9 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       }// End while
     }// End if
 
+    //kalina: order the dumping list by start offset
+    Collections.sort(dumpingList, new gate.util.OffsetComparator());
+
     // The dumpingSet is ready to be exported as XML
     // Here we go.
     if(sListener != null) sListener.statusChanged("Dumping annotations as XML");
@@ -720,15 +726,15 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       xmlDoc.append(Strings.getNl());
     }// ENd if
     // Identify and extract the root annotation from the dumpingSet.
-    theRootAnnotation = identifyTheRootAnnotation(dumpingSet);
+    theRootAnnotation = identifyTheRootAnnotation(dumpingList);
     // If a root annotation has been identified then add it eplicitley at the
     // beginning of the document
     if (theRootAnnotation != null){
-      dumpingSet.remove(theRootAnnotation);
+      dumpingList.remove(theRootAnnotation);
       xmlDoc.append(writeStartTag(theRootAnnotation,includeFeatures));
     }// End if
     // Construct and append the rest of the document
-    xmlDoc.append(saveAnnotationSetAsXml(dumpingSet, includeFeatures));
+    xmlDoc.append(saveAnnotationSetAsXml(dumpingList, includeFeatures));
     // If a root annotation has been identified then add it eplicitley at the
     // end of the document
     if (theRootAnnotation != null){
@@ -775,6 +781,67 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     // Obtain a set with all annotations annotations that overlap
     // totaly or partially with the interval defined by the two provided offsets
     AnnotationSet as = aTargetAnnotSet.get(start,end);
+
+    // Investigate all the annotations from as to see if there is one that
+    // comes in conflict with aSourceAnnotation
+    Iterator it = as.iterator();
+    while(it.hasNext()){
+      Annotation ann = (Annotation) it.next();
+      // Read ann offsets
+      long s1 = ann.getStartNode().getOffset().longValue();
+      long e1 = ann.getEndNode().getOffset().longValue();
+
+      if (s1<s2 && s2<e1 && e1<e2) {
+        this.crossedOverAnnotation = ann;
+        return false;
+      }
+      if (s2<s1 && s1<e2 && e2<e1) {
+        this.crossedOverAnnotation = ann;
+        return false;
+      }
+    }// End while
+    return true;
+  }// insertsSafety()
+
+  private boolean insertsSafety(List aTargetAnnotList,
+                                                Annotation aSourceAnnotation){
+
+    if (aTargetAnnotList == null || aSourceAnnotation == null) {
+      this.crossedOverAnnotation = null;
+      return false;
+    }
+    if (aSourceAnnotation.getStartNode() == null ||
+        aSourceAnnotation.getStartNode().getOffset()== null) {
+      this.crossedOverAnnotation = null;
+      return false;
+    }
+    if (aSourceAnnotation.getEndNode() == null ||
+        aSourceAnnotation.getEndNode().getOffset()== null) {
+      this.crossedOverAnnotation = null;
+      return false;
+    }
+
+    // Get the start and end offsets
+    Long start = aSourceAnnotation.getStartNode().getOffset();
+    Long end =   aSourceAnnotation.getEndNode().getOffset();
+    // Read aSourceAnnotation offsets long
+    long s2 = start.longValue();
+    long e2 = end.longValue();
+
+    // Obtain a set with all annotations annotations that overlap
+    // totaly or partially with the interval defined by the two provided offsets
+    List as = new ArrayList();
+    for (int i=0; i < aTargetAnnotList.size(); i++) {
+      Annotation annot = (Annotation) aTargetAnnotList.get(i);
+      if (annot.getStartNode().getOffset().longValue() >= s2
+          &&
+          annot.getStartNode().getOffset().longValue() <= e2)
+        as.add(annot);
+      else if (annot.getEndNode().getOffset().longValue() >= s2
+          &&
+          annot.getEndNode().getOffset().longValue() <= e2)
+        as.add(annot);
+    }
 
     // Investigate all the annotations from as to see if there is one that
     // comes in conflict with aSourceAnnotation
@@ -850,7 +917,9 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       // offset.
       List annotations = getAnnotationsForOffset(aDumpAnnotSet,offset);
       // Attention: the annotation are serialized from left to right
-      StringBuffer tmpBuff = new StringBuffer("");
+//      StringBuffer tmpBuff = new StringBuffer("");
+      StringBuffer tmpBuff = new StringBuffer(
+          DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
       Stack stack = new Stack();
       // Iterate through all these annotations and serialize them
       Iterator it = annotations.iterator();
@@ -946,6 +1015,166 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     }// End while
     return docContStrBuff.toString();
   }// saveAnnotationSetAsXml()
+
+  private String saveAnnotationSetAsXml(List aDumpAnnotList,
+                                        boolean includeFeatures){
+    String content = null;
+    if (this.getContent()== null)
+      content = new String("");
+    else
+      content = this.getContent().toString();
+    StringBuffer docContStrBuff = filterNonXmlChars(new StringBuffer(content));
+    if (aDumpAnnotList == null)   return docContStrBuff.toString();
+
+    TreeMap offsets2CharsMap = new TreeMap();
+    HashMap annotsForOffset = new HashMap(100);
+    if (this.getContent().size().longValue() != 0){
+      // Fill the offsets2CharsMap with all the indices where
+      // special chars appear
+      buildEntityMapFromString(content,offsets2CharsMap);
+    }//End if
+    // The saving alghorithm is as follows:
+    ///////////////////////////////////////////
+    // Construct a set of annot with all IDs in asc order.
+    // All annotations that end at that offset swap their place in descending
+    // order. For each node write all the tags from left to right.
+
+    // Construct the node set
+    TreeSet offsets = new TreeSet();
+    Iterator iter = aDumpAnnotList.iterator();
+    while (iter.hasNext()){
+      Annotation annot = (Annotation) iter.next();
+      offsets.add(annot.getStartNode().getOffset());
+      offsets.add(annot.getEndNode().getOffset());
+      if (annotsForOffset.containsKey(annot.getStartNode().getOffset())) {
+        ((List) annotsForOffset.get(annot.getStartNode().getOffset())).add(annot);
+      } else {
+        List newList = new ArrayList(10);
+        newList.add(annot);
+        annotsForOffset.put(annot.getStartNode().getOffset(), newList);
+      }
+      if (annotsForOffset.containsKey(annot.getEndNode().getOffset())) {
+        ((List) annotsForOffset.get(annot.getEndNode().getOffset())).add(annot);
+      } else {
+        List newList = new ArrayList(10);
+        newList.add(annot);
+        annotsForOffset.put(annot.getEndNode().getOffset(), newList);
+      }
+    }// End while
+
+    // ofsets is sorted in ascending order.
+    // Iterate this set in descending order and remove an offset at each
+    // iteration
+    while (!offsets.isEmpty()){
+      Long offset = (Long)offsets.last();
+      // Remove the offset from the set
+      offsets.remove(offset);
+      // Now, use it.
+      // Returns a list with annotations that needs to be serialized in that
+      // offset.
+//      List annotations = getAnnotationsForOffset(aDumpAnnotList,offset);
+      List annotations = (List) annotsForOffset.get(offset);
+      annotations = getAnnotationsForOffset(annotations,offset);
+      // Attention: the annotation are serialized from left to right
+//      StringBuffer tmpBuff = new StringBuffer("");
+      StringBuffer tmpBuff = new StringBuffer(
+          DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
+      Stack stack = new Stack();
+      // Iterate through all these annotations and serialize them
+      Iterator it = annotations.iterator();
+      while(it.hasNext()){
+        Annotation a = (Annotation) it.next();
+        it.remove();
+        // Test if a Ends at offset
+        if ( offset.equals(a.getEndNode().getOffset()) ){
+          // Test if a Starts at offset
+          if ( offset.equals(a.getStartNode().getOffset()) ){
+            // Here, the annotation a Starts and Ends at the offset
+            if ( null != a.getFeatures().get("isEmptyAndSpan") &&
+                 "true".equals((String)a.getFeatures().get("isEmptyAndSpan"))){
+
+              // Assert: annotation a with start == end and isEmptyAndSpan
+              tmpBuff.append(writeStartTag(a, includeFeatures));
+              stack.push(a);
+            }else{
+              // Assert annotation a with start == end and an empty tag
+              tmpBuff.append(writeEmptyTag(a));
+              // The annotation is removed from dumped set
+              aDumpAnnotList.remove(a);
+            }// End if
+          }else{
+            // Here the annotation a Ends at the offset.
+            // In this case empty the stack and write the end tag
+            if (!stack.isEmpty()){
+              while(!stack.isEmpty()){
+                Annotation a1 = (Annotation)stack.pop();
+                tmpBuff.append(writeEndTag(a1));
+              }// End while
+            }// End if
+            tmpBuff.append(writeEndTag(a));
+          }// End if
+        }else{
+          // The annotation a does NOT end at the offset. Let's see if it starts
+          // at the offset
+          if ( offset.equals(a.getStartNode().getOffset()) ){
+            // The annotation a starts at the offset.
+            // In this case empty the stack and write the end tag
+            if (!stack.isEmpty()){
+              while(!stack.isEmpty()){
+                Annotation a1 = (Annotation)stack.pop();
+                tmpBuff.append(writeEndTag(a1));
+              }// End while
+            }// End if
+            tmpBuff.append(writeStartTag(a, includeFeatures));
+            // The annotation is removed from dumped set
+            aDumpAnnotList.remove(a);
+          }// End if ( offset.equals(a.getStartNode().getOffset()) )
+        }// End if ( offset.equals(a.getEndNode().getOffset()) )
+      }// End while(it.hasNext()){
+
+      // In this case empty the stack and write the end tag
+      if (!stack.isEmpty()){
+        while(!stack.isEmpty()){
+          Annotation a1 = (Annotation)stack.pop();
+          tmpBuff.append(writeEndTag(a1));
+        }// End while
+      }// End if
+
+      // Before inserting tmpBuff into docContStrBuff we need to check
+      // if there are chars to be replaced and if there are, they would be
+      // replaced.
+      if (!offsets2CharsMap.isEmpty()){
+        Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+        while( !offsets2CharsMap.isEmpty() &&
+                       offsChar.intValue() >= offset.intValue()){
+          // Replace the char at offsChar with its corresponding entity form
+          // the entitiesMap.
+          docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
+          (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+          // Discard the offsChar after it was used.
+          offsets2CharsMap.remove(offsChar);
+          // Investigate next offsChar
+          if (!offsets2CharsMap.isEmpty())
+            offsChar = (Integer) offsets2CharsMap.lastKey();
+        }// End while
+      }// End if
+      // Insert tmpBuff to the location where it belongs in docContStrBuff
+      docContStrBuff.insert(offset.intValue(),tmpBuff.toString());
+    }// End while(!offsets.isEmpty())
+    // Need to replace the entities in the remaining text, if there is any text
+    // So, if there are any more items in offsets2CharsMap they need to be
+    // replaced
+    while (!offsets2CharsMap.isEmpty()){
+      Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+      // Replace the char with its entity
+      docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
+      (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+      // remove the offset from the map
+      offsets2CharsMap.remove(offsChar);
+    }// End while
+    return docContStrBuff.toString();
+  }// saveAnnotationSetAsXml()
+
 
   /**
    *  Return true only if the document has features for original content and
@@ -1202,6 +1431,55 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     return annotationList;
   }// getAnnotationsForOffset()
 
+  private List getAnnotationsForOffset(List aDumpAnnotList, Long offset){
+    List annotationList = new LinkedList();
+    if (aDumpAnnotList == null || offset == null) return annotationList;
+    Set annotThatStartAtOffset = new TreeSet(
+                          new AnnotationComparator(ORDER_ON_END_OFFSET,DESC));
+    Set annotThatEndAtOffset = new TreeSet(
+                          new AnnotationComparator(ORDER_ON_START_OFFSET,DESC));
+    Set annotThatStartAndEndAtOffset = new TreeSet(
+                          new AnnotationComparator(ORDER_ON_ANNOT_ID,ASC));
+
+    // Fill these tree lists with annotation tat start, end or start and
+    // end at the offset.
+    Iterator iter = aDumpAnnotList.iterator();
+    while(iter.hasNext()){
+      Annotation ann = (Annotation) iter.next();
+      if (offset.equals(ann.getStartNode().getOffset())){
+        if (offset.equals(ann.getEndNode().getOffset()))
+          annotThatStartAndEndAtOffset.add(ann);
+        else
+          annotThatStartAtOffset.add(ann);
+      }else{
+        if (offset.equals(ann.getEndNode().getOffset()))
+          annotThatEndAtOffset.add(ann);
+      }// End if
+    }// End while
+    annotationList.addAll(annotThatEndAtOffset);
+    annotThatEndAtOffset = null;
+    annotationList.addAll(annotThatStartAtOffset);
+    annotThatStartAtOffset = null;
+    iter = annotThatStartAndEndAtOffset.iterator();
+    while(iter.hasNext()){
+      Annotation ann = (Annotation) iter.next();
+      Iterator it = annotationList.iterator();
+      boolean breaked = false;
+      while (it.hasNext()){
+        Annotation annFromList = (Annotation) it.next();
+        if (annFromList.getId().intValue() > ann.getId().intValue()){
+          annotationList.add(annotationList.indexOf(annFromList),ann);
+          breaked = true;
+          break;
+        }// End if
+      }// End while
+      if (!breaked)
+        annotationList.add(ann);
+      iter.remove();
+    }// End while
+    return annotationList;
+  }// getAnnotationsForOffset()
+
   private String writeStartTag(Annotation annot, boolean includeFeatures){
     return writeStartTag(annot, includeFeatures, true);
   } // writeStartTag
@@ -1332,6 +1610,46 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     }// End for
     return theRootAnnotation;
   }// End identifyTheRootAnnotation()
+
+  private Annotation identifyTheRootAnnotation(List anAnnotationList){
+    if (anAnnotationList == null) return null;
+    // If the first annotation in the list (which is sorted by start offset)
+    //does not have an offset = 0, then there's no root tag.
+    Node startNode = ((Annotation) anAnnotationList.get(0)).getStartNode();
+    Node endNode = ((Annotation) anAnnotationList.get(0)).getEndNode();
+    // This is placed here just to speed things up. The alghorithm bellow can
+    // can identity the annotation that span over the entire set and with the
+    // smallest ID. However the root annotation will have to have the start
+    // offset equal to 0.
+    if (startNode.getOffset().longValue() != 0) return null;
+    // Go anf find the annotation.
+    Annotation theRootAnnotation = null;
+    // Check if there are annotations starting at offset 0. If there are, then
+    // check all of them to see which one has the greatest span. Basically its
+    // END offset should be the bigest offset from the input annotation set.
+    long start = startNode.getOffset().longValue();
+    long end = endNode.getOffset().longValue();
+    for(int i = 0; i < anAnnotationList.size(); i++){
+      Annotation currentAnnot = (Annotation) anAnnotationList.get(i);
+      // If the currentAnnot has both its Start and End equals to the Start and
+      // end of the AnnotationSet then check to see if its ID is the smallest.
+      if (
+          (start == currentAnnot.getStartNode().getOffset().longValue()) &&
+          (end   == currentAnnot.getEndNode().getOffset().longValue())
+         ){
+          // The currentAnnotation has is a potencial root one.
+          if (theRootAnnotation == null)
+            theRootAnnotation = currentAnnot;
+          else{
+            // If its ID is greater that the currentAnnot then update the root
+            if ( theRootAnnotation.getId().intValue() > currentAnnot.getId().intValue())
+              theRootAnnotation = currentAnnot;
+          }// End if
+      }// End if
+    }// End for
+    return theRootAnnotation;
+  }// End identifyTheRootAnnotation()
+
 
   /** This method takes aScanString and searches for those chars from
     * entitiesMap that appear in the string. A tree map(offset2Char) is filled
@@ -1928,7 +2246,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     * The size of the StringBuffer will be docDonctent.size() multiplied by this
     * value. It is aimed to improve the performance of StringBuffer
     */
-  private final int DOC_SIZE_MULTIPLICATION_FACTOR = 1;
+  private final int DOC_SIZE_MULTIPLICATION_FACTOR = 2;
 
   /** Constant used in the inner class AnnotationComparator to order
     * annotations on their start offset
@@ -2019,7 +2337,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 
   /** Is the document markup-aware? */
   protected Boolean markupAware = new Boolean(false);
-
 //  /** Hash code */
 //  public int hashCode() {
 //    int code = getContent().hashCode();
