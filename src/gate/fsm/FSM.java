@@ -1,5 +1,9 @@
 /*
-* Valentin Tablan, 29/03/2000
+*	FSM.java
+*
+*	Valentin Tablan, 29/Mar/2000
+*
+*	$Id$
 */
 
 package gate.fsm;
