@@ -19,7 +19,8 @@ package gate.creole.gazetteer;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import com.ontotext.gate.exception.*;
+import gate.creole.*;
+
 
 /** implementation of a gazetteer list */
 public class GazetteerList extends gate.creole.AbstractLanguageResource
@@ -49,44 +50,52 @@ implements Set {
 
   /**
    * loads a gazetteer list
-   * @throws FileNotFoundException
-   * @throws IOException
+   * @throws ResourceInstantiationException
    */
-  public void load() throws FileNotFoundException, IOException {
-    if (null == url) {
-      throw new URLNotSpecifiedException();
+  public void load() throws ResourceInstantiationException {
+    try {
+      if (null == url) {
+        throw new ResourceInstantiationException("URL not specified (null).");
+      }
+
+      BufferedReader listReader;
+
+      listReader = new BufferedReader(new InputStreamReader(
+                              (url).openStream(), encoding));
+      String line;
+      while (null != (line = listReader.readLine())) {
+        entries.add(line);
+      } //while
+
+      listReader.close();
+    } catch (Exception x) {
+      throw new ResourceInstantiationException(x);
     }
 
-    BufferedReader listReader;
-
-    listReader = new BufferedReader(new InputStreamReader(
-                            (url).openStream(), encoding));
-    String line;
-    while (null != (line = listReader.readLine())) {
-      entries.add(line);
-    } //while
-
-    listReader.close();
   } // load ()
 
   /**
    * store the list to the specified url
-   * @throws IOException
+   * @throws ResourceInstantiationException
    */
-  public void store() throws IOException{
-    if (null == url) {
-      throw new URLNotSpecifiedException();
-    }
+  public void store() throws ResourceInstantiationException{
+    try {
+      if (null == url) {
+        throw new ResourceInstantiationException("URL not specified (null)");
+      }
 
-    File fileo = new File(url.getPath()+url.getFile());
-    fileo.delete();
-    BufferedWriter listWriter = new BufferedWriter(new FileWriter(fileo));
-    Iterator iter = entries.iterator();
-    while (iter.hasNext()) {
-      listWriter.write(iter.next().toString());
-      listWriter.newLine();
+      File fileo = new File(url.getPath()+url.getFile());
+      fileo.delete();
+      BufferedWriter listWriter = new BufferedWriter(new FileWriter(fileo));
+      Iterator iter = entries.iterator();
+      while (iter.hasNext()) {
+        listWriter.write(iter.next().toString());
+        listWriter.newLine();
+      }
+      listWriter.close();
+    } catch (Exception x) {
+      throw new ResourceInstantiationException(x);
     }
-    listWriter.close();
   } // store()
 
   public void setURL(URL theUrl) {
