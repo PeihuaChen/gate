@@ -27,6 +27,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.swing.UIManager;
 
 import gate.*;
+import gate.creole.*;
 import gate.creole.ANNIEConstants;
 import gate.creole.Transducer;
 import gate.creole.gazetteer.DefaultGazetteer;
@@ -35,6 +36,7 @@ import gate.creole.tokeniser.DefaultTokeniser;
 import gate.gui.MainFrame;
 import gate.gui.docview.AnnotationSetsView;
 import gate.persist.SerialDataStore;
+import gate.util.persistence.PersistenceManager;
 
 /** A scratch pad for experimenting.
   */
@@ -43,7 +45,61 @@ public class Scratch
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  
+  public static void docFromString(){
+    try{
+      Gate.init();
+      SerialAnalyserController annie = (SerialAnalyserController)
+        PersistenceManager.loadObjectFromFile(new File("d:/tmp/annie.gapp"));
+      
+      Corpus corpus = Factory.newCorpus("A Corpus");
+      Document doc = Factory.newDocument("US President George W Bush has said he is seeking a $600m (£323m) boost in aid to nations hit by the Asian tsunami.");
+      corpus.add(doc);
+      annie.setCorpus(corpus);
+      annie.execute();
+      
+      //get the annotations
+      Iterator annIter = doc.getAnnotations().iterator();
+      while(annIter.hasNext()){
+        System.out.println(annIter.next());
+      }
+      
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+  }
+  
+  
+  static class Item{
+    int itemCode = 1;
+    double price = 0.7;
+    public double  getPrice(){
+      return price;
+    }
+  }
+  
+  static class ItemByWeight extends Item{
+    int itemCode = 2;
+    double weight = 4;
+    public double  getPrice(){
+      return price * weight;
+    }
+    
+  }  
+  
   public static void main(String args[]) throws Exception {
+    ItemByWeight ibw = new ItemByWeight();
+    
+    System.out.println(ibw.itemCode);
+    System.out.println(((Item)ibw).itemCode);
+
+    System.out.println(ibw.getPrice());
+    System.out.println(((Item)ibw).getPrice());
+    
+    
+    return;
+    
+ /*   
     File file = new File("Z:/gate/bin");
     System.out.println("Canonical path: " + file.getCanonicalPath());
     System.out.println("URL: " + file.toURL());
@@ -212,7 +268,7 @@ public class Scratch
 //System.out.println("VRs for " + reg.getAnnotationVRs());
 
 //System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
-
+*/
   } // main
 
   /** Example of using an exit-time hook. */
@@ -388,7 +444,8 @@ public class Scratch
     Out.prln("done");
   } // runNerc()
 
-
+  
+ 
   /** Inner class for holding CR and DSR for serialisation experiments */
   class SessionState implements Serializable {
     SessionState() {
