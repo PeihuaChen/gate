@@ -884,7 +884,7 @@ public class DocumentEditor extends AbstractVisualResource
     //The table
     annotationsTableModel = new AnnotationsTableModel();
     annotationsTable = new XJTable(annotationsTableModel);
-    annotationsTable.setIntercellSpacing(new Dimension(10, 5));
+//    annotationsTable.setIntercellSpacing(new Dimension(10, 5));
 
     tableScroll = new JScrollPane(annotationsTable);
     tableScroll.setOpaque(true);

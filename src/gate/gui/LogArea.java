@@ -16,15 +16,15 @@
 
 package gate.gui;
 
-import javax.swing.*;
-import javax.swing.text.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
-import gate.util.*;
+import javax.swing.*;
+import javax.swing.text.*;
+
 import gate.swing.*;
+import gate.util.*;
 
 /**
   * This class is used to log all messages from GATE. When an object of this
@@ -66,16 +66,32 @@ public class LogArea extends XJTextPane {
     LogAreaOutputStream out = new LogAreaOutputStream(false);
 
     // Redirecting Err
-    Err.setPrintWriter(new PrintWriter(err,true));
+    try{
+      Err.setPrintWriter(new UTF8PrintWriter(err,true));
+    }catch(UnsupportedEncodingException uee){
+      uee.printStackTrace();
+    }
     // Redirecting Out
-    Out.setPrintWriter(new PrintWriter(out,true));
+    try{
+      Out.setPrintWriter(new UTF8PrintWriter(out,true));
+    }catch(UnsupportedEncodingException uee){
+      uee.printStackTrace();
+    }
 
     // Redirecting System.out
     originalOut = System.out;
-    System.setOut(new PrintStream(out,true));
+    try{
+      System.setOut(new PrintStream(out, true, "UTF-8"));
+    }catch(UnsupportedEncodingException uee){
+      uee.printStackTrace();
+    }
     // Redirecting System.err
     originalErr = System.err;
-    System.setErr(new PrintStream(err,true));
+    try{
+      System.setErr(new PrintStream(err, true, "UTF-8"));
+    }catch(UnsupportedEncodingException uee){
+      uee.printStackTrace();
+    }
     popup = new JPopupMenu();
     selectAllAction = new SelectAllAction();
     copyAction = new CopyAction();
@@ -155,6 +171,22 @@ public class LogArea extends XJTextPane {
     Style style;
   }
 
+  /**
+   * A print writer that uses UTF-8 to convert from char[] to byte[]
+   */
+  public static class UTF8PrintWriter extends PrintWriter{
+    public UTF8PrintWriter(OutputStream out)
+           throws UnsupportedEncodingException{
+      this(out, true);
+    }
+
+    public UTF8PrintWriter(OutputStream out, boolean autoFlush)
+           throws UnsupportedEncodingException{
+      super(new BufferedWriter(new OutputStreamWriter(out, "UTF-8")),
+            autoFlush);
+    }
+  }
+
   /** Inner class that defines the behaviour of clear all action.*/
   protected class ClearAllAction extends AbstractAction{
     public ClearAllAction(){
@@ -207,8 +239,13 @@ public class LogArea extends XJTextPane {
      */
     public void write(byte[] data, int offset, int length){
       // Insert the string to the log area
-      SwingUtilities.invokeLater(new SwingWriter(new String(data,offset,length),
-                                                 style));
+      try{
+        SwingUtilities.invokeLater(new SwingWriter(new String(data,offset,
+                                                              length, "UTF-8"),
+                                                   style));
+      }catch(UnsupportedEncodingException uee){
+        uee.printStackTrace();
+      }
     }// write(byte[] data, int offset, int length)
   }////End class LogAreaOutputStream
 }//End class LogArea

@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * The purpose of this Map is to combine the functionality found in
  * TreeSet, especially first() and tailSet() with the hashcode driven map
- * using native long as key to hold the annotations orederd by their offset.
+ * using native long as key to hold the annotations ordered by their offset.
  * It is used in the SinglePhaseTransducer.transduce()
  */
 public class SimpleSortedSet {

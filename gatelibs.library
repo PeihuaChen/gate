@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <library>
   <!--JBuilder Library Definition File-->
   <fullname>gatelibs</fullname>
@@ -29,7 +28,7 @@
     <path>[lib/jakarta-regexp-1.2.jar]</path>
     <path>[lib/lucene-1.2-rc5.jar]</path>
     <path>[lib/jwnl.jar]</path>
+    <path>[lib/weka.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
-

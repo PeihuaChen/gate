@@ -47,7 +47,7 @@ public class Scratch
 //    if(classes != null) for(int i = 0; i < classes.size(); i++){
 //      Out.prln(classes.get(i).toString());
 //    }
-    createIndex();
+//    createIndex();
 //    URL anURL = new URL("file:/z:/a/b/c/d.txt");
 //    URL anotherURL = new URL("file:/z:/a/b/c/d.txt");
 //    String relPath = gate.util.persistence.PersistenceManager.
