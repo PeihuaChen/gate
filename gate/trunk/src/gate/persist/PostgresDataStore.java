@@ -52,11 +52,6 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-  public List getLrNames(String lrType) throws gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
-
   public SecurityInfo getSecurityInfo(LanguageResource parm1) throws gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
