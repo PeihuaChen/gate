@@ -538,9 +538,8 @@ public class TestPersist extends TestCase
     Assert.assertNotNull(doc);
 
     //3. get security factory & login
-    AccessController ac = new AccessControllerImpl();
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
-    ac.open(this.JDBC_URL);
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -554,6 +553,9 @@ public class TestPersist extends TestCase
 
     //4. create security settings for doc
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
+
+    //4.5 set DS session
+    ds.setSession(usrSession);
 
     //5. try adding doc to data store
     LanguageResource lr = ds.adopt(doc,si);
@@ -588,6 +590,26 @@ public class TestPersist extends TestCase
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
+
+    //3. get security factory & login
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    Assert.assertNotNull(ac);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assertTrue(ac.isValidSession(usrSession));
+
+    //4. create security settings for doc
+    SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
+
+    //4.5 set DS session
+    ds.setSession(usrSession);
 
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
@@ -683,6 +705,7 @@ public class TestPersist extends TestCase
 
     //close
     ds.close();
+    ac.close();
 
     if(DEBUG) {
       Err.prln("Use case 02 passed...");
@@ -697,11 +720,28 @@ public class TestPersist extends TestCase
     //sync a document
     LanguageResource lr = null;
 
+    //0. get security factory & login
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    Assert.assertNotNull(ac);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assertTrue(ac.isValidSession(usrSession));
+
     //1. open data storage
     DatabaseDataStore ds = new OracleDataStore();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
+
+    //1.5 set DS session
+    ds.setSession(usrSession);
 
     if (DEBUG) Out.prln("ID " + uc01_lrID);
     //2. read LR
@@ -859,6 +899,7 @@ public class TestPersist extends TestCase
 */
 
     //close
+    ac.close();
     ds.close();
 
     if(DEBUG) {
@@ -872,11 +913,26 @@ public class TestPersist extends TestCase
     //delete a document
     LanguageResource lr = null;
 
+    //0. get security factory & login
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    Assert.assertNotNull(ac);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assertTrue(ac.isValidSession(usrSession));
+
     //1. open data storage
     DatabaseDataStore ds = new OracleDataStore();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
+    ds.setSession(usrSession);
 
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
@@ -889,6 +945,8 @@ public class TestPersist extends TestCase
 
     //close
     ds.close();
+    ac.close();
+
     if(DEBUG) {
       Err.prln("Use case 04 passed...");
     }
@@ -901,20 +959,9 @@ public class TestPersist extends TestCase
 
     //descr : create a corpus
 
-    //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
-    Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
-    ds.open();
-
-    //2. get test document
-    Corpus corp = createTestCorpus();
-    Assert.assertNotNull(corp);
-
-    //3. get security factory & login
-    AccessController ac = new AccessControllerImpl();
+    //0. get security factory & login
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
-    ac.open(this.JDBC_URL);
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -925,6 +972,17 @@ public class TestPersist extends TestCase
     Session usrSession = ac.login("kalina","sesame",grp.getID());
     Assert.assertNotNull(usrSession);
     Assert.assertTrue(ac.isValidSession(usrSession));
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+    ds.setSession(usrSession);
+
+    //2. get test document
+    Corpus corp = createTestCorpus();
+    Assert.assertNotNull(corp);
 
     //4. create security settings for doc
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
@@ -955,11 +1013,26 @@ public class TestPersist extends TestCase
 
     LanguageResource lr = null;
 
+    //0. get security factory & login
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    Assert.assertNotNull(ac);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assertTrue(ac.isValidSession(usrSession));
+
     //1. open data storage
     DatabaseDataStore ds = new OracleDataStore();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
+    ds.setSession(usrSession);
 
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
@@ -997,16 +1070,32 @@ public class TestPersist extends TestCase
 
   }
 
+
   public void testDB_UseCase103() throws Exception {
 
     //sync a corpus
     LanguageResource lr = null;
+
+    //0. get security factory & login
+    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    Assert.assertNotNull(ac);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assertTrue(ac.isValidSession(usrSession));
 
     //1. open data storage
     DatabaseDataStore ds = new OracleDataStore();
     Assert.assertNotNull(ds);
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
+    ds.setSession(usrSession);
 
     if (DEBUG) Out.prln("ID " + uc101_lrID);
 
