@@ -394,7 +394,7 @@ extends AbstractLanguageResource implements LanguageResource{
       // If the Gate Document doesn't have a feature map atached then
       // We will create and set one.
       if(aGateDocument.getFeatures() == null){
-            aFeatureMap = new SimpleFeatureMapImpl();
+            aFeatureMap = Factory.newFeatureMap();
             aGateDocument.setFeatures(aFeatureMap);
       }// end if
       aGateDocument.getFeatures().put("MimeType",mimeType.getType() + "/" +

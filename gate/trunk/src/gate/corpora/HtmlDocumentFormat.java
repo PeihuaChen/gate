@@ -61,25 +61,37 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     URLConnection         conn = null;
     PrintWriter           out = null;
     HTMLEditorKit.Parser  parser = new ParserDelegator();
+
     try{
-      conn = doc.getSourceUrl().openConnection ();
-      reader =  new InputStreamReader(conn.getInputStream ());
-      // create a new Htmldocument handler
-      HtmlDocumentHandler htmlDocHandler = new
-                             HtmlDocumentHandler(doc, this.markupElementsMap);
-      // register a status listener with it
-      htmlDocHandler.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            // this is implemented in DocumentFormat.java and inherited here
-            fireStatusChanged(text);
-          }
-      });
+      conn = doc.getSourceUrl().openConnection();
+      reader =  new InputStreamReader(conn.getInputStream());
+    } catch (IOException ex){
+      DocumentContent content =  doc.getContent();
+      if(content == null)
+        throw new DocumentFormatException("The document doesn't have a" +
+        " valid URL and also no content");
+       reader = new InputStreamReader(
+                      new ByteArrayInputStream(content.toString().getBytes())
+               );
+    }// End try
+
+    // create a new Htmldocument handler
+    HtmlDocumentHandler htmlDocHandler = new
+                           HtmlDocumentHandler(doc, this.markupElementsMap);
+    // register a status listener with it
+    htmlDocHandler.addStatusListener(new StatusListener(){
+        public void statusChanged(String text){
+          // this is implemented in DocumentFormat.java and inherited here
+          fireStatusChanged(text);
+        }
+    });
+    try{
       // parse the HTML document
       parser.parse(reader, htmlDocHandler, true);
-
     } catch (IOException e){
       throw new DocumentFormatException(e);
     }
+
   }//unpackMarkup(doc)
 
   /** Unpack the markup in the document. This converts markup from the

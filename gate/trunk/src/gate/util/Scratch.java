@@ -25,7 +25,7 @@ import gate.creole.*;
 
 import org.xml.sax.*;
 import javax.xml.parsers.*;
-
+import org.w3c.www.mime.*;
 
 /** A scratch pad for experimenting.
   */
@@ -37,7 +37,7 @@ public class Scratch
   public static void main(String args[]) {
     try{
       Gate.init();
-      //doIt();
+      doIt();
 /*
       URL url = null;
       url = new URL("file:///d:/tmp/testXml.xml");
@@ -62,22 +62,17 @@ public class Scratch
   } // main
 
   public static void doIt() throws Exception{
-    URL url = null;
-
-      Gate.init();
-      url = new URL("http://www.dcs.shef.ac.uk/~hamish");
-
-    // Load the xml Key Document and unpack it
-    gate.Document keyDocument = null;
-    keyDocument = gate.Factory.newDocument(url);
-
+    String str = new String(
+                 "<s><w>Salut</w> <w>Ba</w> <p/><w>Ce</w> <w>misto</s> </s>"
+                 );
+    gate.Document doc = Factory.newDocument(str);
     gate.DocumentFormat keyDocFormat = null;
     keyDocFormat = gate.DocumentFormat.getDocumentFormat(
-      keyDocument, keyDocument.getSourceUrl()
+      doc, new MimeType("text/xml")
     );
 
     // Unpack the markup
-    keyDocFormat.unpackMarkup(keyDocument);
+    keyDocFormat.unpackMarkup(doc);
 
 
     // Export the Gate document called keyDocument as  XML, into a temp file,
@@ -88,7 +83,7 @@ public class Scratch
     OutputStreamWriter writer = new OutputStreamWriter(
                     new FileOutputStream(xmlFile),"UTF-8");
     // Write (test the toXml() method)
-    writer.write(keyDocument.toXml());
+    writer.write(doc.toXml());
     writer.flush();
   } // doIt
 
