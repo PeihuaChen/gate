@@ -2367,7 +2367,9 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       while(iter.hasNext())
         ((AnnotationSetImpl) iter.next()).edit(start, end, replacement);
     }
-
+    //let the listeners know
+    fireContentEdited(new DocumentEvent(this, DocumentEvent.CONTENT_EDITED, 
+            start, end));
   } // edit(start,end,replacement)
 
   /** Check that an offset is valid, i.e. it is non-null, greater than
@@ -2702,6 +2704,17 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       }
     }
   }
+  
+  protected void fireContentEdited(DocumentEvent e) {
+    if (documentListeners != null) {
+      Vector listeners = documentListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DocumentListener) listeners.elementAt(i)).contentEdited(e);
+      }
+    }
+  }
+  
   public void resourceLoaded(CreoleEvent e) {
   }
   public void resourceUnloaded(CreoleEvent e) {
