@@ -116,15 +116,38 @@ create or replace package body persist is
                             p_doc_id       OUT number,
                             p_content_id   OUT number)
   is
-  
+     l_encoding_id number;
+     l_encoding varchar2(16);
   begin
+  
+     -- -1. if encoding is null, then set it to UTF8
+     l_encoding := p_encoding;
+     if (l_encoding is null) then
+        l_encoding := persist.ENCODING_UTF;
+     end if;
+  
+     --0. get encoding ID if any, otherwise create a new
+     -- entry in T_DOC_ENCODING
+     select enc_id
+     into   l_encoding_id
+     from   t_doc_encoding
+     where  enc_name = l_encoding;
+     
+     if (l_encoding_id is null) then
+       insert into t_doc_encoding(enc_id,
+                                  enc_name)
+       values (seq_doc_encoding.nextval,
+               l_encoding)
+       returning enc_id into l_encoding_id;
+     end if;
+  
      --1. create a document_content entry
      insert into t_doc_content(dc_id,
                                dc_encoding_id,
                                dc_character_content,
                                dc_binary_content)
      values(seq_doc_content.nextval,
-            p_encoding,
+            l_encoding_id,
             empty_clob(),
             empty_blob())
      returning dc_id into p_content_id;
@@ -217,7 +240,16 @@ create or replace package body persist is
      from   t_annotation_type
      where  at_name = p_ann_type;
      
-     -- 2.2 insert annotation
+     -- 2.2 if there is no such type, then create one
+     if (l_ann_type_id is null) then
+        insert into t_annotation_type(at_id,
+                                      at_name)
+        values (seq_annotation_type.nextval,
+                p_ann_type)
+        returning at_id into l_ann_type_id;
+     end if;
+     
+     -- 2.3 insert annotation
      insert into t_annotation(ann_id,
                               ann_at_id,
                               ann_startnode_id,
@@ -236,12 +268,7 @@ create or replace package body persist is
              p_ann_id,
              p_as_id);
      
-     
-     exception
-        when NO_DATA_FOUND then
-           raise error.x_invalid_annotation_type;
-     
-     
+          
   end;
   
 /*begin
