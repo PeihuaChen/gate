@@ -68,6 +68,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     mainTable = new XJTable();
     mainTable.setSortable(false);
     mainTable.setModel(mainTableModel);
+    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     DeleteColumnCellRendererEditor rendererEditor = new DeleteColumnCellRendererEditor();
     mainTable.getColumnModel().getColumn(DELETE_COLUMN).
@@ -154,28 +155,30 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
     
     public int getColumnCount(){
-      return 5;
+      return 6;
     }
     
     public String getColumnName(int column){
       switch (column){
+        case NAME_COLUMN: return "Name";
         case ICON_COLUMN: return "";
-        case NAME_COLUMN: return "URL";
+        case URL_COLUMN: return "URL";
         case LOAD_NOW_COLUMN: return "Load now";
         case LOAD_ALWAYS_COLUMN: return "Load always";
         case DELETE_COLUMN: return "Delete";
-        default: return null;
+        default: return "?";
       }
     }
     
     public Class getColumnClass(int columnIndex){
       switch (columnIndex){
-        case ICON_COLUMN: return Icon.class;
         case NAME_COLUMN: return String.class;
+        case ICON_COLUMN: return Icon.class;
+        case URL_COLUMN: return String.class;
         case LOAD_NOW_COLUMN: return Boolean.class;
         case LOAD_ALWAYS_COLUMN: return Boolean.class;
         case DELETE_COLUMN: return Object.class;
-        default: return null;
+        default: return Object.class;
       }
     }
     
@@ -183,12 +186,13 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
               (URL)Gate.getKnownPlugins().get(row));
       switch (column){
+        case NAME_COLUMN: return new File(dInfo.getUrl().getFile()).getName();
         case ICON_COLUMN: return
           dInfo.isValid() ? (
             dInfo.getUrl().getProtocol().equalsIgnoreCase("file") ? 
             localIcon : remoteIcon) :
           invalidIcon;
-        case NAME_COLUMN: return dInfo.getUrl().toString();
+        case URL_COLUMN: return dInfo.getUrl().toString();
         case LOAD_NOW_COLUMN: return  getLoadNow(dInfo.getUrl());
         case LOAD_ALWAYS_COLUMN: return getLoadAlways(dInfo.getUrl());
         case DELETE_COLUMN: return null;
@@ -462,11 +466,12 @@ public class PluginManagerUI extends JDialog implements GateConstants{
    * options.
    */
   protected Map loadAlwaysByURL;
-  
+ 
   protected static final int ICON_COLUMN = 0;
   protected static final int NAME_COLUMN = 1;
-  protected static final int LOAD_NOW_COLUMN = 2;
-  protected static final int LOAD_ALWAYS_COLUMN = 3;
-  protected static final int DELETE_COLUMN = 4;
+  protected static final int URL_COLUMN = 2;
+  protected static final int LOAD_NOW_COLUMN = 3;
+  protected static final int LOAD_ALWAYS_COLUMN = 4;
+  protected static final int DELETE_COLUMN = 5;
   
 }
