@@ -144,6 +144,12 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
   public List getPublicVrTypes();
 
   /**
+   * Gets all the instantiations of a given type and all its public derivate
+   * types;
+   */
+  public List getAllPublicInstances(String type)throws GateException;
+
+  /**
    * Returns a list of strings representing class names for large VRs valid
    * for a given type of language/processing resource.
    * The default VR will be the first in the returned list.

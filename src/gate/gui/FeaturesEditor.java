@@ -111,7 +111,6 @@ public class FeaturesEditor extends AbstractVisualResource{
     if(newResource == null){
       resource = null;
       features = null;
-System.out.println("NULL!");
     }else{
       resource = newResource;
       features = resource.getFeatures();

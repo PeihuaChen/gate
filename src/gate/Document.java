@@ -120,11 +120,17 @@ public interface Document extends LanguageResource, Comparable {
   public void edit(Long start, Long end, DocumentContent replacement)
     throws InvalidOffsetException;
 
+  /**
+   * Adds a {@link gate.event.DocumentListener} to this document.
+   * All the registered listeners will be notified of changes occured to the
+   * document.
+   */
   public void addDocumentListener(DocumentListener l);
-  public void removeDocumentListener(DocumentListener l);
 
-  public void addGateListener(GateListener l);
-  public void removeGateListener(GateListener l);
+  /**
+   * Removes one of the previously registered document listeners.
+   */
+  public void removeDocumentListener(DocumentListener l);
 
 } // interface Document
 

@@ -23,6 +23,7 @@ import gate.annotation.*;
 import gate.persist.*;
 import java.io.*;
 import java.net.*;
+import gate.event.*;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
@@ -36,6 +37,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public CorpusImpl() {
   } // Construction
 
+
   /** The data store this LR lives in. */
   protected transient DataStore dataStore;
 
@@ -44,16 +46,12 @@ public class CorpusImpl extends TreeSet implements Corpus {
     return this;
   } // init()
 
-  /** Get the name of the corpus. */
-  public String getName() { return name; }
-
-  /** Set the name of the corpus. */
-  public void setName(String name) { this.name = name; }
 
   /** Get the data store the document lives in. */
   public DataStore getDataStore() {
     return dataStore;
   }
+
 
   /** Set the data store that this LR lives in. */
   public void setDataStore(DataStore dataStore) throws PersistenceException {
@@ -69,6 +67,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
 
     dataStore.sync(this);
   } // sync()
+
 
   /** Get the features associated with this corpus. */
   public FeatureMap getFeatures() { return features; }
@@ -88,6 +87,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
     else corpus = (Corpus)other;
 
     // verify the name
+    String name = getName();
     if ((name == null)^(corpus.getName() == null)) return false;
     if ((name != null)&& (!name.equals(corpus.getName()))) return false;
 
@@ -108,19 +108,148 @@ public class CorpusImpl extends TreeSet implements Corpus {
       docHash = (currentDoc == null ? 0 : currentDoc.hashCode());
       hash += docHash;
     }
-    int nameHash = (name == null ? 0 : name.hashCode());
+    int nameHash = (getName() == null ? 0 : getName().hashCode());
     int featureHash = (features == null ? 0 : features.hashCode());
 
     return hash ^ featureHash ^ nameHash;
   } // hashCode
 
-  /** The name of the corpus */
-  protected String name;
+
+  /**
+   * Overridden so it returns an iterator that generates events when elements
+   * are removed.
+   */
+  public Iterator iterator(){
+    return new VerboseIterator(super.iterator());
+  }
+
+  /**
+   * Overridden so it can check the input and notify the listeners of the
+   * addition.
+   */
+  public boolean add(Object o) {
+    if(o instanceof Document){
+      boolean res = super.add(o);
+      if(res) fireDocumentAdded(new CorpusEvent(this, (Document)o,
+                                CorpusEvent.DOCUMENT_ADDED));
+      return res;
+    }else{
+      throw new IllegalArgumentException(
+        "Cannot add a " + o.getClass().toString() + " to a corpus");
+    }
+  }
+
+  /**
+   * Overridden so it can check the input and notify the listeners of the
+   * addition.
+   */
+  public boolean addAll(Collection c){
+    boolean modified = false;
+    Iterator e = c.iterator();
+    while (e.hasNext()) {
+        if(add(e.next()))
+            modified = true;
+    }
+    return modified;
+  }
+
+  /**
+   * Overridden so it can check the input and notify the listeners of the
+   * removal.
+   */
+  public boolean remove(Object o) {
+    if(o instanceof Document){
+      boolean res = super.remove(o);
+      if(res) fireDocumentRemoved(new CorpusEvent(this, (Document)o,
+                                  CorpusEvent.DOCUMENT_REMOVED));
+      return res;
+    }else{
+      throw new IllegalArgumentException(
+        "gate.Corpus.remove():\n" +
+        "A corpus cannot contain a " + o.getClass().toString() + "!");
+    }
+  }
+
+
+  public synchronized void removeCorpusListener(CorpusListener l) {
+    if (corpusListeners != null && corpusListeners.contains(l)) {
+      Vector v = (Vector) corpusListeners.clone();
+      v.removeElement(l);
+      corpusListeners = v;
+    }
+  }
+  public synchronized void addCorpusListener(CorpusListener l) {
+    Vector v = corpusListeners == null ? new Vector(2) : (Vector) corpusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      corpusListeners = v;
+    }
+  }
+
+
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    FeatureMap fm = getFeatures();
+    if(fm == null){
+      fm = Factory.newFeatureMap();
+      setFeatures(fm);
+    }
+    Gate.setName(fm, name);
+  }
+
+  /** Returns the name of this resource*/
+  public String getName(){
+    FeatureMap fm = getFeatures();
+    if(fm == null) return null;
+    else return Gate.getName(fm);
+  }
 
   /** The features associated with this corpus. */
   protected FeatureMap features;
 
+
   /** Freeze the serialization UID. */
   static final long serialVersionUID = 404036675903473841L;
+  private transient Vector corpusListeners;
 
+
+  class VerboseIterator implements Iterator{
+    VerboseIterator (Iterator iterator){
+      this.iterator = iterator;
+    }
+
+    public boolean hasNext(){
+      return iterator.hasNext();
+    }
+
+    public Object next(){
+      return lastNext = iterator.next();
+    }
+
+    public void remove(){
+      iterator.remove();
+      fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, (Document)lastNext,
+                                  CorpusEvent.DOCUMENT_REMOVED));
+    }
+    Iterator iterator;
+    Object lastNext;
+  }
+  protected void fireDocumentAdded(CorpusEvent e) {
+    if (corpusListeners != null) {
+      Vector listeners = corpusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CorpusListener) listeners.elementAt(i)).documentAdded(e);
+      }
+    }
+  }
+  protected void fireDocumentRemoved(CorpusEvent e) {
+    if (corpusListeners != null) {
+      Vector listeners = corpusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CorpusListener) listeners.elementAt(i)).documentRemoved(e);
+      }
+    }
+  }///class VerboseIterator
 } // class CorpusImpl
