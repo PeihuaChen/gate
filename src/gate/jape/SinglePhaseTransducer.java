@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -31,7 +31,7 @@ import gate.fsm.*;
 import gate.gui.*;
 
 /**
-  * Represents a complete CPSL grammar, with a phase name, options and 
+  * Represents a complete CPSL grammar, with a phase name, options and
   * rule set (accessible by name and by sequence).
   * Implements a transduce method taking a Document as input.
   * Constructs from String or File.
@@ -132,8 +132,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
       }
     }
     if(annotations == null) annotations = new AnnotationSetImpl(doc);
-
-//Out.println("Actual input:" + annotations.getAllTypes());
+//Out.println("Actual input types: " + annotations.getAllTypes() + "\n"+
+//                   "Actual input values: " + annotations + "\n===================");
     //INITIALISATION Should we move this someplace else?
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
@@ -225,7 +225,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           //try to match all the constraints
           boolean success = true;
           java.util.Iterator typesIter = constraintsByType.keySet().iterator();
-          AnnotationSet matchedHere;
+          AnnotationSet matchedHere = null;
           Long offset;
           while(success && typesIter.hasNext()){
             //do a query for each annotation type
@@ -283,6 +283,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
       if(acceptingFSMInstances.isEmpty()){
         //advance to next relevant node in the Annotation Graph
         startNode = annotations.nextNode(startNode);
+/*
+        AnnotationSet res = annotations.get(startNode.getOffset());
+        if(!res.isEmpty())
+          startNode = ((Annotation)res.iterator().next()).getStartNode();
+        else startNode = lastNode;
+*/
       }else if(ruleApplicationStyle == BRILL_STYLE){
         //fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
@@ -394,12 +400,15 @@ extends Transducer implements JapeConstants, java.io.Serializable
   *types of annotations.
   */
   java.util.Set input = new java.util.HashSet();
-  
+
 } // class SinglePhaseTransducer
 
 
 
 // $Log$
+// Revision 1.18  2000/10/10 16:13:53  valyt
+// Fixed a small bug in AnnotationSetImpl
+//
 // Revision 1.17  2000/10/10 15:36:37  oana
 // Changed System.out in Out and System.err in Err;
 // Added the DEBUG variable seted on false;

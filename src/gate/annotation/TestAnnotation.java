@@ -541,9 +541,36 @@ public class TestAnnotation extends TestCase
   public void testGap() throws InvalidOffsetException {
     AnnotationSet as = basicAS;
     as.clear();
-    as.add(new Long(0), new Long(10), "foo", null);
-    as.add(new Long(15), new Long(20), "foo", null);
-    assert(!as.get(new Long(12)).isEmpty());
+    FeatureMap fm = Transients.newFeatureMap();
+    fm.put("A", "B");
+    as.add(new Long(0), new Long(10), "foo", fm);
+    as.add(new Long(11), new Long(20), "foo", fm);
+    as.add(new Long(10), new Long(11), "space", fm);
+
+    //do the input selection (ignore spaces)
+    Set input = new HashSet();
+    input.add("foo");
+    input.add("foofoo");
+    AnnotationSet annotations = null;
+    if(input.isEmpty()) annotations = as;
+    else{
+      Iterator typesIter = input.iterator();
+      AnnotationSet ofOneType = null;
+      while(typesIter.hasNext()){
+        ofOneType = as.get((String)typesIter.next());
+        if(ofOneType != null){
+//System.out.println("Adding " + ofOneType.getAllTypes());
+          if(annotations == null) annotations = ofOneType;
+          else annotations.addAll(ofOneType);
+        }
+      }
+    }
+//    if(annotations == null) annotations = new AnnotationSetImpl(doc);
+System.out.println("Actual input:" + annotations.getAllTypes() + "\n" + annotations);
+
+    AnnotationSet res = annotations.get("foo", Transients.newFeatureMap(), new Long(10));
+System.out.println(res);
+    assert(!res.isEmpty());
   }
 
   public static void main(String[] args){

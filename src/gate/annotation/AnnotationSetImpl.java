@@ -53,7 +53,7 @@ import gate.corpora.*;
   * <P>
   * There are five indices: annotation by id, annotations by type, annotations
   * by start/end node and nodes by offset. The last three jointly provide
-  * positional indexing; construction of these is triggered by 
+  * positional indexing; construction of these is triggered by
   * indexByStart/EndOffset(),
   * or by calling a get method that selects on offset. The type
   * index is triggered by indexByType(), or calling a get method that selects
@@ -149,7 +149,7 @@ implements AnnotationSet
       starterAnnots.remove(a);
       if(starterAnnots.isEmpty()) // no annotations start here any more
         annotsByStartNode.remove(id);
-    } 
+    }
     if(annotsByEndNode != null) {
       Integer id = a.getEndNode().getId();
       AnnotationSet endingAnnots = (AnnotationSet) annotsByEndNode.get(id);
@@ -238,7 +238,14 @@ implements AnnotationSet
     Node nextNode = (Node) nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes beyond this offset
       return null;
-    return (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+    AnnotationSet res = (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+    //skip all the nodes that have no starting annotations
+    while(nextNode != null && res == null){
+      nextNode = (Node) nodesByOffset.getNextOf(new Long(offset.longValue() + 1));
+      res = (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+    }
+    //res it either null (no suitable node found) or the correct result
+    return res;
   } // get(offset)
 
   /** Select annotations by type, features and offset */
@@ -514,7 +521,7 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
         (AnnotationSet) annotsByEndNode.get(n.getId());
       if(invalidatedAnnots != null)
         removeAll(invalidatedAnnots);
-    } // loop over replaced area nodes 
+    } // loop over replaced area nodes
 
     // update the offsets of the other nodes
     Iterator nodesAfterReplacementIter =
