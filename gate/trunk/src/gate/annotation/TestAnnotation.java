@@ -23,9 +23,43 @@ public class TestAnnotation extends TestCase
   /** A document */
   protected Document doc1;
 
+  /** An annotation set */
+  protected AnnotationSet basicAS;
+
   /** Fixture set up */
   public void setUp() {
     // doc1 = TestDocument.newDoc();
+
+    basicAS = new AnnotationSetImpl(doc1);
+    FeatureMap fm = new SimpleFeatureMapImpl();
+
+    basicAS.get("T");          // to trigger type indexing
+    basicAS.get(new Long(0));  // trigger offset index (though add will too)
+
+    basicAS.add(new Long(10), new Long(20), "T1", fm);    // 0
+    basicAS.add(new Long(10), new Long(20), "T2", fm);    // 1
+    basicAS.add(new Long(10), new Long(20), "T3", fm);    // 2
+    basicAS.add(new Long(10), new Long(20), "T1", fm);    // 3
+
+    fm.put("pos", "NN");
+    fm.put("author", "hamish");
+    fm.put("version", new Integer(1));
+
+    basicAS.add(new Long(10), new Long(20), "T1", fm);    // 4
+    basicAS.add(new Long(15), new Long(40), "T1", fm);    // 5
+    basicAS.add(new Long(15), new Long(40), "T3", fm);    // 6
+    basicAS.add(new Long(15), new Long(40), "T1", fm);    // 7 
+
+    fm.put("pos", "JJ");
+    fm.put("author", "the devil himself");
+    fm.put("version", new Long(44));
+    fm.put("created", "monday");
+
+    basicAS.add(new Long(15), new Long(40), "T3", fm);    // 8
+    basicAS.add(new Long(15), new Long(40), "T1", fm);    // 9
+    basicAS.add(new Long(15), new Long(40), "T1", fm);    // 10
+
+    System.out.println(basicAS);
   } // setUp
 
   /** Test indexing by offset */
@@ -98,24 +132,38 @@ public class TestAnnotation extends TestCase
     asBuf = as.get("T3");
     assertEquals(3, asBuf.size());
 
-    // let's check that we've only got two nodes
-    SortedSet sortedAnnots = new TreeSet();
-    sortedAnnots.addAll( ((AnnotationSetImpl) as).annotsById.values() );
+    // let's check that we've only got two nodes, what the ids are and so on;
+    // first construct a sorted set of annotations
+    SortedSet sortedAnnots = new TreeSet(as);
+
+    int idCounter = 0; // for checking the annotation id
     Iterator iter = sortedAnnots.iterator();
-    int idCounter = 0;
     while(iter.hasNext()) {
       a = (Annotation) iter.next();
-      assertEquals(idCounter++, a.getId().intValue());
+      assertEquals(idCounter++, a.getId().intValue()); // check annot ids
 
       startNode = a.getStartNode();
       endNode = a.getEndNode();
-      assertEquals(0, startNode.getId().intValue());
-      assertEquals(10, startNode.getOffset().longValue());
-      assertEquals(1, startNode.getId().intValue());
-      assertEquals(20, startNode.getOffset().longValue());
+      assertEquals(0,  startNode.getId().intValue());       // start node id
+      assertEquals(10, startNode.getOffset().longValue());  // start offset
+      assertEquals(1,  endNode.getId().intValue());         // end id
+      assertEquals(20, endNode.getOffset().longValue());    // end offset
     }
 
   } // testTypeIndex()
+
+  /** Test complex get (with type, offset and feature contraints) */
+  public void testComplexGet() {
+    AnnotationSet as = new AnnotationSetImpl(doc1);
+    AnnotationSet asBuf;
+    Integer newId;
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    Annotation a;
+    Node startNode;
+    Node endNode;
+
+    as.add(new Long(10), new Long(20), "T1", fm);
+  } // testComplexGet()
 
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() {
