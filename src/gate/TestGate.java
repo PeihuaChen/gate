@@ -110,8 +110,9 @@ public class TestGate {
       } // switch
 
     // set up arguments for the JUnit test runner
-    String junitArgs[] = new String[1];
-    junitArgs[0] = "gate.TestGate";
+    String junitArgs[] = new String[2];
+    junitArgs[0] = "-noloading";
+    junitArgs[1] = "gate.TestGate";
 
     // use the next line if you're running with output to console in text mode:
     // junitArgs[1] = "-wait";
@@ -126,10 +127,10 @@ public class TestGate {
       Class clazz = null;
       clazz = Class.forName("oracle.jdbc.driver.OracleDriver");
       clazz = null;
-      junit.ui.LoadingTestRunner.main(junitArgs);
+      junit.swingui.TestRunner.main(junitArgs);
 
     } else { // by default us the single-run GUI version
-      junit.ui.TestRunner.main(junitArgs);
+      junit.swingui.TestRunner.main(junitArgs);
     }
 
   } // main
