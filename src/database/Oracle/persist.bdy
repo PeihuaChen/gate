@@ -549,18 +549,40 @@ create or replace package body persist is
                            p_value_type          IN number,
                            p_feat_id             OUT number)                      
   is
+     l_feature_key_id number;
+     cnt number;
   begin
   
-  
+
+     --0.  
      if (false = is_valid_feature_type(p_value_type)) then
         raise error.x_invalid_feature_type;
      end if;  
   
+     -- 1. find feature_key id
+     select count(fk_id)
+     into cnt
+     from t_feature_key
+     where fk_string = p_key;
+     
+     --2. if there is no such key then create one and get the id
+     if (0 = cnt) then
+       insert into t_feature_key(fk_id,
+                                 fk_string)
+       values(seq_feature_key.nextval,
+              p_key)
+       returning fk_id into l_feature_key_id;                  
+     else
+       select fk_id
+       into   l_feature_key_id
+       from   t_feature_key
+       where  fk_string = p_key;
+     end if;
      
      insert into t_feature(ft_id,
                            ft_entity_id,
                            ft_entity_type,
-                           ft_key,
+                           ft_key_id,
                            ft_number_value,
                            ft_binary_value,
                            ft_character_value,
@@ -569,7 +591,7 @@ create or replace package body persist is
      values(seq_feature.nextval,
             p_entity_id,
             p_entity_type,
-            p_key,
+            l_feature_key_id,
             p_value_number,
             empty_blob(),
             p_value_varchar,
