@@ -41,8 +41,15 @@ import gate.creole.ExecutionException;
 
 /**
  * This class copiles a set of java sources using the JDT compiler from the
- * Eclipse project.
- * All processing is done without touching the disk.
+ * Eclipse project.  Unlike the Sun compiler, this compiler can load
+ * dependencies directly from the GATE class loader, which (a) makes it faster,
+ * (b) means the compiler will work when GATE is loaded from a classloader
+ * other than the system classpath (for example within a Tomcat web
+ * application), and (c) allows it to compile code that depends on classes
+ * defined in CREOLE plugins, as well as in the GATE core.  This is the default
+ * compiler for GATE version 3.0.
+ *
+ * @author Ian Roberts
  */
 public class Eclipse extends gate.util.Javac {
 
@@ -344,9 +351,7 @@ public class Eclipse extends gate.util.Javac {
           }
           Err.prln(problem.getMessage()
                 + " at line " 
-                + problem.getSourceLineNumber() + " in " + name + ", ["
-                + problem.getSourceStart() + ", " + problem.getSourceEnd()
-                + "]");
+                + problem.getSourceLineNumber() + " in " + name);
         }
         // print the source for this class, to help the user debug.
         Err.prln("\nThe offending input was:\n");

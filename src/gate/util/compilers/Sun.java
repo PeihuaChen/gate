@@ -8,6 +8,7 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Valentin Tablan, 18/Feb/2002
+ *  Modified by Ian Roberts, 11/Dec/2004
  *
  *  $Id$
  */
@@ -25,8 +26,8 @@ import gate.creole.ExecutionException;
 
 /**
  * This class copiles a set of java sources by accessing the java compiler
- * from tools.jar file in the jdk.
- * All processing is done without touching the disk.
+ * from tools.jar file in the jdk.  As such, it will not run on a JRE alone,
+ * but requires a JDK.
  */
 public class Sun extends gate.util.Javac {
 
