@@ -23,19 +23,19 @@ public interface AccessController {
 
   /** --- */
   public Group findGroup(String name)
-    throws PersistenceException,SecurityException;;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public Group findGroup(Long id)
-    throws PersistenceException,SecurityException;;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public User findUser(String name)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public User findUser(Long id)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public Session findSession(Long id)
@@ -43,31 +43,31 @@ public interface AccessController {
 
   /** --- */
   public Group createGroup(String name)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public void deleteGroup(Long id, Session s)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public void deleteGroup(Group grp, Session s)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public User createUser(String name, String passwd)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public User deleteUser(User usr, Session s)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public User deleteUser(Long id, Session s)
-    throws PersistenceException,SecurityException;
+    throws PersistenceException, SecurityException;
 
   /** --- */
-  public Session login(String usr_name, String passwd,Long prefGroupID)
-    throws PersistenceException,SecurityException;
+  public Session login(String usr_name, String passwd, Long prefGroupID)
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public void logout(Session s)
@@ -84,10 +84,10 @@ public interface AccessController {
 
   /** --- */
   public void open(URL jdbcUrl)
-    throws PersistenceException,SecurityException;;
+    throws PersistenceException, SecurityException;
 
   /** --- */
   public void close()
-    throws PersistenceException,SecurityException;;
+    throws PersistenceException, SecurityException;
 
 }
