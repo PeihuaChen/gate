@@ -227,21 +227,22 @@ public abstract class Factory {
     }
 
     // set the parameterValues of the resource and add the listeners
-    try {
-      if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
-      FeatureMap parameters = newFeatureMap();
-      if(DEBUG) Out.prln("Reading the default parameters for  " +
-                         res.toString());
-      parameters.putAll(resData.getParameterList().getInitimeDefaults());
-      //overwrite the defaults with the user provided values
-      parameters.putAll(parameterValues);
-      setResourceParameters(res, parameters);
-    } catch(Exception e) {
-      if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
-      throw new ResourceInstantiationException(
-        "Parameterisation failure:" + Strings.getNl() + e
-      );
-    }
+    setResourceInittimeParameters(res, parameterValues);
+//    try {
+//      if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
+//      FeatureMap parameters = newFeatureMap();
+//      if(DEBUG) Out.prln("Reading the default parameters for  " +
+//                         res.toString());
+//      parameters.putAll(resData.getParameterList().getInitimeDefaults());
+//      //overwrite the defaults with the user provided values
+//      parameters.putAll(parameterValues);
+//      setResourceParameters(res, parameters);
+//    } catch(Exception e) {
+//      if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
+//      throw new ResourceInstantiationException(
+//        "Parameterisation failure:" + Strings.getNl() + e
+//      );
+//    }
 
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
@@ -333,12 +334,94 @@ public abstract class Factory {
 
   /** For each paramter, set the appropriate property on the resource
     * using bean-style reflection.
+    * This method will read the defaults where safe to do so (i.e. not for
+    * parameters disjunctions) which will get overriden by any values provided
+    * by the user.
     *
     * @see java.beans.Introspector
     * @param resource the resource to be parameterised.
     * @param parameterValues the parameters and their values.
     */
-  public static void setResourceParameters(
+  public static void setResourceInittimeParameters(Resource resource,
+                                                   FeatureMap parameterValues)
+                     throws ResourceInstantiationException {
+    try {
+      if(DEBUG) Out.prln("Setting the parameters for  " + resource.toString());
+      if(DEBUG) Out.prln("Reading the default parameters for  " +
+                         resource.toString());
+      //get the resource metadata
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                get(resource.getClass().getName());
+
+      //the parameters map
+      FeatureMap parameters = newFeatureMap();
+
+      //put the defaults
+      parameters.putAll(rData.getParameterList().getInitimeDefaults());
+
+      //overwrite the defaults with the user provided values
+      parameters.putAll(parameterValues);
+
+      setResourceParameters(resource, parameters);
+    } catch(Exception e) {
+      if(DEBUG) Out.prln("Failed to set the parameters for " +
+                         resource.toString());
+      throw new ResourceInstantiationException(
+        "Parameterisation failure:" + Strings.getNl() + e
+      );
+    }//try
+  }//public static void setResourceInittimeParameters
+
+
+  /** For each paramter, set the appropriate property on the resource
+    * using bean-style reflection.
+    * This method will read the defaults where safe to do so (i.e. not for
+    * parameters disjunctions) which will get overriden by any values provided
+    * by the user.
+    *
+    * @see java.beans.Introspector
+    * @param resource the resource to be parameterised.
+    * @param parameterValues the parameters and their values.
+    */
+  public static void setResourceRuntimeParameters(
+    Resource resource, FeatureMap parameterValues
+  ) throws ResourceInstantiationException {
+    try {
+      if(DEBUG) Out.prln("Setting the parameters for  " + resource.toString());
+      if(DEBUG) Out.prln("Reading the default parameters for  " +
+                         resource.toString());
+      //get the resource metadata
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                get(resource.getClass().getName());
+
+      //the parameters map
+      FeatureMap parameters = newFeatureMap();
+
+      //put the defaults
+      parameters.putAll(rData.getParameterList().getRuntimeDefaults());
+
+      //overwrite the defaults with the user provided values
+      parameters.putAll(parameterValues);
+
+      setResourceParameters(resource, parameters);
+    } catch(Exception e) {
+      if(DEBUG) Out.prln("Failed to set the parameters for " +
+                         resource.toString());
+      throw new ResourceInstantiationException(
+        "Parameterisation failure:" + Strings.getNl() + e
+      );
+    }//try
+  }//public static void setResourceRuntimeParameters
+
+
+  /** For each paramter, set the appropriate property on the resource
+    * using bean-style reflection.
+    *
+    * @see java.beans.Introspector
+    * @param resource the resource to be parameterised.
+    * @param parameterValues the parameters and their values.
+    */
+  protected static void setResourceParameters(
     Resource resource, FeatureMap parameterValues
   ) throws ResourceInstantiationException {
 

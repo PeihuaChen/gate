@@ -94,7 +94,6 @@ public abstract class Transducer implements Serializable
    * If true then the longest match will be fired otherwise the shortest will
    * be used. By default it is true.
    */
-  protected Boolean preferLongestMatch = new Boolean(true);
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -135,12 +134,6 @@ public abstract class Transducer implements Serializable
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
-  }
-  public void setPreferLongestMatch(Boolean newPreferLongestMatch) {
-    preferLongestMatch = newPreferLongestMatch;
-  }
-  public Boolean getPreferLongestMatch() {
-    return preferLongestMatch;
   }
 
   //ProcessProgressReporter implementation ends here

@@ -129,18 +129,18 @@ public class Nerc extends SerialController {
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", tempAnnotationSetName);
-      Factory.setResourceParameters(tokeniser, params);
+      Factory.setResourceRuntimeParameters(tokeniser, params);
 
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", tempAnnotationSetName);
-      Factory.setResourceParameters(gazetteer, params);
+      Factory.setResourceRuntimeParameters(gazetteer, params);
 
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("inputASName", tempAnnotationSetName);
       params.put("outputASName", tempAnnotationSetName);
-      Factory.setResourceParameters(transducer, params);
+      Factory.setResourceRuntimeParameters(transducer, params);
     }catch(Exception e){
       throw new ExecutionException(e);
     }

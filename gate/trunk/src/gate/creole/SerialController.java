@@ -56,7 +56,7 @@ extends ArrayList implements Controller, List
         (ResourceData) Gate.getCreoleRegister().get(pr.getClass().getName());
       ParameterList params = rd.getParameterList();
       try {
-        Factory.setResourceParameters(pr, params.getRuntimeDefaults());
+        Factory.setResourceRuntimeParameters(pr, params.getRuntimeDefaults());
       } catch(Exception e) {
         executionException =
           new ExecutionException("Couldn't set parameters: " + e);
