@@ -283,6 +283,31 @@ public class TestJape extends TestCase
 
   }  // testRhsErrorMessages
 
+  /**
+   * This test sets up a JAPE transducer based on a grammar
+   * (RhsError2.jape) that will throw a compiler error.
+   * The test succeeds so long as we get that exception.
+   */
+  public void testRhsErrorMessages2() {
+    boolean gotException = false;
+
+    try {
+      if(DEBUG) {
+        Out.print(
+          "Opening Jape grammar... " + Gate.getUrl("tests/RhsError2.jape")
+        );
+      }
+      // a JAPE batcher
+      Batch batch = new Batch(Gate.getUrl("tests/RhsError2.jape"), "UTF-8");
+    } catch(Exception e) {
+      if(DEBUG) Out.prln(e);
+      gotException = true;
+    }
+
+    assertTrue("Bad JAPE grammar (2) didn't throw an exception", gotException);
+
+  }  // testRhsErrorMessages2
+
 
   /** Test suite routine for the test runner */
   public static Test suite() {
