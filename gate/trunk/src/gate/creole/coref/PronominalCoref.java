@@ -36,10 +36,11 @@ public class PronominalCoref extends AbstractProcessingResource
 
   //annotation features
   private static final String PRP_CATEGORY = "PRP";
-  private static final String PRPS_CATEGORY = "PRP$";
+  private static final String PRP$_CATEGORY = "PRP$";
   private static final String TOKEN_CATEGORY = "category";
   private static final String TOKEN_STRING = "string";
   private static final String PERSON_GENDER = "gender";
+  private static final String PERSON_ORTHO_COREF = "matches";
 
   //scope
   private static final int SENTENCES_IN_SCOPE = 3;
@@ -50,6 +51,7 @@ public class PronominalCoref extends AbstractProcessingResource
   private Document  doc;
   private AnnotationSet defaultAnnotations;
   private Sentence[] textSentences;
+  private HashMap personGender;
 
   static {
 //    SENTENCE_COMPARATOR = new SentenceComparator();
@@ -57,6 +59,7 @@ public class PronominalCoref extends AbstractProcessingResource
   }
 
   public PronominalCoref() {
+    personGender = new HashMap();
   }
 
   /** Initialise this resource, and return it. */
@@ -99,17 +102,31 @@ public class PronominalCoref extends AbstractProcessingResource
 
     preprocess();
 
-    FeatureMap constraint = new SimpleFeatureMapImpl();
-    constraint.put("category",PRP_CATEGORY);
-    AnnotationSet personalPronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraint);
+    //get personal pronouns
+    FeatureMap constraintPRP = new SimpleFeatureMapImpl();
+    constraintPRP.put("category",PRP_CATEGORY);
+    AnnotationSet personalPronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraintPRP);
+
+    //get possesive pronouns
+    FeatureMap constraintPRP$ = new SimpleFeatureMapImpl();
+    constraintPRP$.put("category",PRP$_CATEGORY);
+    AnnotationSet possesivePronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraintPRP$);
+
+    //combine them
+    AnnotationSet pronouns = personalPronouns;
+    pronouns.addAll(possesivePronouns);
+
     //sort them according to offset
-    Object[] arrPersonalPronouns = personalPronouns.toArray();
-    java.util.Arrays.sort(arrPersonalPronouns,ANNOTATION_COMPARATOR);
+    Object[] arrPronouns = pronouns.toArray();
+    java.util.Arrays.sort(arrPronouns,ANNOTATION_COMPARATOR);
+
+    //cleanup - ease the GC
+    pronouns = personalPronouns = possesivePronouns = null;
 
     int prnSentIndex = 0;
 
-    for (int i=0; i< arrPersonalPronouns.length; i++) {
-      Annotation currPronoun = (Annotation)arrPersonalPronouns[i];
+    for (int i=0; i< arrPronouns.length; i++) {
+      Annotation currPronoun = (Annotation)arrPronouns[i];
       while (this.textSentences[prnSentIndex].getEndOffset().longValue() <
                                       currPronoun.getStartNode().getOffset().longValue()) {
         prnSentIndex++;
@@ -124,7 +141,6 @@ public class PronominalCoref extends AbstractProcessingResource
 
   }
 
-
   private Annotation findAntecedent(Annotation currPronoun,int prnSentIndex) {
 
     //0. preconditions
@@ -132,7 +148,7 @@ public class PronominalCoref extends AbstractProcessingResource
     Assert.assertTrue(prnSentIndex >= 0);
     Assert.assertTrue(currPronoun.getType().equals(TOKEN_TYPE));
     Assert.assertTrue(currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
-                      currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRPS_CATEGORY));
+                      currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
 
     String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
 
@@ -156,7 +172,8 @@ public class PronominalCoref extends AbstractProcessingResource
 
     //0. preconditions
     Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY));
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
+                      pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("HE") ||
                       pronounString.equalsIgnoreCase("HIM") ||
@@ -177,7 +194,7 @@ public class PronominalCoref extends AbstractProcessingResource
       Iterator it = persons.iterator();
       while (it.hasNext()) {
         Annotation currPerson = (Annotation)it.next();
-        String gender = (String)currPerson.getFeatures().get(PERSON_GENDER);
+        String gender = (String)this.personGender.get(currPerson);
 
         if (null == gender ||
             gender.equalsIgnoreCase("MALE") ||
@@ -207,7 +224,8 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
 
     //0. preconditions
     Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY));
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
+                      pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER"));
@@ -226,7 +244,7 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
       Iterator it = persons.iterator();
       while (it.hasNext()) {
         Annotation currPerson = (Annotation)it.next();
-        String gender = (String)currPerson.getFeatures().get(PERSON_GENDER);
+        String gender = (String)this.personGender.get(currPerson);
 
         if (null == gender ||
             gender.equalsIgnoreCase("FEMALE") ||
@@ -257,10 +275,10 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
 
   private void preprocess() {
 
-    //get all annotation in the default set
+    //1.get all annotation in the default set
     this.defaultAnnotations = this.doc.getAnnotations();
 
-    //get all SENTENCE annotations
+    //2.get all SENTENCE annotations
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_TYPE);
 
     this.textSentences = new Sentence[sentenceAnnotations.size()];
@@ -274,21 +292,22 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
       Long sentStartOffset = currSentence.getStartNode().getOffset();
       Long sentEndOffset = currSentence.getEndNode().getOffset();
 
-      //get PERSOSNS in this sentence
+      //2.1. get PERSOSNS in this sentence
       AnnotationSet sentPersons = this.defaultAnnotations.get(this.PERSON_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
-      //get ORGANIZATIONS in this sentence
+      //2.2. get ORGANIZATIONS in this sentence
       AnnotationSet sentOrgs = this.defaultAnnotations.get(this.ORG_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
-      //get LOCATION in this sentence
+      //2.3. get LOCATION in this sentence
       AnnotationSet sentLocs = this.defaultAnnotations.get(this.LOC_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
+      //2.4. create a Sentence for thei SENTENCE annotation
       this.textSentences[i] = new Sentence(i,
                                             0,
                                             sentStartOffset,
@@ -298,7 +317,45 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
                                             sentLocs
                                   );
 
+      //2.5. for all PERSONs in the sentence - find their gender using the
+      //orthographic coreferences if the gender of some entity is unknown
+      Iterator itPersons = sentPersons.iterator();
+      while (itPersons.hasNext()) {
+        Annotation currPerson = (Annotation)itPersons.next();
+        String gender = this.findPersonGender(currPerson);
+        this.personGender.put(currPerson,gender);
+      }
     }
+
+  }
+
+
+  private String findPersonGender(Annotation person) {
+
+    String result = (String)person.getFeatures().get(PERSON_GENDER);
+
+    if (null==result) {
+      //gender is unknown - try to find it from the ortho coreferences
+      List orthoMatches = (List)person.getFeatures().get(PERSON_ORTHO_COREF);
+
+      if (null != orthoMatches) {
+        Iterator itMatches = orthoMatches.iterator();
+
+        while (itMatches.hasNext()) {
+          Integer correferringID = (Integer)itMatches.next();
+          Annotation coreferringEntity = this.defaultAnnotations.get(correferringID);
+          Assert.assertTrue(coreferringEntity.getType().equalsIgnoreCase(PERSON_TYPE));
+          String correferringGender = (String)coreferringEntity.getFeatures().get(PERSON_GENDER);
+
+          if (null != correferringGender) {
+            result = correferringGender;
+            break;
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
 //  private int findSentenceNumber(Annotation ann) {
@@ -328,7 +385,8 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     Assert.assertNotNull(ant1);
     Assert.assertNotNull(ant2);
     Assert.assertNotNull(pronoun);
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY));
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
+                      pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER") ||
