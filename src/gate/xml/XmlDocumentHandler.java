@@ -350,7 +350,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
                 tmpDocContent.charAt(tmpDocContentSize - 1) == '"' ||
                 tmpDocContent.charAt(tmpDocContentSize - 1) == '\''
                )){// do nothing. The content will be appended
-         }else if (!addExtraSpace) { Out.prln("No need to add extra space");
+         }else if (!addExtraSpace) {
          }else
            {
             // In all other cases append " "
