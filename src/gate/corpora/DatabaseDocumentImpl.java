@@ -31,9 +31,9 @@ import gate.creole.*;
 import gate.event.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl
-                                  implements DatastoreListener,
+                                  implements  DatastoreListener,
                                               Document,
-                                              EventAwareLanguageResource{
+                                              EventAwareDocument {
 
   private static final boolean DEBUG = false;
 
@@ -59,11 +59,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
    */
   protected EventsHandler eventHandler;
 
-/*  public static final int DOC_NAME = 1001;
-  public static final int DOC_CONTENT = 1002;
-  public static final int DOC_FEATURES = 1003;
-  public static final int DOC_MAIN = 1004;
-*/
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -114,14 +109,14 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     //annotations
     //1. default
-    setAnnotations(null,_default);
+    _setAnnotations(null,_default);
 
     //2. named
     Iterator itNamed = _named.values().iterator();
     while (itNamed.hasNext()){
       AnnotationSet currSet = (AnnotationSet)itNamed.next();
       //add them all to the DBAnnotationSet
-      setAnnotations(currSet.getName(),currSet);
+      _setAnnotations(currSet.getName(),currSet);
     }
 
     //3. add the listeners for the features
@@ -329,14 +324,10 @@ public class DatabaseDocumentImpl extends DocumentImpl
     if (null == name) {
       //default set
       if (this.defaultAnnots != null) {
-        //the default set is alredy red - do nothing
+        //the default set is alredy read - do nothing
         //super methods will take care
         return;
       }
-//      else {
-//        this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
-        //go on with processing
-//      }
     }
     else {
       //named set
@@ -456,6 +447,10 @@ public class DatabaseDocumentImpl extends DocumentImpl
         else {
           as = new DatabaseAnnotationSetImpl(this,name, transSet);
         }
+
+        //1.6 add the new a-set to the list of the a-sets read from the DB
+//        this.loadedAnnotSets.add(as);
+
       }
       catch(SQLException sqle) {
         throw new SynchronisationException("can't read annotations from DB: ["+ sqle.getMessage()+"]");
@@ -826,16 +821,24 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   }
 
-  private void setAnnotations(String setName,Collection annotations) {
+  private void _setAnnotations(String setName,Collection annotations) {
 
     if (null == setName) {
       Assert.assertTrue(null == this.defaultAnnots);
       this.defaultAnnots = new DatabaseAnnotationSetImpl(this,annotations);
+
+      //add to the set of loaded a-sets but do not add its annotations to the
+      //list of new annotations
+//      this.loadedAnnotSets.add(this.defaultAnnots);
     }
     else {
       Assert.assertTrue(false == this.namedAnnotSets.containsKey(setName));
       AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName,annotations);
       this.namedAnnotSets.put(setName,annSet);
+
+      //add to the set of loaded a-sets but do not add its annotations to the
+      //list of new annotations
+//      this.loadedAnnotSets.add(annSet);
     }
   }
 
@@ -946,4 +949,16 @@ public class DatabaseDocumentImpl extends DocumentImpl
 //System.out.println("dirty flags cleared...");
     }
   }
+
+  public Collection getLoadedAnnotationSets() {
+
+    //never return the data member - return a clone
+    Vector result = new Vector(this.namedAnnotSets.values());
+    if (null != this.defaultAnnots) {
+      result.add(this.defaultAnnots);
+    }
+
+    return result;
+  }
+
 }
