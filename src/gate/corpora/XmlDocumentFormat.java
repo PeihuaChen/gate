@@ -65,7 +65,9 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       // use it
       if (null != doc){
         // parse and construct the gate annotations
-        parser.parse(doc.getSourceURL().toString(),
+        //String s = doc.getContent().toString();
+        //InputStream in = new ByteArrayInputStream(s.getBytes ());
+        parser.parse(doc.getSourceURL ().toString (),
                 new gate.xml.CustomDocumentHandler(doc, this.markupElementsMap)
         );
       }
