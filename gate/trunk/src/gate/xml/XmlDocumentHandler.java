@@ -157,7 +157,6 @@ public class XmlDocumentHandler extends DefaultHandler{
     */
   public void startElement (String uri, String qName, String elemName,
                                                              Attributes atts){
-
     // inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -168,7 +167,7 @@ public class XmlDocumentHandler extends DefaultHandler{
 
     //get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
-     String attName  = atts.getLocalName(i);
+     String attName  = atts.getQName(i);
      String attValue = atts.getValue(i);
      fm.put(attName,attValue);
     }// End for

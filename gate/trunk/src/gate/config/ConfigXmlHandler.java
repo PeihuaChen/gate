@@ -102,7 +102,7 @@ public class ConfigXmlHandler extends DefaultHandler {
     if(elementName.toUpperCase().equals("SYSTEM")) {
       systemData = new SystemData();
       for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
-        if(currentAttributes.getLocalName(i).toUpperCase().equals("NAME"))
+        if(currentAttributes.getQName(i).toUpperCase().equals("NAME"))
           systemData.systemName = currentAttributes.getValue(i);
       }
     }
@@ -223,7 +223,7 @@ public class ConfigXmlHandler extends DefaultHandler {
     // for each attribute of this element, add it to the param list
     for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
       params.put(
-        currentAttributes.getLocalName(i), currentAttributes.getValue(i)
+        currentAttributes.getQName(i), currentAttributes.getValue(i)
       );
     }
 
