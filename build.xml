@@ -123,6 +123,7 @@
     <javac classpathref="build.class.path"
            destdir="${outputDir}" 
            includes="guk/**" 
+           source="1.4"
            srcdir="${srcDir}"/>
 		<jar destfile="${libDir}/ext/guk.jar" 
          update="false"
@@ -141,6 +142,7 @@
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
+           source="1.4"
            includes="gate/**,com/**"
 					 classpathref="build.class.path"/>
   </target>
