@@ -693,13 +693,13 @@ jar/classpath so it's the same as registerBuiltins
     return Strings.getFileSep().equals("/");
   } // runningOnUnix
 
-  /** Flag for Shell SLAC GUI start instead of standart GATE GUI. */
-  private static boolean shellSlackGui = false;
+  /** Flag for SLUG GUI start instead of standart GATE GUI. */
+  private static boolean slugGui = false;
 
-  /** Should we start Shell SLAC GUI. */
-  public static boolean isShellSlackGui() { return shellSlackGui; }
+  /** Should we start SLUG GUI. */
+  public static boolean isSlugGui() { return slugGui; }
 
-  /** Tell GATE whether to start Shell SLAC GUI. */
-  public static void setShellSlackGui(boolean b) { shellSlackGui = b; }
+  /** Tell GATE whether to start SLUG GUI. */
+  public static void setSlugGui(boolean b) { slugGui = b; }
   
 } // class Gate

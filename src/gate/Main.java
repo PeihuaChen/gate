@@ -131,7 +131,7 @@ public class Main {
 
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
     //show the splash
-    if(!Gate.isShellSlackGui()) {
+    if(!Gate.isSlugGui()) {
       SwingUtilities.invokeLater(new Runnable(){
         public void run(){
           //build the Spash
@@ -186,22 +186,29 @@ public class Main {
         applyUserPreferences();
 
         //all the defaults tables have been updated; build the GUI
-        if(Gate.isShellSlackGui()) {
+        if(Gate.isSlugGui()) {
           frame = new ShellSlacFrame();
-          if(DEBUG) Out.prln("constructing Shell SLAC GUI");
+          if(DEBUG) Out.prln("constructing SLUG GUI");
         }
         else {
           frame = new MainFrame();
           if(DEBUG) Out.prln("constructing GUI");
-        } // if - Shell SLAC
+        } // if - SLUG
 
         // run the GUI
-        if(Gate.isShellSlackGui()) {
-          frame.setTitle("Shell Slac "+name+" " + version + " build " + build);
+        if(Gate.isSlugGui()) {
+          frame.setTitle("SLUG application");
         }
         else {
           frame.setTitle(name + " " + version + " build " + build);
-        } // if - Shell SLAC
+        } // if - SLUG
+        
+        // Set title from Java properties
+        String title = 
+          System.getProperty(GateConstants.TITLE_JAVA_PROPERTY_NAME);
+        if(title != null) {
+          frame.setTitle(title);
+        } // if
 
         // Validate frames that have preset sizes
         frame.validate();
@@ -538,9 +545,9 @@ public class Main {
             System.exit(-1);
           }
           break;
-        // -s runs the Shell SLAC GUI
+        // -s runs the SLUG GUI
         case 's':
-          Gate.setShellSlackGui(true);
+          Gate.setSlugGui(true);
           break;
 
 
