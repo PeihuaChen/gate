@@ -852,8 +852,8 @@ implements Runnable, ProcessingResource{
   /** The static initialiser will inspect the class {@link java.lang.Character}
     * using reflection to find all the public static members and will map them
     * to ids starting from 0.
-    * After that it will build all the static data: {@link typeIds}, {@link
-    * maxTypeId}, {@link typeMnemonics}, {@link stringTypeIds}
+    * After that it will build all the static data: {@link #typeIds}, {@link
+    * #maxTypeId}, {@link #typeMnemonics}, {@link #stringTypeIds}
     */
   static{
     Field[] characterClassFields;

@@ -51,8 +51,9 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
   } // put(UnicodeType type, DFSMState state)
 
   /** Adds a new mapping using the actual index in the internal array.
-    * This method is for internal use only. Use {@link #put(UnicodeType}
-    * instead.
+    * This method is for internal use only. Use
+    * {@link #put(gate.creole.tokeniser.UnicodeType,
+    *             gate.creole.tokeniser.DFSMState)} instead.
     */
   void put(int index, DFSMState state){
     transitionFunction[index] = state;

@@ -116,7 +116,7 @@ public class MainFrame extends JFrame
    * Holds all the icons used in the Gate GUI indexed by filename.
    * This is needed so we do not need to decode the icon everytime
    * we need it as that would use unecessary CPU time and memory.
-   * Access to this data is avaialable through the {@link #getIcon()}
+   * Access to this data is avaialable through the {@link #getIcon(String)}
    * method.
    */
   static Map iconByName;
