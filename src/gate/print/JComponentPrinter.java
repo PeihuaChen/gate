@@ -91,7 +91,6 @@ public class JComponentPrinter implements Pageable{
       //move the origin up towards the first inter-row space
       int location = tComp.viewToModel(new Point(0, (int)originY));
       try{
-         tComp.getText(location, 20)+ "\"");
         Rectangle rect = tComp.modelToView(location);
         originY = rect.y + rect.height - 1;
       }catch(BadLocationException ble){
