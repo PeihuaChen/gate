@@ -47,9 +47,10 @@ public class DocumentContentImpl implements DocumentContent
       s = start.longValue();
       e = end.longValue();
     }
-    if(encoding != null){
+
+    if(encoding != null && !encoding.equalsIgnoreCase("")){
       uReader = new BufferedReader(new InputStreamReader(u.openStream(),
-                                                         encoding));
+                                                                    encoding));
     }else{
       uReader = new BufferedReader(new InputStreamReader(u.openStream()));
     };
