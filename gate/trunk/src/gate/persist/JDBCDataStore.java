@@ -39,10 +39,13 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   protected Connection  jdbcConn;
   private   String      dbURL;
   private   String      driverName;
+  private   String      dbID;
+
 
   protected   AccessController  ac;
   protected   Session           session;
   protected   String            name;
+
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
@@ -133,7 +136,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
       //3. open and init the security factory with the same DB repository
       ac.open(dbURL);
 
-      //4. login should be somewhere here?
+      //4. get DB ID
+      this.dbID = this.readDatabaseID();
 
     }
     catch(SQLException sqle) {
@@ -367,5 +371,14 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
     //this should never happen
     throw new IllegalArgumentException();
   }
+
+  /** --- */
+  public String getDatabaseID() {
+    return this.dbID;
+  }
+
+  /** --- */
+  public abstract String readDatabaseID()
+    throws PersistenceException;
 
 }

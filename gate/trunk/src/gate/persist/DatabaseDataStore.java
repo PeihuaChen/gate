@@ -45,4 +45,7 @@ public interface DatabaseDataStore extends DataStore {
   public void setDriver(String driverName)
     throws PersistenceException;
 
+  /** --- */
+  public String getDatabaseID();
+
 }
