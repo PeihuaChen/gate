@@ -320,7 +320,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
                          new Character(Character.toUpperCase(
                                        content.charAt(charIdx)));
       nextState = currentState.next(currentChar);
-      if(null == nextState) {
+      if(nextState == null) {
         //the matching stopped
         if(null != lastMatchingState &&
            !Character.isLetter(content.charAt(matchedRegionEnd + 1)) &&
@@ -374,8 +374,11 @@ public class DefaultGazetteer extends AbstractProcessingResource
       }
     } // while(charIdx < length)
 
-    if(lastMatchingState != null) {
-
+    if( null != lastMatchingState &&
+        !Character.isLetter(content.charAt(matchedRegionEnd + 1)) &&
+        (matchedRegionStart == 0 ||
+        !Character.isLetter(content.charAt(matchedRegionStart - 1))
+       )) {
       Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
       while(lookupIter.hasNext()) {
         currentLookup = (Lookup)lookupIter.next();
