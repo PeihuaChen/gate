@@ -18,8 +18,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import gate.*;
-import gate.creole.AbstractVisualResource;
-import gate.creole.ProtegeProjectName;
+import gate.creole.*;
 // Protege import
 import edu.stanford.smi.protege.ui.*;
 import edu.stanford.smi.protege.model.*;
@@ -130,6 +129,9 @@ System.out.println("KnBase cls count: "+knBase.getClsCount());
       
     } // if
   } // setTarget(Object target)
+  
+//------------------------------------------------------------------------------
+// Main method for test purposes  
   
   /** Test code*/
   public static void main(String[] args) {
