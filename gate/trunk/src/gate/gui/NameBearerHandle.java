@@ -172,6 +172,29 @@ public class NameBearerHandle implements Handle,
     popup.add(action);
   } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
 
+  /** Fill Protege save, save as and save in format actions */
+  private void fillHMMActions(JPopupMenu popup) {
+    Action action;
+
+    com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR = 
+      (com.ontotext.gate.hmm.agent.AlternativeHMMAgent) target;
+      
+    popup.addSeparator();
+    action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
+    action.putValue(action.NAME, "Save trained HMM model");
+    action.putValue(action.SHORT_DESCRIPTION, 
+      "Save trained HMM model into PR URL file");
+    // Add Save trained HMM model action
+    popup.add(action);
+    
+    action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
+    action.putValue(action.SHORT_DESCRIPTION, 
+      "Save trained HMM model into new file");
+    // Add Save As... trained HMM model action
+    popup.add(action);    
+  } // fillHMMActions(gate.gui.ProtegeWrapper protege)
+  
+  
   protected void buildViews() {
     //build the popup
     popup = new JPopupMenu();
@@ -183,6 +206,9 @@ public class NameBearerHandle implements Handle,
     if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
+      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
+        fillHMMActions(popup);
+      }
     }else if(target instanceof LanguageResource) {
       //Language Resources
       popup.addSeparator();
