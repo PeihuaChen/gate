@@ -14,36 +14,13 @@
  */
 
 package gate;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
-import gate.creole.ResourceInstantiationException;
 import gate.event.CorpusListener;
-import gate.util.NameBearer;
 
 /** Corpora are lists of Document. TIPSTER equivalent: Collection.
   */
-public interface Corpus extends LanguageResource, List, NameBearer {
-
-  public static final String CORPUS_NAME_PARAMETER_NAME = "name";
-  public static final String CORPUS_DOCLIST_PARAMETER_NAME = "documentsList";
-
-  /**
-   * Gets the names of the documents in this corpus.
-   * @return a {@link List} of Strings representing the names of the documents
-   * in this corpus.
-   */
-  public List getDocumentNames();
-
-  /**
-   * Gets the name of a document in this corpus.
-   * @param index the index of the document
-   * @return a String value representing the name of the document at
-   * <tt>index</tt> in this corpus.
-   */
-  public String getDocumentName(int index);
+public interface Corpus extends SimpleCorpus {
 
   /**
    * Unloads the document from memory. Only needed if memory
@@ -59,30 +36,6 @@ public interface Corpus extends LanguageResource, List, NameBearer {
    * @return void.
    */
   public void unloadDocument(Document doc);
-
-  /**
-   * Fills this corpus with documents created on the fly from selected files in
-   * a directory. Uses a {@link FileFilter} to select which files will be used
-   * and which will be ignored.
-   * A simple file filter based on extensions is provided in the Gate
-   * distribution ({@link gate.util.ExtensionFileFilter}).
-   * @param directory the directory from which the files will be picked. This
-   * parameter is an URL for uniformity. It needs to be a URL of type file
-   * otherwise an InvalidArgumentException will be thrown.
-   * An implementation for this method is provided as a static method at
-   * {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
-   * @param filter the file filter used to select files from the target
-   * directory. If the filter is <tt>null</tt> all the files will be accepted.
-   * @param encoding the encoding to be used for reading the documents
-   * @param recurseDirectories should the directory be parsed recursively?. If
-   * <tt>true</tt> all the files from the provided directory and all its
-   * children directories (on as many levels as necessary) will be picked if
-   * accepted by the filter otherwise the children directories will be ignored.
-   */
-  public void populate(URL directory, FileFilter filter,
-                       String encoding, boolean recurseDirectories)
-                       throws IOException, ResourceInstantiationException;
-
 
   /**
    * This method returns true when the document is already loaded in memory.
