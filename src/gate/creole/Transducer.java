@@ -68,6 +68,8 @@ public class Transducer extends AbstractProcessingResource {
   public void run(){
     try{
       if(document == null) throw new ParameterException("No document provided!");
+      if(inputASName != null && inputASName.equals("")) inputASName = null;
+      if(outputASName != null && outputASName.equals("")) outputASName = null;
       if(inputASName == null && outputASName == null){
          batch.transduce(document);
       }else{
