@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<CREOLE-DIRECTORY>
+
+<CREOLE>
+  <RESOURCE>
+  
+    <NAME>CMU Minorthird</NAME>
+    <JAR>Minorthird.jar</JAR>
+    <CLASS>edu.cmu.minorthird.RunMixupWrapper</CLASS>
+
+    <PARAMETER NAME="document"
+        RUNTIME="true"
+        COMMENT="document to be processed">
+        gate.Document
+    </PARAMETER>
+	
+    <PARAMETER NAME="mixupFile" 
+        RUNTIME="true"
+        COMMENT="file of the mixup program">
+        java.net.URL
+    </PARAMETER>
+    
+  </RESOURCE>
+</CREOLE>
+
+</CREOLE-DIRECTORY>
