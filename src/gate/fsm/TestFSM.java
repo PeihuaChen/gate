@@ -29,9 +29,11 @@ public class TestFSM extends TestCase {
   /** Construction */
   public TestFSM(String name) { super(name); }
 
-  public void setUp() throws JapeException{
+  public void setUp() throws JapeException {
     String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
     InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
+    if(japeFileStream == null)
+      throw new JapeException("couldn't open " + japeFileName);
     batch = new Batch(japeFileStream);
     transducer = (MultiPhaseTransducer)batch.getTransducer();
     transducer.finish();

@@ -42,6 +42,10 @@ public class Batch implements JapeConstants, java.io.Serializable {
     * to the JAPE file.
     */
   public Batch(InputStream japeStream) throws JapeException {
+    if(japeStream == null)
+      throw new JapeException(
+        "attempt to create a batch parser with null input stream"
+      );
     this.japeFileName = "stream";
     this.japeStream = japeStream;
     initTransducer();
@@ -59,8 +63,9 @@ public class Batch implements JapeConstants, java.io.Serializable {
       parseJape();
     else if(japeFileName.endsWith(".jar") || japeFileName.endsWith(".JAR"))
       deserialiseJape();
-    else if(japeFileName.equals("stream"))
+    else if(japeFileName.equals("stream")) {
       parseJape(japeStream);
+    }
     else
       throw new JapeException(
         "unknown file type (not .jape, .ser or .jar):" + japeFileName
@@ -339,6 +344,9 @@ public class Batch implements JapeConstants, java.io.Serializable {
 } // class Batch
 
 // $Log$
+// Revision 1.3  2000/05/05 10:32:25  hamish
+// added some error handling
+//
 // Revision 1.2  2000/05/03 18:06:39  hamish
 // added construction from InputStream
 //
