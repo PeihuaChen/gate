@@ -206,7 +206,7 @@ distrib:
 	$${TARZ} $${D}/$${GN}.tgz $${GN}; mv $${GN} xxx; \
 	cp gate/build/gate.jar xxx/bin; cp gate/lib/ext/guk.jar xxx/bin/ext; \
 	cp gate/lib/ext/nl.mpi.lookup.jar xxx/bin/ext; \
-	cp gate/bin/tools1[34].jar xxx/bin; \
+	cp gate/bin/tools1[34].jar xxx/bin; cp gate/licence.html xxx; \
 	GN=$${N}--BINARY; mv xxx $${GN}; \
 	$${TARZ} $${D}/$${GN}.tgz $${GN}/bin; mv $${GN} xxx; \
 	GN=$${N}--DOCS; mv xxx $${GN}; \
