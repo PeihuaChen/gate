@@ -28,18 +28,21 @@ Priority: 30
 :person
 --> 
 {
-//removes  TempPerson annotation, gets the rule feature and adds a new Person annotation
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("rule1", personAnn.getFeatures().get("rule"));
-features.put("rule2", "PersonFinal");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
-features);
-annotations.removeAll(person);
-}
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation person1Ann = (gate.Annotation)personSet.iterator().next();
 
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("TempPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("rule1", person1Ann.getFeatures().get("rule"));
+  features.put("rule", "PersonFinal");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "Person",
+features);
+}
 
 Rule:	OrgCountryFinal
 Priority: 50

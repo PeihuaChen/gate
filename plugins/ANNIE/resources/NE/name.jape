@@ -134,37 +134,40 @@ Priority: 30
 // Anne and Kenton
 
 (
- {Lookup.majorType == person_first}
-):personName1
+ {FirstPerson}
+):person1
 (
  SPACE
  {Token.string == "and"}
  SPACE
 )
 ({Token.orth == upperInitial})
-:personName2
+:person2
  -->
- // :personName1.TempPerson = {kind = "personName", rule = PersonFirstContext},
-//:personName2.TempPerson = {kind = "personName", rule = PersonFirstContext}
 
 {
-//gate.AnnotationSet personName1 = (gate.AnnotationSet)bindings.get("personName1");
-//gate.Annotation person1Ann = (gate.Annotation)personName1.iterator().next();
-//gate.FeatureMap features = Factory.newFeatureMap();
-//features.put("gender", person1Ann.getFeatures().get("minorType"));
-//features.put("kind", "personName");
-//features.put("rule", "PersonFirstContext");
-//annotations.add(personName1.firstNode(), personName1.lastNode(), "TempPerson",
-//features);
-//gate.AnnotationSet personName2 = (gate.AnnotationSet)bindings.get("personName2");
-//gate.Annotation person2Ann = (gate.Annotation)personName2.iterator().next();
-//gate.FeatureMap features = Factory.newFeatureMap();
-//features.put("gender", person2Ann.getFeatures().get("minorType"));
-//features.put("kind", "personName");
-//features.put("rule", "PersonFirstContext");
-//annotations.add(personName2.firstNode(), personName2.lastNode(), "TempPerson",
-//features);
+//first deal with person1
+ gate.FeatureMap features1 = Factory.newFeatureMap();
+gate.AnnotationSet person1Set = (gate.AnnotationSet)bindings.get("person1");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)person1Set.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features1.put("gender", personAnn.getFeatures().get("gender"));
 }
+  features1.put("kind", "personName");
+  features1.put("rule", "PersonFirstContext");
+annotations.add(person1Set.firstNode(), person1Set.lastNode(), "TempPerson",
+features1);
+//now deal with person2
+gate.FeatureMap features2 = Factory.newFeatureMap();
+gate.AnnotationSet person2Set = (gate.AnnotationSet)bindings.get("person2");
+  features2.put("kind", "personName");
+  features2.put("rule", "PersonFirstContext");
+annotations.add(person2Set.firstNode(), person2Set.lastNode(), "TempPerson",
+features2);
+}
+
 
 
 Rule: PersonFirstContext2
@@ -172,15 +175,14 @@ Priority: 40
 // Anne and I
 
 (
- {Lookup.majorType == person_first}
+ {FirstPerson}
 ):person
 (
  SPACE
  {Token.string == "and"}
  SPACE
-)
 ({Token.length == "1"})
-:personName2
+)
  -->
 {
  gate.FeatureMap features = Factory.newFeatureMap();
