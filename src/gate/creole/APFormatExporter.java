@@ -256,7 +256,8 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     xmlDoc.append("  <entity ID=\"" + docId + "-" + getNextEntityId() + "\">\n");
     // We know for sure that the list is not empty (see above)
     Annotation a = (Annotation) anEntity.get(0);
-    xmlDoc.append("    <entity_type>" + a.getType() + "</entity_type>\n");
+    xmlDoc.append("    <entity_type>" + a.getType().toUpperCase() +
+     "</entity_type>\n");
     // Write the entities mentions
     Iterator anEntityIter = anEntity.iterator();
     while(anEntityIter.hasNext()){
