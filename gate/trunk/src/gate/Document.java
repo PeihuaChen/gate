@@ -74,6 +74,13 @@ public interface Document extends LanguageResource, Comparable {
     */
   public Map getNamedAnnotationSets();
 
+  /**
+   * Removes one of the named annotation sets.
+   * Note that the default annotation set cannot be removed.
+   * @param name the name of the annotation set to be removed
+   */
+  public void removeAnnotationSet(String name);
+
   /** Make the document markup-aware. This will trigger the creation
    *  of a DocumentFormat object at Document initialisation time; the
    *  DocumentFormat object will unpack the markup in the Document and
