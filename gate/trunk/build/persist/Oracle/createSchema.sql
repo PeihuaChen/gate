@@ -1,8 +1,15 @@
 
-@createDB_Oracle.sql
-pause >>>>>> Tables and sequences successfully  created. Press ENTER to continue...
+@createTable.sql
+pause >>>>>> Tables successfully  created. Press ENTER to continue...
 clear buffer
 
+@createSequence.sql
+pause >>>>>> Sequences successfully  created. Press ENTER to continue...
+clear buffer
+
+@createIndex.sql
+pause >>>>>> Indexes successfully  created. Press ENTER to continue...
+clear buffer
  
 @../../../src/database/Oracle/error.spc 
 pause >>>>>> Package ERROR successfully  created. Press ENTER to continue...
