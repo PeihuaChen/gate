@@ -12,7 +12,6 @@
     <path>[lib/GnuGetOpt.jar]</path>
     <path>[lib/orajdbc2.zip]</path>
     <path>[lib/gateHmm.jar]</path>
-    <path>[lib/docwiz.jar]</path>
     <path>[lib/junit.jar]</path>
     <path>[lib/orajdbc9i.zip]</path>
     <path>[lib/jena.jar]</path>
@@ -32,5 +31,5 @@
     <path>[lib/ext/guk.jar]</path>
     <path>[lib/ext/nl.mpi.lookup.jar]</path>
   </class>
-  <lastmodsaved>1061991626910</lastmodsaved>
+  <lastmodsaved>1061993942650</lastmodsaved>
 </library>
