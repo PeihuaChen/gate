@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Tue Oct 09 16:28:08 2001
+ *  auto generated: Mon Oct 15 15:01:56 2001
  *
  *  $Id$
  *
@@ -307,7 +307,7 @@ DROP TABLE T_ANNOT_SET CASCADE CONSTRAINTS;
 CREATE TABLE T_ANNOT_SET (
        AS_ID                NUMBER NOT NULL,
        AS_DOC_ID            NUMBER NOT NULL,
-       AS_NAME              VARCHAR2(16) NULL,
+       AS_NAME              VARCHAR2(128) NULL,
        PRIMARY KEY (AS_ID), 
        FOREIGN KEY (AS_DOC_ID)
                              REFERENCES T_DOCUMENT
