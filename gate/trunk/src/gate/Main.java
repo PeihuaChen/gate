@@ -228,28 +228,30 @@ public class Main {
         frame.setVisible(true);
         if(splash != null) splash.hide();
 
-        //load session if required and available;
-        //do everything from a new thread.
-        Runnable runnable = new Runnable(){
-          public void run(){
-            try{
-              File sessionFile = new File(Gate.getUserSessionFileName());
-              if(sessionFile.exists()){
-                MainFrame.lockGUI("Loading saved session...");
-                gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
+        if(!Gate.isSlugGui()) {
+          //load session if required and available;
+          //do everything from a new thread.
+          Runnable runnable = new Runnable(){
+            public void run(){
+              try{
+                File sessionFile = new File(Gate.getUserSessionFileName());
+                if(sessionFile.exists()){
+                  MainFrame.lockGUI("Loading saved session...");
+                  gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
+                }
+              }catch(Exception e){
+                Err.prln("Failed to load session data:");
+                e.printStackTrace(Err.getPrintWriter());
+              }finally{
+                MainFrame.unlockGUI();
               }
-            }catch(Exception e){
-              Err.prln("Failed to load session data:");
-              e.printStackTrace(Err.getPrintWriter());
-            }finally{
-              MainFrame.unlockGUI();
             }
-          }
-        };
-        Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                   runnable, "Session loader");
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
+          };
+          Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                     runnable, "Session loader");
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        } // if - when no SLUG GUI load session
       }
     });
   } // runGui()
