@@ -43,7 +43,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
   protected EventsHandler eventHandler;
   protected List documentData;
   protected List removedDocuments;
-  protected Set  addedDocuments;
+  protected List  addedDocuments;
 
   public DatabaseCorpusImpl() {
     super();
@@ -67,7 +67,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.removedDocuments = new ArrayList();
     //just allocate space for this one, don't initialize it -
     //invokations of add() will add elements to it
-    this.addedDocuments = new HashSet();
+    this.addedDocuments = new ArrayList();
 
     //init the document list
     for (int i=0; i< this.documentData.size(); i++) {
@@ -404,6 +404,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
     this.documentData = new ArrayList(this.supportList.size());
     this.removedDocuments = new ArrayList();
+    this.addedDocuments = new ArrayList();
 
     //init the documentData list
     for (int i=0; i< this.supportList.size(); i++) {
@@ -665,6 +666,10 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
   public List getRemovedDocuments() {
     return new ArrayList(this.removedDocuments);
+  }
+
+  public List getAddedDocuments() {
+    return new ArrayList(this.addedDocuments);
   }
 
   private class DatabaseCorpusIterator implements Iterator {
