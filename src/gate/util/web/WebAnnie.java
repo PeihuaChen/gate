@@ -167,18 +167,22 @@ public class WebAnnie  {
         AnnotationSet defaultAnnotSet = doc.getAnnotations();
         Set annotTypesRequired = new HashSet();
 
+        String output = null;
         if (annotations != null) {
             for (int i=0;i<annotations.length;i++) {
                 annotTypesRequired.add(annotations[i]);
             }
             AnnotationSet selectedAnnotations =
                 defaultAnnotSet.get(annotTypesRequired);
-            return doc.toXml(selectedAnnotations, true);
+            output = doc.toXml(selectedAnnotations, true);
         }
         else {
-            return doc.toXml();
+            output = doc.toXml();
         }
-     
+        //delete the used resources
+        Factory.deleteResource(doc);
+        Factory.deleteResource(corpus);
+        return output;
     } // process
     
 } // class WebAnnie
