@@ -49,7 +49,6 @@ public class MainFrame extends JFrame
   JMenuBar menuBar;
   JSplitPane mainSplit;
   JSplitPane leftSplit;
-  Box southBox;
   JLabel statusBar;
   JProgressBar progressBar;
   XJTabbedPane mainTabbedPane;
@@ -387,9 +386,7 @@ public class MainFrame extends JFrame
     mainSplit.setDividerLocation(leftSplit.getPreferredSize().width + 10);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
 
-    southBox = Box.createHorizontalBox();
-    southBox.add(Box.createHorizontalStrut(5));
-
+    //status and progress bars
     statusBar = new JLabel(" ");
     statusBar.setPreferredSize(new Dimension(200,
                                              statusBar.getPreferredSize().
@@ -402,18 +399,22 @@ public class MainFrame extends JFrame
     progressBar.setBorderPainted(false);
     progressBar.setStringPainted(false);
     progressBar.setOrientation(JProgressBar.HORIZONTAL);
-    progressBar.setPreferredSize(new Dimension(300,
-                                               progressBar.getPreferredSize().
-                                               height));
-    progressBar.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
 
-    southBox.add(statusBar);
-    southBox.add(Box.createHorizontalGlue());
-    southBox.add(progressBar);
+    JPanel southBox = new JPanel();
+    southBox.setLayout(new GridLayout(1,2));
+    southBox.setBorder(null);
 
-    southBox.add(Box.createHorizontalStrut(5));
+    Box tempHBox = Box.createHorizontalBox();
+    tempHBox.add(Box.createHorizontalStrut(5));
+    tempHBox.add(statusBar);
+    southBox.add(tempHBox);
+    tempHBox = Box.createHorizontalBox();
+    tempHBox.add(progressBar);
+    tempHBox.add(Box.createHorizontalStrut(5));
+    southBox.add(tempHBox);
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
+    progressBar.setVisible(false);
 
     //TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
@@ -2761,7 +2762,10 @@ public class MainFrame extends JFrame
     ProgressBarUpdater(int newValue){
       value = newValue;
     }
+
     public void run(){
+      if(value == 0) progressBar.setVisible(false);
+      else progressBar.setVisible(true);
       progressBar.setValue(value);
     }
 
