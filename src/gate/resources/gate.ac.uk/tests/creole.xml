@@ -46,11 +46,20 @@
   <!-- creole.xml for tokeniser -->
   <CREOLE>
     <RESOURCE>
-      <NAME>Sheffield Unicode Tokeniser</NAME>
-      <JAR>ShefUniTok.jar</JAR>
-      <CLASS>gate.creole.Tokeniser</CLASS>
+      <NAME>Gate Unicode Tokeniser</NAME>
+      <CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
+
+      <OR>
+	<PARAMETER DEFAULT="creole/tokeniser/DefaultTokeniser.rules"
+	           NAME="rulesResourceName">java.lang.String</PARAMETER>
+	<PARAMETER NAME="rulesURL">java.lang.String</PARAMETER>
+      </OR>
+      <PARAMETER NAME="document"
+	RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="annotationSet" RUNTIME="true"
+		 OPTIONAL="true">gate.AnnotationSet</PARAMETER>
     </RESOURCE>
-  </CREOLE> 
+  </CREOLE>
 
   <!-- creole.xml for doc formats -->
   <CREOLE>
