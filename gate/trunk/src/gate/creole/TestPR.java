@@ -35,66 +35,82 @@ public class TestPR extends TestCase
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  protected static DefaultTokeniser tokeniser = null;
-  protected static DefaultGazetteer gaz = null;
-  protected static SentenceSplitter splitter = null;
-  protected static POSTagger tagger = null;
-  protected static ANNIETransducer transducer = null;
-  protected static OrthoMatcher orthomatcher = null;
+  protected DefaultTokeniser tokeniser = null;
+  protected DefaultGazetteer gaz = null;
+  protected SentenceSplitter splitter = null;
+  protected POSTagger tagger = null;
+  protected ANNIETransducer transducer = null;
+  protected OrthoMatcher orthomatcher = null;
 
-  protected static Document doc1 = null;
-  protected static Document doc2 = null;
-  protected static Document doc3 = null;
+  protected Document doc1 = null;
+  protected Document doc2 = null;
+  protected Document doc3 = null;
 
   /** Construction */
   public TestPR(String name) { super(name); }
 
   /** Fixture set up */
   public void setUp() throws Exception {
+
     //create a default tokeniser
-    FeatureMap params = Factory.newFeatureMap();
-    tokeniser = (DefaultTokeniser) Factory.createResource(
-                    "gate.creole.tokeniser.DefaultTokeniser", params);
+    FeatureMap params = null;
+
+    if (tokeniser == null) {
+      params = Factory.newFeatureMap();
+      tokeniser = (DefaultTokeniser) Factory.createResource(
+                      "gate.creole.tokeniser.DefaultTokeniser", params);
+    }
 
     //create a default gazetteer
-    params = Factory.newFeatureMap();
-    gaz = (DefaultGazetteer) Factory.createResource(
-                          "gate.creole.gazetteer.DefaultGazetteer", params);
+    if (gaz == null) {
+      params = Factory.newFeatureMap();
+      gaz = (DefaultGazetteer) Factory.createResource(
+                            "gate.creole.gazetteer.DefaultGazetteer", params);
+    }
 
     //create a splitter
-    params = Factory.newFeatureMap();
-    splitter = (SentenceSplitter) Factory.createResource(
-                          "gate.creole.splitter.SentenceSplitter", params);
+    if (splitter == null) {
+      params = Factory.newFeatureMap();
+      splitter = (SentenceSplitter) Factory.createResource(
+                            "gate.creole.splitter.SentenceSplitter", params);
+    }
+
     //create a tagger
-    params = Factory.newFeatureMap();
-    tagger = (POSTagger) Factory.createResource(
-                          "gate.creole.POSTagger", params);
+    if (tagger == null) {
+      params = Factory.newFeatureMap();
+      tagger = (POSTagger) Factory.createResource(
+                            "gate.creole.POSTagger", params);
+    }
     //create a grammar
-    params = Factory.newFeatureMap();
-    transducer = (ANNIETransducer) Factory.createResource(
-                          "gate.creole.ANNIETransducer", params);
-
+    if (transducer == null) {
+      params = Factory.newFeatureMap();
+      transducer = (ANNIETransducer) Factory.createResource(
+                            "gate.creole.ANNIETransducer", params);
+    }
     //create a orthomatcher
-    params = Factory.newFeatureMap();
-    orthomatcher = (OrthoMatcher) Factory.createResource(
-                          "gate.creole.orthomatcher.OrthoMatcher", params);
+    if (orthomatcher == null) {
+      params = Factory.newFeatureMap();
+      orthomatcher = (OrthoMatcher) Factory.createResource(
+                            "gate.creole.orthomatcher.OrthoMatcher", params);
+    }
     //get 3 documents
-    doc1 = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() +
+    if (doc1 == null)
+      doc1 = Factory.newDocument(
+        new URL(TestDocument.getTestServerName() +
         "tests/ft-bt-03-aug-2001.html")
-//    new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/ft-bt-03-aug-2001.html")
-    );
-    doc2 = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() +
-        "tests/gu-Am-Brit-4-aug-2001.html")
-//        new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/gu-Am-Brit-4-aug-2001.html")
-    );
+      );
 
-    doc3 = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() +
-        "tests/in-outlook-09-aug-2001.html")
-//        new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/in-outlook-09-aug-2001.html")
-    );
+    if (doc2 == null)
+      doc2 = Factory.newDocument(
+        new URL(TestDocument.getTestServerName() +
+          "tests/gu-Am-Brit-4-aug-2001.html")
+      );
+
+    if (doc3 == null)
+      doc3 = Factory.newDocument(
+        new URL(TestDocument.getTestServerName() +
+          "tests/in-outlook-09-aug-2001.html")
+      );
 
   } // setUp
 
@@ -104,6 +120,7 @@ public class TestPR extends TestCase
   } // tearDown
 
   public void testTokenizer() throws Exception {
+
     //run the tokeniser for doc1
     tokeniser.setDocument(doc1);
     tokeniser.execute();
@@ -341,7 +358,11 @@ public class TestPR extends TestCase
     // verify if the saved data store is the same with the just processed file
     // first document
     URL storageDir =
-//      new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/ft/");
+    //      new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/ft/");
+    Gate.setLocalWebServer(false);
+   //Gate.setNetConnected(false);
+   Out.prln(Gate.getUrl("tests/ft"));
+
       new URL("gate:/gate.ac.uk/tests/ft/");
     //open the data store
     DataStore ds = Factory.openDataStore
@@ -401,7 +422,8 @@ public class TestPR extends TestCase
     AnnotationSet annotSet3 = doc3.getAnnotations();
     assert("The annotation set from data store and processed document are " +
       "not equal for in-outlook-09-aug-2001.html  ",annotSet.equals(annotSet3));
-  } // testAllPR()*/
+  } // testAllPR()
+*/
 
   /** Test suite routine for the test runner */
   public static Test suite() {
