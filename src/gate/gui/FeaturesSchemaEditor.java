@@ -280,6 +280,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   protected class FeatureEditorRenderer extends DefaultCellEditor implements TableCellRenderer{
     public FeatureEditorRenderer(){
       super(new JComboBox());
+      defaultComparator = new ObjectComparator();
       editorCombo = (JComboBox)editorComponent;
       editorCombo.setModel(new DefaultComboBoxModel());
       editorCombo.setBackground(mainTable.getBackground());
@@ -428,7 +429,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
             fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);
-          Collections.sort(fValues);
+          Collections.sort(fValues, defaultComparator);
           for(Iterator valIter = fValues.iterator(); 
               valIter.hasNext(); 
               comboModel.addElement(valIter.next()));
@@ -448,5 +449,6 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     JComboBox editorCombo;
     JComboBox rendererCombo;
     JButton deleteButton;
+    ObjectComparator defaultComparator;
   }
 }
