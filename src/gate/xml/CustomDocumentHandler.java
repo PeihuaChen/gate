@@ -179,10 +179,10 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
 
     // if the white space is not equal with \n then add it to the content
     // of the document
-    if (!text.equalsIgnoreCase("\n")){
+    //if (!text.equalsIgnoreCase("\n")){
         // if not \n then add it to the document
         tmpDocContent += text;
-    }
+    //}
   }
 
   /**

@@ -67,8 +67,10 @@ public class TestXml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
+    docFormat.unpackMarkup (doc);
 
     // graphic visualisation
+    /*
     if (docFormat != null){
         docFormat.unpackMarkup (doc);
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
@@ -76,7 +78,7 @@ public class TestXml extends TestCase
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
     }
-    
+    */
   } // testSomething()
 
   /** Test suite routine for the test runner */
