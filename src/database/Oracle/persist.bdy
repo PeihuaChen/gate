@@ -270,6 +270,21 @@ create or replace package body persist is
      
           
   end;
+
+
+  /*******************************************************************************************/
+  procedure create_corpus(p_lr_id     IN number,
+                          p_corp_id   OUT number)
+  is
+  begin
+     
+     insert into t_corpus(corp_id,
+                          corp_lr_id)
+     values (seq_corpus.nextval,
+             p_lr_id)
+     returning corp_id into p_corp_id;
+     
+  end;
   
 /*begin
   -- Initialization
