@@ -25,12 +25,12 @@
   </path>
 
   <!-- tools.jar path -->
-  <path id="tools.jar" location="${java.home}/lib/tools.jar"/>
+  <path id="tools.jar" location="${basedir}/bin/tools14.jar"/>
   
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
     <pathelement location="${build}/gate.jar"/>
-    <pathelement path="${tools.jar}"/>
+    <path refid="tools.jar"/>
   </path>
   
 	<!-- Copies resources to the output directory -->
