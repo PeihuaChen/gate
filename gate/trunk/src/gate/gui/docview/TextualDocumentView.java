@@ -35,10 +35,7 @@ import gate.util.GateRuntimeException;
 public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){
-    textView = new JEditorPane();
-    scroller = new JScrollPane(textView);
     hgTagForAnn = new HashMap();
-    initListeners();
   }
 
   protected void initListeners(){
@@ -70,8 +67,20 @@ public class TextualDocumentView extends AbstractDocumentView {
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
+    textView = new JEditorPane(){
+//      public boolean getScrollableTracksViewportWidth(){
+//        return true;
+//      }
+    };
+    textView.setContentType("text/plain");
+    textView.setEditorKit(new StyledEditorKit());
+    textView.setAutoscrolls(false);
+    scroller = new JScrollPane(textView);
+
     textView.setText(document.getContent().toString());
     scroller.getViewport().setViewPosition(new Point(0, 0));
+    initListeners();
+
   }
   
   public Object addHighlight(Annotation ann, Color colour){
