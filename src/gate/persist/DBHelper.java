@@ -60,7 +60,7 @@ public class DBHelper {
   public static final int BINARY_CONTENT = 2;
   public static final int EMPTY_CONTENT = 3;
 
-  public static final String DOCUMENT_CLASS = "gate.corpora.DocumentImpl";
+  public static final String DOCUMENT_CLASS = "gate.corpora.DatabaseDocumentImpl";
   public static final String CORPUS_CLASS =  "gate.corpora.CorpusImpl";
 
   public static final String  DB_PARAMETER_GUID = "DB_GUID";
