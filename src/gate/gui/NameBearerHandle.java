@@ -984,47 +984,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
     }//public void actionPerformed(ActionEvent e)
   }//class SaveAction
 
-  class DumpArffAction extends AbstractAction{
-    public DumpArffAction(){
-      super("Write data as ARFF");
-      putValue(SHORT_DESCRIPTION,
-               "Saves the data needed to recreate this application");
-    }
 
-    public void actionPerformed(ActionEvent evt){
-      JFileChooser fileChooser = MainFrame.getFileChooser();
-
-      fileChooser.setDialogTitle("Select a file for ARFF dump");
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-      if (fileChooser.showSaveDialog(largeView) ==
-                                            JFileChooser.APPROVE_OPTION){
-        final File file = fileChooser.getSelectedFile();
-        Thread thread = new Thread(new Runnable(){
-          public void run(){
-            fireStatusChanged("Writing ARFF output!");
-            gate.ml.DataCollector collector = (gate.ml.DataCollector)target;
-            try{
-                FileWriter fw = new FileWriter(file);
-                fw.write(collector.getDataSet().toString());
-                fw.flush();
-                fw.close();
-            }catch(IOException ioe){
-                JOptionPane.showMessageDialog(getLargeView(),
-                                "Error!\n"+
-                                 ioe.toString(),
-                                 "Gate", JOptionPane.ERROR_MESSAGE);
-                ioe.printStackTrace(Err.getPrintWriter());
-
-            }
-            fireStatusChanged("ARFF dump finished!");
-
-          }
-        });
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
-      }
-    }
-  }//class DumpArffData extends AbstractAction{
 
   class DumpToFileAction extends AbstractAction {
     public DumpToFileAction(){
