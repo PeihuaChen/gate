@@ -42,7 +42,7 @@ public class TestPersist extends TestCase
   private static String JDBC_URL;
 
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static Long sampleDoc_lrID = null;
   private static Long sampleCorpus_lrID = null;
   private static Document sampleDoc = null;
