@@ -22,6 +22,10 @@ import gate.persist.PersistenceException;
 
 public interface Group {
 
+  public static final int OBJECT_CHANGE_NAME        = 1001;
+  public static final int OBJECT_CHANGE_ADDUSER     = 1002;
+  public static final int OBJECT_CHANGE_REMOVEUSER  = 1003;
+
   /** --- */
   public Long getID();
 

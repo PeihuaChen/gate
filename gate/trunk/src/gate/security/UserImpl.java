@@ -19,6 +19,7 @@ import java.util.*;
 import java.sql.*;
 import junit.framework.*;
 
+import gate.event.*;
 import gate.persist.PersistenceException;
 
 
@@ -39,6 +40,8 @@ public class UserImpl implements User {
   /** --- */
   private AccessController ac;
 
+  /** --- */
+  private Vector omListeners;
 
   /** --- */
   public UserImpl(Long id, String name, List groups,AccessController ac,Connection conn) {
@@ -48,6 +51,8 @@ public class UserImpl implements User {
     this.groups = groups;
     this.ac = ac;
     this.conn = conn;
+
+    this.omListeners = new Vector();
   }
 
 
@@ -137,4 +142,8 @@ public class UserImpl implements User {
     return (this.id.equals(usr2.getID()));
   }
 
+  public void registerObjectModificationListener(ObjectModificationListener l) {
+
+    this.omListeners.add(l);
+  }
 }
