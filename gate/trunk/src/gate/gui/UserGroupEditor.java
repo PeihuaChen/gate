@@ -398,7 +398,7 @@ public class UserGroupEditor extends JComponent {
 
     public void actionPerformed(ActionEvent e){
       try {
-        controller.createUser("myUser", "myPassword");
+        controller.createUser("myUser", "myPassword", session);
       } catch (gate.persist.PersistenceException ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
       } catch (gate.security.SecurityException ex1) {
