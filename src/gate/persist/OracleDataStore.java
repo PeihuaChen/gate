@@ -288,6 +288,9 @@ public class OracleDataStore extends JDBCDataStore {
                         Long lrParentID)
   throws PersistenceException,SecurityException {
 
+    //0. preconditions
+    Assert.assertNotNull(lrName);
+
     //1. check the session
 //    if (this.ac.isValidSession(s) == false) {
 //      throw new SecurityException("invalid session provided");
@@ -519,15 +522,23 @@ public class OracleDataStore extends JDBCDataStore {
     //1. create a-set
     String asetName = aset.getName();
     Long asetID = null;
+
     //DB stuff
     CallableStatement stmt = null;
       try {
         stmt = this.jdbcConn.prepareCall(
             "{ call "+Gate.DB_OWNER+".persist.create_annotation_set(?,?,?) }");
         stmt.setLong(1,docID.longValue());
-        stmt.setString(2,asetName);
+
+        if (null == asetName) {
+          stmt.setNull(2,java.sql.Types.VARCHAR);
+        }
+        else {
+          stmt.setString(2,asetName);
+        }
         stmt.registerOutParameter(3,java.sql.Types.BIGINT);
         stmt.execute();
+
         asetID = new Long(stmt.getLong(3));
       }
       catch(SQLException sqle) {
@@ -562,6 +573,7 @@ public class OracleDataStore extends JDBCDataStore {
         stmt.registerOutParameter(6,java.sql.Types.BIGINT);
 
         stmt.execute();
+
         annID = new Long(stmt.getLong(6));
       }
       catch(SQLException sqle) {
@@ -1105,9 +1117,7 @@ public class OracleDataStore extends JDBCDataStore {
 
           //does this string fit into a varchar2 or into clob?
           String s = (String)currValue;
-Out.prln("feature is string, len=["+s.length()+"], content=["+s+"]");
           if (false == this.fitsInVarchar2(s)) {
-Out.prln("oops, too long...");
             // Houston, we have a problem
             // put the string into a clob
             _updateFeatureLOB(featID,value,valueType);
