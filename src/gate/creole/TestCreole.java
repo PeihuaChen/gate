@@ -26,13 +26,11 @@ public class TestCreole extends TestCase
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** Initialise the creole register */
-  static {
-    Gate.initCreoleRegister();
-  } // static initialisation
 
   /** Fixture set up */
   public void setUp() throws Exception {
+    // Initialise the creole register
+    Gate.initCreoleRegister();
   } // setUp
 
   /** Test resource registration */
