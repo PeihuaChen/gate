@@ -217,6 +217,7 @@ public class DocumentEditor extends AbstractVisualResource{
   private boolean coreferenceVisible = false;
   private boolean textVisible = true;
   private boolean typesTreeVisible = false;
+  private boolean corefOptionAvailable = false;
 
   /**
    * Default constructor. Creats all the components and initialises all the
@@ -303,6 +304,15 @@ public class DocumentEditor extends AbstractVisualResource{
            e.getPropertyName().equals("coreferenceVisible") ||
            e.getPropertyName().equals("textVisible") ||
            e.getPropertyName().equals("typesTreeVisible")){
+          layoutComponents();
+        }else if(e.getPropertyName().equals("corefOptionAvailable")){
+          if(((Boolean)e.getNewValue()).booleanValue()){
+            if(toolbar.getComponentIndex(coreferenceVisibleBtn) == -1)
+              toolbar.add(coreferenceVisibleBtn,
+                          toolbar.getComponentCount() - 1);
+          }else{
+            toolbar.remove(coreferenceVisibleBtn);
+          }
           layoutComponents();
         }
       }
@@ -805,8 +815,9 @@ public class DocumentEditor extends AbstractVisualResource{
     typesTreeVisibleBtn = new JToggleButton("Annotation Sets", typesTreeVisible);
     toolbar.add(typesTreeVisibleBtn);
 
+
     coreferenceVisibleBtn = new JToggleButton("Coreference", coreferenceVisible);
-    toolbar.add(coreferenceVisibleBtn);
+    if(isCorefOptionAvailable()) toolbar.add(coreferenceVisibleBtn);
     toolbar.add(Box.createHorizontalGlue());
 
     //The text
@@ -1199,22 +1210,24 @@ public class DocumentEditor extends AbstractVisualResource{
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         Component leftComp = null, rightComp = null;
-        if(textVisible && annotationsTableVisible){
+        if(isTextVisible() && isAnnotationsTableVisible()){
           leftSplit.setTopComponent(textScroll);
           leftSplit.setBottomComponent(tableScroll);
           leftComp = leftSplit;
         }else{
-          if(textVisible) leftComp = textScroll;
-          else if(annotationsTableVisible) leftComp = tableScroll;
+          if(isTextVisible()) leftComp = textScroll;
+          else if(isAnnotationsTableVisible()) leftComp = tableScroll;
         }
 
-        if(typesTreeVisible && coreferenceVisible){
+        boolean corefDisplayed = isCoreferenceVisible() &&
+                                 isCorefOptionAvailable();
+        if(isTypesTreeVisible() && corefDisplayed){
           rightSplit.setTopComponent(stylesTreeScroll);
           rightSplit.setBottomComponent(corefScroll);
           rightComp = rightSplit;
         }else{
-          if(typesTreeVisible) rightComp = stylesTreeScroll;
-          else if(coreferenceVisible) rightComp = corefScroll;
+          if(isTypesTreeVisible()) rightComp = stylesTreeScroll;
+          else if(corefDisplayed) rightComp = corefScroll;
         }
 
         if(DocumentEditor.this.getComponentCount() > 1)
@@ -1244,6 +1257,7 @@ public class DocumentEditor extends AbstractVisualResource{
       //no coref data; clear the tree
       corefTreeRoot.removeAllChildren();
       corefTreeModel.nodeStructureChanged(corefTreeRoot);
+      setCorefOptionAvailable(false);
       return;
     }
 
@@ -1264,6 +1278,7 @@ public class DocumentEditor extends AbstractVisualResource{
       }
       corefTreeRoot.removeAllChildren();
       corefTreeModel.nodeStructureChanged(corefTreeRoot);
+      setCorefOptionAvailable(false);
       return;
     }
     String[] newSetNames = (String[])
@@ -1287,11 +1302,12 @@ public class DocumentEditor extends AbstractVisualResource{
     for(int i =0; i < newSetNames.length; i++){
       String setName = newSetNames[i];
       int oldNodeIndex = oldSetNames.indexOf(setName);
-      DefaultMutableTreeNode setNode = (oldNodeIndex != -1) ?
-                                        (DefaultMutableTreeNode)
-                                        corefTreeRoot.getChildAt(oldNodeIndex) :
-                                        new DefaultMutableTreeNode(setName,
-                                                                   true);
+      DefaultMutableTreeNode setNode =
+          (oldNodeIndex != -1) ?
+          (DefaultMutableTreeNode)
+          corefTreeRoot.getChildAt(oldNodeIndex) :
+          new DefaultMutableTreeNode((setName == null ? "Default" : setName),
+                                     true);
       //if found it will be reused so delete it from the list
       if(oldNodeIndex != -1) oldSetNames.remove(oldNodeIndex);
 
@@ -1364,6 +1380,7 @@ public class DocumentEditor extends AbstractVisualResource{
       corefTree.expandPath(new TreePath(corefTreeModel.getPathToRoot(
                            (DefaultMutableTreeNode)children.nextElement())));
     }
+    setCorefOptionAvailable(true);
   }//protected void updateCorefTree()
 
 
@@ -1418,6 +1435,17 @@ public class DocumentEditor extends AbstractVisualResource{
   }
   public boolean isTypesTreeVisible() {
     return typesTreeVisible;
+  }
+  public void setCorefOptionAvailable(boolean corefOptionAvailable) {
+    boolean  oldCorefOptionAvailable = this.corefOptionAvailable;
+    this.corefOptionAvailable = corefOptionAvailable;
+    propertyChangeListeners.firePropertyChange(
+      "corefOptionAvailable", new Boolean(oldCorefOptionAvailable),
+      new Boolean(corefOptionAvailable));
+  }
+
+  public boolean isCorefOptionAvailable() {
+    return corefOptionAvailable;
   }
 
   //inner classes
