@@ -37,7 +37,7 @@
 #representing the corresponding enumerated Unicode category types
 
 #------- The rules start here -----------------
-"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > tokenUI;type=upperInitial;
-"LOWERCASE_LETTER" "UPPERCASE_LETTER"|"LOWERCASE_LETTER"|OTHER_LETTER+ > token;
-(SPACE_SEPARATOR|CONTROL)+ > spaceToken;
-CURRENCY_SYMBOL|MODIFIER_SYMBOL|OTHER_SYMBOL + > symbol;
+"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;type=upperInitial;
+"LOWERCASE_LETTER" "UPPERCASE_LETTER"|"LOWERCASE_LETTER"|OTHER_LETTER+ > Token;
+(SPACE_SEPARATOR|CONTROL)+ > SpaceToken;
+CURRENCY_SYMBOL|MODIFIER_SYMBOL|OTHER_SYMBOL + > Symbol;
