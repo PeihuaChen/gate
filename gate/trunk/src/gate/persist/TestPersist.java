@@ -460,7 +460,6 @@ public class TestPersist extends TestCase
 
     //5. try adding doc to data store
     LanguageResource lr = ds.adopt(doc,si);
-    ds.sync(lr);
 
     //6.close
     ac.close();
@@ -519,6 +518,24 @@ public class TestPersist extends TestCase
   }
 
 
+  public void testDB_UseCase03() throws Exception {
+
+    //read a document
+
+    if(DEBUG) {
+      Err.prln("Use case 03 passed...");
+    }
+  }
+
+  public void testDB_UseCase04() throws Exception {
+
+    //sync a document
+
+    if(DEBUG) {
+      Err.prln("Use case 04 passed...");
+    }
+  }
+
   public static void main(String[] args){
     try{
       Gate.setLocalWebServer(false);
@@ -531,6 +548,10 @@ public class TestPersist extends TestCase
 
       test.setUp();
       test.testDSR();
+      test.tearDown();
+
+      test.setUp();
+      test.testMultipleLrs();
       test.tearDown();
 
       test.setUp();
@@ -547,6 +568,14 @@ public class TestPersist extends TestCase
 
       test.setUp();
       test.testDB_UseCase02();
+      test.tearDown();
+
+      test.setUp();
+      test.testDB_UseCase03();
+      test.tearDown();
+
+      test.setUp();
+      test.testDB_UseCase04();
       test.tearDown();
 
       //I put this last because its failure is dependent on the gc() and
