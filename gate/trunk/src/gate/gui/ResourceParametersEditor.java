@@ -393,6 +393,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       fileButton.setToolTipText("Set from file...");
       listButton = new JButton(MainFrame.getIcon("editList.gif"));
       listButton.setToolTipText("Edit the list");
+      textField = new JTextField();
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
@@ -421,9 +422,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           //not editable; we'll just use the text field
           //prepare the renderer
           String text = value == null ? "<none>" : value.toString();
-          super.getTableCellRendererComponent(table, text, isSelected,
-                                                hasFocus, row, column);
-          return this;
+//          super.getTableCellRendererComponent(table, text, isSelected,
+//                                                hasFocus, row, column);
+          textField.setText(text);
+          return textField;
         }
       }else{
         Class typeClass = null;
@@ -437,37 +439,44 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                       "                                        " :
                       value.toString();
         //prepare the renderer
-        super.getTableCellRendererComponent(table, text, isSelected,
-                                              hasFocus, row, column);
+        textField.setText(text);
+//        super.getTableCellRendererComponent(table, text, isSelected,
+//                                              hasFocus, row, column);
 
         if(type.equals("java.net.URL")){
           if(ResourceParametersEditor.this.isEditable()){
             textButtonBox.removeAll();
-            textButtonBox.add(this);
+            textField.setText(text);
+//            textButtonBox.add(this);
+            textButtonBox.add(textField);
 //            this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
 //                                              getPreferredSize().height));
             textButtonBox.add(Box.createHorizontalStrut(5));
             textButtonBox.add(fileButton);
             return textButtonBox;
           }else{
-            return this;
+//            return this;
+            return textField;
           }
         }else if(typeClass != null &&
                  List.class.isAssignableFrom(typeClass)){
           //List value
-          setText(textForList((List)value));
+//          setText(textForList((List)value));
+          textField.setText(textForList((List)value));
           if(ResourceParametersEditor.this.isEditable()){
           textButtonBox.removeAll();
-          textButtonBox.add(this);
+//          textButtonBox.add(this);
+          textButtonBox.add(textField);
 //          this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
 //                                            getPreferredSize().height));
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(listButton);
           return textButtonBox;
           }else{
-            return this;
+//            return this;
+            return textField;
           }
-        }else return this;
+        }else return textField;
       }
     }// public Component getTableCellRendererComponent
 
@@ -493,6 +502,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     JButton listButton;
     JComboBox combo;
     JPanel textButtonBox;
+    JTextField textField;
   }//class ObjectRenderer extends DefaultTableCellRenderer
   
   class ParameterDisjunctionComparator implements Comparator{
@@ -625,24 +635,26 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
-      label = new JLabel(){
-        public boolean isFocusable(){
-          return true;
-        }
-      };
-      label.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-      label.addMouseListener(new MouseAdapter() {
+//      label = new JLabel(){
+//        public boolean isFocusable(){
+//          return true;
+//        }
+//      };
+//      label.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+      textFieldBoolean = new JTextField();
+      textFieldBoolean.setEditable(false);
+      textFieldBoolean.addMouseListener(new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
-          Boolean value = new Boolean(label.getText());
+          Boolean value = new Boolean(textFieldBoolean.getText());
           value = new Boolean(!value.booleanValue());
-          label.setText(value.toString());
+          textFieldBoolean.setText(value.toString());
         }
       });
-      label.addKeyListener(new KeyAdapter() {
+      textFieldBoolean.addKeyListener(new KeyAdapter() {
         public void keyTyped(KeyEvent e) {
-          Boolean value = new Boolean(label.getText());
+          Boolean value = new Boolean(textFieldBoolean.getText());
           value = new Boolean(!value.booleanValue());
-          label.setText(value.toString());
+          textFieldBoolean.setText(value.toString());
         }
       });
 
@@ -721,8 +733,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(fileButton);
           return textButtonBox;
         }else if(type.equals("java.lang.Boolean")){
-          label.setText(value == null ? "false" : value.toString());
-          return label;
+          textFieldBoolean.setText(value == null ? "false" : value.toString());
+          return textFieldBoolean;
         }else if(typeClass != null &&
                       List.class.isAssignableFrom(typeClass)){
           //List value
@@ -778,7 +790,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       }else{
         if(type.equals("java.lang.Boolean")){
           //get the value from the label
-          return new Boolean(label.getText());
+          return new Boolean(textFieldBoolean.getText());
         }else{
           //get the value from the text field
           return textField.getText();
@@ -798,16 +810,20 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
      */
     JComboBox combo;
 
-    /**
-     * Editor used for boolean values
-     */
-    JLabel label;
+//    /**
+//     * Editor used for boolean values
+//     */
+//    JLabel label;
 
     /**
      * Generic editor for all types that are not treated special
      */
     JTextField textField;
 
+    /**
+     * Editor used for booelan values.
+     */
+    JTextField textFieldBoolean;
     /**
      * A pointer to the filechooser from MainFrame;
      */
