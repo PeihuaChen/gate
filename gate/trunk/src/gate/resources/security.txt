@@ -1,1 +1,0 @@
-jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2
