@@ -117,7 +117,7 @@ public class GroupImpl implements Group{
 
     //4. fire ObjectModificationEvent for all who care
     for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners).objectModified(e);
+      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
     }
 
   }
@@ -171,7 +171,7 @@ public class GroupImpl implements Group{
 
     //6. fire ObjectModificationEvent for all who care
     for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners).objectModified(e);
+      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
     }
 
   }
@@ -227,7 +227,7 @@ public class GroupImpl implements Group{
 
     //6. fire ObjectModificationEvent for all who care
     for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners).objectModified(e);
+      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
     }
 
   }
