@@ -227,6 +227,24 @@ public class OracleDataStore extends JDBCDataStore {
       throw new SecurityException("Invalid security settings supplied");
     }
 
+    //0.5 check the LR's current DS
+    DataStore currentDS = lr.getDataStore();
+    if(currentDS == this){         // adopted already
+      return lr;
+    }
+    else if(currentDS == null) {  // an orphan - do the adoption
+      lr.setDataStore(this);
+      // let the world know
+      //fireResourceAdopted(
+      //    new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
+      //);
+    }
+    else {                      // someone else's child
+      throw new PersistenceException(
+        "Can't adopt a resource which is already in a different datastore");
+    }
+
+
     //1. is the LR one of Document or Corpus?
     if (false == lr instanceof Document &&
         false == lr instanceof Corpus) {
@@ -450,7 +468,8 @@ public class OracleDataStore extends JDBCDataStore {
     //7. create features
     createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
 
-    throw new MethodNotImplementedException();
+    //8. done
+    return doc;
   }
 
 
@@ -568,7 +587,8 @@ public class OracleDataStore extends JDBCDataStore {
     //4. create features
     createFeatures(corpusID,this.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
-    throw new MethodNotImplementedException();
+    //5. done
+    return corp;
   }
 
 
