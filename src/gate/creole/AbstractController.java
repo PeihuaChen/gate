@@ -20,7 +20,8 @@ import gate.event.*;
 
 
 public abstract class AbstractController extends AbstractResource
-                                         implements Controller {
+                                         implements Controller{
+
 
   //executable code
   /**
@@ -40,6 +41,7 @@ public abstract class AbstractController extends AbstractResource
   /** Clears the internal data of the resource, when it gets released **/
   public void cleanup(){
   }
+
 
   /**
    * Notifies all the PRs in this controller that they should stop their

@@ -118,13 +118,6 @@ public class DefaultGazetteer extends AbstractProcessingResource
     return this;
   }
 
-  /**
-   * Resets this resource preparing it for a new run
-   */
-  public void reset(){
-    document = null;
-    annotationSetName = null;
-  }
 
   /** Reads one lists (one file) of phrases
    *
@@ -396,9 +389,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
         }
       }//while(lookupIter.hasNext())
     }
-    reset();
-      fireProcessFinished();
-      fireStatusChanged("Tokenisation complete!");
+    fireProcessFinished();
+    fireStatusChanged("Tokenisation complete!");
   } // run
 
 
@@ -475,6 +467,12 @@ public class DefaultGazetteer extends AbstractProcessingResource
   }
   public Boolean getCaseSensitive() {
     return caseSensitive;
+  }
+  public String getAnnotationSetName() {
+    return annotationSetName;
+  }
+  public gate.Document getDocument() {
+    return document;
   }
 
 } // DefaultGazetteer
