@@ -18,6 +18,8 @@ import java.awt.Point;
 import java.awt.event.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
 import java.util.List;
 
@@ -30,6 +32,7 @@ import javax.swing.text.Highlighter;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.util.GateRuntimeException;
+import gate.util.RawEditorKit;
 
 
 /**
@@ -200,7 +203,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   protected void initGUI() {
     textView = new JEditorPane();
     textView.setContentType("text/plain");
-    textView.setEditorKit(new StyledEditorKit());
+    textView.setEditorKit(new RawEditorKit());
     textView.setAutoscrolls(false);
     scroller = new JScrollPane(textView);
 
@@ -287,7 +290,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     }
     protected boolean highlightsShown = false;
   }
-  
+    
   /**
    * Stores the highlighter tags for all the highlighted annotations;
    */
