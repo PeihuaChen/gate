@@ -1828,19 +1828,19 @@ public class MainFrame extends JFrame
                                        Factory.newFeatureMap(),
                                        Factory.newFeatureMap(),
                                        "ANNIE_" + Gate.genSym());
-            NewResourceDialog resourceDialog = new NewResourceDialog(
-                                  MainFrame.this, "Resource parameters", true );
+//            NewResourceDialog resourceDialog = new NewResourceDialog(
+//                                  MainFrame.this, "Resource parameters", true );
             // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
             for(int i = 0; i < PR_NAMES.length; i++){
               //get the params for the Current PR
               ResourceData resData = (ResourceData)Gate.getCreoleRegister().
                                       get(PR_NAMES[i]);
-              if(resourceDialog.show(resData,
+              if(newResourceDialog.show(resData,
                                      "Parameters for the new " +
                                      resData.getName())){
                 sac.add((ProcessingResource)Factory.createResource(
                           PR_NAMES[i],
-                          resourceDialog.getSelectedParameters()));
+                          newResourceDialog.getSelectedParameters()));
               }else{
                 //the user got bored and aborted the operation
                 statusChanged("Loading cancelled! Removing traces...");
@@ -1860,9 +1860,10 @@ public class MainFrame extends JFrame
           }// End try
         }// run()
       };// End Runnable
-      Thread thread = new Thread(runnable, "");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
+      SwingUtilities.invokeLater(runnable);
+//      Thread thread = new Thread(runnable, "");
+//      thread.setPriority(Thread.MIN_PRIORITY);
+//      thread.start();
     }// actionPerformed();
   }//class LoadANNIEWithoutDefaultsAction
 
