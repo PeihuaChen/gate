@@ -27,4 +27,38 @@ public class GateRuntimeException extends RuntimeException {
   public GateRuntimeException(String message) {
     super(message);
   }
+  
+  public GateRuntimeException(Exception e) {
+    this.exception = e;
+  }
+
+  /**
+   * Overriden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(){
+    printStackTrace(System.err);
+  }
+
+  /**
+   * Overriden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintStream s) {
+    s.flush();
+    super.printStackTrace(s);
+    s.print("  Caused by:\n");
+    if(exception != null) exception.printStackTrace(s);
+  }
+
+  /**
+   * Overriden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintWriter s) {
+    s.flush();
+    super.printStackTrace(s);
+    s.print("  Caused by:\n");
+    if(exception != null) exception.printStackTrace(s);
+  }
+  
+  
+  Exception exception;  
 }
