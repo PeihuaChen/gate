@@ -15,8 +15,9 @@
 package gate.creole.ir;
 
 import java.util.Iterator;
+import java.io.Serializable;
 
-public interface IndexDefinition{
+public interface IndexDefinition extends Serializable{
 
   /** @return String  path of index store directory*/
   public String getIndexLocation();

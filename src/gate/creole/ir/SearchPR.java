@@ -69,10 +69,13 @@ public class SearchPR extends AbstractProcessingResource
     }
 
     try {
+      fireProgressChanged(0);
       resultList = null;
       searcher.setCorpus(corpus);
       resultList = searcher.search(query, limit, fieldNames);
+      fireProcessFinished();
     }
+
     catch (SearchException ie) {
       throw new ExecutionException(ie.getMessage());
     }

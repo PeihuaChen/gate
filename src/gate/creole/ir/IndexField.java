@@ -14,7 +14,8 @@
 
 package gate.creole.ir;
 
-public class IndexField{
+import java.io.Serializable;
+public class IndexField implements Serializable{
 
   /** Name of field for indexing - the name of the feature key of
    *  the document should be same. */

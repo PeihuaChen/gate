@@ -16,7 +16,8 @@ package gate.creole.ir;
 
 import gate.Document;
 
-public interface PropertyReader{
+import java.io.Serializable;
+public interface PropertyReader extends Serializable{
 
   /** @return String value of the requested field. */
   public String getRpopertyValue(Document doc);
