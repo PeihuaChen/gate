@@ -75,7 +75,7 @@ public class ColorGenerator {
   }
 
   /**
-   * Gets the next random colouor
+   * Gets the next random colour
    *
    */
   public Color getNextColor(){

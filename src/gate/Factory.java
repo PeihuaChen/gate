@@ -237,6 +237,8 @@ public abstract class Factory {
       if(DEBUG) Out.prln(resClass.getName() + " is a VR");
 
     // we have a resource which is not an LR, PR or VR
+    } else if(Controller.class.isAssignableFrom(resClass)){
+      //type specific stuff for Controllers
     } else {
       Err.prln("WARNING: instantiating resource which is not a PR, LR or VR:");
       Err.prln(resData + "END OF WARNING" + Strings.getNl());

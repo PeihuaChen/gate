@@ -19,7 +19,7 @@ import gate.util.*;
 import gate.event.*;
 
 
-public abstract class AbstractController extends AbstractNameBearer
+public abstract class AbstractController extends AbstractResource
                                          implements Controller {
 
   //executable code
@@ -30,6 +30,16 @@ public abstract class AbstractController extends AbstractNameBearer
     throw new ExecutionException(
       "Controller " + getClass() + " hasn't overriden the execute() method"
     );  }
+
+
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException{
+    return this;
+  }
+
+  /** Clears the internal data of the resource, when it gets released **/
+  public void cleanup(){
+  }
 
   /**
    * Notifies all the PRs in this controller that they should stop their
@@ -169,6 +179,18 @@ public abstract class AbstractController extends AbstractNameBearer
       fireStatusChanged(message);
     }
   }
+
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    this.name = name;
+  }
+
+  /** Returns the name of this resource*/
+  public String getName(){
+    return name;
+  }
+
+  protected String name;
 
   /**
    * The list of {@link gate.event.StatusListener}s registered with this

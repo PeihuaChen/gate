@@ -908,12 +908,12 @@ public class MainFrame extends JFrame
       resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
     }else if(res instanceof LanguageResource){
       resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
+    }else if(res instanceof Controller){
+      resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
     }
 
-    if(handle instanceof NameBearerHandle){
-      ((NameBearerHandle)handle).addProgressListener(MainFrame.this);
-      ((NameBearerHandle)handle).addStatusListener(MainFrame.this);
-    }
+    handle.addProgressListener(MainFrame.this);
+    handle.addStatusListener(MainFrame.this);
 
     JPopupMenu popup = handle.getPopup();
     popup.addSeparator();
@@ -929,6 +929,8 @@ public class MainFrame extends JFrame
       parent = processingResourcesRoot;
     }else if(res instanceof LanguageResource){
       parent = languageResourcesRoot;
+    }else if(res instanceof Controller){
+      parent = applicationsRoot;
     }
     if(parent != null){
       Enumeration children = parent.children();
@@ -1367,15 +1369,28 @@ public class MainFrame extends JFrame
                         JOptionPane.QUESTION_MESSAGE);
       if(answer == null) return;
       if (answer instanceof String) {
-        SerialController controller = new gate.creole.SerialController();
-        controller.setName((String)answer);
-        NameBearerHandle handle = new NameBearerHandle(controller,
-                                                       MainFrame.this);
-        handle.addProgressListener(MainFrame.this);
-        handle.addStatusListener(MainFrame.this);
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle,
-                                                                 false);
-        resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
+        try{
+          SerialController controller =
+                (SerialController)Factory.createResource(
+                                "gate.creole.SerialController",
+                                Factory.newFeatureMap(),
+                                Factory.newFeatureMap(), null, (String)answer);
+        } catch(ResourceInstantiationException rie){
+          JOptionPane.showMessageDialog(MainFrame.this,
+                                        "Could not create application!\n" +
+                                         rie.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+        }
+
+//        SerialController controller = new gate.creole.SerialController();
+//        controller.setName((String)answer);
+//        NameBearerHandle handle = new NameBearerHandle(controller,
+//                                                       MainFrame.this);
+//        handle.addProgressListener(MainFrame.this);
+//        handle.addStatusListener(MainFrame.this);
+//        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle,
+//                                                                 false);
+//        resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
       } else{
         JOptionPane.showMessageDialog(MainFrame.this,
                                       "Unrecognised input!",

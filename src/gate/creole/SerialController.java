@@ -28,7 +28,7 @@ import gate.event.*;
 public class SerialController extends AbstractController{
 
   public SerialController(){
-    prList = new ArrayList();
+    prList = Collections.synchronizedList(new ArrayList());
     sListener = new InternalStatusListener();
   }
 
@@ -47,11 +47,18 @@ public class SerialController extends AbstractController{
   /** Run the Processing Resources in sequence. */
   public void execute() throws ExecutionException{
     interrupted = false;
-    for (int i = 0; i < prList.size(); i++){
-      if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the " + getName() +
-        " application has been abruptly interrupted!");
-      runComponent(i);
+    //stop access to the list of PRs
+    prList = Collections.unmodifiableList(prList);
+    try{
+      for (int i = 0; i < prList.size(); i++){
+        if(isInterrupted()) throw new ExecutionInterruptedException(
+          "The execution of the " + getName() +
+          " application has been abruptly interrupted!");
+        runComponent(i);
+      }
+    }finally{
+      //restore access to the list of PRs
+      prList = Collections.synchronizedList(new ArrayList(prList));
     }
   } // execute()
 
@@ -98,32 +105,10 @@ public class SerialController extends AbstractController{
     }
   }
 
-    /** Sets the name of this resource*/
-  public void setName(String name){
-    this.name = name;
-  }
-
-  /** Returns the name of this resource*/
-  public String getName(){
-    return name;
-  }
-
-  protected String name;
-
-  /** Get the feature set */
-  public FeatureMap getFeatures() { return features; }
-
-  /** Set the feature set */
-  public void setFeatures(FeatureMap features) { this.features = features; }
-
-  /** The feature set */
-  protected FeatureMap features;
-
   /** The list of contained PRs*/
-  protected ArrayList prList;
+  protected List prList;
 
   /** A proxy for status events*/
   protected StatusListener sListener;
-
 
 } // class SerialController

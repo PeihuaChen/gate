@@ -25,11 +25,15 @@ import javax.swing.tree.*;
 /**
  * Renders a {@link Resource} for tables, trees and lists.
  * It will use the icon info from the creole register, the name of the resource
- * as the rendered string and th type of the resource as the tooltip.
+ * as the rendered string and the type of the resource as the tooltip.
  */
 public class ResourceRenderer extends JLabel
                               implements ListCellRenderer, TableCellRenderer,
                                          TreeCellRenderer {
+
+  public ResourceRenderer(){
+    setOpaque(true);
+  }
 
   public Component getListCellRendererComponent(JList list,
                                                 Object value,
@@ -67,18 +71,18 @@ public class ResourceRenderer extends JLabel
 
     if (isSelected) {
       if(ownerComponent instanceof JTable){
-        super.setForeground(((JTable)ownerComponent).getSelectionForeground());
-        super.setBackground(((JTable)ownerComponent).getSelectionBackground());
+        setForeground(((JTable)ownerComponent).getSelectionForeground());
+        setBackground(((JTable)ownerComponent).getSelectionBackground());
       }else if(ownerComponent instanceof JTree){
-        super.setForeground(UIManager.getColor("Tree.selectionForeground"));
-        super.setBackground(UIManager.getColor("Tree.selectionBackground"));
+        setForeground(UIManager.getColor("Tree.selectionForeground"));
+        setBackground(UIManager.getColor("Tree.selectionBackground"));
       }else if(ownerComponent instanceof JList){
-        super.setForeground(((JList)ownerComponent).getSelectionForeground());
-        super.setBackground(((JList)ownerComponent).getSelectionBackground());
+        setForeground(((JList)ownerComponent).getSelectionForeground());
+        setBackground(((JList)ownerComponent).getSelectionBackground());
       }
     }else{
-      super.setForeground(ownerComponent.getForeground());
-      super.setBackground(ownerComponent.getBackground());
+      setForeground(ownerComponent.getForeground());
+      setBackground(ownerComponent.getBackground());
     }
 
     setFont(ownerComponent.getFont());
@@ -90,12 +94,19 @@ public class ResourceRenderer extends JLabel
     }
 
     String text;
+    String toolTipText;
     Icon icon;
+    ResourceData rData = null;
     if(value instanceof Resource){
       text = ((Resource)value).getName();
 
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                           get(value.getClass().getName());
+      rData = (ResourceData)Gate.getCreoleRegister().
+                                 get(value.getClass().getName());
+    }else{
+      text = value.toString();
+    }
+    if(rData != null){
+      toolTipText = "<HTML>Type: <b>" + rData.getName() + "</b></HTML>";
       String iconName = rData.getIcon();
       if(iconName == null){
         if(value instanceof LanguageResource) iconName = "lr.gif";
@@ -105,11 +116,11 @@ public class ResourceRenderer extends JLabel
       icon = (iconName == null) ? null : MainFrame.getIcon(iconName);
     }else{
       icon = null;
-      text = value.toString();
     }
 
     setText(text);
     setIcon(icon);
+    setToolTipText(value.getClass().getName());
   }
 
   protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
