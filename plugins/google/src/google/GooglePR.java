@@ -79,10 +79,13 @@ public class GooglePR extends AbstractLanguageAnalyser
     search.setQueryString(query);
     //set limit
     //search.setMaxResults(limit);
-    int index = 1;
+    int index = 0;
     try {
       while (index < limit) {
         search.setStartResult(index);
+	if (limit-index<10) {
+	    search.setMaxResults(limit-index);
+	}
         //run search
         GoogleSearchResult results = search.doSearch();
 
@@ -94,40 +97,39 @@ public class GooglePR extends AbstractLanguageAnalyser
         //Err.println("result element array size" + rs.length);
         rs = results.getResultElements();
         if (rs != null) {
-        for (int i = 0; i < rs.length; i++) {
-          GoogleSearchResultElement rElement = rs[i];
-          Err.println(index+i+" - "+rElement.getURL());
-          String docName = rElement.getURL() + "_" + Gate.genSym();
-          FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, rElement.getURL());
-          try {
-            Document doc = (Document) Factory.createResource(
-                  DocumentImpl.class.getName(), params, null, docName
-                  );
-            google.add(doc);
-
-          }
-          catch (ResourceInstantiationException e) {
-            String nl = Strings.getNl();
-            Err.prln(
-                  "WARNING: could not intantiate document" + nl +
-                  "  Document name was: " + docName + nl +
-                  "  Exception was: " + e + nl + nl
-                  );
-          }
-
-        }
-      }
-
-
+	    for (int i = 0; i < rs.length; i++) {
+		GoogleSearchResultElement rElement = rs[i];
+		Err.println(index+i+") "+rElement.getURL());
+		String docName = rElement.getURL() + "_" + Gate.genSym();
+		FeatureMap params = Factory.newFeatureMap();
+		params.put(Document.DOCUMENT_URL_PARAMETER_NAME, rElement.getURL());
+		try {
+		    Document doc = (Document) Factory.createResource(
+								     DocumentImpl.class.getName(), params, null, docName
+								     );
+		    google.add(doc);
+		    
+		}
+		catch (ResourceInstantiationException e) {
+		    String nl = Strings.getNl();
+		    Err.prln(
+			     "WARNING: could not intantiate document" + nl +
+			     "  Document name was: " + docName + nl +
+			     "  Exception was: " + e + nl + nl
+			     );
+		}
+	    }
+	}
+	
+	
         index += 10;
       }
     } catch (Exception gsf) {
-      Err.println("Google Search Fault: "+gsf);
-      gsf.printStackTrace();
+	Err.println("Google Search Fault: "+gsf);
+	gsf.printStackTrace();
     }
   }
-
+    
 
 
   public void setQuery(String query) {
@@ -153,5 +155,7 @@ public class GooglePR extends AbstractLanguageAnalyser
   public Integer getLimit() {
     return new Integer(this.limit);
   }
+
+  
 
  }
