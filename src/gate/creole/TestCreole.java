@@ -128,7 +128,10 @@ public class TestCreole extends TestCase
   public void testLoading() throws Exception {
 
     // get some res data from the register
-    assert("wrong number of resources in the register", reg.size() == 6);
+    assert(
+      "wrong number of resources in the register: " + reg.size(),
+      reg.size() == 7
+    );
 
     //ResourceData pr1rd = (ResourceData) reg.get("Sheffield Test PR 1");
     //ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
