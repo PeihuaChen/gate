@@ -728,6 +728,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 
     xmlDoc.append(saveAnnotationSetAsXml(dumpingSet, includeFeatures));
 
+    xmlDoc.append(rootEnd);
 //    if(wasXML && needsRootTag){
 //      xmlDoc.append("</GatePreserveFormat>");
 //    }
@@ -832,8 +833,13 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       Annotation annot = (Annotation) iter.next();
       offsets.add(annot.getStartNode().getOffset());
       offsets.add(annot.getEndNode().getOffset());
+      //compute the smallest ID
+      if(smallestAnnotationID == null ||
+         smallestAnnotationID.compareTo(annot.getId()) > 0){
+        smallestAnnotationID = annot.getId();
+      }
     }// End while
-    isRootTag = false;
+
     // ofsets is sorted in ascending order.
     // Iterate this set in descending order and remove an offset at each
     // iteration
@@ -862,12 +868,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
                  "true".equals((String)a.getFeatures().get("isEmptyAndSpan"))){
 
               // Assert: annotation a with start == end and isEmptyAndSpan
-              if (offsets.isEmpty() && "".equals(tmpBuff.toString())){
-                // a is the doc's root tag to be written
-                // The annotations are serialized from left to right.
-                // The first annot in the last offset is the ROOT one
-                isRootTag = true;
-              }// End if
               tmpBuff.append(writeStartTag(a, includeFeatures));
               stack.push(a);
             }else{
@@ -898,12 +898,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
                 Annotation a1 = (Annotation)stack.pop();
                 tmpBuff.append(writeEndTag(a1));
               }// End while
-            }// End if
-            if (offsets.isEmpty() && "".equals(tmpBuff.toString())){
-              // a is the last tag to be written
-              // The annotations are serialized from left to right.
-              // The first annot in the last offset is the ROOT one.
-              isRootTag = true;
             }// End if
             tmpBuff.append(writeStartTag(a, includeFeatures));
             // The annotation is removed from dumped set
@@ -1051,7 +1045,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       offsets.add(annot.getStartNode().getOffset());
       offsets.add(annot.getEndNode().getOffset());
     }// End while
-    isRootTag = false;
 
     // ofsets is sorted in ascending order.
     // Iterate this set in descending order and remove an offset at each
@@ -1148,7 +1141,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       } // if
 
     }// End while(!offsets.isEmpty())
-
+    docContStrBuff.append(rootEnd);
     return docContStrBuff.toString();
   } // saveAnnotationSetAsXml()
 
@@ -1223,7 +1216,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
 //    if (!addGatePreserveFormatTag && isRootTag){
-      if (isRootTag){
+      if (annot.getId().equals(smallestAnnotationID)){
       //the features are included either if desired or if that's an annotation
       //from the original markup of the document. We don't want for example to
       //spoil all links in an HTML file!
@@ -1259,8 +1252,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
         strBuff.append(annot.getType());
         strBuff.append(">");
       }
-      // Once the root tag was writen then there will be no other Root tag
-      isRootTag = false;
+
     }else{
       //the features are included either if desired or if that's an annotation
       //from the original markup of the document. We don't want for example to
@@ -1354,6 +1346,13 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       +annot.getType()+ "\". ");
 */
     strBuff.append("</"+annot.getType()+">");
+
+    //don't write the end for the root element as it will be added
+    //automatically at the end.
+    if(annot.getId().equals(smallestAnnotationID)){
+      rootEnd = strBuff.toString();
+      return "";
+    }
     return strBuff.toString();
   }// writeEndTag()
 
@@ -1876,10 +1875,16 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     */
 //  private boolean addGatePreserveFormatTag = false;
 
-  /** This field indicates if an annotation is the doc's root tag.
-    * It is needed when adding the namespace information
-    */
-  private boolean isRootTag = false;
+  /**
+   * Used by the XML dump preserving format method to remember the smallest
+   * annoation ID as a marker for the XML document root.
+   */
+  private Integer smallestAnnotationID = null;
+
+  /**
+   * The closing tag for the document root.
+   */
+  private String rootEnd;
 
   /** This field is used when creating StringBuffers for toXml() methods.
     * The size of the StringBuffer will be docDonctent.size() multiplied by this
