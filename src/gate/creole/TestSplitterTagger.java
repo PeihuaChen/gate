@@ -58,13 +58,26 @@ public class TestSplitterTagger extends TestCase{
 
     //runtime stuff
     splitter.setDocument(doc);
-    splitter.setOutputASName("splitterAS");
+    splitter.setOutputASName("testAS");
+    splitter.setTempAnnotationSetName("testAS");
     splitter.run();
     //check for exceptions
     splitter.check();
-    assert(!doc.getAnnotations("splitterAS").isEmpty());
+    assert(!doc.getAnnotations("testAS").get("Sentence").isEmpty());
 
     //now check the tagger
+    //create a tagger
+    params = Factory.newFeatureMap();
+    POSTagger tagger = (POSTagger) Factory.createResource(
+                          "gate.creole.POSTagger", params);
 
+    //runtime stuff
+    tagger.setDocument(doc);
+    tagger.setInputASName("testAS");
+    tagger.setOutputASName("testAS");
+    tagger.run();
+    //check for exceptions
+    tagger.check();
+    assert(!doc.getAnnotations("testAS").get("POS").isEmpty());
   }
 }
