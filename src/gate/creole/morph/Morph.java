@@ -56,6 +56,8 @@ public class Morph
   /** Boolean value that tells if parser should behave in caseSensitive mode */
   private Boolean caseSensitive;
 
+  private Boolean considerPOSTag;
+
   /** Default Constructor */
   public Morph() {
   }
@@ -131,7 +133,7 @@ public class Morph
       Annotation currentToken = (Annotation) tokensIter.next();
       String tokenValue = (String) (currentToken.getFeatures().
                                     get(TOKEN_STRING_FEATURE_NAME));
-      if(!currentToken.getFeatures().containsKey(TOKEN_CATEGORY_FEATURE_NAME)) {
+      if(considerPOSTag != null && considerPOSTag.booleanValue() && !currentToken.getFeatures().containsKey(TOKEN_CATEGORY_FEATURE_NAME)) {
         fireProcessFinished();
         throw new ExecutionException("please run the POS Tagger first and then Morpher");
         //javax.swing.JOptionPane.showMessageDialog(null, "please run the POS Tagger first and then Morpher"); ;
@@ -140,6 +142,10 @@ public class Morph
 
       String posCategory = (String) (currentToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME));
       if(posCategory == null) {
+        posCategory = "*";
+      }
+
+      if(considerPOSTag == null || !considerPOSTag.booleanValue()) {
         posCategory = "*";
       }
 
@@ -283,5 +289,13 @@ public class Morph
    */
   public void setCaseSensitive(java.lang.Boolean value) {
     this.caseSensitive = value;
+  }
+
+  public Boolean getConsiderPOSTag() {
+    return this.considerPOSTag;
+  }
+
+  public void setConsiderPOSTag(Boolean value) {
+    this.considerPOSTag = value;
   }
 }

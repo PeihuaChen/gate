@@ -2,7 +2,7 @@
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
   <!-- Processing Resources -->
-  <CREOLE>    
+  <CREOLE>
     <!-- creole.xml for the APF exporter -->
     <RESOURCE>
       <NAME>GATE APF exporter</NAME>
@@ -24,7 +24,7 @@
         COMMENT="Should the SOURCE be written to the APF file"
         NAME="isSourceWritten">java.lang.Boolean</PARAMETER>
     </RESOURCE>
-    
+
     <!-- creole.xml for VP Chunker Transducer -->
     <RESOURCE>
       <NAME>ANNIE VP Chunker</NAME>
@@ -45,7 +45,7 @@
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>
     </RESOURCE>
-    
+
     <RESOURCE>
       <NAME>Annotation Set Transfer</NAME>
       <CLASS>gate.creole.annotransfer.AnnotationSetTransfer</CLASS>
@@ -120,7 +120,7 @@
       <ICON>daml.jpg</ICON>
     </RESOURCE>
 
-    
+
     <RESOURCE>
       <NAME>GATE Morphological analyser</NAME>
       <CLASS>gate.creole.morph.Morph</CLASS>
@@ -140,12 +140,16 @@
       <PARAMETER NAME="rootFeatureName"
         COMMENT="Name of the variable which shows the root word" DEFAULT="root"
         OPTIONAL="false" RUNTIME="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="considerPOSTag"
+        COMMENT="If parser should consider POS Tag prior to running Morph"
+        DEFAULT="true" OPTIONAL="false" RUNTIME="true">
+        java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="caseSensitive"
         COMMENT="If parser should be converted to lowercase first"
         DEFAULT="false" OPTIONAL="false" RUNTIME="false">
         java.lang.Boolean</PARAMETER>
     </RESOURCE>
-    
+
     <!--creole.xml for Flexible Gazetteer -->
     <RESOURCE>
       <NAME>Flexible Gazetteer</NAME>
@@ -166,7 +170,7 @@
         OPTIONAL="false">gate.creole.gazetteer.Gazetteer</PARAMETER>
     </RESOURCE>
   </CREOLE>
-  
+
   <!-- Visual Resources -->
   <CREOLE>
     <!-- VR def for gate Syntax Tree Editor/Viewer -->
@@ -185,4 +189,4 @@
     </RESOURCE>
   </CREOLE>
 </CREOLE-DIRECTORY>
-    
+
