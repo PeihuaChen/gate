@@ -7,13 +7,15 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 19/01/2000
  *
  *  $Id$
  */
 
 package gate.util;
+
+import java.io.PrintStream;
 
 /** A superclass for exceptions in the GATE packages. Can be used
   * to catch any internal exception thrown by the GATE libraries.
@@ -26,6 +28,8 @@ public class GateException extends Exception {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  protected Exception e;
+
   public GateException() {
     super();
   }
@@ -36,5 +40,18 @@ public class GateException extends Exception {
 
   public GateException(Exception e) {
     super(e.toString());
+    this.e = e;
+  }
+
+  public void printStackTrace(){
+    printStackTrace(System.err);
+  }
+
+  public void printStackTrace(PrintStream s){
+    super.printStackTrace(s);
+    if(e!= null){
+      System.err.println("From:");
+      e.printStackTrace(s);
+    }
   }
 } // GateException
