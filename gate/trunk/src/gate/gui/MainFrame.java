@@ -335,7 +335,9 @@ public class MainFrame extends JFrame
     logArea = new LogArea();
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
-    Out.prln("GATE 2 started at: " + new Date().toString());
+    
+    Out.prln("GATE " + Main.version + " build " + Main.build + " started at: " + 
+            new Date().toString());
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "GATE log", 0);
 
