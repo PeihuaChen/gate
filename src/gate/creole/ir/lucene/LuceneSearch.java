@@ -24,27 +24,43 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.queryParser.*;
 import org.apache.lucene.store.*;
 
+/** This class represents Lucene implementation of serching in index. */
 public class LuceneSearch implements Search {
 
+  /** An instance of indexed corpus*/
   private IndexedCorpus indexedCorpus;
 
+  /** Set the indexed corpus resource for searching. */
   public void setCorpus(IndexedCorpus ic){
     this.indexedCorpus = ic;
   }
 
-  public QueryResultList search(String query) throws IndexException, SearchException{
+  /** Search in corpus with this query. Unlimited result length.*/
+  public QueryResultList search(String query)
+                                         throws IndexException, SearchException{
     return search(query, -1);
   }
 
-  public QueryResultList search(String query, int limit) throws IndexException, SearchException{
+  /** Search in corpus with this query.
+   *  Size of the result list is limited. */
+  public QueryResultList search(String query, int limit)
+                                         throws IndexException, SearchException{
     return search(query, limit, null);
   }
 
-  public QueryResultList search(String query, List fieldNames) throws IndexException, SearchException{
+  /** Search in corpus with this query.
+   *  In each QueryResult will be added values of theise fields.
+   *  Result length is unlimited. */
+  public QueryResultList search(String query, List fieldNames)
+                                         throws IndexException, SearchException{
     return search(query, -1, fieldNames);
   }
 
-  public QueryResultList search(String query, int limit, List fieldNames) throws IndexException, SearchException{
+  /** Search in corpus with this query.
+   *  In each QueryResult will be added values of theise fields.
+   *  Result length is limited. */
+  public QueryResultList search(String query, int limit, List fieldNames)
+                                         throws IndexException, SearchException{
     Vector result = new Vector();
 
     try {
