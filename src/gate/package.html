@@ -1,0 +1,38 @@
+<BODY>
+
+<H2>Notes on the GATE package</H2>
+
+
+<H3>Time vs. Character Offsets</H3>
+
+<P>
+Where we say "temporal offset" this should generally be taken to by
+synonymous with "character offset", except where made clear by context. The
+usage is driven by the fact that the AGs formalism uses "temporal" where it
+might have been better to use "offset".
+
+
+<H3>Anchoring</H3>
+
+<P>
+Probably we should assume that all our AGs are at least minimally anchored,
+i.e. there are no dangling nodes with indeterminate offset.
+
+
+<H3>Spans</H3>
+
+<P>
+In a minimally anchored AG (Bir99 p.31) there is always some offset
+information about the position of a node, though this may need to be inferred
+by traversing the graph until an anchored node is encountered. In the textual
+case, the values can often be calculated at creation time by reference to the
+text. The getStart()/getEnd() methods of Annotation may cache this value at 
+creation time and recalculate it in face of edits.
+
+
+<H3>Missing</H3>
+
+<P>
+Type precedence (Bir99 p. 38).
+
+</BODY>
