@@ -193,10 +193,8 @@ public class STreeNode extends DefaultMutableTreeNode {
     targetAS.addAll(addedSet);
 
     AnnotationSet removedSet = doc.getAnnotations(REMOVEDSET);
-    if (removedSet == null || removedSet.isEmpty())
-      return true;
-
-    targetAS.removeAll(removedSet);
+    if (removedSet != null &&  ! removedSet.isEmpty())
+      targetAS.removeAll(removedSet);
 
     addedSet.clear();
     removedSet.clear();
@@ -227,6 +225,9 @@ public class STreeNode extends DefaultMutableTreeNode {
 } // STreeNode
 
 // $Log$
+// Revision 1.9  2001/08/07 19:03:05  kalina
+// Made the tree viewer use Token annotations to break the sentence for annotation
+//
 // Revision 1.8  2001/08/07 17:01:32  kalina
 // Changed the AVR implementing classes in line with the updated AVR
 // API (cancelAction() and setSpan new parameter).

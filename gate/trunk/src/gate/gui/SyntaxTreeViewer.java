@@ -90,19 +90,19 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
   // class members
   // whether to use any layout or not
-  private boolean laidOut = false;
+  protected boolean laidOut = false;
 
   // display all buttons x pixels apart horizontally
-  private int horizButtonGap = 5;
+  protected int horizButtonGap = 5;
 
   // display buttons at diff layers x pixels apart vertically
-  private int vertButtonGap = 50;
+  protected int vertButtonGap = 50;
 
   // extra width in pixels to be added to each button
-  private int extraButtonWidth = 10;
+  protected int extraButtonWidth = 10;
 
   // number of pixels to be used as increment by scroller
-  private int maxUnitIncrement = 10;
+  protected int maxUnitIncrement = 10;
 
   // GUI members
   BorderLayout borderLayout1 = new BorderLayout();
@@ -116,47 +116,49 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   // The utterance to be annotated as a sentence. It's not used if the tree
   // is passed
   // as annotations.
-  private Annotation utterance;
-  private Long utteranceStartOffset = new Long(0);
-  private Long utteranceEndOffset = new Long(0);
-  private AnnotationSet currentSet = null;
+  protected Annotation utterance;
+  protected Long utteranceStartOffset = new Long(0);
+  protected Long utteranceEndOffset = new Long(0);
+  protected AnnotationSet currentSet = null;
+
+  protected String tokenType = "Token";
 
   // for internal use only. Set when the utterance is set.
-  private String displayedString = "";
+  protected String displayedString = "";
 
   // The name of the annotation type which is used to locate the
   // stereotype with the allowed categories
   // also when reading and creating annotations
-  private String treeNodeAnnotationType = "SyntaxTreeNode";
+  protected String treeNodeAnnotationType = "SyntaxTreeNode";
 
   // The annotation name of the annotations used to extract the
   // text that appears at the leaves of the tree. For now the viewer
   // supports only one such annotation but might be an idea to extend it
   // so that it gets its text off many token annotations, which do not
   // need to be tokenised or off the syntax tree annotations themselves.
-  private String textAnnotationType = "utterance";
+  protected String textAnnotationType = "utterance";
 
   // all leaf nodes
-  private HashMap leaves = new HashMap();
+  protected HashMap leaves = new HashMap();
 
   // all non-terminal nodes
-  private HashMap nonTerminals = new HashMap();
+  protected HashMap nonTerminals = new HashMap();
 
   // all buttons corresponding to any node
-  private HashMap buttons = new HashMap();
+  protected HashMap buttons = new HashMap();
 
   // all selected buttons
-  private Vector selection = new Vector();
+  protected Vector selection = new Vector();
 
   // all annotations to be displayed
-  private AnnotationSet treeAnnotations;
+  protected AnnotationSet treeAnnotations;
 
-  private Document document = null;
+  protected Document document = null;
   // the document to which the annotations belong
 
   //true when a new utterance annotation has been added
   //then if the user presses cancel, I need to delete it
-  private boolean utteranceAdded = false;
+  protected boolean utteranceAdded = false;
 
 
   public SyntaxTreeViewer() {
@@ -295,6 +297,13 @@ public class SyntaxTreeViewer extends AbstractVisualResource
    * trigger the cleanup operation
    */
   public void cancelAction() throws GateException{
+    //if we added a new utterance but user does not want it any more...
+    if (utteranceAdded) {
+      currentSet.remove(utterance); //delete it
+      utteranceAdded = false;
+    }
+    //also cleanup the temporary annotation sets used by the viewer
+    //to cache the added and deleted tree annotations
     STreeNode.undo(document);
 
   } //okAction()
@@ -636,6 +645,72 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       ioe.printStackTrace();
     }
 
+    AnnotationSet allTokens = currentSet.get(tokenType);
+    if (allTokens == null || allTokens.isEmpty()) {
+      Out.println("TreeViewer warning: No annotations of type " + tokenType +
+                  "so cannot show or edit the text and the tree annotations.");
+      return;
+    }
+
+    AnnotationSet tokens = allTokens.get( utteranceStartOffset,
+                                          utteranceEndOffset);
+
+    //if no tokens return
+    //needs improving maybe, just show one solid utterance
+    if (tokens == null || tokens.isEmpty()){
+      Out.println("TreeViewer warning: No annotations of type " + tokenType +
+                  "so cannot show or edit the text and the tree annotations.");
+      return;
+    }
+
+    Insets insets = this.getInsets();
+    // the starting X position for the buttons
+    int buttonX = insets.left;
+
+    // the starting Y position
+    int buttonY = this.getHeight() - 20 - insets.bottom;
+
+    // sort them from left to right first
+    // Should work as
+    // annotation implements Comparable
+    LinkedList tokenAnnots = new LinkedList(tokens);
+    Collections.sort(tokenAnnots);
+
+    Iterator iter = tokenAnnots.iterator();
+    //loop through the tokens
+    while (iter.hasNext()) {
+      Annotation tokenAnnot = (Annotation) iter.next();
+      Long tokenBegin = tokenAnnot.getStartNode().getOffset();
+      Long tokenEnd = tokenAnnot.getEndNode().getOffset();
+
+      String tokenText = "";
+      try {
+        tokenText = document.getContent().getContent(
+                        tokenBegin, tokenEnd).toString();
+      } catch (InvalidOffsetException ioe) {
+        ioe.printStackTrace();
+      }
+
+      // create the leaf node
+      STreeNode node =
+        new STreeNode(tokenBegin.longValue(), tokenEnd.longValue());
+
+      // make it a leaf
+      node.setAllowsChildren(false);
+
+      // set the text
+      node.setUserObject(tokenText);
+      node.setLevel(0);
+
+      // add to hash table of leaves
+      leaves.put(new Integer(node.getID()), node);
+
+      // create the corresponding button
+      buttonX = createButton4Node(node, buttonX, buttonY);
+
+    } //while
+
+/*
     long currentOffset = utteranceStartOffset.longValue();
 
     StrTokeniser strTok =
@@ -672,60 +747,13 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
       currentOffset += word.length()+1;  //// +1 to include the delimiter too
     }
+*/
 
     this.setSize(buttonX, buttonY + 20 + insets.bottom);
     // this.resize(buttonX, buttonY + 20 + insets.bottom);
     this.setPreferredSize(this.getSize());
 
   } // utterance2Trees
-
-  /**
-    * Converts the given tokens into a set of leaf nodes
-    * this needs testing as I've never used it
-    */
-  private void tokens2Tree(AnnotationSet tokens) {
-    Document doc = tokens.getDocument();
-
-    Insets insets = this.getInsets();
-    // the starting X position for the buttons
-    int buttonX = insets.left;
-
-    // the starting Y position
-    int buttonY = this.getHeight() - 20 - insets.bottom;
-
-    Iterator i = tokens.iterator();
-    while (i.hasNext()) {
-      Annotation annot = (Annotation) i.next();
-
-      // create the leaf node
-      STreeNode node = new STreeNode(
-                                    annot.getStartNode().getOffset().intValue(),
-                                    annot.getEndNode().getOffset().intValue()
-                                    );
-      // make it a leaf
-      node.setAllowsChildren(false);
-
-      node.setUserObject(doc.getContent().toString().substring(
-                                   annot.getStartNode().getOffset().intValue(),
-                                   annot.getEndNode().getOffset().intValue()));
-                                     //set the text
-      node.setLevel(0);
-
-      // add to hash table of leaves
-      leaves.put(new Integer(node.getID()), node);
-
-      // create the corresponding button
-      buttonX = createButton4Node(node, buttonX, buttonY);
-
-    }
-
-    this.setSize(buttonX, buttonY + 20 + insets.bottom);
-    this.setPreferredSize(this.getSize());
-
-
-  } // tokens2Tree
-
-
 
   /**
     * Returns the X position where another button can start if necessary.
@@ -1277,6 +1305,15 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     treeNodeAnnotationType = newTreeNodeAnnotationType;
   }
 
+  public void setTokenType(String newTokenType) {
+    if (newTokenType != null && ! newTokenType.equals(""))
+      tokenType = newTokenType;
+  }
+
+  public String getTokenType() {
+    return tokenType;
+  }
+
   void this_componentShown(ComponentEvent e) {
     Out.println("Tree Viewer shown");
   }
@@ -1344,6 +1381,9 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.18  2001/08/07 19:03:05  kalina
+// Made the tree viewer use Token annotations to break the sentence for annotation
+//
 // Revision 1.17  2001/08/07 17:01:32  kalina
 // Changed the AVR implementing classes in line with the updated AVR
 // API (cancelAction() and setSpan new parameter).
