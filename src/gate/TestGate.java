@@ -41,6 +41,7 @@ import gate.sgml.TestSgml;
 import gate.util.*;
 import gate.wordnet.TestWordNet;
 import gate.xml.TestXml;
+import gate.creole.ml.maxent.*;
 import gate.xml.TestRepositioningInfo;
 
 import gnu.getopt.Getopt;
@@ -250,6 +251,7 @@ public class TestGate {
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestFeatureMap.suite());
         suite.addTest(TestPR.suite());
+        suite.addTest(TestMaxentWrapper.suite());
 
         //test ontotext gazetteer
         suite.addTest(TestHashGazetteer.suite());
