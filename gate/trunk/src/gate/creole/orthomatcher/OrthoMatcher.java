@@ -832,14 +832,14 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
             matchRule2(longName, shortName)
          ||
             matchRule3(longName, shortName)
-         ||
-            matchRule5(longName, shortName)
          ) // rules for all annotations
          ||
          (// rules for organisation annotations
              ( annotationType.equals(organizationType))
              &&
              (    matchRule4(longName, shortName)
+               ||
+                  matchRule5(longName, shortName)
                ||
                   matchRule6(longName, shortName)
                ||
@@ -863,6 +863,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
              (    annotationType.equals(personType))
                &&
              (    matchRule4(longName, shortName)
+               ||
+                  matchRule5(longName, shortName)
                ||
                   matchRule14(longName, shortName)
                || //kalina: added this, so it matches names when contain more
@@ -976,7 +978,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         matched = s1.equalsIgnoreCase(s2);
     else matched =  s1.equals(s2) ;
 //kalina: do not remove, nice for debug
-//    if (matched && (s2.equalsIgnoreCase("news") || s1.equalsIgnoreCase("news")))
+//    if (matched && (s2.equalsIgnoreCase("m") || s1.equalsIgnoreCase("m")))
 //        Out.prln("Rule1: Matched " + s1 + "and " + s2);
     return matched;
   }//matchRule1
