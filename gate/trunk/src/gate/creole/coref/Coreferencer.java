@@ -37,7 +37,6 @@ public class Coreferencer extends AbstractLanguageAnalyser
     Resource result = super.init();
     //load all submodules
 //    this.pronominalModule = (PronominalCoref)Factory.createResource("gate.creole.coref.PronominalCoref");
-//    this.qtModule = (QuotedTextCoref)Factory.createResource("gate.creole.coref.QuotedTextCoref");
     this.pronominalModule.init();
 
     return result;
