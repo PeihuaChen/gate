@@ -51,6 +51,12 @@ public interface ResourceData extends FeatureBearer {
   /** Get method for the resource name */
   public String getName();
 
+  /** Get the list of instantiations of resources */
+  public Set getInstantiations();
+
+  /** Add an instantiation of the resource to the register of these */
+  public void addInstantiation(Resource resource);
+
   /** Set method for the resource class name */
   public void setClassName(String className);
 

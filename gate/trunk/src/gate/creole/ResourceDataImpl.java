@@ -84,6 +84,18 @@ implements ResourceData {
   /** Get method for the resource name */
   public String getName() { return name; }
 
+  /** Get the list of instantiations of resources */
+  public Set getInstantiations() {
+    throw new LazyProgrammerException();
+  } // getInstantiations
+
+  /** Add an instantiation of the resource to the register of these */
+  public void addInstantiation(Resource resource) {
+///////////////
+// maintain stack of instantiations
+////////////////
+  } // addInstantiation
+
   /** The class name of the resource */
   protected String className;
 
