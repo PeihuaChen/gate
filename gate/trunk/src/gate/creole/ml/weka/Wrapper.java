@@ -22,6 +22,7 @@ import org.jdom.Element;
 
 import weka.core.*;
 import weka.classifiers.*;
+import weka.filters.*;
 
 import gate.creole.ml.*;
 import gate.*;
@@ -101,15 +102,21 @@ public class Wrapper implements MLEngine, ActionsPublisher {
           //boolean attribute ->the value should already be true/false
           instance.setValue(index, value);
         }else{
-          //nominal or numeric attribute
-          if(attr.getValues() != null && !attr.getValues().isEmpty()){
-            //nominal attribute
-            if(attr.getValues().contains(value)){
+          //nominal, numeric or string attribute
+          if(attr.getValues() != null){
+            //nominal or string
+            if(attr.getValues().isEmpty()){
+              //string attribute
               instance.setValue(index, value);
             }else{
-              Out.prln("Warning: invalid value: \"" + value +
-                       "\" for attribute " + attr.getName() + " was ignored!");
-              instance.setMissing(index);
+              //nominal attribute
+              if(attr.getValues().contains(value)){
+                instance.setValue(index, value);
+              }else{
+                Out.prln("Warning: invalid value: \"" + value +
+                         "\" for attribute " + attr.getName() + " was ignored!");
+                instance.setMissing(index);
+              }
             }
           }else{
             //numeric attribute
@@ -217,26 +224,63 @@ public class Wrapper implements MLEngine, ActionsPublisher {
 
 
       //get the options for the classiffier
+      String optionsString = null;
       if(sListener != null) sListener.statusChanged("Setting classifier options...");
-      String[] options;
       Element classifierOptionsElem = optionsElement.getChild("CLASSIFIER-OPTIONS");
-      if(classifierOptionsElem == null){
-        options = new String[]{};
-      }else{
-        List optionsList = new ArrayList();
-        StringTokenizer strTok =
-          new StringTokenizer(classifierOptionsElem.getTextTrim() , " ", false);
-        while(strTok.hasMoreTokens()){
-          optionsList.add(strTok.nextToken());
-        }
-        options = (String[])optionsList.toArray(new String[optionsList.size()]);
+      if(classifierOptionsElem != null){
+        optionsString = classifierOptionsElem.getTextTrim();
       }
+
+      //new style overrides old style
+      org.jdom.Attribute optionsAttribute = classifierElem.getAttribute("OPTIONS");
+      if(optionsAttribute != null){
+        optionsString = optionsAttribute.getValue().trim();
+      }
+      String[] options = parseOptions(optionsString);
 
       try{
         classifier = Classifier.forName(classifierClassName, options);
       }catch(Exception e){
         throw new GateException(e);
       }
+
+      //if we have any filters apply them to the classifer
+      List filterElems = optionsElement.getChildren("FILTER");
+      if(filterElems != null && filterElems.size() > 0){
+        Iterator elemIter = filterElems.iterator();
+        while(elemIter.hasNext()){
+          Element filterElem = (Element)elemIter.next();
+          String filterClassName = filterElem.getTextTrim();
+          String filterOptionsString = "";
+          org.jdom.Attribute optionsAttr = filterElem.getAttribute("OPTIONS");
+          if(optionsAttr != null){
+            filterOptionsString = optionsAttr.getValue().trim();
+          }
+          //create the new filter
+          try{
+            Class filterClass = Class.forName(filterClassName);
+            if(!Filter.class.isAssignableFrom(filterClass)){
+              throw new ResourceInstantiationException(
+                filterClassName + " is not a " + Filter.class.getName() + "!");
+            }
+            Filter aFilter = (Filter)filterClass.newInstance();
+            //apply the options to the filter
+            if(filterOptionsString != null && filterOptionsString.length() > 0){
+              if(!(aFilter instanceof OptionHandler)){
+                throw new ResourceInstantiationException(
+                  filterClassName + " cannot handle optins!");
+              }
+              options = parseOptions(filterOptionsString);
+              ((OptionHandler)aFilter).setOptions(options);
+            }
+            //apply the filter to the classifier
+            classifier = new FilteredClassifier(classifier, aFilter);
+          }catch(Exception e){
+            throw new ResourceInstantiationException(e);
+          }
+        }
+      }
+
       Element anElement = optionsElement.getChild("CONFIDENCE-THRESHOLD");
       if(anElement != null){
         try{
@@ -264,15 +308,22 @@ public class Wrapper implements MLEngine, ActionsPublisher {
       gate.creole.ml.Attribute aGateAttr =
         (gate.creole.ml.Attribute)attIter.next();
       weka.core.Attribute aWekaAttribute = null;
-      if(aGateAttr.getValues() != null && !aGateAttr.getValues().isEmpty()){
-        //nominal attribute
-        FastVector attrValues = new FastVector(aGateAttr.getValues().size());
-        Iterator valIter = aGateAttr.getValues().iterator();
-        while(valIter.hasNext()){
-          attrValues.addElement(valIter.next());
+      if(aGateAttr.getValues() != null){
+        //nominal or String attribute
+        if(!aGateAttr.getValues().isEmpty()){
+          //nominal attribute
+          FastVector attrValues = new FastVector(aGateAttr.getValues().size());
+          Iterator valIter = aGateAttr.getValues().iterator();
+          while(valIter.hasNext()){
+            attrValues.addElement(valIter.next());
+          }
+          aWekaAttribute = new weka.core.Attribute(aGateAttr.getName(),
+                                                   attrValues);
+        }else{
+          //VALUES element present but no values defined -> String attribute
+          aWekaAttribute = new weka.core.Attribute(aGateAttr.getName(),
+                                                   null);
         }
-        aWekaAttribute = new weka.core.Attribute(aGateAttr.getName(),
-                                                 attrValues);
       }else{
         if(aGateAttr.getFeature() == null){
           //boolean attribute ([lack of] presence of an annotation)
@@ -303,6 +354,21 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     if(sListener != null) sListener.statusChanged("");
   }
 
+  protected String[] parseOptions(String optionsString){
+    String[] options = null;
+    if(optionsString == null || optionsString.length() == 0){
+      options = new String[]{};
+    }else{
+      List optionsList = new ArrayList();
+      StringTokenizer strTok =
+        new StringTokenizer(optionsString , " ", false);
+      while(strTok.hasMoreTokens()){
+        optionsList.add(strTok.nextToken());
+      }
+      options = (String[])optionsList.toArray(new String[optionsList.size()]);
+    }
+    return options;
+  }
 
   /**
    * Loads the state of this engine from previously saved data.

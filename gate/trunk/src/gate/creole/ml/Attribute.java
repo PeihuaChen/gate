@@ -71,7 +71,7 @@ public class Attribute implements Serializable{
     feature = null;
     isClass = false;
     position = 0;
-    values = new ArrayList();
+    values = null;
   }
 
   public String toString(){
