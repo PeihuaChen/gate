@@ -23,10 +23,12 @@ public class ObjectModificationEvent extends GateEvent {
   public static final int OBJECT_MODIFIED = 1001;
   public static final int OBJECT_DELETED  = 1002;
 
+  private Object oldValue;
+  private Object newValue;
 
-  public ObjectModificationEvent(Object source, int type) {
+  public ObjectModificationEvent(Object oldValue,Object newValue, int type) {
 
-    super(source,type);
+    super(oldValue,type);
 
     Assert.assert(type == OBJECT_CREATED ||
                   type == OBJECT_DELETED ||
@@ -34,4 +36,12 @@ public class ObjectModificationEvent extends GateEvent {
 
   }
 
-}
+  public Object getOldValue() {
+    return oldValue;
+  }
+
+  public Object getNewValue() {
+    return newValue;
+  }
+
+  }
