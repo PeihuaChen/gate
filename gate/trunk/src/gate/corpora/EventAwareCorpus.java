@@ -23,4 +23,7 @@ import java.util.*;
 public interface EventAwareCorpus extends EventAwareLanguageResource {
 
   public List getLoadedDocuments();
+
+  public List getRemovedDocuments();
+
 }
