@@ -57,7 +57,9 @@ public class ListEditorDialog extends JDialog {
     }
 
     try{
-      itemTypeClass = Gate.getClassLoader().loadClass(itemType);
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(itemType);
+      itemTypeClass = rData == null ? Class.forName(itemType) :
+                      rData.getResourceClass();
     }catch(ClassNotFoundException cnfe){
       throw new GateRuntimeException(cnfe.toString());
     }
