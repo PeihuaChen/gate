@@ -9,12 +9,12 @@ package gate.util;
   *that is a database tha does not have the right structure (see Gate2
   *documentation for details on required database structure).
   */
-public class InvalidTransactionOperationException extends GateException {
+public class OpenTransactionsException extends GateException {
 
-  public InvalidTransactionOperationException() {
+  public OpenTransactionsException() {
   }
 
-  public InvalidTransactionOperationException(String s) {
+  public OpenTransactionsException(String s) {
     super(s);
   }
 
