@@ -125,7 +125,7 @@ public class TestConfig extends TestCase
     configMap.clear();
 
     // if user config file exists, save it and remember the name
-    String configName = Gate.getUserConfigFile();
+    String configName = Gate.getUserConfigFileName();
     File userConfigFile = new File(configName);
     File savedConfigFile = null;
     if(userConfigFile.exists()) {
@@ -161,6 +161,27 @@ public class TestConfig extends TestCase
 
   } // testConfigUpdating
 
+  /** Test session state file naming */
+  public void testSessionStateFileNaming() throws Exception {
+    String fileSep = Strings.getFileSep();
+    if(DEBUG) {
+      Out.prln("file sep is: " + fileSep);
+    }
+
+    if(Gate.runningOnUnix()) {
+      assertTrue(fileSep.equals("/"));
+      assertTrue(
+        Gate.getUserSessionFileName().endsWith("."+GateConstants.GATE_DOT_SER)
+      );
+    } else {
+      assertTrue(! fileSep.equals("/"));
+      assertTrue(
+        ! Gate.getUserSessionFileName().endsWith("."+GateConstants.GATE_DOT_SER)
+      );
+    }
+
+  } // testSessionStateFileNaming
+
   /** Test config file naming */
   public void testConfigFileNaming() throws Exception {
     String fileSep = Strings.getFileSep();
@@ -171,12 +192,12 @@ public class TestConfig extends TestCase
     if(Gate.runningOnUnix()) {
       assertTrue(fileSep.equals("/"));
       assertTrue(
-        Gate.getUserConfigFile().endsWith("." + GateConstants.GATE_DOT_XML)
+        Gate.getUserConfigFileName().endsWith("."+GateConstants.GATE_DOT_XML)
       );
     } else {
       assertTrue(! fileSep.equals("/"));
       assertTrue(
-        ! Gate.getUserConfigFile().endsWith("." + GateConstants.GATE_DOT_XML)
+        ! Gate.getUserConfigFileName().endsWith("."+GateConstants.GATE_DOT_XML)
       );
     }
 
