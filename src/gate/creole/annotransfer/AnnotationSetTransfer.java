@@ -109,7 +109,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   } // execute()
 
   public void setTagASName(String newTagASName) {
-    tagASName = newTagASName;
+    //if given an empty string, set to the default set
+    if ("".equals(newTagASName))
+      tagASName = null;
+    else
+      tagASName = newTagASName;
   }
 
   public String getTagASName() {
