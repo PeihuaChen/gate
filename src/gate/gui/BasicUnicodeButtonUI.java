@@ -10,6 +10,7 @@ import java.net.*;
 import java.io.*;
 
 import guk.pcffont.*;
+import guk.*;
 
 public class BasicUnicodeButtonUI extends BasicButtonUI {
 
@@ -54,7 +55,7 @@ public class BasicUnicodeButtonUI extends BasicButtonUI {
   private static PCFUnicodeFontSet ufont;
 
   static{
-    ufont = guk.Tools.getFontSet();
+    ufont = GUK.getFontSet();
   }
 
 }
