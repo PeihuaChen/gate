@@ -16,15 +16,22 @@ create or replace package persist is
  *
  */  
 
+  -- dummy encoding, do not use
   ENCODING_DEFAULT constant varchar2(16) := '-!-';
-  
+
+  -- LR class types
+  -- these should be sync-ed with the java code  
   DOCUMENT_CLASS constant varchar2(128) := 'gate.corpora.DatabaseDocumentImpl';
   CORPUS_CLASS constant varchar2(128) :=  'gate.corpora.DatabaseCorpusImpl';
 
+  -- entity that owns a feature
+  -- should be sync-ed with java sources
   FEATURE_OWNER_CORPUS      constant number :=  1;
   FEATURE_OWNER_DOCUMENT    constant number :=  2;
   FEATURE_OWNER_ANNOTATION  constant number :=  3;
   
+  --feature value types
+  -- should be sync-ed with java sources  
   VALUE_TYPE_NULL       constant number := 100;   
   VALUE_TYPE_INTEGER    constant number := 101;
   VALUE_TYPE_LONG       constant number := 102;
@@ -32,12 +39,14 @@ create or replace package persist is
   VALUE_TYPE_STRING     constant number := 104;
   VALUE_TYPE_BINARY     constant number := 105;
   VALUE_TYPE_FLOAT      constant number := 106;
-  
+
+  --content types
+  -- should be sync-ed with java sources    
   CHARACTER_CONTENT     constant number := 1;
   BINARY_CONTENT        constant number := 2;
   EMPTY_CONTENT         constant number := 3;  
     
-    
+
   procedure get_timestamp(p_timestamp  OUT number);
 
   
@@ -123,18 +132,6 @@ create or replace package persist is
                                 p_new_type       in number);     
 
                                 
-  procedure get_id_lot(p_id1        out number,
-                       p_id2        out number,
-                       p_id3        out number,
-                       p_id4        out number,
-                       p_id5        out number,
-                       p_id6        out number,
-                       p_id7        out number,
-                       p_id8        out number,
-                       p_id9        out number,
-                       p_id10       out number);     
-
-
   procedure update_document(p_lr_id        IN number,
                             p_url          IN varchar2,
                             p_start_offset IN number,
