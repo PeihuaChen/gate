@@ -39,7 +39,7 @@ import guk.im.*;
 
 public class MainFrame extends JFrame {
 
-  MainFrame myself = null;
+  MainFrame thisMainFrame = null;
   JMenuBar menuBar;
   JSplitPane mainSplit;
   JSplitPane leftSplit;
@@ -81,9 +81,10 @@ public class MainFrame extends JFrame {
   OpenDSAction openDSAction;
   HelpAboutAction helpAboutAction;
   NewAnnotDiffAction newAnnotDiffAction = null;
+  NewBootStrapAction newBootStrapAction = null;
   /**Construct the frame*/
   public MainFrame() {
-    myself = this;
+    thisMainFrame = this;
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
     initGuiComponents();
@@ -100,6 +101,7 @@ public class MainFrame extends JFrame {
     openDSAction = new OpenDSAction();
     helpAboutAction = new HelpAboutAction();
     newAnnotDiffAction = new NewAnnotDiffAction();
+    newBootStrapAction = new NewBootStrapAction();
   }
 
   protected void initGuiComponents(){
@@ -339,6 +341,8 @@ public class MainFrame extends JFrame {
       parent = prRoot;
     }else if (handle instanceof AnnotDiffHandle){
       parent = toolsRoot;
+    }else if (handle instanceof BootStrapHandle){
+      parent = toolsRoot;
     }
     DefaultMutableTreeNode node = null;
     if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
@@ -484,6 +488,7 @@ public class MainFrame extends JFrame {
     toolsRoot = new DefaultMutableTreeNode(handle, true);
     popup = new JPopupMenu();
     popup.add(newAnnotDiffAction);
+    popup.add(newBootStrapAction);
     handle.setPopup(popup);
     projectTreeRoot.add(toolsRoot);
 
@@ -523,7 +528,7 @@ public class MainFrame extends JFrame {
 
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e){
-      AnnotDiffHandle handle = new AnnotDiffHandle(myself);
+      AnnotDiffHandle handle = new AnnotDiffHandle(thisMainFrame);
       handle.setTooltipText("<html><b>Tool:</b> " +
                             "Annotation diff" + "</html>");
       handle.setTitle("Annotation Diff");
@@ -532,6 +537,22 @@ public class MainFrame extends JFrame {
       projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(toolsRoot)));
     }// actionPerformed();
   }//class NewAnnotDiffAction
+
+  class NewBootStrapAction extends AbstractAction{
+    public NewBootStrapAction(){
+      super("Create new resource",
+      new ImageIcon(MainFrame.class.getResource("/gate/resources/img/annDiff.gif")));
+    }// NewBootStrapAction
+    public void actionPerformed(ActionEvent e){
+      BootStrapHandle handle = new BootStrapHandle(thisMainFrame);
+      handle.setTooltipText("<html><b>Tool:</b> " +
+                            "Create a new resource" + "</html>");
+      handle.setTitle("Create new resource");
+      toolsRoot.add(new DefaultMutableTreeNode(handle, false));
+      projectTreeModel.nodeStructureChanged(toolsRoot);
+      projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(toolsRoot)));
+    }// actionPerformed();
+  }//class NewBootStrapAction
 
   class NewApplicationAction extends AbstractAction{
     public NewApplicationAction(){

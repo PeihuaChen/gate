@@ -25,6 +25,9 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
+/**
+  * This class is used to handle AnnotDiff with the Gate GUI interface.
+  */
 public class AnnotDiffHandle extends ResourceHandle{
   JPopupMenu popup = null;
   SmallView smallView = null;
