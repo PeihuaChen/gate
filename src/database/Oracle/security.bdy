@@ -17,9 +17,6 @@ create or replace package body security is
  */
 
   
-  READ_ACCESS constant   number := 0;
-  WRITE_ACCESS constant number := 1;
-
   ORACLE_TRUE  constant number := 1;
   ORACLE_FALSE constant number := 0;
   
