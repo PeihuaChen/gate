@@ -123,7 +123,7 @@ tcl:
 # run the main interface
 run: 
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
-	  -Duser.home='Z:\' -Xmx200m gate.Main
+	  -Duser.home='Z:\' -Xmx200m gate.Main &
 
 # run the Jacl Tcl shell
 jaclsh:
