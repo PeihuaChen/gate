@@ -160,6 +160,10 @@ public class PronominalCoref extends AbstractProcessingResource
               strPronoun.equalsIgnoreCase("HER")) {
       return this._resolve$SHE$HER$(currPronoun,prnSentIndex);
     }
+    else if (strPronoun.equalsIgnoreCase("IT") ||
+              strPronoun.equalsIgnoreCase("ITS")) {
+      return this._resolve$IT$ITS$(currPronoun,prnSentIndex);
+    }
     else {
 //      throw new MethodNotImplementedException();
       gate.util.Err.println("["+strPronoun+"] is not handled yet...");
@@ -269,8 +273,56 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     return bestAntecedent;
   }
 
-  private Annotation _resolve$IT$ITS$(String pronoun) {
-    throw new MethodNotImplementedException();
+
+  private Annotation _resolve$IT$ITS$(Annotation pronoun, int sentenceIndex) {
+
+    //0. preconditions
+    Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
+                      pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
+    String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
+    Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
+                      pronounString.equalsIgnoreCase("ITS"));
+
+    //1.
+    int scopeFirstIndex = sentenceIndex - 1;
+    if (scopeFirstIndex < 0 ) scopeFirstIndex = 0;
+
+    int currSentenceIndex = sentenceIndex;
+    Annotation bestAntecedent = null;
+
+    while (currSentenceIndex >= scopeFirstIndex) {
+
+      Sentence currSentence = this.textSentences[currSentenceIndex];
+      AnnotationSet org = currSentence.getOrganizations();
+      AnnotationSet loc = currSentence.getLocations();
+      //combine them
+      AnnotationSet org_loc = org;
+      org_loc.addAll(loc);
+
+      Iterator it = org_loc.iterator();
+      while (it.hasNext()) {
+        Annotation currOrgLoc = (Annotation)it.next();
+
+        if (null == bestAntecedent) {
+          //discard cataphoric references
+          if (currOrgLoc.getStartNode().getOffset().longValue() <
+                                          pronoun.getStartNode().getOffset().longValue()) {
+            bestAntecedent = currOrgLoc;
+          }
+        }
+        else {
+          bestAntecedent = this._chooseAntecedent$IT$ITS$(bestAntecedent,currOrgLoc,pronoun);
+        }
+      }
+
+      if (0 == currSentenceIndex--)
+        break;
+    }
+
+gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
+    return bestAntecedent;
+
   }
 
   private void preprocess() {
@@ -391,12 +443,16 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER") ||
                       pronounString.equalsIgnoreCase("HE") ||
-                      pronounString.equalsIgnoreCase("HIS"));
+                      pronounString.equalsIgnoreCase("HIS") ||
+                      pronounString.equalsIgnoreCase("IT") ||
+                      pronounString.equalsIgnoreCase("ITS"));
 
     if (pronounString.equalsIgnoreCase("HE") ||
         pronounString.equalsIgnoreCase("HIS")||
         pronounString.equalsIgnoreCase("SHE") ||
-        pronounString.equalsIgnoreCase("HER")) {
+        pronounString.equalsIgnoreCase("HER") ||
+        pronounString.equalsIgnoreCase("IT") ||
+        pronounString.equalsIgnoreCase("ITS")) {
 
       Long offset1 = ant1.getStartNode().getOffset();
       Long offset2 = ant2.getStartNode().getOffset();
@@ -433,6 +489,53 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     }
     else {
       throw new MethodNotImplementedException();
+    }
+  }
+
+
+  private Annotation _chooseAntecedent$IT$ITS$(Annotation ant1, Annotation ant2, Annotation pronoun) {
+
+    //0. preconditions
+    Assert.assertNotNull(ant1);
+    Assert.assertNotNull(ant2);
+    Assert.assertNotNull(pronoun);
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
+                      pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
+    String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
+
+    Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
+                      pronounString.equalsIgnoreCase("ITS"));
+
+    Long offset1 = ant1.getStartNode().getOffset();
+    Long offset2 = ant2.getStartNode().getOffset();
+    Long offsetPrn = pronoun.getStartNode().getOffset();
+    long diff1 = offsetPrn.longValue() - offset1.longValue();
+    long diff2 = offsetPrn.longValue() - offset2.longValue();
+    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+
+    //get the one CLOSEST AND PRECEDING the pronoun
+    if (diff1 > 0 && diff2 > 0) {
+      //we have [...antecedentA...AntecedentB....pronoun...] ==> choose B
+      if (diff1 < diff2)
+        return ant1;
+      else
+        return ant2;
+    }
+    else if (diff1 > 0){
+      Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+      //we have [antecedentA...pronoun...AntecedentB] ==> choose A
+      return ant1;
+    }
+    else if (diff2 > 0){
+      Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+      //we have [antecedentA...pronoun...AntecedentB] ==> choose A
+      return ant2;
+    }
+    else {
+      //both possible antecedents are BEHIND the anaophoric pronoun - i.e. we have either
+      //cataphora, or nominal antecedent, or an antecedent that is further back in scope
+      //in any case - discard the antecedents
+      return null;
     }
   }
 
