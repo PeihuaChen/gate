@@ -347,7 +347,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       super("OK");
     }
     public void actionPerformed(ActionEvent evt){
-      hide();
+      setVisible(false);
       //update the data structures to reflect the user's choices
       Iterator pluginIter = loadNowByURL.keySet().iterator();
       while(pluginIter.hasNext()){
@@ -389,13 +389,24 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
   }
   
+  /**
+   * Overridden so we can populate the UI before showing.
+   */
+  public void setVisible(boolean visible){
+    if(visible){
+      loadNowByURL.clear();
+      loadAlwaysByURL.clear();      
+      mainTableModel.fireTableDataChanged();
+    }
+    super.setVisible(visible);
+  }
   protected class CancelAction extends AbstractAction {
     public CancelAction(){
       super("Cancel");
     }
     
     public void actionPerformed(ActionEvent evt){
-      hide();
+      setVisible(false);
       loadNowByURL.clear();
       loadAlwaysByURL.clear();      
     }
