@@ -158,6 +158,27 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
   public List getSmallVRsForResource(String resourceClassName);
 
   /**
+    * Returns a list of strings representing class names for annotation VRs
+    * that are able to display/edit all types of annotations.
+    * The default VR will be the first in the returned list.
+    */
+   public List getAnnotationVRs();
+
+  /**
+    * Returns a list of strings representing class names for annotation VRs
+    * that are able to display/edit a given annotation type
+    * The default VR will be the first in the returned list.
+    */
+   public List getAnnotationVRs(String annotationType);
+
+
+  /**
+    * Returns a list of strings representing annotations types for which
+    * there are custom viewers/editor registered.
+    */
+   public List getVREnabledAnnotationTypes();
+
+  /**
    * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
    * The register will fire events every time a resource is added to or removed
    * from the system and when a datastore is created, opened or closed.
