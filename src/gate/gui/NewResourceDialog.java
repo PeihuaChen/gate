@@ -362,7 +362,7 @@ public class NewResourceDialog extends JDialog {
                                                            row, column);
       String type = pDisj.getType();
       String iconName = "param.gif";
-      if(type.startsWith("gate.")){
+      if(Gate.getCreoleRegister().containsKey(type)){
         ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
         if(rData != null) iconName = rData.getIcon();
       }

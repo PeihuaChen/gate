@@ -308,22 +308,41 @@ public class Gate
     return urlBaseName;
   } // locateGateFiles
 
-  /**Checks whether a given resource is a hidden resource*/
-  static public boolean isHidden(Resource res){
-    if(res.getFeatures() == null) return false;
-    Object value = res.getFeatures().get("gate.HIDDEN");
+  /** Returns the value for the HIDDEN attribute of a feature map */
+  static public boolean getHiddenAttribute(FeatureMap fm){
+    if(fm == null) return false;
+    Object value = fm.get("gate.HIDDEN");
+    return value != null &&
+           value instanceof String &&
+           ((String)value).equals("true");
+  }
+
+  /** Sets the value for the HIDDEN attribute of a feature map */
+  static public void setHiddenAttribute(FeatureMap fm, boolean hidden){
+    if(hidden){
+      fm.put("gate.HIDDEN", "true");
+    }else{
+      fm.remove("gate.HIDDEN");
+    }
+  }
+
+  /** Returns the value for the APPLICATION attribute of a feature map */
+  static public boolean getApplicationAttribute(FeatureMap fm){
+    if(fm == null) return false;
+    Object value = fm.get("gate.APPLICATION");
     return value != null &&
            value instanceof String &&
            ((String)value).equalsIgnoreCase("true");
   }
 
-  /**Checks whether a given resource is a Gate application*/
-  static public boolean isApplication(Resource res){
-    if(res.getFeatures() == null) return false;
-    Object value = res.getFeatures().get("gate.APPLICATION");
-    return value != null &&
-           value instanceof String &&
-           ((String)value).equalsIgnoreCase("true");
+  /** Sets the value for the APPLICATION attribute of a feature map */
+  static public void setApplicationAttribute(FeatureMap fm,
+                                             boolean isApplication){
+    if(isApplication){
+      fm.put("gate.APPLICATION", "true");
+    }else{
+      fm.remove("gate.APPLICATION");
+    }
   }
 
   /** Gets the NAME attribute feature map.*/

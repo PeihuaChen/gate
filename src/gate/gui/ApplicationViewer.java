@@ -392,11 +392,8 @@ public class ApplicationViewer extends AbstractVisualResource
     Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
     while(prIter.hasNext()){
       ProcessingResource pr = (ProcessingResource)prIter.next();
-      if(pr == controller ||
-         ( pr.getFeatures().get("gate.HIDDEN") != null &&
-           ((String)pr.getFeatures().
-                       get("gate.HIDDEN")).equalsIgnoreCase("true"))
-        ){
+      if(Gate.getApplicationAttribute(pr.getFeatures()) ||
+         Gate.getHiddenAttribute(pr.getFeatures())){
         //ignore this resource
       }else{
         if(!addActionForPR.containsKey(pr)){
@@ -489,7 +486,7 @@ public class ApplicationViewer extends AbstractVisualResource
             case 0: return pd;
             case 1: {
               String paramType = pd.getType();
-              if(paramType.startsWith("gate.")){
+              if(Gate.getCreoleRegister().containsKey(paramType)){
                 ResourceData rData = (ResourceData)
                                      Gate.getCreoleRegister().get(paramType);
                 if(rData != null) paramType = rData.getName();
@@ -593,7 +590,7 @@ public class ApplicationViewer extends AbstractVisualResource
         ParameterDisjunction pd = (ParameterDisjunction)value;
         text =  pd.getName();
         if(pd.size() > 1) text+=" [more...]";
-        if(pd.getType().startsWith("gate.")){
+        if(Gate.getCreoleRegister().containsKey(pd.getType())){
           ResourceData rData = (ResourceData)
                                Gate.getCreoleRegister().get(pd.getType());
           if(rData != null){
@@ -621,8 +618,8 @@ public class ApplicationViewer extends AbstractVisualResource
       while(prsIter.hasNext()){
         Resource res = (Resource)prsIter.next();
         if(controller.contains(res)||
-           Gate.isHidden(res) ||
-           Gate.isApplication(res)) size--;
+           Gate.getHiddenAttribute(res.getFeatures()) ||
+           Gate.getApplicationAttribute(res.getFeatures())) size--;
       }
       return size;
     }//public int getRowCount()
@@ -656,8 +653,8 @@ public class ApplicationViewer extends AbstractVisualResource
       while(allPRsIter.hasNext() && index < rowIndex){
         pr = (ProcessingResource)allPRsIter.next();
         if (!(controller.contains(pr)||
-              Gate.isHidden(pr) ||
-              Gate.isApplication(pr))
+              Gate.getHiddenAttribute(pr.getFeatures()) ||
+              Gate.getApplicationAttribute(pr.getFeatures()))
             )  index ++;
       }
       if(index == rowIndex && pr != null){
@@ -946,7 +943,7 @@ public class ApplicationViewer extends AbstractVisualResource
         return values[selectedIndex];
       } else {
         //no value set; use the most currently used one of the given type
-        if(getType().startsWith("gate.")){
+        if(Gate.getCreoleRegister().containsKey(getType())){
           Stack instances = ((ResourceData)
                               Gate.getCreoleRegister().get(getType())).
                                   getInstantiations();
@@ -1146,9 +1143,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
-    if(res.getFeatures().get("gate.HIDDEN") == null ||
-       ((String)res.getFeatures().get("gate.HIDDEN")).equalsIgnoreCase("true"))
-    return;
+    if(Gate.getHiddenAttribute(res.getFeatures())) return;
     updateActions();
     modulesTableModel.fireTableDataChanged();
   }//public void resourceUnloaded(CreoleEvent e)

@@ -844,11 +844,11 @@ public class MainFrame extends JFrame
 
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
-    if(Gate.isHidden(res)) return;
+    if(Gate.getHiddenAttribute(res.getFeatures())) return;
     DefaultResourceHandle handle = new DefaultResourceHandle(res);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
-      if(Gate.isApplication(res)){
+      if(Gate.getApplicationAttribute(res.getFeatures())){
         handle = new ApplicationHandle((SerialController)res, this, this);
         node = new DefaultMutableTreeNode(handle, false);
         resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
@@ -867,12 +867,11 @@ public class MainFrame extends JFrame
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
-    String hidden = (String)res.getFeatures().get("gate.HIDDEN");
-    if(hidden != null && hidden.equalsIgnoreCase("true")) return;
+    if(Gate.getHiddenAttribute(res.getFeatures())) return;
     DefaultMutableTreeNode node;
     DefaultMutableTreeNode parent = null;
     if(res instanceof ProcessingResource){
-      if(Gate.isApplication(res)){
+      if(Gate.getApplicationAttribute(res.getFeatures())){
         parent = applicationsRoot;
       }else{
         parent = processingResourcesRoot;
@@ -1200,7 +1199,7 @@ public class MainFrame extends JFrame
         try{
           FeatureMap features = Factory.newFeatureMap();
           Gate.setName(features, (String)answer);
-          features.put("gate.APPLICATION", "true");
+          Gate.setApplicationAttribute(features, true);
           SerialController controller =
                 (SerialController)Factory.createResource(
                                 "gate.creole.SerialController",
