@@ -931,7 +931,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     return personType;
   }
 
-  public Boolean getExtList() {
+  public Boolean getExtLists() {
     return new Boolean(extLists);
   }
 

@@ -375,7 +375,8 @@ public class TestPR extends TestCase
 
     //open the data store
     DataStore ds = Factory.openDataStore
-                    ("gate.persist.SerialDataStore", storageDir);
+                    ("gate.persist.SerialDataStore",
+                     storageDir.toExternalForm());
 
     //get LR id
     String lr_id_feature_map = (String)ds.getLrIds
@@ -557,8 +558,8 @@ public class TestPR extends TestCase
     storageDir = new URL(urlBase, "tests/gu");
 
     //open the data store
-    ds = Factory.openDataStore
-                    ("gate.persist.SerialDataStore", storageDir);
+    ds = Factory.openDataStore("gate.persist.SerialDataStore",
+                               storageDir.toExternalForm());
     //get LR id
     lr_id_feature_map = (String)ds.getLrIds
                                 ("gate.corpora.DocumentImpl").get(0);
@@ -739,8 +740,8 @@ public class TestPR extends TestCase
     storageDir = new URL(urlBase, "tests/in");
 
     //open the data store
-    ds = Factory.openDataStore
-                    ("gate.persist.SerialDataStore", storageDir);
+    ds = Factory.openDataStore("gate.persist.SerialDataStore",
+                               storageDir.toExternalForm());
     //get LR id
     lr_id_feature_map = (String)ds.getLrIds
                                 ("gate.corpora.DocumentImpl").get(0);

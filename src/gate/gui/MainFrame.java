@@ -429,6 +429,9 @@ public class MainFrame extends JFrame
     fileMenu.add(newAppMenu);
 
     fileMenu.addSeparator();
+    fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
+
+    fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(newDSAction, this));
     fileMenu.add(new XJMenuItem(openDSAction, this));
     fileMenu.addSeparator();
@@ -1641,7 +1644,8 @@ public class MainFrame extends JFrame
                                                   fileChooser.APPROVE_OPTION){
               try {
                 URL dsURL = fileChooser.getSelectedFile().toURL();
-                DataStore ds = Factory.createDataStore(className, dsURL);
+                DataStore ds = Factory.createDataStore(className,
+                                                       dsURL.toExternalForm());
               } catch(MalformedURLException mue) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Invalid location for the datastore\n " +
@@ -1671,6 +1675,57 @@ public class MainFrame extends JFrame
       }
     }
   }//class NewDSAction extends AbstractAction
+
+
+  class LoadResourceFromFileAction extends AbstractAction {
+    public LoadResourceFromFileAction(){
+      super("Load resource from a file");
+      putValue(SHORT_DESCRIPTION,"Load a resource from a previously saved file");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          fileChooser.setDialogTitle("Select a file for this resource");
+          fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+          if (fileChooser.showOpenDialog(MainFrame.this) ==
+                                                fileChooser.APPROVE_OPTION){
+            File file = fileChooser.getSelectedFile();
+            try{
+              PersistentResourceData.loadResourceFromFile(file);
+            }catch(ResourceInstantiationException rie){
+              JOptionPane.showMessageDialog(MainFrame.this,
+                              "Error!\n"+
+                               rie.toString(),
+                               "Gate", JOptionPane.ERROR_MESSAGE);
+              rie.printStackTrace(Err.getPrintWriter());
+              Exception ee = rie.getException();
+              while(ee != null){
+                Err.prln("==>From:");
+                ee.printStackTrace(Err.getPrintWriter());
+                if(ee instanceof ResourceInstantiationException)
+                  ee = ((ResourceInstantiationException)ee).getException();
+                else if(ee instanceof ExecutionException)
+                  ee = ((ExecutionException)ee).getException();
+                else ee = null;
+              }
+
+            }catch(Exception ex){
+              JOptionPane.showMessageDialog(MainFrame.this,
+                              "Error!\n"+
+                               ex.toString(),
+                               "Gate", JOptionPane.ERROR_MESSAGE);
+              ex.printStackTrace(Err.getPrintWriter());
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+
 
   /**
    * Closes the view associated to a resource.
@@ -1724,7 +1779,8 @@ public class MainFrame extends JFrame
                                                   fileChooser.APPROVE_OPTION){
               try {
                 URL dsURL = fileChooser.getSelectedFile().toURL();
-                DataStore ds = Factory.openDataStore(className, dsURL);
+                DataStore ds = Factory.openDataStore(className,
+                                                     dsURL.toExternalForm());
               } catch(MalformedURLException mue) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Invalid location for the datastore\n " +

@@ -418,7 +418,7 @@ public abstract class Factory {
 
   /** Open an existing DataStore. */
   public static DataStore openDataStore(
-    String dataStoreClassName, URL storageUrl
+    String dataStoreClassName, String storageUrl
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
@@ -435,7 +435,7 @@ public abstract class Factory {
     * method will throw an UnsupportedOperationException.
     */
   public static DataStore createDataStore(
-    String dataStoreClassName, URL storageUrl
+    String dataStoreClassName, String storageUrl
   ) throws PersistenceException, UnsupportedOperationException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
@@ -450,7 +450,7 @@ public abstract class Factory {
 
   /** Instantiate a DataStore (not open or created). */
   protected static DataStore instantiateDataStore(
-    String dataStoreClassName, URL storageUrl
+    String dataStoreClassName, String storageUrl
   ) throws PersistenceException {
     DataStore godfreyTheDataStore = null;
     try {
