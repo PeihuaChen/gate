@@ -303,11 +303,12 @@ public class DatabaseDocumentImpl extends DocumentImpl
     */
   public AnnotationSet getAnnotations(String name) {
 
-    //1. read from DB
+    //1. read from DB if the set is there at all
     _getAnnotations(name);
 
     //2. is there such set in the DB?
-    if (null != name && this.namedAnnotSets.keySet().contains(name)) {
+    if (null != name &&
+        false == this.namedAnnotSets.keySet().contains(name)) {
       //add the set name to the list with the recently created sets
       //the set itself will be created by the super method
       this.addedAnotationSets.add(name);
