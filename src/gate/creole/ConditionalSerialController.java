@@ -16,6 +16,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
+import gate.event.ControllerEvent;
 import gate.util.Err;
 
 /**
@@ -44,7 +45,6 @@ public class ConditionalSerialController extends SerialController
    * @param pr the PR to be set.
    */
   public void add(int index, ProcessingResource pr){
-    super.add(index, pr);
     if(pr instanceof LanguageAnalyser){
       strategiesList.add(index,
                          new AnalyserRunningStrategy((LanguageAnalyser)pr,
@@ -53,6 +53,7 @@ public class ConditionalSerialController extends SerialController
     }else{
       strategiesList.add(index, new RunningStrategy.RunAlwaysStrategy(pr));
     }
+    super.add(index, pr);
   }
 
   /**
@@ -60,7 +61,6 @@ public class ConditionalSerialController extends SerialController
    * @param pr the PR to be added.
    */
   public void add(ProcessingResource pr){
-    super.add(pr);
     if(pr instanceof LanguageAnalyser){
       strategiesList.add(new AnalyserRunningStrategy((LanguageAnalyser)pr,
                                                       RunningStrategy.RUN_ALWAYS,
@@ -68,11 +68,14 @@ public class ConditionalSerialController extends SerialController
     }else{
       strategiesList.add(new RunningStrategy.RunAlwaysStrategy(pr));
     }
+    super.add(pr);
   }
 
   public ProcessingResource remove(int index){
     ProcessingResource aPr = super.remove (index);
     strategiesList.remove(index);
+    fireResourceRemoved(new ControllerEvent(this, 
+            ControllerEvent.RESOURCE_REMOVED, aPr));
     return aPr;
   }
 
@@ -81,6 +84,8 @@ public class ConditionalSerialController extends SerialController
     if(index != -1){
       prList.remove(index);
       strategiesList.remove(index);
+      fireResourceRemoved(new ControllerEvent(this, 
+              ControllerEvent.RESOURCE_REMOVED, pr));
       return true;
     }
     return false;
