@@ -403,7 +403,37 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       instantiateActionClass();
     }
 
-    ((RhsAction) theActionObject).doit(doc, annotations, bindings);
+    // run the action class
+    try {
+      ((RhsAction) theActionObject).doit(doc, annotations, bindings);
+
+    // if the action class throws an exception, re-throw it with a
+    // full description of the problem, inc. stack trace and the RHS
+    // action class code
+    } catch (Exception e) {
+      // get the action class string
+      BufferedReader reader = new BufferedReader(
+        new StringReader(actionClassString.toString())
+      );
+      String line = null;
+      StringBuffer actionPrint = new StringBuffer();
+
+      try {
+        for(int lineNum = 1; ( line = reader.readLine() ) != null; lineNum++) {
+          String pad;
+          if(lineNum < 10) pad = " ";
+          else pad = "";
+          actionPrint.append(pad + lineNum + "  " + line + Strings.getNl());
+        }
+      } catch(IOException ie) { }
+
+      StringWriter stackTraceWriter = new StringWriter();
+      e.printStackTrace(new PrintWriter(stackTraceWriter));
+      throw new JapeException(
+        "Couldn't run RHS action: " + Strings.getNl() +
+        stackTraceWriter.getBuffer().toString() + actionPrint.toString()
+      );
+    }
   } // transduce
 
   /** Create a string representation of the object. */
@@ -453,7 +483,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.17  2001/11/15 14:05:09  hamish
+// better error messages from JAPE RHS problems
+//
 // Revision 1.16  2001/11/01 15:49:09  valyt
+//
 // DEBUG mode for Japes
 //
 // Revision 1.15  2001/09/13 12:09:50  kalina

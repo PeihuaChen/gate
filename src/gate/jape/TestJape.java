@@ -247,7 +247,41 @@ public class TestJape extends TestCase
     } catch(JapeException je) {
       je.printStackTrace(Err.getPrintWriter());
     }
-  }
+  } // DoBugTestGrammar
+
+  /**
+   * This test sets up a JAPE transducer based on a grammar
+   * (RhsError.jape) that will throw a null pointer exception.
+   * The test succeeds so long as we get that exception.
+   */
+  public void testRhsErrorMessages() {
+    boolean gotException = false;
+
+    try {
+      if(DEBUG) {
+        Out.print(
+          "Opening Jape grammar... " + Gate.getUrl("tests/RhsError.jape")
+        );
+      }
+      // a JAPE batcher
+      Batch batch = new Batch(Gate.getUrl("tests/RhsError.jape"), "UTF-8");
+
+      // a document with an annotation
+      Document doc = Factory.newDocument("This is a Small Document.");
+      FeatureMap features = Factory.newFeatureMap();
+      features.put("orth", "upperInitial");
+      doc.getAnnotations().add(new Long(0), new Long(8), "Token", features);
+
+      // run jape on the document
+      batch.transduce(doc);
+    } catch(Exception e) {
+      if(DEBUG) Out.prln(e);
+      gotException = true;
+    }
+
+    assertTrue("Bad JAPE grammar didn't throw an exception", gotException);
+
+  }  // testRhsErrorMessages
 
 
   /** Test suite routine for the test runner */
