@@ -31,6 +31,7 @@ import gate.corpora.*;
 import gate.creole.*;
 import gate.creole.ir.TestIndex;
 import gate.creole.morph.TestMorph;
+import gate.creole.gazetteer.TestFlexibleGazetteer;
 import gate.email.TestEmail;
 import gate.html.TestHtml;
 import gate.jape.TestJape;
