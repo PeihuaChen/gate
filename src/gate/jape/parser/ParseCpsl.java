@@ -46,9 +46,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     this(cpslStream);
 
     macrosMap = new HashMap();
-    File f = new File(cpslFileName);
-    fileName = f.getName();
-    dirName = f.getParent();
+    fileName = "stream";
+    dirName = "stream";
   } // ParseCpsl stream constructor
 
   /** Our current file name. */
@@ -908,7 +907,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
             "        AnnotationSet " + existingAnnotSetName +
-            " = lhs.getBoundAnnots(\"" + nameTok.image + "\"); " + nl
+            " = bindings.get(\"" + nameTok.image + "\"); " + nl
           );
         jj_consume_token(period);
         nameTok = jj_consume_token(ident);

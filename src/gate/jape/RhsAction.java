@@ -5,13 +5,14 @@
 
 package gate.jape;
 import gate.*;
+import java.util.Map;
 
 /** An interface that defines what the action classes created
   * for RightHandSides look like.
   */
 public interface RhsAction {
 
-  public void doit(Document doc, LeftHandSide lhs) throws JapeException;
+  public void doit(Document doc, Map bindings) throws JapeException;
 
 } // RhsAction
 

@@ -10,10 +10,13 @@
 package gate.jape;
 
 import java.util.Enumeration;
+import java.util.Map;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+
 import com.objectspace.jgl.*;
+
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
@@ -123,7 +126,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "import gate.util.*;" + nl + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
-      "  public void doit(Document doc, LeftHandSide lhs) { " + nl
+      "  public void doit(Document doc, java.util.Map bindings) { " + nl
     );
   } // Construction from lhs
 
@@ -144,7 +147,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     if(blockNames.add(name) == null) // it wasn't already a member
       actionClassString.append(
-        "    AnnotationSet " + name + "Annots = lhs.getBoundAnnots(\"" +
+        "    AnnotationSet " + name + "Annots = (AnnotationSet)bindings.get(\"" +
         name + "\"); " + nl
       );
 
@@ -377,13 +380,13 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
   /** Makes changes to the document, using LHS bindings. */
-  public void transduce(Document doc) throws JapeException {
+  public void transduce(Document doc, java.util.Map bindings) throws JapeException {
     if(theActionObject == null) {
       defineActionClass();
       instantiateActionClass();
     }
 
-    ((RhsAction) theActionObject).doit(doc, lhs);
+    ((RhsAction) theActionObject).doit(doc, bindings);
   } // transduce
 
   /** Create a string representation of the object. */
@@ -421,6 +424,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.6  2000/05/05 12:51:12  valyt
+// Got rid of deprecation warnings
+//
 // Revision 1.5  2000/05/05 10:14:09  hamish
 // added more to toString
 //

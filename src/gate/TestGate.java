@@ -51,7 +51,7 @@ public class TestGate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTest(TestJdk.suite());          
+//    suite.addTest(TestJdk.suite());          
     suite.addTest(TestJape.suite());
     suite.addTest(TestFSM.suite());
     suite.addTest(TestTemplate.suite());

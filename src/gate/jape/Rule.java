@@ -127,7 +127,7 @@ implements JapeConstants, java.io.Serializable
   public void transduce(Document doc) throws JapeException {
     // the righthand side does the transduction, using bindings from lhs */
     if(debug) System.out.println("applying rule " + name);
-    rhs.transduce(doc);
+//    rhs.transduce(doc);
     /*Debug.pr(
       this, "Rule.transduce: annotations after transduction: " +
       doc.selectAnnotations("Name", new FeatureMap()).toString() +
@@ -191,6 +191,9 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.3  2000/05/05 12:51:12  valyt
+// Got rid of deprecation warnings
+//
 // Revision 1.2  2000/04/14 18:02:46  valyt
 // Added some gate.fsm classes
 // added some accessor function in old jape classes

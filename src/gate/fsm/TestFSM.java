@@ -68,7 +68,7 @@ public class TestFSM extends TestCase {
   private void showGraph(String title, FSM fsm) throws java.io.IOException,
                                  EDU.auburn.VGJ.graph.ParseError{
     String gml = fsm.getGML();
-    GMLlexer gl = new GMLlexer(new StringBufferInputStream(gml));
+    GMLlexer gl = new GMLlexer(new ByteArrayInputStream(gml.getBytes()));
     GMLobject go = new GMLobject(gl, null);
     Graph graph =
           new Graph(go.getGMLSubObject("graph", GMLobject.GMLlist, false));
