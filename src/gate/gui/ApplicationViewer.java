@@ -726,32 +726,11 @@ public class ApplicationViewer extends AbstractVisualResource
             try{
     //System.out.println("PR:" + pr.getFeatures().get("gate.NAME") + "\n" + params);
               Factory.setResourceParameters(pr, params);
-            }catch(java.beans.IntrospectionException ie){
+            }catch(ResourceInstantiationException ie){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
                                             pr.getFeatures().get("gate.NAME") +
                                             ":\n" + ie.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
-              return;
-            }catch(java.lang.reflect.InvocationTargetException ite){
-              JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                            "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") +
-                                            ":\n" + ite.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
-              return;
-            }catch(IllegalAccessException iae){
-              JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                            "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") +
-                                            ":\n" + iae.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
-              return;
-            }catch(GateException ge){
-              JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                            "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") +
-                                            ":\n" + ge.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }

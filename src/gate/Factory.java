@@ -336,10 +336,8 @@ public abstract class Factory
     */
   public static void setResourceParameters(
     Resource resource, FeatureMap parameterValues
-  ) throws
-    IntrospectionException, InvocationTargetException,
-    IllegalAccessException, GateException
-  {
+  ) throws ResourceInstantiationException {
+
     // the number of parameters that we manage to set on the bean
     int numParametersSet = 0;
     if(DEBUG) {
@@ -349,9 +347,16 @@ public abstract class Factory
     }
 
     // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo =
-      Introspector.getBeanInfo(resource.getClass(), Object.class);
-    PropertyDescriptor[] properties = resBeanInfo.getPropertyDescriptors();
+    BeanInfo resBeanInf = null;
+    try {
+      resBeanInf = Introspector.getBeanInfo(resource.getClass(), Object.class);
+    } catch(Exception e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get bean info for resource " + resource.getClass().getName()
+        + Strings.getNl() + "Introspector exception was: " + e
+      );
+    }
+    PropertyDescriptor[] properties = resBeanInf.getPropertyDescriptors();
 
     // keep a list of those params that we manage to set, for error messages
     List paramsThatGotSet = new ArrayList();
@@ -385,13 +390,10 @@ public abstract class Factory
               ).newInstance( new Object[]{paramValue} );
             if(DEBUG) Out.prln(" to " + paramValue.getClass());
           }
-        } catch(NoSuchMethodException nsme) {
+        } catch(Exception e) {
           throw new ResourceInstantiationException(
-            "Error while converting: " + nsme.toString()
-          );
-        } catch(InstantiationException ie) {
-          throw new ResourceInstantiationException(
-            "Error while converting: " + ie.toString()
+            "Error converting " + paramValue.getClass() +
+            " to " + paramValue.getClass() + ": " + e.toString()
           );
         }
 
@@ -404,7 +406,13 @@ public abstract class Factory
           Out.prln("to paramValue = " + paramValue);
         }
 
-        setMethod.invoke(resource, args);
+        try {
+          setMethod.invoke(resource, args);
+        } catch(Exception e) {
+          throw new ResourceInstantiationException(
+            "couldn't invoke set method: " + e
+          );
+        }
         numParametersSet++;
         paramsThatGotSet.add(paramName);
       } // for each property
@@ -415,7 +423,7 @@ public abstract class Factory
     // values, throw an exception
     if(numParametersSet != parameterValues.size()) {
       String n = Strings.getNl();
-      throw new GateException(
+      throw new ResourceInstantiationException(
         "couldn't set all the parameters of resource " +
         resource.getClass().getName() + n + "params that were set are: " +
         paramsThatGotSet + n + "param values passed: " + parameterValues
