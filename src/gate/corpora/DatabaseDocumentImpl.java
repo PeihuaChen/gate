@@ -78,6 +78,29 @@ public class DatabaseDocumentImpl extends DocumentImpl
     parentDocument = null;
   }
 
+  public DatabaseDocumentImpl(Connection conn) {
+
+    //super();
+    contentLock = new Object();
+
+    this.namedAnnotSets = new HashMap();
+//    this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
+
+    this.isContentRead = false;
+    this.jdbcConn = conn;
+
+    this.contentChanged = false;
+    this.featuresChanged = false;
+    this.nameChanged = false;
+    this.documentChanged = false;
+
+    this.removedAnotationSets = new Vector();
+    this.addedAnotationSets = new Vector();
+
+    parentDocument = null;
+  }
+
+
 /*  public DatabaseDocumentImpl(Connection _conn,
                               String _name,
                               DatabaseDataStore _ds,
