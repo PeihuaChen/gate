@@ -1504,7 +1504,6 @@ System.out.println();
       String sql = " select lr_name " +
                    " from  "+Gate.DB_OWNER+".t_lang_resource " +
                    " where  lr_id = ? ";
-System.out.println(sql);
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,((Long)lrPersistenceId).longValue());
       pstmt.execute();
@@ -1522,11 +1521,11 @@ System.out.println(sql);
       Assert.assertNotNull(lrName);
 
       //4.8 features
-      FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_DOCUMENT);
+      FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_CORPUS);
 
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
-System.out.println(">>>>>>>>>>>>>>>>");
+
       sql = " select doc_lr_id " +
             " from "+Gate.DB_OWNER+".t_document        doc, " +
             "      "+Gate.DB_OWNER+".t_corpus_document corpdoc, " +
@@ -1534,7 +1533,6 @@ System.out.println(">>>>>>>>>>>>>>>>");
             " where doc.doc_id = corpdoc.cd_doc_id " +
             "       and corpdoc.cd_corp_id = corp.corp_id " +
             "       and corp_lr_id = ? ";
-System.out.println(sql);
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,((Long)lrPersistenceId).longValue());
       pstmt.execute();
