@@ -110,7 +110,7 @@ gukjar: classes.jar ../classes/guk/Editor.class
 
 # just the gate classes in a jar
 classes.jar: classes
-	cp JWNLResource_en.properties ../classes/ && cd ../classes && $(JAR) cf `$(CYGPATH) ../build/classes.jar` JWNLResource_en.properties gate
+	cd ../classes && $(JAR) cf `$(CYGPATH) ../build/classes.jar` gate
 
 # copy the resources directory into "classes"
 resources:
