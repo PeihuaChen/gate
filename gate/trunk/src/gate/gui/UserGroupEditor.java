@@ -21,13 +21,13 @@ import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 
 import junit.framework.*;
 
 import gate.security.*;
 import gate.*;
-import gate.util.Out;
-import gate.util.Files;
+import gate.util.*;
 
 
 public class UserGroupEditor extends JComponent {
@@ -65,20 +65,37 @@ public class UserGroupEditor extends JComponent {
   public static void main(String[] args) throws Exception {
     Gate.init();
 
-    String configFile = "security.txt";
-    boolean isGateResource = true;
-
-    if(args.length > 0) {
-      configFile = args[0];
-      isGateResource = false;
-    }
-
-    String urlString = readConfigFile(configFile, isGateResource);
-
     JFrame frame = new JFrame();
 
+    java.util.List dbPaths = new ArrayList();
+    DataStoreRegister reg = Gate.getDataStoreRegister();
+    Iterator keyIter = reg.getConfigData().keySet().iterator();
+    while (keyIter.hasNext()) {
+      String keyName = (String) keyIter.next();
+      if (keyName.startsWith("url"))
+        dbPaths.add(reg.getConfigData().get(keyName));
+    }
+    if (dbPaths.isEmpty())
+      throw new
+        GateRuntimeException("Oracle URL not configured in gate.xml");
+    //by default make it the first
+    String storageURL = (String)dbPaths.get(0);
+    if (dbPaths.size() > 1) {
+      Object[] paths = dbPaths.toArray();
+      Object answer = JOptionPane.showInputDialog(
+                          frame,
+                          "Select a database",
+                          "Gate", JOptionPane.QUESTION_MESSAGE,
+                          null, paths,
+                          paths[0]);
+      if (answer != null)
+        storageURL = (String) answer;
+      else
+        return;
+    }
+
 //    AccessController ac = new AccessControllerImpl(urlString);
-    AccessController ac = Factory.createAccessController(urlString);
+    AccessController ac = Factory.createAccessController(storageURL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -137,35 +154,6 @@ public class UserGroupEditor extends JComponent {
     frame.setSize(800, 600);
     frame.show();
 
-  }
-
-  public static String readConfigFile(String configFile, boolean isGateResource)
-                        throws IOException {
-
-
-    InputStream inputStream = null;
-    if (isGateResource)
-      inputStream = Files.getGateResourceAsStream(configFile);
-    else
-      inputStream = new FileInputStream(configFile);
-    if (inputStream == null) {
-      Out.prln("Cannot read URL from file: " + configFile);
-      System.exit(-1);
-    }
-    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-    String urlString = bufferedReader.readLine();
-    if (urlString == null) {
-      Out.prln("Cannot read URL from file: " + "security.txt");
-      System.exit(-1);
-    }
-
-    bufferedReader.close();
-    inputStreamReader.close();
-    inputStream.close();
-
-    return urlString;
   }
 
   public static Session login(AccessController ac, Component parent)
