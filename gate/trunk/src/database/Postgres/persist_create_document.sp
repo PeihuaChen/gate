@@ -1,3 +1,19 @@
+/*
+ *  persist.bdy
+ *
+ *  Copyright (c) 1998-2002, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Marin Dimitrov, 20/Mar/2002
+ *
+ *  $Id$
+ *
+ */
+
 DROP FUNCTION persist_create_document(int4,varchar,varchar,int4,int4,boolean,int4);
 
 CREATE FUNCTION persist_create_document(int4,varchar,varchar,int4,int4,boolean,int4)
