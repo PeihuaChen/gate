@@ -62,8 +62,8 @@ public class TestJape extends TestCase
     // run the parser test
     Batch batch = null;
 //    String japeFileName = "/gate/jape/Test11.jape";
-//    String japeFileName = "/gate/jape/TestABC.jape";
-    String japeFileName = "/gate/jape/Country.jape";
+    String japeFileName = "/gate/jape/TestABC.jape";
+//    String japeFileName = "/gate/jape/Country.jape";
     InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
