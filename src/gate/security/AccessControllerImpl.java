@@ -1164,8 +1164,8 @@ public class AccessControllerImpl
 
           if (false == key.equals(usr.getName())) {
             //gotcha
-            this.groupsByName.remove(key);
-            this.groupsByName.put(usr.getName(),usr);
+            this.usersByName.remove(key);
+            this.usersByName.put(usr.getName(),usr);
             found = true;
             break;
           }
