@@ -228,8 +228,27 @@ create or replace package body test is
   
   begin
 
-     -- delete documents
+     -- delete LRs
+     
+     -- features
+     delete from t_feature;
+     
+     --annotations/sets
+     delete from t_as_annotation;
+     delete from t_annotation;
+     delete from t_annot_set;
+     
+     -- documents/corpuses
+     delete from t_corpus_document;
+     delete from t_document;
+     delete from t_corpus;
+     
+     -- document contents
+     delete from t_doc_content;
+     
+     --finally
      delete from t_lang_resource;
+     
 
      -- remove users in groups
      delete from t_user_group
@@ -243,6 +262,7 @@ create or replace package body test is
      delete from t_user
      where usr_id >0;
 
+     
   end;                                                                                                        
   
 /*begin
