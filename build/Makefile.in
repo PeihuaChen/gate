@@ -55,7 +55,7 @@ RUN=$(JAVA)
 #GUK all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
 #GUK	  classes resources gukjar TestJdk.jar TestResources.jar
 all: ../classes/gate/TestGate.class classes ../doc/userguide.html resources \
-	TestJdk.jar TestResources.jar
+	TestJdk.jar TestResources.jar tcl
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
@@ -132,6 +132,11 @@ jaclsh:
 # run the GUK editor
 gukdemo: 
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` guk.Editor
+
+# run Scratch.main
+scratch: 
+	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
+	  -Duser.home='Z:\' -Xmx200m gate.util.Scratch
 
 # make the user guide
 ../doc/userguide.html: ../doc/src/userguide.html
