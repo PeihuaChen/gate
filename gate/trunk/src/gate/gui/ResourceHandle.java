@@ -18,13 +18,14 @@ import javax.swing.*;
 import java.util.*;
 
 import gate.*;
+import gate.event.*;
 
 /**
  * Interface for classes used to store the information about an open resource.
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
  */
-public interface ResourceHandle {
+public interface ResourceHandle extends ProgressListener, StatusListener {
 
   public Icon getIcon();
 

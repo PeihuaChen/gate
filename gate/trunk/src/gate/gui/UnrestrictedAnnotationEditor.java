@@ -99,16 +99,16 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
       currentAnnotSet.add( currentStartOffset,
                            currentEndOffset,
                            this.getAnnotType(),
-                           this.getFeatures());
+                           this.getCurrentAnnotationFeatures());
     }else{
       if (currentAnnot.getType().equals(this.getAnnotType())){
-        currentAnnot.setFeatures(this.getFeatures());
+        currentAnnot.setFeatures(this.getCurrentAnnotationFeatures());
       }else{
         currentAnnotSet.remove(currentAnnot);
         currentAnnotSet.add( currentStartOffset,
                              currentEndOffset,
                              this.getAnnotType(),
-                             this.getFeatures());
+                             this.getCurrentAnnotationFeatures());
       }// End if
     }// End if
   }//okAction();
@@ -223,7 +223,7 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
   public String getAnnotType(){ return data.getAnnotType();}
 
   /** Returns the features edited with this tool*/
-  public FeatureMap getFeatures(){ return data.getFeatures();}
+  protected FeatureMap getCurrentAnnotationFeatures(){ return data.getFeatures();}
 
   // INNER CLASS
   /** This class implements a feature bearer. It is used as internal data.

@@ -129,6 +129,7 @@ public class DocumentEditor extends AbstractVisualResource{
   protected Highlighter selectionHighlighter;
 
 
+  protected ResourceHandle myHandle;
 
   /**
    * holds the data for the  annotations table: a list of Annotation objects
@@ -290,19 +291,7 @@ public class DocumentEditor extends AbstractVisualResource{
             (DefaultMutableTreeNode)enum.nextElement();
           stylesTreeModel.nodeChanged(node);
         }
-/*
-        //expand all the nodes in the tree
-        if(stylesTreeRoot.getChildCount() > 0){
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                    ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
-          while(node != null){
-            stylesTree.expandPath(new TreePath(node.getPath()));
-            node = node.getNextSibling();
-          }
-          //stylesTreeModel.reload();
-        }
-        stylesTree.paintImmediately(stylesTree.getBounds());
-*/
+
         //set the slider location
         leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
       }
@@ -392,12 +381,12 @@ public class DocumentEditor extends AbstractVisualResource{
                             document.getAnnotations() :
                             document.getAnnotations(setName);
 
-        EditAnnotationAction editAnnAct = new EditAnnotationAction(ann,set);
+        EditAnnotationAction editAnnAct = new EditAnnotationAction(set, ann);
         if(SwingUtilities.isLeftMouseButton(e)){
           if(e.getClickCount() == 1){
           }else if(e.getClickCount() == 2){
             //double left click -> edit the annotation
-            editAnnAct.actionPerformed(null);
+            if(editable) editAnnAct.actionPerformed(null);
           }
         } else if(SwingUtilities.isRightMouseButton(e)) {
           //right click
@@ -415,12 +404,13 @@ public class DocumentEditor extends AbstractVisualResource{
           popup.addSeparator();
           //add save as XML and preserve format
           popup.add(new DumpAsXmlAction());
-          popup.addSeparator();
-
-          //add delete option
-          popup.add(new DeleteSelectedAnnotationsAction(annotationsTable));
-          popup.addSeparator();
-          popup.add(editAnnAct);
+          if(editable){
+            //add delete option
+            popup.addSeparator();
+            popup.add(new DeleteSelectedAnnotationsAction(annotationsTable));
+            popup.addSeparator();
+            popup.add(new XJMenuItem(editAnnAct, myHandle));
+          }
           popup.show(annotationsTable, e.getX(), e.getY());
         }
       }
@@ -836,7 +826,7 @@ public class DocumentEditor extends AbstractVisualResource{
   }
 
   public void setHandle(ResourceHandle handle){
-    //NOP
+    myHandle = handle;
   }
 
 
@@ -2191,94 +2181,90 @@ public class DocumentEditor extends AbstractVisualResource{
 
   /**
    * The action that is fired when the user wants to edit an annotation.
-   * This will show a {@link gate.gui.AnnotationEditDialog} to allow the user
-   * to do the editing.
+   * It will build a dialog containing all the valid annotation editors.
    */
   protected class EditAnnotationAction extends AbstractAction {
-    /** This represent the annotation to be modified*/
-    protected Annotation ann = null;
-    /** The annotation set that ann belongs */
-    protected AnnotationSet set = null;
-
-    /** Constructs an EditAnnotAction from an annotation and a set*/
-    public EditAnnotationAction(Annotation ann, AnnotationSet set){
+    public EditAnnotationAction(AnnotationSet set, Annotation annotation){
       super("Edit");
-      this.ann = ann;
       this.set = set;
-    }// EditAnnotationAction()
+      this.annotation = annotation;
+      putValue(SHORT_DESCRIPTION, "Edits the annotation");
+    }
 
-    /** This method takes care of how the annotation is editted*/
     public void actionPerformed(ActionEvent e){
-      if(!editable) return;
-      //Find an appropiate schema if there is one
-      Set annotationSchemas = getAnnotationSchemas();
-      // If there is no schema defined then Edit the annotation with the
-      // CustomAnnotationEditor
-      if(annotationSchemas != null && !annotationSchemas.isEmpty()){
-        Iterator schemasIter = annotationSchemas.iterator();
-        boolean done = false;
-        // See if there is any schema
-        while(!done && schemasIter.hasNext()){
-          AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
-          if(schema.getAnnotationName().equalsIgnoreCase(ann.getType())){
-            FeatureMap features = ann.getFeatures();
-            annotationEditDialog.setLocationRelativeTo(annotationsTable);
-            FeatureMap newFeatures = annotationEditDialog.show(features,
-                                                               schema);
-            if(newFeatures != null){
-              features.clear();
-              features.putAll(newFeatures);
-              int tableRow = data.indexOf(ann);
-              annotationsTableModel.fireTableRowsUpdated(tableRow, tableRow);
-            }// End if
-            done = true;
-          }// End if
-        }// End while
-        if (!done ){
-          // Edit the annotation without a schema and stuff
-          editWithCustomEditor();
+      //get the list of editors
+      java.util.List specificEditors = Gate.getCreoleRegister().
+                                       getAnnotationVRs(annotation.getType());
+      java.util.List genericEditors = Gate.getCreoleRegister().
+                                      getAnnotationVRs();
+      //create the GUI
+      JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+      //add all the specific editors
+      Iterator editorIter = specificEditors.iterator();
+      while(editorIter.hasNext()){
+        String editorType = (String)editorIter.next();
+        //create the editor
+        AnnotationVisualResource editor;
+        try{
+          editor = (AnnotationVisualResource)
+                                          Factory.createResource(editorType);
+          editor.setTarget(set);
+          editor.setAnnotation(annotation);
+          tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+                        ((ResourceData)Gate.getCreoleRegister().get(editorType)).
+                                                                getName());
+        }catch(ResourceInstantiationException rie){
+          rie.printStackTrace(Err.getPrintWriter());
         }
-      }else{
-        // Edit the annotation without a schema and stuff
-        editWithCustomEditor();
-      }// End if
-    }//public void actionPerformed(ActionEvent e)
+      }
 
-    private void editWithCustomEditor(){
-      CustomAnnotationEditDialog customAnnotEditor =
-                                        new CustomAnnotationEditDialog(
-                                            getAnnotationSchemas());
-      // Before edditing save annotation's type (we need it later after editting)
-      String oldAnnType = ann.getType();
-      // Creates a new annotation
-      // We don't need to see what the user pressed (OK or Cancel)
-      // In both cases the action bellow is valid.
-      // In cancel's case it restores the old type and features.
-      customAnnotEditor.show(ann);
-      String annotType = customAnnotEditor.getAnnotType();
-      FeatureMap annotFeat = customAnnotEditor.getFeatures();
-      if (oldAnnType != null && oldAnnType.equals(annotType)){
-        // No nedd to change the annotation.
-        // We only need to change it's features.
-        ann.setFeatures(annotFeat);
-      }else{
-        // Delete the previous annotation from the set and create another
-        // one in its place.
-        Node startNode = ann.getStartNode();
-        Node endNode = ann.getEndNode();
-
-        //Remove the OLD annot form the set
-        set.remove(ann);
-
-        // Add the new one
-        set.add(startNode,endNode,annotType, annotFeat);
-      }// End if
-      SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
-          annotationsTableModel.fireTableDataChanged();
+      //add all the generic editors
+      editorIter = genericEditors.iterator();
+      while(editorIter.hasNext()){
+        String editorType = (String)editorIter.next();
+        //create the editor
+        AnnotationVisualResource editor;
+        try{
+          editor  = (AnnotationVisualResource)
+                                          Factory.createResource(editorType);
+          if(editor.canDisplayAnnotationType(annotation.getType())){
+            editor.setTarget(set);
+            editor.setAnnotation(annotation);
+            tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+                           ((ResourceData)Gate.getCreoleRegister().
+                                              get(editorType)).getName());
+          }
+        }catch(ResourceInstantiationException rie){
+          rie.printStackTrace(Err.getPrintWriter());
         }
-      });// End invokeLater
-    }// editWithCustomEditor()
+
+      }
+
+      //show the modal dialog
+      JOptionPane optionPane = new JOptionPane(tabbedPane,
+                                               JOptionPane.PLAIN_MESSAGE,
+                                               JOptionPane.OK_CANCEL_OPTION);
+      optionPane.setIcon(null);
+      JDialog dialog =  optionPane.createDialog(DocumentEditor.this,
+                                                "Edit annotation");
+      dialog.pack();
+      dialog.show();
+
+      //if OK notify the selected editor to save the data
+      if(((Integer)optionPane.getValue()).intValue() == optionPane.OK_OPTION){
+        try{
+          ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
+                                      getSelectedComponent()/*).getViewport().
+                                                              getView()*/
+           ).okAction();
+        }catch(GateException ge){
+          ge.printStackTrace(Err.getPrintWriter());
+        }
+      }
+    }
+
+    protected AnnotationSet set;
+    protected Annotation annotation;
   }//class EditAnnotationAction
 
   /**

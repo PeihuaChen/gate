@@ -23,12 +23,12 @@ public class CorpusEvent extends GateEvent {
   /**
    * Event type that is fired when a new document is added to a corpus
    */
-  public static int DOCUMENT_ADDED = 401;
+  public final static int DOCUMENT_ADDED = 401;
 
   /**
    * Event type that is fired when a document is removed from a corpus
    */
-  public static int DOCUMENT_REMOVED = 402;
+  public final static int DOCUMENT_REMOVED = 402;
 
   /**
    * Creates a new CorpusEvent.
