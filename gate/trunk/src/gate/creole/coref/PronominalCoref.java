@@ -23,7 +23,7 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 
-public class PronominalCoref extends AbstractProcessingResource
+public class PronominalCoref extends AbstractLanguageAnalyser
                               implements ProcessingResource{
 
 
@@ -45,21 +45,20 @@ public class PronominalCoref extends AbstractProcessingResource
   //scope
   private static final int SENTENCES_IN_SCOPE = 3;
 
-//  private static final SentenceComparator SENTENCE_COMPARATOR;
-  private static final AnnotationComparator ANNOTATION_COMPARATOR;
+  private /*static*/ AnnotationComparator ANNOTATION_COMPARATOR;
 
-  private Document  doc;
   private AnnotationSet defaultAnnotations;
   private Sentence[] textSentences;
   private HashMap personGender;
 
-  static {
-//    SENTENCE_COMPARATOR = new SentenceComparator();
+/*  static {
+System.out.println("proCoref::static");
     ANNOTATION_COMPARATOR = new AnnotationComparator();
   }
-
+*/
   public PronominalCoref() {
     personGender = new HashMap();
+ANNOTATION_COMPARATOR = new AnnotationComparator();
   }
 
   /** Initialise this resource, and return it. */
@@ -80,15 +79,18 @@ public class PronominalCoref extends AbstractProcessingResource
   } // reInit()
 
   /** Get the document we're running on. */
-  public Document getDocument() {
+/*  public Document getDocument() {
     return this.doc;
   }
+*/
 
   /** Set the document to run on. */
+/*
   public void setDocument(Document newDocument) {
     Assert.assertNotNull(newDocument);
-    this.doc = newDocument;
+    super.setDocument(newDocument);
   }
+*/
 
   /**
    * This method runs the coreferencer. It assumes that all the needed parameters
@@ -96,35 +98,55 @@ public class PronominalCoref extends AbstractProcessingResource
    */
   public void execute() throws ExecutionException{
 
-    if(null == this.doc) {
+    //0. preconditions
+    if(null == this.document) {
       throw new ExecutionException("[coreference] Document is not set!");
     }
 
+    //1. preprocess
     preprocess();
 
-    //get personal pronouns
+    //2. remove corefs from previous run
+    AnnotationSet corefSet = this.document.getAnnotations("COREF");
+    if (false == corefSet.isEmpty()) {
+      corefSet.clear();
+    }
+
+    //3.get personal pronouns
     FeatureMap constraintPRP = new SimpleFeatureMapImpl();
     constraintPRP.put("category",PRP_CATEGORY);
     AnnotationSet personalPronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraintPRP);
 
-    //get possesive pronouns
+    //4.get possesive pronouns
     FeatureMap constraintPRP$ = new SimpleFeatureMapImpl();
     constraintPRP$.put("category",PRP$_CATEGORY);
     AnnotationSet possesivePronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraintPRP$);
 
-    //combine them
+    //5.combine them
     AnnotationSet pronouns = personalPronouns;
-    pronouns.addAll(possesivePronouns);
+    if (null == personalPronouns) {
+      pronouns = possesivePronouns;
+    }
+    else if (null != possesivePronouns) {
+      pronouns.addAll(possesivePronouns);
+    }
 
-    //sort them according to offset
+    //6.do we have pronouns at all?
+    if (null == pronouns) {
+      //do nothing
+      return;
+    }
+
+    //7.sort them according to offset
     Object[] arrPronouns = pronouns.toArray();
     java.util.Arrays.sort(arrPronouns,ANNOTATION_COMPARATOR);
 
-    //cleanup - ease the GC
+    //8.cleanup - ease the GC
     pronouns = personalPronouns = possesivePronouns = null;
 
     int prnSentIndex = 0;
 
+    //9. process all pronouns
     for (int i=0; i< arrPronouns.length; i++) {
       Annotation currPronoun = (Annotation)arrPronouns[i];
       while (this.textSentences[prnSentIndex].getEndOffset().longValue() <
@@ -136,9 +158,22 @@ public class PronominalCoref extends AbstractProcessingResource
       Assert.assertTrue(currSentence.getStartOffset().longValue() <= currPronoun.getStartNode().getOffset().longValue());
       Assert.assertTrue(currSentence.getEndOffset().longValue() >= currPronoun.getEndNode().getOffset().longValue());
 
+      //10. find antecedent (if any) for pronoun
       Annotation antc = findAntecedent(currPronoun,prnSentIndex);
-    }
 
+      //11.create temp annotation set
+      corefSet = this.document.getAnnotations("COREF");
+      Long antOffset = new Long(0);
+
+      if (null!= antc) {
+        antOffset = antc.getStartNode().getOffset();
+      }
+
+      //12. create coref annotation
+      FeatureMap features = new SimpleFeatureMapImpl();
+      features.put("antecedent",antOffset);
+      corefSet.add(currPronoun.getStartNode(),currPronoun.getEndNode(),"COREF",features);
+    }
   }
 
   private Annotation findAntecedent(Annotation currPronoun,int prnSentIndex) {
@@ -149,8 +184,19 @@ public class PronominalCoref extends AbstractProcessingResource
     Assert.assertTrue(currPronoun.getType().equals(TOKEN_TYPE));
     Assert.assertTrue(currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
                       currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
+//    Assert.assertNotNull(currPronoun.getFeatures().get("string"));
 
     String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
+
+    //Assert.assertNotNull(strPronoun);
+if (null == strPronoun) {
+  System.out.println("NULL pronoun! ["+currPronoun+"]");
+  System.out.println("key=["+TOKEN_STRING+"]");
+  System.out.println("value ["+currPronoun.getFeatures().get(TOKEN_STRING)+"]");
+  System.out.println("features=["+currPronoun.getFeatures()+"]");
+  System.out.println("value2 ["+currPronoun.getFeatures().get("string")+"]");
+  System.out.println("["+ "string".equals(TOKEN_STRING) +"]");
+}
 
     if (strPronoun.equalsIgnoreCase("HE") ||
         strPronoun.equalsIgnoreCase("HIS")) {
@@ -327,8 +373,11 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
 
   private void preprocess() {
 
+    //0.5 cleanup
+    this.personGender.clear();
+
     //1.get all annotation in the default set
-    this.defaultAnnotations = this.doc.getAnnotations();
+    this.defaultAnnotations = this.document.getAnnotations();
 
     //2.get all SENTENCE annotations
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_TYPE);
@@ -345,17 +394,17 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
       Long sentEndOffset = currSentence.getEndNode().getOffset();
 
       //2.1. get PERSOSNS in this sentence
-      AnnotationSet sentPersons = this.defaultAnnotations.get(this.PERSON_TYPE,
+      AnnotationSet sentPersons = this.defaultAnnotations.get(PERSON_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
       //2.2. get ORGANIZATIONS in this sentence
-      AnnotationSet sentOrgs = this.defaultAnnotations.get(this.ORG_TYPE,
+      AnnotationSet sentOrgs = this.defaultAnnotations.get(ORG_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
       //2.3. get LOCATION in this sentence
-      AnnotationSet sentLocs = this.defaultAnnotations.get(this.LOC_TYPE,
+      AnnotationSet sentLocs = this.defaultAnnotations.get(LOC_TYPE,
                                                               sentStartOffset,
                                                               sentEndOffset);
 
@@ -410,11 +459,8 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     return result;
   }
 
-//  private int findSentenceNumber(Annotation ann) {
-//    int index = Arrays.binarySearch(this.textSentences,ann.getStartNode().getOffset(),SENTENCE_COMPARATOR);
-//  }
 
-  private static class AnnotationComparator implements Comparator {
+  private /*static*/ class AnnotationComparator implements Comparator {
 
     public int compare(Object o1,Object o2) {
 
@@ -539,21 +585,6 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     }
   }
 
-/*  private static class SentenceComparator implements Comparator {
-
-    public int compare(Object o1,Object o2) {
-
-      Assert.assertNotNull(o1);
-      Assert.assertNotNull(o2);
-      Assert.assertTrue(o1 instanceof Sentence);
-      Assert.assertTrue(o2 instanceof Long);
-
-      Sentence s = (Sentence)o1;
-      Long offset = (Long)o2;
-      return s.getStartOffset().longValue() - offset.intValue();
-    }
-  }
-*/
 
   private class Sentence {
 
