@@ -5,27 +5,12 @@
   <!-- Language Resources -->
   <CREOLE>
     <!-- Documents -->
-    <RESOURCE>
-      <NAME>GATE Document Interface</NAME>
-      <CLASS>gate.Document</CLASS>
-      <INTERFACE>gate.Document</INTERFACE>
-      <ICON>lr.gif</ICON>
-      <PRIVATE/>
-    </RESOURCE>
-
-    <RESOURCE>
-      <NAME>GATE Corpus Interface</NAME>
-      <CLASS>gate.Corpus</CLASS>
-      <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>lr.gif</ICON>
-      <PRIVATE/>
-    </RESOURCE>
 
     <RESOURCE>
       <NAME>GATE document</NAME>
       <CLASS>gate.corpora.DocumentImpl</CLASS>
       <INTERFACE>gate.Document</INTERFACE>
-      <COMMENT>GATE document</COMMENT>
+      <COMMENT>GATE transient document</COMMENT>
       <OR>
         <PARAMETER NAME="sourceUrl" COMMENT="Source URL" SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf">java.net.URL</PARAMETER>
         <PARAMETER NAME="stringContent" COMMENT="The content of the document">java.lang.String</PARAMETER>
@@ -40,6 +25,7 @@
     <RESOURCE>
       <NAME>GATE corpus</NAME>
       <CLASS>gate.corpora.CorpusImpl</CLASS>
+      <COMMENT>GATE transient corpus</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
       <PARAMETER NAME="documentsList"
                  COMMENT="A list of GATE documents"

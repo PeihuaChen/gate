@@ -422,9 +422,10 @@ public class NameBearerHandle implements Handle,
       filer.setDialogTitle("Select the directory that will contain the corpus");
       filer.setFileSelectionMode(filer.DIRECTORIES_ONLY);
 
-      if (filer.showOpenDialog(getLargeView() != null ?
+      if (filer.showDialog(getLargeView() != null ?
                                getLargeView() :
-                               getSmallView()) == filer.APPROVE_OPTION){
+                               getSmallView(),
+                               "Select") == filer.APPROVE_OPTION){
 
         File dir = filer.getSelectedFile();
         //create the top directory if needed
@@ -440,16 +441,18 @@ public class NameBearerHandle implements Handle,
         //iterate through all the docs and save each of them as xml
         Corpus corpus = (Corpus)target;
         Iterator docIter = corpus.iterator();
+        boolean overwriteAll = false;
         while(docIter.hasNext()){
           Document currentDoc = (Document)docIter.next();
           URL sourceURL = currentDoc.getSourceUrl();
           String fileName = sourceURL == null ? currentDoc.getName() :
                                                 sourceURL.getFile();
           fileName = Files.getLastPathComponent(fileName);
-          File docFile = new File(dir, fileName);
+          File docFile = null;
           boolean nameOK = false;
           do{
-            if(docFile.exists()){
+            docFile = new File(dir, fileName);
+            if(docFile.exists() && !overwriteAll){
               //ask the user if we can ovewrite the file
               Object[] options = new Object[] {"Yes", "All", "No", "Cancel"};
               int answer = JOptionPane.showOptionDialog(
@@ -460,16 +463,27 @@ public class NameBearerHandle implements Handle,
                 JOptionPane.WARNING_MESSAGE, null, options, options[2]);
               switch(answer){
                 case 0: {
+                  nameOK = true;
                   break;
                 }
                 case 1: {
+                  nameOK = true;
+                  overwriteAll = true;
                   break;
                 }
                 case 2: {
+                  //user said NO, allow them to provide an alternative name;
+                  fileName = (String)JOptionPane.showInputDialog(
+                      largeView != null ? largeView : smallView,
+                      "Please provide an alternative file name",
+                      "Gate", JOptionPane.QUESTION_MESSAGE,
+                      null, null, fileName);
+                  if(fileName == null) return;
                   break;
                 }
                 case 3: {
-                  break;
+                  //user gave up; return
+                  return;
                 }
               }
 
@@ -477,6 +491,8 @@ public class NameBearerHandle implements Handle,
               nameOK = true;
             }
           }while(!nameOK);
+          //save the file
+
         }
 
 
