@@ -1817,29 +1817,95 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
               DataStore ds = null;
               AccessController ac = null;
               try {
-                //1. open the oracle datastore
-                ds = Factory.openDataStore(className, storageURL);
-
-                //2. login the user
-                //NEEDS FIXING WITH THE LOGIN DIALOG
+                //1. login the user
                 ac = new AccessControllerImpl();
                 Assert.assertNotNull(ac);
                 ac.open(storageURL);
 
-                User usr = ac.findUser("kalina");
-                Assert.assertNotNull(usr);
+                Session mySession = null;
+                User usr = null;
+                Group grp = null;
+                try {
+                  String userName = "";
+                  String userPass = "";
+                  String group = "";
 
-                Group grp = (Group)usr.getGroups().get(0);
-                Assert.assertNotNull(grp);
+                  JPanel listPanel = new JPanel();
+                  listPanel.setLayout(new BoxLayout(listPanel,BoxLayout.X_AXIS));
 
-                Session usrSession = ac.login("kalina","sesame",grp.getID());
-                Assert.assertNotNull(usrSession);
-                Assert.assertTrue(ac.isValidSession(usrSession));
+                  JPanel panel1 = new JPanel();
+                  panel1.setLayout(new BoxLayout(panel1,BoxLayout.Y_AXIS));
+                  panel1.add(new JLabel("User name: "));
+                  panel1.add(new JLabel("Password: "));
+                  panel1.add(new JLabel("Group: "));
 
+                  JPanel panel2 = new JPanel();
+                  panel2.setLayout(new BoxLayout(panel2,BoxLayout.Y_AXIS));
+                  JTextField usrField = new JTextField(30);
+                  panel2.add(usrField);
+                  JPasswordField pwdField = new JPasswordField(30);
+                  panel2.add(pwdField);
+                  JTextField grpField = new JTextField(30);
+                  panel2.add(grpField);
+
+                  listPanel.add(panel1);
+                  listPanel.add(Box.createHorizontalStrut(20));
+                  listPanel.add(panel2);
+
+                  if(OkCancelDialog.showDialog(MainFrame.this.getContentPane(),
+                                                listPanel,
+                                                "Please enter login details")){
+                    userName = usrField.getText();
+                    userPass = new String(pwdField.getPassword());
+                    group = grpField.getText();
+                    if (userName.equals("") || userPass.equals("") || group.equals("")) {
+                      JOptionPane.showMessageDialog(
+                        MainFrame.this,
+                        "You must provide non-empty user name, password and group!",
+                        "Login error",
+                        JOptionPane.ERROR_MESSAGE
+                        );
+                      return;
+                    }
+                  }
+
+                  grp = ac.findGroup(group);
+                  usr = ac.findUser(userName);
+                  mySession = ac.login(userName, userPass, grp.getID());
+                } catch (gate.security.SecurityException ex) {
+                    JOptionPane.showMessageDialog(
+                      MainFrame.this,
+                      "Authentication failed! Incorrect details entred.",
+                      "Login error",
+                      JOptionPane.ERROR_MESSAGE
+                      );
+                  ac.close();
+                  return;
+                }
+
+                if (! ac.isValidSession(mySession)){
+                  JOptionPane.showMessageDialog(
+                    MainFrame.this,
+                    "Incorrect session obtained. "
+                      + "Probably there is a problem with the database!",
+                    "Login error",
+                    JOptionPane.ERROR_MESSAGE
+                    );
+                  ac.close();
+                  return;
+                }
+
+                //2. open the oracle datastore
+                ds = Factory.openDataStore(className, storageURL);
+
+                //3. add the security data for this datastore
+                //this saves the user and group information, so it can
+                //be used later when resources are created with certain rights
                 FeatureMap securityData = Factory.newFeatureMap();
                 securityData.put("user", usr);
                 securityData.put("group", grp);
                 reg.addSecurityData(ds, securityData);
+
               } catch(PersistenceException pe) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Datastore open error!\n " +
@@ -1862,6 +1928,7 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
                                         "Gate", JOptionPane.ERROR_MESSAGE);
                 }
               }
+
           }else{
             JOptionPane.showMessageDialog(
                             MainFrame.this,
