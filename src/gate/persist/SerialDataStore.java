@@ -194,15 +194,17 @@ extends AbstractFeatureBearer implements DataStore {
 
     // create an indentifier for this resource
     String lrName = null;
+    String lrPersistenceId = null;
     FeatureMap lrFeatures = lr.getFeatures();
     if(lrFeatures != null) {
       lrName = (String) lrFeatures.get("NAME");
-    }
+      lrPersistenceId = (String) lrFeatures.get("DataStoreInstanceId");
+    }// End if
     if(lrName == null) lrName = lrData.getName();
-
-    String lrPersistenceId =
-      lrName + "___" + new Date().getTime() + "___" + random();
-    lr.getFeatures().put("DataStoreInstanceId", lrPersistenceId);
+    if (lrPersistenceId == null){
+     lrPersistenceId = lrName + "___" + new Date().getTime() + "___" + random();
+     lr.getFeatures().put("DataStoreInstanceId", lrPersistenceId);
+    }// End if
 
     // create a File to store the resource in
     File resourceFile = new File(resourceTypeDirectory, lrPersistenceId);
