@@ -368,7 +368,10 @@ public class OracleDataStore extends JDBCDataStore {
     //0.5 check the LR's current DS
     DataStore currentDS = lr.getDataStore();
     if(currentDS == null) {  // an orphan - do the adoption
-      lr.setDataStore(this);
+      //do not set the datastore on the lr, because actually it should
+      //remain transient. The DS should only be set on the one that is
+      //saved in Oracle
+//      lr.setDataStore(this);
       // let the world know
       //fireResourceAdopted(
       //    new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
@@ -875,7 +878,10 @@ System.out.println();
     //4. create features
     createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
-    //5. done
+    //5. set the corpus persistence ID
+    corp.setLRPersistenceId(corpusID);
+
+    //6. done
     return corp;
   }
 
