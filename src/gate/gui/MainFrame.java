@@ -104,7 +104,7 @@ public class MainFrame extends JFrame
 
   AppearanceDialog appearanceDialog;
   CartoonMinder animator;
-  TabBlinker logBlinker;
+  TabHighlighter logHighlighter;
   NewResourceDialog newResourceDialog;
   WaitDialog waitDialog;
 
@@ -287,7 +287,7 @@ public class MainFrame extends JFrame
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
 
-    logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
+    logHighlighter = new TabHighlighter(mainTabbedPane, logScroll, Color.red);
 
 
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -760,7 +760,7 @@ public class MainFrame extends JFrame
         changeOccured();
       }
       protected void changeOccured(){
-        logBlinker.startBlinking();
+        logHighlighter.highlight();
       }
     });
 
@@ -778,7 +778,7 @@ public class MainFrame extends JFrame
             changeOccured();
           }
           protected void changeOccured(){
-            logBlinker.startBlinking();
+            logHighlighter.highlight();
           }
         });
       }
