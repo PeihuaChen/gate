@@ -97,7 +97,7 @@ public class TestIndex extends TestCase{
 //    did.setIndexType(GateConstants.IR_LUCENE_INVFILE);
 
     did.setIndexLocation(TEMP_LOCATION);
-    did.addIndexField(new IndexField("content", new ContentPropertyReader(), false));
+    did.addIndexField(new IndexField("content", new DocumentContentReader(), false));
     did.addIndexField(new IndexField("author", null, false));
 
     ic.setIndexDefinition(did);
@@ -196,12 +196,6 @@ public class TestIndex extends TestCase{
 
     } catch (Exception e){
       e.printStackTrace();
-    }
-  }
-
-  public class ContentPropertyReader implements PropertyReader{
-    public String getPropertyValue(gate.Document doc){
-      return doc.getContent().toString();
     }
   }
 }
