@@ -47,7 +47,15 @@ public interface KBClass extends OClass {
    */
   public Set getProperties();
 
-  public KBProperty getPropertyByName(String name);
+  /**
+   * Returns the set of properties with the given name. The set elements are
+   * instances of KBProperty or sub-classes. The reason why we need a set
+   * is because a class can have more than one property with the same name
+   * but different ranges.
+   * @param name
+   * @return
+   */
+  public Set getPropertiesByName(String name);
 
   /**
    * This method supplies all KBProperty inherited from the superclasses of the

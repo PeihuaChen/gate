@@ -58,10 +58,10 @@ public interface KBProperty {
    * Add a SubPropertyOf relation between the given property and this.
    * @param theProperty
    */
-  public void setSubPropertyOf(KBProperty theProperty);
+  public void setSubPropertyOf(String propertyName);
 
   /**
-   * Return a set of all KBProperty instances that are in a
+   * Return a set of all local names of properties that are in a
    * subPropertyOf relation with this property. Null if no
    * such properties. This is not a transitive closure. To obtain
    * the full depth of the property hierarchy, one needs then to
@@ -69,12 +69,6 @@ public interface KBProperty {
    * @return
    */
   public Set getSubPropertyOf();
-
-  /**
-   * The inverse method to getSubPropertyOf. Null if no super-properties.
-   * @return
-   */
-  public Set getSuperProperties();
 
   /**
    * Returns the domain of a property. There is no corresponding set
@@ -90,5 +84,10 @@ public interface KBProperty {
    * restrictions on the property. False otherwise.
    */
   public boolean isValueCompatible(Object value);
+
+  /**Gets the ontology to which the class belongs.
+   * @return  the ontology to which the class belongs
+   */
+  public KnowledgeBase getOntology() ;
 
 }

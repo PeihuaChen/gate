@@ -18,6 +18,7 @@
 package gate.creole.ontology;
 
 import java.util.List;
+import java.util.Set;
 
 public interface KnowledgeBase extends Ontology {
 
@@ -61,7 +62,14 @@ public interface KnowledgeBase extends Ontology {
    * @param domain
    * @param range
    */
-  public KBDatatypeProperty addDatatypeProperty(String name, KBClass domain, Object range);
+  public KBDatatypeProperty addDatatypeProperty(String name, KBClass domain, String range);
+
+  /**
+   * Create a DatatypeProperty with the given domain and range
+   * @param domain
+   * @param range
+   */
+  public KBDatatypeProperty addDatatypeProperty(String name, KBClass domain, Number range);
 
   /**
    * Create a FunctionalProperty with the given domain and range
@@ -76,5 +84,11 @@ public interface KnowledgeBase extends Ontology {
   public KBSymmetricProperty addSymmetricProperty(String name, KBClass domain, KBClass range);
 
   public KBTransitiveProperty addTransitiveProperty(KBClass domain, KBClass range);
+
+  public void addPropertyDefinition(KBProperty theProperty);
+
+  public Set getPropertyDefinitions();
+
+  public KBProperty getPropertyDefinitionByName(String name);
 
 }

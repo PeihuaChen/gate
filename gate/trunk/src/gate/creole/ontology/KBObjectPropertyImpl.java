@@ -25,8 +25,9 @@ public class KBObjectPropertyImpl extends KBPropertyImpl implements KBObjectProp
   private KBClass range;
   private Set inversePropertiesSet;
 
-  protected KBObjectPropertyImpl(String aName, KBClass aDomain, KBClass aRange) {
-    super(aName, aDomain);
+  public KBObjectPropertyImpl(String aName, KBClass aDomain, KBClass aRange,
+                              KnowledgeBase aKB) {
+    super(aName, aDomain, aKB);
     range = aRange;
     inversePropertiesSet = new HashSet();
   }
@@ -42,12 +43,19 @@ public class KBObjectPropertyImpl extends KBPropertyImpl implements KBObjectProp
   }
 
   public Set getInverseProperties() {
-    if (this.inversePropertiesSet.isEmpty())
-      return null;
     return this.inversePropertiesSet;
   }
 
   public void setInverseOf(KBProperty theInverse) {
     this.inversePropertiesSet.add(theInverse);
   }
+
+  public String toString() {
+    return this.getName() + "(" + this.getDomain() + "," + this.range + ")" +
+            "\n sub-propertyOf "
+            + this.getSubPropertyOf().toString() +
+            "\n samePropertyAs " +
+            this.getSamePropertyAs().toString();
+  }
+
 }
