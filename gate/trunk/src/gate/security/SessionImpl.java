@@ -15,6 +15,8 @@
 
 package gate.security;
 
+import junit.framework.*;
+
 import gate.persist.PersistenceException;
 
 public class SessionImpl implements Session {
@@ -96,5 +98,23 @@ public class SessionImpl implements Session {
     return this.timeout;
   }
 
+
+  /**
+   *
+   *  this one is necessary for the contains() operations in Lists
+   *  It is possible that two users have two different GroupImpl that refer
+   *  to the very same GATE group in the DB, because they got it from the security
+   *  factory at different times. So we assume that two instances refer the same
+   *  GATE group if NAME1==NAME2
+   *
+   *  */
+  public boolean equals(Object obj)
+  {
+    Assert.assert(obj instanceof Session);
+
+    Session s2 = (Session)obj;
+
+    return (this.id.equals(s2.getID()));
+  }
 
 }
