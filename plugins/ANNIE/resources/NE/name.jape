@@ -16,7 +16,7 @@
 
 Phase:	Name
 Input: Token Lookup Title FirstPerson
-Options: control = appelt debug = true
+Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
 
