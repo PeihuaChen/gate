@@ -214,7 +214,7 @@ public class SerialDatastoreViewer extends JTree
             params.put(DataStore.LR_ID_FEATURE_NAME, entry.id);
             FeatureMap features = Factory.newFeatureMap();
             Resource res = Factory.createResource(entry.type, params, features,
-                                                  null, entry.name);
+                                                   entry.name);
             //project.frame.resourcesTreeModel.treeChanged();
             fireProgressChanged(0);
             fireProcessFinished();

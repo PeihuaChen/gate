@@ -80,9 +80,7 @@ class ResourcePersistence implements Persistence{
     if(features != null)
       features = PersistenceManager.getTransientRepresentation(features);
     Resource res = Factory.createResource(resourceType, (FeatureMap)initParams,
-                                          (FeatureMap)features,
-                                          PersistenceManager.getListeners(),
-                                          resourceName);
+                                          (FeatureMap)features,resourceName);
     return res;
   }
 

@@ -615,7 +615,7 @@ public class CorpusBenchmarkTool {
       // create the document
       try {
         cleanDoc = (Document) Factory.createResource(
-                              "gate.corpora.DocumentImpl", params, null,
+                              "gate.corpora.DocumentImpl", params,
                               null, cleanDocs[i].getName());
       } catch (gate.creole.ResourceInstantiationException ex) {
         Out.prln("Cannot create document from file: " +
@@ -651,7 +651,7 @@ public class CorpusBenchmarkTool {
         try {
           markedDoc = (Document) Factory.createResource(
                                  "gate.corpora.DocumentImpl", params,
-                                 null, null, cleanDoc.getName());
+                                 null, cleanDoc.getName());
         } catch (gate.creole.ResourceInstantiationException ex) {
           Out.prln("Cannot create document from file: " +
             markedDocFile.getAbsolutePath());

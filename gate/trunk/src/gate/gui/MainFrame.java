@@ -129,6 +129,15 @@ public class MainFrame extends JFrame
    */
   static Map iconByName;
 
+  /**
+   * A Map which holds listeners that are singletons (e.g. the status listener
+   * that updates the status bar on the main frame or the progress listener that
+   * updates the progress bar on the main frame).
+   * The keys used are the class names of the listener interface and the values
+   * are the actual listeners (e.g "gate.event.StatusListener" -> this).
+   */
+  private static java.util.Map listeners;
+
   static public Icon getIcon(String filename){
     Icon result = (Icon)iconByName.get(filename);
     if(result == null){
@@ -987,11 +996,8 @@ public class MainFrame extends JFrame
       }
     });
 
-    gate.util.persistence.PersistenceManager.
-              addListener("gate.event.StatusListener", MainFrame.this);
-    gate.util.persistence.PersistenceManager.
-              addListener("gate.event.ProgressListener", MainFrame.this);
-
+   listeners.put("gate.event.StatusListener", MainFrame.this);
+   listeners.put("gate.event.ProgressListener", MainFrame.this);
   }//protected void initListeners()
 
   public void progressChanged(int i) {
@@ -1200,6 +1206,8 @@ public class MainFrame extends JFrame
         UIManager.put(keys[i], font);
       }
     }//if(unicodeFontName != null)
+
+    listeners = new HashMap();
   }
 
 /*
@@ -1239,6 +1247,20 @@ public class MainFrame extends JFrame
     if (e.getID() == WindowEvent.WINDOW_CLOSING) {
       jMenuFileExit_actionPerformed(null);
     }
+  }
+
+  /**
+   * Returns the listeners map, a map that holds all the listeners that are
+   * singletons (e.g. the status listener that updates the status bar on the
+   * main frame or the progress listener that updates the progress bar on the
+   * main frame).
+   * The keys used are the class names of the listener interface and the values
+   * are the actual listeners (e.g "gate.event.StatusListener" -> this).
+   * The returned map is the actual data member used to store the listeners so
+   * any changes in this map will be visible to everyone.
+   */
+  public static java.util.Map getListeners() {
+    return listeners;
   }
 
 /*
@@ -1451,9 +1473,6 @@ public class MainFrame extends JFrame
       // Loads ANNIE with defaults
       Runnable runnable = new Runnable(){
         public void run(){
-          Map listeners = new HashMap();
-          listeners.put("gate.event.ProgressListener", MainFrame.this);
-          listeners.put("gate.event.StatusListener", MainFrame.this);
           FeatureMap params = Factory.newFeatureMap();
           try{
             // Create a serial analyser
@@ -1462,7 +1481,7 @@ public class MainFrame extends JFrame
             // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
             for(int i = 0; i < PR_NAMES.length; i++){
             ProcessingResource pr = (ProcessingResource)
-                Factory.createResource( PR_NAMES[i], params, listeners);
+                Factory.createResource(PR_NAMES[i], params);
               // Add the PR to the sac
               sac.add(pr);
             }// End for
@@ -2379,6 +2398,6 @@ public class MainFrame extends JFrame
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
-  }//class LocaleSelectorMenuItem extends JRadioButtonMenuItem
+  }///class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
 }

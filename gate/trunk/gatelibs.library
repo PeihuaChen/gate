@@ -21,6 +21,7 @@
     <path>[lib/sapdbc.jar]</path>
     <path>[lib/xerces.jar]</path>
     <path>[lib/orajdbc9i.zip]</path>
+    <path>[lib/ontotext.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>

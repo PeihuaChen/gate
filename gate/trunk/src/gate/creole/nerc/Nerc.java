@@ -40,12 +40,6 @@ public class Nerc extends AbstractLanguageAnalyser {
       //create all the componets
       FeatureMap params;
       FeatureMap features;
-      Map listeners = new HashMap();
-      listeners.put("gate.event.StatusListener", new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
 
       //tokeniser
       fireStatusChanged("Creating a tokeniser");
@@ -61,9 +55,7 @@ public class Nerc extends AbstractLanguageAnalyser {
       Gate.setHiddenAttribute(features, true);
       tokeniser = (DefaultTokeniser)Factory.createResource(
                     "gate.creole.tokeniser.DefaultTokeniser",
-                    params, features, listeners, null);
-      tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-      fireProgressChanged(10);
+                    params, features);
 
       //gazetteer
         fireStatusChanged("Creating a gazetteer");
@@ -76,14 +68,9 @@ public class Nerc extends AbstractLanguageAnalyser {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      listeners.put("gate.event.ProgressListener",
-                    new IntervalProgressListener(11, 50));
-
       gazetteer = (DefaultGazetteer)Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer",
-                      params, features, listeners, null);
-      gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-      fireProgressChanged(50);
+                      params, features);
 
       //sentence spliter
       fireStatusChanged("Creating a sentence splitter");
@@ -98,15 +85,9 @@ public class Nerc extends AbstractLanguageAnalyser {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      listeners.put("gate.event.ProgressListener",
-                    new IntervalProgressListener(50, 60));
-
       splitter = (SentenceSplitter)Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter",
-                      params, features, listeners, null);
-      splitter.setName("Splitter " + System.currentTimeMillis());
-
-      fireProgressChanged(60);
+                      params, features);
 
       //POS Tagger
       fireStatusChanged("Creating a POS tagger");
@@ -120,37 +101,25 @@ public class Nerc extends AbstractLanguageAnalyser {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-      listeners.put("gate.event.ProgressListener",
-                    new IntervalProgressListener(60, 65));
-
       tagger = (POSTagger)Factory.createResource(
                       "gate.creole.POSTagger",
-                      params, features, listeners, null);
-      tagger.setName("Tagger " + System.currentTimeMillis());
-      fireProgressChanged(65);
+                      params, features);
 
 
       //transducer
       fireStatusChanged("Creating a Jape transducer");
       params = Factory.newFeatureMap();
-  //      rData = (ResourceData)Gate.getCreoleRegister().get(
-  //              "gate.creole.Transducer");
-  //      params.putAll(rData.getParameterList().getInitimeDefaults());
+
       if(japeGrammarURL != null) params.put("grammarURL",
                                             japeGrammarURL);
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
-      listeners.put("gate.event.ProgressListener",
-                    new IntervalProgressListener(66, 100));
       transducer = (ANNIETransducer)Factory.createResource(
                                               "gate.creole.ANNIETransducer",
-                                              params, features,
-                                              listeners, null);
-      fireProgressChanged(100);
+                                              params, features);
       fireProcessFinished();
-      transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ResourceInstantiationException rie){
       throw rie;
     }catch(Exception e){
