@@ -146,16 +146,9 @@ public class OptionsDialog extends JDialog {
       getBoolean(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT).
       booleanValue());
 
-    verboseModeCorpusEvalToolChk = new JCheckBox(
-      "Run the corpus evaluation tools in verbose mode",
-      Gate.getUserConfig().
-      getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE).
-      booleanValue());
-
     JPanel vBox = new JPanel();
     vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
     vBox.add(includeFeaturesOnPreserveFormatChk);
-    vBox.add(verboseModeCorpusEvalToolChk);
     vBox.add(Box.createVerticalStrut(10));
     vBox.setBorder(BorderFactory.createTitledBorder(
         BorderFactory.createEtchedBorder() , " Advanced features "));
@@ -366,10 +359,6 @@ public class OptionsDialog extends JDialog {
       userConfig.put(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT,
                      new Boolean(includeFeaturesOnPreserveFormatChk.
                                  isSelected()));
-      userConfig.put(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE,
-                     new Boolean(verboseModeCorpusEvalToolChk.
-                                 isSelected()));
-
       hide();
     }// void actionPerformed(ActionEvent evt)
   }
@@ -489,11 +478,6 @@ public class OptionsDialog extends JDialog {
    * The "Include Annotation Features in Save Preserving Format" checkbox
    */
   JCheckBox includeFeaturesOnPreserveFormatChk;
-
-  /**
-   * The "Run corpus evaluation tools in verbose mode" checkbox
-   */
-  JCheckBox verboseModeCorpusEvalToolChk;
 
 
   /**

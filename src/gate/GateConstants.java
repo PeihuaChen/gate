@@ -60,10 +60,6 @@ public interface GateConstants {
   public static final String SAVE_FEATURES_WHEN_PRESERVING_FORMAT =
     "Save_features_when_preserving_format";
 
-  /** The key for running the corpus evaluation tool in verbose mode*/
-  public static final String CORPUS_EVAL_TOOL_VERBOSE_MODE =
-    "Corpus_evaluation_tool_verbose_mode";
-
   /** The key for the feature keeping the original content of the document */
   public static final String
    ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME = "Original_document_content_on_load";

@@ -119,6 +119,7 @@ public class MainFrame extends JFrame
   GenerateStoredCorpusEvalAction generateStoredCorpusEvalAction = null;
   StoredMarkedCorpusEvalAction storedMarkedCorpusEvalAction = null;
   CleanMarkedCorpusEvalAction cleanMarkedCorpusEvalAction = null;
+  VerboseModeCorpusEvalToolAction verboseModeCorpusEvalToolAction = null;
 
   /**
    * Holds all the icons used in the Gate GUI indexed by filename.
@@ -243,6 +244,7 @@ public class MainFrame extends JFrame
     storedMarkedCorpusEvalAction = new StoredMarkedCorpusEvalAction();
     generateStoredCorpusEvalAction = new GenerateStoredCorpusEvalAction();
     cleanMarkedCorpusEvalAction = new CleanMarkedCorpusEvalAction();
+    verboseModeCorpusEvalToolAction = new VerboseModeCorpusEvalToolAction();
 
   }
 
@@ -564,7 +566,7 @@ public class MainFrame extends JFrame
     toolsMenu.add(newBootStrapAction);
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
-    JMenu corpusEvalMenu = new JMenu("Corpus Evaluation Tools");
+    JMenu corpusEvalMenu = new JMenu("Corpus Benchmark Tools");
     toolsMenu.add(corpusEvalMenu);
     corpusEvalMenu.add(newCorpusEvalAction);
     corpusEvalMenu.addSeparator();
@@ -572,6 +574,10 @@ public class MainFrame extends JFrame
     corpusEvalMenu.addSeparator();
     corpusEvalMenu.add(storedMarkedCorpusEvalAction);
     corpusEvalMenu.add(cleanMarkedCorpusEvalAction);
+    corpusEvalMenu.addSeparator();
+    JCheckBoxMenuItem verboseModeItem =
+      new JCheckBoxMenuItem(verboseModeCorpusEvalToolAction);
+    corpusEvalMenu.add(verboseModeItem);
 //    toolsMenu.add(newCorpusEvalAction);
     toolsMenu.add(
       new AbstractAction("Unicode editor", getIcon("unicode.gif")){
@@ -1401,8 +1407,8 @@ public class MainFrame extends JFrame
   /** This class represent an action which brings up the corpus evaluation tool*/
   class NewCorpusEvalAction extends AbstractAction {
     public NewCorpusEvalAction() {
-      super("Default evaluation mode");
-      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool in its default mode");
+      super("Default mode");
+      putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool in its default mode");
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1421,9 +1427,7 @@ public class MainFrame extends JFrame
           //first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
-          Boolean verboseMode = Gate.getUserConfig().
-              getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE);
-          if (verboseMode != null && verboseMode.booleanValue())
+          if (MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode())
             theTool.setVerboseMode(true);
 
           Out.prln("Please wait while GATE tools are initialised.");
@@ -1449,7 +1453,7 @@ public class MainFrame extends JFrame
   class StoredMarkedCorpusEvalAction extends AbstractAction {
     public StoredMarkedCorpusEvalAction() {
       super("Human marked against stored processing results");
-      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool -stored_clean");
+      putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool -stored_clean");
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1469,9 +1473,7 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setMarkedStored(true);
-          Boolean verboseMode = Gate.getUserConfig().
-              getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE);
-          if (verboseMode != null && verboseMode.booleanValue())
+          if (MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode())
             theTool.setVerboseMode(true);
 
           Out.prln("Evaluating human-marked documents against pre-stored results.");
@@ -1497,7 +1499,7 @@ public class MainFrame extends JFrame
   class CleanMarkedCorpusEvalAction extends AbstractAction {
     public CleanMarkedCorpusEvalAction() {
       super("Human marked against current processing results");
-      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool -marked_clean");
+      putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool -marked_clean");
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1517,9 +1519,7 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setMarkedClean(true);
-          Boolean verboseMode = Gate.getUserConfig().
-              getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE);
-          if (verboseMode != null && verboseMode.booleanValue())
+          if (MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode())
             theTool.setVerboseMode(true);
 
           Out.prln("Evaluating human-marked documents against current processing results.");
@@ -1546,7 +1546,7 @@ public class MainFrame extends JFrame
   class GenerateStoredCorpusEvalAction extends AbstractAction {
     public GenerateStoredCorpusEvalAction() {
       super("Store corpus for future evaluation");
-      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool -generate");
+      putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool -generate");
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1582,6 +1582,24 @@ public class MainFrame extends JFrame
       thread.start();
     }// actionPerformed();
   }//class GenerateStoredCorpusEvalAction
+
+  /** This class represent an action which brings up the corpus evaluation tool*/
+  class VerboseModeCorpusEvalToolAction extends AbstractAction  {
+    public VerboseModeCorpusEvalToolAction() {
+      super("Verbose mode");
+      putValue(SHORT_DESCRIPTION,"Run the Benchmark Tool in verbose mode");
+    }// VerboseModeCorpusEvalToolAction
+
+    public boolean isVerboseMode() {return verboseMode;}
+
+    public void actionPerformed(ActionEvent e) {
+      if (! (e.getSource() instanceof JCheckBoxMenuItem))
+        return;
+      verboseMode = ((JCheckBoxMenuItem)e.getSource()).getState();
+    }// actionPerformed();
+    protected boolean verboseMode = false;
+  }//class VerboseModeCorpusEvalToolListener
+
 
   /** This class represent an action which loads ANNIE with default params*/
   class LoadANNIEWithDefaultsAction extends AbstractAction
