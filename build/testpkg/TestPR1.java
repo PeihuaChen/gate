@@ -12,11 +12,12 @@ import java.util.*;
 
 import gate.*;
 import gate.util.*;
+import gate.creole.*;
 
 
 /** A simple ProcessingResource for testing purposes.
   */
-public class TestPR1 implements ProcessingResource
+public class TestPR1 extends AbstractResource implements ProcessingResource
 {
 
   /** Default Construction */
