@@ -237,12 +237,6 @@ public class MainFrame extends JFrame
     fileMenu.add(new JGateMenuItem(newDSAction));
     fileMenu.add(new JGateMenuItem(openDSAction));
     fileMenu.add(new JGateMenuItem(newApplicationAction));
-
-fileMenu.add(new AbstractAction("blink!"){
-  public void actionPerformed(ActionEvent e){
-    logBlinker.startBlinking();
-  }
-});
     menuBar.add(fileMenu);
 
     JMenu editMenu = new JMenu("Edit");
@@ -1438,5 +1432,5 @@ fileMenu.add(new AbstractAction("blink!"){
     Color blinkColor;
     Color oldColor;
     Thread thread;
-  }
+  }//class TabBlinker implements Runnable
 }
