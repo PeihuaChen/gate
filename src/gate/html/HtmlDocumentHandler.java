@@ -217,7 +217,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // construct a feature map from the attributes list
     // these are empty elements
-    FeatureMap fm = new SimpleFeatureMapImpl();
+    FeatureMap fm = Factory.newFeatureMap();
 
     // take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount ()){

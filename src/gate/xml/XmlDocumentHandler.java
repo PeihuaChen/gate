@@ -179,7 +179,7 @@ public class XmlDocumentHandler extends DefaultHandler{
 
     Integer customObjectId = null;
     // Construct a SimpleFeatureMapImpl from the list of attributes
-    FeatureMap fm = new SimpleFeatureMapImpl();
+    FeatureMap fm = Factory.newFeatureMap();
     //Get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
       String attName  = getMyLocalName(atts.getQName(i));

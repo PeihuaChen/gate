@@ -177,7 +177,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestWeakValueHashMap.suite());
+        suite.addTest(TestAnnotationDiff.suite());
       }else {
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestWeakValueHashMap.suite());
