@@ -23,10 +23,5 @@ public class Gate
   /** Get the GATE class loader. */
   public static GateClassLoader getClassLoader() { return classLoader; }
 
-  /** Initialise the GATE libraries. */
-//  public static void init() {
-    // classLoader = new GateClassLoader();
-//  } // init
-
 } // class Gate
 
