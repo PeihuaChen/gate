@@ -318,7 +318,7 @@ public class Gate implements GateConstants
     
     //load all loadable plugins
     StringTokenizer strTok = new StringTokenizer(pluginPath, 
-            Strings.getPathSep(), false);
+            ";", false);
     while(strTok.hasMoreTokens()){
       String aDir = strTok.nextToken();
       try{
