@@ -23,7 +23,7 @@ import java.util.StringTokenizer;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-//import com.ontotext.gate.gazetteer.TestHashGazetteer;
+import com.ontotext.gate.gazetteer.TestHashGazetteer;
 
 import gate.annotation.TestAnnotation;
 import gate.annotation.TestAnnotationDiff;
@@ -272,7 +272,7 @@ public class TestGate {
         suite.addTest(TestMaxentWrapper.suite());
 
         //test ontotext gazetteer
-//        suite.addTest(TestHashGazetteer.suite());
+        suite.addTest(TestHashGazetteer.suite());
         suite.addTest(TestRepositioningInfo.suite());
         suite.addTest(TestFlexibleGazetteer.suite());
 
