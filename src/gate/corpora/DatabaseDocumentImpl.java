@@ -224,7 +224,8 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     try {
       String sql = " select as_name " +
                    " from  "+Gate.DB_OWNER+".v_annotation_set " +
-                   " where  lr_id = ? ";
+                   " where  lr_id = ? " +
+                   "  and as_name is not null";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,((Long)this.lrPersistentId).longValue());
@@ -251,7 +252,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     //2. read annotations
     for (int i=0; i< annNames.size(); i++) {
       //delegate because of the data is already read getAnnotations() will just return
-      getAnnotations(name);
+      getAnnotations((String)annNames.elementAt(i));
     }
 
     //3. delegate to the parent method
