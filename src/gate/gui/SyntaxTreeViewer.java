@@ -1,7 +1,7 @@
 /*
  *  SyntaxTreeViewer.java
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2004, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -1424,6 +1424,9 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.25  2004/07/21 17:10:07  akshay
+// Changed copyright from 1998-2001 to 1998-2004
+//
 // Revision 1.24  2004/03/25 13:01:05  valyt
 // Imports optimisation throughout the Java sources
 // (to get rid of annoying warnings in Eclipse)

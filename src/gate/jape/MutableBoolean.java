@@ -2,7 +2,7 @@
  *  MutableBoolean.java - A mutable wrapper for int, so you can return
  *                       integer values via a method parameter
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2004, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
