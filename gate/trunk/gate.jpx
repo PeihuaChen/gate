@@ -27,6 +27,7 @@
   <property category="generalFormatting" name="tabSize" value="2"/>
   <property category="idl" name="ProcessIDL" value="false"/>
   <property category="javaFormatting" name="alignMultilineAssign" value="1"/>
+  <property category="javaFormatting" name="packageThreshold" value="0"/>
   <property category="javadoc" name="custom.tags.1" value="todo;a;To Do:"/>
   <property category="optimize.1" name="OptimizableType" value="intuitive.ide.borland.jb8.ProfilerBootstrap"/>
   <property category="optimize.1" name="oicc.FilterFile" value="Z:\gate\gate.oif"/>
