@@ -102,7 +102,7 @@
       <PARAMETER DEFAULT="true"
         COMMENT="Should this gazetteer diferentiate on case"
         NAME="caseSensitive">java.lang.Boolean</PARAMETER>
-      <PARAMETER DEFAULT="true"
+      <PARAMETER DEFAULT="false"
         COMMENT="Should this gazetteer only match whole words"
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
@@ -128,7 +128,7 @@
       <PARAMETER DEFAULT="true"
         COMMENT="Should this gazetteer diferentiate on case"
         NAME="caseSensitive">java.lang.Boolean</PARAMETER>
-      <PARAMETER DEFAULT="true"
+      <PARAMETER DEFAULT="false"
         COMMENT="Should this gazetteer only match whole words"
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
@@ -136,9 +136,9 @@
 
 <!-- creole.xml for chinese Infered gazetteer -->
     <RESOURCE>
-      <NAME>Chinese Infered Gazetteer</NAME>
+      <NAME>Chinese Inferred Gazetteer</NAME>
       <JAR>chinese.jar</JAR>
-      <CLASS>chinese.InferedGazetteer</CLASS>
+      <CLASS>chinese.InferredGazetteer</CLASS>
       <COMMENT>A list lookup component.</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
@@ -207,9 +207,9 @@
 
 <!-- creole.xml for Infered JapeTransducer -->
     <RESOURCE>
-      <NAME>Chinese Infered Grammar</NAME>
+      <NAME>Chinese Inferred Grammar</NAME>
       <JAR>chinese.jar</JAR>
-      <CLASS>chinese.ChineseInferedTransducer</CLASS>
+      <CLASS>chinese.ChineseInferredTransducer</CLASS>
       <COMMENT>A module for executing Jape grammars</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
