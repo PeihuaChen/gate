@@ -32,12 +32,21 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) {
-   System.out.print(Integer.TYPE.getName());
-   // doIt();
+   doIt();
   } // main
 
   public static void doIt() {
+    for(int i = 0; i < 100; i++)
+     Out.prln(random());
   } // doIt
+
+  /** Generate a random integer for file naming. */
+  protected static int random() {
+    return randomiser.nextInt(9999);
+  } // random
+
+  /** Random number generator */
+  protected static Random randomiser = new Random();
 
 } // class Scratch
 

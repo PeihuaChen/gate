@@ -25,6 +25,7 @@ import gate.corpora.*;
 import gate.util.*;
 import gate.annotation.*;
 import gate.creole.*;
+import gate.persist.*;
 
 /** Provides static methods for the creation of Resources.
   */
@@ -36,7 +37,7 @@ public abstract class Factory
   /** The CREOLE register */
   private static CreoleRegister reg = Gate.getCreoleRegister();
 
-  /** Create and instance of a resource using default parameter values.
+  /** Create an instance of a resource using default parameter values.
     * @see #createResource(String,FeatureMap)
     */
   public static Resource createResource(String resourceClassName)
@@ -114,13 +115,38 @@ public abstract class Factory
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln(resClass.getName() + " is an LR");
 
-//if the DS param is set, find an appropriate data store wrapper and:
-/* resClass = dataStoreWrapperClass
-   if none available then
-   throw new ResourceInstantiationException(
-     "Unknown wrapper class " + dataStoreWrapperClass
-   );      OR maybe UnknownDataStoreException
-*/
+      DataStore dataStore = (DataStore) parameterValues.get("DataStore");
+      if(dataStore != null) {
+        if(dataStore instanceof SerialDataStore) {
+          // SDS doesn't need a wrapper class; just check for serialisability
+          if(! (resClass instanceof Serializable))
+            throw new ResourceInstantiationException(
+              "Resource cannot be (de-)serialized: " + resClass.getName()
+            );
+        } else {
+          // find an appropriate wrapper class and replace resClass
+
+          /* resClass = dataStoreWrapperClass
+             if none available then
+             throw new ResourceInstantiationException(
+               "Unknown wrapper class " + dataStoreWrapperClass
+             );      OR maybe UnknownDataStoreException
+          */
+        }
+
+        // get the datastore instance id and retrieve the resource
+        String instanceId = (String) parameterValues.get("DataStoreInstanceId");
+        if(instanceId == null)
+          throw new
+            ResourceInstantiationException("No instance id for " + resClass);
+        try {
+          res = dataStore.getLr(resClass.getName(), instanceId);
+        } catch(PersistenceException e) {
+          throw new ResourceInstantiationException("Bad read from DB: " + e);
+        }
+        resData.addInstantiation(res);
+        return res;
+      } // datastore was present
 
     // type-specific stuff for PRs
     } else if(ProcessingResource.class.isAssignableFrom(resClass)) {

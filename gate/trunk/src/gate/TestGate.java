@@ -33,6 +33,7 @@ import gate.html.*;
 import gate.sgml.*;
 import gate.util.*;
 import gate.config.*;
+import gate.persist.*;
 
 
 /** Top-level entry point for GATE test suite;
@@ -154,10 +155,10 @@ public class TestGate {
       // Test bench
       ////////////////////////////////////////////////
       // Just copy the test suite you want to activate
-      // suite.addTest(TestXSchema.suite());
+//      suite.addTest(TestPersist.suite());
 
       // Test suite
-//*
+      suite.addTest(TestPersist.suite());
       suite.addTest(TestAnnotationDiff.suite());
       suite.addTest(TestConfig.suite());
       suite.addTest(TestBumpyStack.suite());
@@ -181,7 +182,7 @@ public class TestGate {
       suite.addTest(TestDB.suite());
       suite.addTest(TestTokeniser.suite());
       suite.addTest(TestGazetteer.suite());
-//*/
+
     } catch(Exception e) {
       Out.prln("can't add tests! exception = " + e);
       throw(e);

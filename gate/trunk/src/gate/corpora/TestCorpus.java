@@ -65,8 +65,10 @@ public class TestCorpus extends TestCase
   /** Add some documents */
   public void testDocumentAddition() throws Exception {
     Corpus c = Factory.newCorpus("test corpus");
-    Document d1 = new DocumentImpl();
-    Document d2 = new DocumentImpl();
+    Document d1 = Factory.newDocument("a document");
+    Document d2 = Factory.newDocument("another document");
+    d2.setSourceUrl(new URL("http://localhost/1"));
+    d2.setSourceUrl(new URL("http://localhost/2"));
     assert(c.add(d1));
     assert(c.add(d2));
     assertEquals(2, c.size());

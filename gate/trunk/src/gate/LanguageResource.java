@@ -19,6 +19,7 @@ import java.util.*;
 import java.io.*;
 
 import gate.util.*;
+import gate.persist.*;
 
 /** Models all sorts of language resources.
   */
@@ -26,5 +27,13 @@ public interface LanguageResource extends Resource
 {
   /** Get the data store that this LR lives in. Null for transient LRs. */
   public DataStore getDataStore();
+
+  /** Set the data store that this LR lives in. */
+  public void setDataStore(DataStore dataStore) throws PersistenceException;
+
+  /** Save: synchonise the in-memory image of the LR with the persistent
+    * image.
+    */
+  public void sync() throws PersistenceException;
 
 } // interface LanguageResource

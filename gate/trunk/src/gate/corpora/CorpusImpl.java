@@ -20,6 +20,7 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.annotation.*;
+import gate.persist.*;
 import java.io.*;
 import java.net.*;
 
@@ -35,6 +36,9 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public CorpusImpl() {
   } // Construction
 
+  /** The data store this LR lives in. */
+  protected transient DataStore dataStore;
+
   /** Initialise this resource, and return it. */
   public Resource init() {
     return this;
@@ -48,9 +52,23 @@ public class CorpusImpl extends TreeSet implements Corpus {
 
   /** Get the data store the document lives in. */
   public DataStore getDataStore() {
-    //this is the transient version of corpus, hence return null.
-    return null;
+    return dataStore;
   }
+
+  /** Set the data store that this LR lives in. */
+  public void setDataStore(DataStore dataStore) throws PersistenceException {
+    this.dataStore = dataStore;
+  } // setDataStore(DS)
+
+  /** Save: synchonise the in-memory image of the corpus with the persistent
+    * image.
+    */
+  public void sync() throws PersistenceException {
+    if(dataStore == null)
+      throw new PersistenceException("LR has no DataStore");
+
+    dataStore.sync(this);
+  } // sync()
 
   /** Get the features associated with this corpus. */
   public FeatureMap getFeatures() { return features; }

@@ -16,11 +16,12 @@
 package gate;
 
 import java.util.*;
+import java.io.*;
 import gate.util.*;
 import gate.event.*;
 
 /** Annotation sets */
-public interface AnnotationSet extends Set, Cloneable
+public interface AnnotationSet extends Set, Cloneable, Serializable
 {
   /** Create and add an annotation with pre-existing nodes,
     * and return its id
