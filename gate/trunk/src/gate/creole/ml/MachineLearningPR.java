@@ -14,16 +14,13 @@
 package gate.creole.ml;
 
 import java.util.*;
-import java.io.*;
-import javax.swing.*;
-
-import org.jdom.*;
-import org.jdom.input.*;
 
 import gate.*;
 import gate.creole.*;
 import gate.gui.*;
 import gate.util.*;
+import org.jdom.*;
+import org.jdom.input.*;
 
 /**
  * This processing resource is used to train a machine learning algorithm with
@@ -69,8 +66,6 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     }catch(GateException ge){
       throw new ResourceInstantiationException(ge);
     }
-    //create the cache structure
-    cache = new Cache();
 
     //create the engine
     Element engineElement = rootElement.getChild("ENGINE");
@@ -93,6 +88,7 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     }
     engine.setDatasetDefinition(datasetDefinition);
     engine.setOptions(engineElement.getChild("OPTIONS"));
+    engine.setOwnerPR(this);
     try{
       engine.init();
     }catch(GateException ge){
@@ -134,6 +130,10 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     Iterator annotationIter = annotations.iterator();
     int index = 0;
     int size = annotations.size();
+
+    //create the cache structure
+    cache = new Cache();
+
     while(annotationIter.hasNext()){
       Annotation instanceAnn = (Annotation)annotationIter.next();
       List attributeValues = new ArrayList(datasetDefinition.
@@ -190,7 +190,7 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     }else{
       if(feature == null){
         //boolean attribute
-        shouldCreateAnnotation = classificationResult.equals("false");
+        shouldCreateAnnotation = classificationResult.equals("true");
       }else{
         //numeric attribute
         String featureValue = classificationResult.toString();

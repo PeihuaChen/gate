@@ -27,6 +27,7 @@ import gate.creole.ml.*;
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
+import gate.event.*;
 import gate.gui.*;
 
 /**
@@ -142,8 +143,10 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         return convertAttributeValue(classifier.classifyInstance(instance));
       }else{
         if(datasetChanged){
+          if(sListener != null) sListener.statusChanged("[Re]building model...");
           classifier.buildClassifier(dataset);
           datasetChanged = false;
+          if(sListener != null) sListener.statusChanged("");
         }
 
         if(confidenceThreshold > 0 &&
@@ -195,7 +198,15 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * @throws GateException
    */
   public void init() throws GateException{
+    //see if we can shout about what we're doing
+    sListener = null;
+    Map listeners = MainFrame.getListeners();
+    if(listeners != null){
+      sListener = (StatusListener)listeners.get("gate.event.StatusListener");
+    }
+
     //find the classifier to be used
+    if(sListener != null) sListener.statusChanged("Initialising classifier...");
     Element classifierElem = optionsElement.getChild("CLASSIFIER");
     if(classifierElem == null){
       Out.prln("Warning (WEKA ML engine): no classifier selected;" +
@@ -206,6 +217,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
 
 
       //get the options for the classiffier
+      if(sListener != null) sListener.statusChanged("Setting classifier options...");
       String[] options;
       Element classifierOptionsElem = optionsElement.getChild("CLASSIFIER-OPTIONS");
       if(classifierOptionsElem == null){
@@ -244,6 +256,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     }
 
     //initialise the dataset
+    if(sListener != null) sListener.statusChanged("Initialising dataset...");
     FastVector attributes = new FastVector();
     weka.core.Attribute classAttribute;
     Iterator attIter = datasetDefinition.getAttributes().iterator();
@@ -287,6 +300,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         throw new ResourceInstantiationException(e);
       }
     }
+    if(sListener != null) sListener.statusChanged("");
   }
 
 
@@ -295,15 +309,19 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * @param is
    */
   protected void load(InputStream is) throws IOException{
+    if(sListener != null) sListener.statusChanged("Loading model...");
     ObjectInputStream ois = new ObjectInputStream(is);
     try{
       classifier = (Classifier)ois.readObject();
       dataset = (Instances)ois.readObject();
       datasetDefinition = (DatasetDefintion)ois.readObject();
+      datasetChanged = ois.readBoolean();
+      confidenceThreshold = ois.readDouble();
     }catch(ClassNotFoundException cnfe){
       throw new GateRuntimeException(cnfe.toString());
     }
     ois.close();
+    if(sListener != null) sListener.statusChanged("");
   }
 
   /**
@@ -311,12 +329,16 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * @param os
    */
   protected void save(OutputStream os) throws IOException{
+    if(sListener != null) sListener.statusChanged("Saving model...");
     ObjectOutputStream oos = new ObjectOutputStream(os);
     oos.writeObject(classifier);
     oos.writeObject(dataset);
     oos.writeObject(datasetDefinition);
+    oos.writeBoolean(datasetChanged);
+    oos.writeDouble(confidenceThreshold);
     oos.flush();
     oos.close();
+    if(sListener != null) sListener.statusChanged("");
   }
 
   /**
@@ -327,6 +349,15 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     return actionsList;
   }
 
+  /**
+   * Registers the PR using the engine with the engine itself.
+   * @param pr the processing resource that owns this engine.
+   */
+  public void setOwnerPR(ProcessingResource pr){
+    this.owner = pr;
+  }
+
+
   protected class SaveDatasetAsArffAction extends javax.swing.AbstractAction{
     public SaveDatasetAsArffAction(){
       super("Save dataset as ARFF");
@@ -334,25 +365,36 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     }
 
     public void actionPerformed(java.awt.event.ActionEvent evt){
-      JFileChooser fileChooser = MainFrame.getFileChooser();
-      fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-      fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
-      fileChooser.setMultiSelectionEnabled(false);
-      if(fileChooser.showSaveDialog(null) == fileChooser.APPROVE_OPTION){
-        File file = fileChooser.getSelectedFile();
-        try{
-          FileWriter fw = new FileWriter(file, false);
-          fw.write(dataset.toString());
-          fw.flush();
-          fw.close();
-        }catch(IOException ioe){
-          JOptionPane.showMessageDialog(null,
-                          "Error!\n"+
-                           ioe.toString(),
-                           "Gate", JOptionPane.ERROR_MESSAGE);
-          ioe.printStackTrace(Err.getPrintWriter());
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
+          fileChooser.setMultiSelectionEnabled(false);
+          if(fileChooser.showSaveDialog(null) == fileChooser.APPROVE_OPTION){
+            File file = fileChooser.getSelectedFile();
+            try{
+              MainFrame.lockGUI("Saving dataset...");
+              FileWriter fw = new FileWriter(file, false);
+              fw.write(dataset.toString());
+              fw.flush();
+              fw.close();
+            }catch(IOException ioe){
+              JOptionPane.showMessageDialog(null,
+                              "Error!\n"+
+                               ioe.toString(),
+                               "Gate", JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            }finally{
+              MainFrame.unlockGUI();
+            }
+          }
         }
-      }
+      };
+
+      Thread thread = new Thread(runnable, "DatasetSaver(ARFF)");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
@@ -364,22 +406,32 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     }
 
     public void actionPerformed(java.awt.event.ActionEvent evt){
-      JFileChooser fileChooser = MainFrame.getFileChooser();
-      fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-      fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
-      fileChooser.setMultiSelectionEnabled(false);
-      if(fileChooser.showSaveDialog(null) == fileChooser.APPROVE_OPTION){
-        File file = fileChooser.getSelectedFile();
-        try{
-          save(new GZIPOutputStream(new FileOutputStream(file)));
-        }catch(IOException ioe){
-          JOptionPane.showMessageDialog(null,
-                          "Error!\n"+
-                           ioe.toString(),
-                           "Gate", JOptionPane.ERROR_MESSAGE);
-          ioe.printStackTrace(Err.getPrintWriter());
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
+          fileChooser.setMultiSelectionEnabled(false);
+          if(fileChooser.showSaveDialog(null) == fileChooser.APPROVE_OPTION){
+            File file = fileChooser.getSelectedFile();
+            try{
+              MainFrame.lockGUI("Saving ML model...");
+              save(new GZIPOutputStream(new FileOutputStream(file)));
+            }catch(IOException ioe){
+              JOptionPane.showMessageDialog(null,
+                              "Error!\n"+
+                               ioe.toString(),
+                               "Gate", JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            }finally{
+              MainFrame.unlockGUI();
+            }
+          }
         }
-      }
+      };
+      Thread thread = new Thread(runnable, "ModelSaver(serialisation)");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
@@ -390,8 +442,36 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     }
 
     public void actionPerformed(java.awt.event.ActionEvent evt){
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
+          fileChooser.setMultiSelectionEnabled(false);
+          if(fileChooser.showOpenDialog(null) == fileChooser.APPROVE_OPTION){
+            File file = fileChooser.getSelectedFile();
+            try{
+              MainFrame.lockGUI("Loading model...");
+              load(new GZIPInputStream(new FileInputStream(file)));
+            }catch(IOException ioe){
+              JOptionPane.showMessageDialog(null,
+                              "Error!\n"+
+                               ioe.toString(),
+                               "Gate", JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            }finally{
+              MainFrame.unlockGUI();
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runnable, "ModelLoader(serialisation)");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
+
+
 
   protected DatasetDefintion datasetDefinition;
 
@@ -419,4 +499,8 @@ public class Wrapper implements MLEngine, ActionsPublisher {
   protected boolean datasetChanged = false;
 
   protected List actionsList;
+
+  protected ProcessingResource owner;
+
+  protected StatusListener sListener;
 }
