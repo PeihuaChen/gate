@@ -652,13 +652,7 @@ public class PostgresDataStore extends JDBCDataStore {
 
         //3.1. create a dummy feature [LOB hack]
         Long featID = _createFeature(entityID,entityType,key,currValue,valueType,pstmt);
-
-        if (valueType == DBHelper.VALUE_TYPE_BINARY) {
-          //3.3. BLOBs
-          _updateFeatureLOB(featID,value,valueType);
-        }
     }
-
 
   }
 
@@ -675,7 +669,7 @@ public class PostgresDataStore extends JDBCDataStore {
     PreparedStatement pstmt = null;
 
     try {
-      String sql = "select persist_create_feature(?,?,?,?,?,?,?) ";
+      String sql = "select persist_create_feature(?,?,?,?,?,?,?,?) ";
       pstmt = this.jdbcConn.prepareStatement(sql);
     }
     catch (SQLException sqle) {
@@ -698,6 +692,8 @@ public class PostgresDataStore extends JDBCDataStore {
 
   protected void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
+
+    throw new MethodNotImplementedException();
   }
 
   /**
@@ -725,8 +721,9 @@ public class PostgresDataStore extends JDBCDataStore {
       pstmt.setString(3,key);
       pstmt.setNull(4,java.sql.Types.BIGINT);
       pstmt.setNull(5,java.sql.Types.DOUBLE);
-      pstmt.setNull(6,java.sql.Types.VARCHAR);
-      pstmt.setInt(7,valueType);
+      pstmt.setNull(6,java.sql.Types.LONGVARCHAR);
+      pstmt.setNull(7,java.sql.Types.LONGVARBINARY);
+      pstmt.setInt(8,valueType);
 
       //1.2 set proper data
       switch(valueType) {
@@ -757,8 +754,16 @@ public class PostgresDataStore extends JDBCDataStore {
           break;
 
         case DBHelper.VALUE_TYPE_BINARY:
-          //ignore
-          //will be handled later in processing
+          //we serialize the value (object) in the DB
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          ObjectOutputStream oos = new ObjectOutputStream(baos);
+          oos.writeObject(value);
+          oos.close();
+          baos.close();
+          byte[] buff = baos.toByteArray();
+          ByteArrayInputStream bais = new ByteArrayInputStream(buff);
+          pstmt.setBinaryStream(7,bais,buff.length);
+          bais.close();
           break;
 
         case DBHelper.VALUE_TYPE_STRING:
@@ -780,6 +785,9 @@ public class PostgresDataStore extends JDBCDataStore {
       }
 
       featID = new Long(rs.getLong(1));
+    }
+    catch(IOException ioe) {
+      throw new PersistenceException("can't write binary data ["+ioe.getMessage()+"]");
     }
     catch(SQLException sqle) {
 
@@ -961,7 +969,7 @@ public class PostgresDataStore extends JDBCDataStore {
         }
 
         //don't forget to read the rest of the current row
-        Blob blobValue = rs.getBlob("ft_binary_value");
+        InputStream blobValue = rs.getBinaryStream("ft_binary_value");
         String stringValue = rs.getString("ft_character_value");
 
         switch(valueType.intValue()) {
@@ -978,7 +986,11 @@ public class PostgresDataStore extends JDBCDataStore {
             break;
 
           case DBHelper.VALUE_TYPE_BINARY:
-            currFeature = readBLOB(blobValue);
+            //deserialize a java object
+            ObjectInputStream ois = new ObjectInputStream(blobValue);
+            currFeature = ois.readObject();
+            ois.close();
+            blobValue.close();
             break;
 
           case DBHelper.VALUE_TYPE_STRING:
@@ -1045,16 +1057,5 @@ public class PostgresDataStore extends JDBCDataStore {
     return fm;
   }
 
-  /**
-   *  reads the content of the specified BLOB object and returns the object
-   *  contained.
-   *  NOTE: the BLOB is expected to contain serializable objects, not just any
-   *  binary stream
-   */
-  public static Object readBLOB(java.sql.Blob src)
-    throws SQLException, IOException,ClassNotFoundException {
-
-    throw new MethodNotImplementedException();
-  }
 
 }
