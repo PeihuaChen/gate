@@ -70,6 +70,15 @@ public class NameBearerHandle implements Handle,
     this.icon = MainFrame.getIcon(iconName);
 
     buildViews();
+    // Add the CTRL +F4 key & action combination to the resource
+    JComponent largeView = this.getLargeView();
+    if (largeView != null){
+      largeView.getActionMap().put("Close resource",
+                        new CloseAction());
+      if (target instanceof gate.corpora.DocumentImpl){
+        largeView.getActionMap().put("Save As XML", new SaveAsXmlAction());
+      }// End if
+    }// End if
   }//public DefaultResourceHandle(FeatureBearer res)
 
   public Icon getIcon(){
@@ -127,7 +136,10 @@ public class NameBearerHandle implements Handle,
   protected void buildViews() {
     //build the popup
     popup = new JPopupMenu();
-    popup.add(new XJMenuItem(new CloseAction(), sListenerProxy));
+    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
+    closeItem.setAccelerator(KeyStroke.getKeyStroke(
+                                KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
+    popup.add(closeItem);
     if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
@@ -138,8 +150,14 @@ public class NameBearerHandle implements Handle,
       popup.addSeparator();
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
-      if(target instanceof gate.corpora.DocumentImpl)
-        popup.add(new XJMenuItem(new SaveAsXmlAction(), sListenerProxy));
+      if(target instanceof gate.corpora.DocumentImpl){
+        XJMenuItem saveAsXmlItem =
+                         new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
+        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
+                                        KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+
+        popup.add(saveAsXmlItem);
+      }//End if
     }//if(resource instanceof LanguageResource)
 
     fireStatusChanged("Building views...");
@@ -253,7 +271,7 @@ public class NameBearerHandle implements Handle,
       putValue(SHORT_DESCRIPTION, "Removes this resource from the system");
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e){
       if(target instanceof Resource){
         Factory.deleteResource((Resource)target);
       }else if(target instanceof DataStore){

@@ -83,8 +83,11 @@ public class EmailDocumentHandler{
     // Get the sieze of the Gate Document. For the same purpose.
     documentSize = gateDocument.getContent().size().longValue();
 
+//    gateDocumentReader = new BufferedReader(new InputStreamReader(
+//              gateDocument.getSourceUrl().openConnection().getInputStream()));
     gateDocumentReader = new BufferedReader(new InputStreamReader(
-              gateDocument.getSourceUrl().openConnection().getInputStream()));
+                                new ByteArrayInputStream(content.getBytes())));
+
     // for each line read from the gateDocumentReader do
     // if the line begins an e-mail message then fire a status listener, mark
     // that we are processing an e-mail, update the cursor and go to the next

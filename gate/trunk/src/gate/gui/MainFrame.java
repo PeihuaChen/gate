@@ -630,6 +630,47 @@ public class MainFrame extends JFrame
       }
     });
 
+    // Add the keyboard listeners for CTRL+F4 and ALT+F4
+    this.addKeyListener(new KeyAdapter() {
+      public void keyTyped(KeyEvent e) {
+      }
+
+      public void keyPressed(KeyEvent e) {
+        // If Ctrl+F4 was pressed then close the active resource
+        if (e.isControlDown() && e.getKeyCode()==KeyEvent.VK_F4){
+          JComponent resource = (JComponent)
+                                        mainTabbedPane.getSelectedComponent();
+          if (resource != null){
+            Action act = resource.getActionMap().get("Close resource");
+            if (act != null)
+              act.actionPerformed(null);
+          }// End if
+        }// End if
+        // If CTRL+H was pressed then hide the active view.
+        if (e.isControlDown() && e.getKeyCode()==KeyEvent.VK_H){
+          JComponent resource = (JComponent)
+                                        mainTabbedPane.getSelectedComponent();
+          if (resource != null){
+            Action act = resource.getActionMap().get("Hide current view");
+            if (act != null)
+              act.actionPerformed(null);
+          }// End if
+        }// End if
+        // If CTRL+X was pressed then save as XML
+        if (e.isControlDown() && e.getKeyCode()==KeyEvent.VK_X){
+          JComponent resource = (JComponent)
+                                        mainTabbedPane.getSelectedComponent();
+          if (resource != null){
+            Action act = resource.getActionMap().get("Save As XML");
+            if (act != null)
+              act.actionPerformed(null);
+          }// End if
+        }// End if
+      }// End keyPressed();
+
+      public void keyReleased(KeyEvent e) {
+      }
+    });
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
         JComponent largeView = (JComponent)mainTabbedPane.getSelectedComponent();
@@ -973,8 +1014,19 @@ public class MainFrame extends JFrame
 
     JPopupMenu popup = handle.getPopup();
     popup.addSeparator();
-    popup.add(new XJMenuItem(new CloseViewAction(handle), this));
-  }
+
+    // Create a CloseViewAction and a menu item based on it
+    CloseViewAction cva = new CloseViewAction(handle);
+    XJMenuItem menuItem = new XJMenuItem(cva, this);
+    // Add an accelerator ATL+F4 for this action
+    menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                                      KeyEvent.VK_H, ActionEvent.CTRL_MASK));
+    popup.add(menuItem);
+    // Put the action command in the component's action map
+    if (handle.getLargeView() != null)
+      handle.getLargeView().getActionMap().put("Hide current view",cva);
+
+  }// resourceLoaded();
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
@@ -1021,8 +1073,17 @@ public class MainFrame extends JFrame
 
     JPopupMenu popup = handle.getPopup();
     popup.addSeparator();
-    popup.add(new XJMenuItem(new CloseViewAction(handle), this));
-  }
+    // Create a CloseViewAction and a menu item based on it
+    CloseViewAction cva = new CloseViewAction(handle);
+    XJMenuItem menuItem = new XJMenuItem(cva, this);
+    // Add an accelerator ATL+F4 for this action
+    menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                                      KeyEvent.VK_H, ActionEvent.CTRL_MASK));
+    popup.add(menuItem);
+    // Put the action command in the component's action map
+    if (handle.getLargeView() != null)
+      handle.getLargeView().getActionMap().put("Hide current view",cva);
+  }// datastoreOpened();
 
   /**Called when a {@link gate.DataStore} has been created*/
   public void datastoreCreated(CreoleEvent e){
@@ -1523,11 +1584,10 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent e) {
       mainTabbedPane.remove(handle.getLargeView());
-      mainTabbedPane.setSelectedIndex(0);
+      mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
     }//public void actionPerformed(ActionEvent e)
     Handle handle;
   }//class CloseViewAction
-
 
   class OpenDSAction extends AbstractAction {
     public OpenDSAction() {
