@@ -259,4 +259,14 @@ public class ProtegeProjectName extends AbstractLanguageResource
     return ontotextOntology.isModified();
   }
 
+  public boolean isSubClassOf(String cls1, String cls2)
+      throws gate.creole.ontology.NoSuchClosureTypeException {
+    return ontotextOntology.isSubClassOf(cls1, cls2);
+  }
+
+  public boolean isDirectSubClassOf(String cls1, String cls2)
+      throws gate.creole.ontology.NoSuchClosureTypeException {
+    return ontotextOntology.isSubClassOf(cls1, cls2);
+  }
+
 } // class ProtegeProjectName extends AbstractLanguageResource
