@@ -20,6 +20,8 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.*;
 import java.net.*;
+import java.awt.Color;
+
 import javax.swing.*;
 
 import gnu.getopt.*;
@@ -93,7 +95,27 @@ public class Main {
   private static void runGui() {
     MainFrame frame = new MainFrame();
     long startTime = System.currentTimeMillis();
-    Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
+    //build the Spash
+    JPanel splashBox = new JPanel();
+    splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
+    splashBox.setBackground(Color.white);
+
+    JLabel gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
+        "/gate/resources/img/gateSplash.gif")));
+    Box box = new Box(BoxLayout.X_AXIS);
+    box.add(Box.createHorizontalGlue());
+    box.add(gifLbl);
+    box.add(Box.createHorizontalGlue());
+    splashBox.add(box);
+    gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
+        "/gate/resources/img/gateHeader.gif")));
+    box = new Box(BoxLayout.X_AXIS);
+    box.add(Box.createHorizontalGlue());
+    box.add(gifLbl);
+    box.add(Box.createHorizontalGlue());
+    splashBox.add(box);
+    splashBox.add(Box.createVerticalStrut(15));
+    Splash splash = new Splash(frame, splashBox);
     splash.show();
 
     if(DEBUG) Out.prln("constructing GUI");
