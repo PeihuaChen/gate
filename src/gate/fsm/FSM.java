@@ -23,7 +23,7 @@ public class FSM implements JapeConstants{
   * single phase transducer. The FSM built by this constructor is supposed
   * to be a part of a larger FSM which is sent using the owner parameter.
   * All the new states created during the build process belong to the owner FSM.
-  *@param owner the larger FSM that will contain this FSM as a part.
+  *@param owner the larger FSM that will contain this FSM as a sub-set.
   *@param spt the single phase transducer to be used for building this FSM.
   */
   public FSM(FSM owner, SinglePhaseTransducer spt){
@@ -57,7 +57,7 @@ public class FSM implements JapeConstants{
 
   /**
   * Builds a FSM starting from a rule. This FSM is actually a part of a larger
-  * one (maybe the one that is built based on the single phase transducer that
+  * one (usually the one that is built based on the single phase transducer that
   * contains the rule).
   *@param owner the larger FSM that wil own all the states in the new FSM built
   *by this constructor.
@@ -243,7 +243,8 @@ public class FSM implements JapeConstants{
     allStates.add(state);
   }
   /**
-  * Converts this FSM from a non-deterministic to a deterministic one.
+  * Converts this FSM from a non-deterministic to a deterministic one by
+  * eliminating all the unrestricted transitions.
   */
   public void eliminateVoidTransitions(){
     Set dStates = new HashSet();
@@ -334,7 +335,7 @@ public class FSM implements JapeConstants{
   /*
   * Computes the lambda-closure (aka epsilon closure) of the given set of
   * states, that is the set of states that are accessible from any of the
-  *states in the given set using only void transitions.
+  *states in the given set using only unrestricted transitions.
   *@return a set containing all the states accessible from this state via
   *transitions that bear no restrictions.
   */
