@@ -78,6 +78,7 @@
       <PARAMETER NAME="xmlFileUrl" COMMENT="The url to the definition file" SUFFIXES="xml;xsd">java.net.URL</PARAMETER>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/AddressSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/DateSchema.xml" /></AUTOINSTANCE>
+<AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/FacilitySchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/GpeSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/IdentifierSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" /></AUTOINSTANCE>
