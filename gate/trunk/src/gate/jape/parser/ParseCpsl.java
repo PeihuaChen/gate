@@ -224,7 +224,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill, appelt or first)"
+              " (should be brill, appelt or appelt-shortest)"
             );
         } // control
 
