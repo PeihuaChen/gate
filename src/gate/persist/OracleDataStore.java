@@ -3062,7 +3062,7 @@ public class OracleDataStore extends JDBCDataStore {
         String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount, sqlValues);
         conn = DBHelper.connect(this.getStorageUrl(), true);
         stmt = conn.prepareCall(sql);
-        System.out.println("  " + sql);
+///System.out.println("  " + sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3347,7 +3347,7 @@ public class OracleDataStore extends JDBCDataStore {
         String sql = getSQLQueryAnn(constraints, limitcount, sqlValues);
         conn = DBHelper.connect(this.getStorageUrl(), true);
         stmt = conn.prepareCall(sql);
-        System.out.println(sql);
+///System.out.println(sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3358,7 +3358,7 @@ public class OracleDataStore extends JDBCDataStore {
           else if (sqlValues.elementAt(i) instanceof Integer){
             stmt.setLong(i+1,((Integer) sqlValues.elementAt(i)).intValue());
           }
-          System.out.println(" -> " +sqlValues.elementAt(i).toString());
+///System.out.println(" -> " +sqlValues.elementAt(i).toString());
         }
         stmt.execute();
         rs = stmt.getResultSet();
