@@ -32,6 +32,8 @@ public class RepositioningInfo extends ArrayList {
 
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -2895662600168468559L;
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
   /**
    * Just information keeper inner class. No significant functionality.
@@ -304,7 +306,7 @@ public class RepositioningInfo extends ArrayList {
       index = 0;
     } // if
 
-    // correction of all other information records
+   // correction of all other information records
     // All m_currPos above the current record should be corrected with
     // (origLen - newLen) i.e. <code> m_currPos -= origLen - newLen; </code>
 
@@ -348,6 +350,11 @@ public class RepositioningInfo extends ArrayList {
   public void correctInformationOriginalMove(long originalPos, long moveLen) {
     PositionInfo currPI;
 
+    if(DEBUG) {
+      if(originalPos < 380) // debug information restriction
+        Out.println("Before correction: "+this);
+    } // DEBUG
+
     int index = getIndexByOriginalPositionFlow(originalPos);
 
     // correct the index when the originalPos precede all records
@@ -378,7 +385,7 @@ public class RepositioningInfo extends ArrayList {
                                 frontLen);
 
         long endLen = currPI.m_origLength - frontLen;
-        endPI = new PositionInfo(originalPos + frontLen + moveLen,
+        endPI = new PositionInfo(originalPos + moveLen,
                                 endLen,
                                 currPI.m_currPos + frontLen,
                                 endLen);
@@ -386,12 +393,33 @@ public class RepositioningInfo extends ArrayList {
         if(endPI.m_origLength != 0) {
           add(index+1, endPI); // insert new end element
         } // if - should add this record
+
+        if(DEBUG) {
+          if(originalPos < 380) { // debug information restriction
+            Out.println("Point 2. Current: "+currPI);
+            Out.println("Point 2. frontPI: "+frontPI);
+            Out.println("Point 2. endPI: "+endPI);
+          }
+        } // DEBUG
       } // if - inside the record
     } // if
     else {
       // correction if the position is before the current record
       currPI.m_origPos += moveLen;
     }
+
+    if(DEBUG) {
+      if(originalPos < 380) {
+        Out.println("Correction move: "+originalPos+", "+moveLen);
+        Out.println("Corrected: "+this);
+        Out.println("index: "+index);
+        /*
+        Exception ex = new Exception();
+        Out.println("Call point: ");
+        ex.printStackTrace();
+        */
+      }
+    } // DEBUG
   } // correctInformationOriginalMove
 
 } // class RepositioningInfo
