@@ -485,7 +485,7 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>The UI is not properly showing hypernym branches - only the first hypernym is traversed upwards (see "cup", sense 1 -  the branch
     for "container" is not shown)</TD>
     <TD>___test_method</TD>
-    <TD>The underlying GATE WN API seems to work correctly since the unit tests cover such case successfully, i.e. the problem is 
+    <TD>The underlying GATE WN API seems to work correctly since the unit tests cover such case successfully, i.e. the problem is
     most probably in the UI</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
@@ -501,7 +501,7 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>NOT FIXED</TD>
     <TD> Removing an annotation from a database set does not trigger removing the underlying nodes if they're not referenced by any other annotation.
     On the other hand identifying that a node is not needed anymore and deleting it is not easy and will slow down annotation removal
-    
+
     </TD>
     <TD>-</TD>
     <TD>-</TD>
@@ -518,7 +518,7 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>20 Aug 2003 Gate 2.2 build 1372</TD>
     <TD>NOT FIXED</TD>
     <TD>The WordNet implementation does not make any morphological processing (i.e. searches for "running" will return empty result set while
-    the original WordNet GUI will return results as for "run"). MorphologicalProcessor is actually available in JWNL but is not properly used    
+    the original WordNet GUI will return results as for "run"). MorphologicalProcessor is actually available in JWNL but is not properly used
     </TD>
     <TD>-</TD>
     <TD>-</TD>
@@ -526,6 +526,23 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+  	<TD>00099</TD>
+  	<TD>MachineLearningPR</TD>
+  	<TD>Mike</TD>
+  	<TD/>
+  	<TD>23 June 2004 GATE 3.0-alpha, build 1666</TD>
+  	<TD>NOT FIXED</TD>
+  	<TD>The machine learning processing resource will not work properly if
+  	there is an attribute with a negative position, but no attribute with
+  	a positive position. This is probably related to their being a backward
+  	cache but no forward one in such a situtation. The bug can be seen by
+  	examing the datasets collected.</TD>
+  	<TD>-</TD>
+  	<TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
 
 <!------------------------------------------------------------------------->
 </TABLE>
@@ -1724,11 +1741,11 @@ gate.corpora.DocumentImpl
     <TD>Angel</TD>
     <TD>03 Dec 2002 Gate 2.1beta build 958</TD>
     <TD>9 Jan 2003 Gate 2.1-beta1 build 1123</TD>
-    <TD>When the document is created from string it is not parsed even when it is in HTML or XML format. 
-             The document format could be detected from the document content. 
+    <TD>When the document is created from string it is not parsed even when it is in HTML or XML format.
+             The document format could be detected from the document content.
              Some of detection methods are changed to cover this case.
     </TD>
-    <TD>Create GATE document from string with HTML or XML content. 
+    <TD>Create GATE document from string with HTML or XML content.
               See if the result is parsed and only text is extracted or content remains unchanged.
               If the document is parsed also the Original markup should be created.
     </TD>
@@ -1774,8 +1791,8 @@ gate.corpora.DocumentImpl
     <TD>Marin</TD>
     <TD>-</TD>
     <TD>07 Mar 2003 Gate 2.1 build 1191</TD>
-    <TD>The database datastore did not prperly unload transient documents, part of a transient corpus,  
-    when the later was adopted in the database datastore. The result was that each document in the corpus was duplicated in the resource pane 
+    <TD>The database datastore did not prperly unload transient documents, part of a transient corpus,
+    when the later was adopted in the database datastore. The result was that each document in the corpus was duplicated in the resource pane
     (one transiebt and one persistent copy) which is confusing. Now transient documents get properly unloaded when they're adopted and a
     DatabaseDocument is created instead
     </TD>
@@ -1792,7 +1809,7 @@ gate.corpora.DocumentImpl
     <TD>Marin</TD>
     <TD>-</TD>
     <TD>20 May 2003 Gate 2.1 build 1250</TD>
-    <TD>Documents part of database corpus were not properly unloaded. Instead of nullifying the repsective position in the 
+    <TD>Documents part of database corpus were not properly unloaded. Instead of nullifying the repsective position in the
     list with corpus documents, the list element was actually removed so effectively the document was removed from the in-memory
     coprus strucures. As a result the corpus will report that it contains less documents than the correct count and any PR that tries
     to process the corpus (and loads, processes and unloads documents one by one) will effectively process only half of the focuments (before
@@ -1864,7 +1881,7 @@ gate.corpora.DocumentImpl
     The actual problem was in the CorpusImpl equals() implementation (which is inherited by DatabaseCorpusImpl) and which makes the two documents (
     transient and database) look the same just because they contain the same document list. As a result the registry refused to register the database corpus
     as listener for document unload events. After the fix the peformance of a database corpus sync() is greatly improved
-    
+
     </TD>
     <TD>-</TD>
     <TD>-</TD>
@@ -1913,7 +1930,7 @@ failed ...rollback
     <TD> updating of document content was not working properly sometimes (content ID passed instead
     of the expected document ID). Almost always the document ID and the content ID are the same (as a result
     of the document creation process) but under specific conditions this is not true
-    
+
     </TD>
     <TD>-</TD>
     <TD>-</TD>
