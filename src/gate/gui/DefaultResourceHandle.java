@@ -319,6 +319,11 @@ public class DefaultResourceHandle implements ResourceHandle {
                               null, dsNames.toArray(),
                               dsNames.get(0));
           DataStore ds = (DataStore)dsByName.get(answer);
+          if (ds == null){
+            Err.prln("The datastore does not exists. Saving procedure" +
+                              " has FAILED! This should never happen again!");
+            return;
+          }// End if
           DataStore ownDS = ((LanguageResource)resource).getDataStore();
           if(ds == ownDS){
             ds.sync((LanguageResource)resource);

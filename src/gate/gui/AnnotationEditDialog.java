@@ -30,7 +30,9 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.creole.*;
 
-/** This class visually adds/edits features from an annotation*/
+/** This class visually adds/edits features from an annotation
+  * Features are taken from an AnnotationSchema
+  */
 public class AnnotationEditDialog extends JDialog {
 
   // Local data
@@ -65,7 +67,6 @@ public class AnnotationEditDialog extends JDialog {
 
   /** Constructs an AnnotationEditDialog
     * @param aFram the parent frame of this dialog
-    * @param anAnnotationSchema object from which this dialog configures
     * @param aModal (wheter or not this dialog is modal)
     */
   public AnnotationEditDialog( Frame aFrame, boolean aModal) {
@@ -77,13 +78,15 @@ public class AnnotationEditDialog extends JDialog {
     initListeners();
   }//AnnotationEditDialog
 
+  /** Constructs an AnnotationEditDialog using <b>null<b> as a frame and <b>true
+    *  </b> as modal value for dialog
+    */
   public AnnotationEditDialog() {
     this(null, true);
-  }
+  }// AnnotationEditDialog
 
   /** Init local data*/
   protected void initLocalData(){
-
     // Create the response feature Map
     responseMap = Factory.newFeatureMap();
 
@@ -282,7 +285,7 @@ public class AnnotationEditDialog extends JDialog {
     tableModel.data.remove(rowIndex);
   }// doRemoveFeature();
 
-  /** This method adds a feature from the list to the table*/
+  /** This method adds features from the list to the table*/
   private void doAddFeatures(){
     Object[] selectedFeaturesName = featureSchemaList.getSelectedValues();
     for (int i = 0 ; i < selectedFeaturesName.length; i ++){
@@ -291,6 +294,7 @@ public class AnnotationEditDialog extends JDialog {
     tableModel.fireTableDataChanged();
   }//doAddFeatures();
 
+  /** This method adds a feature from the list to the table*/
   private void doAddFeature(String aFeatureName){
       FeatureSchema fs=(FeatureSchema) name2featureSchemaMap.get(aFeatureName);
 
@@ -318,8 +322,7 @@ public class AnnotationEditDialog extends JDialog {
     while (iter.hasNext()){
       RowData rd = (RowData) iter.next();
       responseMap.put(rd.getFeatureSchema().getFeatureName(), rd.getValue());
-    };
-
+    }// End while
   }//doOk();
 
   /** This method is called when the user press the CANCEL button*/
@@ -360,47 +363,6 @@ public class AnnotationEditDialog extends JDialog {
     return show(null,anAnnotSchema);
   }// show()
 
-/*
-  public Resource show(ResourceData rData){
-    nameField.setText("");
-    ParameterList pList = rData.getParameterList();
-//System.out.println(pList.getInitimeParameters());
-    Iterator parIter = pList.getInitimeParameters().iterator();
-    params.clear();
-    while(parIter.hasNext()){
-      params.add(new ParameterDisjunction((List)parIter.next()));
-    }
-    tableModel.fireTableDataChanged();
-    pack();
-    super.show();
-    if(userCanceled) return null;
-    else{
-      //create the new resource
-      FeatureMap params = Factory.newFeatureMap();
-      for(int i=0; i< tableModel.getRowCount(); i++){
-        ParameterDisjunction pDisj = (ParameterDisjunction)
-                                     tableModel.getValueAt(i,0);
-        if(pDisj.getValue() != null){
-          params.put(pDisj.getName(), pDisj.getValue());
-        }
-      }
-      Resource res;
-      try{
-        res = Factory.createResource(rData.getClassName(), params);
-        res.getFeatures().put("gate.NAME", nameField.getText());
-      }catch(ResourceInstantiationException rie){
-        JOptionPane.showMessageDialog(getOwner(),
-                                      "Resource could not be created!\n" +
-                                      rie.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-        res = null;
-      }
-
-      return res;
-    }
-  }
-*/
-
   // Inner classes
   // TABLE MODEL
   protected class FeaturesTableModel extends AbstractTableModel{
@@ -413,7 +375,7 @@ public class AnnotationEditDialog extends JDialog {
 
     public void fireTableDataChanged(){
       super.fireTableDataChanged();
-    }
+    }// fireTableDataChanged();
 
     public int getColumnCount(){return 3;}
 
@@ -496,11 +458,7 @@ public class AnnotationEditDialog extends JDialog {
           // the string object "aValue"
           if (aValue == null){
             rd.setValue("?");
-/*            JOptionPane.showMessageDialog(null,
-                                      "No value to set!",
-                                      "Error", JOptionPane.ERROR_MESSAGE);
-*/
-             return;
+            return;
           }// End if
           // Get the class name the final object must belong
           className = rd.getFeatureSchema().getValueClassName();
@@ -510,10 +468,6 @@ public class AnnotationEditDialog extends JDialog {
           // and return.
           if (className == null){
               rd.setValue(aValue);
-/*              JOptionPane.showMessageDialog(null,
-        "No type to convert to! The value will be saved with its current type!",
-        "Warning", JOptionPane.WARNING_MESSAGE);
-*/
               return;
           }// End if
 
@@ -527,10 +481,6 @@ public class AnnotationEditDialog extends JDialog {
           // This method tries to convert a string to various other types.
           if (!"class java.lang.String".equals(aValueClassName)){
             rd.setValue(aValue);
-/*            JOptionPane.showMessageDialog(null,
-   "No type conversion will be performed! The current value type is not String",
-        "Warning", JOptionPane.WARNING_MESSAGE);
-*/
             return;
           }// End if
 
@@ -542,11 +492,6 @@ public class AnnotationEditDialog extends JDialog {
             classObj = Class.forName(className);
           }catch (ClassNotFoundException cnfex){
             rd.setValue(aValue);
-/*            JOptionPane.showMessageDialog(null,
-                                          cnfex.toString(),
-                                          "Error", JOptionPane.ERROR_MESSAGE);
-*/
-
             return;
           }// End catch
           // Get its list of constructors
@@ -572,12 +517,6 @@ public class AnnotationEditDialog extends JDialog {
 
           if (!found){
             rd.setValue(aValue);
-/*            JOptionPane.showMessageDialog(null,
-               "Couldn't find a constructor to take a string param. for the " +
-                        className +
-                        " type!",
-                       "Warning", JOptionPane.WARNING_MESSAGE);
-*/
             return;
           }// End if
           try{
@@ -590,12 +529,6 @@ public class AnnotationEditDialog extends JDialog {
 
           } catch (Exception e){
             rd.setValue("");
-/*            JOptionPane.showMessageDialog(null,
-                          "Couldn't construct an object of type " +
-                          className +
-                          "from the current value!",
-                          "Error", JOptionPane.ERROR_MESSAGE);
-*/
           }// End catch
 
 //          rd.setValue(aValue);
@@ -678,7 +611,7 @@ public class AnnotationEditDialog extends JDialog {
     }//getCellEditorValue
 
   }//FeaturesEditor
-
+/*
   public static void main(String[] args){
 
     try {
@@ -700,13 +633,9 @@ public class AnnotationEditDialog extends JDialog {
       //aed.show(annotSchema);
       aed.show(fm,annotSchema);
 
-  /*
-      // Create an annoatationSchema from a URL.
-      URL url =
-      annotSchema.fromXSchema(url);
-  */
     } catch (Exception e){
       e.printStackTrace(Err.getPrintWriter());
     }
   }// main
+*/
 }//AnnotationEditDialog

@@ -65,26 +65,26 @@ public class FeatureSchema implements Serializable {
     featurePermissibleValuesSet = aFeaturePermissibleValuesSet;
   }
 
-  /** Whether the values are an enumeration or not. */
+  /** Tests whether the values are an enumeration or not. */
   public boolean isEnumeration() {
     return featurePermissibleValuesSet != null;
-  }
+  }// isEnumeration()
 
   /** Get the feature name */
   public String getFeatureName() {
     return featureName;
-  }
+  }// getFeatureName()
 
 
   /** Get the feature value class name */
   public String getValueClassName() {
     return featureValueClassName;
-  }
+  }// getValueClassName()
 
   /** Returns the permissible values as a Set*/
   public Set getPermissibleValues() {
     return featurePermissibleValuesSet;
-  }
+  }// getPermissibleValues()
 
 
   /** Adds all values from the given set as permissible values for
@@ -95,22 +95,30 @@ public class FeatureSchema implements Serializable {
   public boolean setPermissibleValues(Set aPermisibleValuesSet) {
     featurePermissibleValuesSet.clear();
     return featurePermissibleValuesSet.addAll(aPermisibleValuesSet);
-  }
+  }// setPermissibleValues()
 
   /** Adds a value to the enumeration of permissible value for an
     * feature of this type. Returns false, i.e. fails, if the
     * class name of the feature value does not match the class name
     * of the given object
+    *
+    * @param obj the object representing a permissible value. If null then
+    *  simply returns with false.
     */
   public boolean addPermissibleValue(Object obj) {
+    if(obj == null) return false;
     if (! obj.getClass().getName().equals(featureValueClassName))
         return false;
     if (featurePermissibleValuesSet == null)
         featurePermissibleValuesSet = new HashSet();
     return featurePermissibleValuesSet.add(obj);
-  }
+  }// addPermissibleValue()
 
-  /** This method transforms a feature to its XSchema representation
+  /** This method transforms a feature to its XSchema representation. It is used
+    * in toXSchema().
+    *
+    * @param aJava2XSchemaMap a Java map object that will be serialized in XSchema
+    * @return a String containing the XSchema representation
     */
   public String toXSchema(Map aJava2XSchemaMap){
 

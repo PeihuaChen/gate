@@ -72,7 +72,6 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
                "GATE document is null or no content found. Nothing to parse!");
     }// End if
 
-
     reader = new InputStreamReader(
              new ByteArrayInputStream(doc.getContent().toString().getBytes()));
 
@@ -113,8 +112,7 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
       parser.parse(reader, htmlDocHandler, true);
     } catch (IOException e){
       throw new DocumentFormatException(e);
-    }
-
+    }// End try
   }//unpackMarkup(doc)
 
   /** Unpack the markup in the document. This converts markup from the
@@ -165,5 +163,4 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     setMimeType(mime);
     return this;
   }// init()
-
 }// class HtmlDocumentFormat

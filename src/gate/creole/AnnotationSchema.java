@@ -26,12 +26,11 @@ import javax.xml.parsers.*;
 import org.jdom.input.*;
 import org.jdom.*;
 
-/** This class handles annotation
-  * schemas: annotation types, together with their attributes,
-  * values and types.
+/** This class handles annotation schemas.An annotation schema is a
+  * representation of an annotation, together with its types and their
+  * attributes, values and types.
   */
-public class AnnotationSchema extends AbstractLanguageResource
-{
+public class AnnotationSchema extends AbstractLanguageResource{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -88,8 +87,8 @@ public class AnnotationSchema extends AbstractLanguageResource
       throw new ResourceInstantiationException(
         "Couldn't create annotation schema parser: " + e
       );
-    }
-  } // setUpStaticData
+    }//End try
+  } //setUpStaticData
 
   /** The name of the annotation */
   protected String annotationName = null;
@@ -121,9 +120,8 @@ public class AnnotationSchema extends AbstractLanguageResource
     this.featureSchemaSet = featureSchemaSet;
   } // setFeatureSchemaSet
 
-  /** Returns a FeatureSchema object from featureSchemaSet, given a
-    * feature name.
-    * It will return null if the feature name is not found.
+  /** @return a FeatureSchema object from featureSchemaSet, given a
+    * feature name.It will return null if the feature name is not found.
     */
   public FeatureSchema getFeatureSchema(String featureName) {
     Iterator fsIterator = featureSchemaSet.iterator();
@@ -181,7 +179,7 @@ public class AnnotationSchema extends AbstractLanguageResource
       throw new ResourceInstantiationException(
         "couldn't open annotation schema file: " + e
       );
-    }
+    }// End try
   } // fromXSchema
 
   /** Creates an AnnotationSchema object from an XSchema file
@@ -207,12 +205,14 @@ public class AnnotationSchema extends AbstractLanguageResource
       throw new ResourceInstantiationException(
         "couldn't open annotation schema stream: " + e
       );
-    }
+    }// End try
   } // end fromXSchema
 
-  /** This method builds a JDom structure from a W3C Dom one
+  /** This method builds a JDom structure from a W3C Dom one.Of course that can
+    * be considered a waist of time, but a JDOM structure is more flexible than
+    * a DOM one.
     * @param aDom W3C dom structure
-    * @return org.jdom.Document
+    * @return @see  org.jdom.Document
     */
   private org.jdom.Document buildJdomFromDom(org.w3c.dom.Document aDom){
     org.jdom.Document jDom = null;
@@ -220,23 +220,27 @@ public class AnnotationSchema extends AbstractLanguageResource
     DOMBuilder jDomBuilder = new DOMBuilder();
     // Create a JDOM structure from the dom one
     jDom = jDomBuilder.build(aDom);
-    // Don't need dom anymore.
+    // Don't need dom anymore, but we don't decide that here.
     return jDom;
   } // buildJdomFromDom
 
-  /** This method uses the JDom structure for our XSchema needs
+  /** This method uses the JDom structure for our XSchema needs. What it does is
+    * to add semantics to the XML elements defined in XSchema. In the end we need
+    * to construct an AnnotationSchema object form an XSchema file.
+    *
+    * @param jDom the JDOM structure containing the XSchema document. It must not
+    * be <b>null<b>
     */
   private void workWithJDom(org.jdom.Document jDom){
     // Use the jDom structure the way we want
     org.jdom.Element rootElement = jDom.getRootElement();
     // get all children elements from the rootElement
     List rootElementChildrenList = rootElement.getChildren("element");
-    Iterator rootElementChildrenIterator =
-                                        rootElementChildrenList.iterator();
+    Iterator rootElementChildrenIterator = rootElementChildrenList.iterator();
     while (rootElementChildrenIterator.hasNext()){
-    org.jdom.Element childElement =
-          (org.jdom.Element) rootElementChildrenIterator.next();
-    createAnnotationSchemaObject(childElement);
+      org.jdom.Element childElement =
+                        (org.jdom.Element) rootElementChildrenIterator.next();
+      createAnnotationSchemaObject(childElement);
     }//end while
   } // workWithJdom
 
@@ -355,7 +359,8 @@ public class AnnotationSchema extends AbstractLanguageResource
     featureSchemaSet.add(featureSchema);
   } // createAndAddFeatureSchemaObject
 
-  /** Writes an AnnotationSchema to a XSchema files
+  /** @return a String containing the XSchema document representing
+    *  an AnnotationSchema object.
     */
   public String toXSchema(){
     StringBuffer schemaString = new StringBuffer();
@@ -378,7 +383,6 @@ public class AnnotationSchema extends AbstractLanguageResource
     schemaString.append("</schema>\n");
     return schemaString.toString();
   }// toXSchema
-
 } // AnnotationSchema
 
 
