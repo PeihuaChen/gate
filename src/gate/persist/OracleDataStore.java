@@ -271,12 +271,20 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
-
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
   public void sync(LanguageResource lr) throws PersistenceException {
+    //open a new transaction
+    _sync(lr,true);
+  }
+
+  /**
+   * Save: synchonise the in-memory image of the LR with the persistent
+   * image.
+   */
+  private void _sync(LanguageResource lr, boolean openNewTrans) throws PersistenceException {
 //Out.prln("syncing LR...");
     //0. preconditions
     Assert.assertNotNull(lr);
@@ -296,7 +304,9 @@ public class OracleDataStore extends JDBCDataStore {
     boolean transFailed = false;
     try {
       //2.5 autocommit should be FALSE because of LOBs
-      this.jdbcConn.setAutoCommit(false);
+      if (openNewTrans) {
+        this.jdbcConn.setAutoCommit(false);
+      }
 
       //3. perform changes, if anything goes wrong, rollback
       if (lr instanceof Document) {
@@ -307,7 +317,9 @@ public class OracleDataStore extends JDBCDataStore {
       }
 
       //4. done, commit
-      this.jdbcConn.commit();
+      if (openNewTrans) {
+        this.jdbcConn.commit();
+      }
     }
     catch(SQLException sqle) {
       transFailed = true;
@@ -350,10 +362,16 @@ public class OracleDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-
+  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
+    //open a new transaction
+    return _adopt(lr,secInfo,true);
+  }
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
+  private LanguageResource _adopt(LanguageResource lr,
+                                  SecurityInfo secInfo,
+                                  boolean openNewTrans)
   throws PersistenceException,SecurityException {
 
     LanguageResource result = null;
@@ -412,7 +430,9 @@ public class OracleDataStore extends JDBCDataStore {
     boolean transFailed = false;
     try {
       //2.5 autocommit should be FALSE because of LOBs
-      this.jdbcConn.setAutoCommit(false);
+      if (openNewTrans) {
+        this.jdbcConn.setAutoCommit(false);
+      }
 
       //3. perform changes, if anything goes wrong, rollback
       if (lr instanceof Document) {
@@ -424,7 +444,9 @@ public class OracleDataStore extends JDBCDataStore {
       }
 
       //4. done, commit
-      this.jdbcConn.commit();
+      if (openNewTrans) {
+        this.jdbcConn.commit();
+      }
     }
     catch(SQLException sqle) {
       transFailed = true;
@@ -1648,6 +1670,8 @@ public class OracleDataStore extends JDBCDataStore {
         params.put(DataStore.LR_ID_FEATURE_NAME, currLRID);
         Document dbDoc = (Document)
                     Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
+
         dbDocs.add(dbDoc);
       }
 
@@ -2534,7 +2558,8 @@ public class OracleDataStore extends JDBCDataStore {
         //3.3. adopt the doc with the sec info
         Document adoptedDoc = null;
         try {
-          adoptedDoc = (Document)adopt(dbDoc,si);
+          //don't open a new transaction, since sync() already has opended one
+          adoptedDoc = (Document)_adopt(dbDoc,si,false);
         }
         catch(SecurityException se) {
           throw new PersistenceException(se);
@@ -2544,7 +2569,9 @@ public class OracleDataStore extends JDBCDataStore {
         corp.add(adoptedDoc);
       }
       else {
-        sync(dbDoc);
+        //don't open a new transaction, the sync() called for corpus has already
+        //opened one
+        _sync(dbDoc,false);
       }
     }
   }
