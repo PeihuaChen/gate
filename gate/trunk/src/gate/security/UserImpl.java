@@ -41,6 +41,9 @@ public class UserImpl
    *  used for updates */
   private Connection conn;
 
+  /** --- */
+  private int dbType;
+
   /** reference to the security factory */
   private AccessControllerImpl ac;
 
@@ -65,6 +68,16 @@ public class UserImpl
     this.groups = groups;
     this.ac = ac;
     this.conn = conn;
+
+    try {
+      String jdbcURL = conn.getMetaData().getURL();
+      this.dbType = DBHelper.getDatabaseType(jdbcURL);
+      Assert.assertTrue(this.dbType == DBHelper.ORACLE_DB ||
+                        this.dbType == DBHelper.POSTGRES_DB);
+    }
+    catch(SQLException sqex) {
+      sqex.printStackTrace();
+    }
 
     this.omModificationListeners = new Vector();
     this.omCreationListeners = new Vector();
@@ -120,33 +133,56 @@ public class UserImpl
   public void setName(String newName, Session s)
     throws PersistenceException,SecurityException {
 
+    //1.  check the session
+    if (this.ac.isValidSession(s) == false) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //1.5 check if user has right to change name
+    if (s.getID() != this.id && false == s.isPrivilegedSession()) {
+      throw new SecurityException("insufficient privileges");
+    }
+
     CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
 
-    try {
-      //1.  check the session
-      if (this.ac.isValidSession(s) == false) {
-        throw new SecurityException("invalid session supplied");
+    //2. update database
+
+    //Oracle / Postgres ?
+    if (this.dbType == DBHelper.ORACLE_DB) {
+      try {
+        stmt = this.conn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.set_user_name(?,?)} ");
+        stmt.setLong(1,this.id.longValue());
+        stmt.setString(2,newName);
+        stmt.execute();
       }
-
-      //1.5 check if user has right to change name
-      if (s.getID() != this.id && false == s.isPrivilegedSession()) {
-        throw new SecurityException("insufficient privileges");
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
       }
-
-
-      //2. update database
-
-      stmt = this.conn.prepareCall(
-              "{ call "+Gate.DB_OWNER+".security.set_user_name(?,?)} ");
-      stmt.setLong(1,this.id.longValue());
-      stmt.setString(2,newName);
-      stmt.execute();
+      finally {
+        DBHelper.cleanup(stmt);
+      }
     }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      try {
+        String sql = "select security_set_user_name(?,?)";
+        pstmt = this.conn.prepareStatement(sql);
+        pstmt.setLong(1,this.id.longValue());
+        pstmt.setString(2,newName);
+        pstmt.execute();
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
+      }
     }
-    finally {
-      DBHelper.cleanup(stmt);
+
+    else {
+      throw new IllegalArgumentException();
     }
 
     //4. create ObjectModificationEvent
@@ -169,29 +205,56 @@ public class UserImpl
   public void setPassword(String newPass, Session s)
     throws PersistenceException,SecurityException {
 
-    CallableStatement stmt = null;
-
-    try {
-      //1. first check the session
-      if (this.ac.isValidSession(s) == false) {
-        throw new SecurityException("invalid session supplied");
-      }
-
-      //2. check privileges
-      if (false == s.isPrivilegedSession() && s.getID() != this.id) {
-        throw new SecurityException("insuffieicent privileges");
-      }
-
-
-      stmt = this.conn.prepareCall(
-              "{ call "+Gate.DB_OWNER+".security.set_user_password(?,?)} ");
-      stmt.setLong(1,this.id.longValue());
-      stmt.setString(2,newPass);
-      stmt.execute();
-      //release stmt???
+    //1. first check the session
+    if (this.ac.isValidSession(s) == false) {
+      throw new SecurityException("invalid session supplied");
     }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't change user password in DB: ["+ sqle.getMessage()+"]");
+
+    //2. check privileges
+    if (false == s.isPrivilegedSession() && s.getID() != this.id) {
+      throw new SecurityException("insuffieicent privileges");
+    }
+
+    CallableStatement stmt = null;
+    PreparedStatement pstmt = null;
+
+    //Oracle / Postgres ?
+    if (this.dbType == DBHelper.ORACLE_DB) {
+      try {
+        stmt = this.conn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.set_user_password(?,?)} ");
+        stmt.setLong(1,this.id.longValue());
+        stmt.setString(2,newPass);
+        stmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't change user password in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
+    }
+
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      try {
+        String sql = "select security_set_user_password(?,?)";
+        pstmt = this.conn.prepareStatement(sql);
+        pstmt.setLong(1,this.id.longValue());
+        pstmt.setString(2,newPass);
+        pstmt.execute();
+        //release stmt???
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't change user password in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(pstmt);
+      }
+    }
+
+    else {
+      throw new IllegalArgumentException();
     }
 
   }
