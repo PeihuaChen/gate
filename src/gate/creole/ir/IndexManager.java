@@ -1,5 +1,5 @@
 /*
- *  IndexDefinition.java
+ *  Indexmanager.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -14,16 +14,14 @@
 
 package gate.creole.ir;
 
-import java.util.Iterator;
+public interface IndexManager{
 
-public interface IndexDefinition{
+  public int getIndexType();
 
-  public void setIndexLocation(String location);
+  public void createIndex();
 
-  public String getIndexLocation();
+  public void optimizeIndex();
 
-  public DocumentAnalyzer getAnalyzer();
-
-  public Iterator getIndexFields();
+  public void deleteIndex();
 
 }
