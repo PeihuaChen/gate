@@ -305,7 +305,8 @@ create or replace package body security is
 
        
        if (p_mode = WRITE_ACCESS) then
-       
+
+/*       
           --is the document locked?
           if locking_user <> 0 then 
              
@@ -320,6 +321,7 @@ create or replace package body security is
              return;
           
           else                       
+*/          
              --not locked but check permissions
              -- write access is granted :
              -- 1a. permissions are USER_WRITE and OWNER_USER == p_usr_id
@@ -348,7 +350,7 @@ create or replace package body security is
              p_result := ORACLE_FALSE;
              return;
                          
-          end if;
+          --end if;
 
        else   
           -- read access request
