@@ -154,7 +154,21 @@ public class Main {
     });
 
     // initialise the library and load user CREOLE directories
-    Gate.init();
+    try{
+      Gate.init();
+    }catch(Throwable t){
+      int selection = JOptionPane.showOptionDialog(
+        null,
+        "Error during initialisation:\n" + t.toString() +
+        "\nDo you still want to start Gate?",
+        "Gate", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE,
+        null, new String[]{"Cancel", "Start anyway"},
+        "Cancel");
+      if(selection != 1){
+        t.printStackTrace();
+        System.exit(1);
+      }
+    }
     registerCreoleUrls();
 
     //create the main frame, show it and hide the splash
@@ -475,10 +489,10 @@ public class Main {
           }
           Gate.setSiteConfigFile(f);
           if(DEBUG)
-	    Out.prln(
-	      "Initialisation file " + optionString +
-	      " recorded for initialisation"
-	    );
+      Out.prln(
+        "Initialisation file " + optionString +
+        " recorded for initialisation"
+      );
           break;
         // -e runs the CorpusBenchmarkTool (e for evaluate)
         case 'e':
