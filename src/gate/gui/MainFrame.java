@@ -321,7 +321,7 @@ public class MainFrame extends JFrame
     JPanel splashBox = new JPanel();
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
     splashBox.setBackground(Color.white);
-/*
+
     JLabel gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
         "/gate/resources/img/gateSplash.gif")));
     Box box = new Box(BoxLayout.X_AXIS);
@@ -329,10 +329,10 @@ public class MainFrame extends JFrame
     box.add(gifLbl);
     box.add(Box.createHorizontalGlue());
     splashBox.add(box);
-*/
-    JLabel gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
+
+    gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
         "/gate/resources/img/gateHeader.gif")));
-    Box box = new Box(BoxLayout.X_AXIS);
+    box = new Box(BoxLayout.X_AXIS);
     box.add(gifLbl);
     box.add(Box.createHorizontalGlue());
     splashBox.add(box);
