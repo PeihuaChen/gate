@@ -43,19 +43,37 @@ class FSMState implements Serializable {
 
   /** Adds a new value to the transition function
    */
+// >>> DAM: was - to use charMap
+/*
   void put(Character chr, FSMState state) {
     transitionFunction.put(chr,state);
   }
+*/
+// >>> DAM: TransArray optimization
+  void put(char chr, FSMState state) {
+    transitionFunction.put(chr,state);
+  }
+// >>> DAM: end
 
   /** This method is used to access the transition function of this state.
    */
+// >>> DAM: was
+/*
   FSMState next(Character chr) {//UnicodeType type){
     return (FSMState)transitionFunction.get(chr);
   }
+  */
+// >>> DAM: TransArray optimization
+  FSMState next(char chr) {//UnicodeType type){
+    return (FSMState)transitionFunction.get(chr);
+  }
+// >>> DAM: end
 
   /** Returns a GML (Graph Modelling Language) representation of the edges
    * emerging from this state.
    */
+//<<< DAM: was - to use new char Iter returned by the charMap iteratior
+/*
   String getEdgesGML() {
     String res = "";
     Iterator charsIter = transitionFunction.keySet().iterator();
@@ -69,12 +87,36 @@ class FSMState implements Serializable {
       " target " + nextState.getIndex() +
       " label \"'" + currentChar + "'\" ]\n";
     }
+*/
+// DAM, TransArray optimization
+  String getEdgesGML() {
+    String res = "";
+    char currentChar;
+    FSMState nextState;
+
+    for (int i = 0; i < transitionFunction.itemsKeys.length; i++)
+    {
+      currentChar = transitionFunction.itemsKeys[i];
+      nextState = next(currentChar);
+      res += "edge [ source " + myIndex +
+      " target " + nextState.getIndex() +
+      " label \"'" + currentChar + "'\" ]\n";
+    }
+// >>> DAM, end
     return res;
   }
 
   /** Checks whether this state is a final one
    */
-  boolean isFinal() { return !lookupSet.isEmpty(); }
+  boolean isFinal() {
+// >>> was
+//    return !lookupSet.isEmpty();
+// >>> BOBI, Lookup opitimization
+    if (lookupSet==null)
+        return false;
+    return !lookupSet.isEmpty();
+// >>> end
+  }
 
   /** Returns a set of {@link Lookup} objects describing the types of lookups
    * the phrase for which this state is the final one belongs to
@@ -84,6 +126,12 @@ class FSMState implements Serializable {
   /** Adds a new looup description to this state's lookup descriptions set
    */
   void addLookup(Lookup lookup) {
+// >>> was nothing
+// >>> BOBI, Lookup opitimization
+    if (lookupSet == null)
+        lookupSet = new HashSet(4);
+// >>> end
+
     lookupSet.add(lookup);
   } // addLookup
 
@@ -100,16 +148,23 @@ class FSMState implements Serializable {
 
   /** The transition function of this state.
    */
-// NASO
+// >>> was
 //  Map transitionFunction = new HashMap();
-  Map transitionFunction = new HashMap(4);
-
+// >>> NASO, hash4 optimization
+//  Map transitionFunction = new HashMap(4);
+// >>> DAM, TransArray
+charMap transitionFunction = new charMap();
+// >>> end
 
   /**    *
    */
-// NASO
+// >>> was
 //  Set lookupSet = new HashSet();
-  Set lookupSet = new HashSet(4);
+// >>> NASO, hash4 optimization
+//  Set lookupSet = new HashSet(4);
+// >>> BOBI, Lookup opitimization
+  Set lookupSet;
+// >>> end
 
   /**
    * The unique id of this state. This value is never used by the algorithms but
