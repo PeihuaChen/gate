@@ -13,11 +13,11 @@ import gate.util.*;
 /** 
   * Documents whose content is text
   */
-public class TextualDocument implements Document
+abstract public class TextualDocument implements Document
 {
 
   /** The contents of the document */
-  public String getContents();
+  public String getContents() { return ""; }
 
   /** Main routine. */
   public static void main(String[] args) {
