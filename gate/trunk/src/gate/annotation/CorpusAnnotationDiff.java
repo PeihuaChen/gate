@@ -1318,7 +1318,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
         if (NULL_TYPE != diffSetElement.getLeftType())
           background = colors[diffSetElement.getLeftType()];
         else return new JPanel();
-      }else{
+      }else if (column < 10){
         if (NULL_TYPE != diffSetElement.getRightType())
           background = colors[diffSetElement.getRightType()];
         else return new JPanel();
