@@ -570,12 +570,12 @@
       </GUI>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Oracle Datastore Viewer</NAME>
+      <NAME>JDBC Datastore Viewer</NAME>
       <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
       <!-- type values can be "large" or "small"-->
       <GUI TYPE="small">
         <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.persist.OracleDataStore</RESOURCE_DISPLAYED>
+        <RESOURCE_DISPLAYED>gate.persist.JDBCDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
     <!-- VR def for gate Syntax Tree Editor/Viewer -->
