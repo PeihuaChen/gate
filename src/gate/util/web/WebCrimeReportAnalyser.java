@@ -155,12 +155,12 @@ public class WebCrimeReportAnalyser {
 
             filePath = app.getInitParameter("files.path");
             
-            URL filesURL = new URL("jar:file:" + filePath + "files.jar!/");
-            try {
-                reg.registerDirectories(filesURL);
-            } catch(GateException e) {
-                System.out.println(e.getMessage());
-            }
+//            URL filesURL = new URL("jar:file:" + filePath + "files.jar!/");
+//            try {
+//                reg.registerDirectories(filesURL);
+//            } catch(GateException e) {
+//                System.out.println(e.getMessage());
+//            }
             
             initCrimeReportAnalyser();
 
@@ -248,7 +248,7 @@ public class WebCrimeReportAnalyser {
         }
         
         AnnotationSet uniqueNamedEntities =
-            new AnnotationSetImpl((Document) null);
+            new AnnotationSetImpl(doc);
         
         uniqueNamedEntities.addAll(sortedAnnotationsNamedEntities);
         
