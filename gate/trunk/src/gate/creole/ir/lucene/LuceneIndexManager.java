@@ -43,15 +43,16 @@ public class LuceneIndexManager implements IndexManager{
     try {
       File file = new File(location);
       if (file.exists()){
-        if (file.isDirectory() || file.list().length>0){
-          throw new IndexException("Directory is not empty");
+        if (file.isDirectory() && file.listFiles().length>0) {
+          throw new IndexException(location+ " is not empty directory");
         }
         if (!file.isDirectory()){
           throw new IndexException("Only empty directory can be index path");
         }
       }
 
-      IndexWriter writer = new IndexWriter(location,(Analyzer) idef.getAnalyzer(), true);
+      IndexWriter writer = new IndexWriter(location,
+                                           new SimpleAnalyzer(), true);
 
       for(int i = 0; i<corpus.size(); i++) {
         gate.Document gateDoc = (gate.Document) corpus.get(i);
@@ -66,7 +67,8 @@ public class LuceneIndexManager implements IndexManager{
 
   public void optimizeIndex() throws IndexException{
     try {
-      IndexWriter writer = new IndexWriter(idef.getIndexLocation(), (Analyzer) idef.getAnalyzer(), false);
+      IndexWriter writer = new IndexWriter(idef.getIndexLocation(),
+                                         new SimpleAnalyzer(), false);
       writer.optimize();
       writer.close();
     } catch (java.io.IOException ioe){
@@ -75,10 +77,19 @@ public class LuceneIndexManager implements IndexManager{
   }
 
   public void deleteIndex() throws IndexException{
-    File file = new File(idef.getIndexLocation());
-    boolean isDeleted = file.delete();
+    boolean isDeleted = true;
+    File dir = new File(idef.getIndexLocation());
+    if (dir.exists() && dir.isDirectory()) {
+      File[] files = dir.listFiles();
+      for (int i =0; i<files.length; i++){
+        File f = files[i];
+        isDeleted = f.delete();
+      }
+    }
+    dir.delete();
     if (!isDeleted) {
-      throw new IndexException("Can't delete directory" + idef.getIndexLocation());
+      throw new IndexException("Can't delete directory"
+                               + idef.getIndexLocation());
     }
   }
 
@@ -91,20 +102,23 @@ public class LuceneIndexManager implements IndexManager{
       for (int i = 0; i<removed.size(); i++) {
         gate.Document gateDoc = (gate.Document) removed.get(i);
         String id = gateDoc.getLRPersistenceId().toString();
-        org.apache.lucene.index.Term term = new org.apache.lucene.index.Term(DOCUMENT_ID,id);
+        org.apache.lucene.index.Term term =
+                               new org.apache.lucene.index.Term(DOCUMENT_ID,id);
         reader.delete(term);
       }//for (remove all removed documents)
 
       for (int i = 0; i<changed.size(); i++) {
         gate.Document gateDoc = (gate.Document) changed.get(i);
         String id = gateDoc.getLRPersistenceId().toString();
-        org.apache.lucene.index.Term term = new org.apache.lucene.index.Term(DOCUMENT_ID,id);
+        org.apache.lucene.index.Term term =
+                               new org.apache.lucene.index.Term(DOCUMENT_ID,id);
         reader.delete(term);
       }//for (remove all changed documents)
 
       reader.close();
 
-      IndexWriter writer = new IndexWriter(location,(Analyzer) idef.getAnalyzer(), false);
+      IndexWriter writer = new IndexWriter(location,
+                                          new SimpleAnalyzer(), false);
 
       for(int i = 0; i<added.size(); i++) {
         gate.Document gateDoc = (gate.Document) added.get(i);
@@ -122,11 +136,13 @@ public class LuceneIndexManager implements IndexManager{
     }
   }
 
-  private org.apache.lucene.document.Document getLuceneDoc(gate.Document gateDoc) {
-    org.apache.lucene.document.Document luceneDoc = new org.apache.lucene.document.Document();
+  private org.apache.lucene.document.Document getLuceneDoc(gate.Document gateDoc){
+    org.apache.lucene.document.Document luceneDoc =
+                                     new org.apache.lucene.document.Document();
     Iterator fields = idef.getIndexFields();
 
-    luceneDoc.add(Field.Keyword(DOCUMENT_ID,gateDoc.getLRPersistenceId().toString()));
+    luceneDoc.add(Field.Keyword(DOCUMENT_ID,
+                                gateDoc.getLRPersistenceId().toString()));
 
     while (fields.hasNext()) {
       IndexField field = (IndexField) fields.next();

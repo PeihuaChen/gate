@@ -18,18 +18,18 @@ import java.util.*;
 
 public class DefaultIndexDefinition implements IndexDefinition{
 
-  private DocumentAnalyzer analyzer;
+  //private DocumentAnalyzer analyzer;
   private List fields;
   private String location;
   private int indexType;
 
-  public DocumentAnalyzer getAnalyzer(){
+  /*public DocumentAnalyzer getAnalyzer(){
     return analyzer;
   }
 
   public void setAnalyzer(DocumentAnalyzer analyzer){
     this.analyzer = analyzer;
-  }
+  }*/
 
   public void setIndexLocation(String location){
     this.location = location;

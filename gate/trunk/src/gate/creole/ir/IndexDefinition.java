@@ -18,12 +18,12 @@ import java.util.Iterator;
 
 public interface IndexDefinition{
 
-  public void setIndexLocation(String location);
-
   public String getIndexLocation();
 
-  public DocumentAnalyzer getAnalyzer();
+  //public DocumentAnalyzer getAnalyzer();
 
   public Iterator getIndexFields();
+
+  public int getIndexType();
 
 }

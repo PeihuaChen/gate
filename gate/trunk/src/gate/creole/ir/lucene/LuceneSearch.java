@@ -49,7 +49,7 @@ public class LuceneSearch implements Search {
 
     try {
       IndexSearcher searcher = new IndexSearcher(indexedCorpus.getIndexDefinition().getIndexLocation());
-      Query luceneQuery = QueryParser.parse(query, null, (Analyzer) indexedCorpus.getIndexDefinition().getAnalyzer());
+      Query luceneQuery = QueryParser.parse(query, null, new SimpleAnalyzer());
 
       Hits hits = searcher.search(luceneQuery);
       int resultlength = hits.length();
@@ -63,7 +63,7 @@ public class LuceneSearch implements Search {
         if (fieldNames != null){
           fieldValues = new Vector();
           for (int j=0; j<fieldNames.size(); j++){
-            fieldValues.add(hits.doc(i).get(fieldNames.get(j).toString()));
+            fieldValues.add(new gate.creole.ir.Term( fieldNames.get(j).toString(), hits.doc(i).get(fieldNames.get(j).toString())));
           }
         }
 

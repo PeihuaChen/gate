@@ -20,12 +20,12 @@ import gate.Document;
 public class QueryResult{
 
   private Object docID;
-  private float relevace;
+  private float relevance;
   private List fieldValues;
 
   public QueryResult(Object docID,float relevance, List fieldValues){
     this.docID = docID;
-    this.relevace = relevace;
+    this.relevance = relevance;
     this.fieldValues = fieldValues;
   }
 
@@ -34,7 +34,7 @@ public class QueryResult{
   }
 
   public float getScore(){
-    return relevace;
+    return relevance;
   }
 
   public List getFields(){
