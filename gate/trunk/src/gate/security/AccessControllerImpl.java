@@ -1186,4 +1186,26 @@ public class AccessControllerImpl
   public void processGateEvent(GateEvent e){
     throw new MethodNotImplementedException();
   }
+
+  /** -- */
+  public boolean isValidSecurityInfo(SecurityInfo si) {
+
+    switch(si.getAccessMode()) {
+
+      case SecurityInfo.ACCESS_WR_GW:
+      case SecurityInfo.ACCESS_GR_GW:
+        return (null != si.getGroup());
+
+      case SecurityInfo.ACCESS_GR_OW:
+        return (null != si.getGroup() &&
+                null != si.getUser());
+
+      case SecurityInfo.ACCESS_OR_OW:
+        return (null != si.getUser());
+
+      default:
+        throw new IllegalArgumentException();
+    }
+  }
+
 }
