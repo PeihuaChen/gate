@@ -602,9 +602,29 @@ public class OracleDataStore extends JDBCDataStore {
 
   /** --- */
   protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
-    throws SQLException {
+    throws SQLException, IOException {
 
-    throw new MethodNotImplementedException();
+    //preconditions
+    Assert.assertNotNull(src);
+
+    //1. get Oracle CLOB
+    CLOB clo = (CLOB)dest;
+
+    //2. get Unicode stream
+    Writer output = clo.getCharacterOutputStream();
+
+    //3. write
+    BufferedWriter buffOutput = new BufferedWriter(output,INTERNAL_BUFFER_SIZE);
+    buffOutput.write(src.toString());
+
+    //4. flushing is a good idea [although BufferedWriter::close() calls it this is
+    //implementation specific]
+    buffOutput.flush();
+    output.flush();
+
+    //5.close streams
+    buffOutput.close();
+    output.close();
   }
 
 }
