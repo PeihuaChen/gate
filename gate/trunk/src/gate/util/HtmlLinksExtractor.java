@@ -24,6 +24,10 @@ import java.io.*;
 
 /**
  * This class extracts links from HTML files.
+ * <B>It has been hacked</B> to build the contents of
+ * <A HREF="http://gate.ac.uk/sitemap.html">http://gate.ac.uk/sitemap.html</A>;
+ * you <B>probably don't want to use it</B> for anything else!
+ * <P>
  * Implements the behaviour of the HTML reader.
  * Methods of an object of this class are called by the HTML parser when
  * events will appear.
@@ -36,6 +40,18 @@ public class HtmlLinksExtractor extends ParserCallback {
   /** The tag currently being processed */
   private HTML.Tag currentTag = null;
 
+  /** whether we've done a title before */
+  static boolean firstTitle = true;
+
+  /** will contain &lt;/UL&gt; after first title */
+  static String endUl = "";
+
+  /** Name of the file we're currently processing */
+  static String currFile = "";
+
+  /** Path to the file we're currently processing */
+  static String currPath = "";
+
   /** This method is called when the HTML parser encounts the beginning
     * of a tag that means that the tag is paired by an end tag and it's
     * not an empty one.
@@ -44,15 +60,33 @@ public class HtmlLinksExtractor extends ParserCallback {
 
     currentTag = t;
     if (HTML.Tag.A == t){
-      Out.pr("<" + t);
-      printAttributes(a);
+      Out.pr("<LI><" + t);
+      String href = "";
+      Enumeration e = a.getAttributeNames();
+      while(e.hasMoreElements()) {
+        HTML.Attribute name = (HTML.Attribute) e.nextElement();
+        String value = (String) a.getAttribute(name);
+
+        if(name == HTML.Attribute.HREF) {
+          if(
+            value.startsWith("http:") || value.startsWith("HTTP:") ||
+            value.startsWith("file:") || value.startsWith("FILE:") ||
+            value.startsWith("mailto:") || value.startsWith("MAILTO:") ||
+            value.startsWith("ftp:") || value.startsWith("FTP:")
+          )
+            Out.pr(" HREF=\"" + value + "\"");
+          else { // if it is a relative path....
+            Out.pr(" HREF=\"" + currPath + "/" + value + "\"");
+          }
+        }
+      } // while
+
       Out.pr(">");
     }// End if
 
-    if (HTML.Tag.H1 == t){
-      Out.pr("<" + t);
-      printAttributes(a);
-      Out.pr(">");
+    if (HTML.Tag.TITLE == t){
+      Out.pr(endUl + "<H3>");
+      if(firstTitle) { firstTitle = false; endUl = "</UL>"; }
     }// End if
 
   }//handleStartTag
@@ -78,8 +112,11 @@ public class HtmlLinksExtractor extends ParserCallback {
 
     if (HTML.Tag.A == t)
       Out.pr("</"+t+">\n");
-    if (HTML.Tag.H1 == t)
-      Out.pr("</"+t+">\n");
+    if (HTML.Tag.TITLE == t)
+      Out.pr(
+        "</H3></A>\n\n<P>Links in: <A HREF=\"" + currFile +
+        "\">" + currFile + "</A>:\n<UL>\n"
+      );
 
   }//handleEndTag
 
@@ -92,7 +129,7 @@ public class HtmlLinksExtractor extends ParserCallback {
       Out.pr("/>\n");
     }// End if
 
-    if (HTML.Tag.H1 == t){
+    if (HTML.Tag.TITLE == t){
       Out.pr("<"+t);
       printAttributes(a);
       Out.pr("/>\n");
@@ -108,7 +145,7 @@ public class HtmlLinksExtractor extends ParserCallback {
       Out.pr(tagText);
     }// End if
 
-    if(HTML.Tag.H1 == currentTag){
+    if(HTML.Tag.TITLE == currentTag){
       //text of tag A
       String tagText = new String(text);
       Out.pr(tagText);
@@ -164,8 +201,13 @@ public class HtmlLinksExtractor extends ParserCallback {
       File tmpFile = new File(aFile.getPath()+"\\"+fileList[i]);
       if (tmpFile.isDirectory()){
         // If the file is not included
-        if (!foldersToIgnore.contains(fileList[i]))
+        if (!foldersToIgnore.contains(tmpFile.getName())) {  //fileList[i])) {
+          if(DEBUG) {
+            Err.prln("adding dir: " + tmpFile);
+            Err.prln("  name: " + tmpFile.getName());
+          }
           foldersToExplore.add(tmpFile);
+        }
       }else{
         // only process .html files
         if(
@@ -202,11 +244,15 @@ public class HtmlLinksExtractor extends ParserCallback {
       foldersToIgnore.add(args[i]);
 
     List htmlFileNames = listAllFiles(htmlFolder,foldersToIgnore);
+    //Collections.sort(htmlFileNames);
     while (!htmlFileNames.isEmpty()){
       try{
         String htmlFileName = (String) htmlFileNames.get(0);
+        currFile = htmlFileName;
+        currPath = new File(currFile).getParent().toString();
         htmlFileNames.remove(0);
 
+        Out.prln("\n\n<A HREF=\"file://" + htmlFileName + "\">");
         Reader reader = new FileReader(htmlFileName);
         // parse the HTML document
         parser.parse(reader, htmlDocHandler, true);
