@@ -143,6 +143,9 @@ create or replace package persist is
 
   procedure unlock_lr(p_lr_id     IN  number,
                       p_usr_id    IN number);
+
+  procedure add_document_to_corpus(p_doc_lrid     IN  number,
+                                   p_corp_lrid    IN number);
                                 
 end persist;
 /

@@ -840,6 +840,49 @@ create or replace package body persist is
   end;
 
 
+  /*******************************************************************************************/
+  procedure add_document_to_corpus(p_doc_lrid     IN  number,
+                                   p_corp_lrid    IN number)
+  is
+    cnt       number;
+    l_corp_id number;
+    l_doc_id  number;
+  begin
+  
+     --1. get the doc_id
+     select doc_id
+     into   l_doc_id
+     from   t_document
+     where  doc_lr_id = p_doc_lrid;
+     
+     --2. get the corpus ID
+     select corp_id
+     into   l_corp_id
+     from   t_corpus
+     where  corp_lr_id = p_corp_lrid;
+     
+     --3. check if the document is not part of the corpus already
+     select count(*)
+     into   cnt
+     from   t_corpus_document
+     where  cd_corp_id = l_corp_id
+            and cd_doc_id = l_doc_id;
+            
+     if (cnt = 0) then
+        --4. no such entry, add one
+        insert into t_corpus_document(cd_id,
+                                      cd_corp_id,
+                                      cd_doc_id)
+        values (seq_corpus_document.nextval,
+                l_corp_id,
+                l_doc_id);                
+     end if;
+     
+     exception
+        when NO_DATA_FOUND then
+           raise error.x_invalid_lr;
+
+  end;
 
 
     
