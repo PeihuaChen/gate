@@ -18,6 +18,7 @@ package gate.persist;
 import java.sql.*;
 import java.net.*;
 import java.util.*;
+import java.io.*;
 
 import gate.*;
 import gate.util.*;
@@ -36,12 +37,12 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** --- */
   protected Connection  jdbcConn;
-  private   String         dbURL;
+  private   String      dbURL;
   private   String      driverName;
 
-  protected   AccessController ac;
-  protected   Session          session;
-
+  protected   AccessController  ac;
+  protected   Session           session;
+  protected   String            name;
 
   //!!! ACHTUNG !!!
   // these 4 constants should *always* be synchronzied with the ones in the
@@ -404,5 +405,22 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
     return name;
   }
 
-  protected String name;
+
+
+
+  /** --- */
+  protected void readCLOB(java.sql.Clob src, StringBuffer dest)
+    throws SQLException, IOException {
+
+    throw new MethodNotImplementedException();
+  }
+
+
+  /** --- */
+  protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
+    throws SQLException {
+
+    throw new MethodNotImplementedException();
+  }
+
 }
