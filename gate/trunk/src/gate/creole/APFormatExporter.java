@@ -343,6 +343,13 @@ public class APFormatExporter extends AbstractLanguageAnalyser
   /** This method serializes an entity attribute from an Annotation*/
   private void serializeAnEntityAttributes(Annotation ann){
     if (ann == null) return;
+    boolean isAttribute = false;
+    if ("NAME".equals(ann.getFeatures().get("ENTITY_MENTION_TYPE"))
+        ||
+       null == ann.getFeatures().get("ENTITY_MENTION_TYPE"))
+      isAttribute = true;
+    if (! isAttribute)
+      return;
 
     // name
     xmlDoc.append("        <name>\n");
