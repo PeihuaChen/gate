@@ -314,6 +314,11 @@ public class AccessControllerImpl
         pstmt.setString(1,name);
         pstmt.execute();
         rs = pstmt.getResultSet();
+
+        if (false == rs.next()) {
+          throw new PersistenceException("empty resultset");
+        }
+
         new_id = new Long(rs.getLong(1));
       }
       catch(SQLException sqle) {
