@@ -197,6 +197,8 @@
     <javac classpathref="build.class.path"
            destdir="${outputDir}" 
            includes="guk/**" 
+           debug="true"
+           debuglevel="lines,source"
            source="1.4"
            srcdir="${srcDir}"/>
 		<jar destfile="${libDir}/ext/guk.jar" 
@@ -217,6 +219,8 @@
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
            source="1.4"
+           debug="true"
+           debuglevel="lines,source"
            includes="gate/**,com/**,debugger/**"
 					 classpathref="build.class.path"/>
   </target>
