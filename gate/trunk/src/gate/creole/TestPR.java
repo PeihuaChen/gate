@@ -343,6 +343,18 @@ public class TestPR extends TestCase
     // verify if the saved data store is the same with the just processed file
     // first document
     String urlBaseName = Gate.locateGateFiles();
+    if (urlBaseName.endsWith("/gate/build/gate.jar!/")) {
+      StringBuffer buff = new StringBuffer(
+                            urlBaseName.substring(
+                              0,
+                              urlBaseName.lastIndexOf("build/gate.jar!/"))
+                            );
+      buff.append("classes/");
+      buff.delete(0, "jar:file:".length());
+      buff.insert(0, "file://");
+      urlBaseName = buff.toString();
+    }
+
     URL urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");
     URL storageDir = null;
     storageDir = new URL(urlBase, "tests/ft");
