@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 22/02/2000
  *
  *  $Id$
@@ -29,6 +29,18 @@ public class Strings {
 
   /** Get local fashion for newlines. */
   public static String getNl() { return newline; }
+
+  /** Local fashion for path separators. */
+  private static String pathSep = System.getProperty("path.separator");
+
+  /** Get local fashion for path separators (e.g. ":"). */
+  public static String getPathSep() { return pathSep; }
+
+  /** Local fashion for file separators. */
+  private static String fileSep = System.getProperty("file.separator");
+
+  /** Get local fashion for file separators (e.g. "/"). */
+  public static String getFileSep() { return fileSep; }
 
   /** Add n pad characters to pad. */
   public static String addPadding(String pad, int n) {
