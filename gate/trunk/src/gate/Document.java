@@ -21,7 +21,7 @@ public interface Document
   /** The annotation graphs for this document in a map indexed by id*/
   public Map getAnnotationGraphs();
 
-  public AnnotationGraph getAnnotationGraph(String id);
+  public AnnotationGraph getAnnotationGraph(Long id);
   /** The features of this document */
   public FeatureSet getFeatureSet();
 
@@ -29,9 +29,9 @@ public interface Document
   *textual documents*/
   public double getLength();
   /**Creates a new empty annotation graph associated with this document and returns it.*/
-  public AnnotationGraph newAnnotationGraph(String id);
+  public AnnotationGraph newAnnotationGraph(Long id);
 
-  public String getId();
+  public Long getId();
 
   public Object getContent();
 

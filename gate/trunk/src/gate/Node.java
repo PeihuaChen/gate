@@ -15,7 +15,7 @@ import gate.util.*;
 public interface Node
 {
   /** Id */
-  public String getId();
+  public Long getId();
 
   /** Offset (will be null when the node is not anchored) */
   public Double getOffset();

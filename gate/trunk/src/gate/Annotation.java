@@ -43,7 +43,7 @@ public interface Annotation {
   /** The stereotype associated with this annotation. */
   public AnnotationStereotype getStereotype();
 
-  public String getId();
+  public Long getId();
 
 //  /** Does this annotation structurally include a? */
 //  public boolean sIncludes(Annotation a);
