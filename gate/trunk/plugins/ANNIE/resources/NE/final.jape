@@ -17,18 +17,28 @@
 Phase:	Final
 Options: control = appelt
 
+
 ///////////////////////////////////////////////////////////////
 
-
 Rule: PersonFinal
-Priority: 10
+Priority: 30
 (
  {TempPerson.kind == personName}
 )
 :person
 --> 
-:person.Person = {rule = "PersonFinal"}
-
+{
+//removes  TempPerson annotation, gets the rule feature and adds a new Person annotation
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("gender"));
+features.put("rule1", personAnn.getFeatures().get("rule"));
+features.put("rule2", "PersonFinal");
+annotations.add(person.firstNode(), person.lastNode(), "Person",
+features);
+annotations.removeAll(person);
+}
 
 
 Rule:	OrgCountryFinal
@@ -56,8 +66,21 @@ Priority: 50
 )
 :org
 -->
-  :org.Organization = {rule = "OrgCountryFinal"}
+{
+//removes TempOrg annotation, gets the rule feature and adds a new Org annotation
+gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
+gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", orgAnn.getFeatures().get("rule"));
+features.put("rule2", "OrgCountryFinal");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
+ 
 
+
+//note - move this rule to after final
 
 Rule: OrgFinal
 Priority: 10
@@ -66,9 +89,46 @@ Priority: 10
 )
 :org
 --> 
-:org.Organization = {rule = "OrgFinal"}
+{
+//removes TempOrg annotation, gets the rule feature and adds a new Org annotation
+gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
+gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", orgAnn.getFeatures().get("rule"));
+features.put("rule2", "OrgFinal");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 
+Rule: PersonLocFinal
+Priority: 100
+// George Airport
+// later we might change this to any facility, rather than just airports
+
+(
+ {TempPerson}
+ (SPACE)
+ ({Token.string == "airport"} |
+  {Token.string == "Airport"})
+)
+:loc
+-->
+ {
+//removes TempLoc annotation, gets the rule feature and adds a new Loc annotation
+gate.AnnotationSet loc = (gate.AnnotationSet)bindings.get("loc");
+gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", locAnn.getFeatures().get("rule"));
+features.put("rule2", "PersonLocFinal");
+annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+features);
+annotations.removeAll(loc);
+}
+
+
+ 
 Rule: LocFinal
 Priority: 10
 (
@@ -76,38 +136,22 @@ Priority: 10
 )
 :loc
 --> 
-:loc.Location = {rule = "LocFinal"}
+ {
+//removes TempLoc annotation, gets the rule feature and adds a new Loc annotation
+gate.AnnotationSet loc = (gate.AnnotationSet)bindings.get("loc");
+gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", locAnn.getFeatures().get("rule"));
+features.put("rule2", "LocFinal");
+annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+features);
+annotations.removeAll(loc);
+}
+
 
 //////////////////////////////////////////////////////////////
 // Rules from Timex
 
-//Date Only Rules
-
-Rule: DateOnlyFinal
-Priority: 10
-(
- {TempDate}
-)
-:date 
--->
- :date.Date = {kind = "date", rule = "DateOnlyFinal"}
-
-Rule: DateYearFinal
-Priority: 10
-(
- {TempDate}
- (
- ({Token.string == ","})?
- SPACE {TempDate})?
- SPACE
- {TempYear}
- (SPACE {TempDate})?
-)
-:date
--->
- :date.Date = {kind = "date", rule = "DateYearFinal"}
-
-// Date + Time Rules
 
 Rule: DateTimeFinal
 Priority: 20
@@ -125,7 +169,70 @@ Priority: 20
 )
 :date
 -->
- :date.Date = {kind = "dateTime", rule = "DateTimeFinal"}
+ {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "DateTimeFinal");
+features.put("kind", "dateTime");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
+
+
+Rule: SeasonYearFinal
+Priority: 15
+(
+ ({Token.string == "spring"} |
+  {Token.string == "Spring"})
+ (SPACE)
+ {TempYear.kind == positive}
+)
+:date
+-->
+ {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "SeasonYearFinal");
+features.put("kind", "date");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
+
+
+Rule: DateYearFinal
+Priority: 10
+(
+ {TempDate}
+ (
+ ({Token.string == ","})?
+ SPACE {TempDate})?
+ SPACE
+ {TempYear}
+ (SPACE {TempDate})?
+)
+:date
+-->
+ {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "DateYearFinal");
+features.put("kind", "date");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
+
 
 Rule: TimeDateFinal
 Priority: 10
@@ -140,7 +247,18 @@ Priority: 10
 )
 :date
 -->
- :date.Date = {kind = "dateTime", rule = "TimeDateFinal"}
+ {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "TimeDateFinal");
+features.put("kind", "dateTime");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
 
 
 Rule: TimeYearFinal
@@ -155,41 +273,44 @@ Priority: 10
 )
 :date
 -->
- :date.Date = {kind = "dateTime", rule = "TimeYearFinal"}
+  {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "TimeYearFinal");
+features.put("kind", "dateTime");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
 
 
-Rule: SeasonYearFinal
-Priority: 15
-(
- ({Token.string == "spring"} |
-  {Token.string == "Spring"})
- (SPACE)
- {TempYear.kind == positive}
-)
-:date
--->
- :date.Date = {kind = "date", rule = "SeasonYearFinal"}
+//Date Only Rules
 
-Rule: YearOnlyFinal
+
+Rule: DateOnlyFinal
 Priority: 10
 (
- {TempYear.kind == positive}
+ {TempDate}
 )
-:date
+:date 
 -->
- :date.Date = {kind = "date", rule = "YearOnlyFinal"}
+ {
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "DateOnlyFinal");
+features.put("kind", "date");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
 
-
-Rule: TimeOnlyFinal
-Priority: 10
-(
- {TempTime.kind == positive}
-)
-:date
--->
- :date.Date = {kind = "time", rule = "TimeOnlyFinal"}
-
-
+//fix this later
 Rule: TimeContextFinal
 Priority: 10
 // Wednesday [mdash ] 8-15
@@ -220,9 +341,43 @@ Priority: 50
  (SPACE)
  {TempTime.kind == positive}
 )
-:time
+:date
 -->
-  :time.Date = {kind = "time", rule = TimeWordsContextFinal}
+ {
+//removes TempTime annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "TimeWordsContextFinal");
+features.put("kind", "time");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
+
+
+Rule: YearOnlyFinal
+Priority: 10
+(
+ {TempYear.kind == positive}
+)
+:date
+--> 
+{
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "YearOnlyFinal");
+features.put("kind", "date");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
+
+
 
 Rule: TimeOnlyFinal
 Priority: 10
@@ -231,7 +386,18 @@ Priority: 10
 )
 :date
 -->
- :date.Date = {kind = "time", rule = "TimeOnlyFinal"}
+{
+//removes TempDate annotation, gets the rule feature and adds a new Date annotation
+gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", dateAnn.getFeatures().get("rule"));
+features.put("rule2", "TimeOnlyFinal");
+features.put("kind", "time");
+annotations.add(date.firstNode(), date.lastNode(), "Date",
+features);
+annotations.removeAll(date);
+}
 
 
 ////////////////////////////////////////////////////////////
@@ -239,17 +405,30 @@ Rule: AddressFull
 Priority: 100
 (
  ({Street}
- {Token.string == ","})? (SPACE)*
+  (SPACE)?
+  {Token.string == ","})? (SPACE)*
  ({TempLocation} 
-  ({Token.string == ","})? (SPACE)*
+ (SPACE)? 
+ ({Token.string == ","})? (SPACE)*
  )+
  ({Postcode})
  ({Token.string == ","})? (SPACE)*
- ({TempLocation})?
+ ({TempLocation})*
 )
 :address
 -->
- :address.Address = {kind = "complete", rule = "AddressFull"}
+{
+//removes TempAddress annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "AddressFull");
+features.put("kind", "complete");
+annotations.add(address.firstNode(), address.lastNode(), "Address",
+features);
+annotations.removeAll(address);
+}
 
 
 Rule: EmailFinal
@@ -259,7 +438,18 @@ Priority: 50
 )
 :address
 -->
- :address.Address = {kind = "email", rule = "EmailFinal"}
+{
+//removes Email annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "EmailFinal");
+features.put("kind", "email");
+annotations.add(address.firstNode(), address.lastNode(), "Address",
+features);
+annotations.removeAll(address);
+}
 
 
 Rule: PhoneFinal
@@ -269,7 +459,18 @@ Priority: 50
 )
 :address
 -->
- :address.Address = {kind = "phone", rule = "PhoneFinal"}
+{
+//removes TempAddress annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "PhoneFinal");
+features.put("kind", "phone");
+annotations.add(address.firstNode(), address.lastNode(), "Address",
+features);
+annotations.removeAll(address);
+}
 
 
 Rule: PostcodeFinal
@@ -279,7 +480,18 @@ Priority: 50
 )
 :address
 -->
- :address.Address = {kind = "postcode", rule = "PostcodeFinal"}
+{
+//removes TempAddress annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "PostcodeFinal");
+features.put("kind", "postcode");
+annotations.add(address.firstNode(), address.lastNode(), "Address",
+features);
+annotations.removeAll(address);
+}
 
 
 Rule: IpFinal
@@ -289,7 +501,18 @@ Priority: 50
 )
 :address
 -->
- :address.Address = {kind = "ip", rule = "IpFinal"}
+{
+//removes TempAddress annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "IpFinal");
+features.put("kind", "ip");
+annotations.add(address.firstNode(), address.lastNode(), "Address",
+features);
+annotations.removeAll(address);
+}
 
 
 Rule: UrlFinal
@@ -299,17 +522,39 @@ Priority: 50
 )
 :address
 -->
- :address.Address = {kind = "url", rule = "UrlFinal"}
+{
+//removes TempAddress annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "UrlFinal");
+features.put("kind", "url");
+annotations.add(address.firstNode(), address.lastNode(), "Address",
+features);
+annotations.removeAll(address);
+}
 
 
 Rule: StreetFinal
+//make streets locations
 Priority: 50
 (
 {Street}
 )
 :address
 -->
- :address.Address = {kind = "street", rule = "StreetFinal"}
+{
+//removes TempAddress annotation, gets the rule feature and adds a new Address annotation
+gate.AnnotationSet address = (gate.AnnotationSet)bindings.get("address");
+gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", addressAnn.getFeatures().get("rule"));
+features.put("rule2", "StreetFinal");
+annotations.add(address.firstNode(), address.lastNode(), "Location",
+features);
+annotations.removeAll(address);
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -322,10 +567,38 @@ Priority: 10
 )
 :ident
 -->
- :ident.Identifier = {rule = "IdentifierFinal"}
+{
+//removes TempIdent annotation, gets the rule feature and adds a new Identifier annotation
+gate.AnnotationSet ident = (gate.AnnotationSet)bindings.get("ident");
+gate.Annotation identAnn = (gate.Annotation)ident.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", identAnn.getFeatures().get("rule"));
+features.put("rule2", "IdentifierFinal");
+annotations.add(ident.firstNode(), ident.lastNode(), "Identifier",
+features);
+annotations.removeAll(ident);
+}
+
+
+
+// this gets used when specs rule for emails is fired (in eml-final.jape) 
+
+Rule: SpecsFinal
+Priority: 1000
+
+(
+ {TempSpecs}
+):spec
+-->
+{
+//removes TempSpecs annotation
+gate.AnnotationSet spec = (gate.AnnotationSet)bindings.get("spec");
+//gate.FeatureMap features = Factory.newFeatureMap();
+annotations.removeAll(spec);
+}
 
 //////////////////////////////////////////////////////
-Rule: UnknownTempPerson
+Rule: UnknownPerson
 Priority: 5
 ( 
  {Token.category == NNP}
@@ -337,19 +610,19 @@ Priority: 5
  {TempPerson}
 ):person
 -->
- :unknown.Unknown = {kind = "PN", rule = UnknownTempPerson},
- :person.Person = {rule = UnknownTempPerson}
-
-Rule:Unknown
-( 
- {Token.category == NNP}
-// ((SPACE|{Token.string == "-"})
-// {Token.category == NNP})*
-) 
-:unknown
--->
- :unknown.Unknown = {kind = "PN", rule = Unknown}
-
+:unknown.Unknown = {kind = "PN", rule = UnknownTempPerson},
+{
+//removes TempPerson annotation, gets the rule feature and adds a new Person annotation
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("gender"));
+features.put("rule1", personAnn.getFeatures().get("rule"));
+features.put("rule2", "UnknownPerson");
+annotations.add(person.firstNode(), person.lastNode(), "Person",
+features);
+annotations.removeAll(person);
+}
 
 
 
