@@ -481,6 +481,12 @@ public class ApplicationViewer extends AbstractVisualResource {
           }
         }
       }else if (value instanceof ParameterDisjunction){
+        Icon icon = new ImageIcon(getClass().
+                                  getResource("/gate/resources/img/param.gif"));
+        setOpenIcon(icon);
+        setClosedIcon(icon);
+        setLeafIcon(icon);
+
         ParameterDisjunction pd = (ParameterDisjunction)value;
         text =  pd.getName();
         if(pd.size() > 1) text+=" [more...]";

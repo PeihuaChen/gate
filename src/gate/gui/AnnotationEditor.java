@@ -56,7 +56,6 @@ public class AnnotationEditor extends AbstractVisualResource{
    * A set of {@link gate.annotation.AnnotationSchema} objects describing the
    * types of annotations that this editor should be aware of.
    */
-  private java.util.Set annotationSchemas;
 
   /**
    * A random colour generator used to generate initial default colours for
@@ -235,7 +234,6 @@ public class AnnotationEditor extends AbstractVisualResource{
          Factory.createResource("gate.creole.AnnotationSchema", params);
       Set annotationSchemas = new HashSet();
       annotationSchemas.add(annotSchema);
-      editor.setAnnotationSchemas(annotationSchemas);
 
     }catch(Exception e){
       e.printStackTrace(System.err);
@@ -427,13 +425,13 @@ public class AnnotationEditor extends AbstractVisualResource{
             //there is selected text -> create a new annotation
             int start = textPane.getSelectionStart();
             int end = textPane.getSelectionEnd();
-            if(annotationSchemas != null &&
-               !annotationSchemas.isEmpty()){
+            if(getAnnotationSchemas() != null &&
+               !getAnnotationSchemas().isEmpty()){
               JPopupMenu popup = new JPopupMenu();
               //Add to the default AnnotationSet
               JMenu menu = new JMenu("Add to <Default>");
 
-              Iterator schemasIter = annotationSchemas.iterator();
+              Iterator schemasIter = getAnnotationSchemas().iterator();
               while(schemasIter.hasNext()){
                 AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
                 menu.add(new NewAnnotationPopupItem(start, end, schema,
@@ -448,7 +446,7 @@ public class AnnotationEditor extends AbstractVisualResource{
                 while(asIter.hasNext()){
                   AnnotationSet as = (AnnotationSet)asIter.next();
                   menu = new JMenu("Add to " + as.getName());
-                  schemasIter = annotationSchemas.iterator();
+                  schemasIter = getAnnotationSchemas().iterator();
                   while(schemasIter.hasNext()){
                     AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
                     menu.add(new NewAnnotationPopupItem(start, end, schema, as));
@@ -460,7 +458,7 @@ public class AnnotationEditor extends AbstractVisualResource{
 
               //Add to a new AnnotationSet
               menu = new JMenu("Add to new annotation set");
-              schemasIter = annotationSchemas.iterator();
+              schemasIter = getAnnotationSchemas().iterator();
               while(schemasIter.hasNext()){
                 AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
                 menu.add(new NewAnnotationPopupItem(start, end, schema, null));
@@ -632,6 +630,16 @@ public class AnnotationEditor extends AbstractVisualResource{
     validate();
   }
 
+  protected Set getAnnotationSchemas(){
+    Set result = new HashSet();
+    ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                            get("gate.creole.AnnotationSchema");
+    if(rData != null){
+      result.addAll(rData.getInstantiations());
+    }
+    return result;
+  }
+
   public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
     super.removePropertyChangeListener(l);
     propertyChangeListeners.removePropertyChangeListener(l);
@@ -672,21 +680,11 @@ public class AnnotationEditor extends AbstractVisualResource{
    * this editor for editing or adding new annotations.
    * @param a {@link java.util.Set} of {@link gate.creole.AnnotationSchema}s
    */
-  public void setAnnotationSchemas(java.util.Set newAnnotationSchemas) {
-    java.util.Set  oldAnnotationSchemas = annotationSchemas;
-    annotationSchemas = newAnnotationSchemas;
-    propertyChangeListeners.firePropertyChange("annotationSchemas",
-                                               oldAnnotationSchemas,
-                                               newAnnotationSchemas);
-  }
 
   /**
    * Gets the current set of known annotation schemas.
    * @return a {@link java.util.Set} of {@link gate.creole.AnnotationSchema}s
    */
-  public java.util.Set getAnnotationSchemas() {
-    return annotationSchemas;
-  }
 
   /**
    * If set to true the annotations table will be shown. The default value is
@@ -1681,6 +1679,7 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
     public void actionPerformed(ActionEvent e){
       if(!editable) return;
       //find an appropiate schema
+      Set annotationSchemas = getAnnotationSchemas();
       if(annotationSchemas != null && !annotationSchemas.isEmpty()){
         Iterator schemasIter = annotationSchemas.iterator();
         boolean done = false;
