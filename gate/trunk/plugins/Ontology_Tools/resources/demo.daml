@@ -1,0 +1,48 @@
+<?xml version='1.0'?>
+<rdf:RDF
+    xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+    xmlns:daml='http://www.daml.org/2001/03/daml+oil#'
+    xmlns:rdfs='http://www.w3.org/2000/01/rdf-schema#'>
+    <daml:Ontology rdf:about='gate:/creole/ontology/demo.daml#demo'
+         daml:versionInfo=''
+         rdfs:label='demo'
+         rdfs:comment=''/>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#male_person_first_name'
+         rdfs:label='male_person_first_name'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#person_first_name</rdfs:subClassOf>
+    </rdfs:Class>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#male_person_first_name_lower_case'
+         rdfs:label='male_person_first_name_lower_case'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#male_person_first_name</rdfs:subClassOf>
+    </rdfs:Class>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#person_name'
+         rdfs:label='person_name'
+         rdfs:comment=''/>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#female_person_first_name_lower_case'
+         rdfs:label='female_person_first_name_lower_case'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#female_person_first_name</rdfs:subClassOf>
+    </rdfs:Class>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#person_first_name'
+         rdfs:label='person_first_name'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#person_name</rdfs:subClassOf>
+    </rdfs:Class>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#male_person_first_name_upper_case'
+         rdfs:label='male_person_first_name_upper_case'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#male_person_first_name</rdfs:subClassOf>
+    </rdfs:Class>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#female_person_first_name'
+         rdfs:label='female_person_first_name'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#person_first_name</rdfs:subClassOf>
+    </rdfs:Class>
+    <rdfs:Class rdf:about='gate:/creole/ontology/demo.daml#female_person_first_name_upper_case'
+         rdfs:label='female_person_first_name_upper_case'
+         rdfs:comment=''>
+        <rdfs:subClassOf>gate:/creole/ontology/demo.daml#female_person_first_name</rdfs:subClassOf>
+    </rdfs:Class>
+</rdf:RDF>
