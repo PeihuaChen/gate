@@ -56,8 +56,9 @@ class SystemData
     // create the controller
     try {
       FeatureMap controllerParams = Factory.newFeatureMap();
-      controllerParams.put("resourceList", prList);
-      Factory.createResource(controllerTypeName, controllerParams);
+      Collection controller = (Collection)
+        Factory.createResource(controllerTypeName, controllerParams);
+      controller.addAll(prList);
     } catch(ResourceInstantiationException e) {
       throw new GateSaxException(
         "Couldn't create controller for SYSTEM: " +

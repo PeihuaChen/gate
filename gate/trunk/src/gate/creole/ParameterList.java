@@ -49,6 +49,8 @@ public class ParameterList
   } // getInitimeParameters()
 
   /** Add a parameter disjunction.
+    * It is assumed that the parameters in a disjunction are all runtime
+    * or all init-time, never a mix of the two.
     * @exception NoSuchElementException disjunction has no more elements.
     */
   public boolean add(List disjunction) {
@@ -145,6 +147,41 @@ public class ParameterList
 
     return defaults;
   } // getDefaults()
+
+
+// this stuff is for if we decide to do more thorough checking
+// of parameterisation in Factory.createResource... but at present
+// the gui checks pretty well so...
+//
+//  /** Analyse a parameter-value feature map and return a list
+//    * of init time parameter disjunctions that are unset.
+//    */
+//  public List getUnsetInitimeParameters(FeatureMap paramValues) {
+//    List unsetDisj = new ArrayList();
+//
+//    // for each init disj,
+//    //   for each param,
+//    //     if there's no value in paramValues
+//    //       add this disj to rtnValue,
+//    //       continue disjLoop
+//  } // getUnsetInitimeParameters(paramValues)
+//
+//  /** Analyse a parameter-value feature map and return a list
+//    * of runtime parameter disjunctions that are unset.
+//    */
+//  public List getUnsetRuntimeParameters(FeatureMap paramValues) {
+//  } // getUnsetRuntimeParameters(paramValues)
+//
+//  public List getUnsetInitimeParameters(
+//    FeatureMap paramValues, boolean includeOptional
+//  ) {
+//  } // getUnsetInitimeParameters(paramValues, includeOptional)
+//
+//  public List getUnsetRuntimeParameters(
+//    FeatureMap paramValues, boolean includeOptional
+//  ) {
+//  } // getUnsetRuntimeParameters(paramValues, includeOptional)
+//
 
   /** Status of the last run of <TT>getDefaults(List)</TT>. */
   protected boolean fullyDefaulted = false;

@@ -49,7 +49,9 @@ public class TestPersist extends TestCase
   /** Test resource save and restore */
   public void testSaveRestore() throws Exception {
     File storageDir = File.createTempFile("TestPersist__", "__StorageDir");
-    storageDir.delete();
+    storageDir.delete(); // get rid of the temp file
+    storageDir.mkdir(); // create an empty dir of same name
+
     SerialDataStore sds = new SerialDataStore(storageDir.toURL());
     sds.create();
     sds.open();

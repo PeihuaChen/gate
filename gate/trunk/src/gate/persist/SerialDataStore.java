@@ -80,13 +80,17 @@ extends AbstractFeatureBearer implements DataStore {
     if(storageDir == null)
       throw new PersistenceException("null storage directory: cannot create");
 
-    if(storageDir.exists())
-      throw new PersistenceException(
-        "directory " + storageDir + " exists: cannot create"
-      );
-
-    if(! storageDir.mkdir())
-      throw new PersistenceException("cannot create directory " + storageDir);
+    if(! storageDir.exists()) { // if doesn't exist create it
+      if(! storageDir.mkdir())
+        throw new
+          PersistenceException("cannot create directory " + storageDir);
+    } else { // must be empty
+      String[] existingFiles = storageDir.list();
+      if(! (existingFiles == null || existingFiles.length == 0) )
+        throw new PersistenceException(
+          "directory "+ storageDir +" is not empty: cannot use for data store"
+        );
+    }
   } // create()
 
   /** Delete the data store.
