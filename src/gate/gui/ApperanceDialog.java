@@ -13,6 +13,7 @@ import javax.swing.JDialog;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
@@ -235,9 +236,9 @@ public class ApperanceDialog extends JDialog {
     }
 
     public void actionPerformed(ActionEvent evt) {
-      setUIDefaults(menuKeys, menusFont);
-      setUIDefaults(componentsKeys, componentsFont);
-      setUIDefaults(textComponentsKeys, textComponentsFont);
+      setUIDefaults(menuKeys, new FontUIResource(menusFont));
+      setUIDefaults(componentsKeys, new FontUIResource(componentsFont));
+      setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
       SwingUtilities.updateComponentTreeUI(ApperanceDialog.this);
       SwingUtilities.updateComponentTreeUI(ApperanceDialog.this.getOwner());
     }
@@ -260,9 +261,9 @@ public class ApperanceDialog extends JDialog {
     }
 
     public void actionPerformed(ActionEvent evt){
-      setUIDefaults(menuKeys, oldMenusFont);
-      setUIDefaults(componentsKeys, oldComponentsFont);
-      setUIDefaults(textComponentsKeys, oldTextComponentsFont);
+      setUIDefaults(menuKeys, new FontUIResource(oldMenusFont));
+      setUIDefaults(componentsKeys, new FontUIResource(oldComponentsFont));
+      setUIDefaults(textComponentsKeys, new FontUIResource(oldTextComponentsFont));
       SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(ApperanceDialog.this));
       SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(ApperanceDialog.this.getOwner()));
       hide();
