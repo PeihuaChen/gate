@@ -69,6 +69,8 @@ public class NewResourceDialog extends JDialog {
     nameField = new JTextField(30);
     nameField.setMaximumSize(
         new Dimension(Integer.MAX_VALUE, nameField.getPreferredSize().height));
+    nameField.setRequestFocusEnabled(true);
+    nameField.setVerifyInputWhenFocusTarget(false);
     nameBox.add(nameField);
     nameBox.add(Box.createHorizontalStrut(5));
     nameBox.add(Box.createHorizontalGlue());
@@ -201,9 +203,10 @@ public class NewResourceDialog extends JDialog {
                     tableScroll.getInsets().right;
       tableScroll.setPreferredSize(dim);
     }
+    pack();
+
     requestFocus();
     nameField.requestFocus();
-    pack();
     super.show();
     if(userCanceled) return null;
     else{
