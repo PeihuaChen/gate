@@ -254,7 +254,10 @@ public class TestPersist extends TestCase
 
     Iterator corpusIter = diskCorp.iterator();
     while(corpusIter.hasNext()){
-      if (DEBUG) Out.prln(((Document) corpusIter.next()).getName());
+      if (DEBUG)
+        Out.prln(((Document) corpusIter.next()).getName());
+      else
+        corpusIter.next();
     }
 
 
