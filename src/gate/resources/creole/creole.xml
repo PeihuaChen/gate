@@ -635,15 +635,26 @@
   </CREOLE>
   <!-- creole.xml for Visual Resources -->
   <CREOLE>
-    <RESOURCE>
+<!--    <RESOURCE>
       <NAME>Features Editor</NAME>
       <CLASS>gate.gui.FeaturesEditor</CLASS>
-      <!-- type values can be "large" or "small"-->
+      <!-#- type values can be "large" or "small"-#->
       <GUI TYPE="large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+-->    
+    <RESOURCE>
+      <NAME>Features</NAME>
+      <CLASS>gate.gui.FeaturesSchemaEditor</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="small">
+        <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    
+    
     <RESOURCE>
       <NAME>Initialisation Parameters</NAME>
       <CLASS>gate.gui.PRViewer</CLASS>
@@ -680,7 +691,6 @@
         <RESOURCE_DISPLAYED>gate.Corpus</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    <!-- New VR by Niraj -->
     <RESOURCE>
       <NAME>Jape Viewer</NAME>
       <CLASS>gate.gui.jape.JapeViewer</CLASS>
@@ -703,16 +713,17 @@
       <NAME>Serial Datastore Viewer</NAME>
       <CLASS>gate.gui.SerialDatastoreViewer</CLASS>
       <!-- type values can be "large" or "small"-->
-      <GUI TYPE="small">
+      <GUI TYPE="large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.persist.SerialDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+    
     <RESOURCE>
       <NAME>JDBC Datastore Viewer</NAME>
       <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
       <!-- type values can be "large" or "small"-->
-      <GUI TYPE="small">
+      <GUI TYPE="large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.persist.JDBCDataStore</RESOURCE_DISPLAYED>
       </GUI>
