@@ -292,15 +292,15 @@ public class OracleDataStore extends JDBCDataStore {
 
     //0.5 check the LR's current DS
     DataStore currentDS = lr.getDataStore();
-    if(currentDS.equals(this)){         // adopted already
-      return lr;
-    }
-    else if(currentDS == null) {  // an orphan - do the adoption
+    if(currentDS == null) {  // an orphan - do the adoption
       lr.setDataStore(this);
       // let the world know
       //fireResourceAdopted(
       //    new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
       //);
+    }
+    else if(currentDS.equals(this)){         // adopted already
+      return lr;
     }
     else {                      // someone else's child
       throw new PersistenceException(
@@ -1540,7 +1540,7 @@ public class OracleDataStore extends JDBCDataStore {
 
   /** --- */
   public String readDatabaseID() throws PersistenceException{
-
+System.out.println("READ PARAM called...");
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     String  result = null;
@@ -1570,13 +1570,13 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
     }
-
+System.out.println("reult=["+result+"]");
       return result;
   }
 
 
   public boolean equals(Object obj) {
-
+System.out.println("EQUALS called...");
     if (false == obj instanceof OracleDataStore) {
       return false;
     }
