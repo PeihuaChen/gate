@@ -1826,7 +1826,10 @@ public class CorefEditor
   protected class CorefTreeMouseListener
       extends MouseAdapter {
 
-    public void mouseClicked(MouseEvent me) {
+    public void mouseClicked(MouseEvent me) { }
+    public void mouseReleased(MouseEvent me) { }
+
+    public void mousePressed(MouseEvent me) {
       if (popupWindow != null && popupWindow.isVisible()) {
         popupWindow.setVisible(false);
       }
@@ -1837,14 +1840,14 @@ public class CorefEditor
       int row = corefTree.getRowForLocation(x, y);
       TreePath path = corefTree.getPathForRow(row);
 
-      // let us expand it if the sibling feature is on
       if (path != null) {
         final CorefTreeNode node = (CorefTreeNode) path.
                                    getLastPathComponent();
 
         // if it only chainNode
-        if (node.getType() != CorefTreeNode.CHAIN_NODE)
+        if (node.getType() != CorefTreeNode.CHAIN_NODE) {
           return;
+        }
 
         // see if user clicked the right click
         if (SwingUtilities.isRightMouseButton(me)) {
