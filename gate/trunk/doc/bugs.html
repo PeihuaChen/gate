@@ -377,71 +377,6 @@ NOTE: could not recreate on Win; LInux issue perhaps? Check with Di if it still 
   </TR>
 
   <TR>
-    <TD>00033</TD>
-    <TD>core-serialisation</TD>
-    <TD>Hamish</TD>
-    <TD>___adopted_by</TD>
-    <TD>beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>SDS is losing document features after save/restore</TD>
-    <TD>create doc from http URL
-note that source URL is a feature
-open existing SDS
-"save to" the doc
-quit gate
-restart, open SDS, load doc
-source URL feature no longer present</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-  <TR>
-    <TD>00034</TD>
-    <TD>core</TD>
-    <TD>Marin</TD>
-    <TD>___adopted_by</TD>
-    <TD>beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>it looks like the FeatureMap is not working properly</TD>
-    <TD>the following code:
-
-
--------------------------------
-String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
-
-  System.out.println("key=["+TOKEN_STRING+"]");
-  System.out.println("value ["+currPronoun.getFeatures().get(TOKEN_STRING)+"]");
-  System.out.println("features=["+currPronoun.getFeatures()+"]");
--------------------------------
-
-produces:
-
-============================
-key=[string]
-
-value [null]
-
-features=[{category=PRP$, kind=word, string=its, length=3, orth=lowercase}]  ============================
-
-i.e. getting the value for the key "string" fails, wlthough it seems that this key/velue pair exists in the feature map
-
-the code in feature Map for toString() and get() is totally different, that's why one works and other not
-
-
-more weird details:
-
-- the code works in the debugger, and when used standalone (from TestCoref, not as PR from GATE UI) which implies synchronization problems
-
-- on the other hand I can't see a scenario where these four consecutive lines of the execution are interfered by another thread
-</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-
-  <TR>
     <TD>00035</TD>
     <TD>core-serialisation</TD>
     <TD>Hamish</TD>
@@ -1190,6 +1125,70 @@ still matches them to BT, when it should not. </TD>
     <TD>annotation types which are empty do not get automatically removed from the GUI, nor is it possible to remove them manually (with the Delete key)</TD>
     <TD></TD>
     <TD></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00033</TD>
+    <TD>core-serialisation</TD>
+    <TD>Hamish</TD>
+    <TD>Damyan/Kalina</TD>
+    <TD>beta1</TD>
+    <TD>11-jan-2002 / Beta1</TD>
+    <TD>SDS is losing document features after save/restore</TD>
+    <TD>create doc from http URL
+note that source URL is a feature
+open existing SDS
+"save to" the doc
+quit gate
+restart, open SDS, load doc
+source URL feature no longer present</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00034</TD>
+    <TD>core</TD>
+    <TD>Marin</TD>
+    <TD>Damyan/Kalina</TD>
+    <TD>beta1</TD>
+    <TD>11-jan-2002 / Beta1</TD>
+    <TD>it looks like the FeatureMap is not working properly</TD>
+    <TD>the following code:
+
+
+-------------------------------
+String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
+
+  System.out.println("key=["+TOKEN_STRING+"]");
+  System.out.println("value ["+currPronoun.getFeatures().get(TOKEN_STRING)+"]");
+  System.out.println("features=["+currPronoun.getFeatures()+"]");
+-------------------------------
+
+produces:
+
+============================
+key=[string]
+
+value [null]
+
+features=[{category=PRP$, kind=word, string=its, length=3, orth=lowercase}]  ============================
+
+i.e. getting the value for the key "string" fails, wlthough it seems that this key/velue pair exists in the feature map
+
+the code in feature Map for toString() and get() is totally different, that's why one works and other not
+
+
+more weird details:
+
+- the code works in the debugger, and when used standalone (from TestCoref, not as PR from GATE UI) which implies synchronization problems
+
+- on the other hand I can't see a scenario where these four consecutive lines of the execution are interfered by another thread
+</TD>
+    <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
