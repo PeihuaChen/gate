@@ -324,7 +324,8 @@ public class TextualDocumentView extends AbstractDocumentView {
         ioe.printStackTrace(Err.getPrintWriter());
       }
       //update the offsets in the list
-      annotationListView.getGUI().repaint();
+      Component listView = annotationListView.getGUI();
+      if(listView != null) listView.repaint();
     }
 
     public void removeUpdate(final javax.swing.event.DocumentEvent e) {
