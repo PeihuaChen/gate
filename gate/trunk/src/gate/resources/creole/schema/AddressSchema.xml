@@ -2,15 +2,21 @@
 <schema xmlns="http://www.w3.org/2000/10/XMLSchema">
 	<!-- XSchema deffinition for token-->
 	<element name="Address">
-		<complexType>
-		    <attribute name="Email" type="string" use="optional"/>
-			<attribute name="Url" type="string" use="optional"/>
-			<attribute name="Phone" type="string" use="optional"/>
-			<attribute name="Ip" type="string" use="optional"/>
-			<attribute name="Street" type="string" use="optional"/>
-			<attribute name="City" type="string" use="optional"/>
-			<attribute name="PostalCode" type="string" use="optional"/>
-			<attribute name="Country" type="string" use="optional"/>
-	  </complexType>
-	</element>
+	  <complexType>
+	    <attribute name="kind"  use="optional">
+		  <simpleType>
+		    <restriction base="string">
+			  <enumeration value="email"/>
+			  <enumeration value="url"/>
+			  <enumeration value="phone"/>
+			  <enumeration value="ip"/>
+			  <enumeration value="street"/>
+			  <enumeration value="postal code"/>
+			  <enumeration value="country"/>
+			  <enumeration value="complete"/>			  			  			  			  			  			  
+		    </restriction>
+		</simpleType>	 
+	</attribute>
+  </complexType>
+</element>
 </schema>
