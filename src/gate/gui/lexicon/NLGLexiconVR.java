@@ -93,13 +93,13 @@ public class NLGLexiconVR extends AbstractVisualResource {
 
     leftBox.add(buttonBox);
     mainBox.add(rightBox, null);
+    rightBox.add(POSTextLabel, null);
+    rightBox.add(posString, null);
     rightBox.add(SynsetTextLabel, null);
     rightBox.add(synsetScrollPane, null);
     synsetScrollPane.getViewport().add(synsetEntriesList, null);
     rightBox.add(definitionTextLabel, null);
     rightBox.add(definitionTextArea, null);
-    rightBox.add(POSTextLabel, null);
-    rightBox.add(posString, null);
     leftBox.add(sensesTextLabel, null);
     leftBox.add(sensesScrollPane, null);
     sensesScrollPane.getViewport().add(sensesList, null);
