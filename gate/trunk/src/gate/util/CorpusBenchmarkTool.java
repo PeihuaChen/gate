@@ -150,19 +150,23 @@ public class CorpusBenchmarkTool {
     List inputFiles = null;
     if(args.length < 1) throw new GateException(usage);
     int i = 0;
-    while (i < args.length-1) {
+    while (i < args.length && args[i].startsWith("-")) {
       if(args[i].equals("-generate")) {
         Out.prln("Generating the corpus...");
         corpusTool.setGenerateMode(true);
-        i++;
-        break;
-      } else if (args[i].equals("-marked")) {
-        Out.prln("Evaluating stored against human-annotated only...");
-        corpusTool.setMarkedOnly(true);
-        i++;
-        break;
-      } else
-        i++; //just ignore the option, which we do not recognise
+      } else if (args[i].equals("-marked_clean")) {
+        Out.prln("Evaluating current grammars against human-annotated...");
+//        corpusTool.setMarkedOnly(true);
+      } else if (args[i].equals("-marked_stored")) {
+        Out.prln("Evaluating stored documents against human-annotated...");
+        corpusTool.setMarkedStored(true);
+      } else if (args[i].equals("-verbose")) {
+        Out.prln("Running in verbose mode. Will generate annotation " +
+          "information when precision/recall are lower than " +
+          corpusTool.getThreshold());
+        corpusTool.setVerboseMode(true);
+      }
+      i++; //just ignore the option, which we do not recognise
     }//while
 
     String dirName = args[i];
@@ -195,12 +199,20 @@ public class CorpusBenchmarkTool {
     return isGenerateMode;
   }//getGenerateMode
 
-  public void setMarkedOnly(boolean mode) {
-    isMarkedOnly = mode;
+  public boolean getVerboseMode() {
+    return isVerboseMode;
+  }//getVerboseMode
+
+  public void setVerboseMode(boolean mode) {
+    isVerboseMode = mode;
+  }//setVerboseMode
+
+  public void setMarkedStored(boolean mode) {
+    isMarkedStored = mode;
   }//setGenerateMode
 
-  public boolean getMarkedOnly() {
-    return isMarkedOnly;
+  public boolean getMarkedStored() {
+    return isMarkedStored;
   }//getGenerateMode
 
   /**
@@ -234,6 +246,14 @@ public class CorpusBenchmarkTool {
   public boolean isGenerateMode() {
     return isGenerateMode == true;
   }//isGenerateMode
+
+  public double getThreshold() {
+    return threshold;
+  }
+
+  public void setThreshold(double newValue) {
+    threshold = newValue;
+  }
 
   public File getStartDirectory() {
     return startDir;
@@ -337,7 +357,7 @@ public class CorpusBenchmarkTool {
         if (! cleanDocFile.exists()) {
           Out.prln("Warning: Cannot find original document " +
                    doc.getName() + " in " + fileDir);
-          isMarkedOnly = true;
+          isMarkedStored = true;
         } else {
           FeatureMap params = Factory.newFeatureMap();
           params.put("sourceUrl", cleanDocFile.toURL());
@@ -378,6 +398,8 @@ public class CorpusBenchmarkTool {
           Factory.deleteResource(cleanDoc);
         if (markedDoc != null)
           Factory.deleteResource(markedDoc);
+
+        Out.prln("===========================================================");
       }//for loop through saved docs
       sds.close();
 
@@ -426,7 +448,7 @@ public class CorpusBenchmarkTool {
     if (annotTypes == null || annotTypes.isEmpty())
       return;
 
-    if (cleanDoc != null && !isMarkedOnly) {
+    if (cleanDoc != null && !isMarkedStored) {
 
       processDocument(cleanDoc);
 
@@ -511,14 +533,18 @@ public class CorpusBenchmarkTool {
 
           //check the precision first
           if (annotDiff.getPrecisionAverage() != 1.0) {
-            Out.prln("\t\t\t Precision different from that of human annotations for: " +
-                    cleanDoc.getName() + " is " + annotDiff.getPrecisionAverage());
+            Out.prln("\t\t\t Precision on stored against human-annotated doc " +
+                    markedDoc.getName() + " is " + annotDiff.getPrecisionAverage());
+            if (isVerboseMode && annotDiff.getPrecisionAverage() < threshold)
+              printAnnotations(annotDiff, markedDoc, persDoc);
           }//if precision
 
           //check the recall now
           if (annotDiff.getRecallAverage() != 1.0) {
-            Out.prln("\t\t\t Recall different from that of human annotations for: " +
-                    cleanDoc.getName() + " is " + annotDiff.getRecallAverage());
+            Out.prln("\t\t\t Recall on stored against human-annotated doc " +
+                    markedDoc.getName() + " is " + annotDiff.getRecallAverage());
+            if (isVerboseMode && annotDiff.getRecallAverage() < threshold)
+              printAnnotations(annotDiff, markedDoc, persDoc);
           }//if recall
 
         }//if the f-measure is not 1.0
@@ -537,10 +563,11 @@ public class CorpusBenchmarkTool {
     if (keyDoc == null || respDoc == null)
       return null;
 
-    if (keyDoc.getAnnotations().get(annotType) == null
-    //TO REMOVE WHEN CRISTI FIXES THIS EXCEPTION
-        ||
-        respDoc.getAnnotations().get(annotType) == null)
+    if (annotSetName != null
+        && keyDoc.getAnnotations(annotSetName).get(annotType) == null)
+      return null;
+    else if ((annotSetName == null || annotSetName.equals(""))
+        && keyDoc.getAnnotations().get(annotType) == null)
       return null;
 
     // create the annotation schema needed for AnnotationDiff
@@ -563,6 +590,46 @@ public class CorpusBenchmarkTool {
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
 
     return annotDiff;
+  }
+
+  protected void printAnnotations(AnnotationDiff annotDiff,
+                    Document keyDoc, Document respDoc) {
+    Out.prln();
+    Out.pr("MISSING ANNOTATIONS in the automatic texts: ");
+    Set missingSet =
+      annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE);
+    printAnnotations(missingSet, keyDoc);
+
+    Out.prln();
+    Out.pr("SPURIOUS ANNOTATIONS in the automatic texts: ");
+    Set spuriousSet =
+      annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE);
+    printAnnotations(spuriousSet, respDoc);
+
+    Out.prln();
+    Out.pr("PARTIALLY CORRECT ANNOTATIONS in the automatic texts: ");
+    Set partialSet =
+      annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE);
+    printAnnotations(partialSet, respDoc);
+
+  }
+
+  protected void printAnnotations(Set set, Document doc) {
+    if (set == null || set.isEmpty())
+      return;
+
+    Iterator iter = set.iterator();
+    while (iter.hasNext()) {
+      Annotation ann = (Annotation) iter.next();
+      Out.prln(
+        "String: " +
+        doc.getContent().toString().substring(
+          ann.getStartNode().getOffset().intValue(),
+          ann.getEndNode().getOffset().intValue()) +
+        "; offset[" + ann.getStartNode().getOffset() +
+        "," + ann.getEndNode().getOffset() + "]" +
+        "; features" + ann.getFeatures());
+    }//while
   }
 
   /**
@@ -591,17 +658,20 @@ public class CorpusBenchmarkTool {
    * run in evaluate mode
    */
   private boolean isGenerateMode = false;
+  private boolean isVerboseMode = false;
 
   /**
-   * If true, the corpus tool will evaluate only against the human-marked
+   * If true, the corpus tool will evaluate stored against the human-marked
    * documents
    */
-  private boolean isMarkedOnly = false;
+  private boolean isMarkedStored = false;
 
   private String annotSetName = "Key";
 
+  private double threshold = 0.5;
+
   /** String to print when wrong command-line args */
   private static String usage =
-    "usage: CorpusBenchmarkTool [-generate] directory-name";
+    "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] [-verbose] directory-name";
 
 }
