@@ -23,6 +23,12 @@ import gate.*;
 /**defines the interface of an ontology*/
 public interface Ontology extends LanguageResource{
 
+  /** Get ontology by URL. The ontology will be searched first among the LRs and
+   *  afterwards loaded by the URL if not found
+   *  @param someUrl the url of the ontology
+   *  @return the retrieved or loaded ontology*/
+  public Ontology getOntology(URL someUrl);
+
   /** get the url of this ontology
    * @return the url of this ontology */
   public URL getURL();
