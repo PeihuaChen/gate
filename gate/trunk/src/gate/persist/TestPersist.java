@@ -539,6 +539,7 @@ public class TestPersist extends TestCase
 
     //3. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    ac.open();
     Assert.assertNotNull(ac);
 
     User usr = ac.findUser("kalina");
@@ -594,6 +595,7 @@ public class TestPersist extends TestCase
     //3. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
+    ac.open();
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -723,6 +725,7 @@ public class TestPersist extends TestCase
     //0. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
+    ac.open();
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -916,6 +919,7 @@ public class TestPersist extends TestCase
     //0. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
+    ac.open();
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -962,6 +966,7 @@ public class TestPersist extends TestCase
     //0. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
+    ac.open();
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -1016,6 +1021,7 @@ public class TestPersist extends TestCase
     //0. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
+    ac.open();
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);
@@ -1079,6 +1085,7 @@ public class TestPersist extends TestCase
     //0. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
     Assert.assertNotNull(ac);
+    ac.open();
 
     User usr = ac.findUser("kalina");
     Assert.assertNotNull(usr);

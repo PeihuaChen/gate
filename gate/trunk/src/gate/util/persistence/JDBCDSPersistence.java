@@ -71,9 +71,10 @@ public class JDBCDSPersistence extends DSPersistence {
     securityLoop: do{
       try{
         String userPass;
-        ac = new AccessControllerImpl();
+        ac = new AccessControllerImpl(storageUrlString);
+        ac = Factory.createAccessController(storageUrlString);
         Assert.assertNotNull(ac);
-        ac.open(storageUrlString);
+        ac.open();
 
         Session mySession = null;
         try {
