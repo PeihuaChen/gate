@@ -125,7 +125,7 @@ implements JapeConstants, java.io.Serializable
   } // matches
 
   /** Apply the RHS of this rule (LHS must have been matched first). */
-  public void transduce(Document doc) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
     // the righthand side does the transduction, using bindings from lhs */
     if(debug) System.out.println("applying rule " + name);
 //    rhs.transduce(doc);
@@ -200,6 +200,10 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.5  2000/07/04 14:37:39  valyt
+// Added some support for Jape-ing in a different annotations et than the default one;
+// Changed the L&F for the JapeGUI to the System default
+//
 // Revision 1.4  2000/07/03 21:00:59  valyt
 // Added StatusBar and ProgressBar support for tokenisation & Jape transduction
 // (it looks great :) )

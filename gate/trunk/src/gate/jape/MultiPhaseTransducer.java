@@ -82,7 +82,7 @@ implements JapeConstants, java.io.Serializable
   } // finish
 
   /** Transduce the document by running each phase in turn. */
-  public void transduce(Document doc) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
     ProgressListener pListener = new ProgressListener(){
       public void processFinished(){
         donePhases ++;
@@ -108,7 +108,7 @@ implements JapeConstants, java.io.Serializable
                                " (Phase: " + t.getName() + ")...");
         t.addProcessProgressListener(pListener);
         t.addStatusListener(sListener);
-        t.transduce(doc);
+        t.transduce(doc, annotations);
         t.removeProcessProgressListener(pListener);
         t.removeStatusListener(sListener);
         fireStatusChangedEvent("");
@@ -161,6 +161,10 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.4  2000/07/04 14:37:39  valyt
+// Added some support for Jape-ing in a different annotations et than the default one;
+// Changed the L&F for the JapeGUI to the System default
+//
 // Revision 1.3  2000/07/03 21:00:59  valyt
 // Added StatusBar and ProgressBar support for tokenisation & Jape transduction
 // (it looks great :) )

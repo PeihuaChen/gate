@@ -712,6 +712,13 @@ public class JapeGUI extends JFrame implements ProgressListener,
   long lastStatusUpdate = 0;
   long lastProgressUpdate = 0;
   int lastProgress = 0;
+
+  static{
+    try{
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    }catch(Exception e){}
+  }
+
 }
 
 

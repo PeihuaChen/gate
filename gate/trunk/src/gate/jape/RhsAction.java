@@ -12,7 +12,8 @@ import java.util.Map;
   */
 public interface RhsAction {
 
-  public void doit(Document doc, Map bindings) throws JapeException;
+  public void doit(Document doc, AnnotationSet annotations, Map bindings)
+              throws JapeException;
 
 } // RhsAction
 
