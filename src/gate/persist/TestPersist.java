@@ -210,7 +210,10 @@ public class TestPersist extends TestCase
         features.put("DataStore", sds);
         features.put("DataStoreInstanceId", lrId);
         Resource lr = Factory.createResource(typeName, features);
-        lrsFromDisk.add(lr);
+        if(lrId.startsWith("GATE cor")) // ensure ordering regardless of OS
+          lrsFromDisk.add(0, lr);
+        else
+          lrsFromDisk.add(lr);
       } // for each LR ID
 
     } // for each LR type
