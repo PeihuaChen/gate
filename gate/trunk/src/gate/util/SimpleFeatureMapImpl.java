@@ -56,7 +56,9 @@ public class SimpleFeatureMapImpl
     for (int i=0; i<sfm.m_size; i++) {
       key = sfm.m_keys[i];
       keyValueFromAFeatureMap = sfm.m_values[i];
-      keyValueFromThis = get(key);
+      int v = super.getSubsumeKey(key);
+      if (v < 0) return false;
+      keyValueFromThis = m_values[v];//was: get(key);
 
       if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
             (keyValueFromThis != null && keyValueFromAFeatureMap == null)
@@ -142,9 +144,9 @@ public class SimpleFeatureMapImpl
   } // clear
 
   // Views
-    public Object clone() {
-          return super.clone();
-    }
+  public Object clone() {
+    return super.clone();
+  }
 
   public boolean equals(Object o) {
     return super.equals(o);
@@ -155,7 +157,6 @@ public class SimpleFeatureMapImpl
 //and update correctly the database//////////////////
   private transient Vector mapListeners;
   /**
-   *
    * Removes a gate listener
    */
   public synchronized void removeFeatureMapListener(FeatureMapListener l) {
@@ -164,31 +165,30 @@ public class SimpleFeatureMapImpl
       v.removeElement(l);
       mapListeners = v;
     }
-  }
+  } //removeFeatureMapListener
   /**
-   *
    * Adds a gate listener
    */
-   public synchronized void addFeatureMapListener(FeatureMapListener l) {
-     Vector v = mapListeners == null ? new Vector(2) : (Vector)mapListeners.clone();
+  public synchronized void addFeatureMapListener(FeatureMapListener l) {
+    Vector v = mapListeners == null ? new Vector(2) : (Vector)mapListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       mapListeners = v;
     }
-  }
+  } //addFeatureMapListener
   /**
    *
    * @param e
    */
-   protected void fireMapUpdatedEvent () {
-     if (mapListeners != null) {
-       Vector listeners = mapListeners;
+  protected void fireMapUpdatedEvent () {
+    if (mapListeners != null) {
+      Vector listeners = mapListeners;
       int count = listeners.size();
       if (count == 0) return;
       for (int i = 0; i < count; i++)
         ((FeatureMapListener) listeners.elementAt(i)).featureMapUpdated();
     }
-  }//fireAnnotationUpdated
+  }//fireMapUpdatedEvent
 
 
  /** Freeze the serialization UID. */
