@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 22/03/00
  *
  *  $Id$
@@ -38,7 +38,6 @@ public class Scratch
   } // main
 
   public static void doIt() {
-    Out.println("done");
   } // doIt
 
 } // class Scratch
