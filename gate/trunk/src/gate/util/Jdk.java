@@ -71,6 +71,8 @@ public class Jdk {
     "/../../bin"  // e.g. we're running a JRE that's installed beside a JDK
   };
 
+
+  private sun.toolsx.javac.Main compiler = null;
   /** Returns a File specifying the location of the JDK tools, i.e.
     * the location of programs like <CODE>java, javac, jar</CODE>. It
     * assumes that if it finds <CODE>javac</CODE> or <CODE>javac.exe</CODE>
@@ -109,16 +111,17 @@ public class Jdk {
     */
   public byte[] compile(String javaCode, String className)
   throws GateException {
-    sun.toolsx.javac.Main compiler = new sun.toolsx.javac.Main(
-      System.out, "gate.util.Jdk"
-    );
+    if(compiler == null) compiler = new sun.toolsx.javac.Main(
+                                                  System.out, "gate.util.Jdk");
     String argv[] = new String[5];
     argv[0] = "-classpath";
     argv[1] = System.getProperty("java.class.path");
     argv[2] = "-nodisk";
     argv[3] = className;
     argv[4] = javaCode;
+//long startTime = System.currentTimeMillis();
     compiler.compile(argv);
+//Out.prln("Compilation time: " + (System.currentTimeMillis() - startTime));
     List compilerOutput = compiler.getCompilerOutput();
 
     Iterator iter = compilerOutput.iterator();

@@ -28,7 +28,7 @@ public class GateException extends Exception {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  protected Exception e;
+  protected Throwable e;
 
   public GateException() {
     super();
@@ -38,7 +38,7 @@ public class GateException extends Exception {
     super(s);
   }
 
-  public GateException(Exception e) {
+  public GateException(Throwable e) {
     super(e.toString());
     this.e = e;
   }
