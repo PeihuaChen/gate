@@ -323,7 +323,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       text = pDisj.getName();
       String type = pDisj.getType();
       iconName = "param.gif";
-      if(Gate.getCreoleRegister().containsKey(type)){
+      if(Gate.isGateType(type)){
         ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
         if(rData != null) iconName = rData.getIcon();
       }
