@@ -35,7 +35,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   private URL projectName;
 
   /** Protege ontology */
-  private KnowledgeBase knBase = null;
+  private edu.stanford.smi.protege.model.KnowledgeBase knBase = null;
 
   /** Ontotext Ontology object */
   private Ontology ontotextOntology = null;
@@ -63,13 +63,13 @@ public class ProtegeProjectName extends AbstractLanguageResource
     visualResource = visual;
   } // setViewResource(AbstractVisualResource visual)
 
-  public void setKnowledgeBase(KnowledgeBase base) {
+  public void setKnowledgeBase(edu.stanford.smi.protege.model.KnowledgeBase base) {
     knBase = base;
     fillOntotextOntology();
     createKBListener();
   } // setKnowledgeBase(KnowledgeBase base)
 
-  public KnowledgeBase getKnowledgeBase() {
+  public edu.stanford.smi.protege.model.KnowledgeBase getKnowledgeBase() {
     return knBase;
   } // getKnowledgeBase()
 
@@ -151,7 +151,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public void setURL(URL aUrl) {
     ontotextOntologyUrl = aUrl;
     if(ontotextOntology != null) {
-      ontotextOntology.setURL(aUrl); 
+      ontotextOntology.setURL(aUrl);
       fillOntotextOntology();
       visualResource.refreshOntoeditor(ontotextOntology);
     } // if
@@ -170,13 +170,13 @@ public class ProtegeProjectName extends AbstractLanguageResource
   }
   public void load() throws ResourceInstantiationException {
     if(ontotextOntology != null) {
-      ontotextOntology.setURL(ontotextOntologyUrl); 
+      ontotextOntology.setURL(ontotextOntologyUrl);
       ontotextOntology.load();
     } // if
   }
   public void store() throws ResourceInstantiationException {
     if(ontotextOntology != null) {
-      ontotextOntology.setURL(ontotextOntologyUrl); 
+      ontotextOntology.setURL(ontotextOntologyUrl);
       ontotextOntology.store();
     } // if
   }
@@ -222,7 +222,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
   }
 
   public Set getTopClasses() {
-    if(ontotextOntology != null) 
+    if(ontotextOntology != null)
       return ontotextOntology.getTopClasses();
     else return new HashSet();
   }
@@ -235,7 +235,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
     boolean result = false;
 
     if(o instanceof ProtegeProjectName) {
-      ProtegeProjectName prj = (ProtegeProjectName) o;      
+      ProtegeProjectName prj = (ProtegeProjectName) o;
       if(ontotextOntology != null) {
         result = ontotextOntology.equals(prj.ontotextOntology);
       }
@@ -243,7 +243,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
         result = prj.ontotextOntology == null;
       }
     }
-    
+
     return result;
   }
 
