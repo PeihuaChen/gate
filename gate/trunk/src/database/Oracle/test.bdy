@@ -45,7 +45,7 @@ create or replace package body test is
   USER_5_ID constant number := 5;
 
   UG_ID_1 constant number := 301;
-  UG_ID_2 constant number := 303;  
+  UG_ID_2 constant number := 302;  
   UG_ID_3 constant number := 303;
   UG_ID_4 constant number := 304;
   UG_ID_5 constant number := 305;
@@ -165,11 +165,49 @@ create or replace package body test is
  
      insert into t_lang_resource(lr_id,
                                  lr_type_id,
-                                 lr_owner_id,
+                                 lr_owner_group_id,
+                                 lr_owner_user_id,                                 
                                  lr_name,
-                                 lr_is_private,
+                                 lr_access_mode,
                                  lr_parent_id)
-     values(DOC_1_ID,LR_TYPE_1_ID,GROUP_1_ID,'doc1',ACCESS_WORLD_GROUP,null);                             
+     values(DOC_1_ID,LR_TYPE_1_ID,GROUP_1_ID,null,'doc1',ACCESS_WORLD_GROUP,null);                             
+
+
+     insert into t_lang_resource(lr_id,
+                                 lr_type_id,
+                                 lr_owner_group_id,
+                                 lr_owner_user_id,                                 
+                                 lr_name,
+                                 lr_access_mode,
+                                 lr_parent_id)
+     values(DOC_2_ID,LR_TYPE_1_ID,null,USER_2_ID,'doc2',ACCESS_OWNER_OWNER,null);                             
+
+     insert into t_lang_resource(lr_id,
+                                 lr_type_id,
+                                 lr_owner_group_id,
+                                 lr_owner_user_id,                                 
+                                 lr_name,
+                                 lr_access_mode,
+                                 lr_parent_id)
+     values(DOC_3_ID,LR_TYPE_1_ID,GROUP_2_ID,null,'doc3',ACCESS_GROUP_GROUP,null);                             
+
+     insert into t_lang_resource(lr_id,
+                                 lr_type_id,
+                                 lr_owner_group_id,
+                                 lr_owner_user_id,                                 
+                                 lr_name,
+                                 lr_access_mode,
+                                 lr_parent_id)
+     values(DOC_4_ID,LR_TYPE_1_ID,GROUP_2_ID,USER_5_ID,'doc4',ACCESS_GROUP_OWNER,null);                             
+
+     insert into t_lang_resource(lr_id,
+                                 lr_type_id,
+                                 lr_owner_group_id,
+                                 lr_owner_user_id,                                 
+                                 lr_name,
+                                 lr_access_mode,
+                                 lr_parent_id)
+     values(DOC_5_ID,LR_TYPE_1_ID,GROUP_1_ID,null,'doc5',ACCESS_GROUP_GROUP,null);                             
 
   end;                                                                                                        
 
