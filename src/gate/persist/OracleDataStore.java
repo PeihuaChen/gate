@@ -615,13 +615,14 @@ public class OracleDataStore extends JDBCDataStore {
 
     //add all anotations
     //1. default
-    dbDoc.getAnnotations().addAll(doc.getAnnotations());
+    ((DatabaseDocumentImpl)dbDoc).setAnnotations(null,doc.getAnnotations());
+
     //2. named
     Iterator itNamed = doc.getNamedAnnotationSets().values().iterator();
     while (itNamed.hasNext()){
       AnnotationSet currSet = (AnnotationSet)itNamed.next();
       //add them all to the DBAnnotationSet
-      dbDoc.getAnnotations(currSet.getName()).addAll(currSet);
+      ((DatabaseDocumentImpl)dbDoc).setAnnotations(currSet.getName(),currSet);
     }
 
     return dbDoc;
