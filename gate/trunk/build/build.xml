@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<project name="GATE-nightly" default="testSuite" basedir="..">
+<!-- 
+ANT build file used by the nightly build and test process.
+Adds some more targets to the ones already defined by the main build file.
+$id$ 
+-->
+  <property name="mail.from.name" value="GATE ${os.name} tester"/>
+  <property name="mail.from.address" value="v.tablan@sheffield.ac.uk"/>
+  
+  <property name="mail.to.name" value="GATE developers"/>
+  <property name="mail.to.address" value="v.tablan@sheffield.ac.uk"/>
+
+  <!-- import the main build file so we can reuse some targets -->
+  <import file="../build.xml"/>
+  
+  <target name="testSuite">
+    <record name="${buildDir}/build.log" 
+            action="start"
+            emacsmode="true"
+            loglevel="info"
+            append="no"/>
+    <antcall target="clean"/>
+    <antcall target="jar"/>
+    <record name="${buildDir}/build.log" 
+            action="stop"/>
+    <antcall target="mailBuildReport"/>        
+    <!-- Run the test suite (with xml output)-->        
+    <property name="write.xml" value="true"/>        
+    <antcall target="test"/>
+    <antcall target="testReport"/>
+    <antcall target="mailTestReport"/>
+  </target>
+  
+  <target name="mailBuildReport">
+    <mail mailhost="mailhost.dcs.shef.ac.uk"
+          encoding="plain"
+          subject="&gt;&gt;&gt; GATE automated build results &lt;&lt;&lt;">
+      <from address="${mail.from.address}" name="${mail.from.name}"/>
+      <to address="${mail.to.address}" name="${mail.to.name}"/>
+      <message mimetype="text/plain" 
+               charset="ISO-8859-1" 
+               src="${buildDir}/build.log"/>
+    </mail>
+  </target>
+  
+  <target name="testReport">
+    <junitreport>
+      <fileset file="${buildDir}/testResult.xml"/>
+      <report format="noframes"
+              todir="${buildDir}"/>
+    </junitreport>
+  </target>
+  
+  <target name="mailTestReport">
+    <mail mailhost="mailhost.dcs.shef.ac.uk"
+          encoding="plain"
+          subject="&gt;&gt;&gt; GATE automated test results &lt;&lt;&lt;">
+      <from address="${mail.from.address}" name="${mail.from.name}"/>
+      <to address="${mail.to.address}" name="${mail.to.name}"/>
+      <message mimetype="text/html" 
+               charset="ISO-8859-1" 
+               src="${buildDir}/junit-noframes.html"/>
+    </mail>
+  </target>
+  
+  
+</project>
