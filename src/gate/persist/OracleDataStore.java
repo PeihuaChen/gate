@@ -3335,7 +3335,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
-  /** Get a list of LRs that satisfy some set or restrictions */
+    /** Get a list of LRs that satisfy some set or restrictions */
   public List findLrs(List constraints) throws PersistenceException {
     return findLrs(constraints,null);
   }
@@ -3345,58 +3345,69 @@ public class OracleDataStore extends JDBCDataStore {
    *  of a particular type
    */
   public List findLrs(List constraints, String lrType) throws PersistenceException {
+      Vector lrs = new Vector();
+      CallableStatement stmt = null;
+      ResultSet rs = null;
 
-    Vector lrs = new Vector();
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
+      try {
+        String sql = getSQLQuery(constraints,lrType);
+        stmt = this.jdbcConn.prepareCall(sql);
 
-    try {
-      String sql = getSQLQuery(constraints,lrType);
-      stmt = this.jdbcConn.prepareStatement(sql);
-      stmt.execute();
-      rs = stmt.getResultSet();
+        for (int i = 0; i<sqlValues.size(); i++){
+          if (sqlValues.elementAt(i) instanceof String){
+            stmt.setString(i+1,sqlValues.elementAt(i).toString());
+          }
+          else if (sqlValues.elementAt(i) instanceof Long){
+            stmt.setLong(i+1,((Long) sqlValues.elementAt(i)).longValue());
+          }
+          else if (sqlValues.elementAt(i) instanceof Integer){
+            stmt.setLong(i+1,((Integer) sqlValues.elementAt(i)).intValue());
+          }
+        }
+        stmt.execute();
+        rs = stmt.getResultSet();
 
-      while (rs.next()) {
-        long lr_ID = rs.getLong(1);
-        LanguageResource lr = getLr(lrType,new Long(lr_ID));
-        lrs.addElement(lr);
+        while (rs.next()) {
+          long lr_ID = rs.getLong(1);
+          LanguageResource lr = getLr(lrType,new Long(lr_ID));
+          lrs.addElement(lr);
+        }
+        return lrs;
       }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
+      }
+      catch (SecurityException e){
+        e.printStackTrace();
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(stmt);
+      }
+
       return lrs;
     }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
-    }
-    catch (SecurityException e){
-      e.printStackTrace();
-    }
-    finally {
-      DBHelper.cleanup(rs);
-      DBHelper.cleanup(stmt);
-    }
 
-    return lrs;
-  }
-
+  private Vector sqlValues;
 
   private String getSQLQuery(List filter, String lrType){
     String query="";
+    sqlValues = new Vector();
     if (lrType == null){
       query = " SELECT lr_id " +
                     " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
                     " WHERE ";
     }
-    if (lrType != null && lrType.equals(DBHelper.CORPUS_CLASS)) {
-      query = " SELECT lr_id " +
+    query = " SELECT lr_id " +
                     " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
-                    " WHERE LR.lr_type_id = 2 ";
+                    " WHERE LR.lr_type_id = ? ";
 
+    if (lrType != null && lrType.equals(DBHelper.CORPUS_CLASS)) {
+      sqlValues.addElement(new Long(2));
     }// if DBHelper.CORPUS_CLASS
 
     if (lrType != null && lrType.equals(DBHelper.DOCUMENT_CLASS)) {
-      query = " SELECT lr_id " +
-                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
-                    " WHERE LR.lr_type_id = 1 ";
-
+      sqlValues.addElement(new Long(1));
     }// if DBHelper.DOCUMENT_CLASS
 
     if (filter!=null){
@@ -3416,13 +3427,19 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   private String getRestrictionPartOfQuery(Restriction restr){
+    if (restr.getOperator()==Restriction.OPERATOR_LIMIT_ROWSET){
+      String r = " rownum < ? ";
+      sqlValues.addElement(restr.getValue());
+      return r;
+    }
     String expresion = " EXISTS ("+
                        " SELECT ft_id " +
                        " FROM "+Gate.DB_OWNER+".t_feature FEATURE" +
                        " WHERE FEATURE.ft_entity_id = LR.lr_id ";
 
     if (restr.getKey() != null){
-      expresion = expresion.concat(" AND FEATURE.ft_key = '" + restr.getKey() + "'");
+      expresion = expresion.concat(" AND FEATURE.ft_key = ? ");
+      sqlValues.addElement(restr.getKey());
     }
 
     if (restr.getValue() != null){
@@ -3435,7 +3452,8 @@ public class OracleDataStore extends JDBCDataStore {
           expresion = expresion.concat(getNumberExpresion(restr));
           break;
         default:
-          expresion = expresion.concat(" FEATURE.ft_character_value = '" + restr.getStringValue() + "'");
+          expresion = expresion.concat(" FEATURE.ft_character_value = ? ");
+          sqlValues.addElement(restr.getStringValue());
           break;
       }
     }
@@ -3449,25 +3467,27 @@ public class OracleDataStore extends JDBCDataStore {
     String expr = "";
     switch (restr.getOperator()){
       case Restriction.OPERATOR_EQUATION:
-        expr = expr.concat(" FEATURE.ft_number_value  =" + restr.getStringValue());
+        expr = expr.concat(" FEATURE.ft_number_value  = ? ");
         break;
       case Restriction.OPERATOR_BIGGER:
-        expr = expr.concat(" FEATURE.ft_number_value  <" + restr.getStringValue());
+        expr = expr.concat(" FEATURE.ft_number_value  < ? ");
         break;
       case Restriction.OPERATOR_LESS:
-        expr = expr.concat(" FEATURE.ft_number_value  >" + restr.getStringValue());
+        expr = expr.concat(" FEATURE.ft_number_value  > ? ");
         break;
       case Restriction.OPERATOR_EQUATION_OR_BIGGER:
-        expr = expr.concat(" FEATURE.ft_number_value  >=" + restr.getStringValue());
+        expr = expr.concat(" FEATURE.ft_number_value  >= ? ");
         break;
       case Restriction.OPERATOR_EQUATION_OR_LESS:
-        expr = expr.concat(" FEATURE.ft_number_value  <=" + restr.getStringValue());
+        expr = expr.concat(" FEATURE.ft_number_value  <= ? ");
         break;
       default:
-        expr = expr.concat(" 0=0 ");
-        break;
+        expr = expr.concat(" 0 = 0 ");
+        return expr;
     }
+    sqlValues.addElement(restr.getValue());
     return expr;
   }
 
 }
+

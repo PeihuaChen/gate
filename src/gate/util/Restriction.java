@@ -15,7 +15,7 @@
 
 package gate.util;
 
-public class Restriction {
+public class Restriction implements java.io.Serializable{
 
   /* Type of operator for cmarision in query*/
   public static final int OPERATOR_EQUATION = 100;
@@ -23,6 +23,7 @@ public class Restriction {
   public static final int OPERATOR_BIGGER = 102;
   public static final int OPERATOR_EQUATION_OR_BIGGER = 103;
   public static final int OPERATOR_EQUATION_OR_LESS = 104;
+  public static final int OPERATOR_LIMIT_ROWSET = 105;
 
   private Object value;
   private String key;
