@@ -302,6 +302,13 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       editorDeleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           int row = mainTable.getEditingRow();
+          // tell Swing that we aren't really editing this cell, otherwise an
+          // exception occurs when Swing tries to stop editing a cell that has
+          // been deleted.
+          TableCellEditor currentEditor = mainTable.getCellEditor();
+          if(currentEditor != null) {
+            currentEditor.cancelCellEditing();
+          }
           row = mainTable.rowViewToModel(row);
           URL toDelete = (URL)Gate.getKnownPlugins().get(row);
           Gate.removeKnownPlugin(toDelete);
