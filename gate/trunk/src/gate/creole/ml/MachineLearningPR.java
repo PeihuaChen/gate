@@ -115,7 +115,13 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     if (engineElement.getChild("BATCH-MODE-CLASSIFICATION") == null) {
       batchModeClassification = false;
     } else {
-      batchModeClassification = true;
+      // checks wether the engine supports batch mode
+      // engines must implement AdvancedMLEngine (extending MLengine)
+      // to be asked about this functionality
+      if (engine instanceof AdvancedMLEngine){
+        batchModeClassification = ((AdvancedMLEngine)engine).supportsBatchMode();
+      }
+      else batchModeClassification = false;
     }
 
     engine.setDatasetDefinition(datasetDefinition);
@@ -563,7 +569,8 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
 
   /**
    * This member will be set to true if instances are to be passed to the
-   * wrapper in batches, rather than one instance at a time.
+   * wrapper in batches, rather than one instance at a time and if the engine
+   * supports this functionality.
    */
   protected boolean batchModeClassification;
 }
