@@ -66,89 +66,90 @@ public class AnnotationEditor extends AbstractVisualResource {
 
   //GUI components
   /** The text display.*/
-  JTextPane textPane;
+  protected JTextPane textPane;
 
   /** Scroller used for the text diaplay*/
-  JScrollPane textScroll;
+  protected JScrollPane textScroll;
 
   /** The table placed below the text display used for showing annotations*/
-  XJTable annotationsTable;
+  protected XJTable annotationsTable;
 
   /**Model for the annotations table*/
-  AnnotationsTableModel annotationsTableModel;
+  protected AnnotationsTableModel annotationsTableModel;
 
   /** Scroller for the annotations table*/
-  JScrollPane tableScroll;
+  protected JScrollPane tableScroll;
 
   /*The split that contains the text(top) and the annotations table(bottom)*/
-  JSplitPane leftSplit;
+  protected JSplitPane leftSplit;
 
   /**
    * The right hand side tree with all  the annotation sets and types of
    * annotations
    */
-  JTree stylesTree;
+  protected JTree stylesTree;
 
   /**Scroller for the styles tree*/
-  JScrollPane stylesTreeScroll;
+  protected JScrollPane stylesTreeScroll;
 
   /**The root for the styles tree*/
-  DefaultMutableTreeNode stylesTreeRoot;
+  protected DefaultMutableTreeNode stylesTreeRoot;
 
   /**The model for the styles tree*/
-  DefaultTreeModel stylesTreeModel;
+  protected DefaultTreeModel stylesTreeModel;
 
   /**The dialog used for editing the styles used to highlight annotations*/
-  TextAttributesChooser styleChooser;
+  protected TextAttributesChooser styleChooser;
 
   /**The dialog used for editing/adding annotations*/
-  AnnotationEditDialog annotationEditDialog;
+  protected AnnotationEditDialog annotationEditDialog;
 
   /**
    * A box containing a {@link javax.swing.JProgressBar} used to keep the user
    * entertained while the text display is being updated
    */
-  Box progressBox;
+  protected Box progressBox;
 
   /**The progress bar used during updating the text*/
-  JProgressBar progressBar;
+  protected JProgressBar progressBar;
 
   /**
    * The highlighter used to help the user select annotations that overlap
    * and for highligting in the text the annotations selected in the lower
    * table.
    */
-  Highlighter highlighter;
+  protected Highlighter highlighter;
 
   /**
    * This highlighter is actually used as a data structure. It is used to keep
    * the data for the selected annotations; the actual highlighting will be
-   * done by the {@link #highlighter} as using two different highlighters on the
-   * same text component is looking for trouble.
+   * done by the {@link AnnotationEditor#highlighter} as using two different
+   * highlighters on the same text component is looking for trouble.
    */
-  Highlighter selectionHighlighter;
+  protected Highlighter selectionHighlighter;
 
 
 
   /**
    * holds the data for the  annotations table: a list of Annotation objects
    */
-  java.util.List data;
+  protected java.util.List data;
 
   /**
-   * a list containing {@link Range} objects. These are the ranges in the
-   * {@link #data} structure. A range is a bunch of annotations belonging to the
-   * same annotation set that are contiguous in the {@link #data} structure.
+   * a list containing {@link AnnotationEditor.Range} objects. These are the
+   * ranges in the {@link AnnotationEditor#data} structure. A range is a bunch
+   * of annotations belonging to the same annotation set that are contiguous
+   * in the {@link AnnotationEditor#data} structure.
    */
-  java.util.List ranges;
+  protected java.util.List ranges;
 
   /**
    * A composed map used to get the metadata for an annotation type starting
    * from the annotation set name and the type name.
-   * Annotation set name -> Annotation type -> {@link #TypeData}
-   * Maps from String to Map to {@link #TypeData}.
+   * Annotation set name -> Annotation type -> {@link AnnotationEditor.TypeData}
+   * Maps from String to Map to {@link AnnotationEditor.TypeData}.
    */
-  Map typeDataMap;
+  protected Map typeDataMap;
 
   /**
    * The listener for the evnts coming from the document (annotations and
@@ -159,14 +160,14 @@ public class AnnotationEditor extends AbstractVisualResource {
    * resource runs over a document it is likely to generate more than one new
    * annotation).
    */
-  DelayedListener eventHandler;
+  protected DelayedListener eventHandler;
 
 
   /**
    * Object used to sychronise all the various threads involved in GUI
    * updating;
    */
-  Object lock;
+  protected Object lock;
 
   /**Should the table be visible*/
   private boolean tableVisible;
@@ -976,11 +977,11 @@ public class AnnotationEditor extends AbstractVisualResource {
    * For the default annotation set of a document (which has no name) the
    * &quot;&lt;Default&gt;&quot; value is used.
    *
-   * Once a {@link #TypeData} value has been obtained it can be used to change
+   * Once a {@link AnnotationEditor.TypeData} value has been obtained it can be used to change
    * the way the respective type of annotations are displayed.
    * @param setName a {@link java.lang.String}, the name of the annotation set
    * @param type a {@link java.lang.String}, the name of the type.
-   * @return a {@link #TypeData} value
+   * @return a {@link AnnotationEditor.TypeData} value
    */
   protected TypeData getTypeData(String setName, String type){
     Map setMap = (Map)typeDataMap.get(setName);
@@ -1533,7 +1534,7 @@ public class AnnotationEditor extends AbstractVisualResource {
 
 
   /**
-   * Describes a range in the {@link data} structure. A range is a bunch of
+   * Describes a range in the {@link #data} structure. A range is a bunch of
    * annotations of the same type belonging to the same annotation set that
    * are contiguous in the {@link #data} structure.
    */
