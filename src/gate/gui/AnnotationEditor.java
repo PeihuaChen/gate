@@ -595,6 +595,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
     });
 
+    //when the highlighter changes we need to get a hold of the new one
     textPane.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
         if(e.getPropertyName().equals("highlighter")){
@@ -629,7 +630,7 @@ public class AnnotationEditor extends AbstractVisualResource {
     this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
     //LEFT SPLIT
-    textPane = new JTextPane();
+    textPane = new XJTextPane();
     textPane.setEditable(false);
     textPane.setEnabled(true);
     textPane.setEditorKit(new CustomStyledEditorKit());

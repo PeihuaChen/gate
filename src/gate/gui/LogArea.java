@@ -24,6 +24,7 @@ import java.awt.event.*;
 import java.io.*;
 
 import gate.util.*;
+import gate.swing.*;
 
 /**
   * This class is used to log all messages from GATE. When an object of this
@@ -32,7 +33,7 @@ import gate.util.*;
   * The output from Err is written with <font color="red">red</font> and the
   * one from Out is written in <b>black</b>.
   */
-public class LogArea extends JTextPane {
+public class LogArea extends XJTextPane {
 
   /** Field needed in inner classes*/
   protected LogArea thisLogArea = null;
@@ -84,6 +85,7 @@ public class LogArea extends JTextPane {
 
   /** Init all listeners for this object*/
   public void initListeners(){
+    super.initListeners();
     this.addMouseListener(new MouseAdapter(){
       public void mouseClicked(MouseEvent e){
         if(SwingUtilities.isRightMouseButton(e)){
