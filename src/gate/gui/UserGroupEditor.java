@@ -23,6 +23,7 @@ import gate.security.*;
 import gate.*;
 import java.awt.event.*;
 import gate.util.Out;
+import com.borland.dbswing.DBPasswordDialog;
 
 
 
@@ -45,9 +46,9 @@ public class UserGroupEditor extends JComponent {
 
   /** JDBC URL */
   private static final String JDBC_URL =
-            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
+//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-//            "jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+            "jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
   public UserGroupEditor(AccessController ac, Session theSession) {
     try {
@@ -72,10 +73,11 @@ public class UserGroupEditor extends JComponent {
 
     Session mySession = ac.login("ADMIN", "sesame",
                               ac.findGroup("ADMINS").getID());
-    if (! ac.isValidSession(mySession))
-      Out.prln("Invalid session");
-    else
-      Out.prln("My session is: " + mySession);
+
+    if (! ac.isValidSession(mySession)){
+      Out.prln("Incorrect session obtained. Cannot continue!");
+      return;
+    }
 
     if (!mySession.isPrivilegedSession()) {
       Out.prln("Insufficient priviliges to edit/view groups and users!");
@@ -409,11 +411,19 @@ public class UserGroupEditor extends JComponent {
     }
 
     public void actionPerformed(ActionEvent e){
-      try {
-        Out.prln("Session is" + session);
-        Out.prln("is valid? " + controller.isValidSession(session));
 
-        controller.createUser("myUser", "myPassword", session);
+      DBPasswordDialog dbDialog =
+                    new DBPasswordDialog("Please enter user name and password");
+      dbDialog.setPasswordRequired(true);
+      dbDialog.setUserNameRequired(true);
+      dbDialog.show();
+      if (! dbDialog.isOKPressed())
+        return;
+
+      try {
+        controller.createUser(dbDialog.getUserName(),
+                              dbDialog.getPassword(),
+                              session);
       } catch (gate.persist.PersistenceException ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
       } catch (gate.security.SecurityException ex1) {
@@ -460,7 +470,45 @@ public class UserGroupEditor extends JComponent {
     }
 
     public void actionPerformed(ActionEvent e){
-      Out.prln("I need to add the user to a group!");
+      int index = source.getSelectedIndex();
+      if (index == -1) //return if no selection
+        return;
+      DefaultListModel model = (DefaultListModel) source.getModel();
+
+      JList groupList = new JList();
+      groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+      DefaultListModel grListModel = new DefaultListModel();
+      readGroups( grListModel, groupList);
+      if(OkCancelDialog.showDialog( UserGroupEditor.this,
+                                    groupList,
+                                    "Choose a new group")){
+        String groupName = (String) groupList.getSelectedValue();
+
+        try {
+          User user = controller.findUser((String) model.get(index) );
+          Group group = controller.findGroup(groupName);
+          group.addUser(user, session);
+
+          //finally update the original lists
+          if (usersFirst)
+            showGroupsForUser(user.getName());
+          else
+            showGroupsFirst();
+        } catch (gate.persist.PersistenceException ex) {
+          throw new gate.util.GateRuntimeException(ex.getMessage());
+        } catch (gate.security.SecurityException ex1) {
+          JOptionPane.showMessageDialog(UserGroupEditor.this,
+                                        ex1.getMessage(),
+                                        "Error adding user to group!",
+                                        JOptionPane.ERROR_MESSAGE
+                                       );
+
+        }
+
+      } //ok selected
+
+
     }//public void actionPerformed(ActionEvent e)
   } //Add2GroupAction
 
@@ -473,7 +521,47 @@ public class UserGroupEditor extends JComponent {
     }//
 
     public void actionPerformed(ActionEvent e){
-      Out.prln("I need to remove the user from a group!");
+      int index = source.getSelectedIndex();
+      if (index == -1) //return if no selection
+        return;
+      DefaultListModel model = (DefaultListModel) source.getModel();
+
+      JList groupList = new JList();
+      groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+      DefaultListModel grListModel = new DefaultListModel();
+      readGroups( grListModel, groupList);
+      if(OkCancelDialog.showDialog(
+                          UserGroupEditor.this,
+                          groupList,
+                          "Choose the group from which to remove the user")
+        ){
+
+        String groupName = (String) groupList.getSelectedValue();
+
+        try {
+          User user = controller.findUser((String) model.get(index) );
+          Group group = controller.findGroup(groupName);
+          group.removeUser(user, session);
+
+          //finally update the original lists
+          if (usersFirst)
+            showGroupsForUser(user.getName());
+          else
+            showGroupsFirst();
+        } catch (gate.persist.PersistenceException ex) {
+          throw new gate.util.GateRuntimeException(ex.getMessage());
+        } catch (gate.security.SecurityException ex1) {
+          JOptionPane.showMessageDialog(UserGroupEditor.this,
+                                        ex1.getMessage(),
+                                        "Error removing user from group!",
+                                        JOptionPane.ERROR_MESSAGE
+                                       );
+
+        }
+
+      } //ok selected
+
     }//public void actionPerformed(ActionEvent e)
   } //RemoveFromGroupAction
 
@@ -501,7 +589,44 @@ public class UserGroupEditor extends JComponent {
     }//
 
     public void actionPerformed(ActionEvent e){
-      Out.prln("I need to change the user's name!");
+      int index = source.getSelectedIndex();
+      if (index == -1) //return if no selection
+        return;
+      DefaultListModel model = (DefaultListModel) source.getModel();
+
+      JList groupList = new JList();
+      groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+      DefaultListModel grListModel = new DefaultListModel();
+      readGroups( grListModel, groupList);
+      String newName = JOptionPane.showInputDialog(
+                                     UserGroupEditor.this,
+                                    "Please enter the user's new name");
+
+      //don't change if nothing selected
+      if (newName == null || newName.equals(""))
+        return;
+
+      try {
+        User user = controller.findUser((String) model.get(index) );
+        user.setName(newName, session);
+
+        //finally update the original lists
+        if (usersFirst)
+          showUsersFirst();
+        else
+          showUsersForGroup((String) firstList.getSelectedValue());
+      } catch (gate.persist.PersistenceException ex) {
+        throw new gate.util.GateRuntimeException(ex.getMessage());
+      } catch (gate.security.SecurityException ex1) {
+        JOptionPane.showMessageDialog(UserGroupEditor.this,
+                                      ex1.getMessage(),
+                                      "Error renaming user!",
+                                      JOptionPane.ERROR_MESSAGE
+                                     );
+
+      }
+
     }//public void actionPerformed(ActionEvent e)
   } //RenameUserAction
 
