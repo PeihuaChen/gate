@@ -72,10 +72,12 @@ public class MainFrame extends JFrame
   /** used in popups */
   JMenu newLrsPopupMenu;
   JMenu newPrsPopupMenu;
+  JMenu newAppPopupMenu;
 
   /** used in menu bar */
   JMenu newLrMenu;
   JMenu newPrMenu;
+  JMenu newAppMenu;
 
   JButton stopBtn;
   Action stopAction;
@@ -104,9 +106,6 @@ public class MainFrame extends JFrame
   NewResourceDialog newResourceDialog;
   WaitDialog waitDialog;
 
-  NewApplicationAction newApplicationAction;
-//  NewLRAction newLRAction;
-//  NewPRAction newPRAction;
   NewDSAction newDSAction;
   OpenDSAction openDSAction;
   HelpAboutAction helpAboutAction;
@@ -206,9 +205,7 @@ public class MainFrame extends JFrame
     resourcesTreeRoot.add(datastoresRoot);
     resourcesTreeModel = new DefaultTreeModel(resourcesTreeRoot, true);
 
-    newApplicationAction = new NewApplicationAction();
-//    newLRAction = new NewLRAction();
-//    newPRAction = new NewPRAction();
+//    newApplicationAction = new NewApplicationAction();
     newDSAction = new NewDSAction();
     openDSAction = new OpenDSAction();
     helpAboutAction = new HelpAboutAction();
@@ -226,14 +223,12 @@ public class MainFrame extends JFrame
     }catch(MalformedURLException mue){
       mue.printStackTrace(Err.getPrintWriter());
     }
-
     resourcesTree = new JTree(resourcesTreeModel){
       public void updateUI(){
         super.updateUI();
         setRowHeight(0);
       }
     };
-
 
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
     resourcesTree.setRowHeight(0);
@@ -309,7 +304,6 @@ public class MainFrame extends JFrame
         return pSize;
       }
     };
-
     progressBar.setBorder(BorderFactory.createEmptyBorder());
     progressBar.setForeground(new Color(150, 75, 150));
     progressBar.setBorderPainted(false);
@@ -324,7 +318,6 @@ public class MainFrame extends JFrame
     Box tempVBox = Box.createVerticalBox();
     tempVBox.add(sbBox);
     tempVBox.add(progressBar);
-
     stopAction = new StopAction();
     stopAction.setEnabled(false);
     stopBtn = new JButton(stopAction);
@@ -342,7 +335,6 @@ public class MainFrame extends JFrame
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
 
-
     //TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
@@ -356,7 +348,6 @@ public class MainFrame extends JFrame
       this, "Resource parameters", true
     );
     waitDialog = new WaitDialog(this, "");
-
     //build the Help->About dialog
     JPanel splashBox = new JPanel();
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
@@ -421,7 +412,6 @@ public class MainFrame extends JFrame
     splashBox.add(Box.createVerticalStrut(10));
     splash = new Splash(this, splashBox);
 
-
     targets = new Component[]{this, newResourceDialog, splash};
 
     //MENUS
@@ -434,7 +424,10 @@ public class MainFrame extends JFrame
     fileMenu.add(newLrMenu);
     newPrMenu = new JMenu("New processing resource");
     fileMenu.add(newPrMenu);
-    fileMenu.add(new XJMenuItem(newApplicationAction, this));
+
+    newAppMenu = new JMenu("New application");
+    fileMenu.add(newAppMenu);
+
     fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(newDSAction, this));
     fileMenu.add(new XJMenuItem(openDSAction, this));
@@ -565,8 +558,9 @@ public class MainFrame extends JFrame
     this.setJMenuBar(menuBar);
 
     //popups
+    newAppPopupMenu = new JMenu("New");
     appsPopup = new JPopupMenu();
-    appsPopup.add(newApplicationAction);
+    appsPopup.add(newAppPopupMenu);
 
     newLrsPopupMenu = new JMenu("New");
     lrsPopup = new JPopupMenu();
@@ -579,7 +573,6 @@ public class MainFrame extends JFrame
     dssPopup = new JPopupMenu();
     dssPopup.add(newDSAction);
     dssPopup.add(openDSAction);
-
   }
 
   protected void initListeners(){
@@ -857,6 +850,69 @@ public class MainFrame extends JFrame
         }
       }
     });
+
+
+    newAppMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+      public void menuDeselected(MenuEvent e) {
+      }
+      public void menuSelected(MenuEvent e) {
+        newAppMenu.removeAll();
+        //find out the available types of Controllers and repopulate the menu
+        CreoleRegister reg = Gate.getCreoleRegister();
+        List controllerTypes = reg.getPublicControllerTypes();
+        if(controllerTypes != null && !controllerTypes.isEmpty()){
+          HashMap resourcesByName = new HashMap();
+          Iterator controllerTypesIter = controllerTypes.iterator();
+          while(controllerTypesIter.hasNext()){
+            ResourceData rData = (ResourceData)reg.get(controllerTypesIter.next());
+            resourcesByName.put(rData.getName(), rData);
+          }
+          List controllerNames = new ArrayList(resourcesByName.keySet());
+          Collections.sort(controllerNames);
+          controllerTypesIter = controllerNames.iterator();
+          while(controllerTypesIter.hasNext()){
+            ResourceData rData = (ResourceData)resourcesByName.
+                                 get(controllerTypesIter.next());
+            newAppMenu.add(new XJMenuItem(new NewResourceAction(rData),
+                                         MainFrame.this));
+          }
+        }
+      }
+    });
+
+
+    newAppPopupMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+      public void menuDeselected(MenuEvent e) {
+      }
+      public void menuSelected(MenuEvent e) {
+        newAppPopupMenu.removeAll();
+        //find out the available types of Controllers and repopulate the menu
+        CreoleRegister reg = Gate.getCreoleRegister();
+        List controllerTypes = reg.getPublicControllerTypes();
+        if(controllerTypes != null && !controllerTypes.isEmpty()){
+          HashMap resourcesByName = new HashMap();
+          Iterator controllerTypesIter = controllerTypes.iterator();
+          while(controllerTypesIter.hasNext()){
+            ResourceData rData = (ResourceData)reg.get(controllerTypesIter.next());
+            resourcesByName.put(rData.getName(), rData);
+          }
+          List controllerNames = new ArrayList(resourcesByName.keySet());
+          Collections.sort(controllerNames);
+          controllerTypesIter = controllerNames.iterator();
+          while(controllerTypesIter.hasNext()){
+            ResourceData rData = (ResourceData)resourcesByName.
+                                 get(controllerTypesIter.next());
+            newAppPopupMenu.add(new XJMenuItem(new NewResourceAction(rData),
+                                         MainFrame.this));
+          }
+        }
+      }
+    });
+
   }//protected void initListeners()
 
   public void progressChanged(int i) {
@@ -1354,51 +1410,6 @@ public class MainFrame extends JFrame
     }
   }//class LoadCreoleRepositoryAction extends AbstractAction
 
-
-  class NewApplicationAction extends AbstractAction {
-    public NewApplicationAction() {
-      super("New Application");
-      putValue(SHORT_DESCRIPTION,"Create a new Application");
-    }
-    public void actionPerformed(ActionEvent e) {
-
-      Object answer = JOptionPane.showInputDialog(
-                        MainFrame.this,
-                        "Please provide a name for the new application:",
-                        "Gate",
-                        JOptionPane.QUESTION_MESSAGE);
-      if(answer == null) return;
-      if (answer instanceof String) {
-        try{
-          SerialController controller =
-                (SerialController)Factory.createResource(
-                                "gate.creole.SerialController",
-                                Factory.newFeatureMap(),
-                                Factory.newFeatureMap(), null, (String)answer);
-        } catch(ResourceInstantiationException rie){
-          JOptionPane.showMessageDialog(MainFrame.this,
-                                        "Could not create application!\n" +
-                                         rie.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-        }
-
-//        SerialController controller = new gate.creole.SerialController();
-//        controller.setName((String)answer);
-//        NameBearerHandle handle = new NameBearerHandle(controller,
-//                                                       MainFrame.this);
-//        handle.addProgressListener(MainFrame.this);
-//        handle.addStatusListener(MainFrame.this);
-//        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle,
-//                                                                 false);
-//        resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
-      } else{
-        JOptionPane.showMessageDialog(MainFrame.this,
-                                      "Unrecognised input!",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }
-    }
-
-  }
 
   class NewResourceAction extends AbstractAction {
     public NewResourceAction(ResourceData rData) {

@@ -154,7 +154,6 @@ public class Main {
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         frame = new MainFrame();
-
         if(DEBUG) Out.prln("constructing GUI");
 
         // run the GUI
