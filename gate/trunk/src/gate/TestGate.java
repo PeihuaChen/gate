@@ -54,7 +54,7 @@ import gate.persist.*;
   * <A HREF=http://localhost:80/gate.ac.uk/>http://localhost:80/gate.ac.uk/</A>
   * <LI>
   * the file system location that the classes came from, e.g.
-  * <TT>z:\gate2\classes</TT>, or <TT>jar:....gate.jar</TT>.
+  * <TT>z:\gate\classes</TT>, or <TT>jar:....gate.jar</TT>.
   * </UL>
   * This search order can be modified by parameters to the main
   * function (see below).

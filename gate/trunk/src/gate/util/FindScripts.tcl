@@ -1,6 +1,6 @@
 # FindScripts.tcl
 #
-# lists all the .tcl scripts in the gate2/src directory
+# lists all the .tcl scripts in the gate/src directory
 #
 # Hamish, 14/3/00 
 # $Id$
@@ -22,11 +22,11 @@ namespace eval GATE {
   proc findScripts { } {
     global tclFiles
 
-    # cd to the gate2/src directory
-    # assumes that we are in gate2 or one of its subdirectories when we start
+    # cd to the gate/src directory
+    # assumes that we are in gate or one of its subdirectories when we start
     set WD [pwd]
-    if { ! [string match "*gate2*" $WD] } { error "not in the gate2 directories" }
-    while { [file tail $WD] != "gate2" } { cd ..; set WD [pwd] }
+    if { ! [string match "*gate*" $WD] } { error "not in the gate directories" }
+    while { [file tail $WD] != "gate" } { cd ..; set WD [pwd] }
     cd src
 
     filter {.}
