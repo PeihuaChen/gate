@@ -36,6 +36,7 @@ create or replace package persist is
   
   procedure delete_lr(p_lr_id     IN number,
                       p_lr_type   IN varchar2);
+
     
 end persist;
 /
