@@ -36,6 +36,15 @@ public class DumpingPR extends AbstractLanguageAnalyser
    */
   protected List annotationTypes;
 
+  /**
+   * A list of strings specifying new names to be used instead of the original
+   * annotation types given in the annotationTypes parameter. For example, if
+   * annotationTypes was set to [Location, Date], then if dumpTypes is set to
+   * [Place, Date-expr], then the labels <Place> and <Date-expr> will be inserted
+   * instead of <Location> and <Date>.
+   */
+  protected List dumpTypes;
+
   /**the name of the annotation set
    * from which to take the annotations for dumping
    */
@@ -47,6 +56,8 @@ public class DumpingPR extends AbstractLanguageAnalyser
   protected boolean includeFeatures = false;
 
   protected java.net.URL outputFileUrl;
+
+  private static final String DUMPING_PR_SET = "DumpingPRTempSet";
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -96,7 +107,23 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
     //then get the annotations for export
     AnnotationSet annots2Export = allAnnots.get(types2Export);
+
+    //check whether we want the annotations to be renamed before
+    //export (that's what dumpTypes is for)
+    if (dumpTypes != null && !dumpTypes.isEmpty()) {
+      HashMap renameMap = new HashMap();
+      for(int i=0; i<dumpTypes.size() && i<annotationTypes.size(); i++) {
+        //check if we have a corresponding annotationType and if yes,
+        //then add to the hash map for renaming
+        renameMap.put(annotationTypes.get(i), dumpTypes.get(i));
+      }//for
+      //if we have to rename annotations, then do so
+      if(!renameMap.isEmpty())
+        annots2Export = renameAnnotations(annots2Export, renameMap);
+    }//if
+
     write2File(annots2Export);
+    document.removeAnnotationSet(this.DUMPING_PR_SET);
 
   } // execute()
 
@@ -120,7 +147,33 @@ public class DumpingPR extends AbstractLanguageAnalyser
     }
 
 
-  }
+  }//write2File
+
+  protected AnnotationSet renameAnnotations(AnnotationSet annots2Export,
+                                   HashMap renameMap){
+    Iterator iter = annots2Export.iterator();
+    AnnotationSet as = document.getAnnotations(DUMPING_PR_SET);
+    if (!as.isEmpty())
+      as.clear();
+    while(iter.hasNext()) {
+      Annotation annot = (Annotation) iter.next();
+      //first check whether this type needs to be renamed
+      //if not, continue
+      if (!renameMap.containsKey(annot.getType()))
+        renameMap.put(annot.getType(), annot.getType());
+      try{
+        as.add(annot.getId(),
+            annot.getStartNode().getOffset(),
+            annot.getEndNode().getOffset(),
+            (String) renameMap.get(annot.getType()),
+            annot.getFeatures());
+      } catch (InvalidOffsetException ex) {
+        throw new GateRuntimeException("DumpingPR: " + ex.getMessage());
+      }
+    }//while
+    return as;
+  }//renameAnnotations
+
 
   /**get the name of the annotation set*/
   public String getAnnotationSetName() {
@@ -138,6 +191,14 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   public void setAnnotationTypes(List newTypes) {
     annotationTypes = newTypes;
+  }
+
+  public List getDumpTypes() {
+    return this.dumpTypes;
+  }
+
+  public void setDumpTypes(List newTypes) {
+    dumpTypes = newTypes;
   }
 
   public URL getOutputFileUrl() {
