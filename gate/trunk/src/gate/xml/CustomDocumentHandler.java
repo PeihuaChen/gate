@@ -2,7 +2,7 @@
  *	CustomDocumentHandler.java
  *
  *	Cristian URSU,  9/May/2000
- *  $id$
+ *  $Id$
  */
 
 package gate.xml;
