@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Thu Oct 25 12:20:09 2001
+ *  auto generated: Thu Oct 25 17:07:34 2001
  *
  *  $Id$
  *
@@ -21,6 +21,12 @@ CREATE UNIQUE INDEX XT_ANNOT_SET_01 ON T_ANNOT_SET
 (
        AS_DOC_ID                      ,
        AS_NAME                        
+);
+
+CREATE UNIQUE INDEX XT_ANNOTATION_01 ON T_ANNOTATION
+(
+       ANN_DOC_ID                     ,
+       ANN_LOCAL_ID                   
 );
 
 CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON T_ANNOTATION_TYPE
@@ -67,6 +73,12 @@ CREATE INDEX XT_LANG_RESOURCE_03 ON T_LANG_RESOURCE
 CREATE UNIQUE INDEX XT_LR_TYPE_01 ON T_LR_TYPE
 (
        LRTP_TYPE                      
+);
+
+CREATE UNIQUE INDEX XT_NODE_01 ON T_NODE
+(
+       NODE_DOC_ID                    ,
+       NODE_LOCAL_ID                  
 );
 
 CREATE UNIQUE INDEX XT_PARAMETER_01 ON T_PARAMETER
