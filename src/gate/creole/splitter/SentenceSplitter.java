@@ -20,7 +20,6 @@ import gate.event.*;
 import gate.creole.tokeniser.*;
 import gate.creole.gazetteer.*;
 import gate.creole.*;
-//import gate.creole.nerc.Nerc;
 
 import java.util.*;
 /**
