@@ -12,7 +12,7 @@
  *  $Id$
  *
  */
-package gate.swing;
+package gate.gui;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -57,7 +57,7 @@ public class TabBlinker implements Runnable{
       }// while
     }//run()
 
-    public void stopBlinking(){
+    public void stopBlinking(int foo){
       synchronized(this){
         if(thread.isAlive()){
           stopIt = true;
