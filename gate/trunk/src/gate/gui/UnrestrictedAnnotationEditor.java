@@ -37,7 +37,8 @@ import gate.creole.*;
   * It's his responsability.
   */
 public class UnrestrictedAnnotationEditor extends AbstractVisualResource
-                                          implements AnnotationVisualResource{
+                                          implements AnnotationVisualResource,
+                                                     ResizableVisualResource{
 
   /** Default constructor*/
   public UnrestrictedAnnotationEditor() {}

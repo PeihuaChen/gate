@@ -43,15 +43,20 @@ public class OkCancelDialog extends JDialog {
 
   protected void init(Component contents){
     MainFrame.getGuiRoots().add(this);
-    //fill in the contents
-    JPanel vBox = new JPanel();
-    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
 
-    JPanel contentsPanel = new JPanel();
-    contentsPanel.add(contents);
-    contentsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    getContentPane().setLayout(new BorderLayout());
 
-    vBox.add(contentsPanel);
+//    //fill in the contents
+//    JPanel vBox = new JPanel();
+//    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
+//
+//    JPanel contentsPanel = new JPanel();
+//    contentsPanel.add(contents);
+//    contentsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//
+//    vBox.add(contentsPanel);
+
+    getContentPane().add(contents, BorderLayout.CENTER);
 
     JPanel buttonsBox = new JPanel();
     buttonsBox.setLayout(new BoxLayout(buttonsBox, BoxLayout.X_AXIS));
@@ -64,10 +69,12 @@ public class OkCancelDialog extends JDialog {
     buttonsBox.add(cancelButton);
     buttonsBox.add(Box.createHorizontalGlue());
 
+    Box vBox = Box.createVerticalBox();
+    vBox.add(Box.createVerticalStrut(10));
     vBox.add(buttonsBox);
     vBox.add(Box.createVerticalStrut(10));
 
-    getContentPane().add(vBox, BorderLayout.CENTER);
+    getContentPane().add(vBox, BorderLayout.SOUTH);
 
 
     okButton.addActionListener(new ActionListener() {

@@ -34,7 +34,8 @@ import gate.creole.*;
   * This viewer is {@link gate.creole.AnnotationSchema} driven.
   */
 public class SchemaAnnotationEditor extends AbstractVisualResource
-                                    implements AnnotationVisualResource{
+                                    implements AnnotationVisualResource,
+                                               ResizableVisualResource{
 
   /** Default constructor */
   public SchemaAnnotationEditor(){}
@@ -291,7 +292,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     tableModel = new FeaturesTableModel(tableData);
   }// initLocalData();
 
-  /** This method creates the GUI components and paces them into the layout*/
+  /** This method creates the GUI components and places them into the layout*/
   protected void buildGuiComponents(){
     this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
     // Create the annotationSchema JComboBox box
@@ -320,7 +321,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     featuresTable.setSelectionMode(
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     featuresTable.setModel(new FeaturesTableModel(new HashSet()));
-    featuresTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+//    featuresTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     featuresEditor = new InnerFeaturesEditor();
     featuresTable.setDefaultEditor(java.lang.Object.class, featuresEditor);
     featuresTableScroll = new JScrollPane(featuresTable);
