@@ -16,6 +16,7 @@
 package gate.security;
 
 import java.net.*;
+import java.util.*;
 
 import gate.persist.PersistenceException;
 
@@ -91,9 +92,14 @@ public interface AccessController {
   public void close()
     throws PersistenceException;
 
-  /** --- */
-//  public void setGroupName(Group o, String newName, Session s)
-//    throws PersistenceException, SecurityException;
+
+  /** -- */
+  public List listUsers()
+    throws PersistenceException;
+
+  /** -- */
+  public List listGroups()
+    throws PersistenceException;
 
 
 }
