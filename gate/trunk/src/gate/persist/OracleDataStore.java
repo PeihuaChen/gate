@@ -2567,7 +2567,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+/*  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
     throws PersistenceException {
 
     //0. preconditions
@@ -2616,7 +2616,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
-
+*/
 
   /** helper for sync() - never call directly */
 /*  protected void _syncAnnotations(Document doc)
