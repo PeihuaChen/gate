@@ -19,7 +19,7 @@
 public interface Gazetteer extends gate.LanguageAnalyser,gate.ProcessingResource {
 
   /** look up a string and return a lookup*/
-  public Lookup lookup(String singleItem);
+  public java.util.Set lookup(String singleItem);
 
   /**
    * Sets the AnnotationSet that will be used at the next run for the newly
@@ -83,4 +83,19 @@ public interface Gazetteer extends gate.LanguageAnalyser,gate.ProcessingResource
    * @param gl Gazetteer Listener to be registered
    */
   public void addGazetteerListener(GazetteerListener gl);
+
+  /**
+   * Adds a new string to the gazetteer
+   * @param singleItem
+   * @param lookup the lookup to be associated with the new string
+   * @return true if the operation was successful
+   */
+  boolean add(String singleItem, Lookup lookup);
+
+  /**
+   * Removes a string from the gazetteer
+   * @param singleItem
+   * @return true if the operation was successful
+   */
+  boolean remove(String singleItem);
 }//interface Gazetteer

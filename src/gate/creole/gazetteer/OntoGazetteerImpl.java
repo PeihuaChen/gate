@@ -29,7 +29,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
   public OntoGazetteerImpl() {
   }
 
-  public Lookup lookup(String singleItem) {
+  public java.util.Set lookup(String singleItem) {
     return gaz.lookup(singleItem);
   }
 
@@ -83,4 +83,13 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     }
 
   } // checkParameters
+
+  public boolean remove(String singleItem) {
+    return gaz.remove(singleItem);
+  }
+
+  public boolean add(String singleItem, Lookup lookup) {
+    return gaz.add(singleItem,lookup);
+  }
+
 } // OntoGazetteerImpl
