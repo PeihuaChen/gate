@@ -1697,10 +1697,13 @@ public class AnnotationEditor extends AbstractVisualResource {
                 tableChanged = true;
                 //update the text
                 //hide the highlight
+                int selStart = textPane.getSelectionStart();
+                int selEnd = textPane.getSelectionEnd();
                 textPane.select(ann.getStartNode().getOffset().intValue(),
                                 ann.getEndNode().getOffset().intValue());
                 textPane.setCharacterAttributes(
                           textPane.getStyle("default"), true);
+                textPane.select(selStart, selEnd);
               }//if(tData.getVisible())
               if(tData.annotations.isEmpty()){
                 //no more annotations of this type -> delete the node
@@ -1877,6 +1880,7 @@ public class AnnotationEditor extends AbstractVisualResource {
         public void actionPerformed(ActionEvent e) {
           Runnable runnable = new Runnable(){
             public void run(){
+             highlighter.removeAllHighlights();
              selectAnnotation(set, annotation);
             }
           };
