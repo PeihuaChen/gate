@@ -82,19 +82,11 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   
   protected void initGUI(){
     featuresModel = new FeaturesTableModel();
-    mainTable = new XJTable(){
-      public boolean getScrollableTracksViewportWidth(){
-        return false;
-      }
-      
-      public boolean getScrollableTracksViewportHeight(){
-        return false;
-      }
-    };
+    mainTable = new XJTable();
     mainTable.setModel(featuresModel);
     mainTable.setTableHeader(null);
     mainTable.setSortable(false);
-    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     mainTable.setShowVerticalLines(false);    
     mainTable.setBackground(getBackground());
     mainTable.setIntercellSpacing(new Dimension(2,2));
