@@ -61,10 +61,15 @@ public class MainFrame extends JFrame
   JScrollPane lowerScroll;
 
   JPopupMenu appsPopup;
+  JPopupMenu dssPopup;
   JPopupMenu lrsPopup;
   JPopupMenu prsPopup;
-  JPopupMenu dssPopup;
 
+  /** used in popups */
+  JMenu newLrsPopupMenu;
+  JMenu newPrsPopupMenu;
+
+  /** used in menu bar */
   JMenu newLrMenu;
   JMenu newPrMenu;
 
@@ -194,15 +199,7 @@ public class MainFrame extends JFrame
     resourcesTreeRoot.add(datastoresRoot);
     resourcesTreeModel = new DefaultTreeModel(resourcesTreeRoot, true);
 
-//    handleForResourceName = new WeakHashMap();
-
-
-/*
-    openProjects = new ArrayList();
-    openProjects.add(currentProject = new ProjectData(null, this));
-*/
     newApplicationAction = new NewApplicationAction();
-    //newProjectAction = new NewProjectAction();
     newLRAction = new NewLRAction();
     newPRAction = new NewPRAction();
     newDSAction = new NewDSAction();
@@ -382,9 +379,6 @@ public class MainFrame extends JFrame
     //MENUS
     menuBar = new JMenuBar();
 
-    newLrMenu = new JMenu("New Language Resource");
-
-
 
     JMenu fileMenu = new JMenu("File");
 
@@ -517,11 +511,13 @@ public class MainFrame extends JFrame
     appsPopup = new JPopupMenu();
     appsPopup.add(newApplicationAction);
 
+    newLrsPopupMenu = new JMenu("New");
     lrsPopup = new JPopupMenu();
-    lrsPopup.add(newLRAction);
+    lrsPopup.add(newLrsPopupMenu);
 
+    newPrsPopupMenu = new JMenu("New");
     prsPopup = new JPopupMenu();
-    prsPopup.add(newPRAction);
+    prsPopup.add(newPrsPopupMenu);
 
     dssPopup = new JPopupMenu();
     dssPopup.add(newDSAction);
@@ -724,7 +720,37 @@ public class MainFrame extends JFrame
         newPrMenu.removeAll();
         //find out the available types of LRs and repopulate the menu
         CreoleRegister reg = Gate.getCreoleRegister();
-        List lrTypes = reg.getPublicPrTypes();
+        List prTypes = reg.getPublicPrTypes();
+        if(prTypes != null && !prTypes.isEmpty()){
+          HashMap resourcesByName = new HashMap();
+          Iterator prIter = prTypes.iterator();
+          while(prIter.hasNext()){
+            ResourceData rData = (ResourceData)reg.get(prIter.next());
+            resourcesByName.put(rData.getName(), rData);
+          }
+          List prNames = new ArrayList(resourcesByName.keySet());
+          Collections.sort(prNames);
+          prIter = prNames.iterator();
+          while(prIter.hasNext()){
+            ResourceData rData = (ResourceData)resourcesByName.
+                                 get(prIter.next());
+            newPrMenu.add(new XJMenuItem(new NewResourceAction(rData),
+                                         MainFrame.this));
+          }
+        }
+      }
+    });
+
+    newLrsPopupMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+      public void menuDeselected(MenuEvent e) {
+      }
+      public void menuSelected(MenuEvent e) {
+        newLrsPopupMenu.removeAll();
+        //find out the available types of LRs and repopulate the menu
+        CreoleRegister reg = Gate.getCreoleRegister();
+        List lrTypes = reg.getPublicLrTypes();
         if(lrTypes != null && !lrTypes.isEmpty()){
           HashMap resourcesByName = new HashMap();
           Iterator lrIter = lrTypes.iterator();
@@ -738,14 +764,43 @@ public class MainFrame extends JFrame
           while(lrIter.hasNext()){
             ResourceData rData = (ResourceData)resourcesByName.
                                  get(lrIter.next());
-            newPrMenu.add(new XJMenuItem(new NewResourceAction(rData),
+            newLrsPopupMenu.add(new XJMenuItem(new NewResourceAction(rData),
                                          MainFrame.this));
           }
         }
       }
     });
 
-  }
+    newPrsPopupMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+      public void menuDeselected(MenuEvent e) {
+      }
+      public void menuSelected(MenuEvent e) {
+        newPrsPopupMenu.removeAll();
+        //find out the available types of LRs and repopulate the menu
+        CreoleRegister reg = Gate.getCreoleRegister();
+        List prTypes = reg.getPublicPrTypes();
+        if(prTypes != null && !prTypes.isEmpty()){
+          HashMap resourcesByName = new HashMap();
+          Iterator prIter = prTypes.iterator();
+          while(prIter.hasNext()){
+            ResourceData rData = (ResourceData)reg.get(prIter.next());
+            resourcesByName.put(rData.getName(), rData);
+          }
+          List prNames = new ArrayList(resourcesByName.keySet());
+          Collections.sort(prNames);
+          prIter = prNames.iterator();
+          while(prIter.hasNext()){
+            ResourceData rData = (ResourceData)resourcesByName.
+                                 get(prIter.next());
+            newPrsPopupMenu.add(new XJMenuItem(new NewResourceAction(rData),
+                                         MainFrame.this));
+          }
+        }
+      }
+    });
+  }//protected void initListeners()
 
   public void progressChanged(int i) {
     //progressBar.setStringPainted(true);
