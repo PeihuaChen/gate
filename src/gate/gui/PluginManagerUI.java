@@ -349,7 +349,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       pluginIter = loadAlwaysByURL.keySet().iterator();
       while(pluginIter.hasNext()){
         URL aPluginURL = (URL)pluginIter.next();
-        boolean load = ((Boolean)loadNowByURL.get(aPluginURL)).booleanValue();
+        boolean load = ((Boolean)loadAlwaysByURL.get(aPluginURL)).booleanValue();
         boolean loaded = Gate.getAutoloadPlugins().contains(aPluginURL); 
         if(load && !loaded){
           //set autoload top true
