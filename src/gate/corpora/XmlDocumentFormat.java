@@ -177,6 +177,7 @@ Angel */
     } catch (SAXException e){
           // the next line is commented to avoid Document creation fail on error
 //        throw new DocumentFormatException(e);
+        doc.getFeatures().put("parsingError", new Boolean(true));
           Out.println("Warning: Document remains unparsed. \n"
               +"\n  Stack Dump: ");
           e.printStackTrace(Out.getPrintWriter());
