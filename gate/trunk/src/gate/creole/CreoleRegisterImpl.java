@@ -259,6 +259,75 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   /** Get the list of types of VR in the register. */
   public Set getVrTypes() { return vrTypes; }
 
+  /** Get a list of all instantiations of LR in the register. */
+  public List getLrInstances() {
+    Set lrTypeSet = getLrTypes();
+    List instances = new ArrayList();
+
+    Iterator iter = lrTypeSet.iterator();
+    while(iter.hasNext()) {
+      String type = (String) iter.next();
+      instances.addAll(getLrInstances(type));
+    }
+
+    return instances;
+  } // getLrInstances()
+
+  /** Get a list of all instantiations of PR in the register. */
+  public List getPrInstances() {
+    Set prTypeSet = getPrTypes();
+    List instances = new ArrayList();
+
+    Iterator iter = prTypeSet.iterator();
+    while(iter.hasNext()) {
+      String type = (String) iter.next();
+      instances.addAll(getPrInstances(type));
+    }
+
+    return instances;
+  } // getPrInstances()
+
+  /** Get a list of all instantiations of VR in the register. */
+  public List getVrInstances() {
+    Set vrTypeSet = getVrTypes();
+    List instances = new ArrayList();
+
+    Iterator iter = vrTypeSet.iterator();
+    while(iter.hasNext()) {
+      String type = (String) iter.next();
+      instances.addAll(getVrInstances(type));
+    }
+
+    return instances;
+  } // getVrInstances()
+
+  /** Get a list of instantiations of a type of LR in the register. */
+  public List getLrInstances(String resourceTypeName) {
+    ResourceData resData = (ResourceData) get(resourceTypeName);
+    if(resData == null)
+      return new ArrayList();
+
+    return resData.getInstantiations();
+  } // getLrInstances
+
+  /** Get a list of instantiations of a type of PR in the register. */
+  public List getPrInstances(String resourceTypeName) {
+    ResourceData resData = (ResourceData) get(resourceTypeName);
+    if(resData == null)
+      return new ArrayList();
+
+    return resData.getInstantiations();
+  } // getPrInstances
+
+  /** Get a list of instantiations of a type of VR in the register. */
+  public List getVrInstances(String resourceTypeName) {
+    ResourceData resData = (ResourceData) get(resourceTypeName);
+    if(resData == null)
+      return new ArrayList();
+
+    return resData.getInstantiations();
+  } // getVrInstances
+
   /** A list of the types of LR in the register. */
   protected Set lrTypes = new HashSet();
 
