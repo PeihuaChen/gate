@@ -11,27 +11,27 @@
       <INTERFACE>gate.Document</INTERFACE>
       <COMMENT>GATE transient document</COMMENT>
       <OR>
-        <PARAMETER NAME="sourceUrl" 
-          SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf" 
+        <PARAMETER NAME="sourceUrl"
+          SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf"
           COMMENT="Source URL">java.net.URL</PARAMETER>
         <PARAMETER NAME="stringContent" COMMENT="The content of the document">
           java.lang.String</PARAMETER>
       </OR>
-      <PARAMETER COMMENT="Should the document read the original markup" 
+      <PARAMETER COMMENT="Should the document read the original markup"
         NAME="markupAware" DEFAULT="true">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="encoding" OPTIONAL="true" COMMENT="Encoding" DEFAULT="">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="sourceUrlStartOffset" 
+      <PARAMETER NAME="sourceUrlStartOffset"
         COMMENT="Start offset for documents based on ranges" OPTIONAL="true">
         java.lang.Long</PARAMETER>
-      <PARAMETER NAME="sourceUrlEndOffset" 
+      <PARAMETER NAME="sourceUrlEndOffset"
         COMMENT="End offset for documents based on ranges" OPTIONAL="true">
         java.lang.Long</PARAMETER>
-      <PARAMETER NAME="preserveOriginalContent" 
-        COMMENT="Should the document preserve the original content" 
+      <PARAMETER NAME="preserveOriginalContent"
+        COMMENT="Should the document preserve the original content"
         DEFAULT="false">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="collectRepositioningInfo" 
-        COMMENT="Should the document collect repositioning information" 
+      <PARAMETER NAME="collectRepositioningInfo"
+        COMMENT="Should the document collect repositioning information"
         DEFAULT="false">java.lang.Boolean</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
@@ -41,7 +41,7 @@
       <CLASS>gate.corpora.CorpusImpl</CLASS>
       <COMMENT>GATE transient corpus</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
-      <PARAMETER NAME="documentsList" COMMENT="A list of GATE documents" 
+      <PARAMETER NAME="documentsList" COMMENT="A list of GATE documents"
         OPTIONAL="true" ITEM_CLASS_NAME="gate.Document" >
         java.util.List</PARAMETER>
       <ICON>lrs.gif</ICON>
@@ -111,60 +111,60 @@
       <NAME>Annotation schema</NAME>
       <CLASS>gate.creole.AnnotationSchema</CLASS>
       <COMMENT>An annotation type and its features</COMMENT>
-      <PARAMETER NAME="xmlFileUrl" COMMENT="The url to the definition file" 
+      <PARAMETER NAME="xmlFileUrl" COMMENT="The url to the definition file"
         SUFFIXES="xml;xsd">java.net.URL</PARAMETER>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/AddressSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
         <PARAM NAME ="xmlFileUrl" VALUE="gate:/creole/schema/DateSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/FacilitySchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
         <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/GpeSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/IdentifierSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" 
+        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml"
           />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/LocationSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/MoneySchema.xml" 
+        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/MoneySchema.xml"
           />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/OrganizationSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/PercentSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" 
+        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml"
           />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/TokenSchema.xml" 
+        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/TokenSchema.xml"
           />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE 
+        <PARAM NAME ="xmlFileUrl" VALUE
           ="gate:/creole/schema/SyntaxTreeNodeSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/CorefSchema.xml" 
+        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/CorefSchema.xml"
           />
       </AUTOINSTANCE>
     </RESOURCE>
@@ -176,20 +176,20 @@
       <NAME>GATE APF exporter</NAME>
       <CLASS>gate.creole.APFormatExporter</CLASS>
       <COMMENT>An APF exporter .</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be exported" 
+      <PARAMETER NAME="document" COMMENT="The document to be exported"
         RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
-      <PARAMETER NAME="source" 
+      <PARAMETER NAME="source"
         COMMENT="The source attribute attached to a source file" RUNTIME="true">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="dtdFileName" 
-        COMMENT="The path to the DTD for the APF file" 
+      <PARAMETER NAME="dtdFileName"
+        COMMENT="The path to the DTD for the APF file"
         DEFAULT="ace-rdc.v2.0.1.dtd.dtd">java.lang.String</PARAMETER>
-      <PARAMETER NAME="exportFilePath" COMMENT="Source URL where to export" 
+      <PARAMETER NAME="exportFilePath" COMMENT="Source URL where to export"
         RUNTIME="true" SUFFIXES="xml">java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE" 
+      <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE"
         NAME="exportedTypes">java.util.ArrayList</PARAMETER>
-      <PARAMETER DEFAULT="true" 
-        COMMENT="Should the SOURCE be written to the APF file" 
+      <PARAMETER DEFAULT="true"
+        COMMENT="Should the SOURCE be written to the APF file"
         NAME="isSourceWritten">java.lang.Boolean</PARAMETER>
     </RESOURCE>
     <!-- creole.xml for the internal tokeniser -->
@@ -197,15 +197,15 @@
       <NAME>GATE Unicode Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>
       <COMMENT>A customisable Unicode tokeniser.</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be tokenised" 
+      <PARAMETER NAME="document" COMMENT="The document to be tokenised"
         RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules" 
+      <PARAMETER DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules"
         COMMENT="The URL for the rules file" SUFFIXES="rules" NAME="rulesURL">
         java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8" 
+      <PARAMETER DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the definitions" NAME="encoding">
         java.lang.String</PARAMETER>
       <ICON>shefTokeniser.gif</ICON>
@@ -215,20 +215,20 @@
       <NAME>ANNIE English Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
       <COMMENT>A customisable English tokeniser.</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be tokenised" 
+      <PARAMETER NAME="document" COMMENT="The document to be tokenised"
         RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="tokeniserRulesURL" 
-        DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules" 
+      <PARAMETER NAME="tokeniserRulesURL"
+        DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules"
         COMMENT="The URL for the rules file" SUFFIXES="rules" >
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="transducerGrammarURL" 
-        DEFAULT="gate:/creole/tokeniser/postprocess.jape" 
+      <PARAMETER NAME="transducerGrammarURL"
+        DEFAULT="gate:/creole/tokeniser/postprocess.jape"
         COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="encoding" 
+      <PARAMETER NAME="encoding"
         COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
         java.lang.String</PARAMETER>
       <ICON>shefTokeniser.gif</ICON>
@@ -238,23 +238,23 @@
       <NAME>ANNIE Gazetteer</NAME>
       <CLASS>gate.creole.gazetteer.DefaultGazetteer</CLASS>
       <COMMENT>A list lookup component.</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="listsURL" 
-        DEFAULT="gate:/creole/gazeteer/default/lists.def" 
+      <PARAMETER NAME="listsURL"
+        DEFAULT="gate:/creole/gazeteer/default/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8" 
+      <PARAMETER DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the definitions" NAME="encoding">
         java.lang.String</PARAMETER>
-      <PARAMETER DEFAULT="true" 
-        COMMENT="Should this gazetteer diferentiate on case" 
+      <PARAMETER DEFAULT="true"
+        COMMENT="Should this gazetteer diferentiate on case"
         NAME="caseSensitive">java.lang.Boolean</PARAMETER>
-      <PARAMETER DEFAULT="true" 
-        COMMENT="Should this gazetteer only match whole words" 
+      <PARAMETER DEFAULT="true"
+        COMMENT="Should this gazetteer only match whole words"
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
@@ -262,25 +262,25 @@
     <RESOURCE>
       <NAME>Hash Gazetteer</NAME>
       <CLASS>com.ontotext.gate.gazetteer.HashGazetteer</CLASS>
-      <COMMENT>A list lookup component implemented by OntoText 
-        Lab.(www.ontotext.com) For documentation, download and license 
-        agreement please refer to 
-        (www.ontotext.com/downloads/index.html#gazetteer). The licence 
-        information is also available in licence.ontotext.html in the lib 
+      <COMMENT>A list lookup component implemented by OntoText
+        Lab.(www.ontotext.com) For documentation, download and license
+        agreement please refer to
+        (www.ontotext.com/downloads/index.html#gazetteer). The licence
+        information is also available in licence.ontotext.html in the lib
         folder of GATE</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="listsURL" 
-        DEFAULT="gate:/creole/gazeteer/default/lists.def" 
+      <PARAMETER NAME="listsURL"
+        DEFAULT="gate:/creole/gazeteer/default/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8" 
+      <PARAMETER DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the definitions" NAME="encoding">
         java.lang.String</PARAMETER>
-      <PARAMETER DEFAULT="true" NAME="caseSensitive" 
+      <PARAMETER DEFAULT="true" NAME="caseSensitive"
         COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">
         java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
@@ -290,21 +290,21 @@
       <NAME>Jape Transducer</NAME>
       <CLASS>gate.creole.Transducer</CLASS>
       <COMMENT>A module for executing Jape grammars</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" RUNTIME="true" 
-        COMMENT="The annotation set to be used as input for the transducer" 
+      <PARAMETER NAME="inputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as input for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" RUNTIME="true" 
-        COMMENT="The annotation set to be used as output for the transducer" 
+      <PARAMETER NAME="outputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file" 
+      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
         SUFFIXES="jape">java.net.URL</PARAMETER>
-      <PARAMETER NAME="encoding" DEFAULT="UTF-8" 
+      <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="ontology" 
-        COMMENT="The ontology to be used by this transducer" 
+      <PARAMETER NAME="ontology"
+        COMMENT="The ontology to be used by this transducer"
         OPTIONAL="true">gate.creole.ontology.Ontology</PARAMETER>
     </RESOURCE>
     <!-- creole.xml for ANNIE Transducer -->
@@ -312,18 +312,18 @@
       <NAME>ANNIE NE Transducer</NAME>
       <CLASS>gate.creole.ANNIETransducer</CLASS>
       <COMMENT>ANNIE named entity grammar</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" RUNTIME="true" 
-        COMMENT="The annotation set to be used as input for the transducer" 
+      <PARAMETER NAME="inputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as input for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" RUNTIME="true" 
-        COMMENT="The annotation set to be used as output for the transducer" 
+      <PARAMETER NAME="outputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file" 
+      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
         DEFAULT="gate:/creole/transducer/NE/main.jape" SUFFIXES="jape">
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="encoding" DEFAULT="UTF-8" 
+      <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>
     </RESOURCE>
@@ -332,18 +332,18 @@
       <NAME>ANNIE VP Chunker</NAME>
       <CLASS>gate.creole.VPChunker</CLASS>
       <COMMENT>ANNIE VP Chunker component</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" RUNTIME="true" 
-        COMMENT="The annotation set to be used as input for the transducer" 
+      <PARAMETER NAME="inputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as input for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" RUNTIME="true" 
-        COMMENT="The annotation set to be used as output for the transducer" 
+      <PARAMETER NAME="outputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file" 
+      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
         DEFAULT="gate:/creole/chunker/VP/VerbGroups.jape" SUFFIXES="jape">
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="encoding" DEFAULT="UTF-8" 
+      <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
         java.lang.String</PARAMETER>
     </RESOURCE>
@@ -352,24 +352,24 @@
       <NAME>ANNIE Sentence Splitter</NAME>
       <COMMENT>ANNIE sentence splitter</COMMENT>
       <CLASS>gate.creole.splitter.SentenceSplitter</CLASS>
-      <PARAMETER COMMENT="The document to be processed" NAME="document" 
+      <PARAMETER COMMENT="The document to be processed" NAME="document"
         RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" 
-        COMMENT="The name used for the temporary annotation set" RUNTIME="true" 
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name used for the temporary annotation set" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" 
-        COMMENT="The name used for the temporary annotation set" RUNTIME="true" 
+      <PARAMETER NAME="outputASName"
+        COMMENT="The name used for the temporary annotation set" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="encoding" 
-        COMMENT="The encoding used for reading the definition files" 
+      <PARAMETER NAME="encoding"
+        COMMENT="The encoding used for reading the definition files"
         DEFAULT="UTF-8">java.lang.String</PARAMETER>
-      <PARAMETER NAME="gazetteerListsURL" 
-        DEFAULT="gate:/creole/splitter/gazetteer/lists.def" 
-        COMMENT="The URL to the custom list lookup definition file" 
+      <PARAMETER NAME="gazetteerListsURL"
+        DEFAULT="gate:/creole/splitter/gazetteer/lists.def"
+        COMMENT="The URL to the custom list lookup definition file"
         OPTIONAL="true" SUFFIXES="def">java.net.URL</PARAMETER>
-      <PARAMETER NAME="transducerURL" 
-        DEFAULT="gate:/creole/splitter/grammar/main.jape" 
-        COMMENT="The URL to the custom Jape grammar file" OPTIONAL="true" 
+      <PARAMETER NAME="transducerURL"
+        DEFAULT="gate:/creole/splitter/grammar/main.jape"
+        COMMENT="The URL to the custom Jape grammar file" OPTIONAL="true"
         SUFFIXES="jape">java.net.URL</PARAMETER>
     </RESOURCE>
     <!-- creole.xml for HepTag (Mark Hepple's POS tagger)-->
@@ -377,15 +377,15 @@
       <NAME>ANNIE POS Tagger</NAME>
       <COMMENT>Mark Hepple's Brill-style POS tagger</COMMENT>
       <CLASS>gate.creole.POSTagger</CLASS>
-      <PARAMETER NAME="document" COMMENT="The document to be processed" 
+      <PARAMETER NAME="document" COMMENT="The document to be processed"
         RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" 
-        COMMENT="The name of the annotation set used for input" RUNTIME="true" 
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name of the annotation set used for input" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="lexiconURL" DEFAULT="gate:/creole/heptag/lexicon" 
+      <PARAMETER NAME="lexiconURL" DEFAULT="gate:/creole/heptag/lexicon"
         COMMENT="The URL for the lexicon file" OPTIONAL="true">
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="rulesURL" DEFAULT="gate:/creole/heptag/ruleset" 
+      <PARAMETER NAME="rulesURL" DEFAULT="gate:/creole/heptag/ruleset"
         COMMENT="The URL for the ruleset file" OPTIONAL="true">
         java.net.URL</PARAMETER>
     </RESOURCE>
@@ -394,10 +394,10 @@
       <NAME>ANNIE OrthoMatcher</NAME>
       <CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
       <COMMENT>ANNIE orthographical coreference component</COMMENT>
-      <PARAMETER DEFAULT="gate:/creole/namematcher/listsNM.def" 
-        COMMENT="The URL for the definition file" SUFFIXES="def" 
+      <PARAMETER DEFAULT="gate:/creole/namematcher/listsNM.def"
+        COMMENT="The URL for the definition file" SUFFIXES="def"
         NAME="definitionFileURL">java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8" 
+      <PARAMETER DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the definitions" NAME="encoding">
         java.lang.String</PARAMETER>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
@@ -405,8 +405,8 @@
         java.lang.String</PARAMETER>
       <PARAMETER NAME="caseSensitive" DEFAULT="false" OPTIONAL="true">
         java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="annotationTypes" 
-        DEFAULT="Organization;Person;Location;Date" RUNTIME="true" 
+      <PARAMETER NAME="annotationTypes"
+        DEFAULT="Organization;Person;Location;Date" RUNTIME="true"
         OPTIONAL="true">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="processUnknown" DEFAULT="true" OPTIONAL="true">
         java.lang.Boolean</PARAMETER>
@@ -422,13 +422,13 @@
       <NAME>ANNIE Pronominal Coreferencer</NAME>
       <CLASS>gate.creole.coref.Coreferencer</CLASS>
       <COMMENT>Pronominal Coreference resolution component</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="resolveIt" RUNTIME="true" 
-        COMMENT="Whether or not to resolve it pronouns" DEFAULT="false" 
+      <PARAMETER NAME="resolveIt" RUNTIME="true"
+        COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
         OPTIONAL="true">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
@@ -437,10 +437,10 @@
       <NAME>ANNIE Nominal Coreferencer</NAME>
       <CLASS>gate.creole.coref.NominalCoref</CLASS>
       <COMMENT>Nominal Coreference resolution component</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
@@ -449,14 +449,14 @@
       <CLASS>gate.creole.annotransfer.AnnotationSetTransfer</CLASS>
       <COMMENT>Annotation set transfer component</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" 
-        COMMENT="The name of the annotation set used for input" RUNTIME="true" 
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name of the annotation set used for input" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" 
-        COMMENT="The name of the annotation set used for output" RUNTIME="true" 
+      <PARAMETER NAME="outputASName"
+        COMMENT="The name of the annotation set used for output" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="tagASName" 
-        COMMENT="The name of the annotation set where the BODY tag is" 
+      <PARAMETER NAME="tagASName"
+        COMMENT="The name of the annotation set where the BODY tag is"
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="textTagName" RUNTIME="true" OPTIONAL="true">
         java.lang.String</PARAMETER>
@@ -468,39 +468,39 @@
       <CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
       <COMMENT>Document cleaner</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true" 
+      <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true"
         ITEM_CLASS_NAME="java.lang.String"> java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="setsToKeep" RUNTIME="true" OPTIONAL="true" 
+      <PARAMETER NAME="setsToKeep" RUNTIME="true" OPTIONAL="true"
         ITEM_CLASS_NAME="java.lang.String"> java.util.ArrayList</PARAMETER>
     </RESOURCE>
     <RESOURCE>
       <NAME>Flexible Exporter</NAME>
       <CLASS>gate.creole.dumpingPR.DumpingPR</CLASS>
-      <COMMENT>Exports a document with GATE annotations to its original 
+      <COMMENT>Exports a document with GATE annotations to its original
         format</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="useStandOffXML" OPTIONAL="true" DEFAULT="false" 
+      <PARAMETER NAME="useStandOffXML" OPTIONAL="true" DEFAULT="false"
         COMMENT="Whether to export to stand-off XML rather than inline annotations">
          java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="annotationTypes" RUNTIME="true" 
+      <PARAMETER NAME="annotationTypes" RUNTIME="true"
         DEFAULT="Person;Location;Date">java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="dumpTypes" RUNTIME="true" OPTIONAL="true" 
-        DEFAULT="Person;Location;Date" 
+      <PARAMETER NAME="dumpTypes" RUNTIME="true" OPTIONAL="true"
+        DEFAULT="Person;Location;Date"
         COMMENT="A list of the new names to be used instead of the ANNIE types given for dumping">
         java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="outputFileUrl" RUNTIME="true" OPTIONAL="true" 
+      <PARAMETER NAME="outputFileUrl" RUNTIME="true" OPTIONAL="true"
         COMMENT="The url of the output file" SUFFIXES="xml;html;txt">
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="includeFeatures" OPTIONAL="true" 
-        COMMENT="Whether or not to include features when exporting the GATE annotations" 
+      <PARAMETER NAME="includeFeatures" OPTIONAL="true"
+        COMMENT="Whether or not to include features when exporting the GATE annotations"
         DEFAULT="false">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="useSuffixForDumpFiles" OPTIONAL="true" 
-        COMMENT="Whether or not to use a suffix for the dump files" 
+      <PARAMETER NAME="useSuffixForDumpFiles" OPTIONAL="true"
+        COMMENT="Whether or not to use a suffix for the dump files"
         DEFAULT="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="suffixForDumpFiles" OPTIONAL="true" 
-        COMMENT="The suffix used for files, if suffix adding is set to true" 
+      <PARAMETER NAME="suffixForDumpFiles" OPTIONAL="true"
+        COMMENT="The suffix used for files, if suffix adding is set to true"
         DEFAULT=".gate">java.lang.String</PARAMETER>
     </RESOURCE>
     <!-- creole.xml for the DAML+OIL exporter -->
@@ -508,20 +508,20 @@
       <NAME>DAML+OIL exporter</NAME>
       <CLASS>gate.creole.RDFFormatExporter</CLASS>
       <COMMENT>A DAML+OIL exporter</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be exported" 
+      <PARAMETER NAME="document" COMMENT="The document to be exported"
         RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="ontology" COMMENT="Ontology" SUFFIXES="daml;rdf">
         java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE" 
+      <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE"
         NAME="exportedTypes">java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="exportFilePath" 
+      <PARAMETER NAME="exportFilePath"
         COMMENT="Destination URL where to export" SUFFIXES="daml;rdf">
         java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">
         java.lang.String</PARAMETER>
       <!-- new Parameter added by Niraj -->
-      <PARAMETER NAME="annotationSetName" 
-        COMMENT="AnnotationSet that should be exported" RUNTIME="true" 
+      <PARAMETER NAME="annotationSetName"
+        COMMENT="AnnotationSet that should be exported" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <ICON>daml.jpg</ICON>
     </RESOURCE>
@@ -530,18 +530,18 @@
       <NAME>SearchPR</NAME>
       <CLASS>gate.creole.ir.SearchPR</CLASS>
       <COMMENT>provides IR functionality</COMMENT>
-      <PARAMETER NAME="corpus" RUNTIME="true" 
+      <PARAMETER NAME="corpus" RUNTIME="true"
         COMMENT="The indexed  corpus to be searched">
         gate.creole.ir.IndexedCorpus</PARAMETER>
       <PARAMETER NAME="query" RUNTIME="true" COMMENT="The search query">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="limit" RUNTIME="true" DEFAULT="20" 
+      <PARAMETER NAME="limit" RUNTIME="true" DEFAULT="20"
         COMMENT="The number of results returned">java.lang.Integer</PARAMETER>
-      <PARAMETER NAME="fieldNames" RUNTIME="true" DEFAULT="*" 
+      <PARAMETER NAME="fieldNames" RUNTIME="true" DEFAULT="*"
         COMMENT="The fields returned from result documents">
         java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="searcherClassName" RUNTIME="true" 
-        DEFAULT="gate.creole.ir.lucene.LuceneSearch" 
+      <PARAMETER NAME="searcherClassName" RUNTIME="true"
+        DEFAULT="gate.creole.ir.lucene.LuceneSearch"
         COMMENT="The search implementation">java.lang.String</PARAMETER>
       <ICON>binoculars.gif</ICON>
     </RESOURCE>
@@ -550,38 +550,38 @@
       <NAME>Machine Learning PR</NAME>
       <COMMENT>Trains a machine learning algorithm from a corpus</COMMENT>
       <CLASS>gate.creole.ml.MachineLearningPR</CLASS>
-      <PARAMETER NAME="document" COMMENT="The document to be processed" 
+      <PARAMETER NAME="document" COMMENT="The document to be processed"
         RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" 
-        COMMENT="The name of the annotation set used for input" RUNTIME="true" 
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name of the annotation set used for input" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="configFileURL" 
+      <PARAMETER NAME="configFileURL"
         COMMENT="The URL for the configuration file" SUFFIXES="xml">
         java.net.URL</PARAMETER>
-      <PARAMETER NAME="training" COMMENT="Set to true for training mode" 
+      <PARAMETER NAME="training" COMMENT="Set to true for training mode"
         RUNTIME="true" DEFAULT="true">java.lang.Boolean</PARAMETER>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE Morphological analyser</NAME>
       <CLASS>gate.creole.morph.Morph</CLASS>
       <COMMENT>Morphological Analyzer for the English Language</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be processed" 
+      <PARAMETER NAME="document" COMMENT="The document to be processed"
         RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="rulesFile" 
-        COMMENT="File which defines rules for the morphological analysis" 
+      <PARAMETER NAME="rulesFile"
+        COMMENT="File which defines rules for the morphological analysis"
         DEFAULT="gate:/creole/morph/default.rul" RUNTIME="false">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="annotationSetName" 
-        COMMENT="The name of the annotation set used for input" RUNTIME="true" 
+      <PARAMETER NAME="annotationSetName"
+        COMMENT="The name of the annotation set used for input" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="affixFeatureName" COMMENT="Name of the affix variable" 
+      <PARAMETER NAME="affixFeatureName" COMMENT="Name of the affix variable"
         DEFAULT="affix" OPTIONAL="false" RUNTIME="true">
         java.lang.String</PARAMETER>
-      <PARAMETER NAME="rootFeatureName" 
-        COMMENT="Name of the variable which shows the root word" DEFAULT="root" 
+      <PARAMETER NAME="rootFeatureName"
+        COMMENT="Name of the variable which shows the root word" DEFAULT="root"
         OPTIONAL="false" RUNTIME="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="caseSensitive" 
-        COMMENT="If parser should be converted to lowercase first" 
+      <PARAMETER NAME="caseSensitive"
+        COMMENT="If parser should be converted to lowercase first"
         DEFAULT="false" OPTIONAL="false" RUNTIME="false">
         java.lang.Boolean</PARAMETER>
     </RESOURCE>
@@ -590,18 +590,18 @@
       <NAME>Flexible Gazetteer</NAME>
       <CLASS>gate.creole.gazetteer.FlexibleGazetteer</CLASS>
       <COMMENT>A list lookup component.</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" 
+      <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputAnnotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for getting features from" 
+      <PARAMETER NAME="inputAnnotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for getting features from"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputAnnotationSetName" RUNTIME="true" 
-        COMMENT="The annotation set to be used for the generated annotations" 
+      <PARAMETER NAME="outputAnnotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="inputFeatureNames" 
+      <PARAMETER NAME="inputFeatureNames"
         COMMENT="Annotation.feature names to be considered for the gazetteer">
         java.util.List</PARAMETER>
-      <PARAMETER NAME="gazetteerInst" COMMENT="Gazetteer Instance to be used" 
+      <PARAMETER NAME="gazetteerInst" COMMENT="Gazetteer Instance to be used"
         OPTIONAL="false">gate.creole.gazetteer.Gazetteer</PARAMETER>
     </RESOURCE>
   </CREOLE>
@@ -627,7 +627,7 @@
     </RESOURCE>
     <RESOURCE>
       <NAME>Conditional Corpus Pipeline</NAME>
-      <COMMENT>A serial controller for conditionally run PR pipelines over 
+      <COMMENT>A serial controller for conditionally run PR pipelines over
         corpora</COMMENT>
       <CLASS>gate.creole.ConditionalSerialAnalyserController</CLASS>
       <ICON>controller.gif</ICON>
@@ -644,7 +644,7 @@
         <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
--->    
+-->
     <RESOURCE>
       <NAME>Features</NAME>
       <CLASS>gate.gui.FeaturesSchemaEditor</CLASS>
@@ -653,8 +653,8 @@
         <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
-    
+
+
     <RESOURCE>
       <NAME>Initialisation Parameters</NAME>
       <CLASS>gate.gui.PRViewer</CLASS>
@@ -673,7 +673,7 @@
         <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
+
     <RESOURCE>
       <NAME>OLD Document Editor</NAME>
       <CLASS>gate.gui.DocumentEditor</CLASS>
@@ -718,7 +718,7 @@
         <RESOURCE_DISPLAYED>gate.persist.SerialDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
+
     <RESOURCE>
       <NAME>JDBC Datastore Viewer</NAME>
       <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
@@ -745,9 +745,9 @@
       <GUI>
         <MAIN_VIEWER/>
         <ANNOTATION_TYPE_DISPLAYED>Sentence</ANNOTATION_TYPE_DISPLAYED>
-        <PARAMETER NAME="treeNodeAnnotationType" DEFAULT="SyntaxTreeNode" 
+        <PARAMETER NAME="treeNodeAnnotationType" DEFAULT="SyntaxTreeNode"
           RUNTIME="false" OPTIONAL="true">java.lang.String</PARAMETER>
-        <PARAMETER NAME="tokenType" DEFAULT="Token" RUNTIME="false" 
+        <PARAMETER NAME="tokenType" DEFAULT="Token" RUNTIME="false"
           OPTIONAL="true">java.lang.String</PARAMETER>
       </GUI>
     </RESOURCE>
@@ -778,6 +778,12 @@
     <RESOURCE>
       <NAME>Annotations</NAME>
       <CLASS>gate.gui.docview.AnnotationListView</CLASS>
-    </RESOURCE>    
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Co-reference Editor</NAME>
+      <CLASS>gate.gui.docview.CorefEditor</CLASS>
+    </RESOURCE>
+
   </CREOLE>
 </CREOLE-DIRECTORY>
