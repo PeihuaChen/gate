@@ -1827,6 +1827,14 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     if(((Annotation)anAnnotationList.get(0)).
        getStartNode().getOffset().longValue() > 0) return null;
 
+    // If there's a single annotation and it starts at the start (which we
+	// already know it does), make sure it ends at the end.
+	if (anAnnotationList.size() == 1){
+	  Annotation onlyAnn = (Annotation) anAnnotationList.get(0);
+	  if ( onlyAnn.getEndNode().getOffset().equals( content.size() ) ) return onlyAnn;
+      return null;
+	}
+    
     //find the limits
     long start = 0; //we know this already
     long end = 0; //end = 0  will be improved by the next loop
