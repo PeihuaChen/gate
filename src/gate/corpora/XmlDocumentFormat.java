@@ -64,18 +64,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * report errors corectlly if the XML document is not well formed.
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
-/*
-    // create the element2String map
-    Map anElement2StringMap = null;
-    anElement2StringMap = new HashMap();
-
-    // populate it
-    anElement2StringMap.put("S","\n\n");
-    anElement2StringMap.put("s","\n\n");
-    setElement2StringMap(anElement2StringMap);
-*/
-    if ( (doc == null) ||
-         (doc.getSourceUrl() == null && doc.getContent() == null)){
+    if( (doc == null) ||
+        (doc.getSourceUrl() == null && doc.getContent() == null)){
 
       throw new DocumentFormatException(
                "GATE document is null or no content found. Nothing to parse!");
@@ -95,10 +85,18 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         // The document content is also null. There is nothing we can do.
         throw new DocumentFormatException("The document doesn't have a" +
         " valid URL and also no content");
-
       docHasContentButNoValidURL = true;
     }// End try
 
+    // Create a status listener
+    StatusListener statusListener = new StatusListener(){
+          public void statusChanged(String text){
+            // This is implemented in DocumentFormat.java and inherited here
+            fireStatusChanged(text);
+          }
+    };
+    GateFormatXmlDocumentHandler gateXmlHandler = null;
+    XmlDocumentHandler xmlDocHandler = null;
     if (docHasContentButNoValidURL)
       parseDocumentWithoutURL(doc);
     else try {
@@ -116,35 +114,24 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       SAXParser xmlParser = saxParserFactory.newSAXParser();
       if (isGateXmlDocument){
         // Construct the appropiate xml handler for the job.
-        GateFormatXmlDocumentHandler gateXmlHandler =
-                        new GateFormatXmlDocumentHandler(doc);
+        gateXmlHandler = new GateFormatXmlDocumentHandler(doc);
         // Register a status listener
-        gateXmlHandler.addStatusListener(new StatusListener(){
-            public void statusChanged(String text){
-              // This is implemented in DocumentFormat.java and inherited here
-              fireStatusChanged(text);
-            }
-        });
+        gateXmlHandler.addStatusListener(statusListener);
         // Parse the Gate Document
         xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+        gateXmlHandler.removeStatusListener(statusListener);
       }else{
-        // create a new Xml document handler
-        XmlDocumentHandler xmlDocHandler =  new
-                    XmlDocumentHandler(doc,
-                                       this.markupElementsMap,
-                                       this.element2StringMap);
-
-        // register a status listener with it
-        xmlDocHandler.addStatusListener(new StatusListener(){
-            public void statusChanged(String text){
-              // this is implemented in DocumentFormat.java and inherited here
-              fireStatusChanged(text);
-            }
-          });
-        // parse the document handler
+        // Create a new Xml document handler
+        xmlDocHandler =  new XmlDocumentHandler( doc,
+                                                 this.markupElementsMap,
+                                                 this.element2StringMap);
+        // Register a status listener with it
+        xmlDocHandler.addStatusListener(statusListener);
+        // Parse the document handler
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
         ((DocumentImpl) doc).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
+        xmlDocHandler.removeStatusListener(statusListener);
       }// End if
     } catch (ParserConfigurationException e){
         throw
@@ -154,8 +141,12 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     } catch (IOException e){
         throw new DocumentFormatException("I/O exception for " +
                                       doc.getSourceUrl().toString());
+    }finally{
+      if(gateXmlHandler != null)
+        gateXmlHandler.removeStatusListener(statusListener);
+      if (xmlDocHandler != null)
+        xmlDocHandler.removeStatusListener(statusListener);
     }// End if else try
-
   }// unpackMarkup
 
   /** Unpack the markup in the document. This converts markup from the
@@ -188,8 +179,14 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   private void parseDocumentWithoutURL(gate.Document aDocument)
                                               throws DocumentFormatException {
 
-//    ByteArrayInputStream in =  new ByteArrayInputStream(
-//                                  aDocument.getContent().toString().getBytes());
+    XmlDocumentHandler xmlDocHandler = null;
+    // Create a status listener
+    StatusListener statusList = new StatusListener(){
+        public void statusChanged(String text){
+          // this is implemented in DocumentFormat.java and inherited here
+          fireStatusChanged(text);
+        }
+    };
     try{
       Reader reader = new InputStreamReader(
         new ByteArrayInputStream(aDocument.getContent().toString().getBytes()),
@@ -210,19 +207,15 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
       // create a new Xml document handler
-      XmlDocumentHandler xmlDocHandler =  new XmlDocumentHandler(aDocument,
-                                                    this.markupElementsMap,
-                                                    this.element2StringMap);
-
-      // register a status listener with it
-      xmlDocHandler.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            // this is implemented in DocumentFormat.java and inherited here
-            fireStatusChanged(text);
-          }
-      }); // xmlDocHandler.addStatusListener(new StatusListener(){
-      // parse the document handler
-      xmlParser.parse(is, xmlDocHandler );
+      xmlDocHandler =  new XmlDocumentHandler(aDocument,
+                                              this.markupElementsMap,
+                                              this.element2StringMap);
+      // Regsiter the statusListener with xmlDocHandler
+      xmlDocHandler.addStatusListener(statusList);
+      // Parse the document handler
+      xmlParser.parse(is, xmlDocHandler);
+      ((DocumentImpl) aDocument).setNextAnnotationId(
+                                          xmlDocHandler.getCustomObjectsId());
     } catch (ParserConfigurationException e){
         throw new DocumentFormatException(
                         "XML parser configuration exception ", e);
@@ -230,8 +223,10 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         throw new DocumentFormatException(e);
     } catch (IOException e){
         throw new DocumentFormatException(e);
+    }finally{
+      // Remove the statusListener with xmlDocHandler
+      xmlDocHandler.removeStatusListener(statusList);
     }// End try
-
   }// End parseDocumentWithoutURL()
 
   /** Initialise this resource, and return it. */

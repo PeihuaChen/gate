@@ -68,21 +68,24 @@ public class EmailDocumentFormat extends TextualDocumentFormat
                                                        doc,
                                                        this.markupElementsMap,
                                                        this.element2StringMap);
-    // register a status listener with it
-     emailDocHandler.addStatusListener(new StatusListener() {
+    StatusListener statusListener = new StatusListener(){
         public void statusChanged(String text) {
           // this is implemented in DocumentFormat.java and inherited here
           fireStatusChanged(text);
         }//statusChanged(String text)
-      });//addStatusListener
-
-    // call the method that creates annotations on the gate document
+    };
+    // Register a status listener with it
+    emailDocHandler.addStatusListener(statusListener);
     try{
+      // Call the method that creates annotations on the gate document
       emailDocHandler.annotateMessages();
+
     } catch (IOException e){
       throw new DocumentFormatException("Couldn't create a buffered reader ",e);
     } catch (InvalidOffsetException e){
       throw new DocumentFormatException(e);
+    }finally{
+      emailDocHandler.removeStatusListener(statusListener);
     }// End try
   }//unpackMarkup(doc)
 

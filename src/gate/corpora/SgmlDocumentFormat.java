@@ -66,6 +66,13 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
       throw new DocumentFormatException(
                "GATE document is null or no content found. Nothing to parse!");
     }// End if
+    // Create a status listener
+    StatusListener statusListener = new StatusListener(){
+            public void statusChanged(String text){
+              fireStatusChanged(text);
+            }
+    };
+    XmlDocumentHandler xmlDocHandler = null;
     try {
       Sgml2Xml sgml2Xml = new Sgml2Xml(doc);
 
@@ -93,19 +100,13 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
       // use it
       if (null != doc){
-
         // create a new Xml document handler
-        XmlDocumentHandler xmlDocHandler = new
-                            XmlDocumentHandler(doc, this.markupElementsMap,
+        xmlDocHandler = new XmlDocumentHandler(doc,
+                                               this.markupElementsMap,
                                                this.element2StringMap);
 
         // register a status listener with it
-        xmlDocHandler.addStatusListener(new StatusListener(){
-            public void statusChanged(String text){
-              // this is implemented in DocumentFormat.java and inherited here
-              fireStatusChanged(text);
-            }
-        });
+        xmlDocHandler.addStatusListener(statusListener);
 
         parser.parse(xmlUri, xmlDocHandler);
         ((DocumentImpl) doc).setNextAnnotationId(
@@ -119,7 +120,10 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     } catch (IOException e){
         throw new DocumentFormatException("I/O exception for " +
                                       doc.getSourceUrl().toString());
-    }
+    }finally{
+      if (xmlDocHandler != null)
+        xmlDocHandler.removeStatusListener(statusListener);
+    }// End try
 
   }// unpackMarkup
 

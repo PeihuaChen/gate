@@ -130,6 +130,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         // One of them is null something was wrong in the XML file.
         Out.prln("A key or a value was null. The feature wasn't added into" +
                 " the feature map");
+
       }else {
         if (currentFeatureMap == null){
           // The XMl file was somehow altered and a start Feature wasn't found.
