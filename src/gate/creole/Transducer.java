@@ -70,6 +70,7 @@ public class Transducer extends AbstractLanguageAnalyser {
         } else {
           batch.setEnableDebugging(false);
         }
+        batch.setOntology(ontology);
         fireProcessFinished();
       }catch(Exception e){
         throw new ResourceInstantiationException(e);
@@ -218,6 +219,28 @@ public class Transducer extends AbstractLanguageAnalyser {
    */
   private String outputASName;
 
+  /**
+   * The ontology that will be available on the RHS of JAPE rules.
+   */
+  private gate.creole.ontology.Ontology ontology;
+
+  /**
+   * Gets the ontology used by this transducer.
+   * @return an {@link gate.creole.ontology.Ontology} value.
+   */
+  public gate.creole.ontology.Ontology getOntology() {
+    return ontology;
+  }
+
+  /**
+   * Sets the ontology used by this transducer.
+   * @param ontology an {@link gate.creole.ontology.Ontology} value.
+   */
+  public void setOntology(gate.creole.ontology.Ontology ontology) {
+    this.ontology = ontology;
+  }
+  
+  
   /**
    * A switch used to activate the JAPE debugger.
    */
