@@ -18,9 +18,11 @@ import java.util.*;
 
 import gate.*;
 import gate.creole.ontology.*;
+import gate.gui.ProtegeWrapper;
 import com.ontotext.gate.ontology.OntologyImpl;
 // Protege import
 import edu.stanford.smi.protege.model.*;
+import edu.stanford.smi.protege.event.*;
 
 
 /** Dummy Protege LR. Just keep the Protege project file name */
@@ -35,11 +37,15 @@ public class ProtegeProjectName extends AbstractLanguageResource
 
   /** Ontotext Ontology object */
   private Ontology ontotextOntology = null;
+  
+  /** Keep visual resource to refresh Ontotext Editor if any */
+  ProtegeWrapper visualResource = null;
 
+  /** Track changes in Protege KnowledgeBase to transffer in Ontotext Editor */
+  private KnowledgeBaseListener _knowledgeBaseListener = null;
 
   public ProtegeProjectName() {
     projectName = null;
-    ontotextOntology = new OntologyImpl();
   }
   
   public void setProjectName(String name) {
@@ -50,23 +56,44 @@ public class ProtegeProjectName extends AbstractLanguageResource
     return projectName;
   } // getProjectName()
 
+  public void setViewResource(ProtegeWrapper visual) {
+    visualResource = visual;
+  } // setViewResource(AbstractVisualResource visual)
+  
   public void setKnowledgeBase(KnowledgeBase base) {
     knBase = base;
     fillOntotextOntology();
+    createKBListener();
   } // setKnowledgeBase(KnowledgeBase base)
   
   public KnowledgeBase getKnowledgeBase() {
     return knBase;
   } // getKnowledgeBase()
 
+  private void createKBListener() {
+    _knowledgeBaseListener = new KnowledgeBaseAdapter() {
+      public void clsCreated(KnowledgeBaseEvent event) {
+        fillOntotextOntology();
+        visualResource.refreshOntoeditor(ontotextOntology);
+      } // clsCreated(KnowledgeBaseEvent event)
+
+      public void clsDeleted(KnowledgeBaseEvent event) {
+        fillOntotextOntology();
+        visualResource.refreshOntoeditor(ontotextOntology);
+      } // clsDeleted(KnowledgeBaseEvent event)
+    };
+    knBase.addKnowledgeBaseListener(_knowledgeBaseListener);
+  } // createKBListener()
+  
   private void fillOntotextOntology() {
     Collection coll = knBase.getRootClses();
     Iterator it = coll.iterator();
     Cls cls;
     OClass oCls;
     
+    ontotextOntology = new OntologyImpl();
+
     URL shit = null;
-    
     try {
       shit = new URL("gate:/creole/ontology/demo.daml");
     } catch (Exception ex) {
