@@ -1371,6 +1371,64 @@ public class MainFrame extends JFrame
     guiLock = null;
   }
 
+  /** Method is used in NewDSAction */
+  protected DataStore createSerialDataStore() {
+    DataStore ds = null;
+
+    //get the URL (a file in this case)
+    fileChooser.setDialogTitle("Please create a new empty directory");
+    fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+    if(fileChooser.showOpenDialog(MainFrame.this) ==
+                                          fileChooser.APPROVE_OPTION){
+      try {
+        URL dsURL = fileChooser.getSelectedFile().toURL();
+        ds = Factory.createDataStore("gate.persist.SerialDataStore",
+                                               dsURL.toExternalForm());
+      } catch(MalformedURLException mue) {
+        JOptionPane.showMessageDialog(
+            MainFrame.this, "Invalid location for the datastore\n " +
+                              mue.toString(),
+                              "Gate", JOptionPane.ERROR_MESSAGE);
+      } catch(PersistenceException pe) {
+        JOptionPane.showMessageDialog(
+            MainFrame.this, "Datastore creation error!\n " +
+                              pe.toString(),
+                              "Gate", JOptionPane.ERROR_MESSAGE);
+      } // catch
+    } // if
+    
+    return ds;
+  } // createSerialDataStore()
+  
+  /** Method is used in OpenDSAction */
+  protected DataStore openSerialDataStore() {
+    DataStore ds = null;
+
+    //get the URL (a file in this case)
+    fileChooser.setDialogTitle("Select the datastore directory");
+    fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+    if (fileChooser.showOpenDialog(MainFrame.this) ==
+                                          fileChooser.APPROVE_OPTION){
+      try {
+        URL dsURL = fileChooser.getSelectedFile().toURL();
+        ds = Factory.openDataStore("gate.persist.SerialDataStore",
+                                             dsURL.toExternalForm());
+      } catch(MalformedURLException mue) {
+        JOptionPane.showMessageDialog(
+            MainFrame.this, "Invalid location for the datastore\n " +
+                              mue.toString(),
+                              "Gate", JOptionPane.ERROR_MESSAGE);
+      } catch(PersistenceException pe) {
+        JOptionPane.showMessageDialog(
+            MainFrame.this, "Datastore opening error!\n " +
+                              pe.toString(),
+                              "Gate", JOptionPane.ERROR_MESSAGE);
+      } // catch
+    } // if
+  
+    return ds;
+  } // openSerialDataStore()
+  
 
 /*
   synchronized void showWaitDialog() {
@@ -1907,27 +1965,7 @@ public class MainFrame extends JFrame
         if(answer != null) {
           String className = (String)dsTypeByName.get(answer);
           if(className.equals("gate.persist.SerialDataStore")){
-            //get the URL (a file in this case)
-            fileChooser.setDialogTitle("Please create a new empty directory");
-            fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
-            if(fileChooser.showOpenDialog(MainFrame.this) ==
-                                                  fileChooser.APPROVE_OPTION){
-              try {
-                URL dsURL = fileChooser.getSelectedFile().toURL();
-                DataStore ds = Factory.createDataStore(className,
-                                                       dsURL.toExternalForm());
-              } catch(MalformedURLException mue) {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this, "Invalid location for the datastore\n " +
-                                      mue.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-              } catch(PersistenceException pe) {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this, "Datastore creation error!\n " +
-                                      pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-              }
-            }
+            createSerialDataStore();
           } else if(className.equals("gate.persist.OracleDataStore")) {
               JOptionPane.showMessageDialog(
                     MainFrame.this, "Oracle datastores can only be created " +
@@ -2148,27 +2186,7 @@ public class MainFrame extends JFrame
         if(answer != null) {
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
-            //get the URL (a file in this case)
-            fileChooser.setDialogTitle("Select the datastore directory");
-            fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
-            if (fileChooser.showOpenDialog(MainFrame.this) ==
-                                                  fileChooser.APPROVE_OPTION){
-              try {
-                URL dsURL = fileChooser.getSelectedFile().toURL();
-                DataStore ds = Factory.openDataStore(className,
-                                                     dsURL.toExternalForm());
-              } catch(MalformedURLException mue) {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this, "Invalid location for the datastore\n " +
-                                      mue.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-              } catch(PersistenceException pe) {
-                JOptionPane.showMessageDialog(
-                    MainFrame.this, "Datastore opening error!\n " +
-                                      pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-              }
-            }
+            openSerialDataStore();
           } else if(className.equals("gate.persist.OracleDataStore")) {
               List dbPaths = new ArrayList();
               Iterator keyIter = reg.getConfigData().keySet().iterator();
