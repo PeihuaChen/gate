@@ -29,6 +29,8 @@ import gate.annotation.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl {
 
+  private static final boolean DEBUG = false;
+
   private boolean     isContentRead;
   private Object      contentLock;
   private Connection  jdbcConn;
@@ -37,6 +39,14 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   private boolean     contentChanged;
   private boolean     featuresChanged;
   private boolean     nameChanged;
+
+  //this one should be the same as the values returned
+  //in persist.get_id_lot PL/SQL package
+  //it sux actually
+  private static final int SEQUENCE_POOL_SIZE = 10;
+
+  private Integer sequencePool[];
+  private int poolMarker;
 
   public static final int DOC_NAME = 1001;
   public static final int DOC_CONTENT = 1002;
@@ -56,6 +66,9 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     this.contentChanged = false;
     this.featuresChanged = false;
     this.nameChanged = false;
+
+    sequencePool = new Integer[this.SEQUENCE_POOL_SIZE];
+    poolMarker = this.SEQUENCE_POOL_SIZE;
   }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
@@ -319,7 +332,10 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
         //2. get the features
         FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
-        //fm may be null
+        //fm may should NOT be null
+        if (null == fm) {
+          fm =  new SimpleFeatureMapImpl();
+        }
 
         //3. add to annotation set
         as.add(startOffset,endOffset,type,fm);
@@ -597,11 +613,66 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   /** Generate and return the next annotation ID */
   public Integer getNextAnnotationId() {
-    throw new MethodNotImplementedException();
+
+    //1.try to get ID fromt he pool
+    if (DEBUG) {
+      Out.println(">>> get annID called...");
+    }
+    //is there anything left in the pool?
+    if (this.SEQUENCE_POOL_SIZE == this.poolMarker) {
+      //oops, pool is empty
+      fillSequencePool();
+      this.poolMarker = 0;
+    }
+
+    return this.sequencePool[this.poolMarker++];
   } // getNextAnnotationId
 
+  private void fillSequencePool() {
+
+    if(DEBUG) {
+      Out.println("filling ID lot...");
+    }
+
+    CallableStatement stmt = null;
+    try {
+      stmt = this.jdbcConn.prepareCall(
+            "{ call "+Gate.DB_OWNER+".persist.get_id_lot(?,?,?,?,?,?,?,?,?,?) }");
+      stmt.registerOutParameter(1,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(2,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(3,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(4,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(5,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(6,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(7,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(8,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(9,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(10,java.sql.Types.BIGINT);
+      stmt.execute();
+
+      for (int i=0; i < this.SEQUENCE_POOL_SIZE; i++) {
+        //JDBC countsa from 1, not from 0
+        this.sequencePool[0] = new Integer(stmt.getInt(i+1));
+      }
+    }
+    catch(SQLException sqle) {
+      throw new SynchronisationException("can't get Annotation ID pool: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      try {
+        DBHelper.cleanup(stmt);
+      }
+      catch(PersistenceException pe) {
+        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+      }
+    }
+  }
+
+
+
   public Integer getNextNodeId() {
-    throw new MethodNotImplementedException();
+    //throw new MethodNotImplementedException();
+    return super.getNextNodeId();
   }
 
   public boolean isDocumentChanged(int changeType) {
