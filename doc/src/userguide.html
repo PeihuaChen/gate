@@ -52,6 +52,8 @@ Contents:
   </UL>
 <LI>
 <A HREF=#design>Design</A>
+<LI>
+<A HREF=#developer>Development Notes</A>
 </UL>
 
 <P>
@@ -837,6 +839,24 @@ while - and in the process completely screwed up her Windoze NT.
 <I>Operating</I> system is entirely the wrong word. F**kup system, like
 most MS progeny.
 [Go ahead sue me. This bit was written by Yorick.]
+
+
+<!---------------------------------------------------------------------->
+<!---------------------------------------------------------------------->
+<A NAME=developer></A><H2>Development Notes</H2>
+
+<!---------------------------------------------------------------------->
+<H3>Integrating Sicstus Prolog programs</H3>
+
+<P>
+When calling Sicstus from Java, if the memory allocation directive
+<TT>-Xmx200m</TT> is given to the JVM, the sicstus runtime throws
+this error:
+<PRE>
+{ERROR: Memory allocation failed (upper 4 bits do not match MallocBase)}
+Signal 127
+</PRE>
+
 
 
 <HR>
