@@ -40,6 +40,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import gate.Gate;
 import gate.GateConstants;
+import gate.event.CreoleListener;
 import gate.swing.XJTable;
 import gate.util.*;
 import gate.util.Err;
@@ -451,7 +452,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
 
       int res = JOptionPane.showOptionDialog(
                             PluginManagerUI.this, messageBox,
-                            "Enter an URL to the directory containig the " +
+                            "Enter an URL to the directory containing the " +
                             "\"creole.xml\" file", JOptionPane.OK_CANCEL_OPTION,
                             JOptionPane.QUESTION_MESSAGE, null, null, null);
       if(res == JOptionPane.OK_OPTION){
