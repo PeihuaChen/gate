@@ -85,7 +85,7 @@ development of language processing software.
 
 <P>
 Version 1 of GATE was released in 1996. It was written in C++ and Tcl, has
-been licenced by several hundred organisations, and used in a wide range of
+been licensed by several hundred organisations, and used in a wide range of
 language analysis contexts including Information Extraction (IE -
 \cite{Gai98a,Cun99c}) in English, Greek, Spanish, Swedish, German, Italian and
 French.
@@ -287,11 +287,41 @@ resource". Select the type of resource (e.g. tokeniser, gazetteer,
 etc.) from the list of options. In the pop-up box, choose a name for
 the resource, and either select the default value for the resource, or
 select a new one. Select any other values as appropriate
-(e.g. encoding). Click "OK". An icon should appear
+(e.g. encoding). In the case where it is not indicated that a value is
+"required", the box may be left blank and the system default will be
+used. When all necessary boxes are completed, click "OK". An icon should appear
 under "Processing Resources" in the left hand pane. Note that it may
 take a few seconds for the resource to be loaded. Repeat this
 procedure until all necessary resources have been loaded.
 </P>
+<P>
+The following individual processing resources are currently available: 
+\begin{itemize}
+\item Tokeniser
+\item Sentence Splitter
+\item Hepple POS Tagger
+\item Gazetteer
+\item JAPE Transducer
+\item Namematcher
+\end{itemize}
+<P>
+Note that the resources must be run in this order (with the exception
+of the gazetteer, which, can be run at any point preceding the JAPE
+transducer). If not using all the PRs, some caution is advised, as
+certain modules rely on previous ones and may either not work as
+expected or fail completely. For example, the JAPE transducer requires
+all previous PRs for best performance, but can be run without the
+tagger, splitter, and gazetteer. The tagger, on the other hand, will
+fail to produce results if the splitter is not run first. 
+</P>
+<P>
+The first 5 of these PRs are also combined into an additional
+PR, the NERC (the Named Entity Recognition Component). This can be run
+as one unit instead of the individual PRs. The Namematcher can
+optionally be run following this. Note that while the default
+annotation set used for the individual PRs is the Default set, the
+default set for the NERC is the nercAS set. if the Namematcher is run
+following the NERC, nercAS must therefore be specified as the name of the AnnotationSet.
 
 <!---------------------------------------------------------------------->
 <H3>Running an Application</H3>
@@ -410,7 +440,7 @@ the datastore created earlier).
 A modified file can also be saved as an xml file, by right clicking on
 the document icon in the left window and choosing the
 option "Save as Xml". Once saved, it can be reloaded in t usual way,
-by selecting "New Langugae Resource" from the File menu or by
+by selecting "New Language Resource" from the File menu or by
 selecting "New" and then "Gate document" from the Language Resources icon.
 </P>
 
@@ -431,7 +461,7 @@ Tools menu at the top of the window. It will appear in a new
 window. Select the key and response documents to be used (note that
 both must have been previously loaded into the system), the annotation
 sets to be used for each, and the annotation
-type to be evaluated. If false positived are to be measured, select
+type to be evaluated. If false positives are to be measured, select
 the annotation type (and relevant annotation set) to be used as the
 denominator (normally, Token or Sentence). The weight for the
 F-Measure can also be changed - by default it is set to 0.5 (i.e. to
