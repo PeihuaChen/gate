@@ -9,7 +9,7 @@ Options: control = first
 
 Rule: r1
 (
- ({Token})+
+ (({Token})+):tokens
  ({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"})
  ) :left
 -->
@@ -29,13 +29,16 @@ Rule: r1
   }
   //create the new sentence
   gate.FeatureMap features = Factory.newFeatureMap();
+  java.util.List tokens = new java.util.ArrayList((java.util.Set)bindings.get("tokens"));
+  java.util.Collections.sort(tokens, new gate.util.OffsetComparator()); 
+  features.put("tokens", tokens); 
   annotations.add(startNode, sentence.lastNode(), "Sentence", features);
 }
 
 
 Rule: r3
 (
- ({Token})+
+ (({Token})+):tokens
  ) :left
 ({Split.type=="CR"}|{Split.type=="quote"})
 -->
@@ -55,6 +58,9 @@ Rule: r3
   }
   //create the new sentence
   gate.FeatureMap features = Factory.newFeatureMap();
+  java.util.List tokens = new java.util.ArrayList((java.util.Set)bindings.get("tokens"));
+  java.util.Collections.sort(tokens, new gate.util.OffsetComparator()); 
+  features.put("tokens", tokens); 
   annotations.add(startNode, sentence.lastNode(), "Sentence", features);
 }
 

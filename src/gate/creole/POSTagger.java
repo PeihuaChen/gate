@@ -63,7 +63,7 @@ public class POSTagger extends AbstractProcessingResource {
       AnnotationSet outputAS = (outputASName == null) ?
                                document.getAnnotations() :
                                document.getAnnotations(outputASName);
-      fireStatusChanged("tagging for POS " + document.getName());
+      fireStatusChanged("POS tagging " + document.getName());
       fireProgressChanged(0);
       //prepare the input for HepTag
       //define a comparator for annotations by start offset
@@ -78,14 +78,15 @@ public class POSTagger extends AbstractProcessingResource {
         long startTime= System.currentTimeMillis();
         while(sentIter.hasNext()){
           Annotation sentenceAnn = (Annotation)sentIter.next();
-          AnnotationSet rangeSet = inputAS.get(
-                                    sentenceAnn.getStartNode().getOffset(),
-                                    sentenceAnn.getEndNode().getOffset());
-          if(rangeSet == null) continue;
-          AnnotationSet tokensSet = rangeSet.get("Token");
-          if(tokensSet == null) continue;
-          List tokens = new ArrayList(tokensSet);
-          Collections.sort(tokens, offsetComparator);
+//          AnnotationSet rangeSet = inputAS.get(
+//                                    sentenceAnn.getStartNode().getOffset(),
+//                                    sentenceAnn.getEndNode().getOffset());
+//          if(rangeSet == null) continue;
+//          AnnotationSet tokensSet = rangeSet.get("Token");
+//          if(tokensSet == null) continue;
+//          List tokens = new ArrayList(tokensSet);
+//          Collections.sort(tokens, offsetComparator);
+          List tokens = (List)sentenceAnn.getFeatures().get("tokens");
           List sentence = new ArrayList(tokens.size());
           Iterator tokIter = tokens.iterator();
           while(tokIter.hasNext()){
