@@ -234,9 +234,9 @@ public class NominalCoref extends AbstractCoreferencer
 	String tokenCategory = (String) 
 	  lastToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
 	// UNCOMMENT FOR SINGULAR PROPER NOUNS (The President, the Pope)
-	//if (! tokenCategory.equals("NN") &&
-	//! tokenCategory.equals("NNP")) {
-	if (! tokenCategory.equals("NN")) {
+	if (! tokenCategory.equals("NN") &&
+	! tokenCategory.equals("NNP")) {
+	//if (! tokenCategory.equals("NN")) {
 	  Out.println("Not a singular noun");
 	  continue;
 	}
