@@ -1,3 +1,18 @@
+/*  JFontChooser.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 06/04/2001
+ *
+ *  $Id$
+ *
+ */
+
 package gate.swing;
 
 import javax.swing.*;
@@ -24,7 +39,7 @@ public class JFontChooser extends JPanel {
     initGuiComponents();
     initListeners();
     setFontValue(initialFont);
-  }
+  }// public JFontChooser(Font initialFont)
 
   public static Font showDialog(Component parent, String title,
                                 Font initialfont){
@@ -58,12 +73,12 @@ public class JFontChooser extends JPanel {
     dialog.pack();
     dialog.show();
     return fontChooser.getFontValue();
+  }// showDialog
+
+  protected void initLocalData() {
   }
 
-  protected void initLocalData(){
-  }
-
-  protected void initGuiComponents(){
+  protected void initGuiComponents() {
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     familyCombo = new JComboBox(
                         GraphicsEnvironment.getLocalGraphicsEnvironment().
@@ -102,7 +117,7 @@ public class JFontChooser extends JPanel {
     samplePanel.setBorder(BorderFactory.createTitledBorder("Sample"));
     add(samplePanel);
     add(Box.createVerticalStrut(10));
-  }
+  }// initGuiComponents()
 
   protected void initListeners(){
     //listen for our own properties change events
@@ -134,7 +149,7 @@ public class JFontChooser extends JPanel {
         updateFont();
       }
     });
-  }
+  }// initListeners()
 
   private void updateFont(){
     String family = (String)familyCombo.getSelectedItem();
@@ -147,7 +162,7 @@ public class JFontChooser extends JPanel {
     }
     Font newFont = new Font(family, style, size);
     setFontValue(newFont);
-  }
+  }//updateFont()
 
   public static void main(String args[]){
     try{
@@ -159,14 +174,15 @@ public class JFontChooser extends JPanel {
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     frame.setSize(new Dimension(300, 300));
     frame.setVisible(true);
-System.out.println("Font: " + UIManager.getFont("Button.font"));
+    System.out.println("Font: " + UIManager.getFont("Button.font"));
     showDialog(frame, "Fonter", UIManager.getFont("Button.font"));
-  }
+  }// main
 
   public void setFontValue(java.awt.Font newFontValue) {
     java.awt.Font  oldFontValue = fontValue;
     fontValue = newFontValue;
-    propertyChangeListeners.firePropertyChange("fontValue", oldFontValue, newFontValue);
+    propertyChangeListeners.firePropertyChange(
+                                      "fontValue", oldFontValue, newFontValue);
   }
 
   public java.awt.Font getFontValue() {
@@ -192,4 +208,4 @@ System.out.println("Font: " + UIManager.getFont("Button.font"));
   private java.awt.Font fontValue;
   private transient PropertyChangeSupport propertyChangeListeners =
                     new PropertyChangeSupport(this);
-}
+}// class JFontChooser extends JPanel
