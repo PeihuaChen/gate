@@ -140,12 +140,14 @@ public class NameBearerHandle implements Handle,
     Iterator publishersIter = actionPublishers.iterator();
     while(publishersIter.hasNext()){
       ActionsPublisher aPublisher = (ActionsPublisher)publishersIter.next();
-      Iterator actionIter = aPublisher.getActions().iterator();
-      while(actionIter.hasNext()){
-        Action anAction = (Action)actionIter.next();
-        if(anAction == null) popup.addSeparator();
-        else{
-          popup.add(new XJMenuItem(anAction, sListenerProxy));
+      if(aPublisher.getActions() != null){
+        Iterator actionIter = aPublisher.getActions().iterator();
+        while(actionIter.hasNext()){
+          Action anAction = (Action)actionIter.next();
+          if(anAction == null) popup.addSeparator();
+          else{
+            popup.add(new XJMenuItem(anAction, sListenerProxy));
+          }
         }
       }
     }
