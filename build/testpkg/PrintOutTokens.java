@@ -18,7 +18,7 @@ import gate.creole.*;
 /** A simple ProcessingResource for testing purposes.
   */
 public class PrintOutTokens extends
-AbstractResource implements ProcessingResource
+AbstractProcessingResource implements ProcessingResource
 {
   /** Default Construction */
   public PrintOutTokens() {
