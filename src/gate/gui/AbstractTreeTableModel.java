@@ -1,34 +1,39 @@
 package gate.gui;
 /*
- * %W% %E%
+ *  Copyright (c) 1998-2001, The University of Sheffield.
  *
- * Copyright 1997, 1998 by Sun Microsystems, Inc.,
- * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
- * All rights reserved.
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- * This software is the confidential and proprietary information
- * of Sun Microsystems, Inc. ("Confidential Information").  You
- * shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Sun.
+ *  Valentin Tablan 13/02/2001
+ *
+ *  $Id$
+ *
  */
 
 import javax.swing.tree.*;
 import javax.swing.event.*;
 
 /**
- * An abstract implementation of the TreeTableModel interface, handling
- * the list of listeners.
- *
- * @version %I% %G%
- *
- * @author Philip Milne
+ * An abstract implementation of the TreeTableModel interface. Its main purpose
+ * is handling the list of listeners.
  */
-
 public abstract class AbstractTreeTableModel implements TreeTableModel {
+  /**
+   * The root of the tree.
+   */
   protected Object root;
+
+  /**
+   * The list of listeners.
+   */
   protected EventListenerList listenerList = new EventListenerList();
 
+  /**
+   * Constructor for a tree-table containing only one node: the root.
+   */
   public AbstractTreeTableModel(Object root) {
       this.root = root;
   }
@@ -37,17 +42,26 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
   // Default implmentations for methods in the TreeModel interface.
   //
 
+  /**
+   * Default implementation. Gets the root of the tree.
+   */
   public Object getRoot() {
       return root;
   }
 
+  /**
+   * Is this node a leaf?
+   */
   public boolean isLeaf(Object node) {
       return getChildCount(node) == 0;
   }
 
   public void valueForPathChanged(TreePath path, Object newValue) {}
 
-  // This is not called in the JTree's default mode: use a naive implementation.
+  /**
+   * This method is not called by the current implementation of JTree.
+   * Implemented only for completion.
+   */
   public int getIndexOfChild(Object parent, Object child) {
     for (int i = 0; i < getChildCount(parent); i++){
       if (getChild(parent, i).equals(child)){
@@ -57,15 +71,23 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
     return -1;
   }
 
+  /**
+   * Registers a new {@link javax.swing.event.TreeModelListener} with this
+   * model.
+   */
   public void addTreeModelListener(TreeModelListener l) {
     listenerList.add(TreeModelListener.class, l);
   }
 
+  /**
+   * Removes a {@link javax.swing.event.TreeModelListener} from the list of
+   * listeners registered with this model.
+   */
   public void removeTreeModelListener(TreeModelListener l) {
     listenerList.remove(TreeModelListener.class, l);
   }
 
-  /*
+  /**
    * Notify all listeners that have registered interest for
    * notification on this event type.  The event instance
    * is lazily created using the parameters passed into
@@ -90,7 +112,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
     }
   }
 
-  /*
+  /**
    * Notify all listeners that have registered interest for
    * notification on this event type.  The event instance
    * is lazily created using the parameters passed into
@@ -115,7 +137,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
     }
   }
 
-  /*
+  /**
    * Notify all listeners that have registered interest for
    * notification on this event type.  The event instance
    * is lazily created using the parameters passed into
@@ -140,7 +162,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
     }
   }
 
-  /*
+  /**
    * Notify all listeners that have registered interest for
    * notification on this event type.  The event instance
    * is lazily created using the parameters passed into
@@ -165,32 +187,17 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
     }
   }
 
-  //
-  // Default impelmentations for methods in the TreeTableModel interface.
-  //
-  public Class getColumnClass(int column) {
-    return Object.class;
-  }
-
- /** By default, make the column with the Tree in it the only editable one.
-  *  Making this column editable causes the JTable to forward mouse
-  *  and keyboard events in the Tree column to the underlying JTree.
-  */
-  public boolean isCellEditable(Object node, int column) {
-       return getColumnClass(column) == TreeTableModel.class;
-  }
-
-  public void setValueAt(Object aValue, Object node, int column) {}
-
-
-  // Left to be implemented in the subclass:
-
-  /*
-   *   public Object getChild(Object parent, int index)
-   *   public int getChildCount(Object parent)
-   *   public int getColumnCount()
-   *   public String getColumnName(Object node, int column)
-   *   public Object getValueAt(Object node, int column)
+  /**
+   * Default implementation. Does nothing.
    */
+  public void setValueAt(Object aValue, Object node, int column){}
+
+  abstract public Class getColumnClass(int column);
+  abstract public boolean isCellEditable(Object node, int column);
+  abstract public Object getChild(Object parent, int index);
+  abstract public int getChildCount(Object parent);
+  abstract public int getColumnCount();
+  abstract public String getColumnName(int column);
+  abstract public Object getValueAt(Object node, int column);
 
 }

@@ -37,70 +37,153 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 
-
+/**
+ * This class implements a viewer/editor for the annotations on a document.
+ * As a viewer, this visual resource will display all the annotations found on
+ * the document but in order for the editor to work it needs to be provided
+ * with a set of annotation schemas.
+ */
 public class AnnotationEditor extends AbstractVisualResource{
   //properties
   private transient PropertyChangeSupport propertyChangeListeners =
                                           new PropertyChangeSupport(this);
+  /**
+   * The {@link gate.Document} currently displayed.
+   */
   private gate.Document document;
+
+  /**
+   * A set of {@link gate.annotation.AnnotationSchema} objects describing the
+   * types of annotations that this editor should be aware of.
+   */
   private java.util.Set annotationSchemas;
 
+  /**
+   * A random colour generator used to generate initial default colours for
+   * highlighting various types of annotations.
+   */
   protected ColorGenerator colGenerator = new ColorGenerator();
 
   //GUI components
+  /** The text display.*/
   JTextPane textPane;
+
+  /** Scroller used for the text diaplay*/
   JScrollPane textScroll;
+
+  /** The table placed below the text display used for showing annotations*/
   XJTable annotationsTable;
+
+  /**Model for the annotations table*/
   AnnotationsTableModel annotationsTableModel;
+
+  /** Scroller for the annotations table*/
   JScrollPane tableScroll;
+
+  /*The split that contains the text(top) and the annotations table(bottom)*/
   JSplitPane leftSplit;
 
+  /**
+   * The right hand side tree with all  the annotation sets and types of
+   * annotations
+   */
   JTree stylesTree;
+
+  /**Scroller for the styles tree*/
   JScrollPane stylesTreeScroll;
+
+  /**The root for the styles tree*/
   TreeNode stylesTreeRoot;
+
+  /**The model for the styles tree*/
   DefaultTreeModel stylesTreeModel;
 
+  /**The dialog used for editing the styles used to highlight annotations*/
   TextAttributesChooser styleChooser;
+
+  /**The dialog used for editing/adding annotations*/
   AnnotationEditDialog annotationEditDialog;
 
+  /**
+   * A box containing a {@link javax.swing.JProgressBar} used to keep the user
+   * entertained while the text display is being updated
+   */
   Box progressBox;
+
+  /**The progress bar used during updating the text*/
   JProgressBar progressBar;
 
+  /**The highlighter used for the selected annotation*/
   Highlighter highlighter;
 
 //data members
   /**
-   * holds the data for the table: a list of Annotation objects
+   * holds the data for the  annotations table: a list of Annotation objects
    */
   java.util.List data;
 
   /**
-   * a list containing {@link Range} objects.
+   * a list containing {@link Range} objects. These are the ranges in the
+   * {@link #data} structure. A range is a bunch of annotations belonging to the
+   * same annotation set that are contiguous in the {@link #data} structure.
    */
   java.util.List ranges;
 
   /**
+   * A composed map used to get the metadata for an annotation type starting
+   * from the annotation set name and the type name.
+   * Annotation set name -> Annotation type -> {@link #TypeData}
    * Maps from String to Map to Map.
-   * Annotation set name -> Annotation type -> {@link TypeData}
    */
   Map typeDataMap;
 
+  /**
+   * The listener for the evnts coming from the document (annotations and
+   * annotation sets added or removed). In order to keep the display updated in
+   * an efficient manner these events are processed in sets after a short delay
+   * and not one by one as they occur. This is based on the assumption that
+   * these kinds of events tend to occur in groups (e.g. when a processing
+   * resource runs over a document it is likely to generate more than one new
+   * annotation).
+   */
   DelayedListener eventHandler;
 
+  /**
+   * Thread used for updating the text. This object is also used as a lock so
+   * two updates do not happen in the same time which would produce a lot of
+   * garbage in the display.
+   */
   Thread guiUpdateThread;
   //misc members
 
+  /**Should the table be visible*/
   private boolean tableVisible;
+
+  /**Should the text be visible*/
   private boolean textVisible;
+
+  /**
+   * Should the right hand side tree be visible. That tree is used to select
+   * what types of annotations are visible in the text display, hence the name
+   * filters.
+   */
   private boolean filtersVisible;
+
+  /**Should this component bahave as an editor as well as an viewer*/
   private boolean editable = true;
 
+
+  /**
+   * Default constructor. Creats all the components and initialises all the
+   * internal data to default values where possible.
+   */
   public AnnotationEditor() {
     initLocalData();
     initGuiComponents();
     initListeners();
   }
 
+  /**Test code*/
   public static void main(String[] args) {
     try{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -159,46 +242,11 @@ public class AnnotationEditor extends AbstractVisualResource{
       e.printStackTrace(System.err);
     }
   }
-/*
-  public Resource init(){
-    //data initialisation
-    if(document != null){
-      //set the text
-      textPane.setText(document.getContent().toString());
 
-      //the AnnotationsTable and the AnnotationSetsTable
-      setsData.clear();
-      setsDataMap.clear();
-      String name = "<Default>";
-      SetData sData = new SetData(name, false);
-      setsData.add(sData);
-      setsDataMap.put(name, sData);
-      Iterator setsIter = document.getNamedAnnotationSets().keySet().iterator();
-      while(setsIter.hasNext()){
-        name = (String)setsIter.next();
-        sData = new SetData(name, false);
-        setsData.add(sData);
-        setsDataMap.put(name, sData);
-      }
-      setsTableModel.fireTableDataChanged();
-
-
-      if(visibleAnnotationSetsNames == null){
-        visibleAnnotationSetsNames = new HashSet();
-      }
-      Iterator vasIter = visibleAnnotationSetsNames.iterator();
-      String asName;
-      while(vasIter.hasNext()){
-        asName = (String)vasIter.next();
-        makeSetVisible(asName.equals("<Default>") ?
-                       document.getAnnotations() :
-                       document.getAnnotations(asName));
-      }
-    }//if(document != null)
-
-    return this;
-  }//public Resource init()
-*/
+  /**
+   * Initialises all the listeners that this component has to register with
+   * other classes.
+   */
   protected void initListeners(){
     //listen for our own properties change events
     this.addPropertyChangeListener("document", new PropertyChangeListener(){
@@ -442,6 +490,9 @@ public class AnnotationEditor extends AbstractVisualResource{
 
   }//protected void initListeners()
 
+  /**
+   * Initialises the local variables to their default values
+   */
   protected void initLocalData(){
     //init local vars
     data = Collections.synchronizedList(new ArrayList());
@@ -455,6 +506,7 @@ public class AnnotationEditor extends AbstractVisualResource{
 
   }//protected void initLocalData()
 
+  /**Builds all the graphical components*/
   protected void initGuiComponents(){
     //initialise GUI components
     this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -561,6 +613,7 @@ public class AnnotationEditor extends AbstractVisualResource{
     highlighter = textPane.getHighlighter();
   }//protected void initGuiComponents()
 
+  /**Updates the size of the styles tree so it gets all the width it needs*/
   protected void updateTreeSize(){
     int width = stylesTree.getPreferredScrollableViewportSize().width +
                 stylesTreeScroll.getInsets().left +
@@ -580,10 +633,11 @@ public class AnnotationEditor extends AbstractVisualResource{
     validate();
   }
 
+/*
   boolean addRange(String setName, String type){
     return false;
   }
-
+*/
   boolean removeRange(String setName, String type){
     return false;
   }
