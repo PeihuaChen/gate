@@ -354,6 +354,31 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     return resData.getInstantiations();
   } // getVrInstances
 
+  /** Get a list of all non-private instantiations of LR in the register. */
+  public List getPublicLrInstances() { return getPublics(getLrInstances()); }
+
+  /** Get a list of all non-private instantiations of PR in the register. */
+  public List getPublicPrInstances() { return getPublics(getPrInstances()); }
+
+  /** Get a list of all non-private instantiations of VR in the register. */
+  public List getPublicVrInstances() { return getPublics(getVrInstances()); }
+
+  /** Get a list of all non-private instantiations. */
+  protected List getPublics(List instances) {
+    Iterator iter = instances.iterator();
+    List publics = new ArrayList();
+
+    // for each instance, if resource data specifies it isn't private,
+    // add to the publics list
+    while(iter.hasNext()) {
+      Resource res = (Resource) iter.next();
+      ResourceData rd = (ResourceData) get(res.getClass().getName());
+      if(! rd.isPrivate()) publics.add(res);
+    }
+
+    return publics;
+  } // getPublics
+
   /** A list of the types of LR in the register. */
   protected Set lrTypes = new HashSet();
 
