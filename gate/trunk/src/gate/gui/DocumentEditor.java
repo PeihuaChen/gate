@@ -1292,7 +1292,11 @@ public class DocumentEditor extends AbstractVisualResource{
 
     public int getSize(){
       if(document == null || document.getFeatures() == null) return 0;
-      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      Map matchesMap = null;
+      try{
+        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      }catch(Exception e){
+      }
       if(matchesMap == null) return 0;
       java.util.List matchesList = (java.util.List)
                                    matchesMap.get(corefCombo.getSelectedItem());
@@ -1300,7 +1304,12 @@ public class DocumentEditor extends AbstractVisualResource{
     }
 
     public Object getElementAt(int index){
-      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      if(document == null || document.getFeatures() == null) return null;
+      Map matchesMap = null;
+      try{
+        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      }catch(Exception e){
+      }
       if(matchesMap == null) return null;
       java.util.List matchesList = (java.util.List)
                                    matchesMap.get(corefCombo.getSelectedItem());
@@ -1319,12 +1328,21 @@ public class DocumentEditor extends AbstractVisualResource{
                                   implements ComboBoxModel{
     public int getSize(){
       if(document == null || document.getFeatures() == null) return 0;
-      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      Map matchesMap = null;
+      try{
+        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      }catch(Exception e){
+      }
       return (matchesMap == null) ? 0 : matchesMap.size();
     }
 
     public Object getElementAt(int index){
-      Map matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      if(document == null || document.getFeatures() == null) return null;
+      Map matchesMap = null;
+      try{
+        matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
+      }catch(Exception e){
+      }
       if(matchesMap == null) return null;
       java.util.List setsList = new ArrayList(matchesMap.keySet());
       boolean nullPresent = setsList.remove(null);
