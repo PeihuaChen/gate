@@ -57,11 +57,11 @@ public class SerialAnalyserController extends SerialController
         ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
       }
 
-      try{
-        super.execute();
-      }catch(Exception e){
-        e.printStackTrace(Err.getPrintWriter());
-      }
+//      try{
+      super.execute();
+//      }catch(Exception e){
+//        e.printStackTrace(Err.getPrintWriter());
+//      }
 
       //unset the doc and corpus
       for(int j = 0; j < prList.size(); j++){
