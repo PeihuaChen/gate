@@ -43,6 +43,8 @@ public class TestWordNet extends TestCase {
 
       testWordNet1.testWN_02();
 
+      testWordNet1.testWN_03();
+
     }
     catch(Exception ex) {
       ex.printStackTrace();
@@ -197,6 +199,100 @@ public class TestWordNet extends TestCase {
       break;
     }
 
+  }
+
+  public void testWN_03() throws Exception {
+    //test hyponymy - check all direct hyponyms of a word
+    //compare the result with the WN16 index files
+
+    List senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
+    Assert.assertTrue(senseList.size() == 8);
+
+    Iterator itSenses = senseList.iterator();
+
+    for (int i=0; i< senseList.size(); i++) {
+
+      WordSense currSense = (WordSense)senseList.get(i);
+      Synset currSynset = currSense.getSynset();
+      Assert.assertNotNull(currSynset);
+
+      if (false == currSynset.getGloss().equals("a small open container usually used for drinking; \"he put the cup back in the saucer\"; \"the handle of the cup was missing\"")) {
+        continue;
+      }
+
+      List semRelations = currSynset.getSemanticRelations(SemanticRelation.REL_HYPONYM);
+      Assert.assertNotNull(semRelations);
+      Assert.assertTrue(9 == semRelations.size());
+
+      for (int j=0; j< semRelations.size(); j++ ) {
+        SemanticRelation currHypoRel = (SemanticRelation)semRelations.get(j);
+
+        Assert.assertTrue(currHypoRel.getType() == SemanticRelation.REL_HYPONYM);
+        Assert.assertEquals(currHypoRel.getSymbol(),"~");
+        Assert.assertEquals(currHypoRel.getSource(), currSynset);
+
+        Synset currHyponym = currHypoRel.getTarget();
+        Assert.assertNotNull(currHyponym);
+
+        switch(j) {
+
+          case 0:
+            checkSynset(currHyponym,
+                        "usually without a handle",
+                        1);
+            break;
+
+          case 1:
+            checkSynset(currHyponym,
+                        "a bowl-shaped drinking vessel; especially the Eucharistic cup",
+                        2);
+            break;
+
+          case 2:
+            checkSynset(currHyponym,
+                        "a cup from which coffee is drunk",
+                        1);
+            break;
+
+          case 3:
+            checkSynset(currHyponym,
+                        "a paper cup for holding drinks",
+                        3);
+            break;
+
+          case 4:
+            checkSynset(currHyponym,
+                        "cup to be passed around for the final toast after a meal",
+                        1);
+            break;
+
+          case 5:
+            checkSynset(currHyponym,
+                        "a graduated cup used for measuring ingredients",
+                        1);
+            break;
+
+          case 6:
+            checkSynset(currHyponym,
+                        "a drinking cup with a bar inside the rim to keep a man's mustache out of the drink",
+                        2);
+            break;
+
+          case 7:
+            checkSynset(currHyponym,
+                        "an ancient Greek drinking cup; two handles and footed base",
+                        1);
+            break;
+
+          case 8:
+            checkSynset(currHyponym,
+                        "a cup from which tea is drunk",
+                        1);
+            break;
+        }
+      }
+
+    }
   }
 
   private void checkSynset(Synset s, String gloss, int numWords) {
