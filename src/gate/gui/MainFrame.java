@@ -1086,6 +1086,13 @@ public class MainFrame extends JFrame
 
   }// resourceLoaded();
 
+  public void aaa(int foo){
+  }
+
+  public void bbb(){
+      aaa(10);
+  }
+
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())) return;
