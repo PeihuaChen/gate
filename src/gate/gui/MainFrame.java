@@ -811,8 +811,8 @@ public class MainFrame extends JFrame
   public void progressChanged(int i) {
     //progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
+    if(!animator.isActive()) animator.activate();
     if(oldValue != i){
-      if(!animator.isActive()) animator.activate();
       SwingUtilities.invokeLater(new ProgressBarUpdater(i));
     }
   }
@@ -1779,7 +1779,7 @@ public class MainFrame extends JFrame
       SwingUtilities.invokeLater(new Runnable(){
         public void run(){
           targetPanel.removeAll();
-          targetPanel.paintImmediately(targetPanel.getBounds());
+          targetPanel.repaint();
         }
       });
     }
