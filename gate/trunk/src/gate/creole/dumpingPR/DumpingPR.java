@@ -120,7 +120,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
         renameMap.put(annotationTypes.get(i), dumpTypes.get(i));
       }//for
       //if we have to rename annotations, then do so
-      if(!renameMap.isEmpty())
+      if(!renameMap.isEmpty() && annots2Export != null)
         annots2Export = renameAnnotations(annots2Export, renameMap);
     }//if
 
@@ -135,8 +135,9 @@ public class DumpingPR extends AbstractLanguageAnalyser
     try {
       URL sourceURL = new URL(source);
       StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
-      tempBuff.insert(sourceURL.getFile().lastIndexOf("."), "_gate_output");
+//      tempBuff.insert(sourceURL.getFile().lastIndexOf("."), "_gate_output");
 //      tempBuff.insert(0, sourceURL.getPath());
+      tempBuff.append(".gate");
       String outputPath = tempBuff.toString();
       if (DEBUG)
         Out.prln(outputPath);
