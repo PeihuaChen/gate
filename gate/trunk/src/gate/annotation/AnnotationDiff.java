@@ -43,12 +43,22 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   public final int DEFAULT_TYPE = 0;
   public final int CORRECT_TYPE = 1;
   public final int PARTIALLY_CORRECT_TYPE = 2;
-  public final int INCORRECT_TYPE = 3;
+  public final int SPURIOUS_TYPE = 3;
   public final int MISSING_TYPE = 4;
+
+  private  final Color RED = new Color(255,173,181);
+  private  final Color GREEN = new Color(173,255,214);
+  private  final Color WHITE = new Color(255,255,255);
+  private  final Color BLUE = new Color(173,215,255);
+  private  final Color YELLOW = new Color(255,231,173);
+  private  final Color BLACK = new Color(0,0,0);
+
+  private Color colors[] = new Color[MAX_TYPES];
 
   /** Used to represent the result of diff*/
   Set diffSet = new HashSet();
 
+  /** These fields are used in doDiff() and detectKey(Response)Type()*/
   Set keyPartiallySet = new HashSet();
   Set responsePartiallySet = new HashSet();
   java.util.List keyAnnotList = null;
@@ -74,10 +84,21 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   private AnnotationSchema annotationSchema = null;
 
   /** The Precision value (see NLP Information Extraction)*/
-  private Double precision = new Double(0);
+  private double precisionStrict = 0.0;
+  private double precisionLenient = 0.0;
+  private double precisionAverage = 0.0;
 
   /** The Recall value (see NLP Information Extraction)*/
-  private Double recall = new Double(0);
+  private double recallStrict = 0.0;
+  private double recallLenient = 0.0;
+  private double recallAverage = 0.0;
+
+  /** The False positive (see NLP Information Extraction)*/
+  private double falsePositiveStrict = 0.0;
+  private double falsePositiveLenient = 0.0;
+  private double falsePositiveAverage = 0.0;
+
+  private String annotationTypeForFalsePositive = null;
 
   /** A number formater for displaying precision and recall*/
   protected static NumberFormat formatter = NumberFormat.getInstance();
@@ -92,25 +113,83 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   public AnnotationDiff(){
   }//AnnotationDiff
 
-  /** Sets the key Document containing the annotation set taken as refference*/
+  /** Sets the annotation type needed to calculate the falsePossitive measure*/
+  public void setAnnotationTypeForFalsePositive(String anAnnotType){
+    annotationTypeForFalsePositive = anAnnotType;
+  }// setAnnotationTypeForFalsePositive
+
+  /** Gets the annotation type needed to calculate the falsePossitive measure*/
+  public String getAnnotationTypeForFalsePositive(){
+    return annotationTypeForFalsePositive;
+  }// getAnnotationTypeForFalsePositive
+
+  /** Sets the keyDocument */
   public void setKeyDocument(Document aKeyDocument) {
     keyDocument = aKeyDocument;
   }// setKeyDocument
-
-  /** Gets the precision field*/
-  public Double getPrecision(){
-    return precision;
-  }// getPrecision
-
-  /** Gets the recall*/
-  public Double getRecall(){
-    return recall;
-  }// getRecall
 
   /** Gets the keyDocument */
   public Document getKeyDocument(){
     return keyDocument;
   }// getKeyDocument
+
+  ///////////////////////////////////////////////////
+  // PRECISION methods
+  ///////////////////////////////////////////////////
+
+  /** Gets the precisionStrict field*/
+  public double getPrecisionStrict(){
+    return precisionStrict;
+  }// getPrecisionStrict
+
+  /** Gets the precisionLenient field*/
+  public double getPrecisionLenient(){
+    return precisionLenient;
+  }// getPrecisionLenient
+
+  /** Gets the precisionAverage field*/
+  public double getPrecisionAverage(){
+    return precisionAverage;
+  }// getPrecisionAverage
+
+  ///////////////////////////////////////////////////
+  // RECALL methods
+  ///////////////////////////////////////////////////
+
+  /** Gets the recallStrict field*/
+  public double getRecallStrict(){
+    return recallStrict;
+  }// getRecallStrict
+
+  /** Gets the recallLenient field*/
+  public double getRecallLenient(){
+    return recallLenient;
+  }// getRecallLenient
+
+  /** Gets the recallAverage field*/
+  public double getRecallAverage(){
+    return recallAverage;
+  }// getRecallAverage
+
+  ///////////////////////////////////////////////////
+  // FALSE POSITIVE methods
+  ///////////////////////////////////////////////////
+
+  /** Gets the falsePositiveStrict field*/
+  public double getFalsePositiveStrict(){
+    return falsePositiveStrict;
+  }// getFalsePositiveStrict
+
+  /** Gets the falsePositiveLenient field*/
+  public double getFalsePositiveLenient(){
+    return falsePositiveLenient;
+  }// getFalsePositiveLenient
+
+  /** Gets the falsePositiveAverage field*/
+  public double getFalsePositiveAverage(){
+    return falsePositiveAverage;
+  }// getFalsePositive
+
 
   /**
     * Sets the response Document(containing the annotation Set being compared)
@@ -142,6 +221,13 @@ public class AnnotationDiff extends JPanel implements VisualResource{
     * This method does the diff, P&R calculation and so on.
     */
   public Resource init() {
+
+    colors[DEFAULT_TYPE] = WHITE;
+    colors[CORRECT_TYPE] = GREEN;
+    colors[SPURIOUS_TYPE] = RED;
+    colors[PARTIALLY_CORRECT_TYPE] = BLUE;
+    colors[MISSING_TYPE] = YELLOW;
+
     // Do the diff, P&R calculation and so on
     AnnotationSet keyAnnotSet = null;
     AnnotationSet responseAnnotSet = null;
@@ -201,24 +287,119 @@ public class AnnotationDiff extends JPanel implements VisualResource{
     BoxLayout boxLayout = new BoxLayout(this,BoxLayout.Y_AXIS);
     this.setLayout(boxLayout);
     // Put the table into a JScrollPanel
-    JScrollPane tableScroll = new JScrollPane(diffTable);
+    JScrollPane scrollPane = new JScrollPane(diffTable);
     // Add the tableScroll to the diffPanel
-    this.add(tableScroll);
+    this.add(scrollPane);
 
+    // ADD the LEGENDA
     //Lay out the JLabels from left to right.
     JPanel jLabelPane = new JPanel();
     jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
     // Keep the components together
     jLabelPane.add(Box.createHorizontalGlue());
-    JLabel precisionLabel = new JLabel("Precision: " +
-                                    formatter.format(precision));
-    jLabelPane.add(precisionLabel);
+    JLabel jLabel = new JLabel("Missing (key but no response): " +
+                                                typeCounter[MISSING_TYPE]);
+    jLabel.setForeground(colors[MISSING_TYPE]);
+    jLabel.setBackground(BLACK);
+    jLabel.setOpaque(true);
+    jLabelPane.add(jLabel);
     // This places a space between the two JLabel components
-    jLabelPane.add(Box.createRigidArea(new Dimension(20, 0)));
-    JLabel recallLabel = new JLabel("Recall: " + formatter.format(recall));
-    jLabelPane.add(recallLabel);
+    jLabelPane.add(Box.createRigidArea(new Dimension(40, 0)));
+    jLabel = new JLabel("Correct (exact match): " + typeCounter[CORRECT_TYPE]);
+    jLabel.setForeground(colors[CORRECT_TYPE]);
+    jLabel.setBackground(BLACK);
+    jLabel.setOpaque(true);
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(40, 0)));
+    jLabel =new JLabel("Partially correct (overlap between key and response): "+
+                                        typeCounter[PARTIALLY_CORRECT_TYPE]);
+    jLabel.setForeground(colors[PARTIALLY_CORRECT_TYPE]);
+    jLabel.setBackground(BLACK);
+    jLabel.setOpaque(true);
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(40, 0)));
+    jLabel = new JLabel("Spurious (response but no key): " +
+                                        typeCounter[SPURIOUS_TYPE]);
+    jLabel.setForeground(colors[SPURIOUS_TYPE]);
+    jLabel.setBackground(BLACK);
+    jLabel.setOpaque(true);
+    jLabelPane.add(jLabel);
 
     this.add(jLabelPane);
+
+    // ADD A SPACE
+    //Lay out the JLabels from left to right.
+    jLabelPane = new JPanel();
+    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
+    jLabelPane.add(Box.createHorizontalGlue());
+    jLabelPane.add(Box.createRigidArea(new Dimension(35, 10)));
+    this.add(jLabelPane);
+
+    // FIRST ROW of MEASURES
+    //Lay out the JLabels from left to right.
+    jLabelPane = new JPanel();
+    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
+    // Keep the components together
+    jLabelPane.add(Box.createHorizontalGlue());
+    jLabel = new JLabel("Precision strict: " +
+                                    formatter.format(precisionStrict));
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(35, 0)));
+    jLabel = new JLabel("Recall strict: " + formatter.format(recallStrict));
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(35, 0)));
+    jLabel = new JLabel("False positive strict: " +
+                                        formatter.format(falsePositiveStrict));
+    jLabelPane.add(jLabel);
+
+    this.add(jLabelPane);
+
+    // SECOND ROW of MEASURES
+    //Lay out the JLabels from left to right.
+    jLabelPane = new JPanel();
+    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
+    // Keep the components together
+    jLabelPane.add(Box.createHorizontalGlue());
+    jLabel = new JLabel("Precision average: " +
+                                    formatter.format(precisionAverage));
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(20, 0)));
+    jLabel = new JLabel("Recall average: " + formatter.format(recallAverage));
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(20, 0)));
+    jLabel = new JLabel("False positive average: " +
+                                        formatter.format(falsePositiveAverage));
+    jLabelPane.add(jLabel);
+
+    this.add(jLabelPane);
+
+    // THIRD ROW of MEASURES
+    //Lay out the JLabels from left to right.
+    jLabelPane = new JPanel();
+    jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
+    // Keep the components together
+    jLabelPane.add(Box.createHorizontalGlue());
+    jLabel = new JLabel("Precision lenient: " +
+                                    formatter.format(precisionLenient));
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(28, 0)));
+    jLabel = new JLabel("Recall lenient: " + formatter.format(recallLenient));
+    jLabelPane.add(jLabel);
+    // This places a space between the two JLabel components
+    jLabelPane.add(Box.createRigidArea(new Dimension(28, 0)));
+    jLabel = new JLabel("False positive lenient: " +
+                                        formatter.format(falsePositiveLenient));
+    jLabelPane.add(jLabel);
+
+    this.add(jLabelPane);
+
   }//arangeAllComponents
 
   protected void printStructure(Set aDiffSet){
@@ -237,7 +418,7 @@ public class AnnotationDiff extends JPanel implements VisualResource{
         rightAnnot = diffElem.getRightAnnotation().toString();
       Out.prln( leftAnnot + "|" + rightAnnot);
     }// end while
-    Out.prln("Precision = " + precision + " , Recall = " + recall);
+
   }// printStructure
 
   /** This method does the AnnotationSet diff and creates a set with
@@ -279,7 +460,7 @@ public class AnnotationDiff extends JPanel implements VisualResource{
             // Create a new DiffSetElement and add it to the diffSet
             diffElement = new DiffSetElement( keyAnnot,
                                               responseAnnot,
-                                              CORRECT_TYPE,
+                                              DEFAULT_TYPE,
                                               CORRECT_TYPE);
 
             // Add this element to the DiffSet
@@ -304,7 +485,8 @@ public class AnnotationDiff extends JPanel implements VisualResource{
         }// End if
       }// end while responseIterator
 
-      if (diffElement == null)
+      // If diffElement != null it means that break was used
+      if (diffElement == null){
         if (keyPartiallySet.contains(keyAnnot))
           diffElement = new DiffSetElement( keyAnnot,
                                             null,
@@ -315,7 +497,8 @@ public class AnnotationDiff extends JPanel implements VisualResource{
                                             null,
                                             MISSING_TYPE,
                                             NULL_TYPE);
-
+        addToDiffset(diffElement);
+      }// End if
 
       keyIterator.remove();
     }// end while keyIterator
@@ -333,16 +516,44 @@ public class AnnotationDiff extends JPanel implements VisualResource{
         diffElem = new DiffSetElement( null,
                                        respAnnot,
                                        NULL_TYPE,
-                                       INCORRECT_TYPE);
+                                       SPURIOUS_TYPE);
+      addToDiffset(diffElem);
       responseIter.remove();
     }// End while
 
-    if (actual != 0)
-      precision = new Double(typeCounter[CORRECT_TYPE]/actual);
-    if (possible != 0)
-      recall = new Double(typeCounter[CORRECT_TYPE]/possible);
+    // CALCULATE ALL (NLP) MEASURES
+    if (actual != 0){
+
+      precisionStrict =  (double)typeCounter[CORRECT_TYPE]/actual;
+      precisionLenient = (double)(typeCounter[CORRECT_TYPE] +
+                                  typeCounter[PARTIALLY_CORRECT_TYPE])/actual;
+      precisionAverage = (double)(precisionStrict + precisionLenient) / 2;
+    }// End if
+    if (possible != 0){
+      recallStrict = (double)typeCounter[CORRECT_TYPE]/possible;
+      recallLenient = (double) (typeCounter[CORRECT_TYPE] +
+                                typeCounter[PARTIALLY_CORRECT_TYPE])/possible;
+      recallAverage = (double) (recallStrict + recallLenient) / 2;
+    }// End if
+
+    int no = 232;
+    if (annotationTypeForFalsePositive != null)
+      no =
+         responseDocument.getAnnotations(annotationTypeForFalsePositive).size();
+    if (no != 0){
+      // No error here: the formula is the opposite to recall or precission
+      falsePositiveStrict = (double) (typeCounter[SPURIOUS_TYPE] +
+                                      typeCounter[PARTIALLY_CORRECT_TYPE]) / no;
+      falsePositiveLenient = (double) typeCounter[SPURIOUS_TYPE] / no;
+      falsePositiveAverage = (double) (falsePositiveStrict +
+                                                    falsePositiveLenient) / 2 ;
+
+
+    }// End if
+
   }// doDiff
 
+  /** Decide what type is the keyAnnotation (DEFAULT_TYPE or MISSING,) */
   private int detectKeyType(Annotation anAnnot){
     if (anAnnot == null) return NULL_TYPE;
 
@@ -366,6 +577,8 @@ public class AnnotationDiff extends JPanel implements VisualResource{
     return MISSING_TYPE;
   }//detectKeyType
 
+  /** Decide what type is the responseAnnotation (PARTIALLY_CORRECT_TYPE
+    * or SPURIOUS,) */
   private int detectResponseType(Annotation anAnnot){
     if (anAnnot == null) return NULL_TYPE;
 
@@ -386,7 +599,7 @@ public class AnnotationDiff extends JPanel implements VisualResource{
       }// End if
     }// End while
 
-    return INCORRECT_TYPE;
+    return SPURIOUS_TYPE;
   }//detectResponseType
 
   /** This method add an DiffsetElement to the DiffSet and also counts the
@@ -401,7 +614,8 @@ public class AnnotationDiff extends JPanel implements VisualResource{
     if (NULL_TYPE != aDiffSetElement.getRightType())
       typeCounter[aDiffSetElement.getRightType()]++;
     // For the left side (key) the type can be : D or M
-    if (NULL_TYPE != aDiffSetElement.getLeftType())
+    if (NULL_TYPE != aDiffSetElement.getLeftType() &&
+        CORRECT_TYPE != aDiffSetElement.getLeftType())
       typeCounter[aDiffSetElement.getLeftType()]++;
   }// addToDiffset
 
@@ -558,20 +772,11 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   public class AnnotationDiffCellRenderer extends DefaultTableCellRenderer{
 
     /** Constructs a randerer with a table model*/
-    public AnnotationDiffCellRenderer(){
-    }//AnnotationDiffCellRenderer
-
-    private  final Color RED = new Color(255,100,100);
-    private  final Color GREEN = new Color(150,255,150);
-    private  final Color WHITE = new Color(255,255,255);
-    private  final Color BLUE = new Color(0,0,150);
-    private  final Color YELLOW = new Color(248,243,120);
-    private  final Color BLACK = new Color(0,0,0);
-
-    private Color colors[] = new Color[MAX_TYPES];
+    public AnnotationDiffCellRenderer(){}//AnnotationDiffCellRenderer
 
 
-    private Color background = GREEN;
+
+    private Color background = WHITE;
     private Color foreground = BLACK;
 
     /** This method is called by JTable*/
@@ -582,13 +787,15 @@ public class AnnotationDiff extends JPanel implements VisualResource{
                                                     int row,
                                                     int column){
 
-      JComponent defaultComp = (JComponent) super.getTableCellRendererComponent(
+     JComponent defaultComp = null;
+     defaultComp = (JComponent) super.getTableCellRendererComponent(
                                                                   table,
                                                                   value,
-                                                                  false,
-                                                                  false,
+                                                                  isSelected,
+                                                                  hasFocus,
                                                                   row,
                                                                   column);
+
       // The column number four will be randered using a blank component
       if (column == 4 || value == null)
         return new JPanel();
@@ -599,23 +806,21 @@ public class AnnotationDiff extends JPanel implements VisualResource{
       DiffSetElement diffSetElement =
                         (DiffSetElement) table.getModel().getValueAt(row,9);
 
-      if (diffSetElement == null || NULL_TYPE == diffSetElement.getLeftType())
+      if (diffSetElement == null)
         return defaultComp;
 
-      colors[DEFAULT_TYPE] = WHITE;
-      colors[CORRECT_TYPE] = GREEN;
-      colors[INCORRECT_TYPE] = RED;
-      colors[PARTIALLY_CORRECT_TYPE] = BLUE;
-      colors[MISSING_TYPE] = YELLOW;
-
       if (column < 4){
-        background = colors[diffSetElement.getLeftType()];
+        if (NULL_TYPE != diffSetElement.getLeftType())
+          background = colors[diffSetElement.getLeftType()];
+        else return new JPanel();
       }else{
-        background = colors[diffSetElement.getRightType()];
+        if (NULL_TYPE != diffSetElement.getRightType())
+          background = colors[diffSetElement.getRightType()];
+        else return new JPanel();
       }
 
       defaultComp.setBackground(background);
-//      defaultComp.setForeground(foreground);
+      defaultComp.setForeground(BLACK);
 
       defaultComp.setOpaque(true);
       return defaultComp;
