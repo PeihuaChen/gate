@@ -1092,7 +1092,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
 
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
-    if (!addGatePreserveFormatTag && isRootTag){
+//    if (!addGatePreserveFormatTag && isRootTag){
+      if (isRootTag){
       //the features are included either if desired or if that's an annotation
       //from the original markup of the document. We don't want for example to
       //spoil all links in an HTML file!
@@ -1731,7 +1732,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     * called GatePreserveFormat to the document. HTML, XML, SGML docs won't
     * have this tag added
     */
-  private boolean addGatePreserveFormatTag = false;
+//  private boolean addGatePreserveFormatTag = false;
 
   /** This field indicates if an annotation is the doc's root tag.
     * It is needed when adding the namespace information
