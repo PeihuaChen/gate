@@ -656,6 +656,37 @@ implements AnnotationSet
     return oldValue != a;
   } // add(o)
 
+  /**
+   * Adds multiple annotations to this set in one go.
+   * All the objects in the provided collection should be of
+   * {@link gate.Annotation} type, otherwise a ClassCastException will be
+   * thrown.
+   * The provided annotations will be used to create new annotations using the
+   * appropriate add() methods from this set. The new annotations will have
+   * different IDs from the old ones (which is required in order to preserve the
+   * uniqueness of IDs inside an annotation set).
+   * @param c a collection of annotations
+   * @return <tt>true</tt> if the set has been modified as a result of this
+   * call.
+   */
+  public boolean addAll(Collection c){
+    Iterator annIter = c.iterator();
+    boolean changed = false;
+    while(annIter.hasNext()){
+      Annotation a = (Annotation)annIter.next();
+      try{
+        add(a.getStartNode().getOffset(),
+            a.getEndNode().getOffset(),
+            a.getType(),
+            a.getFeatures());
+        changed = true;
+      }catch(InvalidOffsetException ioe){
+        throw new IllegalArgumentException(ioe.toString());
+      }
+    }
+    return changed;
+  }
+
   /** Create and add an annotation and return its id */
   public Integer add(
     Long start, Long end, String type, FeatureMap features
