@@ -155,6 +155,12 @@ public abstract class Factory
           throw new ResourceInstantiationException("Bad read from DB: " + e);
         }
         resData.addInstantiation(res);
+        //fire the event
+        ((CreoleRegisterImpl)reg).fireResourceLoaded(
+                                   new CreoleEvent(res,
+                                                   CreoleEvent.RESOURCE_LOADED)
+                                  );
+
         return res;
       } // datastore was present
 
@@ -220,6 +226,7 @@ public abstract class Factory
 
     // record the instantiation on the resource data's stack
     resData.addInstantiation(res);
+    //fire the event
     ((CreoleRegisterImpl)reg).fireResourceLoaded(
                                new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
                               );
@@ -394,7 +401,7 @@ public abstract class Factory
    */
   protected static void removeResourceListeners(
     Resource resource, Map listeners
-  ) throws 
+  ) throws
     IntrospectionException, InvocationTargetException,
     IllegalAccessException, GateException
   {
