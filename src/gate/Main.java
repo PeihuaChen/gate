@@ -196,6 +196,7 @@ public class Main {
         } // if - SLUG
 
         // run the GUI
+        frame.setTitleChangable(true);
         if(Gate.isSlugGui()) {
           frame.setTitle("SLUG application");
         }
@@ -209,6 +210,7 @@ public class Main {
         if(title != null) {
           frame.setTitle(title);
         } // if
+        frame.setTitleChangable(false);
 
         // Set icon from Java properties
         // iconName could be absolute or "gate:/img/....gif"
