@@ -372,7 +372,7 @@ extends AbstractLanguageResource implements Document {
     StringBuffer xmlDoc = new StringBuffer(
           DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
     // Add xml header
-    xmlDoc.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+//    xmlDoc.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 
     // If the annotation set contains this "GatePreserveFormat"
     // type, then this is removed because it will be added in the saving
@@ -383,7 +383,7 @@ extends AbstractLanguageResource implements Document {
     // GATE document.
     FeatureMap docFeatures = this.getFeatures();
     String mimeTypeStr = null;
-    addGatePreserveFormatTag = false;
+//    addGatePreserveFormatTag = false;
     if (  docFeatures != null &&
           null != (mimeTypeStr=(String)docFeatures.get("MimeType")) &&
           (
@@ -395,20 +395,20 @@ extends AbstractLanguageResource implements Document {
           /* don't add the root tag */
     }else{
       // Add the root start element
-      xmlDoc.append("<GatePreserveFormat"+
-                    " xmlns:gate=\"http://www.gate.ac.uk\"" +
-                    " gate:annotMaxId=\"" +
-                    getNextAnnotationId() +
-                    "\">");
-      addGatePreserveFormatTag = true;
+//      xmlDoc.append("<GatePreserveFormat"+
+//                    " xmlns:gate=\"http://www.gate.ac.uk\"" +
+//                    " gate:annotMaxId=\"" +
+//                    getNextAnnotationId() +
+//                    "\">");
+//      addGatePreserveFormatTag = true;
     }// End if
 
     xmlDoc.append(saveAnnotationSetAsXml(dumpingSet));
 
-    if (addGatePreserveFormatTag){
-      // Add the root end element
-      xmlDoc.append("</GatePreserveFormat>");
-    }// End if
+//    if (addGatePreserveFormatTag){
+//      // Add the root end element
+//      xmlDoc.append("</GatePreserveFormat>");
+//    }// End if
     if(sListener != null) sListener.statusChanged("Done.");
     return xmlDoc.toString();
   }//End toXml()
@@ -615,8 +615,8 @@ extends AbstractLanguageResource implements Document {
     return docContStrBuff.toString();
   }// saveAnnotationSetAsXml()
 
-  /** This method returns a list with annotations ordered in that way that
-    * they can be serialized from heft to right in an offset. If one of the
+  /** This method returns a list with annotations ordered that way that
+    * they can be serialized from left to right, at the offset. If one of the
     * params is null then an empty list will be returned.
     * @param aDumpAnnotSet is a set containing all annotations that will be
     * dumped.
@@ -634,6 +634,8 @@ extends AbstractLanguageResource implements Document {
     Set annotThatStartAndEndAtOffset = new TreeSet(
                           new AnnotationComparator(ORDER_ON_ANNOT_ID,ASC));
 
+    // Fill these tree lists with annotation tat start, end or start and
+    // end at the offset.
     Iterator iter = aDumpAnnotSet.iterator();
     while(iter.hasNext()){
       Annotation ann = (Annotation) iter.next();
@@ -900,18 +902,22 @@ extends AbstractLanguageResource implements Document {
         String key2String = key.toString();
         String value2String = value.toString();
         Object item = null;
-        // Test key if it is Number or collection
-        if (key instanceof java.lang.Number ||
+        // Test key if it is String, Number or Collection
+        if (key instanceof java.lang.String ||
+            key instanceof java.lang.Number ||
             key instanceof java.util.Collection)
           keyClassName = key.getClass().getName();
-        else
-          keyClassName = String.class.getName();
-        // Test value if it is Number or collection
-        if (value instanceof java.lang.Number ||
+
+        // Test value if it is String, Number or Collection
+        if (value instanceof java.lang.String ||
+            value instanceof java.lang.Number ||
             value instanceof java.util.Collection)
           valueClassName = value.getClass().getName();
-        else
-          valueClassName = String.class.getName();
+
+        // Features and values that are not Strings, Numbers or collections
+        // will be discarded.
+        if (keyClassName == null || valueClassName == null) continue;
+
         // If key is collection serialize the colection in a specific format
         if (key instanceof java.util.Collection){
           StringBuffer keyStrBuff = new StringBuffer("");

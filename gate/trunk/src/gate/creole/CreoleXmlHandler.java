@@ -248,11 +248,12 @@ public class CreoleXmlHandler extends DefaultHandler {
       // if the resource is auto-loading, try and load it
       if(resourceData.isAutoLoading())
         try {
-          Resource res = Factory.createResource(
-              resourceData.getClassName(), Factory.newFeatureMap()
-          );
-          resourceData.makeInstantiationPersistant(res);
-        } catch(ResourceInstantiationException e) {
+          Class resClass = resourceData.getResourceClass();
+//          Resource res = Factory.createResource(
+//              resourceData.getClassName(), Factory.newFeatureMap()
+//          );
+//          resourceData.makeInstantiationPersistant(res);
+        } catch(ClassNotFoundException e) {
           throw new GateSaxException(
             "Couldn't load autoloading resource: " +
             resourceData.getName() + "; problem was: " + e
