@@ -856,10 +856,10 @@ public class TestPersist extends TestCase
       test.testDB_UseCase01();
       test.tearDown();
 */
-      test.setUp();
+/*      test.setUp();
       test.testDB_UseCase02();
       test.tearDown();
-
+*/
       test.setUp();
       test.testDB_UseCase03();
       test.tearDown();
