@@ -96,14 +96,14 @@ list:
 	@ ./list.sh
 
 # rebuild the JAPE file parser.
-# uses JavaCC 0.8pre1 from ../lib for the java (via gate.jar),
+# uses JavaCC 0.8pre1 from ../lib for the java,
 # and 0.7 from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1
 jape: ../src/gate/jape/parser/ParseCpsl.java \
   ../src/gate/jape/parser/ParseCpsl.html \
   ../src/gate/jape/parser/ParseCpslPlain.html
 ../src/gate/jape/parser/ParseCpsl.java: ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
-	../../../../build/jdk.sh java -cp ../../../../build/gate.jar \
+	../../../../build/jdk.sh java -cp ../../../../lib/JavaCC.zip \
 	  COM.sun.labs.javacc.Main ParseCpsl.jj
 ../src/gate/jape/parser/ParseCpsl.html: ../src/gate/jape/parser/ParseCpsl.jj \
   ../src/gate/jape/parser/ParseCpslPlain.html
