@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.swing.UIManager;
+
 import gate.*;
 import gate.creole.ANNIEConstants;
 import gate.creole.Transducer;
@@ -38,6 +40,11 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+    
+    Map defaultsMap = UIManager.getLookAndFeelDefaults();
+    System.out.println(defaultsMap.keySet());
+    
+    
     double a = 16.99;
     double b = 9.99;
     double c = a - b;
