@@ -251,7 +251,7 @@
     <!-- creole.xml for Hash Gazetteer (ex Natural)-->
     <RESOURCE>
       <NAME>Hash Gazetteer</NAME>
-      <CLASS>com.ontotext.gate.gazetteer.HashGazetteer</CLASS>
+      <CLASS>com.ontotext.gate.gazetteer.NaturalGazetteer</CLASS>
       <COMMENT>A list lookup component implemented by OntoText Lab.(www.ontotext.com) For documentation, download and license  agreement please refer to (www.ontotext.com/downloads/index.html#gazetteer). The licence information is also available in licence.ontotext.html in the lib folder of GATE</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
@@ -451,6 +451,8 @@
   RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="textTagName" RUNTIME="true"
       OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="annotationTypes" RUNTIME="true"
+      OPTIONAL="true">java.util.ArrayList</PARAMETER>
     </RESOURCE>
 
     <RESOURCE>
@@ -498,7 +500,7 @@
       <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE" NAME="exportedTypes">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="exportFilePath"  COMMENT="Destination URL where to export" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">java.lang.String</PARAMETER>
-      <ICON>daml.jpg</ICON>
+      <ICON>daml.jpg</ICON>      
     </RESOURCE>
 
     <!-- creole.xml for SearchPR -->
@@ -523,6 +525,7 @@
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
       <ICON>binoculars.gif</ICON>
     </RESOURCE>
+
 
   </CREOLE>
 
