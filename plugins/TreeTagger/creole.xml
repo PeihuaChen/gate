@@ -30,6 +30,14 @@
         COMMENT="Name of the TreeTagger command file">
         java.net.URL
     </PARAMETER>   
+
+    <PARAMETER
+        NAME="encoding"
+        RUNTIME="true"
+        COMMENT="Character encoding for temporary files"
+        DEFAULT="ISO-8859-1">
+        java.lang.String
+    </PARAMETER>
     
   </RESOURCE>
 </CREOLE>
