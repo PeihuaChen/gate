@@ -16,6 +16,91 @@ import gate.annotation.*;
 import gate.util.*;
 
 /** Represents the commonalities between all sorts of documents.
+  * 
+  * <H2>Editing</H2>
+  * 
+  * <P>
+  * The DocumentContent class models the textual or audio-visual
+  * materials which are the source and content of Documents.
+  * 
+  * <P>
+  * Abbreviations:
+  * 
+  * <UL>
+  * <LI>
+  * DC = DocumentContent
+  * <LI>
+  * D = Document
+  * <LI>
+  * AS = AnnotationSet
+  * </UL>
+  * 
+  * <P>
+  * We add an edit method to each of these classes; for DC and AS
+  * the methods are package private; D has the public method.
+  * 
+  * <PRE>
+  *   void edit(Long start, Long end, DocumentContent replacement)
+  *   throws InvalidOffsetException;
+  * </PRE>
+  * 
+  * <P>
+  * D receives edit requests and forwards them to DC and AS.
+  * On DC, this method actually makes the change - e.g. replacing
+  * a String range from start to end with replacement. (Deletions
+  * are catered for by having replacement = null.) D then calls
+  * AS.edit on each of its annotation sets.
+  * 
+  * <P>
+  * On AS, edit calls replacement.size() (i.e. DC.size()) to
+  * figure out how long the replacement is (0 for null). It then
+  * considers annotations that terminate (start or end) in
+  * the altered or deleted range as invalid; annotations that
+  * terminate after the range have their offsets adjusted.
+  * I.e.:
+  * <UL>
+  * <LI>
+  * the nodes that pointed inside the old modified area are invalid now and
+  * will be deleted along with the connected annotations;
+  * <LI>
+  * the nodes that are before the start of the modified area remain
+  * untouched;
+  * <LI>
+  * the nodes that are after the end of the affected area will have the
+  * offset changed according to the formula below.
+  * </UL>
+  * 
+  * <P>
+  * A note re. AS and annotations: annotations no longer have
+  * offsets as in the old model, they now have nodes, and nodes
+  * have offsets.
+  * 
+  * <P>
+  * To implement AS.edit, we have several indices:
+  * <PRE>
+  *   HashMap annotsByStartNode, annotsByEndNode;
+  * </PRE>
+  * which map node ids to annotations;
+  * <PRE>
+  *   RBTreeMap nodesByOffset;
+  * </PRE>
+  * which maps offset to Nodes.
+  * 
+  * <P>
+  * When we get an edit request, we traverse that part of the
+  * nodesByOffset tree representing the altered or deleted
+  * range of the DC. For each node found, we delete any annotations
+  * that terminate on the node, and then delete the node itself.
+  * We then traverse the rest of the tree, changing the offset
+  * on all remaining nodes by:
+  * <PRE>
+  *   newOffset =
+  *     oldOffset -
+  *     (
+  *       (end - start) +
+  *       ( (replacement == null) ? 0 : replacement.size() )
+  *     );
+  * </PRE>
   */
 public class DocumentImpl implements Document
 {
