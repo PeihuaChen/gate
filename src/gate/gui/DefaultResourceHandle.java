@@ -422,7 +422,9 @@ public class DefaultResourceHandle implements ResourceHandle {
             }catch (Exception e){
               e.printStackTrace(Err.getPrintWriter());
             }
+            //show the progress indicator
             fireProgressChanged(0);
+            //the actual reinitialisation
             res.reInit();
             try{
               Factory.removeResourceListeners(res, listeners);
@@ -450,70 +452,6 @@ public class DefaultResourceHandle implements ResourceHandle {
       thread.start();
     }//public void actionPerformed(ActionEvent e)
 
-    /**
-     * This will stop to run as the PARAMETERS feature is not set anymore
-     */
-/*
-    public void actionPerformed2(ActionEvent e) {
-      Runnable runnable = new Runnable(){
-        public void run(){
-          Map listeners = new HashMap();
-          listeners.put("gate.event.StatusListener",
-                        new StatusListener(){
-                          public void statusChanged(String text){
-                            fireStatusChanged(text);
-                          }
-                        });
-
-          listeners.put("gate.event.ProgressListener",
-                        new ProgressListener(){
-                          public void progressChanged(int value){
-                            fireProgressChanged(value);
-                          }
-                          public void processFinished(){
-                            fireProcessFinished();
-                          }
-                        });
-          try{
-            long startTime = System.currentTimeMillis();
-            fireStatusChanged("Reloading " +
-                               resource.getFeatures().get("gate.NAME"));
-            FeatureMap features = Factory.newFeatureMap();
-            features.put("gate.HIDDEN", "true");
-            features.put("gate.NAME", resource.getFeatures().get("gate.NAME"));
-            Resource oldRes = (Resource)resource;
-            resource = Factory.createResource(resource.getClass().getName(),
-                                              (FeatureMap)resource.getFeatures().
-                                                          get("gate.PARAMETERS(transient)"),
-                                              features, listeners);
-            resource.getFeatures().remove("gate.HIDDEN");
-            Factory.deleteResource(oldRes);
-
-
-            largeView.removeAll();
-            addAllViews();
-            long endTime = System.currentTimeMillis();
-            fireStatusChanged(resource.getFeatures().get("gate.NAME") +
-                              " reloaded in " +
-                              NumberFormat.getInstance().format(
-                              (double)(endTime - startTime) / 1000) + " seconds");
-          }catch(ResourceInstantiationException rie){
-            fireStatusChanged("Reload failed");
-            JOptionPane.showMessageDialog(getLargeView(),
-                                          "Reload failed!\n " +
-                                          rie.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
-          }
-
-
-        }
-      };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable);
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
-    }
-*/
   }//class ReloadAction
 
   protected void fireProgressChanged(int e) {

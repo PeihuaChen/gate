@@ -108,9 +108,38 @@ public class ApplicationViewer extends AbstractVisualResource
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable.getTree());
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable);
     JScrollPane scroller = new JScrollPane(mainTreeTable);
-    scroller.setBorder(BorderFactory.createTitledBorder("Used components"));
+    JPanel leftPane = new JPanel();
+    leftPane.setLayout(new BoxLayout(leftPane, BoxLayout.Y_AXIS));
+    leftPane.add(scroller);
+    upBtn = new JButton("Move up", MainFrame.getIcon("up.gif"));
+    downBtn = new JButton("Move down", MainFrame.getIcon("down.gif"));
+    Dimension dim = upBtn.getPreferredSize();
+    int x = dim.width;
+    int y = dim.height;
+    dim = downBtn.getPreferredSize();
+    x = Math.max(x, dim.width);
+    y = Math.max(y, dim.height);
+    dim = new Dimension(x, y);
+    upBtn.setPreferredSize(dim);
+    downBtn.setPreferredSize(dim);
+    upBtn.setMinimumSize(dim);
+    downBtn.setMinimumSize(dim);
+    upBtn.setMaximumSize(dim);
+    downBtn.setMaximumSize(dim);
 
-    mainBox.add(scroller);
+
+    Box horBox = Box.createHorizontalBox();
+    Box verBox = Box.createVerticalBox();
+    verBox.add(upBtn);
+    verBox.add(downBtn);
+    horBox.add(verBox);
+    horBox.add(Box.createHorizontalGlue());
+    leftPane.add(Box.createVerticalStrut(5));
+    leftPane.add(horBox);
+
+    leftPane.setBorder(BorderFactory.createTitledBorder("Used components"));
+
+    mainBox.add(leftPane);
 
     Box buttonsBox = Box.createVerticalBox();
     addModuleBtn = new JButton("Add component", MainFrame.getIcon("left2.gif"));
@@ -118,20 +147,29 @@ public class ApplicationViewer extends AbstractVisualResource
     removeModuleBtn = new JButton("Remove component",
                                   MainFrame.getIcon("right2.gif"));
     removeModuleBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+    dim = addModuleBtn.getPreferredSize();
+    x = dim.width;
+    y = dim.height;
+    dim = removeModuleBtn.getPreferredSize();
+    x = Math.max(x, dim.width);
+    y = Math.max(y, dim.height);
+    dim = new Dimension(x, y);
+    addModuleBtn.setPreferredSize(dim);
+    removeModuleBtn.setPreferredSize(dim);
+    addModuleBtn.setMinimumSize(dim);
+    removeModuleBtn.setMinimumSize(dim);
+    addModuleBtn.setMaximumSize(dim);
+    removeModuleBtn.setMaximumSize(dim);
+
     buttonsBox.add(Box.createVerticalStrut(30));
     buttonsBox.add(addModuleBtn);
     buttonsBox.add(Box.createVerticalStrut(5));
     buttonsBox.add(removeModuleBtn);
+    buttonsBox.add(Box.createVerticalStrut(30));
+    runBtn = new JButton(runAction);
+    runBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+    buttonsBox.add(runBtn);
     buttonsBox.add(Box.createVerticalGlue());
-    upBtn = new JButton("Move up", MainFrame.getIcon("up.gif"));
-    downBtn = new JButton("Move down", MainFrame.getIcon("down.gif"));
-    Box horBox = Box.createHorizontalBox();
-    Box verBox = Box.createVerticalBox();
-    verBox.add(upBtn);
-    verBox.add(downBtn);
-    horBox.add(verBox);
-    horBox.add(Box.createHorizontalGlue());
-    buttonsBox.add(horBox);
 
     mainBox.add(buttonsBox);
 
@@ -1082,6 +1120,7 @@ public class ApplicationViewer extends AbstractVisualResource
   JButton removeModuleBtn;
   JButton upBtn;
   JButton downBtn;
+  JButton runBtn;
   Action runAction;
 
   /**
