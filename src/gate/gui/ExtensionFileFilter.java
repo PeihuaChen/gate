@@ -20,7 +20,8 @@ import java.io.*;
 import java.util.*;
 
 /**
- * This class is used by {@link javax.swing.JFileChooser} to filter the displayed files by their extension.
+ * This class is used by {@link javax.swing.JFileChooser} to filter the
+ * displayed files by their extension.
  *
  */
 public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter{

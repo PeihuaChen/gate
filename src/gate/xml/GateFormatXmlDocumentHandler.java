@@ -20,7 +20,7 @@ import java.util.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
-import gate.gui.*;
+import gate.event.*;
 
 
 import org.xml.sax.*;
@@ -30,8 +30,7 @@ import org.xml.sax.*;
   * Implements the behaviour of the XML reader. This is the reader for
   * Gate Xml documents saved with DocumentImplementation.toXml() method.
   */
-public class GateFormatXmlDocumentHandler extends HandlerBase
-                                           implements StatusReporter{
+public class GateFormatXmlDocumentHandler extends HandlerBase{
   /** Debug flag */
   private static final boolean DEBUG = false;
 

@@ -22,7 +22,7 @@ import java.net.*;
 import gate.util.*;
 import gate.*;
 import gate.email.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.creole.*;
 
 import org.w3c.www.mime.*;

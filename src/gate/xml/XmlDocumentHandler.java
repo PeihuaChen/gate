@@ -20,7 +20,7 @@ import java.util.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
-import gate.gui.*;
+import gate.event.*;
 
 
 import org.xml.sax.*;
@@ -35,8 +35,7 @@ import org.xml.sax.*;
   * This class also will replace the content of the Gate document with a
   * new one containing anly text from the XML document.
   */
-public class XmlDocumentHandler extends HandlerBase
-                                           implements StatusReporter{
+public class XmlDocumentHandler extends HandlerBase{
   /** Debug flag */
   private static final boolean DEBUG = false;
 

@@ -1,3 +1,22 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 14/12/2000
+ *
+ *  $Id$
+ *
+ */
+package gate.gui;
+
+import javax.swing.table.*;
+import javax.swing.event.TableModelListener;
+import javax.swing.event.TableModelEvent;
+
 /**
  * In a chain of data manipulators some behaviour is common. TableMap
  * provides most of this behavour and can be subclassed by filters
@@ -9,12 +28,6 @@
  *
  * @version 1.4 12/17/97
  * @author Philip Milne */
-package gate.gui;
-
-import javax.swing.table.*;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TableModelEvent;
-
 public class TableMap extends AbstractTableModel
                       implements TableModelListener {
     protected TableModel model;

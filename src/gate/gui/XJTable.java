@@ -1,3 +1,17 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 23/01/2001
+ *
+ *  $Id$
+ *
+ */
+
 package gate.gui;
 
 import java.awt.*;
@@ -9,12 +23,25 @@ import javax.swing.event.*;
 
 import gate.util.*;
 
+/**
+ * A &quot;smarter&quot; JTable. Feaures include:
+ * <ul>
+ * <li>sorting the table using the values from a column as keys</li>
+ * <li>updating the widths of the columns so they accommodate the contents to
+ * their preferred sizes.
+ * </ul>
+ * It uses a custom made model that stands between the table model set by the
+ * user and the gui component. This middle model is responsible for sorting the
+ * rows.
+ */
 public class XJTable extends JTable {
 
+  /**Default constructor*/
   public XJTable() {
     init();
   }
 
+  /**Constructor from model*/
   public XJTable(TableModel model) {
     init();
     setModel(model);
@@ -28,11 +55,19 @@ public class XJTable extends JTable {
     }
   }
 
+  /**
+   * Returns the actual table model. Note that gateModel() will return the
+   * middle model used for sorting. This cannot be avoided because JTable
+   * expects to find the model used for the component when calling getModel().
+   */
   public TableModel getActualModel(){
     if(sorter != null)return sorter.getModel();
     else return super.getModel();
   }
 
+  /**
+   * Get the row in the table for a row in the model.
+   */
   public int getTableRow(int modelRow){
     for(int i = 0; i < sorter.indexes.length; i ++){
       if(sorter.indexes[i] == modelRow) return i;
@@ -45,6 +80,7 @@ public class XJTable extends JTable {
     adjustSizes(false);
   }
 
+  /**Should the soring facility be enabled*/
   public void setSortable(boolean isSortable){
     this.sortable = isSortable;
   }
@@ -93,6 +129,9 @@ public class XJTable extends JTable {
   }//init()
 
 
+  /**RFesizes all the cells so they accommodate the components at their
+   * preferred sizes.
+   */
   protected void adjustSizes(boolean headerOnly){
     int totalWidth = 0;
     TableColumn tCol = null;
@@ -174,11 +213,16 @@ public class XJTable extends JTable {
     }//if(! headerOnly)
   }
 
+  /**
+   * Sets the column to be used as key for sorting. This column changes
+   * automatically when the user click a column header.
+   */
   public void setSortedColumn(int column){
     sortedColumn = column;
     sorter.sortByColumn(sortedColumn);
   }
 
+  /**Should the sorting be ascending or descending*/
   public void setAscending(boolean ascending){
     this.ascending = ascending;
   }

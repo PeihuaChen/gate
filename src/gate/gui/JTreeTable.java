@@ -23,9 +23,16 @@ import java.util.EventObject;
  * from the first column that contains a tree.
  */
 public class JTreeTable extends XJTable {
+
+  /**The tree used to render the first column*/
   protected CustomJTree tree;
+
+  /**The model for this component*/
   protected TreeTableModel treeTableModel;
 
+  /**
+   * Constructs a JTreeTable from a model
+   */
   public JTreeTable(TreeTableModel model) {
   	super();
     this.treeTableModel = model;
@@ -63,6 +70,11 @@ public class JTreeTable extends XJTable {
   }
 
 
+  /**
+   * Overrides the setSortable() method from {@link XJtable} so the table is NOT
+   * sortable. In a tree-table component the ordering for the rows is given by
+   * the structure of the tree and they cannot be reordered.
+   */
   public void setSortable(boolean b){
     throw new UnsupportedOperationException(
           "A JTreeTable component cannot be sortable!\n" +
@@ -152,7 +164,13 @@ public class JTreeTable extends XJTable {
     //ImageIcon icon;
   }
 
-  class TreeTableCellEditor extends DefaultCellEditor implements TableCellEditor {
+
+  /**
+   * The editor used to edit the nodes in the tree. It only forwards the
+   * requests to the tree's editor.
+   */
+  class TreeTableCellEditor extends DefaultCellEditor
+                            implements TableCellEditor {
     TreeTableCellEditor(){
       super(new JTextField());
       //placeHolder = new PlaceHolder();
@@ -224,6 +242,11 @@ public class JTreeTable extends XJTable {
 //    PlaceHolder placeHolder;
   }
 
+  /**
+   * Class used to convert the mouse events from the JTreeTable component space
+   * into the JTree space. It is used to forward the mouse events to the tree
+   * if they occured in the space used by the tree.
+   */
   class MouseHandler extends MouseAdapter{
     public void mousePressed(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
@@ -351,6 +374,9 @@ public class JTreeTable extends XJTable {
     }
   }//class TreeTableModelAdapter extends AbstractTableModel
 
+  /**
+   * The JTree used for rendering the first column.
+   */
   class CustomJTree extends JTree{
     public void setEditable(boolean editable){
       super.setEditable(false);

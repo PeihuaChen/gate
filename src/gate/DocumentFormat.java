@@ -20,7 +20,7 @@ import java.net.*;
 import java.io.*;
 
 import gate.util.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.creole.*;
 
 import org.w3c.www.mime.*;
@@ -36,8 +36,7 @@ import org.w3c.www.mime.*;
   * format class for a particular document.
   */
 public abstract class DocumentFormat
-extends AbstractLanguageResource implements LanguageResource, StatusReporter
-{
+extends AbstractLanguageResource implements LanguageResource{
   /** Debug flag */
   private static final boolean DEBUG = false;
 

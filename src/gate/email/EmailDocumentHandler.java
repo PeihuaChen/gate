@@ -21,7 +21,7 @@ import java.io.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
-import gate.gui.*;
+import gate.event.*;
 
 import junit.framework.*;
 
@@ -30,7 +30,7 @@ import junit.framework.*;
   * It takes the Gate Document representing a list with e-mails and
   * creates Gate annotations on it.
   */
-public class EmailDocumentHandler implements StatusReporter{
+public class EmailDocumentHandler{
 
   /** Debug flag */
   private static final boolean DEBUG = false;

@@ -19,7 +19,7 @@ package gate.jape;
 import java.util.*;
 import com.objectspace.jgl.*;
 import gate.annotation.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.util.*;
 import gate.*;
 
@@ -178,6 +178,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.12  2001/03/06 20:11:14  valyt
+// <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
+//
+// Cleaned up some obsolete classes
+//
 // Revision 1.11  2001/01/21 20:51:31  valyt
 // Added the DocumentEditor class and the necessary changes to the gate API
 //

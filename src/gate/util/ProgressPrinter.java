@@ -17,7 +17,7 @@ package gate.util;
 
 import java.io.*;
 
-import gate.gui.*;
+import gate.event.*;
 
 
 /**

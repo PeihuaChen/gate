@@ -31,15 +31,14 @@ import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.creole.*;
 
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.
   */
 public class Batch
-implements JapeConstants, ProcessProgressReporter, StatusReporter
-{
+implements JapeConstants{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -533,6 +532,11 @@ implements JapeConstants, ProcessProgressReporter, StatusReporter
 } // class Batch
 
 // $Log$
+// Revision 1.20  2001/03/06 20:11:14  valyt
+// <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
+//
+// Cleaned up some obsolete classes
+//
 // Revision 1.19  2001/02/08 13:46:06  valyt
 // Added full Unicode support for the gazetteer and Jape
 // converted the gazetteer files to UTF-8

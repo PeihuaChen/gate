@@ -633,18 +633,6 @@ public class AnnotationEditor extends AbstractVisualResource{
     validate();
   }
 
-/*
-  boolean addRange(String setName, String type){
-    return false;
-  }
-*/
-  boolean removeRange(String setName, String type){
-    return false;
-  }
-
-
-
-
   public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
     super.removePropertyChangeListener(l);
     propertyChangeListeners.removePropertyChangeListener(l);
@@ -661,6 +649,10 @@ public class AnnotationEditor extends AbstractVisualResource{
     propertyChangeListeners.addPropertyChangeListener(propertyName, l);
   }
 
+  /**
+   * Sets the document to be displayed
+   * @param newDocument a {@link gate.Document}
+   */
   public void setDocument(gate.Document newDocument) {
     gate.Document  oldDocument = document;
     document = newDocument;
@@ -668,10 +660,19 @@ public class AnnotationEditor extends AbstractVisualResource{
                                                newDocument);
   }
 
+  /**
+   * Gets the currently displayed document
+   * @return a {@link gate.Document}
+   */
   public gate.Document getDocument() {
     return document;
   }
 
+  /**
+   * Sets the set of annotation schemas. The annotation schemas are used by
+   * this editor for editing or adding new annotations.
+   * @param a {@link java.util.Set} of {@link gate.creole.AnnotationSchema}s
+   */
   public void setAnnotationSchemas(java.util.Set newAnnotationSchemas) {
     java.util.Set  oldAnnotationSchemas = annotationSchemas;
     annotationSchemas = newAnnotationSchemas;
@@ -680,48 +681,72 @@ public class AnnotationEditor extends AbstractVisualResource{
                                                newAnnotationSchemas);
   }
 
+  /**
+   * Gets the current set of known annotation schemas.
+   * @return a {@link java.util.Set} of {@link gate.creole.AnnotationSchema}s
+   */
   public java.util.Set getAnnotationSchemas() {
     return annotationSchemas;
   }
+
+  /**
+   * If set to true the annotations table will be shown. The default value is
+   * <b>true</b>
+   */
   public void setTableVisible(boolean newTableVisible) {
     boolean  oldTableVisible = tableVisible;
     tableVisible = newTableVisible;
-    propertyChangeListeners.firePropertyChange("tableVisible", new Boolean(oldTableVisible), new Boolean(newTableVisible));
+    propertyChangeListeners.firePropertyChange("tableVisible",
+                                               new Boolean(oldTableVisible),
+                                               new Boolean(newTableVisible));
   }
+
+  /**
+   * Is the annotations table shown?
+   */
   public boolean isTableVisible() {
     return tableVisible;
   }
+
+  /**
+   * If set to true the text display will be shown. Default value is <b>true</b>
+   */
   public void setTextVisible(boolean newTextVisible) {
     boolean  oldTextVisible = textVisible;
     textVisible = newTextVisible;
     propertyChangeListeners.firePropertyChange("textVisible", new Boolean(oldTextVisible), new Boolean(newTextVisible));
   }
+
+  /**
+   * Is the text display shown?
+   */
   public boolean isTextVisible() {
     return textVisible;
   }
+
+  /**
+   * If set to true the right hand side tree will be displayed. Default value
+   * is <b>true</b>
+   */
   public void setFiltersVisible(boolean newFiltersVisible) {
     boolean  oldFiltersVisible = filtersVisible;
     filtersVisible = newFiltersVisible;
     propertyChangeListeners.firePropertyChange("filtersVisible", new Boolean(oldFiltersVisible), new Boolean(newFiltersVisible));
   }
+
+  /**
+   * Is the right hand side tree shown?
+   */
   public boolean isFiltersVisible() {
     return filtersVisible;
   }
-  //event handlers
-  public void annotationSetAdded(gate.event.DocumentEvent e){
-  }
 
-  public void annotationSetRemoved(gate.event.DocumentEvent e){
-  }
-
-  public void annotationAdded(AnnotationSetEvent e){
-System.out.println("Annotation added!");
-
-  }
-
-  public void annotationRemoved(AnnotationSetEvent e){
-  }
-
+  /**
+   * Updates this component when the underlying document is changed. This method
+   * is only triggered when the document is changed to a new one and not when
+   * the internal data from the document changes. For the document internal
+   * events {@see #DelayedListener}.
+   */
   protected void this_documentChanged(){
     Runnable runnable = new Runnable(){
       public void run(){
@@ -816,16 +841,25 @@ System.out.println("Annotation added!");
     });
   }
 
-
-  public void paint(Graphics g){
-    super.paint(g);
-  }
-  public TypeData getTypeData(String setName, String type){
+  /**
+   * Gets the metadata for a given annotation type.
+   * An annotation type is uniquely identified by the name of its AnnotationSet
+   * and the name of the type.
+   * For the default annotation set of a document (which has no name) the
+   * &quot;&lt;Default&gt;&quot; value is used.
+   * @param setName a {@link java.lang.String}, the name of the annotation set
+   * @param type a {@link java.lang.String}, the name of the type.
+   */
+  protected TypeData getTypeData(String setName, String type){
     Map setMap = (Map)typeDataMap.get(setName);
     if(setMap != null) return (TypeData)setMap.get(type);
     else return null;
   }
 
+
+  /**
+   * Repaints the per-annotation-type highlighting in the text display.
+   */
   protected void showHighlights(AnnotationSet annotations, AttributeSet style){
     //store the state of the text display
     int selStart = textPane.getSelectionStart();
@@ -877,82 +911,10 @@ System.out.println("Annotation added!");
     });
   }//protected void showHighlights()
 
-  protected void restoreText(){
-    Iterator rangesIter = ranges.iterator();
-    int size = 0;
-    Range aRange;
-    while(rangesIter.hasNext()){
-      aRange = (Range)rangesIter.next();
-      size += getTypeData(aRange.setName, aRange.type).getAnnotations().size();
-    }
-
-    //store the state of the text display
-    int selStart = textPane.getSelectionStart();
-    int selEnd = textPane.getSelectionEnd();
-    final int position = textPane.viewToModel(
-                            textScroll.getViewport().getViewPosition());
-    //hide the text
-    try{
-      SwingUtilities.invokeAndWait(new Runnable(){
-        public void run(){
-          progressBar.setValue(0);
-          //progressBar.setMaximumSize(new Dimension(textScroll.getWidth(),20));
-          textScroll.getViewport().setView(progressBox);
-          textPane.setText(document.getContent().toString());
-        }
-      });
-    }catch(java.lang.reflect.InvocationTargetException ite){
-      throw(new gate.util.GateRuntimeException(ite.toString()));
-    }catch(java.lang.InterruptedException ie){
-      throw(new gate.util.GateRuntimeException(ie.toString()));
-    }
-
-    //highlight the annotations
-    int i = 0;
-    int lastValue = 0;
-    int value;
-    rangesIter = ranges.iterator();
-    TypeData tData;
-    while(rangesIter.hasNext()){
-      aRange = (Range)rangesIter.next();
-      tData = getTypeData(aRange.setName, aRange.type);
-      Iterator annIter = tData.annotations.iterator();
-      while(annIter.hasNext()){
-        Annotation ann = (Annotation)annIter.next();
-        textPane.select(ann.getStartNode().getOffset().intValue(),
-                        ann.getEndNode().getOffset().intValue());
-        textPane.setCharacterAttributes(tData.getAttributes(), true);
-        value = i * 100 / size;
-        if(value - lastValue >= 5){
-          progressBar.setValue(value);
-          progressBar.paintImmediately(progressBar.getBounds());
-          lastValue = value;
-        }
-        i++;
-      }
-    }
-    //restore the state
-    textPane.select(selStart, selEnd);
-    try{
-      SwingUtilities.invokeAndWait(new Runnable(){
-        public void run(){
-          //show the text
-          textScroll.getViewport().setView(textPane);
-          try{
-            textScroll.getViewport().setViewPosition(
-                                     textPane.modelToView(position).getLocation());
-          }catch(BadLocationException ble){
-          }
-        }
-      });
-    }catch(java.lang.reflect.InvocationTargetException ite){
-      throw(new gate.util.GateRuntimeException(ite.toString()));
-    }catch(java.lang.InterruptedException ie){
-      throw(new gate.util.GateRuntimeException(ie.toString()));
-    }
-  }//protected void restoreText()
-
-
+  /**
+   * Updates the GUI when the user has selected an annotation e.g. by using the
+   * right click popup.
+   */
   protected void selectAnnotation(String set, Annotation ann){
     TypeData tData = getTypeData(set, ann.getType());
     if(!tData.getVisible()){
@@ -999,12 +961,17 @@ System.out.println("Annotation added!");
       }
     }
   }
+
+  /**Should the editor functionality of this component be enabled*/
   public void setEditable(boolean newEditable) {
     editable = newEditable;
   }
+
+  /**Is the editor functionality enabled*/
   public boolean isEditable() {
     return editable;
   }
+
   //inner classes
   /**
    * A custom table model used to render a table containing the annotations from
@@ -1271,7 +1238,23 @@ System.out.println("Annotation added!");
     JTextPane textComponent;
   }
 
+  /**
+   * Holds the GUI metadata for a given annotation type. An annotation type is
+   * uniquely identified by the name of its AnnotationSet and the name of the
+   * type.
+   * For the default annotation set of a document (which has no name) the
+   * &quot;&lt;Default&gt;&quot; value is used.
+   * The GUI metadata contains, amongst other thiungs, the style used for
+   * highlighting the annotations of this type.
+   * These styles are cascading styles (there is a relation of inheritance
+   * between them) so the annotation type style inherits the characteristics
+   * from the style associated with the annotation set it belongs to.
+   *
+   * For eficiency reasons there are some intermediary styles between a parent
+   * and a child style that used for changing the display in one operation.
+   */
   public class TypeData{
+
     public TypeData(String set, String type, boolean visible){
       this.set = set;
       this.type = type;
@@ -1333,7 +1316,8 @@ System.out.println("Annotation added!");
                   //update the text display
                   Style actualStyle = textPane.getStyle("_" + set + "." + type);
                   actualStyle.setResolveParent(style);
-                  showHighlights(annotations, textPane.getStyle("_" + set + "." + type + "_"));
+                  showHighlights(annotations, textPane.getStyle("_" + set + "."
+                                                                + type + "_"));
                 }else{
                   //hide the corresponding range
                   //update the annotations table
@@ -1398,7 +1382,6 @@ System.out.println("Annotation added!");
     }
 
 
-    javax.swing.text.DefaultStyledDocument doc;
     public void setAnnotations(AnnotationSet as){
       this.annotations = as;
     }
@@ -1419,7 +1402,9 @@ System.out.println("Annotation added!");
 
 
   /**
-   * Describes a range in the {@link data} structure.
+   * Describes a range in the {@link data} structure. A range is a bunch of
+   * annotations belonging to the same annotation set that are contiguous in
+   * the {@link #data} structure.
    */
   class Range implements Comparable{
     public Range(String setName, String type, int start, int end){
@@ -1454,7 +1439,7 @@ System.out.println("Annotation added!");
    * annnotations at a time.
    * This listener runs in its own thread that mostly sleeps and only wakes up
    * when there are unprocessed events after a given time interval
-   * ({@link sleepInterval}) has passed from the last event occured. When the
+   * ({@link #sleepInterval}) has passed from the last event occured. When the
    * thread wakes it will process <strong>all</strong> the pending events and
    * then will go back to sleep.
    */
@@ -1605,8 +1590,16 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
     boolean stop = false;
     protected java.util.List eventQueue;
     protected long lastEvent = 0;
-  }/////class DelayedListener
+  }//class DelayedListener
 
+  /**
+   * Fixes the <a
+   * href="http://developer.java.sun.com/developer/bugParade/bugs/4406598.html">
+   * 4406598 bug</a> in swing text components.
+   * The bug consists in the fact that the Background attribute is ignored by
+   * the text component whent it is defined in a style from which the current
+   * style inherits.
+   */
   public class CustomLabelView extends javax.swing.text.LabelView{
     public CustomLabelView(Element elem){
       super(elem);
@@ -1627,6 +1620,11 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
     }
   }
 
+  /**
+   * The popup menu items used to select annotations at right click.
+   * Apart from the normal {@link javax.swing.JMenuItem} behaviour, this menu
+   * item also highlits the annotation which it would select if pressed.
+   */
   protected class SelectAnnotationPopupItem extends JMenuItem{
     public SelectAnnotationPopupItem(Annotation ann, String setName){
       super(ann.getType());
@@ -1670,6 +1668,11 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
     Annotation annotation;
   }
 
+  /**
+   * The action that is fired when the user wants to edit an annotation.
+   * This will show a {@link gate.gui.AnnotationEditDialog} to allow the user
+   * to do the editing.
+   */
   protected class EditAnnotationAction extends AbstractAction{
     public EditAnnotationAction(Annotation ann){
       super("Edit");
@@ -1703,6 +1706,11 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
 
     Annotation ann;
   }
+
+  /**
+   * The menu items used for creating a new annotation from the right click
+   * popup menu.
+   */
   protected class NewAnnotationPopupItem extends JMenuItem{
     public NewAnnotationPopupItem(int aStart, int anEnd,
                                   AnnotationSchema aSchema,
@@ -1754,6 +1762,14 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
     AnnotationSet targetAS;
   }
 
+  /**
+   * Fixes the <a
+   * href="http://developer.java.sun.com/developer/bugParade/bugs/4406598.html">
+   * 4406598 bug</a> in swing text components.
+   * The bug consists in the fact that the Background attribute is ignored by
+   * the text component whent it is defined in a style from which the current
+   * style inherits.
+   */
   public class CustomStyledEditorKit extends StyledEditorKit{
     private final ViewFactory defaultFactory = new CustomStyledViewFactory();
     public ViewFactory getViewFactory() {
@@ -1779,6 +1795,14 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
     }// read
   }
 
+  /**
+   * Fixes the <a
+   * href="http://developer.java.sun.com/developer/bugParade/bugs/4406598.html">
+   * 4406598 bug</a> in swing text components.
+   * The bug consists in the fact that the Background attribute is ignored by
+   * the text component whent it is defined in a style from which the current
+   * style inherits.
+   */
   public class CustomStyledViewFactory implements ViewFactory{
     public View create(Element elem) {
       String kind = elem.getName();
@@ -1799,5 +1823,4 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
       return new CustomLabelView(elem);
     }
   }
-
   }//class AnnotationEditor

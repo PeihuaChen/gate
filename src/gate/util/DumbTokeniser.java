@@ -17,14 +17,12 @@ package gate.util;
 
 import gate.*;
 import gate.creole.*;
-import gate.gui.*;
+import gate.event.*;
 
 import java.util.*;
 import java.text.BreakIterator;
 
-public class DumbTokeniser extends AbstractProcessingResource
-implements ProcessingResource, ProcessProgressReporter, Runnable
-{
+public class DumbTokeniser extends AbstractProcessingResource{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
