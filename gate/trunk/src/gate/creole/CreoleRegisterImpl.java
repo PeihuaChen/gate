@@ -623,26 +623,25 @@ public class CreoleRegisterImpl extends HashMap
    * there are custom viewers/editor registered.
    */
   public List getVREnabledAnnotationTypes(){
-//    LinkedList responseList = new LinkedList();
-//    Iterator vrIterator = vrTypes.iterator();
-//    while (vrIterator.hasNext()){
-//      String vrClassName = (String) vrIterator.next();
-//      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
-//      if (vrResourceData == null)
-//        throw new GateRuntimeException(
-//          "Couldn't get resource data for VR called " + vrClassName
-//        );
-//      // Test if VR can display all types of annotations
-//      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
-//           vrResourceData.getAnnotationTypeDisplayed() != null ){
-//
-//          String annotationTypeDisplayed =
-//                                  vrResourceData.getAnnotationTypeDisplayed();
-//          responseList.add(annotationTypeDisplayed);
-//      }// End if
-//    }// End while
-//    return Collections.unmodifiableList(responseList);
-return Arrays.asList(new String[]{"Tree"});
+    LinkedList responseList = new LinkedList();
+    Iterator vrIterator = vrTypes.iterator();
+    while (vrIterator.hasNext()){
+      String vrClassName = (String) vrIterator.next();
+      ResourceData vrResourceData = (ResourceData) this.get(vrClassName);
+      if (vrResourceData == null)
+        throw new GateRuntimeException(
+          "Couldn't get resource data for VR called " + vrClassName
+        );
+      // Test if VR can display all types of annotations
+      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
+           vrResourceData.getAnnotationTypeDisplayed() != null ){
+
+          String annotationTypeDisplayed =
+                                  vrResourceData.getAnnotationTypeDisplayed();
+          responseList.add(annotationTypeDisplayed);
+      }// End if
+    }// End while
+    return Collections.unmodifiableList(responseList);
   }// getVREnabledAnnotationTypes()
 
 
