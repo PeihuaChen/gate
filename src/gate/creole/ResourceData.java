@@ -173,7 +173,7 @@ public class ResourceData extends AbstractFeatureBearer {
   /** Set method for the resource xml file URL */
   public void setXmlFileUrl(URL xmlFileUrl) { this.xmlFileUrl = xmlFileUrl; }
 
-  /** Get method for the resource xml file URL */
+  /**@deprecated Get method for the resource xml file URL */
   public URL getXmlFileUrl() { return xmlFileUrl; }
 
   /** The comment string */
