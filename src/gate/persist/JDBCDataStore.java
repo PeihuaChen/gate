@@ -26,7 +26,7 @@ import gate.event.*;
 import gate.security.*;
 
 
-public class JDBCDataStore
+public abstract class JDBCDataStore
 extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** --- */
@@ -418,7 +418,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** --- */
   protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
-    throws SQLException {
+    throws SQLException,IOException  {
 
     throw new MethodNotImplementedException();
   }
