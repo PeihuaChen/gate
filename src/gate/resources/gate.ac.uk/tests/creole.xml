@@ -39,6 +39,7 @@
       <CLASS>testpkg.PrintOutTokens</CLASS>
       <PARAMETER NAME="document"
         RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <TOOL/>
     </RESOURCE>
 
   </CREOLE>
@@ -68,6 +69,7 @@
       <JAR>ShefDocumentFormats.jar</JAR>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
       <AUTOLOAD/>
+      <PRIVATE/>
     </RESOURCE>
 
     <RESOURCE>
@@ -75,6 +77,7 @@
       <JAR>ShefDocumentFormats.jar</JAR>
       <CLASS>gate.corpora.EmailDocumentFormat</CLASS>
       <AUTOLOAD/>
+      <PRIVATE/>
     </RESOURCE>
   </CREOLE> 
 

@@ -281,6 +281,14 @@ public class CreoleXmlHandler extends HandlerBase {
       resourceData.setAutoLoading(true);
 
     //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("PRIVATE")) {
+      resourceData.setPrivate(true);
+
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("TOOL")) {
+      resourceData.setTool(true);
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE")) {
 
     //////////////////////////////////////////////////////////////////
