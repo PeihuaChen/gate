@@ -107,6 +107,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
     * after parsing.
     */
   public void finish() {
+/*
     if(attrs1 == null || attrs1.size() == 0) {
       attrs2 = new JdmAttribute[0];
       attrs1 = null;
@@ -126,6 +127,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
       attrs2[i++] = new JdmAttribute(name, value);
     }
     attrs1 = null;
+ */
   } // finish
 
   /** Create a string representation of the object. */
@@ -174,6 +176,9 @@ implements JapeConstants, java.io.Serializable, Cloneable
 
 
 // $Log$
+// Revision 1.3  2000/05/25 16:10:41  valyt
+// JapeGUI is working
+//
 // Revision 1.2  2000/04/20 13:26:41  valyt
 // Added the graph_drawing library.
 // Creating of the NFSM and DFSM now works.
