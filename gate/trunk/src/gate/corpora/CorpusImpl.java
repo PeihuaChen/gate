@@ -298,13 +298,14 @@ public class CorpusImpl extends AbstractLanguageResource
    * otherwise an InvalidArgumentException will be thrown.
    * @param filter the file filter used to select files from the target
    * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   * @param encoding the encoding to be used for reading the documents
    * @param recurseDirectories should the directory be parsed recursively?. If
    * <tt>true</tt> all the files from the provided directory and all its
    * children directories (on as many levels as necessary) will be picked if
    * accepted by the filter otherwise the children directories will be ignored.
    */
-  public static void populate(Corpus corpus, URL directory,
-                              FileFilter filter, boolean recurseDirectories)
+  public static void populate(Corpus corpus, URL directory, FileFilter filter,
+                              String encoding, boolean recurseDirectories)
                      throws IOException, ResourceInstantiationException{
     //check input
     if(!directory.getProtocol().equalsIgnoreCase("file"))
@@ -327,16 +328,25 @@ public class CorpusImpl extends AbstractLanguageResource
         if(aFile.isDirectory()){
           //recurse dir if required
           if(recurseDirectories){
-            populate(corpus, aFile.toURL(), filter, recurseDirectories);
+            populate(corpus, aFile.toURL(), filter,
+                     encoding, recurseDirectories);
           }
         }else{
           //create the doc
+          StatusListener sListener = (StatusListener)
+                                     gate.gui.MainFrame.getListeners().
+                                     get("gate.event.StatusListener");
+          if(sListener != null) sListener.statusChanged(
+            "Reading: " + aFile.getName());
           String docName = aFile.getName() + "_" + Gate.genSym();
           FeatureMap params = Factory.newFeatureMap();
           params.put("sourceUrl", aFile.toURL());
+          if(encoding != null) params.put("encoding", encoding);
 
           corpus.add(Factory.createResource(DocumentImpl.class.getName(),
                                             params, null, docName));
+          if(sListener != null) sListener.statusChanged(
+            aFile.getName() + " read");
         }
       }
     }
@@ -351,15 +361,16 @@ public class CorpusImpl extends AbstractLanguageResource
    * otherwise an InvalidArgumentException will be thrown.
    * An implementation for this method is provided as a static method at
    * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * @param encoding the encoding to be used for reading the documents
    * @param recurseDirectories should the directory be parsed recursively?. If
    * <tt>true</tt> all the files from the provided directory and all its
    * children directories (on as many levels as necessary) will be picked if
    * accepted by the filter otherwise the children directories will be ignored.
    */
-  public void populate(URL directory, FileFilter filter,
+  public void populate(URL directory, FileFilter filter, String encoding,
                        boolean recurseDirectories)
               throws IOException, ResourceInstantiationException{
-    populate(this, directory, filter, recurseDirectories);
+    populate(this, directory, filter, encoding, recurseDirectories);
   }
 
   public synchronized void removeCorpusListener(CorpusListener l) {

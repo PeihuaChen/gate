@@ -55,6 +55,6 @@ REM Run the thing
 REM ##############################################
 :allGo
 echo using guk.jar in "%GUK_HOME%guk.jar"
-%RUNJAVA% -Xmx200m -Djava.ext.dirs=%GUK_HOME% -cp "%GATE_HOME%gate.jar"  gate.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
+%RUNJAVA% -Xmx400m -Djava.ext.dirs=%GUK_HOME% -cp "%GATE_HOME%gate.jar"  gate.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :finish

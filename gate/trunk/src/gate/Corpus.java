@@ -70,13 +70,14 @@ public interface Corpus extends LanguageResource, List, NameBearer {
    * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
    * @param filter the file filter used to select files from the target
    * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   * @param encoding the encoding to be used for reading the documents
    * @param recurseDirectories should the directory be parsed recursively?. If
    * <tt>true</tt> all the files from the provided directory and all its
    * children directories (on as many levels as necessary) will be picked if
    * accepted by the filter otherwise the children directories will be ignored.
    */
   public void populate(URL directory, FileFilter filter,
-                       boolean recurseDirectories)
+                       String encoding, boolean recurseDirectories)
                        throws IOException, ResourceInstantiationException;
 
   /**

@@ -53,7 +53,7 @@ public class CorpusFillerComponent extends JPanel {
    */
   protected void initGUIComponents(){
     setLayout(new GridBagLayout());
-
+    //first row
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.gridx = constraints.RELATIVE;
     constraints.gridy = 0;
@@ -104,12 +104,31 @@ public class CorpusFillerComponent extends JPanel {
     constraints.anchor = constraints.NORTHWEST;
     add(listEditBtn = new JButton(MainFrame.getIcon("editList.gif")), constraints);
 
+    //third row
+    constraints = new GridBagConstraints();
+    constraints.gridx = constraints.RELATIVE;
+    constraints.gridy = 2;
+    constraints.gridwidth = 2;
+    constraints.anchor = constraints.WEST;
+    constraints.fill = constraints.NONE;
+    constraints.insets = new Insets(0, 0, 0, 5);
+    add(new JLabel("Encoding:"), constraints);
+
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = constraints.RELATIVE;
+    constraints.gridy = 2;
+    constraints.gridwidth = 4;
+    constraints.fill = constraints.HORIZONTAL;
+    add(encodingTextField = new JTextField(15), constraints);
+
+    //fourth row
     recurseCheckBox = new JCheckBox("Recurse directories");
     recurseCheckBox.setSelected(true);
     recurseCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
     constraints = new GridBagConstraints();
     constraints.gridx = constraints.RELATIVE;
-    constraints.gridy = 2;
+    constraints.gridy = 3;
     constraints.gridwidth = 3;
     constraints.anchor = constraints.NORTHWEST;
     add(recurseCheckBox, constraints);
@@ -166,6 +185,20 @@ public class CorpusFillerComponent extends JPanel {
    */
   public String getUrlString() {
     return urlTextField.getText();
+  }
+
+  /**
+   * Gets the encoding selected by the user.
+   */
+  public String getEncoding(){
+    return encodingTextField.getText();
+  }
+
+  /**
+   * Sets the initila value for the encoding field.
+   */
+  public void setEncoding(String enc){
+    encodingTextField.setText(enc);
   }
 
   /**
@@ -241,6 +274,10 @@ public class CorpusFillerComponent extends JPanel {
    */
   JCheckBox recurseCheckBox;
 
+  /**
+   * The textField for the encoding
+   */
+  JTextField encodingTextField;
   /**
    * The list of permitted extensions.
    */
