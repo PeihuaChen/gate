@@ -14,10 +14,12 @@ import gate.util.*;
 
 /** Top-level entry point for GATE test suite.
   * "main" will run the JUnit test runner interface.
+  * Use a "-t" flag to run the textual UI test runner (useful for
+  * debugging, as there's less confusion to do with threads and
+  * class loaders!).
   */
 public class TestGate
 {
-
   /** Main routine. */
   public static void main(String[] args) {
     String a[] = new String[1];
