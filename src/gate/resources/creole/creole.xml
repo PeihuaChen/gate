@@ -620,5 +620,16 @@
         <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
+    <!-- VR Gaze - Gazetteers editor -->
+    <RESOURCE>
+      <NAME>Gaze</NAME>
+      <CLASS>com.ontotext.gate.vr.Gaze</CLASS>
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.gazetteer.Gazetteer</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
   </CREOLE>
 </CREOLE-DIRECTORY>
