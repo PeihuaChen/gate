@@ -205,6 +205,10 @@ public class Gate
   protected static boolean tryFileSystem() throws MalformedURLException {
     String aGateResourceName = "gate/resources/creole/creole.xml";
     urlBase = Gate.getClassLoader().getResource(aGateResourceName);
+
+  /*  urlBase = new URL(urlBase, "/gate/resources/gate.ac.uk/");
+    return true;*/
+
     StringBuffer basePath = new StringBuffer(urlBase.toExternalForm());
     String urlBaseName =
       basePath.substring(0, basePath.length() - aGateResourceName.length());
