@@ -19,6 +19,8 @@ import java.sql.*;
 import java.net.*;
 import java.util.*;
 
+import junit.framework.*;
+
 import gate.*;
 import gate.util.*;
 import gate.event.*;
@@ -29,6 +31,9 @@ public class OracleDataStore extends JDBCDataStore {
 
   private static final int ORACLE_TRUE = 1;
   private static final int ORACLE_FALSE = 0;
+
+  private static final int READ_ACCESS = 0;
+  private static final int WRITE_ACCESS = 1;
 
   public OracleDataStore() {
   }
@@ -82,29 +87,9 @@ public class OracleDataStore extends JDBCDataStore {
   public boolean canReadLR(Long lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
-    //first check the session and then check whether the user is member of the group
-//    if (this.ac.isValidSession(s) == false) {
-//      throw new SecurityException("invalid session supplied");
-//    }
-
-    CallableStatement stmt = null;
-
-    try {
-      stmt = this.jdbcConn.prepareCall("{ call security.has_access_to_lr(?,?,?,?)} ");
-      stmt.setLong(1,lrID.longValue());
-      stmt.setLong(2,s.getUser().getID().longValue());
-      stmt.setLong(3,s.getGroup().getID().longValue());
-
-      stmt.registerOutParameter(4,java.sql.Types.INTEGER);
-      stmt.execute();
-      int result = stmt.getInt(4);
-
-      return (ORACLE_TRUE == result);
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
-    }
+    return canAccessLR(lrID,s,READ_ACCESS);
   }
+
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
@@ -112,9 +97,43 @@ public class OracleDataStore extends JDBCDataStore {
   public boolean canWriteLR(Long lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
-    throw new MethodNotImplementedException();
+    return canAccessLR(lrID,s,WRITE_ACCESS);
   }
 
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has some access (read/write) to the LR
+   */
+  private boolean canAccessLR(Long lrID, Session s,int mode)
+    throws PersistenceException, gate.security.SecurityException{
+
+    Assert.assert(READ_ACCESS == mode || WRITE_ACCESS == mode);
+
+    //first check the session and then check whether the user is member of the group
+    if (this.ac.isValidSession(s) == false) {
+      throw new gate.security.SecurityException("invalid session supplied");
+    }
+
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.has_access_to_lr(?,?,?,?,?)} ");
+      stmt.setLong(1,lrID.longValue());
+      stmt.setLong(2,s.getUser().getID().longValue());
+      stmt.setLong(3,s.getGroup().getID().longValue());
+      stmt.setLong(4,mode);
+
+      stmt.registerOutParameter(5,java.sql.Types.INTEGER);
+      stmt.execute();
+      int result = stmt.getInt(5);
+
+      return (ORACLE_TRUE == result);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
+    }
+  }
 
 
 }
