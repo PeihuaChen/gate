@@ -371,7 +371,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * from the list listeners for this datastore
    */
   public void removeDatastoreListener(DatastoreListener l) {
-
+System.out.println(">> ["+l.hashCode()+"] listener removed...");
     Assert.assertNotNull(this.datastoreListeners);
     this.datastoreListeners.remove(l);
   }
@@ -381,7 +381,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * Registers a new {@link gate.event.DatastoreListener} with this datastore
    */
   public void addDatastoreListener(DatastoreListener l) {
-
+System.out.println(">> ["+l.hashCode()+"] listener added...");
     Assert.assertNotNull(this.datastoreListeners);
     if (false == this.datastoreListeners.contains(l)) {
       this.datastoreListeners.add(l);
@@ -409,7 +409,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
 
   protected void fireResourceWritten(DatastoreEvent e) {
-
+System.out.println("lrid=["+e.getResourceID()+"] written...");
     Assert.assertNotNull(datastoreListeners);
     int count = datastoreListeners.size();
     for (int i = 0; i < count; i++) {
