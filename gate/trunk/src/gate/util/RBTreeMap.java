@@ -12,7 +12,7 @@ import java.util.*;
 /** Slightly modified implementation of java.util.TreeMap in order to return the
   * closest neighbours in the case of a failed search.
   */
-public class RBTreeMap extends TreeMap
+public class RBTreeMap extends AbstractMap
 	             implements SortedMap, Cloneable, java.io.Serializable
 {
     /**
