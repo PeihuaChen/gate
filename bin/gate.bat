@@ -145,6 +145,12 @@ REM ######################################################################
 REM run the beast
 REM ######################################################################
 
+if "%OS%"=="Windows_NT" goto NT
 
 echo RUN:"%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
 start "%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
+exit
+
+:NT
+echo RUN:"%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
+start "GATE" "%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
