@@ -305,16 +305,16 @@ public class AnnotationDiffGUI extends JFrame{
         resSet = resSets == null || resSets.isEmpty()? 
                 null :
                (AnnotationSet)resSets.get(resSetCombo.getSelectedIndex());
-        if(keySet != null && resSet != null){
-          Set types = new HashSet(keySet.getAllTypes());
-          types.retainAll(resSet.getAllTypes());
-          List typesList = new ArrayList(types);
-          Collections.sort(typesList);
-          if(!typesList.isEmpty()){
-            annTypeCombo.setModel(new DefaultComboBoxModel(typesList.toArray()));
-            annTypeCombo.setSelectedIndex(0);
-          }
-        }
+        Set keyTypes = (keySet == null || keySet.isEmpty()) ?
+                new HashSet() : keySet.getAllTypes();
+        Set resTypes = (resSet == null || resSet.isEmpty()) ?
+                new HashSet() : resSet.getAllTypes();
+        Set types = new HashSet(keyTypes);
+        types.retainAll(resTypes);
+        List typesList = new ArrayList(types);
+        Collections.sort(typesList);
+        annTypeCombo.setModel(new DefaultComboBoxModel(typesList.toArray()));
+        if(typesList.size() > 0) annTypeCombo.setSelectedIndex(0);
       }
     }; 
     keySetCombo.addActionListener(setComboActionListener);
