@@ -106,6 +106,12 @@ public class TestPersist extends TestCase
       (Document) Factory.createResource("gate.corpora.DocumentImpl", features);
     Document doc3 =
       (Document) sds.getLr("gate.corpora.DocumentImpl", lrPersistenceId);
+
+    //clear the parameters value from features as they will be different
+    doc.getFeatures().remove("gate.PARAMETERS");
+    doc2.getFeatures().remove("gate.PARAMETERS");
+    doc3.getFeatures().remove("gate.PARAMETERS");
+
     assert(doc3.equals(doc2));
     assert(doc.equals(doc2));
 
@@ -153,6 +159,9 @@ public class TestPersist extends TestCase
     Document doc2 =
       (Document) Factory.createResource("gate.corpora.DocumentImpl", features);
 
+    //parameters should be different
+    doc.getFeatures().remove("gate.PARAMETERS");
+    doc2.getFeatures().remove("gate.PARAMETERS");
     // check that the version we read back matches the original
     assert(doc.equals(doc2));
 
@@ -229,6 +238,16 @@ public class TestPersist extends TestCase
     Document diskDoc = (Document) lrsFromDisk.get(1);
     Document diskDoc2 = (Document) lrsFromDisk.get(2);
     Corpus diskCorp = (Corpus) lrsFromDisk.get(0);
+
+    //clear the parameters value from features as they will be different
+    doc.getFeatures().remove("gate.PARAMETERS");
+    doc2.getFeatures().remove("gate.PARAMETERS");
+    corp.getFeatures().remove("gate.PARAMETERS");
+
+    diskDoc.getFeatures().remove("gate.PARAMETERS");
+    diskDoc2.getFeatures().remove("gate.PARAMETERS");
+    diskCorp.getFeatures().remove("gate.PARAMETERS");
+
     assert("doc from disk not equal to memory version", doc.equals(diskDoc));
     assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
     assert("corpus from disk not equal to mem version", corp.equals(diskCorp));
@@ -277,9 +296,7 @@ public class TestPersist extends TestCase
 
     // delete the datastore
     sds.delete();
-  } // testDelete()
-
-  /** Test the DS register. */
+  } // testDelete() the DS register. */
   public void testDSR() throws Exception {
     DataStoreRegister dsr = Gate.getDataStoreRegister();
     assert("DSR has wrong number elements (not 0): " + dsr.size(),
@@ -346,4 +363,34 @@ public class TestPersist extends TestCase
     return new TestSuite(TestPersist.class);
   } // suite
 
+  public static void main(String[] args){
+    try{
+      Gate.setLocalWebServer(false);
+      Gate.setNetConnected(false);
+      Gate.init();
+      TestPersist test = new TestPersist("");
+      test.setUp();
+      test.testDelete();
+      test.tearDown();
+
+      test.setUp();
+      test.testDSR();
+      test.tearDown();
+
+      test.setUp();
+      test.testMultipleLrs();
+      test.tearDown();
+
+      test.setUp();
+      test.testSaveRestore();
+      test.tearDown();
+
+      test.setUp();
+      test.testSimple();
+      test.tearDown();
+
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+  }
 } // class TestPersist

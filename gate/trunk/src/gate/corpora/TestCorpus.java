@@ -56,7 +56,7 @@ public class TestCorpus extends TestCase
     c2.getFeatures().put("author", "valy");
     assert(
       "corpus feature set wrong, size = " + c2.getFeatures().size(),
-      c2.getFeatures().size() == 1
+      c2.getFeatures().size() == 2
     );
     assert(c2.getFeatures().get("author").equals("valy"));
 
