@@ -164,10 +164,10 @@ public class OptionsDialog extends JDialog {
     bGroup.add(doceditInsertAppendChk);
     doceditInsertPrependChk = new JCheckBox("Prepend");
     bGroup.add(doceditInsertPrependChk);
-    doceditInsertAppendChk.setSelected(Gate.getUserConfig().
-        getBoolean(GateConstants.DOCEDIT_INSERT_APPEND).booleanValue());
     doceditInsertPrependChk.setSelected(Gate.getUserConfig().
         getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND).booleanValue());
+    doceditInsertAppendChk.setSelected(Gate.getUserConfig().
+        getBoolean(GateConstants.DOCEDIT_INSERT_APPEND).booleanValue());
     //if none set then set the default one
     if(!(doceditInsertAppendChk.isSelected()||
          doceditInsertPrependChk.isSelected()))
