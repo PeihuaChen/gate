@@ -79,7 +79,7 @@ implements List {
           mode = m;
           updateContent(content);
           break;
-        }; // LIST_MODE
+        } // LIST_MODE
         case STRING_MODE:{
           content = this.toString();
           mode = m;
@@ -344,7 +344,7 @@ implements List {
         }// for
         stres = result.toString();
         break;
-      };
+      }
       case STRING_MODE : {
         stres = content;
         break;
@@ -371,7 +371,7 @@ implements List {
       case STRING_MODE : {
         content = newContent;
         break;
-      };
+      }
       case LIST_MODE : {
         BufferedReader listReader;
         listReader = new BufferedReader(new StringReader(newContent));
