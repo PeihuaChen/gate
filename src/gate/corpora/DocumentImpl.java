@@ -968,11 +968,27 @@ extends AbstractLanguageResource implements Document {
   /** The encoding of the source of the document content */
   protected String encoding = "UTF-8";
 
-  /** Data needed in toXml(AnnotationSet) methos*/
+  // Data needed in toXml(AnnotationSet) methos
+
+  /** Constant used in the inner class AnnotationComparator to order
+    * annotations on their start offset
+    */
   private final int ORDER_ON_START_OFFSET = 0;
+  /** Constant used in the inner class AnnotationComparator to order
+    * annotations on their end offset
+    */
   private final int ORDER_ON_END_OFFSET = 1;
+  /** Constant used in the inner class AnnotationComparator to order
+    * annotations on their ID
+    */
   private final int ORDER_ON_ANNOT_ID = 2;
+  /** Constant used in the inner class AnnotationComparator to order
+    * annotations ascending
+    */
   private final int ASC = 3;
+  /** Constant used in the inner class AnnotationComparator to order
+    * annotations descending
+    */
   private final int DESC = -3;
 
   /** The range that the content comes from at the source URL

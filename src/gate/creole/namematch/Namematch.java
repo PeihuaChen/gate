@@ -122,10 +122,17 @@ public class Namematch extends AbstractProcessingResource
 
     if (nameAllAnnots != null) {
       if (nameAllAnnots.isEmpty()) {
-        Out.prln("No annotations");
-        return;
+        executionException = new ExecutionException(
+          "No annotations to process!"
+        );
+       return;
       }
-    } else {Out.prln("No annotations");return;}
+    } else {
+      executionException = new ExecutionException(
+        "No annotations to process!"
+      );
+      return;
+    }// End if
 
     // the "unknown" annotations
     AnnotationSet nameAnnotsUnknown;
@@ -141,10 +148,7 @@ public class Namematch extends AbstractProcessingResource
 
       // return if no such annotations exist
       if (nameAnnots != null) {
-        if (nameAnnots.isEmpty()) {
-          Out.prln("No annotations of this type");
-        }
-        else {
+        if (!nameAnnots.isEmpty()){
           // the "unknown" annotations
           if (nameAnnotsUnknown!=null){
             nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
@@ -720,11 +724,11 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: all name annotations
     */
   public boolean matchRule0(String s1,
-			     String s2) {
+           String s2) {
     if (spur_match.containsKey(s1)
-	&& spur_match.containsKey(s2)&&(!s1.equals(s2))) {
+  && spur_match.containsKey(s2)&&(!s1.equals(s2))) {
       return
-	spur_match.get(s1).toString().equals(spur_match.get(s2).toString());
+  spur_match.get(s1).toString().equals(spur_match.get(s2).toString());
       }
     return false;
   }//matchRule0
@@ -734,8 +738,8 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: all name annotations
     */
   public boolean matchRule1(String s1,
-			     String s2,
-			     boolean MatchCase) {
+           String s2,
+           boolean MatchCase) {
     if (MatchCase == true) return s1.equalsIgnoreCase(s2);
     return s1.equals(s2) ;
   }//matchRule1
@@ -748,7 +752,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: all name annotations
     */
   public boolean matchRule2(String s1,
-			     String s2) {
+           String s2) {
 
     if (alias.containsKey(s1) && alias.containsKey(s2))
       return (alias.get(s1).toString().equals(alias.get(s2).toString()));
@@ -800,7 +804,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule4(String s1,
-			     String s2) {
+           String s2) {
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1,"., ");
@@ -810,10 +814,10 @@ public class Namematch extends AbstractProcessingResource
 
     if (tokens1.countTokens() == tokens2.countTokens()) {
       while (tokens1.hasMoreTokens()) {
-	if (!tokens1.nextToken().equalsIgnoreCase(tokens2.nextToken())) {
-	  allTokensMatch = false;
-	  break;
-	} // if (!tokens1.nextToken()
+  if (!tokens1.nextToken().equalsIgnoreCase(tokens2.nextToken())) {
+    allTokensMatch = false;
+    break;
+  } // if (!tokens1.nextToken()
       } // while
       return allTokensMatch;
     } // if (tokens1.countTokens() ==
@@ -828,7 +832,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: all name annotations
     */
   public boolean matchRule5(String s1,
-			     String s2) {
+           String s2) {
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
@@ -847,7 +851,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule6(String s1,
-			     String s2) {
+           String s2) {
 
     if (s1.startsWith("The ")) s1 = s1.substring(4);
 
@@ -880,7 +884,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation and person annotations only
     */
   public boolean matchRule7(String s1,
-			     String s2) {
+           String s2) {
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
@@ -906,7 +910,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule8(String s1,
-			     String s2) {
+           String s2) {
 
     if (s1.startsWith("The ")) s1 = s1.substring(4);
     if (s2.startsWith("The ")) s2 = s2.substring(4);
@@ -927,24 +931,24 @@ public class Namematch extends AbstractProcessingResource
 
       //check last token of s1
       while (tokens1.hasMoreTokens()) {
-	token = tokens1.nextToken();
-	if (!tokens1.hasMoreTokens()
-	    && cdg.containsKey(token)) cdg1=token;
-	else s1 = s1+token;
+  token = tokens1.nextToken();
+  if (!tokens1.hasMoreTokens()
+      && cdg.containsKey(token)) cdg1=token;
+  else s1 = s1+token;
       }
 
       // do the same for s2
       while (tokens2.hasMoreTokens()) {
-	token = tokens2.nextToken();
-	if (!tokens2.hasMoreTokens()
-	    && cdg.containsKey(token)) cdg2=token;
-	else s2 = s2+token;
+  token = tokens2.nextToken();
+  if (!tokens2.hasMoreTokens()
+      && cdg.containsKey(token)) cdg2=token;
+  else s2 = s2+token;
       }
 
       // if the company designators are different
       // then they are NOT the same organisations
       if ((cdg1!=null && cdg2!=null)
-	  && !cdg1.equalsIgnoreCase(cdg2)) return false;
+    && !cdg1.equalsIgnoreCase(cdg2)) return false;
     }
     if (!s1.equals("") && !s2.equals("")) return matchRule1(s1,s2,false);
 
@@ -959,7 +963,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation and person annotations only
     */
   public boolean matchRule9(String s1,
-			     String s2) {
+           String s2) {
 
     if (!cdg.isEmpty()) {
       String stringToTokenize1 = s1;
@@ -968,15 +972,15 @@ public class Namematch extends AbstractProcessingResource
       String previous_token = null;
 
       if (tokens1.countTokens()>1) {
-	while  (tokens1.hasMoreTokens()) {
-	  token = tokens1.nextToken();
-	  if (tokens1.hasMoreTokens()) previous_token = token;
-	}
-	if (cdg.containsKey(token)) {
-	  //now match previous_token with other name
-	  if (previous_token != null)
-	    return matchRule1(previous_token,s2,false);
-	} //if (cdg.containsKey(token))
+  while  (tokens1.hasMoreTokens()) {
+    token = tokens1.nextToken();
+    if (tokens1.hasMoreTokens()) previous_token = token;
+  }
+  if (cdg.containsKey(token)) {
+    //now match previous_token with other name
+    if (previous_token != null)
+      return matchRule1(previous_token,s2,false);
+  } //if (cdg.containsKey(token))
       } // if (tokens1.countTokens()>1)
     } // if (!cdg.isEmpty()) {
     return false;
@@ -990,7 +994,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule10(String s1,
-			      String s2) {
+            String s2) {
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
@@ -1002,26 +1006,26 @@ public class Namematch extends AbstractProcessingResource
     boolean invoke_rule=false;
 
     if (tokens1.countTokens() >= 3
-	&& tokens2.countTokens() >= 2) {
+  && tokens2.countTokens() >= 2) {
 
     // first get the tokens before and after the preposition
     while (tokens1.hasMoreTokens()) {
       token = tokens1.nextToken();
       if (prepos.containsKey(token)) {
-	invoke_rule=true;
-	break;
+  invoke_rule=true;
+  break;
       }
       previous_token = token;
     }
 
     if (invoke_rule) {
     if (tokens1.hasMoreTokens()
-	&& previous_token != null) next_token=tokens1.nextToken();
+  && previous_token != null) next_token=tokens1.nextToken();
     else return false;
 
     // then compare (in reverse) with the first two tokens of s2
       if (matchRule1(next_token,tokens2.nextToken(),false)
-	  && matchRule1(previous_token,tokens2.nextToken(),false)) return true ;
+    && matchRule1(previous_token,tokens2.nextToken(),false)) return true ;
     } // if (invoke_rule)
     }//(tokens1.countTokens() >= 3
     return false;
@@ -1036,7 +1040,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule11(String s1,
-			      String s2) {
+            String s2) {
 
 
     // first do the easy case e.g. "Pan American" == "Pan Am"
@@ -1061,7 +1065,7 @@ public class Namematch extends AbstractProcessingResource
       token22 = tokens2.nextToken();
 
       if (token11.startsWith(token21)
-	  && token12.startsWith(token22)) return true;
+    && token12.startsWith(token22)) return true;
 
     } // if (tokens2.countTokens() == 2)
 
@@ -1071,11 +1075,11 @@ public class Namematch extends AbstractProcessingResource
       // split the token into possible contractions
       // ignore case for matching
       for (int i=2;i<s2.length();i++) {
-	token21=s2.substring(0,i+1);
-	token22=s2.substring(i+1);
+  token21=s2.substring(0,i+1);
+  token22=s2.substring(i+1);
 
-	if (token11.startsWith(token21)
-	    && token12.startsWith(token22)) return true;
+  if (token11.startsWith(token21)
+      && token12.startsWith(token22)) return true;
       }// for
     } // else if
     } //if (tokens1.countTokens() >= 2)
@@ -1089,7 +1093,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule12(String s1,
-			      String s2) {
+            String s2) {
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
@@ -1133,7 +1137,7 @@ public class Namematch extends AbstractProcessingResource
     * Applied to: organisation annotations only
     */
   public boolean matchRule13(String s1,
-			      String s2) {
+            String s2) {
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
@@ -1152,8 +1156,8 @@ public class Namematch extends AbstractProcessingResource
     int matched_tokens = 0;
 
     while (tokens1.hasMoreTokens()) {
-      	token1 = tokens1.nextToken();
-      	if(!tokens1.hasMoreTokens()
+        token1 = tokens1.nextToken();
+        if(!tokens1.hasMoreTokens()
           &&  cdg.containsKey(token1)) cdg1=token1;
         else v1.add(token1);
     }
@@ -1172,7 +1176,7 @@ public class Namematch extends AbstractProcessingResource
     // if the company designators are different
     // then they are NOT the same organisations
     if ((cdg1!=null && cdg2!=null)
-	  && !cdg1.equalsIgnoreCase(cdg2)) return false;
+    && !cdg1.equalsIgnoreCase(cdg2)) return false;
 
     if (v2.size() <= v1.size()) {
     largerVector = v1;
@@ -1185,7 +1189,7 @@ public class Namematch extends AbstractProcessingResource
     // now do the matching
     if (largerVector.size()>=3) {
       for (Iterator iter = smallerVector.iterator();
-    	                        iter.hasNext() ;) {
+                              iter.hasNext() ;) {
         token1 = (String) iter.next();
         if (largerVector.contains(token1))  matched_tokens++;
       } // for (Enumeration enum
