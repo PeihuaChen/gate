@@ -40,8 +40,9 @@ public class TestReload extends TestCase{
   public void testReload() throws Exception {
     ReloadingClassLoader loader = new ReloadingClassLoader();
     //load first version
-    URL url = Gate.class.getResource(Files.getResourcePath() +
-                                     "/gate.ac.uk/tests/first.jar");
+    //it looks that Java doesn't like the jar in jar situation so we'll have to
+    //load the jar archives directly from the website.
+    URL url = new URL("http://gate.ac.uk/tests/first.jar");
     loader.load(url);
     //try the class
     Class c = loader.loadClass("loader.Scratch", true);
@@ -59,8 +60,7 @@ public class TestReload extends TestCase{
     }
 
     //load second version
-    url = Gate.class.getResource(Files.getResourcePath() +
-                                     "/gate.ac.uk/tests/second.jar");
+    url = new URL("http://gate.ac.uk/tests/second.jar");
     loader.load(url);
 
     //try the class
@@ -75,8 +75,10 @@ public class TestReload extends TestCase{
   public void testUnload() throws Exception {
     ReloadingClassLoader loader = new ReloadingClassLoader();
     //load first version
-    URL url = Gate.class.getResource(Files.getResourcePath() +
-                                     "/gate.ac.uk/tests/first.jar");
+//    URL url = Gate.class.getResource(Files.getResourcePath() +
+//                                     "/gate.ac.uk/tests/first.jar");
+    URL url = new URL("http://gate.ac.uk/tests/first.jar");
+
     loader.load(url);
     //try the class
     Class c = loader.loadClass("loader.Scratch", true);
@@ -100,8 +102,7 @@ public class TestReload extends TestCase{
     long startTime;
     long endTime;
     //load fresh class 100 times
-    URL url = Gate.class.getResource(Files.getResourcePath() +
-                                     "/gate.ac.uk/tests/first.jar");
+    URL url = new URL("http://gate.ac.uk/tests/first.jar");
     for(int i = 0; i< 100; i++){
       loader.load(url);
       startTime = System.currentTimeMillis();
