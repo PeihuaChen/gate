@@ -161,6 +161,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Close the data store. */
   public void close() throws PersistenceException {
+    Gate.getDataStoreRegister().remove(this);
   } // close()
 
   /** Save: synchonise the in-memory image of the LR with the persistent
@@ -188,8 +189,15 @@ extends AbstractFeatureBearer implements DataStore {
     }
 
     // create an indentifier for this resource
+    String lrName = null;
+    FeatureMap lrFeatures = lr.getFeatures();
+    if(lrFeatures != null) {
+      lrName = (String) lrFeatures.get("NAME");
+    }
+    if(lrName == null) lrName = lrData.getName();
+
     String lrPersistenceId =
-      lrData.getName() + "___" + new Date().getTime() + "___" + random();
+      lrName + "___" + new Date().getTime() + "___" + random();
     lr.getFeatures().put("DataStoreInstanceId", lrPersistenceId);
 
     // create a File to store the resource in
