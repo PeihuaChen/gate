@@ -459,6 +459,7 @@ public class OracleDataStore extends JDBCDataStore {
     // let the world know about it
     fireResourceWritten(
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()));
+
   }
 
 
@@ -482,14 +483,17 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+  /** Adopt a resource for persistence. */
   public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
     //open a new transaction
     return _adopt(lr,secInfo,true);
   }
 
-  /** Adopt a resource for persistence. */
+  /** helper for adopt()
+   *  @param openNewTrans shows if a new transaction should be started or the adopt
+   *  is performed in the context of an already opened transaction
+   */
   private LanguageResource _adopt(LanguageResource lr,
                                   SecurityInfo secInfo,
                                   boolean openNewTrans)
@@ -622,7 +626,10 @@ public class OracleDataStore extends JDBCDataStore {
 
 
 
-  /** -- */
+  /**
+   *  helper for adopt()
+   *  never call directly
+   */
   private Long createLR(String lrType,
                         String lrName,
                         SecurityInfo si,
@@ -677,7 +684,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** -- */
+
+  /**
+   *  updates the content of the document if it is binary or a long string
+   *  (that does not fit into VARCHAR2)
+   */
   private void updateDocumentContent(Long docContentID,DocumentContent content)
   throws PersistenceException {
 
@@ -738,7 +749,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** -- */
+
+  /**
+   * helper for adopt
+   * creates a LR of type Document
+   */
   private Document createDocument(Document doc,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
@@ -747,7 +762,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** -- */
+
+  /**
+   * helper for adopt
+   * creates a LR of type Document
+   */
   private Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
@@ -842,7 +861,6 @@ public class OracleDataStore extends JDBCDataStore {
     //5. fill document content (record[s] in T_DOC_CONTENT)
 
     //do we have content at all?
-//Out.prln("SIZE=["+docContent.size()+"]");
     if (docContent.size().longValue() > 0) {
       updateDocumentContent(docContentID,docContent);
     }
@@ -886,37 +904,13 @@ public class OracleDataStore extends JDBCDataStore {
                                               doc.getSourceUrlEndOffset(),
                                               doc.getAnnotations(),
                                               doc.getNamedAnnotationSets());
-/*
-    dbDoc.setConnection(this.jdbcConn);
-    dbDoc.setContent(doc.getContent());
-    dbDoc.setDataStore(this);
-    dbDoc.setFeatures(doc.getFeatures());
-    dbDoc.setLRPersistenceId(docID);
-    dbDoc.setMarkupAware(doc.getMarkupAware());
-    dbDoc.setName(doc.getName());
-    dbDoc.setSourceUrl(doc.getSourceUrl());
-    dbDoc.setSourceUrlEndOffset(doc.getSourceUrlEndOffset());
-    dbDoc.setSourceUrlStartOffset(dbDoc.getSourceUrlStartOffset());
-
-    //add all anotations
-    //1. default
-    ((DatabaseDocumentImpl)dbDoc).setAnnotations(null,doc.getAnnotations());
-
-    //2. named
-    Iterator itNamed = doc.getNamedAnnotationSets().values().iterator();
-    while (itNamed.hasNext()){
-      AnnotationSet currSet = (AnnotationSet)itNamed.next();
-      //add them all to the DBAnnotationSet
-      ((DatabaseDocumentImpl)dbDoc).setAnnotations(currSet.getName(),currSet);
-    }
-*/
 
     return dbDoc;
   }
 
 
 
-  /** -- */
+  /** creates an entry for annotation set in the database */
   private void createAnnotationSet(Long lrID, AnnotationSet aset)
     throws PersistenceException {
 
@@ -959,7 +953,6 @@ public class OracleDataStore extends JDBCDataStore {
       Node start = (Node)ann.getStartNode();
       Node end = (Node)ann.getEndNode();
       String type = ann.getType();
-//      FeatureMap annFeatures = ann.getFeatures();
 
       //DB stuff
       Long annGlobalID = null;
@@ -1004,7 +997,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
 
-  /** -- */
+  /** creates a LR of type Corpus  */
   private Corpus createCorpus(Corpus corp,SecurityInfo secInfo)
     throws PersistenceException,SecurityException {
 
@@ -1079,6 +1072,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /**
    * Get a resource from the persistent store.
    * <B>Don't use this method - use Factory.createResource with
@@ -1136,6 +1130,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /** Get a list of the types of LR that are present in the data store. */
   public List getLrTypes() throws PersistenceException {
 
@@ -1164,6 +1159,7 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(stmt);
     }
   }
+
 
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
@@ -1204,6 +1200,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /** Get a list of the names of LRs of a particular type that are present. */
   public List getLrNames(String lrType) throws PersistenceException {
 
@@ -1242,6 +1239,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /** Gets a timestamp marker that will be used for all changes made in
    *  the database so that subsequent calls to deleteSince() could restore (partly)
    *  the database state as it was before the update. <B>NOTE:</B> Restoring the previous
@@ -1269,6 +1267,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /**
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
@@ -1280,6 +1279,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
@@ -1289,6 +1289,8 @@ public class OracleDataStore extends JDBCDataStore {
 
     return canAccessLR((Long) lrID,WRITE_ACCESS);
   }
+
+
 
   /**
    * Checks if the user (identified by the sessionID)
@@ -1335,7 +1337,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** reads the content of a CLOB into the specified StringBuffer */
   public static void readCLOB(java.sql.Clob src, StringBuffer dest)
     throws SQLException, IOException {
 
@@ -1369,9 +1372,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
 
-
-
-  /** --- */
+  /** writes the content of a String into the specified CLOB object */
   public static void writeCLOB(String src,java.sql.Clob dest)
     throws SQLException, IOException {
 
@@ -1399,7 +1400,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** writes the content of a StringBuffer into the specified CLOB object */
   public static void writeCLOB(StringBuffer src,java.sql.Clob dest)
     throws SQLException, IOException {
 
@@ -1408,7 +1410,13 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  reads the content of the specified BLOB object and returns the object
+   *  contained.
+   *  NOTE: the BLOB is expected to contain serializable objects, not just any
+   *  binary stream
+   */
   public static Object readBLOB(java.sql.Blob src)
     throws SQLException, IOException,ClassNotFoundException {
 
@@ -1436,7 +1444,12 @@ public class OracleDataStore extends JDBCDataStore {
     return result;
   }
 
-  /** --- */
+
+
+  /**
+   *  writes the specified object into the BLOB
+   *  NOTE: the object should be serializable
+   */
   public static void writeBLOB(Object src,java.sql.Blob dest)
     throws SQLException, IOException {
 
@@ -1464,7 +1477,12 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  creates a feature of the specified type/value/valueType/key for the specified entity
+   *  Entity is one of: LR, Annotation
+   *  Value types are: boolean, int, long, string, float, Object
+   */
   private Long _createFeature(Long entityID,
                               int entityType,
                               String key,
@@ -1558,7 +1576,10 @@ public class OracleDataStore extends JDBCDataStore {
 
 
 
-  /** --- */
+  /**
+   *  updates the value of a feature where the value is string (>4000 bytes, stored as CLOB)
+   *  or Object (stored as BLOB)
+   */
   private void _updateFeatureLOB(Long featID,Object value, int valueType)
     throws PersistenceException {
 
@@ -1625,7 +1646,25 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
-  /** --- */
+
+
+  /**
+   *  creates a feature with the specified type/key/value for the specified entity
+   *  entitties are either LRs ot Annotations
+   *  valid values are: boolean,
+   *                    int,
+   *                    long,
+   *                    string,
+   *                    float,
+   *                    Object,
+   *                    boolean List,
+   *                    int List,
+   *                    long List,
+   *                    string List,
+   *                    float List,
+   *                    Object List
+   *
+   */
   private void createFeature(Long entityID, int entityType,String key, Object value)
     throws PersistenceException {
 
@@ -1671,8 +1710,6 @@ public class OracleDataStore extends JDBCDataStore {
           valueType = DBHelper.VALUE_TYPE_STRING;
     }
 
-
-
     //3. for all elements:
     for (int i=0; i< elementsToStore.size(); i++) {
 
@@ -1701,13 +1738,28 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  checks if a String should be stores as VARCHAR2 or CLOB
+   *  because the VARCHAR2 in Oracle is limited to 4000 <b>bytes</b>, not all
+   *  the strings fit there. If a String is too long then it is store in the
+   *  database as CLOB.
+   *  Note that in the worst case 3 bytes are needed to represent a single character
+   *  in a database with UTF8 encoding, which limits the string length to 4000/3
+   *  (ORACLE_VARCHAR_LIMIT_BYTES)
+   *  @see ORACLE_VARCHAR_LIMIT_BYTES
+   */
   private boolean fitsInVarchar2(String s) {
 
     return s.getBytes().length < this.ORACLE_VARCHAR_LIMIT_BYTES;
   }
 
-  /** --- */
+
+
+  /**
+   *  helper metod
+   *  iterates a FeatureMap and creates all its features in the database
+   *   */
   private void createFeatures(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
@@ -1722,16 +1774,7 @@ public class OracleDataStore extends JDBCDataStore {
       }
   }
 
-  /** --- */
-  private void deleteFeatures(Long entityID, int entityType)
-    throws PersistenceException {
 
-    //since the avg number of features per document/corpus is relatively small
-    //it's easier to delete the old features and create the new ones instead of
-    //trying to figure out what needs syncing with the DB (i.e.
-    // deleted/new/updated features)
-
-  }
 
   /** get security information for LR . */
   public SecurityInfo getSecurityInfo(LanguageResource lr)
@@ -1799,6 +1842,8 @@ public class OracleDataStore extends JDBCDataStore {
     return si;
   }
 
+
+
   /** set security information for LR . */
   public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
     throws PersistenceException, SecurityException {
@@ -1806,7 +1851,10 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  helper method for getLR - reads LR of type Corpus
+   */
   private DatabaseCorpusImpl readCorpus(Object lrPersistenceId)
     throws PersistenceException {
 
@@ -1907,7 +1955,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+  /** helper method for getLR - reads LR of type Document */
   private DatabaseDocumentImpl readDocument(Object lrPersistenceId)
     throws PersistenceException {
 
@@ -2037,7 +2085,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  reads the features of an entity
+   *  entities are of type LR or Annotation
+   */
   private FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException {
 
@@ -2190,7 +2242,6 @@ public class OracleDataStore extends JDBCDataStore {
       else if (arrFeatures.size() == 1) {
         fm.put(currKey,arrFeatures.elementAt(0));
       }
-
     }//try
     catch(SQLException sqle) {
       throw new PersistenceException("can't read features from DB: ["+ sqle.getMessage()+"]");
@@ -2210,7 +2261,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  reads the ID of the database
+   *  every database should have unique string ID
+   */
   public String readDatabaseID() throws PersistenceException{
 
     PreparedStatement pstmt = null;
@@ -2251,7 +2306,13 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *   checks if two databases are identical
+   *   @see readDatabaseID()
+   *   NOTE: the same database may be represented by different OracleDataStore instances
+   *   but the IDs will be the same
+   */
   public boolean equals(Object obj) {
 
     if (false == obj instanceof OracleDataStore) {
@@ -2268,7 +2329,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - saves a Document in the database */
   private void syncDocument(Document doc) throws PersistenceException {
 
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
@@ -2309,7 +2371,11 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /**
+   *  helper for sync()
+   *  NEVER call directly
+   */
   private void _syncLR(Long lrID, String newName)
     throws PersistenceException {
 
@@ -2338,7 +2404,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncDocument(Document doc)
     throws PersistenceException {
 
@@ -2388,7 +2455,9 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
-  /** --- */
+
+
+  /** helper for sync() - never call directly */
   private void _syncDocumentContent(Document doc)
     throws PersistenceException {
 
@@ -2428,7 +2497,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
     throws PersistenceException {
 
@@ -2531,7 +2601,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
@@ -2545,7 +2616,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
     //0.preconditions
@@ -2629,7 +2701,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
     throws PersistenceException {
 
@@ -2681,7 +2754,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncAnnotations(Document doc)
     throws PersistenceException {
 
@@ -2726,7 +2800,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - never call directly */
   private void _syncFeatures(LanguageResource lr)
     throws PersistenceException {
 
@@ -2776,7 +2851,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** --- */
+
+  /** helper for sync() - saves a Corpus in the database */
   private void syncCorpus(Corpus corp) throws PersistenceException {
 
     //0. preconditions
@@ -2838,6 +2914,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
+
   /**
    * Try to acquire exlusive lock on a resource from the persistent store.
    * Always call unlockLR() when the lock is no longer needed
@@ -2856,9 +2934,11 @@ public class OracleDataStore extends JDBCDataStore {
     return _lockLr((Long)lr.getLRPersistenceId());
   }
 
+
+
   /**
-   * Try to acquire exlusive lock on a resource from the persistent store.
-   * Always call unlockLR() when the lock is no longer needed
+   *  helper for lockLR()
+   *  never call directly
    */
   private boolean _lockLr(Long lrID)
   throws PersistenceException,SecurityException {
@@ -2914,6 +2994,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
@@ -2967,6 +3048,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
@@ -2983,6 +3065,7 @@ public class OracleDataStore extends JDBCDataStore {
     //delegate
     return getLockingUser((Long)lr.getLRPersistenceId());
   }
+
 
 
   /**
@@ -3031,8 +3114,6 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
     }
-
-
   }
 
 }
