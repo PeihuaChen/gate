@@ -142,10 +142,14 @@ public class RepositioningInfo extends ArrayList {
     return result;
   } // getExtractedPos
 
+  public long getOriginalPos(long relPos) {
+    return getOriginalPos(relPos, false);
+  } // getOriginalPos
+
   /** Compute position in original content by position in the extracted content.
    *  If there is no correspondence return -1.
    */
-  public long getOriginalPos(long relPos) {
+  public long getOriginalPos(long relPos, boolean afterChar) {
     long result = relPos;
     PositionInfo currPI = null;
     int size = size();
@@ -158,6 +162,12 @@ public class RepositioningInfo extends ArrayList {
         currPI = (PositionInfo) get(i);
         currPos = currPI.getCurrentPosition();
         currLen = currPI.getCurrentLength();
+
+        if(afterChar && relPos == currPos+currLen) {
+          result = currPI.getOriginalPosition() + currPI.getOriginalLength();
+          found = true;
+          break;
+        } // if
 
         if(relPos < currPos+currLen) {
           if(relPos < currPos) {
