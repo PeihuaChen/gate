@@ -82,7 +82,6 @@ public class NewResourceDialog extends JDialog {
                            new CustomEditor());
 
     table.setIntercellSpacing(new Dimension(10, 10));
-    table.setAutoResizeMode(table.AUTO_RESIZE_LAST_COLUMN);
     JScrollPane scroll = new JScrollPane(table);
     this.getContentPane().add(scroll);
     this.getContentPane().add(Box.createVerticalStrut(5));

@@ -48,7 +48,11 @@ public class TestAnnotation extends TestCase
   {
     String server = TestDocument.getTestServerName();
     assertNotNull(server);
-    doc1 = Factory.newDocument(new URL(server + "tests/doc0.html"));
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    params.put("markupAware", "false");
+    doc1 = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
@@ -190,9 +194,11 @@ public class TestAnnotation extends TestCase
 
   /** Test type index */
   public void testTypeIndex() throws Exception {
-    Document doc = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
-    );
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    params.put("markupAware", "false");
+    Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
@@ -258,9 +264,11 @@ public class TestAnnotation extends TestCase
 
   /** Test the annotations set add method that uses existing nodes */
   public void testAddWithNodes() throws Exception {
-    Document doc = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
-    );
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    params.put("markupAware", "false");
+    Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
@@ -502,9 +510,11 @@ public class TestAnnotation extends TestCase
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() throws Exception {
     // constuct an empty AS
-    Document doc = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
-    );
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    params.put("markupAware", "false");
+    Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
 
     AnnotationSet as = new AnnotationSetImpl(doc);
     assertEquals(as.size(), 0);

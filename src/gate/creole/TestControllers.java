@@ -63,7 +63,11 @@ public class TestControllers extends TestCase
     assertNotNull("c1 controller is null", c1);
 
     //get a document
-    Document doc = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    params.put("markupAware", "false");
+    Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
 
     if(DEBUG) {
       ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
@@ -72,7 +76,7 @@ public class TestControllers extends TestCase
     }
 
     //create a default tokeniser
-    FeatureMap params = Factory.newFeatureMap();
+    params = Factory.newFeatureMap();
     params.put("rulesURL", "gate:/creole/tokeniser/DefaultTokeniser.rules");
     params.put("encoding", "UTF-8");
     params.put("document", doc);
