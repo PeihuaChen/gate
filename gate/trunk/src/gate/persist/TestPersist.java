@@ -642,7 +642,113 @@ public class TestPersist extends TestCase
   public void testDB_UseCase04() throws Exception {
 
     //sync a document
+    LanguageResource lr = null;
 
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. read LR
+    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+
+    //3. change name
+    String oldName = lr.getName();
+    lr.setName(oldName + "__UPD");
+    lr.sync();
+
+    //4. change features
+    FeatureMap fm = lr.getFeatures();
+    Iterator keys = fm.keySet().iterator();
+
+    //4.1 change the value of the first feature
+    while(keys.hasNext()) {
+      String currKey = (String)keys.next();
+      Object val = fm.get(currKey);
+      Object newVal = null;
+      if (val instanceof Long) {
+        newVal = new Long(101010101);
+      }
+      else if (val instanceof Integer) {
+        newVal = new Integer(2121212);
+      }
+      else if (val instanceof String) {
+        newVal = new String("UPD__").concat( (String)val).concat("__UPD");
+      }
+      fm.put(currKey,newVal);
+    }
+    lr.sync();
+    //4.3 add feature
+    //delete feature
+
+/*
+    //6. URL
+    Document dbDoc = (Document)lr;
+    Assert.assertEquals(dbDoc.getSourceUrl(),((Document)this.uc01_LR).getSourceUrl());
+
+    //5.start/end
+    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),((Document)this.uc01_LR).getSourceUrlStartOffset());
+    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),((Document)this.uc01_LR).getSourceUrlEndOffset());
+
+    //6.markupAware
+    Assert.assertEquals(dbDoc.getMarkupAware(),((Document)this.uc01_LR).getMarkupAware());
+
+    //7. content
+    DocumentContent cont = dbDoc.getContent();
+    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+
+    //7. access the contect again and assure it's not read from the DB twice
+    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+
+    //8. encoding
+    String encNew = (String)dbDoc.getParameterValue("encoding");
+    String encOld = (String)((DocumentImpl)this.uc01_LR).getParameterValue("encoding");
+    Assert.assertEquals(encNew,encOld);
+
+    //9. default annotations
+    AnnotationSet defaultNew = dbDoc.getAnnotations();
+    AnnotationSet defaultOld = ((DocumentImpl)this.uc01_LR).getAnnotations();
+
+    Assert.assertNotNull(defaultNew);
+    Assert.assertTrue(defaultNew.size() == defaultOld.size());
+    Iterator itDefault = defaultNew.iterator();
+
+    while (itDefault.hasNext()) {
+      Annotation currAnn = (Annotation)itDefault.next();
+      Assert.assertTrue(defaultOld.contains(currAnn));
+    }
+
+    //10. iterate named annotations
+    Map namedOld = ((DocumentImpl)this.uc01_LR).getNamedAnnotationSets();
+    Iterator itOld = namedOld.keySet().iterator();
+    while (itOld.hasNext()) {
+      String asetName = (String)itOld.next();
+      AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
+      AnnotationSet asetNew = (AnnotationSet)dbDoc.getAnnotations(asetName);
+      Assert.assertNotNull(asetNew);
+      Assert.assertEquals(asetNew,asetOld);
+//      Features fmNew = asetNew.getFea
+    }
+
+
+    //11. ALL named annotation (ensure nothing is read from DB twice)
+    Map namedNew = dbDoc.getNamedAnnotationSets();
+
+    Assert.assertNotNull(namedNew);
+    Assert.assertTrue(namedNew.size() == namedOld.size());
+
+    Iterator itNames = namedNew.keySet().iterator();
+    while (itNames.hasNext()) {
+      String asetName = (String)itNames.next();
+      AnnotationSet asetNew = (AnnotationSet)namedNew.get(asetName);
+      AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
+      Assert.assertNotNull(asetNew);
+      Assert.assertNotNull(asetOld);
+      Assert.assertEquals(asetNew,asetOld);
+    }
+
+*/
     if(DEBUG) {
       Err.prln("Use case 04 passed...");
     }
