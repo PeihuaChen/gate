@@ -47,8 +47,12 @@ public class DBHelper {
   public static final int X_ORACLE_USER_OWNS_RESOURCES =       X_ORACLE_START + 11 ;
   public static final int X_ORACLE_INCOMPLETE_DATA  =          X_ORACLE_START + 12 ;
 
+  public static final int TRUE = 1;
+  public static final int FALSE = 0;
+
 
   private static final boolean DEBUG = true;
+
 
   private static boolean  driversLoaded;
 
