@@ -369,7 +369,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
     //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
-    Long lrID = null;// = this.createLR(this.session,"gate.corpora.DocumentImpl",?,?);
+    Long lrID = null;//this.createLR(this.session,"gate.corpora.DocumentImpl",?,?);
 
     //4. create a record in T_DOCUMENT for this document
     CallableStatement stmt = null;
@@ -517,8 +517,24 @@ public class OracleDataStore extends JDBCDataStore {
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
     Long lrID = null; //createLR(this.session,"gate.corpora.CorpusImpl",?,?);
 
-    //2.create am emtry in the T_COPRUS table
+    //2.create am entry in the T_COPRUS table
     Long corpusID = null;
+    //DB stuff
+    CallableStatement stmt = null;
+      try {
+        stmt = this.jdbcConn.prepareCall(
+            "{ call "+Gate.DB_OWNER+".persist.create_corpus(?,?) }");
+        stmt.setLong(1,lrID.longValue());
+        stmt.registerOutParameter(2,java.sql.Types.BIGINT);
+        stmt.execute();
+        corpusID = new Long(stmt.getLong(2));
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't create corpus [step 2] in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
 
     //3. for each document in the corpus call createDocument()
     Iterator itDocuments = corp.iterator();
