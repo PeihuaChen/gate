@@ -19,10 +19,6 @@ public interface Corpus extends LanguageResource, SortedSet
   public String getName();
 
   /**Get a document by id*/
-  public Document getDocument(long id);
+//  public Document getDocument(long id);
 
-  /**Get the documents. Should be protected but not allowed in an interface*/
-  public Map getDocsById();
-  
-   
 } // interface Corpus

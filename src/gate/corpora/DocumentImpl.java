@@ -161,7 +161,9 @@ public class DocumentImpl implements Document
   public Long[] getSourceURLOffsets() { return sourceURLOffsets; }
 
   /** Get the data store the document lives in. */
-  public DataStore getDataStore() { throw new LazyProgrammerException(); }
+  public DataStore getDataStore() {
+    return null;
+  }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() { return content; }
@@ -190,8 +192,17 @@ public class DocumentImpl implements Document
     return namedSet;
   } // getAnnotations(name)
 
+  /**
+  * Returns a map with the named annotation sets
+  */
+  /*This was needed by the constructor on DocumentWrapper that
+  *takes a DocumentImpl.
+  */
+  public Map getNamedAnnotationSets(){
+    return namedAnnotSets;
+  }
   /** Get the features associated with this document. */
-  public FeatureMap getFeatures() { return features; } 
+  public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
@@ -236,7 +247,7 @@ public class DocumentImpl implements Document
     return
       isValidOffset(start) && isValidOffset(end) &&
       start.longValue() <= end.longValue();
-  } // isValidOffsetRange(start,end) 
+  } // isValidOffsetRange(start,end)
 
   /** Generate and return the next annotation ID */
   public Integer getNextAnnotationId() {
@@ -265,45 +276,6 @@ public class DocumentImpl implements Document
     }
     return orderingString.toString();
   } // getOrderingString()
-
-  /**Returns a map with all the named annotation sets and their names*/
-  public Map getNamedAnnotationSets(){
-    return namedAnnotSets;
-  }
-
-//Persistence stuff
-  public boolean isPersistent(){
-  //This class does not define persistent objects.
-    return false;
-  }
-
-  public boolean isPersistenceCapable(){
-    return true;
-  }
-
-  public String getErrorMessage(){
-    return gate.db.Checker.errMsg;
-  };
-
-  public static boolean setupDS(DataStore ds){
-    //We only have one type of persistent corpora so we don't need to check
-    //the datastore type here.
-    return gate.db.DocumentWrapper.setupDatabase(ds);
-  }
-
-  public LRDBWrapper getDBWrapper(DataStore ds){
-    //We only have one type of persistent corpora so we don't need to check
-    //the datastore type here.
-    LRDBWrapper ret;
-    try{
-      ret = new gate.db.DocumentWrapper(ds, this);
-    }catch(IOException ioe){
-      ret = null;
-    }
-    return ret;
-  }
-//END persistence stuff
-
 
   /** The features associated with this document. */
   protected FeatureMap features;
