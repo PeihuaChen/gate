@@ -198,7 +198,21 @@ public class TestDatabaseAnnotationSet extends TestCase
     testAS.remove(basicAS.get(new Integer(0)));
     if (DEBUG) Out.prln("Test AS is : " + testAS);
 
+    AnnotationSet fromTransientSet = new DatabaseAnnotationSetImpl(basicAS);
+    ann = fromTransientSet.get(new Integer(0));
+    features = ann.getFeatures();
+    features.put("test", "test value");
 
+    ann1 = fromTransientSet.get(new Integer(4));
+    features1 = ann1.getFeatures();
+    features1.remove("pos");
+
+    newFeatures = Factory.newFeatureMap();
+    newFeatures.put("my test", "my value");
+    ann2 = fromTransientSet.get(new Integer(5));
+    ann2.setFeatures(newFeatures);
+
+    if (DEBUG) Out.prln("From transient set is : " + fromTransientSet);
 
   } // testIterator
 

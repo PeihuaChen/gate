@@ -53,13 +53,15 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     documentsList.setCellRenderer(listRenderer);
     JScrollPane listScroll = new JScrollPane(documentsList);
 
-    featuresEditor = new FeaturesEditor();
-    JScrollPane fEdScroll = new JScrollPane(featuresEditor);
+//    featuresEditor = new FeaturesEditor();
+//    JScrollPane fEdScroll = new JScrollPane(featuresEditor);
+//
+//    JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+//                                          listScroll, fEdScroll);
+//    mainSplit.setDividerLocation(0.30);
+//    add(mainSplit, BorderLayout.CENTER);
 
-    JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                                          listScroll, fEdScroll);
-    mainSplit.setDividerLocation(0.30);
-    add(mainSplit, BorderLayout.CENTER);
+    add(listScroll, BorderLayout.CENTER);
 
     toolbar = new JToolBar();
     toolbar.setFloatable(false);
