@@ -153,29 +153,41 @@ public class DocumentImpl implements Document
   } // DocumentImpl(urlString)
 
   /** Documents are identified by URLs */
-  public URL getSourceURL() { throw new LazyProgrammerException(); }
+  public URL getSourceURL() { return sourceURL; }
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document.
     */
-  public Long[] getSourceURLOffsets() { throw new LazyProgrammerException(); }
+  public Long[] getSourceURLOffsets() { return sourceURLOffsets; }
 
   /** Get the data store the document lives in. */
   public DataStore getDataStore() { throw new LazyProgrammerException(); }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
-  public DocumentContent getContent() { throw new LazyProgrammerException(); }
+  public DocumentContent getContent() { return content; }
 
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
     */
-  public AnnotationSet getAnnotations() { throw new LazyProgrammerException(); }
+  public AnnotationSet getAnnotations() {
+    if(defaultAnnots == null)
+      defaultAnnots = new AnnotationSetImpl(this);
+    return defaultAnnots;
+  } // getAnnotations()
 
   /** Get a named set of annotations. Creates a new set if one with this
     * name doesn't exist yet.
     */
   public AnnotationSet getAnnotations(String name) {
-    throw new LazyProgrammerException();
+    if(namedAnnotSets == null)
+      namedAnnotSets = new HashMap();
+    AnnotationSet namedSet = (AnnotationSet) namedAnnotSets.get(name);
+
+    if(namedSet == null) {
+      namedSet = new AnnotationSetImpl(this, name);
+      namedAnnotSets.put(name, namedSet);
+    }
+    return namedSet;
   } // getAnnotations(name)
 
   /** Get the features associated with this document. */
@@ -187,19 +199,13 @@ public class DocumentImpl implements Document
     throw new LazyProgrammerException();
   } // edit(start,end,replacement)
 
-  /** Generate and return the next annotation ID */
-  public Integer getNextAnnotationId() {
-    return new Integer(nextAnnotationId++);
-  } // getNextAnnotationId
-
   /** Check that an offset is valid */
   public boolean isValidOffset(Long offset) {
     if(offset == null)
       return false;
 
     long o = offset.longValue();
-    long len = content.size().longValue();
-    if(o > len || o < 0)
+    if(o > content.size().longValue() || o < 0)
       return false;
       
     return true;
@@ -212,7 +218,12 @@ public class DocumentImpl implements Document
     return
       isValidOffset(start) && isValidOffset(end) &&
       start.longValue() <= end.longValue();
-  } // isValidOffsetRange(start,end)
+  } // isValidOffsetRange(start,end) 
+
+  /** Generate and return the next annotation ID */
+  public Integer getNextAnnotationId() {
+    return new Integer(nextAnnotationId++);
+  } // getNextAnnotationId
 
   /** Generate and return the next node ID */
   public Integer getNextNodeId() { return new Integer(nextNodeId++); }
@@ -254,4 +265,10 @@ public class DocumentImpl implements Document
     * (or null if none).
     */
   Long[] sourceURLOffsets = null;
+
+  /** The default annotation set */
+  AnnotationSet defaultAnnots;
+
+  /** Named sets of annotations */
+  HashMap namedAnnotSets;
 } // class DocumentImpl
