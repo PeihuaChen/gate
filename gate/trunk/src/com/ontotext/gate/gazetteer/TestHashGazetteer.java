@@ -47,7 +47,6 @@ public class TestHashGazetteer extends TestCase {
 
     //create a default gazetteer
     FeatureMap params = Factory.newFeatureMap();
-    params.put("listsURL", new URL("gate:/creole/gazeteer/default/lists.def"));
     HashGazetteer gaz = (HashGazetteer) Factory.createResource(
                           "com.ontotext.gate.gazetteer.HashGazetteer", params);
 
