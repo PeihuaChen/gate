@@ -132,16 +132,23 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     catch(ClassNotFoundException clse) {
       throw new PersistenceException("cannot locate JDBC driver ["+ clse.getMessage() +"]");
     }
+
+    //5. register for Creole events
+    Gate.getCreoleRegister().addCreoleListener(this);
   }
 
   /** Close the data store. */
   public void close() throws PersistenceException {
 
+    //-1. Unregister for Creole events
+    Gate.getCreoleRegister().removeCreoleListener(this);
 
     //0. sync all dependednt resources
     for (int i=0; i< this.dependentResources.size(); i++) {
       LanguageResource lr = (LanguageResource)this.dependentResources.elementAt(0);
       sync(lr);
+      //unload UI component
+      Factory.deleteResource(lr);
     }
 
     //1. close security factory
@@ -439,15 +446,27 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   public void resourceLoaded(CreoleEvent e) {
 System.out.println("resource loaded...");
   }
+
+
   public void resourceUnloaded(CreoleEvent e) {
-System.out.println("resource unloaded...");
+
+    Assert.assertNotNull(e.getResource());
+System.out.println(e);
+    Assert.assertNotNull(e.getDatastore());
+    LanguageResource lr = (LanguageResource)e.getResource();
+
+    this.dependentResources.remove(lr);
+    //don't save it, this may not be the user's choice
   }
+
   public void datastoreOpened(CreoleEvent e) {
 System.out.println("datastore opened...");
   }
+
   public void datastoreCreated(CreoleEvent e) {
 System.out.println("datastore created...");
   }
+
   public void datastoreClosed(CreoleEvent e) {
 System.out.println("datastore closed...");
     //sync all dependent resources
