@@ -169,10 +169,16 @@ public class GroupImpl implements Group{
     //5. update usr collection
     this.users.add(usr);
 
-    //6. fire ObjectModificationEvent for all who care
+    //6. register the user as listener for the group, so that
+    // he can be modified in step 7
+    registerObjectModificationListener((ObjectModificationListener)usr); //yes, it sux
+
+    //7. fire ObjectModificationEvent for all who care
     for (int i=0; i< this.omListeners.size(); i++) {
       ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
     }
+
+
 
   }
 
@@ -230,6 +236,11 @@ public class GroupImpl implements Group{
       ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
     }
 
+    //7. UNregister the user as listener for the group
+    //he's already notified in [step6] and no longer cares
+    //about the group
+    unregisterObjectModificationListener((ObjectModificationListener)usr); //yes, it sux
+
   }
 
 
@@ -255,6 +266,11 @@ public class GroupImpl implements Group{
   public void registerObjectModificationListener(ObjectModificationListener l) {
 
     this.omListeners.add(l);
+  }
+
+  public void unregisterObjectModificationListener(ObjectModificationListener l) {
+
+    this.omListeners.remove(l);
   }
 
 }
