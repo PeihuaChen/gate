@@ -16,7 +16,7 @@ import gate.util.*;
 public interface AnnotationGraph 
 {
   /** find a node by ID */
-  public Node getNode(String id);
+  public Node getNode(Long id);
 
 //  /** Greatest lower bound on an annotation: the greatest anchor in the AG
 //    * such that there is a node with this anchor which structurally precedes
@@ -58,12 +58,12 @@ public interface AnnotationGraph
 
   /**Creates a new node with the offset offset
   @param offset the offset in document where the node will point*/
-  public Node putNodeAt(String id,double offset)throws gate.util.InvalidOffsetException;
+  public Node putNodeAt(Long id,double offset)throws gate.util.InvalidOffsetException;
   /**Returns the Id of the annotation graph*/
-  public String getId();
+  public Long getId();
 
-  public Annotation newAnnotation(String id, Node start, Node end, String type, String equivalenceClass);
+  public Annotation newAnnotation(Long id, Node start, Node end, String type, String equivalenceClass);
 
-  public Annotation newAnnotation(String id,long start, long end, String type, String equivalenceClass);
+  public Annotation newAnnotation(Long id,long start, long end, String type, String equivalenceClass);
 
 } // interface AnnotationGraph
