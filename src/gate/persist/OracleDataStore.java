@@ -51,6 +51,8 @@ public class OracleDataStore extends JDBCDataStore {
   private static final int INTERNAL_BUFFER_SIZE = 16*1024;
 
   public OracleDataStore() {
+
+    super();
   }
 
   /**
@@ -70,57 +72,6 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /**
-   * Removes a a previously registered {@link gate.event.DatastoreListener}
-   * from the list listeners for this datastore
-   */
-  public void removeDatastoreListener(DatastoreListener l) {
-    if (datastoreListeners != null && datastoreListeners.contains(l)) {
-      Vector v = (Vector) datastoreListeners.clone();
-      v.removeElement(l);
-      datastoreListeners = v;
-    }
-  }
-
-
-  /**
-   * Registers a new {@link gate.event.DatastoreListener} with this datastore
-   */
-  public void addDatastoreListener(DatastoreListener l) {
-    Vector v = datastoreListeners == null ? new Vector(2) : (Vector) datastoreListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      datastoreListeners = v;
-    }
-  }
-
-  protected void fireResourceAdopted(DatastoreEvent e) {
-    if (datastoreListeners != null) {
-      Vector listeners = datastoreListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((DatastoreListener) listeners.elementAt(i)).resourceAdopted(e);
-      }
-    }
-  }
-  protected void fireResourceDeleted(DatastoreEvent e) {
-    if (datastoreListeners != null) {
-      Vector listeners = datastoreListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((DatastoreListener) listeners.elementAt(i)).resourceDeleted(e);
-      }
-    }
-  }
-  protected void fireResourceWritten(DatastoreEvent e) {
-    if (datastoreListeners != null) {
-      Vector listeners = datastoreListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((DatastoreListener) listeners.elementAt(i)).resourceWritten(e);
-      }
-    }
-  }
 
   /** Get the name of an LR from its ID. */
   public String getLrName(Object lrId)
@@ -1944,7 +1895,5 @@ System.out.println();
   private void syncCorpus(Corpus corp) throws PersistenceException {
     throw new MethodNotImplementedException();
   }
-
-  private transient Vector datastoreListeners;
 
 }

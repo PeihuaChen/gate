@@ -20,6 +20,8 @@ import java.net.*;
 import java.util.*;
 import java.io.*;
 
+import junit.framework.*;
+
 import gate.*;
 import gate.util.*;
 import gate.event.*;
@@ -46,9 +48,12 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   protected   Session           session;
   protected   String            name;
 
+  private transient Vector datastoreListeners;
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
+
+    this.datastoreListeners = new Vector();
   }
 
 
@@ -69,22 +74,6 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
     throw new MethodNotImplementedException();
   }
 
-
-  /**
-   * Removes a a previously registered {@link gate.event.DatastoreListener}
-   * from the list listeners for this datastore
-   */
-  public void removeDatastoreListener(DatastoreListener l) {
-    throw new MethodNotImplementedException();
-  }
-
-
-  /**
-   * Registers a new {@link gate.event.DatastoreListener} with this datastore
-   */
-  public void addDatastoreListener(DatastoreListener l) {
-    throw new MethodNotImplementedException();
-  }
 
   /** Get the name of an LR from its ID. */
   public abstract String getLrName(Object lrId) throws PersistenceException;
@@ -380,5 +369,58 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /** --- */
   public abstract String readDatabaseID()
     throws PersistenceException;
+
+  /**
+   * Removes a a previously registered {@link gate.event.DatastoreListener}
+   * from the list listeners for this datastore
+   */
+  public void removeDatastoreListener(DatastoreListener l) {
+
+    Assert.assertNotNull(this.datastoreListeners);
+    this.datastoreListeners.remove(l);
+  }
+
+
+  /**
+   * Registers a new {@link gate.event.DatastoreListener} with this datastore
+   */
+  public void addDatastoreListener(DatastoreListener l) {
+
+    Assert.assertNotNull(this.datastoreListeners);
+    if (false == this.datastoreListeners.contains(l)) {
+      this.datastoreListeners.add(l);
+    }
+  }
+
+  protected void fireResourceAdopted(DatastoreEvent e) {
+
+    Assert.assertNotNull(datastoreListeners);
+    int count = datastoreListeners.size();
+    for (int i = 0; i < count; i++) {
+      ((DatastoreListener)datastoreListeners.elementAt(i)).resourceAdopted(e);
+    }
+  }
+
+
+  protected void fireResourceDeleted(DatastoreEvent e) {
+
+    Assert.assertNotNull(datastoreListeners);
+    int count = datastoreListeners.size();
+    for (int i = 0; i < count; i++) {
+      ((DatastoreListener)datastoreListeners.elementAt(i)).resourceDeleted(e);
+    }
+  }
+
+
+  protected void fireResourceWritten(DatastoreEvent e) {
+
+    Assert.assertNotNull(datastoreListeners);
+    int count = datastoreListeners.size();
+    for (int i = 0; i < count; i++) {
+      ((DatastoreListener)datastoreListeners.elementAt(i)).resourceWritten(e);
+    }
+  }
+
+
 
 }
