@@ -16,6 +16,7 @@ import junit.framework.*;
 import gate.*;
 import gate.util.*;
 import gate.annotation.*;
+import gate.creole.tokeniser.*;
 
 
 /** Tests for the Corpus classes
@@ -136,7 +137,16 @@ public class TestJape extends TestCase
     }
 
     //tokenize all documents
-    DefaultTokeniser tokeniser = new DefaultTokeniser();
+    DefaultTokeniser tokeniser = null;
+    try{
+      tokeniser =new DefaultTokeniser(
+        Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+    }catch(IOException ioe){
+      System.err.println("Cannot read the tokeniser rules!" +
+                         "\nAre the Gate resources in place?");
+    }catch(TokeniserException te){
+      te.printStackTrace(System.err);
+    }
     startCorpusTokenization = (new Date()).getTime();
     System.out.print(": " +
                        (startCorpusTokenization - startCorpusLoad) +
