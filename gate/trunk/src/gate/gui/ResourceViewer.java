@@ -32,7 +32,6 @@ public class ResourceViewer extends AbstractVisualResource {
     initListeners();
   }
 
-
   protected void initLocalData(){
     features = new ArrayList();
   }

@@ -48,6 +48,7 @@ public class TestTokeniser extends TestCase{
     );
     //create a default tokeniser
    FeatureMap params = Factory.newFeatureMap();
+   params.put("rulesResourceName", "creole/tokeniser/DefaultTokeniser.rules");
    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                           "gate.creole.tokeniser.DefaultTokeniser", params);
 

@@ -25,10 +25,11 @@ import javax.swing.tree.*;
 
 import java.util.*;
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.persist.*;
 import gate.util.*;
 
 
@@ -60,7 +61,7 @@ public class MainFrame extends JFrame {
   JToolBar toolbar;
 
   JFileChooser fileChooser;
-  JFrame parentFrame;
+  MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
 
   List openProjects;
@@ -70,6 +71,8 @@ public class MainFrame extends JFrame {
   NewProjectAction newProjectAction;
   NewLRAction newLRAction;
   NewPRAction newPRAction;
+  NewDSAction newDSAction;
+  OpenDSAction openDSAction;
 
   /**Construct the frame*/
   public MainFrame() {
@@ -134,6 +137,8 @@ public class MainFrame extends JFrame {
     newProjectAction = new NewProjectAction();
     newLRAction = new NewLRAction();
     newPRAction = new NewPRAction();
+    newDSAction = new NewDSAction();
+    openDSAction = new OpenDSAction();
   }
 
   protected void initGuiComponents(){
@@ -144,9 +149,12 @@ public class MainFrame extends JFrame {
     this.setTitle("Gate 2.0");
 
 
-    ResourceHandle handle = new ResourceHandle("<No Projects>");
+    ResourceHandle handle = new ResourceHandle("<No Projects>", null);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/project.gif")));
+    JPopupMenu popup = new JPopupMenu();
+    popup.add(newProjectAction);
+    handle.setPopup(popup);
     projectTreeRoot = new DefaultMutableTreeNode(handle, true);
     projectTreeModel = new DefaultTreeModel(projectTreeRoot, true);
     projectTree = new JTree(projectTreeModel);
@@ -246,7 +254,16 @@ public class MainFrame extends JFrame {
               //double click - show the resource
               if(handle.isShown()){
                 //select
-                mainTabbedPane.setSelectedComponent(handle.getLargeView());
+                JComponent largeView = handle.getLargeView();
+                if(largeView != null){
+                  mainTabbedPane.setSelectedComponent(largeView);
+                }
+                JComponent smallView = handle.getSmallView();
+                if(smallView != null){
+                  lowerScroll.getViewport().setView(smallView);
+                }else{
+System.out.println("No small view");
+                }
               }else{
                 //show
                 JComponent largeView = handle.getLargeView();
@@ -334,7 +351,7 @@ public class MainFrame extends JFrame {
 
     if(!openProjects.contains(project)) openProjects.add(project);
 
-    ResourceHandle handle = new ResourceHandle(project.toString());
+    ResourceHandle handle = new ResourceHandle(project.toString(), currentProject);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/project.gif")));
     projectTreeRoot.setUserObject(handle);
@@ -348,7 +365,7 @@ public class MainFrame extends JFrame {
     });
 
 
-    handle = new ResourceHandle("Applications");
+    handle = new ResourceHandle("Applications", currentProject);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/applications.gif")));
     appRoot = new DefaultMutableTreeNode(handle, true);
@@ -366,7 +383,7 @@ public class MainFrame extends JFrame {
     }
 
 
-    handle = new ResourceHandle("Language Resources");
+    handle = new ResourceHandle("Language Resources", currentProject);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/lrs.gif")));
     lrRoot = new DefaultMutableTreeNode(handle, true);
@@ -383,7 +400,7 @@ public class MainFrame extends JFrame {
       }
     }
 
-    handle = new ResourceHandle("Processing Resources");
+    handle = new ResourceHandle("Processing Resources", currentProject);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/prs.gif")));
     prRoot = new DefaultMutableTreeNode(handle, true);
@@ -400,12 +417,34 @@ public class MainFrame extends JFrame {
       }
     }
 
-    handle = new ResourceHandle("Data Stores");
+    handle = new ResourceHandle("Data Stores", currentProject);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/dss.gif")));
+    popup = new JPopupMenu();
+    popup.add(newDSAction);
+    popup.add(openDSAction);
+    handle.setPopup(popup);
     dsRoot = new DefaultMutableTreeNode(handle, true);
     projectTreeRoot.add(dsRoot);
+    DataStoreRegister dsr = Gate.getDataStoreRegister();
+    Iterator dsIter = dsr.iterator();
+    while(dsIter.hasNext()){
+      DataStore ds = (DataStore)dsIter.next();
+      //make sure he have a name
+      if(ds.getFeatures() == null){
+        FeatureMap features = Factory.newFeatureMap();
+        features.put("NAME", "Unnamed datasource");
+        ds.setFeatures(features);
+      }else if(ds.getFeatures().get("NAME") == null){
+        ds.getFeatures().put("NAME", "Unnamed datasource");
+      }
+      handle = new DSHandle(ds, currentProject);
+      dsRoot.add(new DefaultMutableTreeNode(handle));
+    }
+
     projectTreeModel.nodeStructureChanged(projectTreeRoot);
+
+
     DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                                   projectTreeRoot.getFirstChild();
     while(node != null){
@@ -419,12 +458,14 @@ public class MainFrame extends JFrame {
 
   class NewProjectAction extends AbstractAction{
     public NewProjectAction(){
-      super("New Project");
+      super("New Project", new ImageIcon(MainFrame.class.getResource("/gate/resources/img/newProject.gif")));
+
     }
     public void actionPerformed(ActionEvent e){
       fileChooser.setDialogTitle("Select new project file");
+      fileChooser.setFileSelectionMode(fileChooser.FILES_ONLY);
       if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
-        ProjectData pData = new ProjectData(fileChooser.getSelectedFile());
+        ProjectData pData = new ProjectData(fileChooser.getSelectedFile(), parentFrame);
         addProject(pData);
       }
     }
@@ -441,7 +482,7 @@ public class MainFrame extends JFrame {
                         "Gate",
                         JOptionPane.QUESTION_MESSAGE);
       if(answer instanceof String){
-        ApplicationHandle handle = new ApplicationHandle((String)answer);
+        ApplicationHandle handle = new ApplicationHandle((String)answer, currentProject);
         appRoot.add(new DefaultMutableTreeNode(handle));
         projectTreeModel.nodeStructureChanged(appRoot);
         projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(appRoot)));
@@ -483,10 +524,10 @@ public class MainFrame extends JFrame {
           newResourceDialog.setTitle("Parameters for the new " + rData.getName());
           LanguageResource res = (LanguageResource)newResourceDialog.show(rData);
           if(res != null){
-            LRHandle handle = new LRHandle(res);
+            LRHandle handle = new LRHandle(res, currentProject);
             handle.setTooltipText("<html><b>Type:</b> " +
                                   rData.getName() + "</html>");
-            lrRoot.add(new DefaultMutableTreeNode(handle));
+            lrRoot.add(new DefaultMutableTreeNode(handle, false));
             projectTreeModel.nodeStructureChanged(lrRoot);
             projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(lrRoot)));
             currentProject.addLR(handle);
@@ -533,10 +574,10 @@ public class MainFrame extends JFrame {
           newResourceDialog.setTitle("Parameters for the new " + rData.getName());
           ProcessingResource res = (ProcessingResource)newResourceDialog.show(rData);
           if(res != null){
-            PRHandle handle = new PRHandle(res);
+            PRHandle handle = new PRHandle(res, currentProject);
             handle.setTooltipText("<html><b>Type:</b> " +
                                   rData.getName() + "</html>");
-            prRoot.add(new DefaultMutableTreeNode(handle));
+            prRoot.add(new DefaultMutableTreeNode(handle, false));
             projectTreeModel.nodeStructureChanged(prRoot);
             projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(prRoot)));
             currentProject.addPR(handle);
@@ -553,6 +594,156 @@ public class MainFrame extends JFrame {
     }
   }//class NewPRAction extends AbstractAction
 
+  class NewDSAction extends AbstractAction{
+    public NewDSAction(){
+      super("Create new");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      DataStoreRegister reg = Gate.getDataStoreRegister();
+      Map dsTypes = reg.getDataStoreClassNames();
+      HashMap dsTypeByName = new HashMap();
+      Iterator dsTypesIter = dsTypes.entrySet().iterator();
+      while(dsTypesIter.hasNext()){
+        Map.Entry entry = (Map.Entry)dsTypesIter.next();
+        dsTypeByName.put(entry.getValue(), entry.getKey());
+      }
+
+      if(!dsTypeByName.isEmpty()){
+        Object[] names = dsTypeByName.keySet().toArray();
+        Object answer = JOptionPane.showInputDialog(
+                            parentFrame,
+                            "Select type of Datastore",
+                            "Gate", JOptionPane.QUESTION_MESSAGE,
+                            null, names,
+                            names[0]);
+        if(answer != null){
+          String className = (String)dsTypeByName.get(answer);
+          if(className.indexOf("SerialDataStore") != -1){
+            //get the URL (a file in this case)
+            fileChooser.setDialogTitle("Select a new directory");
+            fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+            if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
+              try{
+                URL dsURL = fileChooser.getSelectedFile().toURL();
+                DataStore ds = Factory.createDataStore(className, dsURL);
+                if(ds != null){
+                  //make sure he have a name
+                  if(ds.getFeatures() == null){
+                    FeatureMap features = Factory.newFeatureMap();
+                    features.put("NAME", dsURL.getFile());
+                    ds.setFeatures(features);
+                  }else if(ds.getFeatures().get("NAME") == null){
+                    ds.getFeatures().put("NAME", dsURL.getFile());
+                  }
+                  DSHandle handle = new DSHandle(ds, currentProject);
+                  dsRoot.add(new DefaultMutableTreeNode(handle, false));
+                  projectTreeModel.nodeStructureChanged(dsRoot);
+                }
+              }catch(MalformedURLException mue){
+                JOptionPane.showMessageDialog(
+                    parentFrame, "Invalid location for the datastore\n " +
+                                      mue.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+              }catch(PersistenceException pe){
+                JOptionPane.showMessageDialog(
+                    parentFrame, "Datastore creation error!\n " +
+                                      pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+              }
+            }
+          }else{
+            throw new UnsupportedOperationException("Unimplemented option!\n"+
+                                                    "Use a serial datastore");
+          }
+        }
+      }else{
+        //no ds types
+        JOptionPane.showMessageDialog(parentFrame,
+                                      "Could not find any registered types " +
+                                      "of datastores...\n" +
+                                      "Check your Gate installation!",
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+
+      }
+    }
+  }//class NewDSAction extends AbstractAction
+
+
+  class OpenDSAction extends AbstractAction{
+    public OpenDSAction(){
+      super("Open");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      DataStoreRegister reg = Gate.getDataStoreRegister();
+      Map dsTypes = reg.getDataStoreClassNames();
+      HashMap dsTypeByName = new HashMap();
+      Iterator dsTypesIter = dsTypes.entrySet().iterator();
+      while(dsTypesIter.hasNext()){
+        Map.Entry entry = (Map.Entry)dsTypesIter.next();
+        dsTypeByName.put(entry.getValue(), entry.getKey());
+      }
+
+      if(!dsTypeByName.isEmpty()){
+        Object[] names = dsTypeByName.keySet().toArray();
+        Object answer = JOptionPane.showInputDialog(
+                            parentFrame,
+                            "Select type of Datastore",
+                            "Gate", JOptionPane.QUESTION_MESSAGE,
+                            null, names,
+                            names[0]);
+        if(answer != null){
+          String className = (String)dsTypeByName.get(answer);
+          if(className.indexOf("SerialDataStore") != -1){
+            //get the URL (a file in this case)
+            fileChooser.setDialogTitle("Select the datastore directory");
+            fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+            if(fileChooser.showOpenDialog(parentFrame) == fileChooser.APPROVE_OPTION){
+              try{
+                URL dsURL = fileChooser.getSelectedFile().toURL();
+                DataStore ds = Factory.openDataStore(className, dsURL);
+                if(ds != null){
+                  //make sure he have a name
+                  if(ds.getFeatures() == null){
+                    FeatureMap features = Factory.newFeatureMap();
+                    features.put("NAME", dsURL.getFile());
+                    ds.setFeatures(features);
+                  }else if(ds.getFeatures().get("NAME") == null){
+                    ds.getFeatures().put("NAME", dsURL.getFile());
+                  }
+                  DSHandle handle = new DSHandle(ds, currentProject);
+                  dsRoot.add(new DefaultMutableTreeNode(handle));
+                  projectTreeModel.nodeStructureChanged(dsRoot);
+                }
+              }catch(MalformedURLException mue){
+                JOptionPane.showMessageDialog(
+                    parentFrame, "Invalid location for the datastore\n " +
+                                      mue.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+              }catch(PersistenceException pe){
+                JOptionPane.showMessageDialog(
+                    parentFrame, "Datastore opening error!\n " +
+                                      pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+              }
+            }
+          }else{
+            throw new UnsupportedOperationException("Unimplemented option!\n"+
+                                                    "Use a serial datastore");
+          }
+        }
+      }else{
+        //no ds types
+        JOptionPane.showMessageDialog(parentFrame,
+                                      "Could not find any registered types " +
+                                      "of datastores...\n" +
+                                      "Check your Gate installation!",
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+
+      }
+    }
+  }//class OpenDSAction extends AbstractAction
 
 
   protected class ResourceTreeCellRenderer extends DefaultTreeCellRenderer{

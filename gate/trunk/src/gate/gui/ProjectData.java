@@ -19,9 +19,10 @@ import java.util.*;
 
 public class ProjectData {
 
-  public ProjectData(File projectFile) {
+  public ProjectData(File projectFile, MainFrame frame) {
     this.projectFile = projectFile;
     this.projectFileName = projectFile.getAbsolutePath();
+    this.frame = frame;
     appList = new ArrayList();
     dsList = new ArrayList();
     lrList = new ArrayList();
@@ -63,4 +64,5 @@ public class ProjectData {
   List prList;
   List appList;
   List dsList;
+  MainFrame frame;
 }

@@ -119,16 +119,13 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     try{
       if(rulesURL != null){
         rulesReader = new InputStreamReader((new URL(rulesURL)).openStream());
+      }else if(rulesResourceName != null){
+        rulesReader = new InputStreamReader(
+                    Files.getGateResourceAsStream(rulesResourceName));
       }else{
-        /*
         //no init data, Scream!
         throw new ResourceInstantiationException(
           "No URL provided for the rules!");
-        */
-        //this should be as above when the resource loader knows how
-        //to set default parameters
-        rulesReader = new InputStreamReader(
-                            Files.getGateResourceAsStream(defaultResourceName));
       }
       initialState = new FSMState(this);
       BufferedReader bRulesReader = new BufferedReader(rulesReader);
@@ -758,6 +755,12 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   /**    */
   public gate.AnnotationSet getAnnotationSet() {
     return annotationSet;
+  }
+  public void setRulesResourceName(String newRulesResourceName) {
+    rulesResourceName = newRulesResourceName;
+  }
+  public String getRulesResourceName() {
+    return rulesResourceName;
   }// fireProcessFinishedEvent
   //ProcessProgressReporter implementation ends here
 
@@ -841,6 +844,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   /** the document to be tokenised
    */
   protected gate.Document document;
+  private String rulesResourceName;
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}

@@ -21,8 +21,8 @@ import java.awt.event.*;
 
 public class PRHandle extends ResourceHandle {
 
-  public PRHandle(ProcessingResource res) {
-    super(res);
+  public PRHandle(ProcessingResource res, ProjectData project) {
+    super(res, project);
     setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/pr.gif")));
     popup = new JPopupMenu();
