@@ -67,18 +67,7 @@ implements AnnotationSet
 
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
-    annotsById = new HashMap(){
-      public Object remove(Object key){
-        Object res = super.remove(key);
-        if(res != null){
-          fireAnnotationRemoved(new AnnotationSetEvent(
-                                        AnnotationSetImpl.this,
-                                        AnnotationSetEvent.ANNOTATION_REMOVED,
-                                        getDocument(), (Annotation)res));
-System.out.println("Annotation removed fired " + res);
-        }
-        return res;
-      }
+    annotsById = new VerboseHashMap(){
     };
     this.doc = (DocumentImpl) doc;
   } // construction from document
@@ -113,6 +102,12 @@ System.out.println("Annotation removed fired " + res);
     public void remove()     {
       // this takes care of the ID index
       iter.remove();
+      //that's the second way of removing annotations from a set
+      //apart from calling remove() on the set itself
+      fireAnnotationRemoved(new AnnotationSetEvent(
+                              AnnotationSetImpl.this,
+                              AnnotationSetEvent.ANNOTATION_REMOVED,
+                              getDocument(), (Annotation)lastNext));
 
       // remove from type index
       removeFromTypeIndex(lastNext);
@@ -123,6 +118,24 @@ System.out.println("Annotation removed fired " + res);
     } // remove()
 
   }; // AnnotationSetIterator
+
+  /**
+   * Class used for the indexById structure. This is a {@link java.util.HashMap}
+   * that fires events when elements are removed.
+   */
+  protected class VerboseHashMap extends HashMap{
+
+    public Object remove(Object key){
+      Object res = super.remove(key);
+      if(res != null){
+        fireAnnotationRemoved(new AnnotationSetEvent(
+                                      AnnotationSetImpl.this,
+                                      AnnotationSetEvent.ANNOTATION_REMOVED,
+                                      getDocument(), (Annotation)res));
+      }
+      return res;
+    }//public Object remove(Object key)
+  }//protected class VerboseHashMap extends HashMap
 
   /** Get an iterator for this set */
   public Iterator iterator() { return new AnnotationSetIterator(); }
