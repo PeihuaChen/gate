@@ -487,7 +487,6 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
       // remove annots that start at this node
       AnnotationSet invalidatedAnnots =
         (AnnotationSet) annotsByStartNode.get(n.getId());
-System.out.println(invalidatedAnnots);
       if(invalidatedAnnots != null)
         removeAll(invalidatedAnnots);
 
