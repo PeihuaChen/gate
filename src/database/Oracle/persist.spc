@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 18/Sep/2001
  *
- *      $Id$
+ *  $Id$
  *
  */
 
@@ -34,6 +34,8 @@ create or replace package persist is
   procedure get_lr_name(p_lr_id     IN number,
                         p_lr_name   OUT varchar2);
   
+  procedure delete_lr(p_lr_id     IN number,
+                      p_lr_type   IN varchar2);
     
 end persist;
 /
