@@ -108,6 +108,8 @@ public class TestSecurity extends TestCase
     Assert.assertNotNull(adminSession);
     //is session valid?
     Assert.assert(true == ac.isValidSession(adminSession));
+    //assert session is privieged
+    Assert.assert(adminSession.isPrivilegedSession());
 
     //3. create a new user and group
     User myUser;
@@ -116,6 +118,9 @@ public class TestSecurity extends TestCase
     } catch (gate.security.SecurityException ex) {
       //user kalina hasn't got enough priviliges, so login as admin
       adminSession = ac.login("ADMIN", "sesame", ac.findGroup("ADMINS").getID());
+      //assert session is privieged
+      Assert.assert(adminSession.isPrivilegedSession());
+
       myUser = ac.createUser("myUser", "myPassword",adminSession);
     }
 
