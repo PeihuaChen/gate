@@ -40,14 +40,10 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-    File file = new File("/D:/tmp/address");
-    URL url = file.toURL();
-    System.out.println(url.toString());
-    System.out.println(url.getProtocol());
-    System.out.println(url.getPath());
-    File file2 = new File(url.getPath());
-    System.out.println(file2.toString());
-    System.out.println(file2.exists());
+    double a = 16.99;
+    double b = 9.99;
+    double c = a - b;
+    System.out.println(c);
 
 //    Runtime.getRuntime().exec(new String[]{"cmd",
 //                                           "C:\\Program Files\\GATE 2.2\\bin\\gate.bat"},

@@ -70,7 +70,10 @@ public class Javac implements GateConstants{
       String fileName = (String) pathComponents.get(pathComponents.size() - 1);
       File srcFile = new File(directory, fileName + ".java");
       try{
-        FileWriter fw = new FileWriter(srcFile);
+        //we need to use the same encoding for writing the files and for
+        //compiling them: UTF-8 sounds like a good choice
+        Writer fw = new OutputStreamWriter(new FileOutputStream(srcFile, false),
+                                           "UTF-8");
         fw.write(source);
         fw.flush();fw.close();
         sourceFiles.add(srcFile.getCanonicalPath());
@@ -84,16 +87,17 @@ public class Javac implements GateConstants{
     List args = new ArrayList();
     args.add("-sourcepath");
     args.add(srcDir.getAbsolutePath());
+    args.add("-encoding");
+    args.add("UTF-8");
     args.add("-d");
     args.add(classesDir.getAbsolutePath());
-    //call the compiler for each class in turn so we can get the errors
     //make a copy of the arguments in case we need to call calss by class
     List argsSave = new ArrayList(args);
     args.addAll(sourceFiles);
     //steal the Err stream
     PrintStream oldErr = System.err;
     System.setErr(new PrintStream(new ByteArrayOutputStream()));
-
+    //call the compiler for all the classes at once
     int res = Main.compile((String[])args.toArray(new String[args.size()]));
     //restore the err stream
     System.setErr(oldErr);
@@ -118,8 +122,6 @@ public class Javac implements GateConstants{
       }
 
     }
-
-//    args.addAll(sourceFiles);
 
     //load the newly compiled classes
     //load all classes from the classes directory
