@@ -645,7 +645,7 @@ public class OracleDataStore extends JDBCDataStore {
    *  (that does not fit into VARCHAR2)
    */
 //  private void updateDocumentContent(Long docContentID,DocumentContent content)
-  private void updateDocumentContent(Long docID,DocumentContent content)
+  protected void updateDocumentContent(Long docID,DocumentContent content)
   throws PersistenceException {
 
     //1. get LOB locators from DB
@@ -714,15 +714,19 @@ public class OracleDataStore extends JDBCDataStore {
    * helper for adopt
    * creates a LR of type Document
    */
-  protected Document createDocument(Document doc,SecurityInfo secInfo)
+/*  protected Document createDocument(Document doc,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //delegate, set to Null
     return createDocument(doc,null,secInfo);
   }
+*/
 
-
-  private Long createDoc(Long _lrID,
+  /**
+   * helper for adopt
+   * never call directly
+   */
+  protected Long createDoc(Long _lrID,
                           URL _docURL,
                           String _docEncoding,
                           Long _docStartOffset,
@@ -794,7 +798,7 @@ public class OracleDataStore extends JDBCDataStore {
    * helper for adopt
    * creates a LR of type Document
    */
-  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+/*  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //-1. preconditions
@@ -837,61 +841,6 @@ public class OracleDataStore extends JDBCDataStore {
                             docEndOffset,
                             docIsMarkupAware,
                             corpusID);
-/*
-    CallableStatement stmt = null;
-    Long docID = null;
-    Long docContentID = null;
-
-    try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
-      stmt.setLong(1,lrID.longValue());
-      stmt.setString(2,docURL.toString());
-      //do we have doc encoding?
-      if (null == docEncoding) {
-        stmt.setNull(3,java.sql.Types.VARCHAR);
-      }
-      else {
-        stmt.setString(3,docEncoding);
-      }
-      //do we have start offset?
-      if (null==docStartOffset) {
-        stmt.setNull(4,java.sql.Types.NUMERIC);
-      }
-      else {
-        stmt.setLong(4,docStartOffset.longValue());
-      }
-      //do we have end offset?
-      if (null==docEndOffset) {
-        stmt.setNull(5,java.sql.Types.NUMERIC);
-      }
-      else {
-        stmt.setLong(5,docEndOffset.longValue());
-      }
-
-      stmt.setBoolean(6,docIsMarkupAware.booleanValue());
-
-      //is the document part of a corpus?
-      if (null == corpusID) {
-        stmt.setNull(7,java.sql.Types.BIGINT);
-      }
-      else {
-        stmt.setLong(7,corpusID.longValue());
-      }
-
-      //results
-      stmt.registerOutParameter(8,java.sql.Types.BIGINT);
-
-      stmt.execute();
-      docID = new Long(stmt.getLong(8));
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't create document [step 4] in DB: ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(stmt);
-    }
-*/
 
 
     //5. fill document content (record[s] in T_DOC_CONTENT)
@@ -929,7 +878,7 @@ public class OracleDataStore extends JDBCDataStore {
     createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //9. create a DatabaseDocument wrapper and return it
-
+*/
 /*    Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn,
                                               doc.getName(),
                                               this,
@@ -943,7 +892,7 @@ public class OracleDataStore extends JDBCDataStore {
                                               doc.getAnnotations(),
                                               doc.getNamedAnnotationSets());
 */
-    Document dbDoc = null;
+/*    Document dbDoc = null;
     FeatureMap params = Factory.newFeatureMap();
 
     HashMap initData = new HashMap();
@@ -973,11 +922,11 @@ public class OracleDataStore extends JDBCDataStore {
 
     return dbDoc;
   }
-
+*/
 
 
   /** creates an entry for annotation set in the database */
-  private void createAnnotationSet(Long lrID, AnnotationSet aset)
+  protected void createAnnotationSet(Long lrID, AnnotationSet aset)
     throws PersistenceException {
 
     //1. create a-set
@@ -2011,7 +1960,7 @@ public class OracleDataStore extends JDBCDataStore {
    *  also when referencing the types always use the schema owner in upper case
    *  because the jdbc driver is buggy (see MetaLink note if u care)
    */
-  private void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
+  protected void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
     //0. prepare statement ad use it for all features
