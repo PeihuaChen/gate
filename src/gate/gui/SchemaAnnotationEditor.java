@@ -75,10 +75,15 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     Iterator annotSchemaIter = currentAnnotationSchemaList.iterator();
     // currentAnnotationSchemaList is not empty
     currentAnnotSchema = (AnnotationSchema) currentAnnotationSchemaList.get(0);
+    
+    AnnotationSchema annotSch;
+    String annotSchName;
     while (annotSchemaIter.hasNext()){
-      AnnotationSchema annotSch = (AnnotationSchema)annotSchemaIter.next();
-      name2annotSchemaMap.put(annotSch.getAnnotationName(),annotSch);
-      if (currentAnnot.getType().equals(annotSch.getAnnotationName()))
+      annotSch = (AnnotationSchema)annotSchemaIter.next();
+      annotSchName = annotSch.getAnnotationName();
+      if(annotSch != null && annotSchName != null)
+        name2annotSchemaMap.put(annotSchName, annotSch);
+      if (currentAnnot.getType().equals(annotSchName))
         currentAnnotSchema = annotSch;
     }// End while
 
@@ -120,9 +125,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     Iterator annotSchemaIter = currentAnnotationSchemaList.iterator();
     // currentAnnotationSchemaList is not empty (see the above comment)
     currentAnnotSchema = (AnnotationSchema) currentAnnotationSchemaList.get(0);
+
+    AnnotationSchema annotSch;
+    String annotSchName;
     while (annotSchemaIter.hasNext()){
-      AnnotationSchema annotSch = (AnnotationSchema)annotSchemaIter.next();
-      name2annotSchemaMap.put(annotSch.getAnnotationName(),annotSch);
+      annotSch = (AnnotationSchema)annotSchemaIter.next();
+      annotSchName = annotSch.getAnnotationName();
+      if(annotSch != null && annotSchName != null)
+        name2annotSchemaMap.put(annotSchName, annotSch);
     }// End while
 
     initLocalData();
