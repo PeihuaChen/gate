@@ -16,8 +16,6 @@
 package gate.annotation;
 
 import java.awt.*;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -178,8 +176,12 @@ public class AnnotationDiff extends AbstractVisualResource
     */
   private long typeCounter[] = new long[MAX_TYPES];
 
+
+  private gate.util.AnnotationDiffer annotDiffer;
+
   /** Constructs a AnnotationDif*/
   public AnnotationDiff(){
+    annotDiffer = new AnnotationDiffer();
   } //AnnotationDiff
 
   /** Sets the annotation type needed to calculate the falsePossitive measure
@@ -296,80 +298,8 @@ public class AnnotationDiff extends AbstractVisualResource
 
   /** Returns a set with all annotations of a specific type*/
   public Set getAnnotationsOfType(int annotType){
-    HashSet results = new HashSet();
-    if (diffSet == null) return results;
-    Iterator diffIter = diffSet.iterator();
-    while(diffIter.hasNext()){
-      DiffSetElement diffElem = (DiffSetElement)diffIter.next();
-      switch(annotType){
-        case CORRECT_TYPE:{
-          if (diffElem.getRightType() == CORRECT_TYPE)
-            results.add(diffElem.getRightAnnotation());
-        }break;
-        case PARTIALLY_CORRECT_TYPE:{
-          if (diffElem.getRightType() == PARTIALLY_CORRECT_TYPE)
-            results.add(diffElem.getRightAnnotation());
-        }break;
-        case SPURIOUS_TYPE:{
-          if (diffElem.getRightType() == SPURIOUS_TYPE)
-            results.add(diffElem.getRightAnnotation());
-        }break;
-        case MISSING_TYPE:{
-          if (diffElem.getLeftType() == MISSING_TYPE)
-            results.add(diffElem.getLeftAnnotation());
-        }break;
-        case DEFAULT_TYPE:{
-          if (diffElem.getLeftType() == DEFAULT_TYPE)
-            results.add(diffElem.getLeftAnnotation());
-        }break;
-      }// End switch
-    }// End while
-    return results;
+    return annotDiffer.getAnnotationsOfType(annotType);
   }//getAnnotationsOfType
-
-  //Prameters utility methods
-  /**
-   * Gets the value of a parameter of this resource.
-   * @param paramaterName the name of the parameter
-   * @return the current value of the parameter
-   */
-  public Object getParameterValue(String paramaterName)
-                throws ResourceInstantiationException{
-    return AbstractResource.getParameterValue(this, paramaterName);
-  }
-
-  /**
-   * Sets the value for a specified parameter.
-   *
-   * @param paramaterName the name for the parameteer
-   * @param parameterValue the value the parameter will receive
-   */
-  public void setParameterValue(String paramaterName, Object parameterValue)
-              throws ResourceInstantiationException{
-    // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInf = null;
-    try {
-      resBeanInf = Introspector.getBeanInfo(this.getClass(), Object.class);
-    } catch(Exception e) {
-      throw new ResourceInstantiationException(
-        "Couldn't get bean info for resource " + this.getClass().getName()
-        + Strings.getNl() + "Introspector exception was: " + e
-      );
-    }
-    AbstractResource.setParameterValue(this, resBeanInf, paramaterName, parameterValue);
-  }
-
-  /**
-   * Sets the values for more parameters in one step.
-   *
-   * @param parameters a feature map that has paramete names as keys and
-   * parameter values as values.
-   */
-  public void setParameterValues(FeatureMap parameters)
-              throws ResourceInstantiationException{
-    AbstractResource.setParameterValues(this, parameters);
-  }
-
 
 
   ///////////////////////////////////////////////////
@@ -378,32 +308,32 @@ public class AnnotationDiff extends AbstractVisualResource
 
   /** @return the precisionStrict field*/
   public double getPrecisionStrict(){
-    return precisionStrict;
+    return annotDiffer.getPrecisionStrict();
   } // getPrecisionStrict
 
   /** @return the precisionLenient field*/
   public double getPrecisionLenient(){
-    return precisionLenient;
+    return annotDiffer.getPrecisionLenient();
   } // getPrecisionLenient
 
   /** @return the precisionAverage field*/
   public double getPrecisionAverage(){
-    return precisionAverage;
+    return annotDiffer.getPrecisionAverage();
   } // getPrecisionAverage
 
   /** @return the fMeasureStrict field*/
   public double getFMeasureStrict(){
-    return fMeasureStrict;
+    return annotDiffer.getFMeasureStrict(1);
   } // getFMeasureStrict
 
   /** @return the fMeasureLenient field*/
   public double getFMeasureLenient(){
-    return fMeasureLenient;
+    return annotDiffer.getFMeasureLenient(1);
   } // getFMeasureLenient
 
   /** @return the fMeasureAverage field*/
   public double getFMeasureAverage(){
-    return fMeasureAverage;
+    return annotDiffer.getFMeasureAverage(1);
   } // getFMeasureAverage
 
   ///////////////////////////////////////////////////
@@ -412,17 +342,17 @@ public class AnnotationDiff extends AbstractVisualResource
 
   /** @return the recallStrict field*/
   public double getRecallStrict(){
-    return recallStrict;
+    return annotDiffer.getRecallStrict();
   } // getRecallStrict
 
   /** @return the recallLenient field*/
   public double getRecallLenient(){
-    return recallLenient;
+    return annotDiffer.getRecallLenient();
   } // getRecallLenient
 
   /** @return the recallAverage field*/
   public double getRecallAverage(){
-    return recallAverage;
+    return annotDiffer.getRecallAverage();
   } // getRecallAverage
 
   ///////////////////////////////////////////////////
@@ -430,19 +360,19 @@ public class AnnotationDiff extends AbstractVisualResource
   ///////////////////////////////////////////////////
 
   public long getCorrectCount() {
-    return typeCounter[CORRECT_TYPE];
+    return annotDiffer.getCorrectMatches();
   }
 
   public long getPartiallyCorrectCount() {
-    return typeCounter[PARTIALLY_CORRECT_TYPE];
+    return annotDiffer.getPartiallyCorrectMatches();
   }
 
   public long getSpuriousCount() {
-    return typeCounter[SPURIOUS_TYPE];
+    return annotDiffer.getSpurious();
   }
 
   public long getMissingCount() {
-    return typeCounter[MISSING_TYPE];
+    return annotDiffer.getMissing();
   }
 
   ///////////////////////////////////////////////////
@@ -451,17 +381,17 @@ public class AnnotationDiff extends AbstractVisualResource
 
   /** @return the falsePositiveStrict field*/
   public double getFalsePositiveStrict(){
-    return falsePositiveStrict;
+    return annotDiffer.getFalsePositivesStrict();
   } // getFalsePositiveStrict
 
   /** @return the falsePositiveLenient field*/
   public double getFalsePositiveLenient(){
-    return falsePositiveLenient;
+    return annotDiffer.getFalsePositivesLenient();
   } // getFalsePositiveLenient
 
   /** @return the falsePositiveAverage field*/
   public double getFalsePositiveAverage(){
-    return falsePositiveAverage;
+    return (double)(((double)getFalsePositiveLenient() + getFalsePositiveStrict()) / (double)(2.0));
   } // getFalsePositive
 
   /**
@@ -549,14 +479,6 @@ public class AnnotationDiff extends AbstractVisualResource
       keyAnnotSet = keyDocument.getAnnotations(keyAnnotationSetName).
                                     get(annotationSchema.getAnnotationName());
 
-    if (keyAnnotSet == null)
-      // The diff will run with an empty set.All annotations from response
-      // would be spurious.
-      keyAnnotList = new LinkedList();
-    else
-      // The alghoritm will modify this annotation set. It is better to make a
-      // separate copy of them.
-      keyAnnotList = new LinkedList(keyAnnotSet);
 
     if (responseAnnotationSetName == null)
       // Get the response AnnotationSet from the default set
@@ -566,26 +488,29 @@ public class AnnotationDiff extends AbstractVisualResource
       responseAnnotSet = responseDocument.getAnnotations(responseAnnotationSetName).
                                     get(annotationSchema.getAnnotationName());
 
-    if (responseAnnotSet == null)
-      // The diff will run with an empty set.All annotations from key
-      // would be missing.
-      responseAnnotList = new LinkedList();
-    else
-      // The alghoritm will modify this annotation set. It is better to make a
-      // separate copy of them.
-      responseAnnotList = new LinkedList(responseAnnotSet);
 
-    // Sort them ascending on Start offset (the comparator does that)
-    AnnotationSetComparator asComparator = new AnnotationSetComparator();
-    Collections.sort(keyAnnotList, asComparator);
-    Collections.sort(responseAnnotList, asComparator);
-
-    for (int type=0; type < MAX_TYPES; type++)
-      typeCounter[type] = 0;
 
     // Calculate the diff Set. This set will be used later with graphic
     // visualisation.
-    doDiff(keyAnnotList, responseAnnotList);
+    ArrayList choices = (ArrayList) annotDiffer.calculateDiff(keyAnnotSet.get(), responseAnnotSet.get());
+    diffSet = new HashSet();
+    for(int i=0;i<choices.size();i++) {
+      AnnotationDiffer.Choice choice = (AnnotationDiffer.Choice) choices.get(i);
+      int type = choice.getType();
+      int leftType = 0;
+      int rightType = 0;
+      if(type == 2) {
+        leftType = CORRECT_TYPE;
+        rightType = CORRECT_TYPE;
+      } else if(type == 1) {
+        leftType = PARTIALLY_CORRECT_TYPE;
+        rightType = PARTIALLY_CORRECT_TYPE;
+      } else {
+        if(choice.getKey() == null) { leftType = SPURIOUS_TYPE; rightType = SPURIOUS_TYPE; }
+        else { leftType = MISSING_TYPE; rightType = MISSING_TYPE; }
+      }
+      diffSet.add(new DiffSetElement(choice.getKey(),choice.getResponse(), leftType, rightType));
+    }
 
     // If it runs under text mode just stop here.
     if (textMode) return this;
@@ -655,7 +580,7 @@ public class AnnotationDiff extends AbstractVisualResource
     box.add(jLabel);
 
     jLabel = new JLabel("Missing (present in Key but not in Response):  " +
-                                                typeCounter[MISSING_TYPE]);
+                                                annotDiffer.getMissing());
     jLabel.setForeground(BLACK);
     jLabel.setBackground(colors[MISSING_TYPE]);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
@@ -666,7 +591,7 @@ public class AnnotationDiff extends AbstractVisualResource
     // Add a space
     box.add(Box.createRigidArea(new Dimension(0,5)));
 
-    jLabel = new JLabel("Correct (total match):  " + typeCounter[CORRECT_TYPE]);
+    jLabel = new JLabel("Correct (total match):  " + annotDiffer.getCorrectMatches());
     jLabel.setForeground(BLACK);
     jLabel.setBackground(colors[CORRECT_TYPE]);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
@@ -678,7 +603,7 @@ public class AnnotationDiff extends AbstractVisualResource
     box.add(Box.createRigidArea(new Dimension(0,5)));
 
     jLabel =new JLabel("Partially correct (overlap in Key and Response):  "+
-                                        typeCounter[PARTIALLY_CORRECT_TYPE]);
+                                        annotDiffer.getPartiallyCorrectMatches());
     jLabel.setForeground(BLACK);
     jLabel.setBackground(colors[PARTIALLY_CORRECT_TYPE]);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
@@ -690,7 +615,7 @@ public class AnnotationDiff extends AbstractVisualResource
     box.add(Box.createRigidArea(new Dimension(0,5)));
 
     jLabel = new JLabel("Spurious (present in Response but not in Key):  " +
-                                        typeCounter[SPURIOUS_TYPE]);
+                                        annotDiffer.getSpurious());
     jLabel.setForeground(BLACK);
     jLabel.setBackground(colors[SPURIOUS_TYPE]);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
@@ -707,19 +632,19 @@ public class AnnotationDiff extends AbstractVisualResource
     box = new Box(BoxLayout.Y_AXIS);
 
     jLabel = new JLabel("Precision strict: " +
-                                    formatter.format(precisionStrict));
+                                    formatter.format(getPrecisionStrict()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
     jLabel = new JLabel("Precision average: " +
-                                    formatter.format(precisionAverage));
+                                    formatter.format(getPrecisionAverage()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
     jLabel = new JLabel("Precision lenient: " +
-                                    formatter.format(precisionLenient));
+                                    formatter.format(getPrecisionLenient()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
@@ -732,17 +657,17 @@ public class AnnotationDiff extends AbstractVisualResource
     //Lay out the JLabels from left to right.
     box = new Box(BoxLayout.Y_AXIS);
 
-    jLabel = new JLabel("Recall strict: " + formatter.format(recallStrict));
+    jLabel = new JLabel("Recall strict: " + formatter.format(getRecallStrict()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
-    jLabel = new JLabel("Recall average: " + formatter.format(recallAverage));
+    jLabel = new JLabel("Recall average: " + formatter.format(getRecallAverage()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
-    jLabel = new JLabel("Recall lenient: " + formatter.format(recallLenient));
+    jLabel = new JLabel("Recall lenient: " + formatter.format(getRecallLenient()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
@@ -756,19 +681,19 @@ public class AnnotationDiff extends AbstractVisualResource
     box = new Box(BoxLayout.Y_AXIS);
 
     jLabel = new JLabel("F-Measure strict: " +
-                                        formatter.format(fMeasureStrict));
+                                        formatter.format(getFMeasureStrict()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
     jLabel = new JLabel("F-Measure average: " +
-                                        formatter.format(fMeasureAverage));
+                                        formatter.format(getFMeasureAverage()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
     jLabel = new JLabel("F-Measure lenient: " +
-                                        formatter.format(fMeasureLenient));
+                                        formatter.format(getFMeasureLenient()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
@@ -782,19 +707,19 @@ public class AnnotationDiff extends AbstractVisualResource
     box = new Box(BoxLayout.Y_AXIS);
 
     jLabel = new JLabel("False positive strict: " +
-                                        formatter.format(falsePositiveStrict));
+                                        formatter.format(getFalsePositiveStrict()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
     jLabel = new JLabel("False positive average: " +
-                                        formatter.format(falsePositiveAverage));
+                                        formatter.format(getFalsePositiveAverage()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
 
     jLabel = new JLabel("False positive lenient: " +
-                                        formatter.format(falsePositiveLenient));
+                                        formatter.format(getFalsePositiveLenient()));
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
@@ -825,265 +750,6 @@ public class AnnotationDiff extends AbstractVisualResource
     } // end while
   } // printStructure
 
-  /** This method is the brain of the AnnotationSet diff and creates a set with
-    * diffSetElement objects.
-    * @param aKeyAnnotList a list containing the annotations from key. If this
-    * param is <b>null</b> then the method will simply return and will not do a
-    * thing.
-    * @param aResponseAnnotList a list containing the annotation from response.
-    * If this param is <b>null</b> the method will return.
-    */
-  protected void doDiff(java.util.List aKeyAnnotList,
-                        java.util.List aResponseAnnotList){
-
-    // If one of the annotation sets is null then is no point in doing the diff.
-    if (aKeyAnnotList == null || aResponseAnnotList == null)
-      return;
-
-    int responseSize = aResponseAnnotList.size();
-
-    diffSet = new HashSet();
-    // Iterate throught all elements from keyList and find those in the response
-    // list which satisfies isCompatible() and isPartiallyCompatible() relations
-    Iterator keyIterator = aKeyAnnotList.iterator();
-    while(keyIterator.hasNext()){
-      Annotation keyAnnot = (Annotation) keyIterator.next();
-      Iterator responseIterator = aResponseAnnotList.iterator();
-
-      DiffSetElement diffElement = null;
-      while(responseIterator.hasNext()){
-        Annotation responseAnnot = (Annotation) responseIterator.next();
-
-        if(keyAnnot.isPartiallyCompatible(responseAnnot,keyFeatureNamesSet)){
-          keyPartiallySet.add(keyAnnot);
-          responsePartiallySet.add(responseAnnot);
-          if (keyAnnot.coextensive(responseAnnot)){
-            // Found two compatible annotations
-            // Create a new DiffSetElement and add it to the diffSet
-            diffElement = new DiffSetElement( keyAnnot,
-                                              responseAnnot,
-                                              DEFAULT_TYPE,
-                                              CORRECT_TYPE);
-
-            // Add this element to the DiffSet
-            addToDiffset(diffElement);
-          } // End if (keyAnnot.coextensive(responseAnnot))
-        }else if (keyAnnot.coextensive(responseAnnot)){
-          // Found two aligned annotations. We have to find out if the response
-          // is partialy compatible with another key annotation.
-          // Create a new DiffSetElement and add it to the diffSet
-          diffElement = new DiffSetElement( keyAnnot,
-                                            responseAnnot,
-                                            detectKeyType(keyAnnot),
-                                            detectResponseType(responseAnnot));
-          // Add this element to the DiffSet
-          addToDiffset(diffElement);
-        } // End if (keyAnnot.coextensive(responseAnnot)){
-
-        if (diffElement != null){
-          // Eliminate the response annotation from the list.
-          responseIterator.remove();
-          break;
-        } // End if
-      } // end while responseIterator
-
-      // If diffElement != null it means that break was used
-      if (diffElement == null){
-        if (keyPartiallySet.contains(keyAnnot))
-          diffElement = new DiffSetElement( keyAnnot,
-                                            null,
-                                            DEFAULT_TYPE,
-                                            NULL_TYPE);
-        else{
-          // If keyAnnot is not in keyPartiallySet then it has to be checked
-          // agains all annotations in DiffSet to see if there is
-          // a previous annotation from response set which is partially
-          // compatible with the keyAnnot
-          Iterator respParIter = diffSet.iterator();
-          while (respParIter.hasNext()){
-            DiffSetElement diffElem = (DiffSetElement) respParIter.next();
-            Annotation respAnnot = diffElem.getRightAnnotation();
-            if (respAnnot != null && keyAnnot.isPartiallyCompatible(respAnnot,
-                                                          keyFeatureNamesSet)){
-                diffElement = new DiffSetElement( keyAnnot,
-                                                  null,
-                                                  DEFAULT_TYPE,
-                                                  NULL_TYPE);
-                break;
-            } // End if
-          } // End while
-          // If is still nul then it means that the key annotation is missing
-          if (diffElement == null)
-            diffElement = new DiffSetElement( keyAnnot,
-                                              null,
-                                              MISSING_TYPE,
-                                              NULL_TYPE);
-        } // End if
-        addToDiffset(diffElement);
-      } // End if
-
-      keyIterator.remove();
-    } // end while keyIterator
-
-    DiffSetElement diffElem = null;
-    Iterator responseIter = aResponseAnnotList.iterator();
-    while (responseIter.hasNext()){
-      Annotation respAnnot = (Annotation) responseIter.next();
-      if (responsePartiallySet.contains(respAnnot))
-        diffElem = new DiffSetElement( null,
-                                       respAnnot,
-                                       NULL_TYPE,
-                                       PARTIALLY_CORRECT_TYPE);
-      else
-        diffElem = new DiffSetElement( null,
-                                       respAnnot,
-                                       NULL_TYPE,
-                                       SPURIOUS_TYPE);
-      addToDiffset(diffElem);
-      responseIter.remove();
-    } // End while
-
-    // CALCULATE ALL (NLP) MEASURES like:
-    // Precistion, Recall, FalsePositive and F-Measure
-    long possible =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
-                    typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
-                    typeCounter[MISSING_TYPE]; // this comes from Key
-
-    long actual =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
-                  typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
-                  typeCounter[SPURIOUS_TYPE]; // this comes from Resp
-
-    if (actual != responseSize)
-      Err.prln("AnnotDiff warning: The response size(" + responseSize +
-      ") is not the same as the computed value of" +
-    " actual(Correct[resp or key]+Partial[resp]+Spurious[resp]=" + actual +")");
-
-    if (actual != 0){
-      precisionStrict =  ((double)typeCounter[CORRECT_TYPE])/((double)actual);
-      precisionLenient = ((double)(typeCounter[CORRECT_TYPE] +
-                         typeCounter[PARTIALLY_CORRECT_TYPE]))/((double)actual);
-      precisionAverage = ((double)(precisionStrict + precisionLenient)) /
-                                                                  ((double) 2);
-    } // End if
-    if (possible != 0){
-      recallStrict = ((double)typeCounter[CORRECT_TYPE])/((double)possible);
-      recallLenient = ((double)(typeCounter[CORRECT_TYPE] +
-                       typeCounter[PARTIALLY_CORRECT_TYPE]))/((double)possible);
-      recallAverage = ((double)(recallStrict + recallLenient)) / ((double)2);
-    } // End if
-
-
-    int no = 0;
-    // If an annotation type for false poz was selected calculate the number of
-    // Annotations
-    if (annotationTypeForFalsePositive != null)
-     // Was it the default set ?
-     if (responseAnnotationSetNameFalsePoz == null){
-      AnnotationSet aSet = responseDocument.getAnnotations().get(
-                                      annotationTypeForFalsePositive);
-          no = aSet == null ? 0 : aSet.size();
-     }else{
-      AnnotationSet aSet = responseDocument.getAnnotations(responseAnnotationSetNameFalsePoz).get(
-                                        annotationTypeForFalsePositive);
-      no = aSet == null? 0 : aSet.size();
-     }
-    if (no != 0){
-      // No error here: the formula is the opposite to recall or precission
-     falsePositiveStrict = ((double)(typeCounter[SPURIOUS_TYPE] +
-                             typeCounter[PARTIALLY_CORRECT_TYPE])) /((double)no);
-     falsePositiveLenient = ((double)typeCounter[SPURIOUS_TYPE]) /((double) no);
-     falsePositiveAverage = ((double)(falsePositiveStrict +
-                                           falsePositiveLenient))/((double)2) ;
-    } // End if
-
-    // Calculate F-Measure Strict
-    double denominator = weight * (precisionStrict + recallStrict);
-    if (denominator != 0)
-      fMeasureStrict = (precisionStrict * recallStrict) / denominator ;
-    else fMeasureStrict = 0.0;
-    // Calculate F-Measure Lenient
-    denominator = weight * (precisionLenient + recallLenient);
-    if (denominator != 0)
-      fMeasureLenient = (precisionLenient * recallLenient) / denominator ;
-    else fMeasureLenient = 0.0;
-    // Calculate F-Measure Average
-    fMeasureAverage = (fMeasureStrict + fMeasureLenient) / (double)2;
-
-  } // doDiff
-
-  /** Decide what type is the keyAnnotation (DEFAULT_TYPE, MISSING or NULL_TYPE)
-   *  This method must be applied only on annotation from key set.
-   *  @param anAnnot is an annotation from the key set.
-   *  @return three possible value(DEFAULT_TYPE, MISSING or NULL_TYPE)
-   */
-  private int detectKeyType(Annotation anAnnot){
-    if (anAnnot == null) return NULL_TYPE;
-
-    if (keyPartiallySet.contains(anAnnot)) return DEFAULT_TYPE;
-    Iterator iter = responsePartiallySet.iterator();
-    while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
-      if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet))
-        return DEFAULT_TYPE;
-    } // End while
-
-    iter = responseAnnotList.iterator();
-    while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
-      if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet)){
-         responsePartiallySet.add(a);
-         keyPartiallySet.add(anAnnot);
-         return DEFAULT_TYPE;
-      } // End if
-    } // End while
-    return MISSING_TYPE;
-  } //detectKeyType
-
-  /**  Decide what type is the responseAnnotation
-    *  (PARTIALLY_CORRECT_TYPE, SPURIOUS or NULL_TYPE)
-    *  This method must be applied only on annotation from response set.
-    *  @param anAnnot is an annotation from the key set.
-    *  @return three possible value(PARTIALLY_CORRECT_TYPE, SPURIOUS or NULL_TYPE)
-    */
-  private int detectResponseType(Annotation anAnnot){
-    if (anAnnot == null) return NULL_TYPE;
-
-    if (responsePartiallySet.contains(anAnnot)) return PARTIALLY_CORRECT_TYPE;
-    Iterator iter = keyPartiallySet.iterator();
-    while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
-      if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet))
-        return PARTIALLY_CORRECT_TYPE;
-    } // End while
-
-    iter = keyAnnotList.iterator();
-    while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
-      if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet)){
-         responsePartiallySet.add(anAnnot);
-         keyPartiallySet.add(a);
-         return PARTIALLY_CORRECT_TYPE;
-      } // End if
-    } // End while
-    return SPURIOUS_TYPE;
-  } //detectResponseType
-
-  /** This method add an DiffsetElement to the DiffSet and also counts the
-    * number of compatible, partialCompatible, Incorect and Missing annotations.
-    */
-  private void addToDiffset(DiffSetElement aDiffSetElement){
-    if (aDiffSetElement == null) return;
-
-    diffSet.add(aDiffSetElement);
-    // For the Right side (response) the type can be one of the following:
-    // PC, I, C
-    if (NULL_TYPE != aDiffSetElement.getRightType())
-      typeCounter[aDiffSetElement.getRightType()]++;
-    // For the left side (key) the type can be : D or M
-    if (NULL_TYPE != aDiffSetElement.getLeftType() &&
-        CORRECT_TYPE != aDiffSetElement.getLeftType())
-      typeCounter[aDiffSetElement.getLeftType()]++;
-  } // addToDiffset
 
   /* ********************************************************************
    * INNER CLASS
@@ -1239,6 +905,7 @@ public class AnnotationDiff extends AbstractVisualResource
 
   } //Inner class AnnotationDiffTableModel
 
+
   /* ********************************************************************
    * INNER CLASS
    * ********************************************************************/
@@ -1279,46 +946,24 @@ public class AnnotationDiff extends AbstractVisualResource
         return defaultComp;
 
       if (column < 4){
-        if (NULL_TYPE != diffSetElement.getLeftType())
+        if (diffSetElement.getLeftAnnotation() != null) {
           background = colors[diffSetElement.getLeftType()];
+        }
         else return new JPanel();
       }else{
-        if (NULL_TYPE != diffSetElement.getRightType())
+        if (diffSetElement.getRightAnnotation() != null)
           background = colors[diffSetElement.getRightType()];
         else return new JPanel();
       }
 
       defaultComp.setBackground(background);
       defaultComp.setForeground(BLACK);
-
       defaultComp.setOpaque(true);
       return defaultComp;
     } //getTableCellRendererComponent
 
   } // class AnnotationDiffCellRenderer
 
-  /* ********************************************************************
-   * INNER CLASS
-   * ********************************************************************/
-   class AnnotationSetComparator implements java.util.Comparator {
-
-      public AnnotationSetComparator(){}
-
-      public int compare(Object o1, Object o2) {
-        if ( !(o1 instanceof gate.Annotation) ||
-             !(o2 instanceof gate.Annotation)) return 0;
-
-        gate.Annotation a1 = (gate.Annotation) o1;
-        gate.Annotation a2 = (gate.Annotation) o2;
-
-        Long l1 = a1.getStartNode().getOffset();
-        Long l2 = a2.getStartNode().getOffset();
-        if (l1 != null)
-          return l1.compareTo(l2);
-        else
-          return -1;
-      } //compare
-    } // class AnnotationSetComparator
 
   /* ********************************************************************
    * INNER CLASS
