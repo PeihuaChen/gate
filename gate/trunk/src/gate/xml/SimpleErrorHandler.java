@@ -37,40 +37,47 @@ public class SimpleErrorHandler implements ErrorHandler {
     * recoverable(can continue parsing) error.
     */
   public void error(SAXParseException ex) throws SAXException {
-    File fInput = new File (ex.getSystemId());
-
-    if (fInput != null)
-      Out.prln("SAX parser recoverable error:" + fInput.getPath() +
-                                  ": line " + ex.getLineNumber() + ": " + ex);
-    else
-      Out.prln("SAX parser recoverable error:" +
-                                  ": line " + ex.getLineNumber() + ": " + ex);
+    String systemId = "not available";
+    String publicId = "not available";
+    if (ex.getSystemId() != null) systemId = ex.getSystemId();
+    if (ex.getPublicId() != null) publicId = ex.getPublicId();
+    Out.prln("SAX parser recoverable error. Error details: \n"+
+                                " Message: " + ex.getMessage() + "\n" +
+                                " System ID: " + systemId +  "\n" +
+                                " Public ID: " + publicId +  "\n" +
+                                " Line: " + ex.getLineNumber() + "\n" +
+                                " Column: "+ ex.getColumnNumber());
   }// error
   /**
     * This fatalError method is called by the SAX parser when it encounts a
     * fatal(can't continue parsing) error.
     */
-  public void fatalError(SAXParseException ex) throws SAXException {
-    File fInput = new File(ex.getSystemId());
-    if (fInput != null)
-      throw new GateSaxException("Fatal error: " + fInput.getName() +
-                                ": line " + ex.getLineNumber() + ": " + ex);
-    else
-      throw new GateSaxException("Fatal error:" + ex.getLineNumber() +
-              ": " + ex);
+  public void fatalError(SAXParseException ex) throws SAXException{
+    String systemId = "not available";
+    String publicId = "not available";
+    if (ex.getSystemId() != null) systemId = ex.getSystemId();
+    if (ex.getPublicId() != null) publicId = ex.getPublicId();
+    throw new GateSaxException("Fatal XML parse error. Error details: \n"+
+                                " Message: " + ex.getMessage() + "\n" +
+                                " System ID: " + systemId +  "\n" +
+                                " Public ID: " + publicId +  "\n" +
+                                " Line: " + ex.getLineNumber() + "\n" +
+                                " Column: "+ ex.getColumnNumber());
   }// fatalError
   /**
     * This warning is called by the SAX parser when there is the danger of a
     * confusion.
     */
   public void warning(SAXParseException ex) throws SAXException {
-    File fInput = new File(ex.getSystemId());
-    if (fInput != null)
-      Out.prln("SAX parser warning: " + fInput.getName() +
-                              ": line " + ex.getLineNumber() + ": " + ex);
-    else
-      Out.prln("SAX parser warning: " +
-                              " : line " + ex.getLineNumber() + ": " + ex);
-
+    String systemId = "not available";
+    String publicId = "not available";
+    if (ex.getSystemId() != null) systemId = ex.getSystemId();
+    if (ex.getPublicId() != null) publicId = ex.getPublicId();
+    Out.prln("SAX parser warning. Warning details: \n"+
+                                " Message: " + ex.getMessage() + "\n" +
+                                " System ID: " + systemId +  "\n" +
+                                " Public ID: " + publicId +  "\n" +
+                                " Line: " + ex.getLineNumber() + "\n" +
+                                " Column: "+ ex.getColumnNumber());
   }// warning
 }// end class SimpleErrorHandler

@@ -25,8 +25,6 @@
       <CLASS>gate.corpora.CorpusImpl</CLASS>
       <INTERFACE>gate.Corpus</INTERFACE>
       <ICON>lr.gif</ICON>
-      <PARAMETER NAME="documentsList" OPTIONAL="true" ITEM_CLASS_NAME="gate.Document" COMMENT="A list of documents">java.util.List</PARAMETER>
-
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
@@ -70,6 +68,15 @@
       <CLASS>gate.creole.AnnotationSchema</CLASS>
       <COMMENT>An annotation type and its features</COMMENT>
       <PARAMETER NAME="xmlFileUrl" COMMENT="The url to the definition file" SUFFIXES="xml;xsd">java.net.URL</PARAMETER>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/AddressSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/DateSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/IdentifierSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/LocationSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/MoneySchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/OrganizationSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PercentSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" /></AUTOINSTANCE>
     </RESOURCE>
   </CREOLE>
 
@@ -222,13 +229,6 @@
       <PARAMETER NAME="outputASName" COMMENT="The name of the annotation set used for output" DEFAULT="Filtered" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="tagASName" DEFAULT="Original markups" COMMENT="The name of the annotation set where the BODY tag is" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="textTagName" DEFAULT="BODY" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-    </RESOURCE>
-
-    <RESOURCE>
-      <NAME>Document Reset PR</NAME>
-      <CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
-      <PARAMETER NAME="markupASName" DEFAULT="Original markups" COMMENT="The name of the annotation set where the original document markup is unpacked" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
     </RESOURCE>
   </CREOLE>
   <!-- creole.xml for Controllers -->

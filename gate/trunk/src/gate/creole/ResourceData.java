@@ -104,6 +104,12 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** The stack of instantiations */
   protected WeakBumpyStack instantiationStack = new WeakBumpyStack();
 
+  /** This list contains all instances loaded from creole.xml with
+   *  AUTOINSTANCE tag. The idea is that we don't want to loose them from the
+   *  system, because of the WeakBumpyStack
+   */
+  protected List persistantInstantiationList = new ArrayList();
+
   /** Get the list of instantiations of resources */
   public WeakBumpyStack getInstantiations() {
     return instantiationStack;
@@ -114,9 +120,18 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     instantiationStack.push(resource);
   } // addInstantiation
 
+  /** This method makes a certain resource persistant by adding it into a
+    * persistantInstantiationList. It is used especially with AUTOINSTANCE tag
+    * in creole xml.
+    */
+  public void makeInstantiationPersistant(Resource resource) {
+    persistantInstantiationList.add(resource);
+  } // makeInstantiationPersistant
+
   /** Remove an instantiation of the resource from the register of these */
   public void removeInstantiation(Resource resource) {
     instantiationStack.remove(resource);
+    persistantInstantiationList.remove(resource);
   } // removeInstantiation
 
   /** Bump an instantiation to the top of the instantiation stack */

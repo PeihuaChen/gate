@@ -37,13 +37,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                                     implements AnnotationVisualResource{
 
   /** Default constructor */
-  public SchemaAnnotationEditor(){
-    try {
-      jbInit();
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-    }}
+  public SchemaAnnotationEditor(){}
 
   // Methods required by AnnotationVisualResource
 
@@ -108,8 +102,17 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     currentAnnotFeaturesMap = null;
     currentAnnotSchema = null;
     CreoleRegister creoleReg = Gate.getCreoleRegister();
-    List currentAnnotationSchemaList =
-                      creoleReg.getLrInstances("gate.creole.AnnotationSchema");
+    List currentAnnotationSchemaList = null;
+    try{
+      currentAnnotationSchemaList =
+              creoleReg.getAllPublicInstances("gate.creole.AnnotationSchema");
+    } catch (GateException e){
+      // This exception shouldn't happen. If it happens then something went
+      // terribly wrong.
+      throw new LuckyException("gate.creole.AnnotationSchema or a class that"+
+      " extends it, is not registered in the creole.xml register.Edit your"+
+      " creole.xml and try again.");
+    }// End try
     // If there is no Annotation schema loaded, the editor can only do nothing
     if (currentAnnotationSchemaList.isEmpty()) return;
     name2annotSchemaMap = new TreeMap();
@@ -716,16 +719,5 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       if (tf != null ) return tf.getText();
       return new String("");
     }//getCellEditorValue
-  }
-  private void jbInit() throws Exception {
-    this.addComponentListener(new java.awt.event.ComponentAdapter() {
-      public void componentShown(ComponentEvent e) {
-        this_componentShown(e);
-      }
-    });
-  }
-
-  void this_componentShown(ComponentEvent e) {
-    Out.println("Component shown");
   }///InnerFeaturesEditor inner class
 }// End class SchemaAnnotationEditor
