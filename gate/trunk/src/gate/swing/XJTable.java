@@ -119,6 +119,7 @@ public class XJTable extends JTable {
       new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
 
     getTableHeader().setDefaultRenderer(headerRenderer);
+
   }//init()
 
 
