@@ -93,23 +93,34 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       } // if gate:path url
 
 
-      String path = turl.getPath();
-      int slash = path.lastIndexOf("/");
-      if (-1 != slash ) {
-        path = path.substring(0,slash+1);
+      try {
+        URL lurl = new URL(url,listName);
+        list.setURL(lurl);
+        list.load();
+      } catch (Exception x) {
+        String path = turl.getPath();
+        int slash = path.lastIndexOf("/");
+        if (-1 != slash ) {
+          path = path.substring(0,slash+1);
+        }
+
+        File f = new File(path+listName);
+
+        if (!f.exists())
+          f.createNewFile();
+
+        URL lurl = new URL(url,listName);
+        list.setURL(lurl);
+        list.load();
+
       }
 
-      File f = new File(path+listName);
-      if (!f.exists())
-        f.createNewFile();
 
-      URL lurl = new URL(url,listName);
-      list.setURL(lurl);
-      list.load();
+
     } catch (MalformedURLException murle ) {
       throw new ResourceInstantiationException(murle);
     } catch (IOException ioex) {
-       throw new ResourceInstantiationException(ioex);
+      throw new ResourceInstantiationException(ioex);
     }
     return list;
   } // loadSingleList
