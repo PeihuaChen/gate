@@ -63,13 +63,13 @@ public class Scratch
 
   public static void doIt() throws Exception{
     String str = new String(
-                 "<s><w>Salut</w> <w>Ba</w> <p/><w>Ce</w> <w>misto</w> </s>"
+                 "<psad>bun ma <a>salut</a> <b>cool</b> stuf"
                  );
     gate.Document doc = Factory.newDocument(str);
-    doc.setSourceUrl(null);
+//    doc.setSourceUrl(null);
     gate.DocumentFormat keyDocFormat = null;
     keyDocFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, new MimeType("text/xml")
+      doc, new MimeType("text/html")
     );
 
     // Unpack the markup

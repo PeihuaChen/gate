@@ -62,13 +62,16 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     PrintWriter           out = null;
     HTMLEditorKit.Parser  parser = new ParserDelegator();
 
-    if ( (doc == null) ||
-         (doc.getSourceUrl() == null && doc.getContent() == null)){
-
+    if ( doc == null || doc.getContent() == null ){
       throw new DocumentFormatException(
                "GATE document is null or no content found. Nothing to parse!");
     }// End if
 
+
+    reader = new InputStreamReader(
+             new ByteArrayInputStream(doc.getContent().toString().getBytes()));
+
+/*
     if (doc.getSourceUrl() == null)
         // If doc's source URL is null then the document content will be parsed
         // If we are here, it's for sure that document content is not null
@@ -89,7 +92,7 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
 
       }// End try
     }// End if
-
+*/
     // create a new Htmldocument handler
     HtmlDocumentHandler htmlDocHandler = new
                            HtmlDocumentHandler(doc, this.markupElementsMap);
