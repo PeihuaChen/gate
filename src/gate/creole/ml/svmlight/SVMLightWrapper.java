@@ -28,7 +28,7 @@ import java.util.List;
 public class SVMLightWrapper
     implements MLEngine, gate.gui.ActionsPublisher {
 
-  static boolean DEBUG = false;
+  static boolean DEBUG = true;
 
   /**
    * This constructor sets up action list so that these actions (loading and
@@ -71,12 +71,14 @@ public class SVMLightWrapper
   /**
    * See if any &lt;CLASSIFIER-OPTIONS&gt; are specified in the congif file. If
    * such an element exists, then extract the string of options and store it.
-   * Otherwise set classifierOptions to null.
+   * Otherwise set classifierOptions to the empty string.
    *
    * This is the only configuration file option for SVM Light.
    */
    private void extractAndCheckOptions() {
      classifierOptions = optionsElement.getChildTextTrim("CLASSIFIER-OPTIONS");
+     if (classifierOptions == null)
+     	classifierOptions = "";
    }
 
   /**
@@ -555,10 +557,12 @@ public class SVMLightWrapper
      // Keep going till we've extracted everything from the string.
      while (positionInString<optionsString.length()) {
        // Fist skip any white space.
-       while (optionsString.charAt(positionInString)==' '
-              || optionsString.charAt(positionInString)=='\t')
+       while (positionInString < optionsString.length() && (
+       		optionsString.charAt(positionInString)==' '
+              || optionsString.charAt(positionInString)=='\t')) {
          ++positionInString;
-
+       }
+         
        int startOfOption = positionInString;
 
        // Then find the end of the option.
