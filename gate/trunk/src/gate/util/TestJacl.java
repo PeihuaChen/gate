@@ -32,7 +32,7 @@ public class TestJacl extends TestCase
     // try running a script (assumes we are run from within gate2
     // directory hierarchy)
     Interp interp = jacl.getInterp();
-    interp.eval("findScripts");
+    interp.eval("GATE::findScripts");
 
     // get the result - should be a list of .tcl files
     TclObject result = interp.getResult();
