@@ -24,6 +24,7 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.event.*;
 import gate.creole.*;
+import gate.creole.ontology.Ontology;
 import gate.*;
 
 
@@ -37,6 +38,8 @@ public abstract class Transducer implements Serializable
 
   /** Name of this transducer. */
   protected String name;
+
+  protected Ontology ontology = null;
 
   /** Get the phase name of this transducer */
   public String getName() { return name; }
@@ -157,6 +160,22 @@ public abstract class Transducer implements Serializable
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
+  }
+
+  /**
+   * Gets the ontology used by this transducer;
+   * @return an {@link gate.creole.ontology.Ontology} value;
+   */
+  public Ontology getOntology() {
+    return ontology;
+  }
+
+  /**
+   * Sets the ontology used by this transducer;
+   * @param ontology an {@link gate.creole.ontology.Ontology} value;
+   */
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   //ProcessProgressReporter implementation ends here

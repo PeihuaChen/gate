@@ -290,6 +290,28 @@
         COMMENT="The encoding used for reading the grammar">java.lang.String</PARAMETER>
     </RESOURCE>
 
+    <!-- creole.xml for JapeTransducer -->
+    <RESOURCE>
+      <NAME>Jape Transducer (Ontology aware)</NAME>
+      <CLASS>gate.creole.OntologyAwareTransducer</CLASS>
+      <COMMENT>A module for executing Jape grammars</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true"
+        COMMENT="The document to be processed">gate.Document</PARAMETER>
+      <PARAMETER NAME="inputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as input for the transducer"
+  OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="outputASName" RUNTIME="true"
+        COMMENT="The annotation set to be used as output for the transducer"
+  OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="grammarURL"
+        COMMENT="The URL to the grammar file"
+  SUFFIXES="jape">java.net.URL</PARAMETER>
+  <PARAMETER NAME="ontology"
+        COMMENT="The ontology to be accesible on the rules RHS">gate.creole.ontology.Ontology</PARAMETER>
+      <PARAMETER NAME="encoding" DEFAULT="UTF-8"
+        COMMENT="The encoding used for reading the grammar">java.lang.String</PARAMETER>
+    </RESOURCE>
+
     <!-- creole.xml for ANNIE Transducer -->
     <RESOURCE>
       <NAME>ANNIE NE Transducer</NAME>
@@ -472,10 +494,10 @@
       <CLASS>gate.creole.RDFFormatExporter</CLASS>
       <COMMENT>An RDF exporter</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be exported" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
-      <PARAMETER NAME="ontology"  COMMENT="Ontology" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>      
+      <PARAMETER NAME="ontology"  COMMENT="Ontology" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE" NAME="exportedTypes">java.util.ArrayList</PARAMETER>
-      <PARAMETER NAME="exportFilePath"  COMMENT="Destination URL where to export" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>      
-      <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">java.lang.String</PARAMETER>      
+      <PARAMETER NAME="exportFilePath"  COMMENT="Destination URL where to export" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>
+      <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">java.lang.String</PARAMETER>
     </RESOURCE>
 
   </CREOLE>

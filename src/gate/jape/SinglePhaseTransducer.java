@@ -422,7 +422,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
           currentRHS = currentAcceptor.getFSMPosition().getAction();
           currentRHS.transduce(doc, currentAcceptor.getBindings(),
-                               inputAS, outputAS);
+                               inputAS, outputAS, ontology);
 //dam: use long
 //          Long currentAGPosition = currentAcceptor.getAGPosition().getOffset();
 //dam: now
@@ -469,7 +469,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, currentAcceptor.getBindings(),
-                             inputAS, outputAS);
+                             inputAS, outputAS, ontology);
 
         //if in ONCE mode stop after first match
         if(ruleApplicationStyle == ONCE_STYLE) return;

@@ -15,6 +15,8 @@
 
 package gate.jape;
 import gate.*;
+import gate.creole.ontology.Ontology;
+
 import java.util.Map;
 import java.io.*;
 
@@ -35,7 +37,8 @@ public interface RhsAction extends Serializable {
    * @throws JapeException
    */
   public void doit(Document doc, Map bindings, AnnotationSet annotations,
-                   AnnotationSet inputAS, AnnotationSet outputAS)
+                   AnnotationSet inputAS, AnnotationSet outputAS,
+                   Ontology ontology)
               throws JapeException;
 
 } // RhsAction

@@ -48,6 +48,7 @@ public class Scratch
     Out.prln("Target: " + anotherURL);
     Out.prln("Relative path: " + relPath);
     Out.prln("Result " + new URL(anURL, relPath));
+    javax.swing.text.FlowView fv;
 //    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 //    Map uidefaults  = (Map)javax.swing.UIManager.getDefaults();
 //    List keys = new ArrayList(uidefaults.keySet());

@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 
 import gate.annotation.*;
 import gate.util.*;
+import gate.creole.ontology.Ontology;
 import gate.*;
 
 
@@ -119,13 +120,15 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "import java.util.*;" + nl +
       "import gate.*;" + nl +
       "import gate.jape.*;" + nl +
+      "import gate.creole.ontology.Ontology;" + nl +
       "import gate.annotation.*;" + nl +
       "import gate.util.*;" + nl + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
       "  public void doit(Document doc, java.util.Map bindings, " + nl +
       "                   AnnotationSet annotations, " + nl +
-      "                   AnnotationSet inputAS, AnnotationSet outputAS) {" + nl
+      "                   AnnotationSet inputAS, AnnotationSet outputAS, " + nl +
+      "                   Ontology ontology) {" + nl
     );
 
     // initialise various names
@@ -221,7 +224,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Makes changes to the document, using LHS bindings. */
   public void transduce(Document doc, java.util.Map bindings,
-                        AnnotationSet inputAS, AnnotationSet outputAS)
+                        AnnotationSet inputAS, AnnotationSet outputAS,
+                        Ontology ontology)
                         throws JapeException {
     if(theActionObject == null) {
       instantiateActionClass();
@@ -230,7 +234,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     // run the action class
     try {
       ((RhsAction) theActionObject).doit(doc, bindings, outputAS,
-                                         inputAS, outputAS);
+                                         inputAS, outputAS, ontology);
 
     // if the action class throws an exception, re-throw it with a
     // full description of the problem, inc. stack trace and the RHS
@@ -293,7 +297,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.25  2002/05/14 09:43:17  valyt
+// Ontology Aware JAPE transducers
+//
 // Revision 1.24  2002/02/27 15:11:16  valyt
+//
 // bug 00011:
 // Jape access to InputAS
 //
