@@ -295,6 +295,9 @@ public class OracleDataStore extends JDBCDataStore {
     //9. let the world know about it
     fireResourceDeleted(
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
+
+    //10. unload the resource form the GUI
+//    Factory.deleteResource();
   }
 
 
@@ -1175,7 +1178,8 @@ public class OracleDataStore extends JDBCDataStore {
                       " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
                       "        "+Gate.DB_OWNER+".t_lr_type LRTYPE " +
                       " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                      "        AND LRTYPE.lrtp_type = ? "
+                      "        AND LRTYPE.lrtp_type = ? " +
+                      " ORDER BY lr_name"
                       );
       stmt.setString(1,lrType);
       stmt.execute();
