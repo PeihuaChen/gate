@@ -148,6 +148,11 @@ public class OracleDataStore extends JDBCDataStore {
   public void delete()
   throws PersistenceException, UnsupportedOperationException {
 
+    //0. user session should be set
+/*    if (null == this.session) {
+      throw new SecurityException("user session not set");
+    }
+*/
     super.delete();
   }
 
@@ -285,7 +290,7 @@ public class OracleDataStore extends JDBCDataStore {
    * image.
    */
   private void _sync(LanguageResource lr, boolean openNewTrans) throws PersistenceException {
-//Out.prln("syncing LR...");
+
     //0. preconditions
     Assert.assertNotNull(lr);
     if (false == lr instanceof Document &&
@@ -301,9 +306,14 @@ public class OracleDataStore extends JDBCDataStore {
         "This LR is not stored in this DataStore"
       );
 
+    //1. user session should be set
+/*    if (null == this.session) {
+      throw new SecurityException("user session not set");
+    }
+*/
     boolean transFailed = false;
     try {
-      //2.5 autocommit should be FALSE because of LOBs
+      //2. autocommit should be FALSE because of LOBs
       if (openNewTrans) {
         this.jdbcConn.setAutoCommit(false);
       }
@@ -391,7 +401,12 @@ public class OracleDataStore extends JDBCDataStore {
       throw new SecurityException("Invalid security settings supplied");
     }
 
-    //0.5 check the LR's current DS
+    //1. user session should be set
+    if (null == this.session) {
+      throw new SecurityException("user session not set");
+    }
+
+    //2. check the LR's current DS
     DataStore currentDS = lr.getDataStore();
     if(currentDS == null) {  // an orphan - do the adoption
       //do not set the datastore on the lr, because actually it should
@@ -412,7 +427,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
 
-    //1. is the LR one of Document or Corpus?
+    //3. is the LR one of Document or Corpus?
     if (false == lr instanceof Document &&
         false == lr instanceof Corpus) {
 
@@ -420,7 +435,7 @@ public class OracleDataStore extends JDBCDataStore {
                                         "Documents and Corpora");
     }
 
-    //2.is the document already stored in this storage?
+    //4.is the document already stored in this storage?
     Object persistID = lr.getLRPersistenceId();
     if (persistID != null) {
       throw new PersistenceException("This LR is already stored in the " +
@@ -429,12 +444,12 @@ public class OracleDataStore extends JDBCDataStore {
 
     boolean transFailed = false;
     try {
-      //2.5 autocommit should be FALSE because of LOBs
+      //5 autocommit should be FALSE because of LOBs
       if (openNewTrans) {
         this.jdbcConn.setAutoCommit(false);
       }
 
-      //3. perform changes, if anything goes wrong, rollback
+      //6. perform changes, if anything goes wrong, rollback
       if (lr instanceof Document) {
         result =  createDocument((Document)lr,secInfo);
 //System.out.println("result ID=["+result.getLRPersistenceId()+"]");
@@ -443,7 +458,7 @@ public class OracleDataStore extends JDBCDataStore {
         result =  createCorpus((Corpus)lr,secInfo);
       }
 
-      //4. done, commit
+      //7. done, commit
       if (openNewTrans) {
         this.jdbcConn.commit();
       }
@@ -472,14 +487,14 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
-    //5. let the world know
+    //8. let the world know
     fireResourceAdopted(
         new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
                            result,
                            result.getLRPersistenceId())
     );
 
-    //6. fire also resource written event because it's now saved
+    //9. fire also resource written event because it's now saved
     fireResourceWritten(
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
                           result,
@@ -487,7 +502,7 @@ public class OracleDataStore extends JDBCDataStore {
       )
     );
 
-    //7. add the resource to the list of dependent resources - i.e. the ones that the
+    //10. add the resource to the list of dependent resources - i.e. the ones that the
     //data store should take care upon closing [and call sync()]
     this.dependentResources.add(result);
 
@@ -1138,20 +1153,20 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Object lrID, Session s)
+  public boolean canReadLR(Object lrID)
     throws PersistenceException, SecurityException{
 
-    return canAccessLR((Long) lrID,s,READ_ACCESS);
+    return canAccessLR((Long) lrID,READ_ACCESS);
   }
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Object lrID, Session s)
+  public boolean canWriteLR(Object lrID)
     throws PersistenceException, SecurityException{
 
-    return canAccessLR((Long) lrID,s,WRITE_ACCESS);
+    return canAccessLR((Long) lrID,WRITE_ACCESS);
   }
 
 
@@ -1159,13 +1174,19 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    * has some access (read/write) to the LR
    */
-  private boolean canAccessLR(Long lrID, Session s,int mode)
+  private boolean canAccessLR(Long lrID,int mode)
     throws PersistenceException, SecurityException{
 
+    //0. preconditions
     Assert.assertTrue(READ_ACCESS == mode || WRITE_ACCESS == mode);
 
-    //first check the session and then check whether the user is member of the group
-    if (this.ac.isValidSession(s) == false) {
+    //1. is session initialised?
+    if (null == this.session) {
+      throw new SecurityException("user session not set");
+    }
+
+    //2.first check the session and then check whether the user is member of the group
+    if (this.ac.isValidSession(this.session) == false) {
       throw new SecurityException("invalid session supplied");
     }
 
@@ -1175,8 +1196,8 @@ public class OracleDataStore extends JDBCDataStore {
       stmt = this.jdbcConn.prepareCall(
                 "{ call "+Gate.DB_OWNER+".security.has_access_to_lr(?,?,?,?,?)} ");
       stmt.setLong(1,lrID.longValue());
-      stmt.setLong(2,s.getUser().getID().longValue());
-      stmt.setLong(3,s.getGroup().getID().longValue());
+      stmt.setLong(2,this.session.getUser().getID().longValue());
+      stmt.setLong(3,this.session.getGroup().getID().longValue());
       stmt.setLong(4,mode);
 
       stmt.registerOutParameter(5,java.sql.Types.INTEGER);

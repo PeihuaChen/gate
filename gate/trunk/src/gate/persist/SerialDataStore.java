@@ -634,7 +634,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Object lrID, Session s)
+  public boolean canReadLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException{
 
     return true;
@@ -643,7 +643,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Object lrID, Session s)
+  public boolean canWriteLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException{
 
     return true;
@@ -676,6 +676,23 @@ extends AbstractFeatureBearer implements DataStore {
     throw new UnsupportedOperationException("security information is not supported "+
                                             "for DatabaseDataStore");
 
+  }
+
+
+  /** identify user using this datastore */
+  public void setSession(Session s)
+    throws gate.security.SecurityException {
+
+    // do nothing
+  }
+
+
+
+  /** identify user using this datastore */
+  public Session getSession(Session s)
+    throws gate.security.SecurityException {
+
+    return null;
   }
 
 } // class SerialDataStore

@@ -246,7 +246,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public abstract boolean canReadLR(Object lrID, Session s)
+  public abstract boolean canReadLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException;
 
 
@@ -254,7 +254,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public abstract boolean canWriteLR(Object lrID, Session s)
+  public abstract boolean canWriteLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException;
 
 
@@ -481,6 +481,22 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     if(DEBUG)
       System.out.println("datastore closed...");
     //sync all dependent resources
+  }
+
+  /** identify user using this datastore */
+  public void setSession(Session s)
+    throws gate.security.SecurityException {
+
+    this.session = s;
+  }
+
+
+
+  /** identify user using this datastore */
+  public Session getSession(Session s)
+    throws gate.security.SecurityException {
+
+    return this.session;
   }
 
 }
