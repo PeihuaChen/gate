@@ -88,7 +88,7 @@ class FSMState implements java.io.Serializable {
     * from this state */
   String getEdgesGML() {
 ///    String res = "";
-    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
     Set nextSet;
     Iterator nextSetIter;
     FSMState nextState;

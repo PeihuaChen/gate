@@ -78,7 +78,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
   String getEdgesGML(){
     ///String res = "";
     //OT
-    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
     Set nextSet;
     Iterator nextSetIter;
     DFSMState nextState;
@@ -121,8 +121,8 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
            ///read =""
            ;
     //OT
-    StringBuffer prefix = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
-    StringBuffer read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer prefix = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
+    StringBuffer read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     LinkedList attributes = new LinkedList(),
                values = new LinkedList();
@@ -161,7 +161,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
         //OT
         read = new StringBuffer(mainSt.nextToken("\""));
         if(read.equals("\"")) ///read = "";
-            read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+            read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
         else {
           //delete the remaining enclosing quote and restore the delimiters
           mainSt.nextToken(ignorables + "\\\";=");
@@ -175,7 +175,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
           attribute = read.toString();
           ///read = "";
           //OT
-          read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+          read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
           phase = 2;
         }else throw new TokeniserException("Invalid attribute format: " +
                                            read);
@@ -184,7 +184,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
           ///type = read;
           type = read.toString();
           ///read = "";
-          read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+          read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
           //Out.print("Type: " + type);
           attributes.addLast(type);
           values.addLast("");
@@ -193,7 +193,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
           ///value = read;
           value = read.toString();
           ///read = "";
-          read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+          read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
           phase = 3;
         } else throw new TokeniserException("Invalid value format: " +
                                            read);

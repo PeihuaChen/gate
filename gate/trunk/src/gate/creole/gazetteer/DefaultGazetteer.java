@@ -90,7 +90,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
       bReader = new BufferedReader(reader);
       line = bReader.readLine();
       ///String toParse = "";
-      StringBuffer toParse = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+      StringBuffer toParse = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
       int lineIdx = 0;
       while (line != null) {
@@ -238,8 +238,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
   public String getFSMgml() {
     String res = "graph[ \ndirected 1\n";
     ///String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
-                edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
+                edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
     Iterator fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
       FSMState currentState = (FSMState)fsmStatesIter.next();

@@ -125,7 +125,7 @@ implements Runnable, ProcessingResource{
       BufferedReader bRulesReader = new BufferedReader(rulesReader);
       String line = bRulesReader.readLine();
       ///String toParse = "";
-      StringBuffer toParse = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+      StringBuffer toParse = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
       while (line != null){
         if(line.endsWith("\\")){
@@ -307,7 +307,7 @@ implements Runnable, ProcessingResource{
     else return null;
 
     ///String type = "";
-    StringBuffer type = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer type = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     while(!token.equals(until)){
       //type += token;
@@ -495,8 +495,8 @@ implements Runnable, ProcessingResource{
   public String getFSMgml(){
     String res = "graph[ \ndirected 1\n";
     ///String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
-                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     Iterator fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
@@ -529,8 +529,8 @@ implements Runnable, ProcessingResource{
   public String getDFSMgml() {
     String res = "graph[ \ndirected 1\n";
     ///String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
-                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     Iterator dfsmStatesIter = dfsmStates.iterator();
     while (dfsmStatesIter.hasNext()) {

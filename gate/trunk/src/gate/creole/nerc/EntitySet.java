@@ -52,7 +52,7 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
     */
   public String toString() {
     ///String res = "==== FILE: " + fileName + "\n";
-    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
     res.append("==== FILE: ");
     res.append(fileName);
