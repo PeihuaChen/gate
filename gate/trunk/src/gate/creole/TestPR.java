@@ -58,21 +58,21 @@ public class TestPR extends TestCase
         doc1 = Factory.newDocument(
             new URL(TestDocument.getTestServerName() +
                     "tests/ft-bt-03-aug-2001.html"),
-            "ISO8859-1"
+            "windows-1252"
             );
 
       if (doc2 == null)
         doc2 = Factory.newDocument(
             new URL(TestDocument.getTestServerName() +
                     "tests/gu-Am-Brit-4-aug-2001.html"),
-            "ISO8859-1"
+            "windows-1252"
             );
 
       if (doc3 == null)
         doc3 = Factory.newDocument(
             new URL(TestDocument.getTestServerName() +
                     "tests/in-outlook-09-aug-2001.html"),
-            "ISO8859-1"
+            "windows-1252"
             );
     }catch(Exception e){
       e.printStackTrace();
