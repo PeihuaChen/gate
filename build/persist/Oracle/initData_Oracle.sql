@@ -36,7 +36,7 @@
      
      --
      insert into t_lr_type(lrtp_id,lrtp_type)
-     values(2,'gate.corpora.CorpusImpl');
+     values(2,'gate.corpora.DatabaseCorpusImpl');
 
      
      --create the ADMIN user and group
