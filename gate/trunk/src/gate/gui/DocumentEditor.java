@@ -2020,7 +2020,7 @@ if(!highlights.isEmpty()){
         hBox.add(label);
         hBox.add(rightSpacer);
       }else{
-        label.setText(value.toString());
+        label.setText(value == null ? "" : value.toString());
         label.setForeground(tree.getForeground());
         label.setBackground(tree.getBackground());
         label.setFont(tree.getFont());
