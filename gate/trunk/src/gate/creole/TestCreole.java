@@ -10,6 +10,7 @@ package gate.creole;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
 import junit.framework.*;
 
 import gate.*;
@@ -28,8 +29,8 @@ public class TestCreole extends TestCase
     Gate.initCreoleRegister();
   } // setUp
 
-  /** A test */
-  public void testSomething() throws Exception {
+  /** Test resource registration */
+  public void testRegister() throws Exception {
 
     CreoleRegister reg = Gate.getCreoleRegister();
 
@@ -43,7 +44,23 @@ public class TestCreole extends TestCase
     assert(xmlDocFormatRD.getName().equals(docFormatName));
     assert(xmlDocFormatRD.isAutoLoading());
     assert(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
-  } // testSomething()
+  } // testRegister()
+
+  /** Test resource loading */
+  public void testLoading() throws Exception {
+
+    CreoleRegister reg = Gate.getCreoleRegister();
+    reg.clear();
+    reg.getDirectories().clear();
+    reg.addDirectory(new URL("file:/z:/gate2/build/creole.xml"));
+    reg.registerDirectories();
+
+    assert(reg.size() == 2);
+    ResourceData pr1 = (ResourceData) reg.get("Sheffield Test PR 1");
+    ResourceData pr2 = (ResourceData) reg.get("Sheffield Test PR 2");
+    assert(pr1 != null & pr2 != null);
+
+  } // testLoading()
 
   /** Test suite routine for the test runner */
   public static Test suite() {
