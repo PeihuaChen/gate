@@ -529,4 +529,19 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
 
+  /**
+   * Returns the name of the icon to be used when this datastore is displayed
+   * in the GUI
+   */
+  public String getIconName(){
+    return "ds.gif";
+  }
+
+  /**
+   * Returns the comment displayed by the GUI for this DataStore
+   */
+  public String getComment(){
+    return "GATE serial datastore";
+  }
+
 } // class SerialDataStore

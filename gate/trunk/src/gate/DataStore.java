@@ -113,4 +113,16 @@ public interface DataStore extends FeatureBearer {
    * from the list listeners for this datastore
    */
   public void removeDatastoreListener(DatastoreListener l);
+
+  /**
+   * Returns the name of the icon to be used when this datastore is displayed
+   * in the GUI
+   */
+  public String getIconName();
+
+  /**
+   * Returns the comment displayed by the GUI for this DataStore
+   */
+  public String getComment();
+
 } // interface DataStore
