@@ -43,8 +43,10 @@ SUBS=$*
 # where to find Java
 if [ $SYS = cygwin ]
 then
-  JAVABASE=//w/apps/jdk1.2.2
-  JAVABASE1='w:\apps\jdk1.2.2'
+  JAVABASE=//w/jdk/jdk1.2
+  JAVABASE1='w:\jdk\jdk1.2'
+#  JAVABASE=//w/apps/jdk1.2.2
+#  JAVABASE1='w:\apps\jdk1.2.2'
 elif [ $SYS=unix ] 
 then
   JAVABASE=/usr/local/pkg/jdk/jdk1.2fcs
