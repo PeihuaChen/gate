@@ -49,7 +49,8 @@ public class HtmlDocumentHandler extends ParserCallback{
   protected List myStatusListeners = new LinkedList();
 
   private int elements = 0;
-  private int elementsRate = 64;
+  private int elementsRate = 128;
+
   /**
     * Constructor
     */
@@ -69,7 +70,7 @@ public class HtmlDocumentHandler extends ParserCallback{
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // inform the progress listener about that
     if ((++elements % elementsRate) == 0)
-        fireStatusChangedEvent("Elements processed so far : " + elements);
+        fireStatusChangedEvent("Processed elements : " + elements);
     // construct a feature map from the attributes list
     FeatureMap fm = new SimpleFeatureMapImpl();
     // take all the attributes an put them into the feature map
@@ -135,7 +136,7 @@ public class HtmlDocumentHandler extends ParserCallback{
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // inform the progress listener about that
     if ((++elements % elementsRate) == 0)
-        fireStatusChangedEvent("Elements processed so far : " + elements);
+       fireStatusChangedEvent("Processed elements : " + elements);
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -174,8 +175,16 @@ public class HtmlDocumentHandler extends ParserCallback{
     */
   public void handleText(char[] text, int pos){
     String content = new String(text);
+    int tmpDocContentSize = 0;
+    tmpDocContentSize = tmpDocContent.length();
+
+    if (tmpDocContentSize != 0)
+     if (!Character.isWhitespace(content.charAt(0)) &&
+      !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1)))
+          content = " " + content;
+          
     MyCustomObject obj = null;
-    Long end = new Long(tmpDocContent.length() + content.length());
+    Long end = new Long(tmpDocContentSize + content.length());
 
     Iterator iterator = stack.iterator ();
     while (iterator.hasNext()){

@@ -50,7 +50,7 @@ public class XmlDocumentHandler extends HandlerBase
   protected List myStatusListeners = new LinkedList();
 
   private int elements = 0;
-  private int elementsRate = 64;
+  private int elementsRate = 128;
 
   /**
     * Constructor
@@ -89,7 +89,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void startElement(String elemName, AttributeList atts){
     // inform the progress listener about that
     if ((++elements % elementsRate) == 0)
-        fireStatusChangedEvent("Elements processed so far : " + elements);
+        fireStatusChangedEvent("Processed elements : " + elements);
     // construct a SimpleFeatureMapImpl from the list of attributes
     FeatureMap fm = new SimpleFeatureMapImpl();
     // for all attributes do
