@@ -616,7 +616,7 @@ System.out.println("docid = " +this.uc01_lrID);
 
 
     //11. ALL named annotation (ensure nothing is read from DB twice)
-/*    Map namedNew = dbDoc.getNamedAnnotationSets();
+    Map namedNew = dbDoc.getNamedAnnotationSets();
 
     Assert.assertNotNull(namedNew);
     Assert.assert(namedNew.size() == namedOld.size());
@@ -630,7 +630,7 @@ System.out.println("docid = " +this.uc01_lrID);
       Assert.assertNotNull(asetOld);
       Assert.assertEquals(asetNew,asetOld);
     }
-*/
+
     if(DEBUG) {
       Err.prln("Use case 03 passed...");
     }
