@@ -28,9 +28,11 @@ import edu.stanford.smi.protege.event.*;
 /** Dummy Protege LR. Just keep the Protege project file name */
 public class ProtegeProjectName extends AbstractLanguageResource
                                 implements ProtegeProject, Ontology {
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
   /** Protege project file name */
-  private String projectName;
+  private URL projectName;
 
   /** Protege ontology */
   private KnowledgeBase knBase = null;
@@ -49,11 +51,11 @@ public class ProtegeProjectName extends AbstractLanguageResource
     projectName = null;
   }
 
-  public void setProjectName(String name) {
+  public void setProjectName(URL name) {
     projectName = name;
   } // setProjectName(String name)
 
-  public String getProjectName() {
+  public URL getProjectName() {
     return projectName;
   } // getProjectName()
 

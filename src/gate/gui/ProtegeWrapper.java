@@ -28,6 +28,8 @@ import edu.stanford.smi.protege.model.*;
  *  This class wrap the Protege application to show it as VR in GATE
  */
 public class ProtegeWrapper extends AbstractVisualResource {
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
   /** File name as string will be VR target for now */
   private ProtegeProjectName projectFileName = null;
@@ -113,7 +115,7 @@ public class ProtegeWrapper extends AbstractVisualResource {
       String fileName = null;
     
       if(projectFileName != null) {
-        fileName = projectFileName.getProjectName();
+        fileName = projectFileName.getProjectName().getFile();
         if(fileName != null && fileName.trim().length() == 0) {
           fileName = null;
         }
@@ -123,6 +125,9 @@ public class ProtegeWrapper extends AbstractVisualResource {
       frame.getContentPane().add(protegeRootPane);
 
       ProjectManager.getProjectManager().setRootPane(protegeRootPane);
+      if(DEBUG) {
+        System.out.println("Load Protege project: "+fileName);
+      }
       ProjectManager.getProjectManager().loadProject(fileName);
 
       protegeRootPane.setJMenuBar(null);
