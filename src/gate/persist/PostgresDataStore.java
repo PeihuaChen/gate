@@ -817,13 +817,6 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-  /** helper for sync() - saves a Document in the database */
-/*  protected void syncDocument(Document doc)
-    throws PersistenceException, SecurityException {
-
-    throw new MethodNotImplementedException();
-  }
-*/
 
   /**
    *  helper for sync()
@@ -863,8 +856,23 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
+
   /** helper for sync() - never call directly */
-  protected void _syncAnnotations(Document doc)
+  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
