@@ -9,7 +9,8 @@ import java.util.*;
  * <p>Description: This class segments the Chinese Text by adding extra spaces
  * </p>
  * <p>Company: University Of Sheffield</p>
- * @author     - modified by Niraj Aswani
+ * @author Erik E. Peterson - modified by Niraj Aswani
+ * @source http://www.mandarintools.com/segmenter.html
  * @version 1.0
  */
 public class Segmenter {
