@@ -306,7 +306,49 @@ while(listIter.hasNext()){
     fileMenu.add(new XJMenuItem(newApplicationAction, this));
     menuBar.add(fileMenu);
 
-    JMenu editMenu = new JMenu("Edit");
+
+    JMenu optionsMenu = new JMenu("Options");
+    appearanceDialog = new ApperanceDialog(this, "Fonts", true);
+    optionsMenu.add(new AbstractAction("Fonts"){
+      public void actionPerformed(ActionEvent evt){
+        appearanceDialog.setLocationRelativeTo(MainFrame.this);
+        appearanceDialog.show();
+      }
+    });
+
+    JMenu lnfMenu = new JMenu("Look & Feel");
+    ButtonGroup lnfBg = new ButtonGroup();
+
+    UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
+    class SetLNFAction extends AbstractAction{
+      SetLNFAction(UIManager.LookAndFeelInfo info){
+        super(info.getName());
+        this.info = info;
+      }
+      public void actionPerformed(ActionEvent evt) {
+        try{
+          UIManager.setLookAndFeel(info.getClassName());
+          SwingUtilities.updateComponentTreeUI(MainFrame.this);
+        }catch(Exception e){
+          e.printStackTrace(Err.getPrintWriter());
+        }
+      }
+      UIManager.LookAndFeelInfo info;
+    };
+
+    for(int i = 0; i < lnfs.length; i++){
+      UIManager.LookAndFeelInfo lnf = lnfs[i];
+      JRadioButtonMenuItem item = new JRadioButtonMenuItem(new SetLNFAction(lnf));
+      if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
+        item.setSelected(true);
+      }
+      lnfBg.add(item);
+      lnfMenu.add(item);
+    }
+
+    SwingUtilities utt;
+    optionsMenu.add(lnfMenu);
+
     try{
       JMenu imMenu = null;
       Locale locale = new Locale("en", "GB");
@@ -317,6 +359,7 @@ while(listIter.hasNext()){
         ButtonGroup bg = new ButtonGroup();
         item = new LocaleSelectorMenuItem(this);
         imMenu.add(item);
+        item.setSelected(true);
         imMenu.addSeparator();
         bg.add(item);
         for(int i = 0; i < availableLocales.length; i++){
@@ -326,24 +369,15 @@ while(listIter.hasNext()){
           bg.add(item);
         }
       }
-      if(imMenu != null) editMenu.add(imMenu);
+      if(imMenu != null) optionsMenu.add(imMenu);
     }catch(AWTException awte){}
-    menuBar.add(editMenu);
 
-    appearanceDialog = new ApperanceDialog(this, "Fonts", true);
-
-    JMenu optionsMenu = new JMenu("Options");
-    optionsMenu.add(new AbstractAction("Fonts"){
-      public void actionPerformed(ActionEvent evt){
-        appearanceDialog.show();
-      }
-    });
     menuBar.add(optionsMenu);
 
 
     JMenu toolsMenu = new JMenu("Tools");
-    toolsMenu.add(newBootStrapAction);
     toolsMenu.add(newAnnotDiffAction);
+    toolsMenu.add(newBootStrapAction);
     try{
       toolsMenu.add(
         new AbstractAction("Unicode editor",
