@@ -2289,7 +2289,7 @@ Fireman NNP NN
 Fires VBZ
 Firm NN JJ
 Firms NNS NNPS NNP
-First NNP JJ RB LS
+First CD JJ NNP RB LS 
 First-round JJ
 First-section JJ
 Fiscal JJ NN NNP
