@@ -41,7 +41,7 @@
 \i persist_unlock_lr.sp
 \i persist_delete_annotation_set.sp
 \i persist_add_document_to_corpus.sp
-\i persist_remove_doc_from_corpus.sp
+\i persist_remove_document_from_corpus.sp
 \i persist_lock_lr.sp
 \i security_is_member_of_group.sp
 \i security_set_group_name.sp
