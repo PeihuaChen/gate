@@ -22,6 +22,7 @@ import java.io.*;
 
 import oracle.sql.CLOB;
 import oracle.sql.BLOB;
+import oracle.jdbc.driver.*;
 
 import junit.framework.*;
 
@@ -166,6 +167,14 @@ public class OracleDataStore extends JDBCDataStore {
   public void open() throws PersistenceException {
 
     super.open();
+
+    try {
+    //set statement caching for Oracle
+      ((OracleConnection)this.jdbcConn).setStmtCacheSize(50);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException(sqle);
+    }
   }
 
 
@@ -1240,6 +1249,9 @@ public class OracleDataStore extends JDBCDataStore {
                       " ORDER BY lr_name"
                       );
       stmt.setString(1,lrType);
+      //stmt.setFetchSize(30);
+      ((OraclePreparedStatement)stmt).setRowPrefetch(30);
+//      ((OraclePreparedStatement)stmt).defineColumnType(1,java.sql.Types.BIGINT);
       stmt.execute();
       rs = stmt.getResultSet();
 
@@ -1279,6 +1291,9 @@ public class OracleDataStore extends JDBCDataStore {
                 "        AND LRTYPE.lrtp_type = ? "
                 );
       stmt.setString(1,lrType);
+//      stmt.setFetchSize(30);
+      ((OraclePreparedStatement)stmt).setRowPrefetch(30);
+//      ((OraclePreparedStatement)stmt).defineColumnType(1,java.sql.Types.VARCHAR);
       stmt.execute();
       rs = stmt.getResultSet();
 
