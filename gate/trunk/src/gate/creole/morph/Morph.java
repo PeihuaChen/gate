@@ -28,7 +28,7 @@ import gate.creole.ExecutionException;
 import gate.ProcessingResource;
 import gate.AnnotationSet;
 import gate.Annotation;
- import gate.util.GateRuntimeException;
+import gate.util.GateRuntimeException;
 
 /**
  * <p>Title: Morph.java </p>
@@ -59,6 +59,9 @@ public class Morph
 
   /** The name of the annotation set used for input */
   private String annotationSetName;
+
+  /** Boolean value that tells if parser should behave in caseSensitive mode */
+  private Boolean caseSensitive;
 
   /** Default Constructor */
   public Morph() {
@@ -135,6 +138,10 @@ public class Morph
       String tokenValue = (String) (currentToken.getFeatures().
                                     get(TOKEN_STRING_FEATURE_NAME));
       // run the Morpher
+      if(!caseSensitive.booleanValue()) {
+        tokenValue = tokenValue.toLowerCase();
+      }
+
       String baseWord = interpret.runMorpher(tokenValue);
       String affixWord = interpret.getAffix();
 
@@ -254,5 +261,21 @@ public class Morph
    */
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
+  }
+
+  /**
+   * A method which returns if the parser is in caseSenstive mode
+   * @return
+   */
+  public Boolean getCaseSensitive() {
+    return this.caseSensitive;
+  }
+
+  /**
+   * Sets the caseSensitive value, that is used to tell parser if it should
+   * convert document to lowercase before parsing
+   */
+  public void setCaseSensitive(java.lang.Boolean value) {
+    this.caseSensitive = value;
   }
 }
