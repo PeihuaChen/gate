@@ -8,6 +8,7 @@
 
 package gate;
 import java.util.*;
+import java.net.*;
 import gate.util.*;
 
 /** 
@@ -15,5 +16,13 @@ import gate.util.*;
   */
 public interface Document
 {
+  /** Documents are identified by URLs */
+  public Url getUrl();
+
+  /** The annotation graphs for this document */
+  public Set getAnnotationGraphs();
+
+  /** The features of this document */
+  public FeatureSet getFeatureSet();
 
 } // interface Document
