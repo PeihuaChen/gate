@@ -300,8 +300,10 @@ extends AbstractLanguageResource implements Document {
 
   /** Get a named set of annotations. Creates a new set if one with this
     * name doesn't exist yet.
+    * If the provided name is null then it returns the default annotation set.
     */
   public AnnotationSet getAnnotations(String name) {
+    if(name == null) return getAnnotations();
     if(namedAnnotSets == null)
       namedAnnotSets = new HashMap();
     AnnotationSet namedSet = (AnnotationSet) namedAnnotSets.get(name);
