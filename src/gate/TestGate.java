@@ -22,7 +22,13 @@ public class TestGate
   public static void main(String[] args) {
     String a[] = new String[1];
     a[0] = "gate.TestGate";
-    junit.ui.LoadingTestRunner.main(a);
+    // use the next line if you're running with output to console in text mode:
+    // a[1] = "-wait";
+
+    if(args.length > 0 && args[0].equals("-t")) // text runner mode
+      junit.textui.TestRunner.main(a);
+    else
+      junit.ui.LoadingTestRunner.main(a);
   } // main
 
   /** GATE test suite. Every test case class has to be
