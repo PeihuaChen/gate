@@ -45,6 +45,7 @@ region_uk.lst:location:region
 spur_ident.lst:spur_ident
 stop.lst:stop
 street.lst:address:street
+surname_prefix.lst:surname:prefix
 time_ampm.lst:time:ampm
 timezone.lst:time:zone
 time_key.lst:time:time_key
