@@ -96,6 +96,10 @@ public class SimpleFeatureMapImpl
               }
             } // if ontologies are with the same url
           } //if not null objects
+          else {
+            // incomplete feature set: missing ontology feature
+            return false;
+          }
         } else {
           /* processing without ontology awareness */
           if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
@@ -162,6 +166,10 @@ public class SimpleFeatureMapImpl
                 return false;
             } // if ontologies are with the same url
           } //if not null objects
+          else {
+            // incomplete feature set: missing ontology feature
+            return false;
+          }
         } else {
           /*processing without ontology awareness*/
           if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
