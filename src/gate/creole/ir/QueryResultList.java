@@ -28,6 +28,13 @@ public class QueryResultList{
   /** List of QueryResult objects. */
   private List results;
 
+  /* Niraj */
+  /* Default Constructor */
+  // do not delete this as it is must to subclass this class
+  public QueryResultList() {
+  }
+  /* End */
+
   /** Constructor of the class. */
   public QueryResultList(String query, IndexedCorpus corpus, List results){
     this.queryString = query;

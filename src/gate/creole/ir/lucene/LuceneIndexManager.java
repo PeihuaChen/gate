@@ -39,6 +39,12 @@ public class LuceneIndexManager implements IndexManager{
   /** An corpus for indexing*/
   private Corpus corpus;
 
+  /* Niraj */
+  /** constant that ensures that corpus is indexed with IR plugin */
+  public final static String CORPUS_INDEX_FEATURE = "CorpusIndexFeature";
+  public final static String CORPUS_INDEX_FEATURE_VALUE = "IR";
+  /* End */
+
   /** Constructor of the class. */
   public LuceneIndexManager(){
   }
@@ -62,6 +68,11 @@ public class LuceneIndexManager implements IndexManager{
           throw new IndexException("Only empty directory can be index path");
         }
       }
+
+      /* Niraj */
+      // ok so lets put the corpus index feature
+      corpus.getFeatures().put(CORPUS_INDEX_FEATURE, CORPUS_INDEX_FEATURE_VALUE);
+      /* End */
 
       IndexWriter writer = new IndexWriter(location,
                                            new SimpleAnalyzer(), true);
