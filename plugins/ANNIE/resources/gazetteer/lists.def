@@ -3,6 +3,7 @@ charities.lst:organization
 city.lst:location:city
 city_cap.lst:location:city
 company.lst:organization:company
+company_cap.lst:organization:company
 country.lst:location:country
 country_cap.lst:location:country
 country_adj.lst:country_adj
@@ -25,15 +26,18 @@ numbers.lst:number
 ordinal.lst:date:ordinal
 org_base.lst:org_base
 org_key.lst:org_key
+org_key_cap.lst:org_key:cap
 org_ending.lst:org_ending
 org_pre.lst:org_pre
 organization.lst:organization
 person_ambig.lst:person_first:ambig
 person_female.lst:person_first:female
 person_female_cap.lst:person_first:female
+person_female_lower.lst:person_first:female
 person_full.lst:person_full
 person_male.lst:person_first:male
 person_male_cap.lst:person_first:male
+person_male_lower.lst:person_first:male
 province.lst:location:province
 region.lst:location:region
 region_uk.lst:location:region
