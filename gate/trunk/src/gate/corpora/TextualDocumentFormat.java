@@ -67,7 +67,7 @@ public class TextualDocumentFormat extends DocumentFormat
   public void unpackMarkup(Document doc) throws DocumentFormatException{
     if (doc == null || doc.getContent() == null) return;
     // Create paragraph annotations in the default annotation set
-    String annotSetName = null;
+    String annotSetName = "Original markups";
     int endOffset = doc.getContent().toString().length();
     int startOffset = 0;
     annotateParagraphs(doc,startOffset,endOffset,annotSetName);

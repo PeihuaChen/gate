@@ -1445,14 +1445,18 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
           listeners.put("gate.event.StatusListener", MainFrame.this);
           FeatureMap params = Factory.newFeatureMap();
           try{
+            // Create a serial analyser
+            SerialAnalyserController sac = (SerialAnalyserController)
+                Factory.createResource("gate.creole.SerialAnalyserController");
             // Load each PR as defined in gate.creole.AnnieConstants.PR_NAMES
             for(int i=0; i<gate.creole.AnnieConstants.PR_NAMES.length; i++){
-              Factory.createResource( gate.creole.AnnieConstants.PR_NAMES[i],
-                                      params,
-                                      listeners);
+            ProcessingResource pr = (ProcessingResource)
+                Factory.createResource( gate.creole.AnnieConstants.PR_NAMES[i],
+                                        params,
+                                        listeners);
+              // Add the PR to the sac
+              sac.add(pr);
             }// End for
-            // Create an application at the end.
-            Factory.createResource("gate.creole.SerialAnalyserController");
           }catch(gate.creole.ResourceInstantiationException ex){
             ex.printStackTrace(Err.getPrintWriter());
           }// End try
