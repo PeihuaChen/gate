@@ -62,5 +62,8 @@ public interface ANNIEConstants {
   public static final String MONEY_ANNOTATION_TYPE = "Money";
   public static final String DATE_ANNOTATION_TYPE = "Date";
 
+  public static final String DATE_POSTED_ANNOTATION_TYPE = "Date_Posted";
+  public static final String JOB_ID_ANNOTATION_TYPE = "JobId";
+
 
   } // AnnieConstants
