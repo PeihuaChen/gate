@@ -211,8 +211,28 @@ bindistrib:
 
 
 # create distributions
-# don't think this is working...
+# creates a DISTRIB dir at the same level as gate
 distrib:
+	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-build$${B}; \
+	TARZ="tar czf"; D=DISTRIB; \
+	rm -rf ../../$${D}; mkdir ../../$${D}; cd ../../$${D}; \
+	cvs co gate; rm -rf gate/doc/internal; GN=$${N}--SOURCE; \
+	mv gate $${GN}; $${TARZ} $${GN}.tgz $${GN}; rm -rf $${GN}; \
+	cd ..; GN=$${N}--ALL; mv gate $${GN}; mv $${GN}/doc/internal $${D}; \
+	$${TARZ} $${D}/$${GN}.tgz $${GN}; mv $${GN} gate; \
+	cp gate/build/gate.jar gate/bin;cp gate/lib/ext/guk.jar gate/bin/ext; \
+	GN=$${N}--BINARY; mv gate $${GN}; \
+	$${TARZ} $${D}/$${GN}.tgz $${GN}/bin; mv $${GN} gate; \
+	GN=$${N}--DOCS; mv gate $${GN}; \
+	$${TARZ} $${D}/$${GN}.tgz $${GN}/doc $${GN}/*.html; mv $${GN} gate; \
+	mv $${D}/internal gate/doc; \
+	rm gate/bin/gate.jar gate/bin/ext/guk.jar; \
+	echo '*** copy tgzs to etag & releases dirs, and unpack in latter';echo
+  
+
+
+# don't think this is working...
+olddistrib:
 	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-$${B}; \
 	cd ../.. && cp -R gate $${N} && \
 	rm -rf `find $${N} -name internal -print` && \
