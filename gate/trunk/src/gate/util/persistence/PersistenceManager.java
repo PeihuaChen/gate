@@ -353,10 +353,17 @@ public class PersistenceManager {
     try{
       //insure a clean start
       existingPersitentReplacements.clear();
-      Object persistentObject = getPersistentRepresentation(obj);
       existingPersitentReplacements.clear();
 
       oos = new ObjectOutputStream(new FileOutputStream(file));
+
+      //always write the list of creole URLs first
+      List urlList = new ArrayList(Gate.getCreoleRegister().getDirectories());
+      Object persistentList = getPersistentRepresentation(urlList);
+      oos.writeObject(persistentList);
+
+      //now write the object
+      Object persistentObject = getPersistentRepresentation(obj);
       oos.writeObject(persistentObject);
     }finally{
       if(oos != null){
@@ -385,6 +392,21 @@ public class PersistenceManager {
     ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
     Object res = null;
     try{
+      //first read the list of creole URLs
+      Iterator urlIter = ((Collection)
+                          getTransientRepresentation(ois.readObject())).
+                          iterator();
+      while(urlIter.hasNext()){
+        URL anUrl = (URL)urlIter.next();
+        try{
+          if(!Gate.getCreoleRegister().getDirectories().contains(anUrl))
+            Gate.getCreoleRegister().registerDirectories(anUrl);
+        }catch(GateException ge){
+          Err.prln("Could not reload creole directory " +
+                   anUrl.toExternalForm());
+        }
+      }
+      //now we can read the saved object
       res = ois.readObject();
     }catch(ClassNotFoundException cnfe){
       if(sListener != null) sListener.statusChanged("Loading failed!");
