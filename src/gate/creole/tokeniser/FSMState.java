@@ -13,23 +13,23 @@ import java.util.*;
     }
 
     void put(UnicodeType type, FSMState state){
-      if(null == type) put(128,state);
-      else put(type.type , state);
+      if(null == type) put(DefaultTokeniser.maxTypeId, state);
+      else put(type.type, state);
     }
 
     Set nextSet(UnicodeType type){
-      if(null == type) return transitionFunction[256];
-      else return transitionFunction[type.type +128];
+      if(null == type) return transitionFunction[DefaultTokeniser.maxTypeId];
+      else return transitionFunction[type.type];
     }
 
-    Set nextSet(byte type){
-      return transitionFunction[type + 128];
+    Set nextSet(int type){
+      return transitionFunction[type];
     }
 
     void put(int index, FSMState state){
-      if(null == transitionFunction[index +128])
-        transitionFunction[index +128] = new HashSet();
-      transitionFunction[index +128].add(state);
+      if(null == transitionFunction[index])
+        transitionFunction[index] = new HashSet();
+      transitionFunction[index].add(state);
     }
 
     void setRhs(String rhs){this.rhs = rhs;}
@@ -42,7 +42,7 @@ import java.util.*;
       Set nextSet;
       Iterator nextSetIter;
       FSMState nextState;
-      for(int i = 0; i< transitionFunction.length; i++){
+      for(int i = 0; i <= DefaultTokeniser.maxTypeId; i++){
         nextSet = transitionFunction[i];
         if(null != nextSet){
           nextSetIter = nextSet.iterator();
@@ -51,8 +51,8 @@ import java.util.*;
             res += "edge [ source " + myIndex +
             " target " + nextState.getIndex() +
             " label \"";
-            if(i -128 > Byte.MAX_VALUE) res += "[]";
-            else res += DefaultTokeniser.typesMnemonics[i];
+            if(i == DefaultTokeniser.maxTypeId) res += "[]";
+            else res += DefaultTokeniser.typeMnemonics[i];
             res += "\" ]\n";
           }//while(nextSetIter.hasNext())
         }
@@ -74,7 +74,7 @@ import java.util.*;
 */
       return res;
     }
-    Set[] transitionFunction = new Set[257];
+    Set[] transitionFunction = new Set[DefaultTokeniser.maxTypeId + 1];
     String rhs;
     int myIndex;
     static int index;

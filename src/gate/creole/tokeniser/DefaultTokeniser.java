@@ -10,6 +10,7 @@ package gate.creole.tokeniser;
 
 import java.util.*;
 import java.io.*;
+import java.lang.reflect.*;
 
 import gate.*;
 import gate.gui.*;
@@ -177,6 +178,8 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     token = skipIgnoreTokens(st);
     if(null == token) return currentState;
     FSMState newState;
+    Integer typeId;
+    UnicodeType uType;
     bigwhile: while(!token.equals(until)){
       if(token.equals("(")){//(..)
         newState = parseLHS(currentState, st,")");
@@ -184,17 +187,19 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         String sType = parseQuotedString(st, "\"");
 //System.out.println(sType);
         newState = new FSMState(this);
-        UnicodeType uType = (UnicodeType)characterTypes.get(sType);
-        if(null == uType) throw
-                  new InvalidRuleException("Invalid type: \"" + sType + "\"");
+        typeId = (Integer)stringTypeIds.get(sType);
+        if(null == typeId)
+          throw new InvalidRuleException("Invalid type: \"" + sType + "\"");
+        else uType = new UnicodeType(typeId.intValue());
         currentState.put(uType ,newState);
       }else{// a type with no quotes
         String sType = token;
 //System.out.println(sType);
         newState = new FSMState(this);
-        UnicodeType uType = (UnicodeType)characterTypes.get(sType);
-        if(null == uType) throw
-                  new InvalidRuleException("Invalid type: \"" + sType + "\"");
+        typeId = (Integer)stringTypeIds.get(sType);
+        if(null == typeId)
+          throw new InvalidRuleException("Invalid type: \"" + sType + "\"");
+        else uType = new UnicodeType(typeId.intValue());
         currentState.put(uType ,newState);
       }
       //treat the operators
@@ -263,7 +268,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     *token.
     *The ignorable tokens are defined by {@link #ignoreTokens a set}
     */
-  static String skipIgnoreTokens(StringTokenizer st){
+  public static String skipIgnoreTokens(StringTokenizer st){
     Iterator ignorables;
     boolean ignorableFound = false;
     String currentToken;
@@ -357,13 +362,13 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     while(!unmarkedDStates.isEmpty()){
 //System.out.println("\n\n=====================" + unmarkedDStates.size());
       sdCurrentState = (Set)unmarkedDStates.removeFirst();
-      for(int type = Byte.MIN_VALUE; type <= Byte.MAX_VALUE; type++){
+      for(int type = 0; type < maxTypeId; type++){
 //System.out.print(type);
         nextSet = new HashSet();
         innerStatesIter = sdCurrentState.iterator();
         while(innerStatesIter.hasNext()){
           currentInnerState = (FSMState)innerStatesIter.next();
-          Set tempSet = currentInnerState.nextSet((byte)type);
+          Set tempSet = currentInnerState.nextSet(type);
           if(null != tempSet) nextSet.addAll(tempSet);
         }//while(innerStatesIter.hasNext())
         if(!nextSet.isEmpty()){
@@ -506,7 +511,8 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     while(charIdx < length){
       currentChar = content.charAt(charIdx);
 //System.out.println(currentChar + typesMnemonics[Character.getType(currentChar)+128]);
-      nextState = graphPosition.next((byte)Character.getType(currentChar));
+      nextState = graphPosition.next(((Integer)typeIds.get(
+                  new Integer(Character.getType(currentChar)))).intValue());
       if(null != nextState){
         graphPosition = nextState;
         if(graphPosition.isFinal()){
@@ -520,6 +526,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
           tokenString = content.substring(tokenStart, tokenStart +1);
           newTokenFm.put("type","UNKNOWN");
           newTokenFm.put("string", tokenString);
+          newTokenFm.put("length", Integer.toString(tokenString.length()));
           try{
             annotationSet.add(new Long(tokenStart),
                               new Long(tokenStart + 1),
@@ -534,6 +541,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         }else{
           tokenString = content.substring(tokenStart, lastMatch + 1);
           newTokenFm.put("string", tokenString);
+          newTokenFm.put("length", Integer.toString(tokenString.length()));
           for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
             newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
                            lastMatchingState.getTokenDesc()[i][1]);
@@ -546,7 +554,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
                               lastMatchingState.getTokenDesc()[0][0], newTokenFm);
           }catch(InvalidOffsetException ioe){
             //This REALLY shouldn't happen!
-            ioe.printStackTrace(System.err);
+            throw new LuckyException(ioe.toString());
           }
 //          System.out.println(lastMatchingState.getTokenDesc()[0][0] +
 //                             ": " + tokenStart + "->" + lastMatch +
@@ -567,6 +575,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
       tokenString = content.substring(tokenStart, lastMatch + 1);
       newTokenFm = Transients.newFeatureMap();
       newTokenFm.put("string", tokenString);
+      newTokenFm.put("length", Integer.toString(tokenString.length()));
       for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
         newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
                        lastMatchingState.getTokenDesc()[i][1]);
@@ -632,31 +641,31 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return new Transients();
   }
 
-  private FeatureMap features  = null;
-  private List myProgressListeners = new LinkedList();
-  private List myStatusListeners = new LinkedList();
-  private Document doc;
-  private AnnotationSet annotationSet;
+  protected FeatureMap features  = null;
+  protected List myProgressListeners = new LinkedList();
+  protected List myStatusListeners = new LinkedList();
+  protected Document doc;
+  protected AnnotationSet annotationSet;
 
   /**The initial state of the non deterministic machine*/
-  FSMState initialState;
+  protected FSMState initialState;
 
   /**A set containng all the states of the non deterministic machine*/
-  Set fsmStates = new HashSet();
+  protected Set fsmStates = new HashSet();
 
   /**The initial state of the deterministic machine*/
-  DFSMState dInitialState;
+  protected DFSMState dInitialState;
 
   /**A set containng all the states of the deterministic machine*/
-  Set dfsmStates = new HashSet();
+  protected Set dfsmStates = new HashSet();
 
   /**Maps from the String description to the int value representing Unicode
     *categories
     */
-  public static Map characterTypes;
+//  public static Map characterTypes;
 
   /**Maps from the int associated to the unicode category to its name*/
-  public static String[] typesMnemonics;
+//  public static String[] typesMnemonics;
 
   /**The separator from LHS to RHS*/
   static String LHStoRHS = ">";
@@ -664,7 +673,56 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   /**A set of string representing tokens to be ignored (e.g. blanks)*/
   static Set ignoreTokens;
 
+
+//======================
+  /**maps from int (the static value on {@link java.lang.Character} to int
+    *the internal value used by the tokeniser
+    */
+  public static Map typeIds;
+
+  /**The maximum int value used internally as a type id*/
+  public static int maxTypeId;
+
+  /**Maps the internal type ids to the type names*/
+  public static String[] typeMnemonics;
+
+  /**Maps from type names to type internal ids*/
+  public static Map stringTypeIds;
+//========================
   static{
+    Field[] characterClassFields;
+    try{
+      characterClassFields = Class.forName("java.lang.Character").getFields();
+    }catch(ClassNotFoundException cnfe){
+      throw new LuckyException("Could not find the java.lang.Character class!");
+    }
+    Collection staticFields = new LinkedList();
+    for(int i = 0; i< characterClassFields.length; i++)
+      if(Modifier.isStatic(characterClassFields[i].getModifiers()))
+         staticFields.add(characterClassFields[i]);
+    typeIds = new HashMap();
+    maxTypeId = staticFields.size() -1;
+    typeMnemonics = new String[maxTypeId + 1];
+    stringTypeIds = new HashMap();
+    Iterator staticFieldsIter = staticFields.iterator();
+    Field currentField;
+    int currentId = 0;
+    String fieldName;
+    try{
+      while(staticFieldsIter.hasNext()){
+        currentField = (Field)staticFieldsIter.next();
+        if(currentField.getType().toString().equals("byte")){
+          fieldName = currentField.getName();
+          typeIds.put(new Integer(currentField.getInt(null)), new Integer(currentId));
+          typeMnemonics[currentId] = fieldName;
+          stringTypeIds.put(fieldName, new Integer(currentId));
+          currentId++;
+        }
+      }
+    }catch(Exception e){
+      throw new LuckyException(e.toString());
+    }
+/*
     characterTypes = new HashMap();
     characterTypes.put("UPPERCASE_LETTER", new UnicodeType(Character.UPPERCASE_LETTER));
     characterTypes.put("LOWERCASE_LETTER", new UnicodeType(Character.LOWERCASE_LETTER));
@@ -720,7 +778,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     typesMnemonics[Character.CURRENCY_SYMBOL + 128] = "CURRENCY_SYMBOL";
     typesMnemonics[Character.MODIFIER_SYMBOL + 128] = "MODIFIER_SYMBOL";
     typesMnemonics[Character.OTHER_SYMBOL + 128] = "OTHER_SYMBOL";
-
+*/
     ignoreTokens = new HashSet();
     ignoreTokens.add(" ");
     ignoreTokens.add("\t");

@@ -4,6 +4,6 @@ package gate.creole.tokeniser;
   * the static member of java.lang.Character).
   */
 class UnicodeType{
-  byte type;
-  UnicodeType(byte type){ this.type = type;}
+  int type;
+  UnicodeType(int type){ this.type = type;}
 }//class UnicodeType
