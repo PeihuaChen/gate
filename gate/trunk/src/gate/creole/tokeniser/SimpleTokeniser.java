@@ -216,7 +216,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
         newState = parseLHS(currentState, st,")");
       } else if(token.equals("\"")){//"unicode_type"
         String sType = parseQuotedString(st, "\"");
-        //Out.println(sType);
         newState = new FSMState(this);
         typeId = (Integer)stringTypeIds.get(sType);
 
@@ -227,7 +226,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
         currentState.put(uType ,newState);
       } else {// a type with no quotes
         String sType = token;
-        //Out.println(sType);
         newState = new FSMState(this);
         typeId = (Integer)stringTypeIds.get(sType);
 
@@ -829,10 +827,12 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     }
 
     Collection staticFields = new LinkedList();
-
+    // JDK 1.4 introduced directionality constants that have the same values as
+    //character types; we need to skip those as well
     for(int i = 0; i< characterClassFields.length; i++)
-      if(Modifier.isStatic(characterClassFields[i].getModifiers()))
-         staticFields.add(characterClassFields[i]);
+      if(Modifier.isStatic(characterClassFields[i].getModifiers()) &&
+         characterClassFields[i].getName().indexOf("DIRECTIONALITY") == -1)
+        staticFields.add(characterClassFields[i]);
 
     typeIds = new HashMap();
     maxTypeId = staticFields.size() -1;
@@ -864,7 +864,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     ignoreTokens.add(" ");
     ignoreTokens.add("\t");
     ignoreTokens.add("\f");
-
   }
 
 } // class DefaultTokeniser
