@@ -1,0 +1,20 @@
+// java 
+
+Phase: Attendance
+//Input: Token SpaceToken Lookup
+Options: control = appelt
+
+
+
+
+
+Rule: java4
+
+({a}):process3
+
+-->
+
+:process3.ANNOTATE = { r = "a" 
+
+
+}

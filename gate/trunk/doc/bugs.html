@@ -1,76 +1,196 @@
 <!-- 
+bugs.html
+
+Valentin Tablan, April 2001
+
 This file contains a list of the known Gate bugs.
-The first table contains known bugs while the second one contains fixed bugs
-$id$
+The first table contains known bugs while the second one contains
+fixed bugs
+
+$Id$
 -->
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <TITLE>GATE BUGS</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF">
 
-<html>
-<head>
-<title>
-Gate bugs
-</title>
-</head>
-<body>
+<!------------------------------------------------------------------------->
+<H1>
+<IMG SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356></H1>
 
-<H2><a name="known">Known Bugs</a></h2>
+
+<!------------------------------------------------------------------------->
+<H2>Reporting bugs</H2>
+
+<P>
+Please send us a table entry looking like this:
+<PRE>
+  &lt;TR>
+    &lt;TH>Number&lt;/TH>
+    &lt;TH>Subsystem&lt;BR>(core, jape, creole or gui)&lt;/TH>
+    &lt;TH>Reported by&lt;/TH>
+    &lt;TH>Adopted by&lt;/TH>
+    &lt;TH>Reported on&lt;BR>(date/OS/JDK and&lt;BR>GATE versions)&lt;/TH>
+    &lt;TH>Fixed on&lt;BR>(date/GATE version)&lt;/TH>  
+    &lt;TH>Description&lt;/TH>
+    &lt;TH>Test method&lt;/TH>
+    &lt;TH>Supporting materials&lt;/TH>
+  &lt;/TR>
+</PRE>
+Along with any supporting materials like input files needed to
+duplicate the bug. Please provide as much information as possible.
+
+
+<!------------------------------------------------------------------------->
+<H2>Fixing bugs</H2>
+
+<P>
+<UL>
+<LI>
+Adopt the bug by filling in the "Adopted by" column and checking in this 
+file.
+<LI>
+Duplicate the bug; if you cannot, mail the person who submitted it and ask
+them to clarify. If it was fixed in the current version just add "Fixed
+on..." column.
+<LI>
+Add any necessary supporting materials in the bugs directory under the bug
+number.
+<LI>
+Add a test to the test suite that reproduces the bug and add the name of the
+test to the "Test method" column. If the bug can ONLY be reproduced by the
+GUI, then say "GUI only" in this column.
+<LI>
+Fix the bug; run all the tests.
+<LI>
+Fill in the rest of the table, move the entry to the "fixed" table
+and check in.
+</UL>
+
+
+<!-------------------------------------------------------------------------->
+<!-- THIS IS A TEMPLATE! PLEASE COPY IT AS A NEW ENTRY IN THE TABLE BELOW -->
+
+<!-- 13 lines:
+  <TR>
+    <TH>___number</TH>
+    <TH>core jape creole gui</TH>
+    <TH>___reported_by</TH>
+    <TH>___adopted_by</TH>
+    <TH>___reported_on ___date ___OS ___JDK ___Gversion</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>___description</TH>
+    <TH>___test_method</TH>
+    <TH>___supporting_materials</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+
+
+<!------------------------------------------------------------------------->
+<H2><a name="known">Known Bugs</a></H2>
+
 <TABLE border="1" cellspacing="5">
- <TR>
-  <TH>Number</TH>
-  <TH>Subsystem<br>(core/creole/gui)</TH>
-  <TH>Reported by</TH>
-  <TH>Adopted by</TH>
-  <TH>Date reported</TH>
-  <TH>Date fixed</TH>  
-  <TH>Description</TH>
-  <TH>Suporting materials</TH>
- </TR>
+<!--  HEADER  ------------------------------------------------------------->
+  <TR>
+    <TH>Number</TH>
+    <TH>Subsystem (core, jape, creole or gui)</TH>
+    <TH>Reported by</TH>
+    <TH>Adopted by</TH>
+    <TH>Reported on (date/OS/JDK and GATE versions)</TH>
+    <TH>Fixed on (date/GATE version)</TH>  
+    <TH>Description</TH>
+    <TH>Test method</TH>
+    <TH>Supporting materials</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+<!-- ENTRIES -------------------------------------------------------------->
+  <TR>
+    <TH>0001</TH>
+    <TH>jape</TH>
+    <TH>Horacio</TH>
+    <TH>Valy (by default:-)</TH>
+    <TH>April-01 NT4 JDK 1.3 alpha1</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>Infinite loop in jape processing</TH>
+    <TH>___test_method</TH>
+    <TH>directory bugs/0001</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+  <TR>
+    <TH>0002</TH>
+    <TH>gui</TH>
+    <TH>Hamish</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 linux6.2/solaris7 1.3.1 a2-build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>When a datastore is openned, and double-clicked on, before any
+    other resources are created, the resources tree resizes to near zero
+    size</TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+  <TR>
+    <TH>0003</TH>
+    <TH>gui</TH>
+    <TH>Hamish</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 NT4 1.3.1 a2build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>when using larger-than-normal fonts, the annotation diff results at
+    the bottom of the screen sometimes disappear outside the window</TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+  <TR>
+    <TH>0004</TH>
+    <TH>gui</TH>
+    <TH>Hamish</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 NT4 1.3.1 a2build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>the applications edit component needs some work - it resizes in a
+    strange fashion e.g. when you select a component to add. in general
+    components shouldn't resize when you're clicking in them methinks</TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+  <TR>
+    <TH>0005</TH>
+    <TH>gui</TH>
+    <TH>Hamish</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 NT4 1.3.1 a2build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>it would be nice if double click on a document in the datastore
+    display tree loaded the document, in line with double clicking
+    in the resource tree</TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+<!------------------------------------------------------------------------->
+</TABLE>
 
 
-
-<!-- THIS IS A TEMPLATE! PLEASE COPY IT AS A NEW LINE IN THE TABLE ABOVE -->
- <TR>
-  <TD><!--Number--></TD>
-  <TD><!-- Subsystem<br>(core/creole/gui)--></TD>
-  <TD><!-- Reported by--></TD>
-  <TD><!-- Adopted by--></TD>
-  <TD><!-- Date reported--></TD>
-  <TD><!-- Date fixed--></TD>
-  <TD><!-- Description--></TD>
-  <TD><!-- Suporting materials--></TD>
- </TR>
-</TABLE> 
-
-
-
+<!------------------------------------------------------------------------->
 <H2><a name=fixed>Fixed Bugs</a></h2>
 
 
-<TABLE border="1" cellspacing="5">
- <TR>
-  <TH>Number</TH>
-  <TH>Subsystem<br>(core/creole/gui)</TH>
-  <TH>Reported by</TH>
-  <TH>Adopted by</TH>
-  <TH>Date reported</TH>
-  <TH>Date fixed</TH>
-  <TH>Description</TH>
-  <TH>Suporting materials</TH>
- </TR>
 
 
-
-<!-- THIS IS A TEMPLATE! PLEASE COPY IT AS A NEW LINE IN THE TABLE ABOVE -->
- <TR>
-  <TD><!--Number--></TD>
-  <TD><!-- Subsystem<br>(core/creole/gui)--></TD>
-  <TD><!-- Reported by--></TD>
-  <TD><!-- Adopted by--></TD>
-  <TD><!-- Date reported--></TD>
-  <TD><!-- Date fixed--></TD>
-  <TD><!-- Description--></TD>
-  <TD><!-- Suporting materials--></TD>
- </TR>
-</TABLE> 
+<!------------------------------------------------------------------------->
 </body>
 </html>
-
+<!------------------------------------------------------------------------->
