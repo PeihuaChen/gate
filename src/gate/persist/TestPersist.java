@@ -28,6 +28,7 @@ import oracle.sql.*;
 //import oracle.jdbc.driver.*;
 
 import gate.*;
+import gate.annotation.*;
 import gate.event.DatastoreListener;
 import gate.util.*;
 import gate.corpora.*;
@@ -45,9 +46,22 @@ public class TestPersist extends TestCase
   private static final boolean DEBUG = false;
   private static Long sampleDoc_lrID = null;
   private static Long sampleCorpus_lrID = null;
-  private static Document sampleDoc = null;
   private static Corpus sampleCorpus = null;
   private static int dbType;
+
+  /* cached properties of the original transient document that will be
+     compared with the DB copies
+   */
+  private static AnnotationSet sample_defaultASet = null;
+  private static String sample_name = null;
+  private static FeatureMap sample_docFeatures = null;
+  private static URL sample_sourceURL = null;
+  private static Long sample_startOffset = null;
+  private static Long sample_endOffset = null;
+  private static Boolean sample_markupAware = null;
+  private static DocumentContent sample_content = null;
+  private static String sample_encoding = null;
+  private static Map sample_namedASets = null;
 
 //  private static final String UNICODE_STRING = "\u65e5\u672c\u8a9e\u6587\u5b57\u5217";
   private static final String UNICODE_STRING = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628\u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
@@ -596,8 +610,8 @@ public class TestPersist extends TestCase
     ds.open();
 
     //2. get test document
-    Document doc = createTestDocument();
-    Assert.assertNotNull(doc);
+    Document transDoc = createTestDocument();
+    Assert.assertNotNull(transDoc);
 
     //3. get security factory & login
     AccessController ac = Factory.createAccessController(this.JDBC_URL);
@@ -617,25 +631,45 @@ public class TestPersist extends TestCase
     //4. create security settings for doc
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
 
-    //4.5 set DS session
+    //5 set DS session
     ds.setSession(usrSession);
 
-    //5. try adding doc to data store
-    LanguageResource lr = ds.adopt(doc,si);
+    //6. cache the transient document properties for comparison
+    /// ...since it will be cleanup upon adoption from the datastore.
+    //... We'll need the cached values for the comparison only (asserts)
+    sample_defaultASet = new AnnotationSetImpl(transDoc.getAnnotations());
+    sample_name = transDoc.getName();
+    sample_docFeatures = transDoc.getFeatures();
+    sample_sourceURL = transDoc.getSourceUrl();
+    sample_startOffset = transDoc.getSourceUrlStartOffset();
+    sample_endOffset = transDoc.getSourceUrlEndOffset();
+    sample_markupAware = transDoc.getMarkupAware();
+    sample_content = transDoc.getContent();
+    sample_encoding = (String)transDoc.getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
+
+    sample_namedASets = new HashMap();
+    Map transDocNamedSets = transDoc.getNamedAnnotationSets();
+    Iterator it = transDocNamedSets.keySet().iterator();
+    while (it.hasNext()) {
+      String asetName = (String)it.next();
+      AnnotationSet transAset = (AnnotationSet)transDocNamedSets.get(asetName);
+      AnnotationSet asetNew = new AnnotationSetImpl(transAset);
+      this.sample_namedASets.put(transAset.getName(),asetNew);
+    }
+
+
+    //7. try adding doc to data store
+    LanguageResource lr = ds.adopt(transDoc,si);
 
     Assert.assertTrue(lr instanceof DatabaseDocumentImpl);
     Assert.assertNotNull(lr.getDataStore());
     Assert.assertTrue(lr.getDataStore() instanceof DatabaseDataStore);
-//The transient doc has been unloaded during adopt and is now empty
-//the following test doesn't make sense
-//    Assert.assertEquals(doc.getAnnotations(), ((DatabaseDocumentImpl)lr).getAnnotations());
+    Assert.assertEquals(sample_defaultASet, ((DatabaseDocumentImpl)lr).getAnnotations());
 
     sampleDoc_lrID = (Long)lr.getLRPersistenceId();
     if (DEBUG) Out.prln("lr id: " + this.sampleDoc_lrID);
-//    this.sampleDoc = lr;
-    sampleDoc = doc;
-//System.out.println("adopted doc:name=["+((Document)lr).getName()+"], lr_id=["+((Document)lr).getLRPersistenceId()+"]");
-    //6.close
+
+    //8.close
     ac.close();
     ds.close();
 
@@ -688,53 +722,51 @@ public class TestPersist extends TestCase
     //3. check name
     String name = lr.getName();
     Assert.assertNotNull(name);
-    Assert.assertEquals(name,sampleDoc.getName());
+    Assert.assertEquals(name,sample_name);
 
     //4. check features
     FeatureMap fm = lr.getFeatures();
-    FeatureMap fmOrig = sampleDoc.getFeatures();
 
     Assert.assertNotNull(fm);
-    Assert.assertNotNull(fmOrig);
-    Assert.assertTrue(fm.size() == fmOrig.size());
+    Assert.assertNotNull(sample_docFeatures);
+    Assert.assertTrue(fm.size() == sample_docFeatures.size());
 
     Iterator keys = fm.keySet().iterator();
 
     while (keys.hasNext()) {
       String currKey = (String)keys.next();
-      Assert.assertTrue(fmOrig.containsKey(currKey));
-      Assert.assertEquals(fm.get(currKey),fmOrig.get(currKey));
+      Assert.assertTrue(sample_docFeatures.containsKey(currKey));
+      Assert.assertEquals(fm.get(currKey),sample_docFeatures.get(currKey));
     }
 
     //6. URL
     DatabaseDocumentImpl dbDoc = (DatabaseDocumentImpl)lr;
-    Assert.assertEquals(dbDoc.getSourceUrl(),this.sampleDoc.getSourceUrl());
+    Assert.assertEquals(dbDoc.getSourceUrl(),sample_sourceURL);
 
     //5.start/end
-    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),this.sampleDoc.getSourceUrlStartOffset());
-    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),this.sampleDoc.getSourceUrlEndOffset());
+    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),sample_startOffset);
+    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),sample_endOffset);
 
     //6.markupAware
-    Assert.assertEquals(dbDoc.getMarkupAware(),this.sampleDoc.getMarkupAware());
+    Assert.assertEquals(dbDoc.getMarkupAware(),sample_markupAware);
 
     //7. content
     DocumentContent cont = dbDoc.getContent();
-    Assert.assertEquals(cont,this.sampleDoc.getContent());
+    Assert.assertEquals(cont,sample_content);
 
     //8. access the content again and assure it's not read from the DB twice
-    Assert.assertEquals(cont,((Document)this.sampleDoc).getContent());
+    Assert.assertEquals(cont,sample_content);
 
     //9. encoding
     String encNew = (String)dbDoc.
       getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
-    String encOld = (String)((DocumentImpl)this.sampleDoc).
-      getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
+    String encOld = sample_encoding;
     Assert.assertEquals(encNew,encOld);
 
     //10. default annotations
 ///System.out.println("GETTING default ANNOTATIONS...");
     AnnotationSet defaultNew = dbDoc.getAnnotations();
-    AnnotationSet defaultOld = this.sampleDoc.getAnnotations();
+    AnnotationSet defaultOld = sample_defaultASet;
 
     Assert.assertNotNull(defaultNew);
     Assert.assertTrue(defaultNew.size() == defaultOld.size());
@@ -742,37 +774,44 @@ public class TestPersist extends TestCase
 
 
     //10. iterate named annotations
+    Iterator itOld =  this.sample_namedASets.keySet().iterator();
+    while (itOld.hasNext()) {
+      String asetName = (String)itOld.next();
+      AnnotationSet asetOld = (AnnotationSet)sample_namedASets.get(asetName);
+      AnnotationSet asetNew = (AnnotationSet)dbDoc.getAnnotations(asetName);
+      Assert.assertNotNull(asetNew);
+      Assert.assertTrue(asetNew.size() == asetOld.size());
+      Assert.assertEquals(asetNew.get(),asetOld.get());
+    }
+
+/*
+    //10. iterate named annotations
     Map namedOld = this.sampleDoc.getNamedAnnotationSets();
     Iterator itOld = namedOld.keySet().iterator();
-///System.out.println("GETTING named ANNOTATIONS...");
     while (itOld.hasNext()) {
       String asetName = (String)itOld.next();
       AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
       AnnotationSet asetNew = (AnnotationSet)dbDoc.getAnnotations(asetName);
       Assert.assertNotNull(asetNew);
-///System.out.println("aset_old, size=["+asetOld.size()+"]");
-///System.out.println("aset_new, size=["+asetNew.size()+"]");
-///System.out.println("old = >>" + asetOld +"<<");
-///System.out.println("new = >>" + asetNew +"<<");
       Assert.assertTrue(asetNew.size() == asetOld.size());
       Assert.assertEquals(asetNew,asetOld);
     }
-
+*/
 
     //11. ALL named annotation (ensure nothing is read from DB twice)
     Map namedNew = dbDoc.getNamedAnnotationSets();
 
     Assert.assertNotNull(namedNew);
-    Assert.assertTrue(namedNew.size() == namedOld.size());
+    Assert.assertTrue(namedNew.size() == this.sample_namedASets.size());
 
     Iterator itNames = namedNew.keySet().iterator();
     while (itNames.hasNext()) {
       String asetName = (String)itNames.next();
       AnnotationSet asetNew = (AnnotationSet)namedNew.get(asetName);
-      AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
+      AnnotationSet asetOld = (AnnotationSet)sample_namedASets.get(asetName);
       Assert.assertNotNull(asetNew);
       Assert.assertNotNull(asetOld);
-      Assert.assertEquals(asetNew,asetOld);
+      Assert.assertEquals(asetNew.get(),asetOld.get());
     }
 
     //close
@@ -1362,44 +1401,81 @@ public class TestPersist extends TestCase
 
   public void testOracle_01() throws Exception {
 
+    if (DEBUG)
+      System.out.println(">> 01");
+
     prepareDB("oracle");
     _testDB_UseCase01();
+
+    if (DEBUG)
+      System.out.println("<< 01");
   }
 
   public void testOracle_02() throws Exception {
 
+    if (DEBUG)
+      System.out.println(">> 02");
+
     prepareDB("oracle");
     _testDB_UseCase02();
+
+    if (DEBUG)
+      System.out.println("<< 02");
   }
 
   public void testOracle_03() throws Exception {
+    if (DEBUG)
+      System.out.println(">> 03");
 
     prepareDB("oracle");
     _testDB_UseCase03();
+
+    if (DEBUG)
+      System.out.println("<< 03");
   }
 
   public void testOracle_04() throws Exception {
+    if (DEBUG)
+      System.out.println(">> 04");
 
     prepareDB("oracle");
     _testDB_UseCase04();
+
+    if (DEBUG)
+      System.out.println("<< 04");
   }
 
   public void testOracle_101() throws Exception {
+    if (DEBUG)
+      System.out.println(">> 101");
 
     prepareDB("oracle");
     _testDB_UseCase101();
+
+    if (DEBUG)
+      System.out.println("<< 101");
   }
 
   public void testOracle_102() throws Exception {
+    if (DEBUG)
+      System.out.println(">> 102");
 
     prepareDB("oracle");
     _testDB_UseCase102();
+
+    if (DEBUG)
+      System.out.println("<< 102");
   }
 
   public void testOracle_103() throws Exception {
+    if (DEBUG)
+      System.out.println(">> 103");
 
     prepareDB("oracle");
     _testDB_UseCase103();
+
+    if (DEBUG)
+      System.out.println("<< 103");
   }
 
   public void testPostgres_01() throws Exception {
@@ -1449,7 +1525,7 @@ public class TestPersist extends TestCase
   public static void main(String[] args){
     try{
 
-System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
+//-System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
       Gate.setLocalWebServer(false);
       Gate.setNetConnected(false);
       Gate.init();
@@ -1472,33 +1548,33 @@ System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
 
       /* oracle */
 
-//      test.setUp();
-//      test.testOracle_01();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_02();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_03();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_04();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_101();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_102();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_103();
-//      test.tearDown();
+      test.setUp();
+      test.testOracle_01();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_02();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_03();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_04();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_101();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_102();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_103();
+      test.tearDown();
 
 
       /* postgres */
