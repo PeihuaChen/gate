@@ -13,6 +13,7 @@
   <property category="debug.15" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.16" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.17" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.18" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.2" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.3" name="SmartStepRedefineClasses" value="0"/>
   <property category="debug.4" name="SmartStepRedefineClasses" value="0"/>
@@ -27,7 +28,10 @@
   <property category="optimize.1" name="OptimizableType" value="intuitive.ide.borland.jb8.ProfilerBootstrap"/>
   <property category="optimize.1" name="oicc.FilterFile" value="Z:\gate\gate.oif"/>
   <property category="optimize.1" name="oipr.FilterFile" value="Z:\gate\gate.oif"/>
-  <property category="runtime" name="ConfigurationCount" value="17"/>
+  <property category="optimize.18" name="OptimizableType" value="intuitive.ide.borland.jb8.ProfilerBootstrap"/>
+  <property category="optimize.18" name="oicc.FilterFile" value="Z:\gate\gate.oif"/>
+  <property category="optimize.18" name="oipr.FilterFile" value="Z:\gate\gate.oif"/>
+  <property category="runtime" name="ConfigurationCount" value="18"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.0" name="application.class" value="gate.TestGate"/>
   <property category="runtime.0" name="application.parameters" value="-i y:\gate.xml"/>
@@ -141,6 +145,18 @@
   <property category="runtime.17" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin"/>
   <property category="runtime.17" name="jsprunner.docbase" value="."/>
   <property category="runtime.17" name="jsprunner.jspfile" value="."/>
+  <property category="runtime.18" name="BuildTargetOnRun" value="com.borland.jbuilder.build.ProjectBuilder$ProjectBuildAction;make"/>
+  <property category="runtime.18" name="ConfigurationName" value="DB Admin Tool"/>
+  <property category="runtime.18" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+  <property category="runtime.18" name="application.class" value="gate.Main"/>
+  <property category="runtime.18" name="application.parameters" value="-i y:\gate.xml -a"/>
+  <property category="runtime.18" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext -Xmx800m -Djava.library.path=d:/apps/Oracle/Oracle91/bin"/>
+  <property category="runtime.18" name="appserver.ejbJarsSaved" value="1"/>
+  <property category="runtime.18" name="appserver.parameters" value="-jts -jns -jss -jdb"/>
+  <property category="runtime.18" name="appserver.servername" value="ejbcontainer"/>
+  <property category="runtime.18" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin"/>
+  <property category="runtime.18" name="jsprunner.docbase" value="."/>
+  <property category="runtime.18" name="jsprunner.jspfile" value="."/>
   <property category="runtime.2" name="ConfigurationName" value="Main GUI no site config"/>
   <property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.2" name="application.class" value="gate.Main"/>
