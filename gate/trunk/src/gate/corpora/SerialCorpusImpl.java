@@ -380,6 +380,14 @@ public class SerialCorpusImpl extends
       return false;
     Document doc = (Document) o;
 
+    //make it accept only docs from its own datastore
+    if (doc.getDataStore() != null
+        && !this.dataStore.equals(doc.getDataStore())) {
+      Err.prln("Error: Persistent corpus can only accept documents " +
+               "from its own datastore!");
+      return false;
+    }//if
+
     //add the document with its index in the docDataList
     //in this case, since it's going to be added to the end
     //the index will be the size of the docDataList before
