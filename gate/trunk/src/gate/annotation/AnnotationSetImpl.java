@@ -91,11 +91,18 @@ implements AnnotationSet
 // nodesByOffset
     }
     if(annotsByStartNode != null) {
+      Integer id = a.getStartNode().getId();
+      AnnotationSet starterAnnots = (AnnotationSet) annotsByStartNode.get(id);
+      starterAnnots.remove(a);
+      if(starterAnnots.isEmpty())
+        annotsByStartNode.remove(id);
+/*
       Node startNode = a.getStartNode();
       AnnotationSet thisNodeAnnots =
         (AnnotationSet) annotsByStartNode.get(startNode.getId());
       if(thisNodeAnnots != null)
         thisNodeAnnots.remove(a);
+*/
     }
 
     return true;
@@ -108,6 +115,13 @@ implements AnnotationSet
   public Annotation get(Integer id) {
     return (Annotation) annotsById.get(id);
   } // get(id)
+
+  /** Get all annotations */
+  public AnnotationSet get() {
+    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    resultSet.addAll(annotsById.values());
+    return resultSet;
+  } // get()
 
   /** Select annotations by type */
   public AnnotationSet get(String type) {
@@ -162,16 +176,44 @@ implements AnnotationSet
       return resultSet;
   } // get(type, constraints)
 
-  /** Select annotations by type, features and offset */
-  public AnnotationSet get(String type, FeatureMap constraints, Long offset)
-  {
+  /** Select annotations by offset. This returns the set of annotations
+    * whose start node is the least such that it is less than or equal
+    * to offset. If a positional index doesn't exist it is created.
+    */
+  public AnnotationSet get(Long offset) {
     if(annotsByStartNode == null) indexByOffset();
 
     // find the next node at or after offset; get the annots starting there
-    Node nextNode =
-      (Node) ((Object[]) nodesByOffset.getClosestMatch(offset))[0];
+    Node nextNode = (Node) nodesByOffset.getNextOf(offset);
+/*
+SortedSet s = new TreeSet();
+s.addAll(nodesByOffset.values());
+System.out.println(s);
+System.out.println(annotsByStartNode);
+System.out.println("");
+System.out.println(nodesByOffset);
+System.out.println("");
+System.out.println(annotsById);
+System.out.println("");
+Integer id = nextNode.getId();
+// the next call won't trace into, and returns a null set when
+// id = 1 (offset = 10)
+
+// node with id 6 has offset 0!!!!!
+
+AnnotationSet nextAnnots1 = (AnnotationSet) annotsByStartNode.get(id);
+*/
+
     AnnotationSet nextAnnots =
       (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+    return nextAnnots;
+  } // get(offset)
+
+  /** Select annotations by type, features and offset */
+  public AnnotationSet get(String type, FeatureMap constraints, Long offset)
+  {
+    // select by offset
+    AnnotationSet nextAnnots = (AnnotationSet) get(offset);
     if(nextAnnots == null) return null;
 
     // select by type and constraints from the next annots
@@ -196,19 +238,13 @@ implements AnnotationSet
     if(nodesByOffset == null) indexByOffset();
 
     // find existing nodes
-
-Object[] nodePair = nodesByOffset.getClosestMatch(start);
-Node startNode = null, endNode = null;
-if(nodePair != null)
-    startNode = (Node) nodePair[0];
-//      (Node) ((Object[]) nodesByOffset.getClosestMatch(start))[0];
-//    Node endNode =
-//      (Node) ((Object[]) nodesByOffset.getClosestMatch(end))[0];
+    Node startNode  = (Node) nodesByOffset.getNextOf(start);
+    Node endNode    = (Node) nodesByOffset.getNextOf(end);
 
     // if appropriate nodes don't already exist, create them
-    if(startNode == null || startNode.getOffset() != start)
+    if(startNode == null || ! startNode.getOffset().equals(start))
       startNode = new NodeImpl(new Integer(nextNodeId++), start);
-    if(endNode == null || endNode.getOffset() != end)
+    if(endNode == null   || ! endNode.getOffset().equals(end))
       endNode = new NodeImpl(new Integer(nextNodeId++), end);
 
     // construct an annotation
@@ -219,7 +255,6 @@ if(nodePair != null)
     annotsById.put(id, a);
 
     // add to the type index
-////??????    if(annotsByType == null) indexByType();
     addToTypeIndex(a);
 
     // add to the node index
@@ -300,6 +335,37 @@ if(nodePair != null)
 
   /** Get the document this set is attached to. */
   public Document getDocument() { return doc; }
+
+  /** String representation of the set */
+/*  public String toString() {
+
+    // annotsById
+    SortedSet sortedAnnots = new TreeSet();
+    sortedAnnots.addAll(annotsById.values());
+    String aBI = sortedAnnots.toString();
+
+    // annotsByType
+
+    StringBuffer buf = new StringBuffer();
+    Iterator iter = annotsByType.iterator();
+    while(iter.hasNext()) {
+      HashMap thisType = iter.next()entrySet();
+      sortedAnnots.clear();
+      sortedAnnots.addAll(thisType.);
+      buf.append("[type: " +
+    }
+
+
+    return
+      "AnnotationSetImpl: " +
+      "name=" + name +
+//      "; doc.getURL()=" + doc +
+      "; annotsById=" + aBI +
+//      "; annotsByType=" + aBT +
+      "; "
+      ;
+  } // toString()
+*/
 
   /** The name of this set */
   private String name = null;

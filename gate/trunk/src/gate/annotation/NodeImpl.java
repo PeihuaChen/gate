@@ -11,7 +11,7 @@ import gate.util.*;
 
 /** Provides an implementation for the interface gate.Node.
   */
-public class NodeImpl implements Node
+public class NodeImpl implements Node, Comparable
 {
   /** Construction from id. Creates an unrooted node. */
   public NodeImpl (Integer id) {
@@ -30,14 +30,21 @@ public class NodeImpl implements Node
   } // Node(id, offset)
 
   /** Returns the Id of the Node. */
-  public Integer getId () {
-    return  id;
-  }
+  public Integer getId () { return  id; }
 
   /** Offset (will be null when the node is not anchored) */
-  public Long getOffset () {
-    return  offset;
-  }
+  public Long getOffset () { return  offset; }
+
+  /** String representation */
+  public String toString() {
+    return "NodeImpl: id=" + id + "; offset=" + offset;
+  } // toString()
+
+  /** Ordering */
+  public int compareTo(Object o) throws ClassCastException {
+    Node other = (Node) o;
+    return id.compareTo(other.getId());
+  } // compareTo
 
   private Integer id;
   private Long offset;

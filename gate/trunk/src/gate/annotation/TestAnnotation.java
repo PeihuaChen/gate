@@ -28,6 +28,43 @@ public class TestAnnotation extends TestCase
     // doc1 = TestDocument.newDoc();
   } // setUp
 
+  /** Test indexing by offset */
+  public void testOffsetIndex() {
+    AnnotationSet as = new AnnotationSetImpl(doc1);
+    AnnotationSet asBuf;
+    Integer newId;
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    Annotation a;
+    Node startNode;
+    Node endNode;
+
+    newId = as.add(new Long(10), new Long(20), "T", fm);
+    assertEquals(newId.intValue(), 0);
+    a = as.get(newId);
+
+    startNode = a.getStartNode();
+    endNode = a.getEndNode();
+    assertEquals(startNode.getId().intValue(), 0);
+    assertEquals(endNode.getId().intValue(), 1);
+    assertEquals(startNode.getOffset().longValue(), 10);
+    assertEquals(endNode.getOffset().longValue(), 20);
+
+    newId = as.add(new Long(10), new Long(30), "T", fm);
+    assertEquals(newId.intValue(), 1);
+    a = as.get(newId);
+
+    startNode = a.getStartNode();
+    endNode = a.getEndNode();
+    assertEquals(startNode.getId().intValue(), 0);
+    assertEquals(endNode.getId().intValue(), 2);
+    assertEquals(startNode.getOffset().longValue(), 10);
+    assertEquals(endNode.getOffset().longValue(), 30);
+
+    asBuf = as.get(new Long(10));
+    assertEquals(asBuf.size(), 2);
+
+  } // testOffsetIndex()
+
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() {
     // constuct an empty AS
@@ -51,7 +88,7 @@ public class TestAnnotation extends TestCase
     Annotation a = as.get(new Integer(1));
     as.remove(a);
     assertEquals(as.size(), 2);
-    as.add(a); 
+    as.add(a);
     assertEquals(as.size(), 3);
 
     // iterate over the annotations
@@ -81,8 +118,10 @@ public class TestAnnotation extends TestCase
     assertEquals(tokenAnnots.size(), 2);
 
     // indexing by position
-    //AnnotationSet annotsAfter10 = as.get(
-
+    AnnotationSet annotsAfter10 = as.get(new Long(15));
+    if(annotsAfter10 == null)
+      fail("no annots found after offset 10");
+    assertEquals(annotsAfter10.size(), 2);
 
   } // testAnnotationSet
 

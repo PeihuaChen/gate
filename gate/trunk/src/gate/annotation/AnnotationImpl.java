@@ -65,8 +65,14 @@ implements Annotation, FeatureBearer
   public String toString() {
     return "AnnotationImpl: id=" + id + "; type=" + type +
            "; features=" + features + "; start=" + start +
-           "; end=" + end;
+           "; end=" + end + System.getProperty("line.separator");
   } // toString()
+
+  /** Ordering */
+  public int compareTo(Object o) throws ClassCastException {
+    Annotation other = (Annotation) o;
+    return id.compareTo(other.getId());
+  } // compareTo
 
   private Integer id;
   private String type;
