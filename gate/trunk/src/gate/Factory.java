@@ -184,16 +184,6 @@ public abstract class Factory {
             throw new ResourceInstantiationException(
               "Resource cannot be (de-)serialized: " + resClass.getName()
             );
-        } else { // non-serialisation datastores
-
-          // find an appropriate wrapper class and replace resClass
-
-          /* resClass = dataStoreWrapperClass
-             if none available then
-             throw new ResourceInstantiationException(
-               "Unknown wrapper class " + dataStoreWrapperClass
-             );      OR maybe UnknownDataStoreException
-          */
         }
 
         // get the datastore instance id and retrieve the resource
