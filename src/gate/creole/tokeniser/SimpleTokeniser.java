@@ -24,7 +24,6 @@ import gate.*;
 import gate.creole.*;
 import gate.event.*;
 import gate.util.*;
-import gate.fsm.TestFSM;
 
 //import EDU.auburn.VGJ.graph.ParseError;
 
