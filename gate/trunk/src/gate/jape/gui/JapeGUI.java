@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.text.*;
 
@@ -19,6 +20,8 @@ import gate.gui.*;
 import gate.util.*;
 import gate.jape.*;
 import gate.creole.tokeniser.*;
+import gate.creole.gazeteer.*;
+
 
 
 /** A small toy inteface for Jape testing and tweaking */
@@ -128,6 +131,13 @@ public class JapeGUI extends JFrame implements ProgressListener,
         tokRulesBtn_actionPerformed(e);
       }
     });
+    gazeteerBtn.setText("Load Gazeteer Lists");
+    gazeteerBtn.addActionListener(new java.awt.event.ActionListener() {
+
+      public void actionPerformed(ActionEvent e) {
+        gazeteerBtn_actionPerformed(e);
+      }
+    });
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
@@ -141,6 +151,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     northBox.add(collectionAddBtn, null);
     northBox.add(japeLoadBtn, null);
     northBox.add(tokRulesBtn, null);
+    northBox.add(gazeteerBtn, null);
     northBox.add(runBtn, null);
     this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
     textViewPane.setDividerLocation(400);
@@ -158,10 +169,14 @@ public class JapeGUI extends JFrame implements ProgressListener,
     japeFilter = new ExtensionFileFilter();
     japeFilter.addExtension("jape");
     japeFilter.setDescription("Jape grammars");
+
     tokFileFilter = new ExtensionFileFilter();
     tokFileFilter.addExtension("rules");
-    japeFilter.setDescription("Tokeniser rules");
+    tokFileFilter.setDescription("Tokeniser rules files");
 
+    gazFileFilter = new ExtensionFileFilter();
+    gazFileFilter.addExtension("def");
+    gazFileFilter.setDescription("Gazeteer list definition files");
 
     filer = new JFileChooser("d:/tmp");
     filer.addChoosableFileFilter(japeFilter);
@@ -188,7 +203,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
             for(int i=0; i< selectedFiles.length; i++){
               currDoc = Transients.newDocument(selectedFiles[i].toURL());
               corpus.add(currDoc);
-              corpusFiles.add(selectedFiles[i]);
+              corpusFiles.add(selectedFiles[i].toURL().toExternalForm());
             }
           }catch(java.net.MalformedURLException mue){
             mue.printStackTrace(System.err);
@@ -213,7 +228,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
           try{
               currDoc = Transients.newDocument(selectedFile.toURL());
               corpus.add(currDoc);
-              corpusFiles.add(selectedFile);
+              corpusFiles.add(selectedFile.toURL().toExternalForm());
           }catch(java.net.MalformedURLException mue){
             mue.printStackTrace(System.err);
           }catch(IOException ioe){
@@ -249,6 +264,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
   public void run(){
     startCorpusLoad = 0;
     startCorpusTokenization = 0;
+    startLookupLoad = 0;
+    startLookup = 0;
     startJapeFileOpen = 0;
     startCorpusTransduce = 0;
     endProcess = 0;
@@ -269,7 +286,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
         while(filesIter.hasNext()){
               progressBar.setValue(progress++/fileCnt);
               corpus.add(Transients.newDocument(
-                                    ((File)filesIter.next()).toURL()));
+                new URL((String)filesIter.next()))
+              );
               progressBar.setValue(progress/fileCnt);
             }
       }catch(java.net.MalformedURLException mue){
@@ -307,12 +325,45 @@ public class JapeGUI extends JFrame implements ProgressListener,
       currentDoc = (Document)docIter.next();
       tokeniser.tokenise(currentDoc, false);
     }
+    startLookupLoad = System.currentTimeMillis();
+    logTextArea.append("corpus tokenization time: " +
+                       (startLookupLoad - startCorpusTokenization) +
+                       "ms\n");
+
+    //gazeteer lookup
+    docCnt = corpus.size();
+    statusBar.setText("Doing gazeteer lookup...");
+    startLookup = startLookupLoad;
+    try{
+      if(null != gazeteerListDefFile){
+        gazeteer =new DefaultGazeteer(gazeteerListDefFile.getAbsolutePath());
+        gazeteer.addProcessProgressListener(this);
+        gazeteer.addStatusListener(this);
+        startLookup = System.currentTimeMillis();
+        logTextArea.append("gazeteer lists load time: " +
+                           (startLookup - startLookupLoad) +
+                           "ms\n");
+        docIter = corpus.iterator();
+        while(docIter.hasNext()){
+          currentDoc = (Document)docIter.next();
+          gazeteer.doLookup(currentDoc, false);
+        }
+      }
+    }catch(IOException ioe){
+      System.err.println("Cannot read the gazeteer lists!" +
+                         "\nAre the Gate resources in place?");
+    }catch(GazeteerException ge){
+      ge.printStackTrace(System.err);
+    }
+//============================
+
+
     //do the jape stuff
     Gate.init();
     progressBar.setValue(0);
     startJapeFileOpen = System.currentTimeMillis();
-    logTextArea.append("corpus tokenization time: " +
-                       (startJapeFileOpen - startCorpusTokenization) +
+    logTextArea.append("gazeteer lookup time: " +
+                       (startJapeFileOpen - startLookup) +
                        "ms\n");
     try{
       statusBar.setText("Opening Jape grammar...");
@@ -390,13 +441,14 @@ public class JapeGUI extends JFrame implements ProgressListener,
       typesPanel.removeAll();
       Iterator typesIter = currentDoc.getAnnotations().getAllTypes().iterator();
       String currentType;
-
+      ColorGenerator colGen = new ColorGenerator();
       JButton typeButton = new JButton();
       JLabel typeLabel = new JLabel("Clear all");
       typeLabel.setBackground(Color.black);
       typeLabel.setForeground(Color.white);
+      typeLabel.setOpaque(true);
       typeButton.add(typeLabel);
-      typeButton.setBackground(Color.black);
+      typeButton.setBackground(colGen.getNextColor());
       typeButton.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent e) {
           typeButtonPressed("", null);
@@ -407,11 +459,12 @@ public class JapeGUI extends JFrame implements ProgressListener,
         currentType = (String) typesIter.next();
         typeButton = new JButton();
         typeLabel = new JLabel(currentType);
-        typeLabel.setBackground(Color.black);
-        typeLabel.setForeground(Color.white);
+        typeLabel.setBackground(Color.white);
+        typeLabel.setForeground(Color.black);
+        typeLabel.setOpaque(true);
         typeButton.add(typeLabel);
         typeButton.setToolTipText(currentType);
-        typeButton.setBackground(new Color(randomGen.nextInt()));
+        typeButton.setBackground(colGen.getNextColor());
         typeButton.addActionListener(new java.awt.event.ActionListener() {
           public void actionPerformed(ActionEvent e) {
             if(e.getSource() instanceof Container){
@@ -433,7 +486,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
       typesPanel.repaint();
       //create the table
       tableView = new SortedTable();
-      tableView.setTableModel(new AnnotationSetTableModel(currentDoc.getAnnotations()));
+      tableView.setTableModel(new AnnotationSetTableModel(currentDoc,currentDoc.getAnnotations()));
       tableViewScroll.getViewport().add(tableView, null);
 
     }
@@ -463,6 +516,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
           //delete the document from the list
           corpusListModel.removeElement(currentDoc.getSourceURL().getFile());
           corpus.remove(currentDoc);
+          corpusFiles.remove(currentDoc.getSourceURL().toExternalForm());
           if(corpus.isEmpty()) currentDoc = null;
           else currentDoc = (Document)corpus.first();
           updateAll();
@@ -499,187 +553,6 @@ public class JapeGUI extends JFrame implements ProgressListener,
 //System.out.println(type);
   }
 
-  class AnnotationSetTableModel extends gate.gui.SortedTableModel{
-    public AnnotationSetTableModel(AnnotationSet as){
-      setData (as, new AnnotationSetComparator());
-    }
-
-    public int getColumnCount(){
-      return 5;
-    }
-
-    public Class getColumnClass(int column){
-      return new String("0").getClass();
-    }
-
-    public String getColumnName(int column){
-      switch(column){
-        case 0:{
-          return "Start";// + addSortOrderString(0);
-        }
-        case 1:{
-          return "End";// + addSortOrderString(1);
-        }
-        case 2:{
-          return "Type";// + addSortOrderString(2);
-        }
-        case 3:{
-          return "Features";// + addSortOrderString(3);
-        }
-        case 4:{
-          return "Text";// + addSortOrderString(4);
-        }
-      }
-      return null;
-    }
-
-    public boolean isCellEditable(int rowIndex, int columnIndex){
-      return false;
-    }
-
-    public Object getValueAt(int row, int column){
-      gate.Annotation currentAnn = (gate.Annotation) m_data.get(row);
-      switch(column){
-        case 0:{
-          return currentAnn.getStartNode().getOffset();
-        }
-        case 1:{
-          return currentAnn.getEndNode().getOffset();
-        }
-        case 2:{
-          return currentAnn.getType();
-        }
-        case 3:{
-          return currentAnn.getFeatures();
-        }
-        case 4:{
-          return currentDoc.getContent().toString().substring(
-              currentAnn.getStartNode().getOffset().intValue(),
-              currentAnn.getEndNode().getOffset().intValue());
-        }
-      }
-      return null;
-    }
-
-    public Object getMaxValue(int column){
-      String maxValue = null;
-      int maxValueLength = 0;
-
-      switch(column){
-        case 0:
-                 for (int i = 0 ; i < getRowCount(); i++){
-                   String strValue = ((gate.Annotation) m_data.get(i)).getStartNode().getOffset().toString();
-                   int length = strValue.length();
-                   if (length > maxValueLength){
-                      maxValueLength = length;
-                      maxValue = strValue;
-                   }
-                 }
-                 return maxValue;
-
-        case 1:
-                 for (int i = 0 ; i < getRowCount(); i++){
-                   String strValue = ((gate.Annotation) m_data.get(i)).getEndNode().getOffset().toString();
-                   int length = strValue.length();
-                   if (length > maxValueLength){
-                      maxValueLength = length;
-                      maxValue = strValue;
-                   }
-                 }
-                 return maxValue;
-
-        case 2:
-                 for (int i = 0 ; i < getRowCount(); i++){
-                   String strValue = ((gate.Annotation) m_data.get(i)).getType();
-                   int length = strValue.length();
-                   if (length > maxValueLength){
-                      maxValueLength = length;
-                      maxValue = strValue;
-                   }
-                 }
-                 return maxValue;
-
-        case 3:
-                 for (int i = 0 ; i < getRowCount(); i++){
-                   String strValue = ((gate.Annotation) m_data.get(i)).getFeatures().toString();
-                   int length = strValue.length();
-                   if (length > maxValueLength){
-                      maxValueLength = length;
-                      maxValue = strValue;
-                   }
-                 }
-                 return maxValue;
-        case 4:
-        //*
-                 for (int i = 0 ; i < getRowCount(); i++){
-                   String strValue = currentDoc.getContent().toString().substring(
-                                     ((gate.Annotation) m_data.get(i)).getStartNode().getOffset().intValue(),
-                                     ((gate.Annotation) m_data.get(i)).getEndNode().getOffset().intValue());
-                   int length = strValue.length();
-                   if (length > maxValueLength){
-                      maxValueLength = length;
-                      maxValue = strValue;
-                   }
-                 }
-                 return maxValue;
-          //*/
-     }
-      return null;
-    } // getMaxValue()
-
-    class AnnotationSetComparator extends gate.gui.SortedTableComparator{
-
-      public AnnotationSetComparator(){
-      }
-      public int compare(Object o1, Object o2){
-        if ( !(o1 instanceof gate.Annotation) ||
-             !(o2 instanceof gate.Annotation)) return 0;
-
-        gate.Annotation a1 = (gate.Annotation) o1;
-        gate.Annotation a2 = (gate.Annotation) o2;
-        int result = 0;
-
-        switch(this.getSortCol()){
-          case 0: // Start
-          {
-            Long l1 = a1.getStartNode().getOffset();
-            Long l2 = a2.getStartNode().getOffset();
-            result = l1.compareTo(l2);
-          }break;
-          case 1: // End
-          {
-            Long l1 = a1.getEndNode().getOffset();
-            Long l2 = a2.getEndNode().getOffset();
-            result  = l1.compareTo(l2);
-          }break;
-          case 2: // Type
-          {
-            String s1 = a1.getType();
-            String s2 = a2.getType();
-            result = s1.compareTo(s2);
-          }break;
-          case 3: // Features
-          {
-            String fm1 = a1.getFeatures().toString();
-            String fm2 = a2.getFeatures().toString();
-            result = fm1.compareTo(fm2);
-          }break;
-          case 4: // Text
-          {
-            String text1 = currentDoc.getContent().toString().substring(
-              a1.getStartNode().getOffset().intValue(),
-              a1.getEndNode().getOffset().intValue());
-            String text2 = currentDoc.getContent().toString().substring(
-              a2.getStartNode().getOffset().intValue(),
-              a2.getEndNode().getOffset().intValue());
-            result = text1.compareTo(text2);
-          }break;
-        }// switch
-        if (!this.getSortOrder()) result = -result;
-        return result;
-      }//compare
-    }//class AnnotationSetComparator
-  }//class AnnotationSetTableModel
 
   //Gui members
   JMenuBar jMenuBar1 = new JMenuBar();
@@ -708,14 +581,17 @@ public class JapeGUI extends JFrame implements ProgressListener,
   JFileChooser filer;
   ExtensionFileFilter japeFilter;
   ExtensionFileFilter tokFileFilter;
+  ExtensionFileFilter gazFileFilter;
 
-  /** A set of objects of type File containing all the files that should go in
-    * the corpus.
+  /**A set of String objects containing all the names of the files that should
+    *go in the corpus.
     */
   Set corpusFiles = new HashSet();
   File grammarFile;
   File tokeniserRulesFile = null;
+  File gazeteerListDefFile = null;
   DefaultTokeniser tokeniser =null;
+  DefaultGazeteer gazeteer = null;
 
 
   private boolean invokedStandalone = false;
@@ -731,7 +607,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
   javax.swing.table.TableModel tm;
   long startCorpusLoad = 0, startCorpusTokenization = 0,
        startJapeFileOpen = 0, startCorpusTransduce = 0,
-       endProcess = 0;
+       endProcess = 0, startLookup = 0, startLookupLoad = 0;
   FlowLayout flowLayout2 = new FlowLayout();
   JTextArea logTextArea = new JTextArea();
   JScrollPane logScrollPane = new JScrollPane();
@@ -750,7 +626,6 @@ public class JapeGUI extends JFrame implements ProgressListener,
     int res = filer.showOpenDialog(this);
     if(res == JFileChooser.APPROVE_OPTION){
       tokeniserRulesFile = filer.getSelectedFile();
-      grammarLbl.setText(grammarFile.getName());
     }
   }
 
@@ -769,6 +644,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
 
   public void processFinished(){
     progressBar.setValue(0);
+    progressBar.paintImmediately(progressBar.getVisibleRect());
   }
 
   //StatusListener implementation
@@ -782,11 +658,24 @@ public class JapeGUI extends JFrame implements ProgressListener,
   long lastStatusUpdate = 0;
   long lastProgressUpdate = 0;
   int lastProgress = 0;
+  JButton gazeteerBtn = new JButton();
 
   static{
     try{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     }catch(Exception e){}
+  }
+
+  void gazeteerBtn_actionPerformed(ActionEvent e) {
+    filer.setFileFilter(gazFileFilter);
+    filer.setDialogTitle("Select the Gazeteer list definition");
+    filer.setMultiSelectionEnabled(false);
+    filer.setSelectedFile(null);
+    filer.setSelectedFiles(null);
+    int res = filer.showOpenDialog(this);
+    if(res == JFileChooser.APPROVE_OPTION){
+      gazeteerListDefFile = filer.getSelectedFile();
+    }
   }
 
 }
