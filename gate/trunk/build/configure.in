@@ -37,7 +37,7 @@ CYGPATHP=$CYGPATH
 
 # tools.jar
 JAVAC_DIR=`dirname \`dirname $JAVAC\``
-TOOLSJAR=`find $JAVAC_DIR -name tools.jar -print`
+TOOLSJAR=`find $JAVAC_DIR -follow -name tools.jar -print`
 if test ! -f "$TOOLSJAR"
 then
   echo "Can't find tools.jar; JAVAC_DIR=${JAVAC_DIR}; TOOLSJAR=${TOOLSJAR}; try setting JAVA_HOME?"
