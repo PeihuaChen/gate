@@ -41,6 +41,15 @@ public class Gate
   public static final int STRINGBUFFER_SIZE = 1024;
 
   /**
+   *  The default size to be used for Hashtable, HashMap and HashSet.
+   *  The defualt is 11 and it leads to big memory usage. Having a default
+   *  load factor of 0.75, table of size 4 can take 3 elements before being
+   *  re-hashed - a values that seems to be optimal for most of the cases.
+   *  */
+  public static final int HASH_STH_SIZE = 4;
+
+
+  /**
    *  The database schema owner (GATEADMIN is default)
    *  this one should not be hardcoded but set in the
    *  XML initialization files
