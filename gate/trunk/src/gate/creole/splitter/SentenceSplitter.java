@@ -71,13 +71,14 @@ public class SentenceSplitter extends Nerc{
           FeatureMap sentenceFeatures = Factory.newFeatureMap();
 
           //get a list of tokens
-          ArrayList tokens = new ArrayList(tempAS.get(new Long(startSentence),
-                                                      new Long(endSentence)).
-                                           get("Token"));
-          //sort the tokens by offset
-          Collections.sort(tokens, offsetComparator);
-          sentenceFeatures.put("tokensList", tokens);
-          if(tokens.size() > 0){
+          AnnotationSet as = tempAS.get(new Long(startSentence),
+                                        new Long(endSentence)).
+                                        get("Token");
+          if(as != null && as.size() > 0){
+            ArrayList tokens = new ArrayList(as);
+            //sort the tokens by offset
+            Collections.sort(tokens, offsetComparator);
+            sentenceFeatures.put("Tokens", tokens);
             try{
               outputAS.add(new Long(((Annotation)tokens.get(0)).
                                     getStartNode().getOffset().longValue()),
@@ -86,7 +87,7 @@ public class SentenceSplitter extends Nerc{
             }catch(InvalidOffsetException ioe){
               throw new ExecutionException(ioe);
             }
-          }//if(tokens.size() > 0)
+          }//if(as != null && as.size() > 0)
 
           startSentence = endSentence;
         }//while(splitIter.hasNext())
