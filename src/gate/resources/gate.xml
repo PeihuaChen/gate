@@ -21,4 +21,5 @@
 </SYSTEM>
 <DBCONFIG url="jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2"/>
 <!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@gatedb.dcs.shef.ac.uk"/-->
+<!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@/grindleford.dcs.shef.ac.uk:1521:GateDB2"/-->
 </GATE>
