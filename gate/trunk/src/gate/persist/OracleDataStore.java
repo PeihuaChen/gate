@@ -219,10 +219,6 @@ public class OracleDataStore extends JDBCDataStore {
 //      this.jdbcConn.commit();
       commitTrans();
     }
-//    catch(SQLException sqle) {
-//      transFailed = true;
-//      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
-//    }
     catch(PersistenceException pe) {
       transFailed = true;
       throw(pe);
@@ -323,112 +319,6 @@ public class OracleDataStore extends JDBCDataStore {
 
 
 
-  /**
-   * Save: synchonise the in-memory image of the LR with the persistent
-   * image.
-   */
-/*  public void sync(LanguageResource lr)
-  throws PersistenceException,SecurityException {
-
-    //4.delegate (open a new transaction)
-    _sync(lr,true);
-  }
-*/
-
-
-  /**
-   * Save: synchonise the in-memory image of the LR with the persistent
-   * image.
-   */
-/*  private void _sync(LanguageResource lr, boolean openNewTrans)
-    throws PersistenceException,SecurityException {
-
-    //0.preconditions
-    Assert.assertNotNull(lr);
-    Long lrID = (Long)lr.getLRPersistenceId();
-
-    if (false == lr instanceof Document &&
-        false == lr instanceof Corpus) {
-      //only documents and corpuses could be serialized in DB
-      throw new IllegalArgumentException("only Documents and Corpuses could "+
-                                          "be serialized in DB");
-    }
-
-    // check that this LR is one of ours (i.e. has been adopted)
-    if( null == lr.getDataStore() || false == lr.getDataStore().equals(this))
-      throw new PersistenceException(
-        "This LR is not stored in this DataStore"
-      );
-
-
-    //1. check session
-    if (null == this.session) {
-      throw new SecurityException("session not set");
-    }
-
-    if (false == this.ac.isValidSession(this.session)) {
-      throw new SecurityException("invalid session supplied");
-    }
-
-    //2. check permissions
-    if (false == canWriteLR(lrID)) {
-      throw new SecurityException("insufficient privileges");
-    }
-
-    //3. is the resource locked?
-    User lockingUser = getLockingUser(lr);
-    User currUser = this.session.getUser();
-
-    if (lockingUser != null && false == lockingUser.equals(currUser)) {
-      throw new PersistenceException("document is locked by another user and cannot be synced");
-    }
-
-
-    boolean transFailed = false;
-    try {
-      //2. autocommit should be FALSE because of LOBs
-      if (openNewTrans) {
-//        this.jdbcConn.setAutoCommit(false);
-        beginTrans();
-      }
-
-      //3. perform changes, if anything goes wrong, rollback
-      if (lr instanceof Document) {
-        syncDocument((Document)lr);
-      }
-      else {
-        syncCorpus((Corpus)lr);
-      }
-
-      //4. done, commit
-      if (openNewTrans) {
-//        this.jdbcConn.commit();
-        commitTrans();
-      }
-    }
-    catch(PersistenceException pe) {
-      transFailed = true;
-      throw(pe);
-    }
-    finally {
-      //problems?
-      if (transFailed) {
-        rollbackTrans();
-  //      try {
-//          this.jdbcConn.rollback();
-//        }
-//        catch(SQLException sqle) {
-//          throw new PersistenceException(sqle);
-//        }
-      }
-    }
-
-    // let the world know about it
-    fireResourceWritten(
-      new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()));
-
-  }
-*/
 
 
   /**
@@ -448,137 +338,6 @@ public class OracleDataStore extends JDBCDataStore {
   public boolean isAutoSaving() {
     throw new MethodNotImplementedException();
   }
-
-
-  /** Adopt a resource for persistence. */
-/*  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
-  throws PersistenceException,SecurityException {
-    //open a new transaction
-    return _adopt(lr,secInfo,true);
-  }
-*/
-  /** helper for adopt()
-   *  @param openNewTrans shows if a new transaction should be started or the adopt
-   *  is performed in the context of an already opened transaction
-   */
-/*
-  private LanguageResource _adopt(LanguageResource lr,
-                                  SecurityInfo secInfo,
-                                  boolean openNewTrans)
-  throws PersistenceException,SecurityException {
-
-    LanguageResource result = null;
-
-    //-1. preconditions
-    Assert.assertNotNull(lr);
-    Assert.assertNotNull(secInfo);
-    if (false == lr instanceof Document &&
-        false == lr instanceof Corpus) {
-      //only documents and corpuses could be serialized in DB
-      throw new IllegalArgumentException("only Documents and Corpuses could "+
-                                          "be serialized in DB");
-    }
-
-    //0. check SecurityInfo
-    if (false == this.ac.isValidSecurityInfo(secInfo)) {
-      throw new SecurityException("Invalid security settings supplied");
-    }
-
-    //1. user session should be set
-    if (null == this.session) {
-      throw new SecurityException("user session not set");
-    }
-
-    //2. check the LR's current DS
-    DataStore currentDS = lr.getDataStore();
-    if(currentDS == null) {
-      // an orphan - do the adoption (later)
-    }
-    else if(currentDS.equals(this)){         // adopted already
-      return lr;
-    }
-    else {                      // someone else's child
-      throw new PersistenceException(
-        "Can't adopt a resource which is already in a different datastore");
-    }
-
-
-    //3. is the LR one of Document or Corpus?
-    if (false == lr instanceof Document &&
-        false == lr instanceof Corpus) {
-
-      throw new IllegalArgumentException("Database datastore is implemented only for "+
-                                        "Documents and Corpora");
-    }
-
-    //4.is the document already stored in this storage?
-    Object persistID = lr.getLRPersistenceId();
-    if (persistID != null) {
-      throw new PersistenceException("This LR is already stored in the " +
-                                      " database (persistance ID is =["+(Long)persistID+"] )");
-    }
-
-    boolean transFailed = false;
-    try {
-      //5 autocommit should be FALSE because of LOBs
-      if (openNewTrans) {
-//        this.jdbcConn.setAutoCommit(false);
-        beginTrans();
-      }
-
-      //6. perform changes, if anything goes wrong, rollback
-      if (lr instanceof Document) {
-        result =  createDocument((Document)lr,secInfo);
-//System.out.println("result ID=["+result.getLRPersistenceId()+"]");
-      }
-      else {
-        //adopt each document from the corpus in a separate transaction context
-        result =  createCorpus((Corpus)lr,secInfo,true);
-      }
-
-      //7. done, commit
-      if (openNewTrans) {
-//        this.jdbcConn.commit();
-        commitTrans();
-      }
-    }
-    catch(PersistenceException pe) {
-      transFailed = true;
-      throw(pe);
-    }
-    catch(SecurityException se) {
-      transFailed = true;
-      throw(se);
-    }
-    finally {
-      //problems?
-      if (transFailed) {
-        rollbackTrans();
-      }
-    }
-
-    //8. let the world know
-    fireResourceAdopted(
-        new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
-                           result,
-                           result.getLRPersistenceId())
-    );
-
-    //9. fire also resource written event because it's now saved
-    fireResourceWritten(
-      new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
-                          result,
-                          result.getLRPersistenceId()
-      )
-    );
-
-    //10. add the resource to the list of dependent resources - i.e. the ones that the
-    //data store should take care upon closing [and call sync()]
-    this.dependentResources.add(result);
-
-    return result;
-  }
-*/
 
 
   /**
@@ -793,136 +552,6 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
-
-  /**
-   * helper for adopt
-   * creates a LR of type Document
-   */
-/*  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
-  throws PersistenceException,SecurityException {
-
-    //-1. preconditions
-    Assert.assertNotNull(doc);
-    Assert.assertNotNull(secInfo);
-
-    //0. check securoity settings
-    if (false == this.ac.isValidSecurityInfo(secInfo)) {
-      throw new SecurityException("Invalid security settings");
-    }
-
-    //1. get the data to be stored
-    AnnotationSet defaultAnnotations = doc.getAnnotations();
-    DocumentContent docContent = doc.getContent();
-    FeatureMap docFeatures = doc.getFeatures();
-    String docName  = doc.getName();
-    URL docURL = doc.getSourceUrl();
-    Boolean docIsMarkupAware = doc.getMarkupAware();
-    Long docStartOffset = doc.getSourceUrlStartOffset();
-    Long docEndOffset = doc.getSourceUrlEndOffset();
-    String docEncoding = null;
-    try {
-      docEncoding = (String)doc.
-        getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
-    }
-    catch(gate.creole.ResourceInstantiationException re) {
-      throw new PersistenceException("cannot create document: error getting " +
-                                     " document encoding ["+re.getMessage()+"]");
-    }
-
-
-    //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
-    Long lrID = createLR(DBHelper.DOCUMENT_CLASS,docName,secInfo,null);
-
-    //4. create a record in T_DOCUMENT for this document
-    Long docID = createDoc(lrID,
-                            docURL,
-                            docEncoding,
-                            docStartOffset,
-                            docEndOffset,
-                            docIsMarkupAware,
-                            corpusID);
-
-
-    //5. fill document content (record[s] in T_DOC_CONTENT)
-
-    //do we have content at all?
-    if (docContent.size().longValue() > 0) {
-//      updateDocumentContent(docContentID,docContent);
-      updateDocumentContent(docID,docContent);
-    }
-
-    //6. insert annotations, etc
-
-    //6.1. create default annotation set
-    createAnnotationSet(lrID,defaultAnnotations);
-
-    //6.2. create named annotation sets
-    Map namedAnns = doc.getNamedAnnotationSets();
-    //the map may be null
-    if (null != namedAnns) {
-      Set setAnns = namedAnns.entrySet();
-      Iterator itAnns = setAnns.iterator();
-
-      while (itAnns.hasNext()) {
-        Map.Entry mapEntry = (Map.Entry)itAnns.next();
-        //String currAnnName = (String)mapEntry.getKey();
-        AnnotationSet currAnnSet = (AnnotationSet)mapEntry.getValue();
-
-        //create a-sets
-        createAnnotationSet(lrID,currAnnSet);
-      }
-    }
-
-    //7. create features
-//    createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
-    createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
-
-    //9. create a DatabaseDocument wrapper and return it
-*/
-/*    Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn,
-                                              doc.getName(),
-                                              this,
-                                              lrID,
-                                              doc.getContent(),
-                                              doc.getFeatures(),
-                                              doc.getMarkupAware(),
-                                              doc.getSourceUrl(),
-                                              doc.getSourceUrlStartOffset(),
-                                              doc.getSourceUrlEndOffset(),
-                                              doc.getAnnotations(),
-                                              doc.getNamedAnnotationSets());
-*/
-/*    Document dbDoc = null;
-    FeatureMap params = Factory.newFeatureMap();
-
-    HashMap initData = new HashMap();
-    initData.put("JDBC_CONN",this.jdbcConn);
-    initData.put("DS",this);
-    initData.put("LR_ID",lrID);
-    initData.put("DOC_NAME",doc.getName());
-    initData.put("DOC_CONTENT",doc.getContent());
-    initData.put("DOC_FEATURES",doc.getFeatures());
-    initData.put("DOC_MARKUP_AWARE",doc.getMarkupAware());
-    initData.put("DOC_SOURCE_URL",doc.getSourceUrl());
-    initData.put("DOC_SOURCE_URL_START",doc.getSourceUrlStartOffset());
-    initData.put("DOC_SOURCE_URL_END",doc.getSourceUrlEndOffset());
-    initData.put("DOC_DEFAULT_ANNOTATIONS",doc.getAnnotations());
-    initData.put("DOC_NAMED_ANNOTATION_SETS",doc.getNamedAnnotationSets());
-
-    params.put("initData__$$__", initData);
-
-    try {
-      //here we create the persistent LR via Factory, so it's registered
-      //in GATE
-      dbDoc = (Document)Factory.createResource("gate.corpora.DatabaseDocumentImpl", params);
-    }
-    catch (gate.creole.ResourceInstantiationException ex) {
-      throw new GateRuntimeException(ex.getMessage());
-    }
-
-    return dbDoc;
-  }
-*/
 
 
   /** creates an entry for annotation set in the database */
@@ -2547,48 +2176,6 @@ public class OracleDataStore extends JDBCDataStore {
 
 
 
-  /** helper for sync() - saves a Document in the database */
-/*  protected void syncDocument(Document doc)
-    throws PersistenceException, SecurityException {
-
-    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
-    Assert.assertTrue(doc.getLRPersistenceId() instanceof Long);
-
-    Long lrID = (Long)doc.getLRPersistenceId();
-    EventAwareLanguageResource dbDoc = (EventAwareLanguageResource)doc;
-    //1. sync LR
-    // only name can be changed here
-    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
-      _syncLR(doc);
-    }
-
-    //2. sync Document
-    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_MAIN)) {
-      _syncDocumentHeader(doc);
-    }
-
-    //3. [optional] sync Content
-    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_CONTENT)) {
-      _syncDocumentContent(doc);
-    }
-
-    //4. [optional] sync Features
-    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_FEATURES)) {
-      _syncFeatures(doc);
-    }
-
-    //5. [optional] delete from DB named sets that were removed from the document
-    Collection removedSets = ((EventAwareDocument)dbDoc).getRemovedAnnotationSets();
-    Collection addedSets = ((EventAwareDocument)dbDoc).getAddedAnnotationSets();
-    if (false == removedSets.isEmpty() || false == addedSets.isEmpty()) {
-      _syncAnnotationSets(doc,removedSets,addedSets);
-    }
-
-    //6. [optional] sync Annotations
-    _syncAnnotations(doc);
-  }
-
-*/
 
   /**
    *  helper for sync()
@@ -2732,7 +2319,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     //0.preconditions
@@ -2838,7 +2425,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     //technically this approach sux
@@ -2893,7 +2480,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
     //0.preconditions
     Assert.assertNotNull(doc);
@@ -3030,7 +2617,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  protected void _syncAnnotations(Document doc)
+/*  protected void _syncAnnotations(Document doc)
     throws PersistenceException {
 
     //0. preconditions
@@ -3080,7 +2667,7 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
   }
-
+*/
 
 
   /** helper for sync() - never call directly */
@@ -3366,74 +2953,6 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-
-  /**
-   * Releases the exlusive lock on a resource from the persistent store.
-   */
-/*  private User getLockingUser(LanguageResource lr)
-    throws PersistenceException,SecurityException {
-
-    //0. preconditions
-    Assert.assertNotNull(lr);
-    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
-                      lr instanceof DatabaseCorpusImpl);
-    Assert.assertNotNull(lr.getLRPersistenceId());
-    Assert.assertEquals(lr.getDataStore(),this);
-
-    //delegate
-    return getLockingUser((Long)lr.getLRPersistenceId());
-  }
-*/
-
-
-  /**
-   * Releases the exlusive lock on a resource from the persistent store.
-   */
-/*  private User getLockingUser(Long lrID)
-  throws PersistenceException,SecurityException {
-
-    //1. check session
-    if (null == this.session) {
-      throw new SecurityException("session not set");
-    }
-
-    if (false == this.ac.isValidSession(this.session)) {
-      throw new SecurityException("invalid session supplied");
-    }
-
-    //3. read from DB
-    PreparedStatement pstmt = null;
-    Long userID = null;
-    ResultSet rs = null;
-
-    try {
-      String sql = "  select  nvl(lr_locking_user_id,0) as user_id" +
-                    " from "+Gate.DB_OWNER+".t_lang_resource " +
-                    " where   lr_id = ?";
-
-      pstmt = this.jdbcConn.prepareStatement(sql);
-      pstmt.setLong(1,lrID.longValue());
-      pstmt.execute();
-      rs = pstmt.getResultSet();
-
-      if (false == rs.next()) {
-        throw new PersistenceException("LR not found in DB");
-      }
-
-      long result = rs.getLong("user_id");
-
-      return result == 0  ? null
-                          : this.ac.findUser(new Long(result));
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't get locking user from DB : ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(rs);
-      DBHelper.cleanup(pstmt);
-    }
-  }
-*/
 
 
   /**
