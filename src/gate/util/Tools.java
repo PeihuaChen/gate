@@ -8,6 +8,8 @@
 
 package gate.util;
 
+import java.util.*;
+
 public class Tools {
 
   public Tools() {
@@ -19,5 +21,10 @@ public class Tools {
   */
   static public synchronized Long gensym(){
     return new Long(sym++);
+  }
+
+  static public synchronized Long genTime(){
+
+    return new Long(new Date().getTime());
   }
 }

@@ -100,6 +100,11 @@ public class DocumentContentImpl implements DocumentContent
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
+  /**<Valy>For testing...</Valy>*/
+  public String toString(){
+    return content;
+  }
+
   /** Just for now - later we have to cater for different types of
     * content.
     */
