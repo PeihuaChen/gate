@@ -7,9 +7,12 @@
 */
 
 package gate;
+
 import java.util.*;
 import java.net.*;
+
 import gate.util.*;
+
 
 /** Represents the commonalities between all sorts of documents.
   */
@@ -40,13 +43,20 @@ public interface Document extends LanguageResource
 
   /** Make changes to the content. */
   public void edit(Long start, Long end, DocumentContent replacement)
-  throws InvalidOffsetException;
-
+    throws InvalidOffsetException;
   
   /** Generate and return the next annotation ID */
   public Integer getNextAnnotationId();
 
   /** Generate and return the next node ID */
   public Integer getNextNodeId();
+
+  /** Check that an offset is valid */
+  public boolean isValidOffset(Long offset);
+
+  /** Check that both start and end are valid offsets and that
+    * they constitute a valid offset range
+    */
+  public boolean isValidOffsetRange(Long start, Long end);
 
 } // interface Document
