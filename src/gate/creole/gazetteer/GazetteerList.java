@@ -153,11 +153,14 @@ implements List {
       File fileo = new File(tempUrl.getFile());
 
       fileo.delete();
-      BufferedWriter listWriter = new BufferedWriter(new FileWriter(fileo));
+      OutputStreamWriter listWriter  = new OutputStreamWriter(
+                    new FileOutputStream(fileo), encoding);
+//      BufferedWriter listWriter = new BufferedWriter(new FileWriter(fileo));
       Iterator iter = entries.iterator();
       while (iter.hasNext()) {
         listWriter.write(iter.next().toString());
-        listWriter.newLine();
+        listWriter.write(13);
+        listWriter.write(10);
       }
       listWriter.close();
     } catch (Exception x) {
