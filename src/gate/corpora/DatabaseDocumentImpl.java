@@ -318,6 +318,8 @@ public class DatabaseDocumentImpl extends DocumentImpl {
                      " from  "+Gate.DB_OWNER+".v_annotation  " +
                      " where  asann_as_id = ? ";
 
+      if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
+
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
       pstmt.execute();
@@ -325,10 +327,14 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
       while (rs.next()) {
         //1. read data memebers
-        Long annID = new Long(rs.getLong(1));
+        Integer annID = new Integer(rs.getInt(1));
         String type = rs.getString(2);
         Long startOffset = new Long(rs.getLong(3));
         Long endOffset = new Long(rs.getLong(4));
+
+        if (DEBUG) Out.println("annID=["+annID+"]");
+        if (DEBUG) Out.println("start=["+startOffset+"]");
+        if (DEBUG) Out.println("end=["+endOffset+"]");
 
         //2. get the features
         FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
@@ -338,7 +344,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         }
 
         //3. add to annotation set
-        as.add(startOffset,endOffset,type,fm);
+        as.add(annID,startOffset,endOffset,type,fm);
       }
     }
     catch(SQLException sqle) {
