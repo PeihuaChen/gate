@@ -64,6 +64,8 @@ public class OrthoMatcher extends AbstractProcessingResource
   //** Orthomatching is not case-sensitive by default*/
   protected boolean caseSensitive = false;
 
+  protected FeatureMap queryFM = Factory.newFeatureMap();
+
   protected ExecutionException executionException;
 
   // name lookup tables (used for namematch)
@@ -310,10 +312,28 @@ public class OrthoMatcher extends AbstractProcessingResource
       String shortName = annotString;
 
       // determine the title from annotation string
+      //now changed to a rule, here we just match by gender
       if (prevAnnot.getType().equals(personType)) {
-        longName =
-          containTitle(nameAllAnnots, longName,prevAnnot);
-        shortName = containTitle(nameAllAnnots, shortName,nameAnnot);
+        String prevGender = (String) prevAnnot.getFeatures().get(GENDER_FEATURE);
+        String nameGender = (String) nameAnnot.getFeatures().get(GENDER_FEATURE);
+        if (   prevGender != null
+            && nameGender != null
+            && ( (nameGender.equalsIgnoreCase("female")
+                  &&
+                  prevGender.equalsIgnoreCase("male")
+                  )
+               ||
+                  (prevGender.equalsIgnoreCase("female")
+                   && nameGender.equalsIgnoreCase("male")
+                  )
+                )
+            ) //if condition
+          continue; //we don't have a match if the two genders are different
+
+         // check for title and remove it
+         longName = containTitle(longName,prevAnnot);
+         shortName = containTitle(shortName,nameAnnot);
+
       }//if
 
       if (shortName.length()>=longName.length()) {
@@ -432,43 +452,47 @@ public class OrthoMatcher extends AbstractProcessingResource
   }//cleanup
 
   /** return a person name without title */
-  protected String containTitle (AnnotationSet annotSet,String annotString,
-                              Annotation annot){
+  protected String containTitle (String annotString, Annotation annot){
     // get the offsets
     Long startAnnot = annot.getStartNode().getOffset();
     Long endAnnot = annot.getEndNode().getOffset();
 
     // determine "Lookup" annotation set
+    queryFM.clear();
+    queryFM.put("majorType", "title");
     AnnotationSet as =
-      annotSet.get(startAnnot,endAnnot).get("Lookup");
-
+      nameAllAnnots.get(startAnnot,endAnnot).get("Lookup", queryFM,
+                                                  startAnnot);
     if ((as !=null )) {
-      Iterator iter = as.iterator();
+      List titles = new ArrayList((Set)as);
+      Collections.sort(titles, new gate.util.OffsetComparator());
+
+      Iterator iter = titles.iterator();
       while (iter.hasNext()) {
-        Annotation currentAnnot = (Annotation)(iter.next());
+        Annotation titleAnn = (Annotation)(iter.next());
 
-        // determine the features of the current annotation
-        FeatureMap fm = currentAnnot.getFeatures();
-        if (fm.containsKey("majorType")&&
-          (fm.get("majorType").equals("title"))){
+        //we've not found a title at the start offset,
+        //there's no point in looking further
+        //coz titles come first
+        if (titleAnn.getStartNode().getOffset().compareTo(startAnnot) != 0)
+          return annotString;
 
-            Long offsetStartAnnot = currentAnnot.getStartNode().getOffset();
-            Long offsetEndAnnot = currentAnnot.getEndNode().getOffset();
-            try {
-              // the title from the current annotation
-              String annotTitle =
-                document.getContent().getContent(
-                  offsetStartAnnot,offsetEndAnnot).toString();
+        try {
+          // the title from the current annotation
+          String annotTitle =
+            document.getContent().getContent(
+              titleAnn.getStartNode().getOffset(),
+              titleAnn.getEndNode().getOffset()
+            ).toString();
 
-              // eliminate the title from annotation string and return the result
-              if (annotTitle.length()<annotString.length())
-                return annotString.substring(
-                                    annotTitle.length()+1,annotString.length());
-            } catch (InvalidOffsetException ioe) {
-              executionException = new ExecutionException
-                                 ("Invalid offset of the annotation");
-            }
-        }//if
+          // eliminate the title from annotation string and return the result
+          if (annotTitle.length()<annotString.length())
+            return annotString.substring(
+                                 annotTitle.length()+1,annotString.length());
+        } catch (InvalidOffsetException ioe) {
+            executionException = new ExecutionException
+                               ("Invalid offset of the annotation");
+        }//try
       }// while
     }//if
     return annotString;
@@ -1200,7 +1224,6 @@ public class OrthoMatcher extends AbstractProcessingResource
     if (matched_tokens >= largerVector.size()-1) return true;
     return false;
   }//matchRule13
-
 
   /** Tables for namematch info
     * (used by the namematch rules)
