@@ -88,7 +88,7 @@ public interface DataStore extends FeatureBearer {
    * <B>Don't use this method - use Factory.createResource with
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
-  public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
   throws PersistenceException;
 
   /** Get a list of the types of LR that are present in the data store. */

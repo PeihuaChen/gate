@@ -226,6 +226,13 @@ implements AnnotationSet
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
 
+    // the aliasing that happens when returning a set directly from the
+    // types index can cause concurrent access problems; but the fix below
+    // breaks the tests....
+    //AnnotationSet newSet =
+    //  new AnnotationSetImpl((Collection) annotsByType.get(type));
+    //return newSet;
+
     return (AnnotationSet) annotsByType.get(type);
   } // get(type)
 
