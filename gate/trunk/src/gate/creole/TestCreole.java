@@ -62,13 +62,14 @@ public class TestCreole extends TestCase
     if (Gate.isGateHomeReachable())
       reg.addDirectory(
         new URL("http://derwent.dcs.shef.ac.uk/tests/creole.xml")
+
       );
     else if (Gate.isGateAcUkReachable())
       reg.addDirectory(
-        new URL("http://gate.ac.uk/tests/creole.xml")
+        new URL("http://www.gate.ac.uk/tests/creole.xml")
       );
     else
-      throw new LazyProgrammerException();
+      throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
 
     reg.registerDirectories();
 

@@ -24,6 +24,9 @@ import junit.framework.*;
   */
 public class EmailDocumentHandler implements StatusReporter{
 
+  /**
+    Constructor used in tests mostly
+  */
   public EmailDocumentHandler(){
     setUp();
   }
@@ -501,7 +504,7 @@ public class EmailDocumentHandler implements StatusReporter{
     zone.add("PST");
     zone.add("PDT");
   }//setUp
-  
+
   /**
     This method returns the value of the member fieldName.
     fieldName is set by the method lineBeginsWithField(String line).

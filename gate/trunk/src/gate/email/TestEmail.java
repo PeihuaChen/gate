@@ -50,6 +50,7 @@ public class TestEmail extends TestCase
 
     // create the markupElementsMap map
     Map markupElementsMap = null;
+    gate.Document doc = null;
     /*
     markupElementsMap = new HashMap();
     // populate it
@@ -64,22 +65,21 @@ public class TestEmail extends TestCase
     markupElementsMap.put ("a","link");
     */
 
+    // init detects if Derwent or www.gate.ac.uk are reachable
+
+    Gate.init();
     // create a new gate document
-    //gate.Document doc = gate.Transients.newDocument(
-    //          new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
-
-
-    gate.Document doc = gate.Transients.newDocument(
-              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test1.eml")
-              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test2.eml")
-              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test3.eml")
-              //new URL("http://www.dcs.shef.ac.uk/~cursu/email/test4.eml")
-              new URL("http://www.dcs.shef.ac.uk/~cursu/email/test5.eml")
-              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test.eml")
-              //  new URL("http://www.dcs.shef.ac.uk/~cursu/email/miguel.mail.eml")
-    );
-
-
+    if (Gate.isGateHomeReachable())
+        doc = gate.Transients.newDocument(
+            new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/email/test.eml")
+        );
+    else if (Gate.isGateAcUkReachable())
+             doc = gate.Transients.newDocument(
+                new URL ("http://www.gate.ac.uk/tests/email/test.eml")
+            );
+         else
+          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+    // get a document format that deals with e-mails
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceURL()
     );

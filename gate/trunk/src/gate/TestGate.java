@@ -19,6 +19,7 @@ import gate.db.*;
 import gate.jape.*;
 import gate.fsm.*;
 import gate.xml.*;
+import gate.email.*;
 import gate.html.*;
 import gate.sgml.*;
 
@@ -62,6 +63,7 @@ public class TestGate
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
     suite.addTest(TestSgml.suite());
+    suite.addTest(TestEmail.suite());
     suite.addTest(TestJdk.suite());
     suite.addTest(TestJape.suite());
     suite.addTest(TestFSM.suite());

@@ -47,6 +47,7 @@ public class TestSgml extends TestCase
 
     // create the markupElementsMap map
     Map markupElementsMap = null;
+    gate.Document doc = null;
     /*
     markupElementsMap = new HashMap();
     // populate it
@@ -60,13 +61,22 @@ public class TestSgml extends TestCase
     markupElementsMap.put ("A","link");
     markupElementsMap.put ("a","link");
     */
+
+    // init detects if Derwent or www.gate.ac.uk are reachable
+    Gate.init();
     // create a new gate document
-    gate.Document doc = gate.Transients.newDocument(
-            new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/Hds.sgm")
-            //new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/K79.sgm")
-            //new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/Fly.sgm")
-           //new URL ("file:///d:/tmp/Hds.SGML")
-    );
+    if (Gate.isGateHomeReachable())
+        doc = gate.Transients.newDocument(
+            new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/sgml/Hds.sgm")
+        );
+    else if (Gate.isGateAcUkReachable())
+             doc = gate.Transients.newDocument(
+                new URL ("http://www.gate.ac.uk/tests/sgml/Hds.sgm")
+            );
+         else
+          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+
+
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     //*
