@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION security_create_user(varchar,varchar);
-CREATE FUNCTION security_create_user(varchar,varchar) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION security_create_user(varchar,varchar) RETURNS int4 AS '
    DECLARE
       p_usr_name alias for $1;
       p_usr_pass alias for $2;

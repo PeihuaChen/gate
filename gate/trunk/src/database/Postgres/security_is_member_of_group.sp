@@ -13,9 +13,9 @@
  *
  */
 
-DROP FUNCTION security_is_member_of_group(int4,int4);
 
-CREATE FUNCTION security_is_member_of_group(int4,int4) RETURNS boolean AS '
+
+CREATE OR REPLACE FUNCTION security_is_member_of_group(int4,int4) RETURNS boolean AS '
 
    DECLARE
 

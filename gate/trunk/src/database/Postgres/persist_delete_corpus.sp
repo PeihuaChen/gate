@@ -13,9 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_delete_corpus(int4);
-
-CREATE FUNCTION persist_delete_corpus(int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_delete_corpus(int4) RETURNS boolean AS '
 
    DECLARE
       p_lr_id alias for $1;

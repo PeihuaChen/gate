@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION persist_delete_annotation_set(int4,varchar);
 
-CREATE FUNCTION persist_delete_annotation_set(int4,varchar) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_delete_annotation_set(int4,varchar) RETURNS boolean AS '
    DECLARE
       p_lr_id        alias for $1;
       p_set_name     alias for $2;

@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION security_can_delete_group(int4);
-CREATE FUNCTION security_can_delete_group(int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_can_delete_group(int4) RETURNS boolean AS '
 
    DECLARE
       p_grp_id alias for $1;

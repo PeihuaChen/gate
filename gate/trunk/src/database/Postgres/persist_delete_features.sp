@@ -14,8 +14,7 @@
  */
 
 
-DROP FUNCTION persist_delete_features(int4,int2);
-CREATE FUNCTION persist_delete_features(int4,int2) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_delete_features(int4,int2) RETURNS boolean AS '
 
    DECLARE
       p_ent_id     alias for $1;

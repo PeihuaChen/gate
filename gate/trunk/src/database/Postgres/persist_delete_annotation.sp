@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_delete_annotation(int4,int4);
-CREATE FUNCTION persist_delete_annotation(int4,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_delete_annotation(int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_doc_id alias for $1;

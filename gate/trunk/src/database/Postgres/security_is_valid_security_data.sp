@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION security_is_valid_security_data(int2,int4,int4);
 
-CREATE FUNCTION security_is_valid_security_data(int2,int4,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_is_valid_security_data(int2,int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_perm_mode alias for $1;

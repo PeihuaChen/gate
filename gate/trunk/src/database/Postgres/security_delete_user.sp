@@ -13,9 +13,8 @@
  *
  */
 
-DROP FUNCTION security_delete_user(int4);
 
-CREATE FUNCTION security_delete_user(int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_delete_user(int4) RETURNS boolean AS '
 
    DECLARE
       p_usr_id alias for $1;

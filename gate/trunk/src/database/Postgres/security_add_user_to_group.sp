@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION security_add_user_to_group(int4,int4);
-CREATE FUNCTION security_add_user_to_group(int4,int4) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_add_user_to_group(int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_group_id alias for $1;

@@ -13,8 +13,7 @@
  *
  */
 
-DROP FUNCTION persist_create_corpus(int4);
-CREATE FUNCTION persist_create_corpus(int4) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_corpus(int4) RETURNS int4 AS '
 
    DECLARE
       p_lr_id alias for $1;
