@@ -92,3 +92,5 @@ alter table gateadmin.t_feature
 alter index gateadmin.xpkt_feature rebuild tablespace "GATEINDEX01";
 alter index gateadmin.xt_feature_01 rebuild tablespace "GATEINDEX01";
 
+alter user GATEADMIN default tablespace "GATEDATA01";
+alter user GATEUSER default tablespace "GATEDATA01";
