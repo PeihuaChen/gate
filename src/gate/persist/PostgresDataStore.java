@@ -134,46 +134,6 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-  protected String readDatabaseID() throws gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-
-    PreparedStatement pstmt = null;
-    ResultSet rs = null;
-    String  result = null;
-
-    //1. read from DB
-    try {
-      String sql = " select par_value_string " +
-                   " from  "+this.dbSchema+"t_parameter " +
-                   " where  par_key = ? ";
-
-      pstmt = this.jdbcConn.prepareStatement(sql);
-      pstmt.setString(1,DBHelper.DB_PARAMETER_GUID);
-      pstmt.execute();
-      rs = pstmt.getResultSet();
-
-      if (false == rs.next()) {
-        throw new PersistenceException("Can't read database parameter ["+
-                                          DBHelper.DB_PARAMETER_GUID+"]");
-      }
-      result = rs.getString(1);
-    }
-    catch(SQLException sqle) {
-        throw new PersistenceException("Can't read database parameter ["+
-                                          sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(rs);
-      DBHelper.cleanup(pstmt);
-    }
-
-    if (DEBUG) {
-      Out.println("reult=["+result+"]");
-    }
-
-    return result;
-
-  }
   public List findLrIds(List constraints) throws gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
