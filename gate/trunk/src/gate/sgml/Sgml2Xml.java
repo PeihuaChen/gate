@@ -485,16 +485,17 @@ public class Sgml2Xml{
     }
 
     //finally add the XML prolog
-    m_modifier.insert(0,"<?xml version=\"1.0\"?>\n");
+    m_modifier.insert(0,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     //Out.println(m_modifier.toString());
-
+/*
     // get a InputStream from m_modifier and write it into a temp file
     // finally return the URI of the new XML document
     ByteArrayInputStream is = new ByteArrayInputStream(
                                               m_modifier.toString().getBytes()
                                                        );
+*/
     // this method is in gate.util package
-    File file = Files.writeTempFile(is);
+    File file = Files.writeTempFile(m_modifier.toString(),"UTF-8");
 
     //return m_doc.getSourceURL().toString();
     return file.toURL().toString();

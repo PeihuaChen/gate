@@ -118,10 +118,9 @@ public class TestXml extends TestCase
     // Export the Gate document called keyDocument as  XML, into a temp file,
     // using UTF-8 encoding
     File xmlFile = null;
-    xmlFile = Files.writeTempFile(null);
-
+    xmlFile = Files.writeTempFile(keyDocument.toXml(),"UTF-8");
     assert("The temp Gate XML file is null. Can't continue.",xmlFile != null);
-
+/*
     // Prepare to write into the xmlFile using UTF-8 encoding
     OutputStreamWriter writer = new OutputStreamWriter(
                     new FileOutputStream(xmlFile),"UTF-8");
@@ -129,7 +128,7 @@ public class TestXml extends TestCase
     writer.write(keyDocument.toXml());
     writer.flush();
     writer.close();
-
+*/
     // Load the XML Gate document form the tmp file into memory
     gate.Document gateDoc = null;
     gateDoc = gate.Factory.newDocument(xmlFile.toURL());

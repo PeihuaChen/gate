@@ -232,9 +232,11 @@ public class DefaultResourceHandle implements ResourceHandle {
       fileChooser.setSelectedFiles(null);
       fileChooser.setFileFilter(filter);
 
-      int res = (getLargeView() != null) ? fileChooser.showDialog(getLargeView(), "Save"):
-                  (getSmallView() != null) ? fileChooser.showDialog(getSmallView(), "Save") :
-                                             fileChooser.showDialog(null, "Save");
+      int res = (getLargeView() != null) ?
+                              fileChooser.showDialog(getLargeView(), "Save"):
+                (getSmallView() != null) ?
+                              fileChooser.showDialog(getSmallView(), "Save") :
+                                          fileChooser.showDialog(null, "Save");
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFile = fileChooser.getSelectedFile();
         currentDir = fileChooser.getCurrentDirectory();

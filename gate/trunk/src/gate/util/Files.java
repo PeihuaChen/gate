@@ -160,8 +160,60 @@ public class Files {
     resourceFileOutputStream.close();
     contentStream.close ();
     return resourceFile;
-  }
+  }// writeTempFile()
 
+  /**
+    * Writes aString into a temporary file located inside
+    * the default temporary directory defined by JVM, using the specific
+    * anEncoding.
+    * An unique ID is generated and associated automaticaly with the file name.
+    * @param aString the String to be written. If is null then the file will be
+    * empty.
+    * @param anEncoding the encoding to be used. If is null then the default
+    * encoding will be used.
+    * @return the tmp file containing the string.
+    */
+  public static File writeTempFile(String aString, String anEncoding) throws
+      UnsupportedEncodingException, IOException{
+    File resourceFile  = null;
+    OutputStreamWriter writer = null;
+
+    // Create a temporary file name
+    resourceFile = File.createTempFile ("gateResource", ".tmp");
+    resourceFile.deleteOnExit ();
+
+    if (aString == null) return resourceFile;
+    // Prepare the writer
+    if (anEncoding == null){
+      // Use default encoding
+      writer = new OutputStreamWriter(new FileOutputStream(resourceFile));
+
+    }else {
+      // Use the specified encoding
+      writer = new OutputStreamWriter(
+                      new FileOutputStream(resourceFile),anEncoding);
+    }// End if
+
+    // This Action is added only when a gate.Document is created.
+    // So, is for sure that the resource is a gate.Document
+    writer.write(aString);
+    writer.flush();
+    writer.close();
+    return resourceFile;
+  }// writeTempFile()
+
+  /**
+    * Writes aString into a temporary file located inside
+    * the default temporary directory defined by JVM, using the default
+    * encoding.
+    * An unique ID is generated and associated automaticaly with the file name.
+    * @param aString the String to be written. If is null then the file will be
+    * empty.
+    * @return the tmp file containing the string.
+    */
+  public static File writeTempFile(String aString) throws IOException{
+    return writeTempFile(aString,null);
+  }// writeTempFile()
 
 
   /** Get a resource from the classpath as a byte array.

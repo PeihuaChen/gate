@@ -549,6 +549,7 @@ public class AnnotationDiff extends AbstractVisualResource{
       return;
 
     int responseSize = aResponseAnnotList.size();
+
     diffSet = new HashSet();
     // Iterate throught all elements from keyList and find those in the response
     // list which satisfies isCompatible() and isPartiallyCompatible() relations
@@ -660,7 +661,7 @@ public class AnnotationDiff extends AbstractVisualResource{
                   typeCounter[SPURIOUS_TYPE]; // this comes from Resp
 
     if (actual != responseSize)
-      Err.prln("WARNING: The response size(" + responseSize +
+      Err.prln("AnnotDiff warning: The response size(" + responseSize +
       ") is not the same as the computed value of" +
     " actual(Correct[resp or key]+Partial[resp]+Spurious[resp]=" + actual +")");
 
