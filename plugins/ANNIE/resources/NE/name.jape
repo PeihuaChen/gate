@@ -89,7 +89,16 @@ Priority: 50
  {Lookup.majorType == person_full, Lookup.minorType == normal}
 )
 :person -->
-  :person.TempPerson = {kind = "personName", rule = GazPerson}
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "GazPerson");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 
 Rule:	GazPersonFirst
@@ -106,7 +115,6 @@ Priority: 20
 -->
   //:person.TempPerson = {kind = "personName", rule = GazPersonFirst}
 {
-//removes  TempPerson annotation, gets the rule feature and adds a new Person annotation
 gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
@@ -170,7 +178,16 @@ Priority: 15
  (SPACE PERSONENDING)?
 )
 :person -->
-  :person.TempPerson = {kind = "personName", rule = "PersonTitle"}
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personTitle");
+features.put("rule", "GazPerson");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 Rule: 	FirstPersonStop
 Priority: 20
