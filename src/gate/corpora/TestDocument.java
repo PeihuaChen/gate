@@ -38,11 +38,11 @@ public class TestDocument extends TestCase
       e.printStackTrace(System.err);
     }
     if (Gate.isGateHomeReachable())
-        testServer = "http://derwent.dcs.shef.ac.uk/gate.ac.uk/";
+      testServer = "http://derwent.dcs.shef.ac.uk/gate.ac.uk/";
     else if (Gate.isGateAcUkReachable())
-             testServer = "http://www.gate.ac.uk/";
-         else throw new
-        LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+      testServer = "http://www.gate.ac.uk/";
+    else throw new
+      LazyProgrammerException("Derwent and www.gate.ac.uk are not reachable");
 
 
     testDocument1 = "tests/html/test2.htm";
