@@ -48,6 +48,8 @@ public class TabHighlighter {
    */
   public void highlight(){
     if(tPane.getSelectedIndex() != tab){
+      if(tPane.getComponentAt(tab).equals(highlightColour)) return;
+
       oldColour = tPane.getBackgroundAt(tab);
       tPane.setBackgroundAt(tab, highlightColour);
     }
