@@ -46,9 +46,6 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Keep the refference to this structure */
   private RepositioningInfo ampCodingInfo = null;
 
-  private String contentsForStack = "";
-
-
   /** Set repositioning information structure refference. If you set this
    *  refference to <B>null</B> information wouldn't be collected.
    */
@@ -209,9 +206,6 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     */
   public void startElement (String uri, String qName, String elemName,
                                                              Attributes atts){
-
-    contentsForStack = "";
-
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -265,15 +259,6 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     */
   public void endElement (String uri, String qName, String elemName )
                                                          throws SAXException{
-    // Addition by Niraj
-    // The action that should be taken when the full text between elements have
-    // been fetched
-    if(contentsForStack.length() != 0) {
-      charactersAction(contentsForStack.toCharArray(),0,contentsForStack.length());
-      contentsForStack = "";
-    }
-    // end of addition
-
     // obj is for internal use
     CustomObject obj = null;
 
@@ -314,13 +299,9 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     * stack and update with the new values. For entities, this method is called
     * separatley regardless of the text sourinding the entity.
     */
-  public void characters(char [] text,int start,int length) throws SAXException {
-    contentsForStack = contentsForStack + new String(text,start,length);
-  }
-
-  public void charactersAction( char[] text,int start,int length) throws SAXException{
+  public void characters( char[] text,int start,int length) throws SAXException{
     // correction of real offset. Didn't affect on other data.
-    super.charactersMethod(text, start, length);
+    super.characters(text, start, length);
     // create a string object based on the reported text
     String content = new String(text, start, length);
     StringBuffer contentBuffer = new StringBuffer("");

@@ -28,7 +28,7 @@ import gate.creole.*;
 
 //import org.w3c.www.mime.*;
 // xml tools
-//import customxerces.javax.xml.parsers.*;
+import javax.xml.parsers.*;
 import org.xml.sax.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
@@ -86,20 +86,17 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
       //Out.println("Conversion done..." + xmlUri);
       //Out.println(sgml2Xml.convert());
       // Get a parser factory.
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+      // Set up the factory to create the appropriate type of parser
+
       // Set up the factory to create the appropriate type of parser
       // non validating one
-      // non namesapace aware one
-      // Create a SAX parser
-      javax.xml.parsers.SAXParserFactory saxParserFactory = javax.xml.parsers.SAXParserFactory.newInstance();
       saxParserFactory.setValidating(false);
+      // non namesapace aware one
       saxParserFactory.setNamespaceAware(true);
-      javax.xml.parsers.SAXParser parser = saxParserFactory.newSAXParser();
 
-
-      customxerces.javax.xml.parsers.SAXParserFactory cxSaxParserFactory = customxerces.javax.xml.parsers.SAXParserFactory.newInstance();
-      cxSaxParserFactory.setValidating(false);
-      cxSaxParserFactory.setNamespaceAware(true);
-      customxerces.javax.xml.parsers.SAXParser cxParser = cxSaxParserFactory.newSAXParser();
+      // Create a SAX parser
+      SAXParser parser = saxParserFactory.newSAXParser();
 
       // use it
       if (null != doc){
@@ -111,22 +108,13 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
         // register a status listener with it
         xmlDocHandler.addStatusListener(statusListener);
 
-        // if collect repositioning info is true then use customxerces
-        if(doc.getCollectRepositioningInfo().booleanValue() && doc.getPreserveOriginalContent().booleanValue()) {
-          cxParser.parse(xmlUri, xmlDocHandler);
-        } else {
-          parser.parse(xmlUri, xmlDocHandler);
-        }
-
+        parser.parse(xmlUri, xmlDocHandler);
         ((DocumentImpl) doc).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
      }// end if
-    } catch (customxerces.javax.xml.parsers.ParserConfigurationException e){
+    } catch (ParserConfigurationException e){
         throw
         new DocumentFormatException("XML parser configuration exception ", e);
-    } catch (javax.xml.parsers.ParserConfigurationException e){
-      throw
-      new DocumentFormatException("XML parser configuration exception ", e);
     } catch (SAXException e){
         throw new DocumentFormatException(e);
     } catch (IOException e){

@@ -30,6 +30,7 @@ import gate.persist.*;
 import gate.gui.*;
 
 import org.xml.sax.*;
+import javax.xml.parsers.*;
 
 /** A scratch pad for experimenting.
   */

@@ -22,6 +22,7 @@ import gate.util.*;
 import gate.*;
 
 import org.xml.sax.*;
+import javax.xml.parsers.*;
 import org.jdom.input.*;
 import org.jdom.*;
 
