@@ -234,9 +234,13 @@ problem.
     difficult to tell whether two certain operations are interfering with each
     other so the GUI should lock itself not allowing the user to start a new
     operation before the current one finished.</p>
-    <P><font color="green"><B>Workaround:</b> Until the gate developers get
-    their act together and implement some mechanism for locking, the users are
-    advised to show patience and allow each operation to finish before starting
+
+    Kalina's note: I think that such operations should not be performed in a separate thread allowing the user to control the GUI. Instead they should pop up a dialog telling the user theu have to wait. The problem otherwise:
+
+- I do not know when the save is finished, so I close the document while it's still being saved. What happens is cleanup() gets called, which remoes the data before it's saved.
+
+
+    <P><font color="green"><B>Workaround:</b> Allow each operation to finish before starting
     a new one. This is particularly important for operations involving
     datastores and executions of applications.
     </font></p></TD>
@@ -281,7 +285,7 @@ problem.
 
   <TR>
     <TD>00025</TD>
-    <TD></TD>
+    <TD>core</TD>
     <TD>Diana</TD>
     <TD></TD>
     <TD>17/Dec/2001 Beta1</TD>
@@ -295,6 +299,648 @@ problem.
     <!--<TD>spare2</TD>-->
   </TR>
 
+
+  <TR>
+    <TD>00026</TD>
+    <TD>gui</TD>
+    <TD>Kalina</TD>
+    <TD>Valentin</TD>
+    <TD>alpha3</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>there is a problem with the OKCancelDialog and the tabbed panel it puts inside. Basically, because the tabbedPabel grows to fit the size of the editors, this creates a problem when these editors exceed the screen. The dialog does not fit on it any more and the tabs are gone, you cannot see anything!
+    All of this is due to the token sets of annotations that you add on the sentence annotations. If easier, maybe change those to annotation Ids instead and avoid tackling the issue, because it only occurs when the annotation has an excessively long feature. Whatever.</TD>
+    <TD>Run Nerc on a document of choice, then double click any Sentence.
+At that point, the treeviewer gets constructed on the first pane and Cristi&prime;s annotation viewer gets constructed in the next. However, his viewer does not control its Size and Preferred size, neither it has a scroller. So the tab panel decides to make itself as big as his viewer and nothing shows on screen, because the treeviewer is only small and is not visible, just as the tabs themselves.</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00027</TD>
+    <TD>gui</TD>
+    <TD>Valentin</TD>
+    <TD>Valentin</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>DocViewer sizes weirdly when only the text is displayed.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+<TR>
+   <TD>00028</TD>
+   <TD>Subsystem<BR>gui</TD>
+   <TD>Reported by Steve Wohlever</TD>
+   <TD>Adopted by</TD>
+   <TD>Reported on<BR>21/11/2001 Sparc Solaris 7 JDK 1.3.0 and 1.3.1_01 and<BR>2.0b1build691</TD>
+   <TD>Fixed on<BR></TD>
+   <TD>When I attempt to load a GATE document language resource via the GATE GUI (i.e., click on the "open folder" icon for the sourceUrl property), my screen is filled with a simple blue background (and this background spans multiple "virtual" desktops in my X-Windows session, using the FVWM window manager). No Java Swing widgets are visible on this background (making it impossible to do anything, much less load a document). I have also tried this with the Sun CDE window manager. In that case, a gray window fills just my current desktop, again with no Java widgets (and thus no way to do anything). This problem does not arise on Windows 2000 (JDK
+1.3.1_01) (which is not my preferred platform), and I did not have this problem on Solaris when using GATE 2.0 a3build516.</TD>
+   <TD>Just run build/gate.sh</TD>
+   <TD>Supporting  materials</TD>
+</TR>
+
+  <TR>
+    <TD>00029</TD>
+    <TD>gui</TD>
+    <TD>Valentin</TD>
+    <TD>Valentin</TD>
+    <TD>Beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Main view title doesn&prime;t change on resource rename.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00030</TD>
+    <TD>core</TD>
+    <TD>Diana</TD>
+    <TD>___adopted_by</TD>
+    <TD>Beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Restoring an application from a file crashes Gate if one of the components is
+missing (e.g. you&prime;ve removed a document from where it was originally stored). It should just give you an error message and exit gracefully, no?</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00031</TD>
+    <TD>gui</TD>
+    <TD>Marin</TD>
+    <TD>___adopted_by</TD>
+    <TD>Beta 1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>If I try to add a "new Sentence annotation" to a new set form the GUI I get <br>++++++++++++++++++++
+TreeViewer warning: No annotations of type Tokenso cannot show or edit the text and the tree annotations.
+</TD>
+    <TD>___test_method</TD>
+    <TD><a href="bugs/trace01.txt">trace</a></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00032</TD>
+    <TD>gui</TD>
+    <TD>Diana</TD>
+    <TD>Valentin</TD>
+    <TD>Beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>I tried to change the colour of one of the annotations (by selecting red instead of pale yellow as the background) and to my surprise, it made all  those annotations disappear completely! And I couldn&prime;t even change the colour back to something else, as it wouldn&prime;t let me..... Bizarre, as it used to work fine. I tested it several times and got the same thing every time.
+
+NOTE: could not recreate on Win; LInux issue perhaps? Check with Di if it still happens.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00033</TD>
+    <TD>core-serialisation</TD>
+    <TD>Hamish</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>SDS is losing document features after save/restore</TD>
+    <TD>create doc from http URL
+note that source URL is a feature
+open existing SDS
+"save to" the doc
+quit gate
+restart, open SDS, load doc
+source URL feature no longer present</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00034</TD>
+    <TD>core</TD>
+    <TD>Marin</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>it looks like the FeatureMap is not working properly</TD>
+    <TD>the following code:
+
+
+-------------------------------
+String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
+
+  System.out.println("key=["+TOKEN_STRING+"]");
+  System.out.println("value ["+currPronoun.getFeatures().get(TOKEN_STRING)+"]");
+  System.out.println("features=["+currPronoun.getFeatures()+"]");
+-------------------------------
+
+produces:
+
+============================
+key=[string]
+
+value [null]
+
+features=[{category=PRP$, kind=word, string=its, length=3, orth=lowercase}]  ============================
+
+i.e. getting the value for the key "string" fails, wlthough it seems that this key/velue pair exists in the feature map
+
+the code in feature Map for toString() and get() is totally different, that's why one works and other not
+
+
+more weird details:
+
+- the code works in the debugger, and when used standalone (from TestCoref, not as PR from GATE UI) which implies synchronization problems
+
+- on the other hand I can't see a scenario where these four consecutive lines of the execution are interfered by another thread
+</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00035</TD>
+    <TD>core-serialisation</TD>
+    <TD>Hamish</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>create a corpus with the attached .txt
+save to SDS
+close gate and restart
+open SDS
+load corpus
+try to load document - system dies, evidently doing lots of
+  swapping... (file is 33kb; system started with 200Mb RAM)
+</TD>
+    <TD>___test_method</TD>
+    <TD><a href="bugs/17160411.txt">17160411.txt</a></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00036</TD>
+    <TD>core/jape</TD>
+    <TD>Hamish</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>running on the OB set with default resources, I get the exception
+below. not sure if the preceding exceptions are relevant; the last one happens at line 22 of
+
+ 1  // FinalYearOnlyFinalActionClass143
+
+ 2  package japeactionclasses;
+
+ 3  import java.io.*;
+
+ 4  import java.util.*;
+
+ 5  import gate.*;
+
+ 6  import gate.jape.*;
+
+ 7  import gate.annotation.*;
+
+ 8  import gate.util.*;
+
+ 9
+
+10  public class FinalYearOnlyFinalActionClass143
+
+11  implements java.io.Serializable, RhsAction {
+
+12    public void doit(Document doc, AnnotationSet annotations,
+java.util.Map bindings) {
+
+13  //removes TempDate annotation, gets the rule feature and adds a new Date annotation
+
+14  gate.AnnotationSet date = (gate.AnnotationSet)bindings.get("date");
+
+15  gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
+
+16  gate.FeatureMap features = Factory.newFeatureMap();
+
+17  features.put("rule1", dateAnn.getFeatures().get("rule"));
+
+18  features.put("rule2", "YearOnlyFinal");
+
+19  features.put("kind", "date");
+
+20  annotations.add(date.firstNode(), date.lastNode(), "Date",
+
+21  features);
+
+22  annotations.removeAll(date);
+
+23
+
+24    }
+
+25  }
+
+Diana&prime;s note (unlikely though):
+The problem is badly written Java code on the RHS of a rule (my fault!) It was  trying to get a feature and value ("rule" in this case) that didn't
+exist
+
+17  features.put("rule1", dateAnn.getFeatures().get("rule"));
+
+because of a previous rule in another grammar where the feature should have
+been added but hadn't been.
+
+Of course, I should have ensured that it only looks for features if they
+exist :-)
+
+</TD>
+    <TD>___test_method</TD>
+    <TD><a href="bugs/trace02.txt">trace</a></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00037</TD>
+    <TD>core/gui</TD>
+    <TD>Diana/Marin</TD>
+    <TD>___adopted_by</TD>
+    <TD>bet1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>When you select all the loaded documents and then do Close All, and then exit
+Gate, it doesn't appear to have removed the documents properly, because it
+saves them before it exits, and then reloads them when you start Gate again.<br>
+same story here and it happens with PRs (sometimes), applications (almost
+always) and with corpora (almost always, but only an empty corpus is loaded, i.e. containing no documents)
+
+I guess it&prime;s relevant to when GATE tries to persist the settings (and that somehow sometimes it fails to do so)
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00038</TD>
+    <TD>gui</TD>
+    <TD>Hamish</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>check out GateExamples, build, and register GateExamples/build as a creole directory
+
+then create a doc
+
+the new "MyDocViewer" thing comes up as it should; the bug
+is that it comes up 2 or 3 times
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00039</TD>
+    <TD>core - I/O</TD>
+    <TD>Hamish</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>the "don't give me all the GATE features" facility doesn't
+seem to work: sometimes you get features, sometimes not
+</TD>
+    <TD>check out GateExamples and run the default configuration in JBuilder - results attached. so the
+"<html>" tag is ok (an extra space added though), but the "<meta " thing has the "gateId" in it...</TD>
+    <TD><a href="bugs/dump01.txt">output dump</a></TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00040</TD>
+    <TD>core</TD>
+    <TD>Marin</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>I was testing something and I noticed that Federal Bureau of Investigation is recognized as organization, while FBI is not, although it is available in the government.lst
+
+any ideas?
+
+also isn't it possible to automatically populate the organizations lists presented in memory with their acronyms?
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00041</TD>
+    <TD>core</TD>
+    <TD>Valentin</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Closing Gate on solaris raised this:
+
+Failed to save config data:
+gate.util.GateException: problem writing user gate.xml:
+java.io.FileNotFoundException: Z:\/.gate.xml (No such file or directory)
+        at gate.Gate.writeUserConfig(Gate.java:597)
+        at gate.gui.MainFrame$28.run(MainFrame.java:1747)
+        at java.lang.Thread.run(Thread.java:484)
+Failed to save session data:
+java.io.FileNotFoundException: Z:\/.gate.session (No such file or
+directory)
+        at java.io.FileOutputStream.open(Native Method)
+        at java.io.FileOutputStream.<init>(FileOutputStream.java:102)
+        at java.io.FileOutputStream.<init>(FileOutputStream.java:62)
+        at java.io.FileOutputStream.<init>(FileOutputStream.java:132)
+        at gate.util.persistence.PersistenceManager.saveObjectToFile(PersistenceMan
+ager.java:358)
+        at gate.gui.MainFrame$28.run(MainFrame.java:1783)
+        at java.lang.Thread.run(Thread.java:484)
+
+Anyone know why it should look for Z:\ on solaris?</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00042</TD>
+    <TD>gui - feature request</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>When doing corpus annotation with GATE, i.e. correcting ANNIE's wrong annotations, what you often do is want to delete a wrong annotation and then mark it up correctly. The second part was made easy by Cristi. The first part: deleting an annotation is difficult.
+
+you have to have the annotations table on, then click on the annotation text, then choose the annotation type, get positioned in the table (which is slow and confusing on long documents) just to press delete. The problem is that linguists don't care about all the internal features produced by GATE most of the time.
+
+Suggestion: add a menu of actions for each annotation type (delete and select for now). It'll take longer to explain in writing but Valy agrees it's a good idea to bypass the complex delete procedure. It will not be computationally more expensive and will only take 10 mins to implement (as a pessimist I say 30).</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00043</TD>
+    <TD>gui - feature request</TD>
+    <TD>Kalina</TD>
+    <TD>Kalina (she volunteered for it)</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>
+ We need separate panels for the key and response annotations in
+ the adiff display, with their own horizontal scrolling, so that we can
+ get both on the same screen when the features lists are long
+
+ We must show the string for each annotation, because as it is, the ADIFF panel is anything but informative. When I analyse the OM errors for example, I have to keep swapping between the Document viewer where I can see the strings and the adiff, in order to discover why something might have gone wrong. That's not more than 30 mins work that will improve the life of people doing PR debugging increadibly. I volunteer to do it.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00044</TD>
+    <TD>gui - feature request</TD>
+    <TD>Marin</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Have a different icon for persistent LR's (i.e. documents) that have changed to show the user they need saving.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00045</TD>
+    <TD>gui - feature requests</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>1. Search - allows you to find a string in the DocumentViewer/Editor. Vitally needed when marking up text. For example, you want to markup all occurences of 'he'. The only way to do that now is to read the entire text. Maybe it should be easier than that.
+
+technical difficulty: very low (content.indexOf (given string) + do
+highlight)
+<br>
+2. Corpus/save preserving format - same as the existing save as XML functionality, just slightly different method call. Just new entry on the menu.
+
+technical difficulty: low
+<br>
+3. make the action menu for resources a separate class and that gets constructed from actions exposed on the resources themselves. Valy says that's a really good idea and not difficult to implement. The nice thing about it is that it'll reduce the overhead of adding new types of LRs like Wordnet to the GUI with no programming effort on behalf of the user.
+
+technical difficulty: medium (Valy knows exactly how but just not enough time till the beta; suggests done in January, before final release).
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00046</TD>
+    <TD>core - feature request</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>The profiler shows that obtaining beanInfo on each class is an expensive operation. I minimised that to an extent now by stopping it from being read for every parameter. Hopefully now it's read once parameters need to be set. However, still this is not needed, because the beanInfo does not change once the class is loaded.
+
+So how about making a static on each Resource, which when it gets constructed, it checks and if the static is null -> creates the BeanInfo, if not, does nothing. That might speed up the things even more. Probably not worth trying till January, but something to keep in mind.
+
+Valentin's note: how often do we set parameters on resources? Is it worth the while?
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00047</TD>
+    <TD>?</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>The idea is to have a file in the corpus directory which is either empty, then process the entire doc or contains the string of the annotation name which should be the BODY annotation in annotation set transfer.
+
+The problem is that without AST, precision and recall are lower by about 5% from the real figures.
+
+Should fix as soon as Oana has fixed the entire corpus.
+
+Diana's note:
+.....would be very happy later on if it were allowed to process just the main
+body of the documents and not the whole thing, by allowing you to specify the
+tag to be used for the annotation set transfer.
+
+</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00048</TD>
+    <TD>core+gui</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>alpha3</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>WILL MAKE RUNNING THE EVAL TOOLS FROM GUI WORK IN NOVEMBER
+ Valentin's comment: how about this for realism? :)
+    </TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00049</TD>
+    <TD>core- I/O</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD><pre>Document.toXML()</pre> needs optimising so it allocates less memory.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00050</TD>
+    <TD>creole</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Priority of rule firing in the OrthoMatcher</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00051</TD>
+    <TD>core - I/O - feature request</TD>
+    <TD>Hamish</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>We need to enable selective dump of
+annot features in the format-preserving thingy</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+  <TR>
+    <TD>00052</TD>
+    <TD>core - I/O</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Preserve format XML export should check for <i>gateId</i></TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00053</TD>
+    <TD>creole - orthomatcher</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>John Smith matches Peter Smith</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00054</TD>
+    <TD>core - feature request</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Add a ProcessingResourceVR interface for later use.</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00055</TD>
+    <TD>gui - feature request</TD>
+    <TD>Kalina</TD>
+    <TD>___adopted_by</TD>
+    <TD>beta1</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>"Restore App from file" as a menu item on right click on Applications</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+
+
+  <TR>
+    <TD>___number</TD>
+    <TD>core jape creole gui</TD>
+    <TD>___reported_by</TD>
+    <TD>___adopted_by</TD>
+    <TD>___reported_on ___date ___OS ___JDK ___Gversion</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>___description</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
 
 <!------------------------------------------------------------------------->
 </TABLE>
