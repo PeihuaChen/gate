@@ -16,26 +16,23 @@ public class AnnotationImpl
       *@param start The node from where the annotation will depart;
       *@param end The node where trhe annotation ends;
       *@param type The type of the new annotation;
-      *@param equivalenceClass the equivalence class of the new annotation.
       */
     public AnnotationImpl (Long id, gate.Node start, gate.Node end,
-                           String type, String equivalenceClass) {
+                           String type) {
         this.id = id;
         this.start = start;
         this.end = end;
         this.type = type;
-        this.eqClass = equivalenceClass;
     }
 
     /**Constructor. Builds a new annotation with an automatically assigned ID.
       *@param start The node from where the annotation will depart;
       *@param end The node where trhe annotation ends;
       *@param type The type of the new annotation;
-      *@param equivalenceClass the equivalence class of the new annotation.
       */
     public AnnotationImpl (gate.Node start, gate.Node end,
-                           String type, String equivalenceClass) {
-        this(Tools.gensym(), start, end, type, equivalenceClass);
+                           String type) {
+        this(Tools.gensym(), start, end, type);
     }
 
 
@@ -50,12 +47,6 @@ public class AnnotationImpl
     */
     public gate.FeatureMap getFeatures () {
         return  featureMap;
-    }
-
-
-    /** The equivalence class of this annotation. */
-    public String getEquivalenceClass () {
-        return  eqClass;
     }
 
 
@@ -86,7 +77,6 @@ public class AnnotationImpl
 
     private String type = "";
     private gate.FeatureMap featureMap = null;
-    private String eqClass = "";
     private gate.Node start, end;
     private gate.AnnotationStereotype stereotype = null;
     private Long id;

@@ -20,9 +20,6 @@ public interface Annotation extends FeatureBearer {
   /** The type of the annotation (corresponds to TIPSTER "name"). */
   public String getType();
 
-  /** The equivalence class of this annotation. */
-  public String getEquivalenceClass();
-
   /** The start node. */
   public Node getStartNode();
 
@@ -30,6 +27,6 @@ public interface Annotation extends FeatureBearer {
   public Node getEndNode();
 
   /** The id of this annotation. */
-  public Long getId();
+  public long getId();
 
 } // interface Annotation
