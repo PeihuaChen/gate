@@ -377,25 +377,25 @@ public class OClassImpl implements OClass{
     if ( o instanceof OClass ) {
       OClass c = (OClass) o;
       result = true;
-      if (null != this.getId() & null!= c.getId())
+      if (null != this.getId() && null!= c.getId())
         result &= this.getId().equals(c.getId());
       else
-        result = this.getId() == c.getId();
+        result &= this.getId() == c.getId();
 
-      if (null != this.getName() & null!= c.getName())
+      if (null != this.getName() && null!= c.getName())
         result &= this.getName().equals(c.getName());
       else
-        result = this.getName() == c.getName();
+        result &= this.getName() == c.getName();
 
-      if (null != this.getOntology() & null!= c.getOntology())
+      if (null != this.getOntology() && null!= c.getOntology())
         result &=  this.getOntology().equals(c.getOntology());
       else
-        result = this.getOntology() == c.getOntology();
+        result &= this.getOntology() == c.getOntology();
 
-      if (null != this.getURI() & null!= c.getURI())
+      if (null != this.getURI() && null!= c.getURI())
         result &= this.getURI().equals(c.getURI());
       else
-        result = this.getURI() == c.getURI();
+        result &= this.getURI() == c.getURI();
     }
     return result;
   } // equals
