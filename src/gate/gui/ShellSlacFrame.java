@@ -147,15 +147,19 @@ public class ShellSlacFrame extends MainFrame {
     action = new ImportDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
 
-    JMenu exportMenu = new JMenu("Export...");
+    JMenu exportMenu = new JMenu("Export");
     action = new ExportDocumentAction();
     exportMenu.add(new XJMenuItem(action, this));
     action = new ExportDocumentInlineAction();
     exportMenu.add(new XJMenuItem(action, this));
     fileMenu.add(exportMenu);
     
+    JMenu exportAllMenu = new JMenu("Export All");
     action = new ExportAllDocumentAction();
-    fileMenu.add(new XJMenuItem(action, this));
+    exportAllMenu.add(new XJMenuItem(action, this));
+    action = new ExportAllDocumentInlineAction();
+    exportAllMenu.add(new XJMenuItem(action, this));
+    fileMenu.add(exportAllMenu);
 
 /*
     action = new StoreAllDocumentAction();
@@ -758,7 +762,7 @@ public class ShellSlacFrame extends MainFrame {
   /** Export current document action */
   class ExportDocumentInlineAction extends AbstractAction {
     public ExportDocumentInlineAction() {
-      super("Export with Inline markup");
+      super("with inline markup");
       putValue(SHORT_DESCRIPTION, "Save the selected document in XML format"
             +" with inline markup");
     } // ExportDocumentInlineAction()
@@ -878,7 +882,7 @@ public class ShellSlacFrame extends MainFrame {
   /** Export current document action */
   class ExportDocumentAction extends AbstractAction {
     public ExportDocumentAction() {
-      super("Export in GATE Format");
+      super("in GATE format");
       putValue(SHORT_DESCRIPTION, "Save the selected document in XML format");
     } // ExportDocumentAction()
 
@@ -896,7 +900,7 @@ public class ShellSlacFrame extends MainFrame {
   /** Export All menu action */
   class ExportAllDocumentAction extends AbstractAction {
     public ExportAllDocumentAction() {
-      super("Export All");
+      super("in GATE format");
       putValue(SHORT_DESCRIPTION, "Save all documents in XML format");
     } // ExportAllDocumentAction()
 
@@ -916,6 +920,57 @@ public class ShellSlacFrame extends MainFrame {
       } // if
     } // actionPerformed(ActionEvent e)
   } // class ExportAllDocumentAction extends AbstractAction
+
+  /** Export All Inline menu action */
+  class ExportAllDocumentInlineAction extends AbstractAction {
+    public ExportAllDocumentInlineAction() {
+      super("with inline markup");
+      putValue(SHORT_DESCRIPTION, "Save all documents in XML format"
+            +" with inline markup");
+    } // ExportAllDocumentInlineAction()
+
+    public void actionPerformed(ActionEvent e) {
+      fileChooser.setDialogTitle("Select Export directory");
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+      int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
+      if(res == fileChooser.APPROVE_OPTION) {
+        File directory = fileChooser.getSelectedFile();
+        if(directory != null && directory.isDirectory()) {
+          Document currentDoc;
+          String fileName;
+          URL fileURL;
+          Runnable run;
+          Thread thread;
+          
+          for(int i=0; i<corpus.size(); ++i) {
+            currentDoc = (Document) corpus.get(i);
+
+            fileURL = currentDoc.getSourceUrl();
+            fileName = null;
+            if(fileURL != null){
+              fileName = fileURL.getFile();
+              fileName = Files.getLastPathComponent(fileName);
+            } // if
+            if(fileName == null || fileName.length() == 0){
+              fileName = currentDoc.getName();
+            } // if
+            if(fileName.length() == 0) {
+              fileName = "gate_result"+i;
+            } // if      
+            // create full file name
+            fileName = fileName+".gate";
+            
+            // run export
+            run = new ExportInline(currentDoc, new File(directory, fileName));
+            thread = new Thread(run, "");
+            thread.setPriority(Thread.MIN_PRIORITY);
+            thread.start();
+          } // for
+        } // if
+      } // if
+    } // actionPerformed(ActionEvent e)
+  } // class ExportAllDocumentInlineAction extends AbstractAction
 
   /** Object to run ExportAll in a new Thread */
   private class ExportAllRunnable implements Runnable {
