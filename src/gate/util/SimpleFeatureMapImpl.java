@@ -28,6 +28,7 @@ public class SimpleFeatureMapImpl  extends HashMap implements FeatureMap
 //=== DAM: FeatArray optimization, now derived from SimpleMapImpl
 public class SimpleFeatureMapImpl
     extends SimpleMapImpl
+//    extends HashMap
     implements FeatureMap, java.io.Serializable, java.lang.Cloneable
 //>>> DAM: end
 {
@@ -46,19 +47,22 @@ public class SimpleFeatureMapImpl
     if (aFeatureMap == null) return true;
 
     if (size() < aFeatureMap.size()) return false;
-
+/**/
     SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
 
     Object key;
     Object keyValueFromAFeatureMap;
     Object keyValueFromThis;
-    for (int i=0; i<sfm.m_capacity; i++)
+    int index;
+    for (int i=0; i<sfm.m_size; i++)
     {
       key = sfm.m_keys[i];
-        if (key == null)
-        continue;
+//        if (key == null)
+//        continue;
       keyValueFromAFeatureMap = sfm.m_values[i];
-      keyValueFromThis = get(key);
+      index = super.getSubsumeKey(key);
+      if (index < 0) return false;
+      keyValueFromThis = m_values[index];
 
       if  ( (keyValueFromThis == null) ^ (keyValueFromAFeatureMap == null))
         return false;
@@ -66,6 +70,25 @@ public class SimpleFeatureMapImpl
       if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
         if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
     } // for
+/**/
+/*
+    SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
+    Object keyValueFromAFeatureMap;
+    Object keyValueFromThis;
+    Iterator iter = sfm.keySet().iterator();
+    while (iter.hasNext())
+    {
+        Object e = iter.next();
+        keyValueFromAFeatureMap = sfm.get(e);
+        keyValueFromThis = get(e);
+
+      if  ( (keyValueFromThis == null) ^ (keyValueFromAFeatureMap == null))
+        return false;
+
+      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
+        if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
+    }
+*/
     return true;
   }//subsumes()
 
@@ -95,12 +118,23 @@ public class SimpleFeatureMapImpl
     Object key;
     Object keyValueFromAFeatureMap;
     Object keyValueFromThis;
-    for (int i=0; i<sfm.m_capacity; i++) {
+
+    for (int i=0; i<sfm.m_size; i++) {
       key = sfm.m_keys[i];
 
 // the additional check of the key for being in the aFeatureNamesSet
-      if (key == null || !aFeatureNamesSet.contains(key))
+/*      if (key == null || !aFeatureNamesSet.contains(key))
         continue;
+*/
+/*    Iterator iter = sfm.keySet().iterator();
+    while (iter.hasNext())
+    {
+        Object e = (Map.Entry)iter.next();
+*/
+      if (!aFeatureNamesSet.contains(key))
+        continue;
+//        keyValueFromAFeatureMap = sfm.get(e);
+//        keyValueFromThis = get(e);
       keyValueFromAFeatureMap = sfm.m_values[i];
         keyValueFromThis = get(key);
 
@@ -151,6 +185,7 @@ public class SimpleFeatureMapImpl
     return super.equals(o);
   }
 
+
 //////////////////THE EVENT HANDLING CODE//////////////
 //Needed so an annotation can listen to its features//
 //and update correctly the database//////////////////
@@ -170,8 +205,8 @@ public class SimpleFeatureMapImpl
    *
    * Adds a gate listener
    */
-  public synchronized void addFeatureMapListener(FeatureMapListener l) {
-    Vector v = mapListeners == null ? new Vector(2) : (Vector) mapListeners.clone();
+   public synchronized void addFeatureMapListener(FeatureMapListener l) {
+     Vector v = mapListeners == null ? new Vector(2) : (Vector)mapListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       mapListeners = v;
@@ -181,13 +216,13 @@ public class SimpleFeatureMapImpl
    *
    * @param e
    */
-  protected void fireMapUpdatedEvent () {
-    if (mapListeners != null) {
-      Vector listeners = mapListeners;
+   protected void fireMapUpdatedEvent () {
+     if (mapListeners != null) {
+       Vector listeners = mapListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
+      if (count == 0) return;
+      for (int i = 0; i < count; i++)
         ((FeatureMapListener) listeners.elementAt(i)).featureMapUpdated();
-      }
     }
   }//fireAnnotationUpdated
 
