@@ -2268,7 +2268,7 @@ System.out.println("trans failed ...rollback");
 
       //4.5  source url
       String url = rs.getString("doc_url");
-      result.setSourceUrl(new URL(url));
+      if(url != null && url.length() > 0) result.setSourceUrl(new URL(url));
 
       //4.6. start offset
       Long start = null;
