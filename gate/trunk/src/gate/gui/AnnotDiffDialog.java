@@ -181,14 +181,14 @@ class AnnotDiffDialog extends JFrame {
     responseDocComboBox.setPreferredSize(dim);
     responseDocComboBox.setMaximumSize(dim);
     responseDocComboBox.setMinimumSize(dim);
-    responseDocComboBox.setRenderer(new MyCellRenderer(Color.red, Color.white));
+    responseDocComboBox.setRenderer(new MyCellRenderer(Color.red, Color.black));
     // init its label
     responseLabel = new JLabel("Select the RESPONSE doc");
     responseLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     responseLabel.setOpaque(true);
     responseLabel.setFont(responseLabel.getFont().deriveFont(Font.BOLD));
     responseLabel.setBackground(Color.red);
-    responseLabel.setForeground(Color.white);
+    responseLabel.setForeground(Color.black);
 
     // init responseDocAnnotSetComboBox
     comboAsCont = new TreeSet(responseAnnotationSetMap.keySet());
@@ -201,7 +201,7 @@ class AnnotDiffDialog extends JFrame {
     responseDocAnnotSetLabel.setOpaque(true);
     responseDocAnnotSetLabel.setFont(
                   responseDocAnnotSetLabel.getFont().deriveFont(Font.BOLD));
-    responseDocAnnotSetLabel.setForeground(Color.white);
+    responseDocAnnotSetLabel.setForeground(Color.black);
     responseDocAnnotSetLabel.setBackground(Color.red);
 
     // init responseDocAnnotSetFalsePozComboBox
@@ -216,7 +216,7 @@ class AnnotDiffDialog extends JFrame {
     responseDocAnnotSetFalsePozLabel.setOpaque(true);
     responseDocAnnotSetFalsePozLabel.setFont(
               responseDocAnnotSetFalsePozLabel.getFont().deriveFont(Font.BOLD));
-    responseDocAnnotSetFalsePozLabel.setForeground(Color.white);
+    responseDocAnnotSetFalsePozLabel.setForeground(Color.black);
     responseDocAnnotSetFalsePozLabel.setBackground(Color.red);
 
 
