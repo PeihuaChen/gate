@@ -25,7 +25,7 @@ create or replace package persist is
   FEATURE_OWNER_DOCUMENT    constant number :=  2;
   FEATURE_OWNER_ANNOTATION  constant number :=  3;
   
-   
+  VALUE_TYPE_NULL       constant number := 100;   
   VALUE_TYPE_INTEGER    constant number := 101;
   VALUE_TYPE_LONG       constant number := 102;
   VALUE_TYPE_BOOLEAN    constant number := 103;

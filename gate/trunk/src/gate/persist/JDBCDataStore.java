@@ -337,7 +337,9 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   /** --- */
   protected int findFeatureType(Object value) {
 
-    if (value instanceof Integer)
+    if (null == value)
+      return DBHelper.VALUE_TYPE_NULL;
+    else if (value instanceof Integer)
       return DBHelper.VALUE_TYPE_INTEGER;
     else if (value instanceof Long)
       return DBHelper.VALUE_TYPE_LONG;

@@ -1224,7 +1224,11 @@ public class OracleDataStore extends JDBCDataStore {
     writeCLOB(src.toString(),dest);
   }
 
-  private Long _createFeature(Long entityID, int entityType,String key,Object value, int valueType)
+  private Long _createFeature(Long entityID,
+                              int entityType,
+                              String key,
+                              Object value,
+                              int valueType)
     throws PersistenceException {
 
     //1. store in DB
@@ -1246,6 +1250,9 @@ public class OracleDataStore extends JDBCDataStore {
 
       //1.2 set proper data
       switch(valueType) {
+
+        case DBHelper.VALUE_TYPE_NULL:
+          break;
 
         case DBHelper.VALUE_TYPE_BOOLEAN:
 
@@ -1382,6 +1389,7 @@ public class OracleDataStore extends JDBCDataStore {
     Vector elementsToStore = new Vector();
 
     switch(valueType) {
+      case DBHelper.VALUE_TYPE_NULL:
       case DBHelper.VALUE_TYPE_BINARY:
       case DBHelper.VALUE_TYPE_BOOLEAN:
       case DBHelper.VALUE_TYPE_FLOAT:
@@ -1481,14 +1489,12 @@ public class OracleDataStore extends JDBCDataStore {
   /** get security information for LR . */
   public SecurityInfo getSecurityInfo(LanguageResource lr)
     throws PersistenceException {
-
     throw new MethodNotImplementedException();
   }
 
   /** set security information for LR . */
   public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
     throws PersistenceException, SecurityException {
-
     throw new MethodNotImplementedException();
   }
 
@@ -1774,6 +1780,11 @@ public class OracleDataStore extends JDBCDataStore {
         Clob clobValue = rs.getClob(6);
 
         switch(valueType.intValue()) {
+
+          case DBHelper.VALUE_TYPE_NULL:
+            currFeature = null;
+            break;
+
           case DBHelper.VALUE_TYPE_BINARY:
             throw new MethodNotImplementedException();
 
