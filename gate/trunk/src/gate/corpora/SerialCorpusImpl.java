@@ -56,7 +56,7 @@ public class SerialCorpusImpl extends
 
   protected transient IndexManager indexManager= null;
   protected transient List addedDocs = null;
-  protected transient List removedDocs = null;
+  protected transient List removedDocIDs = null;
   protected transient List changedDocs = null;
 
   public SerialCorpusImpl() {
@@ -479,7 +479,7 @@ public class SerialCorpusImpl extends
       Document oldDoc =  (Document) documents.remove(index);
       if (DEBUG) Out.prln("documents after remove of " + oldDoc.getName()
                           + " are " + documents);
-      documentRemoved(oldDoc);
+      documentRemoved(oldDoc.getLRPersistenceId().toString());
       fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                           oldDoc,
                                           index,
@@ -652,9 +652,16 @@ public class SerialCorpusImpl extends
 
   public Object remove(int index){
     if (DEBUG) Out.prln("Remove index called");
+
+    boolean isLoaded = isDocumentLoaded(index);
+    Document removed = (Document) get(index);
+    documentRemoved(removed.getLRPersistenceId().toString());
+    if (!isLoaded){
+      unloadDocument(removed);
+    }
+
     docDataList.remove(index);
     Document res = (Document) documents.remove(index);
-    documentRemoved(res);
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                         res,
                                         index,
@@ -725,6 +732,10 @@ public class SerialCorpusImpl extends
     documents = new ArrayList();
     documents.addAll(tCorpus);
 
+    this.addedDocs = new Vector();
+    this.removedDocIDs = new Vector();
+    this.changedDocs = new Vector();
+
     //make sure we fire events when docs are added/removed/etc
     Gate.getCreoleRegister().addCreoleListener(this);
 
@@ -785,7 +796,7 @@ public class SerialCorpusImpl extends
 //          break;
 //      }
       this.addedDocs = new Vector();
-      this.removedDocs = new Vector();
+      this.removedDocIDs = new Vector();
       this.changedDocs = new Vector();
     }
   }//readObject
@@ -813,7 +824,7 @@ public class SerialCorpusImpl extends
 //        break;
 //    }
       this.addedDocs = new Vector();
-      this.removedDocs = new Vector();
+      this.removedDocIDs = new Vector();
       this.changedDocs = new Vector();
     }
   }
@@ -834,15 +845,13 @@ public class SerialCorpusImpl extends
 
   private void documentAdded(Document doc) {
     if (indexManager != null){
-      removedDocs.remove(doc);
       addedDocs.add(doc);
     }
   }
 
-  private void documentRemoved(Document doc) {
+  private void documentRemoved(String lrID) {
     if (indexManager != null) {
-      addedDocs.remove(doc);
-      removedDocs.add(doc);
+      removedDocIDs.add(lrID);
     }
   }
 
@@ -857,7 +866,7 @@ public class SerialCorpusImpl extends
             }
           }
         }
-        indexManager.sync(addedDocs, removedDocs, changedDocs);
+        indexManager.sync(addedDocs, removedDocIDs, changedDocs);
       } catch (IndexException ie) {
         ie.printStackTrace();
       }
