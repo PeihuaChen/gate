@@ -31,10 +31,10 @@ public interface User {
   public List getGroups();
 
   /** --- */
-  public void setName(String newName, Long sessionID)
+  public void setName(String newName, Session s)
     throws PersistenceException,SecurityException;
 
   /** --- */
-  public void setPassword(String newPass, Long sessionID)
+  public void setPassword(String newPass, Session s)
     throws PersistenceException,SecurityException;
 }
