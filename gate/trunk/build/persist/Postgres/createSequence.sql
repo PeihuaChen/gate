@@ -32,26 +32,26 @@ create sequence  seq_feature_key
 
 drop sequence   seq_user ;
 create sequence  seq_user
-       start 1
+       start 1000
        increment 1
        maxvalue 2147483647
-       minvalue 1
+       minvalue 1000
        cache 1;
 
 drop sequence    seq_group ;
 create sequence  seq_group
-       start 1
+       start 1000
        increment 1
        maxvalue 2147483647
-       minvalue 1
+       minvalue 1000
        cache 1;
 
 drop sequence    seq_user_group ;
 create sequence  seq_user_group
-       start 1
+       start 1000
        increment 1
        maxvalue 2147483647
-       minvalue 1
+       minvalue 1000
        cache 1;
 
 drop sequence    seq_doc_encoding ;
