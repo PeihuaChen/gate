@@ -758,121 +758,127 @@ public class NameBearerHandle implements Handle,
     }
 
     public void actionPerformed(ActionEvent e) {
-      try {
-        DataStoreRegister dsReg = Gate.getDataStoreRegister();
-        Map dsByName =new HashMap();
-        Iterator dsIter = dsReg.iterator();
-        while(dsIter.hasNext()){
-          DataStore oneDS = (DataStore)dsIter.next();
-          String name;
-          if((name = (String)oneDS.getName()) != null){
-          } else {
-            name  = oneDS.getStorageUrl();
-            try {
-              URL tempURL = new URL(name);
-              name = tempURL.getFile();
-            } catch (java.net.MalformedURLException ex) {
-              throw new GateRuntimeException(
-                        );
+      Runnable runnable = new Runnable(){
+        public void run(){
+          try {
+            DataStoreRegister dsReg = Gate.getDataStoreRegister();
+            Map dsByName =new HashMap();
+            Iterator dsIter = dsReg.iterator();
+            while(dsIter.hasNext()){
+              DataStore oneDS = (DataStore)dsIter.next();
+              String name;
+              if((name = (String)oneDS.getName()) != null){
+              } else {
+                name  = oneDS.getStorageUrl();
+                try {
+                  URL tempURL = new URL(name);
+                  name = tempURL.getFile();
+                } catch (java.net.MalformedURLException ex) {
+                  throw new GateRuntimeException(
+                            );
+                }
+              }
+              dsByName.put(name, oneDS);
             }
-          }
-          dsByName.put(name, oneDS);
-        }
-        List dsNames = new ArrayList(dsByName.keySet());
-        if(dsNames.isEmpty()){
-          JOptionPane.showMessageDialog(getLargeView(),
-                                        "There are no open datastores!\n " +
-                                        "Please open a datastore first!",
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
+            List dsNames = new ArrayList(dsByName.keySet());
+            if(dsNames.isEmpty()){
+              JOptionPane.showMessageDialog(getLargeView(),
+                                            "There are no open datastores!\n " +
+                                            "Please open a datastore first!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
 
-        } else {
-          Object answer = JOptionPane.showInputDialog(
-                              getLargeView(),
-                              "Select the datastore",
-                              "Gate", JOptionPane.QUESTION_MESSAGE,
-                              null, dsNames.toArray(),
-                              dsNames.get(0));
-          if(answer == null) return;
-          DataStore ds = (DataStore)dsByName.get(answer);
-          if (ds == null){
-            Err.prln("The datastore does not exists. Saving procedure" +
-                              " has FAILED! This should never happen again!");
-            return;
-          }// End if
-          DataStore ownDS = ((LanguageResource)target).getDataStore();
-          if(ds == ownDS){
-            MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
-
-            StatusListener sListener = (StatusListener)
-                                       gate.gui.MainFrame.getListeners().
-                                       get("gate.event.StatusListener");
-            if(sListener != null) sListener.statusChanged(
-              "Saving: " + ((LanguageResource)target).getName());
-            double timeBefore = System.currentTimeMillis();
-            ds.sync((LanguageResource)target);
-            double timeAfter = System.currentTimeMillis();
-            if(sListener != null) sListener.statusChanged(
-              ((LanguageResource)target).getName() + " saved in " +
-              NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
-              + " seconds");
-          }else{
-            FeatureMap securityData = (FeatureMap)
-                         Gate.getDataStoreRegister().getSecurityData(ds);
-            SecurityInfo si = null;
-            //check whether the datastore supports security data
-            //serial ones do not for example
-            if (securityData != null) {
-              //first get the type of access from the user
-              if(!AccessRightsDialog.showDialog(window))
+            } else {
+              Object answer = JOptionPane.showInputDialog(
+                                  getLargeView(),
+                                  "Select the datastore",
+                                  "Gate", JOptionPane.QUESTION_MESSAGE,
+                                  null, dsNames.toArray(),
+                                  dsNames.get(0));
+              if(answer == null) return;
+              DataStore ds = (DataStore)dsByName.get(answer);
+              if (ds == null){
+                Err.prln("The datastore does not exists. Saving procedure" +
+                                  " has FAILED! This should never happen again!");
                 return;
-              int accessType = AccessRightsDialog.getSelectedMode();
-              if(accessType < 0)
-                return;
-              si = new SecurityInfo(accessType,
-                                    (User) securityData.get("user"),
-                                    (Group) securityData.get("group"));
-            }//if security info
-            StatusListener sListener = (StatusListener)
-                                       gate.gui.MainFrame.getListeners().
-                                       get("gate.event.StatusListener");
-            MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
+              }// End if
+              DataStore ownDS = ((LanguageResource)target).getDataStore();
+              if(ds == ownDS){
+                MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
 
-            if(sListener != null) sListener.statusChanged(
-              "Saving: " + ((LanguageResource)target).getName());
-            double timeBefore = System.currentTimeMillis();
-            LanguageResource lr = ds.adopt((LanguageResource)target,si);
-            ds.sync(lr);
-            double timeAfter = System.currentTimeMillis();
-            if(sListener != null) sListener.statusChanged(
-              ((LanguageResource)target).getName() + " saved in " +
-              NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
-              + " seconds");
+                StatusListener sListener = (StatusListener)
+                                           gate.gui.MainFrame.getListeners().
+                                           get("gate.event.StatusListener");
+                if(sListener != null) sListener.statusChanged(
+                  "Saving: " + ((LanguageResource)target).getName());
+                double timeBefore = System.currentTimeMillis();
+                ds.sync((LanguageResource)target);
+                double timeAfter = System.currentTimeMillis();
+                if(sListener != null) sListener.statusChanged(
+                  ((LanguageResource)target).getName() + " saved in " +
+                  NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
+                  + " seconds");
+              }else{
+                FeatureMap securityData = (FeatureMap)
+                             Gate.getDataStoreRegister().getSecurityData(ds);
+                SecurityInfo si = null;
+                //check whether the datastore supports security data
+                //serial ones do not for example
+                if (securityData != null) {
+                  //first get the type of access from the user
+                  if(!AccessRightsDialog.showDialog(window))
+                    return;
+                  int accessType = AccessRightsDialog.getSelectedMode();
+                  if(accessType < 0)
+                    return;
+                  si = new SecurityInfo(accessType,
+                                        (User) securityData.get("user"),
+                                        (Group) securityData.get("group"));
+                }//if security info
+                StatusListener sListener = (StatusListener)
+                                           gate.gui.MainFrame.getListeners().
+                                           get("gate.event.StatusListener");
+                MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
 
-            //check whether the new LR is different from the transient one and
-            //if so, unload the transient LR, so the user realises
-            //it is no longer valid. Don't do this in the adopt() code itself
-            //because the batch code might wish to keep the transient
-            //resource for some purpose.
-            if (lr != target) {
-              Factory.deleteResource((LanguageResource)target);
+                if(sListener != null) sListener.statusChanged(
+                  "Saving: " + ((LanguageResource)target).getName());
+                double timeBefore = System.currentTimeMillis();
+                LanguageResource lr = ds.adopt((LanguageResource)target,si);
+                ds.sync(lr);
+                double timeAfter = System.currentTimeMillis();
+                if(sListener != null) sListener.statusChanged(
+                  ((LanguageResource)target).getName() + " saved in " +
+                  NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
+                  + " seconds");
+
+                //check whether the new LR is different from the transient one and
+                //if so, unload the transient LR, so the user realises
+                //it is no longer valid. Don't do this in the adopt() code itself
+                //because the batch code might wish to keep the transient
+                //resource for some purpose.
+                if (lr != target) {
+                  Factory.deleteResource((LanguageResource)target);
+                }
+              }
             }
+          } catch(PersistenceException pe) {
+            MainFrame.unlockGUI();
+            JOptionPane.showMessageDialog(getLargeView(),
+                                          "Save failed!\n " +
+                                          pe.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+          }catch(gate.security.SecurityException se) {
+            MainFrame.unlockGUI();
+            JOptionPane.showMessageDialog(getLargeView(),
+                                          "Save failed!\n " +
+                                          se.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+          }finally{
+            MainFrame.unlockGUI();
           }
+
         }
-      } catch(PersistenceException pe) {
-        MainFrame.unlockGUI();
-        JOptionPane.showMessageDialog(getLargeView(),
-                                      "Save failed!\n " +
-                                      pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }catch(gate.security.SecurityException se) {
-        MainFrame.unlockGUI();
-        JOptionPane.showMessageDialog(getLargeView(),
-                                      "Save failed!\n " +
-                                      se.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }finally{
-        MainFrame.unlockGUI();
-      }
+      };
+      new Thread(runnable).start();
     }
   }//class SaveToAction extends AbstractAction
 
