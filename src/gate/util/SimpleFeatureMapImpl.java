@@ -111,6 +111,72 @@ public class SimpleFeatureMapImpl
     return true;
   }//subsumes()
 
+	/** Tests if <b>this</b> featureMap object includes aFeatureMap features. <br>
+	  * If the feature map contains <code>class</code> and (optionally) <code>ontology</code> features:<br>
+	  * then the ontologyLR is used to provide ontology based subsume with respect to the subClassOf relations.
+	  * @param ontologyLR an ontology to be used for the subsume
+		* @param aFeatureMap object which will be included  or not in  <b>this</b>
+		* FeatureMap obj.
+		* @return <code>true</code> if <b>this</b> includes aFeatureMap
+		* and <code>false</code> if not.
+		*/
+	public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap) {
+
+		if (ontologyLR == null) { return this.subsumes(aFeatureMap);  }
+
+		if (aFeatureMap == null) return true;
+
+		if (this.size() < aFeatureMap.size()) return false;
+
+		SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
+
+		Object key;
+		Object keyValueFromAFeatureMap;
+		Object keyValueFromThis;
+
+		for (int i = 0; i < sfm.count; i++) {
+			key = sfm.theKeys[i];
+			keyValueFromAFeatureMap = sfm.theValues[i];
+			int v = super.getSubsumeKey(key);
+			if (v < 0) return false;
+			keyValueFromThis = theValues[v];//was: get(key);
+
+			if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
+						(keyValueFromThis != null && keyValueFromAFeatureMap == null)
+					) return false;
+
+			/*ontology aware subsume implementation based on the ontology LR
+			ontotext.bp*/
+			if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
+
+				if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
+					/* ontology aware processing */
+					OClass c1 = ontologyLR.getClassByName(keyValueFromAFeatureMap.toString());
+					OClass c2 = ontologyLR.getClassByName(keyValueFromThis.toString());
+
+					/* no such class in the ontology */
+					if (null== c1 || null== c2) return false;
+					Set subs1;
+					if (!c1.equals(c2)){
+						try {
+							subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
+						} catch (gate.creole.ontology.NoSuchClosureTypeException x) {
+							throw new gate.util.GateRuntimeException(x);
+						}
+						if (!subs1.contains(c2)) return false;
+					}
+				} else {
+					/* processing without ontology awareness */
+					if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
+				}  // else
+
+			} // if
+		} // for
+
+		return true;
+	}//subsumes(ontology)
+
+
   /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
     * for the those features present in the aFeatureNamesSet.
     * @param aFeatureMap which will be included or not in <b>this</b>
