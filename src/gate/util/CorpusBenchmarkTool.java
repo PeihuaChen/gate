@@ -61,7 +61,6 @@ public class CorpusBenchmarkTool {
              +" "+ isVerboseMode +" "+ isMoreInfoMode);
 */
     execute(startDir);
-    System.out.println("Done execute");
 /*    if (application != null) {
       Iterator iter = new ArrayList(application.getPRs()).iterator();
       while (iter.hasNext())
@@ -69,7 +68,6 @@ public class CorpusBenchmarkTool {
 
       Factory.deleteResource(application);
     }*/
-    System.out.println("Done execute");
   }
 
   public void init() {
@@ -260,7 +258,6 @@ public class CorpusBenchmarkTool {
 
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();
-    System.out.println("Done Executing");
     //if we're not generating the corpus, then print the precision and recall
     //statistics for the processed corpus
     if (! corpusTool.getGenerateMode())
@@ -361,7 +358,7 @@ public class CorpusBenchmarkTool {
    * the precision will be the average precision on those two sets of documents.
    */
   public double getPrecisionAverage() {
-    return precisionSum/docNumber;
+    return (double)precisionSum/docNumber;
   }
 
   /**
@@ -375,15 +372,15 @@ public class CorpusBenchmarkTool {
    * the recall will be the average recall on those two sets of documents.
    */
   public double getRecallAverage() {
-    return recallSum/docNumber;
+    return (double)recallSum/docNumber;
   }
 
   /** For processed documents */
   public double getPrecisionAverageProc() {
-    return proc_precisionSum/docNumber;
+    return (double)proc_precisionSum/docNumber;
   }
   public double getRecallAverageProc() {
-    return proc_recallSum/docNumber;
+    return (double)proc_recallSum/docNumber;
   }
 
 
@@ -439,9 +436,12 @@ public class CorpusBenchmarkTool {
         params.put(Document.DOCUMENT_URL_PARAMETER_NAME, files[i].toURL());
         params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, documentEncoding);
 
+        FeatureMap features = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(features, true);
+
         // create the document
         Document doc = (Document) Factory.createResource(
-          "gate.corpora.DocumentImpl", params
+          "gate.corpora.DocumentImpl", params, features
         );
 
         doc.setName(files[i].getName());
@@ -463,7 +463,6 @@ public class CorpusBenchmarkTool {
     } catch (gate.security.SecurityException ex3) {
       throw new GateRuntimeException("CorpusBenchmark: " + ex3.getMessage());
     }
-    System.out.println("Done");
   }//generateCorpus
 
   protected void evaluateCorpus(File fileDir,
@@ -531,9 +530,13 @@ public class CorpusBenchmarkTool {
         FeatureMap features = Factory.newFeatureMap();
         features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
         features.put(DataStore.LR_ID_FEATURE_NAME, docID);
+        FeatureMap hparams = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(hparams, true);
+
         persDoc = (Document) Factory.createResource(
                                     "gate.corpora.DocumentImpl",
-                                    features);
+                                    features, hparams);
+
 
         if(isMoreInfoMode) {
           StringBuffer errName = new StringBuffer(persDoc.getName());
@@ -559,7 +562,7 @@ public class CorpusBenchmarkTool {
 
           // create the document
           cleanDoc = (Document) Factory.createResource(
-                                  "gate.corpora.DocumentImpl", params);
+                                  "gate.corpora.DocumentImpl", params, hparams);
           cleanDoc.setName(persDoc.getName());
         }
 
@@ -581,7 +584,7 @@ public class CorpusBenchmarkTool {
 
             // create the document
             markedDoc = (Document) Factory.createResource(
-                                     "gate.corpora.DocumentImpl", params);
+                                     "gate.corpora.DocumentImpl", params, hparams);
             markedDoc.setName(persDoc.getName());
           }
         } else {
@@ -604,7 +607,7 @@ public class CorpusBenchmarkTool {
             features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
             Document tempDoc = (Document) Factory.createResource(
                                         "gate.corpora.DocumentImpl",
-                                        features1);
+                                        features1, hparams);
             //check whether this is our doc
             if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
                  endsWith(persDoc.getName())) {
@@ -654,9 +657,14 @@ public class CorpusBenchmarkTool {
         FeatureMap features = Factory.newFeatureMap();
         features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
         features.put(DataStore.LR_ID_FEATURE_NAME, docID);
+
+        FeatureMap hparams = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(hparams, true);
+
+
         persDoc = (Document) Factory.createResource(
                                     "gate.corpora.DocumentImpl",
-                                    features);
+                                    features, hparams);
 
         if(isMoreInfoMode) {
           StringBuffer errName = new StringBuffer(persDoc.getName());
@@ -687,7 +695,7 @@ public class CorpusBenchmarkTool {
 
             // create the document
             markedDoc = (Document) Factory.createResource(
-                                     "gate.corpora.DocumentImpl", params);
+                                     "gate.corpora.DocumentImpl", params, hparams);
             markedDoc.setName(persDoc.getName());
           }//find marked as file
         } else {
@@ -711,7 +719,7 @@ public class CorpusBenchmarkTool {
               features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
               Document tempDoc = (Document) Factory.createResource(
                                           "gate.corpora.DocumentImpl",
-                                          features1);
+                                          features1, hparams);
               //check whether this is our doc
               if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
                    endsWith(persDoc.getName())) {
@@ -769,11 +777,13 @@ public class CorpusBenchmarkTool {
       }
       params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
+      FeatureMap hparams = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(hparams, true);
+
       // create the document
       try {
         cleanDoc = (Document) Factory.createResource(
-                              "gate.corpora.DocumentImpl", params,
-                              null, cleanDocs[i].getName());
+                              "gate.corpora.DocumentImpl", params, hparams, cleanDocs[i].getName());
       } catch (gate.creole.ResourceInstantiationException ex) {
         Out.prln("Cannot create document from file: " +
           cleanDocs[i].getAbsolutePath());
@@ -819,7 +829,7 @@ public class CorpusBenchmarkTool {
           try {
             markedDoc = (Document) Factory.createResource(
                                    "gate.corpora.DocumentImpl", params,
-                                   null, cleanDoc.getName());
+                                   hparams, cleanDoc.getName());
           } catch (gate.creole.ResourceInstantiationException ex) {
             Out.prln("Cannot create document from file: " +
               markedDocFile.getAbsolutePath());
@@ -848,7 +858,7 @@ public class CorpusBenchmarkTool {
             features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
             Document tempDoc = (Document) Factory.createResource(
                                         "gate.corpora.DocumentImpl",
-                                        features1);
+                                        features1, hparams);
             //check whether this is our doc
             if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
                  endsWith(cleanDoc.getName())) {
@@ -1294,16 +1304,19 @@ public class CorpusBenchmarkTool {
   }
 
   protected void updateStatistics(AnnotationDiffer annotDiffer, String annotType){
-    double precisionAverage = ((double)(annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
+    double precisionAverage = ((double)((double)annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
 (double)(2.0));
-    precisionSum += precisionAverage;
+    if(precisionAverage != Double.NaN)
+      precisionSum += precisionAverage;
 
     double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
-    recallSum += recallAverage;
+    if(recallAverage != Double.NaN)
+      recallSum += recallAverage;
 
-    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1) + annotDiffer.getFMeasureStrict(1)) /
+    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1.0) + annotDiffer.getFMeasureStrict(1.0)) /
 (double) (2.0));
-    fMeasureSum += fMeasureAverage;
+    if(fMeasureAverage != Double.NaN)
+      fMeasureSum += fMeasureAverage;
 
     Double oldPrecision = (Double) precisionByType.get(annotType);
     if (oldPrecision == null)
@@ -1376,14 +1389,17 @@ public class CorpusBenchmarkTool {
     hasProcessed = true;
     double precisionAverage = ((double)(annotDiffer.getPrecisionLenient() + annotDiffer.getPrecisionStrict()) /
 (double)(2.0));
-    proc_precisionSum += precisionAverage;
+    if(precisionAverage != Double.NaN)
+      proc_precisionSum += precisionAverage;
 
     double recallAverage = ((double)(annotDiffer.getRecallLenient() + annotDiffer.getRecallStrict()) / (double) (2.0));
-    proc_recallSum += recallAverage;
+    if(recallAverage != Double.NaN)
+      proc_recallSum += recallAverage;
 
-    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1) + annotDiffer.getFMeasureStrict(1)) /
+    double fMeasureAverage = ((double) (annotDiffer.getFMeasureLenient(1.0) + annotDiffer.getFMeasureStrict(1.0)) /
 (double) (2.0));
-    proc_fMeasureSum += fMeasureAverage;
+    if(fMeasureAverage != Double.NaN)
+      proc_fMeasureSum += fMeasureAverage;
 
     Double oldPrecision = (Double) proc_precisionByType.get(annotType);
     if (oldPrecision == null)
@@ -1526,6 +1542,7 @@ public class CorpusBenchmarkTool {
     long possible = correct + partial + missing;
     //precision strict is correct/actual
     //precision is (correct + 0.5 * partially correct)/actual
+
     double precision = (correct + 0.5 * partial) / actual;
     //recall strict is correct/possible
     double recall = (correct + 0.5*partial)/possible;
@@ -1534,6 +1551,7 @@ public class CorpusBenchmarkTool {
       ((beta*beta + 1)*precision*recall)
       /
       ((beta*beta*precision) + recall);
+
 
     long proc_correct=0;
     long proc_partial=0;
@@ -1567,6 +1585,7 @@ public class CorpusBenchmarkTool {
         ((beta*beta + 1)*proc_precision*proc_recall)
         /
         ((beta*beta*proc_precision) + proc_recall);
+
     }
 
     // output data
@@ -1744,13 +1763,11 @@ public class CorpusBenchmarkTool {
     // we need to find the sets
     AnnotationSet keys, responses;
     if(annotSetName == null || annotSetName.equals("")) {
-      keys = keyDoc.getAnnotations();
-      responses = respDoc.getAnnotations();
+      keys = keyDoc.getAnnotations().get(annotType);
+      responses = respDoc.getAnnotations().get(annotType);
     } else {
-      keys = keyDoc.getAnnotations(annotSetName)/*.get()*/;
-      System.out.println("Keys : "+keys.size());
-      responses = respDoc.getAnnotations(outputSetName)/*.get()*/;
-      System.out.println("Resp : "+responses.size());
+      keys = keyDoc.getAnnotations(annotSetName).get(annotType);
+      responses = respDoc.getAnnotations(outputSetName).get(annotType);
     }
 
     // we have annotation sets so call the annotationDiffer
@@ -1862,9 +1879,9 @@ public class CorpusBenchmarkTool {
   //collect the sum of all precisions and recalls of all docs
   //and the number of docs, so I can calculate the average for
   //the corpus at the end
-  private double precisionSum = 0;
-  private double recallSum = 0;
-  private double fMeasureSum = 0;
+  private double precisionSum = 0.0;
+  private double recallSum = 0.0;
+  private double fMeasureSum = 0.0;
   private HashMap precisionByType = new HashMap();
   private HashMap prCountByType = new HashMap();
   private HashMap recallByType = new HashMap();

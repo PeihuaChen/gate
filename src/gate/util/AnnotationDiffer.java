@@ -35,8 +35,15 @@ public class AnnotationDiffer {
    */
   public List calculateDiff(Collection key, Collection response){
     //initialise data structures
-    keyList = new ArrayList(key);
-    responseList = new ArrayList(response);
+    if(key == null || key.size() == 0)
+      keyList = new ArrayList();
+    else
+      keyList = new ArrayList(key);
+
+    if(response == null || response.size() == 0)
+      responseList = new ArrayList();
+    else
+      responseList = new ArrayList(response);
 
     keyChoices = new ArrayList(keyList.size());
     keyChoices.addAll(Collections.nCopies(keyList.size(), null));
@@ -69,7 +76,7 @@ public class AnnotationDiffer {
             choice = new PairingImpl(i, j, WRONG);
           }
         }
-        
+
 //        // >>>>>>
 //        if(significantFeaturesSet == null){
 //          //full comaptibility required
@@ -87,7 +94,7 @@ public class AnnotationDiffer {
 //          }
 //        }
 //        // <<<<<<
-        
+
         //add the new choice if any
         if (choice != null) {
           addPairing(choice, i, keyChoices);
@@ -140,11 +147,11 @@ public class AnnotationDiffer {
           break;
         }
         default:{
-          throw new GateRuntimeException("Invalid pairing type: " + 
+          throw new GateRuntimeException("Invalid pairing type: " +
                   bestChoice.type);
         }
       }
-    } 
+    }
     //add choices for the incorrect matches (MISSED, SPURIOUS)
     //get the unmatched keys
     for(int i = 0; i < keyChoices.size(); i++){
@@ -172,47 +179,62 @@ public class AnnotationDiffer {
   }
 
   public double getPrecisionStrict(){
+    if(responseList.size() == 0) {
+      return 1.0;
+    }
     return (double)((double)correctMatches / (double)responseList.size());
   }
 
   public double getRecallStrict(){
+    if(keyList.size() == 0) {
+      return 1.0;
+    }
     return (double)((double)correctMatches / (double)keyList.size());
   }
 
   public double getPrecisionLenient(){
+    if(responseList.size() == 0) {
+      return 1.0;
+    }
     return (double)((double)(correctMatches + partiallyCorrectMatches) / (double)responseList.size());
   }
 
   public double getPrecisionAverage() {
-    return (double)((double)(getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0));
+    return (double)((double)((double)getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0));
   }
 
   public double getRecallLenient(){
+    if(keyList.size() == 0) {
+      return 1.0;
+    }
     return (double)((double)(correctMatches + partiallyCorrectMatches) / (double)keyList.size());
   }
 
   public double getRecallAverage() {
-    return (double)((double)(getRecallLenient() + getRecallStrict()) / (double)(2.0));
+    return (double)((double)((double) getRecallLenient() + getRecallStrict()) / (double)(2.0));
   }
 
   public double getFMeasureStrict(double beta){
     double precision = getPrecisionStrict();
     double recall = getRecallStrict();
     double betaSq = beta * beta;
-    return (double)(((betaSq + 1) * precision * recall ) /
+    double answer = (double)(((betaSq + 1) * precision * recall ) /
            (double)(betaSq * precision + recall));
+      return answer;
   }
 
   public double getFMeasureLenient(double beta){
     double precision = getPrecisionLenient();
     double recall = getRecallLenient();
     double betaSq = beta * beta;
-    return (double)(((betaSq + 1) * precision * recall ) /
+    double answer = (double)(((betaSq + 1) * precision * recall ) /
            (double)(betaSq * precision + recall));
+      return answer;
   }
 
   public double getFMeasureAverage(double beta) {
-    return (double)(((double)(getFMeasureLenient(beta) + getFMeasureStrict(beta)) / (double)(2.0)));
+    double answer = (double)(((double)((double) getFMeasureLenient(beta) + getFMeasureStrict(beta)) / (double)(2.0)));
+      return answer;
   }
 
   public int getCorrectMatches(){
@@ -237,6 +259,15 @@ public class AnnotationDiffer {
 
   public int getFalsePositivesLenient(){
     return responseList.size() - correctMatches - partiallyCorrectMatches;
+  }
+
+
+  public int getKeysCount() {
+    return keyList.size();
+  }
+
+  public int getResponsesCount() {
+    return responseList.size();
   }
 
   public void printMissmatches(){
@@ -459,7 +490,7 @@ public class AnnotationDiffer {
       int res = first.getScore() - second.getScore();
       //compare by type
       if(res == 0) res = first.getType() - second.getType();
-      //compare by completeness (a wrong match with both key and response 
+      //compare by completeness (a wrong match with both key and response
       //is "better" than one with only key or response
       if(res == 0){
         res = (first.getKey() == null ? 0 : 1) +
