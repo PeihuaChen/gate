@@ -39,8 +39,8 @@ public class TestPersist extends TestCase
 
   /** Debug flag */
   private static final boolean DEBUG = false;
-  private Long uc01_lrID = null;
-  private LanguageResource uc01_LR = null;
+  private static Long uc01_lrID = null;
+  private static LanguageResource uc01_LR = null;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
@@ -533,7 +533,7 @@ public class TestPersist extends TestCase
     //read a document
     //use the one created in UC01
 //this.uc01_lrID = new Long(1041);
-System.out.println("docid = " +this.uc01_lrID);
+//System.out.println("docid = " +this.uc01_lrID);
     LanguageResource lr = null;
 
     //1. open data storage
