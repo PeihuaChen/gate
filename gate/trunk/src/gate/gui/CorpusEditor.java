@@ -197,7 +197,11 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
           return;
         }
 
-        JList docList = new JList(loadedDocuments.toArray());
+        Vector docNames = new Vector(loadedDocuments.size());
+        for (int i = 0; i< loadedDocuments.size(); i++) {
+          docNames.add(((Document)loadedDocuments.get(i)).getName());
+        }
+        JList docList = new JList(docNames);
         docList.setCellRenderer(listRenderer);
 
         JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
@@ -207,7 +211,10 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
                             "Add document(s) to corpus").show();
 
         if(((Integer)dialog.getValue()).intValue() == dialog.OK_OPTION){
-          corpus.addAll(Arrays.asList(docList.getSelectedValues()));
+          int[] selection = docList.getSelectedIndices();
+          for (int i = 0; i< selection.length ; i++) {
+            corpus.add(loadedDocuments.get(selection[i]));
+          }
         }
       }catch(GateException ge){
         //gate.Document is not registered in creole.xml....what is!?

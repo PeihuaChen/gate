@@ -509,7 +509,7 @@ public class SerialCorpusImpl extends
                                                 features);
           if (DEBUG) Out.prln("Loading document :" + lr.getName());
           res = lr;
-          this.put(key, res);
+          super.put(key, res);
         } catch (ResourceInstantiationException ex) {
           Err.prln("Error reading document inside a serialised corpus.");
           throw new GateRuntimeException(ex.getMessage());
