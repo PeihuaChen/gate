@@ -10,7 +10,7 @@
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
- *	Cristian URSU,  9/May/2000
+ *	Cristian URSU,  9 May 2000
  *
  *  $Id$
  */
@@ -43,10 +43,33 @@ public class XmlDocumentHandler extends HandlerBase
   private static final boolean DEBUG = false;
 
   /**
-    * Constructor initialises some private fields
+    * Constructs a XmlDocumentHandler object. The annotationSet set will be the
+    * default one taken from the gate document.
+    * @param aDocument the Gate document that will be processed.
+    * @param aMarkupElementsMap this map contains the elements name that we
+    * want to create.
+    * @param anElement2StringMap this map contains the strings that will be
+    * added to the text contained by the key element.
     */
   public XmlDocumentHandler(gate.Document aDocument, Map  aMarkupElementsMap,
                             Map anElement2StringMap){
+    this(aDocument,aMarkupElementsMap,anElement2StringMap,null);
+  }//XmlDocumentHandler
+
+  /**
+    * Constructs a XmlDocumentHandler object.
+    * @param aDocument the Gate document that will be processed.
+    * @param aMarkupElementsMap this map contains the elements name that we
+    * want to create.
+    * @param anElement2StringMap this map contains the strings that will be
+    * added to the text contained by the key element.
+    * @param anAnnotationSet is the annotation set that will be filled when the
+    * document was processed
+    */
+  public XmlDocumentHandler(gate.Document       aDocument,
+                            Map                 aMarkupElementsMap,
+                            Map                 anElement2StringMap,
+                            gate.AnnotationSet  anAnnotationSet){
     // init stack
     stack = new java.util.Stack();
     // this string contains the plain text (the text without markup)
@@ -64,6 +87,8 @@ public class XmlDocumentHandler extends HandlerBase
     // content, when a certain element is found
     // if the map is null then no string is added
     element2StringMap = anElement2StringMap;
+
+    basicAS = anAnnotationSet;
   }
 
   /**
@@ -86,9 +111,10 @@ public class XmlDocumentHandler extends HandlerBase
     doc.setContent(new DocumentContentImpl(tmpDocContent));
     // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
-
-    // gets AnnotationSet based on the new gate document
-    basicAS = doc.getAnnotations();
+    // If basicAs is null then get the default AnnotationSet,
+    // based on the gate document.
+    if (basicAS == null)
+      basicAS = doc.getAnnotations();
     // create all the annotations (on this new document) from the collector
     Iterator anIterator = colector.iterator();
     while (anIterator.hasNext()){
@@ -220,7 +246,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void error(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
-	  _seh.error(ex);
+    _seh.error(ex);
   }
 
   /**
@@ -229,7 +255,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void fatalError(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
-	  _seh.fatalError(ex);
+    _seh.fatalError(ex);
   }
 
   /**
@@ -238,7 +264,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void warning(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
-	  _seh.warning(ex);
+    _seh.warning(ex);
   }
 
   /**
@@ -331,7 +357,7 @@ public class XmlDocumentHandler extends HandlerBase
 
   // this map contains the string that we want to insert iside the document
   // content, when a certain element is found
-  // if the map is null then no string is added 
+  // if the map is null then no string is added
   private Map element2StringMap = null;
 
   // this object inducates what to do when the parser encounts an error
