@@ -203,21 +203,13 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** The xml file name of the resource */
   protected String xmlFileName;
 
-  /** Set method for the resource xml file name */
-  public void setXmlFileName(String xmlFileName) {
-    this.xmlFileName = xmlFileName;
-  } // setXmlFileName
-
-  /** Get method for the resource xml file name */
-  public String getXmlFileName() { return xmlFileName; }
-
   /** The xml file URL of the resource */
   protected URL xmlFileUrl;
 
-  /** Set method for the resource xml file URL */
+  /** Set the URL to the creole.xml file that defines this resource */
   public void setXmlFileUrl(URL xmlFileUrl) { this.xmlFileUrl = xmlFileUrl; }
 
-  /**@deprecated Get method for the resource xml file URL */
+  /** Get the URL to the creole.xml file that defines this resource */
   public URL getXmlFileUrl() { return xmlFileUrl; }
 
   /** The comment string */
