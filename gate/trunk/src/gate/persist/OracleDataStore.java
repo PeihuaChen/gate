@@ -297,7 +297,12 @@ public class OracleDataStore extends JDBCDataStore {
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
 
     //10. unload the resource form the GUI
-//    Factory.deleteResource();
+    try {
+      unloadLR((Long)lrId);
+    }
+    catch(GateException ge) {
+      Err.prln("can't unload resource from GUI...");
+    }
   }
 
 
@@ -3136,8 +3141,12 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
+
   /**
-   *
+   *   adds document to corpus in the database
+   *   if the document is already part of the corpus nothing
+   *   changes
    */
   private void addDocumentToCorpus(Long docID,Long corpID)
   throws PersistenceException,SecurityException {
@@ -3187,8 +3196,32 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       DBHelper.cleanup(cstmt);
     }
-
   }
 
+
+
+  /**
+   *   unloads a LR from the GUI
+   */
+  private void unloadLR(Long lrID)
+  throws GateException{
+
+    //0. preconfitions
+    Assert.assertNotNull(lrID);
+
+    //1. get all LRs in the system
+    List resources = Gate.getCreoleRegister().getAllInstances("gate.LanguageResource");
+
+    Iterator it = resources.iterator();
+    while (it.hasNext()) {
+      LanguageResource lr = (LanguageResource)it.next();
+      if (lrID.equals(lr.getLRPersistenceId()) &&
+          this.equals(lr.getDataStore())) {
+        //found it - unload it
+        Factory.deleteResource(lr);
+        break;
+      }
+    }
+  }
 
 }
