@@ -122,13 +122,13 @@ public class OracleDataStore extends JDBCDataStore {
 
     super.open();
 
-    try {
+    /*try {
     //set statement caching for Oracle
       ((OracleConnection)this.jdbcConn).setStmtCacheSize(50);
     }
     catch(SQLException sqle) {
       throw new PersistenceException(sqle);
-    }
+    }*/
   }
 
 
@@ -2024,7 +2024,7 @@ public class OracleDataStore extends JDBCDataStore {
             break;
 
           case DBHelper.VALUE_TYPE_FLOAT:
-            numberValue = new Float(rs.getFloat(3));
+            numberValue = new Double(rs.getDouble(3));
             break;
 
           case DBHelper.VALUE_TYPE_INTEGER:
