@@ -93,7 +93,7 @@ public class CreoleXmlHandler extends HandlerBase {
     }
 
     if(elementName.toUpperCase().equals("RESOURCE")) {
-      resourceData = new ResourceDataImpl();
+      resourceData = new ResourceData();
       resourceData.setFeatures(Factory.newFeatureMap());
     }
     currentAttributes = atts;

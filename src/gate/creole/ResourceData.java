@@ -1,5 +1,5 @@
 /*
- *  ResourceDataImpl.java
+ *  ResourceData.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
  *
@@ -25,16 +25,24 @@ import gate.util.*;
 
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
-  * @see gate.ResourceData
+  * Some metadata elements are used by GATE to load resources, or index
+  * the members of the CREOLE register; some are used during resource
+  * parameterisation and initialisation.
+  * Metadata elements which are used by the CREOLE registration and loading
+  * mechanisms are properties of ResourceData implementations and have their
+  * own get/set methods. Other metadata elements are made features of the
+  * ResourceData. So, for example, if you add an element "FunkyElementThaing"
+  * to the metadata of a resource, this will be made a feature of that
+  * resource's ResourceData.
+  * @see CreoleRegister
   */
-public class ResourceDataImpl extends AbstractFeatureBearer
-implements ResourceData {
+public class ResourceData extends AbstractFeatureBearer {
 
   /** Debug flag */
   protected static final boolean DEBUG = false;
 
   /** Construction */
-  public ResourceDataImpl() { }
+  public ResourceData() { }
 
   /** String representation */
   public String toString() {
@@ -65,7 +73,7 @@ implements ResourceData {
     * same name
     */
   public boolean equals(Object other) {
-    if(name.equals(((ResourceDataImpl) other).getName()))
+    if(name.equals(((ResourceData) other).getName()))
       return true;
     return false;
   } // equals
@@ -207,4 +215,4 @@ implements ResourceData {
   /** Is the resource autoloading? */
   public boolean isAutoLoading() { return autoLoading; }
 
-} // ResourceDataImpl
+} // ResourceData

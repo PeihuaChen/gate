@@ -33,13 +33,6 @@ import gate.util.*;
   * <A HREF=CookBook.txt>source code</A>.
   *
   * <P>
-  * Rule 1: if it's not in the <TT>gate</TT> or <TT>gate.util</TT>
-  * package, you probably don't want to use it directly.
-  * Contact the <A HREF=mailto:santa@north.pole>GATE development team</A>
-  * and tell them what you're trying to do, and we'll try and make that
-  * available at the top level.
-  *
-  * <P>
   * The CookBook is set up as
   * part of the GATE test suite (using the JUnit framework), so there's an easy
   * way to run the examples (viz.,
@@ -53,9 +46,10 @@ import gate.util.*;
   * <P>
   * Programming to the GATE Java API involves manipulating the classes and
   * interfaces in the <A HREF=package-summary.html>gate package</A>. These are
-  * mainly interfaces; classes there are often to do with getting
+  * often interfaces; classes there are often to do with getting
   * access to objects that implement the interfaces (without exposing those
-  * implementations). In other words, it's an interface-based design.
+  * implementations). In other words, there's a lot of interface-based design
+  * around.
   *
   * <P>
   * The <A HREF=Factory.html>Factory</A> class
@@ -175,7 +169,7 @@ public class CookBook extends TestCase
     AnnotationSet markupAnnotations = doc.getAnnotations();
     assertNotNull("no markup annotations on doc " + doc, markupAnnotations);
     int numMarkupAnnotations = markupAnnotations.size();
-    //if(DEBUG)
+    if(DEBUG)
       Out.prln("annotations on doc after unpack= " + numMarkupAnnotations);
     assert(
       "wrong number annots on doc: " + numMarkupAnnotations,
