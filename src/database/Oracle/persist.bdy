@@ -71,16 +71,54 @@ create or replace package body persist is
   /*******************************************************************************************/
   procedure create_document(p_lr_id        IN number,
                             p_url          IN varchar2,
+                            p_encoding     IN varchar2,
                             p_start_offset IN number,
                             p_end_offset   IN number,
-                            p_is_mrk_aware IN boolean,
+                            p_is_mrk_aware IN number,
                             p_corpus_id    IN number,
                             p_doc_id       OUT number,
                             p_content_id   OUT number)
   is
   
   begin
+     --1. create a document_content entry
+     insert into t_doc_content(dc_id,
+                               dc_encoding_id,
+                               dc_content)
+     values(seq_doc_content.nextval,
+            p_encoding,
+            empty_blob())
+     returning dc_id into p_content_id;
+     
+     --2. create a document entry  
+     insert into t_document(doc_id,
+                            doc_content_id,
+                            doc_lr_id,
+                            doc_url,
+                            doc_start,
+                            doc_end,
+                            doc_is_markup_aware)
+     values(seq_document.nextval,
+            p_content_id,
+            p_lr_id,
+            p_url,
+            p_start_offset,
+            p_end_offset,
+            p_is_mrk_aware)
+     returning doc_id into p_doc_id;
+                 
+     --3. if part of a corpus create a corpus_document entry
+     if (p_corpus_id is not null) then
+        insert into t_corpus_document(cd_id,
+                                      cd_corp_id,
+                                      cd_doc_id)
+        values (seq_corpus_document.nextval,
+                p_corpus_id,
+                p_doc_id);                
+     end if;     
+     
      raise error.x_not_implemented;
+                                     
   end;                                                                                                        
   
   
