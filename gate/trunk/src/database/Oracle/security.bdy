@@ -41,11 +41,6 @@ create or replace package body security is
   ORACLE_TRUE  constant number := 1;
   ORACLE_FALSE constant number := 0;
   
-  PERM_WR_GW constant number := 1;
-  PERM_GR_GW constant number := 2; 
-  PERM_GR_OW constant number := 3; 
-  PERM_OR_OW constant number := 4; 
-
   
   /*******************************************************************************************/  
   function is_member_of_group(p_user_id number,p_grp_id number) 
@@ -153,18 +148,26 @@ create or replace package body security is
   /*******************************************************************************************/
   procedure delete_group(p_grp_id  IN number)
   is
-  
+    has_documents boolean;
   begin
+       -- check for documents
+       -- if the group ownes documents then fail
+       can_delete_group(p_grp_id,has_documents);
+       
+       if (has_documents = true) then
+          raise error.x_group_owns_resources;
+       end if;
+  
        -- delete group users from t_user_group
        delete from t_user_group
        where  ugrp_group_id = p_grp_id;
-       
+/*       
        --set LRs owned by group as OWNER_READ/OWNER_WRITE
        update t_lang_resource
        set    lr_owner_group_id = null,
               lr_access_mode = PERM_OR_OW
        where  lr_owner_group_id = p_grp_id;
-       
+*/       
        --delete the group
        delete from t_group
        where grp_id = p_grp_id;
@@ -200,19 +203,28 @@ create or replace package body security is
   /*******************************************************************************************/
   procedure delete_user(p_usr_id  IN number)
   is
-  
+     has_documents boolean;
   begin
+       -- check for documents
+       -- if the user owns documents then fail
+       can_delete_group(p_usr_id,has_documents);
+       
+       if (has_documents = true) then
+          raise error.x_user_owns_resources;
+       end if;
+  
        -- delete user from t_user_group
        delete from t_user_group
        where  ugrp_user_id = p_usr_id;
        
-       --set LRs owned by user as orphan
+/*       --set LRs owned by user as orphan
        update t_lang_resource
        set    lr_owner_user_id = null,
               lr_access_mode = PERM_GR_GW
        where  lr_owner_user_id = p_usr_id;
+*/
 
-       --set LRs locked by user as orphan
+       -- unlock LRs locked by user 
        update t_lang_resource
        set    lr_locking_user_id = null
        where  lr_locking_user_id = p_usr_id;
@@ -384,10 +396,45 @@ create or replace package body security is
        --do we have such LR?       
        when NO_DATA_FOUND then
           raise error.x_invalid_lr; 
-       
-       
+              
   end;
+  
+  
+  
+  /*******************************************************************************************/
+  procedure can_delete_group(p_grp_id     IN  number,
+                             p_result     OUT boolean)
+  is
+    cnt number;  
+  begin
+  
+     --if there are resources owned by group then fail
+     select count(lr_owner_group_id)
+     into   cnt
+     from   t_lang_resource
+     where  lr_owner_group_id = p_grp_id;
+  
+     p_result:= (cnt = 0);
+          
+  end;                                                                                                        
 
+  /*******************************************************************************************/
+  procedure can_delete_user(p_usr_id     IN  number,
+                             p_result     OUT boolean)
+  is
+    cnt number;  
+  begin
+  
+     --if there are resources owned by group then fail
+     select count(lr_owner_user_id)
+     into   cnt
+     from   t_lang_resource
+     where  lr_owner_user_id = p_usr_id;
+  
+     p_result:= (cnt = 0);
+          
+  end;                                                                                                        
+  
 /*begin
   -- Initialization
   <Statement>; */
