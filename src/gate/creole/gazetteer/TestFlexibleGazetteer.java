@@ -62,17 +62,21 @@ public class TestFlexibleGazetteer extends TestCase {
         (gate.creole.morph.Morph) Factory.createResource(
         "gate.creole.morph.Morph");
 
+    // Get a default gazetteer, again just use all the default settings
+    gate.creole.gazetteer.Gazetteer gazetteerInst =
+        (gate.creole.gazetteer.DefaultGazetteer) Factory.createResource(
+        "gate.creole.gazetteer.DefaultGazetteer");
+
     //create a flexible gazetteer
     // First create a feature map containing all the relevant parameters.
     FeatureMap params = Factory.newFeatureMap();
-    // Use the default lists.
-    params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
-      new URL("gate:/creole/gazeteer/default/lists.def"));
     // Create a list of input features with just one feature (root) and add it
     // to the feature map.
     java.util.ArrayList testInputFeatures=new java.util.ArrayList();
-    testInputFeatures.add("root");
+    testInputFeatures.add("Token.root");
     params.put("inputFeatureNames", testInputFeatures);
+    params.put("gazetteerInst",gazetteerInst);
+
     // Actually create the gazateer
     FlexibleGazetteer flexGaz = (FlexibleGazetteer) Factory.createResource(
                           "gate.creole.gazetteer.FlexibleGazetteer", params);
@@ -101,7 +105,7 @@ public class TestFlexibleGazetteer extends TestCase {
       System.out.println("There are this many lookup annotations: "+
                          lookups.size());
     }
-    assertTrue(lookups.size()== 59);
+    assertTrue(lookups.size()== 40);
 
     // Now clean up so we don't get a memory leak.
     Factory.deleteResource(doc);
