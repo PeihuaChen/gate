@@ -95,5 +95,27 @@ clean:
 list:
 	@ ./list.sh
 
+# rebuild the JAPE file parser.
+# uses JavaCC 0.8pre1 from ../lib for the java (via gate.jar),
+# and 0.7 from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1
+jape: ../src/gate/jape/parser/ParseCpsl.java \
+  ../src/gate/jape/parser/ParseCpsl.html \
+  ../src/gate/jape/parser/ParseCpslPlain.html
+../src/gate/jape/parser/ParseCpsl.java: ../src/gate/jape/parser/ParseCpsl.jj
+	cd ../src/gate/jape/parser; \
+	../../../../build/jdk.sh java -cp ../../../../build/gate.jar \
+	  COM.sun.labs.javacc.Main ParseCpsl.jj
+../src/gate/jape/parser/ParseCpsl.html: ../src/gate/jape/parser/ParseCpsl.jj \
+  ../src/gate/jape/parser/ParseCpslPlain.html
+	cd ../src/gate/jape/parser; \
+	mv ParseCpsl.html ParseCpslPlain.html || :; \
+	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
+	  COM.sun.labs.jjdoc.JJDocMain -ONE_TABLE=false ParseCpsl.jj
+../src/gate/jape/parser/ParseCpslPlain.html: \
+  ../src/gate/jape/parser/ParseCpsl.jj
+	cd ../src/gate/jape/parser; \
+	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
+	  COM.sun.labs.jjdoc.JJDocMain  ParseCpsl.jj
+
 
 ############################################################################
