@@ -162,6 +162,12 @@ public class SerialController extends AbstractController
    * Cleans the internal data and prepares this object to be collected
    */
   public void cleanup(){
+    // Diana desire to remove PR-s
+    Resource res;
+    for(int i=0; i<prList.size(); ++i) {
+      res = (Resource) prList.get(i);
+      Factory.deleteResource(res);
+    } // for
     prList.clear();
   }
 
