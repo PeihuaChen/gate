@@ -26,10 +26,10 @@ echo '***' 1>&2
 
 
 # Chumley St. John
-AC_PATH_PROG(JAVAC, javac javac.exe, javac, ${JAVA_HOME}/bin):/bin:/usr/bin://w/jdk/jdk1.3/bin
-AC_PATH_PROG(JAVA, java java.exe, java, ${JAVA_HOME}/bin):/bin:/usr/bin://w/jdk/jdk1.3/bin
-AC_PATH_PROG(JAR, jar jar.exe, jar, ${JAVA_HOME}/bin):/bin:/usr/bin://w/jdk/jdk1.3/bin
-AC_PATH_PROG(JAVADOC, javadoc javadoc.exe, javadoc, ${JAVA_HOME}/bin):/bin:/usr/bin://w/jdk/jdk1.3/bin
+AC_PATH_PROG(JAVAC, javac javac.exe, javac, ${JAVA_HOME}/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVA, java java.exe, java, ${JAVA_HOME}/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAR, jar jar.exe, jar, ${JAVA_HOME}/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVADOC, javadoc javadoc.exe, javadoc, ${JAVA_HOME}/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
 CYGPATH=echo
 AC_PATH_PROG(CYGPATH, cygpath, echo)
 CYGPATHP=$CYGPATH
@@ -43,6 +43,7 @@ case "$host" in
   *linux*)		SH_OS=LINUX ;;
   *aix*)		SH_OS=AIX ;;
   *irix*)		SH_OS=IRIX ;;
+  *cygwin*)		SH_OS=CYGWIN ;;
   *)			SH_OS=UNKNOWN ;;
 esac
 case "$host_alias" in
