@@ -3042,7 +3042,7 @@ public class OracleDataStore extends JDBCDataStore {
           //3.3. adopt the doc with the sec info
 //System.out.println("adopting ["+dbDoc.getName()+"] ...");
           //don't open a new transaction, since sync() already has opended one
-          adoptedDoc = (Document)_adopt(dbDoc,si,false);
+          adoptedDoc = (Document)_adopt(dbDoc,si,true);
 
           //3.4. add doc to corpus in DB
           addDocumentToCorpus((Long)adoptedDoc.getLRPersistenceId(),
@@ -3059,7 +3059,7 @@ public class OracleDataStore extends JDBCDataStore {
         //don't open a new transaction, the sync() called for corpus has already
         //opened one
         try {
-          _sync(dbDoc,false);
+          _sync(dbDoc,true);
 
           //if the document is form the same DS but did not belong to the corpus add it now
           //NOTE: if the document already belongs to the corpus then nothing will be changed
