@@ -269,7 +269,7 @@ Macro: DO
     {Token.category=="VBD" , Token.string=="did"}
 )
 
-Macro: DO_NEG
+Macro: DO-NEG
 (
     {Token.category=="RB" , Token.string=="n't"}
 )
@@ -308,9 +308,25 @@ Macro: CONJ-02
 Macro: IT-BE
 (
    ( (MODAL-VERB)? (IT) (MODAL-VERB)? (BE) ) |
-   ( (HAS)? (IT) (HAS)? (BEEN) ) |
+   ( (HAS)? (DO-NEG)? (IT) (HAS)? (DO-NEG)? (BEEN) ) |
    ( (IT-S) (BEEN)? ) |
    ( (BE)(IT) )
+)
+
+Macro: FIND
+(
+    {Token.category=="VBZ" , Token.string=="finds"} |
+    {Token.category=="VB" , Token.string=="find"} |
+    {Token.category=="VBD" , Token.string=="found"} |
+    {Token.category=="VBN" , Token.string=="found"} |
+    {Token.category=="VBZ" , Token.string=="makes"} |
+    {Token.category=="VB" , Token.string=="make"} |
+    {Token.category=="VBD" , Token.string=="made"} |
+    {Token.category=="VBN" , Token.string=="made"} |
+    {Token.category=="VBZ" , Token.string=="considers"} |
+    {Token.category=="VB" , Token.string=="consider"} |
+    {Token.category=="VBD" , Token.string=="considered"} |
+    {Token.category=="VBN" , Token.string=="considered"}
 )
 
 /*
@@ -400,11 +416,11 @@ Rule:Rule_D
 Priority: 66
 (
    (DO)?
-   (DO_NEG)?
+   (DO-NEG)?
    (IT)
    (ADVERB-01)?
    (DO)?
-   (DO_NEG)?
+   (DO-NEG)?
    (SEEM-VERB)
    ( (CONJ-02) | (TO) )?
 ) :pleonasm
@@ -428,7 +444,41 @@ Priority: 66
     }
 
     doc.getFeatures().put("PLEONASM",cnt);
-	
+
+}
+
+Rule:Rule_E
+Priority: 55
+(
+   ( (DO) | (HAS) )?
+   (DO-NEG)?
+   (FIND)
+   (IT)
+   (ADVERB-01)?
+   (MODALADJ)
+   ( (CONJ) | (TO) )
+) :pleonasm
+-->
+{
+	gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");
+	Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
+
+	gate.FeatureMap features = Factory.newFeatureMap();
+	features.put("firedBy","ruleE");
+	annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+
+    //try to get doc feature
+    Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
+
+    if (null == cnt) {
+	cnt = new Integer(1);
+    }
+    else {
+	cnt = new Integer(cnt.intValue() + 1);
+    }
+
+    doc.getFeatures().put("PLEONASM",cnt);
+
 }
 
 
