@@ -18,8 +18,7 @@ package gate.util;
 import java.util.*;
 import gate.*;
 import gate.event.*;
-/** Simple case of features.
-  */
+/** Simple case of features. */
 //>>> DAM: was (derived from HashMap)
 /*
 public class SimpleFeatureMapImpl  extends HashMap implements FeatureMap
@@ -34,6 +33,8 @@ public class SimpleFeatureMapImpl
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+ /** Freeze the serialization UID. */
+  static final long serialVersionUID = -2747241616127229116L;
 
   /** Test if <b>this</b> featureMap includes all features from aFeatureMap
     * @param aFeatureMap object which will be included or not in
@@ -53,12 +54,12 @@ public class SimpleFeatureMapImpl
     Object keyValueFromAFeatureMap;
     Object keyValueFromThis;
 
-    for (int i=0; i<sfm.m_size; i++) {
-      key = sfm.m_keys[i];
-      keyValueFromAFeatureMap = sfm.m_values[i];
+    for (int i = 0; i < sfm.count; i++) {
+      key = sfm.theKeys[i];
+      keyValueFromAFeatureMap = sfm.theValues[i];
       int v = super.getSubsumeKey(key);
       if (v < 0) return false;
-      keyValueFromThis = m_values[v];//was: get(key);
+      keyValueFromThis = theValues[v];//was: get(key);
 
       if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
             (keyValueFromThis != null && keyValueFromAFeatureMap == null)
@@ -96,13 +97,13 @@ public class SimpleFeatureMapImpl
     Object keyValueFromAFeatureMap;
     Object keyValueFromThis;
 
-    for (int i=0; i<sfm.m_size; i++) {
-      key = sfm.m_keys[i];
+    for (int i = 0; i < sfm.count; i++) {
+      key = sfm.theKeys[i];
 
       if (!aFeatureNamesSet.contains(key))
         continue;
 
-      keyValueFromAFeatureMap = sfm.m_values[i];
+      keyValueFromAFeatureMap = sfm.theValues[i];
         keyValueFromThis = get(key);
 
       if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
@@ -146,11 +147,11 @@ public class SimpleFeatureMapImpl
   // Views
   public Object clone() {
     return super.clone();
-  }
+  } //clone
 
   public boolean equals(Object o) {
     return super.equals(o);
-  }
+  } // equals
 
 //////////////////THE EVENT HANDLING CODE//////////////
 //Needed so an annotation can listen to its features//
@@ -189,9 +190,5 @@ public class SimpleFeatureMapImpl
         ((FeatureMapListener) listeners.elementAt(i)).featureMapUpdated();
     }
   }//fireMapUpdatedEvent
-
-
- /** Freeze the serialization UID. */
-  static final long serialVersionUID = -2747241616127229116L;
 } // class SimpleFeatureMapImpl
 
