@@ -298,6 +298,8 @@ Angel */
                                                                           this);
     // Register the mime type with mine string
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    //sometimes XML file appear as application/xml
+    mimeString2mimeTypeMap.put("application/xml", mime);
     // Register file sufixes for this mime type
     suffixes2mimeTypeMap.put("xml",mime);
     suffixes2mimeTypeMap.put("xhtm",mime);
