@@ -37,7 +37,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-
   /**
     */
   public GateFormatXmlDocumentHandler(gate.Document aDocument){
@@ -226,11 +225,14 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       return;
     }// End if
     if ("Value".equals((String)currentElementStack.peek())){
+//if (currentFeatureName != null && "string".equals(currentFeatureName) &&
+//currentAnnot!= null && "Token".equals(currentAnnot.getElemName()) &&
+//currentAnnot.getEnd().longValue() == 1063)
+//System.out.println("Content=" + content + " start="+ start + " length=" + length);
       processTextOfValueElement(content);
       return;
     }// End if
-
-  }//character
+  }//characters
 
   /**
     * This method is called when the SAX parser encounts white spaces
@@ -390,16 +392,16 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
     // check for new line
     if(text.indexOf('\n') != -1) {
-      String newLineType =
+      String newLineType = 
         (String) doc.getFeatures().get(GateConstants.DOCUMENT_NEW_LINE_TYPE);
 
       if("LF".equalsIgnoreCase(newLineType)) {
         newLineType = null;
       }
-
+      
       // exit with the same text if the change isn't necessary
       if(newLineType == null) return result;
-
+      
       String newLine = "\n";
       if("CRLF".equalsIgnoreCase(newLineType)) {
         newLine = "\r\n";
@@ -411,7 +413,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         newLine = "\n\r";
       }
 
-      StringBuffer buff = new StringBuffer(text);
+      StringBuffer buff = new StringBuffer(text);      
       int index = text.lastIndexOf('\n');
       while(index != -1) {
         buff.replace(index, index+1, newLine);
@@ -419,10 +421,10 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       } // while
       result = buff.toString();
     } // if
-
+    
     return result;
   } // recoverNewLineSequence(String text)
-
+  
   /** This method deals with a Text belonging to Name element. */
   private void processTextOfNameElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)

@@ -15,11 +15,11 @@
 
 package gate.xml;
 
-import customxerces.org.apache.xerces.framework.XMLErrorReporter;
-import customxerces.org.apache.xerces.utils.ChunkyByteArray;
-import customxerces.org.apache.xerces.utils.StringPool;
+import org.apache.xerces.framework.XMLErrorReporter;
+import org.apache.xerces.utils.ChunkyByteArray;
+import org.apache.xerces.utils.StringPool;
 import org.xml.sax.InputSource;
-import customxerces.org.apache.xerces.readers.*;
+import org.apache.xerces.readers.*;
 
 import java.io.*;
 import java.net.URL;
@@ -44,7 +44,7 @@ public class StreamingCharFactory extends DefaultReaderFactory {
                                                           StringPool stringPool)
     throws Exception
     {
-        return new customxerces.org.apache.xerces.readers.StreamingCharReader(entityHandler,
+        return new org.apache.xerces.readers.StreamingCharReader(entityHandler,
                                                                  errorReporter,
 //                                                                 sendCharDataAsCharArray,
                                                                  true,
@@ -59,7 +59,7 @@ public class StreamingCharFactory extends DefaultReaderFactory {
     throws Exception
     {
         XMLEntityHandler.EntityReader reader;
-        reader = new customxerces.org.apache.xerces.readers.StreamingCharReader(entityHandler,
+        reader = new org.apache.xerces.readers.StreamingCharReader(entityHandler,
                                                                    errorReporter,
 //                                                                 sendCharDataAsCharArray,
                                                                    true,
