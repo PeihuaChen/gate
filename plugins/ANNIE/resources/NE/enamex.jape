@@ -65,9 +65,7 @@ Macro: PERSONENDING
 
 Macro: DET
 (
- ({Token.string == "A"} | {Token.string == "a"} |
-  {Token.string == "The"} |{Token.string == "the"}|
-  {Token.string == "One"} |{Token.string == "one"})
+ {POS.category == DT}
 )
 
 
@@ -182,6 +180,23 @@ Priority: 50
   :person.TempPerson = {kind = "negative", rule = "NotFirstPersonStop"}
 
 
+Rule: NotPersonFull
+Priority: 50
+// A British
+
+(
+ {POS.category == DT}
+ (SPACE)
+)
+(
+ (LASTNAME)
+):unknown
+(
+ (SPACE PERSONENDING)?
+)
+-->
+{}
+
 Rule: 	PersonFull
 Priority: 10
 // F.W. Jones
@@ -195,7 +210,19 @@ Priority: 10
 :person -->
   :person.TempPerson = {kind = "personName", rule = "PersonFull"}
 
-
+Rule: NotPersonFullReverse
+Priority: 20
+// XYZ, I
+(
+ (LASTNAME)
+ {Token.string == ","}
+ (SPACE)?
+ {POS.category == PRP}
+ (SPACE PERSONENDING)?
+)
+:unknown 
+-->
+{}
 
 Rule: 	PersonFullReverse
 Priority: 5
@@ -364,7 +391,7 @@ Priority: 15
 // Xxx Services Ltd. 
 // but NOT A XXX Services Ltd.
 (
- {Lookup.majorType == determiner}
+ {POS.category == DT}
  (SPACE)
 )?
 (
@@ -388,7 +415,7 @@ Priority: 20
 // Coca Cola Co.
 
 (
- {Lookup.majorType == determiner}
+ {POS.category == DT}
  (SPACE)
 )?
 (
@@ -414,7 +441,7 @@ Priority: 20
 // AA and BB Services Ltd.
 // but NOT A XXX Services Ltd.
 (
- {Lookup.majorType == determiner}
+ {POS.category == DT}
  (SPACE)
 )?
 (
@@ -490,9 +517,11 @@ Priority: 30
 // includes govern_key e.g. academy
 // Barclays Bank
 // Royal Academy of Art
-
 (
- (DET SPACE)?
+ (
+  {POS.category == DT}
+  SPACE
+ )?
 )
 (
  ({Token.orth == upperInitial} | 
@@ -579,7 +608,12 @@ Priority: 25
 
 // Western Europe
 // South China sea
-
+(
+ (
+  {POS.category == DT}
+  SPACE
+ )?
+)
 (
  ({Lookup.majorType == loc_key, Lookup.minorType == pre}
   SPACE)?
@@ -592,7 +626,13 @@ Priority: 25
 
 
 Rule:	GazLocation
-Priority: 20
+Priority: 50
+(
+ (
+  {POS.category == DT}
+  SPACE
+ )?
+)
   (
 	({Lookup.majorType == location})
   )
@@ -635,8 +675,6 @@ Rule:InLoc1
 :locName
 -->
  :locName.TempLocation = {kind = "locName", rule = InLoc1}
-
-
 
 
 
