@@ -719,5 +719,19 @@ extends AbstractFeatureBearer implements DataStore {
     return;
   }
 
+  /** Get a list of LRs that satisfy some set or restrictions */
+  public List findLrs(List constraints) throws PersistenceException {
+    throw new UnsupportedOperationException(
+                              "Serial DataStore does not support document retrieval.");
+  }
+
+  /**
+   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  of a particular type
+   */
+  public List findLrs(List constraints, String lrType) throws PersistenceException {
+    throw new UnsupportedOperationException(
+                              "Serial DataStore does not support document retrieval.");
+  }
 
 } // class SerialDataStore
