@@ -100,6 +100,7 @@ public class BootStrapDialog extends JDialog{
        return;
     }// End if
 
+    resourceType = (String)resourceTypesComboBox.getSelectedItem();
     resourceInterfaces = this.getSelectedInterfaces();
 
     Thread thread = new Thread(new CreateResourceRunner());
@@ -330,27 +331,27 @@ public class BootStrapDialog extends JDialog{
     }// CreateResourceRunner()
 
     public void run(){
-/*      bootStrapWizard = new BootStrap();
-      bootStrapWizard.createResource(resourceName,
-                                     resourceType,
-                                     className,
-                                     resourceInterfaces,
-                                     pathNewProject);
-*/
-      JOptionPane.showMessageDialog(mainFrame,
+
+
+      try{
+        bootStrapWizard = new BootStrap();
+        bootStrapWizard.createResource(resourceName,
+                                       resourceType,
+                                       className,
+                                       resourceInterfaces,
+                                       pathNewProject);
+        JOptionPane.showMessageDialog(mainFrame,
                                     "Creation succeeded !",
                                     "DONE !",
                                     JOptionPane.DEFAULT_OPTION);
-      thisBootStrapDialog.hide();
-
-    /*      try{
-      } catch (ResourceInstantiationException e){
+        thisBootStrapDialog.hide();
+      }catch (Exception e){
+        e.printStackTrace(System.err);
         JOptionPane.showMessageDialog(mainFrame,
                      e.getMessage() + "\n Resource creation stopped !",
-                     "Resource creation error !",
+                     "BootStrap error !",
                      JOptionPane.ERROR_MESSAGE);
       }
-*/
     }// run();
   }//CreateResourceRunner
 
