@@ -183,8 +183,7 @@ public class Jdk {
       theObject = theClass.newInstance();
     } catch(Exception e) {
       throw new GateException(
-        "couldn't create instance of class " + theClass + ": "
-        + e.getMessage()
+        "couldn't create instance of class " + theClass + ": " + e
       );
     }
 
