@@ -19,7 +19,7 @@ import gate.util.*;
 *of the interface gate.Document.
 */
 public abstract class DocumentImpl
-    implements Document
+    implements Document, FeatureBearer
 {
     /*Constructor. Build a new document with an automatically assigned ID.
     */
@@ -52,8 +52,8 @@ public abstract class DocumentImpl
 
 
     /** The features of this document */
-    public FeatureSet getFeatureSet () {
-        return  featureSet;
+    public FeatureMap getFeatures () {
+        return  featureMap;
     }
 
 
@@ -89,7 +89,7 @@ public abstract class DocumentImpl
     /**The set of Annotation Graphs associated with this document*/
     private java.util.Hashtable agSet = null;
     /**The set of features for this document*/
-    private FeatureSet featureSet = null;
+    private FeatureMap featureMap = null;
     private Long id;
 
 }
