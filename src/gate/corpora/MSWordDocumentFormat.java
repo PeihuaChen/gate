@@ -22,14 +22,13 @@ import gate.DocumentFormat;
 import gate.creole.ResourceInstantiationException;
 import gate.util.DocumentFormatException;
 
-import org.pdfbox.pdfparser.*;
-import org.pdfbox.pdmodel.PDDocument;
-import org.pdfbox.util.*;
+// Addition by Ting Wang
+import org.textmining.text.extraction.WordExtractor;
 import java.io.*;
 
 /**
  */
-public class PdfDocumentFormat extends DocumentFormat{
+public class MSWordDocumentFormat extends DocumentFormat{
 
 
   /**
@@ -38,14 +37,14 @@ public class PdfDocumentFormat extends DocumentFormat{
    */
   public Resource init() throws ResourceInstantiationException{
     // Register plain text mime type
-    MimeType mime = new MimeType("application","pdf");
+    MimeType mime = new MimeType("application"," msword"); 
     // Register the class handler for this mime type
     mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
                                                                           this);
     // Register the mime type with mine string
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     // Register file sufixes for this mime type
-    suffixes2mimeTypeMap.put("pdf",mime);
+    suffixes2mimeTypeMap.put("doc", mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;
@@ -53,7 +52,7 @@ public class PdfDocumentFormat extends DocumentFormat{
 
 
   /**
-   * The PDF Document Format does not support repositioning info.
+   * The MSWord Document Format does not support repositioning info.
    * @return false.
    */
   public Boolean supportsRepositioning() {
@@ -66,36 +65,31 @@ public class PdfDocumentFormat extends DocumentFormat{
    * Uses the markupElementsMap to determine which elements to convert, and
    * what annotation type names to use.
    */
-  public void unpackMarkup(Document doc) throws DocumentFormatException{
+  public void unpackMarkup(Document doc)
+                                     throws DocumentFormatException{
     //get the original file
     URL fileURL = doc.getSourceUrl();
-    if(fileURL == null) throw new DocumentFormatException(
-            "Unpacking PDF files requires an URL to the original content!");
-    
-    //Implement the PDF unpacking.
-    try {
-      //parse the original file into a text
-      String extractedContent = null;
+    //parse the original file into a text
+    String extractedContent = null;
 
+    //Implement the MSWord unpacking.
+    try {
       // get an Input stream from the gate document
       InputStream in = new ByteArrayInputStream(
-              doc.getContent().toString().getBytes());
-      // create a PDF Text Stripper
-      PDFTextStripper aPdfTextStripper = new PDFTextStripper();
-      PDFParser parser = new PDFParser(in);
-      parser.parse();
-      PDDocument pdfDoc = parser.getPDDocument();
-      
-      extractedContent = aPdfTextStripper.getText(pdfDoc);
-      pdfDoc.close();
+                                           doc.getContent().toString().getBytes()
+                                           );
+
+      // create a MSWord Text Extractor
+      WordExtractor extractor = new WordExtractor();
+      // extract the text from the stream
+      extractedContent = extractor.extractText(in);
       in.close();
-      //set the content on the document
-      doc.setContent(new DocumentContentImpl(extractedContent));
-    } catch (IOException e){
-      throw new DocumentFormatException("I/O exception for " +
-                                        doc.getSourceUrl().toExternalForm(), 
-                                        e);
+    } catch (Exception e){
+      throw new DocumentFormatException("Exception for " +
+                                        doc.getSourceUrl().toExternalForm(),e);
     }
+    //set the content on the document
+    doc.setContent(new DocumentContentImpl(extractedContent));
   }
 
 
