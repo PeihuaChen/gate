@@ -171,7 +171,6 @@ docs: ../doc/userguide.html build.txt version.txt java2html
 	  -link http://java.sun.com/products/jdk/1.3/docs/api/ \
 	  $(SP) $(CP) -J-Xmx200m -public \
 	  -d `$(CYGPATH) ../doc/javadoc` $(PKGS)
-	cp ../src/gate/CookBook.java ../doc/javadoc/gate/CookBook.txt
 
 # make the developer Javadocs (inc. private members)
 internaldocs: 
