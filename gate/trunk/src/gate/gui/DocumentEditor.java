@@ -2641,6 +2641,14 @@ Out.prln("NULL size");
       return annotations;
     }
 
+    public void setNode(DefaultMutableTreeNode node){
+      this.node = node;
+    }
+
+    public DefaultMutableTreeNode getNode(){
+      return node;
+    }
+
     public String toString() {return getTitle();}
 
     private String set;
@@ -2649,6 +2657,9 @@ Out.prln("NULL size");
     private Style style;
     private Set annotations = null;
     private Range range = null;
+
+    /** The node that represents this set/type in the types tree*/
+    private DefaultMutableTreeNode node = null;
   }//class TypeData
 
 
@@ -2767,9 +2778,7 @@ Out.prln("NULL size");
         tData = new TypeData(setName, type, false);
         tData.setAnnotations(set.get(type));
         setMap.put(type, tData);
-
         SwingUtilities.invokeLater(new NodeAdder(tData));
-
 
       }//new type
 
@@ -2820,21 +2829,7 @@ Out.prln("NULL size");
            tData.annotations.iterator().next() == ann) ||
            tData.annotations.size() == 0){
           //no more annotations of this type -> delete the node
-          //first find the set
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-            ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
-          while(node != null &&
-            !((TypeData)node.getUserObject()).getSet().equals(setName))
-            node = node.getNextSibling();
-          if(node != null && node.getChildCount() > 0){
-            node = (DefaultMutableTreeNode)node.getFirstChild();
-            while(node != null &&
-              !((TypeData)node.getUserObject()).getType().equals(type))
-              node = node.getNextSibling();
-            if(node != null){
-              SwingUtilities.invokeLater(new NodeRemover(node));
-            }
-          }
+          SwingUtilities.invokeLater(new NodeRemover(tData));
           //remove the data for this type
           Map setMap = (Map)typeDataMap.get(setName);
           setMap.remove(tData.getType());
@@ -2892,13 +2887,18 @@ Out.prln("NULL size");
      * Helper class that removes one node from the types tree.
      */
     class NodeRemover implements Runnable{
-      NodeRemover(DefaultMutableTreeNode node){
-        this.node = node;
+      NodeRemover(TypeData tData){
+        this.tData = tData;
       }
       public void run(){
-        stylesTreeModel.removeNodeFromParent(node);
+        DefaultMutableTreeNode node = tData.getNode();
+        if(node != null){
+          stylesTreeModel.removeNodeFromParent(tData.getNode());
+        }else{
+          Err.prln("Could not find node for " + tData.set + "->" + tData.type);
+        }
       }
-      DefaultMutableTreeNode node;
+      TypeData tData;
     }//class NodeRemover implements Runnable
 
     /**
@@ -2912,7 +2912,7 @@ Out.prln("NULL size");
         //create the new node
         DefaultMutableTreeNode newNode =
                   new DefaultMutableTreeNode(tData, tData.getType() == null);
-
+        tData.setNode(newNode);
         //find its parent
         DefaultMutableTreeNode node = null;
         if(tData.getType() == null){
@@ -3027,7 +3027,7 @@ Out.prln("NULL size");
 
         //remove the node for the set
         typeDataMap.remove(setName);
-        new NodeRemover(setNode).run();
+        stylesTreeModel.removeNodeFromParent(setNode);
       }//public void run()
 
       String setName;
