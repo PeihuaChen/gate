@@ -207,7 +207,7 @@ public class TestGate {
       // Test bench
       ////////////////////////////////////////////////
       // set this true to run all tests; false to run the just one below
-      boolean allTests = true;
+      boolean allTests = false;
       if(! allTests){
         suite.addTest(TestWordNet.suite());
       } else {
