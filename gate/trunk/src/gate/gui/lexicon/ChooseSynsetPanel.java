@@ -141,6 +141,13 @@ public class ChooseSynsetPanel extends JPanel {
       }
     });
 
+    synsetList.addListSelectionListener(new ListSelectionListener(){
+      public void valueChanged(ListSelectionEvent e) {
+        LexKBSynset selectedSynset = (LexKBSynset)synsetList.getSelectedValue();
+        if (selectedSynset != null)
+        definitionTextArea.setText(selectedSynset.getDefinition());
+      }
+    });
   }
 
   protected void updateGUI(LexKBSynset theSynset) {
