@@ -62,9 +62,6 @@ public class Main {
     Gate.setNetConnected(false);
     Gate.setLocalWebServer(false);
 
-    // initialise the library and load user CREOLE directories
-    Gate.init();
-    registerCreoleUrls();
 
     // run the interface or do batch processing
     if(batchMode) {
@@ -92,9 +89,7 @@ public class Main {
   } // registerCreoleUrls()
 
   /** Run the user interface */
-  private static void runGui() {
-    MainFrame frame = new MainFrame();
-    long startTime = System.currentTimeMillis();
+  private static void runGui() throws GateException{
     //build the Spash
     JPanel splashBox = new JPanel();
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
@@ -115,8 +110,16 @@ public class Main {
     box.add(Box.createHorizontalGlue());
     splashBox.add(box);
     splashBox.add(Box.createVerticalStrut(15));
-    Splash splash = new Splash(frame, splashBox);
+    Splash splash = new Splash(splashBox);
     splash.show();
+
+    // initialise the library and load user CREOLE directories
+    Gate.init();
+    registerCreoleUrls();
+
+
+    MainFrame frame = new MainFrame();
+    long startTime = System.currentTimeMillis();
 
     if(DEBUG) Out.prln("constructing GUI");
 
@@ -400,7 +403,11 @@ public class Main {
   } // processArgs()
 
   /** Run commands as a batch process. */
-  private static void batchProcess() {
+  private static void batchProcess() throws GateException{
+    // initialise the library and load user CREOLE directories
+    Gate.init();
+    registerCreoleUrls();
+
 /*
     // turn debugging on where requested
     if(verbose) {
