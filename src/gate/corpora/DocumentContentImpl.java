@@ -43,8 +43,7 @@ public class DocumentContentImpl implements DocumentContent
 
   /** Contruction from URL and offsets. */
   public DocumentContentImpl(URL u, String encoding, Long start, Long end)
-         throws IOException
-  {
+  throws IOException {
 
     int readLength = 0;
     char[] readBuffer = new char[INTERNAL_BUFFER_SIZE];
@@ -58,49 +57,38 @@ public class DocumentContentImpl implements DocumentContent
       e = end.longValue();
     }
 
-    if(encoding != null && !encoding.equalsIgnoreCase("")){
-      uReader = new BufferedReader(new InputStreamReader(u.openStream(),
-                                                         encoding),
-                                   INTERNAL_BUFFER_SIZE);
-    }else{
-      uReader = new BufferedReader(new InputStreamReader(u.openStream()),
-                                   INTERNAL_BUFFER_SIZE);
+    if(encoding != null && !encoding.equalsIgnoreCase("")) {
+      uReader = new BufferedReader(
+        new InputStreamReader(u.openStream(), encoding), INTERNAL_BUFFER_SIZE
+      );
+    } else {
+      uReader = new BufferedReader(
+        new InputStreamReader(u.openStream()), INTERNAL_BUFFER_SIZE
+      );
     };
 
-/*
-      while( true ) {
-      int i = uReader.read();
-      if(i == -1) break;
-
-      if(counter >= s && counter < e)
-        buf.append((char) i);
-      counter++;
-    }
-*/
-
-    //1. skip S characters
+    // 1. skip S characters
     uReader.skip(s);
 
-    //2. how many character shall I read?
+    // 2. how many character shall I read?
     long toRead = e - s;
 
-    //3. read gtom source into buffer
-    while ( toRead > 0 &&
-            (readLength = uReader.read(readBuffer,
-                                       0,
-                                       INTERNAL_BUFFER_SIZE)) != -1 ) {
-
+    // 3. read gtom source into buffer
+    while (
+      toRead > 0 &&
+      (readLength = uReader.read(readBuffer, 0, INTERNAL_BUFFER_SIZE)) != -1
+    ) {
       if (toRead <  readLength) {
         //well, if toRead(long) is less than readLenght(int)
         //then there can be no overflow, so the cast is safe
         readLength = (int)toRead;
       }
 
-      buf.append(readBuffer,0,readLength);
+      buf.append(readBuffer, 0, readLength);
       toRead -= readLength;
     }
 
-    //4.close reader
+    // 4.close reader
     uReader.close();
 
     content = new String(buf);
