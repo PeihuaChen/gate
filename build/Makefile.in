@@ -171,7 +171,7 @@ docs: ../doc/userguide.html build.txt version.txt java2html
 	  ../doc/src/version.html >../doc/version.html
 	$(JAVADOC) \
 	  -link http://java.sun.com/j2se/1.4.2/docs/api/  \
-	  -encoding UTF-8 -docencoding UTF-8 -charset UTF-8 \
+	  -encoding UTF-8 -docencoding UTF-8 -charset UTF-8 -breakiterator \
 	  $(SP) $(CP) -J-Xmx200m -public \
 	  -d `$(CYGPATH) ../doc/javadoc` $(PKGS)
 
@@ -179,7 +179,7 @@ docs: ../doc/userguide.html build.txt version.txt java2html
 internaldocs:
 	$(JAVADOC) \
 	  -link http://redmires/java1.4.2docs/api/  \
-	  -encoding UTF-8 -docencoding UTF-8 -charset UTF-8 \
+	  -encoding UTF-8 -docencoding UTF-8 -charset UTF-8 -breakiterator \
 	  $(SP) $(CP) -J-Xmx200m -private -use \
 	  -d `$(CYGPATH) ../doc/javadoc/internal` $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
