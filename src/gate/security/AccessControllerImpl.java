@@ -27,8 +27,16 @@ import gate.util.MethodNotImplementedException;
 
 public class AccessControllerImpl implements AccessController {
 
+  public static final int DEFAULT_SESSION_TIMEOUT_MIN = 60;
+
+  public static final int LOGIN_OK = 1;
+  public static final int LOGIN_FAILED = 2;
+
+
   private HashMap     sessions;
-  private HashMap     keepAliveTimes;
+  private HashMap     sessionLastUsed;
+  private HashMap     sessionTimeouts;
+
   private Connection  jdbcConn;
   private URL         jdbcURL;
 
@@ -45,7 +53,8 @@ public class AccessControllerImpl implements AccessController {
   public AccessControllerImpl() {
 
     sessions = new HashMap();
-    keepAliveTimes = new HashMap();
+    sessionLastUsed = new HashMap();
+    sessionTimeouts = new HashMap();
 
     usersByID =  new HashMap();
     usersByName=  new HashMap();
@@ -94,10 +103,8 @@ public class AccessControllerImpl implements AccessController {
     if (null == grp) {
       throw new SecurityException("No such group");
     }
-    else {
-      return grp;
-    }
 
+    return grp;
   }
 
   /** --- */
@@ -109,9 +116,8 @@ public class AccessControllerImpl implements AccessController {
     if (null == grp) {
       throw new SecurityException("No such group");
     }
-    else {
-      return grp;
-    }
+
+    return grp;
   }
 
   /** --- */
@@ -123,9 +129,8 @@ public class AccessControllerImpl implements AccessController {
     if (null == usr) {
       throw new SecurityException("No such user");
     }
-    else {
-      return usr;
-    }
+
+    return usr;
   }
 
   /** --- */
@@ -137,9 +142,8 @@ public class AccessControllerImpl implements AccessController {
     if (null == usr) {
       throw new SecurityException("No such user");
     }
-    else {
-      return usr;
-    }
+
+    return usr;
   }
 
   /** --- */
@@ -151,9 +155,8 @@ public class AccessControllerImpl implements AccessController {
     if (null==s) {
       throw new SecurityException("No such session ID!");
     }
-    else {
-      return s;
-    }
+
+    return s;
   }
 
   /** --- */
@@ -227,6 +230,56 @@ public class AccessControllerImpl implements AccessController {
   public Session login(String usr_name, String passwd,Long prefGroupID)
     throws PersistenceException,SecurityException {
 
+    //1. check the user locally
+    User usr = (User)this.usersByName.get(usr_name);
+    if (null == usr) {
+      throw new SecurityException("no such user (username=["+usr_name+"])");
+    }
+
+    //2. check group localy
+    Group grp = (Group)this.groupsByID.get(prefGroupID);
+    if (null == grp) {
+      throw new SecurityException("no such group (id=["+prefGroupID+"])");
+    }
+
+    //2. check user/pass in DB
+    CallableStatement stmt = null;
+    long login_result;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.login(?,?,?,?)} ");
+      stmt.setString(1,usr_name);
+      stmt.setString(2,passwd);
+      stmt.setLong(3,prefGroupID.longValue());
+
+      stmt.registerOutParameter(4,java.sql.Types.INTEGER);
+      stmt.execute();
+      login_result = stmt.getLong(4);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get a timestamp from DB: ["+ sqle.getMessage()+"]");
+    }
+
+    if (LOGIN_FAILED == login_result) {
+      throw new SecurityException("Login failed: incorrect user,password or group");
+    }
+
+    //3. create a Session and set User/Group
+    Long sessionID = createSessionID();
+    while (this.sessions.containsKey(sessionID)) {
+      sessionID = createSessionID();
+    }
+
+    SessionImpl s = new SessionImpl(sessionID,
+                                    usr,
+                                    grp,
+                                    DEFAULT_SESSION_TIMEOUT_MIN);
+
+
+    //4. set the session timeouts and keep alives
+    this.sessionTimeouts.put(sessionID,new Long(DEFAULT_SESSION_TIMEOUT_MIN));
+    touchSession(s); //this one changes the keepAlive time
+
     throw new MethodNotImplementedException();
   }
 
@@ -240,8 +293,12 @@ public class AccessControllerImpl implements AccessController {
     Session removedSession = (Session)this.sessions.remove(SID);
     Assert.assertNotNull(removedSession);
 
-    Object time = this.keepAliveTimes.remove(SID);
-    Assert.assertNotNull(time);
+    Object lastUsed = this.sessionLastUsed.remove(SID);
+    Assert.assertNotNull(lastUsed);
+
+    Object timeout = this.sessionTimeouts.remove(SID);
+    Assert.assertNotNull(timeout);
+
   }
 
   /** --- */
@@ -252,35 +309,48 @@ public class AccessControllerImpl implements AccessController {
   }
 
   /** --- */
-  public boolean isValidSession(Session s)
-    throws SecurityException {
+  public boolean isValidSession(Session s) {
 
-    throw new MethodNotImplementedException();
-  }
+    //1. do we have such session?
+    Session s1 = (Session)this.sessions.get(s.getID());
 
-  /** --- */
-/*  public void setGroupName(Group grp, String newName, Session s)
-    throws PersistenceException, SecurityException {
-
-    CallableStatement stmt = null;
-
-    try {
-      //first check the session and then check whether the user is member of the group
-      if (isValidSession(s) == false) {
-        throw new SecurityException("invalid session supplied");
-      }
-
-      stmt = this.jdbcConn.prepareCall("{ call security.set_group_name(?,?)} ");
-      stmt.setLong(1,grp.getID().longValue());
-      stmt.setString(2,newName);
-      stmt.execute();
-      //release stmt???
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
+    if (null == s1) {
+      return false;
     }
 
-  }
-*/
+    //2. has it expired meanwhile?
+    Assert.assertNotNull(this.sessionLastUsed.get(s.getID()));
 
+    long lastUsedMS = ((Long)this.sessionLastUsed.get(s.getID())).longValue();
+    long sessTimeoutMin = ((Long)this.sessionTimeouts.get(s.getID())).longValue();
+    long currTimeMS = System.currentTimeMillis();
+    //timeout is in minutes
+    long lastUsedMin = (currTimeMS-lastUsedMS)*1000/60;
+
+    if (lastUsedMin > sessTimeoutMin) {
+      //session expired
+      return false;
+    }
+
+    //everything ok
+    //touch session
+    touchSession(s);
+
+    return true;
+  }
+
+
+  /*  private methods */
+
+  private void touchSession(Session s) {
+
+    this.sessionLastUsed.put(s.getID(),  new Long(System.currentTimeMillis()));
+  }
+
+
+  private Long createSessionID() {
+
+    //need comment?
+    return new Long(((System.currentTimeMillis() << 16) >> 16)*(Math.round(Math.random()*1024))*Runtime.getRuntime().freeMemory()*(Math.round(Math.random())* 1024));
+  }
 }
