@@ -31,6 +31,12 @@ public interface Document extends LanguageResource, Comparable
     */
   public DocumentContent getContent();
 
+  /**
+    * mutator method
+    */
+   // added by Cristian URSU on 7/June/2000 
+  public void setContent(DocumentContent newContent);
+
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
     */
@@ -40,6 +46,7 @@ public interface Document extends LanguageResource, Comparable
     * name doesn't exist yet.
     */
   public AnnotationSet getAnnotations(String name);
+
 
   /** Make changes to the content. */
   public void edit(Long start, Long end, DocumentContent replacement)

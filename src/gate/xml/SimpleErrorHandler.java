@@ -2,7 +2,7 @@
  *	SimpleErrorHandle.java
  *
  *	Cristian URSU,  8/May/2000
- *  $id$
+ *  $Id$
  */
 
 package gate.xml;

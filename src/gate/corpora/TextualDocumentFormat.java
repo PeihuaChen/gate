@@ -42,7 +42,9 @@ public class TextualDocumentFormat extends DocumentFormat
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(Document doc){System.out.println("UNPACKcalled from TextualDocumentFormat");}
+  public void unpackMarkup(Document doc){
+    System.out.println("UNPACK called from TextualDocumentFormat");
+  }
 
   /** Get the factory that created this object. */
   public Factory getFactory() {
