@@ -123,16 +123,16 @@ public class TestNamematch extends TestCase
     namematch.setAnnotationType("TTTT");
     namematch.setAttributeType("token");
     // uses intern cdg list or extern cdg list
-    namematch.setIntCdgList(true);
+    namematch.setIntCdgList(new Boolean(true));
     // uses inter lists or extern lists
-    namematch.setIntExtLists(false);
+    namematch.setIntExtLists(new Boolean(false));
     namematch.run();
     namematch.check();
 
     // the vector with all the matches from the document
     Vector matches = namematch.getMatchesDocument();
     if (matches != null)
-      assert(matches.toString().equals("[[0, 3, 5], [2, 4], [6, 8], [7, 9]]"));
+      assert(matches.toString().equals("[[9, 7], [8, 6], [5, 3, 0], [4, 2]]"));
 
     AnnotationSet annotSet = doc.getAnnotations("AnnotationSetAS");
     FeatureMap fm1;
