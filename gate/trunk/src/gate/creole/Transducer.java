@@ -55,6 +55,14 @@ public class Transducer extends AbstractProcessingResource {
 //    }
   }
 
+  /*
+  private void writeObject(ObjectOutputStream oos) throws IOException {
+    Out.prln("writing transducer");
+    oos.defaultWriteObject();
+    Out.prln("finished writing transducer");
+  } // writeObject
+  */
+
   /**
    * This method is the one responsible for initialising the transducer. It
    * assumes that all the needed parameters have been already set using the
@@ -62,23 +70,13 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-    if(batch != null){
-      //if we're actually reinitialising we need to remove the listeners
-      if( sListener != null){
-        batch.removeStatusListener(sListener);
-      }
-      if( pListener != null){
-        batch.removeProgressListener(pListener);
-      }
-    }
-
     if(grammarURL != null && encoding != null){
       try{
         if(sListener != null){
           batch = new Batch(grammarURL, encoding, sListener);
-        }else{
-          batch = new Batch(grammarURL, encoding);
-        }
+          }else{
+            batch = new Batch(grammarURL, encoding);
+          }
       }catch(JapeException je){
         throw new ResourceInstantiationException(je);
       }
@@ -88,7 +86,8 @@ public class Transducer extends AbstractProcessingResource {
         encoding + ") are needed to create a JapeTransducer!"
       );
 
-    if (pListener != null) batch.addProgressListener(pListener);
+      if(pListener != null) batch.addProgressListener(pListener);
+
     return this;
   }
 
@@ -97,7 +96,7 @@ public class Transducer extends AbstractProcessingResource {
    * This method is responsible for doing all the processing of the input
    * document.
    */
-  public void execute() throws ExecutionException{
+  public void run(){
     try{
       if(document == null) throw new ParameterException("No document provided!");
       if(inputASName != null && inputASName.equals("")) inputASName = null;
@@ -110,7 +109,7 @@ public class Transducer extends AbstractProcessingResource {
                         document.getAnnotations() :
                         document.getAnnotations(outputASName));
     }catch(Exception e){
-      throw new ExecutionException(e);
+      executionException = new ExecutionException(e);
     }
   }
 
