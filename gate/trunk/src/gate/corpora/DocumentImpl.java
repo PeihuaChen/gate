@@ -20,8 +20,10 @@ import gate.util.*;
   * <H2>Editing</H2>
   * 
   * <P>
-  * The DocumentContent class models the textual or audio-visual
+  * The DocumentImpl class implements the Document interface.
+  * The DocumentContentImpl class models the textual or audio-visual
   * materials which are the source and content of Documents.
+  * The AnnotationSetImpl class supplies annotations on Documents.
   * 
   * <P>
   * Abbreviations:
@@ -46,7 +48,7 @@ import gate.util.*;
   * 
   * <P>
   * D receives edit requests and forwards them to DC and AS.
-  * On DC, this method actually makes the change - e.g. replacing
+  * On DC, this method makes a change to the content - e.g. replacing
   * a String range from start to end with replacement. (Deletions
   * are catered for by having replacement = null.) D then calls
   * AS.edit on each of its annotation sets.
@@ -97,9 +99,22 @@ import gate.util.*;
   *   newOffset =
   *     oldOffset -
   *     (
-  *       (end - start) +
-  *       ( (replacement == null) ? 0 : replacement.size() )
+  *       (end - start) -                                     // size of mod
+  *       ( (replacement == null) ? 0 : replacement.size() )  // size of repl
   *     );
+  * </PRE>
+  * Note that we use the same convention as e.g. java.lang.String: start
+  * offsets are inclusive; end offsets are exclusive. I.e. for string "abcd"
+  * range 1-3 = "bc". Examples, for a node with offset 4:
+  * <PRE>
+  * edit(1, 3, "BC");
+  * newOffset = 4 - ( (3 - 1) - 2 ) = 4
+  *
+  * edit(1, 3, null);
+  * newOffset = 4 - ( (3 - 1) - 0 ) = 2
+  *
+  * edit(1, 3, "BBCC");
+  * newOffset = 4 - ( (3 - 1) - 4 ) = 6
   * </PRE>
   */
 public class DocumentImpl implements Document
