@@ -24,6 +24,7 @@ import java.util.*;
 
 /**
   * This abstract class is to be used when a Sorted table model is needed
+  * @deprecated  As of 21 Jan 2001, replaced by {@link XJTable}
   */
 public abstract class SortedTableModel extends AbstractTableModel {
 
