@@ -52,7 +52,7 @@ public class WordNetViewer extends AbstractVisualResource
 
   public WordNetViewer(){
     jbInit();
-    initResources();
+    //initResources();
   }
 
   private void initResources(){
@@ -144,6 +144,7 @@ public class WordNetViewer extends AbstractVisualResource
 
   private void actionSearch(){
     String text = searchWordTextField.getText().trim();
+    text = text.replace(' ','_');
     searchLabel2.setText("Searches for " + text + ":");
 
     nounButton.setEnabled(false);
@@ -199,36 +200,50 @@ public class WordNetViewer extends AbstractVisualResource
       }
 
       display.append("\n");
-      display.append("The " + wordIdentifier + " " + text + " has " +senses.size() + " senses:");
+      display.append("The ");
+      display.append(wordIdentifier);
+      display.append(" ");
+      display.append(text);
+      display.append(" has ");
+      display.append(senses.size());
+      display.append(" senses:");
       display.append("\n\n");
       for (int i=0; i< senses.size(); i++) {
         WordSense currSense = (WordSense) senses.get(i);
         Synset currSynset = currSense.getSynset();
-        addToPopupMenu(currSynset, wordType, senses);
+        addToPopupMenu(currSense, currSynset, wordType, senses);
         java.util.List words = currSynset.getWordSenses();
-        String wordsString = "";
-        for (int j = 0; j<words.size(); j++){
-          WordSense word = (WordSense) words.get(j);
-          wordsString = wordsString + word.getWord().getLemma();
-          if (j<(words.size()-1)){
-            wordsString = wordsString + ", ";
-          }
-        }
+        String wordsString = getWords(words);
+
         display.append(" " + (i+1) + ". " + wordsString + " -- " + currSynset.getGloss());
         display.append("\n");
       }
     }
   }
 
-  private void addToPopupMenu(Synset synset, int wordType, java.util.List senses){
+  private void addToPopupMenu(WordSense wordSense, Synset synset, int wordType, java.util.List senses){
     java.util.List semRelations = null;
     try {
       semRelations = synset.getSemanticRelations();
     } catch (Exception e){
       e.printStackTrace();
     }
-    for (int i=0; i<semRelations.size(); i++) {
-      SemanticRelation relation = (SemanticRelation) semRelations.get(i);
+
+    java.util.List lexRelations = null;
+    try {
+      lexRelations = wordSense.getLexicalRelations();
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+
+    for (int i=0; i<(semRelations.size()+lexRelations.size()); i++) {
+      Relation relation;
+      if (i<semRelations.size()){
+        relation = (SemanticRelation) semRelations.get(i);
+      } else {
+        relation = (LexicalRelation) lexRelations.get(i-semRelations.size());
+      }
+
       switch (wordType) {
         case WordNet.POS_NOUN:
           if (false == existInPopup(nounPopup, getLabel(relation)) ){
@@ -239,10 +254,11 @@ public class WordNetViewer extends AbstractVisualResource
           if (false == existInPopup(verbPopup, getLabel(relation)) ){
             verbPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
           }
-          if (!senatnceFrames){
+          //commented because problem with WN API and Sentance Frames
+          /*if (!senatnceFrames){
             verbPopup.add(new RelationItem("Senatnce Frames", SENTANCE_FAMES, senses));
             senatnceFrames = true;
-          }
+          }*/
           break;
         case WordNet.POS_ADJECTIVE:
           if (false == existInPopup(adjectivePopup, getLabel(relation)) ){
@@ -289,44 +305,56 @@ public class WordNetViewer extends AbstractVisualResource
     RelationItem ri = (RelationItem) e.getSource();
     switch (ri.getRelationType()){
       case Relation.REL_ANTONYM:
+        relAntonymSeeAlso(ri.getSenses(), Relation.REL_ANTONYM,"=> ");
         break;
       case Relation.REL_ATTRIBUTE:
+        relAtributeSimilarTo(ri.getSenses(), Relation.REL_ATTRIBUTE, "=> ");
         break;
       case Relation.REL_CAUSE:
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_CAUSE, "=> ");
         break;
       case Relation.REL_DERIVED_FROM_ADJECTIVE:
         break;
       case Relation.REL_ENTAILMENT:
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_ENTAILMENT, "=> ");
         break;
       case Relation.REL_HYPERNYM:
         relHypernym(ri.getSenses());
         break;
       case Relation.REL_HYPONYM:
-        relHyponym(ri.getSenses());
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_HYPONYM, "=> ");
         break;
       case Relation.REL_MEMBER_HOLONYM:
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_MEMBER_HOLONYM,"MEMBER OF: ");
         break;
       case Relation.REL_MEMBER_MERONYM:
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_MEMBER_MERONYM, "HAS MEMBER: ");
         break;
       case Relation.REL_PARTICIPLE_OF_VERB:
         break;
       case Relation.REL_PART_HOLONYM:
-        relPartHolonym(ri.getSenses());
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_PART_HOLONYM, "PART OF: ");
         break;
       case Relation.REL_PART_MERONYM:
-        relPartMeronym(ri.getSenses());
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_PART_MERONYM, "HAS PART: ");
         break;
       case Relation.REL_PERTAINYM:
         break;
       case Relation.REL_SEE_ALSO:
+        relAntonymSeeAlso(ri.getSenses(), Relation.REL_SEE_ALSO,"=> ");
         break;
       case Relation.REL_SIMILAR_TO:
+        relAtributeSimilarTo(ri.getSenses(), Relation.REL_SIMILAR_TO, "=> ");
         break;
       case Relation.REL_SUBSTANCE_HOLONYM:
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_SUBSTANCE_HOLONYM,
+                             " SUBSTANCE OF: ");
         break;
       case Relation.REL_SUBSTANCE_MERONYM:
+        relHoloMeroHypo(ri.getSenses(), Relation.REL_SUBSTANCE_MERONYM, "HAS SUBSTANCE: ");
         break;
       case Relation.REL_VERB_GROUP:
+        relAtributeSimilarTo(ri.getSenses(), Relation.REL_VERB_GROUP, "=> ");
         break;
       case SENTANCE_FAMES:
         sentanceFrames(ri.getSenses());
@@ -374,18 +402,21 @@ public class WordNetViewer extends AbstractVisualResource
     }
   }
 
-  private void relHyponym(java.util.List senses){
+
+  private void relHoloMeroHypo(java.util.List senses, int relationType,
+                               String relRefString){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
       WordSense currSense = (WordSense) senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
-        if (currSynset.getSemanticRelations(Relation.REL_HYPONYM).size()>0){
+        if (currSynset.getSemanticRelations(relationType).size()>0){
           display.append("\n");
           display.append("Sense ");
           display.append(i+1);
           display.append("\n");
-          recursiveHyponym(currSynset, display, "  =>");
+          recursiveHoloMeroHypo(currSynset, display, "  ", false,
+                                relationType, relRefString);
         }
       } catch (Exception e){
         e.printStackTrace();
@@ -395,108 +426,16 @@ public class WordNetViewer extends AbstractVisualResource
     resultPane.setText(display.toString());
   }
 
-  private void recursiveHyponym(Synset synset, StringBuffer display, String prefix){
-    java.util.List words = synset.getWordSenses();
-    String wordsString = getWords(words);
+  private void recursiveHoloMeroHypo(Synset synset, StringBuffer display,
+                                String prefix, boolean symbPrefix,
+                                int relationType, String relRefString){
 
-    display.append(prefix);
-    display.append(" ");
-    display.append(wordsString);
-    display.append(" -- ");
-    display.append(synset.getGloss());
-    display.append("\n");
-
-    java.util.List  hypoList = null;
-    try {
-      hypoList = synset.getSemanticRelations(Relation.REL_HYPONYM);
-    } catch (Exception e){
-      e.printStackTrace();
-    }
-    if (hypoList!=null){
-      for (int i = 0; i<hypoList.size(); i++){
-        SemanticRelation rel = (SemanticRelation) hypoList.get(i);
-        prefix = "    " + prefix;
-        recursiveHyponym(rel.getTarget(), display, prefix);
-        prefix = prefix.substring(4,prefix.length());
-      }
-    }
-  }
-
-  private void relPartMeronym(java.util.List senses){
-    StringBuffer display = new StringBuffer("");
-    for (int i = 0; i<senses.size(); i++){
-      WordSense currSense = (WordSense) senses.get(i);
-      Synset currSynset = currSense.getSynset();
-      try {
-        if (currSynset.getSemanticRelations(Relation.REL_PART_MERONYM).size()>0){
-          display.append("\n");
-          display.append("Sense ");
-          display.append(i+1);
-          display.append("\n");
-          recursivePartMeronym(currSynset, display, "  ", false);
-        }
-      } catch (Exception e){
-        e.printStackTrace();
-      }
-    }
-
-    resultPane.setText(display.toString());
-  }
-
-  private void recursivePartMeronym(Synset synset, StringBuffer display, String prefix, boolean symbPrefix){
-    java.util.List words = synset.getWordSenses();
-    String wordsString = getWords(words);
-
-    display.append(prefix);
-    if (symbPrefix){
-      display.append("HAS PART: ");
-    }
-    display.append(wordsString);
-    display.append(" -- ");
-    display.append(synset.getGloss());
-    display.append("\n");
-
-    java.util.List  meroList = null;
-    try {
-      meroList = synset.getSemanticRelations(Relation.REL_PART_MERONYM);
-    } catch (Exception e){
-      e.printStackTrace();
-    }
-    if (meroList!=null && meroList.size()>0){
-      SemanticRelation rel = (SemanticRelation) meroList.get(0);
-      prefix = "    " + prefix;
-      recursivePartMeronym(rel.getTarget(), display, prefix, true);
-    }
-  }
-
-  private void relPartHolonym(java.util.List senses){
-    StringBuffer display = new StringBuffer("");
-    for (int i = 0; i<senses.size(); i++){
-      WordSense currSense = (WordSense) senses.get(i);
-      Synset currSynset = currSense.getSynset();
-      try {
-        if (currSynset.getSemanticRelations(Relation.REL_PART_HOLONYM).size()>0){
-          display.append("\n");
-          display.append("Sense ");
-          display.append(i+1);
-          display.append("\n");
-          recursivePartHolonym(currSynset, display, "  ", false);
-        }
-      } catch (Exception e){
-        e.printStackTrace();
-      }
-    }
-
-    resultPane.setText(display.toString());
-  }
-
-  private void recursivePartHolonym(Synset synset, StringBuffer display, String prefix, boolean symbPrefix){
     java.util.List words = synset.getWordSenses();
     String wordsString = getWords(words);
 
     display.append(prefix);
     if (symbPrefix) {
-      display.append("PART OF: ");
+      display.append(relRefString);
     }
     display.append(wordsString);
     display.append(" -- ");
@@ -505,22 +444,102 @@ public class WordNetViewer extends AbstractVisualResource
 
     java.util.List  holoList = null;
     try {
-      holoList = synset.getSemanticRelations(Relation.REL_PART_HOLONYM);
+      holoList = synset.getSemanticRelations(relationType);
     } catch (Exception e){
       e.printStackTrace();
     }
     if (holoList!=null && holoList.size()>0){
-      SemanticRelation rel = (SemanticRelation) holoList.get(0);
-      prefix = "    " + prefix;
-      recursivePartHolonym(rel.getTarget(), display, prefix, true);
+      for (int i = 0; i<holoList.size(); i++){
+        SemanticRelation rel = (SemanticRelation) holoList.get(i);
+        prefix = "    " + prefix;
+        recursiveHoloMeroHypo(rel.getTarget(), display, prefix, true,
+                              relationType, relRefString);
+        prefix = prefix.substring(4, prefix.length());
+      }
     }
   }
+
+  private void relAntonymSeeAlso(java.util.List senses,
+                                 int relType, String relRefString){
+    StringBuffer display = new StringBuffer("");
+    for (int i = 0; i<senses.size(); i++){
+      WordSense currSense = (WordSense) senses.get(i);
+      Synset currSynset = currSense.getSynset();
+      try {
+        java.util.List antonyms = currSense.getLexicalRelations(relType);
+        if (antonyms!=null && antonyms.size()>0){
+          display.append("\n");
+          display.append("Sense ");
+          display.append(i+1);
+          display.append("\n  ");
+          display.append(getWords(currSynset.getWordSenses()));
+          display.append(" -- ");
+          display.append(currSynset.getGloss());
+          display.append("\n");
+          for (int j=0; j<antonyms.size(); j++){
+            LexicalRelation rel = (LexicalRelation) antonyms.get(j);
+            WordSense word = rel.getTarget();
+            display.append("      ");
+            display.append(relRefString);
+            display.append(word.getWord().getLemma());
+            display.append(" -- ");
+            display.append(word.getSynset().getGloss());
+            display.append("\n");
+          }
+          display.append("\n");
+        }
+      } catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+
+    resultPane.setText(display.toString());
+  }
+
+  private void relAtributeSimilarTo(java.util.List senses, int releationType,
+                                     String relRefString){
+    StringBuffer display = new StringBuffer("");
+    for (int i = 0; i<senses.size(); i++){
+      WordSense currSense = (WordSense) senses.get(i);
+      Synset currSynset = currSense.getSynset();
+      try {
+        java.util.List atributes = currSynset.getSemanticRelations(releationType);
+        if (atributes!=null && atributes.size()>0){
+          display.append("\n");
+          display.append("Sense ");
+          display.append(i+1);
+          display.append("\n  ");
+          display.append(getWords(currSynset.getWordSenses()));
+          display.append(" -- ");
+          display.append(currSynset.getGloss());
+          display.append("\n");
+          for (int j=0; j<atributes.size(); j++){
+            SemanticRelation rel = (SemanticRelation) atributes.get(j);
+            Synset synset = rel.getTarget();
+            display.append("     ");
+            display.append(relRefString);
+            display.append(getWords(synset.getWordSenses()));
+
+            display.append(" -- ");
+            display.append(synset.getGloss());
+            display.append("\n");
+          }
+          display.append("\n");
+        }
+      } catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+
+    resultPane.setText(display.toString());
+  }
+
 
   private String getWords(java.util.List words){
     StringBuffer wordsString = new StringBuffer("");
     for (int j = 0; j<words.size(); j++){
       WordSense word = (WordSense) words.get(j);
-      wordsString.append(word.getWord().getLemma());
+      wordsString.append(word.getWord().getLemma().replace('_',' '));
       if (j<(words.size()-1)){
         wordsString.append(", ");
       }
