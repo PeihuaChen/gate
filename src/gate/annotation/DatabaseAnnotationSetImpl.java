@@ -34,9 +34,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
    */
   protected EventsHandler eventHandler;
 
-  protected HashSet addedAnnotations = new HashSet();
-  protected HashSet removedAnnotations = new HashSet();
-  protected HashSet updatedAnnotations = new HashSet();
+  protected HashMap addedAnnotationsList = new HashMap();
+  protected HashMap removedAnnotationsList = new HashMap();
+  protected HashMap updatedAnnotationsList = new HashMap();
 
   /** Construction from Document. */
   public DatabaseAnnotationSetImpl(Document doc) {
@@ -57,6 +57,11 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
     super(c);
     eventHandler = new EventsHandler();
     this.addAnnotationSetListener(eventHandler);
+
+    Iterator iter = this.iterator();
+    while(iter.hasNext())
+      ((Annotation) iter.next()).addAnnotationListener(eventHandler);
+
   } // construction from collection
 
 
