@@ -392,6 +392,33 @@ Priority: 50
 )
 :person -->
   {}
+Rule: FirstPersonStop
+Priority: 50
+// John And
+
+(
+ {FirstPerson}
+):person
+(
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}|
+ {Token.category == IN}
+)
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("gender"));
+features.put("kind", "personName");
+features.put("rule", "GazPersonFirst");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
+
+
+
 
 
 Rule: NotPersonFull
