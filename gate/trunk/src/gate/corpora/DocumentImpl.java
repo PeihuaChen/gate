@@ -155,7 +155,16 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   /** Default construction. Content left empty. */
   public DocumentImpl() {
     content = new DocumentContentImpl();
+    stringContent = "";
   } // default construction
+
+  /** Cover unpredictable Features creation */
+  public FeatureMap getFeatures() {
+    if (features == null) {
+      features = new SimpleFeatureMapImpl();
+    }
+    return features;
+  }
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
@@ -543,7 +552,10 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   public DocumentContent getContent() { return content; }
 
   /** Set method for the document content */
-  public void setContent(DocumentContent content) { this.content = content; }
+  public void setContent(DocumentContent content) {
+    this.content = content;
+    this.stringContent = content.toString();
+  }
 
   /** Get the encoding of the document content source */
   public String getEncoding() {
