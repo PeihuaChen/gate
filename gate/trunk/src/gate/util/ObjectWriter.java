@@ -81,8 +81,8 @@ public class ObjectWriter extends Thread{
         }
       }//while(buffIter.hasNext())
 
-      outputStream.flush();
-//      outputStream.close();
+//      outputStream.flush();
+      outputStream.close();
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
     }
