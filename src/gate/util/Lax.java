@@ -1,6 +1,15 @@
 /*
  *	Lax.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Cristian URSU, 07/July/2000
  *
  *	$Id$
@@ -23,6 +32,13 @@ import java.util.*;
 import java.io.*;
 
 public class Lax extends org.xml.sax.HandlerBase {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
 	// LAX translates XML content into method calls on this object
 	private Vector _vecHandlers = null;
@@ -133,9 +149,9 @@ public void characters(char[] caChars, int iStart, int iEnd) throws SAXException
 					}
 					mTextMethod.invoke(oThisHandler, new Object[] { sArg });
 				} catch (InvocationTargetException ex) {
-					System.err.println(ex);
+					Err.println(ex);
 				} catch (IllegalAccessException ex) {
-					System.err.println(ex);
+					Err.println(ex);
 				}
 			}
 		}
@@ -161,9 +177,9 @@ public void endElement(String sTag) throws SAXException {
 			try {
 				mEndMethod.invoke(oThisHandler, new Object[] {});
 			} catch (InvocationTargetException ex) {
-				System.err.println(ex);
+				Err.println(ex);
 			} catch (IllegalAccessException ex) {
-				System.err.println(ex);
+				Err.println(ex);
 			}
 		}
 	}
@@ -214,8 +230,8 @@ public void parseXmlDocument(java.io.File xmlFile) {
 
 		parser.parse(xmlFile, this);
 	} catch (Exception ex) {
-    ex.printStackTrace(System.err);
-		System.exit(2);
+    ex.printStackTrace(Err.getPrintWriter());
+		// System.exit(2);
 	}
 }
 
@@ -232,8 +248,8 @@ public void parseXmlDocument(org.xml.sax.InputSource xmlInputSource) {
 
 		parser.parse(xmlInputSource, this);
 	} catch (Exception ex) {
-    ex.printStackTrace(System.err);
-		System.exit(2);
+    ex.printStackTrace(Err.getPrintWriter());
+		// System.exit(2);
 	}
 }
 
@@ -250,8 +266,8 @@ public void parseXmlDocument(java.io.InputStream  xmlInputStream) {
 
 		parser.parse(xmlInputStream, this);
 	} catch (Exception ex) {
-    ex.printStackTrace(System.err);
-		System.exit(2);
+    ex.printStackTrace(Err.getPrintWriter());
+		// System.exit(2);
 	}
 }
 
@@ -268,8 +284,8 @@ public void parseXmlDocument(java.lang.String xmlURI) {
 
 		parser.parse(xmlURI, this);
 	} catch (Exception ex) {
-    ex.printStackTrace(System.err);
-		System.exit(2);
+    ex.printStackTrace(Err.getPrintWriter());
+		//System.exit(2);
 	}
 }
 
@@ -330,9 +346,9 @@ public void startElement(String sTag, AttributeList alAttrs) {
 					mStartMethod.invoke(oThisHandler, new Object[] {alAttrs});
 				}
 			} catch (InvocationTargetException ex) {
-				System.err.println(ex);
+				Err.println(ex);
 			} catch (IllegalAccessException ex) {
-				System.err.println(ex);
+				Err.println(ex);
 			}
 		}
 	}

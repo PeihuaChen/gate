@@ -1,3 +1,20 @@
+/*
+ * DFSMState.java
+ *
+ * Copyright (c) 2000-2001, The University of Sheffield.
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free
+ * software, licenced under the GNU Library General Public License,
+ * Version 2, June1991.
+ * 
+ * A copy of this licence is included in the distribution in the file
+ * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ * Valentin Tablan, 27/06/2000
+ *
+ * $Id$
+ */
+
 package gate.creole.tokeniser;
 
 import java.util.*;
@@ -13,6 +30,15 @@ import gate.util.*;
   *{@see FSMState FSMState}
   */
 class DFSMState{ //extends FSMState{
+
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /**Constructs a new DFSMState object and adds it to the list of deterministic
     *states of the {@link DefaultTokeniser DefaultTokeniser} provided as owner.
     *@param owner a {@link DefaultTokeniser DefaultTokeniser} object
@@ -120,7 +146,7 @@ class DFSMState{ //extends FSMState{
         if(phase == 0){
           type = read;
           read = "";
-//System.out.print("Type: " + type);
+//Out.print("Type: " + type);
           attributes.addLast(type);
           values.addLast("");
           phase = 1;
@@ -133,13 +159,13 @@ class DFSMState{ //extends FSMState{
       }else read += token;
 
       if(phase == 3){
-//System.out.print("; " + attribute + "=" + value);
+//Out.print("; " + attribute + "=" + value);
         attributes.addLast(attribute);
         values.addLast(value);
         phase = 1;
       }
     }
-//System.out.println();
+//Out.println();
     if(attributes.size() < 1)
       throw new InvalidRuleException("Invalid right hand side " + rhs);
     tokenDesc = new String[attributes.size()][2];
@@ -148,7 +174,7 @@ class DFSMState{ //extends FSMState{
       tokenDesc[i][1] = (String)values.get(i);
     }
 //      for(int i = 0; i < attributes.size(); i++){
-//        System.out.println(tokenDesc[i][0] + "=" +
+//        Out.println(tokenDesc[i][0] + "=" +
 //                           tokenDesc[i][1]);
 //      }
   }

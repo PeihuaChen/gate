@@ -1,6 +1,15 @@
-/**
+/*
  *	Sgml2Xml.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Cristian URSU,  4/July/2000
  *
  *  $Id$
@@ -52,6 +61,14 @@ import gate.*;
 
 public class Sgml2Xml{
   /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
+  /**
     * The constructor initialises some member fields
     * @param SgmlDoc the content of the Sgml document that will be modified
   */
@@ -85,9 +102,9 @@ public class Sgml2Xml{
 new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
 <w VBZ>is\n<trunc> <w UNC>th </trunc>");
     try{
-      System.out.println(convertor.convert());
+      Out.println(convertor.convert());
     } catch (Exception e){
-      e.printStackTrace(System.err);
+      e.printStackTrace(Err.getPrintWriter());
     }
   }
 */
@@ -443,7 +460,7 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
 
     //finally add the XML prolog
     m_modifier.insert(0,"<?xml version=\"1.0\"?>\n");
-    //System.out.println(m_modifier.toString());
+    //Out.println(m_modifier.toString());
 
     // get a InputStream from m_modifier and write it into a temp file
     // finally return the URI of the new XML document
@@ -679,4 +696,3 @@ class MyComparator implements Comparator{
         return -result;
       }//compare
 }//class MyComparator
-

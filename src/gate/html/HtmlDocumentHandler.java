@@ -1,10 +1,19 @@
-/**
-  *	HtmlDocumentHandler.java
-  *
-  *	Cristian URSU,  12/June/2000
-  *
-  * $Id$
-  */
+/*
+ *	HtmlDocumentHandler.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
+ *	Cristian URSU,  12/June/2000
+ *
+ *  $Id$
+ */
 
 package gate.html;
 
@@ -31,6 +40,13 @@ import gate.gui.*;
     * new one containing anly text from the HTML document.
     */
 public class HtmlDocumentHandler extends ParserCallback{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /**
     * Constructor initialises all the private memeber data
@@ -120,7 +136,7 @@ public class HtmlDocumentHandler extends ParserCallback{
                            );
           }
         }catch (InvalidOffsetException e){
-            e.printStackTrace (System.err);
+            e.printStackTrace (Err.getPrintWriter());
         }
       }//while
       // notify the listener about the total amount of elements that
@@ -144,7 +160,7 @@ public class HtmlDocumentHandler extends ParserCallback{
     FeatureMap fm = new SimpleFeatureMapImpl();
     // take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount ()){
-       // System.out.println("HAS  attributes = " + a.getAttributeCount ());
+       // Out.println("HAS  attributes = " + a.getAttributeCount ());
         Enumeration enum = a.getAttributeNames ();
         while (enum.hasMoreElements ()){
           Object attribute = enum.nextElement ();
@@ -196,7 +212,7 @@ public class HtmlDocumentHandler extends ParserCallback{
     it depends on the programmer if he wants to deal with that error
     */
   public void handleError(String errorMsg, int pos){
-    //System.out.println ("ERROR CALLED : " + errorMsg);
+    //Out.println ("ERROR CALLED : " + errorMsg);
   }
 
   /**
@@ -205,7 +221,7 @@ public class HtmlDocumentHandler extends ParserCallback{
     * is nothing more to parse.
     */
   public void flush() throws BadLocationException{
-    System.out.println("Flush called!!!!!!!!!!!");
+    Out.println("Flush called!!!!!!!!!!!");
   }
   /**
     This method is called when the HTML parser encounts a comment
@@ -319,5 +335,4 @@ class  CustomObject{
   private Long end  = null;
 
 }// CustomObject
-
 

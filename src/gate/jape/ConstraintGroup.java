@@ -1,10 +1,19 @@
 /*
-	ConstraintGroup.java - transducer class
-
-	Hamish Cunningham, 24/07/98
-
-	$Id$
-*/
+ *  ConstraintGroup.java - transducer class
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 24/07/98
+ *
+ *  $Id$
+ */
 
 
 package gate.jape;
@@ -23,6 +32,14 @@ import gate.*;
 public class ConstraintGroup
 extends PatternElement implements JapeConstants, java.io.Serializable
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Anonymous constructor. */
   public ConstraintGroup() {
     patternElementDisjunction1 = new Array();
@@ -347,6 +364,11 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.3  2000/10/10 15:36:35  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.2  2000/04/14 18:02:46  valyt
 // Added some gate.fsm classes
 // added some accessor function in old jape classes

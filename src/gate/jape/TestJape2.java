@@ -1,10 +1,21 @@
-
-//Title:        TestJape2.java (Java Annotation Patterns Engine)
-//Version:      $Id$
-//Copyright:    Copyright (c) 1998
-//Author:       Hamish Cunningham
-//Company:      NLP Group, DCS, Univ. of Sheffield
-//Description:  Test class for JAPE.
+/*
+ *  TestJape2.java (Java Annotation Patterns Engine)
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 23/02/2000
+ *
+ *  $Id$
+ *
+ *  Description: Test class for JAPE.
+ */
 
 package gate.jape;
 
@@ -23,6 +34,13 @@ import com.objectspace.jgl.*;
   * @author Hamish Cunningham
   */
 public class TestJape2 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /** How much noise to make. */
   static private boolean verbose = false;
@@ -80,7 +98,7 @@ public class TestJape2 {
       usage("can't create transducer " + e.getMessage());
     }
     /*Transducer transducer = parseJape(japeName);
-    //System.out.println(transducer);
+    //Out.println(transducer);
     if(transducer == null)
       System.exit(1);*/
 
@@ -90,10 +108,10 @@ public class TestJape2 {
       usage("couldn't run transducer " + e.getMessage());
     }
     //runTransducer(transducer, coll);
-    //System.out.println(transducer);
+    //Out.println(transducer);
 
     message("done\n\r");
-    System.exit(0);
+    //System.exit(0);
 
   } // main
 
@@ -163,7 +181,7 @@ public class TestJape2 {
       message("deserialising " + japeName);
       File f = new File(japeName);
       if(! f.exists())
-        System.out.println(japeName + " not found");
+        Out.println(japeName + " not found");
 
       try {
         FileInputStream fis = new FileInputStream(f.getPath());
@@ -171,7 +189,7 @@ public class TestJape2 {
         transducer = (Transducer) ois.readObject();
         ois.close();
       } catch (Exception ex) {
-        System.err.println(
+        Err.println(
           "Can't read from " + f.getName() + ": " + ex.toString()
         );
       }
@@ -183,7 +201,7 @@ public class TestJape2 {
       } catch(IOException e) {
         e.printStackTrace();
       } catch(gate.jape.parser.ParseException ee) {
-        System.err.println("Error parsing transducer: " + ee.getMessage());
+        Err.println("Error parsing transducer: " + ee.getMessage());
       }
     }
 
@@ -200,7 +218,7 @@ public class TestJape2 {
       do {
         message("doing document " + doc.getId());
         transducer.transduce(doc);
-        // System.out.println(transducer.toString());
+        // Out.println(transducer.toString());
       } while( (doc = coll.nextDocument()) != null );
     } catch(JdmException e) {
       e.printStackTrace();
@@ -216,22 +234,27 @@ public class TestJape2 {
       "usage: java gate.jape.TestJape2.main [-v] " +
         "-j JapePatternFile -c CollectionName FileName(s)";
 
-    System.err.println(errorMessage);
-    System.err.println(usageMessage);
-    System.exit(1);
+    Err.println(errorMessage);
+    Err.println(usageMessage);
+    //System.exit(1);
 
   } // usage
 
 
   /** Hello? Anybody there?? */
   public static void message(String mess) {
-    if(verbose) System.out.println("TestJape2: " + mess);
+    if(verbose) Out.println("TestJape2: " + mess);
   } // message
 
 } // class TestJape2
 
 
 // $Log$
+// Revision 1.2  2000/10/10 15:36:37  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.1  2000/02/23 13:46:12  hamish
 // added
 //

@@ -1,10 +1,19 @@
 /*
-	SinglePhaseTransducer.java - transducer class
-
-	Hamish Cunningham, 24/07/98
-
-	$Id$
-*/
+ *  SinglePhaseTransducer.java - transducer class
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 24/07/98
+ *
+ *  $Id$
+ */
 
 
 package gate.jape;
@@ -30,6 +39,14 @@ import gate.gui.*;
 public class SinglePhaseTransducer
 extends Transducer implements JapeConstants, java.io.Serializable
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Construction from name. */
   public SinglePhaseTransducer(String name) {
     this.name = name;
@@ -100,7 +117,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     AnnotationSet annotations = null;
 
     //select only the annotations of types specified in the input list
-//System.out.println("Input:" + input);
+//Out.println("Input:" + input);
     if(input.isEmpty()) annotations = annotationSet;
     else{
       Iterator typesIter = input.iterator();
@@ -108,7 +125,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
       while(typesIter.hasNext()){
         ofOneType = annotationSet.get((String)typesIter.next());
         if(ofOneType != null){
-//System.out.println("Adding " + ofOneType.getAllTypes());
+//Out.println("Adding " + ofOneType.getAllTypes());
           if(annotations == null) annotations = ofOneType;
           else annotations.addAll(ofOneType);
         }
@@ -116,7 +133,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     }
     if(annotations == null) annotations = new AnnotationSetImpl(doc);
 
-//System.out.println("Actual input:" + annotations.getAllTypes());
+//Out.println("Actual input:" + annotations.getAllTypes());
     //INITIALISATION Should we move this someplace else?
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
@@ -164,7 +181,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         if(currentFSM.getFSMPosition().isFinal()){
           //if the current FSM is in a final state
           acceptingFSMInstances.add(currentFSM.clone());
-//  System.out.println("==========================\n" +
+//  Out.println("==========================\n" +
 //                     "New Accepting FSM:\n" + currentFSM +
 //                     "\n==========================");
         }
@@ -272,10 +289,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
         FSMInstance currentAcceptor;
         RightHandSide currentRHS;
         long lastAGPosition = startNode.getOffset().longValue();
-//  System.out.println("XXXXXXXXXXXXXXXXXXXX All the accepting FSMs are:");
+//  Out.println("XXXXXXXXXXXXXXXXXXXX All the accepting FSMs are:");
         while(accFSMs.hasNext()){
           currentAcceptor = (FSMInstance) accFSMs.next();
-//  System.out.println("==========================\n" +
+//  Out.println("==========================\n" +
 //                     currentAcceptor +
 //                     "\n==========================");
 
@@ -289,7 +306,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
             lastAGPosition = currentAGPosition;
           }
         }
-//  System.out.println("XXXXXXXXXXXXXXXXXXXX");
+// Out.println("XXXXXXXXXXXXXXXXXXXX");
       }else if(ruleApplicationStyle == APPELT_STYLE){
         //AcceptingFSMInstances is an ordered structure:
         //just execute the longest (last) rule.
@@ -383,6 +400,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.17  2000/10/10 15:36:37  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.16  2000/09/12 13:40:52  valyt
 // Fixed a bug in Jape (the input specification didn't work properly)
 //

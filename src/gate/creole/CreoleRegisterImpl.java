@@ -1,10 +1,19 @@
 /*
-	CreoleRegisterImpl.java
-
-	Hamish Cunningham, 1/Sept/2000
-
-	$Id$
-*/
+ *  CreoleRegisterImpl.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ * 
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ * 
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 1/Sept/2000
+ *
+ *  $Id$
+ */
 
 package gate.creole;
 
@@ -27,11 +36,16 @@ import gate.util.*;
   */
 public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** The set of CREOLE directories (URLs). */
   private Set directories = new HashSet();
-
-  /** Are we debugging? */
-  private static final boolean DEBUG = false;
 
   /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
   public void addDirectory(URL directoryUrl) {
@@ -76,7 +90,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
         directoryUrl =
           new URL(urlName + ((needSlash) ? "/creole.xml" : "creole.xml"));
       } catch(MalformedURLException e) {
-        if(DEBUG) System.out.println(e);
+        if(DEBUG) Out.println(e);
         throw(new GateException(e));
       }
     }
@@ -102,13 +116,13 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       parser.parse(directoryUrl.openStream(), handler);
 
 	  } catch (IOException e) {
-      if(DEBUG) System.out.println(e);
+      if(DEBUG) Out.println(e);
       throw(new GateException(e));
 	  } catch (SAXException e) {
-      if(DEBUG) System.out.println(e);
+      if(DEBUG) Out.println(e);
       throw(new GateException(e));
 	  } catch (ParserConfigurationException e) {
-      if(DEBUG) System.out.println(e);
+      if(DEBUG) Out.println(e);
       throw(new GateException(e));
 	  }
 

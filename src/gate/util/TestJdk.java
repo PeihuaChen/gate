@@ -1,6 +1,15 @@
 /*
  *	TestJdk.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Hamish Cunningham, 16/Mar/00
  *
  *	$Id$
@@ -20,6 +29,14 @@ import java.net.*;
   */
 public class TestJdk extends TestCase
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Instance of the Jdk class */
   private Jdk jdk;
 
@@ -60,9 +77,9 @@ public class TestJdk extends TestCase
       "package gate.util;" + nl +
       "import java.io.*;" + nl +
       "public class X {" + nl +
-      "  public X() { /*System.out.println(\"X construcing\");*/ } " + nl +
+      "  public X() { /*Out.println(\"X construcing\");*/ } " + nl +
       "  public static void main(String[] args)" + nl +
-      "    { System.out.println(\"Hello from X\"); }" + nl +
+      "    { Out.println(\"Hello from X\"); }" + nl +
       "  public static String getSomething() { return \"something\"; }" + nl +
       "} " + nl
       ;
@@ -191,6 +208,6 @@ if(true) return;
       testJdk.testCompiler2();
       testJdk.testFinder();
       testJdk.testReloading();
-    }catch (Exception e) {e.printStackTrace(System.err);}
+    }catch (Exception e) {e.printStackTrace(Err.getPrintWriter());}
   }
 } // class TestJdk

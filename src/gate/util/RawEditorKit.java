@@ -1,6 +1,15 @@
 /*
  *	RawEditorKit.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Valentin Tablan, Nov/1999
  *
  *	$Id$
@@ -17,12 +26,20 @@ import java.io.IOException;
   * Needed for GUI components
   */
 public class RawEditorKit extends StyledEditorKit {
-   /**
+  /**
+  *  This field is "final static" because it brings in
+  *  the advantage of dead code elimination
+  *  When DEBUG is set on false the code that it guardes will be eliminated
+  *  by the compiler. This will spead up the progam a little bit.
+  */
+  private static final boolean DEBUG = false;
+
+  /**
       Inserts content from the given stream, which will be
       treated as plain text.
       This insertion is done without checking \r or \r \n sequence.
       It takes the text from the Reader and place it into Document at position pos
-   */
+    */
   public void read(Reader in, Document doc, int pos)
               throws IOException, BadLocationException {
 
@@ -35,4 +52,3 @@ public class RawEditorKit extends StyledEditorKit {
 	  }//while
   }//read
 }//class
-

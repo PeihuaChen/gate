@@ -1,5 +1,18 @@
-/*ObjectWriter.java
-  Valentin Tablan 21 Feb 2000
+/*
+ *  ObjectWriter.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Valentin Tablan 21 Feb 2000
+ *
+ *  $Id$
  */
 
 package gate.util;
@@ -14,6 +27,14 @@ import java.util.*;
   *All read/writes occur in separate threads to avoid a deadlock. 
   */
 public class ObjectWriter extends Thread{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   public ObjectWriter(Object obj) throws IOException{
     size = 0;
     Writer writer = new Writer(obj);
@@ -92,7 +113,7 @@ public class ObjectWriter extends Thread{
       outputStream.close();
     }catch(IOException ioe){
       throw new RuntimeException(ioe.toString());
-//      ioe.printStackTrace(System.err);
+//      ioe.printStackTrace(Err.getPrintWriter());
     }
   }
 
@@ -107,7 +128,7 @@ public class ObjectWriter extends Thread{
       try{
         _inputStream = new PipedInputStream(_outputStream);
       }catch(IOException ioe){
-        ioe.printStackTrace(System.err);
+        ioe.printStackTrace(Err.getPrintWriter());
       }
     }
 
@@ -124,7 +145,7 @@ public class ObjectWriter extends Thread{
         _oos.writeObject(_object);
         _oos.close();
       }catch(IOException ioe){
-        ioe.printStackTrace(System.err);
+        ioe.printStackTrace(Err.getPrintWriter());
       }
     };
     private Object _object;

@@ -1,10 +1,36 @@
+/*
+ * DragLabel.java
+ *
+ * Copyright (c) 2000-2001, The University of Sheffield.
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free
+ * software, licenced under the GNU Library General Public License,
+ * Version 2, June1991.
+ * 
+ * A copy of this licence is included in the distribution in the file
+ * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ * Valentin Tablan, 14/07/2000
+ *
+ * $Id$
+ */
 package gate.gui;
 
 import javax.swing.*;
 import java.awt.dnd.*;
 import java.awt.datatransfer.*;
 
+import gate.util.*;
+
 public class DragLabel extends JLabel {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   public DragLabel(String s) {
     super(s);
     dndInit();
@@ -48,9 +74,9 @@ public class DragLabel extends JLabel {
 
       // if the action is ok we go ahead
       // otherwise we punt
-      System.out.println(e.getDragAction());
+      Out.println(e.getDragAction());
       if((e.getDragAction() & DragLabel.this.dragAction) == 0) return;
-      System.out.println( "kicking off drag");
+      Out.println( "kicking off drag");
 
       // get the label's text and put it inside a Transferable
       // Transferable transferable = new StringSelection( DragLabel.this.getText() );
@@ -92,7 +118,7 @@ public class DragLabel extends JLabel {
      */
     public void dragDropEnd(DragSourceDropEvent e) {
       if( e.getDropSuccess() == false ) {
-	      System.out.println( "not successful");
+	      Out.println( "not successful");
 	      return;
       }
 
@@ -100,7 +126,7 @@ public class DragLabel extends JLabel {
        * the dropAction should be what the drop target specified
        * in acceptDrop
        */
-      System.out.println( "dragdropend action " + e.getDropAction() );
+      Out.println( "dragdropend action " + e.getDropAction() );
 
       // this is the action selected by the drop target
       if(e.getDropAction() == DnDConstants.ACTION_MOVE)
@@ -111,7 +137,7 @@ public class DragLabel extends JLabel {
      * @param e the event
      */
     public void dragEnter(DragSourceDragEvent e) {
-      System.out.println( "draglabel enter " + e);
+      Out.println( "draglabel enter " + e);
       DragSourceContext context = e.getDragSourceContext();
       //intersection of the users selected action, and the source and target actions
       int myaction = e.getDropAction();
@@ -131,16 +157,16 @@ public class DragLabel extends JLabel {
       int ua = e.getUserAction();
       int da = e.getDropAction();
       int ta = e.getTargetActions();
-      System.out.println("dl dragOver source actions" + sa);
-      System.out.println("user action" + ua);
-      System.out.println("drop actions" + da);
-      System.out.println("target actions" + ta);
+      Out.println("dl dragOver source actions" + sa);
+      Out.println("user action" + ua);
+      Out.println("drop actions" + da);
+      Out.println("target actions" + ta);
     }
     /**
      * @param e the event
      */
     public void dragExit(DragSourceEvent e) {
-      System.out.println( "draglabel exit " + e);
+      Out.println( "draglabel exit " + e);
       DragSourceContext context = e.getDragSourceContext();
     }
 
@@ -155,6 +181,5 @@ public class DragLabel extends JLabel {
     }
   }
 }
-
 
 

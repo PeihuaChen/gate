@@ -1,10 +1,19 @@
-
-//Title:        GATE
-//Version:      $Id$
-//Copyright:    Copyright (c) 2000
-//Author:
-//Company:      NLP Group, Univ. of Sheffield
-//Description:
+/*
+ *  SyntaxTreeViewer.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *
+ *  Kalina Bontcheva, 20/09/2000
+ *
+ *  $Id$
+ */
 
 package gate.gui;
 
@@ -93,6 +102,13 @@ This is well-tested and is the usual way.  <P>
 
 public class SyntaxTreeViewer extends JPanel
     implements Scrollable, ActionListener, MouseListener{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   //class members
   private boolean laidOut = false;  //whether to use any layout or not
@@ -219,12 +235,12 @@ public class SyntaxTreeViewer extends JPanel
         if (hs != null && hs.size() > 0) {
           int k = 0;
           for (Iterator i = hs.iterator(); i.hasNext(); k++) {
-            System.out.println("Tree Annot " + k + ": ");
-            System.out.println(i.next().toString());
+            Out.println("Tree Annot " + k + ": ");
+            Out.println(i.next().toString());
           }
         } //if
-        System.out.println("Exiting...");
-        System.exit(0);
+        Out.println("Exiting...");
+        //System.exit(0);
       }
     });
 
@@ -356,7 +372,7 @@ public class SyntaxTreeViewer extends JPanel
     	treeAnnotations.get(textAnnotationType);
 
 		if (utterances.size() == 0) {
-      System.out.println("No annotations of type " + textAnnotationType + " passed so can't display anything!");
+      Out.println("No annotations of type " + textAnnotationType + " passed so can't display anything!");
       return;
     }
 
@@ -402,7 +418,7 @@ public class SyntaxTreeViewer extends JPanel
 
         STreeNode leaf = findLeaf(annot.getStartNode(), annot.getEndNode());
         if (leaf == null) {//not found
-        	System.out.println("Can't find my leaf node for annotation: " + annot);
+        	Out.println("Can't find my leaf node for annotation: " + annot);
         }
 
         JButton button = (JButton) buttons.get(new Integer(leaf.getID()));
@@ -487,7 +503,7 @@ public class SyntaxTreeViewer extends JPanel
   private void utterances2Trees() {
 
   	if (! utterance.getType().equals(textAnnotationType)) {
-			System.out.println("Can't display annotations other than the specified type:" + textAnnotationType);
+			Out.println("Can't display annotations other than the specified type:" + textAnnotationType);
       return;
     }
 
@@ -584,7 +600,7 @@ public class SyntaxTreeViewer extends JPanel
     int buttonWidth,
         buttonHeight;
 
-//    System.out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
+//    Out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
 
     buttonWidth = fm.stringWidth(button.getText())
                   + button.getMargin().left + button.getMargin().right
@@ -592,7 +608,7 @@ public class SyntaxTreeViewer extends JPanel
     buttonHeight = fm.getHeight() + button.getMargin().top + button.getMargin().bottom;
     buttonY = buttonY - buttonHeight;
 
-//    System.out.print("New Button width " + buttonWidth + "; New Button height " + buttonHeight);
+//    Out.print("New Button width " + buttonWidth + "; New Button height " + buttonHeight);
     button.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
     button.addActionListener(this);
     button.addMouseListener(this);
@@ -618,7 +634,7 @@ public class SyntaxTreeViewer extends JPanel
         buttonX = 0,
         buttonY =0;
 
-//    System.out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
+//    Out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
 
     buttonWidth = fm.stringWidth(button.getText())
                   + button.getMargin().left + button.getMargin().right
@@ -640,9 +656,9 @@ public class SyntaxTreeViewer extends JPanel
 
     buttonX = (left + right) /2 - buttonWidth/2;
     buttonY = top - vertButtonGap;
-//    System.out.println("Button's Y is" + buttonY);
+//    Out.println("Button's Y is" + buttonY);
 
-//    System.out.print("New Button width " + buttonWidth + "; New Button height " + buttonHeight);
+//    Out.print("New Button width " + buttonWidth + "; New Button height " + buttonHeight);
     button.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
     button.addActionListener(this);
     button.addMouseListener(this);
@@ -780,7 +796,7 @@ public class SyntaxTreeViewer extends JPanel
         source.doClick();
         selectNode(e);
       }
-//        System.out.println(e.getComponent().getClass() + " right-clicked!");
+//        Out.println(e.getComponent().getClass() + " right-clicked!");
       showRightClickPopup(e);
     } //end of right-click processing
 
@@ -1190,6 +1206,11 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.8  2000/10/10 15:36:35  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.7  2000/10/10 09:49:57  valyt
 // Fixed the Annotation test
 //
@@ -1212,4 +1233,3 @@ class FocusButton extends JButton {
 //
 // Revision 1.1  2000/09/20 17:03:37  kalina
 // Added the tree viewer from the prototype. It works now with the new annotation API.
-

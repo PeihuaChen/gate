@@ -1,6 +1,15 @@
 /*
  *	TestFiles.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Hamish Cunningham, 10/June/00
  *
  *	$Id$
@@ -17,6 +26,14 @@ import java.net.*;
   */
 public class TestFiles extends TestCase
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Construction */
   public TestFiles(String name) { super(name); }
 
@@ -42,10 +59,10 @@ public class TestFiles extends TestCase
     byte[] resBytes = Files.getGateResourceAsByteArray(japeResName);
 
     /*
-    System.out.println(new String(resBytes));
-    System.out.println(resBytes.length);
-    System.out.println(resString);
-    System.out.println(resString.length());
+    Out.println(new String(resBytes));
+    Out.println(resBytes.length);
+    Out.println(resString);
+    Out.println(resString.length());
     */
 
     char resChars[] = new char[firstLine.length()];
@@ -81,7 +98,7 @@ public class TestFiles extends TestCase
 //      app.testJarFiles ();
       app.testGetResources();
     }catch (Exception e){
-      e.printStackTrace (System.err);
+      e.printStackTrace (Err.getPrintWriter());
     }
   }
 
@@ -101,7 +118,7 @@ public class TestFiles extends TestCase
     FileInputStream fileStreamSecond = null;
 
     //open first jar file in a temporal file
-//   System.out.println(Files.getResourceAsStream(jarFilePathFirst));
+//   Out.println(Files.getResourceAsStream(jarFilePathFirst));
     f1 = Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathFirst));
 
     //open second jar file in a temporal file
@@ -145,7 +162,7 @@ public class TestFiles extends TestCase
     if (iter.hasNext()){
       while (iter.hasNext()){
         String verif = iter.next().toString();
-        //System.out.println(verif);
+        //Out.println(verif);
       }
     }
   }//testFind

@@ -1,10 +1,19 @@
 /*
-	CreoleXmlHandler.java 
-
-	Hamish Cunningham, 1/Sept/2000
-
-	$Id$
-*/
+ *	CreoleXmlHandler.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
+ *  Hamish Cunningham, 1/Sept/2000
+ *
+ *  $Id$
+ */
 
 package gate.creole;
 
@@ -27,7 +36,12 @@ public class CreoleXmlHandler extends HandlerBase {
   /** The current resource data object */
   private ResourceData resourceData;
 
-  /** Are we debugging? */
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
   private static final boolean DEBUG = false;
 
   /** Construction */
@@ -60,7 +74,7 @@ public class CreoleXmlHandler extends HandlerBase {
       resourceData = new ResourceDataImpl();
 
     if(DEBUG) {
-      System.out.println(
+      Out.println(
         elementName + " " +
         ((atts.getLength() > 0) ? atts.toString() : "")
       );
@@ -83,7 +97,7 @@ public class CreoleXmlHandler extends HandlerBase {
       register.put(resourceData.getName(), resourceData);
       
       if(DEBUG)
-        System.out.println("added: " + resourceData);
+        Out.println("added: " + resourceData);
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
       resourceData.setName((String) elementStack.pop());
@@ -118,7 +132,7 @@ public class CreoleXmlHandler extends HandlerBase {
 
     elementStack.push(content);
 
-    if(DEBUG) System.out.println(content);
+    if(DEBUG) Out.println(content);
 
   } // characters
 
