@@ -51,7 +51,7 @@ SP=	-sourcepath `$(CYGPATHP) ../src`
 
 # compile and run commands
 #COMPILE=./jdk.sh -s -g:none javac -d ../classes $(SP) $(CP)
-COMPILE=$(JAVAC) -O -d `$(CYGPATH) ../classes` $(SP) $(CP)
+COMPILE=$(JAVAC) -d `$(CYGPATH) ../classes` $(SP) $(CP)
 RUN=$(JAVA)
 
 # "all" builds the .class files.
