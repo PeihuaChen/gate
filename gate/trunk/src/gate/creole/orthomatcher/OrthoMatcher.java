@@ -82,6 +82,10 @@ public class OrthoMatcher extends AbstractProcessingResource
   protected HashMap processedAnnots = new HashMap(150);
   protected HashMap annots2Remove = new HashMap(75);
   protected List matchesDocFeature = new ArrayList();
+  //maps annotation ids to array lists of tokens
+  protected HashMap tokensMap = new HashMap(150);
+
+  protected Annotation shortAnnot, longAnnot;
 
   /** a feature map to be used when retrieving annotations
    *  declared here so can be reused for efficiency
@@ -167,6 +171,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     nameAllAnnots = null;
     processedAnnots.clear();
     annots2Remove.clear();
+    tokensMap.clear();
   } // run()
 
   protected void matchNameAnnotations() {
@@ -203,6 +208,20 @@ public class OrthoMatcher extends AbstractProcessingResource
         if (!caseSensitive)
           annotString = annotString.toLowerCase();
 
+        //get the tokens
+        List tokens = new ArrayList((Set)
+                        nameAllAnnots.get("Token",
+                          nameAnnot.getStartNode().getOffset(),
+                          nameAnnot.getEndNode().getOffset()
+                        ));
+        Collections.sort(tokens, new gate.util.OffsetComparator());
+        tokensMap.put(nameAnnot.getId(), tokens);
+
+        //if a person, then remove their title before matching
+        if (nameAnnot.getType().equals(personType))
+          annotString = containTitle(annotString, nameAnnot);
+        //here for organization need to remove The and cdg from end
+
         //first check whether we have not matched such a string already
         //if so, just consider it matched, don't bother calling the rules
         if (processedAnnots.containsValue(annotString)) {
@@ -213,6 +232,7 @@ public class OrthoMatcher extends AbstractProcessingResource
           processedAnnots.put(id, annotString);
           continue;
         }
+
 
         //otherwise try matching with previous annotations
         matchWithPrevious(nameAnnot, annotString);
@@ -254,12 +274,24 @@ public class OrthoMatcher extends AbstractProcessingResource
       if (!caseSensitive)
         unknownString = unknownString.toLowerCase();
 
+      //get the tokens
+      List tokens = new ArrayList((Set)
+                      nameAllAnnots.get("Token",
+                        unknown.getStartNode().getOffset(),
+                        unknown.getEndNode().getOffset()
+                      ));
+      Collections.sort(tokens, new gate.util.OffsetComparator());
+      tokensMap.put(unknown.getId(), tokens);
+
+
       //first check whether we have not matched such a string already
       //if so, just consider it matched, don't bother calling the rules
       if (processedAnnots.containsValue(unknownString)) {
         Annotation matchedAnnot = updateMatches(unknown, unknownString);
+        Out.prln("Matched " + unknown + "with string " + unknownString);
+        Out.prln("Taht's same as " + matchedAnnot);
         if (matchedAnnot.getType().equals(unknownType)) {
-          annots2Remove.put(unknown.getId(), annots2Remove.get(matchedAnnot));
+          annots2Remove.put(unknown.getId(), annots2Remove.get(matchedAnnot.getId()));
         }
         else
           annots2Remove.put(unknown.getId(), matchedAnnot.getType());
@@ -275,6 +307,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       Iterator unknownIter = annots2Remove.keySet().iterator();
       while (unknownIter.hasNext()) {
         Integer unknId = (Integer) unknownIter.next();
+        Out.prln("Adding new annotation of type" + annots2Remove.get(unknId));
         Annotation unknown = nameAllAnnots.get(unknId);
         nameAllAnnots.add(
           unknown.getStartNode(),
@@ -300,16 +333,19 @@ public class OrthoMatcher extends AbstractProcessingResource
          )
         continue;
 
-      String prevAnnotString = (String) processedAnnots.get(prevId);
-
       //check if we have already matched this annotation to the new one
       if (matchedAlready(nameAnnot, prevAnnot) )
         continue;
+
+      String prevAnnotString = (String) processedAnnots.get(prevId);
+
 
       // find which annotation string of the two is longer
       //  this is useful for some of the matching rules
       String longName = prevAnnotString;
       String shortName = annotString;
+      longAnnot = prevAnnot;
+      shortAnnot = nameAnnot;
 
       // determine the title from annotation string
       //now changed to a rule, here we just match by gender
@@ -330,27 +366,32 @@ public class OrthoMatcher extends AbstractProcessingResource
             ) //if condition
           continue; //we don't have a match if the two genders are different
 
-         // check for title and remove it
-         longName = containTitle(longName,prevAnnot);
-         shortName = containTitle(shortName,nameAnnot);
-
       }//if
 
       if (shortName.length()>=longName.length()) {
         String temp = longName;
         longName = shortName;
         shortName = temp;
+        Annotation tempAnn = longAnnot;
+        longAnnot = shortAnnot;
+        shortAnnot = tempAnn;
       }//if
 
       //if the two annotations match
       if (apply_rules_namematch(prevAnnot.getType(), shortName,longName)) {
-        updateMatches(nameAnnot, prevAnnot);
+
+        Annotation matchedAnnot =  updateMatches(nameAnnot, prevAnnot);
         //if unknown annotation, we need to change to the new type
-        if (nameAnnot.getType().equals(unknownType)) {
-          annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
+//        if (nameAnnot.getType().equals(unknownType))
+//          annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
+          if (matchedAnnot.getType().equals(unknownType))
+            annots2Remove.put(nameAnnot.getId(),
+                                annots2Remove.get(matchedAnnot.getId()));
+          else
+            annots2Remove.put(nameAnnot.getId(), matchedAnnot.getType());
+
           //also put an attribute to indicate that
           nameAnnot.getFeatures().put("NMRule", unknownType);
-        }
       }
 
     }//while through previous annotations
@@ -404,7 +445,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     return matchedAnnot;
   }
 
-  protected void updateMatches(Annotation newAnnot, Annotation prevAnnot) {
+  protected Annotation updateMatches(Annotation newAnnot, Annotation prevAnnot) {
 
     List matchesList = (List) prevAnnot.getFeatures().get(MATCHES_FEATURE);
     if ((matchesList == null) || matchesList.isEmpty()) {
@@ -433,6 +474,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       else if (unknownNewGender && !unknownPrevGender)
         newAnnot.getFeatures().put(GENDER_FEATURE, prevGender);
     }//if
+    return prevAnnot;
   }
 
 
@@ -463,7 +505,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     AnnotationSet as =
       nameAllAnnots.get(startAnnot,endAnnot).get("Lookup", queryFM,
                                                   startAnnot);
-    if ((as !=null )) {
+    if (as !=null && ! as.isEmpty()) {
       List titles = new ArrayList((Set)as);
       Collections.sort(titles, new gate.util.OffsetComparator());
 
@@ -486,9 +528,16 @@ public class OrthoMatcher extends AbstractProcessingResource
             ).toString();
 
           // eliminate the title from annotation string and return the result
-          if (annotTitle.length()<annotString.length())
+          if (annotTitle.length()<annotString.length()) {
+            //remove from the array of tokens, so then we can compare properly
+            //the remaining tokens
+//            Out.prln("Removing title from: " + annot + " with string " + annotString);
+//            Out.prln("Tokens are" + tokensMap.get(annot.getId()));
+//            Out.prln("Title is" + annotTitle);
+            ((ArrayList) tokensMap.get(annot.getId())).remove(0);
             return annotString.substring(
                                  annotTitle.length()+1,annotString.length());
+          }
         } catch (InvalidOffsetException ioe) {
             executionException = new ExecutionException
                                ("Invalid offset of the annotation");
@@ -621,7 +670,7 @@ public class OrthoMatcher extends AbstractProcessingResource
                &&
              (    matchRule4(longName, shortName)
                ||
-                  matchRule7(longName, shortName)
+                  matchRule14(longName, shortName)
                ||
                   matchRule12(shortName, longName)
                || //kalina: added this, so it matches names when contain more
@@ -739,9 +788,11 @@ public class OrthoMatcher extends AbstractProcessingResource
     */
   public boolean matchRule1(String s1,
            String s2,
-           boolean MatchCase) {
+           boolean matchCase) {
+//    Out.prln("Rule1: Matching " + s1 + "and " + s2);
+
     boolean matched = false;
-    if (MatchCase == true)
+    if (!matchCase)
         matched = s1.equalsIgnoreCase(s2);
     else matched =  s1.equals(s2) ;
 //kalina: do not remove, nice for debug
@@ -785,7 +836,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       if (!s1.endsWith("s")) s1_poss = s1.concat("'s");
       else s1_poss = s1.concat("'");
 
-      if (s1_poss != null && matchRule1(s1_poss,s2,true)) return true;
+      if (s1_poss != null && matchRule1(s1_poss,s2,caseSensitive)) return true;
 
       // now check the second case i.e. "Standard and Poor" == "Standard's"
       // changed s1-->s2
@@ -797,7 +848,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       else s1_poss = token.concat("'");
 
       // changed s2-->s1
-      if (s1_poss != null && matchRule1(s1_poss,s1,true)) return true;
+      if (s1_poss != null && matchRule1(s1_poss,s1,caseSensitive)) return true;
     } // if (s2.endsWith("'s")
     return false;
   }//matchRule3
@@ -812,23 +863,26 @@ public class OrthoMatcher extends AbstractProcessingResource
   public boolean matchRule4(String s1,
            String s2) {
 
-    String stringToTokenize1 = s1;
-    StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1,"., ");
-    String stringToTokenize2 = s2;
-    StringTokenizer tokens2 = new StringTokenizer(stringToTokenize2,"., ");
+    ArrayList tokens1 = (ArrayList) tokensMap.get(longAnnot.getId());
+    ArrayList tokens2 = (ArrayList) tokensMap.get(shortAnnot.getId());
+
+
     boolean allTokensMatch = true;
 
-    if (tokens1.countTokens() == tokens2.countTokens()) {
-//      Out.prln("Rule 4");
-      while (tokens1.hasMoreTokens()) {
-  if (!tokens1.nextToken().equalsIgnoreCase(tokens2.nextToken())) {
-    allTokensMatch = false;
-    break;
-  } // if (!tokens1.nextToken()
-      } // while
-      return allTokensMatch;
-    } // if (tokens1.countTokens() ==
-    return false;
+    Iterator tokens1Iter = tokens1.iterator();
+    Iterator tokens2Iter = tokens2.iterator();
+//    Out.prln("Rule 4: " + s1 + " and " + s2);
+    while (tokens1Iter.hasNext() && tokens2Iter.hasNext()) {
+      Annotation token = (Annotation) tokens1Iter.next();
+      if (((String)token.getFeatures().get("kind")).equals("punctuation"))
+        continue;
+      if (! token.getFeatures().get("string").equals(
+             ((Annotation) tokens2Iter.next()).getFeatures().get("string"))) {
+        allTokensMatch = false;
+        break;
+      } // if (!tokens1.nextToken()
+    } // while
+    return allTokensMatch;
   }//matchRule4
 
   /**
@@ -841,12 +895,14 @@ public class OrthoMatcher extends AbstractProcessingResource
   public boolean matchRule5(String s1,
            String s2) {
 
-    String stringToTokenize1 = s1;
-    StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
+    ArrayList tokens1 = (ArrayList) tokensMap.get(longAnnot.getId());
 
 //    Out.prln("Rule 5");
-    if (tokens1.countTokens()>1)
-      return matchRule1(tokens1.nextToken(),s2,true);
+    if (tokens1.size()>1)
+      return matchRule1((String)
+                      ((Annotation) tokens1.get(0)).getFeatures().get("string"),
+                      s2,
+                      caseSensitive);
 
     return false;
 
@@ -861,28 +917,39 @@ public class OrthoMatcher extends AbstractProcessingResource
   public boolean matchRule6(String s1,
            String s2) {
 
-    if (s1.startsWith("The ")) s1 = s1.substring(4);
-    String stringToTokenize1 = s1;
-    StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
+    ArrayList tokens1 = (ArrayList) tokensMap.get(longAnnot.getId());
+    ArrayList tokens2 = (ArrayList) tokensMap.get(shortAnnot.getId());
+    int i = 0;
 
-    String token = null;
+    //don't try it unless the second name is only one token
+    if (tokens2.size() != 1)
+      return false;
+
+    if ( ((String) ((Annotation) tokens1.get(0)
+          ).getFeatures().get("string")).equalsIgnoreCase("The"))
+      i++;
+
+    //if the number of tokens without the the is not the same as the length
+    //of the second token, there's no point in comparing
+    if (tokens1.size()-i != s2.length())
+      return false;
+
     StringBuffer acronym_s1 = new StringBuffer("");
     StringBuffer acronymDot_s1 = new StringBuffer("");
 
-    while (tokens1.hasMoreTokens()) {
-      token = tokens1.nextToken();
-      acronym_s1.append(token.substring(0,1));
+    for ( ;i < tokens1.size(); i++ ) {
+      String toAppend = ( (String) ((Annotation) tokens1.get(i)
+                         ).getFeatures().get("string")).substring(0,1);
+      acronym_s1.append(toAppend);
+      acronymDot_s1.append(toAppend);
+      acronymDot_s1.append(".");
     }
 
-    s1 = acronym_s1.toString();
+    if (matchRule1(acronym_s1.toString(),s2,caseSensitive) ||
+        matchRule1(acronymDot_s1.toString(),s2,caseSensitive) )
+      return true;
 
-    //now check if last token is cdg
-    //if (cdg.containsKey(token)) s1 = s1.substring(0,s1.length()-1);
-    s2 = regularExpressions(s2,""," ");
-    s2 = regularExpressions(s2,"","\\.");
-
-    return matchRule1(s1,s2,false);
-
+    return false;
   }//matchRule6
 
   /**
@@ -892,31 +959,34 @@ public class OrthoMatcher extends AbstractProcessingResource
     * matches the other name
     * e.g. "R.H. Macy & Co." == "Macy"
     * Condition(s): case-sensitive match
-    * Applied to: organisation and person annotations only
-    *
-    * kalina: That rule is responsible for matching Hamish Cunningham and
-    * Cunningham for Person-s, because it's been changed, so that the connector
-    * actually being there is unnecessary. Took me absolutely f***ing ages
-    * to find out that this particular rule is responsible for that.
+    * Applied to: organisation annotations only
     */
   public boolean matchRule7(String s1,
            String s2) {
 
-    String stringToTokenize1 = s1;
-    StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
-    String token = null;
+    ArrayList tokens1 = (ArrayList) tokensMap.get(longAnnot.getId());
+    ArrayList tokens2 = (ArrayList) tokensMap.get(shortAnnot.getId());
+
+    //don't try it unless the second string is just one token
+    if (tokens2.size() != 1)
+      return false;
+
     String previous_token = null;
 
-    while (tokens1.hasMoreTokens()) {
-      token = tokens1.nextToken();
-      if (connector.containsKey(token)) break;
-      previous_token = token;
+    for (int i = 0;  i < tokens1.size(); i++ ) {
+      if (connector.containsKey( ((Annotation) tokens1.get(i)
+          ).getFeatures().get("string") )) {
+        previous_token = (String) ((Annotation) tokens1.get(i-1)
+                                    ).getFeatures().get("string");
+
+        break;
+      }
     }
 
     //now match previous_token with other name
     if (previous_token != null) {
 //      Out.prln("Rule7");
-      return matchRule1(previous_token,s2,false);
+      return matchRule1(previous_token,s2,caseSensitive);
     }
     return false;
   }//matchRule7
@@ -969,7 +1039,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       if ((cdg1!=null && cdg2!=null)
     && !cdg1.equalsIgnoreCase(cdg2)) return false;
     }
-    if (!s1.equals("") && !s2.equals("")) return matchRule1(s1,s2,false);
+    if (!s1.equals("") && !s2.equals("")) return matchRule1(s1,s2,caseSensitive);
 
     return false;
   }//matchRule8
@@ -998,7 +1068,7 @@ public class OrthoMatcher extends AbstractProcessingResource
         if (cdg.contains(token)) {
           //now match previous_token with other name
           if (previous_token != null)
-            return matchRule1(previous_token,s2,false);
+            return matchRule1(previous_token,s2,caseSensitive);
           } //if (cdg.containsKey(token))
         } // if (tokens1.countTokens()>1)
     } // if (!cdg.isEmpty()) {
@@ -1043,8 +1113,8 @@ public class OrthoMatcher extends AbstractProcessingResource
     else return false;
 
     // then compare (in reverse) with the first two tokens of s2
-      if (matchRule1(next_token,tokens2.nextToken(),false)
-    && matchRule1(previous_token,tokens2.nextToken(),false)) return true ;
+      if (matchRule1(next_token,tokens2.nextToken(),caseSensitive)
+    && matchRule1(previous_token,tokens2.nextToken(),caseSensitive)) return true ;
     } // if (invoke_rule)
     }//(tokens1.countTokens() >= 3
     return false;
@@ -1138,7 +1208,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       while (tokens2.hasMoreTokens()) token2 = tokens2.nextToken();
       s2_FirstAndLastTokens = s2_FirstAndLastTokens + token2;
 
-      return matchRule1(s1_FirstAndLastTokens,s2_FirstAndLastTokens,false);
+      return matchRule1(s1_FirstAndLastTokens,s2_FirstAndLastTokens,caseSensitive);
     } // if (tokens1.countTokens()>1
     return false;
   }//matchRule12
@@ -1224,6 +1294,33 @@ public class OrthoMatcher extends AbstractProcessingResource
     if (matched_tokens >= largerVector.size()-1) return true;
     return false;
   }//matchRule13
+
+  /**
+    * RULE #14: if the last token of one name
+    * matches the second name
+    * e.g. "Hamish Cunningham" == "Cunningham"
+    * Condition(s): case-insensitive match
+    * Applied to: all person annotations
+    */
+  public boolean matchRule14(String s1,
+           String s2) {
+
+    ArrayList tokens1 = (ArrayList) tokensMap.get(longAnnot.getId());
+
+//    Out.prln("Rule 14 " + s1 + " and " + s2);
+    String s1_short = (String)
+                      ((Annotation) tokens1.get(
+                          tokens1.size()-1)).getFeatures().get("string");
+//    Out.prln("Converted to " + s1_short);
+    if (tokens1.size()>1)
+      return matchRule1(s1_short,
+                      s2,
+                      caseSensitive);
+
+    return false;
+
+  }//matchRule14
+
 
   /** Tables for namematch info
     * (used by the namematch rules)
