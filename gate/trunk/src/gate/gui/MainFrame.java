@@ -1223,9 +1223,16 @@ public class MainFrame extends JFrame
     }
 
     public void actionPerformed(ActionEvent evt) {
-      newResourceDialog.setTitle(
-                          "Parameters for the new " + rData.getName());
-      newResourceDialog.show(rData);
+      Runnable runnable = new Runnable(){
+        public void run(){
+          newResourceDialog.setTitle(
+                              "Parameters for the new " + rData.getName());
+          newResourceDialog.show(rData);
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
+      thread.start();
     }
 
     ResourceData rData;
