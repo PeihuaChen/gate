@@ -43,6 +43,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
   protected EventsHandler eventHandler;
   protected List documentData;
   protected List removedDocuments;
+  protected Set  addedDocuments;
 
   public DatabaseCorpusImpl() {
     super();
@@ -61,10 +62,12 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.dataStore = _ds;
     this.lrPersistentId = _persistenceID;
     this.features = _features;
-//    this.supportList = _dbDocs;
     this.documentData =  _dbDocs;
     this.supportList = new ArrayList(this.documentData.size());
     this.removedDocuments = new ArrayList();
+    //just allocate space for this one, don't initialize it -
+    //invokations of add() will add elements to it
+    this.addedDocuments = new HashSet();
 
     //init the document list
     for (int i=0; i< this.documentData.size(); i++) {
@@ -102,6 +105,9 @@ public class DatabaseCorpusImpl extends CorpusImpl
     if (isValidForAdoption(doc)) {
       result = super.add(doc);
     }
+    else {
+      return false;
+    }
 
     //add to doc data too
 /* Was:
@@ -111,6 +117,13 @@ public class DatabaseCorpusImpl extends CorpusImpl
                                                doc.getLRPersistenceId());
 
     this.documentData.add(newDocData);
+
+    //add the LRID to the set of newly added documents so that upon sync() a reference
+    // from the doc to the corpus will be added in the database
+    if (null != doc.getLRPersistenceId()) {
+      this.addedDocuments.add(doc.getLRPersistenceId());
+//Out.prln("adding [" + doc.getLRPersistenceId() + "] to NewlyAddedDocs...");
+    }
 
     if (result) {
       fireDocumentAdded(new CorpusEvent(this,
@@ -144,6 +157,14 @@ public class DatabaseCorpusImpl extends CorpusImpl
       //add to doc data too
       DocumentData newDocData = new DocumentData(doc.getName(),null);
       this.documentData.add(index,newDocData);
+
+      //add the LRID to the set of newly added documents so that upon sync() a reference
+      // from the doc to the corpus will be added in the database
+      if (null != doc.getLRPersistenceId()) {
+
+      this.addedDocuments.add(doc.getLRPersistenceId());
+//Out.prln("adding ["+doc.getLRPersistenceId()+"] to NewlyAddedDocs...");
+      }
 
       //if added then fire event
       if (this.supportList.size() > collInitialSize) {
@@ -247,6 +268,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
         this.nameChanged = false;
 
       this.removedDocuments.clear();
+      this.addedDocuments.clear();
     }
   }
 
@@ -499,16 +521,25 @@ public class DatabaseCorpusImpl extends CorpusImpl
 //    Assert.assertTrue(null != removedID);
     //removedID may be NULL if the doc is still transient
 
-    //2. add to the list of removed documents
-    if (null != removedID) {
+    //2. add to the list of removed documents but only if it's not newly added
+    //othewrwise just ignore
+    if (null != removedID && false == this.addedDocuments.contains(removedID)) {
       this.removedDocuments.add(removedID);
+//Out.prln("adding ["+removedID+"] to RemovedDocs...");
     }
 
     //3. delete
     this.documentData.remove(index);
     Document res = (Document)this.supportList.remove(index);
 
-    //4, fire events
+    //4. remove the LRID to the set of newly added documents (if there) so that upon sync() a reference
+    // from the doc to the corpus will NOT be added in the database
+    if (this.addedDocuments.contains(removedID)) {
+      this.addedDocuments.remove(removedID);
+//Out.prln("removing ["+removedID+"] from NewlyAddedDocs...");
+    }
+
+    //5, fire events
     fireDocumentRemoved(new CorpusEvent(DatabaseCorpusImpl.this,
                                         res,
                                         index,
@@ -546,14 +577,23 @@ public class DatabaseCorpusImpl extends CorpusImpl
       //removed ID may be null - doc is still transient
 
       //2. add to the list of removed documents
-      if (null != removedID) {
+      if (null != removedID && false == this.addedDocuments.contains(removedID)) {
         this.removedDocuments.add(removedID);
+//Out.prln("adding ["+removedID+"] to RemovedDocs...");
       }
 
       //3. delete
       this.documentData.remove(index);
       Document oldDoc = (Document) this.supportList.remove(index);
 
+      //4. remove the LRID to the set of newly added documents (if there) so that upon sync() a reference
+      // from the doc to the corpus will NOT be added in the database
+      if (this.addedDocuments.contains(removedID)) {
+        this.addedDocuments.remove(removedID);
+//Out.prln("removing ["+removedID+"] from NewlyAddedDocs...");
+      }
+
+      //5. fire events
       fireDocumentRemoved(new CorpusEvent(DatabaseCorpusImpl.this,
                                           oldDoc,
                                           index,
