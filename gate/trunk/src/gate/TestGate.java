@@ -150,6 +150,7 @@ public class TestGate {
 
     TestSuite suite = new TestSuite();
 
+    suite.addTest(TestAnnotation.suite());
     suite.addTest(TestEmail.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
@@ -164,7 +165,6 @@ public class TestGate {
     suite.addTest(TestTemplate.suite());
     suite.addTest(TestJacl.suite());
     suite.addTest(TestDocument.suite());
-    suite.addTest(TestAnnotation.suite());
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(TestDB.suite());

@@ -444,8 +444,11 @@ public class TestAnnotation extends TestCase
       annots[i++] = a;
 
       assert(basicAS.contains(a));
+//System.out.println("Before:" + basicAS);
       iter.remove();
-      assert(! basicAS.contains(a));
+//System.out.println("Annotation:" + a);
+//System.out.println("After:" + basicAS);
+      assert(!basicAS.contains(a));
     } // while
 
     i = 0;
@@ -564,7 +567,76 @@ public class TestAnnotation extends TestCase
     assertEquals(annotsAfter10.size(), 2);
 
   } // testAnnotationSet
+/*
+  public void testAnnotationEquals() throws Exception {
+    Node node1 = new NodeImpl(new Integer(1),new Long(10));
+    Node node2 = new NodeImpl(new Integer(2),new Long(20));
+    Node node3 = new NodeImpl(new Integer(3),new Long(15));
+    Node node4 = new NodeImpl(new Integer(4),new Long(15));
+    Node node5 = new NodeImpl(new Integer(5),new Long(20));
+    Node node6 = new NodeImpl(new Integer(6),new Long(30));
 
+    FeatureMap fm1 = new SimpleFeatureMapImpl();
+    fm1.put("color","red");
+    fm1.put("Age",new Long(25));
+    fm1.put(new Long(23), "Cristian");
+
+    FeatureMap fm2 = new SimpleFeatureMapImpl();
+    fm2.put("color","red");
+    fm2.put("Age",new Long(25));
+    fm2.put(new Long(23), "Cristian");
+
+    FeatureMap fm4 = new SimpleFeatureMapImpl();
+    fm4.put("color","red");
+    fm4.put("Age",new Long(26));
+    fm4.put(new Long(23), "Cristian");
+
+    FeatureMap fm3 = new SimpleFeatureMapImpl();
+    fm3.put("color","red");
+    fm3.put("Age",new Long(25));
+    fm3.put(new Long(23), "Cristian");
+    fm3.put("best",new Boolean(true));
+
+    Annotation annot1 = new AnnotationImpl(new Integer(1),
+                                           node1,
+                                           node2,
+                                           "word",
+                                           null);
+    Annotation annot2 = new AnnotationImpl (new Integer(2),
+                                            node2,
+                                            node6,
+                                            "sentence",
+                                            null);
+    Annotation annot3 = new AnnotationImpl (new Integer(3),
+                                            node5,
+                                            node6,
+                                            "sentence",
+                                            null);
+   // types and offsets not equals
+   assert("Those annotations must not be equal!",!annot1.equals(annot2));
+   // Those two must be equals
+   assert("Those annotations must be equal!",annot2.equals(annot3));
+   assert("Annot don't have the same hash code !",
+           annot2.hashCode() == annot3.hashCode()
+          );
+    annot2.setFeatures(fm1);
+    annot3.setFeatures(fm2);
+    assert("Those annotations must be equal!",annot2.equals(annot3));
+    assert("Annot don't have the same hash code !",
+           annot2.hashCode() == annot3.hashCode()
+          );
+
+    annot2.setFeatures(fm1);
+    annot3.setFeatures(fm3);
+    assert("Those annotations must not be equal!",!annot2.equals(annot3));
+
+    annot3.setFeatures(null);
+    assert("Those annotations must not be equal!",!annot2.equals(annot3));
+
+    annot3.setFeatures(fm4);
+    assert("Those annotations must not be equal!",!annot2.equals(annot3));
+  }// testAnnotationEquals
+*/
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestAnnotation.class);
@@ -616,10 +688,11 @@ public class TestAnnotation extends TestCase
   public static void main(String[] args){
 
     try{
-
+      Gate.init();
       TestAnnotation testAnnot = new TestAnnotation("");
       testAnnot.setUp();
-      testAnnot._testGap();
+      testAnnot.testIterator();
+//      testAnnot._testGap();
       testAnnot.tearDown();
 
     }catch(Throwable t){
