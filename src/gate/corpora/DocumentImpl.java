@@ -191,11 +191,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
                                       get("gate.event.StatusListener");
           if(sListener != null) docFormat.addStatusListener(sListener);
 
-          // should we collect the repositioning information
-          if(collectRepositioningInfo.booleanValue()) {
-            // set flag as true if document format support collecting
-            docFormat.setShouldCollectRepositioning(collectRepositioningInfo);
-          } // if
+          // set the flag if true and if the document format support collecting
+          docFormat.setShouldCollectRepositioning(collectRepositioningInfo);
 
           if(docFormat.getShouldCollectRepositioning().booleanValue()) {
             // unpack with collectiong of repositioning information
