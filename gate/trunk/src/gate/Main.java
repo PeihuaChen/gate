@@ -116,6 +116,7 @@ public class Main {
 
   /** Run the user interface. */
   private static void runGui() throws GateException {
+    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
     //show the splash
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
@@ -175,11 +176,9 @@ public class Main {
                           (screenSize.height - frameSize.height) / 2);
 
         frame.setVisible(true);
-
         splash.hide();
       }
     });
-
   } // runGui()
 
   // find out the version and build numbers
