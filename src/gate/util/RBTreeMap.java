@@ -211,7 +211,7 @@ public class RBTreeMap extends AbstractMap
     * doesn't exist. If there is an exact match, the method will return the
     * value associated to the given key.
     * @param key the key for wich the look-up will be done.
-    * @returns the value associated to the given key or the next available
+    * @return the value associated to the given key or the next available
     * value
     */
   public Object getNextOf(Object key){

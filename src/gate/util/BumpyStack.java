@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 10/Nov/2000
  *
  *  $Id$
@@ -23,7 +23,7 @@ public class BumpyStack extends Stack
 {
   /** Bump an item to the front of the stack.
     * @param item the item to bump
-    * @returns true when the item was found, else false
+    * @return true when the item was found, else false
     */
   public boolean bump(Object item) {
     int itemIndex = search(item);
