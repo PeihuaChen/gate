@@ -16,6 +16,7 @@
 package gate.util;
 
 import java.util.*;
+import java.io.*;
 
 /**
  * Implements Map interface in using less memory. Very simple but usefull
@@ -369,6 +370,25 @@ transient Object g_akey = null;
     buf.append("}");
     return buf.toString();
   }
+
+  /**
+   * readObject - calls the default readObject() and then initialises the
+   * transient data
+   *
+   * @serialData Read serializable fields. No optional data read.
+   */
+  private void readObject(ObjectInputStream s)
+      throws IOException, ClassNotFoundException {
+    s.defaultReadObject();
+    if (theKeysHere == null) {
+      theKeysHere = new HashMap();
+      theKeysHere.put(nullKey, nullKey);
+    }
+    for(int i=0; i<m_keys.length; i++){
+      theKeysHere.put(m_keys[i], m_keys[i]);
+    }//for
+
+  }//readObject
 
 
  /** Freeze the serialization UID. */

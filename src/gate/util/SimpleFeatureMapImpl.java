@@ -18,7 +18,6 @@ package gate.util;
 import java.util.*;
 import gate.*;
 import gate.event.*;
-
 /** Simple case of features.
   */
 //>>> DAM: was (derived from HashMap)
@@ -150,7 +149,6 @@ public class SimpleFeatureMapImpl
   public boolean equals(Object o) {
     return super.equals(o);
   }
-
 
 //////////////////THE EVENT HANDLING CODE//////////////
 //Needed so an annotation can listen to its features//
