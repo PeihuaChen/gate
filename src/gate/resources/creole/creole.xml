@@ -62,37 +62,37 @@
     <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
-      <AUTOLOAD/>
+      <AUTOINSTANCE></AUTOINSTANCE>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE Textual Document Format</NAME>
       <CLASS>gate.corpora.TextualDocumentFormat</CLASS>
-      <AUTOLOAD/>
+      <AUTOINSTANCE></AUTOINSTANCE>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE HTML Document Format</NAME>
       <CLASS>gate.corpora.HtmlDocumentFormat</CLASS>
-      <AUTOLOAD/>
+      <AUTOINSTANCE></AUTOINSTANCE>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE SGML Document Format</NAME>
       <CLASS>gate.corpora.SgmlDocumentFormat</CLASS>
-      <AUTOLOAD/>
+      <AUTOINSTANCE></AUTOINSTANCE>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE RTF Document Format</NAME>
       <CLASS>gate.corpora.RtfDocumentFormat</CLASS>
-      <AUTOLOAD/>
+      <AUTOINSTANCE></AUTOINSTANCE>
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE EMAIL Document Format</NAME>
       <CLASS>gate.corpora.EmailDocumentFormat</CLASS>
-      <AUTOLOAD/>
+      <AUTOINSTANCE></AUTOINSTANCE>
       <PRIVATE/>
     </RESOURCE>
     <!-- Annotation schema -->

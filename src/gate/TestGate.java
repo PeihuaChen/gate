@@ -208,7 +208,8 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestConfig.suite());
+        suite.addTest(TestCreole.suite());
+        suite.addTest(TestPR.suite());
       } else {
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
