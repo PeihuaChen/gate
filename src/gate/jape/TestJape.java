@@ -86,7 +86,7 @@ public class TestJape extends TestCase
       Factory.newDocument(Files.getGateResourceAsString("texts/doc0.html"))
     );
     //add some annotations on the first (only) document in corpus c
-    Document doc = (Document)c.first();
+    Document doc = (Document)c.get(0);
     AnnotationSet defaultAS = doc.getAnnotations();
 
     try {
@@ -127,7 +127,7 @@ public class TestJape extends TestCase
     // test the transducers
     batch.transduce(c);
     // check the results
-    doc = (Document)c.first();
+    doc = (Document)c.get(0);
     // defaultAS = doc.getAnnotations();
     // Out.println(defaultAS);
   } // testBatch()
