@@ -18,18 +18,20 @@ import gate.gui.*;
 
   /**
    Implements the behaviour of the Email reader
-   It takes the gate document representing a list with e-mails and
+   It takes the Gate Document representing a list with e-mails and
    creates Gate annotations on it.
   */
 public class EmailDocumentHandler implements StatusReporter{
 
   /**
     Constructor initialises some private fields
-    */
+  */
   public EmailDocumentHandler(gate.Document aGateDocument, Map  aMarkupElementsMap,
                             Map anElement2StringMap){
 
     gateDocument = aGateDocument;
+    // gets AnnotationSet based on the new gate document
+    basicAS = aGateDocument.getAnnotations();
     markupElementsMap = aMarkupElementsMap;
     element2StringMap = anElement2StringMap;
     setUp();
@@ -46,7 +48,6 @@ public class EmailDocumentHandler implements StatusReporter{
     </ul>
   */
   public void annotateMessages(){
-  /*
     // obtain a BufferedReader form the Gate document...
     BufferedReader gateDocumentReader = null;
     try{
@@ -71,40 +72,202 @@ public class EmailDocumentHandler implements StatusReporter{
     // next line
 
     String line = null;
+    String aFieldName = null;
     long cursor = 0;
-    boolean insideAnEmail = false;
+    long endEmail = 0;
+    long startEmail = 0;
+    long endHeader = 0;
+    long startHeader = 0;
+    long endBody = 0;
+    long startBody = 0;
+    long endField = 0;
+    long startField = 0;
+    boolean insideAnEmail   = false;
+    boolean insideHeader    = false;
+    boolean insideBody      = false;
+    boolean emailReadBefore = false;
+    boolean fieldReadBefore = false;
+    long nlSize = detectNLSize();
+    //System.out.println("NL SIZE = " + nlSize);
     try{
       // read each line from the reader
       while ((line = gateDocumentReader.readLine()) != null){
+        // Here we test if the line delimitates two e-mail messages.
+        // Each e-mail message begins with a line like this:
+        // From P.Fairhurst Thu Apr 18 12:22:23 1996
+        // Method lineBeginsMessage() detects such lines.
         if (lineBeginsMessage(line)){
-              // inform the status listener to fire only if no of elements processed
+              // inform the status listener to fire only if no. of elements processed
               // so far is a multiple of ELEMENTS_RATE
             if ((++ emails % EMAILS_RATE) == 0)
                 fireStatusChangedEvent("Reading emails : " + emails);
+            // if there are e-mails read before then the previous e-mail end here
+            if (true == emailReadBefore){
+              // cursor points at the beggining of the line
+              // e-mail and Body ends before the \n char
+              // email ends as cursor value indicates
+              endEmail = cursor - nlSize ;
+              // also the e-mail body ends when an e-mail ends
+              endBody = cursor - nlSize;
 
-            // the cursor is update with the length of the line + the new line char
-            cursor += line.length() + 1;
+              //System.out.println("Email ends at :" + endEmail);
+              //System.out.println("EMAIL IS: ****************************************************");
+              //System.out.println(gateDocument.getContent().toString().substring(startEmail,endEmail));
+              //Annotate an E-mail body (startBody, endEmail)
+              createAnnotation("Body",startBody,endBody,null);
+              //Annotate an E-mail message(startEmail, endEmail) Email starts
+              createAnnotation("Message",startEmail,endEmail,null);
+            }
+            // if no e-mail was read before, now there is at list one message read
+            emailReadBefore = true;
+            // the cursor is updated with the length of the line + the new line char
+            cursor += line.length() + nlSize;
+            // E-mail starts imediately after this line which sepatates 2 messages
+            startEmail = cursor;
+            // E-mail header starts also from here
+            startHeader = cursor;
+            //System.out.println("Email starts at :"+ startEmail + " With LINE: " + line);
             // we are inside an e-mail
             insideAnEmail = true;
-
+            // next is the E-mail header
+            insideHeader = true;
+            // no field inside header has been read before
+            fieldReadBefore = false;
+            // read the next line
             continue;
-        }
-        if (!insideAnEmail){
+        }//if (lineBeginsMessage(line))
+        if (false == insideAnEmail){
           // the cursor is update with the length of the line + the new line char
-          cursor += line.length() + 1;
+          cursor += line.length() + nlSize;
+          // read the next line
           continue;
-        }
-        // here we are inside an e-mail message
-        if (lineIsHeader)
+        }//if
+        // here we are inside an e-mail message (inside Header or Body)
+        if (true == insideHeader){
+          // E-mail spec sais that E-mail header is separated by E-mail body
+          // by a \n char
+          if (line.equals("")){
+            // this \n sepatates the header of an e-mail form its body
+            // If we are here it means that the header has ended.
+            insideHeader  = false;
+            // e-mail header ends here
+            endHeader = cursor - nlSize;
+            // update the cursor with the length of \n
+            cursor += line.length() + nlSize;
+            // E-mail body starts from here
+            startBody = cursor;
+            // if fields were read before, it means that the e-mail has a header
+            if (true == fieldReadBefore){
+              endField = endHeader;
+              //Create a field annotation (fieldName, startField, endField)
+              createAnnotation(aFieldName, startField, endField, null);
+              //Create an e-mail header annotation
+              createAnnotation("Header",startHeader,endHeader,null);
+            }//if
+            // read the next line
+            continue;
+          }//if (line.equals(""))
+          // if line begins with a field then prepare to create an
+          // annotation with the name of the field
+          if (lineBeginsWithField(line)){
+            // if a field was read before, it means that the previous field ends
+            // here
+            if (true == fieldReadBefore){
+              // the previous field end here
+              endField = cursor - nlSize;
+              //Create a field annotation (fieldName, startField, endField)
+              createAnnotation(aFieldName, startField, endField, null);
+            }//if
+            fieldReadBefore = true;
+            aFieldName = getFieldName();
+            startField = cursor + aFieldName.length() + ":".length();
+          }//if
+          // in both cases the cursor is updated and read the next line
+          // the cursor is update with the length of the line + the new line char
+          cursor += line.length() + nlSize;
+          // read the next line
+          continue;
+        }//if (true == insideHeader)
+        // here we are inside the E-mail body
+        // the body will end when the e-mail will end.
+        // here we just update the cursor
+        cursor += line.length() + nlSize;
+      }//while
+      // it might be possible that the file to contain only one e-mail and
+      // if the file contains only one e-mail message then the variable
+      // emailReadBefore must be set on true value
+      if (true == emailReadBefore){
+        endBody  = cursor - nlSize;
+        endEmail = cursor - nlSize;
+        //System.out.println("Email ends at :" + endEmail);
+        //System.out.println("EMAIL IS: ****************************************************");
+        //Annotate an E-mail body (startBody, endEmail)
+        createAnnotation("Body",startBody,endBody,null);
+        //Annotate an E-mail message(startEmail, endEmail) Email starts
+        createAnnotation("Message",startEmail,endEmail,null);
+        //System.out.println(gateDocument.getContent().toString().substring(startEmail,endEmail));
       }
+      // if emailReadBefore is not set on true, that means that we didn't
+      // encounter any line like this:
+      // From P.Fairhurst Thu Apr 18 12:22:23 1996
     }catch (IOException e){
       e.printStackTrace(System.err);
     }
-  */  
   }//annotateMessages
 
   /**
+    This method detects if the text file which contains e-mail messages is under
+    MSDOS or UNIX format.
+    Under MSDOS the size of NL is 2 (\n \r) and under UNIX (\n) the size is 1
+    @return the size of the NL (1,2 or 0 = if no \n is found)
+  */
+  private int detectNLSize(){
+   //*
+    // get a char array
+    char[] document = null;
+    // transform the gate Document into a char array
+    document = gateDocument.getContent().toString().toCharArray();
+    // search for the \n char
+    // when it is found test if is followed by the \r char
+    for (int i=0; i<document.length; i++){
+      if (document[i] == '\n'){
+        // we just found a \n char.
+        // here we test if is followed by a \r char or preceded by a \r char
+        if (
+            (((i+1) < document.length) && (document[i+1] == '\r'))
+            ||
+            (((i-1) >= 0)              && (document[i-1] == '\r'))
+           ) return 2;
+        else return 1;
+      }
+    }
+    //if no \n char is found then the document is contained into a single text
+    // line.
+    return 0;
+   //*/
+  }//detectNLSize
+
+  /**
+    This method creates a gate annotation given its name, start, end and feature
+    map.
+  */
+  private void createAnnotation(String anAnnotationName, long anAnnotationStart,
+                                 long anAnnotationEnd, FeatureMap aFeatureMap){
+    if (aFeatureMap == null)
+        aFeatureMap = new SimpleFeatureMapImpl();                              
+    try{
+      basicAS.add(new Long(anAnnotationStart), new Long(anAnnotationEnd),
+                  anAnnotationName, aFeatureMap
+                  );
+    }catch (gate.util.InvalidOffsetException e){
+      //System.out.println("NAME=" + anAnnotationName + " START=" + anAnnotationStart + " STOP=" + anAnnotationEnd + " DOC SIZE=" + gateDocument.getContent().size());
+      e.printStackTrace(System.err);
+    }
+  }//createAnnotation
+
+  /**
     Tests if the line begins an e-mail message
+    @param aTextLine a line from the file containing the e-mail messages
     @return true if the line begins an e-mail message
     @return false if is doesn't
   */
@@ -114,27 +277,75 @@ public class EmailDocumentHandler implements StatusReporter{
     // then this line begins a message
     // create a new String Tokenizer with " " as separator
     StringTokenizer tokenizer = new StringTokenizer(aTextLine," ");
-
+    // get the first token
     String firstToken = null;
     if (tokenizer.hasMoreTokens())
         firstToken = tokenizer.nextToken();
     else return false;
-
+    // trim it
+    firstToken.trim();
+    // check against "From" word
+    // if the first token is not From then the entire line can not begin a message
     if (!firstToken.equals("From"))
         return false;
     // else continue the analize
     while (tokenizer.hasMoreTokens()){
+      // get the next token
       String token = tokenizer.nextToken();
       token.trim();
+      // see if it has a meaning ( analize if is a Day, Month,Zone, Time, Year )
       if (hasAMeaning(token))
           score += 1;
-      else
-          score += 0;
     }
-
-    if (score == 5) return true;
+    // a score greather or equql with 5 means that this line begins a message
+    if (score >= 5) return true;
     else return false;
   }//lineBeginsMessage
+
+  /**
+    Tests if the line begins with a field from the e-mail header
+    If the answer is true then it also sets the member fieldName with the
+    value of this e-mail header field.
+    @param aTextLine a line from the file containing the e-mail text
+    @return true if the line begins with a field from the e-mail header
+    @return false if is doesn't
+  */
+  private boolean lineBeginsWithField(String aTextLine){
+    if (containsSemicolon(aTextLine)){
+      StringTokenizer tokenizer = new StringTokenizer(aTextLine,":");
+      // get the first token
+      String firstToken = null;
+      if (tokenizer.hasMoreTokens())
+        firstToken = tokenizer.nextToken();
+      else return false;
+      if (firstToken != null){
+        // trim it
+        firstToken.trim();
+        if (containsWhiteSpaces(firstToken)) return false;
+        // set the member field
+        fieldName = firstToken;
+      }
+      return true;
+    }else return false;
+  }//lineBeginsWithField
+
+  /**
+    This method checks if a String contains white spaces.
+  */
+  private boolean containsWhiteSpaces(String aString){
+    for (int i = 0; i<aString.length(); i++)
+      if (Character.isWhitespace(aString.charAt(i))) return true;
+    return false;
+  }//containsWhiteSpaces
+
+  /**
+    This method checks if a String contains a semicolon char
+  */
+  private boolean containsSemicolon(String aString){
+    for (int i = 0; i<aString.length(); i++)
+      if (aString.charAt(i) == ':') return true;
+    return false;
+  }//containsSemicolon
 
   /**
     This method tests a token if is Day, Month, Zone, Time, Year
@@ -166,12 +377,10 @@ public class EmailDocumentHandler implements StatusReporter{
       // it might be the last two digits of 19xx
       if ((number >= 0) && (number <= 99)) return true;
     }
-
     // test if is time: hh:mm:ss
     if (isTime(aToken)) return true;
-
    return false;
-  }
+  }//hasAMeaning
 
   /**
     Tests a token if is in time format HH:MM:SS
@@ -249,7 +458,7 @@ public class EmailDocumentHandler implements StatusReporter{
   }// isTime
 
   /**
-    Initialises the collections
+    Initialises the collections with data used by method lineBeginsMessage()
   */
   private void setUp(){
     day = new HashSet();
@@ -286,8 +495,18 @@ public class EmailDocumentHandler implements StatusReporter{
     zone.add("MDT");
     zone.add("PST");
     zone.add("PDT");
-
-  }
+  }//setUp
+  
+  /**
+    This method returns the value of the member fieldName.
+    fieldName is set by the method lineBeginsWithField(String line).
+    Each time the the line begins with a field name, that fiels will be stored
+    in this member.
+  */
+  private String getFieldName(){
+    if (fieldName == null) return new String("");
+    else return fieldName;
+  }//getFieldName
 
   //StatusReporter Implementation
 
@@ -322,7 +541,7 @@ public class EmailDocumentHandler implements StatusReporter{
   private gate.Document gateDocument = null;
 
   // an annotation set used for creating annotation reffering the doc
-  private gate.AnnotationSet basicAS;
+  private gate.AnnotationSet basicAS = null;
 
   // this map marks the elements that we don't want to create annotations
   private Map  markupElementsMap = null;
@@ -335,6 +554,11 @@ public class EmailDocumentHandler implements StatusReporter{
 
   // this reports the the number of emails that have beed processed so far
   private int emails = 0;
+
+  // this is set by the method lineBeginsWithField(String line)
+  // each time the the line begins with a field name, that fiels will be stored
+  // in this member.
+  private String fieldName = null;
 
   private Collection day = null;
   private Collection month = null;
