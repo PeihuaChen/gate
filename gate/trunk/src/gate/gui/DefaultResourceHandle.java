@@ -124,7 +124,7 @@ public class DefaultResourceHandle implements ResourceHandle {
     /* Not so fancy hardcoded views build */
     popup = new JPopupMenu();
     popup.add(new CloseAction());
-    if(resource instanceof Resource &&
+    if(resource instanceof ProcessingResource &&
        !Gate.isApplication((Resource)resource) ){
       popup.addSeparator();
       popup.add(new ReloadAction());
@@ -386,41 +386,44 @@ public class DefaultResourceHandle implements ResourceHandle {
 
   class ReloadAction extends AbstractAction {
     ReloadAction() {
-      super("Reload");
+      super("Reinitialise");
     }
 
-    public void actionPerformed1(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
-          if(!(resource instanceof Resource)) return;
+          if(!(resource instanceof ProcessingResource)) return;
           try{
             long startTime = System.currentTimeMillis();
-            fireStatusChanged("Reloading " +
+            fireStatusChanged("Reinitialising " +
                                resource.getFeatures().get("gate.NAME"));
             Map listeners = new HashMap();
-            listeners.put("gate.event.StatusListener",
-                          new StatusListener(){
-                            public void statusChanged(String text){
-                              fireStatusChanged(text);
-                            }
-                          });
+            StatusListener sListener = new StatusListener(){
+                                        public void statusChanged(String text){
+                                          fireStatusChanged(text);
+                                        }
+                                       };
+            listeners.put("gate.event.StatusListener", sListener);
 
-            listeners.put("gate.event.ProgressListener",
-                          new ProgressListener(){
-                            public void progressChanged(int value){
-                              fireProgressChanged(value);
-                            }
-                            public void processFinished(){
-                              fireProcessFinished();
-                            }
-                          });
-            Resource res = (Resource)resource;
+            ProgressListener pListener =
+                new ProgressListener(){
+                  public void progressChanged(int value){
+                    fireProgressChanged(value);
+                  }
+                  public void processFinished(){
+                    fireProcessFinished();
+                  }
+                };
+            listeners.put("gate.event.ProgressListener", pListener);
+
+            ProcessingResource res = (ProcessingResource)resource;
             try{
               Factory.setResourceListeners(res, listeners);
             }catch (Exception e){
               e.printStackTrace(Err.getPrintWriter());
             }
-            res.init();
+            fireProgressChanged(0);
+            res.reInit();
             try{
               Factory.removeResourceListeners(res, listeners);
             }catch (Exception e){
@@ -428,11 +431,12 @@ public class DefaultResourceHandle implements ResourceHandle {
             }
             long endTime = System.currentTimeMillis();
             fireStatusChanged(resource.getFeatures().get("gate.NAME") +
-                              " reloaded in " +
+                              " reinitialised in " +
                               NumberFormat.getInstance().format(
                               (double)(endTime - startTime) / 1000) + " seconds");
+            fireProcessFinished();
           }catch(ResourceInstantiationException rie){
-            fireStatusChanged("Reload failed");
+            fireStatusChanged("reinitialisation failed");
             JOptionPane.showMessageDialog(getLargeView(),
                                           "Reload failed!\n " +
                                           rie.toString(),
@@ -446,7 +450,11 @@ public class DefaultResourceHandle implements ResourceHandle {
       thread.start();
     }//public void actionPerformed(ActionEvent e)
 
-    public void actionPerformed(ActionEvent e) {
+    /**
+     * This will stop to run as the PARAMETERS feature is not set anymore
+     */
+/*
+    public void actionPerformed2(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
           Map listeners = new HashMap();
@@ -484,11 +492,6 @@ public class DefaultResourceHandle implements ResourceHandle {
 
             largeView.removeAll();
             addAllViews();
-    /*
-            JTabbedPane view = (JTabbedPane)largeView;
-            ((AnnotationEditor)view.getComponentAt(view.indexOfTab("Annotations"))).
-            setDocument((Document) resource);
-    */
             long endTime = System.currentTimeMillis();
             fireStatusChanged(resource.getFeatures().get("gate.NAME") +
                               " reloaded in " +
@@ -510,6 +513,7 @@ public class DefaultResourceHandle implements ResourceHandle {
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
+*/
   }//class ReloadAction
 
   protected void fireProgressChanged(int e) {

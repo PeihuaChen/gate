@@ -286,21 +286,6 @@ extends AbstractFeatureBearer implements DataStore {
         throw new PersistenceException("Can't write " + resourceTypeDirectory);
     }
 
-    //Create a new set of features removing all the transient ones
-    //save the original features
-    FeatureMap originalFeatures = lr.getFeatures();
-    FeatureMap persistentFeatures = Factory.newFeatureMap();
-    persistentFeatures.putAll(originalFeatures);
-    Iterator keyIter = persistentFeatures.keySet().iterator();
-    Set transientKeys = new HashSet();
-    while(keyIter.hasNext()){
-      String key = (String)keyIter.next();
-      if(key.indexOf("transient") != -1) transientKeys.add(key);
-    }
-    keyIter = transientKeys.iterator();
-    while(keyIter.hasNext()) persistentFeatures.remove(keyIter.next());
-    lr.setFeatures(persistentFeatures);
-
     // create an indentifier for this resource
     String lrName = null;
     String lrPersistenceId = null;
@@ -333,11 +318,6 @@ extends AbstractFeatureBearer implements DataStore {
     } catch(IOException e) {
       throw new PersistenceException("Couldn't write to storage file: " + e);
     }
-
-    // restore the original features, taking care to preserve any new values
-    // that have been added or changed
-    originalFeatures.putAll(persistentFeatures);
-    lr.setFeatures(originalFeatures);
 
     // let the world know about it
     fireResourceWritten(

@@ -217,6 +217,12 @@ public class NewResourceDialog extends JDialog {
                                                     nameField.getText() +
                                                     "...");
 
+      gate.event.ProgressListener pListener = (gate.event.ProgressListener)
+                                  listeners.get("gate.event.ProgressListener");
+      if(pListener != null){
+        pListener.progressChanged(0);
+      }
+
       try {
         long startTime = System.currentTimeMillis();
         FeatureMap features = Factory.newFeatureMap();
@@ -228,6 +234,7 @@ public class NewResourceDialog extends JDialog {
             nameField.getText() + " loaded in " +
             NumberFormat.getInstance().format(
             (double)(endTime - startTime) / 1000) + " seconds");
+        if(pListener != null) pListener.processFinished();
       } catch(ResourceInstantiationException rie) {
         JOptionPane.showMessageDialog(getOwner(),
                                       "Resource could not be created!\n" +
