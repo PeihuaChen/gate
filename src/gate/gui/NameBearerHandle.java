@@ -461,10 +461,13 @@ public class NameBearerHandle implements Handle,
             try{
               MainFrame.lockGUI("Saving...");
               // Prepare to write into the xmlFile using the original encoding
-              String encoding = ((gate.TextualDocument)target).getEncoding();
+              ////////////////////////////////
+              // Save-as-XML always uses UTF-8
+              ////////////////////////////////
+              String encoding = /*((gate.TextualDocument)target).getEncoding();
               if(encoding == null || encoding.length() == 0)
                 encoding = System.getProperty("file.encoding");
-              if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
+              if(encoding == null || encoding.length() == 0) encoding =*/ "UTF-8";
 
               OutputStreamWriter writer = new OutputStreamWriter(
                                             new FileOutputStream(selectedFile),
@@ -710,15 +713,15 @@ public class NameBearerHandle implements Handle,
                   // check for preserve format flag
                   if(preserveFormat) {
                     Set annotationsToDump = null;
-                    // Find the shown document editor. 
-                    // If none, just dump the original markup annotations, 
+                    // Find the shown document editor.
+                    // If none, just dump the original markup annotations,
                     // i.e., leave the annotationsToDump null
                     if (largeView instanceof JTabbedPane) {
                       Component shownComponent =
                         ((JTabbedPane) largeView).getSelectedComponent();
                       if (shownComponent instanceof DocumentEditor) {
-                        // so we only get annotations for dumping 
-                        // if they are shown in the table of the document editor, 
+                        // so we only get annotations for dumping
+                        // if they are shown in the table of the document editor,
                         // which is currently in front of the user
                         annotationsToDump =
                           ((DocumentEditor) shownComponent).getDisplayedAnnotations();
@@ -732,7 +735,7 @@ public class NameBearerHandle implements Handle,
                     boolean saveFeatures = true;
                     if (featuresSaved != null)
                       saveFeatures = featuresSaved.booleanValue();
-            
+
                     // Write with the toXml() method
                     content = currentDoc.toXml(annotationsToDump, saveFeatures);
                   }
@@ -744,9 +747,9 @@ public class NameBearerHandle implements Handle,
                   String encoding = ((gate.TextualDocument)currentDoc).getEncoding();
                   if(encoding == null || encoding.length() == 0)
                     encoding = System.getProperty("file.encoding");
-                  if(encoding == null || encoding.length() == 0) 
+                  if(encoding == null || encoding.length() == 0)
                     encoding = "UTF-8";
-          
+
                   OutputStreamWriter writer = new OutputStreamWriter(
                                                 new FileOutputStream(docFile),
                                                 encoding);
