@@ -78,6 +78,29 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         );
       }
     });
+
+    documentsList.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
+          int row = documentsList.locationToIndex(e.getPoint());
+          if(row != -1){
+            corpus.get(row);
+          }
+        }
+      }
+
+      public void mousePressed(MouseEvent e) {
+      }
+
+      public void mouseReleased(MouseEvent e) {
+      }
+
+      public void mouseEntered(MouseEvent e) {
+      }
+
+      public void mouseExited(MouseEvent e) {
+      }
+    });
   }
 
   public void setTarget(Object target){
