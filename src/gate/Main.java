@@ -51,7 +51,12 @@ public class Main {
     * <UL>
     * <LI>
     * <B>-h</B> display a short help message
+    * <LI>
     * <B>-d URL</B> define URL to be a location for CREOLE resoures
+    * <LI>
+    * <B>-i file</B> additional initialisation file (probably called
+    *   <TT>gate.xml</TT>). Used for site-wide initialisation by the
+    *   start-up scripts.
     * </UL>
     */
   public static void main(String[] args) throws GateException {
@@ -430,7 +435,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hd:e:");
+    Getopt g = new Getopt("GATE main", args, "hd:ei:");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -456,7 +461,25 @@ public class Main {
             "CREOLE Directory " + urlString + " queued for registration"
           );
           break;
-        //-e runs the CorpusBenchmarkTool (e for evaluate)
+        // -i gate.xml site-wide init file
+        case 'i':
+          String optionString = g.getOptarg();
+          URL u2 = null;
+          File f = new File(optionString);
+          try {
+            u2 = f.toURL();
+          } catch(MalformedURLException e) {
+            Err.prln("Bad initialisation file: " + optionString);
+            Err.prln(e);
+            System.exit(STATUS_ERROR);
+          }
+          Gate.setSiteConfigFile(f);
+          Out.prln(
+            "Initialisation file " + optionString +
+            " recorded for initialisation"
+          );
+          break;
+        // -e runs the CorpusBenchmarkTool (e for evaluate)
         case 'e':
           try {
             CorpusBenchmarkTool.main(args);

@@ -95,7 +95,7 @@ test: japefiles
 	$(RUN) -Xint -Djava.compiler=nojit -Xmx150m \
 	  -classpath gate.jar \
 	  -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` \
-	  junit.textui.TestRunner gate.TestGate
+	  junit.textui.TestRunner gate.TestGate -i $$GATE_CONFIG
 #	  junit.ui.TestRunner gate.TestGate
 #	  junit.ui.LoadingTestRunner gate.TestGate
 
@@ -145,7 +145,7 @@ tcl:
 # run the main interface
 run:
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
-	  -Duser.home='Z:\' -Xmx200m gate.Main &
+	  -Xmx200m gate.Main -i $$GATE_CONFIG &
 
 # run the Jacl Tcl shell
 jaclsh:
