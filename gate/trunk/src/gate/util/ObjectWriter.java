@@ -14,7 +14,7 @@ import java.util.*;
   *All read/writes occur in separate threads to avoid a deadlock. 
   */
 public class ObjectWriter extends Thread{
-  public ObjectWriter(Object obj) {
+  public ObjectWriter(Object obj) throws IOException{
     size = 0;
     Writer writer = new Writer(obj);
     InputStream is = writer.getInputStream();
@@ -26,38 +26,30 @@ public class ObjectWriter extends Thread{
     int writeOffset = 0;//where to write in lastBuff
     byte lastBuff[] = new byte[buffSize];
 
-    try{
-      while (!over){
-        int read = is.read(lastBuff, writeOffset, space);
-        if(read == -1) {
-          lastOffset = writeOffset;
+    while (!over){
+      int read = is.read(lastBuff, writeOffset, space);
+      if(read == -1) {
+        lastOffset = writeOffset;
+        buffer.addLast(lastBuff);
+        over = true;
+      }else{
+        space-= read;
+        size+=read;
+        if(space == 0){
+          //no more space; we need a new buffer
           buffer.addLast(lastBuff);
-          over = true;
+          space = buffSize;
+          writeOffset = 0;
+          lastBuff = new byte[buffSize];
         }else{
-          space-= read;
-          size+=read;
-          if(space == 0){
-            //no more space; we need a new buffer
-            buffer.addLast(lastBuff);
-            space = buffSize;
-            writeOffset = 0;
-            lastBuff = new byte[buffSize];
-          }else{
-            //current buffer not full yet
-            writeOffset+=read;
-          }
+          //current buffer not full yet
+          writeOffset+=read;
         }
-      };//while(!over)
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-    };
+      }
+    };//while(!over)
     outputStream = new PipedOutputStream(); //will be used to write the data
-    try{
-      //will be returned for objects that want to read the object
-      inputStream = new PipedInputStream(outputStream);
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-    }
+    //will be returned for objects that want to read the object
+    inputStream = new PipedInputStream(outputStream);
   }
 
   /**
@@ -99,7 +91,8 @@ public class ObjectWriter extends Thread{
       outputStream.flush();
       outputStream.close();
     }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
+      throw new RuntimeException(ioe.toString());
+//      ioe.printStackTrace(System.err);
     }
   }
 
