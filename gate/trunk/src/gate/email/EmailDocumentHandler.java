@@ -2,6 +2,7 @@
  *	EmailDocumentHandler.java
  *
  *	Cristian URSU,  3/Aug/2000
+ *
  *  $Id$
  */
 
@@ -18,24 +19,26 @@ import gate.gui.*;
 import junit.framework.*;
 
   /**
-   Implements the behaviour of the Email reader
-   It takes the Gate Document representing a list with e-mails and
-   creates Gate annotations on it.
-  */
+    * This class implements the behaviour of the Email reader
+    * It takes the Gate Document representing a list with e-mails and
+    * creates Gate annotations on it.
+    */
 public class EmailDocumentHandler implements StatusReporter{
 
   /**
-    Constructor used in tests mostly
-  */
+    * Constructor used in tests mostly
+    */
   public EmailDocumentHandler(){
     setUp();
   }
 
   /**
-    Constructor initialises some private fields
-  */
-  public EmailDocumentHandler(gate.Document aGateDocument, Map  aMarkupElementsMap,
-                            Map anElement2StringMap){
+    * Constructor initialises some private fields
+    */
+  public EmailDocumentHandler( gate.Document aGateDocument,
+                               Map  aMarkupElementsMap,
+                               Map  anElement2StringMap
+                              ){
 
     gateDocument = aGateDocument;
     // gets AnnotationSet based on the new gate document
@@ -46,15 +49,15 @@ public class EmailDocumentHandler implements StatusReporter{
   }
 
   /**
-    Reads the Gate Document line by line and does the folowing things:
-    <ul>
-    <li> Each line is analized in order to detect where an e-mail starts.
-    <li> If the line belongs to an e-mail header then creates the annotation if
-         the markupElementsMap allows that.
-    <li> Lines belonging to the e-mail body are placed under a Gate annotation
-         called messageBody.
-    </ul>
-  */
+    * Reads the Gate Document line by line and does the folowing things:
+    * <ul>
+    * <li> Each line is analized in order to detect where an e-mail starts.
+    * <li> If the line belongs to an e-mail header then creates the
+    *      annotation if the markupElementsMap allows that.
+    * <li> Lines belonging to the e-mail body are placed under a Gate
+    *      annotation called messageBody.
+    *</ul>
+    */
   public void annotateMessages(){
     // obtain a BufferedReader form the Gate document...
     BufferedReader gateDocumentReader = null;
@@ -69,14 +72,16 @@ public class EmailDocumentHandler implements StatusReporter{
       // that we are processing an e-mail, update the cursor and go to the next
       // line.
 
-      // if we are inside an e-mail, test if the line belongs to the message header
+      // if we are inside an e-mail, test if the line belongs to the message
+      // header
       // if so, create a header field annotation.
 
       // if we are inside a a body and this is the first line from the body,
       // create the message body annotation.
       // Otherwise just update the cursor and go to the next line
 
-      // if the line doesn't belong to an e-mail message then just update the cursor.
+      // if the line doesn't belong to an e-mail message then just update the
+      // cursor.
     // next line
 
     String line = null;
@@ -105,11 +110,13 @@ public class EmailDocumentHandler implements StatusReporter{
         // From P.Fairhurst Thu Apr 18 12:22:23 1996
         // Method lineBeginsMessage() detects such lines.
         if (lineBeginsMessage(line)){
-              // inform the status listener to fire only if no. of elements processed
-              // so far is a multiple of ELEMENTS_RATE
+              // Inform the status listener to fire only
+              // if no. of elements processed.
+              // So far is a multiple of ELEMENTS_RATE
             if ((++ emails % EMAILS_RATE) == 0)
                 fireStatusChangedEvent("Reading emails : " + emails);
-            // if there are e-mails read before then the previous e-mail end here
+            // if there are e-mails read before, then the previous e-mail
+            // ends here.
             if (true == emailReadBefore){
               // cursor points at the beggining of the line
               // e-mail and Body ends before the \n char
@@ -117,24 +124,22 @@ public class EmailDocumentHandler implements StatusReporter{
               endEmail = cursor - nlSize ;
               // also the e-mail body ends when an e-mail ends
               endBody = cursor - nlSize;
-
-              //System.out.println("Email ends at :" + endEmail);
-              //System.out.println("EMAIL IS: ****************************************************");
-              //System.out.println(gateDocument.getContent().toString().substring(startEmail,endEmail));
               //Annotate an E-mail body (startBody, endEmail)
               createAnnotation("Body",startBody,endBody,null);
               //Annotate an E-mail message(startEmail, endEmail) Email starts
               createAnnotation("Message",startEmail,endEmail,null);
             }
-            // if no e-mail was read before, now there is at list one message read
+            // if no e-mail was read before, now there is at list one message
+            // read
             emailReadBefore = true;
-            // the cursor is updated with the length of the line + the new line char
+            // the cursor is updated with the length of the line + the
+            // new line char
             cursor += line.length() + nlSize;
-            // E-mail starts imediately after this line which sepatates 2 messages
+            // E-mail starts imediately after this line which sepatates 2
+            // messages
             startEmail = cursor;
             // E-mail header starts also from here
             startHeader = cursor;
-            //System.out.println("Email starts at :"+ startEmail + " With LINE: " + line);
             // we are inside an e-mail
             insideAnEmail = true;
             // next is the E-mail header
@@ -145,7 +150,8 @@ public class EmailDocumentHandler implements StatusReporter{
             continue;
         }//if (lineBeginsMessage(line))
         if (false == insideAnEmail){
-          // the cursor is update with the length of the line + the new line char
+          // the cursor is update with the length of the line +
+          // the new line char
           cursor += line.length() + nlSize;
           // read the next line
           continue;
@@ -191,7 +197,8 @@ public class EmailDocumentHandler implements StatusReporter{
             startField = cursor + aFieldName.length() + ":".length();
           }//if
           // in both cases the cursor is updated and read the next line
-          // the cursor is update with the length of the line + the new line char
+          // the cursor is update with the length of the line +
+          // the new line char
           cursor += line.length() + nlSize;
           // read the next line
           continue;
@@ -207,13 +214,10 @@ public class EmailDocumentHandler implements StatusReporter{
       if (true == emailReadBefore){
         endBody  = cursor - nlSize;
         endEmail = cursor - nlSize;
-        //System.out.println("Email ends at :" + endEmail);
-        //System.out.println("EMAIL IS: ****************************************************");
         //Annotate an E-mail body (startBody, endEmail)
         createAnnotation("Body",startBody,endBody,null);
         //Annotate an E-mail message(startEmail, endEmail) Email starts
         createAnnotation("Message",startEmail,endEmail,null);
-        //System.out.println(gateDocument.getContent().toString().substring(startEmail,endEmail));
       }
       // if emailReadBefore is not set on true, that means that we didn't
       // encounter any line like this:
@@ -224,11 +228,11 @@ public class EmailDocumentHandler implements StatusReporter{
   }//annotateMessages
 
   /**
-    This method detects if the text file which contains e-mail messages is under
-    MSDOS or UNIX format.
-    Under MSDOS the size of NL is 2 (\n \r) and under UNIX (\n) the size is 1
-    @return the size of the NL (1,2 or 0 = if no \n is found)
-  */
+    * This method detects if the text file which contains e-mail messages
+    * is under MSDOS or UNIX format.
+    * Under MSDOS the size of NL is 2 (\n \r) and under UNIX (\n) the size is 1
+    * @return the size of the NL (1,2 or 0 = if no \n is found)
+    */
   private int detectNLSize(){
    //*
     // get a char array
@@ -268,17 +272,16 @@ public class EmailDocumentHandler implements StatusReporter{
                   anAnnotationName, aFeatureMap
                   );
     }catch (gate.util.InvalidOffsetException e){
-      //System.out.println("NAME=" + anAnnotationName + " START=" + anAnnotationStart + " STOP=" + anAnnotationEnd + " DOC SIZE=" + gateDocument.getContent().size());
       e.printStackTrace(System.err);
     }
   }//createAnnotation
 
   /**
-    Tests if the line begins an e-mail message
-    @param aTextLine a line from the file containing the e-mail messages
-    @return true if the line begins an e-mail message
-    @return false if is doesn't
-  */
+    * Tests if the line begins an e-mail message
+    * @param aTextLine a line from the file containing the e-mail messages
+    * @return true if the line begins an e-mail message
+    * @return false if is doesn't
+    */
   private boolean lineBeginsMessage(String aTextLine){
     int score = 0;
     // if first token is "From" and the rest contains Day, Zone, etc
@@ -293,7 +296,8 @@ public class EmailDocumentHandler implements StatusReporter{
     // trim it
     firstToken.trim();
     // check against "From" word
-    // if the first token is not From then the entire line can not begin a message
+    // if the first token is not From then the entire line can not begin
+    // a message.
     if (!firstToken.equals("From"))
         return false;
     // else continue the analize
@@ -301,7 +305,7 @@ public class EmailDocumentHandler implements StatusReporter{
       // get the next token
       String token = tokenizer.nextToken();
       token.trim();
-      // see if it has a meaning ( analize if is a Day, Month,Zone, Time, Year )
+      // see if it has a meaning(analize if is a Day, Month,Zone, Time, Year )
       if (hasAMeaning(token))
           score += 1;
     }
@@ -311,13 +315,13 @@ public class EmailDocumentHandler implements StatusReporter{
   }//lineBeginsMessage
 
   /**
-    Tests if the line begins with a field from the e-mail header
-    If the answer is true then it also sets the member fieldName with the
-    value of this e-mail header field.
-    @param aTextLine a line from the file containing the e-mail text
-    @return true if the line begins with a field from the e-mail header
-    @return false if is doesn't
-  */
+    * Tests if the line begins with a field from the e-mail header
+    * If the answer is true then it also sets the member fieldName with the
+    * value of this e-mail header field.
+    * @param aTextLine a line from the file containing the e-mail text
+    * @return true if the line begins with a field from the e-mail header
+    * @return false if is doesn't
+    */
   private boolean lineBeginsWithField(String aTextLine){
     if (containsSemicolon(aTextLine)){
       StringTokenizer tokenizer = new StringTokenizer(aTextLine,":");
@@ -338,8 +342,8 @@ public class EmailDocumentHandler implements StatusReporter{
   }//lineBeginsWithField
 
   /**
-    This method checks if a String contains white spaces.
-  */
+    * This method checks if a String contains white spaces.
+    */
   private boolean containsWhiteSpaces(String aString){
     for (int i = 0; i<aString.length(); i++)
       if (Character.isWhitespace(aString.charAt(i))) return true;
@@ -347,8 +351,8 @@ public class EmailDocumentHandler implements StatusReporter{
   }//containsWhiteSpaces
 
   /**
-    This method checks if a String contains a semicolon char
-  */
+    * This method checks if a String contains a semicolon char
+    */
   private boolean containsSemicolon(String aString){
     for (int i = 0; i<aString.length(); i++)
       if (aString.charAt(i) == ':') return true;
@@ -356,8 +360,8 @@ public class EmailDocumentHandler implements StatusReporter{
   }//containsSemicolon
 
   /**
-    This method tests a token if is Day, Month, Zone, Time, Year
-  */
+    * This method tests a token if is Day, Month, Zone, Time, Year
+    */
   private boolean hasAMeaning(String aToken){
     // if token is a Day return true
     if (day.contains(aToken)) return true;
@@ -466,8 +470,8 @@ public class EmailDocumentHandler implements StatusReporter{
   }// isTime
 
   /**
-    Initialises the collections with data used by method lineBeginsMessage()
-  */
+    * Initialises the collections with data used by method lineBeginsMessage()
+    */
   private void setUp(){
     day = new HashSet();
     day.add("Mon");
@@ -506,11 +510,11 @@ public class EmailDocumentHandler implements StatusReporter{
   }//setUp
 
   /**
-    This method returns the value of the member fieldName.
-    fieldName is set by the method lineBeginsWithField(String line).
-    Each time the the line begins with a field name, that fiels will be stored
-    in this member.
-  */
+    * This method returns the value of the member fieldName.
+    * fieldName is set by the method lineBeginsWithField(String line).
+    * Each time the the line begins with a field name, that fiels will be stored
+    * in this member.
+    */
   private String getFieldName(){
     if (fieldName == null) return new String("");
     else return fieldName;
@@ -519,20 +523,21 @@ public class EmailDocumentHandler implements StatusReporter{
   //StatusReporter Implementation
 
   /**
-    This methos is called when a listener is registered with this class
-  */
+    * This methos is called when a listener is registered with this class
+    */
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
   }
   /**
-    This methos is called when a listener is removed
-  */
+    * This methos is called when a listener is removed
+    */
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
   /**
-    This methos is called whenever we need to inform the listener about an event
-  */
+    * This methos is called whenever we need to inform the listener
+    * about an event.
+    */
   protected void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
@@ -576,8 +581,8 @@ public class EmailDocumentHandler implements StatusReporter{
  // TEST SECTION
 
   /**
-    Test containsSemicolon
-  */
+    * Test containsSemicolon
+    */
   private void testContainsSemicolon() {
     String str1 = "X-Sender: oana@derwent";
     String str2 = "X-Sender oana@derwent";
@@ -591,7 +596,7 @@ public class EmailDocumentHandler implements StatusReporter{
   }// testContainsSemicolon
 
   /**
-    Test containsWhiteSpaces
+    * Test containsWhiteSpaces
     */
   private void testContainsWhiteSpaces(){
     String str1 = "Content-Type: TEXT/PLAIN; charset=US-ASCII";
@@ -606,7 +611,7 @@ public class EmailDocumentHandler implements StatusReporter{
   }// testContainsWhiteSpaces
 
   /**
-    Test hasAMeaning
+    * Test hasAMeaning
     */
   private void testHasAMeaning() {
     String str1 = "12:05:22";
@@ -628,10 +633,10 @@ public class EmailDocumentHandler implements StatusReporter{
     Assert.assert((hasAMeaning(str7) == false));
     Assert.assert((hasAMeaning(str8) == false));
     Assert.assert((hasAMeaning(str9) == false));
-  }// testHasAMeaning
+  }//testHasAMeaning
 
   /**
-    Test isTime
+    * Test isTime
     */
   private void testIsTime() {
     String str1 = "13:05:22";
@@ -644,7 +649,7 @@ public class EmailDocumentHandler implements StatusReporter{
   }// testIsTime
 
   /**
-    Test lineBeginsMessage
+    * Test lineBeginsMessage
     */
   private void testLineBeginsMessage(){
     String str1 = "From oana@dcs.shef.ac.uk Wed Sep 13 13:05:23 2000";
@@ -658,7 +663,7 @@ public class EmailDocumentHandler implements StatusReporter{
   }// testLineBeginsMessage
 
   /**
-    Test lineBeginsWithField
+    * Test lineBeginsWithField
     */
   private void testLineBeginsWithField() {
     String str1 = "Message-ID: <Pine.SOL.3.91.1000913130311.19537A-10@derwent>";
@@ -669,7 +674,7 @@ public class EmailDocumentHandler implements StatusReporter{
   }// testLineBeginsWithField
 
    /**
-     Test final
+     * Test final
      */
    public void testSelf(){
      testContainsSemicolon();

@@ -2,6 +2,7 @@
  *	XmlDocumentHandler.java
  *
  *	Cristian URSU,  9/May/2000
+ *
  *  $Id$
  */
 
@@ -18,19 +19,20 @@ import gate.gui.*;
 import org.xml.sax.*;
 
 
-  /**
-   Implements the behaviour of the XML reader
-   Methods of an object of this class are called by the SAX parser when
-   events will appear.
-   The idea is to parse the XML document and construct Gate annotations objects
-   This class also will replace the content of the Gate document with a new one
-   containing anly text from the XML document
+/**
+  * Implements the behaviour of the XML reader
+  * Methods of an object of this class are called by the SAX parser when
+  * events will appear.
+  * The idea is to parse the XML document and construct Gate annotations
+  * objects.
+  * This class also will replace the content of the Gate document with a
+  * new one containing anly text from the XML document.
   */
 public class XmlDocumentHandler extends HandlerBase
                                            implements StatusReporter{
 
   /**
-    Constructor initialises some private fields
+    * Constructor initialises some private fields
     */
   public XmlDocumentHandler(gate.Document aDocument, Map  aMarkupElementsMap,
                             Map anElement2StringMap){
@@ -38,7 +40,8 @@ public class XmlDocumentHandler extends HandlerBase
     stack = new java.util.Stack();
     // this string contains the plain text (the text without markup)
     tmpDocContent = new String("");
-    // colector is used later to transform all custom objects into annotation objects
+    // colector is used later to transform all custom objects into annotation
+    // objects
     colector = new LinkedList();
     // the Gate document
     doc = aDocument;
@@ -53,19 +56,19 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-     This method is called when the SAX parser encounts the beginning of the
-     XML document.
+    * This method is called when the SAX parser encounts the beginning of the
+    * XML document.
     */
   public void startDocument() throws org.xml.sax.SAXException {
   }
 
   /**
-    This method is called when the SAX parser encounts the end of the
-    XML document.
-    Here we set the content of the gate Document to be the one generated inside
-    this class (tmpDocContent)
-    After that we use the colector to generate all the annotation reffering this
-    new gate document
+    * This method is called when the SAX parser encounts the end of the
+    * XML document.
+    * Here we set the content of the gate Document to be the one generated
+    * inside this class (tmpDocContent).
+    * After that we use the colector to generate all the annotation reffering
+    * this new gate document.
     */
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
@@ -89,11 +92,11 @@ public class XmlDocumentHandler extends HandlerBase
           );
         else {
           // get the type of the annotation from Map
-          String annotationType = (String) markupElementsMap.get(obj.getElemName());
+          String annotationType = (String)
+                                markupElementsMap.get(obj.getElemName());
           if (annotationType != null)
-            basicAS.add(obj.getStart (),obj.getEnd(), annotationType, obj.getFM());
+            basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
         }
-
       }catch (gate.util.InvalidOffsetException e){
         e.printStackTrace(System.err);
       }
@@ -101,9 +104,8 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-    This method is called when the SAX parser encounts the beginning of an
-    XML element.
-
+    * This method is called when the SAX parser encounts the beginning of an
+    * XML element.
     */
   public void startElement(String elemName, AttributeList atts){
     // inform the progress listener to fire only if no of elements processed
@@ -127,9 +129,9 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-     This method is called when the SAX parser encounts the end of an
-     XML element.
-     Here we extract
+    * This method is called when the SAX parser encounts the end of an
+    * XML element.
+    * Here we extract
     */
   public void endElement(String elemName) throws SAXException{
     // obj is for internal use
@@ -155,11 +157,11 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-    This method is called when the SAX parser encounts text in the XML doc.
-    Here we calculate the end indices for all the elements present inside the
-    stack and update with the new values.
-  */
-  public void characters( char[] text, int start, int length) throws SAXException{
+    * This method is called when the SAX parser encounts text in the XML doc.
+    * Here we calculate the end indices for all the elements present inside the
+    * stack and update with the new values.
+    */
+  public void characters( char[] text,int start,int length) throws SAXException{
     // create a string object based on the reported text
     String content = new String(text, start, length);
 
@@ -184,14 +186,15 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-   This method is called when the SAX parser encounts white spaces
-  */
-  public void ignorableWhitespace(char ch[], int start, int length) throws SAXException{
+    * This method is called when the SAX parser encounts white spaces
+    */
+  public void ignorableWhitespace(char ch[],int start,int length) throws
+                                                                   SAXException{
 
     // internal String object
     String  text = new String(ch, start, length);
-    // if the last character in tmpDocContent is \n and the read whitespace is \n
-    // then don't add it to tmpDocContent...
+    // if the last character in tmpDocContent is \n and the read whitespace is
+    // \n then don't add it to tmpDocContent...
 
     if (tmpDocContent.length () != 0)
       if (tmpDocContent.charAt (tmpDocContent.length () - 1) != '\n' ||
@@ -201,8 +204,8 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-   Error method.We deal with this exception inside SimpleErrorHandler class
-  */
+    * Error method.We deal with this exception inside SimpleErrorHandler class
+    */
   public void error(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
@@ -210,8 +213,8 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-   FatalError method.
-  */
+    * FatalError method.
+    */
   public void fatalError(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
@@ -219,8 +222,8 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-   Warning method comment.
-  */
+    * Warning method comment.
+    */
   public void warning(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
@@ -228,9 +231,10 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-   This method is called when the SAX parser encounts a comment
-   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
-  */
+    * This method is called when the SAX parser encounts a comment
+    * It works only if the XmlDocumentHandler implements a
+    * com.sun.parser.LexicalEventListener
+    */
   public void comment(String text) throws SAXException{
     // create a FeatureMap and then add the comment to the annotation set.
     /*
@@ -243,50 +247,57 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-   This method is called when the SAX parser encounts a start of a CDATA section
-   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
-  */
+    * This method is called when the SAX parser encounts a start of a CDATA
+    * section
+    * It works only if the XmlDocumentHandler implements a
+    * com.sun.parser.LexicalEventListener
+    */
   public void startCDATA()throws SAXException{
   }
 
   /**
-   This method is called when the SAX parser encounts the end of a CDATA section
-   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
-  */
+    * This method is called when the SAX parser encounts the end of a CDATA
+    * section.
+    * It works only if the XmlDocumentHandler implements a
+    * com.sun.parser.LexicalEventListener
+    */
   public void endCDATA() throws SAXException{
   }
 
   /**
-   This method is called when the SAX parser encounts a parsed Entity
-   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
-  */
+    * This method is called when the SAX parser encounts a parsed Entity
+    * It works only if the XmlDocumentHandler implements a
+    * com.sun.parser.LexicalEventListener
+    */
   public void startParsedEntity(String name) throws SAXException{
   }
 
   /**
-   This method is called when the SAX parser encounts a parsed entity and
-   informs the application if that entity was parsed or not
-   It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
-  */
+    * This method is called when the SAX parser encounts a parsed entity and
+    * informs the application if that entity was parsed or not
+    * It's working only if the CustomDocumentHandler implements a
+    *  com.sun.parser.LexicalEventListener
+    */
   public void endParsedEntity(String name, boolean included)throws SAXException{
   }
 
   //StatusReporter Implementation
 
   /**
-    This methos is called when a listener is registered with this class
-  */
+    * This methos is called when a listener is registered with this class
+    */
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
   }
   /**
-    This methos is called when a listener is removed
-  */
+    * This methos is called when a listener is removed
+    */
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
   /**
-    This methos is called whenever we need to inform the listener about an event
+    * This methos is called whenever we need to inform the listener about an
+    * event.
   */
   protected void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
@@ -343,8 +354,8 @@ public class XmlDocumentHandler extends HandlerBase
 
 
 /*
-  The objects belonging to this class are used inside the stack.
-  This class is for internal needs
+ * The objects belonging to this class are used inside the stack.
+ * This class is for internal needs
  */
 class  CustomObject{
 

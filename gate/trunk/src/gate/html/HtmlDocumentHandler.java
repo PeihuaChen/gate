@@ -1,9 +1,10 @@
 /**
- *	HtmlDocumentHandler.java
- *
- *	Cristian URSU,  12/June/2000
- *  $Id$
- */
+  *	HtmlDocumentHandler.java
+  *
+  *	Cristian URSU,  12/June/2000
+  *
+  * $Id$
+  */
 
 package gate.html;
 
@@ -11,6 +12,7 @@ import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 import javax.swing.text.html.HTMLEditorKit.*;
 import javax.swing.text.*;
+
 import java.util.*;
 
 import gate.corpora.*;
@@ -20,24 +22,26 @@ import gate.gui.*;
 
 
   /**
-   Implements the behaviour of the HTML reader
-   Methods of an object of this class are called by the HTML parser when
-   events will appear.
-   The idea is to parse the HTML document and construct Gate annotations objects
-   This class also will replace the content of the Gate document with a new one
-   containing anly text from the HTML document
-  */
+    * Implements the behaviour of the HTML reader
+    * Methods of an object of this class are called by the HTML parser when
+    * events will appear.
+    * The idea is to parse the HTML document and construct Gate annotations
+    * objects.
+    * This class also will replace the content of the Gate document with a
+    * new one containing anly text from the HTML document.
+    */
 public class HtmlDocumentHandler extends ParserCallback{
 
   /**
-    Constructor initialises all the private memeber data
-  */
+    * Constructor initialises all the private memeber data
+    */
   public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap){
     // init stack
     stack = new java.util.Stack();
     // this string contains the plain text (the text without markup)
     tmpDocContent = new String("");
-    // colector is used later to transform all custom objects into annotation objects
+    // colector is used later to transform all custom objects into
+    // annotation objects
     colector = new LinkedList();
     // the Gate document
     doc = aDocument;
@@ -48,9 +52,9 @@ public class HtmlDocumentHandler extends ParserCallback{
   }
 
   /**
-    This method is called when the HTML parser encounts the beginning of a tag
-    that means that the tag is paired by an end tag and it's not an empty one
-
+    * This method is called when the HTML parser encounts the beginning
+    * of a tag that means that the tag is paired by an end tag and it's
+    * not an empty one.
    */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // fire the status listener if the elements processed exceded the rate
@@ -72,12 +76,12 @@ public class HtmlDocumentHandler extends ParserCallback{
     CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
     // put it into the stack
     stack.push (obj);
-  } //handleStartTag
+  }//handleStartTag
 
    /**
-    This method is called when the HTML parser encounts the end of a tag
-    that means that the tag is paired by a beginning tag
-    */
+     * This method is called when the HTML parser encounts the end of a tag
+     * that means that the tag is paired by a beginning tag
+     */
   public void handleEndTag(HTML.Tag t, int pos){
     // obj is for internal use
     CustomObject obj = null;
@@ -100,17 +104,27 @@ public class HtmlDocumentHandler extends ParserCallback{
         // construct an annotation from this obj
         try{
           if (markupElementsMap == null){
-            basicAS.add(obj.getStart(),obj.getEnd(),obj.getElemName(),obj.getFM());
+             basicAS.add( obj.getStart(),
+                          obj.getEnd(),
+                          obj.getElemName(),
+                          obj.getFM()
+                         );
           }else{
-            String annotationType = (String) markupElementsMap.get(obj.getElemName());
+            String annotationType =
+                   (String) markupElementsMap.get(obj.getElemName());
             if (annotationType != null)
-               basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
+               basicAS.add( obj.getStart(),
+                            obj.getEnd(),
+                            annotationType,
+                            obj.getFM()
+                           );
           }
         }catch (InvalidOffsetException e){
             e.printStackTrace (System.err);
         }
       }//while
-      // notify the listener about the total amount of elements that has been processed
+      // notify the listener about the total amount of elements that
+      // has been processed
       fireStatusChangedEvent("Total elements : " + elements);
     }//else
   }//handleEndTag
@@ -134,7 +148,7 @@ public class HtmlDocumentHandler extends ParserCallback{
         Enumeration enum = a.getAttributeNames ();
         while (enum.hasMoreElements ()){
           Object attribute = enum.nextElement ();
-          fm.put ( attribute.toString(), (a.getAttribute (attribute)).toString());
+          fm.put ( attribute.toString(),(a.getAttribute(attribute)).toString());
         }//while
     }//if
     // create the start index of the annotation
@@ -157,8 +171,8 @@ public class HtmlDocumentHandler extends ParserCallback{
 
     // here we check to see if the first char of content and last char
     // of the tmpDocContentare not whitespaces...
-    // If that so then we have to introduce a white space in order not to create
-    // a new word
+    // If that so then we have to introduce a white space in order
+    // not to create a new word
     if (tmpDocContentSize != 0)
      if (!Character.isWhitespace(content.charAt(0)) &&
       !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1)))
@@ -186,10 +200,10 @@ public class HtmlDocumentHandler extends ParserCallback{
   }
 
   /**
-    This method is called once, when the HTML parser reaches the end of its input
-    streamin order to notify the parserCallback that there is nothing more to
-    parse.
-  */
+    * This method is called once, when the HTML parser reaches the end
+    * of its input streamin order to notify the parserCallback that there
+    * is nothing more to parse.
+    */
   public void flush() throws BadLocationException{
     System.out.println("Flush called!!!!!!!!!!!");
   }

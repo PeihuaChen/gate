@@ -23,7 +23,8 @@ public class SimpleErrorHandler implements ErrorHandler {
     */
   public void error(SAXParseException ex) throws SAXException {
 	  File fInput = new File (ex.getSystemId());
-	  System.err.println("e: " + fInput.getPath() + ": line " + ex.getLineNumber() + ": " + ex);
+	  System.err.println("e: " + fInput.getPath() + ": line " +
+                                                ex.getLineNumber() + ": " + ex);
     System.err.println("This is recoverable error. ");
 
   }
@@ -32,7 +33,8 @@ public class SimpleErrorHandler implements ErrorHandler {
     */
   public void fatalError(SAXParseException ex) throws SAXException {
 	  File fInput = new File(ex.getSystemId());
-	  System.err.println("E: " + fInput.getName() + ": line " + ex.getLineNumber() + ": " + ex);
+	  System.err.println("E: " + fInput.getName() + ": line " +
+                                               ex.getLineNumber() + ": " + ex);
     System.err.println("This is fatal error. ");
   }
   /**
@@ -40,7 +42,8 @@ public class SimpleErrorHandler implements ErrorHandler {
     */
   public void warning(SAXParseException ex) throws SAXException {
 	  File fInput = new File(ex.getSystemId());
-	  System.err.println("w: " + fInput.getName() + ": line " + ex.getLineNumber() + ": " + ex);
+	  System.err.println("w: " + fInput.getName() + ": line " +
+                                               ex.getLineNumber() + ": " + ex);
     System.err.println("This is just a warning. ");
   }
 }

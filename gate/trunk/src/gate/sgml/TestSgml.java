@@ -18,7 +18,7 @@ import gate.gui.*;
 import gate.*;
 import javax.swing.*;
 
-/** Test class for XML facilities
+/** Test class for SGML facilities
   *
   */
 public class TestSgml extends TestCase
@@ -67,14 +67,14 @@ public class TestSgml extends TestCase
     // create a new gate document
     if (Gate.isGateHomeReachable())
         doc = gate.Transients.newDocument(
-            new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/sgml/Hds.sgm")
+         new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/sgml/Hds.sgm")
         );
     else if (Gate.isGateAcUkReachable())
              doc = gate.Transients.newDocument(
                 new URL ("http://www.gate.ac.uk/tests/sgml/Hds.sgm")
             );
-         else
-          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+         else throw
+    new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
 
 
     // get the docFormat that deals with it.
@@ -114,7 +114,7 @@ public class TestSgml extends TestCase
       int docSize = doc.getContent().size().intValue();
       System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
         docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-        time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
+      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
         "." + (docSize/time1*1000)%1024 + " K/second");
       */
     //*/

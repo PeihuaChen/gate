@@ -71,14 +71,14 @@ public class TestEmail extends TestCase
     // create a new gate document
     if (Gate.isGateHomeReachable())
         doc = gate.Transients.newDocument(
-            new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/email/test.eml")
+        new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/email/test.eml")
         );
     else if (Gate.isGateAcUkReachable())
              doc = gate.Transients.newDocument(
                 new URL ("http://www.gate.ac.uk/tests/email/test.eml")
             );
-         else
-          throw new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+         else throw
+    new LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
     // get a document format that deals with e-mails
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceURL()
@@ -109,7 +109,7 @@ public class TestEmail extends TestCase
       //f.delete();
       System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
         docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-        time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
+       time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024+
         "." + (docSize/time1*1000)%1024 + " K/second");
       */
    //*/
@@ -128,4 +128,4 @@ public class TestEmail extends TestCase
     return new TestSuite(TestEmail.class);
   } // suite
 
-} // class TestXml
+}//class TestEmail

@@ -2,6 +2,7 @@
  *	Sgml2Xml.java
  *
  *	Cristian URSU,  4/July/2000
+ *
  *  $Id$
  */
 
@@ -24,21 +25,26 @@ import gate.*;
 
   What does it do:
   <ul>
-    <li>If it finds something like this : <element attribute = value>
-        it will produce: <element attribute = "value">
-    <li>If it finds something like this : <element something attribute2=value>
-      it will produce : <element defaultAttribute="something" attribute2="value">;
-    <li>If it finds : <element att1='value1 value2' att2="value2 value3"> it will
-      produce: <element att1="value1 value2" att2="value2 value3">
-    <li>If it finds : <element1> <elem>text </element1> will produce:
-        <element1> <elem>text<elem> </element1>
-    <li>If it find : <element1> <elem>[white spaces]</element1>, it will produce:
-        <element1> <elem/>[white spaces]</element1>
+    <li>If it finds something like this : &lt;element attribute = value&gt;
+        it will produce: &lt;element attribute = "value"&gt;
+    <li>If it finds something like this : &lt;element something
+        attribute2=value&gt;it will produce : &lt;element
+        defaultAttribute="something" attribute2="value"&gt;
+    <li>If it finds : &lt;element att1='value1 value2' att2="value2
+        value3"&gt; it will produce: &lt;element att1="value1 value2"
+        att2="value2 value3"&gt;
+    <li>If it finds : &lt;element1&gt; &lt;elem&gt;text &lt;/element1&gt;
+        will produce: &lt;element1&gt; &lt;elem&gt;text&lt;elem&gt;
+        &lt;/element1&gt;
+    <li>If it find : &lt;element1&gt; &lt;elem&gt;[white spaces]
+        &lt;/element1&gt;,
+        it will produce:&lt;element1&gt; &lt;elem/&gt;[white spaces]&lt;
+        /element1&gt;
   </ul>
   What doesn't:
   <ul>
-    <li>Doesn't expand the entities. So the entities from the SGML document must be
-        resolved by the XML parser
+    <li>Doesn't expand the entities. So the entities from the SGML document must
+        be resolved by the XML parser
     <li>Doesn't replace internal entities with their corresponding value
   </ul>
 
@@ -46,8 +52,8 @@ import gate.*;
 
 public class Sgml2Xml{
   /**
-   The constructor initialises some member fields
-   @param SgmlDoc the content of the Sgml document that will be modified
+    * The constructor initialises some member fields
+    * @param SgmlDoc the content of the Sgml document that will be modified
   */
   public Sgml2Xml(String SgmlDoc){
     // create a new modifier
@@ -58,8 +64,8 @@ public class Sgml2Xml{
     stack = new Stack();
   }
   /**
-    The other constructor
-    @param doc The Gate document that will be transformed to XML
+    * The other constructor
+    * @param doc The Gate document that will be transformed to XML
   */
   public Sgml2Xml(Document doc){
     // set as a member
@@ -73,23 +79,18 @@ public class Sgml2Xml{
 
   }
 
+/*
   public static void main(String[] args){
-    Sgml2Xml convertor = new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say <w VBZ>is\n<trunc> <w UNC>th </trunc>");
-   /*
-    Sgml2Xml convertor = new Sgml2Xml(
-
-"<s n=16>\n" +
-" <w PNP>I<w VBB>'m <w AJ0>supposed <w TO0>to <w ORD>first <w VVI>say <w VBZ>is\n"+
-"<trunc> <w UNC>th </trunc> <w VBB>are <w PNP>you <w VVG>finding <w AT0>the\n"+
-" <w NN1>course <w AV0>okay <w CJC>and <w TO0>to <w VVI>ask <w PNP>you <w PRP>about\n" +
-" <w DPS>your <w NN2>projects<c PUN>.\n");
-*/
+    Sgml2Xml convertor =
+new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
+<w VBZ>is\n<trunc> <w UNC>th </trunc>");
     try{
       System.out.println(convertor.convert());
     } catch (Exception e){
       e.printStackTrace(System.err);
     }
   }
+*/
   /**
     It analises the char that was red in state 1
     If it finds '<' it then goes to state 2
@@ -144,11 +145,12 @@ public class Sgml2Xml{
   }// doState2
 
   /**
-    Just read the first char from the element's name and now analize the next char
-    If '>' the elem name was a single char -> state 1
-    IF is WhiteSpaces -> state 4
-    Otherwise stay in state 3 and read the elemnt's name
-  */
+    * Just read the first char from the element's name and now analize the next
+    * char.
+    * If '>' the elem name was a single char -> state 1
+    * IF is WhiteSpaces -> state 4
+    * Otherwise stay in state 3 and read the elemnt's name
+    */
   private void doState3(char currChar){
     if ( '>' == currChar ){
       // save the pos where the element's name ends
@@ -249,8 +251,8 @@ public class Sgml2Xml{
       // every value must be inside this pair""
       m_modifier.insert(m_cursor - 1, '"');
       // insert implies the modification of m_cursor
-      // we increment m_cursor in order to say in the same position and to anulate
-      // the efect of insert
+      // we increment m_cursor in order to say in the same position and to
+      // anulate the efect of insert.
       m_cursor ++;
     }
   }// doState6
@@ -445,7 +447,9 @@ public class Sgml2Xml{
 
     // get a InputStream from m_modifier and write it into a temp file
     // finally return the URI of the new XML document
-    ByteArrayInputStream is = new ByteArrayInputStream(m_modifier.toString().getBytes());
+    ByteArrayInputStream is = new ByteArrayInputStream(
+                                              m_modifier.toString().getBytes()
+                                                       );
     // this method is in gate.util package
     File file = Files.writeTempFile(is);
 
@@ -487,14 +491,14 @@ public class Sgml2Xml{
   }//performFinalAction
 
   /**
-    This is the action performed when an end tag is read.
-    The action consists in colecting all the dubiosElements(elements without an
-    end tag). They are considered dubious because we don't know if they are empty
-    or may be closed... Only the DTD can provide this information.
-    We don't have a DTD so we will consider that all dubious elements followed by
-    text will close at the end of the text...
-    If a dubious element is followed by another element then is automaticaly considered
-    an empty element.
+    * This is the action performed when an end tag is read.
+    * The action consists in colecting all the dubiosElements(elements without
+    * an end tag). They are considered dubious because we don't know if they
+    * are empty or may be closed... Only the DTD can provide this information.
+    * We don't have a DTD so we will consider that all dubious elements
+    * followed by text will close at the end of the text...
+    * If a dubious element is followed by another element then is
+    * automaticaly considered an empty element.
 
     @param elemName is the the name of the end tag that was read
   */
@@ -518,8 +522,8 @@ public class Sgml2Xml{
     It resolves the dobious Elements this way:
     <ul>
     <li>
-    1. We don't have a DTD so we will consider that all dubious elements followed
-       by text will close at the end of the text...
+    1. We don't have a DTD so we will consider that all dubious elements
+       followed by text will close at the end of the text...
     <li>
     2. If a dubious element is followed by another element then is automaticaly
        considered an empty element.
@@ -555,7 +559,8 @@ public class Sgml2Xml{
   // this is a gate Document... It's content will be transferred to
   // m_modifier
   private Document m_doc = null;
-  // this is the modifier that will transform an SGML document into an XML document
+  // this is the modifier that will transform an SGML document into an
+  // XML document
   private StringBuffer m_modifier = null;
   // we need the stack to be able to remember the order of the tags
   private Stack stack = null;
@@ -574,10 +579,11 @@ public class Sgml2Xml{
 
   // indicates the last position of a text character (one which is not a white
   // space)
-  // it is used in doState1() when we have to decide if an element is empty or not
+  // it is used in doState1() when we have to decide if an element is empty or
+  // not
   // We decide that based on this field
-  // If the charPos > 0 then it means that the object from the top of stack is followed
-  // by text and we consider that is not empty
+  // If the charPos > 0 then it means that the object from the top of stack
+  // is followed by text and we consider that is not empty
   private int charPos = 0;
 
   // is the current tag name
