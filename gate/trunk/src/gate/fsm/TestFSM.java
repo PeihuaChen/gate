@@ -23,7 +23,14 @@ import EDU.auburn.VGJ.algorithm.cgd.CGDAlgorithm;
 import EDU.auburn.VGJ.algorithm.shawn.Spring;
 import EDU.auburn.VGJ.algorithm.cartegw.BiconnectGraph;
 
-
+/** JUnit style test code for the gate.fsm package.
+  *Unfortunatley it doesn't actually do any testing because of the difficulty
+  *to test this kind of stuff.
+  * However the main() method runs a visual test that will print the graphs
+  *(deterministic and nod-~) resulted form parsing a Jape file.
+  *The real functionality of this package is tested in the jape package that
+  *make extensive use of the services provided by his package.
+  */
 public class TestFSM extends TestCase {
 
   /** Construction */
@@ -43,6 +50,9 @@ public class TestFSM extends TestCase {
   public void tearDown(){
   }
 
+  /** Does some kind of a test that verifies whether parsing the jape file
+    *results in a graph. It doesn't check the structure graph.
+    */
   public void testOne(){
     Enumeration phases = transducer.getPhases().elements();
     while(phases.hasMoreElements()){
@@ -53,6 +63,7 @@ public class TestFSM extends TestCase {
     }
   }
 
+  /**Will try to parse a .jape file and display the graphs resulted.*/
   public void graphTest()throws java.io.IOException,
                                  EDU.auburn.VGJ.graph.ParseError{
     Enumeration phases = transducer.getPhases().elements();
@@ -66,6 +77,8 @@ public class TestFSM extends TestCase {
 
   }
 
+  /** Opens anew window containing the visual representation of a FSM and
+    *having a given title*/
   private void showGraph(String title, FSM fsm) throws java.io.IOException,
                                  EDU.auburn.VGJ.graph.ParseError{
     String gml = fsm.getGML();
@@ -89,6 +102,7 @@ public class TestFSM extends TestCase {
     graph_editing_window.applyAlgorithm("Tree Right");
   }
 
+  /** runs the graphical test*/
   public static void main(String[] args) {
     try{
       TestFSM testFSM = new TestFSM("TestFSM");

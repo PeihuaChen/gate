@@ -108,6 +108,14 @@ public class Transition {
   */
   private LinkedList bindings;
 
+  /** The unique index of this transition. This value is not used by any of
+    *the algorithms. It is only provided as a convenient method of identifying
+    *the transitions in textual representations (toString() and GML related
+    *methods)
+    */
   private int myIndex;
+
+  /**Static member used for generating unique IDs for the objects of type
+    *Transition*/
   private static int index = 0;
 }

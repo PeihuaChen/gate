@@ -41,33 +41,25 @@ public class State {
     return transitions;
   }
 
-  /*
-  * Adds an action to this state. A state having at least one action is a
-  * final one. An action is actually a gate.jape.RightHandSide object.
-  *@param trans the last transition used to reach this state before the
-  *action needs to be fired.
-  *@param rhs the action
-  */
-  //I don't think this complicated mechenism is actually necessary.
-  //It looks like a final state can only have one associated action so
-  //we might be able to simplify thing a little.
-  //Note: I was rather dizzy when I thought this might be needed so I might
-  //have been wrong :)
+  /** Sets the action associated to this FINAL state. An action is actually
+    *a gate.jape.RightHandSide object.
+    * NOTE: only a final state has an associated action so after a call to this
+    *method this state will be a final one.
+    */
   protected void setAction(RightHandSide rhs){
     action = rhs;
     isFinal = true;
   }
 
-  /**
-  * Sets the value for fileIndex
-  */
+  /** Sets the value for fileIndex. File index is the index in the jape
+    *definition file of the rule that contains as right hand side the action
+    *associated to this state. This value is only intended for final states.
+    */
   protected void setFileIndex(int i){ fileIndex = i; }
 
   /**
-  * Gets the action associated to this state when reaced via a given transition.
-  *@param key one of the transitions that reach this state
-  *@return the action associated to this state when accessed via the given
-  *transition
+  * Gets the action associated to this state.
+  *@return a RightHandSide object
   */
   public RightHandSide getAction(){
     return action;
@@ -79,13 +71,6 @@ public class State {
   * The value for fileIndex is correct only on final states!
   */
   int getFileIndex(){return fileIndex; }
-  /**
-  * Gets the set of all actions associated to this state
-  */
-  //If I am right this set (collection) will always be a singleton.
-//  protected Collection getAllActions(){
-//    return actions.values();
-//  }
 
   /**
   * Adds a new transition to the list of outgoing transitions for this state.
@@ -98,13 +83,13 @@ public class State {
   /**
   * Gets the index of this state. Each state has a unique index (a int value).
   * This value is not actually used by any of the algorithms. It is useful only
-  * as a way of refering to states.
+  * as a way of refering to states in string representations so it is used by
+  *toString and GML related methods.
   *@return the index associated to this state
   */
   protected int getIndex(){
     return myIndex;
   };
-
 
   /**
   * Returns a GML (graph modelling language) representation for the edges
@@ -156,6 +141,7 @@ public class State {
   * Is this state a final one?
   */
   protected boolean isFinal = false;
+
   /**
   * The right hand side associated to the rule for which this state recognizes
   * the lhs.
