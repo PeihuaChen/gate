@@ -230,6 +230,7 @@ public class OracleDatastoreViewer extends JTree
                               NumberFormat.getInstance().format(
                               (double)(end - start) / 1000) + " seconds");
           } catch(ResourceInstantiationException rie){
+            MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(OracleDatastoreViewer.this,
                                           "Error!\n" + rie.toString(),
                                           "Gate", JOptionPane.ERROR_MESSAGE);
