@@ -1625,9 +1625,11 @@ System.out.println("trans failed ...rollback");
       _syncRemovedDocumentsFromCorpus(removedDocLRIDs,(Long)corp.getLRPersistenceId());
     }
 
-    //3. get all documents
+    //3. get all LODADED documents
     //--Iterator it = corp.iterator();
     Iterator it = dbCorpus.getLoadedDocuments().iterator();
+//Out.prln("loaded docs = ["+dbCorpus.getLoadedDocuments().size()+"]");
+    List newlyAddedDocs = dbCorpus.getAddedDocuments();
 
     while (it.hasNext()) {
       Document dbDoc = (Document)it.next();
@@ -1681,10 +1683,16 @@ System.out.println("trans failed ...rollback");
                               );
 
           //if the document is form the same DS but did not belong to the corpus add it now
-          //NOTE: if the document already belongs to the corpus then nothing will be changed
-          //in the DB
-          addDocumentToCorpus((Long)dbDoc.getLRPersistenceId(),
-                              (Long)corp.getLRPersistenceId());
+          //BUT ONLY if it's newly added - i.e. do nothing if the document already belongs to the
+          //corpus and this is reflected in the database
+          if (newlyAddedDocs.contains(dbDoc.getLRPersistenceId())) {
+//Out.pr("A");
+            addDocumentToCorpus( (Long) dbDoc.getLRPersistenceId(),
+                                (Long) corp.getLRPersistenceId());
+          }
+          else {
+//Out.pr("I");
+          }
         }
         catch(SecurityException se) {
           gate.util.Err.prln("document cannot be synced: ["+se.getMessage()+"]");
