@@ -418,6 +418,7 @@
                   prefix="${src.dirname}">
         <include name="*"/>
         <include name="bin/**"/>
+        <exclude name="bin/gate.jar"/>
         <include name="build/**"/>
         <exclude name="build/*.jar"/>
         <include name="classes"/>
@@ -461,6 +462,9 @@
       <zipfileset dir="${basedir}"
                   prefix="${all.dirname}"
                   excludes="${distDirname},${distDirname}/**"/>
+      <zipfileset dir="${basedir}"
+                  prefix="${doc.dirname}"
+                  file="../sale/tao/tao.pdf"/>
     </zip>
   </target>
   
