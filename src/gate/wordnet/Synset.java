@@ -31,13 +31,15 @@ public interface Synset {
 
   public String getGloss();
 
+  public long getOffset();
+
   public List getWordSenses();
 
   public WordSense getWordSense(int offset);
 
-  public List getSemanticRealtions() throws WordNetException;
+  public List getSemanticRelations() throws WordNetException;
 
-  public List getSemanticRealtions(int type) throws WordNetException;
+  public List getSemanticRelations(int type) throws WordNetException;
 
 }
 

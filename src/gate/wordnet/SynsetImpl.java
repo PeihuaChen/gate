@@ -102,7 +102,8 @@ public class SynsetImpl implements Synset {
                                           this,
                                           0,
                                           jwWord.getIndex(),
-                                          false);
+                                          false,
+                                          this.wnDictionary);
       }
 
       this.wordSenses.add(gateWordSense);
@@ -115,7 +116,7 @@ public class SynsetImpl implements Synset {
   }
 
   public boolean isUniqueBeginner() throws WordNetException {
-    List parents = getSemanticRealtions(Relation.REL_HYPERNYM);
+    List parents = getSemanticRelations(Relation.REL_HYPERNYM);
     return parents.isEmpty();
   }
 
@@ -131,21 +132,21 @@ public class SynsetImpl implements Synset {
     return (WordSense)this.wordSenses.get(offset);
   }
 
-  public List getSemanticRealtions() throws WordNetException{
+  public List getSemanticRelations() throws WordNetException{
 
     if (null == this.semRelations) {
-      _loadSemanticRealtions();
+      _loadSemanticRelations();
     }
 
     return this.semRelations;
   }
 
-  public List getSemanticRealtions(int type) throws WordNetException{
+  public List getSemanticRelations(int type) throws WordNetException{
 
     List result = new ArrayList(1);
 
     if (null == this.semRelations) {
-      _loadSemanticRealtions();
+      _loadSemanticRelations();
     }
 
     Iterator it = this.semRelations.iterator();
@@ -161,7 +162,7 @@ public class SynsetImpl implements Synset {
   }
 
 
-  private void _loadSemanticRealtions() throws WordNetException{
+  private void _loadSemanticRelations() throws WordNetException{
 
     POS jwPOS = null;
     jwPOS = WNHelper.int2POS(this.synsetPOS);
@@ -194,4 +195,9 @@ public class SynsetImpl implements Synset {
     }
   }
 
+
+  public long getOffset() {
+
+    return this.synsetOffset;
+  }
 }
