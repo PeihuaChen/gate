@@ -16,7 +16,7 @@ import gate.*;
 import gate.gui.*;
 import gate.util.*;
 import gate.fsm.TestFSM;
-import EDU.auburn.VGJ.graph.ParseError;
+//import EDU.auburn.VGJ.graph.ParseError;
 
 /**
   *Implementation of a Unicode rule based tokeniser.
@@ -86,6 +86,10 @@ import EDU.auburn.VGJ.graph.ParseError;
 public class DefaultTokeniser implements Runnable, ProcessingResource,
                                          ProcessProgressReporter,
                                          StatusReporter{
+
+  /**Creates a tokeniser from the default set of rules included with the gate
+    *resources
+    */
   public DefaultTokeniser()throws IOException,
                                      TokeniserException {
     this(Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
@@ -247,7 +251,8 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return currentState;
   }
 
-  /**Parses a quoted string returning all the text up to a given delimiter.
+  /**Parses from the given string tokeniser until it finds a specific delimiter.
+    *One use for this method is to read everything until the first quote.
     *@param st a {@link java.util.StringTokenizer StringTokenizer} that provides
     *the input
     *@param until a String representing the end delimiter.
@@ -266,7 +271,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     return type;
   }
 
-  /**Skips the ignorables tokens from the input returning the first significant
+  /**Skips the ignorable tokens from the input returning the first significant
     *token.
     *The ignorable tokens are defined by {@link #ignoreTokens a set}
     */
@@ -290,6 +295,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
 
   void parseRHS(String rhs){
   }
+
   /*
   * Computes the lambda-closure (aka epsilon closure) of the given set of
   * states, that is the set of states that are accessible from any of the
@@ -408,7 +414,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   }
 
   /**Returns a string representation of the non-deterministic FSM graph using
-    *GML.
+    *GML (Graph modelling language).
     */
   public String getFSMgml(){
     String res = "graph[ \ndirected 1\n";
@@ -491,8 +497,8 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   }
 
   /**The method that does the actual tokenisation. This method should not be
-    *explicitly called but the {@link #tokenise tokenise} method should be
-    *used instead.
+    *explicitly called by the user but the {@link #tokenise tokenise} method
+    *should be used instead.
     */
   public void run(){
     fireStatusChangedEvent("Tokenising " + doc.getSourceURL().getFile() + "...");
@@ -630,6 +636,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   }
   //ProcessProgressReporter implementation ends here
 
+/*
   static public void main(String[] args){
     try{
       DefaultTokeniser dt = new DefaultTokeniser(Files.getResourceAsStream(
@@ -638,7 +645,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
       dt.tokenise(doc, false);
     }catch(Exception ex){ex.printStackTrace(System.err);}
   }
-
+*/
   public Factory getFactory(){
     return new Transients();
   }
@@ -646,7 +653,10 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   protected FeatureMap features  = null;
   protected List myProgressListeners = new LinkedList();
   protected List myStatusListeners = new LinkedList();
+
+  /**the document to be tokenised*/
   protected Document doc;
+  /**the annotations et where the new annotations will be added*/
   protected AnnotationSet annotationSet;
 
   /**The initial state of the non deterministic machine*/
@@ -661,24 +671,17 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   /**A set containng all the states of the deterministic machine*/
   protected Set dfsmStates = new HashSet();
 
-  /**Maps from the String description to the int value representing Unicode
-    *categories
-    */
-//  public static Map characterTypes;
-
-  /**Maps from the int associated to the unicode category to its name*/
-//  public static String[] typesMnemonics;
-
   /**The separator from LHS to RHS*/
   static String LHStoRHS = ">";
 
   /**A set of string representing tokens to be ignored (e.g. blanks)*/
   static Set ignoreTokens;
 
-
-//======================
   /**maps from int (the static value on {@link java.lang.Character} to int
-    *the internal value used by the tokeniser
+    *the internal value used by the tokeniser. The ins values used by the
+    *tokeniser are consecutive values, starting from 0 and going as high as
+    *necessary.
+    *They map all the public static int members on{@link java.lang.Character}
     */
   public static Map typeIds;
 
@@ -690,7 +693,13 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
 
   /**Maps from type names to type internal ids*/
   public static Map stringTypeIds;
-//========================
+
+  /**The static initialiser will inspect the class {@link java.lang.Character}
+    *using reflection to find all the public static members and will map them
+    *to ids starting from 0.
+    *After that it will build all the static data: {@link typeIds}, {@link
+    *maxTypeId}, {@link typeMnemonics}, {@link stringTypeIds}
+    */
   static{
     Field[] characterClassFields;
     try{
@@ -724,63 +733,6 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     }catch(Exception e){
       throw new LuckyException(e.toString());
     }
-/*
-    characterTypes = new HashMap();
-    characterTypes.put("UPPERCASE_LETTER", new UnicodeType(Character.UPPERCASE_LETTER));
-    characterTypes.put("LOWERCASE_LETTER", new UnicodeType(Character.LOWERCASE_LETTER));
-    characterTypes.put("TITLECASE_LETTER", new UnicodeType(Character.TITLECASE_LETTER));
-    characterTypes.put("MODIFIER_LETTER", new UnicodeType(Character.MODIFIER_LETTER));
-    characterTypes.put("OTHER_LETTER", new UnicodeType(Character.OTHER_LETTER));
-    characterTypes.put("NON_SPACING_MARK", new UnicodeType(Character.NON_SPACING_MARK));
-    characterTypes.put("ENCLOSING_MARK", new UnicodeType(Character.ENCLOSING_MARK));
-    characterTypes.put("COMBINING_SPACING_MARK", new UnicodeType(Character.COMBINING_SPACING_MARK));
-    characterTypes.put("DECIMAL_DIGIT_NUMBER", new UnicodeType(Character.DECIMAL_DIGIT_NUMBER));
-    characterTypes.put("LETTER_NUMBER", new UnicodeType(Character.LETTER_NUMBER));
-    characterTypes.put("OTHER_NUMBER", new UnicodeType(Character.OTHER_NUMBER));
-    characterTypes.put("SPACE_SEPARATOR", new UnicodeType(Character.SPACE_SEPARATOR));
-    characterTypes.put("LINE_SEPARATOR", new UnicodeType(Character.LINE_SEPARATOR));
-    characterTypes.put("PARAGRAPH_SEPARATOR", new UnicodeType(Character.PARAGRAPH_SEPARATOR));
-    characterTypes.put("CONTROL", new UnicodeType(Character.CONTROL));
-    characterTypes.put("FORMAT", new UnicodeType(Character.FORMAT));
-    characterTypes.put("SURROGATE", new UnicodeType(Character.SURROGATE));
-    characterTypes.put("DASH_PUNCTUATION", new UnicodeType(Character.DASH_PUNCTUATION));
-    characterTypes.put("START_PUNCTUATION", new UnicodeType(Character.START_PUNCTUATION));
-    characterTypes.put("END_PUNCTUATION", new UnicodeType(Character.END_PUNCTUATION));
-    characterTypes.put("CONNECTOR_PUNCTUATION", new UnicodeType(Character.CONNECTOR_PUNCTUATION));
-    characterTypes.put("OTHER_PUNCTUATION", new UnicodeType(Character.OTHER_PUNCTUATION));
-    characterTypes.put("MATH_SYMBOL", new UnicodeType(Character.MATH_SYMBOL));
-    characterTypes.put("CURRENCY_SYMBOL", new UnicodeType(Character.CURRENCY_SYMBOL));
-    characterTypes.put("MODIFIER_SYMBOL", new UnicodeType(Character.MODIFIER_SYMBOL));
-    characterTypes.put("OTHER_SYMBOL", new UnicodeType(Character.OTHER_SYMBOL));
-
-    typesMnemonics = new String[257];
-    typesMnemonics[Character.UPPERCASE_LETTER + 128] = "UPPERCASE_LETTER";
-    typesMnemonics[Character.LOWERCASE_LETTER + 128] = "LOWERCASE_LETTER";
-    typesMnemonics[Character.TITLECASE_LETTER + 128] = "TITLECASE_LETTER";
-    typesMnemonics[Character.MODIFIER_LETTER + 128] = "MODIFIER_LETTER";
-    typesMnemonics[Character.OTHER_LETTER + 128] = "OTHER_LETTER";
-    typesMnemonics[Character.NON_SPACING_MARK + 128] = "NON_SPACING_MARK";
-    typesMnemonics[Character.ENCLOSING_MARK + 128] = "ENCLOSING_MARK";
-    typesMnemonics[Character.COMBINING_SPACING_MARK + 128] = "COMBINING_SPACING_MARK";
-    typesMnemonics[Character.DECIMAL_DIGIT_NUMBER + 128] = "DECIMAL_DIGIT_NUMBER";
-    typesMnemonics[Character.LETTER_NUMBER + 128] = "LETTER_NUMBER";
-    typesMnemonics[Character.OTHER_NUMBER + 128] = "OTHER_NUMBER";
-    typesMnemonics[Character.SPACE_SEPARATOR + 128] = "SPACE_SEPARATOR";
-    typesMnemonics[Character.LINE_SEPARATOR + 128] = "LINE_SEPARATOR";
-    typesMnemonics[Character.PARAGRAPH_SEPARATOR + 128] = "PARAGRAPH_SEPARATOR";
-    typesMnemonics[Character.CONTROL + 128] = "CONTROL";
-    typesMnemonics[Character.FORMAT + 128] = "FORMAT";
-    typesMnemonics[Character.SURROGATE + 128] = "SURROGATE";
-    typesMnemonics[Character.DASH_PUNCTUATION + 128] = "DASH_PUNCTUATION";
-    typesMnemonics[Character.START_PUNCTUATION + 128] = "START_PUNCTUATION";
-    typesMnemonics[Character.END_PUNCTUATION + 128] = "END_PUNCTUATION";
-    typesMnemonics[Character.CONNECTOR_PUNCTUATION + 128] = "CONNECTOR_PUNCTUATION";
-    typesMnemonics[Character.OTHER_PUNCTUATION + 128] = "OTHER_PUNCTUATION";
-    typesMnemonics[Character.MATH_SYMBOL + 128] = "MATH_SYMBOL";
-    typesMnemonics[Character.CURRENCY_SYMBOL + 128] = "CURRENCY_SYMBOL";
-    typesMnemonics[Character.MODIFIER_SYMBOL + 128] = "MODIFIER_SYMBOL";
-    typesMnemonics[Character.OTHER_SYMBOL + 128] = "OTHER_SYMBOL";
-*/
     ignoreTokens = new HashSet();
     ignoreTokens.add(" ");
     ignoreTokens.add("\t");

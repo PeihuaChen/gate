@@ -8,8 +8,7 @@
 
 package gate.creole.tokeniser;
 
-/** Used by resources that can load rules from outside sources (such as a
-  * definition file) when finding an invalid rule.
+/**Fired when an invalid tokeniser rule is found
   */
 public class InvalidRuleException extends TokeniserException {
 
