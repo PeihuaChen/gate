@@ -25,7 +25,7 @@ do
   mkdir $$.$BASE
   cp $f $$.$BASE
   cd $$.$BASE
-  jar xf $BASE
+  ../jdk.sh jar xf $BASE
   rm $BASE
   rm -rf META-INF
   ../jdk.sh jar uf ../$JARTOUPDATE *
