@@ -10,6 +10,7 @@
 package gate.jape;
 
 import java.util.Enumeration;
+import java.util.Iterator;
 import com.objectspace.jgl.*;
 
 import gate.annotation.*;
@@ -90,12 +91,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
   * rule application style.
   */
   public void transduce(Document doc) throws JapeException {
-   //INITIALISATION
-
+    //INITIALISATION Should we move this someplace else?
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
     //convert it to deterministic
     fsm.eliminateVoidTransitions();
+
+
     //define data structures
     //FSM instances that haven't blocked yet
     java.util.LinkedList activeFSMInstances = new java.util.LinkedList();
@@ -114,7 +116,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     while(startNode != lastNode){
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
-      currentFSM = new FSMInstance(
+      currentFSM = FSMInstance.getNewInstance(
                   fsm,
                   fsm.getInitialState(),//fresh start
                   startNode,//the matching starts form the current startNode
@@ -225,7 +227,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
             activeFSMInstances.addLast(newFSMI);
           }
         }//while(transIter.hasNext())
-  //System.out.println("No of active FSMs: " + activeFSMInstances.size());
+       //return currentFSM to the rightful owner :)
+       FSMInstance.returnInstance(currentFSM);
        }//while(!activeFSMInstances.isEmpty())
 
        //FIRE THE RULE
@@ -256,7 +259,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
           }
         }
 //  System.out.println("XXXXXXXXXXXXXXXXXXXX");
-        acceptingFSMInstances.clear();
       }else if(ruleApplicationStyle == APPELT_STYLE){
         //AcceptingFSMInstances is an ordered structure:
         //just execute the first rule.
@@ -266,9 +268,14 @@ extends Transducer implements JapeConstants, java.io.Serializable
         currentRHS.transduce(doc,currentAcceptor.getBindings());
         //advance in AG
         startNode = currentAcceptor.getAGPosition();
-      }else throw new RuntimeException("Unknown rule application style!");
-    }//while(startNode != lastNode)
 
+      }else throw new RuntimeException("Unknown rule application style!");
+      //release all the accepting instances as they have done their job
+      Iterator acceptors = acceptingFSMInstances.iterator();
+      while(acceptors.hasNext())
+        FSMInstance.returnInstance((FSMInstance)acceptors.next());
+    }//while(startNode != lastNode)
+    FSMInstance.clearInstances();
   } // transduce
 
 
@@ -501,6 +508,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.9  2000/06/22 13:50:28  valyt
+// Changed TestJdk to accommodate linux
+//
 // Revision 1.8  2000/05/24 10:22:23  valyt
 // Added Jape GUI
 //

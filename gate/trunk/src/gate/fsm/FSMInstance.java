@@ -122,14 +122,14 @@ public class FSMInstance implements Comparable, Cloneable{
     */
   public Object clone() {
   //do a classic clone except for bindings which need to be cloned themselves
-    try{
-      FSMInstance clone = (FSMInstance)super.clone();
-      clone.bindings = (HashMap)bindings.clone();
-      return clone;
-    }catch (CloneNotSupportedException cnse){
-      cnse.printStackTrace(System.err);
-      return null;
-    }
+System.out.println("Clone!");
+    FSMInstance clone = FSMInstance.getNewInstance(this.supportGraph,
+                                                   this.FSMPosition,
+                                                   this.startNode,
+                                                   this.AGPosition,
+                                                   null);
+    ((FSMInstance)clone).bindings = (HashMap)bindings.clone();
+    return (FSMInstance)clone;
   }
 
   /** Implementation of the compareTo method required by the Comparable
@@ -186,4 +186,44 @@ public class FSMInstance implements Comparable, Cloneable{
   * state was generated.
   */
   private int fileIndex;
+
+  /** Static method that provides new FSM instances. This method handles some
+    * basic object pooling in order to reuse the FSMInstance objects.
+    * This is considered to be a good idea because during jape transducing
+    * a large number of FSMIntances are needed for short periods.
+    */
+  public static FSMInstance getNewInstance(FSM supportGraph, State FSMPosition,
+                                           Node startNode, Node AGPosition,
+                                           HashMap bindings){
+    FSMInstance res;
+    if(myInstances.isEmpty()) res = new FSMInstance(supportGraph, FSMPosition,
+                                                    startNode, AGPosition,
+                                                    bindings);
+    else{
+      res = (FSMInstance)myInstances.removeFirst();
+      res.supportGraph = supportGraph;
+      res.FSMPosition = FSMPosition;
+      res.startNode = startNode;
+      res.AGPosition = AGPosition;
+      res.bindings = bindings;
+    }
+    return res;
+  }
+
+  /** Static method used to return a FSMInstance that is not needed anymore
+    */
+  public static void returnInstance(FSMInstance ins){
+    myInstances.addFirst(ins);
+  }
+
+  /** Release all the FSMInstances that are not currently in use */
+  public static void clearInstances(){
+    myInstances = new LinkedList();
+  }
+
+  //The list of existing instances of type FSMInstance
+  private static LinkedList myInstances;
+  static{
+    myInstances = new LinkedList();
+  }
 }
