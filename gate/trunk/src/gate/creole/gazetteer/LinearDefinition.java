@@ -69,7 +69,8 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         } else {
           path = path.substring(0,slash+1);
         }
-        URL lurl = new URL(url.getProtocol()+"://"+path+node.getList());
+        URL lurl = new URL(url,node.getList());
+//        URL lurl = new URL(url.getProtocol()+"://"+path+node.getList());
         list.setURL(lurl);
         list.load();
 
