@@ -82,6 +82,14 @@ public class ProtegeProjectName extends AbstractLanguageResource
         fillOntotextOntology();
         visualResource.refreshOntoeditor(ontotextOntology);
       } // clsDeleted(KnowledgeBaseEvent event)
+
+      public void frameNameChanged(KnowledgeBaseEvent event) {
+        Frame frame = event.getFrame();
+        if(frame instanceof Cls) {
+          fillOntotextOntology();
+          visualResource.refreshOntoeditor(ontotextOntology);
+        } // if
+      } // frameNameChanged(KnowledgeBaseEvent event)
     };
     knBase.addKnowledgeBaseListener(_knowledgeBaseListener);
   } // createKBListener()
