@@ -71,20 +71,18 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     /* Niraj */
     Map matchesMap = null;
     Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
-    if(!(matchesMapObject instanceof Map)) {
+    if(matchesMapObject instanceof Map) {
       // no need to do anything
       // and return
-      return;
+      matchesMap = (Map) matchesMapObject;
     }
-
-    matchesMap = (Map) matchesMapObject;
     /* End */
 
     //first clear the default set, which cannot be removed
     if (annotationTypes == null || annotationTypes.isEmpty()) {
       document.getAnnotations().clear();
       /* Niraj */
-      removeFromDocumentCorefData((String) null, matchesMap);
+      removeFromDocumentCorefData( (String)null, matchesMap);
       /* End */
     } else {
       removeSubSet(document.getAnnotations(), /* Niraj */ matchesMap /* End */);
@@ -112,7 +110,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
         if (annotationTypes == null || annotationTypes.isEmpty()) {
           document.removeAnnotationSet(setName);
           /* Niraj */
-          removeFromDocumentCorefData((String) setName, matchesMap);
+          removeFromDocumentCorefData( (String) setName, matchesMap);
           /* End */
         } else {
           removeSubSet(document.getAnnotations(setName), /* Niraj */ matchesMap /* End */);
@@ -122,7 +120,10 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
     /* Niraj */
     // and finally we add it to the document
-    document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME, matchesMap);
+    if(matchesMap != null) {
+      document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME,
+                                 matchesMap);
+    }
     /* End */
 
   } // execute()
