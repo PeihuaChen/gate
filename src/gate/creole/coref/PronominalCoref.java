@@ -611,7 +611,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
         while (it.hasNext()) {
           Annotation currCandidate = (Annotation)it.next();
-          if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) < 0) {
+          if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) > 0) {
             //wow, we have a candidate that is closer to the quote
             bestAntecedent = currCandidate;
           }
