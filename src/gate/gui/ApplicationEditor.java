@@ -1139,7 +1139,7 @@ public class ApplicationEditor extends AbstractVisualResource
       if(value == null){
         //no value set; use the most currently used one of the given type
         if(Gate.getCreoleRegister().containsKey(getType())){
-          Stack instances = ((ResourceData)
+          WeakBumpyStack instances = ((ResourceData)
                               Gate.getCreoleRegister().get(getType())).
                                   getInstantiations();
           if(instances != null && !instances.isEmpty()){
