@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
 
       if not FOUND then
          raise exception ''%d'',x_invalid_lr;
-      end if
+      end if;
 
       /* get content id */
       select doc_content_id
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
 
       if not FOUND then
          raise exception ''%d'',x_invalid_lr;
-      end if
+      end if;
 
      /* 1. delete features */
      delete 
@@ -57,11 +57,14 @@ CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
      /* 2.1. delete annotation features */
      delete 
      from   t_feature
-     where  ft_entity_type = persist.C_FEATURE_OWNER_ANNOTATION
+     where  ft_entity_type = C_FEATURE_OWNER_ANNOTATION
             and ft_entity_id in (select ann_global_id
                                  from   t_annotation
                                  where  ann_doc_id = l_doc_id
                                 );
+
+     /* dummy */
+     return true;
 
    END;
 '
