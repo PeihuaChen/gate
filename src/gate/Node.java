@@ -18,20 +18,6 @@ public interface Node
   public Long getId();
 
   /** Offset (will be null when the node is not anchored) */
-  public Double getOffset();
-
-  /** Does this node structurally precede n? */
-  public boolean sPrecedes(Node n);
-
-  /** Does this node temporally (i.e. by offset) precede n? */
-  public boolean tPrecedes(Node n);
-
-  /** Does this node precede n? */
-  public boolean precedes(Node n);
-
-  public void addStartAnnotation(gate.Annotation annot);
-
-  public void addEndAnnotation(gate.Annotation annot);
-
+  public Long getOffset();
 
 } // interface Node

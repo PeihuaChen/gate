@@ -16,10 +16,7 @@ import gate.util.*;
   * TIPSTER equivalent: Collection.
   *
   */
-public interface Corpus extends SortedSet
+public interface Corpus extends SortedSet, FeatureBearer
 {
    
-  /** The features of this corpus */
-  public FeatureSet getFeatureSet();
-
 } // interface Corpus

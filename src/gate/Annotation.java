@@ -15,24 +15,13 @@ import gate.util.*;
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.
   */
-public interface Annotation {
+public interface Annotation extends FeatureBearer {
 
   /** The type of the annotation (corresponds to TIPSTER "name"). */
   public String getType();
 
-  /** The features, or content of this arc (corresponds to TIPSTER
-    * "attributes", and to LDC "label", which is the simplest case).
-    */
-  public FeatureSet getFeatures();
-
   /** The equivalence class of this annotation. */
   public String getEquivalenceClass();
-
-//  /** The start of the span. */
-//  public Long getStart();
-//
-//  /** The end of the span. */
-//  public Long getEnd();
 
   /** The start node. */
   public Node getStartNode();
@@ -40,18 +29,7 @@ public interface Annotation {
   /** The end node. */
   public Node getEndNode();
 
-  /** The stereotype associated with this annotation. */
-  public AnnotationStereotype getStereotype();
-
+  /** The id of this annotation. */
   public Long getId();
-
-//  /** Does this annotation structurally include a? */
-//  public boolean sIncludes(Annotation a);
-//
-//  /** Does this annotation temporally (i.e. by offset) include a? */
-//  public boolean tIncludes(Annotation a);
-//
-//  /** Does this annotation include a? */
-//  public boolean includes(Annotation a);
 
 } // interface Annotation
