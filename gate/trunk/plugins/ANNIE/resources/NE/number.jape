@@ -122,12 +122,12 @@ Rule: PercentBasic
   {Token.string == "minus"} 
   (SPACE)? 
  )?
- (({Token.kind == number}|NUMBER_WORDS)
+ ((AMOUNT_NUMBER|NUMBER_WORDS)
   SPACE
   {Token.string == "point"}
   SPACE
  )? 
- ({Token.kind == number}|NUMBER_WORDS)
+ (AMOUNT_NUMBER|NUMBER_WORDS)
  (SPACE)?
  (PERCENT)
 )
@@ -139,23 +139,17 @@ Rule: PercentSpan
 // two to four percent
 
 (
- ({Token.kind == number}|NUMBER_WORDS)
+ (AMOUNT_NUMBER|NUMBER_WORDS)
  (SPACE)
  ({Token.string == "-"} |
   {Token.string == "to"})
  (SPACE)
- ({Token.kind == number}|NUMBER_WORDS)
+ (AMOUNT_NUMBER|NUMBER_WORDS)
  (SPACE)? 
  (PERCENT)
 )
 :number -->
   :number.Percent = {rule = "PercentSpan"}
-
-
-
-
-
-
 
 
 
