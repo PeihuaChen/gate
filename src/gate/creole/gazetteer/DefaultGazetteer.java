@@ -100,8 +100,10 @@ public class DefaultGazetteer extends AbstractProcessingResource
         } else {
           ///toParse += line;
           toParse.append(line);
-          fireStatusChanged("Reading " + toParse.toString());
-          fireProgressChanged(lineIdx * 100 / linesCnt);
+          if (!Main.batchMode) {
+            fireStatusChanged("Reading " + toParse.toString());
+            fireProgressChanged(lineIdx * 100 / linesCnt);
+          }
           lineIdx ++;
           readList(toParse.toString(), true);
           ///toParse = "";
@@ -109,7 +111,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
         }
         line = bReader.readLine();
       }
-      fireProcessFinished();
+      if (!Main.batchMode)
+        fireProcessFinished();
     }catch(IOException ioe){
       throw new ResourceInstantiationException(ioe);
     }catch(GazetteerException ge){
@@ -297,7 +300,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    fireStatusChanged("Doing lookup in " +
+    if (!Main.batchMode)
+      fireStatusChanged("Doing lookup in " +
                            document.getSourceUrl().getFile() + "...");
     String content = document.getContent().toString();
     int length = content.length();
@@ -366,7 +370,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
         charIdx ++;
       }
       if(charIdx - oldCharIdx > 256) {
-        fireProgressChanged((100 * charIdx )/ length );
+        if (!Main.batchMode)
+          fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }
     } // while(charIdx < length)
@@ -391,8 +396,10 @@ public class DefaultGazetteer extends AbstractProcessingResource
       }//while(lookupIter.hasNext())
     }
     reset();
-    fireProcessFinished();
-    fireStatusChanged("Tokenisation complete!");
+    if (!Main.batchMode) {
+      fireProcessFinished();
+      fireStatusChanged("Tokenisation complete!");
+    }
   } // run
 
 
@@ -475,7 +482,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
 
   /**    */
   protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
+    if (!Main.batchMode && progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -485,7 +492,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
   }
   /**    */
   protected void fireProcessFinished() {
-    if (progressListeners != null) {
+    if (!Main.batchMode && progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -511,7 +518,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
   }
   /**    */
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
+    if (!Main.batchMode && statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

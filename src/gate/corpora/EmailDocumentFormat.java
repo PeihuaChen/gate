@@ -69,12 +69,13 @@ public class EmailDocumentFormat extends TextualDocumentFormat
                                                        this.markupElementsMap,
                                                        this.element2StringMap);
     // register a status listener with it
-    emailDocHandler.addStatusListener(new StatusListener() {
-      public void statusChanged(String text) {
-        // this is implemented in DocumentFormat.java and inherited here
-        fireStatusChanged(text);
-      }//statusChanged(String text)
-    });//addStatusListener
+    if (!Main.batchMode)
+      emailDocHandler.addStatusListener(new StatusListener() {
+        public void statusChanged(String text) {
+          // this is implemented in DocumentFormat.java and inherited here
+          fireStatusChanged(text);
+        }//statusChanged(String text)
+      });//addStatusListener
 
     // call the method that creates annotations on the gate document
     try{

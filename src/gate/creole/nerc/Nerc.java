@@ -66,10 +66,12 @@ public class Nerc extends SerialController {
                     params, features, listeners);
       this.add(tokeniser);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-      fireProgressChanged(10);
+      if (!Main.batchMode) {
+        fireProgressChanged(10);
 
       //gazetteer
-      fireStatusChanged("Creating a gazetteer");
+        fireStatusChanged("Creating a gazetteer");
+      }
       params = Factory.newFeatureMap();
       if(gazetteerListsURL != null) params.put("listsURL",
                                                gazetteerListsURL);
@@ -88,10 +90,12 @@ public class Nerc extends SerialController {
                       params, features, listeners);
       this.add(gazetteer);
       gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-      fireProgressChanged(50);
+      if (!Main.batchMode) {
+        fireProgressChanged(50);
 
       //sentence spliter
-      fireStatusChanged("Creating a sentence splitter");
+        fireStatusChanged("Creating a sentence splitter");
+      }
       params = Factory.newFeatureMap();
       if(splitterGazetteerURL != null) params.put("gazetteerListsURL",
                                                splitterGazetteerURL);
@@ -112,10 +116,12 @@ public class Nerc extends SerialController {
                       params, features, listeners);
       this.add(splitter);
       splitter.setName("Splitter " + System.currentTimeMillis());
-      fireProgressChanged(60);
+      if (!Main.batchMode) {
+        fireProgressChanged(60);
 
       //POS Tagger
-      fireStatusChanged("Creating a POS tagger");
+        fireStatusChanged("Creating a POS tagger");
+      }
       params = Factory.newFeatureMap();
       if(taggerLexiconURL != null) params.put("lexiconURL",
                                                taggerLexiconURL);
@@ -135,11 +141,13 @@ public class Nerc extends SerialController {
                       params, features, listeners);
       this.add(tagger);
       tagger.setName("Tagger " + System.currentTimeMillis());
-      fireProgressChanged(65);
+      if (!Main.batchMode) {
+        fireProgressChanged(65);
 
 
       //transducer
-      fireStatusChanged("Creating a Jape transducer");
+        fireStatusChanged("Creating a Jape transducer");
+      }
       params = Factory.newFeatureMap();
   //      rData = (ResourceData)Gate.getCreoleRegister().get(
   //              "gate.creole.Transducer");
@@ -177,7 +185,8 @@ public class Nerc extends SerialController {
     FeatureMap params;
     if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
     try{
-      fireProgressChanged(0);
+      if (!Main.batchMode)
+        fireProgressChanged(0);
       //tokeniser
       params = Factory.newFeatureMap();
       params.put("document", document);
@@ -213,57 +222,72 @@ public class Nerc extends SerialController {
     }catch(Exception e){
       throw new ExecutionException(e);
     }
-    fireProgressChanged(5);
-    ProgressListener pListener = new CustomProgressListener(5, 15);
-    StatusListener sListener = new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    };
+    ProgressListener pListener = null;
+    StatusListener sListener = null;
+    if (!Main.batchMode) {
+      fireProgressChanged(5);
+      pListener = new CustomProgressListener(5, 15);
+      sListener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
 
     //tokeniser
-    tokeniser.addProgressListener(pListener);
-    tokeniser.addStatusListener(sListener);
+      tokeniser.addProgressListener(pListener);
+      tokeniser.addStatusListener(sListener);
+    }
     tokeniser.run();
     tokeniser.check();
-    tokeniser.removeProgressListener(pListener);
-    tokeniser.removeStatusListener(sListener);
+    if (!Main.batchMode) {
+      tokeniser.removeProgressListener(pListener);
+      tokeniser.removeStatusListener(sListener);
 
     //gazetteer
-    pListener = new CustomProgressListener(10, 20);
-    gazetteer.addProgressListener(pListener);
-    gazetteer.addStatusListener(sListener);
+
+      pListener = new CustomProgressListener(10, 20);
+      gazetteer.addProgressListener(pListener);
+      gazetteer.addStatusListener(sListener);
+    }
     gazetteer.run();
     gazetteer.check();
-    gazetteer.removeProgressListener(pListener);
-    gazetteer.removeStatusListener(sListener);
+    if (!Main.batchMode) {
+      gazetteer.removeProgressListener(pListener);
+      gazetteer.removeStatusListener(sListener);
 
     //sentence splitter
-    pListener = new CustomProgressListener(20, 35);
-    splitter.addProgressListener(pListener);
-    splitter.addStatusListener(sListener);
+      pListener = new CustomProgressListener(20, 35);
+      splitter.addProgressListener(pListener);
+      splitter.addStatusListener(sListener);
+    }
     splitter.run();
     splitter.check();
-    splitter.removeProgressListener(pListener);
-    splitter.removeStatusListener(sListener);
+    if (!Main.batchMode) {
+      splitter.removeProgressListener(pListener);
+      splitter.removeStatusListener(sListener);
 
     //POS tagger
-    pListener = new CustomProgressListener(35, 40);
-    tagger.addProgressListener(pListener);
-    tagger.addStatusListener(sListener);
+      pListener = new CustomProgressListener(35, 40);
+      tagger.addProgressListener(pListener);
+      tagger.addStatusListener(sListener);
+    }
     tagger.run();
     tagger.check();
-    tagger.removeProgressListener(pListener);
-    tagger.removeStatusListener(sListener);
+    if (!Main.batchMode) {
+      tagger.removeProgressListener(pListener);
+      tagger.removeStatusListener(sListener);
 
     //transducer
-    pListener = new CustomProgressListener(40, 90);
-    transducer.addProgressListener(pListener);
-    transducer.addStatusListener(sListener);
+      pListener = new CustomProgressListener(40, 90);
+      transducer.addProgressListener(pListener);
+      transducer.addStatusListener(sListener);
+    }
     transducer.run();
     transducer.check();
-    transducer.removeProgressListener(pListener);
-    transducer.removeStatusListener(sListener);
+    if (!Main.batchMode) {
+      transducer.removeProgressListener(pListener);
+      transducer.removeStatusListener(sListener);
+    }
   }//protected void runSystem() throws ExecutionException
 
   /**

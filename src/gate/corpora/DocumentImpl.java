@@ -181,15 +181,17 @@ extends AbstractLanguageResource implements Document {
       DocumentFormat docFormat =
         DocumentFormat.getDocumentFormat(this, sourceUrl);
       try {
-        if(docFormat != null){
+        if(docFormat != null && !Main.batchMode){
           StatusListener sListener = new StatusListener(){
             public void statusChanged(String text){
               fireStatusChanged(text);
             }
           };
-          docFormat.addStatusListener(sListener);
+          if (!Main.batchMode)
+            docFormat.addStatusListener(sListener);
           docFormat.unpackMarkup(this);
-          docFormat.removeStatusListener(sListener);
+          if (!Main.batchMode)
+            docFormat.removeStatusListener(sListener);
         }
       } catch(DocumentFormatException e) {
         throw new ResourceInstantiationException(
@@ -365,7 +367,8 @@ extends AbstractLanguageResource implements Document {
     // Construct the dumping set in that way that all annotations will verify
     // the condition that there are not annotations which are crossed.
     // First add all annotation from the original markups
-    fireStatusChanged("Constructing the dumping annotation set.");
+    if (!Main.batchMode)
+      fireStatusChanged("Constructing the dumping annotation set.");
     dumpingSet.addAll(originalMarkupsAnnotSet);
     // Then take all the annotations from aSourceAnnotationSet and verify if
     // they can be inserted safely into the dumpingSet. Where not possible,
@@ -388,7 +391,8 @@ extends AbstractLanguageResource implements Document {
 
     // The dumpingSet is ready to be exported as XML
     // Here we go.
-    fireStatusChanged("Dumping annotations as XML");
+    if (!Main.batchMode)
+      fireStatusChanged("Dumping annotations as XML");
     StringBuffer xmlDoc = new StringBuffer("");
     // Add xml header
     xmlDoc.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
@@ -425,7 +429,8 @@ extends AbstractLanguageResource implements Document {
       xmlDoc.append("</GatePreserveFormat>");
     }// End if
     this.removeAnnotationSet("Dumping annotation set");
-    fireStatusChanged("Done.");
+    if (!Main.batchMode)
+      fireStatusChanged("Done.");
     return xmlDoc.toString();
   }//End toXml()
 
@@ -786,7 +791,8 @@ extends AbstractLanguageResource implements Document {
     xmlContent.append("</TextWithNodes>\n");
     // Serialize as XML all document's annotation sets
     // Serialize the default AnnotationSet
-    fireStatusChanged("Saving the default annotation set ");
+    if (!Main.batchMode)
+      fireStatusChanged("Saving the default annotation set ");
     xmlContent.append("<!-- The default annotation set -->\n\n");
     xmlContent.append(annotationSetToXml(this.getAnnotations()));
     // Serialize all others AnnotationSets
@@ -797,13 +803,15 @@ extends AbstractLanguageResource implements Document {
         AnnotationSet annotSet = (AnnotationSet) iter.next();
         xmlContent.append("<!-- Named annotation set -->\n\n");
         // Serialize it as XML
-        fireStatusChanged("Saving " + annotSet.getName()+ " annotation set ");
+        if (!Main.batchMode)
+          fireStatusChanged("Saving " + annotSet.getName()+ " annotation set ");
         xmlContent.append(annotationSetToXml(annotSet));
       }// End while
     }// End if
     // Add the end of GateDocument
     xmlContent.append("</GateDocument>");
-    fireStatusChanged("Done !");
+    if (!Main.batchMode)
+      fireStatusChanged("Done !");
     // return the XmlGateDocument
     return xmlContent.toString();
   }// toXml
@@ -1098,7 +1106,7 @@ extends AbstractLanguageResource implements Document {
   private String stringContent;
   private Boolean markupAware = new Boolean(false);
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
+    if (!Main.batchMode && statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1201,7 +1209,7 @@ extends AbstractLanguageResource implements Document {
     }
   }
   protected void fireAnnotationSetAdded(DocumentEvent e) {
-    if (documentListeners != null) {
+    if (!Main.batchMode && documentListeners != null) {
       Vector listeners = documentListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1210,7 +1218,7 @@ extends AbstractLanguageResource implements Document {
     }
   }
   protected void fireAnnotationSetRemoved(DocumentEvent e) {
-    if (documentListeners != null) {
+    if (!Main.batchMode && documentListeners != null) {
       Vector listeners = documentListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
