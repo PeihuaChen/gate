@@ -73,12 +73,12 @@ create or replace package persist is
                             p_content_id   OUT number);
 
                             
-  procedure create_annotation_set(p_doc_id           IN number,
+  procedure create_annotation_set(p_lr_id           IN number,
                                   p_as_name          IN varchar2,
                                   p_as_id            OUT number);
 
 
-  procedure create_annotation(p_doc_id           IN number,
+  procedure create_annotation(p_lr_id           IN number,
                               p_ann_local_id     IN number,    
                               p_as_id            IN number,
                               p_node_start_lid   IN number,                                
