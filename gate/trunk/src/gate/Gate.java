@@ -895,13 +895,29 @@ jar/classpath so it's the same as registerBuiltins
    * user's <TT>gate.xml</TT> file (create one if it doesn't exist).
    */
   public static void writeUserConfig() throws GateException {
+    String pluginsHomeStr;
+    try{
+      pluginsHomeStr = pluginsHome.getCanonicalPath();
+    }catch(IOException ioe){
+      throw new GateRuntimeException("Problem while locating the plug-ins home!",
+              ioe);
+    }
     //update the values for knownPluginPath
     String knownPluginPath = "";
     Iterator pluginIter = getKnownPlugins().iterator();
     while(pluginIter.hasNext()){
       URL aPluginURL = (URL)pluginIter.next();
       //do not save installed plug-ins - they get loaded automatically
-      
+      if(aPluginURL.getProtocol().equals("file")){
+        File pluginDirectory = new File(aPluginURL.getFile());
+        try{
+          if(pluginDirectory.getCanonicalPath().startsWith(pluginsHomeStr)) continue;
+        }catch(IOException ioe){
+          throw new GateRuntimeException("Problem while locating the plug-in" + 
+                  aPluginURL.toString(),
+                  ioe);
+        }
+      }
       if(knownPluginPath.length() > 0) knownPluginPath += ";";
       knownPluginPath += aPluginURL.toExternalForm();
     }
