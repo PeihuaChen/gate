@@ -108,6 +108,11 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     });
   }
 
+  public void cleanup(){
+    super.cleanup();
+    corpus = null;
+  }
+
   public void setTarget(Object target){
     if(!(target instanceof Corpus)){
       throw new IllegalArgumentException(

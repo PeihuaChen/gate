@@ -312,26 +312,26 @@ public class NameBearerHandle implements Handle,
 
       statusListeners.clear();
       progressListeners.clear();
-      //delete the viewers
-      if(largeView instanceof VisualResource){
-        Factory.deleteResource((VisualResource)largeView);
-      }else if(largeView instanceof JTabbedPane){
-        Component[] comps = ((JTabbedPane)largeView).getComponents();
-        for(int i = 0; i < comps.length; i++){
-          if(comps[i] instanceof VisualResource)
-            Factory.deleteResource((VisualResource)comps[i]);
-        }
-      }
-      if(smallView instanceof VisualResource){
-        Factory.deleteResource((VisualResource)smallView);
-      }else if(smallView instanceof JTabbedPane){
-        Component[] comps = ((JTabbedPane)smallView).getComponents();
-        for(int i = 0; i < comps.length; i++){
-          if(comps[i] instanceof VisualResource)
-            Factory.deleteResource((VisualResource)comps[i]);
-        }
-      }
-
+//      //delete the viewers
+//      if(largeView instanceof VisualResource){
+//        Factory.deleteResource((VisualResource)largeView);
+//      }else if(largeView instanceof JTabbedPane){
+//        Component[] comps = ((JTabbedPane)largeView).getComponents();
+//        for(int i = 0; i < comps.length; i++){
+//          if(comps[i] instanceof VisualResource)
+//            Factory.deleteResource((VisualResource)comps[i]);
+//        }
+//      }
+//      if(smallView instanceof VisualResource){
+//        Factory.deleteResource((VisualResource)smallView);
+//      }else if(smallView instanceof JTabbedPane){
+//        Component[] comps = ((JTabbedPane)smallView).getComponents();
+//        for(int i = 0; i < comps.length; i++){
+//          if(comps[i] instanceof VisualResource)
+//            Factory.deleteResource((VisualResource)comps[i]);
+//        }
+//      }
+//
     }//public void actionPerformed(ActionEvent e)
   }//class CloseAction
 
@@ -1007,8 +1007,6 @@ public class NameBearerHandle implements Handle,
     if(largeView != null){
       if(largeView instanceof VisualResource){
         //we only had a view so no tabbed pane was used
-        ((VisualResource)largeView).setTarget(null);
-        ((VisualResource)largeView).setHandle(null);
         Factory.deleteResource((VisualResource)largeView);
       }else{
         Component vrs[] = ((JTabbedPane)largeView).getComponents();
@@ -1023,6 +1021,8 @@ public class NameBearerHandle implements Handle,
     if(smallView != null){
       if(smallView instanceof VisualResource){
         //we only had a view so no tabbed pane was used
+        ((VisualResource)smallView).setTarget(null);
+        ((VisualResource)smallView).setHandle(null);
         Factory.deleteResource((VisualResource)smallView);
       }else{
         Component vrs[] = ((JTabbedPane)smallView).getComponents();
@@ -1037,6 +1037,7 @@ public class NameBearerHandle implements Handle,
     }
 
     Gate.getCreoleRegister().removeCreoleListener(this);
+    popup = null;
     target = null;
   }
 
@@ -1110,6 +1111,7 @@ public class NameBearerHandle implements Handle,
 
   public void resourceUnloaded(CreoleEvent e) {
     if(getTarget() == e.getResource()) cleanup();
+
   }
 
   public void resourceRenamed(Resource resource, String oldName,

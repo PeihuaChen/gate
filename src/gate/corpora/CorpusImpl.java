@@ -283,6 +283,7 @@ public class CorpusImpl extends AbstractLanguageResource
   /** Construction */
 
   public void cleanup(){
+    Gate.getCreoleRegister().removeCreoleListener(this);
   }
 
   /** Initialise this resource, and return it. */

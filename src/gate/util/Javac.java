@@ -103,6 +103,10 @@ public class Javac{
       return new ByteArrayInputStream(classSource.getBytes());
     }
 
+    void printCount(String kind, int count) {
+      System.out.println("Count: " + count);
+    }
+
     /**
      * Overidden so it loads the compiled class in the gate classloader rather
      * than writting it on the disk.

@@ -457,6 +457,17 @@ public class SerialControllerEditor extends AbstractVisualResource
     });
   }//protected void initListeners()
 
+  /**
+   * Cleans the internal data and prepares this object to be collected
+   */
+  public void cleanup(){
+    Gate.getCreoleRegister().removeCreoleListener(this);
+    controller = null;
+    progressListeners.clear();
+    statusListeners.clear();
+    parametersEditor.cleanup();
+  }
+
   protected void buildInternalMenus(){
     addMenu.removeAll();
     Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();

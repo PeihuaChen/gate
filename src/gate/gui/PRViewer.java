@@ -46,7 +46,13 @@ public class PRViewer extends AbstractVisualResource {
   protected void initListeners(){
   }
 
+  public void cleanup(){
+    super.cleanup();
+    editor.cleanup();
+  }
+
   public void setTarget(Object target){
+    if(target == null) return;
     if(!(target instanceof ProcessingResource)){
       throw new GateRuntimeException(this.getClass().getName() +
                                      " can only be used to display " +

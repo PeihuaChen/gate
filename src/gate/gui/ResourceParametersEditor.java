@@ -125,6 +125,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
   }
 
   /**
+   * Cleans the internal data and prepares this object to be collected
+   */
+  public void cleanup(){
+    Gate.getCreoleRegister().removeCreoleListener(this);
+  }
+
+  /**
    * Disable key handling for most keys by JTable when not editing.
    */
   protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,

@@ -1012,6 +1012,10 @@ public class DocumentEditor extends AbstractVisualResource
    * Sets the document to be displayed
    */
   public void setTarget(Object target){
+    if(target == null){
+      document = null;
+      return;
+    }
     if(!(target instanceof gate.Document)){
       throw new IllegalArgumentException(
         "The document editor can only display Gate documents!\n" +
