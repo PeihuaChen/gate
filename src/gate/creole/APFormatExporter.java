@@ -184,7 +184,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     xmlDoc.append("<?xml version=\"1.0\" ?>\n");
     xmlDoc.append("<!DOCTYPE source_file SYSTEM ");
     if (dtdFileName == null)
-      xmlDoc.append("\"ace-pilot-ref.dtd\"");
+      xmlDoc.append("\"ace-rdc.v2.0.1.dtd\"");
     else
       xmlDoc.append("\""+dtdFileName+"\"");
     xmlDoc.append(">\n");
@@ -202,7 +202,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
           xmlDoc.append(" SOURCE=\""+ docTypeAnn.getFeatures().get("SOURCE")+ "\" ");
       }//if no doc type annotations
     }
-    xmlDoc.append("VERSION=\"1.2\" URI=\"");
+    xmlDoc.append("VERSION=\"2.0\" URI=\"");
     xmlDoc.append(docId);
     xmlDoc.append("-lf\">\n");
     xmlDoc.append("  <document DOCID=\"");
@@ -309,7 +309,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     xmlDoc.append("  <entity ID=\"" + docId + "-" + getNextEntityId() + "\">\n");
     // We know for sure that the list is not empty (see above)
     Annotation a = (Annotation) anEntity.get(0);
-    xmlDoc.append("    <entity_type>" + a.getType().toUpperCase() +
+    xmlDoc.append("    <entity_type GENERIC=\"FALSE\">" + a.getType().toUpperCase() +
      "</entity_type>\n");
     // Write the entities mentions
     Iterator anEntityIter = anEntity.iterator();
