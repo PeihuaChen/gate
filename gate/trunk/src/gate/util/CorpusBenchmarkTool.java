@@ -41,97 +41,12 @@ public class CorpusBenchmarkTool {
 
   public void initPRs() {
     try {
-      FeatureMap params = Factory.newFeatureMap();
-
-      //create a default tokeniser
-      Out.prln("Loading tokeniser <P>");
-      String rulesURL = this.configs.getProperty("tokeniserRulesURL");
-      if (rulesURL != null && !rulesURL.equals(""))
-        params.put(
-          DefaultTokeniser.DEF_TOK_TOKRULES_URL_PARAMETER_NAME, rulesURL);
-      String grammarsURL = this.configs.getProperty("tokeniserGrammarURL");
-      if (grammarsURL != null && !grammarsURL.equals(""))
-        params.put(
-          DefaultTokeniser.DEF_TOK_GRAMRULES_URL_PARAMETER_NAME, grammarsURL);
-      //the annots are put in temp, as they are going to be transfered to the
-      //new set
-      params.put(DefaultTokeniser.DEF_TOK_ANNOT_SET_PARAMETER_NAME, "temp");
-      tokeniser = (DefaultTokeniser) Factory.createResource(
-                      "gate.creole.tokeniser.DefaultTokeniser", params);
-
-      //create a default gazetteer
-      Out.prln("Loading gazetteer <P>");
-      params.clear();
-      String listsURL = this.configs.getProperty("gazetteerListsURL");
-      if (listsURL != null && !listsURL.equals("")) {
-        params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME, listsURL);
-        Out.prln("Running gazetteer on lists in: " + listsURL + "<P>");
-      }
-      String caseSensitive = this.configs.getProperty("gazetteerCaseSensitive");
-      if (caseSensitive != null && !caseSensitive.equals(""))
-        params.put(DefaultGazetteer.DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME,
-          new Boolean(caseSensitive));
-      params.put(DefaultGazetteer.DEF_GAZ_ANNOT_SET_PARAMETER_NAME, "temp");
-      gazetteer = (DefaultGazetteer) Factory.createResource(
-                      "gate.creole.gazetteer.DefaultGazetteer", params);
-
-      //create the Annotation set transfer
-      Out.prln("Loading annotation set transfer <P>");
-      params.clear();
-      params.put(AnnotationSetTransfer.AST_INPUT_AS_PARAMETER_NAME, "temp");
-      params.put(AnnotationSetTransfer.AST_OUTPUT_AS_PARAMETER_NAME, annotSetName);
-      //by default make it transfer all annotations
-      params.put(AnnotationSetTransfer.AST_TEXT_TAG_PARAMETER_NAME, "");
-      setTransfer = (AnnotationSetTransfer) Factory.createResource(
-                      "gate.creole.annotransfer.AnnotationSetTransfer", params);
-
-      //create a splitter
-      Out.prln("Loading sentence splitter <P>");
-      params.clear();
-      listsURL = this.configs.getProperty("splitterGazetteerURL");
-      if (listsURL != null && !listsURL.equals(""))
-        params.put(SentenceSplitter.SPLIT_GAZ_URL_PARAMETER_NAME, listsURL);
-      grammarsURL = this.configs.getProperty("splitterGrammarURL");
-      if (grammarsURL != null && !grammarsURL.equals(""))
-        params.put(SentenceSplitter.SPLIT_TRANSD_URL_PARAMETER_NAME, grammarsURL);
-      params.put(SentenceSplitter.SPLIT_INPUT_AS_PARAMETER_NAME, annotSetName);
-      params.put(SentenceSplitter.SPLIT_OUTPUT_AS_PARAMETER_NAME, annotSetName);
-      splitter = (SentenceSplitter) Factory.createResource(
-                      "gate.creole.splitter.SentenceSplitter", params);
-
-      //create a tagger
-      Out.prln("Loading POS tagger <P>");
-      params.clear();
-      String lexiconURL = this.configs.getProperty("taggerLexiconURL");
-      if (lexiconURL != null && !lexiconURL.equals(""))
-        params.put(POSTagger.TAG_LEXICON_URL_PARAMETER_NAME, lexiconURL);
-      rulesURL = this.configs.getProperty("taggerRulesURL");
-      if (rulesURL != null && !rulesURL.equals(""))
-        params.put(POSTagger.TAG_RULES_URL_PARAMETER_NAME, rulesURL);
-      params.put(POSTagger.TAG_INPUT_AS_PARAMETER_NAME, annotSetName);
-      tagger = (POSTagger) Factory.createResource(
-                      "gate.creole.POSTagger", params);
-
-      //create a grammar
-      Out.prln("Loading grammars for transducer <P>");
-      params.clear();
-      String grammarURL = this.configs.getProperty("grammarURL");
-      if (grammarURL != null && !grammarURL.equals("")) {
-        params.put(ANNIETransducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, grammarURL);
-        Out.prln("Running transducer on grammars in: " + grammarURL + "<P>");
-      }
-      params.put(ANNIETransducer.TRANSD_INPUT_AS_PARAMETER_NAME, annotSetName);
-      params.put(ANNIETransducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, annotSetName);
-      transducer = (ANNIETransducer) Factory.createResource(
-                      "gate.creole.ANNIETransducer", params);
-
-      //create an orthomatcher
-      Out.prln("Loading orthomatcher <P>");
-      params.clear();
-      params.put(OrthoMatcher.OM_ANN_SET_PARAMETER_NAME, annotSetName);
-      orthomatcher = (OrthoMatcher) Factory.createResource(
-                      "gate.creole.orthomatcher.OrthoMatcher", params);
-    } catch (ResourceInstantiationException ex) {
+      if (applicationFile == null)
+        Out.prln("Application not set!");
+      Out.prln("App file is: " + applicationFile.getAbsolutePath());
+      application = (Controller) gate.util.persistence.PersistenceManager
+                                   .loadObjectFromFile(applicationFile);
+    } catch (Exception ex) {
       throw new GateRuntimeException("Corpus Benchmark Tool:"+ex.getMessage());
     }
   }//initPRs
@@ -141,13 +56,6 @@ public class CorpusBenchmarkTool {
     if (isMarkedStored)
       return;
 
-    Factory.deleteResource(this.tokeniser);
-    Factory.deleteResource(this.gazetteer);
-    Factory.deleteResource(this.setTransfer);
-    Factory.deleteResource(this.splitter);
-    Factory.deleteResource(this.tagger);
-    Factory.deleteResource(this.transducer);
-    Factory.deleteResource(this.orthomatcher);
   }
 
   public void execute() {
@@ -170,6 +78,29 @@ public class CorpusBenchmarkTool {
         String setName = this.configs.getProperty("annotSetName");
         if (setName != null && !setName.equals(""))
           this.annotSetName = setName;
+        setName = this.configs.getProperty("outputSetName");
+        if (setName != null && !setName.equals(""))
+          this.outputSetName = setName;
+        String types = this.configs.getProperty("annotTypes");
+        if (types != null && !types.equals("")) {
+          Out.prln("Using annotation types from properties file. <P>\n");
+          StringTokenizer strTok = new StringTokenizer(types, ";");
+          annotTypes = new ArrayList();
+          while (strTok.hasMoreTokens())
+            annotTypes.add(strTok.nextToken());
+        } else {
+          annotTypes = new ArrayList();
+          annotTypes.add("Organization");
+          annotTypes.add("Person");
+          annotTypes.add("Date");
+          annotTypes.add("Location");
+          annotTypes.add("Address");
+          annotTypes.add("Money");
+          annotTypes.add("Percent");
+          annotTypes.add("GPE");
+          annotTypes.add("Facility");
+        }
+
       } catch (IOException ex) {
         //just ignore the file and go on with the defaults
         this.configs = new Properties();
@@ -182,17 +113,6 @@ public class CorpusBenchmarkTool {
     //for processing unprocessed documents
     if (!this.isMarkedStored)
       initPRs();
-
-    annotTypes = new ArrayList();
-    annotTypes.add("Organization");
-    annotTypes.add("Person");
-    annotTypes.add("Date");
-    annotTypes.add("Location");
-    annotTypes.add("Address");
-    annotTypes.add("Money");
-    annotTypes.add("Percent");
-    annotTypes.add("GPE");
-    annotTypes.add("Facility");
 
   }
 
@@ -278,6 +198,15 @@ public class CorpusBenchmarkTool {
     if (!dir.isDirectory())
       throw new GateException(usage);
 
+    //get the last argument which is the application
+    i++;
+    String appName = args[i];
+    File appFile = new File(appName);
+    if (!appFile.isFile())
+      throw new GateException(usage);
+    else
+      corpusTool.setApplicationFile(appFile);
+
     corpusTool.init();
 
     Out.prln("Measuring annotaitions of types: " + corpusTool.annotTypes + "<P>");
@@ -329,6 +258,10 @@ public class CorpusBenchmarkTool {
   public boolean getMarkedClean() {
     return isMarkedClean;
   }//
+
+  public void setApplicationFile(File newAppFile) {
+    applicationFile = newAppFile;
+  }
 
   /**
    * Returns the average precision over the entire set of processed documents.
@@ -704,32 +637,25 @@ ex.printStackTrace();
 
   protected void processDocument(Document doc) {
     try {
-      tokeniser.setDocument(doc);
-      tokeniser.execute();
-
-      gazetteer.setDocument(doc);
-      gazetteer.execute();
-
-      String textTagName = configs.getProperty("astTEXTTagName");
-      if (textTagName != null && !textTagName.equals(""))
-        setTransfer.setTextTagName(textTagName);
-      setTransfer.setDocument(doc);
-      setTransfer.execute();
-
-      splitter.setDocument(doc);
-      splitter.execute();
-
-      tagger.setDocument(doc);
-      tagger.execute();
-
-      transducer.setDocument(doc);
-      transducer.execute();
-
-      orthomatcher.setDocument(doc);
-      orthomatcher.execute();
-    } catch (gate.creole.ExecutionException ex) {
-      throw new GateRuntimeException("Corpus generation error: " +
-                                     ex.getMessage());
+      if (application instanceof CorpusController) {
+        Corpus tempCorpus = Factory.newCorpus("temp");
+        tempCorpus.add(doc);
+        ((CorpusController)application).setCorpus(tempCorpus);
+        application.execute();
+        Factory.deleteResource(tempCorpus);
+        tempCorpus = null;
+      } else {
+        Iterator iter = application.getPRs().iterator();
+        while (iter.hasNext())
+          ((ProcessingResource) iter.next()).setParameterValue("document", doc);
+        application.execute();
+      }
+    } catch (ResourceInstantiationException ex) {
+      throw new RuntimeException("Error executing application: "
+                                    + ex.getMessage());
+    } catch (ExecutionException ex) {
+      throw new RuntimeException("Error executing application: "
+                                    + ex.getMessage());
     }
   }
 
@@ -969,7 +895,7 @@ ex.printStackTrace();
     // create the annotation schema needed for AnnotationDiff
     AnnotationSchema annotationSchema = new AnnotationSchema();
 
-    // organization type
+    // set annotation type
     annotationSchema.setAnnotationName(annotType);
     // create an annotation diff
     AnnotationDiff annotDiff = new AnnotationDiff();
@@ -977,7 +903,7 @@ ex.printStackTrace();
     annotDiff.setKeyDocument(keyDoc);
     annotDiff.setResponseDocument(respDoc);
     annotDiff.setKeyAnnotationSetName(annotSetName);
-    annotDiff.setResponseAnnotationSetName(annotSetName);
+    annotDiff.setResponseAnnotationSetName(outputSetName);
     annotDiff.setKeyFeatureNamesSet(new HashSet());
     annotDiff.setTextMode(new Boolean(true));
     annotDiff.init();
@@ -1034,13 +960,8 @@ ex.printStackTrace();
   private File currDir;
   private static List annotTypes;
 
-  private DefaultTokeniser tokeniser;
-  private DefaultGazetteer gazetteer;
-  private SentenceSplitter splitter;
-  private POSTagger tagger;
-  private ANNIETransducer transducer;
-  private OrthoMatcher orthomatcher;
-  private AnnotationSetTransfer setTransfer;
+  private Controller application = null;
+  private File applicationFile = null;
 
   //collect the sum of all precisions and recalls of all docs
   //and the number of docs, so I can calculate the average for
@@ -1068,12 +989,13 @@ ex.printStackTrace();
   private boolean isMarkedClean = false;
 
   private String annotSetName = "Key";
+  private String outputSetName = null;
 
   private double threshold = 0.5;
   private Properties configs = new Properties();
 
   /** String to print when wrong command-line args */
   private static String usage =
-    "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] [-verbose] directory-name";
+    "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] [-verbose] directory-name application";
 
 }
