@@ -12,7 +12,7 @@
       <COMMENT>GATE transient document</COMMENT>
       <OR>
         <PARAMETER NAME="sourceUrl"
-          SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf"
+          SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf"
           COMMENT="Source URL">java.net.URL</PARAMETER>
         <PARAMETER NAME="stringContent" COMMENT="The content of the document">
           java.lang.String</PARAMETER>
@@ -106,6 +106,12 @@
       <AUTOINSTANCE/>
       <PRIVATE/>
     </RESOURCE>
+    <RESOURCE>
+      <NAME>GATE PDF Document Format</NAME>
+      <CLASS>gate.corpora.PdfDocumentFormat</CLASS>
+      <AUTOINSTANCE/>
+      <PRIVATE/>
+    </RESOURCE>    
     <!-- Annotation schema -->
     <RESOURCE>
       <NAME>Annotation schema</NAME>
