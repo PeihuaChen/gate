@@ -331,9 +331,10 @@ public class AnnotationEditDialog extends JDialog {
       responseMap = Factory.newFeatureMap();
       if (featureMap != null)
         responseMap.putAll(featureMap);
-
-      JOptionPane.showMessageDialog(mainFrame,
-         "AnnotationSchema specifies no features for this annotation !",
+      // If called in editing mode, then show this message
+      if (aFeatMap != null)
+        JOptionPane.showMessageDialog(mainFrame,
+          "AnnotationSchema specifies no features for this annotation !",
                                     "Gate", JOptionPane.ERROR_MESSAGE);
       return responseMap;
     }// End if
