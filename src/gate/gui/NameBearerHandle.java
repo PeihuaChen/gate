@@ -162,6 +162,11 @@ public class NameBearerHandle implements Handle,
     action = new edu.stanford.smi.protege.action.ChangeProjectStorageFormat();
     // Add Save in format... Protege action
     popup.add(action);
+
+    popup.addSeparator();
+    action = new edu.stanford.smi.protege.action.BuildProject();
+    // Add Import... Protege action
+    popup.add(action);
   } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
 
   protected void buildViews() {
