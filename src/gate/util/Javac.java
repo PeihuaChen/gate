@@ -59,6 +59,7 @@ public class Javac implements GateConstants{
     }
 
     List sourceFiles = new ArrayList();
+    List sourceListings = new ArrayList();
 
     Iterator fileIter = sources.keySet().iterator();
     while(fileIter.hasNext()){
@@ -73,6 +74,7 @@ public class Javac implements GateConstants{
         fw.write(source);
         fw.flush();fw.close();
         sourceFiles.add(srcFile.getCanonicalPath());
+        sourceListings.add(source);
       }catch(IOException ioe){
         throw new GateException(ioe);
       }
@@ -84,13 +86,28 @@ public class Javac implements GateConstants{
     args.add(srcDir.getAbsolutePath());
     args.add("-d");
     args.add(classesDir.getAbsolutePath());
-    args.addAll(sourceFiles);
-    //call the compiler
-    int res = Main.compile((String[])args.toArray(new String[args.size()]));
+    //call the compiler for each class in turn so we can get the errors
+    boolean errors = false;
+    for(int i = 0; i < sourceFiles.size(); i++){
+      String aSourceFile = (String)sourceFiles.get(i);
+      args.add(aSourceFile);
+      //call the compiler
+      int res = Main.compile((String[])args.toArray(new String[args.size()]));
+      if(res != 0){
+        errors = true;
+        //javac writes the error to System.err; let's print the source as well
+        Err.prln("\nThe offending input was:\n");
+        String source = (String)sourceListings.get(i);
+        source = Strings.addLineNumbers(source);
+        Err.prln(source);
+      }
+      args.remove(args.size() -1);
+    }
+
+//    args.addAll(sourceFiles);
 
     //load the newly compiled classes
     //load all classes from the classes directory
-
     try{
       loadAllClasses(classesDir, null);
     }catch(IOException ioe){
@@ -100,7 +117,8 @@ public class Javac implements GateConstants{
     //delete the work directory
     Files.rmdir(workDir);
 
-    if(res != 0) throw new GateException("Compiler error!");
+    if(errors) throw new GateException(
+          "There were errors; see error log for details!");
   }
 
   /**
