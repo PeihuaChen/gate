@@ -10,8 +10,7 @@ package gate;
 import java.util.*;
 import gate.util.*;
 
-/** 
-  * Nodes in AnnotationGraphs. Immutable.
+/** Nodes in AnnotationGraphs. Immutable.
   */
 public interface Node
 {
