@@ -40,6 +40,22 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   private   String      driverName;
 
   protected   AccessController ac;
+  protected   Session          session;
+
+
+  //!!! ACHTUNG !!!
+  // these 4 constants should *always* be synchronzied with the ones in the
+  // related SQL packages/scripts [for Oracle - security.spc]
+  // i.e. if u don't have a serious reason do *not* change anything
+
+  /** world read/ group write */
+  public static final int ACCESS_WR_GW = 1;
+  /** group read/ group write */
+  public static final int ACCESS_GR_GW = 2;
+  /** group read/ owner write */
+  public static final int ACCESS_GR_OW = 3;
+  /** owner read/ owner write */
+  public static final int ACCESS_OR_OW = 4;
 
 
   /** Do not use this class directly - use one of the subclasses */
@@ -176,13 +192,18 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
     try {
+
+      //1, get connection to the DB
       jdbcConn = DBHelper.connect(dbURL);
 
-      //create security factory
+      //2. create security factory
       this.ac = new AccessControllerImpl();
 
-      //open and init the securoty factory with the same DB repository
+      //3. open and init the security factory with the same DB repository
       ac.open(dbURL);
+
+      //4. login should be somewhere here?
+
     }
     catch(SQLException sqle) {
       throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");

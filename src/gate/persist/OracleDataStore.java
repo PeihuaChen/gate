@@ -71,6 +71,7 @@ public class OracleDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
+
   /** Get the name of an LR from its ID. */
   public String getLrName(Object lrId)
     throws PersistenceException {
@@ -205,6 +206,7 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource adopt(LanguageResource lr)
   throws PersistenceException {
 
+    //1. is the LR one of Document or Corpus?
     if (false == lr instanceof Document &&
         false == lr instanceof Corpus) {
 
@@ -212,19 +214,84 @@ public class OracleDataStore extends JDBCDataStore {
                                         "Documents and Corpora");
     }
 
+    //2.is the document already stored in this storage?
+    Object persistID = lr.getLRPersistenceId();
+    if (persistID != null) {
+      throw new PersistenceException("This LR is already stored in the " +
+                                      " database (persistance ID is =["+(Long)persistID+"] )");
+    }
+
     if (lr instanceof Document) {
-      return adoptDocument((Document)lr);
+      return createDocument((Document)lr);
     }
     else {
-      return adoptCorpus((Corpus)lr);
+      return createCorpus((Corpus)lr);
     }
 
   }
 
 
-  private LanguageResource adoptDocument(Document doc)
+  /** -- */
+  private Long createLR(Session s,
+                        String lrType,
+                        String lrName,
+                        int accessMode,
+                        Long lrParentID)
+  throws PersistenceException,gate.security.SecurityException {
+
+    //1. check the session
+    if (this.ac.isValidSession(s) == false) {
+      throw new gate.security.SecurityException("invalid session provided");
+    }
+
+    //2. create a record in DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call persist.create_lr(?,?,?,?,?,?,?) }");
+      stmt.setLong(1,s.getUser().getID().longValue());
+      stmt.setLong(2,s.getGroup().getID().longValue());
+      stmt.setString(3,lrType);
+      stmt.setString(4,lrName);
+      stmt.setInt(5,accessMode);
+      stmt.setLong(6,lrParentID.longValue());
+      //Oracle numbers are BIGNINT
+      stmt.registerOutParameter(7,java.sql.Types.BIGINT);
+      stmt.execute();
+
+      Long result =  new Long(stmt.getLong(7));
+      return result;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create LR [step 3] in DB : ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+  }
+
+
+  /** -- */
+  private void updateDocumentContent(Long docContentID,DocumentContent content)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+
+  /** -- */
+  private LanguageResource createDocument(Document doc)
   throws PersistenceException {
 
+    //delegate, set to Null
+    return createDocument(doc,null);
+  }
+
+
+  /** -- */
+  private LanguageResource createDocument(Document doc, Long corpusID)
+  throws PersistenceException {
+
+    //1. get the data to be stored
     AnnotationSet docAnnotations = doc.getAnnotations();
     DocumentContent docContent = doc.getContent();
     FeatureMap docFeatures = doc.getFeatures();
@@ -234,31 +301,67 @@ public class OracleDataStore extends JDBCDataStore {
     Long docStartOffset = doc.getSourceUrlStartOffset();
     Long docEndOffset = doc.getSourceUrlEndOffset();
 
-    //is the document already stored in this storage?
-    Object persistID = doc.getLRPersistenceId();
-    if (persistID != null) {
-      throw new PersistenceException("This document is already stored in the " +
-                                      " database (persistance ID is =["+(Long)persistID+"] )");
-    }
+    //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
+    Long lrID = null;// = this.createLR(this.session,"gate.corpora.DocumentImpl",?,?);
 
-
+    //4. create a record in T_DOCUMENT for this document
     CallableStatement stmt = null;
+    Long docID = null;
+    Long docContentID = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call persist.create_lr() }");
+      stmt = this.jdbcConn.prepareCall("{ call persist.create_document(?,?,?,?,?,?,?,?) }");
+      stmt.setLong(1,lrID.longValue());
+      stmt.setString(2,docURL.toString());
+      stmt.setLong(3,docStartOffset.longValue());
+      stmt.setLong(4,docEndOffset.longValue());
+      stmt.setBoolean(5,docIsMarkupAware.booleanValue());
+      //is the document part of a corpus?
+      stmt.setLong(6,null == corpusID ? 0 : corpusID.longValue());
+      //results
+      stmt.registerOutParameter(7,java.sql.Types.BIGINT);
+      stmt.registerOutParameter(8,java.sql.Types.BIGINT);
+
+      stmt.execute();
+      docID = new Long(stmt.getLong(7));
+      docContentID = new Long(stmt.getLong(8));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't create LR [step 4] in DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //5. fill document content (record[s] in T_DOC_CONTENT)
+    updateDocumentContent(docContentID,docContent);
+
+    //6. insert annotations, etc
+
+    //7. commit?
+
+    throw new MethodNotImplementedException();
+  }
+
+
+  /** -- */
+  private LanguageResource createCorpus(Corpus corp)
+  throws PersistenceException {
+
+    //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
+    Long lrID = null; //createLR(this.session,"gate.corpora.CorpusImpl",?,?);
+
+    //2.create am emtry in the T_COPRUS table
+    Long corpusID = null;
+
+    //3. for each document in the corpus call createDocument()
+    Iterator itDocuments = corp.iterator();
+    while (itDocuments.hasNext()) {
+      Document doc = (Document)itDocuments.next();
+
+      createDocument(doc,corpusID);
     }
 
     throw new MethodNotImplementedException();
   }
 
-  private LanguageResource adoptCorpus(Corpus doc)
-  throws PersistenceException {
-
-    throw new MethodNotImplementedException();
-  }
 
   /**
    * Get a resource from the persistent store.
@@ -269,6 +372,7 @@ public class OracleDataStore extends JDBCDataStore {
   throws PersistenceException {
     throw new MethodNotImplementedException();
   }
+
 
   /** Get a list of the types of LR that are present in the data store. */
   public List getLrTypes() throws PersistenceException {
@@ -298,6 +402,7 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(stmt);
     }
   }
+
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
   public List getLrIds(String lrType) throws PersistenceException {
@@ -333,6 +438,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
   }
+
 
   /** Get a list of the names of LRs of a particular type that are present. */
   public List getLrNames(String lrType) throws PersistenceException {
@@ -394,6 +500,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
   }
+
 
   /**
    * Checks if the user (identified by the sessionID)
