@@ -56,8 +56,8 @@
       </OR>
       <PARAMETER NAME="document"
 	RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
-      <PARAMETER NAME="annotationSet" RUNTIME="true"
-		 OPTIONAL="true">gate.AnnotationSet</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+		 OPTIONAL="true">java.lang.String</PARAMETER>
     </RESOURCE>
   </CREOLE>
 
