@@ -3,7 +3,7 @@
 //Onto Gazetteer demo.
 //borilsav popov
 //ontotext
-//21 march 2002
+//01 may 2002
 // intended use: determine the gender given the CLASS annotation over a person name. 
 
 Phase:	Gender
@@ -14,8 +14,8 @@ Rule: isFemale
 
 (
  {
-   Lookup.CLASS == female_person_first_name,
-   Lookup.ONTOLOGY == "gate:/creole/ontology/demo.daml"
+   Lookup.class == female_person_first_name,
+   Lookup.ontology == "gate:/creole/ontology/demo.daml"
  }
 ):person
 -->
@@ -34,8 +34,8 @@ Rule: isMale
 
 (
  {
-   Lookup.CLASS == male_person_first_name,
-   Lookup.ONTOLOGY == "gate:/creole/ontology/demo.daml"
+   Lookup.class == male_person_first_name,
+   Lookup.ontology == "gate:/creole/ontology/demo.daml"
  }
 ):person
 -->
