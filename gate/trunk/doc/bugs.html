@@ -138,7 +138,7 @@ and check in.
     <TD>When creating a document the URL entry field in the parameters
     dialogue is sometimes blanked out. If you enter the URL, then leave the
     cursor in that field and click OK, the field is blanked and an error
-    message about the missing URL thrown. Second and subsequent tries will work 
+    message about the missing URL thrown. Second and subsequent tries will work
     ok.  <B>Workaround:</B>hit return instead of clicking OK.</TD>
     <TD>-</TD>
     <TD>-</TD>
@@ -328,7 +328,7 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>beta1</TD>
     <TD>___fixed_on ___date ___Gversion</TD>
     <TD>when a new user/group is created with the DBAdmin GUI the user/group is hown in the login dialog for opening an Oracle DS, but
-    an attempt to log in as such will fail - the GATE pplication must be restarted in order to use the new user. 
+    an attempt to log in as such will fail - the GATE pplication must be restarted in order to use the new user.
     Most probably the security factory is getting desynchronized</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
@@ -367,17 +367,17 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     You should put the fixed Parser.class file in the JDK_dir\jre\lib\rt.jar<br>
     </TD>
     <TD>If you parse the HTML file:<br><br>
-	&lt;HTML&gt; <br>
-	&lt;FONT SIZE = 2&gt;<br>
-	&lt;P&gt;<br>
-	Text with wrong position.<br>
-	&lt;/FONT&gt;<br>
-	The wrong position start.<br>
-	&lt;/HTML&gt;    <br><br>
-	You will have an error in the callback handler of HTML parser:<br>
-	"end.missingfont??"<br>
-	two pieces of text will be connected in one and the reported position<br>
-	of text will be wrong - will be the position of second piece of text.
+  &lt;HTML&gt; <br>
+  &lt;FONT SIZE = 2&gt;<br>
+  &lt;P&gt;<br>
+  Text with wrong position.<br>
+  &lt;/FONT&gt;<br>
+  The wrong position start.<br>
+  &lt;/HTML&gt;    <br><br>
+  You will have an error in the callback handler of HTML parser:<br>
+  "end.missingfont??"<br>
+  two pieces of text will be connected in one and the reported position<br>
+  of text will be wrong - will be the position of second piece of text.
     </TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
@@ -482,6 +482,19 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00083</TD>
+    <TD>core/jape</TD>
+    <TD>Valentin</TD>
+    <TD>___adopted_by</TD>
+    <TD>21/08/2002 Win(NT/2K/XP) 1.4 Gate 2.1alpha(895)</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Feature strings (e.g. Token.string) are destroyed in theyr way to jape.
+    It looks like they are converted to byte[] and back to string using the platform default. This destroys all unicode values.</TD>
+    <TD>run the attached application</TD>
+    <TD><a href="bugs/i18nBug.zip">i18nBug.zip</a></TD>
   </TR>
 
 <!------------------------------------------------------------------------->
