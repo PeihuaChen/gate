@@ -75,7 +75,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
    * It also does some type checking so only Documents are accepted as corpus
    * members.
    */
-  protected class VerboseList extends AbstractList{
+  protected class VerboseList extends AbstractList implements Serializable{
+
+    VerboseList(){
+      data = new ArrayList();
+    }
 
     public Object get(int index){
       return data.get(index);
