@@ -19,7 +19,8 @@ import gate.*;
 /**
 <P>
 This class provides examples of using the GATE APIs.
-Read this documentation along with a copy of the source code.
+Read this documentation along with a copy of the
+<A HREF=CookBook.java>source code</A>.
 
 <P>
 The CookBook is set up as

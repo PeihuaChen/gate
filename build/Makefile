@@ -41,6 +41,8 @@ docs:
 	  -d ../doc/javadoc/internal $(PKGS)
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
+	cp ../src/gate/CookBook.java ../doc/javadoc/gate
+	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate
 
 clean:
 	rm -rf ../classes/gate `find .. -name '*.~*' -print`
@@ -52,6 +54,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.16  2000/02/18 15:56:36  hamish
+# added copy of CookBook source code to docs
+#
 # Revision 1.15  2000/02/18 15:33:04  hamish
 # added classes; added -use to internal javadoc
 #
