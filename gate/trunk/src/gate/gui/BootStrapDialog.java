@@ -62,6 +62,8 @@ public class BootStrapDialog extends JDialog{
   JButton    createResourceButton = null;
   JButton    cancelButton = null;
 
+  JFileChooser fileChooser = null;
+
   public BootStrapDialog(MainFrame aMainFrame){
     mainFrame = aMainFrame;
     thisBootStrapDialog = this;
@@ -75,29 +77,35 @@ public class BootStrapDialog extends JDialog{
   private void doCreateResource(){
     resourceName = resourceNameTextField.getText();
     if (resourceName == null || "".equals(resourceName)){
+      thisBootStrapDialog.setModal(false);
       JOptionPane.showMessageDialog(mainFrame,
                       "A name for the resource must be provided",
                       "ERROR !",
                       JOptionPane.ERROR_MESSAGE);
-       return;
+      thisBootStrapDialog.setModal(true);
+      return;
     }// End if
 
     className = classNameTextField.getText();
     if (className == null || "".equals(className)){
+      thisBootStrapDialog.setModal(false);
       JOptionPane.showMessageDialog(mainFrame,
                       "A name for the implementing class must be provided",
                       "ERROR !",
                       JOptionPane.ERROR_MESSAGE);
-       return;
+      thisBootStrapDialog.setModal(true);
+      return;
     }// End if
 
     pathNewProject = chooseFolderTextField.getText();
     if (pathNewProject == null || "".equals(pathNewProject)){
+      thisBootStrapDialog.setModal(false);
       JOptionPane.showMessageDialog(mainFrame,
                       "A path to the creation folder must be provided",
                       "ERROR !",
                       JOptionPane.ERROR_MESSAGE);
-       return;
+      thisBootStrapDialog.setModal(true);
+      return;
     }// End if
 
     resourceType = (String)resourceTypesComboBox.getSelectedItem();
@@ -131,7 +139,6 @@ public class BootStrapDialog extends JDialog{
     this.getContentPane().setLayout(
         new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
     this.setModal(true);
-    this.setSize(350,320);
     // init resource name
     resourceNameLabel = new JLabel("Resource name");
     resourceNameLabel.setToolTipText("Here goes the name of the resource" +
@@ -140,13 +147,13 @@ public class BootStrapDialog extends JDialog{
     resourceNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     resourceNameTextField = new JTextField();
     resourceNameTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
-    resourceNameTextField.setColumns(80);
-    resourceNameTextField.setPreferredSize(
-                                  resourceNameTextField.getPreferredSize());
-    resourceNameTextField.setMinimumSize(
-                                  resourceNameTextField.getPreferredSize());
-    resourceNameTextField.setMaximumSize(
-                                  resourceNameTextField.getPreferredSize());
+    resourceNameTextField.setColumns(40);
+    Dimension dim = new Dimension(
+                              resourceNameTextField.getPreferredSize().width,
+                              resourceNameTextField.getPreferredSize().height);
+    resourceNameTextField.setPreferredSize(dim);
+    resourceNameTextField.setMinimumSize(dim);
+//    resourceNameTextField.setMaximumSize(dim);
 
     // init resourceTypesComboBox
     resourceTypesLabel = new JLabel("Resource type");
@@ -167,13 +174,13 @@ public class BootStrapDialog extends JDialog{
     classNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     classNameTextField = new JTextField();
     classNameTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
-    classNameTextField.setColumns(80);
-    classNameTextField.setPreferredSize(
-                                  classNameTextField.getPreferredSize());
-    classNameTextField.setMinimumSize(
-                                  classNameTextField.getPreferredSize());
-    classNameTextField.setMaximumSize(
-                                  classNameTextField.getPreferredSize());
+    classNameTextField.setColumns(40);
+    dim = new Dimension(classNameTextField.getPreferredSize().width,
+                        classNameTextField.getPreferredSize().height);
+
+    classNameTextField.setPreferredSize(dim);
+    classNameTextField.setMinimumSize(dim);
+//    classNameTextField.setMaximumSize(dim);
 
     // init interfaces
     interfacesLabel = new JLabel("Interfaces implemented use ");
@@ -182,13 +189,13 @@ public class BootStrapDialog extends JDialog{
     interfacesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     interfacesTextField = new JTextField(possibleInterfaces);
     interfacesTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
-    interfacesTextField.setColumns(80);
-    interfacesTextField.setPreferredSize(
-                                  interfacesTextField.getPreferredSize());
-    interfacesTextField.setMinimumSize(
-                                  interfacesTextField.getPreferredSize());
-    interfacesTextField.setMaximumSize(
-                                  interfacesTextField.getPreferredSize());
+    interfacesTextField.setColumns(40);
+    dim = new Dimension(interfacesTextField.getPreferredSize().width,
+                        interfacesTextField.getPreferredSize().height);
+
+    interfacesTextField.setPreferredSize(dim);
+    interfacesTextField.setMinimumSize(dim);
+//    interfacesTextField.setMaximumSize(dim);
 
     // init choose Folder
     chooseFolderLabel = new JLabel("Create in folder ...");
@@ -200,13 +207,13 @@ public class BootStrapDialog extends JDialog{
     chooseFolderButton.setAlignmentX(Component.LEFT_ALIGNMENT);
     chooseFolderTextField = new JTextField();
     chooseFolderTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
-    chooseFolderTextField.setColumns(27);
-    chooseFolderTextField.setPreferredSize(
-                                  chooseFolderTextField.getPreferredSize());
-    chooseFolderTextField.setMinimumSize(
-                                  chooseFolderTextField.getPreferredSize());
-    chooseFolderTextField.setMaximumSize(
-                                  chooseFolderTextField.getPreferredSize());
+    chooseFolderTextField.setColumns(35);
+    dim = new Dimension(chooseFolderTextField.getPreferredSize().width,
+                        chooseFolderTextField.getPreferredSize().height);
+
+    chooseFolderTextField.setPreferredSize(dim);
+    chooseFolderTextField.setMinimumSize(dim);
+//    chooseFolderTextField.setMaximumSize(dim);
 
     // init createresource
     createResourceButton = new JButton("Finish");
@@ -268,6 +275,9 @@ public class BootStrapDialog extends JDialog{
     this.getContentPane().add(Box.createRigidArea(new Dimension(0,5)));
     this.getContentPane().add(mainBox);
     this.getContentPane().add(Box.createRigidArea(new Dimension(0,5)));
+
+    this.pack();
+    fileChooser = new JFileChooser();
   }//initGuiComponents
 
   /**
@@ -298,11 +308,12 @@ public class BootStrapDialog extends JDialog{
    chooseFolderButton.addActionListener(new java.awt.event.ActionListener(){
       public void actionPerformed(ActionEvent e){
         // choose folder code
-        JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select the path for this resource");
         fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
-        if(fileChooser.showOpenDialog(mainFrame) == fileChooser.APPROVE_OPTION)
-          pathNewProject =  fileChooser.getSelectedFile().toString();
+        if(fileChooser.showOpenDialog(mainFrame) == fileChooser.APPROVE_OPTION){
+          pathNewProject = fileChooser.getSelectedFile().toString();
+          fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+        }// End if
         chooseFolderTextField.setText(pathNewProject);
 
       }//actionPerformed
@@ -341,17 +352,19 @@ public class BootStrapDialog extends JDialog{
                                        className,
                                        resourceInterfaces,
                                        pathNewProject);
+        thisBootStrapDialog.hide();
         JOptionPane.showMessageDialog(mainFrame,
                                     "Creation succeeded !",
                                     "DONE !",
                                     JOptionPane.DEFAULT_OPTION);
-        thisBootStrapDialog.hide();
       }catch (Exception e){
+        thisBootStrapDialog.setModal(false);
         e.printStackTrace(Err.getPrintWriter());
         JOptionPane.showMessageDialog(mainFrame,
                      e.getMessage() + "\n Resource creation stopped !",
                      "BootStrap error !",
                      JOptionPane.ERROR_MESSAGE);
+        thisBootStrapDialog.setModal(true);
       }
     }// run();
   }//CreateResourceRunner
