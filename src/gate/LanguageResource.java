@@ -47,4 +47,24 @@ public interface LanguageResource extends Resource
     */
   public void sync() throws PersistenceException,SecurityException;
 
+  /**
+   * Returns true of an LR has been modified since the last sync.
+   * Always returns false for transient LRs.
+   */
+  public boolean isModified();
+
+  /**
+   * Returns the parent LR of this LR.
+   * Only relevant for LRs that support shadowing. Most do not by default.
+   */
+  public LanguageResource getParent()
+    throws PersistenceException,SecurityException;
+
+  /**
+   * Sets the parent LR of this LR.
+   * Only relevant for LRs that support shadowing. Most do not by default.
+   */
+  public void setParent(LanguageResource parentLR)
+    throws PersistenceException,SecurityException;
+
 } // interface LanguageResource
