@@ -36,10 +36,10 @@ public class TestWeakValueHashMap extends TestCase {
 
     //populate the Map;
     //Don't use Strings as they are not collectable being interned
-    Object value1 = new Object();
+    Object value1 = new Object[50000];
     wvhm.put("v1", value1);
-    wvhm.put("v2", new Object());
-    wvhm.put("v3", new Object());
+    wvhm.put("v2", new Object[50000]);
+    wvhm.put("v3", new Object[50000]);
 
     //force gc
     System.gc();
@@ -55,10 +55,10 @@ public class TestWeakValueHashMap extends TestCase {
 
     //populate the Map;
     //Don't use Strings as they are not collectable being interned
-    Object value1 = new Object();
+    Object value1 = new Object[50000];
     wvhm.put("v1", value1);
-    wvhm.put("v2", new Object());
-    wvhm.put("v3", new Object());
+    wvhm.put("v2", new Object[50000]);
+    wvhm.put("v3", new Object[50000]);
 
     //force gc
     System.gc();
@@ -74,10 +74,10 @@ public class TestWeakValueHashMap extends TestCase {
 
     //populate the Map;
     //Don't use Strings as they are not collectable being interned
-    Object value1 = new Object();
+    Object value1 = new Object[50000];
     wvhm.put("v1", value1);
-    wvhm.put("v2", new Object());
-    wvhm.put("v3", new Object());
+    wvhm.put("v2", new Object[50000]);
+    wvhm.put("v3", new Object[50000]);
 
     //force gc
     System.gc();
@@ -92,7 +92,7 @@ public class TestWeakValueHashMap extends TestCase {
     WeakValueHashMap wvhm = new WeakValueHashMap();
 
     //populate the Map;
-    Object value1 = new Object();
+    Object value1 = new Object[50000];
     wvhm.put(null, value1);
 
     assertEquals("The weak hash map does not support null keys!",
