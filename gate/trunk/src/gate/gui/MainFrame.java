@@ -71,6 +71,7 @@ public class MainFrame extends JFrame
   JFileChooser fileChooser;
   MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
+  WaitDialog waitDialog;
 
   List openProjects;
   ProjectData currentProject;
@@ -84,6 +85,9 @@ public class MainFrame extends JFrame
   HelpAboutAction helpAboutAction;
   NewAnnotDiffAction newAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
+
+
+
   /**Construct the frame*/
   public MainFrame() {
     thisMainFrame = this;
@@ -226,6 +230,7 @@ public class MainFrame extends JFrame
     newResourceDialog = new NewResourceDialog(parentFrame,
                                               "Resource parameters",
                                               true);
+    waitDialog = new WaitDialog(this, "");
 
     //build the splash
     JPanel splashBox = new JPanel();
@@ -354,6 +359,12 @@ public class MainFrame extends JFrame
 
   public void statusChanged(String text){
     SwingUtilities.invokeLater(new StatusBarUpdater(text));
+  }
+
+  public void resourceLoaded(CreoleEvent e){
+  }
+
+  public void resourceUnloaded(CreoleEvent e){
   }
 
 
@@ -520,9 +531,13 @@ public class MainFrame extends JFrame
                   new TreePath(projectTreeModel.getPathToRoot(node)));
       node = node.getNextSibling();
     }
+  }//protected void setCurrentProject(ProjectData project)
 
-
+  protected void showWaitDialog(){
+    waitDialog.setLocation(getLocation());
   }
+
+
 
   class NewProjectAction extends AbstractAction{
     public NewProjectAction(){
@@ -633,46 +648,53 @@ public class MainFrame extends JFrame
     }
 
     public void actionPerformed(ActionEvent e){
-      CreoleRegister reg = Gate.getCreoleRegister();
-      List lrTypes = reg.getPublicLrTypes();
-      if(lrTypes != null && !lrTypes.isEmpty()){
-        HashMap resourcesByName = new HashMap();
-        Iterator lrIter = lrTypes.iterator();
-        while(lrIter.hasNext()){
-          ResourceData rData = (ResourceData)reg.get(lrIter.next());
-          resourcesByName.put(rData.getName(), rData);
-        }
-        List lrNames = new ArrayList(resourcesByName.keySet());
-        Collections.sort(lrNames);
-        Object answer = JOptionPane.showInputDialog(
-                            parentFrame,
-                            "Select type of Language resource",
-                            "Gate", JOptionPane.QUESTION_MESSAGE,
-                            null, lrNames.toArray(),
-                            lrNames.get(0));
-        if(answer != null){
-          ResourceData rData = (ResourceData)resourcesByName.get(answer);
-          newResourceDialog.setTitle("Parameters for the new " + rData.getName());
-          LanguageResource res = (LanguageResource)newResourceDialog.show(rData);
-          if(res != null){
-            LRHandle handle = new LRHandle(res, currentProject);
-            handle.setTooltipText("<html><b>Type:</b> " +
-                                  rData.getName() + "</html>");
-            lrRoot.add(new DefaultMutableTreeNode(handle, false));
-            projectTreeModel.nodeStructureChanged(lrRoot);
-            projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(lrRoot)));
-            currentProject.addLR(handle);
+      Runnable runnable = new Runnable(){
+        public void run(){
+          CreoleRegister reg = Gate.getCreoleRegister();
+          List lrTypes = reg.getPublicLrTypes();
+          if(lrTypes != null && !lrTypes.isEmpty()){
+            HashMap resourcesByName = new HashMap();
+            Iterator lrIter = lrTypes.iterator();
+            while(lrIter.hasNext()){
+              ResourceData rData = (ResourceData)reg.get(lrIter.next());
+              resourcesByName.put(rData.getName(), rData);
+            }
+            List lrNames = new ArrayList(resourcesByName.keySet());
+            Collections.sort(lrNames);
+            Object answer = JOptionPane.showInputDialog(
+                                parentFrame,
+                                "Select type of Language resource",
+                                "Gate", JOptionPane.QUESTION_MESSAGE,
+                                null, lrNames.toArray(),
+                                lrNames.get(0));
+            if(answer != null){
+              ResourceData rData = (ResourceData)resourcesByName.get(answer);
+              newResourceDialog.setTitle("Parameters for the new " + rData.getName());
+              LanguageResource res = (LanguageResource)newResourceDialog.show(rData);
+              if(res != null){
+                LRHandle handle = new LRHandle(res, currentProject);
+                handle.setTooltipText("<html><b>Type:</b> " +
+                                      rData.getName() + "</html>");
+                lrRoot.add(new DefaultMutableTreeNode(handle, false));
+                projectTreeModel.nodeStructureChanged(lrRoot);
+                projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(lrRoot)));
+                currentProject.addLR(handle);
+                statusChanged(res.getFeatures().get("NAME") + " loaded!");
+              }
+            }
+          }else{
+            //no lr types
+            JOptionPane.showMessageDialog(parentFrame,
+                                          "Could not find any registered types " +
+                                          "of resources...\n" +
+                                          "Check your Gate installation!",
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
           }
-
         }
-      }else{
-        //no lr types
-        JOptionPane.showMessageDialog(parentFrame,
-                                      "Could not find any registered types " +
-                                      "of resources...\n" +
-                                      "Check your Gate installation!",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }
+      };
+      Thread thread = new Thread(runnable);
+      thread.setPriority(thread.MIN_PRIORITY);
+      thread.start();
     }
   }//class NewLRAction extends AbstractAction
 
@@ -715,6 +737,7 @@ public class MainFrame extends JFrame
                 projectTreeModel.nodeStructureChanged(prRoot);
                 projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(prRoot)));
                 currentProject.addPR(handle);
+                statusChanged(res.getFeatures().get("NAME") + " loaded!");
               }
             }
           }else{
@@ -725,7 +748,7 @@ public class MainFrame extends JFrame
                                           "Check your Gate installation!",
                                           "Gate", JOptionPane.ERROR_MESSAGE);
           }
-        }
+        }//public void run()
       };
       Thread thread = new Thread(runnable);
       thread.setPriority(thread.MIN_PRIORITY);
@@ -992,9 +1015,5 @@ public class MainFrame extends JFrame
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
-  }
-  public void resourceLoaded(CreoleEvent e) {
-  }
-  public void resourceUnloaded(CreoleEvent e) {
   }
 }
