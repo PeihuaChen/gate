@@ -41,7 +41,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       throw new ExecutionException("No document found to export in APF format!");
     if (exportedTypes == null)
       throw new ExecutionException("No export types found.");
-    xmlDoc = new StringBuffer();
+    xmlDoc = new StringBuffer(10*(document.getContent().size().intValue()));
     initDocId();
     if (docId == null)
       throw new ExecutionException("Couldn't detect the document's ID");

@@ -66,11 +66,11 @@ public class TextualDocumentFormat extends DocumentFormat
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
     if (doc == null || doc.getContent() == null) return;
-    // Create paragraph annotations in the default annotation set
-    String annotSetName = "Original markups";
+    // Create paragraph annotations in the specified annotation set
     int endOffset = doc.getContent().toString().length();
     int startOffset = 0;
-    annotateParagraphs(doc,startOffset,endOffset,annotSetName);
+    annotateParagraphs(doc,startOffset,endOffset,
+                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
   }//unpackMarkup
 
   /** This method annotates paragraphs in a GATE document. The investigated text

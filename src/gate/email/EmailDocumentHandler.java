@@ -57,7 +57,8 @@ public class EmailDocumentHandler{
 
     // gets AnnotationSet based on the new gate document
     if (basicAS == null)
-      basicAS = gateDocument.getAnnotations("Original markups");
+      basicAS = gateDocument.getAnnotations(
+                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
     markupElementsMap = aMarkupElementsMap;
     element2StringMap = anElement2StringMap;

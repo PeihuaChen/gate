@@ -80,15 +80,15 @@ public class EmailDocumentFormat extends TextualDocumentFormat
       // Call the method that creates annotations on the gate document
       emailDocHandler.annotateMessages();
       // Process the body annotations and search for paragraphs
-      AnnotationSet bodyAnnotations = doc.getAnnotations("Original markups")
-                                                                  .get("body");
+      AnnotationSet bodyAnnotations = doc.getAnnotations(
+                    GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get("body");
       if (bodyAnnotations != null && !bodyAnnotations.isEmpty()){
         Iterator iter = bodyAnnotations.iterator();
         while(iter.hasNext()){
           Annotation a = (Annotation)iter.next();
           annotateParagraphs(doc,a.getStartNode().getOffset().intValue(),
                                  a.getEndNode().getOffset().intValue(),
-                                 "Original markups");
+                                 GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
         }// End while
       }// End if
     } catch (IOException e){

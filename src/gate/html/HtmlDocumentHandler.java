@@ -65,7 +65,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     stack = new java.util.Stack();
 
     // this string contains the plain text (the text without markup)
-    tmpDocContent = new StringBuffer("");
+    tmpDocContent = new StringBuffer(aDocument.getContent().size().intValue());
 
     // colector is used later to transform all custom objects into
     // annotation objects
@@ -168,7 +168,8 @@ public class HtmlDocumentHandler extends ParserCallback {
       // If basicAs is null then get the default annotation
       // set from this gate document
       if (basicAS == null)
-        basicAS = doc.getAnnotations("Original markups");
+        basicAS = doc.getAnnotations(
+                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
       // sort colector ascending on its id
       Collections.sort(colector);

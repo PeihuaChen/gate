@@ -141,15 +141,6 @@ extends AbstractLanguageResource implements Document {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
 
-    entitiesMap = new HashMap();
-    entitiesMap.put(new Character('<'),"&lt;");
-    entitiesMap.put(new Character('>'),"&gt;");
-    entitiesMap.put(new Character('&'),"&amp;");
-    entitiesMap.put(new Character('\''),"&apos;");
-    entitiesMap.put(new Character('"'),"&quot;");
-    entitiesMap.put(new Character((char)160),"&#160;");
-    entitiesMap.put(new Character((char)169),"&#169;");
-
     // set up the source URL and create the content
     if(sourceUrl == null) {
       if(stringContent == null) {
@@ -212,6 +203,7 @@ extends AbstractLanguageResource implements Document {
     }
     namedAnnotSets = null;
   } // cleanup()
+
 
   /** Documents are identified by URLs */
   public URL getSourceUrl() { return sourceUrl; }
@@ -336,9 +328,12 @@ extends AbstractLanguageResource implements Document {
     */
   public String toXml(Set aSourceAnnotationSet){
     AnnotationSet originalMarkupsAnnotSet =
-                                      this.getAnnotations("Original markups");
+            this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
-    AnnotationSet dumpingSet = this.getAnnotations("Dumping annotation set");
+    // Create a dumping annotation set on the document. It will be used for
+    // dumping annotations...
+    AnnotationSet dumpingSet = new AnnotationSetImpl((Document) this);
+
     // This set will be constructed inside this method. If is not empty, the
     // annotation contained will be lost.
     if (!dumpingSet.isEmpty()){
@@ -374,7 +369,8 @@ extends AbstractLanguageResource implements Document {
     // The dumpingSet is ready to be exported as XML
     // Here we go.
     fireStatusChanged("Dumping annotations as XML");
-    StringBuffer xmlDoc = new StringBuffer("");
+    StringBuffer xmlDoc = new StringBuffer(
+          DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
     // Add xml header
     xmlDoc.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 
@@ -413,10 +409,8 @@ extends AbstractLanguageResource implements Document {
       // Add the root end element
       xmlDoc.append("</GatePreserveFormat>");
     }// End if
-    this.removeAnnotationSet("Dumping annotation set");
     fireStatusChanged("Done.");
     return xmlDoc.toString();
-
   }//End toXml()
 
   /** This method verifies if aSourceAnnotation can ve inserted safety into the
@@ -802,7 +796,11 @@ extends AbstractLanguageResource implements Document {
     * @return a string representing a Gate Xml document
     */
   public String toXml(){
-    StringBuffer xmlContent = new StringBuffer("");
+    // Initialize the xmlContent with 3 time the size of the current document.
+    // This is because of the tags size. This measure is made to increase the
+    // performance of StringBuffer.
+    StringBuffer xmlContent = new StringBuffer(
+         DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
     // Add xml header
     xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
     // Add the root element
@@ -886,12 +884,78 @@ extends AbstractLanguageResource implements Document {
     while(keyIterator.hasNext()){
       Object key = keyIterator.next();
       Object value = aFeatureMap.get(key);
-      if ((key != null) && (value != null))
-        str.append("<Feature><Name>" +
-                  filterNonXmlChars(replaceCharsWithEntities(key.toString()))
-                  + "</Name><Value>"+
-                  filterNonXmlChars(replaceCharsWithEntities(value.toString()))
-                  + "</Value></Feature>\n");
+      if ((key != null) && (value != null)){
+        String keyClassName = null;
+        String keyItemClassName = null;
+        String valueClassName = null;
+        String valueItemClassName = null;
+        String key2String = key.toString();
+        String value2String = value.toString();
+        Object item = null;
+        // Test key if it is Number or collection
+        if (key instanceof java.lang.Number ||
+            key instanceof java.util.Collection)
+          keyClassName = key.getClass().getName();
+        else
+          keyClassName = String.class.getName();
+        // Test value if it is Number or collection
+        if (value instanceof java.lang.Number ||
+            value instanceof java.util.Collection)
+          valueClassName = value.getClass().getName();
+        else
+          valueClassName = String.class.getName();
+        // If key is collection serialize the colection in a specific format
+        if (key instanceof java.util.Collection){
+          StringBuffer keyStrBuff = new StringBuffer("");
+          Iterator iter = ((Collection) key).iterator();
+          if (iter.hasNext()){
+            item = iter.next();
+            if (item instanceof java.lang.Number)
+              keyItemClassName = item.getClass().getName();
+            else
+              keyItemClassName = String.class.getName();
+            keyStrBuff.append(item.toString());
+          }// End if
+          while (iter.hasNext()){
+            item = iter.next();
+            keyStrBuff.append(";" + item.toString());
+          }// End while
+          key2String = keyStrBuff.toString();
+        }// End if
+        // If key is collection serialize the colection in a specific format
+        if (value instanceof java.util.Collection){
+          StringBuffer valueStrBuff = new StringBuffer("");
+          Iterator iter = ((Collection) value).iterator();
+          if (iter.hasNext()){
+            item = iter.next();
+            if (item instanceof java.lang.Number)
+              valueItemClassName = item.getClass().getName();
+            else
+              valueItemClassName = String.class.getName();
+            valueStrBuff.append(item.toString());
+          }// End if
+          while (iter.hasNext()){
+            item = iter.next();
+            valueStrBuff.append(";" + item.toString());
+          }// End while
+          value2String = valueStrBuff.toString();
+        }// End if
+        str.append("<Feature>\n  <Name");
+        if (keyClassName != null)
+          str.append(" className=\""+keyClassName+"\"");
+        if (keyItemClassName != null)
+          str.append(" itemClassName=\""+keyItemClassName+"\"");
+        str.append(">");
+        str.append(filterNonXmlChars(replaceCharsWithEntities(key2String)));
+        str.append("</Name>\n  <Value");
+        if (valueClassName != null)
+          str.append(" className=\"" + valueClassName + "\"");
+        if (valueItemClassName != null)
+          str.append(" itemClassName=\"" + valueItemClassName + "\"");
+        str.append(">");
+        str.append(filterNonXmlChars(replaceCharsWithEntities(value2String)));
+        str.append("</Value>\n</Feature>\n");
+      }// End if
     }// end While
     return str.toString();
   }//featuresToXml
@@ -1162,6 +1226,12 @@ extends AbstractLanguageResource implements Document {
     */
   private boolean isRootTag = false;
 
+  /** This field is used when creating StringBuffers for toXml() methods.
+    * The size of the StringBuffer will be docDonctent.size() multiplied by this
+    * value. It is aimed to improve the performance of StringBuffer
+    */
+  private final int DOC_SIZE_MULTIPLICATION_FACTOR = 1;
+
   /** Constant used in the inner class AnnotationComparator to order
     * annotations on their start offset
     */
@@ -1186,7 +1256,18 @@ extends AbstractLanguageResource implements Document {
   /** A map initialized in init() containing entities that needs to be
     * replaced in strings
     */
-  private Map entitiesMap = null;
+  private static Map entitiesMap = null;
+  // Initialize the entities map use when saving as xml
+  static{
+    entitiesMap = new HashMap();
+    entitiesMap.put(new Character('<'),"&lt;");
+    entitiesMap.put(new Character('>'),"&gt;");
+    entitiesMap.put(new Character('&'),"&amp;");
+    entitiesMap.put(new Character('\''),"&apos;");
+    entitiesMap.put(new Character('"'),"&quot;");
+    entitiesMap.put(new Character((char)160),"&#160;");
+    entitiesMap.put(new Character((char)169),"&#169;");
+  }//static
 
   /** The range that the content comes from at the source URL
     * (or null if none).
