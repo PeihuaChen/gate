@@ -34,7 +34,7 @@ CREATE or REPLACE FUNCTION persist_update_document_content(int4,text) RETURNS bo
 
       update t_doc_content
       set    dc_character_content = p_content
-      where  dc_id = p_lr_id;
+      where  dc_id = l_dc_id;
 
       /* dummy */
       return true;
