@@ -72,6 +72,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   /** --- */
   private static final FeatureMap PRP_RESTRICTION;
 
+  private boolean resolveIt = true;
+
   /** --- */
   static {
     ANNOTATION_OFFSET_COMPARATOR = new AnnotationOffsetComparator();
@@ -169,6 +171,17 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   public String getAnnotationSetName() {
     return annotationSetName;
   }
+
+  /** --- */
+  public void setResolveIt(Boolean newValue) {
+    this.resolveIt = newValue.booleanValue();
+  }
+
+  /** --- */
+  public Boolean getResolveIt() {
+    return new Boolean(this.resolveIt);
+  }
+
 
   /**
    * This method runs the coreferencer. It assumes that all the needed parameters
@@ -449,6 +462,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   /** --- */
   private Annotation _resolve$IT$ITS$ITSELF$(Annotation pronoun, int sentenceIndex) {
+    //do not resolve it pronouns if disabled by the user
+    if (! resolveIt)
+      return null;
 
     //0. preconditions
     Assert.assertTrue(pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
