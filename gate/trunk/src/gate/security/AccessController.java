@@ -44,7 +44,7 @@ public interface AccessController {
     throws SecurityException;
 
   /** --- */
-  public Group createGroup(String name)
+  public Group createGroup(String name,Session s)
     throws PersistenceException, SecurityException;
 
   /** --- */
@@ -56,7 +56,7 @@ public interface AccessController {
     throws PersistenceException, SecurityException;
 
   /** --- */
-  public User createUser(String name, String passwd)
+  public User createUser(String name, String passwd,Session s)
     throws PersistenceException, SecurityException;
 
   /** --- */
