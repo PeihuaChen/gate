@@ -214,7 +214,7 @@ final class WNHelper {
   public static boolean isValidSemanticPointer(int _type) {
     return _type == Relation.REL_ATTRIBUTE ||
           _type == Relation.REL_CAUSE ||
-          _type == Relation.REL_DERIVED_FROM_ADJECTIVE ||
+          //_type == Relation.REL_DERIVED_FROM_ADJECTIVE ||
           _type == Relation.REL_ENTAILMENT ||
           _type == Relation.REL_HYPERNYM ||
           _type == Relation.REL_HYPONYM ||
@@ -233,7 +233,8 @@ final class WNHelper {
         return _type == Relation.REL_ANTONYM ||
                _type == Relation.REL_PERTAINYM ||
                _type == Relation.REL_PARTICIPLE_OF_VERB ||
-               _type == Relation.REL_SEE_ALSO;
+               _type == Relation.REL_SEE_ALSO ||
+               _type == Relation.REL_DERIVED_FROM_ADJECTIVE;
   }
 
 
