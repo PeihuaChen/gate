@@ -12,7 +12,7 @@
 
 PKGS=	gate gate.util gate.annotation gate.corpora gate.jape \
 	gate.jape.parser gate.db gate.fsm gate.gui gate.jape.gui \
-	gate.creole.tokeniser gate.html gate.xml
+	gate.creole.tokeniser gate.html gate.xml muse muse.gui
 CP=	-classpath \
 ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/parser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:
 SP=	-sourcepath ../src
@@ -55,7 +55,7 @@ resources:
 
 # refresh the jar with all the class files
 jarupdate:
-	cd ../classes && ../build/jdk.sh jar uvf ../build/gate.jar gate
+	cd ../classes && ../build/jdk.sh jar uvf ../build/gate.jar gate muse
 
 # build the Tcl script library:
 # update the list of scripts, and copy the scripts into classes
