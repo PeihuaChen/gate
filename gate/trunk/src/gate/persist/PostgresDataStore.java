@@ -38,34 +38,6 @@ public class PostgresDataStore extends JDBCDataStore {
     super();
   }
 
-  public List getLrTypes() throws gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    Vector lrTypes = new Vector();
-    Statement stmt = null;
-    ResultSet rs = null;
-
-    try {
-      stmt = this.jdbcConn.createStatement();
-      rs = stmt.executeQuery(" SELECT lrtp_type " +
-                             " FROM   t_lr_type");
-
-      while (rs.next()) {
-        //access by index is faster
-        String lrType = rs.getString(1);
-        lrTypes.add(lrType);
-      }
-
-      return lrTypes;
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't get LR types from DB: ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(rs);
-      DBHelper.cleanup(stmt);
-    }
-  }
-
   public List getLrIds(String lrType) throws gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
