@@ -183,10 +183,10 @@ public class APFormatExporter extends AbstractLanguageAnalyser
   protected void serializeDocumentToAPF(){
     xmlDoc.append("<?xml version=\"1.0\" ?>\n");
     xmlDoc.append("<!DOCTYPE source_file SYSTEM ");
-    if (dtdFileName == null)
+       if (dtdFileName == null)
       xmlDoc.append("\"ace-rdc.v2.0.1.dtd\"");
-    else
-      xmlDoc.append("\""+dtdFileName+"\"");
+         else
+           xmlDoc.append("\""+dtdFileName+"\"");
     xmlDoc.append(">\n");
     xmlDoc.append("<source_file TYPE=\"text\"");
     if (isSourceWritten) {
