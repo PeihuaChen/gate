@@ -25,10 +25,11 @@ import gate.creole.*;
 import java.io.*;
 import java.awt.event.*;
 import gate.swing.*;
+import gate.event.*;
 import javax.swing.text.Highlighter;
 import javax.swing.text.DefaultHighlighter;
 
-public class CorefEditor extends AbstractDocumentView implements ActionListener {
+public class CorefEditor extends AbstractDocumentView implements ActionListener, gate.event.FeatureMapListener, gate.event.DocumentListener {
 
   // default AnnotationSet Name
   private final static String DEFAULT_ANNOTSET_NAME = "Default";
@@ -37,7 +38,11 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
   private JToggleButton showAnnotations;
   private JComboBox annotSets, annotTypes;
   private DefaultComboBoxModel annotSetsModel, annotTypesModel;
+
+  // Co-reference Tree
   private JTree corefTree;
+
+  // Root node
   private CorefTreeNode rootNode;
 
   // top level hashMap (corefChains)
@@ -61,7 +66,6 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
   private HashMap currentColors;
 
   private ColorGenerator colorGenerator;
-  private Highlighter highlighter;
   private TextualDocumentView textView;
   private JEditorPane textPane;
 
@@ -82,22 +86,37 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
   /* This stores start and end offsets of highlightedTypeAnnots */
   private int [] highlightedTypeAnnotsOffsets;
 
-  private ChainToolTipAction chainToolTipAction = new ChainToolTipAction();
-  private javax.swing.Timer chainToolTipTimer = new javax.swing.Timer(500, chainToolTipAction);
-  private NewCorefAction newCorefAction = new NewCorefAction();
-  private javax.swing.Timer newCorefActionTimer = new javax.swing.Timer(500, newCorefAction);
+  /* Timer for the Chain Tool tip action */
+  private ChainToolTipAction chainToolTipAction;
+  private javax.swing.Timer chainToolTipTimer;
+
+  private NewCorefAction newCorefAction;
+  private javax.swing.Timer newCorefActionTimer;
+
   private Annotation annotToConsiderForChain = null;
+  private JWindow popupWindow;
+  private boolean explicitCall = false;
+  private Highlighter highlighter;
 
   /**
    * This method intiates the GUI for co-reference editor
    */
   protected void initGUI(){
 
-    // set the view to Java Look and Feel
-    try {
-      UIManager.setLookAndFeel(
-          UIManager.getCrossPlatformLookAndFeelClassName());
-    } catch (Exception e) { }
+    //get a pointer to the textual view used for highlights
+    Iterator centralViewsIter = owner.getCentralViews().iterator();
+    while(textView == null && centralViewsIter.hasNext()){
+      DocumentView aView = (DocumentView)centralViewsIter.next();
+      if(aView instanceof TextualDocumentView)
+        textView = (TextualDocumentView)aView;
+    }
+    textPane = (JEditorPane)((JScrollPane)textView.getGUI()).getViewport().getView();
+    highlighter = textPane.getHighlighter();
+    chainToolTipAction = new ChainToolTipAction();
+    chainToolTipTimer = new javax.swing.Timer(500, chainToolTipAction);
+
+    newCorefAction = new NewCorefAction();
+    newCorefActionTimer = new javax.swing.Timer(500, newCorefAction);
 
 
     colorGenerator = new ColorGenerator();
@@ -118,41 +137,38 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
     showAnnotations = new JToggleButton("show");
     showAnnotations.addActionListener(this);
 
+    // annotSets
+    annotSets = new JComboBox();
+    annotSets.addActionListener(this);
+
     // get all the annotationSets
     Map annotSetsMap = document.getNamedAnnotationSets();
     annotSetsModel = new DefaultComboBoxModel();
-    if(annotSets != null) {
+    if(annotSetsMap != null) {
       annotSetsModel = new DefaultComboBoxModel(annotSetsMap.keySet().toArray());
     }
-    annotSetsModel.insertElementAt(DEFAULT_ANNOTSET_NAME,0);
-    annotSetsModel.setSelectedItem(annotSetsModel.getElementAt(0));
-
-    // get all the types of the currently Selected AnnotationSet
-    Set types = document.getAnnotations().getAllTypes();
-    annotTypesModel = new DefaultComboBoxModel();
-    if(types != null) {
-      annotTypesModel = new DefaultComboBoxModel(types.toArray());
-    }
-
-    // annotSets
-    annotSets = new JComboBox(annotSetsModel);
-    annotSets.addActionListener(this);
+    annotSetsModel.insertElementAt(DEFAULT_ANNOTSET_NAME, 0);
+    annotSets.setModel(annotSetsModel);
 
     // annotTypes
+    annotTypesModel = new DefaultComboBoxModel();
     annotTypes = new JComboBox(annotTypesModel);
+    annotTypes.addActionListener(this);
     subPanel.add(annotSets);
     subPanel.add(annotTypes);
 
     // intialises the Data
     initData();
 
-    // and now tree
-    rootNode.add((CorefTreeNode) corefAnnotationSetNodesMap.get(DEFAULT_ANNOTSET_NAME));
-    currentSelections = (HashMap) selectionChainsMap.get(DEFAULT_ANNOTSET_NAME);
-    currentColors = (HashMap) colorChainsMap.get(DEFAULT_ANNOTSET_NAME);
-
     // and creating the tree
     corefTree = new JTree(rootNode);
+    corefTree.putClientProperty("JTree.lineStyle", "None");
+    corefTree.setRowHeight(corefTree.getRowHeight() * 2);
+    corefTree.setLargeModel(true);
+    corefTree.setAutoscrolls(true);
+
+    //corefTree.setRootVisible(false);
+    //corefTree.setShowsRootHandles(false);
     corefTree.addMouseListener(new CorefTreeMouseListener());
     corefTree.setCellRenderer(new CorefTreeCellRenderer());
 
@@ -160,20 +176,412 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
     mainPanel.add(new JScrollPane(corefTree), BorderLayout.CENTER);
     JPanel tempPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     tempPanel.add(showAnnotations);
-    topPanel.add(tempPanel, BorderLayout.NORTH);
+    topPanel.add(tempPanel, BorderLayout.SOUTH);
     topPanel.add(subPanel, BorderLayout.CENTER);
 
-    //get a pointer to the textual view used for highlights
-    Iterator centralViewsIter = owner.getCentralViews().iterator();
-    while(textView == null && centralViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)centralViewsIter.next();
-      if(aView instanceof TextualDocumentView)
-        textView = (TextualDocumentView)aView;
-    }
-    textPane = (JEditorPane)((JScrollPane)textView.getGUI()).getViewport().getView();
+
     // get the highlighter
-    highlighter = ((JEditorPane)((JScrollPane)textView.getGUI()).getViewport().getView()).getHighlighter();
     textPaneMouseListener = new TextPaneMouseListener();
+
+    if(annotSets.getModel().getSize() > 0) {
+      annotSets.setSelectedIndex(0);
+    }
+
+    // finally show the tree
+    //annotSetSelectionChanged();
+
+    document.addDocumentListener(this);
+    document.getFeatures().addFeatureMapListener(this);
+
+  }
+
+
+
+
+  /** This methods cleans up the memory by removing all listener registrations */
+  public void cleanup() {
+    document.removeDocumentListener(this);
+    document.getFeatures().removeFeatureMapListener(this);
+  }
+
+
+
+
+  /** Given arrayList containing Ids of the annotations, and an annotationSet, this method
+   * returns the annotations that has longest string among the matches
+   */
+  public Annotation findOutTheLongestAnnotation(ArrayList matches, AnnotationSet set) {
+    if(matches == null || matches.size() == 0) {
+      return null;
+    }
+    int length = 0;
+    int index = 0;
+    for (int i = 0; i < matches.size(); i++) {
+      Annotation currAnn = (Annotation) set.get( (Integer) matches.get(i));
+      int start = currAnn.getStartNode().getOffset().intValue();
+      int end = currAnn.getEndNode().getOffset().intValue();
+      if ( (end - start) > length) {
+        length = end - start;
+        index = i;
+      }
+    }
+    // so now we now have the longest String annotations at index
+    return (Annotation) set.get( (Integer) matches.get(index));
+  }
+
+
+
+  /**
+   * This method is called when any annotationSet is removed outside the
+   * co-reference editor..
+   * @param de
+   */
+  public void annotationSetRemoved(gate.event.DocumentEvent de) {
+    // this method removes the annotationSet from the annotSets
+    // and all chainNodes under it
+
+    String annotSet = de.getAnnotationSetName();
+    annotSet = (annotSet == null) ? DEFAULT_ANNOTSET_NAME : annotSet;
+    // find out the currently Selected annotationSetName
+    String annotSetName = (String) annotSets.getSelectedItem();
+    // remove it from the main data store
+    corefChains.remove(corefAnnotationSetNodesMap.get(annotSet));
+    // remove it from the main data store
+    corefAnnotationSetNodesMap.remove(annotSet);
+    // remove it from the annotationSetModel (combobox)
+    annotSetsModel.removeElement(annotSet);
+    annotSets.setModel(annotSetsModel);
+    // remove it from the colorChainMap
+    colorChainsMap.remove(annotSet);
+    // remove it from the selectionChainMap
+    selectionChainsMap.remove(annotSet);
+    if (annotSetsModel.getSize() == 0) {
+      // no annotationSet to display
+      // so set visible false
+      if(popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.setVisible(false);
+      }
+      corefTree.setVisible(false);
+    }
+    else {
+      if (annotSetName.equals(annotSet)) {
+        if(popupWindow != null && popupWindow.isVisible()) {
+          popupWindow.setVisible(false);
+        }
+        corefTree.setVisible(true);
+        annotSets.setSelectedIndex(0);
+        //annotSetSelectionChanged();
+      }
+    }
+  }
+
+
+
+
+  /**
+   * This method is called when any new annotationSet is added
+   * @param de
+   */
+  public void annotationSetAdded(gate.event.DocumentEvent de) {
+    String annotSet = de.getAnnotationSetName();
+    annotSet = (annotSet == null) ? DEFAULT_ANNOTSET_NAME : annotSet;
+    // find out the currently Selected annotationSetName
+    String annotSetName = (String) annotSets.getSelectedItem();
+
+    // check if newly added annotationSet is the default AnnotationSet
+    CorefTreeNode annotSetNode = null;
+
+    if (annotSet.equals(DEFAULT_ANNOTSET_NAME))
+      annotSetNode = createChain(document.getAnnotations(), true);
+    else
+      annotSetNode = createChain(document.getAnnotations(annotSet), false);
+
+    corefAnnotationSetNodesMap.put(annotSet, annotSetNode);
+    annotSetsModel.addElement(annotSet);
+    annotSets.setModel(annotSetsModel);
+
+    if (annotSetName != null)
+      annotSets.setSelectedItem(annotSetName);
+    else
+      annotSets.setSelectedIndex(0);
+
+    //annotSetSelectionChanged();
+  }
+
+
+
+
+  /**
+   * Called when features are changed outside the co-refEditor
+   */
+  public void featureMapUpdated() {
+    if(explicitCall)
+      return;
+
+    // we would first save the current settings
+    // 1. Current AnnotSet
+    // 2. Current AnnotType
+    // 3. ShowAnnotation Status
+    String currentAnnotSet = (String) annotSets.getSelectedItem();
+    String currentAnnotType = (String) annotTypes.getSelectedItem();
+    boolean currentShowAnnotationStatus = showAnnotations.isSelected();
+
+    // there is some change in the featureMap
+    Map matchesMap = null;
+    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
+                                                  DOCUMENT_COREF_FEATURE_NAME);
+    if(matchesMap == null) return;
+
+    //AnnotationSetName --> List of ArrayLists
+    //each ArrayList contains Ids of related annotations
+    Iterator setIter = matchesMap.keySet().iterator();
+    HashMap annotSetsNamesMap = new HashMap();
+    for(int i=0;i<annotSets.getItemCount();i++) {
+      annotSetsNamesMap.put((String) annotSets.getItemAt(i), new Boolean(false));
+    }
+
+    outer:while (setIter.hasNext()) {
+      String currentSet = (String) setIter.next();
+      java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+      currentSet = (currentSet == null) ? DEFAULT_ANNOTSET_NAME : currentSet;
+      AnnotationSet currAnnotSet = getAnnotationSet(currentSet);
+      annotSetsNamesMap.put(currentSet, new Boolean(true));
+
+      if(matches == null) return;
+      Iterator entitiesIter = matches.iterator();
+      //each entity is a list of annotation IDs
+
+      HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(
+          currentSet));
+      HashMap visitedList = new HashMap();
+      if (chains != null) {
+        Iterator chainsList = chains.keySet().iterator();
+
+        // intially no chainHead is visited
+        while (chainsList.hasNext()) {
+          visitedList.put( (CorefTreeNode) chainsList.next(), new Boolean(false));
+        }
+
+        // now we need to search for chainHead of each group
+        while (entitiesIter.hasNext()) {
+          ArrayList ids = (ArrayList) entitiesIter.next();
+          if(ids == null || ids.size() == 0) {
+            explicitCall = true;
+            matches.remove(ids);
+            String set = currentSet.equals(DEFAULT_ANNOTSET_NAME) ? null : currentSet;
+            matchesMap.put(set, matches);
+            explicitCall = false;
+            break;
+          }
+
+          CorefTreeNode chainHead = null;
+          for (int i = 0; i < ids.size(); i++) {
+            Integer id = (Integer) ids.get(i);
+            // now lets find out the headnode for this, if it is available
+            chainHead = findOutTheChainHead(currAnnotSet.get(id));
+            if (chainHead != null) {
+              visitedList.put(chainHead, new Boolean(true));
+              break;
+            }
+          }
+
+          if (chainHead != null) {
+            // we found the chainHead for this
+            // so we would replace the ids
+            // but before that we would check if chainHead should be replaced
+            Annotation longestAnn = findOutTheLongestAnnotation(ids, getAnnotationSet(currentSet));
+            if(getString(longestAnn).equals(chainHead.toString())) {
+              // no action needed
+            } else {
+              // we first check if new longestAnnotation String is already available as some other chain Node head
+              if(currentColors.containsKey(getString(longestAnn))) {
+                // yes one chainHead with this string already exists
+                // so we need to merge them together
+                String longestString = getString(longestAnn);
+                CorefTreeNode tempChainHead = findOutChainNode(longestString);
+                // now all the ids under current chainHead should be placed under the tempChainHead
+                ArrayList tempIds = (ArrayList) chains.get(tempChainHead);
+                ArrayList currentChainHeadIds = (ArrayList) chains.get(chainHead);
+                // so lets merge them
+                tempIds.addAll(currentChainHeadIds);
+
+                // and update the chains
+                chains.put(tempChainHead, tempIds);
+                chains.remove(chainHead);
+                corefChains.put(corefAnnotationSetNodesMap.get(currentSet), chains);
+                visitedList.put(chainHead, new Boolean(false));
+
+              } else {
+                String previousString = chainHead.toString();
+                String newString = getString(longestAnn);
+                chainHead.setUserObject(newString);
+
+                // we need to change the colors
+                Color color = (Color) currentColors.get(previousString);
+                currentColors.remove(previousString);
+                currentColors.put(newString, color);
+                colorChainsMap.put(newString, currentColors);
+
+                // we need to change the selections
+                Boolean val = (Boolean) currentSelections.get(previousString);
+                currentSelections.remove(previousString);
+                currentSelections.put(newString, val);
+                selectionChainsMap.put(newString, currentSelections);
+
+                chains.put(chainHead, ids);
+                corefChains.put(corefAnnotationSetNodesMap.get(currentSet), chains);
+              }
+            }
+            //chains.put(chainHead, ids);
+            //corefChains.put(corefAnnotationSetNodesMap.get(currentSet), chains);
+          }
+          else {
+            // this is something new addition
+            // so we need to create a new chainNode
+            // this is the new chain
+            // get the current annotSetNode
+            CorefTreeNode annotSetNode = (CorefTreeNode)
+                                         corefAnnotationSetNodesMap.get(currentSet);
+
+            // we need to find out the longest string annotation
+            Annotation ann = findOutTheLongestAnnotation(ids, currAnnotSet);
+            // create the new chainNode
+            CorefTreeNode chainNode = new CorefTreeNode(getString(ann), false, CorefTreeNode.CHAIN_NODE);
+            // add this to tree
+            annotSetNode.add(chainNode);
+            corefAnnotationSetNodesMap.put(currentSet, annotSetNode);
+
+            // ArrayList matches
+            HashMap newHashMap = (HashMap) corefChains.get(annotSetNode);
+            newHashMap.put(chainNode, ids);
+            corefChains.put(annotSetNode, newHashMap);
+
+            // entry into the selection
+            HashMap tempSelection = (HashMap) selectionChainsMap.get(currentSet);
+            tempSelection.put(chainNode.toString(), new Boolean(true));
+            selectionChainsMap.put(currentSet, tempSelection);
+
+            // entry into the colors
+            float components[] = colorGenerator.getNextColor().getComponents(null);
+            Color color = new Color(components[0],
+                                    components[1],
+                                    components[2],
+                                    0.5f);
+            HashMap tempColors = (HashMap) colorChainsMap.get(currentSet);
+            tempColors.put(chainNode.toString(), color);
+            colorChainsMap.put(annotSets.getSelectedItem(), tempColors);
+          }
+        }
+
+        // here we need to find out the chainNodes those are no longer needed
+        Iterator visitedListIter = visitedList.keySet().iterator();
+        while (visitedListIter.hasNext()) {
+          CorefTreeNode chainNode = (CorefTreeNode) visitedListIter.next();
+          if (! ( (Boolean) visitedList.get(chainNode)).booleanValue()) {
+            // yes this should be deleted
+            CorefTreeNode annotSetNode = (CorefTreeNode)
+                                         corefAnnotationSetNodesMap.get(currentSet);
+
+            // remove from the tree
+            annotSetNode.remove(chainNode);
+            corefAnnotationSetNodesMap.put(currentSet, annotSetNode);
+
+            // ArrayList matches
+            HashMap newHashMap = (HashMap) corefChains.get(annotSetNode);
+            newHashMap.remove(chainNode);
+            corefChains.put(annotSetNode, newHashMap);
+
+            // remove from the selections
+            HashMap tempSelection = (HashMap) selectionChainsMap.get(currentSet);
+            tempSelection.remove(chainNode.toString());
+            selectionChainsMap.put(currentSet, tempSelection);
+
+            // remove from the colors
+            HashMap tempColors = (HashMap) colorChainsMap.get(currentSet);
+            tempColors.remove(chainNode.toString());
+            colorChainsMap.put(currentSet, currentColors);
+          }
+        }
+      }
+    }
+
+    Iterator tempIter = annotSetsNamesMap.keySet().iterator();
+    while(tempIter.hasNext()) {
+      String currentSet = (String) tempIter.next();
+      if(!((Boolean) annotSetsNamesMap.get(currentSet)).booleanValue()) {
+          String annotSet = currentSet;
+          // find out the currently Selected annotationSetName
+          String annotSetName = (String) annotSets.getSelectedItem();
+          // remove it from the main data store
+          corefChains.remove(corefAnnotationSetNodesMap.get(annotSet));
+          // remove it from the main data store
+          corefAnnotationSetNodesMap.remove(annotSet);
+          // remove it from the annotationSetModel (combobox)
+          annotSetsModel.removeElement(annotSet);
+          annotSets.setModel(annotSetsModel);
+          annotSets.updateUI();
+          // remove it from the colorChainMap
+          colorChainsMap.remove(annotSet);
+          // remove it from the selectionChainMap
+          selectionChainsMap.remove(annotSet);
+      }
+    }
+
+
+    if (annotSetsModel.getSize() == 0) {
+      // no annotationSet to display
+      // so set visible false
+      if(popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.setVisible(false);
+      }
+      corefTree.setVisible(false);
+      highlighter.removeAllHighlights();
+      /*if(highlightedTags != null) {
+        Set tags = highlightedTags.keySet();
+        if (tags != null) {
+          Iterator iter = tags.iterator();
+          while (iter.hasNext()) {
+            ArrayList tags1 = (ArrayList) highlightedTags.get(iter.next());
+            textView.removeHighlights(tags1);
+          }
+        }
+      }
+      if(typeSpecificHighlightedTags != null) {
+        textView.removeHighlights(typeSpecificHighlightedTags);
+      }*/
+    }
+    else {
+      if(popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.setVisible(false);
+      }
+      corefTree.setVisible(true);
+      explicitCall = true;
+      annotSets.setSelectedItem(currentAnnotSet);
+      annotSetSelectionChanged();
+      annotTypes.setSelectedItem(currentAnnotType);
+      showAnnotations.setSelected(currentShowAnnotationStatus);
+      highlighter.removeAllHighlights();
+      /*if(highlightedTags != null) {
+        Set tags = highlightedTags.keySet();
+        if (tags != null) {
+          Iterator iter = tags.iterator();
+          while (iter.hasNext()) {
+            ArrayList tags1 = (ArrayList) highlightedTags.get(iter.next());
+            textView.removeHighlights(tags1);
+          }
+        }
+      }
+      if(typeSpecificHighlightedTags != null) {
+        textView.removeHighlights(typeSpecificHighlightedTags);
+      }*/
+      highlightedTags = null;
+      highlightAnnotations();
+      typeSpecificHighlightedTags = null;
+      showTypeWiseAnnotations();
+      explicitCall = false;
+    }
+
+
   }
 
 
@@ -184,11 +592,26 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
   public void actionPerformed(ActionEvent ae) {
     // when annotationSet value changes
     if(ae.getSource() == annotSets) {
-      annotSetSelectionChanged();
+      if(!explicitCall) {
+        annotSetSelectionChanged();
+      }
     } else if(ae.getSource() == showAnnotations) {
-      showTypeWiseAnnotations();
+      if(!explicitCall) {
+        showTypeWiseAnnotations();
+      }
+    } else if(ae.getSource() == annotTypes) {
+      if(!explicitCall) {
+        if(typeSpecificHighlightedTags != null) {
+          for(int i=0;i<typeSpecificHighlightedTags.size();i++) {
+            highlighter.removeHighlight(typeSpecificHighlightedTags.get(i));
+          }
+        }
+        typeSpecificHighlightedTags = null;
+        showTypeWiseAnnotations();
+      }
     }
   }
+
 
   /**
    * When user preses the show Toggle button, this will show up annotations
@@ -225,17 +648,20 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
           Annotation ann = (Annotation) iter.next();
           highlightedTypeAnnots.add(ann);
           try {
-            typeSpecificHighlightedTags.add(highlighter.addHighlight(ann.
-                getStartNode().getOffset().intValue(),
-                ann.getEndNode().getOffset().intValue(),
-                new DefaultHighlighter.DefaultHighlightPainter(color)));
-          } catch(javax.swing.text.BadLocationException e) {
-              e.printStackTrace();
+            typeSpecificHighlightedTags.add(highlighter.addHighlight(ann.getStartNode().
+                getOffset().intValue(),
+                            ann.getEndNode().getOffset().intValue(),
+                                         new DefaultHighlighter.
+                                         DefaultHighlightPainter(color)));
+          } catch(Exception e) {
+            e.printStackTrace();
           }
+          //typeSpecificHighlightedTags.add(textView.addHighlight(ann, getAnnotationSet((String)annotSets.getSelectedItem()),color));
         }
       }
     } else {
       for(int i=0;i<typeSpecificHighlightedTags.size();i++) {
+        //textView.removeHighlight(typeSpecificHighlightedTags.get(i));
         highlighter.removeHighlight(typeSpecificHighlightedTags.get(i));
       }
       typeSpecificHighlightedTags = new ArrayList();
@@ -255,6 +681,7 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
   }
 
+
   /**
    * Returns annotation Set
    * @param annotSet
@@ -266,13 +693,22 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
   }
 
 
+
   /**
    * When annotationSet selection changes
    */
   private void annotSetSelectionChanged() {
-    String currentAnnotSet = (String) annotSets.getSelectedItem();
+    if(annotSets.getModel().getSize() == 0) {
+      if(popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.setVisible(false);
+      }
+      corefTree.setVisible(false);
+      return;
+    }
 
+    String currentAnnotSet = (String) annotSets.getSelectedItem();
     // get all the types of the currently Selected AnnotationSet
+    if(currentAnnotSet == null) currentAnnotSet = (String) annotSets.getItemAt(0);
     AnnotationSet temp = getAnnotationSet(currentAnnotSet);
     Set types = temp.getAllTypes();
     annotTypesModel = new DefaultComboBoxModel();
@@ -288,18 +724,22 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
         currentAnnotSet));
     currentSelections = (HashMap) selectionChainsMap.get(currentAnnotSet);
     currentColors = (HashMap) colorChainsMap.get(currentAnnotSet);
-
+    if(!corefTree.isVisible()) {
+      if(popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.setVisible(false);
+      }
+      corefTree.setVisible(true);
+    }
     corefTree.repaint();
     corefTree.updateUI();
-
   }
+
 
 
   /**
    * This will initialise the data
    */
   private void initData() {
-
 
     //************************************************************************
     // Internal Data structure
@@ -319,7 +759,9 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
     corefAnnotationSetNodesMap = new HashMap();
     // now we need to findout the chains
     // for the defaultAnnotationSet
-    corefAnnotationSetNodesMap.put(DEFAULT_ANNOTSET_NAME, createChain(document.getAnnotations(), true));
+    corefAnnotationSetNodesMap.put(DEFAULT_ANNOTSET_NAME,
+                                    createChain(document.getAnnotations(), true));
+
     // and for the rest AnnotationSets
     Map annotSets = document.getNamedAnnotationSets();
     if(annotSets != null) {
@@ -378,6 +820,7 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
       ArrayList matches = (ArrayList) ann.getFeatures().get(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME);
       int length = 0;
       int index = 0;
+      if(matches == null) matches = new ArrayList();
       matches.add(ann.getId());
       for(int i=0;i<matches.size();i++) {
         Annotation currAnn = (Annotation) set.get((Integer) matches.get(i));
@@ -409,153 +852,60 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
                          0.5f);
       colorMap.put(chainNode.toString(), color);
     }
+
     corefChains.put(annotSetNode, chainLinks);
     selectionChainsMap.put(setName, selectionMap);
     colorChainsMap.put(setName, colorMap);
     return annotSetNode;
   }
 
+  /**
+   * Given an annotation, this method returns the string of that annotation
+   * @param ann
+   * @return
+   */
   public String getString(Annotation ann) {
     return document.getContent().toString().substring(ann.
           getStartNode().getOffset().intValue(),
                              ann.getEndNode().getOffset().intValue());
   }
 
+
   /**
    * This method removes the reference of this annotatation from the current chain
    * @param ann
    */
   public void removeChainReference(Annotation annot, CorefTreeNode chainHead) {
-    // from where we need to remove this entry
-    // 1. colorChainMaps
-    // 2. corefChains
-    // 3. corefTree
-    // 4. corefTreeModel
-    // 5. currentColors
-    // 6. currentSelections
-    // 7. highlightedChainAnnots
-    // 8. highlightedChainAnnotsOffsets
-    // 9. selectionChainMaps
 
     // so we would find out the matches
     CorefTreeNode currentNode = chainHead;
-    // so currentNode is the head of the selected annotations
-    // now first see if the selected annotation itself is the head
-    if (getString(annot).equals(currentNode.toString())) {
-        // yes the head itself required to be deleted
+    ArrayList ids = (ArrayList) ((HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()))).get(chainHead);
+    // we need to update the Co-reference document feature
+    Map matchesMap = null;
+    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
+                                                  DOCUMENT_COREF_FEATURE_NAME);
+    String currentSet = (String)annotSets.getSelectedItem();
+    currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null : currentSet;
+    java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+    if(matches == null) matches = new ArrayList();
+    int index = matches.indexOf(ids);
+    if(index != -1) {
+      // yes found
+      ids.remove(annot.getId());
+      Annotation ann = findOutTheLongestAnnotation(ids, getAnnotationSet((String) annotSets.getSelectedItem()));
 
-        // 1. We need to remove its reference from all its corrosponding annotations matching List
-        HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()));
-        ArrayList matches = (ArrayList) (annot.getFeatures().get(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME));
-        AnnotationSet set = getAnnotationSet((String) annotSets.getSelectedItem());
-        for(int i=0;matches != null && i<matches.size();i++) {
-          Annotation ann = (Annotation) set.get((Integer) matches.get(i));
-          ((ArrayList) ann.getFeatures().get(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME)).remove(annot.getId());
-        }
-
-        // 2. We need to remove it from the ArrayList Ids from the corefChains
-        ArrayList chainIds = (ArrayList) chains.get(currentNode);
-        chainIds.remove(annot.getId());
-
-        // 3. Now we need to change the value of currentNode
-        if(!chainIds.isEmpty()) {
-          // so let's find out the longestString
-          int length = 0;
-          int index = 0;
-          for (int i = 0; i < chainIds.size(); i++) {
-            Annotation currAnn = (Annotation) set.get( (Integer) chainIds.get(i));
-            int start = currAnn.getStartNode().getOffset().intValue();
-            int end = currAnn.getEndNode().getOffset().intValue();
-            if ( (end - start) > length) {
-              length = end - start;
-              index = i;
-            }
-          }
-          Annotation currAnn = (Annotation) set.get( (Integer) chainIds.get(index));
-          String longestString = getString(currAnn);
-          String previousString = currentNode.toString();
-          currentNode.setUserObject(longestString);
-
-          // 4. we need to make changes in the following instances
-          // colorChainsMap
-          // currentColors
-          // selectionChainsMap
-          // currentSelections
-          HashMap temp = (HashMap) colorChainsMap.get((String) annotSets.getSelectedItem());
-          Color color = (Color) temp.get(previousString);
-          temp.remove(previousString);
-          temp.put(longestString, color);
-          currentColors = temp;
-          colorChainsMap.put((String) annotSets.getSelectedItem(), temp);
-
-          temp = (HashMap) selectionChainsMap.get((String) annotSets.getSelectedItem());
-          Boolean value = (Boolean) temp.get(previousString);
-          temp.remove(previousString);
-          temp.put(longestString, value);
-          currentSelections = temp;
-          selectionChainsMap.put((String) annotSets.getSelectedItem(), temp);
-
-          // and finally make arrangements for highlighting
-          highlightedTags = null;
-
-          // redraw the tree
-          corefTree.repaint();
-          corefTree.updateUI();
-
-        } else {
-          // the chainIds is empty.. so we need to remove this from the
-          // 1. remove it from
-          // colorChainsMap
-          // currentColors
-          // selectionChainsMap
-          // currentSelections
-          String previousString = currentNode.toString();
-          HashMap temp = (HashMap) colorChainsMap.get((String) annotSets.getSelectedItem());
-          temp.remove(previousString);
-          currentColors = temp;
-          colorChainsMap.put((String) annotSets.getSelectedItem(), temp);
-
-          temp = (HashMap) selectionChainsMap.get((String) annotSets.getSelectedItem());
-          Boolean value = (Boolean) temp.get(previousString);
-          temp.remove(previousString);
-          currentSelections = temp;
-          selectionChainsMap.put((String) annotSets.getSelectedItem(), temp);
-
-          // 2. remove the currentNode from the tree
-          CorefTreeNode annotSetNode = (CorefTreeNode) corefAnnotationSetNodesMap.get(annotSets.getSelectedItem());
-          annotSetNode.remove(currentNode);
-
-          chains.remove(currentNode);
-          corefChains.put(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()), chains);
-
-          // and finally make arrangements for highlighting
-          highlightedTags = null;
-
-          // redraw the tree
-          corefTree.repaint();
-          corefTree.updateUI();
-
-        }
-
-    } else {
-      // this is not the chain head
-      // 1. We need to remove its reference from all its corrosponding annotations matching List
-      HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()));
-      ArrayList matches = (ArrayList) (annot.getFeatures().get(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME));
-      AnnotationSet set = getAnnotationSet((String) annotSets.getSelectedItem());
-      for(int i=0;i<matches.size();i++) {
-        Annotation ann = (Annotation) set.get((Integer) matches.get(i));
-        ((ArrayList) ann.getFeatures().get(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME)).remove(annot.getId());
-      }
-      // 2. We need to remove it from the ArrayList Ids from the corefChains
-      ArrayList chainIds = (ArrayList) chains.get(currentNode);
-      chainIds.remove(annot.getId());
-      chains.put(currentNode, chainIds);
-      highlightedTags = null;
+      matches.set(index, ids);
+      matchesMap.put(currentSet, matches);
+      document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME, matchesMap);
     }
   }
 
 
+  /**
+   * Given an annotation, this will find out the chainHead
+   * @param ann
+   * @return
+   */
   private CorefTreeNode findOutTheChainHead(Annotation ann) {
     HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()));
     Iterator iter = chains.keySet().iterator();
@@ -568,6 +918,8 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
     return null;
   }
 
+
+
   /**
    * This methods highlights the annotations
    */
@@ -575,13 +927,11 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
     if(highlightedTags == null) {
       highlightedTags = new HashMap();
-      highlighter.removeAllHighlights();
       highlightedChainAnnots = new ArrayList();
     }
 
-    CorefTreeNode parent = (CorefTreeNode) corefAnnotationSetNodesMap.get((String) annotSets.getSelectedItem());
-    AnnotationSet annotSet = getAnnotationSet(parent.toString());
-    HashMap chainMap = (HashMap) corefChains.get(parent);
+    AnnotationSet annotSet = getAnnotationSet((String) annotSets.getSelectedItem());
+    HashMap chainMap = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()));
     Iterator iter = chainMap.keySet().iterator();
 
     while(iter.hasNext()) {
@@ -595,16 +945,17 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
             for (int i = 0; i < ids.size(); i++) {
               Annotation ann = annotSet.get( (Integer) ids.get(i));
               highlightedChainAnnots.add(ann);
+              Color color = (Color) currentColors.get(currentNode.toString());
               try {
-                Color color = (Color) currentColors.get(currentNode.toString());
-                highlighTag.add(highlighter.addHighlight(
-                    ann.getStartNode().getOffset().intValue(),
-                    ann.getEndNode().getOffset().intValue(),
-                    new DefaultHighlighter.DefaultHighlightPainter(color)));
-              }
-              catch (javax.swing.text.BadLocationException e) {
+                highlighTag.add(highlighter.addHighlight(ann.getStartNode().
+                    getOffset().intValue(),
+                                ann.getEndNode().getOffset().intValue(),
+                                             new DefaultHighlighter.
+                                             DefaultHighlightPainter(color)));
+              } catch(Exception e) {
                 e.printStackTrace();
               }
+              //highlighTag.add(textView.addHighlight(ann, getAnnotationSet((String) annotSets.getSelectedItem()), color));
             }
             highlightedTags.put(currentNode, highlighTag);
           }
@@ -613,6 +964,7 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
         if(highlightedTags.containsKey(currentNode)) {
           ArrayList highlights = (ArrayList) highlightedTags.get(currentNode);
           for(int i=0;i<highlights.size();i++) {
+            //textView.removeHighlight(highlights.get(i));
             highlighter.removeHighlight(highlights.get(i));
           }
           highlightedTags.remove(currentNode);
@@ -681,6 +1033,12 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
    }
   }
 
+  public void mouseClicked(MouseEvent me) {
+    if(popupWindow != null && popupWindow.isVisible()) {
+      popupWindow.setVisible(false);
+    }
+  }
+
   public CorefTreeNode findOutChainNode(String chainNodeString) {
     if(corefChains == null || corefAnnotationSetNodesMap == null) {
       return null;
@@ -706,42 +1064,47 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
    int textLocation;
    Point mousePoint;
-   JPopupMenu popup = new JPopupMenu();
-   String defaultLabelText = "New Coreference Window";
    JLabel label = new JLabel();
    JPanel panel = new JPanel();
    JPanel subPanel = new JPanel();
-   JTextField field = new JTextField(20);
-   JButton add = new JButton("Add");
-   JButton newChain = new JButton("New Chain");
+   JLabel field = new JLabel("");
+   JButton add = new JButton("OK");
+   JButton cancel = new JButton("Cancel");
    JList list = new JList();
+   JPanel mainPanel = new JPanel();
+   JPopupMenu popup1 = new JPopupMenu();
 
    public NewCorefAction() {
-     popup.setBackground(UIManager.getLookAndFeelDefaults().
+     popupWindow = new JWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+     popupWindow.setBackground(UIManager.getLookAndFeelDefaults().
          getColor("ToolTip.background"));
-     popup.setLayout(new BorderLayout());
+     mainPanel.setLayout(new BorderLayout());
+     mainPanel.setOpaque(true);
+     mainPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+     mainPanel.setBackground(UIManager.getLookAndFeelDefaults().
+         getColor("ToolTip.background"));
+     popupWindow.setContentPane(mainPanel);
 
      panel.setLayout(new BorderLayout());
-     panel.add(subPanel, BorderLayout.NORTH);
+     panel.add(field, BorderLayout.NORTH);
+     panel.setOpaque(false);
      panel.add(new JScrollPane(list), BorderLayout.CENTER);
-     subPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-     subPanel.add(field);
-     subPanel.add(add);
-     panel.add(newChain, BorderLayout.SOUTH);
-     popup.add(label, BorderLayout.NORTH);
-     popup.add(panel,BorderLayout.CENTER);
 
+     subPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+     subPanel.add(add);
+     subPanel.add(cancel);
+     subPanel.setOpaque(false);
+     panel.add(subPanel, BorderLayout.SOUTH);
+     mainPanel.add(label, BorderLayout.NORTH);
+     mainPanel.add(panel,BorderLayout.CENTER);
      // and finally load the data for the list
-     add.addActionListener(new AddAction());
-     newChain.addActionListener(new AddAction());
+     AddAction action = new AddAction();
+     add.addActionListener(action);
+     cancel.addActionListener(action);
+
      list.setVisibleRowCount(5);
      list.addListSelectionListener(this);
-     field.addKeyListener(this);
-   }
-
-   public void valueChanged(ListSelectionEvent lse) {
-     field.setText((String) list.getSelectedValue());
-     field.updateUI();
+     list.addKeyListener(this);
    }
 
    public void actionPerformed(ActionEvent ae) {
@@ -774,62 +1137,91 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
      // yes it is put on highlighted so show the annotationType
      if (highlightedTypeAnnotsOffsets != null &&
          index < highlightedTypeAnnotsOffsets.length && index >= 0) {
+       textPane.removeAll();
        annotToConsiderForChain = (Annotation) highlightedTypeAnnots.get(index);
        // now check if this annotation is already linked with something
        CorefTreeNode headNode = findOutTheChainHead(annotToConsiderForChain);
        if(headNode != null) {
-         JPopupMenu popup1 = new JPopupMenu();
-         JLabel label1 = new JLabel("Annotation co-referenced with : \""+headNode.toString()+"\"");
+         popup1 = new JPopupMenu();
          popup1.setBackground(UIManager.getLookAndFeelDefaults().
-             getColor("ToolTip.background"));
-        label1.setBackground(UIManager.getLookAndFeelDefaults().
-             getColor("ToolTip.background"));
+         getColor("ToolTip.background"));
+         JLabel label1 = new JLabel("Annotation co-referenced to : \""+headNode.toString()+"\"");
          popup1.setLayout(new FlowLayout());
          popup1.add(label1);
+         if(popupWindow != null && popupWindow.isVisible()) {
+           popupWindow.setVisible(false);
+         }
          popup1.setVisible(true);
          popup1.show(textPane, (int) mousePoint.getX(), (int) mousePoint.getY());
        } else {
 
-         list.setListData(currentSelections.keySet().toArray());
+
+         ArrayList set = new ArrayList(currentSelections.keySet());
+         Collections.sort(set);
+         set.add(0, "[New Chain]");
+         list.setListData(set.toArray());
          list.updateUI();
-         popup.setVisible(false);
-         label.setText(defaultLabelText + "for : \"" +
-                       getString(annotToConsiderForChain) + "\"");
-         popup.setVisible(true);
-         popup.show(textPane, (int) mousePoint.getX(),
-                    (int) mousePoint.getY());
+         popupWindow.setVisible(false);
+         label.setText("Add \""+getString(annotToConsiderForChain) + "\" to ");
+         Point topLeft = textPane.getLocationOnScreen();
+                 int x = topLeft.x + (int) mousePoint.getX();
+                 int y = topLeft.y + (int) mousePoint.getY();
+         popupWindow.setLocation(x,y);
+         popupWindow.pack();
+         if(popup1.isVisible()) {
+           popup1.setVisible(false);
+         }
+         popupWindow.setVisible(true);
+
+         list.requestFocus(true);
        }
      }
    }
 
-   public void keyReleased(KeyEvent ke) {
+   public void valueChanged(ListSelectionEvent lse) {
+     field.setText((String) list.getSelectedValue());
+   }
+
+   public void keyTyped(KeyEvent ke) {
+     if(field.getText() == null) {
+       field.setText("");
+     }
+
      if(ke.getKeyChar()== KeyEvent.VK_UP) {
-       int index1 = list.getSelectedIndex();
-       if(index1 < list.getModel().getSize() - 1) {
-         list.setSelectedIndex(index1 + 1);
-         field.setText((String) list.getSelectedValue());
-         field.updateUI();
-       }
+       field.setText((String) list.getSelectedValue());
+       field.updateUI();
        return;
      } else if(ke.getKeyChar() == KeyEvent.VK_DOWN) {
-       int index1 = list.getSelectedIndex();
-       if(index1 > 0) {
-         list.setSelectedIndex(index1 - 1);
-         field.setText((String) list.getSelectedValue());
-         field.updateUI();
-       }
+       field.setText((String) list.getSelectedValue());
+       field.updateUI();
        return;
      } else if(ke.getKeyChar() == KeyEvent.VK_ENTER) {
        actionPerformed(new ActionEvent(add,ActionEvent.ACTION_PERFORMED,"add"));
        return;
+     } else if(ke.getKeyChar() == KeyEvent.VK_BACK_SPACE) {
+       if(field.getText().length() > 0) {
+         String text = field.getText();
+         field.setText(text.substring(0, text.length()-1));
+         field.updateUI();
+       }
+     } else if(Character.isLetterOrDigit(ke.getKeyChar()) || Character.isSpaceChar(ke.getKeyChar())) {
+       field.setText(field.getText() + ke.getKeyChar());
+       field.updateUI();
      }
 
      String startWith = field.getText();
      Vector myList = new Vector();
-     Iterator iter = currentSelections.keySet().iterator();
-     while(iter.hasNext()) {
-       String currString = (String) iter.next();
-       if(currString.startsWith(startWith)) {
+     ArrayList set = new ArrayList(currentSelections.keySet());
+     Collections.sort(set);
+     set.add(0, "[New Chain]");
+     boolean first = true;
+     for(int i=0;i<set.size();i++) {
+       String currString = (String) set.get(i);
+       if(currString.toLowerCase().startsWith(startWith.toLowerCase())) {
+         if(first) {
+           field.setText(currString.substring(0, startWith.length()));
+           first = false;
+         }
          myList.add(currString);
        }
      }
@@ -847,8 +1239,11 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
    private class AddAction extends AbstractAction {
      public void actionPerformed(ActionEvent ae) {
-       if(ae.getSource() == add) {
-         if(field.getText() == null || field.getText().length() == 0) {
+       if(ae.getSource() == cancel) {
+         popupWindow.setVisible(false);
+         return;
+       } else if(ae.getSource() == add) {
+         if(field.getText().length() == 0) {
            try {
              JOptionPane.showMessageDialog(Main.getMainFrame(),
                                            "No Chain Selected",
@@ -865,6 +1260,43 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
            if(ann == null) return;
            // yes it is available
            // find out the CorefTreeNode for the chain under which it is to be inserted
+           if(field.getText().equals("[New Chain]")) {
+             // we want to add this
+             // now first find out the annotation
+             if(ann == null) return;
+             CorefTreeNode chainNode = findOutChainNode(getString(ann));
+             if(chainNode != null) {
+               try {
+                 JOptionPane.showMessageDialog(Main.getMainFrame(),
+                                               "Chain with " + getString(ann) +
+                                               " title already exists",
+                                               "New Chain - Error",
+                                               JOptionPane.ERROR_MESSAGE);
+               }catch(Exception e) {
+                 e.printStackTrace();
+               }
+               return;
+             }
+
+             popupWindow.setVisible(false);
+
+            Map matchesMap = null;
+            matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
+                                              DOCUMENT_COREF_FEATURE_NAME);
+            String currentSet = (String) annotSets.getSelectedItem();
+            currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null : currentSet;
+            java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+            ArrayList tempList = new ArrayList();
+            tempList.add(ann.getId());
+            if(matches == null) matches = new ArrayList();
+            matches.add(tempList);
+            if(matchesMap == null) matchesMap = new HashMap();
+            matchesMap.put(currentSet, matches);
+            document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME, matchesMap);
+            return;
+           }
+
+
            CorefTreeNode chainNode = findOutChainNode(field.getText());
            HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()));
            if(chainNode == null) {
@@ -877,157 +1309,27 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
              }
              return;
            }
-           popup.setVisible(false);
+           popupWindow.setVisible(false);
            ArrayList ids = (ArrayList) chains.get(chainNode);
-           AnnotationSet set = getAnnotationSet( (String) annotSets.
-                                                getSelectedItem());
-           // make the entry of current annotation in all its corefering annotations
-           for (int i = 0; i < ids.size(); i++) {
-             Annotation tempAnnot = (Annotation) set.get( (Integer) ids.get(i));
-             ArrayList matches = (ArrayList) (tempAnnot.getFeatures().get(
-                 ANNIEConstants.
-                 ANNOTATION_COREF_FEATURE_NAME));
-             if (matches == null)
-               matches = new ArrayList();
 
-             if (!matches.contains(ann.getId())) {
-               matches.add(ann.getId());
-               tempAnnot.getFeatures().put(ANNIEConstants.
-                                           ANNOTATION_COREF_FEATURE_NAME,
-                                           matches);
-             }
-
-           }
-           // inserting all ids to the currentAnnotations
-           FeatureMap features = ann.getFeatures();
-           if (features.containsKey(ANNIEConstants.
-                                    ANNOTATION_COREF_FEATURE_NAME)) {
-             ArrayList matches = (ArrayList) features.get(ANNIEConstants.
-                 ANNOTATION_COREF_FEATURE_NAME);
-             for (int j = 0; j < ids.size(); j++) {
-               if (!matches.contains(ids.get(j))) {
-                 matches.add(ids.get(j));
-               }
-             }
-           }
-           else {
-             features.put(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME, ids);
-           }
-
-           ids.add(ann.getId());
-           chains.put(chainNode, ids);
-           corefChains.put(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()), chains);
-
-           // now see if the string of new annotation is longer than the current chainNode
-           if (chainNode.toString().length() >= getString(ann).length()) {
-             currentSelections.put(chainNode.toString(), new Boolean(true));
-             // and rehighlight the chains
-             highlightedTags = null;
-             highlightAnnotations();
-             typeSpecificHighlightedTags = null;
-             showTypeWiseAnnotations();
-             return;
-           }
-           else {
-             // the new added annotation has a longer value
-             // 1. Now we need to change the value of currentNode
-             String longestString = getString(ann);
-             String previousString = chainNode.toString();
-             chainNode.setUserObject(longestString);
-
-             // 2. we need to make changes in the following instances
-             // colorChainsMap
-             // currentColors
-             // selectionChainsMap
-             // currentSelections
-             HashMap temp = (HashMap) colorChainsMap.get( (String) annotSets.
-                 getSelectedItem());
-             Color color = (Color) temp.get(previousString);
-             temp.remove(previousString);
-             temp.put(longestString, color);
-             currentColors = temp;
-             colorChainsMap.put( (String) annotSets.getSelectedItem(), temp);
-
-             temp = (HashMap) selectionChainsMap.get( (String) annotSets.
-                 getSelectedItem());
-             temp.remove(previousString);
-             temp.put(longestString, new Boolean(true));
-             currentSelections = temp;
-             selectionChainsMap.put( (String) annotSets.getSelectedItem(),
-                                    temp);
-
-             // and finally make arrangements for highlighting
-             highlightedTags = null;
-             highlightAnnotations();
-             typeSpecificHighlightedTags = null;
-             showTypeWiseAnnotations();
-
-             // redraw the tree
-             corefTree.repaint();
-             corefTree.updateUI();
-             return;
-           }
-         }
-       } else if(ae.getSource() == newChain) {
-
-         // we want to add this
-         // now first find out the annotation
-         Annotation ann = annotToConsiderForChain;
-         if(ann == null) return;
-         HashMap chains = (HashMap) corefChains.get(corefAnnotationSetNodesMap.get(annotSets.getSelectedItem()));
-         CorefTreeNode chainNode = findOutChainNode(getString(ann));
-         if(chainNode != null) {
-           try {
-             JOptionPane.showMessageDialog(Main.getMainFrame(),
-                                           "Chain with " + getString(ann) +
-                                           " title already exists",
-                                           "New Chain - Error",
-                                           JOptionPane.ERROR_MESSAGE);
-           }catch(Exception e) {
-             e.printStackTrace();
+           Map matchesMap = null;
+           matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
+                                             DOCUMENT_COREF_FEATURE_NAME);
+           String currentSet = (String) annotSets.getSelectedItem();
+           currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null : currentSet;
+           java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+           if(matches == null) matches = new ArrayList();
+           int index = matches.indexOf(ids);
+           if(index != -1) {
+             ArrayList tempIds = (ArrayList) matches.get(index);
+             tempIds.add(ann.getId());
+             matches.set(index, tempIds);
+             if(matchesMap == null) matchesMap = new HashMap();
+             matchesMap.put(currentSet, matches);
+             document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME, matchesMap);
            }
            return;
          }
-
-         popup.setVisible(false);
-
-         // this is the new chain
-         // get the current annotSetNode
-         CorefTreeNode annotSetNode = (CorefTreeNode)
-                                      corefAnnotationSetNodesMap.get(annotSets.
-             getSelectedItem());
-         // create the new chainNode
-         chainNode = new CorefTreeNode(getString(ann), false,
-                                       CorefTreeNode.CHAIN_NODE);
-         // add this to tree
-         annotSetNode.add(chainNode);
-         // ArrayList matches
-         HashMap newHashMap = (HashMap) corefChains.get(annotSetNode);
-         ArrayList newChainList = new ArrayList();
-         newChainList.add(ann.getId());
-         newHashMap.put(chainNode, newChainList);
-         corefChains.put(annotSetNode, newHashMap);
-         // entry into the selection
-         currentSelections.put(chainNode.toString(), new Boolean(true));
-         selectionChainsMap.put(annotSets.getSelectedItem(), currentSelections);
-         // entry into the colors
-         float components[] = colorGenerator.getNextColor().getComponents(null);
-         Color color = new Color(components[0],
-                                 components[1],
-                                 components[2],
-                                 0.5f);
-         currentColors.put(chainNode.toString(), color);
-         colorChainsMap.put(annotSets.getSelectedItem(), currentColors);
-         // and finally make arrangements for highlighting
-         highlightedTags = null;
-         highlightAnnotations();
-         typeSpecificHighlightedTags = null;
-         showTypeWiseAnnotations();
-
-         // redraw the tree
-         corefTree.repaint();
-         corefTree.updateUI();
-         return;
        }
      }
    }
@@ -1046,7 +1348,6 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
     }
 
 
-
     public void actionPerformed(ActionEvent ae) {
 
       int index = -1;
@@ -1062,6 +1363,11 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
       // yes it is put on highlighted so show the annotationType
       if (highlightedChainAnnotsOffsets != null && index < highlightedChainAnnotsOffsets.length && index >= 0) {
+
+        if(popupWindow != null && popupWindow.isVisible()) {
+          popupWindow.setVisible(false);
+        }
+
         popup.setVisible(false);
         popup.removeAll();
         final int tempIndex = index;
@@ -1072,6 +1378,8 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
           JPanel tempPanel = new JPanel();
           tempPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
           tempPanel.add(new JLabel(chainHead.toString()));
+          tempPanel.setBackground(UIManager.getLookAndFeelDefaults().
+             getColor("ToolTip.background"));
           final JButton deleteButton = new JButton("Delete");
           tempPanel.add(deleteButton);
           popup.add(tempPanel);
@@ -1087,13 +1395,6 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
                   // remove it
                   removeChainReference( (Annotation) highlightedChainAnnots.get(
                       tempIndex), (CorefTreeNode) tempMap.get(deleteButton.getActionCommand()));
-                  // again highlightCoreferences
-                  highlightedTags = null;
-                  highlightAnnotations();
-                  if (showAnnotations.isSelected()) {
-                    typeSpecificHighlightedTags = null;
-                    showTypeWiseAnnotations();
-                  }
                 }
               }
               catch (Exception e1) {
@@ -1104,8 +1405,11 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
         }
         //label.setText("Remove \""+getString((Annotation) highlightedChainAnnots.get(index)) + "\" from \""+ findOutTheChainHead((Annotation) highlightedChainAnnots.get(index)).toString()+"\"");
         popup.revalidate();
+        if(popupWindow != null && popupWindow.isVisible()) {
+          popupWindow.setVisible(false);
+        }
         popup.setVisible(true);
-        popup.show(textPane,(int) mousePoint.getX() ,(int) mousePoint.getY() + 10);
+        popup.show(textPane,(int) mousePoint.getX() ,(int) mousePoint.getY());
       }
     }
 
@@ -1148,6 +1452,10 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
   protected class CorefTreeMouseListener extends MouseAdapter {
 
     public void mouseClicked(MouseEvent me) {
+      if(popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.setVisible(false);
+      }
+      textPane.removeAll();
       // ok now find out the currently selected node
       int x = me.getX();
       int y = me.getY();
@@ -1223,12 +1531,13 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
      * @param owner
      */
     public CorefTreeCellRenderer() {
+      setOpaque(true);
       check = new JCheckBox();
       check.setBackground(Color.white);
       label = new JLabel();
-      setLayout(new FlowLayout());
-      add(check);
-      add(label);
+      setLayout(new BorderLayout(5, 10));
+      add(check, BorderLayout.WEST);
+      add(label, BorderLayout.CENTER);
     }
 
 
@@ -1244,14 +1553,14 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
       CorefTreeNode userObject = (CorefTreeNode) value;
       label.setText(userObject.toString());
-      label.setFont(tree.getFont());
+      this.setSize(label.getWidth(),label.getFontMetrics(label.getFont()).getHeight() * 2);
+
       if (userObject.getType() == CorefTreeNode.ROOT_NODE || userObject.getType() == CorefTreeNode.ANNOTSET_NODE) {
         this.setBackground(Color.white);
         this.check.setVisible(false);
         return this;
       } else {
         this.setBackground((Color) currentColors.get(userObject.toString()));
-        this.setMaximumSize(new Dimension(this.getWidth(),check.getHeight()));
         check.setVisible(true);
         check.setBackground(Color.white);
       }
@@ -1262,36 +1571,5 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
 
       return this;
     }
-
-
-    /**
-     * This method tells that what should be the preferred size for the node in the tree
-     * @return
-     */
-    public Dimension getPreferredSize() {
-      Dimension d_check = check.getPreferredSize();
-      Dimension d_label = label.getPreferredSize();
-      return new Dimension(d_check.width + d_label.width,
-                           (d_check.height < d_label.height ?
-                            d_label.height : d_check.height));
-    }
-
-    public void doLayout() {
-      Dimension d_check = check.getPreferredSize();
-      Dimension d_label = label.getPreferredSize();
-      int y_check = 0;
-      int y_label = 0;
-      if (d_check.height < d_label.height) {
-        y_check = (d_label.height - d_check.height) / 2;
-      }
-      else {
-        y_label = (d_check.height - d_label.height) / 2;
-      }
-      check.setLocation(0, y_check);
-      check.setBounds(0, y_check, d_check.width, d_check.height);
-      label.setLocation(d_check.width, y_label);
-      label.setBounds(d_check.width, y_label, d_label.width, d_label.height);
-    }
-
   }
 }
