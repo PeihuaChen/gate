@@ -318,10 +318,9 @@ public class AccessControllerImpl
       throw new SecurityException("invalid session supplied");
     }
 
-    //2. is user member of group?
-    User usr = s.getUser();
-    if (false == grp.getUsers().contains(usr)) {
-      throw new SecurityException("user is not a member of the group");
+    //2. check privileges
+    if (false == s.isPrivilegedSession()) {
+      throw new SecurityException("insufficient privileges");
     }
 
     //3. delete in DB
@@ -436,11 +435,9 @@ public class AccessControllerImpl
       throw new SecurityException("invalid session supplied");
     }
 
-    //2. is user to be deleted the same from the session?
-    User sessionUsr = s.getUser();
-    //equals() is custom, so "==" is ok
-    if (sessionUsr != usr) {
-      throw new SecurityException("session user is not the user to be deleted");
+    //2. check privileges
+    if (false == s.isPrivilegedSession()) {
+      throw new SecurityException("insufficient privileges");
     }
 
     //3. delete in DB
