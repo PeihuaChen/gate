@@ -3517,7 +3517,7 @@ public class OracleDataStore extends JDBCDataStore {
       }// if DBHelper.DOCUMENT_CLASS
     }
 
-    if (filter!=null){
+    if (filter!=null && filter.size()>0){
       if (lrType!=null){
         query = query.append(" AND ");
       }
