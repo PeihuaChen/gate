@@ -149,6 +149,10 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
       throw new PersistenceException("cannot close JDBC connection, DB error is ["+
                                       sqle.getMessage() +"]");
     }
+
+    //finally unregister this datastore from the GATE register of datastores
+    Gate.getDataStoreRegister().remove(this);
+
   }
 
   /**
