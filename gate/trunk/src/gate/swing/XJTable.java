@@ -104,6 +104,36 @@ public class XJTable extends JTable{
   }
   
   /**
+   * Converts a row number from the model co-ordinates system to the view's. 
+   * @param modelRow the row number in the model
+   * @return the corresponding row number in the view. 
+   */
+  public int rowModelToView(int modelRow){
+    return sortingModel.sourceToTarget(modelRow);
+  }
+
+  /**
+   * @return Returns the ascending.
+   */
+  public boolean isAscending() {
+    return ascending;
+  }
+  /**
+   * @param ascending The ascending to set.
+   */
+  public void setAscending(boolean ascending) {
+    this.ascending = ascending;
+  }
+  /**
+   * Converts a row number from the view co-ordinates system to the model's. 
+   * @param viewRow the row number in the view.
+   * @return the corresponding row number in the model. 
+   */
+  public int rowViewToModel(int viewRow){
+    return sortingModel.targetToSource(viewRow);
+  }
+  
+  /**
    * Sets the custom comparator to be used for a particular column. Columns that
    * don't have a custom comparator will be sorted using the natural order.
    * @param column the column index.
