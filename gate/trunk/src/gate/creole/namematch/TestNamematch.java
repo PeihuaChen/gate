@@ -70,7 +70,7 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(257), new Long(274), "unknown", fm);
+      annotSetAS.add(new Long(257), new Long(274), "Unknown", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","person");
@@ -82,13 +82,13 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(294), new Long(306), "unknown", fm);
+      annotSetAS.add(new Long(294), new Long(306), "Unknown", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(307), new Long(326), "unknown", fm);
+      annotSetAS.add(new Long(307), new Long(326), "Unknown", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","person");
@@ -118,7 +118,7 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(390), new Long(394), "unknown", fm);
+      annotSetAS.add(new Long(390), new Long(394), "Unknown", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
@@ -137,6 +137,7 @@ public class TestNamematch extends TestCase
 
     // the set with all the matches from the document
     List matches = namematch.getMatchesDocument();
+    Out.prln(matches);
     if (matches != null)
       assert(matches.toString().equals("[[9, 7], [8, 6], [5, 3, 0], [4, 2]]"));
 

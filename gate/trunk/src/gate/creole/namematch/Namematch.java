@@ -129,7 +129,11 @@ public class Namematch extends AbstractProcessingResource
 
     // the "unknown" annotations
     AnnotationSet nameAnnotsUnknown;
-    nameAnnotsUnknown = nameAllAnnots.get("unknown", Factory.newFeatureMap());
+    nameAnnotsUnknown = nameAllAnnots.get("Unknown", Factory.newFeatureMap());
+
+    // delete them from annotation set
+   // if (annotsUnknown!=null)
+     // nameAllAnnots.removeAll(annotsUnknown);
 
     // go through all the annotation types
     Iterator iterAnnotationTypes = annotationTypes.iterator();
@@ -146,7 +150,7 @@ public class Namematch extends AbstractProcessingResource
         else {
           // the "unknown" annotations
           if (nameAnnotsUnknown!=null){
-            nameAnnotsUnknown = nameAnnotsUnknown.get("unknown",
+            nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
                                   Factory.newFeatureMap());
             // add the "unknown" annotations to the current set of annotation
             Iterator iter = nameAnnotsUnknown.iterator();
@@ -251,6 +255,8 @@ public class Namematch extends AbstractProcessingResource
               if (apply_rules_namematch(shortName,longName)) {
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
+                AnnotationMatches matchedByAnnot1 = new AnnotationMatches();
+
                 if (matched_annots.containsKey(annot2_id.toString())){
                   matchedAnnot2 =
                    (AnnotationMatches) matched_annots.get(annot2_id.toString());
@@ -260,32 +266,69 @@ public class Namematch extends AbstractProcessingResource
                 if (matchedAnnot2 !=null) {
                   for (int k=0;k<matchedAnnot2.howMany();k++) {
                     String matchedByAnnot2Id = matchedAnnot2.matchedAnnotAt(k);
-                    if (!matchedAnnot1.containsMatched(matchedByAnnot2Id))
+                    if (!matchedAnnot1.containsMatched(matchedByAnnot2Id)) {
                       matchedAnnot1.addMatchedAnnotId(matchedByAnnot2Id);
+                    }
                       // then add annot1 to all those annotations
                       // that have been matched with annot2 so far
                       matchedByAnnot2 = (AnnotationMatches)
                                          matched_annots.get(matchedByAnnot2Id);
-                      if (matchedByAnnot2 !=null)
+
+                      if ((matchedByAnnot2 !=null)&&
+                        (!matchedByAnnot2.containsMatched
+                          (annot1_id.toString()))) {
                         matchedByAnnot2.addMatchedAnnotId(annot1_id.toString());
-                  } // for
+                      }
+                    } // for
+                  }
+                  // add the ids of annotation1 to annotation2
+                  for (int l=0;l<matchedAnnot1.howMany();l++) {
+                    String matchedByAnnot1Id = matchedAnnot1.matchedAnnotAt(l);
+
+                    if (!matchedAnnot2.containsMatched(
+                                            matchedAnnot1.matchedAnnotAt(l))) {
+                      matchedAnnot2.addMatchedAnnotId(
+                                      matchedAnnot1.matchedAnnotAt(l));
+
+                    }
+                    matchedByAnnot1 = (AnnotationMatches)
+                                       matched_annots.get(matchedByAnnot1Id);
+
+                    if ((matchedByAnnot1 !=null)&&
+                      (!matchedByAnnot1.containsMatched
+                        (annot2_id.toString()))) {
+                      matchedByAnnot1.addMatchedAnnotId(annot2_id.toString());
+                    }
+
+                  }
+
+
+                  // last add annotation 2 to those of annot1
+                  // and annotation 1 to those of annot2
+                  /*if (nameAnnotsUnknown!=null)
+                  if ((!nameAnnotsUnknown.contains(annot1))||
+                      (!nameAnnotsUnknown.contains(annot2))||
+                      ((nameAnnotsUnknown.contains(annot1))&&
+                        (!annot1.getType().equals("Unknown")))||
+                      ((nameAnnotsUnknown.contains(annot2))&&
+                        (!annot2.getType().equals("Unknown")))
+                      ){
+                      */
+                if ((!nameAnnotsUnknown.contains(annot1))||
+                  (!nameAnnotsUnknown.contains(annot2))) {
+                  if (!matchedAnnot1.containsMatched(annot1_id.toString()))
+                    matchedAnnot1.addMatchedAnnotId(annot1_id.toString());
+                  if (!matchedAnnot1.containsMatched(annot2_id.toString()))
+                    matchedAnnot1.addMatchedAnnotId(annot2_id.toString());
+
+                  if (!matchedAnnot2.containsMatched(annot1_id.toString()))
+                    matchedAnnot2.addMatchedAnnotId(annot1_id.toString());
+                  if (!matchedAnnot2.containsMatched(annot2_id.toString()))
+                    matchedAnnot2.addMatchedAnnotId(annot2_id.toString());
+
+                  matched_annots.put(annot1_id.toString(),matchedAnnot1);
+                  matched_annots.put(annot2_id.toString(),matchedAnnot2);
                 }
-
-                // last add annotation 2 to those of annot1
-                // and annotation 1 to those of annot2
-
-                if (!matchedAnnot1.containsMatched(annot1_id.toString()))
-                  matchedAnnot1.addMatchedAnnotId(annot1_id.toString());
-                if (!matchedAnnot1.containsMatched(annot2_id.toString()))
-                  matchedAnnot1.addMatchedAnnotId(annot2_id.toString());
-
-                if (!matchedAnnot2.containsMatched(annot1_id.toString()))
-                  matchedAnnot2.addMatchedAnnotId(annot1_id.toString());
-                if (!matchedAnnot2.containsMatched(annot2_id.toString()))
-                  matchedAnnot2.addMatchedAnnotId(annot2_id.toString());
-
-                matched_annots.put(annot1_id.toString(),matchedAnnot1);
-                matched_annots.put(annot2_id.toString(),matchedAnnot2);
 
                 // classify the "unknown" annotation if such exists
                 if (nameAnnotsUnknown!=null) {
@@ -324,7 +367,8 @@ public class Namematch extends AbstractProcessingResource
             Iterator it = nameAnnotsUnknown.iterator();
             while (it.hasNext()) {
               Annotation ann = (Annotation)it.next();
-              nameAnnots.remove(ann);
+              if (nameAnnots.contains(ann)) nameAnnots.remove(ann);
+              if (nameAllAnnots.contains(ann)) nameAllAnnots.remove(ann);
             }
 
             // add the new annotation
@@ -334,8 +378,11 @@ public class Namematch extends AbstractProcessingResource
               while (iter.hasNext()) {
                 Annotation annot = (Annotation)iter.next();
                 nameAnnots.add(annot);
+                nameAllAnnots.add(annot);
               };
+              // delete them
             }// if
+
           }// if
 
           // append the "matches" attribute to existing annotations
@@ -359,6 +406,12 @@ public class Namematch extends AbstractProcessingResource
         }// else
       }//if
     }//while
+
+      nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
+                        Factory.newFeatureMap());
+      if (nameAnnotsUnknown!=null) {
+        nameAllAnnots.addAll(nameAnnotsUnknown);
+    }
 
     // set the matches of the document
     determineMatchesDocument();
