@@ -233,7 +233,7 @@ list:
 jape: japefiles ../src/gate/jape/parser/ParseCpsl.java \
 	../src/gate/jape/parser/ParseCpsl.html \
 	../src/gate/jape/parser/ParseCpslPlain.html
-	../src/gate/jape/parser/ParseCpsl.java: ../src/gate/jape/parser/ParseCpsl.jj
+../src/gate/jape/parser/ParseCpsl.java: ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
 	$(RUN) -cp `$(CYGPATH) ../../../../lib/JavaCC.zip` \
 	COM.sun.labs.javacc.Main ParseCpsl.jj
