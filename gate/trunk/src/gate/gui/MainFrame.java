@@ -291,12 +291,6 @@ public class MainFrame extends JFrame
 
     // Create a new logArea and redirect the Out and Err output to it.
     logArea = new LogArea();
-Map fontAttr = new HashMap();
-fontAttr.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-fontAttr.put(TextAttribute.FAMILY, "Arial");
-fontAttr.put(TextAttribute.SIZE, new Float(24));
-Font font = new Font(fontAttr);
-logArea.setFont(font);
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
     Out.prln("Gate 2 started at: " + new Date().toString());
