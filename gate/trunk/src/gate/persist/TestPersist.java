@@ -62,7 +62,8 @@ public class TestPersist extends TestCase
     storageDir.mkdir(); // create an empty dir of same name
 
     SerialDataStore sds = (SerialDataStore)
-      Factory.createDataStore("gate.persist.SerialDataStore", storageDir.toURL());
+      Factory.createDataStore("gate.persist.SerialDataStore",
+                              storageDir.toURL().toExternalForm());
 
 
 //    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
@@ -138,7 +139,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL()
+      "gate.persist.SerialDataStore", storageDir.toURL().toExternalForm()
     );
 
     // check we can get empty lists from empty data stores
@@ -320,7 +321,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL()
+      "gate.persist.SerialDataStore", storageDir.toURL().toExternalForm()
     );
 
     // create a document with some annotations / features on it
@@ -342,7 +343,7 @@ public class TestPersist extends TestCase
     storageDir = File.createTempFile("TestPersist__", "__StorageDir");
     storageDir.delete();
     DataStore sds2 = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL()
+      "gate.persist.SerialDataStore", storageDir.toURL().toExternalForm()
     );
 
     // DSR should have two members

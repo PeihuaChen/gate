@@ -42,6 +42,16 @@ public abstract class AbstractController extends AbstractResource
   public void cleanup(){
   }
 
+  /**
+   * Populates this controller from a collection of {@link ProcessingResource}s
+   * (optional operation).
+   *
+   * Controllers that are serializable must implement this method needed by GATE
+   * to restore the contents of the controllers.
+   * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
+   * 	       is not supported by this controller.
+   */
+  public void setPRs(Collection PRs){}
 
   /**
    * Notifies all the PRs in this controller that they should stop their

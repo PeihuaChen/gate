@@ -375,7 +375,8 @@ public class CorpusBenchmarkTool {
     try {
       //open the data store
       DataStore sds = Factory.openDataStore
-                      ("gate.persist.SerialDataStore", processedDir.toURL());
+                      ("gate.persist.SerialDataStore",
+                       processedDir.toURL().toExternalForm());
 
       List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
       for (int i=0; i < lrIDs.size(); i++) {
@@ -457,7 +458,8 @@ public class CorpusBenchmarkTool {
     try {
       //open the data store
       DataStore sds = Factory.openDataStore
-                      ("gate.persist.SerialDataStore", storedDir.toURL());
+                      ("gate.persist.SerialDataStore",
+                       storedDir.toURL().toExternalForm());
 
       List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
       for (int i=0; i < lrIDs.size(); i++) {
