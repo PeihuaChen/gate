@@ -104,7 +104,8 @@ create or replace package persist is
                       
   
   function is_valid_feature_type(p_type          IN number)
-     return boolean;
+     return boolean
+     deterministic;
 
   
   procedure change_content_type(p_cont_id        in number,
