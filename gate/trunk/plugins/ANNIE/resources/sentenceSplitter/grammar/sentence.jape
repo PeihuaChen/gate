@@ -1,7 +1,7 @@
 // Valentin Tablan, 17/05/2001
 
 
-Phase:split6
+Phase:sentence
 Input: Token Split
 Options: control = first
 

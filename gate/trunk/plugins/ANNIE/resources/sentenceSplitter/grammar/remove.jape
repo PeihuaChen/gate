@@ -1,7 +1,7 @@
 // Valentin Tablan, 17/05/2001
 
 
-Phase:split3
+Phase:remove
 Input: Token Lookup Split SpaceToken
 Options: control = Appelt
 
