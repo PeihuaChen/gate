@@ -171,10 +171,10 @@ public class NameBearerHandle implements Handle,
         popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
       }
     }//if(resource instanceof LanguageResource)
-    if(target instanceof Resource){
-      popup.addSeparator();
-      popup.add(new XJMenuItem(new ReloadClassAction(), sListenerProxy));
-    }
+//    if(target instanceof Resource){
+//      popup.addSeparator();
+//      popup.add(new XJMenuItem(new ReloadClassAction(), sListenerProxy));
+//    }
 
 
     fireStatusChanged("Building views...");
