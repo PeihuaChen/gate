@@ -93,7 +93,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
   * Transduce a document using the default annotation set and the current
   * rule application style.
   */
-  public void transduce(Document doc) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
     fireProgressChangedEvent(0);
 
     //INITIALISATION Should we move this someplace else?
@@ -257,7 +257,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //                     "\n==========================");
 
           currentRHS = currentAcceptor.getFSMPosition().getAction();
-          currentRHS.transduce(doc,currentAcceptor.getBindings());
+          currentRHS.transduce(doc, annotations, currentAcceptor.getBindings());
 
           long currentAGPosition =
                currentAcceptor.getAGPosition().getOffset().longValue();
@@ -273,7 +273,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         FSMInstance currentAcceptor =
                                     (FSMInstance)acceptingFSMInstances.last();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
-        currentRHS.transduce(doc,currentAcceptor.getBindings());
+        currentRHS.transduce(doc, annotations, currentAcceptor.getBindings());
         //advance in AG
         startNode = currentAcceptor.getAGPosition();
 
@@ -341,6 +341,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.12  2000/07/04 14:37:39  valyt
+// Added some support for Jape-ing in a different annotations et than the default one;
+// Changed the L&F for the JapeGUI to the System default
+//
 // Revision 1.11  2000/07/03 21:00:59  valyt
 // Added StatusBar and ProgressBar support for tokenisation & Jape transduction
 // (it looks great :) )

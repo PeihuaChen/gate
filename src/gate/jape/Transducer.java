@@ -31,7 +31,7 @@ public abstract class Transducer implements java.io.Serializable,
   public String getName() { return name; }
 
   /** Transduce a document.  */
-  public abstract void transduce(Document doc) throws JapeException;
+  public abstract void transduce(Document doc, AnnotationSet annotations) throws JapeException;
 
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
@@ -86,6 +86,10 @@ public abstract class Transducer implements java.io.Serializable,
 
 
 // $Log$
+// Revision 1.3  2000/07/04 14:37:39  valyt
+// Added some support for Jape-ing in a different annotations et than the default one;
+// Changed the L&F for the JapeGUI to the System default
+//
 // Revision 1.2  2000/07/03 21:00:59  valyt
 // Added StatusBar and ProgressBar support for tokenisation & Jape transduction
 // (it looks great :) )

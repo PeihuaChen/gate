@@ -215,13 +215,13 @@ public class Batch implements JapeConstants, java.io.Serializable,
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
 //      transducer.transduce(doc);
-      transduce(doc);
+      transduce(doc, doc.getAnnotations());
     }
   } // transduce(coll)
 
   /** Process a single document. */
-  public void transduce(Document doc) throws JapeException {
-    transducer.transduce(doc);
+  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
+    transducer.transduce(doc, annotations);
   } // transduce(doc)
 
   /** Process a single text. */
@@ -229,7 +229,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
     Document doc = null;
     try { doc = Transients.newDocument(text);
     } catch (IOException e) { throw new JapeException(e.toString()); }
-    transducer.transduce(doc);
+    transducer.transduce(doc, doc.getAnnotations());
     return doc;
   } // transduce(text)
 
@@ -258,7 +258,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
           Document.COPIED
         );*/
       } catch(IOException e) { throw new JapeException(e.toString()); }
-      transducer.transduce(doc);
+      transducer.transduce(doc, doc.getAnnotations());
     }
     return coll;
   } // transduce(textFileNames)
@@ -413,6 +413,10 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.7  2000/07/04 14:37:39  valyt
+// Added some support for Jape-ing in a different annotations et than the default one;
+// Changed the L&F for the JapeGUI to the System default
+//
 // Revision 1.6  2000/07/03 21:00:59  valyt
 // Added StatusBar and ProgressBar support for tokenisation & Jape transduction
 // (it looks great :) )

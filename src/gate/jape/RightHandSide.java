@@ -114,7 +114,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "import gate.util.*;" + nl + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
-      "  public void doit(Document doc, java.util.Map bindings) { " + nl
+      "  public void doit(Document doc, AnnotationSet annotations, " +
+      " java.util.Map bindings) { " + nl
     );
 
     // initialise various names
@@ -382,13 +383,14 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
   /** Makes changes to the document, using LHS bindings. */
-  public void transduce(Document doc, java.util.Map bindings) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations,
+                        java.util.Map bindings) throws JapeException {
     if(theActionObject == null) {
       defineActionClass();
       instantiateActionClass();
     }
 
-    ((RhsAction) theActionObject).doit(doc, bindings);
+    ((RhsAction) theActionObject).doit(doc, annotations, bindings);
   } // transduce
 
   /** Create a string representation of the object. */
@@ -426,6 +428,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.10  2000/07/04 14:37:39  valyt
+// Added some support for Jape-ing in a different annotations et than the default one;
+// Changed the L&F for the JapeGUI to the System default
+//
 // Revision 1.9  2000/06/12 13:33:27  hamish
 // removed japeactionclasse create code (static init block
 //
