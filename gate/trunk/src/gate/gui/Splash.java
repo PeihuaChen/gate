@@ -36,21 +36,21 @@ public class Splash extends JWindow {
     getContentPane().add(content, BorderLayout.CENTER);
     validate();
     pack();
-  }
+  }// public Splash(Window owner, JComponent content)
 
   /**
    * Contructor from image.
    */
   public Splash(String imageResourcePath) {
     this(null, imageResourcePath);
-  }
+  }// public Splash(String imageResourcePath)
 
   /**
    * Constructor from content.
    */
   public Splash(JComponent content) {
     this(null, content);
-  }
+  }// public Splash(JComponent content)
 
   /**
    * Constructor from owner and image.
@@ -58,7 +58,7 @@ public class Splash extends JWindow {
   public Splash(Window owner, String imageResourcePath) {
     this(owner,
         new JLabel(new ImageIcon(Splash.class.getResource(imageResourcePath))));
-  }
+  }// public Splash(Window owner, String imageResourcePath)
 
   /**
    * Displays the splash screen centered in the owner's space or centered on
@@ -89,5 +89,6 @@ public class Splash extends JWindow {
     setLocation(ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
                 ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
     super.show();
-  }
-}
+  }// public void show()
+
+}// class Splash

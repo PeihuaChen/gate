@@ -56,20 +56,20 @@ public class ApplicationViewer extends AbstractVisualResource
 */
   public void setController(SerialController controller){
     this.controller = controller;
-  }
+  }//setController
 
-  public void setHandle(ResourceHandle handle){
+  public void setHandle(ResourceHandle handle) {
     this.handle = handle;
-  }
+  }//setHandle
 
-  public Resource init(){
+  public Resource init() {
     initLocalData();
     initGuiComponents();
     initListeners();
     return this;
-  }
+  }//init
 
-  protected void initLocalData(){
+  protected void initLocalData() {
     paramsForPR = new HashMap();
     addActionForPR = new HashMap();
     removeActionForPR = new HashMap();
@@ -85,9 +85,9 @@ public class ApplicationViewer extends AbstractVisualResource
       removeActionForPR.put(pr, remAction);
     }
 */
-  }
+  }//initLocalData
 
-  protected void initGuiComponents(){
+  protected void initGuiComponents() {
     this.setLayout(new BorderLayout());
     Box mainBox = Box.createHorizontalBox();
 
@@ -164,9 +164,9 @@ public class ApplicationViewer extends AbstractVisualResource
     removeMenu = new JMenu("Remove");
     popup.add(addMenu);
     popup.add(removeMenu);
-  }
+  }// initGuiComponents()
 
-  protected void initListeners(){
+  protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
     this.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
@@ -185,9 +185,9 @@ public class ApplicationViewer extends AbstractVisualResource
               ApplicationViewer.this,
               "Please select some components from the list of available components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
-        }else{
+        } else {
           List actions = new ArrayList();
-          for(int i = 0; i < rows.length; i++){
+          for(int i = 0; i < rows.length; i++) {
             Action act =(Action)
                        addActionForPR.get(modulesTable.getValueAt(rows[i], -1));
             if(act != null) actions.add(act);
@@ -240,8 +240,8 @@ public class ApplicationViewer extends AbstractVisualResource
             mainTTModel.removeNodeFromParent(
                         (DefaultMutableTreeNode)nodesIter.next());
           }
-        }
-      }
+        }// else
+      }//  public void actionPerformed(ActionEvent e)
     });
 
     upBtn.addActionListener(new ActionListener() {
@@ -252,8 +252,8 @@ public class ApplicationViewer extends AbstractVisualResource
               ApplicationViewer.this,
               "Please select some components to be moved from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
-        }else{
-          for(int i = 0; i < paths.length; i++){
+        } else {
+          for(int i = 0; i < paths.length; i++) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                                           paths[i].getLastPathComponent();
             Object value = node.getUserObject();
@@ -274,7 +274,7 @@ public class ApplicationViewer extends AbstractVisualResource
                   mainTreeTable.expandPath(paths[i]);
                 }
               }
-            }else{
+            } else {
               JOptionPane.showMessageDialog(
                   ApplicationViewer.this,
                   "Only processing resources can be moved!\n" +
@@ -288,7 +288,7 @@ public class ApplicationViewer extends AbstractVisualResource
               mainTreeTable.getTree().setSelectionPaths(finalPaths);
             }
           });
-        }
+        }// else
       }//public void actionPerformed(ActionEvent e)
     });
 
@@ -300,7 +300,7 @@ public class ApplicationViewer extends AbstractVisualResource
               ApplicationViewer.this,
               "Please select some components to be moved from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
-        }else{
+        } else {
           for(int i = paths.length -1; i >= 0; i--){
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                                           paths[i].getLastPathComponent();
@@ -335,28 +335,28 @@ public class ApplicationViewer extends AbstractVisualResource
               mainTreeTable.getTree().setSelectionPaths(finalPaths);
             }
           });
-        }
+        }// else
       }//public void actionPerformed(ActionEvent e)
     });
 
     mainTreeTable.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         ApplicationViewer.this.validate();
-      }
+      }// public void componentResized(ComponentEvent e)
 
       public void componentShown(ComponentEvent e) {
         ApplicationViewer.this.validate();
-      }
+      }// public void componentShown(ComponentEvent e)
     });
 
     modulesTable.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         ApplicationViewer.this.validate();
-      }
+      }// public void componentResized(ComponentEvent e)
 
       public void componentShown(ComponentEvent e) {
         ApplicationViewer.this.validate();
-      }
+      }// public void componentShown(ComponentEvent e)
     });
   }//protected void initListeners()
 
@@ -379,7 +379,7 @@ public class ApplicationViewer extends AbstractVisualResource
           removeActionForPR.put(pr, remAction);
         }
       }
-    }
+    }// while
   }//protected void updateActions()
 
   public MenuElement[] getPopupElements(){
@@ -400,14 +400,14 @@ public class ApplicationViewer extends AbstractVisualResource
       removeMenu.add((Action)remActionsIter.next());
     }
     return popup.getSubElements();
-  }
+  }//public MenuElement[] getPopupElements()
 
   protected String getResourceName(Resource res){
     ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                          get(res.getClass().getName());
     if(rData != null) return rData.getName();
     else return res.getClass().getName();
-  }
+  }//getResourceName
 
   class PRsAndParamsTTModel extends DefaultTreeModel implements TreeTableModel{
     PRsAndParamsTTModel(SerialController aController){
@@ -416,7 +416,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
     public int getColumnCount(){
       return 3;
-    }
+    }//getColumnCount
 
     public String getColumnName(int column){
       switch(column){
@@ -425,7 +425,7 @@ public class ApplicationViewer extends AbstractVisualResource
         case 2: return "Parameter Value";
         default: return "?";
       }
-    }
+    }//public String getColumnName(int column)
 
     public Class getColumnClass(int column){
       switch(column){
@@ -433,7 +433,7 @@ public class ApplicationViewer extends AbstractVisualResource
         case 2: return Object.class;
         default: return Object.class;
       }
-    }
+    }//public Class getColumnClass(int column)
 
     public Object getValueAt(Object node, int column){
       if(node == root){
@@ -462,7 +462,7 @@ public class ApplicationViewer extends AbstractVisualResource
         }
       }
       return null;
-    }
+    }//public Object getValueAt(Object node, int column)
 
     public boolean isCellEditable(Object node, int column){
       node = ((DefaultMutableTreeNode)node).getUserObject();
@@ -472,7 +472,7 @@ public class ApplicationViewer extends AbstractVisualResource
                ((ParameterDisjunction)node).size() > 1 ;
       }
       return false;
-    }
+    }//public boolean isCellEditable(Object node, int column)
 
     public void setValueAt(Object aValue, Object node, int column){
       node = ((DefaultMutableTreeNode)node).getUserObject();
@@ -489,7 +489,7 @@ public class ApplicationViewer extends AbstractVisualResource
           break;
         }
       }//switch(column)
-    }
+    }//setValueAt
 /*
     public Object getChild(Object parent, int index){
       if(parent == root){
@@ -522,11 +522,11 @@ public class ApplicationViewer extends AbstractVisualResource
 */
     public void dataChanged(){
       fireTreeStructureChanged(this, new Object[]{getRoot()}, null, null);
-    }
+    }//dataChanged
 
   }//class PRsAndParamsTTModel extends AbstractTreeTableModel
 
-  class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
+  class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
     public Component getTreeCellRendererComponent(JTree tree,
                                                   Object value,
                                                   boolean sel,
@@ -578,7 +578,7 @@ public class ApplicationViewer extends AbstractVisualResource
         }
       }
       return res;
-    }
+    }//private Icon getIcon(String name)
 
     private Map iconForName = new HashMap();
   }//class CustomTreeCellRenderer extends DefaultTreeCellRenderer
@@ -587,11 +587,11 @@ public class ApplicationViewer extends AbstractVisualResource
     public int getRowCount(){
       return
         Gate.getCreoleRegister().getPrInstances().size() - controller.size() -1;
-    }
+    }//public int getRowCount()
 
     public int getColumnCount(){
       return 2;
-    }
+    }//public int getColumnCount()
 
     public String getColumnName(int columnIndex){
       switch(columnIndex){
@@ -599,15 +599,15 @@ public class ApplicationViewer extends AbstractVisualResource
         case 1: return "Type";
         default: return "?";
       }
-    }
+    }//public String getColumnName(int columnIndex)
 
     public Class getColumnClass(int columnIndex){
       return String.class;
-    }
+    }//public Class getColumnClass(int columnIndex)
 
     public boolean isCellEditable(int rowIndex,  int columnIndex){
       return false;
-    }
+    }//public boolean isCellEditable(int rowIndex,  int columnIndex)
 
     public Object getValueAt(int rowIndex, int columnIndex){
       //find the right PR
@@ -628,14 +628,14 @@ public class ApplicationViewer extends AbstractVisualResource
         }
       }
       return null;
-    }
+    }// public Object getValueAt(int rowIndex, int columnIndex)
 
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
     }
 
   }//class ModulesTableModel extends AbstractTableModel
 
-  class AddPRAction extends AbstractAction{
+  class AddPRAction extends AbstractAction {
     AddPRAction(ProcessingResource aPR){
       super((String)aPR.getFeatures().get("gate.NAME"));
       this.pr = aPR;
@@ -674,7 +674,7 @@ public class ApplicationViewer extends AbstractVisualResource
   }//class AddPRAction extends AbstractAction
 
 
-  class RemovePRAction extends AbstractAction{
+  class RemovePRAction extends AbstractAction {
     RemovePRAction(ProcessingResource pr){
       super((String)pr.getFeatures().get("gate.NAME"));
       this.pr = pr;
@@ -686,14 +686,15 @@ public class ApplicationViewer extends AbstractVisualResource
       modulesTableModel.fireTableDataChanged();
       this.setEnabled(false);
       ((Action)addActionForPR.get(pr)).setEnabled(true);
-    }
+    }//public void actionPerformed(ActionEvent e)
     ProcessingResource pr;
   }//class RemovePRAction extends AbstractAction
 
-  class RunAction extends AbstractAction{
+  class RunAction extends AbstractAction {
     RunAction(){
       super("Run");
     }
+
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
         public void run(){
@@ -765,14 +766,14 @@ public class ApplicationViewer extends AbstractVisualResource
       Thread thread = new Thread(runnable);
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
-    }
-  }
+    }//public void actionPerformed(ActionEvent e)
+  }//class RunAction
 
-  class ParameterDisjunction{
+  class ParameterDisjunction {
     /**
      * gets a list of {@link gate.creole.Parameter}
      */
-    public ParameterDisjunction(List options){
+    public ParameterDisjunction(List options) {
       this.options = options;
       Iterator paramsIter = options.iterator();
       names = new String[options.size()];
@@ -782,7 +783,7 @@ public class ApplicationViewer extends AbstractVisualResource
       }
       values = new Object[options.size()];
       setSelectedIndex(0);
-    }
+    }// public ParameterDisjunction(List options)
 
     public void setSelectedIndex(int index){
       selectedIndex = index;
@@ -796,7 +797,7 @@ public class ApplicationViewer extends AbstractVisualResource
         }
       }
 //      tableModel.fireTableDataChanged();
-    }
+    }// public void setSelectedIndex(int index)
 
     public int size() {
       return options.size();
@@ -842,7 +843,8 @@ public class ApplicationViewer extends AbstractVisualResource
       }else{
         values[selectedIndex] = value;
       }
-    }
+    }// public void setValue(Object value)
+
     public Object getValue(){
       if(values[selectedIndex] != null) {
         return values[selectedIndex];
@@ -857,8 +859,8 @@ public class ApplicationViewer extends AbstractVisualResource
         } else {
           return null;
         }
-      }
-    }
+      }// else
+    }// public Object getValue()
 
 
     int selectedIndex;
@@ -871,11 +873,11 @@ public class ApplicationViewer extends AbstractVisualResource
     Object[] values;
   }//class ParameterDisjunction
 
-  class ParameterDisjunctionEditor extends DefaultCellEditor{
+  class ParameterDisjunctionEditor extends DefaultCellEditor {
     public ParameterDisjunctionEditor(){
       super(new JComboBox());
       combo = (JComboBox)super.getComponent();
-    }
+    }//public ParameterDisjunctionEditor()
 
     public Component getTreeCellEditorComponent(JTree tree,
                                                 Object value,
@@ -889,12 +891,12 @@ public class ApplicationViewer extends AbstractVisualResource
      combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
      combo.setSelectedItem(pDisj.getName());
      return combo;
-    }
+    }//public Component getTreeCellEditorComponent
     public Object getCellEditorValue(){
       return new Integer(combo.getSelectedIndex());
     }
     JComboBox combo;
-  }
+  }//class ParameterDisjunctionEditor
 
   class ParameterValueRenderer extends ObjectRenderer {
     public Component getTableCellRendererComponent(JTable table,
@@ -914,8 +916,8 @@ public class ApplicationViewer extends AbstractVisualResource
       }
       return super.getTableCellRendererComponent(table, value, isSelected,
                                                  hasFocus, row, column);
-    }
-  }
+    }//public Component getTableCellRendererComponent
+  }//class ParameterValueRenderer
 
   class ParameterValueEditor extends AbstractCellEditor
                              implements TableCellEditor{
@@ -939,7 +941,7 @@ public class ApplicationViewer extends AbstractVisualResource
       });
       textButtonBox = Box.createHorizontalBox();
       textButtonBox.add(textField, button);
-    }
+    }//ParameterValueEditor()
 
     public Component getTableCellEditorComponent(JTable table,
                                                  Object value,
@@ -974,7 +976,7 @@ public class ApplicationViewer extends AbstractVisualResource
       else return textField.getText();
     }//public Object getCellEditorValue()
 
-    class ComboRenderer extends DefaultListCellRenderer{
+    class ComboRenderer extends DefaultListCellRenderer {
       public Component getListCellRendererComponent(JList list,
                                                     Object value,
                                                     int index,
@@ -990,8 +992,8 @@ public class ApplicationViewer extends AbstractVisualResource
         }
         return super.getListCellRendererComponent(list, value, index,
                                                    isSelected, cellHasFocus);
-      }
-    }
+      }//public Component getListCellRendererComponent
+    }//class ComboRenderer
 
     String type;
     JComboBox combo;
@@ -999,7 +1001,7 @@ public class ApplicationViewer extends AbstractVisualResource
     boolean comboUsed;
     JButton button;
     Box textButtonBox;
-  }
+  }//class ParameterValueEditor
 /*
   XJTable prsTable;
   XJTable paramsTable;
@@ -1034,6 +1036,7 @@ public class ApplicationViewer extends AbstractVisualResource
   Map removeActionForPR;
   private transient Vector statusListeners;
   private transient Vector progressListeners;
+
   public void resourceLoaded(CreoleEvent e) {
     if(e.getResource() instanceof ProcessingResource){
       updateActions();
@@ -1041,7 +1044,7 @@ public class ApplicationViewer extends AbstractVisualResource
     }else{
       mainTreeTable.repaint();
     }
-  }
+  }// public void resourceLoaded
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
@@ -1050,7 +1053,7 @@ public class ApplicationViewer extends AbstractVisualResource
     return;
     updateActions();
     modulesTableModel.fireTableDataChanged();
-  }
+  }//public void resourceUnloaded(CreoleEvent e)
 
   public void datastoreOpened(CreoleEvent e) {
   }
@@ -1064,14 +1067,16 @@ public class ApplicationViewer extends AbstractVisualResource
       v.removeElement(l);
       statusListeners = v;
     }
-  }
+  }//removeStatusListener
+
   public synchronized void addStatusListener(StatusListener l) {
     Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
     }
-  }
+  }//addStatusListener
+
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
@@ -1080,21 +1085,24 @@ public class ApplicationViewer extends AbstractVisualResource
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
-  }
+  }//addStatusListener
+
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector) progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
-  }
+  }//removeProgressListener
+
   public synchronized void addProgressListener(ProgressListener l) {
     Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
     }
-  }
+  }//addProgressListener
+
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -1103,7 +1111,8 @@ public class ApplicationViewer extends AbstractVisualResource
         ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
       }
     }
-  }
+  }//fireProgressChanged
+
   protected void fireProcessFinished() {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -1112,7 +1121,7 @@ public class ApplicationViewer extends AbstractVisualResource
         ((ProgressListener) listeners.elementAt(i)).processFinished();
       }
     }
-  }
+  }//fireProcessFinished
 
 /*
   class PRListTableModel extends AbstractTableModel{
@@ -1297,4 +1306,4 @@ public class ApplicationViewer extends AbstractVisualResource
     }
   }//class PRParametersTableModel
 */
-}
+}//ApplicationViewer

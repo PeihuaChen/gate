@@ -35,7 +35,7 @@ public class DSHandle extends DefaultResourceHandle {
     initLocalData();
     initGuiComponents();
     initListeners();
-  }
+  }//public DSHandle(DataStore datastore)
 
   protected void initLocalData(){
   }
@@ -45,15 +45,16 @@ public class DSHandle extends DefaultResourceHandle {
   }
 
   protected void initGuiComponents(){
-    treeRoot = new DefaultMutableTreeNode(datastore.getFeatures().get("gate.NAME"),
-                                          true);
-    try{
+    treeRoot = new DefaultMutableTreeNode(
+                 datastore.getFeatures().get("gate.NAME"),true);
+    try {
       Iterator lrTypesIter = datastore.getLrTypes().iterator();
       CreoleRegister cReg = Gate.getCreoleRegister();
       while(lrTypesIter.hasNext()){
         String type = (String)lrTypesIter.next();
         ResourceData rData = (ResourceData)cReg.get(type);
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(rData.getName());
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(
+                                                              rData.getName());
         Iterator lrIDsIter = datastore.getLrIds(type).iterator();
         while(lrIDsIter.hasNext()){
           String id = (String)lrIDsIter.next();
@@ -64,7 +65,7 @@ public class DSHandle extends DefaultResourceHandle {
         }
         treeRoot.add(node);
       }
-    }catch(PersistenceException pe){
+    } catch(PersistenceException pe) {
       throw new GateRuntimeException(pe.toString());
     }
     treeModel = new DefaultTreeModel(treeRoot, true);
@@ -74,7 +75,7 @@ public class DSHandle extends DefaultResourceHandle {
     popup = new JPopupMenu();
     popup.add(new CloseAction());
     popup.add(new RefreshAction());
-  }
+  }//protected void initGuiComponents()
 
   protected void initListeners(){
 
@@ -84,18 +85,19 @@ public class DSHandle extends DefaultResourceHandle {
           //where inside the tree?
           TreePath path = tree.getPathForLocation(e.getX(), e.getY());
           if(path != null){
-            Object value = ((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+            Object value = ((DefaultMutableTreeNode)
+                                  path.getLastPathComponent()).getUserObject();
             if(value instanceof DSEntry){
               JPopupMenu popup = ((DSEntry)value).getPopup();
               popup.show(tree, e.getX(), e.getY());
             }
           }
-        }
-      }
+        }//if
+      }//public void mouseClicked(MouseEvent e)
     });
-  }
+  }//protected void initListeners()
 
-  class RefreshAction extends AbstractAction{
+  class RefreshAction extends AbstractAction {
     public RefreshAction(){
       super("Refresh");
     }
@@ -110,7 +112,8 @@ public class DSHandle extends DefaultResourceHandle {
             while(lrTypesIter.hasNext()){
               String type = (String)lrTypesIter.next();
               ResourceData rData = (ResourceData)cReg.get(type);
-              DefaultMutableTreeNode node = new DefaultMutableTreeNode(rData.getName());
+              DefaultMutableTreeNode node = new DefaultMutableTreeNode
+                                                              (rData.getName());
               Iterator lrIDsIter = datastore.getLrIds(type).iterator();
               while(lrIDsIter.hasNext()){
                 String id = (String)lrIDsIter.next();
@@ -121,16 +124,16 @@ public class DSHandle extends DefaultResourceHandle {
               }
               treeRoot.add(node);
             }
-          }catch(PersistenceException pe){
+          } catch(PersistenceException pe){
             throw new GateRuntimeException(pe.toString());
           }
           treeModel.reload();
-        }
+        }//public void run
       });
-    }
-  }
+    }// public void actionPerformed(ActionEvent e)
+  }//class RefreshAction
 
-  class CloseAction extends AbstractAction{
+  class CloseAction extends AbstractAction {
     public CloseAction(){
       super("Close");
     }
@@ -138,15 +141,15 @@ public class DSHandle extends DefaultResourceHandle {
     public void actionPerformed(ActionEvent e){
       try{
         datastore.close();
-      }catch(PersistenceException pe){
+      } catch(PersistenceException pe){
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
-    }
-  }
+    }//public void actionPerformed(ActionEvent e)
+  }//class CloseAction
 
-  class LoadAction extends AbstractAction{
+  class LoadAction extends AbstractAction {
     LoadAction(DSEntry entry){
       super("Load");
       this.entry = entry;
@@ -166,16 +169,16 @@ public class DSHandle extends DefaultResourceHandle {
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
-      }catch(ResourceInstantiationException rie){
+      } catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + rie.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
-    }
+    }// public void actionPerformed(ActionEvent e)
     DSEntry entry;
-  }
+  }//class LoadAction extends AbstractAction
 
-  class DeleteAction extends AbstractAction{
+  class DeleteAction extends AbstractAction {
     DeleteAction(DSEntry entry){
       super("Delete");
       this.entry = entry;
@@ -190,12 +193,12 @@ public class DSHandle extends DefaultResourceHandle {
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
-    }
+    }// public void actionPerformed(ActionEvent e)
     DSEntry entry;
-  }
+  }// class DeleteAction
 
 
-  class DSEntry{
+  class DSEntry {
     DSEntry(String name, String id, String type){
       this.name = name;
       this.type = type;
@@ -203,7 +206,7 @@ public class DSHandle extends DefaultResourceHandle {
       popup = new JPopupMenu();
       popup.add(new LoadAction(this));
       popup.add(new DeleteAction(this));
-    }
+    }// DSEntry
 
     public String toString(){
       return name;
@@ -217,10 +220,10 @@ public class DSHandle extends DefaultResourceHandle {
     String type;
     String id;
     JPopupMenu popup;
-  }
+  }// class DSEntry
 
   JTree tree;
   DefaultMutableTreeNode treeRoot;
   DefaultTreeModel treeModel;
   DataStore datastore;
-}
+}//public class DSHandle

@@ -227,9 +227,9 @@ public class SyntaxTreeViewer extends JPanel
 
     //add popup to container
 		this.add(popup);
-  }
+  }// private void jbInit()
 
-  public static void main(String[] args) throws Exception{
+  public static void main(String[] args) throws Exception {
     Gate.init();
     // final String text = "This is a sentence. That is another one.";
     final String text = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628 \u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
@@ -319,12 +319,12 @@ public class SyntaxTreeViewer extends JPanel
     AnnotationSet annots = doc.getAnnotations().get(set);
     syntaxTreeViewer1.setTreeAnnotations(annots);
 
-  }
+  }// public static void main
 
   protected void paintComponent(Graphics g) {
     super.paintComponent( g);
     drawLines(g);
-  }
+  }// protected void paintComponent(Graphics g)
 
 
   private void drawLines(Graphics g) {
@@ -336,17 +336,17 @@ public class SyntaxTreeViewer extends JPanel
                   coords.getY1(),
                   coords.getX2(),
                   coords.getY2());
-    }
-  }
+    }// for
+  }// private void drawLines(Graphics g)
 
   public Dimension getPreferredScrollableViewportSize() {
         return getPreferredSize();
-  }
+  }// public Dimension getPreferredScrollableViewportSize()
 
   public int getScrollableUnitIncrement(Rectangle visibleRect,
                                               int orientation, int direction) {
     return maxUnitIncrement;
-  }
+  }// public int getScrollableUnitIncrement
 
   public int getScrollableBlockIncrement(Rectangle visibleRect,
                                               int orientation, int direction) {
@@ -354,11 +354,11 @@ public class SyntaxTreeViewer extends JPanel
         return visibleRect.width - maxUnitIncrement;
     else
         return visibleRect.height - maxUnitIncrement;
-  }
+  }// public int getScrollableBlockIncrement
 
   public boolean getScrollableTracksViewportWidth() {
     return false;
-  }
+  }// public boolean getScrollableTracksViewportWidth()
 
   public boolean getScrollableTracksViewportHeight() {
     return false;
@@ -519,7 +519,7 @@ public class SyntaxTreeViewer extends JPanel
 		processed.put(annot.getId(), parentButton);
     selection.clear();
     return parentButton;
-  }
+  }// private JButton processChildrenAnnots
 
   private STreeNode findLeaf(Node start, Node end) {
   	for (Iterator i = leaves.values().iterator(); i.hasNext(); ) {
@@ -531,7 +531,7 @@ public class SyntaxTreeViewer extends JPanel
     }
 
     return null;
-  }
+  }//private STreeNode findLeaf(Node start, Node end)
 
 
   /**
@@ -683,7 +683,7 @@ public class SyntaxTreeViewer extends JPanel
     buttonX += buttonWidth + horizButtonGap;
     return buttonX;
 
-  }
+  }// private int createButton4Node(STreeNode node, int buttonX, int buttonY)
 
   private JButton createCentralButton(STreeNode newNode) {
 
@@ -748,7 +748,7 @@ public class SyntaxTreeViewer extends JPanel
     }
 
 		return button;
-  }
+  }// private JButton createCentralButton(STreeNode newNode)
 
   private void shiftButtonsDown(int offset) {
 		for (Iterator i = buttons.values().iterator(); i.hasNext(); ) {
@@ -764,7 +764,7 @@ public class SyntaxTreeViewer extends JPanel
       coords.setY1(coords.getY1() + offset);
       coords.setY2(coords.getY2() + offset);
     }
-  }
+  }// private void shiftButtonsDown(int offset)
 
   public void actionPerformed(ActionEvent e) {
 
@@ -843,7 +843,7 @@ public class SyntaxTreeViewer extends JPanel
     } //if statement for MenuItems
 
 
-  }
+  }// public void actionPerformed(ActionEvent e)
 
   public void mouseClicked(MouseEvent e) {
 
@@ -876,7 +876,7 @@ public class SyntaxTreeViewer extends JPanel
       showRightClickPopup(e);
     } //end of right-click processing
 
-  }
+  }// public void mouseClicked(MouseEvent e)
 
   public void mousePressed(MouseEvent e) {
   }
@@ -1243,37 +1243,30 @@ public class SyntaxTreeViewer extends JPanel
   }
 
   */
-
-
-
-
-
-
-
-}
+}// class SyntaxTreeViewer
 
 
 class FocusButton extends JButton {
 
   public FocusButton(String text) {
-  	super(text);
+    super(text);
   }
 
   public FocusButton() {
-  	super();
+    super();
   }
 
   public FocusButton(Icon icon) {
-  	super(icon);
+    super(icon);
   }
 
   public FocusButton(String text, Icon icon) {
-  	super(text, icon);
-  }
+    super(text, icon);
+  }// public FocusButton
 
-	public boolean isManagingFocus() {
-  	return true;
-  }
+  public boolean isManagingFocus() {
+    return true;
+  }// public boolean isManagingFocus()
 
   public void processComponentKeyEvent(KeyEvent e) {
   	super.processComponentKeyEvent(e);
@@ -1288,11 +1281,14 @@ class FocusButton extends JButton {
     	SyntaxTreeViewer viewer = (SyntaxTreeViewer) ((JButton) e.getSource()).getParent();
 			viewer.removeNode((JButton) e.getSource());
 		}
-  }
+  }// public void processComponentKeyEvent(KeyEvent e)
 
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.16  2001/04/09 10:36:36  oana
+// a few changes in the code style
+//
 // Revision 1.15  2000/12/08 14:50:29  valyt
 // Removed all traces of Unicode stuff
 //
