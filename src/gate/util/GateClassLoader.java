@@ -18,6 +18,17 @@ public class GateClassLoader extends URLClassLoader {
   /** Default construction - use an empty URL list. */
   public GateClassLoader() { super(new URL[0]); }
 
+  /** Chaining constructor. */
+  public GateClassLoader(ClassLoader parent) { super(new URL[0], parent); }
+
+  /** Default construction with URLs list. */
+  public GateClassLoader(URL[] urls) { super(urls); }
+
+  /** Chaining constructor with URLs list. */
+  public GateClassLoader(URL[] urls, ClassLoader parent) {
+    super(urls, parent);
+  } //
+
   /** Delegate loading to the super class (loadClass has protected
     * access there).
     */
