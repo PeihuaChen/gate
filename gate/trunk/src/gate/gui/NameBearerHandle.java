@@ -167,8 +167,8 @@ public class NameBearerHandle implements Handle,
         popup.addSeparator();
         corpusFiller = new CorpusFillerComponent();
         popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
-//        popup.addSeparator();
-//        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
+        popup.addSeparator();
+        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
       }
     }//if(resource instanceof LanguageResource)
     if(target instanceof Resource){
@@ -445,9 +445,15 @@ public class NameBearerHandle implements Handle,
         while(docIter.hasNext()){
           Document currentDoc = (Document)docIter.next();
           URL sourceURL = currentDoc.getSourceUrl();
-          String fileName = sourceURL == null ? currentDoc.getName() :
-                                                sourceURL.getFile();
-          fileName = Files.getLastPathComponent(fileName);
+          String fileName = null;
+          if(sourceURL != null){
+            fileName = sourceURL.getFile();
+            fileName = Files.getLastPathComponent(fileName);
+          }
+          if(fileName == null || fileName.length() == 0){
+            fileName = currentDoc.getName();
+          }
+          if(!fileName.toLowerCase().endsWith(".xml")) fileName += ".xml";
           File docFile = null;
           boolean nameOK = false;
           do{
@@ -492,15 +498,25 @@ public class NameBearerHandle implements Handle,
             }
           }while(!nameOK);
           //save the file
+          try{
+            FileWriter fw = new FileWriter(docFile);
+            fw.write(currentDoc.toXml());
+            fw.flush();
+            fw.close();
+          }catch(IOException ioe){
+            JOptionPane.showMessageDialog(largeView != null ?
+                                          largeView : smallView,
+                                          "Could not create write file:" +
+                                          ioe.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+            ioe.printStackTrace(Err.getPrintWriter());
+            return;
+          }
+        }//while(docIter.hasNext())
+      }//select directory
 
-        }
-
-
-      }
-
-
-    }
-  }
+    }//public void actionPerformed(ActionEvent e)
+  }//class SaveCorpusAsXmlAction extends AbstractAction
 
   /**
    * Saves a corpus as a set of xml files in a directory.
