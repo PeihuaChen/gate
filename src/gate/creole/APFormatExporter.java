@@ -352,10 +352,12 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     String str3 = (entityMentionGeneric == null)? "" :
                              ("GENERIC=\"" + entityMentionGeneric + "\"");
 
+/* modified by Di - the new scorer needs a unique ID for each mention as well */
 
     xmlDoc.append("      <entity_mention TYPE=\"" + entityMentionType+"\"" +
-     str1 + " " + str2 + " " + str3 + ">\n"
+     str1 + " " + str2 + " " + str3 + "ID=\""  + "M" + getNextMentionId() +"\">\n"
     );
+
     // extent
     xmlDoc.append("        <extent>\n");
     xmlDoc.append("          <charseq>\n");
@@ -425,6 +427,12 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     return entityId ++;
   }// getNextEntityId()
 
+  /** added by  Di - returns the next safe ID for an entity mention */
+ private int getNextMentionId(){
+    return mentionId ++;
+  }
+
+
   /** This list of strings represents the entities type that will be exported*/
   private List exportedTypes = null;
   /** This is the name of the dtd file. If it's not present no dtd would be
@@ -438,6 +446,10 @@ public class APFormatExporter extends AbstractLanguageAnalyser
 
   /** This field represent an unique entity ID generator*/
   private int entityId = 1;
+
+    /** added by Di - this field represents a unique entity ID generator */
+    private int mentionId = 1;
+
   /** This is the xmlDoc that will be created*/
   private StringBuffer xmlDoc = null;
 
