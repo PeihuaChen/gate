@@ -26,13 +26,14 @@ import gate.corpora.*;
 
 public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
                                        implements DatastoreListener,
-                                                  EventAwareAnnotationSet {
+                                                  EventAwareAnnotationSet,
+                                                  AnnotationListener {
 
   /**
    * The listener for the events coming from the document (annotations and
    * annotation sets added or removed).
    */
-  protected EventsHandler eventHandler;
+//=  protected EventsHandler eventHandler;
 
   protected HashSet addedAnnotations = new HashSet();
   protected HashSet removedAnnotations = new HashSet();
@@ -63,11 +64,11 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //preconditions
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
 
-    eventHandler = new EventsHandler();
-    this.addAnnotationSetListener(eventHandler);
+//=    eventHandler = new EventsHandler();
+//=    this.addAnnotationSetListener(eventHandler);
 
     //add self as listener for sync events from the document's datastore
-    doc.getDataStore().removeDatastoreListener(this);
+//00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
 
   } // construction from document
@@ -79,11 +80,11 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //preconditions
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
 
-    eventHandler = new EventsHandler();
-    this.addAnnotationSetListener(eventHandler);
+//=    eventHandler = new EventsHandler();
+//=    this.addAnnotationSetListener(eventHandler);
 
     //add self as listener for sync events from the document's datastore
-    doc.getDataStore().removeDatastoreListener(this);
+//00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
 
   } // construction from document and name
@@ -94,8 +95,8 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     this(c);
     this.doc = (DocumentImpl) doc;
     //add self as listener for sync events from the document's datastore
-    doc.getDataStore().removeDatastoreListener(this);
-    doc.getDataStore().addDatastoreListener(this);
+//00    doc.getDataStore().removeDatastoreListener(this);
+//00    doc.getDataStore().addDatastoreListener(this);
   } // construction from document and name
 
   /** Construction from Document and name. */
@@ -103,7 +104,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     this(doc,c);
     this.name = name;
     //add self as listener for sync events from the document's datastore
-    doc.getDataStore().removeDatastoreListener(this);
+//00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
   } // construction from document and name
 
@@ -114,15 +115,20 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     super(c);
 
     //also copy the name, because that super one doesn't
-    this.name = ((AnnotationSet) c).getName();
+    AnnotationSet as = (AnnotationSet) c;
+    this.name = as.getName();
 
-    eventHandler = new EventsHandler();
-    this.addAnnotationSetListener(eventHandler);
+//=    eventHandler = new EventsHandler();
+//=    this.addAnnotationSetListener(eventHandler);
 
     Iterator iter = this.iterator();
     while(iter.hasNext())
-      ((Annotation) iter.next()).addAnnotationListener(eventHandler);
+      ((Annotation) iter.next()).addAnnotationListener(this);
 
+    Document doc = as.getDocument();
+    //add self as listener for sync events from the document's datastore
+//00    doc.getDataStore().removeDatastoreListener(this);
+    doc.getDataStore().addDatastoreListener(this);
   } // construction from collection
 
 
@@ -155,6 +161,10 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
                     && this.removedAnnotations.equals(target.removedAnnotations)
                     && this.updatedAnnotations.equals(target.updatedAnnotations);
 
+    //FINALLY - CHECK THAT THE SET IS FROM THE SAME DOCUMENT *INSTANCE*
+    //DO *NOT* USE EQUALS()
+    result = result && ( this.getDocument() == target.getDocument());
+
     return result;
   } // equals
 
@@ -162,8 +172,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
    * All the events from the document or its annotation sets are handled by
    * this inner class.
    */
-  class EventsHandler implements AnnotationListener,
+/*  class EventsHandler implements AnnotationListener
                                  AnnotationSetListener{
+
 
     public void annotationAdded(gate.event.AnnotationSetEvent e) {
       AnnotationSet set = (AnnotationSet)e.getSource();
@@ -200,6 +211,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
       DatabaseAnnotationSetImpl.this.removedAnnotations.add(ann);
     }
 
+
     public void annotationUpdated(AnnotationEvent e){
       Annotation ann = (Annotation) e.getSource();
 
@@ -216,7 +228,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
   }//inner class EventsHandler
 
-
+*/
 
   /**
    * Called by a datastore when a new resource has been adopted
@@ -311,6 +323,67 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
     return result;
   }
+
+  public void annotationUpdated(AnnotationEvent e){
+    Annotation ann = (Annotation) e.getSource();
+
+    //check if the annotation is newly created
+    //if so, do not add it to the update list, since it was not stored in the
+    //database yet, so the most recent value will be inserted into the DB upon
+    //DataStore::sync()
+    if (false == this.addedAnnotations.contains(ann)) {
+      this.updatedAnnotations.add(ann);
+    }
+  }
+
+  /** Add an existing annotation. Returns true when the set is modified. */
+  public boolean add(Object o) throws ClassCastException {
+
+    boolean result = super.add(o);
+
+    if (true == result) {
+      //register as listener for update events from this annotation
+      Annotation ann = (Annotation)o;
+      ann.addAnnotationListener(this);
+
+      //add to the newly created annotations set
+      this.addedAnnotations.add(ann);
+    }
+
+    return result;
+  }
+
+  /** Remove an element from this set. */
+  public boolean remove(Object o) throws ClassCastException {
+
+    boolean result = super.remove(o);
+
+    if (true == result) {
+      //UNregister as listener for update events from this annotation
+      Annotation ann = (Annotation)o;
+      ann.removeAnnotationListener(this);
+
+      //1. check if this annot is in the newly created annotations set
+      if (this.addedAnnotations.contains(ann)) {
+        //a new annotation that was deleted afterwards, remove it from all sets
+        this.addedAnnotations.remove(ann);
+      }
+      else {
+
+        //2. check if the annotation was updated, if so, remove it from the
+        //update list
+        if (this.updatedAnnotations.contains(ann)) {
+          this.updatedAnnotations.remove(ann);
+        }
+
+        //3. add to the list with deleted anns
+        this.removedAnnotations.add(ann);
+      }
+    }
+
+    return result;
+  }
+
 
 
 }
