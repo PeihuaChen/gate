@@ -300,7 +300,7 @@ implements AnnotationSet
       nextNode = (Node) nodesByOffset.getNextOf(
         new Long(nextNode.getOffset().longValue() + 1)
       );
-    };
+    }
 
     //res it either null (no suitable node found) or the correct result
     return res;
