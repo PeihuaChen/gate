@@ -2,14 +2,14 @@
  *	Files.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 22/02/2000
  *
  *	$Id$
@@ -30,6 +30,13 @@ public class Files {
   /** Used to generate temporary resources names*/
   static long resourceIndex = 0;
 
+  /**Where on the classpath the gate resources are to be found*/
+  protected static String resourcePath = "gate/resources";
+
+  /**Gets the path for the gate resources within the classpath*/
+  public static String getResourcePath(){
+    return resourcePath;
+  }
   /** Get a string representing the contents of a text file. */
   public static String getString(String fileName) throws IOException {
     return getString(new File(fileName));
@@ -81,7 +88,8 @@ public class Files {
   } // getResourceAsString(String)
 
   /** Get a resource from the GATE resources directory as a String.
-    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
+    * The resource name should be relative to {@link #resourcePath} which
+    * is equal with <TT>gate/resources</TT>; e.g.
     * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
@@ -172,7 +180,8 @@ public class Files {
   } // getResourceAsByteArray(String)
 
   /** Get a resource from the GATE resources directory as a byte array.
-    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
+    * The resource name should be relative to{@link #resourcePath} which
+    * is equal with <TT>gate/resources</TT>; e.g.
     * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
@@ -211,19 +220,21 @@ public class Files {
     */
   public static InputStream getResourceAsStream(String resourceName)
   throws IOException {
-    return ClassLoader.getSystemResourceAsStream(resourceName);
+    return  ClassLoader.getSystemResourceAsStream(resourceName);
+//    return Gate.getClassLoader().getResourceAsStream(resourceName);
   } // getResourceAsStream(String)
 
   /** Get a resource from the GATE resources directory as an InputStream.
-    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
+    * The resource name should be relative to {@link #resourcePath} which
+    * is equal with <TT>gate/resources</TT>; e.g.
     * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
   public static InputStream getGateResourceAsStream(String resourceName)
   throws IOException {
     if(resourceName.startsWith("/") || resourceName.startsWith("\\") )
-      return getResourceAsStream("gate/resources" + resourceName);
-    else return getResourceAsStream("gate/resources/" + resourceName);
+      return getResourceAsStream(resourcePath + resourceName);
+    else return getResourceAsStream(resourcePath + "/" + resourceName);
   } // getResourceAsStream(String)
 
 
@@ -269,5 +280,6 @@ public class Files {
     }
     return regexfinal;
   }//find
+
 
 } // class Files

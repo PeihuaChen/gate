@@ -107,7 +107,11 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     */
   public DefaultTokeniser()throws IOException,
                                      TokeniserException {
-    this(Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+    this(Files.getGateResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+/*
+    init(new InputStreamReader(getClass().getResourceAsStream(
+            "/gate/resources/creole/tokeniser/DefaultTokeniser.rules")));
+*/
   }
 
   /**Constructs a DefaultTokeniser from the file with the name specified by
@@ -290,7 +294,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     *token.
     *The ignorable tokens are defined by {@link #ignoreTokens a set}
     */
-  public static String skipIgnoreTokens(StringTokenizer st){
+  protected static String skipIgnoreTokens(StringTokenizer st){
     Iterator ignorables;
     boolean ignorableFound = false;
     String currentToken;
