@@ -91,8 +91,8 @@ public class Gate implements GateConstants
         + "|" + "gate.util.protocols"
     );
 
-    System.setProperty("javax.xml.parsers.SAXParserFactory",
-                             "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+    //System.setProperty("javax.xml.parsers.SAXParserFactory",
+      //                       "org.apache.xerces.jaxp.SAXParserFactoryImpl");
 
     //initialise the symbols generator
     lastSym = 0;
