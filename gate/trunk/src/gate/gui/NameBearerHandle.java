@@ -494,6 +494,8 @@ public class NameBearerHandle implements Handle,
             FeatureMap securityData = (FeatureMap)
                          Gate.getDataStoreRegister().getSecurityData(ds);
             SecurityInfo si = null;
+            //check whether the datastore supports security data
+            //serial ones do not for example
             if (securityData != null)
               si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,
                                     (User) securityData.get("user"),
