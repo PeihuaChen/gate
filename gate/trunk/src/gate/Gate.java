@@ -284,8 +284,9 @@ public class Gate implements GateConstants
       }
     }
     //add all the installed plugins
-    File pluginsHome = new File(System.getProperty(GATE_HOME_PROPERTY_NAME), 
-            "plugins");
+    // pluginsHome is now set by initLocalPaths
+    //File pluginsHome = new File(System.getProperty(GATE_HOME_PROPERTY_NAME), 
+    //        "plugins");
     File[] dirs = pluginsHome.listFiles();
     for(int i = 0; i < dirs.length; i++){
       File creoleFile = new File(dirs[i], "creole.xml");
@@ -1246,6 +1247,42 @@ jar/classpath so it's the same as registerBuiltins
    * The top level directory for GATE installed plugins.
    */
   protected static File pluginsHome;
+
+  /**
+   * Set the location of the GATE home directory.
+   *
+   * @throws IllegalStateException if the value has already been set.
+   */
+  public static void setGateHome(File gateHome) {
+    if(Gate.gateHome != null) {
+      throw new IllegalStateException("gateHome has already been set");
+    }
+    Gate.gateHome = gateHome;
+  }
+  
+  /**
+   * Set the location of the plugins directory.
+   *
+   * @throws IllegalStateException if the value has already been set.
+   */
+  public static void setPluginsHome(File pluginsHome) {
+    if(Gate.pluginsHome != null) {
+      throw new IllegalStateException("pluginsHome has already been set");
+    }
+    Gate.pluginsHome = pluginsHome;
+  }
+
+  /**
+   * Set the location of the user's config file.
+   *
+   * @throws IllegalStateException if the value has already been set.
+   */
+  public static void setUserConfigFile(File userConfigFile) {
+    if(Gate.userConfigFile != null) {
+      throw new IllegalStateException("userConfigFile has already been set");
+    }
+    Gate.userConfigFile = userConfigFile;
+  }
   
   /**
    * The list of plugins (aka CREOLE directories) the system knows about.
