@@ -120,4 +120,4 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
        end if;
 
    END;'
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

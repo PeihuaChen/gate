@@ -65,4 +65,4 @@ CREATE OR REPLACE FUNCTION security_login(varchar,varchar,int4) RETURNS boolean 
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

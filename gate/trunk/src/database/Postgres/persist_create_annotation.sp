@@ -164,4 +164,4 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

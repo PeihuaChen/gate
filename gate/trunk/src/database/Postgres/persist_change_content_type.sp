@@ -43,4 +43,4 @@ CREATE OR REPLACE FUNCTION persist_change_content_type(int4,int2) RETURNS boolea
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -60,4 +60,4 @@ CREATE OR REPLACE FUNCTION persist_delete_annotation_set(int4,varchar) RETURNS b
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

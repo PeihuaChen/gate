@@ -56,4 +56,4 @@ CREATE OR REPLACE FUNCTION persist_remove_doc_from_corpus(int4,int4) RETURNS boo
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -40,4 +40,4 @@ CREATE OR REPLACE FUNCTION security_create_group(varchar) RETURNS int4 AS '
       return currval(''seq_group'');
 
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

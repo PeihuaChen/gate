@@ -68,4 +68,4 @@ CREATE OR REPLACE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boo
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

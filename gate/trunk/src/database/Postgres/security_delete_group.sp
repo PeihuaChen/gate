@@ -35,4 +35,4 @@ CREATE OR REPLACE FUNCTION security_delete_group(int4) RETURNS boolean AS '
       /* dummy */
       return true;
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

@@ -52,4 +52,4 @@ CREATE OR REPLACE FUNCTION persist_delete_corpus(int4) RETURNS boolean AS '
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -30,4 +30,4 @@ CREATE OR REPLACE FUNCTION security_can_delete_user(int4) RETURNS boolean AS '
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

@@ -28,4 +28,4 @@ CREATE OR REPLACE FUNCTION security_remove_user_from_group(int4,int4) RETURNS bo
        /* dummy */
        return true;
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';

@@ -57,4 +57,4 @@ CREATE OR REPLACE FUNCTION persist_delete_annotation(int4,int4) RETURNS boolean 
 
    END;
 '
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql';

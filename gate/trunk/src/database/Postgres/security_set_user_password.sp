@@ -30,4 +30,4 @@ CREATE OR REPLACE FUNCTION security_set_user_password(int4,varchar) RETURNS bool
       return true;
 
    END;
-' LANGUAGE 'plpgsql'
+' LANGUAGE 'plpgsql';
