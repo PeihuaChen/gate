@@ -58,7 +58,12 @@ public class DBHelper {
   public static final int CHARACTER_CONTENT = 1;
   public static final int BINARY_CONTENT = 2;
 
+  public static final String DOCUMENT_CLASS = "gate.corpora.DocumentImpl";
+  public static final String CORPUS_CLASS =  "gate.corpora.CorpusImpl";
+
+
   private static final boolean DEBUG = true;
+
 
 
   private static boolean  driversLoaded;
