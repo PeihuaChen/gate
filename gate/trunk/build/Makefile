@@ -10,7 +10,7 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util gate.impl.ag gate.annotation
+PKGS=	gate gate.util gate.annotation
 CP=	-classpath \
 ../classes:../lib/junit.jar
 SP=	-sourcepath ../src
@@ -41,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.9  2000/02/10 16:01:42  hamish
+# removed impl pkg
+#
 # Revision 1.8  2000/02/09 15:55:44  hamish
 # no jit on test run
 #
