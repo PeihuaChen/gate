@@ -26,15 +26,15 @@ public abstract class KBPropertyImpl implements KBProperty {
   private KBClass domain;
   private Set samePropertiesSet;
   private Set superPropertiesSet;
-  private Set subPropertiesSet;
+  private KnowledgeBase ontology;
 
 
-  protected KBPropertyImpl(String aName, KBClass aDomain) {
+  public KBPropertyImpl(String aName, KBClass aDomain, KnowledgeBase aKB) {
     this.name = aName;
     this.domain = aDomain;
+    this.ontology = aKB;
     samePropertiesSet = new HashSet();
     superPropertiesSet = new HashSet();
-    subPropertiesSet = new HashSet();
   }
 
   public String getName() {
@@ -54,34 +54,46 @@ public abstract class KBPropertyImpl implements KBProperty {
   }
 
   public Set getSamePropertyAs() {
-    if (this.samePropertiesSet.isEmpty())
-      return null;
+    if (this.samePropertiesSet.isEmpty() &&
+        ! this.getOntology().getPropertyDefinitions().contains(this)) {
+      KBProperty propDefinition =
+        this.getOntology().getPropertyDefinitionByName(this.name);
+      if (propDefinition == null)
+        return this.samePropertiesSet;
+      else
+        return propDefinition.getSamePropertyAs();
+    }
     return this.samePropertiesSet;
   }
 
-  public void setSubPropertyOf(KBProperty theProperty) {
-    this.subPropertiesSet.add(theProperty);
-    if (theProperty instanceof KBPropertyImpl)
-      ((KBPropertyImpl)theProperty).setSuperProperty(this);
+  public void setSubPropertyOf(String propertyName) {
+    this.superPropertiesSet.add(propertyName);
   }
 
   public Set getSubPropertyOf() {
-    if (this.subPropertiesSet.isEmpty())
-      return null;
-    return this.subPropertiesSet;
-  }
-
-  protected void setSuperProperty(KBProperty theProperty) {
-    this.superPropertiesSet.add(theProperty);
-  }
-
-  public Set getSuperProperties() {
-    if (this.superPropertiesSet.isEmpty())
-      return null;
+    if (this.superPropertiesSet.isEmpty() &&
+        ! this.getOntology().getPropertyDefinitions().contains(this)) {
+      KBProperty propDefinition =
+        this.getOntology().getPropertyDefinitionByName(this.name);
+      if (propDefinition == null)
+        return this.superPropertiesSet;
+      else
+        return propDefinition.getSubPropertyOf();
+    }
     return this.superPropertiesSet;
   }
 
   public KBClass getDomain() {
     return this.domain;
+  }
+
+  public KnowledgeBase getOntology() {
+    return this.ontology;
+  }
+
+  public String toString() {
+    return this.getName() + "(" + this.domain + ")" + "\n sub-propertyOf "
+            + this.getSubPropertyOf().toString() + "\n samePropertyAs " +
+            this.getSamePropertyAs().toString();
   }
 }

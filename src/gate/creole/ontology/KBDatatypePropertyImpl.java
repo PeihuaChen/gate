@@ -18,16 +18,17 @@
 
 package gate.creole.ontology;
 
-public class KBDatatypePropertyImpl extends KBPropertyImpl {
+public class KBDatatypePropertyImpl extends KBPropertyImpl
+                                    implements KBDatatypeProperty{
   private Object range;
 
-  protected KBDatatypePropertyImpl(String aName, KBClass aDomain, String aString) {
-    super(aName, aDomain);
+  public KBDatatypePropertyImpl(String aName, KBClass aDomain, String aString, KnowledgeBase aKB) {
+    super(aName, aDomain, aKB);
     range = aString;
   }
 
-  protected KBDatatypePropertyImpl(String aName, KBClass aDomain, Number number) {
-    super(aName, aDomain);
+  public KBDatatypePropertyImpl(String aName, KBClass aDomain, Number number, KnowledgeBase aKB) {
+    super(aName, aDomain, aKB);
     range = number;
   }
 
@@ -37,6 +38,18 @@ public class KBDatatypePropertyImpl extends KBPropertyImpl {
     else if (value instanceof Number)
       return true;
     return false;
+  }
+
+  public Object getRange() {
+    return range;
+  }
+
+  public String toString() {
+    return this.getName() + "(" + this.getDomain() + "," + this.range + ")" +
+            "\n sub-propertyOf "
+            + this.getSubPropertyOf().toString() +
+            "\n samePropertyAs " +
+            this.getSamePropertyAs().toString();
   }
 
 }

@@ -70,18 +70,19 @@ public class KBClassImpl extends OClassImpl implements KBClass  {
     return this.propertiesSet;
   }
 
-  public KBProperty getPropertyByName(String name) {
+  public Set getPropertiesByName(String name) {
     if (this.propertiesSet.isEmpty())
       return null;
     if (name == null)
       return null;
     Iterator iter = this.propertiesSet.iterator();
+    HashSet resultSet = new HashSet();
     while (iter.hasNext()) {
       KBProperty property = (KBProperty) iter.next();
       if (name.equals(property.getName()))
-        return property;
+        resultSet.add(property);
     }
-    return null;
+    return resultSet;
   }
 
   public Set getInheritedProperties() {
@@ -102,7 +103,7 @@ public class KBClassImpl extends OClassImpl implements KBClass  {
     return inheritedProperties;
   }
 
-  protected boolean addProperty(KBProperty theProperty) {
+  public boolean addProperty(KBProperty theProperty) {
     if (this.propertiesSet == null)
       this.propertiesSet = new HashSet();
     if (! this.equals(theProperty.getDomain()))
