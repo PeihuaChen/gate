@@ -74,7 +74,7 @@ CREATE TABLE  t_doc_content  (
     dc_id              int4 DEFAULT nextval('seq_doc_content')  NOT NULL ,
     dc_encoding_id     int4,
     dc_character_content  text,
-    dc_binary_content  oid,
+    dc_binary_content  bytea,
     dc_content_type    int2 NOT NULL ,
    FOREIGN KEY ( dc_encoding_id )
       REFERENCES  t_doc_encoding ( enc_id )
@@ -90,9 +90,8 @@ CREATE TABLE  t_feature  (
     ft_entity_type     int2 NOT NULL ,
     ft_key_id          int4 NOT NULL ,
     ft_number_value    int4,
-    ft_binary_value    oid,
-    ft_character_value  varchar(4000),
-    ft_long_character_value  text,
+    ft_binary_value    bytea,
+    ft_character_value  text,
     ft_value_type      int2 NOT NULL ,
    FOREIGN KEY ( ft_key_id )
       REFERENCES  t_feature_key ( fk_id )
@@ -142,7 +141,7 @@ CREATE TABLE  t_document  (
     doc_id             int4 DEFAULT nextval('seq_document')  NOT NULL ,
     doc_content_id     int4,
     doc_lr_id          int4 NOT NULL ,
-    doc_url            varchar(4000) NOT NULL ,
+    doc_url            text NOT NULL ,
     doc_start          int4,
     doc_end            int4,
     doc_is_markup_aware  bool NOT NULL ,
