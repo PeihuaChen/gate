@@ -297,8 +297,20 @@ public class TextualDocumentView extends AbstractDocumentView {
                       new DefaultHighlighter.DefaultHighlightPainter(
                               textView.getSelectionColor()));
               annTag.setTag(tag);
-              textView.scrollRectToVisible(textView.
-                      modelToView(ann.getStartNode().getOffset().intValue()));
+              //if at least part of the blinking section is visible then we
+              //need to do no scrolling
+              //this is required for long annotations that span more than a 
+              //screen
+              Rectangle visibleView = scroller.getViewport().getViewRect();
+              int viewStart = textView.viewToModel(visibleView.getLocation());
+              Point endPoint = new Point(visibleView.getLocation());
+              endPoint.translate(visibleView.width, visibleView.height);
+              int viewEnd = textView.viewToModel(endPoint);
+              int annStart = ann.getStartNode().getOffset().intValue();
+              int annEnd = ann.getEndNode().getOffset().intValue();
+              if(annEnd < viewStart || viewEnd < annStart){
+                textView.scrollRectToVisible(textView.modelToView(annStart));
+              }
             }catch(BadLocationException ble){
               //this should never happen
               throw new GateRuntimeException(ble);
