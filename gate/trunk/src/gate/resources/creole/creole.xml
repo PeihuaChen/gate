@@ -62,6 +62,13 @@
       <ICON>lr.gif</ICON>
       <PRIVATE/>
     </RESOURCE>
+    <RESOURCE>
+      <NAME>Oracle Corpus</NAME>
+      <CLASS>gate.corpora.DatabaseCorpusImpl</CLASS>
+      <INTERFACE>gate.Corpus</INTERFACE>
+      <ICON>lr.gif</ICON>
+      <PRIVATE/>
+    </RESOURCE>
 
     <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
