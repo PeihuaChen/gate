@@ -3,7 +3,8 @@
 <!--JBuilder XML Project-->
 <project>
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.AppletRunner" />
+  <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.0" name="application.vmparameters" value="-Djava.compiler=NONE" />
   <property category="runtime.0" name="jsprunner.docbase" value="." />
   <property category="runtime.0" name="jsprunner.jspfile" value="W%|/JBuilder4/bin" />
   <property category="sys" name="AuthorLabel" value="@author" />
@@ -18,7 +19,7 @@
   <property category="sys" name="DefaultPackage" value="gate2" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
-  <property category="sys" name="DocPath" value="doc" />
+  <property category="sys" name="DocPath" value="doc/javadoc/internal" />
   <property category="sys" name="EventMatch" value="false" />
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
