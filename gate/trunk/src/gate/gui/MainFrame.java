@@ -1198,7 +1198,7 @@ public class MainFrame extends JFrame
       if (answer instanceof String) {
         try{
           FeatureMap features = Factory.newFeatureMap();
-          Gate.setName(features, answer);
+          Gate.setName(features, (String)answer);
           features.put("gate.APPLICATION", "true");
           SerialController controller =
                 (SerialController)Factory.createResource(
