@@ -617,6 +617,10 @@
                  COMMENT="Name of the variable which shows the root word"
                  DEFAULT="root" OPTIONAL="false"
                  RUNTIME="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="caseSensitive"
+		 COMMENT="If parser should be converted to lowercase first"
+		 DEFAULT="false" OPTIONAL="false"
+		 RUNTIME="false">java.lang.Boolean</PARAMETER>
     </RESOURCE>
   </CREOLE>
 
