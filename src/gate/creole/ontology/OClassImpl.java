@@ -19,21 +19,43 @@ import java.util.*;
 
 
 
-/** represents a single ontology class
- *  @todo: infer methods hidden but always invoked when needed
- *  @todo: safe Set of classes*/
+/** Represents a single ontology class.*/
 public class OClassImpl implements OClass{
 
+  /** the ontology to which the class belongs*/
   Ontology ontology;
+
+  /** the URI of the class */
   String uri;
+
+  /** the id of the class */
   String id;
+
+  /**the name of the class */
   String name;
+
+  /**the comment of the class*/
   String comment;
+
+  /** the set of direct sub classes of this class */
   Set directSubClasses = new HashSet();
+
+  /** the set of direct super classes of this class */
   Set directSuperClasses = new HashSet();
+
+  /** The sub classes transitive closure set*/
   Set subClassesTransitiveClosure = new HashSet();
+
+  /** The super classes transitive closure set*/
   Set superClassesTransitiveClosure = new HashSet();
 
+  /**
+   * Creates a new class given id,name,comment and ontology.
+   * @param anId the id of the new class
+   * @param aName the name of the new class
+   * @param aComment the comment of the new class
+   * @param anOntology the ontology to which the new class belongs
+   */
   public OClassImpl(String anId, String aName, String aComment, Ontology anOntology) {
     id = anId;
     name = aName;
@@ -41,10 +63,18 @@ public class OClassImpl implements OClass{
     ontology = anOntology;
   }
 
+  /**
+   * Gets the id of the class.
+   * @return the id of the class
+   */
   public String getId(){
     return id;
   }
 
+  /**
+   * Gets the ontology to which this class is associated.
+   * @return the ontology to which this class is associated.
+   */
   public Ontology getOntology() {
     return ontology;
   }
@@ -236,12 +266,7 @@ public class OClassImpl implements OClass{
 
 
 
-  /**
-   * get the subclasses closure of a set of classes
-   * @param closure
-   * @param classes
-   * @return subclasses closure of a set of classes
-   */
+
   public static Set getSubClasses(byte closure,Set classes) {
     try {
       Set result = new HashSet();
@@ -260,12 +285,7 @@ public class OClassImpl implements OClass{
 
   } // getSubClasses()
 
-  /**
-   * get the super classes closure of a set of classes
-   * @param closure
-   * @param classes
-   * @return super classes closure of a set of classes
-   */
+
   public static Set getSuperClasses(byte closure,Set classes) {
     try {
       Set result = new HashSet();
@@ -285,12 +305,6 @@ public class OClassImpl implements OClass{
   } // getSuperClasses()
 
 
-  /**
-   *
-   * @return <b>distance</b> from this class to a <b>set of sub classes</b>
-   * e.g. 1 : a,b
-   *      2 : c,d
-   */
   public ArrayList getSubClassesVSDistance() {
     try {
       ArrayList result = new ArrayList();
@@ -323,12 +337,7 @@ public class OClassImpl implements OClass{
   } // getSubClassesVSDistance()
 
 
-  /**
-   *
-   * @return <b>distance</b> from this class to a <b>set of super classes</b>
-   * e.g. 1 : a,b
-   *      2 : c,d
-   */
+
   public ArrayList getSuperClassesVSDistance() {
     try {
       ArrayList result = new ArrayList();

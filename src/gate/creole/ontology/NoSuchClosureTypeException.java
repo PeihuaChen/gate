@@ -24,18 +24,29 @@ import gate.util.GateException;
  */
 public class NoSuchClosureTypeException extends GateException {
 
+  /** the type of the closure*/
   private byte type;
 
+  /** the core message */
   private final static String  MSG = "No Such Closure Type Exception : Type = ";
 
+  /**Constructs a new blank exception */
   public NoSuchClosureTypeException() {
   }
 
+  /**
+   * Constructs the exception given the type of the closure.
+   * @param aType the type of the closure
+   */
   public NoSuchClosureTypeException(byte aType) {
     super(MSG + aType);
     type = aType;
   }
 
+  /**
+   * Gets the type of the closure.
+   * @return the type of the closure
+   */
   public byte getType() {
     return type;
   }
