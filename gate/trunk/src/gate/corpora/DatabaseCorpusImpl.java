@@ -286,13 +286,15 @@ public class DatabaseCorpusImpl extends CorpusImpl
           //super.remove(doc);
 
           //remove from the list of loaded documents
-          Document oldDoc = (Document) this.supportList.remove(index);
-        }
+//System.out.println("resourceUnloaded called -- removing doc[" + index +"] from supportList...");
+          //WAS: Document oldDoc = (Document)this.supportList.remove(index);
+          this.supportList.set(index, null);
 
-        if (DEBUG)
-          Out.prln("corpus: document "+ index + " unloaded and set to null");
-      } //if
-    }
+          if (DEBUG)
+            Out.prln("corpus: document " + index + " unloaded and set to null");
+        } //else
+      } //else
+    } //if
   }
 
 
@@ -452,6 +454,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     Assert.assertTrue(index >= 0);
     Assert.assertTrue(index < this.documentData.size());
     Assert.assertTrue(index < this.supportList.size());
+    Assert.assertTrue(this.documentData.size() == this.supportList.size());
 
     if (index >= this.documentData.size())
       return null;
@@ -689,7 +692,8 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
       //3. remove the document from the memory
       //do this, only if the saving has succeeded
-      this.supportList.remove(index);
+      // WAS this.supportList.remove(index);
+      this.supportList.set(index,null);
     }
     catch (PersistenceException pex) {
       throw new GateRuntimeException("Error unloading document from corpus"
