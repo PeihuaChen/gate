@@ -176,9 +176,9 @@ public class CreoleRegisterImpl extends HashMap
       }
     } catch (IOException e) {
       throw(new GateException(e));
-    } catch (SAXException e) {
-      if(DEBUG) Out.println(e.toString());
-      throw(new GateException(e));
+    } catch (SAXException se) {
+      if(DEBUG) se.printStackTrace(Err.getPrintWriter());
+      throw(new GateException(se));
     }
 
   } // parseDirectory
