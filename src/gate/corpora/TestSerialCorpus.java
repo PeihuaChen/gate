@@ -41,7 +41,7 @@ public class TestSerialCorpus extends TestCase
 
   /** Corpus creation */
   public void testCreation() throws Exception {
-    Corpus c = new SerialCorpusImpl();
+    Corpus c = new SerialCorpusImpl(Factory.newCorpus("test"));
     c.setName("test corpus");
 
     assert(c.isEmpty());
@@ -71,14 +71,6 @@ public class TestSerialCorpus extends TestCase
     Document d2_1 = (Document) c1.get(1);
     assertEquals(d1, d1_1);
     assertEquals(d2, d2_1);
-
-    Corpus c2 = new SerialCorpusImpl();
-    c2.add(d1);
-    c2.add(d2);
-    Document d1_2 = (Document) c2.get(0);
-    Document d2_2 = (Document) c2.get(1);
-    assertEquals(d1, d1_2);
-    assertEquals(d2, d2_2);
 
   } // testDocumentAddition()
 

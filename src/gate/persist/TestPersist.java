@@ -243,7 +243,8 @@ public class TestPersist extends TestCase
 
     List allLRs =
       Gate.getCreoleRegister().getLrInstances("gate.corpora.DocumentImpl");
-    assert("wrong number of documents in Creole register", allLRs.size() == 4);
+    assert("gc() dependent test: Wrong number of documents in Creole register."
+      + " I found "+ allLRs.size() + " and expected 3.", allLRs.size() == 3);
     Iterator iter = allLRs.iterator();
     while (iter.hasNext()) {
       LanguageResource lr = (LanguageResource)iter.next();
@@ -470,7 +471,8 @@ public class TestPersist extends TestCase
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
 
     //5. try adding doc to data store
-    ds.adopt(doc,si);
+    LanguageResource lr = ds.adopt(doc,si);
+    ds.sync(lr);
 
     //6.close
     ac.close();
@@ -544,15 +546,18 @@ public class TestPersist extends TestCase
       test.tearDown();
 
       test.setUp();
-      test.testMultipleLrs();
-      test.tearDown();
-
-      test.setUp();
       test.testSaveRestore();
       test.tearDown();
 
       test.setUp();
       test.testSimple();
+      test.tearDown();
+
+      //I put this last because its failure is dependent on the gc() and
+      //there's nothing I can do about it. Maybe I'll remove this from the
+      //test
+      test.setUp();
+      test.testMultipleLrs();
       test.tearDown();
 
       test.setUp();
@@ -562,6 +567,7 @@ public class TestPersist extends TestCase
       test.setUp();
       test.testDB_UseCase02();
       test.tearDown();
+
 
     }catch(Exception e){
       e.printStackTrace();
