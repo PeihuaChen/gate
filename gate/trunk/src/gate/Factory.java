@@ -40,6 +40,7 @@ public abstract class Factory {
   /** The DataStore register */
   private static DataStoreRegister dsReg = Gate.getDataStoreRegister();
 
+  /** An object to source events from. */
   private static CreoleProxy creoleProxy;
 
   /** Create an instance of a resource using default parameter values.
@@ -76,10 +77,10 @@ public abstract class Factory {
     * containing these parameter settings.
     *
     * @param resourceClassName the name of the class implementing the resource.
-    * @param parameterValues the feature map containing
+    * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
     * @param listeners The listeners to be registered with the resource during
-    * its initialisation. A {@link java.util.Map} that maps freom fully
+    * its initialisation. A {@link java.util.Map} that maps from fully
     * qualified class name (as a string) to listener (of the type declared by
     * the key).
     * @return an instantiated resource.
@@ -88,10 +89,9 @@ public abstract class Factory {
     String resourceClassName, FeatureMap parameterValues,
     Map listeners
   ) throws ResourceInstantiationException
-   {
-      return createResource(resourceClassName, parameterValues, null,
-                            listeners);
-   }
+  {
+    return createResource(resourceClassName, parameterValues, null, listeners);
+  } // createResource(resClassName, paramVals, listeners)
 
   /** Create an instance of a resource, and return it.
     * Callers of this method are responsible for
@@ -100,7 +100,7 @@ public abstract class Factory {
     * containing these parameter settings.
     *
     * @param resourceClassName the name of the class implementing the resource.
-    * @param parameterValues the feature map containing
+    * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
     * @param features the features for the new resource
     * @return an instantiated resource.
@@ -120,7 +120,7 @@ public abstract class Factory {
     * containing these parameter settings.
     *
     * @param resourceClassName the name of the class implementing the resource.
-    * @param parameterValues the feature map containing
+    * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
     * @param listeners The listeners to be registered with the resource during
     * its initialisation. A {@link java.util.Map} that maps freom fully
@@ -244,16 +244,15 @@ public abstract class Factory {
       );
     }
 
-    //set the listeners if any
-
-    if(listeners != null && !listeners.isEmpty()){
-      // set the parameterValues of the resource and add the listeners
+    // set the listeners if any
+    if(listeners != null && !listeners.isEmpty()) {
       try {
         if(DEBUG) Out.prln("Setting the listeners for  " + res.toString());
-          setResourceListeners(res, listeners);
+        setResourceListeners(res, listeners);
       } catch(Exception e) {
-        if(DEBUG) Out.prln("Failed to set the listeners for " + res.toString());
-        throw new ResourceInstantiationException("Parameterisation failure" + e);
+        if(DEBUG) Out.prln("Failed to set listeners for " + res.toString());
+        throw new
+          ResourceInstantiationException("Parameterisation failure" + e);
       }
     }
 
@@ -269,12 +268,11 @@ public abstract class Factory {
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
     res = res.init();
 
-    //remove the listeners if any
-    if(listeners != null && !listeners.isEmpty()){
-      // set the parameterValues of the resource and add the listeners
+    // remove the listeners if any
+    if(listeners != null && !listeners.isEmpty()) {
       try {
         if(DEBUG) Out.prln("Removing the listeners for  " + res.toString());
-          removeResourceListeners(res, listeners);
+        removeResourceListeners(res, listeners);
       } catch(Exception e) {
         if (DEBUG) Out.prln(
           "Failed to remove the listeners for " + res.toString()
@@ -286,16 +284,17 @@ public abstract class Factory {
 
     // record the instantiation on the resource data's stack
     resData.addInstantiation(res);
-    //add the features sepcified by the user
+
+    // add the features specified by the user
     if(features != null) res.getFeatures().putAll(features);
     res.getFeatures().put("gate.PARAMETERS(transient)", parameterValues);
 
-    //fire the event
+    // fire the event
     creoleProxy.fireResourceLoaded(
-                               new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
-                              );
+      new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+    );
     return res;
-  } // create(resourceClassName)
+  } // create(resourceClassName, parameterValues, features, listeners)
 
   /** Create an instance of a resource, and return it.
     * Callers of this method are responsible for
@@ -304,16 +303,16 @@ public abstract class Factory {
     * containing these parameter settings.
     *
     * @param resourceClassName the name of the class implementing the resource.
-    * @param parameterValues the feature map containing
+    * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
     * @return an instantiated resource.
     */
   public static Resource createResource(
     String resourceClassName, FeatureMap parameterValues
   ) throws ResourceInstantiationException
-   {
-      return createResource(resourceClassName, parameterValues, null);
-   }
+  {
+    return createResource(resourceClassName, parameterValues, null);
+  } // createResource(resClassName, paramVals)
 
   /** Delete an instance of a resource. This involves removing it from
     * the stack of instantiations maintained by this resource type's
@@ -329,7 +328,7 @@ public abstract class Factory {
     List instances = rd.getInstantiations();
     instances.remove(resource);
     creoleProxy.fireResourceUnloaded(
-            new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
+      new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
     );
   } // deleteResource
 
@@ -588,8 +587,11 @@ public abstract class Factory {
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
-    if(dsReg.add(ds)) creoleProxy.fireDatastoreOpened(
-                        new CreoleEvent(ds, CreoleEvent.DATASTORE_OPENED));
+    if(dsReg.add(ds))
+      creoleProxy.fireDatastoreOpened(
+        new CreoleEvent(ds, CreoleEvent.DATASTORE_OPENED)
+      );
+
     return ds;
   } // openDataStore()
 
@@ -603,8 +605,11 @@ public abstract class Factory {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
     ds.open();
-    if(dsReg.add(ds)) creoleProxy.fireDatastoreCreated(
-                          new CreoleEvent(ds, CreoleEvent.DATASTORE_CREATED));
+    if(dsReg.add(ds))
+      creoleProxy.fireDatastoreCreated(
+        new CreoleEvent(ds, CreoleEvent.DATASTORE_CREATED)
+      );
+
     return ds;
   } // createDataStore()
 
@@ -625,14 +630,17 @@ public abstract class Factory {
     godfreyTheDataStore.setStorageUrl(storageUrl);
 
     return godfreyTheDataStore;
-  }// instantiateDS(URL)
+  } // instantiateDS(dataStoreClassName, storageURL)
 
+  /** Add a listener */
   public static synchronized void addCreoleListener(CreoleListener l){
     creoleProxy.addCreoleListener(l);
-  }
+  } // addCreoleListener(CreoleListener)
+
+  /** Static initialiser to set up the CreoleProxy event source object */
   static {
     creoleProxy = new CreoleProxy();
-  }
+  } // static initialiser
 
 } // abstract Factory
 
