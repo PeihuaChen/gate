@@ -1012,10 +1012,10 @@ public class CorefEditor
       int index = 0;
       if (matches == null)
         matches = new ArrayList();
-      if (matches.size() > 0) {
 
-        String longestString = getString( (Annotation)
-                                         findOutTheLongestAnnotation(matches,
+      if (matches.size() > 0 && set.size() > 0) {
+
+        String longestString = getString((Annotation) findOutTheLongestAnnotation(matches,
             set));
         // so this should become one of the tree node
         CorefTreeNode chainNode = new CorefTreeNode(longestString, false,
