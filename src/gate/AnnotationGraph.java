@@ -10,7 +10,7 @@ package gate;
 import java.util.*;
 import gate.util.*;
 
-/** Annotation graphs are defined at 
+/** NOT IN USE AT PRESENT. <P>Annotation graphs are defined at 
   * <A HREF=http://www.ldc.upenn.edu/annotation/>the LDC's annotation site</A>
   */
 public interface AnnotationGraph 
