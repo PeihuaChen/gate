@@ -49,7 +49,7 @@ public class JarFiles {
       sourceJarName = (String) jarFileNamesIterator.next();
       // create the new input jar files based on the fle name
       jarFileSource = new JarFile(sourceJarName);
-      System.out.println("Adding " + sourceJarName + " to " + destinationJarName);
+      //System.out.println("Adding " + sourceJarName + " to " + destinationJarName);
       addJar(jarFileDestination, jarFileSource);
       jarFileSource.close();
     }
