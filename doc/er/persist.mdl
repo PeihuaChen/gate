@@ -254,21 +254,6 @@
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
-			uid        	0)
-		    (object Operation "setName"
-			quid       	"3BA1E71B0272"
-			parameters 	(list Parameters
-			    (object Parameter "name"
-				type       	"String"))
-			result     	"void"
-			concurrency 	"Sequential"
-			opExportControl 	"Public"
-			uid        	0)
-		    (object Operation "getName"
-			quid       	"3BA1E74A00D5"
-			result     	"String"
-			concurrency 	"Sequential"
-			opExportControl 	"Public"
 			uid        	0)))
 	    (object Class "DatabaseDataStore"
 		quid       	"3BA1EBEC0302"
@@ -293,6 +278,38 @@
 			uid        	0)
 		    (object Operation "rollbackTrans"
 			quid       	"3BA1F89301D3"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "timestamp"
+			quid       	"3BA5E4FE0323"
+			result     	"Long"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "deleteSince"
+			quid       	"3BA5E5220285"
+			parameters 	(list Parameters
+			    (object Parameter "savepointID"
+				type       	"Long"))
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "lockResource"
+			quid       	"3BA636F900C8"
+			parameters 	(list Parameters
+			    (object Parameter "lrID"
+				type       	"Long"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "unlockResource"
+			quid       	"3BA637130397"
+			parameters 	(list Parameters
+			    (object Parameter "lrID"
+				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -384,13 +401,13 @@
 			opExportControl 	"Protected"
 			uid        	0)
 		    (object Operation "connect"
-			quid       	"3BA207E600BB"
+			quid       	"3BA5EB18033D"
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Protected"
 			uid        	0)
 		    (object Operation "disconnect"
-			quid       	"3BA207F30363"
+			quid       	"3BA5EB180365"
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Protected"
@@ -402,29 +419,30 @@
 		zoom       	100
 		max_height 	28350
 		max_width  	21600
-		origin_x   	63
-		origin_y   	1756
+		origin_x   	0
+		origin_y   	1525
 		items      	(list diagram_item_list
 		    (object ClassView "Class" "Logical View::DataStore" @1
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
-			location   	(752, 1362)
+			ShowOperationSignature 	TRUE
+			location   	(752, 1360)
 			label      	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(490, 828)
+			    location   	(24, 826)
 			    fill_color 	16777215
 			    nlines     	1
-			    max_width  	524
+			    max_width  	1456
 			    justify    	0
 			    label      	"DataStore")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(490, 778)
+			    location   	(24, 776)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	524
+			    max_width  	1456
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -434,13 +452,13 @@
 			quidu      	"3BA1E31200BE"
 			compartment 	(object Compartment
 			    Parent_View 	@1
-			    location   	(490, 889)
+			    location   	(24, 887)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
 			    nlines     	21
-			    max_width  	522)
-			width      	542
+			    max_width  	1462)
+			width      	1474
 			height     	1192
 			annotation 	8
 			autoResize 	TRUE)
@@ -451,7 +469,7 @@
 			location   	(784, 288)
 			label      	(object ItemLabel
 			    Parent_View 	@2
-			    location   	(637, 154)
+			    location   	(637, 204)
 			    fill_color 	16777215
 			    nlines     	1
 			    max_width  	294
@@ -459,7 +477,7 @@
 			    label      	"FeatureBearer")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@2
-			    location   	(637, 104)
+			    location   	(637, 154)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
@@ -473,14 +491,14 @@
 			quidu      	"3BA1E46E01EB"
 			compartment 	(object Compartment
 			    Parent_View 	@2
-			    location   	(637, 212)
+			    location   	(637, 262)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
-			    nlines     	5
+			    nlines     	3
 			    max_width  	300)
 			width      	312
-			height     	392
+			height     	292
 			annotation 	8
 			autoResize 	TRUE)
 		    (object InheritView "" @3
@@ -494,22 +512,23 @@
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
-			location   	(1984, 1664)
+			ShowOperationSignature 	TRUE
+			location   	(1968, 1680)
 			label      	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(1787, 1555)
+			    location   	(1638, 1471)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	394
+			    max_width  	660
 			    justify    	0
 			    label      	"DatabaseDataStore")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(1787, 1505)
+			    location   	(1638, 1421)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	394
+			    max_width  	660
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -519,27 +538,28 @@
 			quidu      	"3BA1EBEC0302"
 			compartment 	(object Compartment
 			    Parent_View 	@4
-			    location   	(1787, 1616)
+			    location   	(1638, 1532)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
-			    nlines     	4
-			    max_width  	316)
-			width      	412
-			height     	342
+			    nlines     	8
+			    max_width  	656)
+			width      	678
+			height     	542
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::OracleDataStore" @5
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
+			ShowOperationSignature 	TRUE
 			location   	(992, 2688)
 			label      	(object ItemLabel
 			    Parent_View 	@5
-			    location   	(803, 2607)
+			    location   	(142, 2607)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	378
+			    max_width  	1700
 			    justify    	0
 			    label      	"OracleDataStore")
 			icon_style 	"Icon"
@@ -548,13 +568,13 @@
 			quidu      	"3BA1FA57029B"
 			compartment 	(object Compartment
 			    Parent_View 	@5
-			    location   	(803, 2668)
+			    location   	(142, 2668)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
 			    nlines     	2
-			    max_width  	375)
-			width      	396
+			    max_width  	1706)
+			width      	1718
 			height     	186
 			annotation 	8
 			autoResize 	TRUE)
@@ -562,10 +582,11 @@
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
-			location   	(1968, 2736)
+			ShowOperationSignature 	TRUE
+			location   	(2000, 2912)
 			label      	(object ItemLabel
 			    Parent_View 	@6
-			    location   	(1813, 2685)
+			    location   	(1845, 2861)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	310
@@ -583,6 +604,7 @@
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
+			ShowOperationSignature 	TRUE
 			location   	(2608, 2640)
 			label      	(object ItemLabel
 			    Parent_View 	@7
@@ -611,13 +633,14 @@
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
+			ShowOperationSignature 	TRUE
 			location   	(1968, 2256)
 			label      	(object ItemLabel
 			    Parent_View 	@9
-			    location   	(1787, 2075)
+			    location   	(820, 2075)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	362
+			    max_width  	2296
 			    justify    	0
 			    label      	"JDBCDataStore")
 			icon_style 	"Icon"
@@ -626,13 +649,13 @@
 			quidu      	"3BA2074B027B"
 			compartment 	(object Compartment
 			    Parent_View 	@9
-			    location   	(1787, 2136)
+			    location   	(820, 2136)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	6
-			    max_width  	359)
-			width      	380
+			    max_width  	2303)
+			width      	2314
 			height     	386
 			annotation 	8
 			autoResize 	TRUE)
@@ -663,7 +686,37 @@
 			quidu      	"3BA2076D037E"
 			client     	@9
 			supplier   	@4
-			line_style 	0)))))
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::JDBCDataStore" @14
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			ShowOperationSignature 	TRUE
+			location   	(1968, 2256)
+			label      	(object ItemLabel
+			    Parent_View 	@14
+			    location   	(820, 2075)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	2296
+			    justify    	0
+			    label      	"JDBCDataStore")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA2074B027B"
+			compartment 	(object Compartment
+			    Parent_View 	@14
+			    location   	(820, 2136)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	6
+			    max_width  	2303)
+			width      	2314
+			height     	386
+			annotation 	8
+			autoResize 	TRUE)))))
     root_subsystem 	(object SubSystem "Component View"
 	quid       	"3BA1E1830101"
 	physical_models 	(list unit_reference_list
