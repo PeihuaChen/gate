@@ -268,15 +268,21 @@ public class SerialCorpusImpl extends
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     if (res instanceof Document) {
+      Document doc = (Document) res;
       if (DEBUG)
         Out.prln("resource Unloaded called ");
-      //unload all occurences, but no need to remove them from the corpus too
-      int index = indexOf(res);
-      if (index < 0)
-        return;
-      documents.set(index, null);
-      if (DEBUG)
-        Out.prln("corpus: document "+ index + " unloaded and set to null");
+      //remove from the corpus too, if a transient one
+      if (doc.getDataStore() != this.getDataStore()) {
+        this.remove(doc);
+      } else {
+        //unload all occurences
+        int index = indexOf(res);
+        if (index < 0)
+          return;
+        documents.set(index, null);
+        if (DEBUG)
+          Out.prln("corpus: document "+ index + " unloaded and set to null");
+      } //if
     }
   }
   public void datastoreOpened(CreoleEvent e) {
