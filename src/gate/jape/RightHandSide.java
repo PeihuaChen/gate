@@ -123,8 +123,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "import gate.util.*;" + nl + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
-      "  public void doit(Document doc, AnnotationSet annotations, " +
-      " java.util.Map bindings) { " + nl
+      "  public void doit(Document doc, java.util.Map bindings, " + nl +
+      "                   AnnotationSet annotations, " + nl +
+      "                   AnnotationSet inputAS, AnnotationSet outputAS) {" + nl
     );
 
     // initialise various names
@@ -219,15 +220,17 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
   /** Makes changes to the document, using LHS bindings. */
-  public void transduce(Document doc, AnnotationSet annotations,
-                        java.util.Map bindings) throws JapeException {
+  public void transduce(Document doc, java.util.Map bindings,
+                        AnnotationSet inputAS, AnnotationSet outputAS)
+                        throws JapeException {
     if(theActionObject == null) {
       instantiateActionClass();
     }
 
     // run the action class
     try {
-      ((RhsAction) theActionObject).doit(doc, annotations, bindings);
+      ((RhsAction) theActionObject).doit(doc, bindings, outputAS,
+                                         inputAS, outputAS);
 
     // if the action class throws an exception, re-throw it with a
     // full description of the problem, inc. stack trace and the RHS
@@ -290,7 +293,12 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.24  2002/02/27 15:11:16  valyt
+// bug 00011:
+// Jape access to InputAS
+//
 // Revision 1.23  2002/02/26 13:27:12  valyt
+//
 // Error messages from the compiler
 //
 // Revision 1.22  2002/02/26 10:30:07  valyt
