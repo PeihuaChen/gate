@@ -784,12 +784,12 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
   /** helper for sync() - saves a Corpus in the database */
-  protected void syncCorpus(Corpus corp)
+/*  protected void syncCorpus(Corpus corp)
     throws PersistenceException,SecurityException {
 
     throw new MethodNotImplementedException();
   }
-
+*/
 
   /**
    *  helper for sync()
@@ -1214,6 +1214,99 @@ public class PostgresDataStore extends JDBCDataStore {
     }
   }
 
+
+  /** helper for sync() - never call directly */
+  protected void _syncRemovedDocumentsFromCorpus(List docLRIDs, Long corpLRID)
+    throws PersistenceException {
+
+    //0.preconditions
+    Assert.assertNotNull(docLRIDs);
+    Assert.assertNotNull(corpLRID);
+    Assert.assertTrue(docLRIDs.size() > 0);
+
+    PreparedStatement pstmt = null;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_remove_document_from_corpus(?,?)");
+
+      Iterator it = docLRIDs.iterator();
+      while (it.hasNext()) {
+        Long currLRID = (Long)it.next();
+        pstmt.setLong(1,currLRID.longValue());
+        pstmt.setLong(2,corpLRID.longValue());
+        pstmt.execute();
+      }
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR :
+          throw new PersistenceException("invalid LR supplied: no such document: ["+
+                                                            sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException("can't change document data: ["+
+                                                            sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+
+  }
+
+  /**
+   *   adds document to corpus in the database
+   *   if the document is already part of the corpus nothing
+   *   changes
+   */
+  protected void addDocumentToCorpus(Long docID,Long corpID)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(docID);
+    Assert.assertNotNull(corpID);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(corpID)) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    if (false == canWriteLR(docID)) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    //3. database
+    PreparedStatement pstmt = null;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_add_document_to_corpus(?,?) ");
+      pstmt.setLong(1,docID.longValue());
+      pstmt.setLong(2,corpID.longValue());
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("invalid LR ID supplied ["+sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't add document to corpus : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+  }
 
 
 }
