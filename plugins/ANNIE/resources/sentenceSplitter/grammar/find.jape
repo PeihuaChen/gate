@@ -59,6 +59,8 @@ Rule: CR
 (
  ({SpaceToken.string == "\n"}|
   ({SpaceToken.string=="\n"}{SpaceToken.string=="\r"}))
+ ({SpaceToken.kind == space})*
+
  ({SpaceToken.string == "\n"}|
   ({SpaceToken.string=="\n"}{SpaceToken.string=="\r"}))+
  ({SpaceToken.kind == space})*
@@ -78,7 +80,7 @@ Rule:Fake
 
 Rule: Abbrev1
 (
- {Lookup.majorType == "abbreviation"}
+ {Lookup.majorType == "splitter_abbreviation"}
  {Token.string == "."}
 ):fake
 -->
