@@ -519,23 +519,24 @@ extends Transducer implements JapeConstants, java.io.Serializable
         }//if(paths != null)
       }//while(!activeFSMInstances.isEmpty())
 
+      Node newStartNode = null;
       //FIRE THE RULE
       if(acceptingFSMInstances.isEmpty()){
 //System.out.println("No acceptor");
         //no rule to fire just advance to next relevant node in the
         //Annotation Graph
 //System.out.print(startNode.getOffset());
-        startNode = annotations.nextNode(startNode);
+        newStartNode = annotations.nextNode(startNode);
 //System.out.println("->" + startNode.getOffset());
         // check to see if there are any annotations starting here
-        AnnotationSet annSet = annotations.get(startNode.getOffset());
+        AnnotationSet annSet = annotations.get(newStartNode.getOffset());
 
         if(annSet == null || annSet.isEmpty()){
           // no more starting annotations beyond this point
-          startNode = lastNode;
+          newStartNode = lastNode;
         } else {
           // advance to the next node that has starting annotations
-          startNode = ((Annotation)annSet.iterator().next()).getStartNode();
+          newStartNode = ((Annotation)annSet.iterator().next()).getStartNode();
         }
       } else if(ruleApplicationStyle == BRILL_STYLE) {
       //System.out.println("Brill acceptor");
@@ -558,7 +559,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           long currentAGPosition =
                currentAcceptor.getAGPosition().getOffset().longValue();
           if(lastAGPosition <= currentAGPosition){
-            startNode = currentAcceptor.getAGPosition();
+            newStartNode = currentAcceptor.getAGPosition();
             lastAGPosition = currentAGPosition;
           }
         }
@@ -572,7 +573,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
-        startNode = currentAcceptor.getAGPosition();
+        newStartNode = currentAcceptor.getAGPosition();
 
       } else if(ruleApplicationStyle == FIRST_STYLE) {
 //System.out.println("Appelt acceptor");
@@ -584,16 +585,34 @@ extends Transducer implements JapeConstants, java.io.Serializable
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
 //System.out.print(startNode.getOffset());
-        startNode = currentAcceptor.getAGPosition();
+        newStartNode = currentAcceptor.getAGPosition();
 //System.out.println("->" + startNode.getOffset());
       } else throw new RuntimeException("Unknown rule application style!");
-       startNodeOff = startNode.getOffset().intValue();
+       startNodeOff = newStartNode.getOffset().intValue();
 
       //fire the progress event
       if(startNodeOff - oldStartNodeOff > 1024){
         fireProgressChanged(100 * startNodeOff / lastNodeOff);
         oldStartNodeOff = startNodeOff;
       }
+      if(startNode == newStartNode){
+        //no advance: we probably matched some annotations that cover no text
+        //we should force the advance
+        Err.prln("Infinite loop detected in grammar " + getName() +
+                 " at position " + startNodeOff + " in " + doc.getSourceUrl() +
+                 "!\nAdvancing forced!");
+        newStartNode = annotations.nextNode(startNode);
+        // check to see if there are any annotations starting here
+        AnnotationSet annSet = annotations.get(newStartNode.getOffset());
+        if(annSet == null || annSet.isEmpty()){
+          // no more starting annotations beyond this point
+          newStartNode = lastNode;
+        } else {
+          // advance to the next node that has starting annotations
+          newStartNode = ((Annotation)annSet.iterator().next()).getStartNode();
+        }
+      }
+      startNode = newStartNode;
 //System.out.println("->" + startNodeOff);
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();

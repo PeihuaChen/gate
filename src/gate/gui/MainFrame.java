@@ -286,7 +286,7 @@ public class MainFrame extends JFrame
 
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                leftSplit, mainTabbedPane);
-    mainSplit.setDividerLocation(leftSplit.getPreferredSize().width);
+    mainSplit.setDividerLocation(leftSplit.getPreferredSize().width + 10);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
 
     southBox = Box.createHorizontalBox();
