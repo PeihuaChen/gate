@@ -371,9 +371,14 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * from the list listeners for this datastore
    */
   public void removeDatastoreListener(DatastoreListener l) {
-//System.out.println(">> ["+l.hashCode()+"] listener removed...");
+//System.out.println(">> ["+l.hashCode()+"] listener being removed...");
     Assert.assertNotNull(this.datastoreListeners);
-    this.datastoreListeners.remove(l);
+//    Assert.assertTrue(this.datastoreListeners.contains(l));
+
+    Vector temp = (Vector)this.datastoreListeners.clone();
+    temp.remove(l);
+
+    this.datastoreListeners = temp;
   }
 
 
@@ -384,7 +389,9 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 //System.out.println(">> ["+l.hashCode()+"] listener added...");
     Assert.assertNotNull(this.datastoreListeners);
     if (false == this.datastoreListeners.contains(l)) {
-      this.datastoreListeners.add(l);
+      Vector temp = (Vector)this.datastoreListeners.clone();
+      temp.add(l);
+      this.datastoreListeners = temp;
     }
   }
 
