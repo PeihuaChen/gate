@@ -87,6 +87,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     ToolTipManager.sharedInstance().registerComponent(resourcesList);
     
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+    mainSplit.setResizeWeight(.75);
     JScrollPane scroller = new JScrollPane(mainTable);
     scroller.setBorder(BorderFactory.createTitledBorder(
             scroller.getBorder(), 
@@ -137,8 +138,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
      }
     });
     mainSplit.addComponentListener(new ComponentAdapter(){
-      public void componentResized(ComponentEvent e){
-        mainSplit.setDividerLocation(0.75);
+      public void componentShown(ComponentEvent e){
+        //try to honour left component's preferred size 
+        mainSplit.setDividerLocation(-100);
       }
     });
   }
@@ -280,7 +282,23 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       label = new JLabel();
       rendererDeleteButton = new JButton(MainFrame.getIcon("delete.gif"));
       rendererDeleteButton.setMaximumSize(rendererDeleteButton.getPreferredSize());
+      rendererDeleteButton.setMargin(new Insets(2, 5, 2, 5));
+      rendererBox = new JPanel();
+      rendererBox.setLayout(new GridBagLayout());
+      rendererBox.setOpaque(false);
+      GridBagConstraints constraints = new GridBagConstraints();
+      constraints.fill = GridBagConstraints.NONE;
+      constraints.gridy = 0;
+      constraints.gridx = GridBagConstraints.RELATIVE;
+      constraints.weightx = 1;
+      rendererBox.add(Box.createGlue(), constraints);
+      constraints.weightx = 0;
+      rendererBox.add(rendererDeleteButton, constraints);
+      constraints.weightx = 1;
+      rendererBox.add(Box.createGlue(), constraints);
+      
       editorDeleteButton = new JButton(MainFrame.getIcon("delete.gif"));
+      editorDeleteButton.setMargin(new Insets(2, 5, 2, 5));
       editorDeleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           int row = mainTable.getEditingRow();
@@ -293,6 +311,16 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           resourcesListModel.dataChanged();
         }
       });
+    editorDeleteButton.setMaximumSize(editorDeleteButton.getPreferredSize());
+    editorBox = new JPanel();
+    editorBox.setLayout(new GridBagLayout());
+    editorBox.setOpaque(false);
+    constraints.weightx = 1;
+    editorBox.add(Box.createGlue(), constraints);
+    constraints.weightx = 0;
+    editorBox.add(editorDeleteButton, constraints);
+    constraints.weightx = 1;
+    editorBox.add(Box.createGlue(), constraints);
     }
     
     public Component getTableCellRendererComponent(JTable table,
@@ -304,7 +332,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
 //      editorDeleteButton.setSelected(false);
       switch(column){
         case DELETE_COLUMN:
-          return rendererDeleteButton;
+//          return rendererDeleteButton;
+          return rendererBox;
         default: return null;
       }
     }
@@ -316,7 +345,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             int column){
       switch(column){
         case DELETE_COLUMN:
-          return editorDeleteButton;
+          return editorBox;
         default: return null;
       }
     }
@@ -327,6 +356,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     
     JButton editorDeleteButton;
     JButton rendererDeleteButton;
+    JPanel rendererBox;
+    JPanel editorBox;
     JLabel label;
   }
   
