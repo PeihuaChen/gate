@@ -8,7 +8,7 @@
  *
  *  PdfDocumentFormat.java
  *
- *  Valentin Tablan, 14-Feb-2005
+ *  Ting Wang, Valentin Tablan, 14-Feb-2005, 
  *
  *  $Id$
  */
@@ -22,14 +22,19 @@ import gate.DocumentFormat;
 import gate.creole.ResourceInstantiationException;
 import gate.util.DocumentFormatException;
 
+import org.pdfbox.pdfparser.*;
+import org.pdfbox.pdmodel.PDDocument;
+import org.pdfbox.util.*;
+import java.io.*;
+
 /**
  */
 public class PdfDocumentFormat extends DocumentFormat{
 
-  
-  /** 
+
+  /**
    * Initialise this resource, and return it.
-   * Registers this format unpacker with the system. 
+   * Registers this format unpacker with the system.
    */
   public Resource init() throws ResourceInstantiationException{
     // Register plain text mime type
@@ -45,40 +50,60 @@ public class PdfDocumentFormat extends DocumentFormat{
     setMimeType(mime);
     return this;
   } // init()
-  
-  
-  /** 
+
+
+  /**
    * The PDF Document Format does not support repositioning info.
-   * @return false. 
+   * @return false.
    */
   public Boolean supportsRepositioning() {
     return new Boolean(false);
   } // supportsRepositioning
-  
-  
+
+
   /** Unpack the markup in the document. This converts markup from the
    * native format (e.g. XML, RTF) into annotations in GATE format.
    * Uses the markupElementsMap to determine which elements to convert, and
    * what annotation type names to use.
    */
-  public void unpackMarkup(Document doc)
-                                     throws DocumentFormatException{
+  public void unpackMarkup(Document doc) throws DocumentFormatException{
     //get the original file
     URL fileURL = doc.getSourceUrl();
-    //parse the original file into a text
-    String extractedContent = "Created from PDF";
-    //TODO Implement the PDF unpacking. 
+    if(fileURL == null) throw new DocumentFormatException(
+            "Unpacking PDF files requires an URL to the original content!");
     
-    //set the content on the document
-    doc.setContent(new DocumentContentImpl(extractedContent));
+    //Implement the PDF unpacking.
+    try {
+      //parse the original file into a text
+      String extractedContent = null;
+
+      // get an Input stream from the gate document
+      InputStream in = new ByteArrayInputStream(
+              doc.getContent().toString().getBytes());
+      // create a PDF Text Stripper
+      PDFTextStripper aPdfTextStripper = new PDFTextStripper();
+      PDFParser parser = new PDFParser(in);
+      parser.parse();
+      PDDocument pdfDoc = parser.getPDDocument();
+      
+      extractedContent = aPdfTextStripper.getText(pdfDoc);
+      pdfDoc.close();
+      in.close();
+      //set the content on the document
+      doc.setContent(new DocumentContentImpl(extractedContent));
+    } catch (IOException e){
+      throw new DocumentFormatException("I/O exception for " +
+                                        doc.getSourceUrl().toExternalForm(), 
+                                        e);
+    }
   }
 
-  
+
   public void unpackMarkup(Document doc, RepositioningInfo repInfo,
                                        RepositioningInfo ampCodingInfo)
                                      throws DocumentFormatException{
-    unpackMarkup(doc); 
+    unpackMarkup(doc);
   }
-  
-  
+
+
 }
