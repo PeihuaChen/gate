@@ -67,9 +67,8 @@ jar: tcl japefiles resources classes.jar
 	  classes.jar ../lib/*.jar ../lib/*.zip
 
 # just the gate classes in a jar
-classes.jar:
-	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar \
-	  gate resources
+classes.jar: classes
+	cd ../classes && ../build/jdk.sh jar cf ../build/classes.jar gate
 
 # copy the resources directory into "classes"
 resources:
@@ -78,6 +77,7 @@ resources:
 
 # refresh the jar with all the class files
 jarupdate:
+	cd ../classes && ../build/jdk.sh jar uf ../build/classes.jar gate
 	cd ../classes && ../build/jdk.sh jar uf ../build/gate.jar gate
 
 # build the Tcl script library:
