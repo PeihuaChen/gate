@@ -158,7 +158,7 @@
       <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
       <ICON>controller.gif</ICON>
     </RESOURCE>
-    
+
   </CREOLE>
 
   <!-- Processing Resources -->
@@ -613,12 +613,11 @@
     <RESOURCE>
       <NAME>Ontology Editor</NAME>
       <CLASS>com.ontotext.gate.vr.OntologyEditorImpl</CLASS>
-      <GUI>
+      <GUI TYPE = "large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
-    
+
   </CREOLE>
 </CREOLE-DIRECTORY>
