@@ -296,7 +296,9 @@ public class TestPersist extends TestCase
 
     // delete the datastore
     sds.delete();
-  } // testDelete() the DS register. */
+  } // testDelete()
+
+  /** Test the DS register. */
   public void testDSR() throws Exception {
     DataStoreRegister dsr = Gate.getDataStoreRegister();
     assert("DSR has wrong number elements (not 0): " + dsr.size(),

@@ -30,6 +30,9 @@ import gate.event.*;
 public class SerialDataStore
 extends AbstractFeatureBearer implements DataStore {
 
+  /** Debug flag */
+  private static final boolean DEBUG = false;
+
   /** Construction requires a file protocol URL
     * pointing to the storage directory used for
     * the serialised classes.
@@ -97,7 +100,57 @@ extends AbstractFeatureBearer implements DataStore {
           "directory "+ storageDir +" is not empty: cannot use for data store"
         );
     }
+
+    // dump the version file
+    try {
+      File versionFile = getVersionFile();
+      OutputStreamWriter osw = new OutputStreamWriter(
+        new FileOutputStream(versionFile)
+      );
+      osw.write(versionNumber + Strings.getNl());
+      osw.close();
+    } catch(IOException e) {
+      throw new PersistenceException("couldn't write version file: " + e);
+    }
   } // create()
+
+  /** The name of the version file */
+  protected String versionFileName = "__GATE_SerialDataStore__";
+
+  /** Get a File for the protocol version file. */
+  protected File getVersionFile() throws IOException {
+    return new File(storageDir, versionFileName);
+  } // getVersionFile
+
+  /**
+   * Version number for variations in the storage protocol.
+   * Protocol versions:
+   * <UL>
+   * <LI>
+   * 1.0: has no version file. Uncompressed.
+   * <LI>
+   * 1.1: has a version file. Uses GZIP compression.
+   * </UL>
+   */
+  protected String versionNumber = "1.1";
+
+  /** List of valid protocol version numbers. */
+  protected String[] protocolVersionNumbers = {
+    "1.0",
+    "1.1"
+  }; // protocolVersionNumbers
+
+  /** Check a version number for validity. */
+  protected boolean isValidProtocolVersion(String versionNumber) {
+    if(versionNumber == null)
+      return false;
+
+    for(int i = 0; i < protocolVersionNumbers.length; i++)
+      if(protocolVersionNumbers[i].equals(versionNumber))
+        return true;
+
+    return false;
+  } // isValidProtocolVersion
 
   /** Delete the data store.
     */
@@ -178,18 +231,26 @@ extends AbstractFeatureBearer implements DataStore {
       throw new PersistenceException("Can't read " + storageDir);
     }
 
-    // check storage directory is a Gate datastore
-    List names = Arrays.asList(storageDir.list());
-    Iterator namesIter = names.iterator();
-    while(namesIter.hasNext()){
-      String name = (String)namesIter.next();
-      ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(name);
-      if(resData == null) {
-        throw new PersistenceException(
-          "Invalid storage directory: " + name + " is not a valid Gate type"
-        );
-      }
+    // check storage directory is a valid serial datastore
+// if we want to support old style:
+// String versionInVersionFile = "1.0";
+    String versionInVersionFile = null;
+    try {
+      FileReader fis = new FileReader(getVersionFile());
+      BufferedReader isr = new BufferedReader(fis);
+      versionInVersionFile = isr.readLine();
+      if(DEBUG) Out.prln("opening SDS version " + versionInVersionFile);
+      isr.close();
+    } catch(IOException e) {
+      throw new PersistenceException(
+        "Invalid storage directory: " + e
+      );
     }
+    if(! isValidProtocolVersion(versionInVersionFile))
+      throw new PersistenceException(
+        "Invalid protocol version number: " + versionInVersionFile
+      );
+
   } // open()
 
   /** Close the data store. */
@@ -338,7 +399,14 @@ extends AbstractFeatureBearer implements DataStore {
     if(storageDir == null || ! storageDir.exists())
       throw new PersistenceException("Can't read storage directory");
 
-    return Arrays.asList(storageDir.list());
+    // filter out the version file
+    String[] fileArray = storageDir.list();
+    List lrTypes = new ArrayList();
+    for(int i=0; i<fileArray.length; i++)
+      if(! fileArray[i].equals(versionFileName))
+        lrTypes.add(fileArray[i]);
+
+    return lrTypes;
   } // getLrTypes()
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
