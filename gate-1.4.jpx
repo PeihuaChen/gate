@@ -3,6 +3,25 @@
 <project>
   <property category="build" name="CopyExtensions.1" value="txt"/>
   <property category="build" name="CopyExtensions.2" value="xml"/>
+  <property category="debug.0" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.1" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.10" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.11" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.12" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.13" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.14" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.15" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.16" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.17" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.18" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.2" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.3" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.4" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.5" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.6" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.7" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.8" name="SmartStepRedefineClasses" value="0"/>
+  <property category="debug.9" name="SmartStepRedefineClasses" value="0"/>
   <property category="idl" name="ProcessIDL" value="false"/>
   <property category="runtime" name="ConfigurationCount" value="18"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
@@ -21,7 +40,7 @@
   <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.1" name="application.class" value="gate.Main"/>
   <property category="runtime.1" name="application.parameters" value="-i y:\gate.xml"/>
-  <property category="runtime.1" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext -Xmx500m -Djava.library.path=d:/apps/Oracle/Oracle91/bin"/>
+  <property category="runtime.1" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext -Xmx700m -Djava.library.path=d:/apps/Oracle/Oracle91/bin"/>
   <property category="runtime.1" name="appserver.ejbJarsSaved" value="1"/>
   <property category="runtime.1" name="appserver.parameters" value="-jts -jns -jss -jdb"/>
   <property category="runtime.1" name="appserver.servername" value="ejbcontainer"/>
@@ -218,6 +237,7 @@
   <property category="runtime.9" name="jsprunner.docbase" value="."/>
   <property category="runtime.9" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin"/>
   <property category="runtime.9" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin"/>
+  <property category="serverservices" name="disabled.services" value=""/>
   <property category="sys" name="AuthorLabel" value="@author"/>
   <property category="sys" name="BackupPath" value="bak"/>
   <property category="sys" name="BeansInstantiate" value="false"/>
@@ -236,7 +256,7 @@
   <property category="sys" name="ExcludeClassEnabled" value="0"/>
   <property category="sys" name="IncludeTestPath" value="1"/>
   <property category="sys" name="InstanceVisibility" value="4"/>
-  <property category="sys" name="JDK" value="java 1.4.0-b92"/>
+  <property category="sys" name="JDK" value="java version 1.4.0_03-b04"/>
   <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener"/>
   <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener"/>
   <property category="sys" name="JbxEventListener2" value="gate.event.CreoleListener"/>
@@ -257,6 +277,14 @@
   <property category="sys" name="VersionLabel" value="@version"/>
   <property category="sys" name="WorkingDirectory" value="."/>
   <property category="sys" name="warn.auto.packages" value="false"/>
+  <node name="gateURL Extension" type="Archive">
+    <property category="archiving" name="buildWithProject" value="0"/>
+    <property category="archiving" name="extraDeployRoots.1" value="C:gate.util.protocols.gate.Handler"/>
+    <property category="archiving" name="libraryStates.1" value="1:gatelibs"/>
+    <property category="archiving" name="outPathState" value="1"/>
+    <property category="archiving" name="targetCompressed" value="1"/>
+    <property category="archiving" name="targetPath" value="build/gateURL.jar"/>
+  </node>
   <file path="src/gate/resources/creole/creole.xml"/>
   <file path="src/gate/GateConstants.java"/>
   <file path="src/gate/TextualDocument.java"/>

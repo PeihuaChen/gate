@@ -41,14 +41,14 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-    Map charsets = java.nio.charset.Charset.availableCharsets();
-    Iterator namesIter = charsets.keySet().iterator();
-    while(namesIter.hasNext()){
-      String name = (String)namesIter.next();
-      System.out.println(name + " : " + charsets.get(name));
-    }
-    System.out.println(System.getProperty("file.encoding"));
-    System.out.println(java.nio.charset.Charset.forName(System.getProperty("file.encoding")));
+//    Map charsets = java.nio.charset.Charset.availableCharsets();
+//    Iterator namesIter = charsets.keySet().iterator();
+//    while(namesIter.hasNext()){
+//      String name = (String)namesIter.next();
+//      System.out.println(name + " : " + charsets.get(name));
+//    }
+//    System.out.println(System.getProperty("file.encoding"));
+//    System.out.println(java.nio.charset.Charset.forName(System.getProperty("file.encoding")));
 //    System.out.println(new Character((char)0xa3));
 //    Gate.init();
 //
