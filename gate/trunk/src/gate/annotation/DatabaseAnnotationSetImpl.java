@@ -20,6 +20,7 @@ import junit.framework.*;
 import gate.event.*;
 import gate.*;
 import gate.util.*;
+import gate.corpora.*;
 
 
 public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
@@ -50,6 +51,13 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
     super(doc, name);
     eventHandler = new EventsHandler();
     this.addAnnotationSetListener(eventHandler);
+  } // construction from document and name
+
+  /** Construction from Document and name. */
+  public DatabaseAnnotationSetImpl(Document doc, String name, Collection c) {
+    this(c);
+    this.name = name;
+    this.doc = (DocumentImpl) doc;
   } // construction from document and name
 
   /** Construction from Collection (which must be an AnnotationSet) */
