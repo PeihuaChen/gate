@@ -191,6 +191,17 @@ public class TestCreole extends TestCase
     reg.clear();
   } // testClassIndex()
 
+  /** Test type lists */
+  public void testTypeLists() throws Exception {
+    Set vrs = reg.getVrTypes();
+    Set prs = reg.getPrTypes();
+    Set lrs = reg.getLrTypes();
+
+    assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 2);
+    assert("wrong number prs in reg: " + prs.size(), prs.size() == 6);
+    assert("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
+  } // testTypeLists()
+
   /** Test comments on resources */
   public void testComments() throws Exception {
 

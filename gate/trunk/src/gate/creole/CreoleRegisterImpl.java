@@ -213,9 +213,16 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       );
     }
 
-    // if it's an LR add its class name to the list
+    // add class names to the type lists
     if(LanguageResource.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln("LR: " + resClass);
       lrTypes.add(rd.getClassName());
+    } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln("PR: " + resClass);
+      prTypes.add(rd.getClassName());
+    } else if(VisualResource.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln("VR: " + resClass);
+      vrTypes.add(rd.getClassName());
     }
 
     return super.put(key, value);
@@ -242,9 +249,21 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   } // clear()
 
   /** Get the list of types of LR in the register. */
-  public List getLrTypes() { return lrTypes; }
+  public Set getLrTypes() { return lrTypes; }
+
+  /** Get the list of types of PR in the register. */
+  public Set getPrTypes() { return prTypes; }
+
+  /** Get the list of types of VR in the register. */
+  public Set getVrTypes() { return vrTypes; }
 
   /** A list of the types of LR in the register. */
-  protected List lrTypes = new ArrayList();
+  protected Set lrTypes = new HashSet();
+
+  /** A list of the types of PR in the register. */
+  protected Set prTypes = new HashSet();
+
+  /** A list of the types of VR in the register. */
+  protected Set vrTypes = new HashSet();
 
 } // class CreoleRegisterImpl
