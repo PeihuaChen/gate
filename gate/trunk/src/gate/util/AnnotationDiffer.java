@@ -13,10 +13,18 @@
  */
 package gate.util;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 import gate.Annotation;
+
 public class AnnotationDiffer {
+  
+  public static interface AnnotationPrinter{
+    public String printAnnotation(Annotation annotation);
+  }
+  
   /**
    * Computes a diff between two collections of annotations.
    * @param key
@@ -148,7 +156,7 @@ public class AnnotationDiffer {
     for(int i = 0; i < keyChoices.size(); i++){
       List aList = (List)keyChoices.get(i);
       if(aList == null || aList.isEmpty()){
-        System.out.println("Unmatched Key: " + keyList.get(i).toString());
+        System.out.println("Missed Key: " + keyList.get(i).toString());
       }
     }
 
@@ -156,11 +164,65 @@ public class AnnotationDiffer {
     for(int i = 0; i < responseChoices.size(); i++){
       List aList = (List)responseChoices.get(i);
       if(aList == null || aList.isEmpty()){
-        System.out.println("Unmatched Key: " + responseList.get(i).toString());
+        System.out.println("Spurious Response: " + responseList.get(i).toString());
+      }
+    }
+  }
+
+  
+  public void writeMissmatches(Writer writer) throws IOException{
+    String nl = Strings.getNl();
+    //get the partial correct matches
+    Iterator iter = finalChoices.iterator();
+    while(iter.hasNext()){
+      Choice aChoice = (Choice)iter.next();
+      switch(aChoice.type){
+        case PARTIALLY_CORRECT:{
+          writer.write("Missmatch (partially correct):");
+          writer.write(nl);
+          writer.write("Key: " + 
+                  (annotationPrinter == null ? 
+                  keyList.get(aChoice.keyIndex).toString():
+                  annotationPrinter.printAnnotation(
+                          (Annotation)keyList.get(aChoice.keyIndex))));
+          writer.write(nl);
+          writer.write("Response: " + 
+                  annotationPrinter == null ?
+                  responseList.get(aChoice.responseIndex).toString() :
+                  annotationPrinter.printAnnotation(
+                          (Annotation)responseList.get(aChoice.responseIndex)));
+          writer.write(nl);
+          break;
+        }
       }
     }
 
+    //get the unmatched keys
+    for(int i = 0; i < keyChoices.size(); i++){
+      List aList = (List)keyChoices.get(i);
+      if(aList == null || aList.isEmpty()){
+        writer.write("Missed Key: " + 
+        	(annotationPrinter == null ?
+        	keyList.get(i).toString() :
+        	annotationPrinter.printAnnotation((Annotation)keyList.get(i))));
+        writer.write(nl);
+      }
+    }
+
+    //get the unmatched responses
+    for(int i = 0; i < responseChoices.size(); i++){
+      List aList = (List)responseChoices.get(i);
+      if(aList == null || aList.isEmpty()){
+        writer.write("Spurious Response: " + 
+        	(annotationPrinter == null ?
+        	responseList.get(i).toString() :
+        	annotationPrinter.printAnnotation((Annotation)responseList.get(i))));
+        writer.write(nl);
+      }
+    }
   }
+  
+  
   /**
    * Performs some basic checks over the internal data structures from the last
    * run.
@@ -233,6 +295,10 @@ public class AnnotationDiffer {
     this.significantFeaturesSet = significantFeaturesSet;
   }
 
+  public void setAnnotationPrinter(AnnotationPrinter annotationPrinter){
+    this.annotationPrinter = annotationPrinter;
+  }
+  
   /**
    * Represents a pairing of a key annotation with a response annotation and
    * the associated score for that pairing.
@@ -328,7 +394,8 @@ public class AnnotationDiffer {
     int score;
     boolean scoreCalculated;
   }
-
+  
+  
   public static final int CORRECT = 2;
   public static final int PARTIALLY_CORRECT = 1;
   public static final int DIFFERENT = 0;
@@ -367,5 +434,7 @@ public class AnnotationDiffer {
    * A list with the choices selected for the best result.
    */
   protected List finalChoices;
+  
+  protected AnnotationPrinter annotationPrinter;
 
 }
