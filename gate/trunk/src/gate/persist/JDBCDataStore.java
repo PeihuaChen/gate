@@ -1,0 +1,198 @@
+/*
+ *  JDBCDataStore.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Marin Dimitrov, 18/Sep/2001
+ *
+ */
+
+package gate.persist;
+
+import java.sql.*;
+import java.net.*;
+import java.util.*;
+
+import gate.*;
+import gate.util.*;
+import gate.event.*;
+
+public class JDBCDataStore
+extends AbstractFeatureBearer implements DataStore{
+
+  /** --- */
+  private Connection jdbcConn;
+
+
+  /** Do not use this class directly - use one of the subclasses */
+  protected JDBCDataStore() {
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  protected void cleanup(ResultSet rs) {
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  protected void cleanup(Statement stmt) {
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  protected Connection connect(URL connectURL) {
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  protected void disconnect() {
+    throw new MethodNotImplementedException();
+//    this.jdbcConn.close();
+  }
+
+  /**
+   * Returns the comment displayed by the GUI for this DataStore
+   */
+  public String getComment() {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Returns the name of the icon to be used when this datastore is displayed
+   * in the GUI
+   */
+  public String getIconName() {
+    throw new MethodNotImplementedException();
+  }
+
+
+  /**
+   * Removes a a previously registered {@link gate.event.DatastoreListener}
+   * from the list listeners for this datastore
+   */
+  public void removeDatastoreListener(DatastoreListener l) {
+    throw new MethodNotImplementedException();
+  }
+
+
+  /**
+   * Registers a new {@link gate.event.DatastoreListener} with this datastore
+   */
+  public void addDatastoreListener(DatastoreListener l) {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get the name of an LR from its ID. */
+  public String getLrName(String lrId) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Set the URL for the underlying storage mechanism. */
+  public void setStorageUrl(URL storageUrl) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get the URL for the underlying storage mechanism. */
+  public URL getStorageUrl() {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Create a new data store. <B>NOTE:</B> for some data stores
+   * creation is an system administrator task; in such cases this
+   * method will throw an UnsupportedOperationException.
+   */
+  public void create()
+  throws PersistenceException, UnsupportedOperationException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Open a connection to the data store. */
+  public void open() throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Close the data store. */
+  public void close() throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Delete the data store. <B>NOTE:</B> for some data stores
+   * deletion is an system administrator task; in such cases this
+   * method will throw an UnsupportedOperationException.
+   */
+  public void delete()
+  throws PersistenceException, UnsupportedOperationException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Delete a resource from the data store.
+   * @param lrId a data-store specific unique identifier for the resource
+   * @param lrClassName class name of the type of resource
+   */
+  public void delete(String lrClassName, String lrId)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Save: synchonise the in-memory image of the LR with the persistent
+   * image.
+   */
+  public void sync(LanguageResource lr) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Set method for the autosaving behaviour of the data store.
+   * <B>NOTE:</B> many types of datastore have no auto-save function,
+   * in which case this will throw an UnsupportedOperationException.
+   */
+  public void setAutoSaving(boolean autoSaving)
+  throws UnsupportedOperationException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get the autosaving behaviour of the LR. */
+  public boolean isAutoSaving() {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Adopt a resource for persistence. */
+  public LanguageResource adopt(LanguageResource lr)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Get a resource from the persistent store.
+   * <B>Don't use this method - use Factory.createResource with
+   * DataStore and DataStoreInstanceId parameters set instead.</B>
+   */
+  public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get a list of the types of LR that are present in the data store. */
+  public List getLrTypes() throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get a list of the IDs of LRs of a particular type that are present. */
+  public List getLrIds(String lrType) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get a list of the names of LRs of a particular type that are present. */
+  public List getLrNames(String lrType) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+}
