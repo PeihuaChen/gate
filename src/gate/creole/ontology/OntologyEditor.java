@@ -35,7 +35,7 @@ public interface OntologyEditor extends VisualResource {
  * @param name the name of the ontology
  * @param sourceURI the URI of the ontology
  * @param theURL the URL of the ontology
- * @param comment ontology's comment */
+ * @param comment ontology comment */
 public void createOntology
   (String name, String sourceURI, String theURL, String comment)
   throws ResourceInstantiationException;
@@ -202,7 +202,7 @@ public void fileSave(int x, int y,Vector ontologies) ;
  */
 public void fileClose(int x, int y,Vector ontologies) ;
 
-/**Inovkes a 'new ontology dialog'.
+/**Inovkes a new ontology dialog.
  * @param x  coords of the dialog
  * @param y  coords of the dialog */
 public void fileNew(int x, int y);
