@@ -71,6 +71,10 @@ public interface OntoLexLR extends LanguageResource {
    */
   public void removeByLexId(Object lexId);
 
+  /** Remove the given mapping
+   */
+  public void remove(Object conceptId, Object lexId);
+
   /**
    * True if the mapping is empty
    */
