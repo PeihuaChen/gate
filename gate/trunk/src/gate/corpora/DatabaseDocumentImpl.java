@@ -1078,9 +1078,27 @@ public class DatabaseDocumentImpl extends DocumentImpl
    * Overriden to remove the features listener, when the document is closed.
    */
   public void cleanup() {
-    super.cleanup();
+
     if (eventHandler != null)
-      this.features.removeFeatureMapListener(eventHandler);
+
+    this.features.removeFeatureMapListener(eventHandler);
+    getDataStore().removeDatastoreListener(this);
+
+    //unregister annot-sets
+    if (null != this.defaultAnnots) {
+      getDataStore().removeDatastoreListener((DatastoreListener)this.defaultAnnots);
+    }
+
+    Set loadedNamedAnnots = this.namedAnnotSets.entrySet();
+    Iterator it = loadedNamedAnnots.iterator();
+    while (it.hasNext()) {
+      Map.Entry currEntry = (Map.Entry)it.next();
+      AnnotationSet currSet = (AnnotationSet)currEntry.getValue();
+      //unregister
+      getDataStore().removeDatastoreListener((DatastoreListener)currSet);
+    }
+
+    super.cleanup();
   }///inner class EventsHandler
 
 
@@ -1100,10 +1118,24 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     //unregister self as listener from the DataStore
     if (evt.getResourceID().equals(this.getLRPersistenceId())) {
+
       //someone deleted this document
       getDataStore().removeDatastoreListener(this);
-    }
 
+      //unregister annot-sets
+      if (null != this.defaultAnnots) {
+        getDataStore().removeDatastoreListener((DatastoreListener)this.defaultAnnots);
+      }
+
+      Set loadedNamedAnnots = this.namedAnnotSets.entrySet();
+      Iterator it = loadedNamedAnnots.iterator();
+      while (it.hasNext()) {
+        Map.Entry currEntry = (Map.Entry)it.next();
+        AnnotationSet currSet = (AnnotationSet)currEntry.getValue();
+        //unregister
+        getDataStore().removeDatastoreListener((DatastoreListener)currSet);
+      }
+    }
   }//resourceDeleted
 
   /**
@@ -1299,6 +1331,13 @@ public class DatabaseDocumentImpl extends DocumentImpl
     }
 
     return result;
+  }
+
+
+
+  public boolean equals(Object other) {
+
+    return this == other;
   }
 
 }
