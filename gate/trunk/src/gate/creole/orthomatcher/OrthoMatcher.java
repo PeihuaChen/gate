@@ -166,7 +166,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     // set the matches of the document
 //    determineMatchesDocument();
     if (! matchesDocFeature.isEmpty()) {
-      document.getFeatures().put(MATCHES_FEATURE, matchesDocFeature);
+      document.getFeatures().put(DOC_MATCHES_FEATURE, matchesDocFeature);
 
       //cannot do clear() as this has already been put on the document
       //so I need a new one for the next run of matcher
@@ -498,15 +498,21 @@ public class OrthoMatcher extends AbstractProcessingResource
   protected void cleanup() {
     document.getFeatures().remove(DOC_MATCHES_FEATURE);
 
-    Iterator iter = annotationTypes.iterator();
+    //get all annotations that have a matches feature
+    HashSet fNames = new HashSet();
+    fNames.add(MATCHES_FEATURE);
+    AnnotationSet annots =
+                  nameAllAnnots.get(null, fNames);
+
+//    Out.prln("Annots to cleanup" + annots);
+
+    if (annots == null || annots.isEmpty())
+      return;
+
+    Iterator iter = annots.iterator();
     while (iter.hasNext()) {
-      String type = (String) iter.next();
-      AnnotationSet annots = nameAllAnnots.get(type);
-      if (annots == null || annots.isEmpty())
-        continue;
-      Iterator iter1 = annots.iterator();
-      while (iter1.hasNext())
-        ((Annotation) iter1.next()).getFeatures().remove(MATCHES_FEATURE);
+      while (iter.hasNext())
+        ((Annotation) iter.next()).getFeatures().remove(MATCHES_FEATURE);
     } //while
   }//cleanup
 
@@ -520,8 +526,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     queryFM.clear();
     queryFM.put("majorType", "title");
     AnnotationSet as =
-      nameAllAnnots.get(startAnnot,endAnnot).get("Lookup", queryFM,
-                                                  startAnnot);
+      nameAllAnnots.get(startAnnot,endAnnot).get("Lookup", queryFM);
     if (as !=null && ! as.isEmpty()) {
       List titles = new ArrayList((Set)as);
       Collections.sort(titles, new gate.util.OffsetComparator());
