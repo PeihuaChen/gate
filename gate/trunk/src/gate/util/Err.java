@@ -23,12 +23,7 @@ import java.io.*;
   * methods.
   */
 public class Err {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   private static PrintWriter err = new PrintWriter(System.err,true);

@@ -21,12 +21,7 @@ import gate.util.*;
 
 /**The top level exception for all the exceptions fired by the tokeniser*/
 public class TokeniserException extends GateException {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   public TokeniserException(String text){ super(text);}

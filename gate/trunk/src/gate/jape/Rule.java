@@ -31,12 +31,7 @@ import gate.*;
 public class Rule extends Transducer
 implements JapeConstants, java.io.Serializable
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** Construction */
@@ -214,6 +209,9 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.7  2000/10/16 16:44:34  oana
+// Changed the comment of DEBUG variable
+//
 // Revision 1.6  2000/10/10 15:36:37  oana
 // Changed System.out in Out and System.err in Err;
 // Added the DEBUG variable seted on false;

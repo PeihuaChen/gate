@@ -30,6 +30,7 @@ import java.io.*;
   * based on Sun's JAXP layer...so it works with any JAXP compliant parser
   */
 public class Lax extends org.xml.sax.HandlerBase {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

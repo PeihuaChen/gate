@@ -39,12 +39,7 @@ import gate.gui.*;
 public class SinglePhaseTransducer
 extends Transducer implements JapeConstants, java.io.Serializable
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** Construction from name. */
@@ -428,6 +423,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.20  2000/10/16 16:44:34  oana
+// Changed the comment of DEBUG variable
+//
 // Revision 1.19  2000/10/11 16:37:40  valyt
 // Fixed the tests
 //

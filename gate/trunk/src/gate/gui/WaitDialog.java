@@ -22,12 +22,8 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 public class WaitDialog extends JWindow implements Runnable{
-    /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   Box centerBox;

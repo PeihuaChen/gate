@@ -36,12 +36,7 @@ import com.objectspace.jgl.*;
   */
 public class PrioritisedRuleList extends DList implements java.io.Serializable
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** Adds a rule in order. Used for non-matched rules. Implements the
@@ -131,6 +126,9 @@ public class PrioritisedRuleList extends DList implements java.io.Serializable
 
 
 // $Log$
+// Revision 1.3  2000/10/16 16:44:34  oana
+// Changed the comment of DEBUG variable
+//
 // Revision 1.2  2000/10/10 15:36:36  oana
 // Changed System.out in Out and System.err in Err;
 // Added the DEBUG variable seted on false;
