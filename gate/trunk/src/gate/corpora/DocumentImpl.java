@@ -167,12 +167,10 @@ extends AbstractLanguageResource implements Document {
         DocumentFormat.getDocumentFormat(this, sourceUrl);
       try {
         if(docFormat != null){
-          StatusListener sListener = new StatusListener(){
-            public void statusChanged(String text){
-              fireStatusChanged(text);
-            }
-          };
-          docFormat.addStatusListener(sListener);
+          StatusListener sListener = (StatusListener)
+                                      gate.gui.MainFrame.getListeners().
+                                      get("gate.event.StatusListener");
+          if(sListener != null) docFormat.addStatusListener(sListener);
           docFormat.unpackMarkup(this);
           docFormat.removeStatusListener(sListener);
        } //if format != null
@@ -340,10 +338,14 @@ extends AbstractLanguageResource implements Document {
       dumpingSet.clear();
     }// End if
 
+    StatusListener sListener = (StatusListener)
+                               gate.gui.MainFrame.getListeners().
+                               get("gate.event.StatusListener");
     // Construct the dumping set in that way that all annotations will verify
     // the condition that there are not annotations which are crossed.
     // First add all annotation from the original markups
-    fireStatusChanged("Constructing the dumping annotation set.");
+    if(sListener != null)
+      sListener.statusChanged("Constructing the dumping annotation set.");
     dumpingSet.addAll(originalMarkupsAnnotSet);
     // Then take all the annotations from aSourceAnnotationSet and verify if
     // they can be inserted safely into the dumpingSet. Where not possible,
@@ -366,7 +368,7 @@ extends AbstractLanguageResource implements Document {
 
     // The dumpingSet is ready to be exported as XML
     // Here we go.
-    fireStatusChanged("Dumping annotations as XML");
+    if(sListener != null) sListener.statusChanged("Dumping annotations as XML");
     StringBuffer xmlDoc = new StringBuffer(
           DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
     // Add xml header
@@ -407,7 +409,7 @@ extends AbstractLanguageResource implements Document {
       // Add the root end element
       xmlDoc.append("</GatePreserveFormat>");
     }// End if
-    fireStatusChanged("Done.");
+    if(sListener != null) sListener.statusChanged("Done.");
     return xmlDoc.toString();
   }//End toXml()
 
@@ -815,7 +817,11 @@ extends AbstractLanguageResource implements Document {
     xmlContent.append("</TextWithNodes>\n");
     // Serialize as XML all document's annotation sets
     // Serialize the default AnnotationSet
-    fireStatusChanged("Saving the default annotation set ");
+    StatusListener sListener = (StatusListener)
+                               gate.gui.MainFrame.getListeners().
+                               get("gate.event.StatusListener");
+    if(sListener != null)
+      sListener.statusChanged("Saving the default annotation set ");
     xmlContent.append("<!-- The default annotation set -->\n\n");
     xmlContent.append(annotationSetToXml(this.getAnnotations()));
     // Serialize all others AnnotationSets
@@ -826,13 +832,15 @@ extends AbstractLanguageResource implements Document {
         AnnotationSet annotSet = (AnnotationSet) iter.next();
         xmlContent.append("<!-- Named annotation set -->\n\n");
         // Serialize it as XML
-        fireStatusChanged("Saving " + annotSet.getName()+ " annotation set ");
+        if(sListener != null) sListener.statusChanged("Saving " +
+                                                      annotSet.getName()+
+                                                      " annotation set ");
         xmlContent.append(annotationSetToXml(annotSet));
       }// End while
     }// End if
     // Add the end of GateDocument
     xmlContent.append("</GateDocument>");
-    fireStatusChanged("Done !");
+    if(sListener != null) sListener.statusChanged("Done !");
     // return the XmlGateDocument
     return xmlContent.toString();
   }// toXml
@@ -1463,33 +1471,9 @@ extends AbstractLanguageResource implements Document {
   } // End inner class AnnotationComparator
 
 
-  private transient Vector statusListeners;
   private transient Vector documentListeners;
   private transient Vector gateListeners;
 
-  public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
-      v.removeElement(l);
-      statusListeners = v;
-    }
-  }
-  public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      statusListeners = v;
-    }
-  }
-  protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
-      }
-    }
-  }
   public synchronized void removeDocumentListener(DocumentListener l) {
     if (documentListeners != null && documentListeners.contains(l)) {
       Vector v = (Vector) documentListeners.clone();
