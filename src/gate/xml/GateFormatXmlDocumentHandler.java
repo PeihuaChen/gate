@@ -35,9 +35,9 @@ import org.xml.sax.helpers.*;
   */
 public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
-  private String contentsOfStack = "";
+  public ArrayList contentsForStack = new ArrayList();
 
   /**
     */
@@ -86,10 +86,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     */
   public void startElement (String uri, String qName, String elemName,
                                                              Attributes atts){
-
-    // Addition by Niraj
-    contentsOfStack = "";
-    // End of addition
+    contentsForStack.add(new String(""));
 
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
@@ -125,23 +122,8 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     public void endElement (String uri, String qName, String elemName )
                                                            throws SAXException{
 
-     // Addition by Niraj
-     if(contentsOfStack.length() != 0) {
-      if("TextWithNodes".equals((String)currentElementStack.peek())){
-          processTextOfTextWithNodesElement(contentsOfStack);
-      } else if ("Name".equals((String)currentElementStack.peek())){
-          processTextOfNameElement(contentsOfStack);
-      } else if ("Value".equals((String)currentElementStack.peek())){
-             //if (currentFeatureName != null && "string".equals(currentFeatureName) &&
-             //currentAnnot!= null && "Token".equals(currentAnnot.getElemName()) &&
-             //currentAnnot.getEnd().longValue() == 1063)
-             //System.out.println("Content=" + content + " start="+ start + " length=" + length);
-             processTextOfValueElement(contentsOfStack);
-      }
-      if(DEBUG) Out.prln(contentsOfStack);
-      contentsOfStack = "";
-     }
-      // End of Addition
+     String text = (String)(contentsForStack.remove(contentsForStack.size()-1));
+     charactersAction(text);
 
     currentElementStack.pop();
     // Deal with Annotation
@@ -232,20 +214,8 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
   }//endElement
 
-  /**
-    * This method is called when the SAX parser encounts text in the XML doc.
-    * Here we calculate the end indices for all the elements present inside the
-    * stack and update with the new values.
-    */
-  public void characters( char[] text,int start,int length) throws SAXException{
-    // Create a string object based on the reported text
-    String content = new String(text, start, length);
+  public void charactersAction(String content) throws SAXException {
 
-    contentsOfStack = contentsOfStack + content;
-    // Commented By Niraj and has been moved into the endElement method
-    // because it is not sure if the text provided by parser is a full text
-    // or a chunk of the text
-    /* Niraj
     if ("TextWithNodes".equals((String)currentElementStack.peek())){
       processTextOfTextWithNodesElement(content);
       return;
@@ -255,15 +225,25 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       return;
     }// End if
     if ("Value".equals((String)currentElementStack.peek())){
-//if (currentFeatureName != null && "string".equals(currentFeatureName) &&
-//currentAnnot!= null && "Token".equals(currentAnnot.getElemName()) &&
-//currentAnnot.getEnd().longValue() == 1063)
-//System.out.println("Content=" + content + " start="+ start + " length=" + length);
       processTextOfValueElement(content);
       return;
     }// End if
-     Niraj */
-  }//characters
+
+  }
+
+  /**
+    * This method is called when the SAX parser encounts text in the XML doc.
+    * Here we calculate the end indices for all the elements present inside the
+    * stack and update with the new values.
+    */
+  public void characters( char[] text,int start,int length) throws SAXException{
+    // Create a string object based on the reported text
+    String content = new String(text, start, length);
+    int index = (contentsForStack.size() == 0) ? 0 : contentsForStack.size()-1;
+    String newString = (String)(contentsForStack.get(index)) + content;
+    contentsForStack.set(index,newString);
+
+  }//character
 
   /**
     * This method is called when the SAX parser encounts white spaces
