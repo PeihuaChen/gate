@@ -16,92 +16,84 @@
  */
 package guk.im;
 
-/**
- * Title:        Gate Unicode Kit
- * Description:
- * Copyright:    Copyright (c) 1999
- * Company:
- * @author
- * @version
- */
 import java.util.*;
 
-/** 
+/**
  * A state of the {@link LocaleHandler} FSM.
- * 
+ *
  */
 public class State{
 
-  /** 
+  /**
    * Creates a new state
-   * 
-   * @param isFinal 
+   *
+   * @param isFinal
    */
   public State(boolean isFinal ){
     this.finalState = isFinal;
   }
 
-  /** 
+  /**
    * Default constructor; creates a non final state
-   * 
+   *
    */
   public State(){
     this.finalState = false;
   }
 
-  /** 
+  /**
    * Adds anew action to this state.
-   * 
-   * @param key 
-   * @param action 
+   *
+   * @param key
+   * @param action
    */
   public Action addAction(Key key, Action action){
     return (Action)transitionFunction.put(key, action);
   }
 
-  /** 
+  /**
    * Gets the action this state will activate for a given {@link Key}
-   * 
-   * @param key 
+   *
+   * @param key
    */
   public Action getNext(Key key){
     return (Action)transitionFunction.get(key);
   }
 
-  /** 
+  /**
    * Is this state final?
-   * 
+   *
    */
   public boolean isFinal(){
     return finalState;
   }
 
-  /** 
+  /**
    * Has this state any actions?
-   * 
+   *
    */
   public boolean hasNext(){
     return !transitionFunction.isEmpty();
   }
 
-  /** 
+  /**
    * Sets the final attribute.
-   * 
-   * @param pFinal 
+   *
+   * @param pFinal
    */
   public void setFinal(boolean pFinal){
     finalState = pFinal;
   }
   //maps from Key to Action
-  /** 
+  /**
    * The transition function for this state.
-   * 
+   *
    */
   Map transitionFunction = new HashMap();
 
-  /** 
+  /**
    * Is this state final?
-   * 
+   *
    */
   boolean finalState;
 }//class State

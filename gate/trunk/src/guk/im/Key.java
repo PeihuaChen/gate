@@ -16,21 +16,12 @@
  */
 
 package guk.im;
-
-/**
- * Title:        Gate Unicode Kit
- * Description:
- * Copyright:    Copyright (c) 1999
- * Company:
- * @author
- * @version
- */
 import java.awt.event.*;
 
-/** 
+/**
  * This calls describes a keyboard key.
  * A key is defined by one character and modifiers (CTRL or ALT or both).
- * 
+ *
  */
 public class Key {
   /**    */
