@@ -18,18 +18,39 @@ Phase:	pleonastic_it
 Input: Token
 Options: control = appelt
 
+
 Macro: IT
 (
     {Token.category=="PRP",Token.string=="It"}  
 )
 
+
 Macro: IS
 (
     {Token.category=="VBZ",Token.string=="is"} | 
-    {Token.category=="VBZ",Token.string=="was"}
+    {Token.category=="VBD",Token.string=="was"}
 )
 
-Macro: ADVERB
+Macro: IT-S
+(
+    {Token.category=="PRP",Token.string=="It"}  
+    {Token.category=="VBZ",Token.orth=="apostrophe",Token.string=="'s"}    
+)
+
+Macro: NOT
+(
+    {Token.category=="RB",Token.string=="not"} |
+    {Token.category=="RB",Token.string=="never"}    
+)
+
+
+Macro: FOR
+(
+    {Token.category=="IN",Token.string=="for"}
+)
+
+
+Macro: ADVERB-01
 (
     {Token.category=="RB", Token.string=="highly"} |
     {Token.category=="RB", Token.string=="very"} |
@@ -37,37 +58,232 @@ Macro: ADVERB
     {Token.category=="RB", Token.string=="increasingly"}    
 )
 
-Macro: MODALADJ
+
+Macro: ADVERB-02
 (
-    {Token.category=="JJ" , Token.string=="necessary"} |   
-    {Token.category=="JJ" , Token.string=="difficult"} |   
-    {Token.category=="JJ" , Token.string=="advisable"} |   
-    {Token.category=="JJ" , Token.string=="easy"} |   
-    {Token.category=="JJ" , Token.string=="good"} |   
-    {Token.category=="JJ" , Token.string=="important"} |   
-    {Token.category=="JJ" , Token.string=="likely"} |   
-    {Token.category=="JJ" , Token.string=="possible"} |   
-    {Token.category=="JJ" , Token.string=="useful"}
-    {Token.category=="JJ" , Token.string=="necessary"}
+    {Token.category=="RB", Token.string=="highly"} |
+    {Token.category=="RB", Token.string=="often"} |
+    {Token.category=="RB", Token.string=="still"} |
+    {Token.category=="RB", Token.string=="rarely"}    
 )
 
-Rule:IT_IS_ADVERB_MODADJ
+Macro: TIME-MODIF
+(
+    {Token.category=="RB", Token.string=="just"} |
+    {Token.category=="IN", Token.string=="about"}
+)
+
+Macro: MODALADJ
+(
+    {Token.category=="JJ" , Token.string=="advisable"} |   
+    {Token.category=="JJ" , Token.string=="suggested"} |
+    {Token.category=="JJ" , Token.string=="reccomended"} |
+    {Token.category=="JJ" , Token.string=="sensible"} |
+    {Token.category=="JJ" , Token.string=="wise"} |
+
+    {Token.category=="JJ" , Token.string=="convenient"} |
+    
+    {Token.category=="JJ" , Token.string=="desirable"} |
+    {Token.category=="JJ" , Token.string=="suitable"} |
+    {Token.category=="JJ" , Token.string=="worthy"} |
+    
+    {Token.category=="JJ" , Token.string=="difficult"} |   
+    {Token.category=="JJ" , Token.string=="hard"} |   
+
+    {Token.category=="JJ" , Token.string=="easy "} |
+    {Token.category=="JJ" , Token.string=="painless"} |
+       
+    {Token.category=="JJ" , Token.string=="economical "} |
+    {Token.category=="JJ" , Token.string=="efficient"} |
+    
+    {Token.category=="JJ" , Token.string=="certain"} |
+    {Token.category=="JJ" , Token.string=="sure"} |
+        
+    {Token.category=="JJ" , Token.string=="good"} |   
+    {Token.category=="JJ" , Token.string=="acceptable"} |       
+    {Token.category=="JJ" , Token.string=="suitable"} |   
+
+    {Token.category=="JJ" , Token.string=="important"} |   
+    {Token.category=="JJ" , Token.string=="useful"} |
+    {Token.category=="JJ" , Token.string=="practical"} |        
+        
+    {Token.category=="JJ" , Token.string=="legal"} |
+    {Token.category=="JJ" , Token.string=="valid"} |        
+
+    {Token.category=="JJ" , Token.string=="likely"} |   
+    {Token.category=="JJ" , Token.string=="probable"} |   
+    {Token.category=="JJ" , Token.string=="expected"} |   
+    {Token.category=="JJ" , Token.string=="plausible"} |               
+
+    {Token.category=="JJ" , Token.string=="necessary"} |   
+    {Token.category=="JJ" , Token.string=="unnecessary"} |       
+    {Token.category=="JJ" , Token.string=="essential"} |   
+    {Token.category=="JJ" , Token.string=="obligatory"} |   
+    {Token.category=="JJ" , Token.string=="mandatory"} |   
+    
+    {Token.category=="JJ" , Token.string=="possible"} |   
+    {Token.category=="JJ" , Token.string=="feasible"} |   
+    
+    
+    {Token.category=="JJ" , Token.string=="sufficient"} |   
+    {Token.category=="JJ" , Token.string=="adequate"} |   
+    {Token.category=="JJ" , Token.string=="enough"}              
+)
+
+
+Macro: THAT
+(
+    {Token.category=="IN" , Token.string=="that"}   
+)
+
+
+Macro: TO
+(
+    {Token.category=="TO" , Token.string=="to"}
+//    {Token.category=="VB"}       
+)
+
+
+Macro: COGV-ED
+(
+    {Token.category=="VBN" , Token.string=="anticipated"} |
+    {Token.category=="VBN" , Token.string=="expected"}  |
+    {Token.category=="VBN" , Token.string=="foreseen"}  |
+    {Token.category=="VBN" , Token.string=="predicted"} |
+    {Token.category=="VBN" , Token.string=="promised"}  |
+    
+    {Token.category=="VBN" , Token.string=="assumed"}  |
+    {Token.category=="VBN" , Token.string=="accepted"}  |
+    
+    {Token.category=="VBN" , Token.string=="believed"}  |
+
+    {Token.category=="VBN" , Token.string=="required"}  |
+    {Token.category=="VBN" , Token.string=="demanded"}  |
+    
+    {Token.category=="VBN" , Token.string=="known"}  |
+    {Token.category=="VBN" , Token.string=="recognized"}  |
+    {Token.category=="VBN" , Token.string=="realized"}  |
+    
+    {Token.category=="VBN" , Token.string=="recommended"}  |
+    {Token.category=="VBN" , Token.string=="proposed"}  |                            
+    {Token.category=="VBN" , Token.string=="suggested"}  |                            
+    
+    {Token.category=="VBN" , Token.string=="thought"}  |    
+    {Token.category=="VBN" , Token.string=="considered"}  |                            
+    {Token.category=="VBN" , Token.string=="intended"} 
+)
+
+
+Macro: VERB-01
+(
+    {Token.category=="VBZ" , Token.string=="seems"} |
+    {Token.category=="VBZ" , Token.string=="appears"} |
+    {Token.category=="VBZ" , Token.string=="looks"}            
+)
+
+
+
+/*
+    IT_IS_ADVERB_MODADJ
+*/
+Rule:Rule_A
 Priority: 99
 (
     (
-        (IT)
-        (IS)
-        (ADVERB)?
-        (MODALADJ)
+        (   ((IT) (IS)) |
+            (IT-S)
+        )
+        (NOT)?
+        (ADVERB-01)?
+        (MODALADJ)        
+        ((THAT) | (TO) | (FOR))         
     ) :pleonasm
 )
 -->
 {
-    gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");    
-    Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
+        gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");    
+        Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
 
-    gate.FeatureMap features = Factory.newFeatureMap();
-    features.put("firedBy","ruleA");
-    annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+        gate.FeatureMap features = Factory.newFeatureMap();
+        features.put("firedBy","ruleA");
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
 }
 
+
+
+
+/*
+    IT_IS_COGV-ED_THAT
+*/
+Rule:Rule_C
+Priority: 77
+(
+    (
+        (   ((IT) (IS)) |
+            (IT-S)
+        )
+        (NOT)?
+        (ADVERB-02)?        
+        (COGV-ED)
+        (THAT)
+    ) :pleonasm
+)
+-->
+{
+        gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");    
+        Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
+
+        gate.FeatureMap features = Factory.newFeatureMap();
+        features.put("firedBy","ruleC");
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+}
+
+
+/*
+    IT_[ADVERB-02]_VERB-01_[THAT,TO]_S
+*/
+Rule:Rule_D
+Priority: 66
+(
+    (
+        (IT)
+        ( (ADVERB-02) | (NOT) )?
+        (VERB-01)
+        ( (THAT) | (TO) )
+    ) :pleonasm
+)
+-->
+{
+        gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");    
+        Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
+
+        gate.FeatureMap features = Factory.newFeatureMap();
+        features.put("firedBy","ruleD");
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+}
+
+
+/*
+    IT_IS_[about]_time_[that,to]
+*/
+Rule:Rule_D
+Priority: 55
+(
+    (
+        (   ((IT) (IS)) |
+            (IT-S)
+        )
+    (TIME-MODIF)
+    {Token.category=="NN" , Token.string=="time"}
+    ( (THAT) | (TO) | (FOR))
+    ) :pleonasm
+)
+-->
+{
+        gate.AnnotationSet found_pleonasm = (gate.AnnotationSet)bindings.get("pleonasm");    
+        Annotation pleonasm = (Annotation)found_pleonasm.iterator().next();
+
+        gate.FeatureMap features = Factory.newFeatureMap();
+        features.put("firedBy","ruleD");
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+}
