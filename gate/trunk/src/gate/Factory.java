@@ -178,8 +178,13 @@ public abstract class Factory
 
     // if the features of the resource have not been explicitly set,
     // set them to the features of the resource data
-    if(res.getFeatures() == null || res.getFeatures().isEmpty())
-      res.setFeatures(resData.getFeatures());
+    if(res.getFeatures() == null || res.getFeatures().isEmpty()){
+      FeatureMap fm = newFeatureMap();
+      fm.putAll(resData.getFeatures());
+      res.setFeatures(fm);
+    }
+
+
 
     // initialise the resource
     if(DEBUG) Out.prln("Initialising resource " + res.toString());

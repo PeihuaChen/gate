@@ -333,7 +333,12 @@ public class GateIM implements InputMethod {
   public void activate() {
     enabled = true;
     if(currentLocale == null) setLocale(defaultLocale);
-    if(mapVisible) keyboardMap.addJob("SHOW");
+    if(mapVisible){
+      if(keyboardMap == null) keyboardMap = new KeyboardMap(this,
+                                                            currentHandler,
+                                                            currentState);
+      keyboardMap.addJob("SHOW");
+    }
   }
 
   /**
@@ -521,7 +526,7 @@ public class GateIM implements InputMethod {
    * Should the keyboard map be visible?
    *
    */
-  boolean mapVisible = false;
+  boolean mapVisible = true;
 
   /** The resource path to the input methods director
    */
