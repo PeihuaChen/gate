@@ -862,7 +862,9 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
                                                 boolean expanded,
                                                 boolean leaf,
                                                 int row){
-     ParameterDisjunction pDisj = (ParameterDisjunction)value;
+     ParameterDisjunction pDisj = (ParameterDisjunction)
+                                  ((DefaultMutableTreeNode)value).
+                                  getUserObject();
      combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
      combo.setSelectedItem(pDisj.getName());
      return combo;
@@ -880,6 +882,7 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
                                                boolean hasFocus,
                                                int row,
                                                int column){
+      //value = ((DefaultMutableTreeNode)value).getUserObject();
       if(value instanceof FeatureBearer){
         String name = (String)
                         ((FeatureBearer)value).getFeatures().get("gate.NAME");
@@ -922,8 +925,11 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
                                                  boolean isSelected,
                                                  int row,
                                                  int column){
-      type = ((ParameterDisjunction)mainTreeTable.getTree().getPathForRow(row).
-              getLastPathComponent()).getType();
+
+      type = ((ParameterDisjunction)
+              ((DefaultMutableTreeNode)
+              mainTreeTable.getTree().getPathForRow(row).getLastPathComponent())
+              .getUserObject()).getType();
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
       if(rData != null){
         //Gate type
@@ -1014,9 +1020,12 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
   }
 
   public void resourceUnloaded(CreoleEvent e) {
+    Resource res = e.getResource();
+    if(res.getFeatures().get("gate.HIDDEN") == null ||
+       ((String)res.getFeatures().get("gate.HIDDEN")).equalsIgnoreCase("true"))
+    return;
     updateActions();
     modulesTableModel.fireTableDataChanged();
-
   }
 
   public void datastoreOpened(CreoleEvent e) {

@@ -64,6 +64,9 @@ public class MainFrame extends JFrame
   JPopupMenu prsPopup;
   JPopupMenu dssPopup;
 
+  JMenu newLrMenu;
+  JMenu newPrMenu;
+
   JTree resourcesTree;
   JScrollPane resourcesTreeScroll;
   DefaultTreeModel resourcesTreeModel;
@@ -220,6 +223,10 @@ public class MainFrame extends JFrame
 
     //MENUS
     menuBar = new JMenuBar();
+
+    newLrMenu = new JMenu("New Language Resource");
+
+
 
     JMenu fileMenu = new JMenu("File");
     //fileMenu.add(new JGateMenuItem(newProjectAction));
