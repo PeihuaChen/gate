@@ -12,10 +12,8 @@ import gate.util.*;
 
 /** Nodes in AnnotationGraphs. Immutable.
   */
-public interface Node
+public interface Node extends IdBearer
 {
-  /** Id */
-  public Long getId();
 
   /** Offset (will be null when the node is not anchored) */
   public Long getOffset();
