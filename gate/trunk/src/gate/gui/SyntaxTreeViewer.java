@@ -969,7 +969,7 @@ public class SyntaxTreeViewer extends JPanel
   */
   private void setMenuCommands(JPopupMenu menu, String command) {
     for (int i = 0; i < menu.getComponentCount() ; i++) {
-      JMenuItem item = (JMenuItem) menu.getComponentAtIndex(i);
+      JMenuItem item = (JMenuItem) menu.getComponent(i);
       item.setActionCommand(command);
     }
 
@@ -1202,6 +1202,9 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.11  2000/10/24 10:10:18  valyt
+// Fixed the deprecation warning in gate/gui/SyntaxTreeViewer.java
+//
 // Revision 1.10  2000/10/18 13:26:47  hamish
 // Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
 //     parameter list fed to createResource.

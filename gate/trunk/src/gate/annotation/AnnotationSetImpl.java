@@ -592,7 +592,7 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
   protected HashMap annotsById;
 
   /** Maps annotation types (Strings) to AnnotationSets */
-  HashMap annotsByType = null;
+  Map annotsByType = null;
 
   /** Maps offsets (Longs) to nodes */
   RBTreeMap nodesByOffset;
@@ -600,10 +600,10 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
   /** Maps node ids (Integers) to AnnotationSets representing those
     * annotations that start from that node
     */
-  HashMap annotsByStartNode;
+  Map annotsByStartNode;
 
   /** Maps node ids (Integers) to AnnotationSets representing those
     * annotations that end at that node
     */
-  HashMap annotsByEndNode;
+  Map annotsByEndNode;
 } // AnnotationSetImpl
