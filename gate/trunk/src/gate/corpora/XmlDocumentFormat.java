@@ -143,6 +143,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     suffixes2mimeTypeMap.put("xml",mime);
     suffixes2mimeTypeMap.put("xhtm",mime);
     suffixes2mimeTypeMap.put("xhtml",mime);
+    // Register magic numbers for this mime type
+    magic2mimeTypeMap.put("<?xml",mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;

@@ -101,21 +101,30 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
                                         throws DocumentFormatException;
 
   /**
-    * Returns a MymeType having as input a fileSufix
-    * If the file sufix is not recognised then a null will be returned
+    * Returns a MimeType having as input a fileSufix.
+    * If the file sufix is <b>null</b> or not recognised then,
+    * <b>null</b> will be returned.
+    * @param fileSufix The file sufix associated with a recognisabe mime type.
+    * @return The MimeType associated with this file suffix.
     */
   static private MimeType  getMimeType(String fileSufix){
     // Get a mimeType string associated with this fileSuffix
-    // Eg: for html get "text/html", for xml get "text/xml"
+    // Eg: for html returns  MimeType("text/html"), for xml returns
+    // MimeType("text/xml")
     if(fileSufix == null) return null;
-    return (MimeType) suffixes2mimeTypeMap.get(fileSufix.toLowerCase());
+    return  (MimeType) suffixes2mimeTypeMap.get(fileSufix.toLowerCase());
   }//getMimeType
 
   /**
-    * Returns a MymeType having as input a url
+    * Returns a MymeType having as input a URL object. If the MimeType wasn't
+    * recognized it returns <b>null</b>.
+    * @param url The URL object from which the MimeType will be extracted
+    * @return A MimeType object for that URL, or <b>null</b> if the Mime Type is
+    * unknown.
     */
   static private MimeType  getMimeType(URL url) {
     String mimeTypeString = null;
+    String charsetFromWebServer = null;
     String contentType = null;
     InputStream is = null;
     MimeType mimeTypeFromWebServer = null;
@@ -133,8 +142,8 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
       is = url.openConnection().getInputStream();
       contentType = url.openConnection().getContentType();
     } catch (IOException e){
-      // Failed to get the mime type with te Web server.
-      // Let's try some other methods.
+      // Failed to get the content type with te Web server.
+      // Let's try some other methods like FileSuffix or magic numbers.
     }
     // If a content Type was returned by the server, try to get the mime Type
     // string
@@ -143,43 +152,193 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
     if (contentType != null){
       StringTokenizer st = new StringTokenizer(contentType, ";");
       // We assume that the first token is the mime type string...
-      // If this doesn't happen then we are wrong...
-      mimeTypeString     = st.nextToken().toLowerCase();
+      // If this doesn't happen then BAD LUCK :(( ...
+      if (st.hasMoreTokens())
+        mimeTypeString     = st.nextToken().toLowerCase();
+      // The next token it should be the CharSet
+      if (st.hasMoreTokens())
+        charsetFromWebServer = st.nextToken().toLowerCase();
+      if (charsetFromWebServer != null){
+        //We have something like : "charset=iso-8859-1" and let's extract the
+        // encoding.
+        st = new StringTokenizer(charsetFromWebServer, "=");
+        // Don't need this anymore
+        charsetFromWebServer = null;
+        // Discarding the first token which is : "charset"
+        if (st.hasMoreTokens())
+          st.nextToken().toUpperCase();
+        // Get the encoding : "ISO-8859-1"
+        if (st.hasMoreTokens())
+          charsetFromWebServer = st.nextToken().toUpperCase();
+      } // End if
     }// end if
-    // Return the corresponding mime type from the assocated MAP
+    // Return the corresponding MimeType with WebServer from the associated MAP
     mimeTypeFromWebServer = (MimeType)
                                 mimeString2mimeTypeMap.get(mimeTypeString);
     // Let's try a file suffix detection
-    // Get the file sufix from the URL
-    // See method definition for more details
+    // Get the file sufix from the URL.See method definition for more details
     fileSufix = getFileSufix(url);
     // Get the mime type based on the on file sufix
     mimeTypeFromFileSuffix = getMimeType(fileSufix);
 
     // Let's perform a magic numbers guess..
-    mimeTypeFromMagicNumbers = guessTypeUsingMagicNumbers(is);
-    // If all those mimeTypes are != null the the priority is the folowing:
-    // 1. mimeTypeFromFileSuffix
-    // 2. mimeTypeFromWebServer
-    // 3. mimeTypeFromMagicNumbers
-
-    if(mimeTypeFromFileSuffix != null)
-      return mimeTypeFromFileSuffix;
-    if(mimeTypeFromWebServer != null)
-      return mimeTypeFromWebServer;
-    if(mimeTypeFromMagicNumbers != null)
-      return mimeTypeFromMagicNumbers;
-    // If all of them are null then surrender.
-    return null;
+    mimeTypeFromMagicNumbers = guessTypeUsingMagicNumbers(is,
+                                                    charsetFromWebServer);
+    //All those types enter into a deciding system
+    return decideBetweenThreeMimeTypes( mimeTypeFromWebServer,
+                                        mimeTypeFromFileSuffix,
+                                        mimeTypeFromMagicNumbers);
   }//getMimeType
+
   /**
-    * This method tries to guess the mime Type using some magic numbers
+    * This method decides what mimeType is in majority
+    * @param aMimeTypeFromWebServer a MimeType
+    * @param aMimeTypeFromFileSuffix a MimeType
+    * @param aMimeTypeFromMagicNumbers a MimeType
+    * @return the MimeType which occurs most. If all are null, then returns
+    * <b>null</b>
     */
-  protected static MimeType guessTypeUsingMagicNumbers(InputStream
-                                                                aInputStream){
-    // Doesn't do anything right now.
-    return null;
+  protected static MimeType decideBetweenThreeMimeTypes(
+                                    MimeType aMimeTypeFromWebServer,
+                                    MimeType aMimeTypeFromFileSuffix,
+                                    MimeType aMimeTypeFromMagicNumbers){
+
+    // First a voting system
+    if (areEqual(aMimeTypeFromWebServer,aMimeTypeFromFileSuffix))
+      return aMimeTypeFromFileSuffix;
+    if (areEqual(aMimeTypeFromFileSuffix,aMimeTypeFromMagicNumbers))
+      return aMimeTypeFromFileSuffix;
+    if (areEqual(aMimeTypeFromWebServer,aMimeTypeFromMagicNumbers))
+      return aMimeTypeFromWebServer;
+
+    // 1 is the highest priority
+    if (aMimeTypeFromFileSuffix != null)
+      aMimeTypeFromFileSuffix.addParameter("Priority","1");
+    // 2 is the second priority
+    if (aMimeTypeFromWebServer != null)
+      aMimeTypeFromWebServer.addParameter("Priority","2");
+    // 3 is the third priority
+    if (aMimeTypeFromMagicNumbers != null)
+      aMimeTypeFromMagicNumbers.addParameter("Priority","3");
+
+    return decideBetweenTwoMimeTypes(
+                             decideBetweenTwoMimeTypes(aMimeTypeFromWebServer,
+                                                       aMimeTypeFromFileSuffix),
+                             aMimeTypeFromMagicNumbers);
+
+  }// decideBetweenThreeMimeTypes
+
+  /** Decide between two mimeTypes. The decistion is made on "Priority"
+    * parameter set into decideBetweenThreeMimeTypes method. If both mimeTypes
+    * doesn't have "Priority" paramether set, it will return one on them.
+    * @param aMimeType a MimeType object with "Prority" parameter set
+    * @param anotherMimeType a MimeType object with "Prority" parameter set
+    * @return One of the two mime types.
+    */
+  protected static MimeType decideBetweenTwoMimeTypes( MimeType aMimeType,
+                                                MimeType anotherMimeType){
+    if (aMimeType == null) return anotherMimeType;
+    if (anotherMimeType == null) return aMimeType;
+
+    int priority1 = 0;
+    int priority2 = 0;
+    // Both of them are not null
+    if (aMimeType.hasParameter("Priority"))
+      try{
+        priority1 =
+              new Integer(aMimeType.getParameterValue("Priority")).intValue();
+      }catch (NumberFormatException e){
+        return anotherMimeType;
+      }
+    if (anotherMimeType.hasParameter("Priority"))
+      try{
+        priority2 =
+          new Integer(anotherMimeType.getParameterValue("Priority")).intValue();
+      }catch (NumberFormatException e){
+        return aMimeType;
+      }
+
+    // The lower the number, the highest the priority
+    if (priority1 <= priority2)
+      return aMimeType;
+    else
+      return anotherMimeType;
+  }// decideBetweenTwoMimeTypes
+
+  /**
+    * Tests if two MimeType objects are equal.
+    * @return true only if boths MimeType objects are different than <b>null</b>
+    * and their Types and Subtypes are equals. The method is case sensitive.
+    */
+  protected static boolean areEqual( MimeType aMimeType,
+                                     MimeType anotherMimeType){
+    if (aMimeType == null || anotherMimeType == null)
+      return false;
+
+    if ( aMimeType.getType().equals(anotherMimeType.getType()) &&
+         aMimeType.getSubtype().equals(anotherMimeType.getSubtype())
+       ) return true;
+    else
+      return false;
+  }// are Equal
+
+  /**
+    * This method tries to guess the mime Type using some magic numbers.
+    * @param aInputStream a InputStream which has to be transformed into a
+    *        InputStreamReader
+    * @param anEncoding the encoding. If is null or unknown then a
+    * InputStreamReader with default encodings will be created.
+    * @return the mime type associated with magic numbers
+    */
+  protected static MimeType guessTypeUsingMagicNumbers(InputStream aInputStream,
+                                                            String anEncoding){
+
+    InputStreamReader reader = null;
+    if (anEncoding != null)
+      try{
+        reader = new InputStreamReader(aInputStream, anEncoding);
+      } catch (UnsupportedEncodingException e){
+        reader = null;
+      }
+    if (reader == null)
+      // Create a reader with the default encoding system
+      reader = new InputStreamReader(aInputStream);
+
+    // We have a input stream reader
+    return runMagicNumbers(reader);
   }//guessTypeUsingMagicNumbers
+
+  /** Performs magic over Gate Document */
+  protected static MimeType runMagicNumbers(InputStreamReader aReader){
+    // No reader, nothing to detect
+    if( aReader == null) return null;
+
+    // Prepare to run the magic stuff
+    String strBuffer = null;
+    int bufferSize = 2048;
+    int charReads = 0;
+    char[] cbuf = new char[bufferSize];
+
+    try {
+      charReads = aReader.read(cbuf,0,bufferSize);
+    } catch (IOException e){
+      return null;
+    }
+
+    strBuffer = new String(cbuf,0,charReads);
+
+    // Run the magic numbers test
+    Set magicSet = magic2mimeTypeMap.keySet();
+    Iterator iterator=magicSet.iterator();
+    while (iterator.hasNext()){
+      String magic = (String) iterator.next();
+      if (strBuffer.indexOf(magic) != -1)
+        return (MimeType) magic2mimeTypeMap.get(magic);
+    }// End while
+
+    // If this fails then surrender
+    return null;
+  }// runMagicNumbers
 
   /**
     * Return the fileSuffix or null if the url doesn't have a file suffix

@@ -35,6 +35,9 @@ public class EmailDocumentHandler implements StatusReporter{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  private String content = null;
+  private long documentSize = 0;
+
   /**
     * Constructor used in tests mostly
     */
@@ -74,6 +77,12 @@ public class EmailDocumentHandler implements StatusReporter{
                                         gate.util.InvalidOffsetException {
     // obtain a BufferedReader form the Gate document...
     BufferedReader gateDocumentReader = null;
+    // Get the string representing the content of the document
+    // It is used inside CreateAnnotation method
+    content = gateDocument.getContent().toString();
+    // Get the sieze of the Gate Document. For the same purpose.
+    documentSize = gateDocument.getContent().size().longValue();
+
     gateDocumentReader = new BufferedReader(new InputStreamReader(
               gateDocument.getSourceUrl().openConnection().getInputStream()));
     // for each line read from the gateDocumentReader do
@@ -279,13 +288,39 @@ public class EmailDocumentHandler implements StatusReporter{
   private void createAnnotation(String anAnnotationName, long anAnnotationStart,
                                  long anAnnotationEnd, FeatureMap aFeatureMap)
                                        throws gate.util.InvalidOffsetException{
-    if (aFeatureMap == null)
-        aFeatureMap = new SimpleFeatureMapImpl();
-    basicAS.add( new Long(anAnnotationStart),
-                 new Long(anAnnotationEnd),
-                 anAnnotationName.toLowerCase(),
-                 aFeatureMap);
+
+/*
+    while (Character.isWhitespace(content.charAt((int) anAnnotationStart)))
+      anAnnotationStart ++;
+
+//    System.out.println(content.charAt((int) anAnnotationEnd));
+    while (Character.isWhitespace(content.charAt((int) anAnnotationEnd)))
+      anAnnotationEnd --;
+
+    anAnnotationEnd ++;
+*/
+   if (canCreateAnnotation(anAnnotationStart,anAnnotationEnd,documentSize)){
+      if (aFeatureMap == null)
+          aFeatureMap = new SimpleFeatureMapImpl();
+      basicAS.add( new Long(anAnnotationStart),
+                   new Long(anAnnotationEnd),
+                   anAnnotationName.toLowerCase(),
+                   aFeatureMap);
+   }// End if
   }//createAnnotation
+  /**
+    * This method verifies if an Annotation can be created.
+    */
+  private boolean canCreateAnnotation(long start,
+                                      long end,
+                                      long gateDocumentSize){
+
+    if (start < 0 || end < 0 ) return false;
+    if (start > end ) return false;
+    if ((start > gateDocumentSize) || (end > gateDocumentSize)) return false;
+    return true;
+  }// canCreateAnnotation
+
   /**
     * Tests if the line begins an e-mail message
     * @param aTextLine a line from the file containing the e-mail messages
