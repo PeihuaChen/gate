@@ -227,6 +227,12 @@
       <PARAMETER NAME="tagASName" DEFAULT="Original markups" COMMENT="The name of the annotation set where the BODY tag is" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="textTagName" DEFAULT="BODY" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
     </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Document Reset PR</NAME>
+      <CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
+      <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+    </RESOURCE>
   </CREOLE>
   <!-- creole.xml for Controllers -->
   <CREOLE>
