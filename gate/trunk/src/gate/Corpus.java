@@ -19,8 +19,7 @@ import java.util.*;
 import gate.util.*;
 import gate.event.*;
 
-/** Corpora are sets of Document. They are ordered by lexicographic collation
-  * on Url. TIPSTER equivalent: Collection.
+/** Corpora are lists of Document. TIPSTER equivalent: Collection.
   */
 public interface Corpus extends LanguageResource, List, NameBearer {
 
