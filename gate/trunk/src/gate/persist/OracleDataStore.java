@@ -2892,18 +2892,23 @@ public class OracleDataStore extends JDBCDataStore {
         //3.2 get the security info for the corpus
         SecurityInfo si = getSecurityInfo(corp);
 
-        //3.3. adopt the doc with the sec info
+
         Document adoptedDoc = null;
         try {
+          //3.3. adopt the doc with the sec info
 //System.out.println("adopting ["+dbDoc.getName()+"] ...");
           //don't open a new transaction, since sync() already has opended one
           adoptedDoc = (Document)_adopt(dbDoc,si,false);
+
+          //3.4. add doc to corpus in DB
+          addDocumentToCorpus((Long)adoptedDoc.getLRPersistenceId(),
+                              (Long)corp.getLRPersistenceId());
         }
         catch(SecurityException se) {
           throw new PersistenceException(se);
         }
 
-        //3.4 add back to corpus the new DatabaseDocument
+        //3.5 add back to corpus the new DatabaseDocument
         corp.add(adoptedDoc);
       }
       else {
@@ -2911,6 +2916,12 @@ public class OracleDataStore extends JDBCDataStore {
         //opened one
         try {
           _sync(dbDoc,false);
+
+          //if the document is form the same DS but did not belong to the corpus add it now
+          //NOTE: if the document already belongs to the corpus then nothing will be changed
+          //in the DB
+          addDocumentToCorpus((Long)dbDoc.getLRPersistenceId(),
+                              (Long)corp.getLRPersistenceId());
         }
         catch(SecurityException se) {
           gate.util.Err.prln("document cannot be synced: ["+se.getMessage()+"]");
@@ -3121,6 +3132,59 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+  /**
+   *
+   */
+  private void addDocumentToCorpus(Long docID,Long corpID)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(docID);
+    Assert.assertNotNull(corpID);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(corpID)) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    if (false == canWriteLR(docID)) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    //3. database
+    CallableStatement cstmt = null;
+
+    try {
+      cstmt = this.jdbcConn.prepareCall("{ call "+
+                                  Gate.DB_OWNER+".persist.add_document_to_corpus(?,?) }");
+      cstmt.setLong(1,docID.longValue());
+      cstmt.setLong(2,corpID.longValue());
+      cstmt.execute();
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("invalid LR ID supplied ["+sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't add document to corpus : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+    }
+
+  }
 
 
 }
