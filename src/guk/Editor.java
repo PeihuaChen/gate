@@ -95,16 +95,16 @@ public class Editor extends JFrame {
     setLocation((screenSize.width - frameSize.width) / 2,
               (screenSize.height - frameSize.height) / 2);
     setVisible(true);
-  }
+  }// public Editor()
 
   /**
    * Component initialization
    */
-  private void jbInit() throws Exception   {
+  private void jbInit() throws Exception {
     Locale locale = new Locale("en", "GB");
     Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
     JMenuItem item;
-    if(availableLocales != null && availableLocales.length > 1){
+    if(availableLocales != null && availableLocales.length > 1) {
       jMenuIM = new JMenu("Input methods");
       ButtonGroup bg = new ButtonGroup();
       for(int i = 0; i < availableLocales.length; i++){
@@ -113,7 +113,7 @@ public class Editor extends JFrame {
         jMenuIM.add(item);
         bg.add(item);
       }
-    }
+    }// if
 
     undoManager.setLimit(1000);
     //OPEN ACTION
@@ -151,7 +151,7 @@ public class Editor extends JFrame {
                       );
             if(encoding == null) return;
             file = filer.getSelectedFile();
-            try{
+            try {
               InputStreamReader reader = new InputStreamReader(
                 new BufferedInputStream(new FileInputStream(file)),
                 (String)encoding);
@@ -159,7 +159,7 @@ public class Editor extends JFrame {
               textPane.replaceSelection("");
               textPane.read(reader, null);
               reader.close();
-            }catch(FileNotFoundException fnfe){
+            } catch(FileNotFoundException fnfe) {
               JOptionPane.showMessageDialog(frame,
                                             "Cannot find the file specified!",
                                             "Gate",
@@ -167,7 +167,7 @@ public class Editor extends JFrame {
               file = null;
               docChanged = false;
               updateTitle();
-            }catch(UnsupportedEncodingException usee){
+            } catch(UnsupportedEncodingException usee) {
               JOptionPane.showMessageDialog(frame,
                                             "Unsupported encoding!\n" +
                                             "Please choose another.",
@@ -176,7 +176,7 @@ public class Editor extends JFrame {
               file = null;
               docChanged = false;
               updateTitle();
-            }catch(IOException ioe){
+            } catch(IOException ioe) {
               JOptionPane.showMessageDialog(
                                   frame,
                                   "Input/Output error! (wrong encoding?)\n" +
@@ -191,18 +191,18 @@ public class Editor extends JFrame {
             updateTitle();
           }
         }
-      }
+      }// actionPerformed(ActionEvent e)
     };
     openAction.putValue(Action.SHORT_DESCRIPTION, "Open file...");
 
 
     //SAVE ACTION
     saveAction = new AbstractAction("Save", new ImageIcon(
-            guk.Editor.class.getResource("img/saveFile.gif"))){
+            guk.Editor.class.getResource("img/saveFile.gif"))) {
       public void actionPerformed(ActionEvent e){
         if(docChanged){
           if(file == null) saveAsAction.actionPerformed(null);
-          else{
+          else {
             //get the encoding
             Object[] encodings = { "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
                                    "ISO-8859-1", "US-ASCII" };
@@ -216,7 +216,7 @@ public class Editor extends JFrame {
                       encodings[0]
                       );
             if(encoding == null) return;
-            try{
+            try {
               OutputStreamWriter writer = new OutputStreamWriter(
                   new FileOutputStream(file), (String)encoding);
               writer.write(textPane.getText());
@@ -224,7 +224,7 @@ public class Editor extends JFrame {
               writer.close();
               docChanged = false;
               updateTitle();
-            }catch(UnsupportedEncodingException usee){
+            } catch(UnsupportedEncodingException usee) {
               JOptionPane.showMessageDialog(frame,
                                             "Unsupported encoding!\n" +
                                             "Please choose another.",
@@ -232,7 +232,7 @@ public class Editor extends JFrame {
                                             JOptionPane.ERROR_MESSAGE);
               docChanged = true;
               updateTitle();
-            }catch(IOException ioe){
+            } catch(IOException ioe) {
               JOptionPane.showMessageDialog(frame,
                                             "Input/Output error!\n" +
                                             "Please try again.",
@@ -241,16 +241,16 @@ public class Editor extends JFrame {
               docChanged = true;
               updateTitle();
             }
-          }
-        }
-      }
+          }// else
+        }// if
+      }// actionPerformed(ActionEvent e)
     };
     saveAction.putValue(Action.SHORT_DESCRIPTION, "Save...");
 
     //SAVE AS ACTION
     saveAsAction = new AbstractAction("Save as...", new ImageIcon(
             guk.Editor.class.getResource("img/saveFile.gif"))){
-      public void actionPerformed(ActionEvent e){
+      public void actionPerformed(ActionEvent e) {
           filer.setMultiSelectionEnabled(false);
           filer.setDialogTitle("Select file to save to...");
           filer.setSelectedFile(null);
@@ -274,7 +274,7 @@ public class Editor extends JFrame {
               saveAction.actionPerformed(null);
             }
           }
-      }
+      }// actionPerformed(ActionEvent e)
     };
     saveAsAction.putValue(Action.SHORT_DESCRIPTION, "Save as...");
 
@@ -299,7 +299,7 @@ public class Editor extends JFrame {
           file = null;
           updateTitle();
         }
-      }
+      }// actionPerformed(ActionEvent e)
     };
     closeAction.putValue(Action.SHORT_DESCRIPTION, "Close...");
 
@@ -322,7 +322,7 @@ public class Editor extends JFrame {
           frame.setVisible(false);
           frame.dispose();
         }
-      }
+      }// actionPerformed(ActionEvent e)
     };
     exitAction.putValue(Action.SHORT_DESCRIPTION, "Exit...");
 
@@ -374,8 +374,8 @@ public class Editor extends JFrame {
     pasteAction.putValue(Action.SHORT_DESCRIPTION, "Paste...");
 
     //attributesChangedAction
-    attributesChangedAction = new AbstractAction(){
-      public void actionPerformed(ActionEvent e){
+    attributesChangedAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
         int start = textPane.getSelectionStart();
         int end = textPane.getSelectionEnd();
         //change the selection
@@ -383,12 +383,13 @@ public class Editor extends JFrame {
         StyleConstants.setFontFamily(as,
                                     (String)fontsComboBox.getSelectedItem());
         StyleConstants.setFontSize(as,
-                                   Integer.parseInt((String)sizeComboBox.getSelectedItem()));
+                                   Integer.parseInt(
+                                   (String)sizeComboBox.getSelectedItem()));
         textPane.setCharacterAttributes(as, false);
         //restore selection
         textPane.setCaretPosition(start);
         textPane.moveCaretPosition(end);
-      }
+      }// actionPerformed(ActionEvent e)
     };
 
     textPane.addPropertyChangeListener("document", new PropertyChangeListener(){
@@ -418,12 +419,12 @@ public class Editor extends JFrame {
               docChanged = true;
               updateTitle();
             }
-          }
+          }// changeOccured()
         });
         //add the document UNDO listener
         undoManager.discardAllEdits();
         textPane.getDocument().addUndoableEditListener(undoManager);
-      }
+      }// propertyChange(PropertyChangeEvent evt)
     });
 
     fontsComboBox = new JComboBox(
@@ -434,7 +435,7 @@ public class Editor extends JFrame {
     fontsComboBox.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         attributesChangedAction.actionPerformed(null);
-      }
+      }// actionPerformed(ActionEvent e)
     });
 
 
@@ -443,15 +444,15 @@ public class Editor extends JFrame {
     sizeComboBox.setEditable(true);
     sizeComboBox.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
-        try{
+        try {
           Integer.parseInt((String)sizeComboBox.getSelectedItem());
           //fire the action
           attributesChangedAction.actionPerformed(null);
-        }catch(NumberFormatException nfe){
+        } catch(NumberFormatException nfe){
           //invalid input, go to default
           sizeComboBox.setSelectedIndex(3);
         }
-      }
+      }//actionPerformed(ActionEvent e)
     });
 
     //initialisation for the fonts and size combos
@@ -461,14 +462,14 @@ public class Editor extends JFrame {
                                   textPane.getInputAttributes())));
     //keep them updated
     textPane.addCaretListener(new CaretListener(){
-      public void caretUpdate(CaretEvent e){
+      public void caretUpdate(CaretEvent e) {
         if(e.getDot() == e.getMark()){
           fontsComboBox.setSelectedItem(StyleConstants.getFontFamily(
                                         textPane.getCharacterAttributes()));
           sizeComboBox.setSelectedItem(String.valueOf(StyleConstants.getFontSize(
                                         textPane.getCharacterAttributes())));
         }
-      }
+      }//caretUpdate(CaretEvent e)
     });
 
     fontsComboBox.setMaximumSize(new Dimension(150,25));
@@ -550,7 +551,7 @@ public class Editor extends JFrame {
     this.setJMenuBar(jMenuBar1);
     contentPane.add(jToolBar, BorderLayout.NORTH);
     contentPane.add(new JScrollPane(textPane), BorderLayout.CENTER);
-  }
+  }// jbInit()
 
   protected void updateTitle(){
     String title = "Gate Unicode Editor - ";
@@ -558,7 +559,7 @@ public class Editor extends JFrame {
     else title += "Untitled";
     if(docChanged) title += "*";
     frame.setTitle(title);
-  }
+  }// updateTitle()
 
   /**
    * Main method
@@ -575,7 +576,7 @@ public class Editor extends JFrame {
     for(int i = 0; i < ffs.length; i++) System.out.println(ffs[i]);
     */
     new Editor();
-  }
+  }// main
 
   /**
    * Help | About action performed
@@ -589,7 +590,7 @@ public class Editor extends JFrame {
                     (frmSize.height - dlgSize.height) / 2 + loc.y);
     dlg.setModal(true);
     dlg.show();
-  }
+  }// jMenuHelpAbout_actionPerformed(ActionEvent e)
 
   /**
    * Overridden so we can exit when window is closed
@@ -597,19 +598,20 @@ public class Editor extends JFrame {
   protected void processWindowEvent(WindowEvent e) {
     if (e.getID() == WindowEvent.WINDOW_CLOSING) {
       exitAction.actionPerformed(null);
-    }else{
+    } else {
       super.processWindowEvent(e);
     }
-  }
+  }// processWindowEvent(WindowEvent e)
 
   void jCheckBoxMenuItemKeyboardMap_stateChanged(ActionEvent e) {
     Object imObject = getInputContext().getInputMethodControlObject();
     if(imObject != null && imObject instanceof GateIM){
       ((GateIM)imObject).setMapVisible(jCheckBoxMenuItemKeyboardMap.getState());
     }else jCheckBoxMenuItemKeyboardMap.setState(false);
-  }
-}
-class LocaleSelectorMenuItem extends JRadioButtonMenuItem{
+  }// void jCheckBoxMenuItemKeyboardMap_stateChanged(ActionEvent e)
+}// class Editor extends JFrame
+
+class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
   public LocaleSelectorMenuItem(Locale locale, Frame pframe){
     super(locale.getDisplayName());
     this.frame = pframe;
@@ -620,8 +622,8 @@ class LocaleSelectorMenuItem extends JRadioButtonMenuItem{
         me.setSelected(frame.getInputContext().selectInputMethod(myLocale));
       }
     });
-  }
+  }// LocaleSelectorMenuItem(Locale locale, Frame pframe)
   Locale myLocale;
   JRadioButtonMenuItem me;
   Frame frame;
-}
+}// class LocaleSelectorMenuItem extends JRadioButtonMenuItem
