@@ -23,6 +23,8 @@ import gate.security.*;
 import gate.*;
 import java.awt.event.*;
 import gate.util.Out;
+import gate.util.Files;
+import java.io.*;
 
 
 public class UserGroupEditor extends JComponent {
@@ -42,12 +44,6 @@ public class UserGroupEditor extends JComponent {
   protected JPopupMenu userMenu = new JPopupMenu();
   protected JPopupMenu groupMenu = new JPopupMenu();
 
-  /** JDBC URL */
-  private static final String JDBC_URL =
-//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
-//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-            "jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
-
   public UserGroupEditor(AccessController ac, Session theSession) {
     try {
       jbInit();
@@ -66,10 +62,20 @@ public class UserGroupEditor extends JComponent {
   public static void main(String[] args) throws Exception {
     Gate.init();
 
+    String configFile = "security.txt";
+    boolean isGateResource = true;
+
+    if(args.length > 0) {
+      configFile = args[0];
+      isGateResource = false;
+    }
+
+    String urlString = readConfigFile(configFile, isGateResource);
+
     JFrame frame = new JFrame();
 
     AccessController ac = new AccessControllerImpl();
-    ac.open(JDBC_URL);
+    ac.open(urlString);
 
     Session mySession = null;
 
@@ -126,6 +132,35 @@ public class UserGroupEditor extends JComponent {
     frame.setSize(800, 600);
     frame.show();
 
+  }
+
+  public static String readConfigFile(String configFile, boolean isGateResource)
+                        throws IOException {
+
+
+    InputStream inputStream = null;
+    if (isGateResource)
+      inputStream = Files.getGateResourceAsStream(configFile);
+    else
+      inputStream = new FileInputStream(configFile);
+    if (inputStream == null) {
+      Out.prln("Cannot read URL from file: " + configFile);
+      System.exit(-1);
+    }
+    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+    String urlString = bufferedReader.readLine();
+    if (urlString == null) {
+      Out.prln("Cannot read URL from file: " + "security.txt");
+      System.exit(-1);
+    }
+
+    bufferedReader.close();
+    inputStreamReader.close();
+    inputStream.close();
+
+    return urlString;
   }
 
   public static Session login(AccessController ac, Component parent)
