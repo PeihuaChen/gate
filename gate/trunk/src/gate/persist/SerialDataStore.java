@@ -245,7 +245,6 @@ extends AbstractFeatureBearer implements DataStore {
 
     // create a File to store the resource in
     File resourceFile = new File(resourceTypeDirectory, lrPersistenceId);
-
     // dump the LR into the new File
     try {
       ObjectOutputStream oos = new ObjectOutputStream(
@@ -254,6 +253,7 @@ extends AbstractFeatureBearer implements DataStore {
       oos.writeObject(lr);
       oos.close();
     } catch(IOException e) {
+e.printStackTrace(System.err);
       throw new PersistenceException("Couldn't write to storage file: " + e);
     }
 
@@ -297,6 +297,7 @@ extends AbstractFeatureBearer implements DataStore {
       ObjectInputStream ois = new ObjectInputStream(fis);
       lr = (LanguageResource) ois.readObject();
       ois.close();
+      fis.close();
     } catch(IOException e) {
       throw
         new PersistenceException("Couldn't read file "+resourceFile+": "+e);

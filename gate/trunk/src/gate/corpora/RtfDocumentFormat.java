@@ -38,8 +38,7 @@ import org.w3c.www.mime.*;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
-public class RtfDocumentFormat extends TextualDocumentFormat
-{
+public class RtfDocumentFormat extends TextualDocumentFormat{
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -140,5 +139,4 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     setMimeType(mime);
     return this;
   }// init()
-
 }// class RtfDocumentFormat

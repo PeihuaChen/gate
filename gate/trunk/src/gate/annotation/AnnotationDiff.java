@@ -31,7 +31,8 @@ import gate.creole.*;
 
 /**
   * This class compare two annotation sets on annotation type given by the
-  * AnnotationSchema object. It also deals with graphic representation.
+  * AnnotationSchema object. It also deals with graphic representation of the
+  * result.
   */
 public class AnnotationDiff extends AbstractVisualResource{
 
@@ -117,22 +118,31 @@ public class AnnotationDiff extends AbstractVisualResource{
   public AnnotationDiff(){
   }//AnnotationDiff
 
-  /** Sets the annotation type needed to calculate the falsePossitive measure*/
+  /** Sets the annotation type needed to calculate the falsePossitive measure
+    * @param anAnnotType is the annotation type needed to calculate a special
+    *  mesure called falsePossitive. Usualy the value is "token", but it can be
+    *  any other string with the same semantic.
+    */
   public void setAnnotationTypeForFalsePositive(String anAnnotType){
     annotationTypeForFalsePositive = anAnnotType;
   }// setAnnotationTypeForFalsePositive
 
-  /** Gets the annotation type needed to calculate the falsePossitive measure*/
+  /** Gets the annotation type needed to calculate the falsePossitive measure
+    * @return annotation type needed to calculate a special
+    * mesure called falsePossitive.
+    */
   public String getAnnotationTypeForFalsePositive(){
     return annotationTypeForFalsePositive;
   }// getAnnotationTypeForFalsePositive
 
-  /** Sets the keyDocument */
+  /** Sets the keyDocument in AnnotDiff
+    * @param aKeyDocument The GATE document used as a key in annotation diff.
+    */
   public void setKeyDocument(Document aKeyDocument) {
     keyDocument = aKeyDocument;
   }// setKeyDocument
 
-  /** Gets the keyDocument */
+  /** @return the keyDocument used in AnnotDiff process */
   public Document getKeyDocument(){
     return keyDocument;
   }// getKeyDocument
@@ -141,17 +151,17 @@ public class AnnotationDiff extends AbstractVisualResource{
   // PRECISION methods
   ///////////////////////////////////////////////////
 
-  /** Gets the precisionStrict field*/
+  /** @return the precisionStrict field*/
   public double getPrecisionStrict(){
     return precisionStrict;
   }// getPrecisionStrict
 
-  /** Gets the precisionLenient field*/
+  /** @return the precisionLenient field*/
   public double getPrecisionLenient(){
     return precisionLenient;
   }// getPrecisionLenient
 
-  /** Gets the precisionAverage field*/
+  /** @return the precisionAverage field*/
   public double getPrecisionAverage(){
     return precisionAverage;
   }// getPrecisionAverage
@@ -160,17 +170,17 @@ public class AnnotationDiff extends AbstractVisualResource{
   // RECALL methods
   ///////////////////////////////////////////////////
 
-  /** Gets the recallStrict field*/
+  /** @return the recallStrict field*/
   public double getRecallStrict(){
     return recallStrict;
   }// getRecallStrict
 
-  /** Gets the recallLenient field*/
+  /** @return the recallLenient field*/
   public double getRecallLenient(){
     return recallLenient;
   }// getRecallLenient
 
-  /** Gets the recallAverage field*/
+  /** @return the recallAverage field*/
   public double getRecallAverage(){
     return recallAverage;
   }// getRecallAverage
@@ -179,49 +189,47 @@ public class AnnotationDiff extends AbstractVisualResource{
   // FALSE POSITIVE methods
   ///////////////////////////////////////////////////
 
-  /** Gets the falsePositiveStrict field*/
+  /** @return the falsePositiveStrict field*/
   public double getFalsePositiveStrict(){
     return falsePositiveStrict;
   }// getFalsePositiveStrict
 
-  /** Gets the falsePositiveLenient field*/
+  /** @return the falsePositiveLenient field*/
   public double getFalsePositiveLenient(){
     return falsePositiveLenient;
   }// getFalsePositiveLenient
 
-  /** Gets the falsePositiveAverage field*/
+  /** @return the falsePositiveAverage field*/
   public double getFalsePositiveAverage(){
     return falsePositiveAverage;
   }// getFalsePositive
 
   /**
-    * Sets the response Document(containing the annotation Set being compared)
+    * @param aResponseDocument the GATE response Document
+    * containing the annotation Set being compared against the annotation from
+    * the keyDocument.
     */
   public void setResponseDocument(Document aResponseDocument) {
     responseDocument = aResponseDocument;
   }//setResponseDocument
 
   /**
-    * Sets the annotation type being compared. This type is found in annotation
-    * Schema object as parameter.
+    * @param anAnnotationSchema the annotation type being compared.
+    * This type is found in annotationSchema object as field
+    * @see  gate.creole.AnnotationSchema#getAnnotationName().
     */
   public void setAnnotationSchema(AnnotationSchema anAnnotationSchema) {
     annotationSchema = anAnnotationSchema;
   } // setAnnotationType
 
-  /** Returns the annotation schema object */
+  /** @return the annotation schema object used in annotation diff process */
   public AnnotationSchema getAnnotationSchema(){
     return annotationSchema;
   }// AnnotationSchema
 
-  /** This method is required in VisualResource Interface*/
-  public JComponent getGUI(){
-   // return diffPanel;
-   return null;
-  }// getViewer
-
   /**
-    * This method does the diff, P&R calculation and so on.
+    * This method does the diff, Precision,Recall,FalsePositive
+    * calculation and so on.
     */
   public Resource init() throws ResourceInstantiationException {
 
@@ -303,9 +311,11 @@ public class AnnotationDiff extends AbstractVisualResource{
       printStructure(diffSet);
 
     return this;
-  } // init()
+  } //init()
 
-  /** This method aranges everything on this JPanel*/
+  /** This method creates the graphic components and aranges them on
+    * <b>this</b> JPanel
+    */
   protected void arangeAllComponents(){
     this.removeAll();
     // Setting the box layout for diffpanel
@@ -451,9 +461,9 @@ public class AnnotationDiff extends AbstractVisualResource{
 
     infoBox.add(box);
     this.add(infoBox);
-
   }//arangeAllComponents
 
+  /** Used internally for debugging */
   protected void printStructure(Set aDiffSet){
     Iterator iterator = aDiffSet.iterator();
     String leftAnnot = null;
@@ -470,24 +480,27 @@ public class AnnotationDiff extends AbstractVisualResource{
         rightAnnot = diffElem.getRightAnnotation().toString();
       Out.prln( leftAnnot + "|" + rightAnnot);
     }// end while
-
   }// printStructure
 
-  /** This method does the AnnotationSet diff and creates a set with
+  /** This method is the brain of the AnnotationSet diff and creates a set with
     * diffSetElement objects.
+    * @param aKeyAnnotList a list containing the annotations from key. If this
+    * param is <b>null</b> then the method will simply return and will not do a
+    * thing.
+    * @param aResponseAnnotList a list containing the annotation from response.
+    * If this param is <b>null</b> the method will return.
     */
-  protected void doDiff( java.util.List aKeyAnnotList,
-                     java.util.List aResponseAnnotList){
-
-    int responseSize = aResponseAnnotList.size();
+  protected void doDiff(java.util.List aKeyAnnotList,
+                        java.util.List aResponseAnnotList){
 
     // If one of the annotation sets is null then is no point in doing the diff.
     if (aKeyAnnotList == null || aResponseAnnotList == null)
       return;
 
+    int responseSize = aResponseAnnotList.size();
     diffSet = new HashSet();
     // Iterate throught all elements from keyList and find those in the response
-    // List which satisfies isCompatible() and isPartiallyCompatible() relations
+    // list which satisfies isCompatible() and isPartiallyCompatible() relations
     Iterator keyIterator = aKeyAnnotList.iterator();
     while(keyIterator.hasNext()){
       Annotation keyAnnot = (Annotation) keyIterator.next();
@@ -585,7 +598,7 @@ public class AnnotationDiff extends AbstractVisualResource{
       responseIter.remove();
     }// End while
 
-    // CALCULATE ALL (NLP) MEASURES like
+    // CALCULATE ALL (NLP) MEASURES like:
     // Precistion, Recall and FalsePositive
     int possible =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
                     typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
@@ -630,7 +643,11 @@ public class AnnotationDiff extends AbstractVisualResource{
     }// End if
   }// doDiff
 
-  /** Decide what type is the keyAnnotation (DEFAULT_TYPE or MISSING,) */
+  /** Decide what type is the keyAnnotation (DEFAULT_TYPE, MISSING or NULL_TYPE)
+   *  This method must be applied only on annotation from key set.
+   *  @param anAnnot is an annotation from the key set.
+   *  @return three possible value(DEFAULT_TYPE, MISSING or NULL_TYPE)
+   */
   private int detectKeyType(Annotation anAnnot){
     if (anAnnot == null) return NULL_TYPE;
 
@@ -650,12 +667,15 @@ public class AnnotationDiff extends AbstractVisualResource{
          return DEFAULT_TYPE;
       }// End if
     }// End while
-
     return MISSING_TYPE;
   }//detectKeyType
 
-  /** Decide what type is the responseAnnotation (PARTIALLY_CORRECT_TYPE
-    * or SPURIOUS,) */
+  /**  Decide what type is the responseAnnotation
+    *  (PARTIALLY_CORRECT_TYPE, SPURIOUS or NULL_TYPE)
+    *  This method must be applied only on annotation from response set.
+    *  @param anAnnot is an annotation from the key set.
+    *  @return three possible value(PARTIALLY_CORRECT_TYPE, SPURIOUS or NULL_TYPE)
+    */
   private int detectResponseType(Annotation anAnnot){
     if (anAnnot == null) return NULL_TYPE;
 
@@ -675,7 +695,6 @@ public class AnnotationDiff extends AbstractVisualResource{
          return PARTIALLY_CORRECT_TYPE;
       }// End if
     }// End while
-
     return SPURIOUS_TYPE;
   }//detectResponseType
 
@@ -696,18 +715,15 @@ public class AnnotationDiff extends AbstractVisualResource{
       typeCounter[aDiffSetElement.getLeftType()]++;
   }// addToDiffset
 
-
-
   /* ********************************************************************
    * INNER CLASS
    * ********************************************************************/
 
   /**
-   * A custom table model used to render a table containing the two annotation
-   * sets. The columns will be:
-   * (KEY) Type, Start, End, Features, empty column, (Response) Type,Start, End,
-   * Features
-   */
+    * A custom table model used to render a table containing the two annotation
+    * sets. The columns will be:
+    * (KEY) Type, Start, End, Features, empty column,(Response) Type,Start, End, Features
+    */
   protected class AnnotationDiffTableModel extends AbstractTableModel{
 
     /** Constructs an AnnotationDiffTableModel given a data Collection */
@@ -986,7 +1002,5 @@ public class AnnotationDiff extends AbstractVisualResource{
     public int getRightType(){
       return rightType;
     }// getRightType
-
   }// classs DiffSetElement
-
 } // class AnnotationDiff

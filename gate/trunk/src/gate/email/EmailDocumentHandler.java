@@ -43,7 +43,7 @@ public class EmailDocumentHandler{
     */
   public EmailDocumentHandler() {
     setUp();
-  }
+  }//EmailDocumentHandler
 
   /**
     * Constructor initialises some private fields
@@ -61,7 +61,7 @@ public class EmailDocumentHandler{
     markupElementsMap = aMarkupElementsMap;
     element2StringMap = anElement2StringMap;
     setUp();
-  }
+  }// EmailDocumentHandler
 
   /**
     * Reads the Gate Document line by line and does the folowing things:

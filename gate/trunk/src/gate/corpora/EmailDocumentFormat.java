@@ -73,8 +73,8 @@ public class EmailDocumentFormat extends TextualDocumentFormat
       public void statusChanged(String text) {
         // this is implemented in DocumentFormat.java and inherited here
         fireStatusChanged(text);
-      }
-    });
+      }//statusChanged(String text)
+    });//addStatusListener
 
     // call the method that creates annotations on the gate document
     try{
@@ -83,7 +83,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
       throw new DocumentFormatException("Couldn't create a buffered reader ",e);
     } catch (InvalidOffsetException e){
       throw new DocumentFormatException(e);
-    }
+    }// End try
   }//unpackMarkup(doc)
 
   /** Unpack the markup in the document. This converts markup from the
@@ -136,6 +136,5 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     setMimeType(mime);
     return this;
   }// init()
-
 }// class EmailDocumentFormat
 
