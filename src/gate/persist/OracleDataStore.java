@@ -644,7 +644,8 @@ public class OracleDataStore extends JDBCDataStore {
    *  updates the content of the document if it is binary or a long string
    *  (that does not fit into VARCHAR2)
    */
-  private void updateDocumentContent(Long docContentID,DocumentContent content)
+//  private void updateDocumentContent(Long docContentID,DocumentContent content)
+  private void updateDocumentContent(Long docID,DocumentContent content)
   throws PersistenceException {
 
     //1. get LOB locators from DB
@@ -652,14 +653,17 @@ public class OracleDataStore extends JDBCDataStore {
     ResultSet rs = null;
     CallableStatement cstmt = null;
     try {
-      String sql =  "select dc_content_type, " +
-                    "       dc_character_content, " +
-                    "       dc_binary_content " +
-                    "from "+gate.Gate.DB_OWNER+".t_doc_content " +
-                    "where  dc_id = ? " +
+      String sql =  "select dc.dc_id, "+
+                    "       dc.dc_content_type, " +
+                    "       dc.dc_character_content, " +
+                    "       dc.dc_binary_content " +
+                    "from "+gate.Gate.DB_OWNER+".t_doc_content dc , " +
+                            gate.Gate.DB_OWNER+".t_document doc " +
+                    "where  dc.dc_id = doc.doc_content_id " +
+                    "       and doc.doc_content_id = ? " +
                     "for update ";
       pstmt = this.jdbcConn.prepareStatement(sql);
-      pstmt.setLong(1,docContentID.longValue());
+      pstmt.setLong(1,docID.longValue());
       rs = pstmt.executeQuery();
 
       //rs = pstmt.getResultSet();
@@ -667,6 +671,7 @@ public class OracleDataStore extends JDBCDataStore {
       rs.next();
       //important: read the objects in the order they appear in
       //the ResultSet, otherwise data may be lost
+      Long contentID = new Long(rs.getLong("dc_id"));
       long contentType = rs.getLong("DC_CONTENT_TYPE");
       Clob clob = (Clob)rs.getClob("dc_character_content");
       Blob blob = (Blob)rs.getBlob("dc_binary_content");
@@ -683,7 +688,7 @@ public class OracleDataStore extends JDBCDataStore {
 
       //3. update content type
       cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.change_content_type(?,?) }");
-      cstmt.setLong(1,docContentID.longValue());
+      cstmt.setLong(1,contentID.longValue());
       cstmt.setLong(2,newContentType);
       cstmt.execute();
     }
@@ -764,7 +769,8 @@ public class OracleDataStore extends JDBCDataStore {
 
     try {
       stmt = this.jdbcConn.prepareCall(
-              "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
+//              "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
+                "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
       //do we have doc encoding?
@@ -801,11 +807,11 @@ public class OracleDataStore extends JDBCDataStore {
 
       //results
       stmt.registerOutParameter(8,java.sql.Types.BIGINT);
-      stmt.registerOutParameter(9,java.sql.Types.BIGINT);
+//      stmt.registerOutParameter(9,java.sql.Types.BIGINT);
 
       stmt.execute();
       docID = new Long(stmt.getLong(8));
-      docContentID = new Long(stmt.getLong(9));
+//      docContentID = new Long(stmt.getLong(9));
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't create document [step 4] in DB: ["+ sqle.getMessage()+"]");
@@ -818,7 +824,8 @@ public class OracleDataStore extends JDBCDataStore {
 
     //do we have content at all?
     if (docContent.size().longValue() > 0) {
-      updateDocumentContent(docContentID,docContent);
+//      updateDocumentContent(docContentID,docContent);
+      updateDocumentContent(docID,docContent);
     }
 
     //6. insert annotations, etc
