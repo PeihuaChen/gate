@@ -390,6 +390,45 @@ public class DocumentEditor extends AbstractVisualResource{
               nData.setVisible(! nData.getVisible());
               stylesTree.repaint(cellRect);
 //              stylesTreeModel.nodeChanged(node);
+            // Check if the click indicates a shortcut to create an annotation
+            }else if( e.getClickCount() == 1 &&
+                      clickedComp instanceof JTextComponent &&
+                      isTextSelected()){
+              // Here create an annotation with the selected text into the
+              // target annotation set
+
+              if(!editable) return;
+              Long startOffset = new Long(textPane.getSelectionStart());
+              Long endOffset = new Long(textPane.getSelectionEnd());
+              TreePath treePath = stylesTree.getSelectionPath();
+              TypeData typeData = (TypeData)((DefaultMutableTreeNode)
+                              treePath.getLastPathComponent()).getUserObject();
+              String setName = typeData.getSet();
+              if(typeData.getType() == null){
+                // The set is empty. It will not create an annotation.
+                // Loose the selection and return
+                textPane.setSelectionStart(startOffset.intValue());
+                textPane.setSelectionEnd(startOffset.intValue());
+                return;
+              }// End if
+              try{
+                if ("Default".equals(setName)){
+                  document.getAnnotations().add(startOffset,
+                                                endOffset,
+                                                typeData.getType(),
+                                                Factory.newFeatureMap());
+                }else{
+                  document.getAnnotations(setName).add( startOffset,
+                                                        endOffset,
+                                                        typeData.getType(),
+                                                       Factory.newFeatureMap());
+                }// End if
+              } catch(gate.util.InvalidOffsetException ioe){
+                throw new GateRuntimeException(ioe.getMessage());
+              }// End try
+              // Loose the selection
+              textPane.setSelectionStart(startOffset.intValue());
+              textPane.setSelectionEnd(startOffset.intValue());
             }else if(clickedComp instanceof JTextComponent &&
                      e.getClickCount() == 2){
               if(styleChooser == null){
@@ -845,6 +884,10 @@ public class DocumentEditor extends AbstractVisualResource{
   }//protected void updateTreeSize()
 
 
+  /** This method returns true if a text is selected in the textPane*/
+  private boolean isTextSelected(){
+    return !(textPane.getSelectionStart()==textPane.getSelectionEnd());
+  }// isTextSelected()
   /**
    * Gets all the {@link gate.creole.AnnotationSchema} objects currently
    * loaded in the system.
