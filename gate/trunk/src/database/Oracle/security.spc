@@ -23,6 +23,9 @@ create or replace package security is
   
   ADMIN_USER_ID constant number := 0;
   ADMIN_GROUP_ID constant number := 0;
+
+  READ_ACCESS constant   number := 0;
+  WRITE_ACCESS constant number := 1;
     
   /* exceptions */
 
