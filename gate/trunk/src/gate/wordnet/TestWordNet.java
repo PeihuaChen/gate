@@ -152,5 +152,9 @@ System.out.println(iSet);
   }
 */
 
+  /** Test suite routine for the test runner */
+  public static Test suite() {
+    return new TestSuite(TestWordNet.class);
+  } // suite
 
 }
