@@ -200,6 +200,7 @@ public class TestGate {
     // init, after printing them out, because the junit gui doesn't
     // say anything more informative than "can't invoke suite" if there's
     // an exception here...
+
     try {
       //get the config if set through a property
       String configFile = System.getProperty("gate.config");
