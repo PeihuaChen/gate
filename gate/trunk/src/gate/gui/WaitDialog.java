@@ -7,8 +7,10 @@ import javax.swing.border.*;
 public class WaitDialog extends JWindow implements Runnable{
   Box centerBox;
 
-  public WaitDialog(Frame frame, String title, boolean modal) {
+  public WaitDialog(Frame frame, String title) {
     super(frame);
+    this.icon = new ImageIcon(ClassLoader.getSystemResource(
+                "gate/resources/img/wait.gif"));
     this.frame = frame;
     try  {
       jbInit();
@@ -19,7 +21,7 @@ public class WaitDialog extends JWindow implements Runnable{
     }
   }
 
-  public synchronized void showDialog(String[] texts, boolean modal){
+  public synchronized void showDialog(String[] texts){
     centerBox.removeAll();
     for(int i =0; i < texts.length; i++){
       centerBox.add(new JLabel(texts[i]));
@@ -37,7 +39,7 @@ public class WaitDialog extends JWindow implements Runnable{
     show();
   }
 
-  public synchronized void showDialog(Component[] components, boolean modal){
+  public synchronized void showDialog(Component[] components){
     centerBox.removeAll();
     for(int i =0; i < components.length; i++){
       centerBox.add(components[i]);
@@ -58,14 +60,10 @@ public class WaitDialog extends JWindow implements Runnable{
     JPanel centerPanel = new JPanel();
     centerBox = Box.createVerticalBox();
     centerPanel.setLayout(borderLayout1);
-//    centerPanel.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
-//    centerPanel.setBorder(new CompoundBorder(new LineBorder(Color.darkGray, 2),
-//                                    new SoftBevelBorder(BevelBorder.LOWERED)));
     centerPanel.setBorder(new LineBorder(Color.darkGray, 2));
     centerPanel.setBackground(Color.white);
     centerBox.setBackground(Color.white);
-    picture = new JLabel(new ImageIcon(ClassLoader.getSystemResource(
-                    "muse/resources/wait.gif")));
+    picture = new JLabel(icon);
     centerPanel.add(centerBox, BorderLayout.CENTER);
     centerPanel.add(picture, BorderLayout.WEST);
     centerPanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);
@@ -81,7 +79,12 @@ public class WaitDialog extends JWindow implements Runnable{
   public void run(){
     while(!stop){
       try{
-        Thread.sleep(200);
+        Thread.sleep(300);
+        centerBox.validate();
+        pack();
+        Point loc = frame.getLocation();
+        setLocation(loc.x + (frame.getSize().width - getSize().width) / 2 ,
+                    loc.y + (frame.getSize().height - getSize().height) /2);
         picture.paintImmediately(picture.getVisibleRect());
       }catch(InterruptedException ie){}
     }
@@ -92,4 +95,5 @@ public class WaitDialog extends JWindow implements Runnable{
   BorderLayout borderLayout1 = new BorderLayout();
   Frame frame;
   JLabel picture;
+  Icon icon;
 }

@@ -63,11 +63,6 @@ public class DocumentViewer extends JPanel {
       }
     });
     this.addComponentListener(new java.awt.event.ComponentAdapter() {
-/*
-      public void componentShown(ComponentEvent e) {
-        this_componentShown(e);
-      }
-*/
       public void componentResized(ComponentEvent e) {
         this_componentResized(e);
       }
@@ -87,7 +82,6 @@ public class DocumentViewer extends JPanel {
     JLabel buttonLabel = new JLabel("Clear all");
     buttonLabel.setBackground(Color.black);
     buttonLabel.setForeground(Color.white);
-//    buttonLabel.setBorder(LineBorder.createGrayLineBorder());
     buttonLabel.setOpaque(true);
     buttonLabel.setHorizontalAlignment(SwingConstants.CENTER);
     clearButton.add(buttonLabel,SwingConstants.CENTER);
@@ -180,6 +174,19 @@ public class DocumentViewer extends JPanel {
     this.add(centerSplit, BorderLayout.CENTER);
   }
 
+  public void setDocument(Document doc){
+    this.document = doc;
+  }
+  
+  public void documentHasChanged(){
+    try  {
+      jbInit();
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+    this_componentResized(null);
+  }
 
   void typeButtonPressed(String type, Color col){
     if(type.equals("")){
@@ -215,7 +222,7 @@ public class DocumentViewer extends JPanel {
     if(textPane.getHeight() + 10 > centerSplit.getHeight() /2)
       centerSplit.setDividerLocation(0.5);
     else centerSplit.setDividerLocation(textPane.getHeight() + 10);
-
+    validate();
   }
 
   class ButtonComparator implements Comparator{
