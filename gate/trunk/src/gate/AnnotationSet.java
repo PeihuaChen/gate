@@ -13,7 +13,8 @@ import gate.util.*;
 /** Annotation sets */
 public interface AnnotationSet extends Set
 {
-  public Integer add(Long start, Long end, String type, FeatureMap features);
+  public Integer add(Long start, Long end, String type, FeatureMap features)
+    throws InvalidOffsetException;
   // public Integer add(Node startNode, Node endNode, String type, FeatureMap features);
   public boolean add(Object o);
 
