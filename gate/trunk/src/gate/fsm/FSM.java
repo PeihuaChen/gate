@@ -18,6 +18,7 @@ package gate.fsm;
 import java.util.*;
 
 import gate.jape.*;
+import gate.util.*;
 
 /**
   * This class implements a standard Finite State Machine.
@@ -271,16 +272,17 @@ public class FSM implements JapeConstants {
 
     // find out if the new state is a final one
     Iterator innerStatesIter = currentDState.iterator();
-    RightHandSide action;
+    RightHandSide action = null;
 
     while(innerStatesIter.hasNext()){
       State currentInnerState = (State)innerStatesIter.next();
       if(currentInnerState.isFinal()){
+if(action != null) Out.prln("ambiguity");
         action = (RightHandSide)currentInnerState.getAction();
         initialState.setAction(action);
         initialState.setFileIndex(currentInnerState.getFileIndex());
         initialState.setPriority(currentInnerState.getPriority());
-        break;
+//        break;
       }
     }
 
@@ -313,11 +315,13 @@ public class FSM implements JapeConstants {
                 State currentInnerState = (State)innerStatesIter.next();
 
                 if(currentInnerState.isFinal()) {
+if(newState.getAction() != null) Out.prln("ambiguity");
+
                   newState.setAction(
                           (RightHandSide)currentInnerState.getAction());
                   newState.setFileIndex(currentInnerState.getFileIndex());
                   newState.setPriority(currentInnerState.getPriority());
-                  break;
+//                  break;
                 }
               }
             }// if(!dStates.contains(newDState))
