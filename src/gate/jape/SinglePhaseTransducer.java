@@ -364,7 +364,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
             accIter = conflicts.iterator();
             int i = 0;
             while(accIter.hasNext()){
-              Out.prln(i++ + ")" + accIter.next().toString());
+              Out.prln(i++ + ") " + accIter.next().toString());
             }
           }
         }
