@@ -11,7 +11,7 @@
 			  <enumeration value="phone"/>
 			  <enumeration value="ip"/>
 			  <enumeration value="street"/>
-			  <enumeration value="postal code"/>
+			  <enumeration value="postcode"/>
 			  <enumeration value="country"/>
 			  <enumeration value="complete"/>			  			  			  			  			  			  
 		    </restriction>
