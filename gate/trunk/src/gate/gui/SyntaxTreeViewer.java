@@ -13,6 +13,7 @@ import java.util.*;
 import java.beans.*;
 import java.net.URL;
 
+
 //AWT imports - layouts and events
 import java.awt.*;
 import java.awt.event.*;
@@ -25,7 +26,8 @@ import javax.swing.event.PopupMenuEvent;
 //GATE imports
 import gate.util.*;
 import gate.*;
-import java.net.URL;
+
+import guk.uekit.*;
 
 /**
 The SyntaxTreeViewer works by getting an annotation set of all annotations that
@@ -1188,6 +1190,9 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.7  2000/10/10 09:49:57  valyt
+// Fixed the Annotation test
+//
 // Revision 1.6  2000/10/02 12:34:06  valyt
 // Added the UnicodeEnabled switch on gate.util.Tools
 //
