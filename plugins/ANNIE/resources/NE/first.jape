@@ -16,19 +16,17 @@ Macro: SPACE
 // control space
 
 ( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
-
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "2"})?) |
-
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-| 
-({SpaceToken.kind == control, SpaceToken.length == "2"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-
+ ({SpaceToken.kind == space}
+  ({SpaceToken.kind == control})?
+  ({SpaceToken.kind == control})?
+ )
+|
+ ({SpaceToken.kind == control}
+  ({SpaceToken.kind == control})?
+  ({SpaceToken.kind == space})?
+ )
 )
+
 ///////////////////////////////////////////////////////////////
 
 
