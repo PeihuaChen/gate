@@ -12,8 +12,8 @@
 # Empty lines are ignored.
 
 #A rule has a left hand side (LHS) and a right hand side (RHS);
-#the RHS is a regular expression tha has to be matched on the input
-#the LHS describes the annotations to be added to the AnnotationSet.
+#the LHS is a regular expression tha has to be matched on the input
+#the RHS describes the annotations to be added to the AnnotationSet.
 #LHS is separated from the RHS by '>'
 #LHS knows about the following operators:
 #	+ (1..n)
@@ -66,7 +66,7 @@
 "UPPERCASE_LETTER" (DASH_PUNCTUATION)* (UPPERCASE_LETTER|DASH_PUNCTUATION)+ > Token;orth=allCaps;kind=word;
 "LOWERCASE_LETTER" (LOWERCASE_LETTER|DASH_PUNCTUATION)* > Token;orth=lowercase;kind=word;
 
-// MixedCaps is any mixture of caps and small letters that doesn't 
+// MixedCaps is any mixture of caps and small letters that doesn't
 // fit in the preceding categories
 
 ("LOWERCASE_LETTER" "LOWERCASE_LETTER"+"UPPERCASE_LETTER"+ \
