@@ -1,4 +1,4 @@
-package gate.util;
+package gate.gui;
 
 /** This interface describes objects that can register themselves as listeners
   * to ProcessProgressReporters.

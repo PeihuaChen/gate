@@ -1,4 +1,4 @@
-package gate.util;
+package gate.gui;
 
 /** This interface describes a processing resource that can report on the
   * progress of its processing activity.
