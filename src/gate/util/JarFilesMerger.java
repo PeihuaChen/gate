@@ -10,39 +10,41 @@ package gate.util;
 import java.util.*;
 import java.util.jar.*;
 import java.io.*;
-/**
-  *This class is used to merge a set of Jar/Zip Files in a Jar File
-  *It is ignored the manifest.
-    */
+
+/** This class is used to merge a set of Jar/Zip Files in a Jar File
+  * It is ignored the manifest.
+  */
 public class JarFilesMerger {
 
-  /**
-    * This method takes the content of all jar/zip files from the set
-    *jarFileNames and put them in a file with the name outputFileName.
-    *If the jar entry is manifest then this information isn't added.
-    *@param jarFileNames is a set of names of files (jar/zip)
-    *@param outputFileName is the name of the file which contains all the
-    *classes of jarFilesNames
+  /** This method takes the content of all jar/zip files from the set
+    * jarFileNames and put them in a file with the name outputFileName.
+    * If the jar entry is manifest then this information isn't added.
+    * @param jarFileNames is a set of names of files (jar/zip)
+    * @param outputFileName is the name of the file which contains all the
+    * classes of jarFilesNames
     */
   public void merge(Set jarFileNames, String outputFileName) {
-  Iterator iter;
-  String jarFileName;
-  Enumeration enum;
-  FileOutputStream outStream = null;
-  JarOutputStream  outJar = null;
-  byte buffer[] = new byte[1000];
-  try{
-    outStream = new FileOutputStream(outputFileName);
-  }catch(FileNotFoundException fnfe){
-    fnfe.printStackTrace(System.err);
-    System.exit(1);
-  }
-  try{
-    outJar = new JarOutputStream(outStream);
-  }catch(IOException ioe){
-    ioe.printStackTrace(System.err);
-    System.exit(1);
-  }
+    Iterator iter;
+    String jarFileName;
+    Enumeration enum;
+    FileOutputStream outStream = null;
+    JarOutputStream  outJar = null;
+    byte buffer[] = new byte[1000];
+
+    // open the output jar file
+    try {
+      outStream = new FileOutputStream(outputFileName);
+    } catch(FileNotFoundException fnfe) {
+      fnfe.printStackTrace(System.err);
+      System.exit(1);
+    }
+    try {
+      outJar = new JarOutputStream(outStream);
+    } catch(IOException ioe) {
+      ioe.printStackTrace(System.err);
+      System.exit(1);
+    }
+
     iter=jarFileNames.iterator();
     while(iter.hasNext()) {
       jarFileName = (String) iter.next();
@@ -90,7 +92,7 @@ public class JarFilesMerger {
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
     }
- }
+ } //
 
   /**
     *args[0] is the final jar file and the other are the set of jar file names
@@ -99,18 +101,19 @@ public class JarFilesMerger {
     *files
     */
   public static void main(String[] args){
-   if(args.length < 2){
-    System.err.println("No input files");
-    System.exit(1);
-   }
-   {
-     JarFilesMerger jarFiles = new JarFilesMerger();
-     Set filesToMerge = new HashSet();
-     for (int i=2;i<=args.length;i++)
-     {
-       filesToMerge.add(args[i-1]);
-     }
-     jarFiles.merge(filesToMerge, args[0]);
-   }
-  }
-}
+    if(args.length < 2){
+      System.err.println("No input files");
+      System.exit(1);
+    }
+    {
+      JarFilesMerger jarFiles = new JarFilesMerger();
+      Set filesToMerge = new HashSet();
+      for (int i=2;i<=args.length;i++)
+      {
+        filesToMerge.add(args[i-1]);
+      }
+      jarFiles.merge(filesToMerge, args[0]);
+    }
+  } // main
+
+} // class name
