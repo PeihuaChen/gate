@@ -50,6 +50,9 @@ public class Profiler {
   private PrintStream m_out;
   private boolean m_enabled = true;
   private boolean m_garbageCollection = true;
+  /** Indicates whether just to return the string dumps (false) or also print them
+   to the std out (true)*/
+  private boolean m_doPrintToStdOut = true;
 
   // keeps the sum of the time spend on a category of tasks
   // the catoegries are identified via strings which are used as
@@ -145,10 +148,11 @@ public class Profiler {
   /**
    * Inialises the profiler for a new run
    */
-  public void initRun(String runDescription) {
-    m_out.println("-----------------------------------------------");
-    m_out.println("New profiler run: " + runDescription);
-    m_out.println("-----------------------------------------------");
+  public String initRun(String runDescription) {
+    StringBuffer buf = new StringBuffer();
+    buf.append("-----------------------------------------------\n");
+    buf.append("New profiler run: " + runDescription);
+    buf.append("\n-----------------------------------------------\n");
 
     m_maxMemory=0;
     m_currMemory=0;
@@ -160,6 +164,10 @@ public class Profiler {
 
     m_categorySums = new Hashtable();
     m_categoryLasts = new Hashtable();
+    if ( m_doPrintToStdOut ) {
+      m_out.print(buf.toString());
+    }
+    return buf.toString();
   } // initRun
 
   /**
@@ -167,8 +175,8 @@ public class Profiler {
    * and memory usage in absolute terms as well as compared to the previous
    * execution point
    */
-  public void checkPoint(String execPointDescr) {
-    checkPoint(execPointDescr, new String[0], true, true, true);
+  public String checkPoint(String execPointDescr) {
+    return checkPoint(execPointDescr, new String[0], true, true, true);
   }
 
   /**
@@ -178,11 +186,11 @@ public class Profiler {
    * the execution point to be displayed; flag determining whether the
    * statistics to be shown
    */
-  public void checkPoint(String execPointDescr, String categories[],
+  public String checkPoint(String execPointDescr, String categories[],
       boolean showDescr, boolean showStats, boolean memoryCheck)
   {
     if (!m_enabled)
-      return;
+      return "";
 
     long currTime = System.currentTimeMillis() - m_startTime;
     m_lastDuration = currTime - m_lastCheckTime;
@@ -211,7 +219,7 @@ public class Profiler {
     m_profilerTime += (m_lastCheckTime - currTime);
 
     checkCategories(categories);
-    showResults(execPointDescr, showDescr, showStats);
+    return showResults(execPointDescr, showDescr, showStats);
   } // checkPoint
 
   private void checkCategories(String categs[]) {
@@ -229,7 +237,7 @@ public class Profiler {
     } // for
   } // checkCategories
 
-  private void showResults(String execPointDescr, boolean showDescr,
+  private String showResults(String execPointDescr, boolean showDescr,
       boolean showStats)
   {
     StringBuffer buff = new StringBuffer(500);
@@ -256,9 +264,10 @@ public class Profiler {
 //            buff.append(printTime(m_lastCheckTime));
     }
 
-    if (buff.length() > 0) {
+    if (buff.length() > 0 && m_doPrintToStdOut) {
         m_out.println(buff.toString());
     }
+    return buff.toString();
   } // showResults
 
   /**
@@ -349,4 +358,12 @@ public class Profiler {
         printSpeed(time, volume, whateverMeasure));
   } // printCategAvg
 
+  /**
+   * Sets the profiler to print (or not) to the standard output.
+   * The default behaviour is - print to std out.
+   * @param doPrint whether or not to print to std out.
+   */
+  public void printToSystemOut(boolean doPrint){
+    m_doPrintToStdOut = doPrint;
+  } // printToSystemOut(doPrint);
 } // Profiler
