@@ -249,6 +249,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             t.setDebugMode(true);
           else t.setDebugMode(false);
         }
+        else if(optionNameTok.image.equalsIgnoreCase("matchGroup")) {
+          if(optionValueTok.image.equalsIgnoreCase("true") ||
+             optionValueTok.image.equalsIgnoreCase("yes") ||
+             optionValueTok.image.equalsIgnoreCase("y"))
+            t.setMatchGroupMode(true);
+          else t.setMatchGroupMode(false);
+        }
       }
       break;
     default:
