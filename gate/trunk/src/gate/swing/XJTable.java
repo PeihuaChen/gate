@@ -200,7 +200,7 @@ public class XJTable extends JTable{
         targetToSource[i] = i;
       }
       sourceModel.addTableModelListener(this);
-      if(isSortable()) setSortedColumn(0);
+      if(isSortable() && sortedColumn == -1) setSortedColumn(0);
     }
     
     /**
