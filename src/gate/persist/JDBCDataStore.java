@@ -1579,8 +1579,101 @@ System.out.println("trans failed ...rollback");
   }
 
   /** helper for sync() - saves a Corpus in the database */
-  protected abstract void syncCorpus(Corpus corp)
-    throws PersistenceException,SecurityException;
+  protected void syncCorpus(Corpus corp)
+    throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(corp);
+    Assert.assertTrue(corp instanceof DatabaseCorpusImpl);
+    Assert.assertEquals(this,corp.getDataStore());
+    Assert.assertNotNull(corp.getLRPersistenceId());
+
+    EventAwareCorpus dbCorpus = (EventAwareCorpus)corp;
+
+    //1. sync the corpus name?
+    if (dbCorpus.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
+      _syncLR(corp);
+    }
+
+    //2. sync the corpus features?
+    if (dbCorpus.isResourceChanged(EventAwareLanguageResource.RES_FEATURES)) {
+      _syncFeatures(corp);
+    }
+
+    //2.5 get removed documents and detach (not remove) them from the corpus in the
+    //database
+    List removedDocLRIDs = dbCorpus.getRemovedDocuments();
+    if (removedDocLRIDs.size() > 0) {
+      _syncRemovedDocumentsFromCorpus(removedDocLRIDs,(Long)corp.getLRPersistenceId());
+    }
+
+    //3. get all documents
+    //--Iterator it = corp.iterator();
+    Iterator it = dbCorpus.getLoadedDocuments().iterator();
+
+    while (it.hasNext()) {
+      Document dbDoc = (Document)it.next();
+      //note - document may be NULL which means it was not loaded (load on demand)
+      //just ignore it then
+      if (null == dbDoc) {
+        continue;
+      }
+
+      //adopt/sync?
+      if (null == dbDoc.getLRPersistenceId()) {
+        //doc was never adopted, adopt it
+
+        //3.1 remove the transient doc from the corpus
+        it.remove();
+
+        //3.2 get the security info for the corpus
+        SecurityInfo si = getSecurityInfo(corp);
+
+
+        Document adoptedDoc = null;
+        try {
+          //3.3. adopt the doc with the sec info
+//System.out.println("adopting ["+dbDoc.getName()+"] ...");
+          //don't open a new transaction, since sync() already has opended one
+          adoptedDoc = (Document)_adopt(dbDoc,si,true);
+
+          //3.4. add doc to corpus in DB
+          addDocumentToCorpus((Long)adoptedDoc.getLRPersistenceId(),
+                              (Long)corp.getLRPersistenceId());
+        }
+        catch(SecurityException se) {
+          throw new PersistenceException(se);
+        }
+
+        //3.5 add back to corpus the new DatabaseDocument
+        corp.add(adoptedDoc);
+      }
+      else {
+        //don't open a new transaction, the sync() called for corpus has already
+        //opened one
+        try {
+          _sync(dbDoc,true);
+
+          // let the world know about it
+          fireResourceWritten( new DatastoreEvent(this,
+                                                  DatastoreEvent.RESOURCE_WRITTEN,
+                                                  dbDoc,
+                                                  dbDoc.getLRPersistenceId()
+                                                  )
+                              );
+
+          //if the document is form the same DS but did not belong to the corpus add it now
+          //NOTE: if the document already belongs to the corpus then nothing will be changed
+          //in the DB
+          addDocumentToCorpus((Long)dbDoc.getLRPersistenceId(),
+                              (Long)corp.getLRPersistenceId());
+        }
+        catch(SecurityException se) {
+          gate.util.Err.prln("document cannot be synced: ["+se.getMessage()+"]");
+        }
+      }
+    }
+  }
 
   /** helper for sync() - saves a Document in the database */
   /** helper for sync() - saves a Document in the database */
@@ -2405,5 +2498,18 @@ System.out.println("trans failed ...rollback");
       }
     }
   }
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncRemovedDocumentsFromCorpus(List docLRIDs, Long corpLRID)
+    throws PersistenceException;
+
+  /**
+   *   adds document to corpus in the database
+   *   if the document is already part of the corpus nothing
+   *   changes
+   */
+  protected abstract void addDocumentToCorpus(Long docID,Long corpID)
+  throws PersistenceException,SecurityException;
+
 
 }
