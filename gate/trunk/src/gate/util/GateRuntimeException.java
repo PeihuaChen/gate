@@ -28,8 +28,13 @@ public class GateRuntimeException extends RuntimeException {
     super(message);
   }
   
-  public GateRuntimeException(Exception e) {
-    this.exception = e;
+  public GateRuntimeException(String message, Throwable cause) {
+    super(message);
+    this.throwable = cause;
+  }
+  
+  public GateRuntimeException(Throwable e) {
+    this.throwable = e;
   }
 
   /**
@@ -46,7 +51,7 @@ public class GateRuntimeException extends RuntimeException {
     s.flush();
     super.printStackTrace(s);
     s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
+    if(throwable != null) throwable.printStackTrace(s);
   }
 
   /**
@@ -56,9 +61,9 @@ public class GateRuntimeException extends RuntimeException {
     s.flush();
     super.printStackTrace(s);
     s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
+    if(throwable != null) throwable.printStackTrace(s);
   }
   
   
-  Exception exception;  
+  Throwable throwable;  
 }
