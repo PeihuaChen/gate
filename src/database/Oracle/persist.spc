@@ -19,7 +19,7 @@ create or replace package persist is
   ENCODING_UTF constant varchar2(16) := 'UTF8';
   
   DOCUMENT_CLASS constant varchar2(128) := 'gate.corpora.DatabaseDocumentImpl';
-  CORPUS_CLASS constant varchar2(128) :=  'gate.corpora.CorpusImpl';
+  CORPUS_CLASS constant varchar2(128) :=  'gate.corpora.DatabaseCorpusImpl';
 
   FEATURE_OWNER_CORPUS      constant number :=  1;
   FEATURE_OWNER_DOCUMENT    constant number :=  2;
