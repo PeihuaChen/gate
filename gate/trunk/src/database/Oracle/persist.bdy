@@ -886,26 +886,61 @@ create or replace package body persist is
   end;
 
   /*******************************************************************************************/  
-  procedure create_feature_bulk(p_entity_ids           IN INTARRAY,
-                                p_entity_types         IN INTARRAY,
-                                p_keys                 IN CHARARRAY,  
-                                p_value_numbers        IN INTARRAY,                                
-                                p_value_varchars       IN CHARARRAY,
-                                p_value_types          IN INTARRAY,
-                                p_feat_ids             OUT INTARRAY,
+  procedure create_feature_bulk(p_entity_ids           IN INT_ARRAY,
+                                p_entity_types         IN INT_ARRAY,
+                                p_keys                 IN STRING_ARRAY,  
+                                p_value_numbers        IN INT_ARRAY,                                
+                                p_value_floats         IN INT_ARRAY,                                                                                                
+                                p_value_varchars       IN STRING_ARRAY,
+                                p_value_types          IN INT_ARRAY,
                                 p_count                IN number)
   is
-     counter number;
+--     l_counter number;
+     l_id number;
+     l_number_value number;
+     l_string_value varchar(4000);
+     l_feature_type number;
   begin
-     
-     for counter in 1..p_count loop
-        create_feature(p_entity_ids(counter),
-                       p_entity_types(counter),
-                       p_keys(counter),  
-                       p_value_numbers(counter),                                
-                       p_value_varchars(counter),
-                       p_value_types(counter),
-                       p_feat_ids(counter));
+
+     for i in 1 .. p_count loop
+
+        l_feature_type := p_value_types(i);
+        l_number_value := null;
+        l_string_value := null;
+
+        if (VALUE_TYPE_NULL = l_feature_type) then
+           --do nothing
+           null;
+           
+        elsif (l_feature_type = VALUE_TYPE_INTEGER or
+               l_feature_type = VALUE_TYPE_LONG or
+               l_feature_type = VALUE_TYPE_BOOLEAN) then
+
+           l_number_value := p_value_numbers(i);
+           --l_string_value := null;    
+
+        elsif (l_feature_type = VALUE_TYPE_FLOAT) then
+        
+           l_number_value := p_value_floats(i);
+           --l_string_value := null;                          
+        
+        elsif (l_feature_type = VALUE_TYPE_STRING) then
+
+           --l_number_value := null;
+           l_string_value := p_value_varchars(i);                          
+
+        else           
+           raise error.x_invalid_feature_type;
+                      
+        end if;
+                 
+        create_feature(p_entity_ids(i),
+                       p_entity_types(i),
+                       p_keys(i),  
+                       l_number_value,                                
+                       l_string_value,
+                       l_feature_type,
+                       l_id);
      end loop;
 
   end;                           
