@@ -18,6 +18,7 @@ package gate.xml;
 import java.util.*;
 
 import gate.corpora.*;
+import gate.annotation.*;
 import gate.util.*;
 import gate.*;
 import gate.event.*;
@@ -130,8 +131,8 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     if ("GateDocument".equals(elemName))
       processGateDocumentElement(atts);
 
-    if ("PlainText".equals(elemName))
-      processPlainTextElement(atts);
+    if ("TextWithNodes".equals(elemName))
+      processTextWithNodesElement(atts);
 
     if ("AnnotationSet".equals(elemName))
       processAnnotationSetElement(atts);
@@ -141,6 +142,9 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
 
     if ("Features".equals(elemName))
       processFeaturesElement(atts);
+
+    if ("Node".equals(elemName))
+      processNodeElement(atts);
   }// startElement
 
   /**
@@ -152,6 +156,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
       colector.add(currentAnnot);
       currentAnnot = null;
     }// End if
+    currentElementStack.pop();
   }//endElement
 
   /**
@@ -162,8 +167,8 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   public void characters( char[] text,int start,int length) throws SAXException{
     // Create a string object based on the reported text
     String content = new String(text, start, length);
-    if ("PlainText".equals((String)currentElementStack.peek()))
-      processTextOfPlainTextElement(content);
+    if ("TextWithNodes".equals((String)currentElementStack.peek()))
+      processTextOfTextWithNodesElement(content);
   }//characters
 
   /**
@@ -223,9 +228,9 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     }// End if
   }// processGateDocumentElement
 
-  /** This method deals with a PlainText element. */
-  private void processPlainTextElement(AttributeList atts){
-  }//processPlainTextElement
+  /** This method deals with a TextWithNodes element. */
+  private void processTextWithNodesElement(AttributeList atts){
+  }//processTextWithNodesElement
 
   /** This method deals with a AnnotationSet element. */
   private void processAnnotationSetElement(AttributeList atts){
@@ -244,14 +249,38 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
          currentAnnot.setElemName(attValue);
 
        try{
-         if ("Start".equals(attName))
-          currentAnnot.setStart(new Long(attValue));
-
-         if ("End".equals(attName))
-          currentAnnot.setEnd(new Long(attValue));
+         if ("StartNode".equals(attName)){
+          Integer id = new Integer(attValue);
+          Long offset = (Long)id2Offset.get(id);
+          if (offset == null){
+            currentAnnot.setStart(new Long(0));
+            Out.prln("Warning: Couldn't found Node with id = " + id +
+            ".It was specified in annot " + currentAnnot.getElemName() +
+            " as a start node!" +
+            "Annot was created with this node reset to 0." +
+            "Data might not have the same consistency");
+          }else
+            currentAnnot.setStart(offset);
+         }// Endif
+         if ("EndNode".equals(attName)){
+          Integer id = new Integer(attValue);
+          Long offset = (Long) id2Offset.get(id);
+          if (offset == null){
+            currentAnnot.setEnd(new Long(0));
+            Out.prln("Warning: Couldn't found Node with id = " + id +
+            ".It was specified in annot " + currentAnnot.getElemName() +
+            " as a end node!" +
+            "Annot was created with this node reset to 0." +
+            "Data might not have the same consistency");
+          }else
+            currentAnnot.setEnd(offset);
+         }// End if
        } catch (NumberFormatException e){
           currentAnnot.setStart(new Long(0));
           currentAnnot.setEnd(new Long(0));
+          Out.prln("Warning: Offsets problems(cannot create Integers from"+
+          " id[" + attValue + "]) in annot " + currentAnnot.getElemName() +
+          ".Setting them to (0,0). Data might loose consistency.");
        }// End try
       }// End For
     }// End if
@@ -274,10 +303,28 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
       currentAnnot.setFM(fm);
   }//processFeaturesElement
 
-  /** This method deals with a Text belonging to PlainText element. */
-  private void processTextOfPlainTextElement(String text){
+  /** This method deals with a Node element. */
+  private void processNodeElement(AttributeList atts){
+    if (atts != null){
+      for (int i = 0; i < atts.getLength(); i++) {
+        // Extract name and value
+        String attName  = atts.getName(i);
+        String attValue = atts.getValue(i);
+        if ("id".equals(attName)){
+          try{
+            Integer id = new Integer(attValue);
+            id2Offset.put(id,new Long(tmpDocContent.length()));
+          }catch(NumberFormatException e){
+          }// End try
+        }// End if
+      }// End for
+    }// End if
+  }// processNodeElement();
+
+  /** This method deals with a Text belonging to TextWithNodes element. */
+  private void processTextOfTextWithNodesElement(String text){
     tmpDocContent.append(text);
-  }//processTextOfPlainTextElement
+  }//processTextOfTextWithNodesElement
 
   /**
     * This method is called when the SAX parser encounts a comment
@@ -377,7 +424,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     * The transformation will take place inside onDocumentEnd() method.
     */
   private List colector = null;
-
+  private Map id2Offset = new TreeMap();
 
   private FeatureMap documentFeatures = null;
   private Stack currentElementStack = new Stack();

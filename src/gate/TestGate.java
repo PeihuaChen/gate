@@ -154,12 +154,11 @@ public class TestGate {
       ////////////////////////////////////////////////
       // Test bench
       ////////////////////////////////////////////////
-
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
 
       if(! allTests)
-        suite.addTest(TestCreole.suite());
+        suite.addTest(TestXml.suite());
       else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());

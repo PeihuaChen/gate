@@ -22,8 +22,11 @@ import javax.swing.*;
 import java.awt.event.*;
 
 import java.util.*;
+import java.io.*;
 
 public class LRHandle extends CustomResourceHandle {
+
+  File currentDir = null;
 
   public LRHandle(LanguageResource res, ProjectData project) {
     super(res, project);
@@ -39,6 +42,7 @@ public class LRHandle extends CustomResourceHandle {
       annView.setDocument((Document)resource);
       view.add("Annotations", annView);
       view.setSelectedComponent(annView);
+      popup.add(new SaveAsXmlAction());
     }
   }
 
@@ -53,6 +57,54 @@ public class LRHandle extends CustomResourceHandle {
       Factory.deleteResource(resource);
     }
   }
+
+  class SaveAsXmlAction extends AbstractAction{
+    public SaveAsXmlAction(){
+      super("Save As Xml...");
+    }// SaveAsXmlAction()
+
+    public void actionPerformed(ActionEvent e){
+
+      JFileChooser fileChooser = null;
+      File selectedFile = null;
+
+      ExtensionFileFilter filter = new ExtensionFileFilter();
+      filter.addExtension("xml");
+      filter.addExtension("gml");
+
+      if (currentDir == null)
+        fileChooser = new JFileChooser();
+      else
+        fileChooser = new JFileChooser(currentDir);
+
+      fileChooser.setMultiSelectionEnabled(false);
+      fileChooser.setDialogTitle("Select document to save ...");
+      fileChooser.setSelectedFiles(null);
+      fileChooser.setFileFilter(filter);
+      int res = fileChooser.showDialog(project.frame, "Save");
+      if(res == JFileChooser.APPROVE_OPTION){
+        selectedFile = fileChooser.getSelectedFile();
+        currentDir = fileChooser.getCurrentDirectory();
+        if(selectedFile == null) return;
+        try{
+          // Prepare to write into the xmlFile using UTF-8 encoding
+          OutputStreamWriter writer = new OutputStreamWriter(
+                          new FileOutputStream(selectedFile),"UTF-8");
+ //         OutputStreamWriter writer = new OutputStreamWriter(
+ //                                       new FileOutputStream(selectedFile));
+
+          // Write (test the toXml() method)
+          // This Action is added only when a gate.Document is created.
+          // So, is for sure that the resource is a gate.Document
+          writer.write(((gate.Document)resource).toXml());
+          writer.flush();
+          writer.close();
+        } catch (Exception ex){
+          ex.printStackTrace(System.out);
+        }
+      }// End if
+    }// actionPerformed()
+  }// SaveAsXmlAction
 
   class SaveAction extends AbstractAction{
     public SaveAction(){
