@@ -127,24 +127,47 @@ jar/classpath so it's the same as registerBuiltins
     dataStoreRegister = new DataStoreRegister();
   } // initDataStoreRegister()
 
+  /** The name of config data files (<TT>gate.xml</TT>). */
+  private static String gateDotXml = "gate.xml";
+
   /** Reads config data (<TT>gate.xml</TT> files). */
   public static void initConfigData() throws GateException {
     ConfigDataProcessor configProcessor = new ConfigDataProcessor();
 
     // url of the builtin config data (for error messages)
     URL configUrl =
-      Gate.getClassLoader().getResource("gate/resources/gate.xml");
+      Gate.getClassLoader().getResource("gate/resources/" + gateDotXml);
 
     // open a stream to the builtin config data file
     InputStream configStream = null;
     try {
-      configStream = Files.getGateResourceAsStream("gate.xml");
+      configStream = Files.getGateResourceAsStream(gateDotXml);
     } catch(IOException e) {
       throw new GateException(
         "Couldn't open builtin config data file: " + configUrl + " " + e
       );
     }
     configProcessor.parseConfigFile(configStream, configUrl);
+
+    // parse the user's config file (if it exists)
+    String userConfigName =
+      System.getProperty("user.home") + Strings.getFileSep() + gateDotXml;
+    if(DEBUG) { Out.prln("loading user config from " + userConfigName); }
+    configStream = null;
+    boolean userConfigExists = true;
+    try {
+      configStream = new FileInputStream(userConfigName);
+    } catch(IOException e) {
+      userConfigExists = false;
+    }
+    if(userConfigExists)
+      configProcessor.parseConfigFile(configStream, configUrl);
+    if(DEBUG) {
+      Out.prln(
+        "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
+      );
+    }
+
   } // initConfigData()
 
   /** Get a URL that points to either an HTTP server or a file system

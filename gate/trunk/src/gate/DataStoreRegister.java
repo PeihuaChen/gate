@@ -87,6 +87,21 @@ public class DataStoreRegister extends HashSet {
     } // while
   }   // clear()
 
+  /** Configuration data such as driver names. */
+  private static Map configData = new HashMap();
+
+  /** Get the configuration data map. */
+  public static Map getConfigData() { return configData; }
+
+  /**
+   * Adds configuration data (e.g. from <TT>gate.xml</TT> files) to
+   * the register. New attribute/value pairs are added to the existing
+   * set.
+   */
+  public static void addConfig(Map configData) {
+    DataStoreRegister.configData.putAll(configData);
+  } // addConfig
+
   /**
    * Removes a previously registered {@link gate.event.CreoleListener}
    * from the list of listeners for this DataStoreRegister.

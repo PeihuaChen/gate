@@ -86,7 +86,7 @@ public class ConfigXmlHandler extends DefaultHandler {
     }
   } // endDocument
 
-  /** A verboase method for Attributes*/
+  /** A verbose method for Attributes*/
   private String attributes2String(Attributes atts){
     StringBuffer strBuf = new StringBuffer("");
     if (atts == null) return strBuf.toString();
@@ -102,8 +102,9 @@ public class ConfigXmlHandler extends DefaultHandler {
   }// attributes2String()
 
   /** Called when the SAX parser encounts the beginning of an XML element */
-  public void startElement (String uri, String qName, String elementName,
-                                                             Attributes atts){
+  public void startElement (
+    String uri, String qName, String elementName, Attributes atts
+  ) {
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
@@ -123,6 +124,8 @@ public class ConfigXmlHandler extends DefaultHandler {
         if(currentAttributes.getQName(i).toUpperCase().equals("NAME"))
           systemData.systemName = currentAttributes.getValue(i);
       }
+    } else if(elementName.toUpperCase().equals("DBCONFIG")) {
+      DataStoreRegister.addConfig(currentAttributeMap);
     }
 
   } // startElement
@@ -173,6 +176,10 @@ public class ConfigXmlHandler extends DefaultHandler {
     } else if(elementName.toUpperCase().equals("PR")) {
       // create a PR and add it to the SystemData
       createResource((String) contentStack.pop(), systemData.prList);
+
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("DBCONFIG")) {
+      // these are empty elements with attributes; nothing to do here
 
     //////////////////////////////////////////////////////////////////
     } else {
