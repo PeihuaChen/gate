@@ -3,7 +3,6 @@ package gate.jape.parser;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import com.objectspace.jgl.Pair;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
@@ -1354,39 +1353,39 @@ private final int jjMoveNfa_2(int startState, int curPos)
    }
 }
 static final int[] jjnextStates = {
-   29, 30, 31, 36, 37, 40, 41, 16, 45, 52, 12, 13, 16, 19, 20, 22, 
-   24, 32, 33, 16, 40, 41, 16, 46, 47, 49, 51, 14, 15, 34, 35, 38, 
-   39, 42, 43, 13, 20, 3, 4, 6, 8, 14, 15, 17, 19, 
+   29, 30, 31, 36, 37, 40, 41, 16, 45, 52, 12, 13, 16, 19, 20, 22,
+   24, 32, 33, 16, 40, 41, 16, 46, 47, 49, 51, 14, 15, 34, 35, 38,
+   39, 42, 43, 13, 20, 3, 4, 6, 8, 14, 15, 17, 19,
 };
 public static final String[] jjstrLiteralImages = {
-"", null, null, null, null, null, null, null, null, null, null, null, null, 
-null, null, null, null, null, null, null, null, null, null, null, null, "\41", null, 
-null, null, null, null, null, null, null, null, null, null, null, null, "\72", 
-"\73", "\56", "\174", "\54", "\173", "\175", "\50", "\51", "\75", "\75\75", "\72\53", 
+"", null, null, null, null, null, null, null, null, null, null, null, null,
+null, null, null, null, null, null, null, null, null, null, null, null, "\41", null,
+null, null, null, null, null, null, null, null, null, null, null, null, "\72",
+"\73", "\56", "\174", "\54", "\173", "\175", "\50", "\51", "\75", "\75\75", "\72\53",
 null, null, null, null, null, null, null, "\55\55\76", };
 public static final String[] lexStateNames = {
-   "DEFAULT", 
-   "IN_PHASES", 
-   "PHASES_WITHIN_COMMENT", 
-   "IN_STRING", 
-   "WITHIN_COMMENT", 
+   "DEFAULT",
+   "IN_PHASES",
+   "PHASES_WITHIN_COMMENT",
+   "IN_STRING",
+   "WITHIN_COMMENT",
 };
 public static final int[] jjnewLexState = {
-   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 2, -1, 1, -1, -1, -1, -1, -1, -1, 
-   -1, -1, -1, 3, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-   -1, -1, -1, -1, 4, -1, 0, -1, -1, 
+   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 2, -1, 1, -1, -1, -1, -1, -1, -1,
+   -1, -1, -1, 3, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+   -1, -1, -1, -1, 4, -1, 0, -1, -1,
 };
 static final long[] jjtoToken = {
-   0x607ffbc0ff81c01L, 
+   0x607ffbc0ff81c01L,
 };
 static final long[] jjtoSkip = {
-   0x17800000005e000L, 
+   0x17800000005e000L,
 };
 static final long[] jjtoSpecial = {
-   0x17800000005e000L, 
+   0x17800000005e000L,
 };
 static final long[] jjtoMore = {
-   0x800003f0020000L, 
+   0x800003f0020000L,
 };
 private ASCII_CharStream input_stream;
 private final int[] jjrounds = new int[53];
@@ -1453,7 +1452,7 @@ int jjround;
 int jjmatchedPos;
 int jjmatchedKind;
 
-public final Token getNextToken() 
+public final Token getNextToken()
 {
   int kind;
   Token specialToken = null;
@@ -1462,13 +1461,13 @@ public final Token getNextToken()
 
   EOFLoop :
   for (;;)
-  {   
-   try   
-   {     
+  {
+   try
+   {
       curChar = input_stream.BeginToken();
-   }     
+   }
    catch(java.io.IOException e)
-   {        
+   {
       jjmatchedKind = 0;
       matchedToken = jjFillToken();
       matchedToken.specialToken = specialToken;
@@ -1546,7 +1545,7 @@ public final Token getNextToken()
               }
               SkipLexicalActions(matchedToken);
            }
-           else 
+           else
               SkipLexicalActions(null);
          if (jjnewLexState[jjmatchedKind] != -1)
            curLexState = jjnewLexState[jjmatchedKind];
@@ -1632,7 +1631,7 @@ final void MoreLexicalActions()
          jjimageLen = 0;
                 image.setLength(image.length() - 2); image.append("\"");
          break;
-      default : 
+      default :
          break;
    }
 }
@@ -1648,7 +1647,7 @@ final void TokenLexicalActions(Token matchedToken)
         // image.setLength(image.length() - 1);
          matchedToken.image = image.toString();
          break;
-      default : 
+      default :
          break;
    }
 }
