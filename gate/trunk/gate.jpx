@@ -114,7 +114,7 @@
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
   <property category="sys" name="InstanceVisibility" value="4" />
-  <property category="sys" name="JDK" value="java 1.3.0_02" />
+  <property category="sys" name="JDK" value="java 1.3.1-b24" />
   <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener" />
   <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener" />
   <property category="sys" name="JbxEventListener2" value="gate.event.StatusListener" />
@@ -135,6 +135,5 @@
   <property category="sys" name="WorkingDirectory" value="." />
   <property category="sys" name="warn.auto.packages" value="false" />
   <file path="src/gate/resources/creole/creole.xml" />
-  <file path="src/testpkg/TestPR3.java" />
 </project>
 
