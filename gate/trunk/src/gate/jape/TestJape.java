@@ -115,7 +115,7 @@ public class TestJape extends TestCase
     // run the parser test
     Batch batch = null;
     // String japeFileName = "/gate/jape/Test11.jape";
-    String japeFileName = "gate/resources/jape/TestABC.jape";
+    String japeFileName = Files.getResourcePath() + "/jape/TestABC.jape";
     // String japeFileName = "/gate/jape/Country.jape";
     InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
@@ -159,9 +159,10 @@ public class TestJape extends TestCase
     //tokenize all documents
     gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
     try {
-      tokeniser =new gate.creole.tokeniser.DefaultTokeniser();
-      tokeniser.setRulesResourceName("creole/tokeniser/DiTokeniser.rules");
-      tokeniser.init();
+      //create a default tokeniser
+      FeatureMap params = Factory.newFeatureMap();
+      tokeniser = (DefaultTokeniser) Factory.createResource(
+                            "gate.creole.tokeniser.DefaultTokeniser", params);
       /*Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));*/
     } catch(ResourceInstantiationException re) {
       re.printStackTrace(Err.getPrintWriter());
@@ -178,7 +179,10 @@ public class TestJape extends TestCase
     Document currentDoc;
     while(docIter.hasNext()){
       currentDoc = (Document)docIter.next();
-      tokeniser.tokenise(currentDoc, false);
+      tokeniser.setDocument(currentDoc);
+      //use the default anotation set
+      tokeniser.setAnnotationSet(null);
+      tokeniser.run();
     }
 
     startJapeFileOpen = System.currentTimeMillis();
@@ -190,10 +194,11 @@ public class TestJape extends TestCase
     startGazeteerLoad = startLookup = System.currentTimeMillis();
     Out.print("Loading gazeteer lists...");
     try {
-      gazeteer =new gate.creole.gazetteer.DefaultGazetteer(
-
-                    "creole/gazeteer/aventinus3","lists.def");
-
+      //create a default gazetteer
+      FeatureMap params = Factory.newFeatureMap();
+      gazeteer = (DefaultGazetteer) Factory.createResource(
+                            "gate.creole.gazetteer.DefaultGazetteer", params);
+      gazeteer.init();
       startLookup = System.currentTimeMillis();
       Out.print(": " +
                          (startLookup - startGazeteerLoad) +
@@ -203,13 +208,12 @@ public class TestJape extends TestCase
       docIter = corpus.iterator();
       while(docIter.hasNext()){
         currentDoc = (Document)docIter.next();
-        gazeteer.doLookup(currentDoc, false);
+        gazeteer.setDocument(currentDoc);
+        gazeteer.run();
       }
-    } catch(IOException ioe) {
+    } catch(ResourceInstantiationException re) {
       Err.println("Cannot read the gazeteer lists!" +
-                         "\nAre the Gate resources in place?");
-    } catch(GazetteerException ge) {
-      ge.printStackTrace(Err.getPrintWriter());
+                         "\nAre the Gate resources in place?\n" + re);
     }
 
     startJapeFileOpen = System.currentTimeMillis();

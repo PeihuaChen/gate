@@ -531,45 +531,21 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     this.features = features;
   } // setFeatures
 
-  /** Tokenises the given document writting all the generated annotations in
-    * the provided annotation set.
-    * It is the user's responsability to make sure that the annotation set
-    * provided belongs to the document as the tokeniser will not make any
-    * checks.
-    * @param doc the document to be tokenised
-    * @param annotationSet the AnnotationSet where the new annotations will be
-    * added
-    * @param runInNewThread if <b>true</b> the tokeniser will spawn a new thread
-    * for doing all the processing, if <b>false</b> all the priocessing will
-    * take place in the current thread and this method will block until the
-    * tokenisation is done.
-    */
-  public void tokenise(Document doc, AnnotationSet annotationSet,
-                       boolean runInNewThread){
-    this.doc =  doc;
-    this.annotationSet = annotationSet;
-
-    if(runInNewThread){
-      Thread thread = new Thread(this);
-      thread.start();
-    }else run();
-  } // tokenise
-
-  /** Tokenises the given document writting all the generated annotations in
-    * the default annotation set.
-    */
-  public void tokenise(Document doc, boolean runInNewThread){
-    tokenise(doc, doc.getAnnotations(), runInNewThread);
-  }
-
-  /** The method that does the actual tokenisation. This method should not be
-    * explicitly called by the user but the {@link #tokenise tokenise} method
-    * should be used instead.
-    */
+  /**
+   * The method that does the actual tokenisation.
+   */
   public void run() {
+    //check the input
+    if(document == null)
+      throw new GateRuntimeException("No document to tokenise!");
+    if(annotationSet == null) annotationSet = document.getAnnotations();
+    else if(annotationSet.getDocument() != document)
+      throw new GateRuntimeException(
+        "The annotation set provided does not belong to the current document!");
+
     fireStatusChangedEvent(
-      "Tokenising " + doc.getSourceUrl().getFile() + "...");
-    String content = doc.getContent().toString();
+      "Tokenising " + document.getSourceUrl().getFile() + "...");
+    String content = document.getContent().toString();
     int length = content.length();
     char currentChar;
     DFSMState graphPosition = dInitialState;
@@ -731,6 +707,18 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   }
   public String getRulesResourceName() {
     return rulesResourceName;
+  }
+  public void setDocument(gate.Document newDocument) {
+    document = newDocument;
+  }
+  public gate.Document getDocument() {
+    return document;
+  }
+  public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
+    annotationSet = newAnnotationSet;
+  }
+  public gate.AnnotationSet getAnnotationSet() {
+    return annotationSet;
   }// fireProcessFinishedEvent
   //ProcessProgressReporter implementation ends here
 
@@ -749,9 +737,6 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   protected FeatureMap features  = null;
   protected List myProgressListeners = new LinkedList();
   protected List myStatusListeners = new LinkedList();
-
-  /** the document to be tokenised */
-  protected Document doc;
 
   /** the annotations et where the new annotations will be added*/
   protected AnnotationSet annotationSet;
@@ -796,6 +781,9 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
 
   static protected String defaultResourceName =
                             "creole/tokeniser/DefaultTokeniser.rules";
+
+  /** the document to be tokenised */
+  protected gate.Document document;
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}

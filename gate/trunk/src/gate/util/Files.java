@@ -50,7 +50,7 @@ public class Files {
   static long resourceIndex = 0;
 
   /**Where on the classpath the gate resources are to be found*/
-  protected static String resourcePath = "gate/resources";
+  protected static String resourcePath = "/gate/resources";
 
   /**Gets the path for the gate resources within the classpath*/
   public static String getResourcePath(){
@@ -243,8 +243,8 @@ public class Files {
   public static InputStream getResourceAsStream(String resourceName)
     throws IOException {
 
-    return  ClassLoader.getSystemResourceAsStream(resourceName);
-//    return Gate.getClassLoader().getResourceAsStream(resourceName);
+    return  Files.class.getResourceAsStream(resourceName);
+    //return  ClassLoader.getSystemResourceAsStream(resourceName);
   } // getResourceAsStream(String)
 
   /** Get a resource from the GATE resources directory as an InputStream.

@@ -22,6 +22,7 @@ import java.util.*;
 import java.net.*;
 
 import gate.util.*;
+import gate.creole.*;
 import gate.gui.*;
 import gate.*;
 
@@ -48,7 +49,7 @@ import gate.*;
   * will generate annotations of type Lookup having the attributes specified in
   * the definition file.
   */
-public class DefaultGazetteer implements Runnable {
+public class DefaultGazetteer implements ProcessingResource, Runnable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -56,10 +57,8 @@ public class DefaultGazetteer implements Runnable {
   /** Build a gazetter using the default lists from the agte resources
     * {@see init()}
     */
-  public DefaultGazetteer()
-         throws IOException, GazetteerException
-  {
-    this("gate/resources/creole/gazeteer/default/", "lists.def");
+  public DefaultGazetteer(){
+//    this("gate/resources/creole/gazeteer/default/", "lists.def");
   }
 
   /** Builds a gazetter reading the definitions of the lists from the specified
@@ -67,6 +66,7 @@ public class DefaultGazetteer implements Runnable {
     * @param fileName a string representing the name of the file
     * {@see init()}
     */
+/*
   public DefaultGazetteer(String fileName) throws IOException,
                                                  FileNotFoundException,
                                                  GazetteerException
@@ -80,7 +80,7 @@ public class DefaultGazetteer implements Runnable {
     reader = new FileReader(defsFile);
 
   }//public DefaultGazeteer(String fileName)
-
+*/
   /** Builds a gazetteer reading the lists from the classpath.
     * @param resourcePath the path to the file containing the definitions of the
     * lists.
@@ -88,6 +88,7 @@ public class DefaultGazetteer implements Runnable {
     * lists.
     * {@see init()}
     */
+/*
   public DefaultGazetteer(String resourcePath, String resourceName)
          throws IOException, GazetteerException
   {
@@ -100,27 +101,43 @@ public class DefaultGazetteer implements Runnable {
                                                       resPath + resourceName));
   } // public DefaultGazeteer(String resourcePath, String resourceName)
 
-
+*/
   /** Does the actual loading and prsing of the lists. This method must be
     * called before the gazetteer can be used
     */
-  public void init()throws IOException, GazetteerException {
-    BufferedReader bReader = new BufferedReader(reader);
-    String line = bReader.readLine();
-    String toParse = "";
+  public Resource init()throws ResourceInstantiationException{
+    try{
+      initialState = new FSMState(this);
 
-    while (line != null) {
-      if(line.endsWith("\\")) {
-        toParse += line.substring(0,line.length()-1);
-      } else {
-        toParse += line;
-        fireStatusChangedEvent("Reading " + toParse);
-        readList(toParse, true);
-        toParse = "";
+      if(listsURLStr == null){
+        String defaultListsURLStr = this.getClass().getResource(
+                          Files.getResourcePath() +
+                          "/creole/gazeteer/default/lists.def").toExternalForm();
+        mainURL = new URL(defaultListsURLStr);
+      }else mainURL = new URL(listsURLStr);
+      Reader reader = new InputStreamReader(mainURL.openStream());
+
+      BufferedReader bReader = new BufferedReader(reader);
+      String line = bReader.readLine();
+      String toParse = "";
+
+      while (line != null) {
+        if(line.endsWith("\\")) {
+          toParse += line.substring(0,line.length()-1);
+        } else {
+          toParse += line;
+          fireStatusChangedEvent("Reading " + toParse);
+          readList(toParse, true);
+          toParse = "";
+        }
+        line = bReader.readLine();
       }
-      line = bReader.readLine();
+    }catch(IOException ioe){
+      throw new ResourceInstantiationException(ioe);
+    }catch(GazetteerException ge){
+      throw new ResourceInstantiationException(ge);
     }
-
+    return this;
   }
 
   /** Reads one lists (one file) of phrases
@@ -157,12 +174,8 @@ public class DefaultGazetteer implements Runnable {
     }
     BufferedReader listReader;
 
-    if(fromResource){
-      listReader = new BufferedReader(new InputStreamReader(
-                   ClassLoader.getSystemResourceAsStream(resPath + listName)));
-    } else {
-      listReader = new BufferedReader(new FileReader(resPath + listName));
-    }
+    listReader = new BufferedReader(new InputStreamReader(
+                            (new URL(mainURL, listName)).openStream()));
 
     Lookup lookup = new Lookup(majorType, minorType, languages);
     String line = listReader.readLine();
@@ -248,40 +261,32 @@ public class DefaultGazetteer implements Runnable {
     return res;
   } // getFSMgml
 
-  /** This method runs this gazetteer over a provided input.
-    * @param document the document this gazetteer should run on
-    * @param runInNewThread whether the gazetteer should start a new thread for
-    * its processing needs or it should run in the thread of the calling method
-    */
-  public void doLookup(Document document, boolean runInNewThread){
-    doLookup(document, document.getAnnotations(), runInNewThread);
-  } // doLookup
+  //no doc required: javadoc will copy it from the interface
+  public FeatureMap getFeatures(){
+    return features;
+  } // getFeatures
 
-  /** This method runs this gazetteer over a provided input.
-    * @param document the document this gazetteer should run on
-    * @param runInNewThread whether the gazetteer should start a new thread for
-    * @param annotations the annotation set which should ben used for adding the
-    * new annotations generated by this gazetteer.
-    * its processing needs or it should run in the thread of the calling method
-    */
-  public void doLookup(Document document,
-                       AnnotationSet annotations,
-                       boolean runInNewThread){
-    this.doc =  document;
-    this.annotations = annotations;
-    if(runInNewThread){
-      Thread thread = new Thread(this);
-      thread.start();
-    } else run();
-  } // doLookup
+  public void setFeatures(FeatureMap features){
+    this.features = features;
+  } // setFeatures
+
+
 
   /** The method that does the actual input. This method should never be called
     * by the user; the {@link doLookup()} methodshould be used instead.
     */
   public void run(){
+    //check the input
+    if(document == null)
+      throw new GateRuntimeException("No document to parse!");
+    if(annotationSet == null) annotationSet = document.getAnnotations();
+    else if(annotationSet.getDocument() != document)
+      throw new GateRuntimeException(
+        "The annotation set provided does not belong to the current document!");
+
     fireStatusChangedEvent("Doing lookup in " +
-                                          doc.getSourceUrl().getFile() + "...");
-    String content = doc.getContent().toString();
+                           document.getSourceUrl().getFile() + "...");
+    String content = document.getContent().toString();
     int length = content.length();
     Character currentChar;
     FSMState currentState = initialState;
@@ -320,7 +325,7 @@ public class DefaultGazetteer implements Runnable {
                 fm.put("language", currentLookup.languages);
             }
             try {
-              annotations.add(new Long(matchedRegionStart),
+              annotationSet.add(new Long(matchedRegionStart),
                               new Long(matchedRegionEnd + 1),
                               "Lookup",
                               fm);
@@ -361,7 +366,7 @@ public class DefaultGazetteer implements Runnable {
         if(null != currentLookup.minorType)
           fm.put("minorType", currentLookup.minorType);
         try{
-          annotations.add(new Long(matchedRegionStart),
+          annotationSet.add(new Long(matchedRegionStart),
                           new Long(matchedRegionEnd + 1),
                           "Lookup",
                           fm);
@@ -427,15 +432,28 @@ public class DefaultGazetteer implements Runnable {
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
   }
+  public void setListsURLStr(String newListsURLStr) {
+    listsURLStr = newListsURLStr;
+  }
+  public String getListsURLStr() {
+    return listsURLStr;
+  }
+  public void setDocument(gate.Document newDocument) {
+    document = newDocument;
+  }
+  public gate.Document getDocument() {
+    return document;
+  }
+  public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
+    annotationSet = newAnnotationSet;
+  }
+  public gate.AnnotationSet getAnnotationSet() {
+    return annotationSet;
+  }
   //ProcessProgressReporter implementation ends here
 
-  /** The path to the resource directory containing the files used to define this
-    * gazetteer.
-    */
-  String resPath = null;
-
   /** If this gazetteer is loaded from the classpath instead of files */
-  boolean fromResource = false;
+//  boolean fromResource = false;
 
   /** The initial state of the FSM that backs this gazetteer */
   FSMState initialState;
@@ -443,19 +461,23 @@ public class DefaultGazetteer implements Runnable {
   /** A set containing all the states of the FSM backing the gazetteer */
   Set fsmStates = new HashSet();
 
-  /** Used to store the document currently being parsed */
-  Document doc;
-
-  /** Used to store the annotation set currently being usede for the newly
-    * generated annotations
-    */
-  AnnotationSet annotations;
 
   protected List myProgressListeners = new LinkedList();
 
   protected List myStatusListeners = new LinkedList();
 
-  /** The reader used to build this gazetteer */
-  protected Reader reader;
+  protected FeatureMap features  = null;
+
+  protected String listsURLStr = null;
+
+  protected URL mainURL = null;
+
+  /** Used to store the document currently being parsed */
+  protected Document document;
+
+  /** Used to store the annotation set currently being used for the newly
+    * generated annotations
+    */
+  protected AnnotationSet annotationSet;
 
 } // DefaultGazetteer
