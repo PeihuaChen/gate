@@ -22,11 +22,14 @@ public interface AnnotationSet extends Set
 
   public boolean remove(Object o);
 
-  public Annotation get(Integer id);
+
+  public Annotation    get(Integer id);
+  public AnnotationSet get();
   public AnnotationSet get(String type);
   public AnnotationSet get(Set types);
   public AnnotationSet get(String type, FeatureMap constraints);
   public AnnotationSet get(String type, FeatureMap constraints, Long offset);
+  public AnnotationSet get(Long offset);
 
   public void indexByType();
   public void indexByOffset();
