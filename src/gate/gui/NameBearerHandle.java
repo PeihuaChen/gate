@@ -161,7 +161,9 @@ public class NameBearerHandle implements Handle,
                                         KeyEvent.VK_X, ActionEvent.CTRL_MASK));
 
         popup.add(saveAsXmlItem);
-      }//End if
+      }else if(target instanceof Corpus){
+        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+      }
     }//if(resource instanceof LanguageResource)
 
     fireStatusChanged("Building views...");
@@ -591,6 +593,21 @@ public class NameBearerHandle implements Handle,
     }//public void actionPerformed(ActionEvent e)
 
   }//class ReloadAction
+
+  class PopulateCorpusAction extends AbstractAction {
+    PopulateCorpusAction() {
+      super("Populate");
+      putValue(SHORT_DESCRIPTION,
+               "Fills this corpus with documents from a directory");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+
+    }
+  }
+
+
+
 
   class ProxyStatusListener implements StatusListener{
     public void statusChanged(String text){
