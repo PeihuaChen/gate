@@ -136,7 +136,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   /** If you set this flag to true the original content of the document will
    *  be kept in the document feature. <br>
    *  Default value is false to avoid the unnecessary waste of memory */
-  private static boolean preserveOriginalContent = false;
+  private Boolean preserveOriginalContent = new Boolean(false);
 
   /** Default construction. Content left empty. */
   public DocumentImpl() {
@@ -166,7 +166,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
         throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
 
-      if(preserveOriginalContent && content != null) {
+      if(preserveOriginalContent.booleanValue() && content != null) {
         String originalContent = new String(
           ((DocumentContentImpl) content).getOriginalContent());
         getFeatures().put(GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME,
@@ -230,13 +230,22 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     return sourceUrlOffsets;
   } // getSourceUrlOffsets
 
-  public static boolean getPreserveOriginalContent() {
-    return preserveOriginalContent;
-  } // isPreserveOriginalContent
-
-  public static void setPreserveOriginalContent(boolean preserveFlag) {
-    preserveOriginalContent = preserveFlag;
+  /**
+   * Allow/disallow preserving of the original document content.
+   * If is <B>true</B> the original content will be retrieved from
+   * the DocumentContent object and preserved as document feature.
+   */
+  public void setPreserveOriginalContent(Boolean b) {
+    preserveOriginalContent = b;
   } // setPreserveOriginalContent
+
+  /** Get the preserving of content status of the Document.
+   *
+   *  @return whether the Document should preserve it's original content.
+   */
+  public Boolean getPreserveOriginalContent() {
+    return preserveOriginalContent;
+  } // getPreserveOriginalContent
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document. This method gets the
