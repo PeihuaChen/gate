@@ -19,6 +19,8 @@ import java.util.*;
 import java.net.*;
 import java.awt.Component;
 import java.awt.Window;
+import java.awt.Frame;
+import java.awt.Dialog;
 import java.awt.event.*;
 import java.text.NumberFormat;
 import java.io.*;
@@ -28,6 +30,7 @@ import gate.*;
 import gate.util.*;
 import gate.swing.*;
 import gate.creole.*;
+import gate.creole.ir.*;
 import gate.persist.*;
 import gate.event.*;
 import gate.security.*;
@@ -144,18 +147,18 @@ public class NameBearerHandle implements Handle,
   /** Fill Protege save, save as and save in format actions */
   private void fillProtegeActions(JPopupMenu popup) {
     Action action;
-    
+
     popup.addSeparator();
 
     action = new edu.stanford.smi.protege.action.SaveProject();
-    action.putValue(action.NAME, "Save Protege"); 
-    action.putValue(action.SHORT_DESCRIPTION, "Save protege project"); 
+    action.putValue(action.NAME, "Save Protege");
+    action.putValue(action.SHORT_DESCRIPTION, "Save protege project");
     // Add Save Protege action
     popup.add(action);
 
     action = new edu.stanford.smi.protege.action.SaveAsProject();
-    action.putValue(action.NAME, "Save Protege As..."); 
-    action.putValue(action.SHORT_DESCRIPTION, "Save protege project as"); 
+    action.putValue(action.NAME, "Save Protege As...");
+    action.putValue(action.SHORT_DESCRIPTION, "Save protege project as");
     // Add Save as... Protege action
     popup.add(action);
 
@@ -202,6 +205,12 @@ public class NameBearerHandle implements Handle,
         popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
         popup.addSeparator();
         popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
+        if (target instanceof IndexedCorpus){
+          popup.addSeparator();
+          popup.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
+          popup.add(new XJMenuItem(new OptimizeIndexAction(), sListenerProxy));
+          popup.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
+        }
       }
       if (target instanceof gate.creole.ProtegeProjectName){
         fillProtegeActions(popup);
@@ -1074,6 +1083,82 @@ public class NameBearerHandle implements Handle,
                                  runnable);
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
+    }
+  }
+
+  class CreateIndexAction extends AbstractAction {
+    CreateIndexAction() {
+      super("Create Index");
+      putValue(SHORT_DESCRIPTION,
+               "Create index with documents from a corpus");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      CreateIndexDialog cid = null;
+      if (getWindow() instanceof Frame){
+        cid = new CreateIndexDialog((Frame) getWindow(), (IndexedCorpus) target);
+      }
+      if (getWindow() instanceof Dialog){
+        cid = new CreateIndexDialog((Dialog) getWindow(), (IndexedCorpus) target);
+      }
+      cid.show();
+    }
+  }
+
+  class OptimizeIndexAction extends AbstractAction {
+    OptimizeIndexAction() {
+      super("Optimize Index");
+      putValue(SHORT_DESCRIPTION,
+               "Optimize existing index");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try {
+        IndexedCorpus ic = (IndexedCorpus) target;
+        if (ic.getIndexManager() != null){
+          ic.getIndexManager().optimizeIndex();
+        } else {
+          JOptionPane.showMessageDialog(getLargeView() != null ?
+                                     getLargeView() :
+                                     getSmallView(),
+                                     "There are not existing index!",
+                                     "Index", JOptionPane.PLAIN_MESSAGE);
+        }
+      } catch (gate.creole.ir.IndexException ie) {
+        ie.printStackTrace();
+      }
+    }
+  }
+
+  class DeleteIndexAction extends AbstractAction {
+    DeleteIndexAction() {
+      super("Delete Index");
+      putValue(SHORT_DESCRIPTION,
+               "Delete existing index");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      int answer = JOptionPane.showOptionDialog(getLargeView() != null ?
+                                     getLargeView() :
+                                     getSmallView(), "Do you want to delete index?", "Index",
+                                     JOptionPane.YES_NO_OPTION,
+                                     JOptionPane.QUESTION_MESSAGE, null, null, null);
+      if (answer == JOptionPane.YES_OPTION) {
+        try {
+          IndexedCorpus ic = (IndexedCorpus) target;
+          if (ic.getIndexManager() != null){
+            ic.getIndexManager().deleteIndex();
+          } else {
+            JOptionPane.showMessageDialog(getLargeView() != null ?
+                                     getLargeView() :
+                                     getSmallView(),
+                                     "There are not existing index!",
+                                     "Index", JOptionPane.PLAIN_MESSAGE);
+          }
+        } catch (gate.creole.ir.IndexException ie) {
+          ie.printStackTrace();
+        }
+      }
     }
   }
 
