@@ -857,6 +857,23 @@ this error:
 Signal 127
 </PRE>
 
+<P>
+Jasper seems to have static initialiser code that assumes that 
+java.library.path has been set to point to the location of
+the Sicstus native code. This means that it is very difficult to
+set the correct paths from GATE (e.g. by reading them from a Prolog
+PR's creole.xml file). Also, the behaviour of Jasper in relation
+to the sicstus.path property, the setting of the boot path in
+the Sicstus class constructors seems pretty random. For these reasons
+GATE itself tries to set up Sicstus configuration data at install
+time. If this data is incorrect you will need to edit the
+Makefile and/or startup script as appropriate.
+
+<P>
+Jasper's java library also seems to vary accross platforms - I couldn't get
+a jasper.jar from Linux to work on NT and vice-versa. Therefore Sicstus
+support is excluded from GATE itself.
+
 
 
 <HR>
