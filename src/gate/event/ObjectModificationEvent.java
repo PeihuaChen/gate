@@ -23,25 +23,20 @@ public class ObjectModificationEvent extends GateEvent {
   public static final int OBJECT_MODIFIED = 1001;
   public static final int OBJECT_DELETED  = 1002;
 
-  private Object oldValue;
-  private Object newValue;
+  private static int subtype;
 
-  public ObjectModificationEvent(Object oldValue,Object newValue, int type) {
+  public ObjectModificationEvent(Object source, int type, int subtype) {
 
-    super(oldValue,type);
+    super(source,type);
 
     Assert.assert(type == OBJECT_CREATED ||
                   type == OBJECT_DELETED ||
                   type == OBJECT_MODIFIED);
 
+    this.subtype = subtype;
   }
 
-  public Object getOldValue() {
-    return oldValue;
+  public int getSubType() {
+    return this.subtype;
   }
-
-  public Object getNewValue() {
-    return newValue;
-  }
-
   }
