@@ -13,13 +13,11 @@ import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.Timer;
 import javax.swing.event.*;
 import javax.swing.event.MouseInputListener;
 import javax.swing.event.PopupMenuListener;
@@ -28,7 +26,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Highlighter;
 
 import gate.Annotation;
 import gate.AnnotationSet;
@@ -778,23 +775,28 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
       
       if(annotsAtPoint.size() > 0){
-        //do something with the annotations
-        JPopupMenu popup = new JPopupMenu();
-        Iterator annIter = annotsAtPoint.iterator();
-        while(annIter.hasNext()){
-          AnnotationHandler aHandler = (AnnotationHandler)annIter.next();
-          popup.add(new HighlightMenuItem(
-                  new EditAnnotationAction(aHandler),
-                  aHandler.ann.getStartNode().getOffset().intValue(),
-                  aHandler.ann.getEndNode().getOffset().intValue(),
-                  popup));
-        }
-        try{
-	        Rectangle rect =  textPane.modelToView(textLocation);
-	        popup.show(textPane, rect.x + 10, rect.y);
-        }catch(BadLocationException ble){
-          throw new GateRuntimeException(ble);
-        }
+        if(annotsAtPoint.size() > 1){
+	        JPopupMenu popup = new JPopupMenu();
+	        Iterator annIter = annotsAtPoint.iterator();
+	        while(annIter.hasNext()){
+	          AnnotationHandler aHandler = (AnnotationHandler)annIter.next();
+	          popup.add(new HighlightMenuItem(
+	                  new EditAnnotationAction(aHandler),
+	                  aHandler.ann.getStartNode().getOffset().intValue(),
+	                  aHandler.ann.getEndNode().getOffset().intValue(),
+	                  popup));
+	        }
+	        try{
+		        Rectangle rect =  textPane.modelToView(textLocation);
+		        popup.show(textPane, rect.x + 10, rect.y);
+	        }catch(BadLocationException ble){
+	          throw new GateRuntimeException(ble);
+	        }
+	      }else{
+	        //only one annotation: start the editing directly
+	        new EditAnnotationAction((AnnotationHandler)annotsAtPoint.get(0)).
+	        	actionPerformed(null);
+	      }
       }
     }
     
