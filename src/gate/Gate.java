@@ -90,7 +90,7 @@ public class Gate
 
     // create class loader and creole register if they're null
     if(classLoader == null)
-      classLoader = new GateClassLoader(ClassLoader.getSystemClassLoader());
+      classLoader = new GateClassLoader();
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
     // init the creole register
