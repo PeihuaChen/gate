@@ -1582,7 +1582,6 @@ System.out.println("trans failed ...rollback");
           FeatureMap features = ann.getFeatures();
           Assert.assertNotNull(features);
           createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
-//          createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
         }
       }
 
@@ -1603,12 +1602,111 @@ System.out.println("trans failed ...rollback");
   }
 
   /** helper for sync() - never call directly */
-  protected abstract void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
-    throws PersistenceException;
+  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    //0.preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(as);
+    Assert.assertNotNull(changes);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(as instanceof DatabaseAnnotationSetImpl);
+    Assert.assertTrue(changes.size() > 0);
+
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    Long lrID = (Long)doc.getLRPersistenceId();
+    Long docID = null;
+    Long asetID = null;
+
+    try {
+      //1. get the a-set ID in the database
+      String sql = " select as_id,  " +
+                   "        as_doc_id " +
+                   " from  "+this.dbSchema+"v_annotation_set " +
+                   " where  lr_id = ? ";
+      //do we have aset name?
+      String clause = null;
+      String name = as.getName();
+      if (null != name) {
+        clause =   "        and as_name = ? ";
+      }
+      else {
+        clause =   "        and as_name is null ";
+      }
+      sql = sql + clause;
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      if (null != name) {
+        pstmt.setString(2,name);
+      }
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (rs.next()) {
+        asetID = new Long(rs.getLong("as_id"));
+        docID = new Long(rs.getLong("as_doc_id"));
+      }
+      else {
+        throw new PersistenceException("cannot find annotation set with" +
+                                      " name=["+name+"] , LRID=["+lrID+"] in database");
+      }
+
+      //3. delete the removed annotations from this set
+
+      //cleanup
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+      //3.1. prepare call
+
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        pstmt = this.jdbcConn.prepareCall("{ call "+this.dbSchema+"persist.delete_annotation(?,?) }");
+      }
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+        pstmt = this.jdbcConn.prepareStatement("select persist_delete_annotation(?,?)");
+      }
+      else {
+        throw new IllegalArgumentException();
+      }
+
+      Iterator it = changes.iterator();
+
+      while (it.hasNext()) {
+
+        //3.2. insert annotation
+        Annotation ann = (Annotation)it.next();
+
+        pstmt.setLong(1,docID.longValue()); //annotations are linked with documents, not LRs!
+        pstmt.setLong(2,ann.getId().longValue());
+        pstmt.execute();
+      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete annotations in DB : ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+  }
+
 
   /** helper for sync() - never call directly */
-  protected abstract void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
-    throws PersistenceException;
+  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    //technically this approach sux
+    //at least it works
+
+    //1. delete
+    _syncRemovedAnnotations(doc,as,changes);
+    //2. recreate
+    _syncAddedAnnotations(doc,as,changes);
+  }
 
   /**
    * Get a resource from the persistent store.
