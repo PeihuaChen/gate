@@ -23,6 +23,9 @@ import java.lang.reflect.*;
 import junit.framework.*;
 import java.sql.*;
 
+import oracle.sql.*;
+//import oracle.jdbc.driver.*;
+
 import gate.*;
 import gate.util.*;
 import gate.corpora.*;
@@ -32,6 +35,8 @@ import gate.security.*;
   */
 public class TestPersist extends TestCase
 {
+  private static String JDBC_URL_1;
+  private static String JDBC_URL_2;
   private static String JDBC_URL;
 
   /** Debug flag */
@@ -127,10 +132,10 @@ public class TestPersist extends TestCase
     if (! Gate.getDataStoreRegister().getConfigData().containsKey("url-test"))
       throw new GateRuntimeException("DB URL not configured in gate.xml");
     else
-      JDBC_URL =
+      JDBC_URL_1 =
         (String) Gate.getDataStoreRegister().getConfigData().get("url-test");
-
-      this.dbType = DBHelper.getDatabaseType(JDBC_URL);
+      JDBC_URL_2 =
+        (String) Gate.getDataStoreRegister().getConfigData().get("url-test1");
   } // setUp
 
   /** Put things back as they should be after running tests
@@ -467,6 +472,9 @@ public class TestPersist extends TestCase
     doc.getFeatures().put("LONG STRING", this.VERY_LONG_STRING);
     doc.getFeatures().put("NULL feature",null);
     doc.getFeatures().put("BINARY feature",new Dummy(101,"101",true,101.101f));
+    doc.getFeatures().put("LONG feature",new Long(101));
+//    doc.getFeatures().put("FLOAT feature",new Double(101.102d));
+//    doc.getFeatures().put("UNICODE feature",new String("\u65e5\u672c\u8a9e\u6587\u5b57\u5217"));
 
     //create a complex feature - array of strings
     Vector complexFeature = new Vector();
@@ -476,11 +484,12 @@ public class TestPersist extends TestCase
     complexFeature.add("string 4");
     complexFeature.add("string 5");
     doc.getFeatures().put("complex feature",complexFeature);
-
+    FeatureMap fm  = Factory.newFeatureMap();
+//    fm.put("FLOAT feature ZZZ",new Double(101.102d));
+//    fm.put("UNICODE feature",new String("\u65e5\u672c\u8a9e\u6587\u5b57\u5217"));
     doc.getAnnotations().add(
-      new Long(0), new Long(20), "thingymajig", Factory.newFeatureMap()
-    );
-    doc.setName("DB test Document");
+      new Long(0), new Long(20), "thingymajig", fm);
+    doc.setName("DB test Document---");
 
     return doc;
   }
@@ -542,8 +551,35 @@ public class TestPersist extends TestCase
     return ds;
   }
 
+  private void prepareDB(String db) {
+
+    if (this.JDBC_URL_1.indexOf(db) > 0 ) {
+      this.JDBC_URL = this.JDBC_URL_1;
+    }
+    else {
+      this.JDBC_URL = this.JDBC_URL_2;
+    }
+
+    Assert.assertNotNull("jdbc url not set for Oracle or Postgres",this.JDBC_URL);
+
+    this.dbType = DBHelper.getDatabaseType(JDBC_URL);
+  }
+
+
+  public void testOracle_01() throws Exception {
+
+    prepareDB("oracle");
+    testDB_UseCase01();
+  }
+
+  public void testPostgres_01() throws Exception {
+
+    prepareDB("postgres");
+    testDB_UseCase01();
+  }
+
   /** Test the DS register. */
-  public void testDB_UseCase01() throws Exception {
+  private void testDB_UseCase01() throws Exception {
 ///Err.prln("Use case 01 started...");
     //descr: create a document in the DB
 
@@ -600,8 +636,19 @@ public class TestPersist extends TestCase
     }
   }
 
+  public void testPostgres_02() throws Exception {
 
-  public void testDB_UseCase02() throws Exception {
+    prepareDB("postgres");
+    testDB_UseCase02();
+  }
+
+  public void testOracle_02() throws Exception {
+
+    prepareDB("oracle");
+    testDB_UseCase02();
+  }
+
+  private void testDB_UseCase02() throws Exception {
 ///Err.prln("Use case 02 started...");
     //read a document
     //use the one created in UC01
@@ -742,8 +789,19 @@ public class TestPersist extends TestCase
   }
 
 
+  public void testPostgres_03() throws Exception {
 
-  public void testDB_UseCase03() throws Exception {
+    prepareDB("postgres");
+    testDB_UseCase03();
+  }
+
+  public void testOracle_03() throws Exception {
+
+    prepareDB("oracle");
+    testDB_UseCase03();
+  }
+
+  private void testDB_UseCase03() throws Exception {
 ///Err.prln("Use case 03 started...");
     //sync a document
     LanguageResource lr = null;
@@ -956,8 +1014,19 @@ public class TestPersist extends TestCase
     }
   }
 
+  public void testOracle_04() throws Exception {
 
-  public void testDB_UseCase04() throws Exception {
+    prepareDB("oracle");
+    testDB_UseCase04();
+  }
+
+  public void testPostgres_04() throws Exception {
+
+    prepareDB("postgres");
+    testDB_UseCase04();
+  }
+
+  private void testDB_UseCase04() throws Exception {
 ///Err.prln("Use case 04 started...");
     //delete a document
     LanguageResource lr = null;
@@ -1010,9 +1079,20 @@ public class TestPersist extends TestCase
 
   }
 
+  public void testPostgres_101() throws Exception {
+
+    prepareDB("postgres");
+    testDB_UseCase101();
+  }
+
+  public void testOracle_101() throws Exception {
+
+    prepareDB("oracle");
+    testDB_UseCase101();
+  }
 
   /** Test the DS register. */
-  public void testDB_UseCase101() throws Exception {
+  private void testDB_UseCase101() throws Exception {
 ///Err.prln("Use case 101 started...");
     //descr : create a corpus
 
@@ -1064,9 +1144,20 @@ public class TestPersist extends TestCase
 
   }
 
+  public void testOracle_102() throws Exception {
+
+    prepareDB("oracle");
+    testDB_UseCase102();
+  }
+
+  public void testPostgres_102() throws Exception {
+
+    prepareDB("postgres");
+    testDB_UseCase102();
+  }
 
   /** Test the DS register. */
-  public void testDB_UseCase102() throws Exception {
+  private void testDB_UseCase102() throws Exception {
     //read a corpus
 ///Err.prln("Use case 102 started...");
     LanguageResource lr = null;
@@ -1130,7 +1221,19 @@ public class TestPersist extends TestCase
   }
 
 
-  public void testDB_UseCase103() throws Exception {
+  public void testPostgres_103() throws Exception {
+
+    prepareDB("postgres");
+    testDB_UseCase103();
+  }
+
+  public void testOracle_103() throws Exception {
+
+    prepareDB("oracle");
+    testDB_UseCase103();
+  }
+
+  private void testDB_UseCase103() throws Exception {
 ///Err.prln("Use case 103 started...");
     //sync a corpus
     LanguageResource lr = null;
@@ -1223,7 +1326,19 @@ public class TestPersist extends TestCase
 
 
       TestPersist test = new TestPersist("");
-//      test.testPostgres01();
+
+/*
+      long timeStart = 0;
+      timeStart = System.currentTimeMillis();
+      int size = 512*1024;
+//      test.testOracleLOB(size,3);
+      test.testPostgresLOB(size,3);
+      System.out.println("time: ["+ (System.currentTimeMillis()-timeStart) +"]");
+
+      if (true) {
+        throw new RuntimeException();
+      }
+*/
 
       test.setUp();
       test.testDelete();
@@ -1252,39 +1367,66 @@ public class TestPersist extends TestCase
       test.testMultipleLrs();
       test.tearDown();
 
+      /* oracle */
+
       test.setUp();
-      test.testDB_UseCase01();
+      test.testOracle_01();
       test.tearDown();
-/*
+
       test.setUp();
-      test.testDB_UseCase01();
+      test.testOracle_02();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_03();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_04();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_101();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_102();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_103();
+      test.tearDown();
+
+
+      /* postgres */
+/*      test.setUp();
+      test.testPostgres_01();
+      test.tearDown();
+
+      test.setUp();
+      test.testPostgres_02();
+      test.tearDown();
+
+      test.setUp();
+      test.testPostgres_03();
+      test.tearDown();
+
+      test.setUp();
+      test.testPostgres_04();
+      test.tearDown();
+
+      test.setUp();
+      test.testPostgres_101();
+      test.tearDown();
+
+      test.setUp();
+      test.testPostgres_102();
+      test.tearDown();
+
+      test.setUp();
+      test.testPostgres_103();
       test.tearDown();
 */
-      test.setUp();
-      test.testDB_UseCase02();
-      test.tearDown();
-
-      test.setUp();
-      test.testDB_UseCase03();
-      test.tearDown();
-
-      test.setUp();
-      test.testDB_UseCase04();
-      test.tearDown();
-
-
-      test.setUp();
-      test.testDB_UseCase101();
-      test.tearDown();
-
-      test.setUp();
-      test.testDB_UseCase102();
-      test.tearDown();
-
-      test.setUp();
-      test.testDB_UseCase103();
-      test.tearDown();
-
       if (DEBUG) {
         Err.println("done.");
       }
@@ -1293,39 +1435,135 @@ public class TestPersist extends TestCase
     }
   }
 
- /* public void testPostgres01() throws Exception {
-
-    DatabaseDataStore ds = new PostgresDataStore();
-    Assert.assertNotNull(ds);
-    ds.setStorageUrl("jdbc:postgresql://192.168.128.208:5432/gate09?user=gateuser&password=gate");
-    ds.open();
-    List lTypes = ds.getLrTypes();
-System.out.println(lTypes);
-    List lIds = ds.getLrIds(DBHelper.DOCUMENT_CLASS);
-System.out.println(lIds);
-
-*/
-
 /*
-    String url = "jdbc:postgresql://192.168.128.208:5432/gate09";
-    try {
+  public void testPostgresLOB(int size, int count) throws Exception {
 
-      Connection c = DBHelper.connect(url,"gateadmin","gate");
-      try {
-        PreparedStatement ps = c.prepareStatement("select test(1)");
-        ps.execute();
-      }
-      catch (SQLException sex) {
-        System.out.println("code:"+sex.getErrorCode());
-        sex.printStackTrace();
+    byte[] buffer = new byte[size];
+    String url = "jdbc:postgresql://192.168.128.208:5432/gate09?user=gateuser&password=gate";
+//    ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+
+    try {
+      Connection conn = DBHelper.connect(url);
+      conn.setAutoCommit(false);
+      PreparedStatement pstmt = conn.prepareStatement("insert into lob_test values(?)");
+
+      for (int i =0; i< count; i++) {
+//        bais.reset();
+//        pstmt.setBinaryStream(1,bais,buffer.length);
+        pstmt.setBytes(1,buffer);
+        pstmt.executeUpdate();
+        conn.commit();
       }
     }
     catch(Exception e) {
       e.printStackTrace();
     }
+
+
+  }
+
+  public void testOracleLOB(int size,int count) throws Exception {
+    byte[] buffer = new byte[size];
+    String url = "jdbc:oracle:thin:GATEUSER/gate@192.168.128.208:1521:gate07";
+    ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+
+    CallableStatement cstmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    Blob blobValue = null;
+
+    try {
+      Connection conn = DBHelper.connect(url);
+      conn.setAutoCommit(false);
+      cstmt = conn.prepareCall("{ call gateadmin.create_lob(?) }");
+
+
+      for (int i =0; i< count; i++) {
+
+        cstmt.registerOutParameter(1,java.sql.Types.BIGINT);
+        cstmt.execute();
+        long blobID = cstmt.getLong(1);
+
+        pstmt = conn.prepareStatement("select blob_value from gateadmin.lob_test where id=?");
+        pstmt.setLong(1,blobID);
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+        rs.next();
+
+        blobValue = rs.getBlob(1);
+        BLOB oraBlob = (BLOB)blobValue;
+        OutputStream output = oraBlob.getBinaryOutputStream();
+        output.write(buffer,0,buffer.length);
+        output.close();
+
+        conn.commit();
+      }
+
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+    }
+
+  }
+
 */
-/*  }
+/*
+  public void testPostgres01() throws Exception {
+
+    String url = "jdbc:postgresql://192.168.128.208:5432/gate09";
+    try {
+
+      Connection c = DBHelper.connect(url,"gateuser","gate");
+      c.setAutoCommit(false);
+
+      Object src = new Long(1234);
+
+      PreparedStatement pstmt = c.prepareStatement("insert into test3 values (nextval('seq3'), ?)");
+      Object o = new Object();
+
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(src);
+      oos.flush();
+      oos.close();
+      baos.close();
+
+      byte[] buff = baos.toByteArray();
+System.out.println(buff.length);
+      ByteArrayInputStream bais = new ByteArrayInputStream(buff);
+
+      pstmt.setBinaryStream(1,bais,buff.length);
+      pstmt.execute();
+bais.close();
+      c.commit();
+      bais.close();
+
+      PreparedStatement pstmt2 = c.prepareStatement("select blob from test3 where id = (select max(id) from test3)");
+      pstmt2.execute();
+      ResultSet rs = pstmt2.getResultSet();
+      if (false == rs.next()) {
+        throw new Exception("empty result set");
+      }
+
+      InputStream is = rs.getBinaryStream("blob");
+      ObjectInputStream ois = new ObjectInputStream(is);
+      Object result = ois.readObject();
+System.out.println(result);
+      ois.close();
+      is.close();
+
+      rs.close();
+      pstmt2.close();
+      c.commit();
+
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+    }
+
+  }
 */
+
 } // class TestPersist
 
 
