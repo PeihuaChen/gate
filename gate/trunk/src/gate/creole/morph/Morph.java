@@ -78,6 +78,9 @@ public class Morph
       throw new ResourceInstantiationException("\n\n No Rule File Provided");
     }
 
+    // compile the rules
+    interpret.init(rulesFile);
+
     return this;
   }
 
@@ -100,9 +103,6 @@ public class Morph
     if (document == null) {
       throw new GateRuntimeException("No document to process!");
     }
-
-    // compile the rules
-    interpret.init(rulesFile);
 
     // get the annotationSet name provided by the user, or otherwise use the
     // default method
@@ -162,6 +162,27 @@ public class Morph
   public void setDocument(gate.Document document) {
     this.document = document;
   }
+
+
+  /**
+   * This method should only be called after init()
+   * @param word
+   * @return the rootWord
+   */
+  public String findBaseWord(String word) {
+    return interpret.runMorpher(word);
+  }
+
+  /**
+   * This method should only be called after init()
+   * @param word
+   * @return the afix of the rootWord
+   */
+  public String findAffix(String word) {
+    interpret.runMorpher(word);
+    return interpret.getAffix();
+  }
+
 
   /**
    * Returns the document under process
