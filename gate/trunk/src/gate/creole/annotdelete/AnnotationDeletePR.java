@@ -40,7 +40,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
   protected List annotationTypes;
-  protected List setsToKeep = new ArrayList();
+  protected List setsToKeep;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
