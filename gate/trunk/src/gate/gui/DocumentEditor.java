@@ -856,7 +856,7 @@ public class DocumentEditor extends AbstractVisualResource
 
 
     //coreference
-    corefTreeRoot = new DefaultMutableTreeNode("Coreference data", true);
+    corefTreeRoot = new DefaultMutableTreeNode("Co-reference data", true);
     corefTree = new JTree(corefTreeModel = new DefaultTreeModel(corefTreeRoot,
                                                                 true));
     corefTree.setCellRenderer(new CorefNodeRenderer());
@@ -2754,7 +2754,7 @@ Out.prln("NULL size");
                      new SetRemovedOperation(e.getAnnotationSetName()));
     }//public void annotationSetRemoved(gate.event.DocumentEvent e)
 
-    /**Called when the content of the document has changed through an edit 
+    /**Called when the content of the document has changed through an edit
      * operation.
      */
     public void contentEdited(DocumentEvent e){
