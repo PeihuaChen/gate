@@ -130,7 +130,7 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.setDefaultRenderer(String.class, new DiffTableCellRenderer());
     diffTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     scroller = new JScrollPane(diffTable);
-    scroller.setColumnHeaderView(diffTable.getTableHeader());
+//    scroller.setColumnHeaderView(diffTable.getTableHeader());
     getContentPane().add(scroller, constraints);
     
     //build the results pane
