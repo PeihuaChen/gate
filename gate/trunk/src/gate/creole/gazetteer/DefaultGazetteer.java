@@ -49,7 +49,7 @@ import gate.*;
   * will generate annotations of type Lookup having the attributes specified in
   * the definition file.
   */
-public class DefaultGazetteer extends AbstractProcessingResource
+public class DefaultGazetteer extends AbstractLanguageAnalyser
 implements ProcessingResource {
 
   /** Debug flag */
