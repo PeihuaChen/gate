@@ -25,7 +25,8 @@ import gate.creole.tokeniser.*;
 import gate.creole.gazetteer.*;
 import gate.creole.splitter.*;
 import gate.creole.orthomatcher.*;
-import java.text.NumberFormat;
+import gate.util.profile.*;
+//import java.text.NumberFormat;
 
 /**
  * This class provides a main function that:
@@ -47,10 +48,9 @@ public class ProfilePRs {
   private static String usage =
     "usage: ProfilePRs [-dir directory-name | file(s)]";
 
-  private static double totalDocLength = 0, totalTokTime = 0,
-    totalGazTime = 0, totalSplitTime = 0, totalTagTime = 0,
-    totalJapeTime = 0, totalMatcherTime = 0;
+  private static double totalDocLength = 0;
   private static int docs = 0;
+  private static Profiler prof = new Profiler();
 
   /** Main function */
   public static void main(String[] args) throws Exception {
@@ -75,64 +75,55 @@ public class ProfilePRs {
         inputFiles.add(new File(args[i]));
     }
 
+    prof.initRun("Measuring performance on directory " + args[1]);
+//    prof.enable(false);
+//    prof.enableGCCalling(false);
+
     // initialise GATE
-    Out.prln("initialising GATE");
+    prof.checkPoint("Before GATE.init()");
     Gate.init();
     //tell GATE we're in batch mode
 //    gate.Main.batchMode = true;
 
-    double timeBefore = 0, timeAfter = 0;
 
     // create some processing resources
-    Out.prln("creating PRs");
+    prof.checkPoint("Before creating the processing resources");
 
-    timeBefore = System.currentTimeMillis();
     //create a default tokeniser
     FeatureMap params = Factory.newFeatureMap();
     DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                     "gate.creole.tokeniser.DefaultTokeniser", params);
-    timeAfter = System.currentTimeMillis();
-    Out.prln("Tokeniser initialised for (seconds): " + (timeAfter-timeBefore));
+    prof.checkPoint("Tokeniser initialised");
 
     //create a default gazetteer
-    timeBefore = System.currentTimeMillis();
     params = Factory.newFeatureMap();
     DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
                           "gate.creole.gazetteer.DefaultGazetteer", params);
-    timeAfter = System.currentTimeMillis();
-    Out.prln("Gazetteer initialised for (seconds): " + (timeAfter-timeBefore));
+    prof.checkPoint("Gazetteer initialised");
 
     //create a splitter
-    timeBefore = System.currentTimeMillis();
     params = Factory.newFeatureMap();
     SentenceSplitter splitter = (SentenceSplitter) Factory.createResource(
                           "gate.creole.splitter.SentenceSplitter", params);
-    timeAfter = System.currentTimeMillis();
-    Out.prln("Splitter initialised for (seconds): " + (timeAfter-timeBefore));
+    prof.checkPoint("Sentence splitter initialised");
 
     //create a tagger
-    timeBefore = System.currentTimeMillis();
     params = Factory.newFeatureMap();
     POSTagger tagger = (POSTagger) Factory.createResource(
                           "gate.creole.POSTagger", params);
-    timeAfter = System.currentTimeMillis();
-    Out.prln("Tagger initialised for (seconds): " + (timeAfter-timeBefore));
+    prof.checkPoint("POSTagger initialised");
 
     //create a grammar
-    timeBefore = System.currentTimeMillis();
     params = Factory.newFeatureMap();
     ANNIETransducer transducer = (ANNIETransducer) Factory.createResource(
                           "gate.creole.ANNIETransducer", params);
-    timeAfter = System.currentTimeMillis();
-    Out.prln("Grammars initialised for (seconds): " + (timeAfter-timeBefore));
+    prof.checkPoint("Grammars initialised");
 
     //create an orthomatcher
-    timeBefore = System.currentTimeMillis();
     params = Factory.newFeatureMap();
     OrthoMatcher orthomatcher = (OrthoMatcher) Factory.createResource(
                           "gate.creole.orthomatcher.OrthoMatcher", params);
-    timeAfter = System.currentTimeMillis();
-    Out.prln("Orthomatcher initialised for (seconds): " + (timeAfter-timeBefore));
+    prof.checkPoint("Orthomatcher initialised");
 
 
     // for each document
@@ -141,11 +132,13 @@ public class ProfilePRs {
     //   run the PRs
     //   dump output from the doc
     //   delete the doc
-    Out.prln("looping on input files list");
+    Out.prln("\nLooping on input files list");
     Iterator filesIter = inputFiles.iterator();
+    docs = inputFiles.size();
+    int fileNo=0;
     while(filesIter.hasNext()) {
       File inFile = (File) filesIter.next(); // the current file
-      Out.prln("processing file " + inFile.getPath());
+      fileNo++;
 
       // set the source URL parameter to a "file:..." URL string
       params.clear();
@@ -156,107 +149,57 @@ public class ProfilePRs {
       Document doc = (Document) Factory.createResource(
         "gate.corpora.DocumentImpl", params
       );
-      docs++;
       totalDocLength += doc.getContent().size().longValue();
 
       // set the document param on the PRs
       tokeniser.setDocument(doc);
-      timeBefore = System.currentTimeMillis();
+      prof.checkPoint("Processing file " + inFile.getPath() +
+          ", #" + fileNo + "/" + docs, new String[0], true, false, false);
       tokeniser.execute();
-      timeAfter = System.currentTimeMillis();
-      totalTokTime += timeAfter - timeBefore;
+      prof.checkPoint("", new String[] {"Tokenizer", "Processing"}, false, false, false);
 
       //run gazetteer
       gaz.setDocument(doc);
-      timeBefore = System.currentTimeMillis();
       gaz.execute();
-      timeAfter = System.currentTimeMillis();
-      totalGazTime += timeAfter - timeBefore;
+      prof.checkPoint("", new String[] {"Gazettier", "Processing"}, false, false, false);
 
       //run splitter
       splitter.setDocument(doc);
-      timeBefore = System.currentTimeMillis();
       splitter.execute();
-      timeAfter = System.currentTimeMillis();
-      totalSplitTime += timeAfter - timeBefore;
+      prof.checkPoint("", new String[] {"Splitter", "Processing"}, false, false, false);
 
       //run the tagger
       tagger.setDocument(doc);
-      timeBefore = System.currentTimeMillis();
       tagger.execute();
-      timeAfter = System.currentTimeMillis();
-      totalTagTime += timeAfter - timeBefore;
+      prof.checkPoint("", new String[] {"Tagger", "Processing"}, false, false, false);
 
       //run the transducer
       transducer.setDocument(doc);
-      timeBefore = System.currentTimeMillis();
       transducer.execute();
-      timeAfter = System.currentTimeMillis();
-      totalJapeTime += timeAfter - timeBefore;
+      prof.checkPoint("", new String[] {"JAPE grammars", "Processing"}, false, false, false);
 
       // run the orthomatcher
       orthomatcher.setDocument(doc);
-      timeBefore = System.currentTimeMillis();
       orthomatcher.execute();
-      timeAfter = System.currentTimeMillis();
-      totalMatcherTime += timeAfter - timeBefore;
+      prof.checkPoint("", new String[] {"Orthomatcher", "Processing"}, false, false, false);
 
       // make the doc a candidate for garbage collection
       Factory.deleteResource(doc);
 
     } // input files loop
 
-    totalTokTime = (double) totalTokTime/1000;
-    totalGazTime = (double) totalGazTime/1000;
-    totalSplitTime = (double) totalSplitTime/1000;
-    totalTagTime = (double) totalTagTime/1000;
-    totalJapeTime = (double) totalJapeTime/1000;
-    totalMatcherTime = (double) totalMatcherTime/1000;
-    Out.prln("Total tokeniser time: " +
-      NumberFormat.getInstance().format(totalTokTime));
-    Out.prln("Total gazetteer time: " +
-      NumberFormat.getInstance().format(totalGazTime));
-    Out.prln("Total splitter time: " +
-      NumberFormat.getInstance().format(totalSplitTime));
-    Out.prln("Total tagger time: " +
-      NumberFormat.getInstance().format(totalTagTime));
-    Out.prln("Total JAPE grammars time: " +
-      NumberFormat.getInstance().format(totalJapeTime));
-    Out.prln("Total orthomatcher time: " +
-      NumberFormat.getInstance().format(totalMatcherTime));
-    Out.print("Total processing time: ");
-    Out.prln(totalTokTime + totalGazTime + totalSplitTime
-             + totalTagTime + totalJapeTime + totalMatcherTime);
+    prof.checkPoint("Done!");
 
     totalDocLength = (double) totalDocLength/1024;
-    Out.prln("Total KBytes processed: " +
-      NumberFormat.getInstance().format(totalDocLength));
+    Out.prln("\nTotal KBytes processed: " + (long)totalDocLength);
 
-    Out.pr("Avg tokeniser speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/totalTokTime)
-             + " Kb/sec");
-    Out.pr("Avg gazetteer speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/totalGazTime)
-             + " Kb/sec");
-    Out.pr("Avg splitter speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/totalSplitTime)
-             + " Kb/sec");
-    Out.pr("Avg tagger speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/totalTagTime)
-             + " Kb/sec");
-    Out.pr("Avg JAPE grammars speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/totalJapeTime)
-             + " Kb/sec");
-    Out.pr("Avg orthomatcher Speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/totalMatcherTime)
-             + " Kb/sec");
-
-    Out.pr("Combined Speed: ");
-    Out.prln(NumberFormat.getInstance().format(totalDocLength/
-              (totalTokTime + totalGazTime + totalSplitTime
-              + totalTagTime + totalJapeTime + totalMatcherTime)));
-
-
+    prof.printCategAvg("Processing", docs, totalDocLength, "kb");
+    prof.printCategAvg("Tokenizer", docs, totalDocLength, "kb");
+    prof.printCategAvg("Gazettier", docs, totalDocLength, "kb");
+    prof.printCategAvg("Splitter", docs, totalDocLength, "kb");
+    prof.printCategAvg("Tagger", docs, totalDocLength, "kb");
+    prof.printCategAvg("JAPE grammars", docs, totalDocLength, "kb");
+    prof.printCategAvg("Orthomatcher", docs, totalDocLength, "kb");
   } // main
 
 
