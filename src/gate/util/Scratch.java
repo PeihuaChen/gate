@@ -18,6 +18,8 @@ package gate.util;
 
 import java.awt.Color;
 import java.io.*;
+import java.net.*;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.prefs.Preferences;
@@ -25,6 +27,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.swing.UIManager;
+import org.pdfbox.pdmodel.PDDocument;
+import org.pdfbox.util.PDFTextStripper;
 
 import gate.*;
 import gate.creole.*;
@@ -69,37 +73,9 @@ public class Scratch
     }
   }
   
-  
-  static class Item{
-    int itemCode = 1;
-    double price = 0.7;
-    public double  getPrice(){
-      return price;
-    }
-  }
-  
-  static class ItemByWeight extends Item{
-    int itemCode = 2;
-    double weight = 4;
-    public double  getPrice(){
-      return price * weight;
-    }
     
-  }  
-  
-  public static void main(String args[]) throws Exception {
-    ItemByWeight ibw = new ItemByWeight();
+  public static void main(String args[]) throws Exception {   
     
-    System.out.println(ibw.itemCode);
-    System.out.println(((Item)ibw).itemCode);
-
-    System.out.println(ibw.getPrice());
-    System.out.println(((Item)ibw).getPrice());
-    
-    
-    return;
-    
- /*   
     File file = new File("Z:/gate/bin");
     System.out.println("Canonical path: " + file.getCanonicalPath());
     System.out.println("URL: " + file.toURL());
@@ -268,7 +244,6 @@ public class Scratch
 //System.out.println("VRs for " + reg.getAnnotationVRs());
 
 //System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
-*/
   } // main
 
   /** Example of using an exit-time hook. */
