@@ -13,6 +13,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 import gate.event.StatusListener;
+import gate.gui.MainFrame;
 import gate.util.Err;
 
 /**
@@ -99,7 +100,7 @@ public class XJEditorPane extends JEditorPane {
 
   class ForwardAction extends AbstractAction{
     private ForwardAction() throws IOException{
-      super("Forward", new ImageIcon(new URL("gate:/img/forward.gif")));
+      super("Forward", MainFrame.getIcon("forward.gif"));
     }
 
     public void actionPerformed(ActionEvent e){

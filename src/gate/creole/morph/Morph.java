@@ -19,6 +19,7 @@ package gate.creole.morph;
  */
 
 
+import java.net.URL;
 import java.util.Iterator;
 
 import gate.*;
@@ -38,7 +39,7 @@ public class Morph
   private gate.Document document;
 
   /** File which cotains rules to be processed */
-  private String rulesFile;
+  private URL rulesFileURL;
 
   /** Instance of BaseWord class - English Morpher */
   private Interpret interpret;
@@ -68,13 +69,13 @@ public class Morph
    */
   public Resource init() throws ResourceInstantiationException {
     interpret = new Interpret();
-    if (rulesFile == null) {
+    if (rulesFileURL == null) {
       // no rule file is there, simply run the interpret to interpret it and
       throw new ResourceInstantiationException("\n\n No Rule File Provided");
     }
 
     // compile the rules
-    interpret.init(rulesFile);
+    interpret.init(rulesFileURL);
 
     return this;
   }
@@ -194,17 +195,17 @@ public class Morph
 
   /**
    * Sets the rule file to be processed
-   * @param rulesFile - rule File name to be processed
+   * @param rulesFileURL - rule File name to be processed
    */
-  public void setRulesFile(String rulesFile) {
-    this.rulesFile = rulesFile;
+  public void setRulesFileURL(URL rulesFileURL) {
+    this.rulesFileURL = rulesFileURL;
   }
 
   /**
    * Returns the document under process
    */
-  public String getRulesFile() {
-    return this.rulesFile;
+  public URL getRulesFileURL() {
+    return this.rulesFileURL;
   }
 
   /**

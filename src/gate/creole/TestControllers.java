@@ -73,11 +73,6 @@ public class TestControllers extends TestCase
 
     //create a default tokeniser
     params = Factory.newFeatureMap();
-    params.put(DefaultTokeniser.DEF_TOK_TOKRULES_URL_PARAMETER_NAME,
-                "gate:/creole/tokeniser/DefaultTokeniser.rules");
-    params.put(DefaultTokeniser.DEF_TOK_GRAMRULES_URL_PARAMETER_NAME,
-                "gate:/creole/tokeniser/postprocess.jape");
-    params.put(DefaultTokeniser.DEF_TOK_ENCODING_PARAMETER_NAME, "UTF-8");
     params.put(DefaultTokeniser.DEF_TOK_DOCUMENT_PARAMETER_NAME, doc);
     ProcessingResource tokeniser = (ProcessingResource) Factory.createResource(
       "gate.creole.tokeniser.DefaultTokeniser", params
@@ -86,8 +81,6 @@ public class TestControllers extends TestCase
     //create a default gazetteer
     params = Factory.newFeatureMap();
     params.put(DefaultGazetteer.DEF_GAZ_DOCUMENT_PARAMETER_NAME, doc);
-    params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
-      "gate:/creole/gazeteer/default/lists.def");
     ProcessingResource gaz = (ProcessingResource) Factory.createResource(
       "gate.creole.gazetteer.DefaultGazetteer", params
     );

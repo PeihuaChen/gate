@@ -145,12 +145,9 @@ public class MainFrame extends JFrame
   static public Icon getIcon(String filename){
     Icon result = (Icon)iconByName.get(filename);
     if(result == null){
-      try{
-        result = new ImageIcon(new URL("gate:/img/" + filename));
-        iconByName.put(filename, result);
-      }catch(MalformedURLException mue){
-        mue.printStackTrace(Err.getPrintWriter());
-      }
+      result = new ImageIcon(MainFrame.class.
+              getResource("/gate/resources/img/" + filename));
+      iconByName.put(filename, result);
     }
     return result;
   }
@@ -301,12 +298,9 @@ public class MainFrame extends JFrame
     this.setSize(new Dimension(width == null ? 800 : width.intValue(),
                                height == null ? 600 : height.intValue()));
 
-    try{
-      this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-            new URL("gate:/img/gateIcon.gif")));
-    }catch(MalformedURLException mue){
-      mue.printStackTrace(Err.getPrintWriter());
-    }
+    this.setIconImage(Toolkit.getDefaultToolkit().getImage(
+          MainFrame.class.getResource(Files.getResourcePath() + 
+                  "/img/gateIcon.gif")));
     resourcesTree = new JTree(resourcesTreeModel){
       public void updateUI(){
         super.updateUI();

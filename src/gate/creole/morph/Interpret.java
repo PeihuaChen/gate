@@ -1,6 +1,8 @@
 package gate.creole.morph;
 
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,11 +49,11 @@ public class Interpret {
    * It starts the actual program
    * @param ruleFileName
    */
-  public void init(String ruleFileName) throws ResourceInstantiationException {
+  public void init(URL ruleFileURL) throws ResourceInstantiationException {
     variables = new Storage();
     prepareListOfMorphMethods();
     rules = new CompiledRules();
-    file = new ReadFile(ruleFileName);
+    file = new ReadFile(ruleFileURL);
     affix = null;
     isDefineRulesSession = false;
     isDefineVarSession = false;
@@ -564,7 +566,11 @@ public class Interpret {
       System.exit( -1);
     }
     Interpret interpret = new Interpret();
-    interpret.init(args[0]);
+    try{
+      interpret.init(new URL((String)args[0]));
+    }catch(MalformedURLException mue){
+      throw new RuntimeException(mue);
+    }
     String rootWord = interpret.runMorpher(args[1]);
     String affix = interpret.getAffix();
     System.out.println("Root : "+rootWord);

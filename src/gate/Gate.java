@@ -232,6 +232,26 @@ jar/classpath so it's the same as registerBuiltins
         "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
       );
     }
+    
+    
+    //get the CREOLE repositories to load if set trough a sys prop
+    String creolepath = System.getProperty("creole.path");
+    if(creolepath != null && creolepath.length() > 0){
+      StringTokenizer strTok = new StringTokenizer(creolepath, 
+              Strings.getPathSep(), false);
+      while(strTok.hasMoreTokens()){
+        String aPath = strTok.nextToken();
+        //this is an URL
+        try{
+          URL creoleURL = new File(aPath).toURL();
+          System.out.println("Loading CREOLE repository " + creoleURL);
+          Gate.getCreoleRegister().registerDirectories(creoleURL);
+        }catch(MalformedURLException mue){
+          throw new GateRuntimeException(mue);
+        }
+      }
+    }
+    
   } // initConfigData()
 
   /**

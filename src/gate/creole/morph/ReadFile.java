@@ -1,6 +1,7 @@
 package gate.creole.morph;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -20,16 +21,16 @@ public class ReadFile {
   private ArrayList data;
 
   /**
-   * Constroctor - Initialise the buffered Reader instance
+   * Constructor - Initialise the buffered Reader instance
    * @param fileName Name of the file to be read
    */
-  public ReadFile(String fileName) {
+  public ReadFile(URL fileURL) {
 
     data = new ArrayList();
 
     try {
-      java.net.URL url = new java.net.URL(fileName);
-      br = new BufferedReader(new InputStreamReader(url.openStream(),"UTF-8"));
+      br = new BufferedReader(new InputStreamReader(fileURL.openStream(),
+              "UTF-8"));
     } catch(FileNotFoundException e) {
       e.printStackTrace();
     } catch(IOException e) {
