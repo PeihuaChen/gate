@@ -59,11 +59,11 @@ public interface AccessController {
     throws PersistenceException, SecurityException;
 
   /** --- */
-  public User deleteUser(User usr, Session s)
+  public void deleteUser(User usr, Session s)
     throws PersistenceException, SecurityException;
 
   /** --- */
-  public User deleteUser(Long id, Session s)
+  public void deleteUser(Long id, Session s)
     throws PersistenceException, SecurityException;
 
   /** --- */
