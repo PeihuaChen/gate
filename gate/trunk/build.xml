@@ -141,7 +141,7 @@
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
-           includes="gate/**"
+           includes="gate/**,com/**"
 					 classpathref="build.class.path"/>
   </target>
 	
@@ -151,7 +151,7 @@
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
-               includes="gate/**"/>
+               includes="gate/**,com/**"/>
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
 	</target>
