@@ -194,8 +194,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
     //the big while for the actual parsing
     while(startNodeOff != -1){
-Out.prln();
-Out.pr("Start: " + startNodeOff);
+//Out.prln();
+//Out.pr("Start: " + startNodeOff);
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
       //currentFSM = FSMInstance.getNewInstance(
@@ -219,8 +219,8 @@ Out.pr("Start: " + startNodeOff);
           "The execution of the \"" + getName() +
           "\" Jape transducer has been abruptly interrupted!");
 
-Out.pr(" <" + acceptingFSMInstances.size() + "/" +
-              activeFSMInstances.size() +">");
+//Out.pr(" <" + acceptingFSMInstances.size() + "/" +
+//              activeFSMInstances.size() +">");
         // take the first active FSM instance
         currentFSM = (FSMInstance)activeFSMInstances.removeFirst();
 
@@ -303,8 +303,8 @@ Out.pr(" <" + acceptingFSMInstances.size() + "/" +
                   binds.put(oneLabel, newSet);
                 }//while(labelsIter.hasNext())
                 activeFSMInstances.addLast(newFSMI);
-Out.pr("^(" + newFSMI.getStartAGPosition().getOffset() +
-                               "->" + newFSMI.getAGPosition().getOffset() + ")");
+//Out.pr("^(" + newFSMI.getStartAGPosition().getOffset() +
+//                               "->" + newFSMI.getAGPosition().getOffset() + ")");
               }//if match
             }//while(transitionsIter.hasNext())
           }//while(pathsIter.hasNext())
@@ -384,8 +384,8 @@ Out.pr("^(" + newFSMI.getStartAGPosition().getOffset() +
 
         //eliminate the possibility for infinite looping
         if(oldStartNodeOff == startNodeOff){
-Out.prln("");
-Out.pr("SKIP " + startNodeOff);
+//Out.prln("");
+//Out.pr("SKIP " + startNodeOff);
           //we are about to step twice in the same place, ...skip ahead
           lastAGPosition = new Long(startNodeOff + 1);
           OffsetsTailSet = offsets.tailSet(lastAGPosition);
