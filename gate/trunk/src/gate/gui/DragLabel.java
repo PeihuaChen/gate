@@ -1,18 +1,16 @@
 /*
- * DragLabel.java
+ *  DragLabel.java
  *
- * Copyright (c) 2000-2001, The University of Sheffield.
- * 
- * This file is part of GATE (see http://gate.ac.uk/), and is free
- * software, licenced under the GNU Library General Public License,
- * Version 2, June1991.
- * 
- * A copy of this licence is included in the distribution in the file
- * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
- * Valentin Tablan, 14/07/2000
+ *  Copyright (c) 1998-2001, The University of Sheffield.
  *
- * $Id$
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ * 
+ *  Valentin Tablan, 14/07/2000
+ *
+ *  $Id$
  */
 package gate.gui;
 
@@ -96,7 +94,7 @@ public class DragLabel extends JLabel {
         e.startDrag(DragSource.DefaultCopyDrop, image, point, transferable, dsListener);
         */
       } catch( InvalidDnDOperationException idoe ) {
-  	    idoe.printStackTrace();
+        idoe.printStackTrace();
       }
     }
   }
@@ -117,8 +115,8 @@ public class DragLabel extends JLabel {
       */
     public void dragDropEnd(DragSourceDropEvent e) {
       if( e.getDropSuccess() == false ) {
-	      Out.println( "not successful");
-	      return;
+        Out.println( "not successful");
+        return;
       }
 
       /*
@@ -143,9 +141,9 @@ public class DragLabel extends JLabel {
       // target actions
       int myaction = e.getDropAction();
       if( (myaction & DragLabel.this.dragAction) != 0) {
-	      context.setCursor(DragSource.DefaultCopyDrop);
+        context.setCursor(DragSource.DefaultCopyDrop);
       } else {
-      	context.setCursor(DragSource.DefaultCopyNoDrop);
+        context.setCursor(DragSource.DefaultCopyNoDrop);
       }
     }
 

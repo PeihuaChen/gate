@@ -1,14 +1,12 @@
 /* 
  *  PrioritisedRuleList.java - transducer class
  *
- *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
- *  Version 2, June1991.
- *
- *  A copy of this licence is included in the distribution in the file
- *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Hamish Cunningham, 27/07/98
  *
@@ -126,6 +124,9 @@ public class PrioritisedRuleList extends DList implements java.io.Serializable
 
 
 // $Log$
+// Revision 1.4  2000/11/08 16:35:03  hamish
+// formatting
+//
 // Revision 1.3  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //
