@@ -132,5 +132,19 @@ public interface Document extends LanguageResource, Comparable {
    */
   public void removeDocumentListener(DocumentListener l);
 
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method sets the
+    * end offset.
+    */
+  public void setSourceUrlEndOffset(Long sourceUrlEndOffset);
+
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method sets the
+    * start offset.
+    */
+  public void setSourceUrlStartOffset(Long sourceUrlStartOffset);
+
 } // interface Document
 
