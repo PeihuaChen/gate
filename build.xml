@@ -497,6 +497,7 @@
         <include name="bin/**"/>
         <include name="build/**"/>
         <exclude name="build/*.jar"/>
+        <exclude name="build/deploy/**"/>
         <include name="classes"/>
         <include name="doc/**"/>
         <exclude name="doc/java2html/"/>
