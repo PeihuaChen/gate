@@ -210,11 +210,14 @@ public class Main {
             try{
               File sessionFile = new File(Gate.getUserSessionFileName());
               if(sessionFile.exists()){
+                MainFrame.lockGUI("Loading saved session...");
                 gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
               }
             }catch(Exception e){
               Err.prln("Failed to load session data:");
               e.printStackTrace(Err.getPrintWriter());
+            }finally{
+              MainFrame.unlockGUI();
             }
           }
         };
