@@ -247,7 +247,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     // Init the table model
     Set tableData = new HashSet();
     Iterator iterator = currentAnnotFeaturesMap.keySet().iterator();
-System.out.println("Fetures " + currentAnnotFeaturesMap);
     while (iterator.hasNext()){
       String key = (String) iterator.next();
       // If in currentAnnotFeaturesMap there is a key contained into
