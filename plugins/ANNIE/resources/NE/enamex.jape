@@ -213,8 +213,7 @@ Priority: 5
  (LASTNAME)
  {Token.string == ","}
  (SPACE)?
- ((INITIALS (SPACE)? )+ |
-  (INITIALS2)) 
+ (INITIALS (SPACE)? )+ 
  (SPACE PERSONENDING)?
 )
 :person -->
