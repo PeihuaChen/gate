@@ -24,6 +24,9 @@ import gate.util.*;
 
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
+  * Some metadata elements are used by GATE to load resources, or index
+  * the members of the CREOLE register; some are used during resource
+  * parameterisation and initialisation.
   * Metadata elements which are used by the CREOLE registration and loading
   * mechanisms are properties of ResourceData implementations and have their
   * own get/set methods. Other metadata elements are made features of the
