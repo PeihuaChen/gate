@@ -354,11 +354,15 @@ public class CorpusImpl extends AbstractLanguageResource
             params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
           try {
-            corpus.add(
-              Factory.createResource(
+            Document doc = (Document)Factory.createResource(
                 DocumentImpl.class.getName(), params, null, docName
-              )
-            );
+              );
+            corpus.add(doc);
+            if(corpus.getLRPersistenceId() != null){
+              //persistent corpus -> unload the document
+              corpus.unloadDocument(doc);
+              Factory.deleteResource(doc);
+            }
           } catch(ResourceInstantiationException e) {
             String nl = Strings.getNl();
             Err.prln(
