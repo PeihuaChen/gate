@@ -119,7 +119,7 @@ public class AnnotationDiff implements VisualResource{
 
   /** This method is required in VisualResource Interface*/
   public JComponent getGUI(){
-    return diffTable;
+    return diffPanel;
   }// getViewer
 
   /**
@@ -308,7 +308,7 @@ public class AnnotationDiff implements VisualResource{
     *  Two Annotation are equals if their offsets, types and features are the
     *  same.
     */
-  protected boolean areEqual(   Annotation anAnnot,
+  public boolean areEqual(   Annotation anAnnot,
                                 Annotation otherAnnot){
     if(anAnnot == null || otherAnnot == null)
       return false;

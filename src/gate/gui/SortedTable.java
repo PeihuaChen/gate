@@ -38,9 +38,9 @@ public class SortedTable extends JTable {
   public SortedTable(){}
 
   /** Constructs a SortedTable using a SortedtableModel*/
-  public void setTableModel(SortedTableModel model) {
+  public void setModel(SortedTableModel model) {
     m_model = model;
-    setModel(model);
+    super.setModel(model);
     InitHeader();
     initColumnSizes(JTable.AUTO_RESIZE_ALL_COLUMNS);
   }//setTableModel

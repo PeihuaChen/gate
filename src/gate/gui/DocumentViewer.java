@@ -69,7 +69,7 @@ public class DocumentViewer extends JPanel {
     textPane.setEditable(false);
     textPane.setText(document.getContent().toString());
     tableView = new SortedTable();
-    tableView.setTableModel(new AnnotationSetTableModel(document,
+    tableView.setModel(new AnnotationSetTableModel(document,
                                                        document.getAnnotations()
                                                         )
                             );
