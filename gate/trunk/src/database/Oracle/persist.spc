@@ -61,6 +61,9 @@ create or replace package persist is
                               p_ann_type         IN varchar2,
                               p_ann_id           OUT number);
 
+
+  procedure delete_lr(p_lr_id     IN number,
+                      p_corp_id   OUT number);
     
 end persist;
 /
