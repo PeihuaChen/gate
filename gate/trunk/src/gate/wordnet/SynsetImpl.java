@@ -96,8 +96,21 @@ public class SynsetImpl implements Synset {
                                           WNHelper.AdjPosition2int(jwAdjective),
                                           this.wnDictionary);
       }
+
       else if (this.synsetPOS == WordNet.POS_VERB) {
+
+        Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Verb);
+        net.didion.jwnl.data.Verb jwVerb = (net.didion.jwnl.data.Verb)jwWord;
+
+        gateWordSense = new VerbImpl(gateWord,
+                                      this,
+                                      0,
+                                      jwWord.getIndex(),
+                                      false,
+                                      jwVerb,
+                                      this.wnDictionary);
       }
+
       else {
         gateWordSense = new WordSenseImpl(gateWord,
                                           this,
