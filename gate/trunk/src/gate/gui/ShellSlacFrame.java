@@ -159,7 +159,16 @@ public class ShellSlacFrame extends MainFrame {
 */
 
     fileMenu.addSeparator();
-    action = new ExitGateAction();
+//    action = new ExitGateAction();
+
+    // define exit action without save of session
+    action = new AbstractAction () {
+      public void actionPerformed(ActionEvent e) {
+        setVisible(false);
+        dispose();
+        System.exit(0);
+      }
+    };
     action.putValue(action.NAME, "Exit");
     fileMenu.add(new XJMenuItem(action, this));
     retMenuBar.add(fileMenu);
