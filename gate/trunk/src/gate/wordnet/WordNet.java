@@ -30,6 +30,8 @@ public interface WordNet extends LanguageResource {
   public static final int POS_NOUN       = 1003;
   public static final int POS_VERB       = 1004;
 
+  public String getVersion();
+
   public Iterator getSynsets();
 
   public Iterator getSynsets(int pos);
