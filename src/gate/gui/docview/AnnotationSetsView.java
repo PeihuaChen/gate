@@ -1200,7 +1200,7 @@ public class AnnotationSetsView extends AbstractDocumentView
               (aHandler.set.getName() == null ? "  " : 
                 aHandler.set.getName()) +
               "]");
-      
+      putValue(SHORT_DESCRIPTION, aHandler.ann.getFeatures().toString());
       this.aHandler = aHandler;
     }
     
