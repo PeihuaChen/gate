@@ -33,7 +33,7 @@ import gate.swing.*;
 import gate.util.*;
 
 public class SerialControllerEditor extends AbstractVisualResource
-                               implements CreoleListener,
+                               implements CreoleListener, ControllerListener,
                                           ActionsPublisher{
 
   public SerialControllerEditor() {
@@ -46,10 +46,13 @@ public class SerialControllerEditor extends AbstractVisualResource
       "gate.gui.ApplicationViewer can only be used for serial controllers\n" +
       target.getClass().toString() +
       " is not a gate.creole.SerialController!");
+    if(controller != null) controller.removeControllerListener(this);
     this.controller = (SerialController)target;
+    controller.addControllerListener(this);
     analyserMode = controller instanceof SerialAnalyserController ||
                    controller instanceof ConditionalSerialAnalyserController;
     conditionalMode = controller instanceof ConditionalController;
+    
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -377,7 +380,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               controller.add(row - 1, value);
             }
           }
-          memberPRsTableModel.fireTableDataChanged();
+//          memberPRsTableModel.fireTableDataChanged();
           //restore selection
           for(int i = 0; i < rows.length; i++){
             int newRow = -1;
@@ -412,7 +415,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               controller.add(row + 1, value);
             }
           }
-          memberPRsTableModel.fireTableDataChanged();
+//          memberPRsTableModel.fireTableDataChanged();
           //restore selection
           for(int i = 0; i < rows.length; i++){
             int newRow = -1;
@@ -789,7 +792,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     if(e.getResource() instanceof ProcessingResource){
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
-      repaint(100);
+//      repaint(100);
     }else if(e.getResource() instanceof LanguageResource){
       if(e.getResource() instanceof Corpus && analyserMode){
         corpusComboModel.fireDataChanged();
@@ -806,7 +809,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
-      repaint(100);
+//      repaint(100);
     }
   }//public void resourceUnloaded(CreoleEvent e)
 
@@ -831,6 +834,26 @@ public class SerialControllerEditor extends AbstractVisualResource
       statusListeners = v;
     }
   }
+  
+  /* (non-Javadoc)
+   * @see gate.event.ControllerListener#resourceAdded(gate.event.ControllerEvent)
+   */
+  public void resourceAdded(ControllerEvent evt){
+    loadedPRsTableModel.fireTableDataChanged();
+    memberPRsTableModel.fireTableDataChanged();
+
+  }
+  
+  /* (non-Javadoc)
+   * @see gate.event.ControllerListener#resourceRemoved(gate.event.ControllerEvent)
+   */
+  public void resourceRemoved(ControllerEvent evt){
+    loadedPRsTableModel.fireTableDataChanged();
+    memberPRsTableModel.fireTableDataChanged();
+  }
+  
+  
+  
   public synchronized void addStatusListener(StatusListener l) {
     Vector v = statusListeners == null ? new Vector(2) :
                                   (Vector) statusListeners.clone();
@@ -1072,10 +1095,10 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     public void actionPerformed(ActionEvent e){
       controller.add(pr);
-      loadedPRsTableModel.fireTableDataChanged();
-      memberPRsTableModel.fireTableDataChanged();
-      SerialControllerEditor.this.validate();
-      SerialControllerEditor.this.repaint(100);
+//      loadedPRsTableModel.fireTableDataChanged();
+//      memberPRsTableModel.fireTableDataChanged();
+//      SerialControllerEditor.this.validate();
+//      SerialControllerEditor.this.repaint(100);
     }
 
     ProcessingResource pr;
@@ -1091,14 +1114,14 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     public void actionPerformed(ActionEvent e){
       if(controller.remove(pr)){
-        loadedPRsTableModel.fireTableDataChanged();
-        memberPRsTableModel.fireTableDataChanged();
+//        loadedPRsTableModel.fireTableDataChanged();
+//        memberPRsTableModel.fireTableDataChanged();
         if(parametersEditor.getResource() == pr){
           parametersEditor.init(null, null);
           parametersBorder.setTitle("No selected processing resource");
         }
-        SerialControllerEditor.this.validate();
-        SerialControllerEditor.this.repaint(100);
+//        SerialControllerEditor.this.validate();
+//        SerialControllerEditor.this.repaint(100);
       }
     }
 
