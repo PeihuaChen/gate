@@ -144,9 +144,15 @@ if(true) return;
   public void testReloading() throws Exception {
 
     GateClassLoader loader = Gate.getClassLoader();
-    loader.addURL(new URL("http://derwent.dcs.shef.ac.uk/tests/TestJdk.jar"));
-    //loader.addURL(new URL("file:/build/TestJdk.jar"));
 
+    if (Gate.isGateHomeReachable())
+      loader.addURL(new URL("http://derwent.dcs.shef.ac.uk/tests/TestJdk.jar"));
+    else if (Gate.isGateAcUkReachable())
+      loader.addURL(new URL("http://gate.ac.uk/tests/TestJdk.jar"));
+    else
+      throw new LazyProgrammerException();
+
+    //loader.addURL(new URL("file:/build/TestJdk.jar"));
     Class dummyClass1 = loader.loadClass("testpkg.Dummy");
     assert("dummy1 is null", dummyClass1 != null);
     Object dummyObject1 = dummyClass1.newInstance();

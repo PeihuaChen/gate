@@ -58,9 +58,18 @@ public class TestCreole extends TestCase
     CreoleRegister reg = Gate.getCreoleRegister();
     reg.clear();
     reg.getDirectories().clear();
-    reg.addDirectory(
-      new URL("http://derwent.dcs.shef.ac.uk/tests/creole.xml")
-    );
+
+    if (Gate.isGateHomeReachable())
+      reg.addDirectory(
+        new URL("http://derwent.dcs.shef.ac.uk/tests/creole.xml")
+      );
+    else if (Gate.isGateAcUkReachable())
+      reg.addDirectory(
+        new URL("http://gate.ac.uk/tests/creole.xml")
+      );
+    else
+      throw new LazyProgrammerException();
+
     reg.registerDirectories();
 
     assert(reg.size() == 2);

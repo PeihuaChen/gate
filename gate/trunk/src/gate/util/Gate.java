@@ -11,6 +11,7 @@ package gate.util;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
 
 import gate.*;
 import gate.creole.*;
@@ -20,11 +21,20 @@ import gate.creole.*;
   */
 public class Gate
 {
+
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
     "http://gate.ac.uk/creole/creole.xml"
   };
 
+  public static void main(String args[]){
+    Gate gate = new Gate();
+    try{
+      gate.init();
+    }catch (Exception e){
+      e.printStackTrace(System.err);
+    }
+  }
   /** Initialisation - must be called by all clients before using
     * any other parts of the library.
     */
@@ -40,7 +50,34 @@ public class Gate
 
     // check net connection and set canReachGateHome
     // and canReachGateAcUk appropriately
-//////////////// oana....
+    try{
+      // determine an IP address for the given host name
+      InetAddress inet = InetAddress.getByName("derwent.dcs.shef.ac.uk");
+
+      // set the gateHomeReachable
+      gateHomeReachable = true;
+
+    } catch (UnknownHostException e) {
+      // if no IP address for the host could be found then
+      // set the gateHomeReachable on false
+      gateHomeReachable = false;
+    }
+
+    try{
+      // determine an IP address for www.gate.ac.uk
+      InetAddress inet = InetAddress.getByName("www.gate.ac.uk");
+
+      // set the gateAcUkReachable
+      gateAcUkReachable = true;
+
+    } catch (UnknownHostException e) {
+
+      // if no IP address could be found
+      // then set the gateAcUkReachable on false
+      gateAcUkReachable = false;
+    }
+
+
   } // init()
 
   /** Is access to the GATE internal server available? */
