@@ -116,9 +116,6 @@ public class WeakValueHashMap extends AbstractMap{
 
     public Iterator iterator() {
       return new Iterator(){
-        {
-          supportEntrySetIter = supportEntrySet.iterator();
-        }
 
         public boolean hasNext(){
           return supportEntrySetIter.hasNext();
@@ -134,7 +131,7 @@ public class WeakValueHashMap extends AbstractMap{
         public void remove(){
           supportEntrySetIter.remove();
         }
-        Iterator supportEntrySetIter;
+        Iterator supportEntrySetIter = supportEntrySet.iterator();
       };
     }
 
