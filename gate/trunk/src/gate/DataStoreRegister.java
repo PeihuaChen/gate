@@ -25,4 +25,21 @@ import gate.persist.*;
   */
 public class DataStoreRegister extends HashSet {
 
+  /** All the DataStore classes available. This is a map of class name
+   *  to descriptive text.
+   */
+  public static Map getDataStoreClassNames() {
+    Map names = new HashMap();
+
+// no plugability here at present.... at some future point there should
+// be a capability to add new data store classes via creole.xml metadata
+// and resource jars
+    names.put(
+      "gate.persist.SerialDataStore",
+      "A simple file-based storage mechanism that uses Java serialisation"
+    );
+
+    return names;
+  } // getDataStoreClassNames()
+
 } // class DataStoreRegister
