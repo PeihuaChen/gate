@@ -10,6 +10,7 @@ package gate.corpora;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
 
 import gate.*;
 import gate.annotation.*;
@@ -119,18 +120,35 @@ import gate.util.*;
   */
 public class DocumentImpl implements Document
 {
-  /** Construction from URL */
-  public DocumentImpl(URL u) {
-  } // DocumentImpl(u)
+  /** Default construction. Content left empty. */
+  public DocumentImpl() {
+    content = new DocumentContentImpl();
+  } // default construction
 
-  /** Construction from URL and offsets */
+  /** Construction from URL; content read over the net. */
+  public DocumentImpl(URL u) { this(u, null, null); }
+
+  /** Construction from URL and offsets. Both offsets must be
+    * non-null, or they are both ignored. Content is read over the
+    * net between the offsets.
+    */
   public DocumentImpl(URL u, Long start, Long end) {
+    // store the offsets if they're non-null
+    if(start != null && end != null) {
+      sourceURLOffsets = new Long[2];
+      sourceURLOffsets[0] = start;
+      sourceURLOffsets[1] = end;
+    }
+
+    // get content out of the URL
+    content = new DocumentContentImpl(u, start, end);
   } // DocumentImpl(u,start,end)
 
   /** Construction from String representing URL */
-  public DocumentImpl(String urlString) {
+  public DocumentImpl(String urlString) throws MalformedURLException {
+    this(new URL(urlString), null, null);
   } // DocumentImpl(urlString)
-  
+
   /** Documents are identified by URLs */
   public URL getSourceURL() { throw new LazyProgrammerException(); }
 
@@ -145,18 +163,6 @@ public class DocumentImpl implements Document
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() { throw new LazyProgrammerException(); }
 
-  /** The portion of content falling between two offsets. */
-// moved to DC
-  // public Object getContent(Long start, Long end) throws InvalidOffsetException
-  // { return null; }
-
-  /** The size of the set of valid offsets in this document's content.
-    * For texts this will be the length of the string. For audiovisual
-    * materials this will be a measure of time.
-    */ 
-// moved to DC
-  // public Long size() { return null; }
-
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
     */
@@ -167,7 +173,7 @@ public class DocumentImpl implements Document
     */
   public AnnotationSet getAnnotations(String name) {
     throw new LazyProgrammerException();
-  } // getAnnotations(name) 
+  } // getAnnotations(name)
 
   /** Get the features associated with this document. */
   public FeatureMap getFeatures() { return features; }
@@ -183,6 +189,28 @@ public class DocumentImpl implements Document
     return new Integer(nextAnnotationId++);
   } // getNextAnnotationId
 
+  /** Check that an offset is valid */
+  public boolean isValidOffset(Long offset) {
+    if(offset == null)
+      return false;
+
+    long o = offset.longValue();
+    long len = content.size().longValue();
+    if(o > len || o < 0)
+      return false;
+      
+    return true;
+  } // isValidOffset
+
+  /** Check that both start and end are valid offsets and that
+    * they constitute a valid offset range
+    */
+  public boolean isValidOffsetRange(Long start, Long end) {
+    return
+      isValidOffset(start) && isValidOffset(end) &&
+      start.longValue() <= end.longValue();
+  } // isValidOffsetRange(start,end)
+
   /** Generate and return the next node ID */
   public Integer getNextNodeId() { return new Integer(nextNodeId++); }
 
@@ -194,4 +222,12 @@ public class DocumentImpl implements Document
 
   /** The id of the next new node */
   int nextNodeId = 0;
+
+  /** The content of the document */
+  DocumentContent content;
+
+  /** The range that the content comes from at the source URL
+    * (or null if none).
+    */
+  Long[] sourceURLOffsets = null;
 } // class DocumentImpl

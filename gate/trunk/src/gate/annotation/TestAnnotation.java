@@ -32,8 +32,7 @@ public class TestAnnotation extends TestCase
 
   /** Fixture set up */
   public void setUp() throws InvalidOffsetException {
-    doc1 =
-      new gate.corpora.DocumentImpl("http://derwent:8000/tests/doc1.html");
+    doc1 = new gate.corpora.DocumentImpl();
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
@@ -161,7 +160,7 @@ public class TestAnnotation extends TestCase
 
   /** Test type index */
   public void testTypeIndex() throws InvalidOffsetException {
-    Document doc = new DocumentImpl("http://derwent:8000/tests/doc1.html");
+    Document doc = new DocumentImpl();
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
@@ -391,7 +390,7 @@ public class TestAnnotation extends TestCase
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() throws InvalidOffsetException {
     // constuct an empty AS
-    Document doc = new DocumentImpl("http://derwent:8000/tests/doc1.html");
+    Document doc = new DocumentImpl();
     AnnotationSet as = new AnnotationSetImpl(doc);
     assertEquals(as.size(), 0);
 

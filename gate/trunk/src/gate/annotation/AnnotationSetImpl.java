@@ -241,14 +241,7 @@ implements AnnotationSet
     Long start, Long end, String type, FeatureMap features
   ) throws InvalidOffsetException {
     // are the offsets valid?
-    if(start == null || end == null)
-      throw new InvalidOffsetException();
-    long startValue = start.longValue();
-    long endValue = end.longValue();
-    if(
-      startValue > endValue || startValue < 0 || endValue < 0
-// || startValue > doc.size() || endValue > doc.size()
-    )
+    if(! doc.isValidOffsetRange(start, end))
       throw new InvalidOffsetException();
 
     // the id of the new annotation

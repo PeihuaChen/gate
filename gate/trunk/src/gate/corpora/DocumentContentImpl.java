@@ -10,6 +10,7 @@ package gate.corpora;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
 
 import gate.*;
 import gate.annotation.*;
@@ -19,6 +20,23 @@ import gate.util.*;
   */
 public class DocumentContentImpl implements DocumentContent
 {
+  /** Default construction */
+  public DocumentContentImpl() {
+  } // default construction
+  
+  /** Contruction from URL and offsets. */
+  public DocumentContentImpl(URL u, Long start, Long end) {
+    BufferedReader uReader = null;
+    try {
+      uReader = new BufferedReader(new InputStreamReader(u.openStream()));
+      uReader.readLine();
+    } catch(UnknownHostException e) { // no network connection
+      return;
+    } catch(IOException e) {
+    }
+  } // Contruction from URL and offsets */
+
+
   /** Propagate changes to the document content. */
   void edit(Long start, Long end, DocumentContent replacement)
   throws InvalidOffsetException {
@@ -35,7 +53,7 @@ public class DocumentContentImpl implements DocumentContent
     * content).
     */
   public Long size() {
-    throw new LazyProgrammerException();
+    return new Long(100000);
   } // size()
 
 } // class DocumentContentImpl
