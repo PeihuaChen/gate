@@ -1942,6 +1942,8 @@ public class MainFrame extends JFrame
 
                 //2. open the oracle datastore
                 ds = Factory.openDataStore(className, storageURL);
+                //set the session, so all get/adopt/etc work
+                ds.setSession(mySession);
 
                 //3. add the security data for this datastore
                 //this saves the user and group information, so it can
