@@ -67,7 +67,10 @@ public class TestHtml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
                                                         doc, doc.getSourceUrl()
                                                         );
-    assert(docFormat instanceof gate.corpora.HtmlDocumentFormat);
+    assert( "Bad document Format was produced. HtmlDocumentFormat was expected",
+            docFormat instanceof gate.corpora.HtmlDocumentFormat
+          );
+
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);

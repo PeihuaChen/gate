@@ -67,7 +67,10 @@ public class TestXml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );
-    assert(docFormat instanceof gate.corpora.XmlDocumentFormat);
+    assert( "Bad document Format was produced. XmlDocumentFormat was expected",
+            docFormat instanceof gate.corpora.XmlDocumentFormat
+          );
+
     // Set the maps
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.setElement2StringMap(anElement2StringMap);
