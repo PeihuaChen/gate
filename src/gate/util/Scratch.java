@@ -41,23 +41,43 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-    File tempFile = File.createTempFile("gaga", "");
-    tempFile.delete();
-    tempFile.mkdir();
-    tempFile.deleteOnExit();
-    File tempFile2 = File.createTempFile("fil", ".tmp", tempFile);
-    tempFile2.deleteOnExit();
-System.out.println(tempFile.getCanonicalPath());
-    Thread.sleep(100000);
+    Gate.init();
+    Document doc = Factory.newDocument("The quick brown fox jumped over the lazy dog");
+    AnnotationSet annSet1 = doc.getAnnotations("Set1");
+    annSet1.add(new Long(1), new Long(5), "Foo", Factory.newFeatureMap());
 
+    AnnotationSet annSet2 = doc.getAnnotations("Set2");
+    annSet2.add(new Long(1), new Long(5), "Bar", Factory.newFeatureMap());
+    annSet2.addAll(annSet1);
+
+    List annotations = new ArrayList(annSet2);
+    Collections.sort(annotations, new OffsetComparator());
+    Iterator annIter = annotations.iterator();
+    while(annIter.hasNext()){
+      Annotation ann =(Annotation)annIter.next();
+      System.out.print("Start node: ID = " + ann.getStartNode().getId());
+      System.out.println(" Offset = " + ann.getStartNode().getOffset());
+      System.out.print("End node: ID = " + ann.getEndNode().getId());
+      System.out.println(" Offset = " + ann.getEndNode().getOffset());
+
+    }
+//    File tempFile = File.createTempFile("gaga", "");
+//    tempFile.delete();
+//    tempFile.mkdir();
+//    tempFile.deleteOnExit();
+//    File tempFile2 = File.createTempFile("fil", ".tmp", tempFile);
+//    tempFile2.deleteOnExit();
+//System.out.println(tempFile.getCanonicalPath());
+//    Thread.sleep(100000);
+//
 //    Map charsets = java.nio.charset.Charset.availableCharsets();
 //    Iterator namesIter = charsets.keySet().iterator();
 //    while(namesIter.hasNext()){
 //      String name = (String)namesIter.next();
 //      System.out.println(name + " : " + charsets.get(name));
 //    }
-    System.out.println(System.getProperty("file.encoding"));
-    System.out.println(java.nio.charset.Charset.forName(System.getProperty("file.encoding")).name());
+//    System.out.println(System.getProperty("file.encoding"));
+//    System.out.println(java.nio.charset.Charset.forName(System.getProperty("file.encoding")).name());
 //    System.out.println(new Character((char)0xa3));
 //    Gate.init();
 //
