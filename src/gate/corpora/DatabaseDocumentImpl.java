@@ -983,25 +983,36 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   }
 
-  private void _setAnnotations(String setName,Collection annotations) {
+  private void _setAnnotations(String setName,Collection annotations)
+    throws InvalidOffsetException {
+
+    AnnotationSet tempSet = null;
 
     if (null == setName) {
       Assert.assertTrue(null == this.defaultAnnots);
-      this.defaultAnnots = new DatabaseAnnotationSetImpl(this,annotations);
-
-      //add to the set of loaded a-sets but do not add its annotations to the
-      //list of new annotations
-//      this.loadedAnnotSets.add(this.defaultAnnots);
+//      this.defaultAnnots = new DatabaseAnnotationSetImpl(this,annotations);
+      tempSet = new DatabaseAnnotationSetImpl(this);
+      this.defaultAnnots = tempSet;
     }
     else {
       Assert.assertTrue(false == this.namedAnnotSets.containsKey(setName));
-      AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName,annotations);
-      this.namedAnnotSets.put(setName,annSet);
-
-      //add to the set of loaded a-sets but do not add its annotations to the
-      //list of new annotations
-//      this.loadedAnnotSets.add(annSet);
+//      AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName,annotations);
+      tempSet = new DatabaseAnnotationSetImpl(this,setName);
+      this.namedAnnotSets.put(setName,tempSet);
     }
+
+    //NOTE - the source aset is not from this document, so we can't use the proper constructor -
+    //we should iterate all elements from the original aset and create equiva elements in the new aset
+    Iterator itAnnotations = annotations.iterator();
+    while (itAnnotations.hasNext()) {
+      Annotation currAnn = (Annotation)itAnnotations.next();
+      tempSet.add(currAnn.getId(),
+                  currAnn.getStartNode().getOffset(),
+                  currAnn.getEndNode().getOffset(),
+                  currAnn.getType(),
+                  currAnn.getFeatures());
+    }
+
   }
 
   /** Set method for the document's URL */
@@ -1204,7 +1215,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
   }//setParent
 
   public void setInitData__$$__(Object data)
-    throws PersistenceException {
+    throws PersistenceException, InvalidOffsetException {
 
     HashMap initData = (HashMap)data;
 
