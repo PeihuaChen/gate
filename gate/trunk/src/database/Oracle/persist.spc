@@ -17,6 +17,14 @@ create or replace package persist is
  */  
 
   ENCODING_UTF constant varchar2(16) := 'UTF8';
+  
+  DOCUMENT_CLASS constant varchar2(128) := 'gate.corpora.DatabaseDocumentImpl';
+  CORPUS_CLASS constant varchar2(128) :=  'gate.corpora.CorpusImpl';
+
+  FEATURE_OWNER_CORPUS      constant number :=  1;
+  FEATURE_OWNER_DOCUMENT    constant number :=  2;
+  FEATURE_OWNER_ANNOTATION  constant number :=  3;
+  
    
   VALUE_TYPE_INTEGER    constant number := 101;
   VALUE_TYPE_LONG       constant number := 102;
@@ -38,8 +46,7 @@ create or replace package persist is
   procedure set_lr_name(p_lr_id     IN number,
                         p_lr_name   IN varchar2);
   
-  procedure delete_lr(p_lr_id     IN number,
-                      p_lr_type   IN varchar2);
+  procedure delete_lr(p_lr_id     IN number);
 
 
   procedure create_lr(p_usr_id           IN number,
