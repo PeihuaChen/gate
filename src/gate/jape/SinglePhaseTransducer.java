@@ -481,6 +481,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           Annotation onePath;
           State currentState = currentFSM.getFSMPosition();
           Iterator transitionsIter;
+          FeatureMap features = Factory.newFeatureMap();
           //foreach possible annotation
           while(pathsIter.hasNext()){
             onePath = (Annotation)pathsIter.next();
@@ -494,12 +495,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
               currentConstraints =
                            currentTransition.getConstraints().getConstraints();
               String annType;
-              FeatureMap features = Factory.newFeatureMap();
               //we assume that all annotations in a contraint are of the same type
               for(int i = 0; i<currentConstraints.length; i++){
                 annType = currentConstraints[i].getAnnotType();
                 //if wrong type try next transition
                 if(!annType.equals(onePath.getType()))continue transitionsWhile;
+                features.clear();
                 features.putAll(currentConstraints[i].getAttributeSeq());
               }
               if(onePath.getFeatures().entrySet().containsAll(features.entrySet())){
