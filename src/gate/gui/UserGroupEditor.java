@@ -321,6 +321,7 @@ public class UserGroupEditor extends JComponent {
   void firstListItemSelected(ListSelectionEvent e) {
     int i = firstList.getSelectedIndex();
     String name = (String) firstList.getModel().getElementAt(i);
+    Out.prln("user groups to display: "+ name);
 
     if (usersFirst)
       showGroupsForUser(name);
@@ -329,6 +330,7 @@ public class UserGroupEditor extends JComponent {
   } //firstListItemSelected
 
   protected void showGroupsForUser(String name) {
+    Out.prln("user selected: " + name);
     User user = null;
     try {
       user = controller.findUser(name);
@@ -659,12 +661,10 @@ public class UserGroupEditor extends JComponent {
       try {
         User user = controller.findUser((String) model.get(index) );
         user.setName(newName, session);
+        model.setElementAt(newName, index);
 
         //finally update the original lists
-        if (usersFirst)
-          showUsersFirst();
-        else
-          showUsersForGroup((String) firstList.getSelectedValue());
+        source.setSelectedIndex(index);
       } catch (gate.persist.PersistenceException ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
       } catch (gate.security.SecurityException ex1) {
@@ -689,8 +689,20 @@ public class UserGroupEditor extends JComponent {
     }//
 
     public void actionPerformed(ActionEvent e){
+      int index = source.getSelectedIndex();
+      if (index == -1) //return if no selection
+        return;
+
+      String groupName = JOptionPane.showInputDialog(
+                                     UserGroupEditor.this,
+                                    "Please enter the name of the new group");
+
+      //don't change if nothing selected
+      if (groupName == null || groupName.equals(""))
+        return;
+
       try {
-        controller.createGroup("myGroup", session);
+        controller.createGroup(groupName, session);
       } catch (gate.persist.PersistenceException ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
       } catch (gate.security.SecurityException ex1) {
@@ -797,28 +809,59 @@ public class UserGroupEditor extends JComponent {
       if (index == -1) //return if no selection
         return;
       DefaultListModel model = (DefaultListModel) source.getModel();
+      String groupName = (String) source.getSelectedValue();
 
       JList userList = new JList();
       userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
       DefaultListModel usrListModel = new DefaultListModel();
-      readUsers( usrListModel, userList);
+
+      Group group = null;
+      try {
+        group = controller.findGroup(groupName);
+      } catch (gate.persist.PersistenceException ex) {
+        throw new gate.util.GateRuntimeException(
+                    "Cannot locate group: " + groupName
+                  );
+      } catch (gate.security.SecurityException ex1) {
+        throw new gate.util.GateRuntimeException(
+                    ex1.getMessage()
+                  );
+      }
+      if (group == null)
+        return;
+      java.util.List myUsers = group.getUsers();
+      if (myUsers == null)
+        return;
+
+      for (int j = 0; j< myUsers.size(); j++) {
+        try {
+          User myUser = (User)myUsers.get(j);
+          usrListModel.addElement(myUser.getName());
+        } catch (Exception ex) {
+          throw new gate.util.GateRuntimeException(
+                  ex.getMessage()
+                );
+        }//catch
+      }//for loop
+      userList.setModel(usrListModel);
+
       if(OkCancelDialog.showDialog(
                           UserGroupEditor.this,
                           new JScrollPane(userList),
                           "Choose the user you want removed from this group")
         ){
 
-        String userName = (String) userList.getSelectedValue();
 
         try {
-          Group group = controller.findGroup((String) model.get(index) );
-          User user = controller.findUser(userName);
+          User user = controller.findUser((String) userList.getSelectedValue());
           group.removeUser(user, session);
 
           //finally update the original lists
           if (!usersFirst)
             showUsersForGroup(group.getName());
+          else
+            showGroupsForUser(user.getName());
         } catch (gate.persist.PersistenceException ex) {
           throw new gate.util.GateRuntimeException(ex.getMessage());
         } catch (gate.security.SecurityException ex1) {
