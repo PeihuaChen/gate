@@ -405,7 +405,11 @@ class AnnotDiffDialog extends JFrame {
     Dimension maxDimm = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension newDim = new Dimension(maxDimm.width/3, maxDimm.height/3);
     JScrollPane upperScrolPane = new JScrollPane(northBox);
+    upperScrolPane.getViewport().
+                    putClientProperty("EnableWindowBlit", new Boolean(true));
     JScrollPane lowerScrolPane = new JScrollPane(annotDiff);
+    lowerScrolPane.getViewport().
+                    putClientProperty("EnableWindowBlit", new Boolean(true));
     lowerScrolPane.setMaximumSize(newDim);
     lowerScrolPane.setMinimumSize(newDim);
     lowerScrolPane.setPreferredSize(newDim);
