@@ -42,19 +42,17 @@ class SystemData
   /** The list of LRs */
   List lrList = new ArrayList();
 
-  /** The type name of the SYSTEM */
+  /** The name of the SYSTEM */
   String systemName = new String("name not set");
+
+  /** The type name of the SYSTEM's controller */
+  String controllerTypeName = new String("controller type name not set");
 
   /** Create a Controller; called when all the system data
     * is present.
     */
-  void createSystem(String controllerTypeName)
-  throws GateSaxException
+  void createSystem() throws GateSaxException
   {
-    // create all the LRs
-
-    // create all the PRs
-
     // create the controller
     try {
       FeatureMap controllerParams = Factory.newFeatureMap();
@@ -66,7 +64,6 @@ class SystemData
         systemName + "; problem was: " + Strings.getNl() + e
       );
     }
-
   } // createSystem()
 
 } // class SystemData

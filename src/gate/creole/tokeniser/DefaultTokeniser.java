@@ -94,7 +94,7 @@ import gate.fsm.TestFSM;
   * //.
  */
 
-public class DefaultTokeniser extends AbstractResource
+public class DefaultTokeniser extends AbstractProcessingResource
 implements Runnable, ProcessingResource, ProcessProgressReporter,
            StatusReporter
 {
@@ -538,12 +538,20 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    */
   public void run() {
     //check the input
-    if(document == null)
-      throw new GateRuntimeException("No document to tokenise!");
+    if(document == null) {
+      runtimeException = new ProcessingResourceRuntimeException(
+        "No document to tokenise!"
+      );
+      return;
+    }
+
     if(annotationSet == null) annotationSet = document.getAnnotations();
-    else if(annotationSet.getDocument() != document)
-      throw new GateRuntimeException(
-        "The annotation set provided does not belong to the current document!");
+    else if(annotationSet.getDocument() != document) {
+      runtimeException = new ProcessingResourceRuntimeException(
+        "The annotation set provided does not belong to the current document!"
+      );
+      return;
+    }
 
     fireStatusChangedEvent(
       "Tokenising " + document.getSourceUrl().getFile() + "...");
@@ -617,7 +625,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
                             lastMatchingState.getTokenDesc()[0][0], newTokenFm);
           } catch(InvalidOffsetException ioe) {
             //This REALLY shouldn't happen!
-            throw new LuckyException(ioe.toString());
+            throw new GateRuntimeException(ioe.toString());
           }
 
           // Out.println(lastMatchingState.getTokenDesc()[0][0] +
@@ -655,7 +663,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
                           lastMatchingState.getTokenDesc()[0][0], newTokenFm);
       } catch(InvalidOffsetException ioe) {
         //This REALLY shouldn't happen!
-        ioe.printStackTrace(Err.getPrintWriter());
+        throw new GateRuntimeException(ioe.toString());
       }
     }
     reset();

@@ -24,7 +24,8 @@ import gate.util.*;
 
 /** The CREOLE register records the set of resources that are currently
   * known to the system. Each member of the register is a
-  * <A HREF=ResourceData.html>ResourceData</A> object.
+  * <A HREF=creole/ResourceData.html>ResourceData</A> object, indexed by
+  * the class name or interface name of the resource.
   * <P>
   * The register is accessible from the static method
   * <A HREF=util/Gate.html#getCreoleRegister()>gate.util.Gate.getCreoleRegister
@@ -44,7 +45,7 @@ import gate.util.*;
   * <P>
   * To register resources clients use the <CODE>registerDirectories</CODE>
   * methods. When resources have been registered they can be accessed via
-  * their <CODE>CreoleData</CODE> objects. So a typical use of the register
+  * their <CODE>ResourceData</CODE> objects. So a typical use of the register
   * is to: add the set of URLs containing CREOLE directories; register
   * all resources found at those URLs; browse the set of registered
   * resources.
@@ -53,7 +54,7 @@ import gate.util.*;
   * already present in the register, the new silently overwrites the old.
   *
   * @see gate.util.Gate
-  * @see gate.ResourceData
+  * @see gate.creole.ResourceData
   */
 public interface CreoleRegister extends Map, Serializable
 {

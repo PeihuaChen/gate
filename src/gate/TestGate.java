@@ -151,8 +151,8 @@ public class TestGate {
 
     try {
       // suite.addTest(TestAnnotationDiff.suite());
-      suite.addTest(TestBumpyStack.suite());
       suite.addTest(TestConfig.suite());                //*
+      suite.addTest(TestBumpyStack.suite());
       suite.addTest(TestAnnotation.suite());
       suite.addTest(TestEmail.suite());
       suite.addTest(TestXml.suite());

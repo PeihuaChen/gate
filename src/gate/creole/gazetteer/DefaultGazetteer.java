@@ -49,7 +49,8 @@ import gate.*;
   * will generate annotations of type Lookup having the attributes specified in
   * the definition file.
   */
-public class DefaultGazetteer implements ProcessingResource{
+public class DefaultGazetteer extends AbstractProcessingResource
+implements ProcessingResource {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -282,12 +283,20 @@ public class DefaultGazetteer implements ProcessingResource{
     */
   public void run(){
     //check the input
-    if(document == null)
-      throw new GateRuntimeException("No document to parse!");
+    if(document == null) {
+      runtimeException = new ProcessingResourceRuntimeException(
+        "No document to parse!"
+      );
+      return;
+    }
+
     if(annotationSet == null) annotationSet = document.getAnnotations();
-    else if(annotationSet.getDocument() != document)
-      throw new GateRuntimeException(
-        "The annotation set provided does not belong to the current document!");
+    else if(annotationSet.getDocument() != document) {
+      runtimeException = new ProcessingResourceRuntimeException(
+        "The annotation set provided does not belong to the current document!"
+      );
+      return;
+    }
 
     fireStatusChanged("Doing lookup in " +
                            document.getSourceUrl().getFile() + "...");
@@ -376,7 +385,7 @@ public class DefaultGazetteer implements ProcessingResource{
                           "Lookup",
                           fm);
         } catch(InvalidOffsetException ioe) {
-          throw new LuckyException(ioe.toString());
+          throw new GateRuntimeException(ioe.toString());
         }
       }//while(lookupIter.hasNext())
     }

@@ -25,7 +25,7 @@ import gate.creole.*;
 /** Execute a list of PRs serially.
   */
 public class SerialController
-extends AbstractResource implements Controller
+extends AbstractProcessingResource implements Controller
 {
   /** The list of resources the controller runs. */
   protected List resourceList = new ArrayList();
@@ -48,8 +48,17 @@ extends AbstractResource implements Controller
     Iterator iter = resourceList.iterator();
     while(iter.hasNext()) {
       ProcessingResource pr = (ProcessingResource) iter.next();
+
+      //reg.parameterise(pr, parameterListIdMap.get(pr));
       pr.run();
-    }
+      try {
+        pr.check();
+      } catch(ProcessingResourceRuntimeException e) {
+        runtimeException = e;
+        return;
+      }
+    } // for each PR in the resourceList
+
   } // run()
 
 } // class SerialController

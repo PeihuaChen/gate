@@ -132,10 +132,12 @@ public class ConfigXmlHandler extends HandlerBase {
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("SYSTEM")) {
+// check we got correct params on systemData?
+      systemData.createSystem();
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CONTROLLER")) {
-      systemData.createSystem((String) contentStack.pop());
+      systemData.controllerTypeName = (String) contentStack.pop();
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("LR")) {

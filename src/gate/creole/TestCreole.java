@@ -206,6 +206,21 @@ public class TestCreole extends TestCase
     );
   } // testComments()
 
+  /** Test default run() on processing resources */
+  public void testDefaultRun() throws Exception {
+    ProcessingResource defaultPr = new AbstractProcessingResource() {
+    };
+    defaultPr.run();
+    boolean gotExceptionAsExpected = false;
+    try {
+      defaultPr.check();
+    } catch(ProcessingResourceRuntimeException e) {
+      gotExceptionAsExpected = true;
+    }
+
+    assert("check should have thrown exception", gotExceptionAsExpected);
+  } // testDefaultRun()
+
   /** Test arbitrary metadata elements on resources */
   public void testArbitraryMetadata() throws Exception {
 

@@ -36,9 +36,11 @@ import gate.creole.*;
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.
   */
-public class Batch implements JapeConstants, java.io.Serializable,
-                              ProcessProgressReporter, StatusReporter,
-                              ProcessingResource{
+public class Batch
+extends AbstractProcessingResource
+implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
+           StatusReporter, ProcessingResource
+{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -499,6 +501,10 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.17  2000/11/10 18:53:57  hamish
+// implemented exception policy for PRs, PRs.check, and
+// added AbstractProcessingResource
+//
 // Revision 1.16  2000/11/10 12:35:25  valyt
 // Made the tokeniser and gazetter reset after each run.
 //

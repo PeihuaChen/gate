@@ -18,10 +18,15 @@ package gate;
 import java.util.*;
 
 import gate.util.*;
+import gate.creole.*;
 
 /** Models all sorts of processing resources.
+  * Because <CODE>run()</CODE> doesn't throw exceptions, we
+  * have a <CODE>check()</CODE> that will re-throw any exception
+  * that was caught when <CODE>run()</CODE> was invoked.
   */
 public interface ProcessingResource extends Resource, Runnable
 {
-
+  /** Trigger any exception that was caught when run() was invoked. */
+  public void check() throws ProcessingResourceRuntimeException;
 } // interface ProcessingResource
