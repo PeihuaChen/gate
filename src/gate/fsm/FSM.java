@@ -305,6 +305,8 @@ public class FSM implements JapeConstants{
       if(currentInnerState.isFinal()){
         action = (RightHandSide)currentInnerState.getAction();
         initialState.setAction(action);
+        initialState.setFileIndex(currentInnerState.getFileIndex());
+        initialState.setPriority(currentInnerState.getPriority());
         break;
       }
     }
@@ -340,6 +342,8 @@ public class FSM implements JapeConstants{
                 if(currentInnerState.isFinal()) {
                   newState.setAction(
                           (RightHandSide)currentInnerState.getAction());
+                  newState.setFileIndex(currentInnerState.getFileIndex());
+                  newState.setPriority(currentInnerState.getPriority());
                   break;
                 }
               }

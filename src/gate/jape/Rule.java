@@ -53,7 +53,7 @@ implements JapeConstants, java.io.Serializable
   /** The priority of the rule. */
   private int priority;
 
-  /** Get the rule pririty. */
+  /** Get the rule priority. */
   public int getPriority() { return priority; }
 
   /** The rule's position in sequence (e.g. order in file). */
@@ -209,6 +209,9 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.11  2001/02/20 12:25:49  valyt
+// Fixed the Jpae priorities bug
+//
 // Revision 1.10  2001/01/21 20:51:31  valyt
 // Added the DocumentEditor class and the necessary changes to the gate API
 //

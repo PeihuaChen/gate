@@ -531,7 +531,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           startNode = ((Annotation)annSet.iterator().next()).getStartNode();
         }
       } else if(ruleApplicationStyle == BRILL_STYLE) {
-//System.out.println("Brill acceptor");
+      //System.out.println("Brill acceptor");
         // fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
         FSMInstance currentAcceptor;
@@ -560,6 +560,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
         // just execute the longest (last) rule.
+
         FSMInstance currentAcceptor =
                                     (FSMInstance)acceptingFSMInstances.last();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
@@ -654,6 +655,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.26  2001/02/20 12:25:49  valyt
+// Fixed the Jpae priorities bug
+//
 // Revision 1.25  2001/01/21 20:51:31  valyt
 // Added the DocumentEditor class and the necessary changes to the gate API
 //

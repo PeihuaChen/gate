@@ -81,6 +81,7 @@ public class FSMInstance implements Comparable, Cloneable{
   public void setFSMPosition(State newFSMPos) {
     FSMPosition = newFSMPos;
     fileIndex = FSMPosition.getFileIndex();
+    priority = FSMPosition.getPriority();
   }
 
   /** Returns the index in the Jape definition file of the rule that caused
@@ -130,7 +131,25 @@ public class FSMInstance implements Comparable, Cloneable{
   /** Overrides the hashCode method from Object so this obejcts can be stored in
     * hash maps and hash sets.
     */
-  public int hashCode() { return (int)length; }
+  public int hashCode() {
+    return (int)length ^ priority ^ fileIndex ^ bindings.hashCode() ^
+           FSMPosition.getAction().hashCode();
+  }
+
+  public boolean equals(Object other){
+    if(other instanceof FSMInstance){
+      FSMInstance otherFSM = (FSMInstance)other;
+      boolean result = length == otherFSM.length &&
+             priority == otherFSM.priority &&
+             fileIndex == otherFSM.fileIndex &&
+             bindings.equals(otherFSM.bindings) &&
+             FSMPosition.getAction().equals(otherFSM.FSMPosition.getAction());
+System.out.println("FSMInstance.equals() : " + result);
+      return result;
+    }else{
+      throw new ClassCastException(other.getClass().toString());
+    }
+  }
 
   /** Returns a clone of this object.
     * The cloning is done bitwise except for the bindings that are cloned by
@@ -180,8 +199,7 @@ public class FSMInstance implements Comparable, Cloneable{
       else if(priority < other.priority) return -1;
       else if(priority > other.priority) return 1;
       //equal priority
-      else if(fileIndex <= other.fileIndex) return 1;
-      else return -1;
+      else return fileIndex - other.fileIndex;
     } else throw new ClassCastException(
                     "Attempt to compare a FSMInstance object to an object " +
                     "of type " + obj.getClass()+"!");
@@ -191,10 +209,12 @@ public class FSMInstance implements Comparable, Cloneable{
     */
   public String toString() {
     String res = "";
-    res +=   "FSM position :" + FSMPosition.getIndex();
-    res += "\nFirst matched ANN at:" + startNode.getId() +
-           "\nLast matched ANN at :" + AGPosition.getId();
-    res += "\nBindings     :" + bindings;
+    res +=  "FSM position :" + FSMPosition.getIndex() +
+            "\nFirst matched ANN at:" + startNode.getId() +
+            "\nLast matched ANN at :" + AGPosition.getId() +
+            "\nPriority :" + priority +
+            "\nFile index :" + fileIndex +
+            "\nBindings     :" + bindings;
     return res;
   }
 
