@@ -13,6 +13,9 @@
   
   <!-- Files required by the build process -->
   <property name="buildDir" location="build"/>
+
+  <!-- Files required by the build process -->
+  <property name="binDir" location="bin"/>
   
   <!-- Output directory for the build process -->
   <property name="outputDir"  location="classes"/>
@@ -57,8 +60,9 @@
   
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
-    <pathelement location="${buildDir}/gate.jar"/>
+    <pathelement location="${binDir}/gate.jar"/>
     <path refid="tools.jar.path"/>
+		<fileset refid="libs"/>
   </path>
   
   <tstamp>
@@ -143,12 +147,12 @@
 	
   <!-- Make gate.jar archive -->
 	<target name="jar" depends="compile,resources">
-		<jar destfile="${buildDir}/gate.jar" 
+		<jar destfile="${binDir}/gate.jar" 
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
                includes="gate/**"/>
-      <zipgroupfileset refid="libs"/>
+<!--    <zipgroupfileset refid="libs"/> -->
     </jar>
 	</target>
   
