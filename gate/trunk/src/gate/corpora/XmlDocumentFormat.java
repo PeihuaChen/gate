@@ -22,6 +22,7 @@ import java.net.*;
 
 import gate.util.*;
 import gate.*;
+import gate.xml.*;
 import gate.gui.*;
 import gate.creole.*;
 
@@ -78,23 +79,33 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 
       // use it
       if (null != doc){
+        if (isGateXmlDocument){
+          // Construct the appropiate xml handler for the job.
+          GateFormatXmlDocumentHandler gateXmlHandler =
+                          new GateFormatXmlDocumentHandler(doc);
+          // Register a status listener
 
-        // create a new Xml document handler
-        gate.xml.XmlDocumentHandler xmlDocHandler =  new
-                    gate.xml.XmlDocumentHandler(doc, this.markupElementsMap,
-                                                this.element2StringMap);
+          // Parse the Gate Document
+          xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+        }else{
+          // create a new Xml document handler
+          XmlDocumentHandler xmlDocHandler =  new
+                      XmlDocumentHandler(doc,
+                                         this.markupElementsMap,
+                                         this.element2StringMap);
 
-        // register a status listener with it
-        xmlDocHandler.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            // this is implemented in DocumentFormat.java and inherited here
-            fireStatusChanged(text);
-          }
-        });
+          // register a status listener with it
+          xmlDocHandler.addStatusListener(new StatusListener(){
+            public void statusChanged(String text){
+              // this is implemented in DocumentFormat.java and inherited here
+              fireStatusChanged(text);
+            }
+          });
 
-        // parse the document handler
-        xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
-      }
+          // parse the document handler
+          xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
+        }// End if
+      }// End if
 
     } catch (ParserConfigurationException e){
         throw
