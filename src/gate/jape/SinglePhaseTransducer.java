@@ -383,13 +383,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
         lastAGPosition = startNodeOff + 1;
       } else if(ruleApplicationStyle == BRILL_STYLE) {
         // fire the rules corresponding to all accepting FSM instances
-        java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
+        java.util.Iterator accFSMIter = acceptingFSMInstances.iterator();
         FSMInstance currentAcceptor;
         RightHandSide currentRHS;
         lastAGPosition = startNode.getOffset().longValue();
 
-        while(accFSMs.hasNext()){
-          currentAcceptor = (FSMInstance) accFSMs.next();
+        while(accFSMIter.hasNext()){
+          currentAcceptor = (FSMInstance) accFSMIter.next();
           currentRHS = currentAcceptor.getFSMPosition().getAction();
 
           // by Shafirin Andrey start
@@ -432,8 +432,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
         // AcceptingFSMInstances is an ordered structure:
         // just execute the longest (last) rule
         Collections.sort(acceptingFSMInstances, Collections.reverseOrder());
-        Iterator accFSMs = acceptingFSMInstances.iterator();
-        FSMInstance currentAcceptor = (FSMInstance)accFSMs.next();
+        Iterator accFSMIter = acceptingFSMInstances.iterator();
+        FSMInstance currentAcceptor = (FSMInstance)accFSMIter.next();
         if(isDebugMode()){
           //see if we have any conflicts
           Iterator accIter = acceptingFSMInstances.iterator();
@@ -494,62 +494,65 @@ extends Transducer implements JapeConstants, java.io.Serializable
           //Out.prln("Jape grammar in MULTI application style.");
           // ~bp:  check for other matching fsm instances with same length,
           // priority and rule index : if such execute them also.
-          FSMInstance rivalAcceptor;
           String currentAcceptorString = null;
-          while (accFSMs.hasNext()) {
-            rivalAcceptor =(FSMInstance) accFSMs.next();
+          multiModeWhile: while(accFSMIter.hasNext()) {
+            FSMInstance rivalAcceptor =(FSMInstance) accFSMIter.next();
             //get rivals that match the same document segment
-            // if rival is not equal this means that there are no further
-            // equal rivals (since the list is sorted)
-            while(rivalAcceptor.compareTo(currentAcceptor)==0){
+            //makes use of the semantic difference between the compareTo and 
+            //equals methods on FSMInstance
+            if(rivalAcceptor.compareTo(currentAcceptor)==0){
               // gets the rivals that are NOT COMPLETELY IDENTICAL with the
               // current acceptor.
-              if (!(rivalAcceptor.equals(currentAcceptor))){
-                if (isDebugMode()){ /*depends on the debug option in the transducer */
-                  if (currentAcceptorString == null) {
-                    // first rival
-                    currentAcceptorString = currentAcceptor.toString();
-                    Out.prln("~Jape Grammar Transducer : "+
-                    "\nConcurrent Patterns by length,priority and index (all transduced):");
-                    Out.prln(currentAcceptorString);
-                    Out.prln("bindings : "+currentAcceptor.getBindings());
-                    Out.prln("Rivals Follow: ");
-                  }
-                  Out.prln(rivalAcceptor);
-                  Out.prln("bindings : "+rivalAcceptor.getBindings());
-                }// DEBUG
-                currentRHS = rivalAcceptor.getFSMPosition().getAction();
-
-                // by Shafirin Andrey start
-                // debugger callback
-                if(gate.Gate.isEnableJapeDebug()) {
-                  if (null != phaseController) {
-                    SPTLock lock = new SPTLock();
-                    rulesTrace.leaveLast(currentRHS);
-                    phaseController.TraceTransit(rulesTrace);
-                    rulesTrace = new TraceContainer();
-                    phaseController.RuleMatched(lock, this, currentRHS, doc,
-                                                rivalAcceptor.getBindings(),
-                                                inputAS, outputAS);
-                  }
-                }
-                // by Shafirin Andrey end
-
-                currentRHS.transduce(doc, rivalAcceptor.getBindings(),
-                                     inputAS, outputAS, ontology);
-
-                // by Shafirin Andrey start
-                // debugger callback
-                if(gate.Gate.isEnableJapeDebug()) {
-                  if (null != phaseController) {
-                    SPTLock lock = new SPTLock();
-                    phaseController.RuleFinished(lock, this, currentRHS, doc,
-                                                 rivalAcceptor.getBindings(),
-                                                 inputAS, outputAS);
-                  }
-                }
-                // by Shafirin Andrey end
-              } // equal rival
+              if(!rivalAcceptor.equals(currentAcceptor)){
+	              if (isDebugMode()){ /*depends on the debug option in the transducer */
+	                if (currentAcceptorString == null) {
+	                  // first rival
+	                  currentAcceptorString = currentAcceptor.toString();
+	                  Out.prln("~Jape Grammar Transducer : "+
+	                  "\nConcurrent Patterns by length,priority and index (all transduced):");
+	                  Out.prln(currentAcceptorString);
+	                  Out.prln("bindings : "+currentAcceptor.getBindings());
+	                  Out.prln("Rivals Follow: ");
+	                }
+	                Out.prln(rivalAcceptor);
+	                Out.prln("bindings : "+rivalAcceptor.getBindings());
+	              }// DEBUG
+	              currentRHS = rivalAcceptor.getFSMPosition().getAction();
+	
+	              // by Shafirin Andrey start
+	              // debugger callback
+	              if(gate.Gate.isEnableJapeDebug()) {
+	                if (null != phaseController) {
+	                  SPTLock lock = new SPTLock();
+	                  rulesTrace.leaveLast(currentRHS);
+	                  phaseController.TraceTransit(rulesTrace);
+	                  rulesTrace = new TraceContainer();
+	                  phaseController.RuleMatched(lock, this, currentRHS, doc,
+	                                              rivalAcceptor.getBindings(),
+	                                              inputAS, outputAS);
+	                }
+	              }
+	              // by Shafirin Andrey end
+	
+	              currentRHS.transduce(doc, rivalAcceptor.getBindings(),
+	                                   inputAS, outputAS, ontology);
+	
+	              // by Shafirin Andrey start
+	              // debugger callback
+	              if(gate.Gate.isEnableJapeDebug()) {
+	                if (null != phaseController) {
+	                  SPTLock lock = new SPTLock();
+	                  phaseController.RuleFinished(lock, this, currentRHS, doc,
+	                                               rivalAcceptor.getBindings(),
+	                                               inputAS, outputAS);
+	                }
+	              }
+	              // by Shafirin Andrey end
+	            } // equal rival
+            }else{
+              //if rival is not equal this means that there are no further
+              // equal rivals (since the list is sorted)
+              break multiModeWhile;
             }
           } // while there are fsm instances
         } // matchGroupMode
