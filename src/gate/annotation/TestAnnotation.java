@@ -20,19 +20,29 @@ public class TestAnnotation extends TestCase
   /** Construction */
   public TestAnnotation(String name) { super(name); }
 
-  /** Base of the test server URL */
-  protected String testServer;
+//  /** Base of the test server URL */
+//  protected String testServer;
+//
+//  /** Name of test document 1 */
+////  protected String testDocument1;
+//
+//  /** Fixture set up */
+//  public void setUp() {
+//  } // setUp
 
-  /** Name of test document 1 */
-  protected String testDocument1;
+  /** Test AnnotationSetImpl */
+  public void testAnnotationSet() {
+    AnnotationSet as = new AnnotationSetImpl();
+    assertEquals(as.size(), 0);
 
-  /** Fixture set up */
-  public void setUp() {
-  } // setUp
+    //as.add(0, 10, "Token", new SimpleFeatureMapImpl());
+    
+    Iterator iter = as.iterator();
+    while(iter.hasNext()) {
+      Annotation a = (Annotation) iter.next();
+    }
 
-  /** A test test */
-  public void testSomething() {
-  } // testSomething
+  } // testAnnotationSet
 
   /** Test suite routine for the test runner */
   public static Test suite() {

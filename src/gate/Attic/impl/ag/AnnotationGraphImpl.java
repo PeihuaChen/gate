@@ -96,16 +96,6 @@ public class AnnotationGraphImpl
     } //getAnnotations(String type, FeatureSet features)
 
 
-    /** Get annotations by type and equivalence class
-      *@param type The type of annotations sought in this query;
-      *@param equivalenceClass The equivalence class for the requested
-      *annotations. Acts as a suplimental filter besides <tt>type</tt>.
-      */
-    public gate.AnnotationGraph getAnnotations (String type, String equivalenceClass) {
-        return  null;
-    } //getAnnotations(String type, String equivalenceClass)
-
-
     /** Get annotations by type and position. This is the set of annotations of
     * a particular type which share the smallest leastUpperBound that is >=
     * offset
@@ -121,12 +111,6 @@ public class AnnotationGraphImpl
     public gate.AnnotationGraph getAnnotations (String type, FeatureMap features, Long offset) {
         return  null;
     } //getAnnotations(String type,FeatureSet features,Long offset)
-
-
-    /** Get annotations by type and equivalence class */
-    public gate.AnnotationGraph getAnnotations (String type, String equivalenceClass, Long offset) {
-        return  null;
-    } //getAnnotations(String type,String equivalenceClass,Long offset)
 
 
     /**Creates a new node with the offset offset
@@ -164,12 +148,10 @@ public class AnnotationGraphImpl
       *@param start The start node for the new annotation;
       *@param end The end node for new annotation;
       *@param type The type of the new annotation;
-      *@param equivalenceClass the equivalence class of the new annotation.
       */
     public Annotation newAnnotation (Long id, gate.Node start, gate.Node end,
-                                     String type, String equivalenceClass) {
-        AnnotationImpl annot = new AnnotationImpl(id, start, end, type,
-                                                  equivalenceClass);
+                                     String type) {
+        AnnotationImpl annot = new AnnotationImpl(id, start, end, type);
         //start.addStartAnnotation(annot);
         //end.addEndAnnotation(annot);
         annotations.put(annot.getId(), annot);
@@ -195,10 +177,9 @@ public class AnnotationGraphImpl
       *@param start The offset of the start node of the new annotation;
       *@param end The offset for the end node of the new annotation;
       *@param type The type of the new annotation;
-      *@param equivalenceClass the equivalence class of the new annotation.
       */
     public gate.Annotation newAnnotation (Long id, long start, long end,
-                                          String type, String equivalenceClass) {
+                                          String type) {
         gate.Node startN = null;
         gate.Node endN = null;
 
@@ -214,7 +195,7 @@ public class AnnotationGraphImpl
             e.printStackTrace(System.err);
         }
 
-        return  newAnnotation(id, startN, endN, type, equivalenceClass);
+        return  newAnnotation(id, startN, endN, type);
     }
 
     /**
