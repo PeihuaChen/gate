@@ -1022,6 +1022,49 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //2. get the persons
       AnnotationSet antecedents = new AnnotationSetImpl(sentence.getPersons());
 
+      //4. now get the he/she pronouns in the relevant context
+      AnnotationSet annotations = null;
+
+      switch(mode) {
+
+        case ANTEC_BEFORE:
+          annotations = defaultAnnotations.getContained(sentence.getStartOffset(),
+                                                      this.getStartOffset());
+          break;
+
+        case ANTEC_AFTER:
+          annotations = defaultAnnotations.getContained(this.getEndOffset(),
+                                                     sentence.getEndOffset());
+          break;
+
+        case ANTEC_BACK:
+          annotations = defaultAnnotations.getContained(sentence.getStartOffset(),
+                                                     sentence.getEndOffset());
+          break;
+      }
+
+      //4. get the pronouns
+      //restrict to he/she pronouns
+      if (null != annotations) {
+        AnnotationSet pronouns = annotations.get(TOKEN_TYPE,PRP_RESTRICTION);
+
+        if (null != pronouns) {
+
+          Iterator it = pronouns.iterator();
+          while (it.hasNext()) {
+            Annotation currPronoun = (Annotation)it.next();
+            //add to succPersons only if HE/SHE
+            String pronounString = (String)currPronoun.getFeatures().get(TOKEN_STRING);
+
+            if (null != pronounString &&
+                (pronounString.equalsIgnoreCase("he") || pronounString.equalsIgnoreCase("she"))
+                )
+              antecedents.add(currPronoun);
+          }//while
+        }//if
+      }//if
+
+
       //3. depending on the mode, may have to restrict persons to these that precede/succeed
       //the quoted fragment
       //
@@ -1072,48 +1115,6 @@ public class PronominalCoref extends AbstractLanguageAnalyser
           }
         }
       }
-
-
-      //4. now get the he/she pronouns in the relevant context
-      AnnotationSet annotations = null;
-
-      switch(mode) {
-
-        case ANTEC_BEFORE:
-          annotations = defaultAnnotations.getContained(sentence.getStartOffset(),
-                                                      this.getStartOffset());
-          break;
-
-        case ANTEC_AFTER:
-          annotations = defaultAnnotations.getContained(this.getEndOffset(),
-                                                     sentence.getEndOffset());
-          break;
-
-        case ANTEC_BACK:
-          annotations = defaultAnnotations.getContained(sentence.getStartOffset(),
-                                                     sentence.getEndOffset());
-          break;
-      }
-
-      //restrict to he/she pronouns
-      if (null != annotations) {
-        AnnotationSet pronouns = annotations.get(TOKEN_TYPE,PRP_RESTRICTION);
-
-        if (null != pronouns) {
-
-          Iterator it = pronouns.iterator();
-          while (it.hasNext()) {
-            Annotation currPronoun = (Annotation)it.next();
-            //add to succPersons only if HE/SHE
-            String pronounString = (String)currPronoun.getFeatures().get(TOKEN_STRING);
-
-            if (null != pronounString &&
-                (pronounString.equalsIgnoreCase("he") || pronounString.equalsIgnoreCase("she"))
-                )
-              antecedents.add(currPronoun);
-          }//while
-        }//if
-      }//if
 
       return antecedents;
     }
