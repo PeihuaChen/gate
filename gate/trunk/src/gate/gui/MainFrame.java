@@ -199,8 +199,11 @@ public class MainFrame extends JFrame
       }
       if(imMenu != null) editMenu.add(imMenu);
     }catch(AWTException awte){}
-
     menuBar.add(editMenu);
+
+    JMenu advancedMenu = new JMenu("Advanced");
+    advancedMenu.add(newBootStrapAction);
+    menuBar.add(advancedMenu);
 
     JMenu helpMenu = new JMenu("Help");
     helpMenu.add(helpAboutAction);
@@ -368,8 +371,6 @@ public class MainFrame extends JFrame
       parent = prRoot;
     }else if (handle instanceof AnnotDiffHandle){
       parent = toolsRoot;
-    }else if (handle instanceof BootStrapHandle){
-      parent = toolsRoot;
     }
     DefaultMutableTreeNode node = null;
     if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
@@ -515,12 +516,10 @@ public class MainFrame extends JFrame
     toolsRoot = new DefaultMutableTreeNode(handle, true);
     popup = new JPopupMenu();
     popup.add(newAnnotDiffAction);
-    popup.add(newBootStrapAction);
     handle.setPopup(popup);
     projectTreeRoot.add(toolsRoot);
 
     projectTreeModel.nodeStructureChanged(projectTreeRoot);
-
 
     DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                                   projectTreeRoot.getFirstChild();
@@ -567,17 +566,12 @@ public class MainFrame extends JFrame
 
   class NewBootStrapAction extends AbstractAction{
     public NewBootStrapAction(){
-      super("Create new resource",
+      super("BootStrap Wizard",
       new ImageIcon(MainFrame.class.getResource("/gate/resources/img/annDiff.gif")));
     }// NewBootStrapAction
     public void actionPerformed(ActionEvent e){
-      BootStrapHandle handle = new BootStrapHandle(thisMainFrame);
-      handle.setTooltipText("<html><b>Tool:</b> " +
-                            "Create a new resource" + "</html>");
-      handle.setTitle("Create new resource");
-      toolsRoot.add(new DefaultMutableTreeNode(handle, false));
-      projectTreeModel.nodeStructureChanged(toolsRoot);
-      projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(toolsRoot)));
+      BootStrapDialog bootStrapDialog = new BootStrapDialog(thisMainFrame);
+      bootStrapDialog.show();
     }// actionPerformed();
   }//class NewBootStrapAction
 
