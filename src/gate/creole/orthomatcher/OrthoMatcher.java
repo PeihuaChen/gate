@@ -1106,16 +1106,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
 
     int i = 0;
 
-    //don't try it unless the second name is only one token
-    if (tokensShortAnnot.size() != 1)
+    //check and if the shorted string has a space in it, then it's not
+    //an acronym
+    if (s2.indexOf(" ") > 0)
       return false;
 
-    //if the number of tokens without the the is not the same as the length
-    //of the second token, there's no point in comparing
-    if (tokensLongAnnot.size() != s2.length())
-      return false;
-
-//    Out.prln("Acronym: Matching " + s1 + "and " + s2);
+    Out.prln("Acronym: Matching " + s1 + "and " + s2);
     StringBuffer acronym_s1 = new StringBuffer("");
     StringBuffer acronymDot_s1 = new StringBuffer("");
 
@@ -1127,8 +1123,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
       acronymDot_s1.append(".");
     }
 
-//    Out.prln("Acronym: To Match " + acronym_s1 + "and " + s2);
-//    Out.prln("Result: " + matchRule1(acronym_s1.toString(),s2,caseSensitive));
+    Out.prln("Acronym dot: To Match " + acronymDot_s1 + "and " + s2);
+    Out.prln("Result: " + matchRule1(acronymDot_s1.toString(),s2,caseSensitive));
 
     if (matchRule1(acronym_s1.toString(),s2,caseSensitive) ||
         matchRule1(acronymDot_s1.toString(),s2,caseSensitive) )
