@@ -1,0 +1,37 @@
+/*
+ *  DDL script for Oracle 8.x
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Marin Dimitrov, 19/Sep/2001
+ * 
+ *  auto generated: Wed Oct 17 15:51:02 2001
+ *
+ *  $Id$
+ *
+ */
+
+
+DROP VIEW V_LR;
+
+CREATE OR REPLACE VIEW V_LR AS
+       SELECT T_LR_TYPE.LRTP_TYPE, T_LANG_RESOURCE.LR_ID, T_LANG_RESOURCE.LR_OWNER_USER_ID, T_LANG_RESOURCE.LR_OWNER_GROUP_ID, T_LANG_RESOURCE.LR_LOCKING_USER_ID, T_LANG_RESOURCE.LR_NAME, T_LANG_RESOURCE.LR_ACCESS_MODE, T_LANG_RESOURCE.LR_PARENT_ID
+       FROM T_LR_TYPE, T_LANG_RESOURCE
+       WHERE lr_type_id = lrtp_id;
+
+
+DROP VIEW V_DOCUMENT;
+
+CREATE OR REPLACE VIEW V_DOCUMENT AS
+       SELECT T_DOCUMENT.DOC_CONTENT_ID, T_DOCUMENT.DOC_LR_ID, T_DOCUMENT.DOC_ID, T_DOCUMENT.DOC_URL, T_DOCUMENT.DOC_START, T_DOCUMENT.DOC_END, T_DOCUMENT.DOC_IS_MARKUP_AWARE, T_LANG_RESOURCE.LR_ID, T_LANG_RESOURCE.LR_OWNER_USER_ID, T_LANG_RESOURCE.LR_OWNER_GROUP_ID, T_LANG_RESOURCE.LR_LOCKING_USER_ID, T_LANG_RESOURCE.LR_TYPE_ID, T_LANG_RESOURCE.LR_NAME, T_LANG_RESOURCE.LR_ACCESS_MODE, T_LANG_RESOURCE.LR_PARENT_ID
+       FROM T_DOCUMENT, T_LANG_RESOURCE
+       WHERE doc_lr_id = lr_id;
+
+
+
+
