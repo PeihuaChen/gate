@@ -269,27 +269,21 @@ class SunCompiler {
   /** Compile a string and return the binary image of the resultant
     * class.
     */
-  byte[] compile(
-    String javaCode, String className, String sourcePath, String binaryPath
-  ) throws Exception /*****/ {
+  byte[] compile(String javaCode, String className) throws Exception /*****/ {
     boolean status = false;
     byte[] binary = null;
     ByteArrayOutputStream buf = new ByteArrayOutputStream(4069);
 
     // construct the compilation environment
-//    BatchEnvironment env = new BatchEnvironment(
-//      System.out, new ClassPath(sourcePath), new ClassPath(binaryPath)
-//    );
-    BatchEnvironment env = BatchEnvironment.create(
+    BatchEnvironment env = new BatchEnvironment(
       System.out,
-      sourcePath,
-      classPath,
-      null/*sysClassPathArg*/,
-      null/*extDirsArg*/);
+      new ClassPath(System.getProperty("java.class.path"))
+    );
 
     // parse the code
     env.parseFile(new StringClassFile(javaCode, className));
 
+    // 
 
     // return the binary image of the class
     return binary;

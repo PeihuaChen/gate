@@ -42,7 +42,7 @@ public class TestJdk extends TestCase
 
   /** Jdk compiler */
   public void testCompiler() throws Exception {
-    Byte[] classBytes =
+    byte[] classBytes =
       jdk.compile(new File("z:\\gate2\\src\\gate\\util\\Jdk.java"));
 
     assert(classBytes != null && classBytes.length != 0);
