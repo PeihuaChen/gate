@@ -17,14 +17,26 @@ package gate.creole.ir;
 import gate.*;
 import gate.util.*;
 import gate.creole.*;
+import java.util.*;
 
 public class SearchPR extends AbstractProcessingResource
                       implements ProcessingResource{
 
+  private IndexedCorpus corpus = null;
+  private String query  = null;
+  private Search searcher = null;
+  private QueryResultList resultList = null;
+  private int limit = -1;
+  private List fieldNames = null;
+
+  /** Constructor of the class*/
+  public SearchPR(){
+  }
+
    /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-    //NOT IMPLEMENTED YET
-    return null;
+    Resource result = super.init();
+    return result;
   }
 
   /**
@@ -36,7 +48,7 @@ public class SearchPR extends AbstractProcessingResource
    * resource will change too after calling reInit().
   */
   public void reInit() throws ResourceInstantiationException {
-    //NOT IMPLEMENTED YET
+    init();
   }
 
   /**
@@ -44,6 +56,50 @@ public class SearchPR extends AbstractProcessingResource
    * are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
-    //NOT IMPLEMENTED YET
+    if ( corpus == null){
+      throw new ExecutionException("Corpus is not initialized");
+    }
+    if ( query == null){
+      throw new ExecutionException("Query is not initialized");
+    }
+    if ( searcher == null){
+      throw new ExecutionException("Searcher is not initialized");
+    }
+
+    try {
+      resultList = null;
+      searcher.setCorpus(corpus);
+      resultList = searcher.search(query, limit, fieldNames);
+    }
+    catch (SearchException ie) {
+      throw new ExecutionException(ie.getMessage());
+    }
+    catch (IndexException ie) {
+      throw new ExecutionException(ie.getMessage());
+    }
+  }
+
+  public void setCoprus(IndexedCorpus corpus) {
+    this.corpus = corpus;
+  }
+
+  public void setQuery(String query) {
+    this.query = query;
+  }
+
+  public void setSearcher(Search searcher){
+    this.searcher = searcher;
+  }
+
+  public void setLimit(int limit){
+    this.limit = limit;
+  }
+
+  private void setFieldNames(List fieldNames){
+    this.fieldNames = fieldNames;
+  }
+
+  private QueryResultList getResult(){
+    return resultList;
   }
 }
