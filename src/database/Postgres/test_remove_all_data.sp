@@ -49,4 +49,3 @@ CREATE or replace FUNCTION test_remove_all_data() RETURNS boolean AS '
    END;
 '
 LANGUAGE 'plpgsql';
-/
