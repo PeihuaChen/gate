@@ -40,9 +40,11 @@
     <path>[lib/plugins/xerces.jar]</path>
     <path>[lib/maxent.jar]</path>
     <path>[lib/troveForMaxent.jar]</path>
+    <path>[lib/JAPEDebugger1170.jar]</path>
   </class>
   <source>
     <path>build</path>
     <path>src</path>
   </source>
+  <lastmodsaved>1090428873190</lastmodsaved>
 </library>

@@ -255,7 +255,9 @@
   <property category="runtime.9" name="jsprunner.docbase" value="."/>
   <property category="runtime.9" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin"/>
   <property category="runtime.9" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin"/>
-  <property category="serverservices" name="disabled.services" value=""/>
+  <property category="serverservices" name="disabled.services" value="sqlj"/>
+  <property category="serverservices" name="is.single.server" value="0"/>
+  <property category="serverservices" name="single.server.name" value=""/>
   <property category="sys" name="AuthorLabel" value="@author"/>
   <property category="sys" name="BackupPath" value="bak"/>
   <property category="sys" name="BeansInstantiate" value="false"/>
