@@ -1020,6 +1020,8 @@ ex.printStackTrace();
   public void printStatistics() {
 
     Out.prln("<H2> Statistics </H2>");
+
+/*
     Out.prln("<H3> Precision </H3>");
     if (precisionByType != null && !precisionByType.isEmpty()) {
       Iterator iter = precisionByType.keySet().iterator();
@@ -1049,7 +1051,7 @@ ex.printStackTrace();
 
     Out.prln("Overall recall: " + getRecallAverage()
              + "<P>");
-/*
+*/
     if (annotTypes == null) {
       Out.prln("No types given for evaluation, cannot obtain precision/recall");
       return;
@@ -1057,8 +1059,8 @@ ex.printStackTrace();
     Out.prln("<table border=1>");
     Out.prln("<TR> <TD><B>Annotation Type</B></TD> <TD><B>Correct</B></TD>" +
               "<TD><B>Partially Correct</B></TD> <TD><B>Missing</B></TD>" +
-              "<TD><B>Spurious</B></TD> <TD><B>Precision (strict)</B></TD>" +
-              "<TD><B>Recall (strict)</B></TD> <TD><B>F-Measure</B></TD> </TR>");
+              "<TD><B>Spurious</B></TD> <TD><B>Precision</B></TD>" +
+              "<TD><B>Recall</B></TD> <TD><B>F-Measure</B></TD> </TR>");
     for (int i = 0; i < annotTypes.size(); i++) {
       String annotType = (String) annotTypes.get(i);
       printStatsForType(annotType);
@@ -1069,40 +1071,31 @@ ex.printStackTrace();
   protected void printStatsForType(String annotType){
       Out.prln("<TR>");
       Out.prln("<TD>" + annotType + "</TD>");
-      Out.prln("<TD>" + correctByType.get(annotType) + "</TD>");
-      Out.prln("<TD>" + partialByType.get(annotType) + "</TD>");
-      Out.prln("<TD>" + missingByType.get(annotType) + "</TD>");
-      Out.prln("<TD>" + spurByType.get(annotType) + "</TD>");
-      long actual = ((Long)correctByType.get(annotType)).longValue() +
-                    ((Long)partialByType.get(annotType)).longValue() +
-                    ((Long)spurByType.get(annotType)).longValue();
-      long possible = ((Long)correctByType.get(annotType)).longValue() +
-                    ((Long)partialByType.get(annotType)).longValue() +
-                    ((Long)missingByType.get(annotType)).longValue();
+      long correct = (correctByType.get(annotType) == null)? 0 :
+                        ((Long)correctByType.get(annotType)).longValue();
+      long partial = (partialByType.get(annotType) == null)? 0 :
+                        ((Long)partialByType.get(annotType)).longValue();
+      long spurious = (spurByType.get(annotType) == null)? 0 :
+                        ((Long)spurByType.get(annotType)).longValue();
+      long missing = (missingByType.get(annotType) == null)? 0:
+                        ((Long)missingByType.get(annotType)).longValue();
+      Out.prln("<TD>" + correct + "</TD>");
+      Out.prln("<TD>" + partial + "</TD>");
+      Out.prln("<TD>" + missing + "</TD>");
+      Out.prln("<TD>" + spurious + "</TD>");
+
+      long actual = correct + partial + spurious;
+      long possible = correct + partial + missing;
       //precision strict is correct/actual
       //precision is (correct + 0.5 * partially correct)/actual
-      double precision =
-              (
-                ((Long)correctByType.get(annotType)).longValue() +
-                0.5*((Long)partialByType.get(annotType)).longValue()
-              )/actual;
+      double precision = (correct + 0.5*partial)/actual;
       Out.prln("<TD>" +
              precision +
-            "(" +
-            ((Long)correctByType.get(annotType)).longValue()/actual +
-            ")" +
             "</TD>");
       //recall strict is correct/possible
-      double recall =
-            (
-              ((Long)correctByType.get(annotType)).longValue() +
-              0.5*((Long)partialByType.get(annotType)).longValue()
-            )/possible;
+      double recall = (correct + 0.5*partial)/possible;
       Out.prln("<TD>" +
              recall +
-            "(" +
-            ((Long)correctByType.get(annotType)).longValue()/possible +
-            ")" +
             "</TD>");
 
       //F-measure = ( (beta*beta + 1)*P*R ) / ((beta*beta*P) + R)
@@ -1113,7 +1106,7 @@ ex.printStackTrace();
 
       Out.prln("<TD>" + fmeasure + "</TD>");
       Out.prln("</TR>");
-*/
+
   }
 
   protected AnnotationDiff measureDocs(
