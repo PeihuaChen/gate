@@ -36,8 +36,11 @@ import gate.event.*;
 import gate.persist.*;
 import gate.util.*;
 import guk.im.*;
+import javax.swing.event.*;
 
-
+/**
+ * The main Gate GUI frame. This is a singleton.
+ */
 public class MainFrame extends JFrame
                        implements ProgressListener, StatusListener, CreoleListener{
 
@@ -51,6 +54,7 @@ public class MainFrame extends JFrame
   JTabbedPane mainTabbedPane;
   JScrollPane projectTreeScroll;
   JScrollPane lowerScroll;
+  /*To be removed ->*/
   JTree projectTree;
   DefaultTreeModel projectTreeModel;
   DefaultMutableTreeNode projectTreeRoot;
@@ -59,6 +63,24 @@ public class MainFrame extends JFrame
   DefaultMutableTreeNode lrRoot;
   DefaultMutableTreeNode prRoot;
   DefaultMutableTreeNode dsRoot;
+  /* <- To be removed*/
+  //new version
+  JPopupMenu appsPopup;
+  JPopupMenu lrsPopup;
+  JPopupMenu prsPopup;
+  JPopupMenu dssPopup;
+
+  JTree resourcesTree;
+  JScrollPane resourcesTreeScroll;
+  ResourcesTreeModel resourcesTreeModel;
+  String resourcesTreeRoot;
+  String applicationsRoot;
+  String languageResourcesRoot;
+  String processingResourcesRoot;
+  String datastoresRoot;
+
+  WeakHashMap handleForResourceName;
+
 
 
   Splash splash;
@@ -77,7 +99,7 @@ public class MainFrame extends JFrame
   ProjectData currentProject;
 
   NewApplicationAction newApplicationAction;
-  NewProjectAction newProjectAction;
+  //NewProjectAction newProjectAction;
   NewLRAction newLRAction;
   NewPRAction newPRAction;
   NewDSAction newDSAction;
@@ -87,9 +109,15 @@ public class MainFrame extends JFrame
   NewBootStrapAction newBootStrapAction = null;
 
 
+  static MainFrame instance;
+
+  static public MainFrame getInstance(){
+    if(instance == null) instance = new MainFrame();
+    return instance;
+  }
 
   /**Construct the frame*/
-  public MainFrame() {
+  private MainFrame() {
     thisMainFrame = this;
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
@@ -98,9 +126,19 @@ public class MainFrame extends JFrame
   }
 
   protected void initLocalData(){
+    resourcesTreeRoot = "Gate";
+    applicationsRoot = "Applications";
+    languageResourcesRoot = "Language Resources";
+    processingResourcesRoot = "Processing Resources";
+    datastoresRoot = "Data stores";
+    handleForResourceName = new WeakHashMap();
+
+
+
     openProjects = new ArrayList();
+    openProjects.add(currentProject = new ProjectData(null, this));
     newApplicationAction = new NewApplicationAction();
-    newProjectAction = new NewProjectAction();
+    //newProjectAction = new NewProjectAction();
     newLRAction = new NewLRAction();
     newPRAction = new NewPRAction();
     newDSAction = new NewDSAction();
@@ -117,8 +155,8 @@ public class MainFrame extends JFrame
     this.setSize(new Dimension(800, 600));
     this.setTitle(Main.name + " " + Main.version);
 
-
-    ResourceHandle handle = new ResourceHandle("<No Projects>", null);
+/*
+    CustomResourceHandle handle = new CustomResourceHandle("<No Projects>", null);
     handle.setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/project.gif")));
     JPopupMenu popup = new JPopupMenu();
@@ -150,14 +188,41 @@ public class MainFrame extends JFrame
     leftBox.add(Box.createVerticalStrut(5));
     leftSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
     leftBox.add(leftSplit);
+*/
+//new version ->
 
+    resourcesTreeModel = new ResourcesTreeModel();
+    resourcesTree = new JTree(resourcesTreeModel);
+    resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
+    resourcesTree.setRowHeight(0);
+    ToolTipManager.sharedInstance().registerComponent(resourcesTree);
+    resourcesTreeScroll = new JScrollPane(resourcesTree);
+
+    lowerScroll = new JScrollPane();
+    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                               resourcesTreeScroll, lowerScroll);
+
+    //popups
+    appsPopup = new JPopupMenu();
+    appsPopup.add(newApplicationAction);
+
+    lrsPopup = new JPopupMenu();
+    lrsPopup.add(newLRAction);
+
+    prsPopup = new JPopupMenu();
+    prsPopup.add(newPRAction);
+
+    dssPopup = new JPopupMenu();
+    dssPopup.add(newDSAction);
+    dssPopup.add(openDSAction);
+    // <- new version
 
     logArea = new JTextArea("Gate 2 started at: " + new Date().toString());
     logScroll = new JScrollPane(logArea);
     mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                               leftBox, mainTabbedPane);
+                               leftSplit, mainTabbedPane);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
 
     southBox = Box.createHorizontalBox();
@@ -178,7 +243,7 @@ public class MainFrame extends JFrame
     menuBar = new JMenuBar();
 
     JMenu fileMenu = new JMenu("File");
-    fileMenu.add(new JGateMenuItem(newProjectAction));
+    //fileMenu.add(new JGateMenuItem(newProjectAction));
     fileMenu.add(new JGateMenuItem(newLRAction));
     fileMenu.add(new JGateMenuItem(newPRAction));
     fileMenu.add(new JGateMenuItem(newDSAction));
@@ -220,7 +285,7 @@ public class MainFrame extends JFrame
     //TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
-    toolbar.add(new JGateButton(newProjectAction));
+    //toolbar.add(new JGateButton(newProjectAction));
 
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
 
@@ -260,61 +325,77 @@ public class MainFrame extends JFrame
   }
 
   protected void initListeners(){
-    projectCombo.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        setCurrentProject((ProjectData)projectCombo.getSelectedItem());
-      }
-    });
+    Gate.getCreoleRegister().addCreoleListener(this);
 
-    projectTree.addMouseListener(new MouseAdapter() {
+    resourcesTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         //where inside the tree?
         int x = e.getX();
         int y = e.getY();
-        TreePath path = projectTree.getPathForLocation(x, y);
-        ResourceHandle handle = null;
+        TreePath path = resourcesTree.getPathForLocation(x, y);
+        JPopupMenu popup = null;
+        CustomResourceHandle handle = null;
         if(path != null){
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.
-                                       getLastPathComponent();
-          handle = (ResourceHandle)node.getUserObject();
-        }
-        if(handle != null){
-          if(SwingUtilities.isRightMouseButton(e)){
-            JPopupMenu popup = handle.getPopup();
-            if(popup != null){
-              popup.show(projectTree, e.getX(), e.getY());
+          Object value = path.getLastPathComponent();
+          if(value instanceof String){
+            if(value == resourcesTreeRoot){
+            }else if(value == applicationsRoot){
+              popup = appsPopup;
+            }else if(value == languageResourcesRoot){
+              popup = lrsPopup;
+            }else if(value == processingResourcesRoot){
+              popup = prsPopup;
+            }else if(value == datastoresRoot){
+              popup = dssPopup;
             }
-          }else if(SwingUtilities.isLeftMouseButton(e)){
-            if(e.getClickCount() == 2){
-              //double click - show the resource
-              if(handle.isShown()){
-                //select
-                JComponent largeView = handle.getLargeView();
-                if(largeView != null){
-                  mainTabbedPane.setSelectedComponent(largeView);
-                }
-                JComponent smallView = handle.getSmallView();
-                if(smallView != null){
-                  lowerScroll.getViewport().setView(smallView);
-                }else{
-                  lowerScroll.getViewport().setView(null);
-                }
-              }else{
-                //show
-                JComponent largeView = handle.getLargeView();
-                if(largeView != null){
-                  mainTabbedPane.addTab(handle.getTitle(), handle.getSmallIcon(),
-                                        largeView, handle.getTooltipText());
-                  mainTabbedPane.setSelectedComponent(handle.getLargeView());
-                }
-                JComponent smallView = handle.getSmallView();
-                if(smallView != null){
-                  lowerScroll.getViewport().setView(smallView);
-                }else{
-                  lowerScroll.getViewport().setView(null);
-                }
-                handle.setShown(true);
+          }else if(value instanceof Resource){
+            handle = (CustomResourceHandle)handleForResourceName.get(
+                ((Resource)value).getFeatures().get("NAME"));
+            if(handle != null) popup = handle.getPopup();
+          }else if(value instanceof DataStore){
+            handle = (CustomResourceHandle)handleForResourceName.get(
+                ((DataStore)value).getFeatures().get("NAME"));
+            if(handle != null) popup = handle.getPopup();
+          }else if(value instanceof CustomResourceHandle){
+            //for applictaions
+            handle = (CustomResourceHandle)value;
+            popup = handle.getPopup();
+          }
+        }
+        if(SwingUtilities.isRightMouseButton(e)){
+          if(popup != null){
+            popup.show(resourcesTree, e.getX(), e.getY());
+          }
+        }else if(SwingUtilities.isLeftMouseButton(e)){
+          if(e.getClickCount() == 2 && handle != null){
+            //double click - show the resource
+            if(handle.isShown()){
+              //select
+              JComponent largeView = handle.getLargeView();
+              if(largeView != null){
+                mainTabbedPane.setSelectedComponent(largeView);
               }
+              JComponent smallView = handle.getSmallView();
+              if(smallView != null){
+                lowerScroll.getViewport().setView(smallView);
+              }else{
+                lowerScroll.getViewport().setView(null);
+              }
+            }else{
+              //show
+              JComponent largeView = handle.getLargeView();
+              if(largeView != null){
+                mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(),
+                                      largeView, handle.getTooltipText());
+                mainTabbedPane.setSelectedComponent(handle.getLargeView());
+              }
+              JComponent smallView = handle.getSmallView();
+              if(smallView != null){
+                lowerScroll.getViewport().setView(smallView);
+              }else{
+                lowerScroll.getViewport().setView(null);
+              }
+              handle.setShown(true);
             }
           }
         }
@@ -362,9 +443,30 @@ public class MainFrame extends JFrame
   }
 
   public void resourceLoaded(CreoleEvent e){
+    Resource res = e.getResource();
+    CustomResourceHandle handle = (CustomResourceHandle)
+                      handleForResourceName.get(res.getFeatures().get("NAME"));
+    if(handle == null){
+      ResourceData rData = (ResourceData)
+                        Gate.getCreoleRegister().get(res.getClass().getName());
+      if(res instanceof LanguageResource){
+        handle = new LRHandle((LanguageResource)res, currentProject);
+        handle.setTooltipText("<html><b>Type:</b> " +
+                              rData.getName() + "</html>");
+        handleForResourceName.put(res.getFeatures().get("NAME"), handle);
+      }else if(res instanceof ProcessingResource){
+        handle = new PRHandle((ProcessingResource)res, currentProject);
+        handle.setTooltipText("<html><b>Type:</b> " +
+                              rData.getName() + "</html>");
+        handleForResourceName.put(res.getFeatures().get("NAME"), handle);
+      }
+    }
+    resourcesTreeModel.treeChanged();
   }
 
   public void resourceUnloaded(CreoleEvent e){
+    handleForResourceName.remove(e.getResource().getFeatures().get("NAME"));
+    resourcesTreeModel.treeChanged();
   }
 
 
@@ -376,7 +478,7 @@ public class MainFrame extends JFrame
     }
   }
 
-  void remove(ResourceHandle handle){
+  void remove(CustomResourceHandle handle){
     DefaultMutableTreeNode parent = null;
     if(handle instanceof ApplicationHandle){
       parent = appRoot;
@@ -431,8 +533,8 @@ public class MainFrame extends JFrame
 
     if(!openProjects.contains(project)) openProjects.add(project);
 
-    ResourceHandle handle = new ResourceHandle(project.toString(), currentProject);
-    handle.setSmallIcon(new ImageIcon(
+    CustomResourceHandle handle = new CustomResourceHandle(project.toString(), currentProject);
+    handle.setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/project.gif")));
     projectTreeRoot.setUserObject(handle);
 
@@ -445,8 +547,8 @@ public class MainFrame extends JFrame
     });
 
 
-    handle = new ResourceHandle("Applications", currentProject);
-    handle.setSmallIcon(new ImageIcon(
+    handle = new CustomResourceHandle("Applications", currentProject);
+    handle.setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/applications.gif")));
     appRoot = new DefaultMutableTreeNode(handle, true);
     JPopupMenu popup = new JPopupMenu();
@@ -455,7 +557,7 @@ public class MainFrame extends JFrame
     projectTreeRoot.add(appRoot);
     Iterator resIter = currentProject.getApplicationsList().iterator();
     while(resIter.hasNext()){
-      handle = (ResourceHandle)resIter.next();
+      handle = (CustomResourceHandle)resIter.next();
       appRoot.add(new DefaultMutableTreeNode(handle));
       if(handle.isShown() && handle.getLargeView() != null){
         mainTabbedPane.addTab(handle.getTitle(), handle.getLargeView());
@@ -463,8 +565,8 @@ public class MainFrame extends JFrame
     }
 
 
-    handle = new ResourceHandle("Language Resources", currentProject);
-    handle.setSmallIcon(new ImageIcon(
+    handle = new CustomResourceHandle("Language Resources", currentProject);
+    handle.setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/lrs.gif")));
     lrRoot = new DefaultMutableTreeNode(handle, true);
     popup = new JPopupMenu();
@@ -473,15 +575,15 @@ public class MainFrame extends JFrame
     projectTreeRoot.add(lrRoot);
     resIter = currentProject.getLRList().iterator();
     while(resIter.hasNext()){
-      handle = (ResourceHandle)resIter.next();
+      handle = (CustomResourceHandle)resIter.next();
       lrRoot.add(new DefaultMutableTreeNode(handle));
       if(handle.isShown() && handle.getLargeView() != null){
         mainTabbedPane.addTab(handle.getTitle(), handle.getLargeView());
       }
     }
 
-    handle = new ResourceHandle("Processing Resources", currentProject);
-    handle.setSmallIcon(new ImageIcon(
+    handle = new CustomResourceHandle("Processing Resources", currentProject);
+    handle.setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/prs.gif")));
     prRoot = new DefaultMutableTreeNode(handle, true);
     popup = new JPopupMenu();
@@ -490,15 +592,15 @@ public class MainFrame extends JFrame
     projectTreeRoot.add(prRoot);
     resIter = currentProject.getPRList().iterator();
     while(resIter.hasNext()){
-      handle = (ResourceHandle)resIter.next();
+      handle = (CustomResourceHandle)resIter.next();
       prRoot.add(new DefaultMutableTreeNode(handle));
       if(handle.isShown() && handle.getLargeView() != null){
         mainTabbedPane.addTab(handle.getTitle(), handle.getLargeView());
       }
     }
 
-    handle = new ResourceHandle("Data Stores", currentProject);
-    handle.setSmallIcon(new ImageIcon(
+    handle = new CustomResourceHandle("Data Stores", currentProject);
+    handle.setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/dss.gif")));
     popup = new JPopupMenu();
     popup.add(newDSAction);
@@ -533,17 +635,16 @@ public class MainFrame extends JFrame
     }
   }//protected void setCurrentProject(ProjectData project)
 
-  void showWaitDialog(){
+  synchronized void showWaitDialog(){
     Point location = getLocationOnScreen();
     location.translate(10, getHeight() - waitDialog.getHeight() - southBox.getHeight() - 10);
     waitDialog.setLocation(location);
     waitDialog.showDialog(new Component[]{});
   }
 
-  void hideWaitDialog(){
+  synchronized void  hideWaitDialog(){
     waitDialog.goAway();
   }
-
 
 
   class NewProjectAction extends AbstractAction{
@@ -630,10 +731,11 @@ public class MainFrame extends JFrame
 
           ApplicationHandle handle = new ApplicationHandle(controller,
                                                            currentProject);
-          appRoot.add(new DefaultMutableTreeNode(handle));
-          projectTreeModel.nodeStructureChanged(appRoot);
-          projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(appRoot)));
           currentProject.addApplication(handle);
+          resourcesTreeModel.treeChanged();
+          resourcesTree.expandPath(new TreePath(
+                                    new Object[]{resourcesTreeRoot,
+                                                 applicationsRoot}));
         }catch(ResourceInstantiationException rie){
           JOptionPane.showMessageDialog(parentFrame,
                                         "Could not create application!\n" +
@@ -682,10 +784,13 @@ public class MainFrame extends JFrame
                 LRHandle handle = new LRHandle(res, currentProject);
                 handle.setTooltipText("<html><b>Type:</b> " +
                                       rData.getName() + "</html>");
-                lrRoot.add(new DefaultMutableTreeNode(handle, false));
-                projectTreeModel.nodeStructureChanged(lrRoot);
-                projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(lrRoot)));
-                currentProject.addLR(handle);
+                handleForResourceName.put(res.getFeatures().get("NAME"), handle);
+                //lrRoot.add(new DefaultMutableTreeNode(handle, false));
+                //projectTreeModel.nodeStructureChanged(lrRoot);
+                resourcesTree.expandPath(new TreePath(
+                            new Object[]{resourcesTreeRoot,
+                              languageResourcesRoot}));
+                //currentProject.addLR(handle);
                 statusChanged(res.getFeatures().get("NAME") + " loaded!");
               }
             }
@@ -740,10 +845,11 @@ public class MainFrame extends JFrame
                 PRHandle handle = new PRHandle(res, currentProject);
                 handle.setTooltipText("<html><b>Type:</b> " +
                                       rData.getName() + "</html>");
-                prRoot.add(new DefaultMutableTreeNode(handle, false));
-                projectTreeModel.nodeStructureChanged(prRoot);
-                projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(prRoot)));
-                currentProject.addPR(handle);
+                handleForResourceName.put(res.getFeatures().get("NAME"), handle);
+                //prRoot.add(new DefaultMutableTreeNode(handle, false));
+                //projectTreeModel.nodeStructureChanged(prRoot);
+                resourcesTree.expandPath(new TreePath(new Object[]{resourcesTreeRoot, processingResourcesRoot}));
+                //currentProject.addPR(handle);
                 statusChanged(res.getFeatures().get("NAME") + " loaded!");
               }
             }
@@ -807,8 +913,10 @@ public class MainFrame extends JFrame
                     ds.getFeatures().put("NAME", dsURL.getFile());
                   }
                   DSHandle handle = new DSHandle(ds, currentProject);
-                  dsRoot.add(new DefaultMutableTreeNode(handle, false));
-                  projectTreeModel.nodeStructureChanged(dsRoot);
+                  handleForResourceName.put(ds.getFeatures().get("NAME"), handle);
+                  resourcesTreeModel.treeChanged();
+                  //dsRoot.add(new DefaultMutableTreeNode(handle, false));
+                  //projectTreeModel.nodeStructureChanged(dsRoot);
                 }
               }catch(MalformedURLException mue){
                 JOptionPane.showMessageDialog(
@@ -884,8 +992,10 @@ public class MainFrame extends JFrame
                     ds.getFeatures().put("NAME", dsURL.getFile());
                   }
                   DSHandle handle = new DSHandle(ds, currentProject);
-                  dsRoot.add(new DefaultMutableTreeNode(handle));
-                  projectTreeModel.nodeStructureChanged(dsRoot);
+                  handleForResourceName.put(ds.getFeatures().get("NAME"), handle);
+                  resourcesTreeModel.treeChanged();
+                  //dsRoot.add(new DefaultMutableTreeNode(handle));
+                  //projectTreeModel.nodeStructureChanged(dsRoot);
                 }
               }catch(MalformedURLException mue){
                 JOptionPane.showMessageDialog(
@@ -939,14 +1049,186 @@ public class MainFrame extends JFrame
                                               boolean hasFocus){
       super.getTreeCellRendererComponent(tree, value, selected, expanded,
                                          leaf, row, hasFocus);
-      Object handle = ((DefaultMutableTreeNode)value).getUserObject();
-      if(handle != null && handle instanceof ResourceHandle){
-        setIcon(((ResourceHandle)handle).getSmallIcon());
-        setText(((ResourceHandle)handle).getTitle());
-        setToolTipText(((ResourceHandle)handle).getTooltipText());
+      if(value instanceof Resource){
+        CustomResourceHandle handle = (CustomResourceHandle)
+              handleForResourceName.get(((Resource)value).getFeatures().get("NAME"));
+        if(handle != null){
+          setIcon(((CustomResourceHandle)handle).getIcon());
+          setText(((CustomResourceHandle)handle).getTitle());
+          setToolTipText(((CustomResourceHandle)handle).getTooltipText());
+        }
+      }else if(value instanceof CustomResourceHandle){
+          setIcon(((CustomResourceHandle)value).getIcon());
+          setText(((CustomResourceHandle)value).getTitle());
+          setToolTipText(((CustomResourceHandle)value).getTooltipText());
+      }else if(value instanceof DataStore){
+        CustomResourceHandle handle = (CustomResourceHandle)
+              handleForResourceName.get(((DataStore)value).getFeatures().get("NAME"));
+        if(handle != null){
+          setIcon(((CustomResourceHandle)handle).getIcon());
+          setText(((CustomResourceHandle)handle).getTitle());
+          setToolTipText(((CustomResourceHandle)handle).getTooltipText());
+        }
+      }else if(value instanceof String){
+        Icon icon = getIcon();
+        if(value == resourcesTreeRoot){
+          icon = new ImageIcon(getClass().getResource("/gate/resources/img/project.gif"));
+        }else if(value == applicationsRoot){
+          icon = new ImageIcon(getClass().getResource("/gate/resources/img/applications.gif"));
+        }else if(value == languageResourcesRoot){
+          icon = new ImageIcon(getClass().getResource("/gate/resources/img/lrs.gif"));
+        }else if(value == processingResourcesRoot){
+          icon = new ImageIcon(getClass().getResource("/gate/resources/img/prs.gif"));
+        }else if(value == datastoresRoot){
+          icon = new ImageIcon(getClass().getResource("/gate/resources/img/dss.gif"));
+        }
+        setIcon(icon);
       }
       return this;
     }
+
+    public Component getTreeCellRendererComponent1(JTree tree,
+                                              Object value,
+                                              boolean sel,
+                                              boolean expanded,
+                                              boolean leaf,
+                                              int row,
+                                              boolean hasFocus){
+      super.getTreeCellRendererComponent(tree, value, selected, expanded,
+                                         leaf, row, hasFocus);
+      Object handle = ((DefaultMutableTreeNode)value).getUserObject();
+      if(handle != null && handle instanceof CustomResourceHandle){
+        setIcon(((CustomResourceHandle)handle).getIcon());
+        setText(((CustomResourceHandle)handle).getTitle());
+        setToolTipText(((CustomResourceHandle)handle).getTooltipText());
+      }
+      return this;
+    }
+  }
+
+  /**
+   * Model for the tree representing the resources loaded in the system
+   */
+  class ResourcesTreeModel implements TreeModel{
+
+    public Object getRoot(){
+      return resourcesTreeRoot;
+    }
+
+    public Object getChild(Object parent,
+                       int index){
+      return getChildren(parent).get(index);
+    }
+
+    public int getChildCount(Object parent){
+      return getChildren(parent).size();
+    }
+
+    public boolean isLeaf(Object node){
+      return getChildren(node).isEmpty();
+    }
+
+
+    public int getIndexOfChild(Object parent,
+                           Object child){
+      return getChildren(parent).indexOf(child);
+    }
+
+    protected List getChildren(Object parent){
+      List result = new ArrayList();
+      if(parent == resourcesTreeRoot){
+        result.add(applicationsRoot);
+        result.add(languageResourcesRoot);
+        result.add(processingResourcesRoot);
+        result.add(datastoresRoot);
+      }else if(parent == applicationsRoot){
+        result.addAll(currentProject.getApplicationsList());
+      }else if(parent == languageResourcesRoot){
+        result.addAll(Gate.getCreoleRegister().getLrInstances());
+      }else if(parent == processingResourcesRoot){
+        result.addAll(Gate.getCreoleRegister().getPrInstances());
+      }else if(parent == datastoresRoot){
+        result.addAll(Gate.getDataStoreRegister());
+      }
+      ListIterator iter = result.listIterator();
+      while(iter.hasNext()){
+        Object value = iter.next();
+        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(value.getClass().getName());
+        if(rData != null && rData.isPrivate()) iter.remove();
+      }
+      return result;
+    }
+
+    public synchronized void removeTreeModelListener(TreeModelListener l) {
+      if (treeModelListeners != null && treeModelListeners.contains(l)) {
+        Vector v = (Vector) treeModelListeners.clone();
+        v.removeElement(l);
+        treeModelListeners = v;
+      }
+    }
+
+    public synchronized void addTreeModelListener(TreeModelListener l) {
+      Vector v = treeModelListeners == null ? new Vector(2) : (Vector) treeModelListeners.clone();
+      if (!v.contains(l)) {
+        v.addElement(l);
+        treeModelListeners = v;
+      }
+    }
+
+    void treeChanged(){
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          fireTreeStructureChanged(new TreeModelEvent(this,new Object[]{resourcesTreeRoot}));
+        }
+      });
+    }
+
+    public void valueForPathChanged(TreePath path,
+                                Object newValue){
+      fireTreeNodesChanged(new TreeModelEvent(this,path));
+    }
+
+    protected void fireTreeNodesChanged(TreeModelEvent e) {
+      if (treeModelListeners != null) {
+        Vector listeners = treeModelListeners;
+        int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+          ((TreeModelListener) listeners.elementAt(i)).treeNodesChanged(e);
+        }
+      }
+    }
+
+    protected void fireTreeNodesInserted(TreeModelEvent e) {
+      if (treeModelListeners != null) {
+        Vector listeners = treeModelListeners;
+        int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+          ((TreeModelListener) listeners.elementAt(i)).treeNodesInserted(e);
+        }
+      }
+    }
+
+    protected void fireTreeNodesRemoved(TreeModelEvent e) {
+      if (treeModelListeners != null) {
+        Vector listeners = treeModelListeners;
+        int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+          ((TreeModelListener) listeners.elementAt(i)).treeNodesRemoved(e);
+        }
+      }
+    }
+
+    protected void fireTreeStructureChanged(TreeModelEvent e) {
+      if (treeModelListeners != null) {
+        Vector listeners = treeModelListeners;
+        int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+          ((TreeModelListener) listeners.elementAt(i)).treeStructureChanged(e);
+        }
+      }
+    }
+
+    private transient Vector treeModelListeners;
   }
 
   class ProgressBarUpdater implements Runnable{

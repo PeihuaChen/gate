@@ -40,8 +40,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     removeActionForPR = new HashMap();
     Iterator prIter = project.getPRList().iterator();
     while(prIter.hasNext()){
-      ProcessingResource pr = (ProcessingResource)
-                              ((PRHandle)prIter.next()).getResource();
+      ProcessingResource pr = (ProcessingResource)prIter.next();
       AddPRAction addAction = new AddPRAction(pr);
       RemovePRAction remAction = new RemovePRAction(pr);
       remAction.setEnabled(false);
@@ -310,8 +309,7 @@ public class ApplicationViewer extends AbstractVisualResource {
   protected void updateActions(){
     Iterator prIter = project.getPRList().iterator();
     while(prIter.hasNext()){
-      ProcessingResource pr = (ProcessingResource)
-                              ((PRHandle)prIter.next()).getResource();
+      ProcessingResource pr = (ProcessingResource)prIter.next();
       if(!addActionForPR.containsKey(pr)){
         AddPRAction addAction = new AddPRAction(pr);
         RemovePRAction remAction = new RemovePRAction(pr);
@@ -468,13 +466,16 @@ public class ApplicationViewer extends AbstractVisualResource {
         tipText = ((ResourceData)
                    Gate.getCreoleRegister().get(pr.getClass().getName())
                    ).getComment();
-        Iterator prIter = project.getPRList().iterator();
+        List prList = project.getPRList();
+        prList.remove(controller);
+        Iterator prIter = prList.iterator();
         boolean done = false;
         while(!done && prIter.hasNext()){
-          PRHandle handle = (PRHandle)prIter.next();
-          if(handle.getResource() == pr){
+          if(pr == prIter.next()){
+            MainFrame frame = MainFrame.getInstance();
+            PRHandle prHandle = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("NAME"));
             done = true;
-            Icon icon = handle.getSmallIcon();
+            Icon icon = prHandle.getIcon();
             setOpenIcon(icon);
             setClosedIcon(icon);
             setLeafIcon(icon);
@@ -507,7 +508,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   class ModulesTableModel extends AbstractTableModel{
     public int getRowCount(){
-      return project.getPRList().size() - controller.size();
+      return project.getPRList().size() - controller.size() -1;
     }
 
     public int getColumnCount(){
@@ -532,11 +533,13 @@ public class ApplicationViewer extends AbstractVisualResource {
 
     public Object getValueAt(int rowIndex, int columnIndex){
       //find the right PR
-      Iterator allPRsIter = project.getPRList().iterator();
+      List allPrs = project.getPRList();
+      allPrs.remove(controller);
+      Iterator allPRsIter = allPrs.iterator();
       int index = -1;
       ProcessingResource pr =null;
       while(allPRsIter.hasNext() && index < rowIndex){
-        pr = (ProcessingResource)((PRHandle)allPRsIter.next()).getResource();
+        pr = (ProcessingResource)allPRsIter.next();
         if(!controller.contains(pr))  index ++;
       }
       if(index == rowIndex && pr != null){
@@ -604,52 +607,65 @@ public class ApplicationViewer extends AbstractVisualResource {
       super("Run");
     }
     public void actionPerformed(ActionEvent e){
-      Iterator prsIter = controller.iterator();
-      while(prsIter.hasNext()){
-        ProcessingResource pr = (ProcessingResource)prsIter.next();
-        FeatureMap params = Factory.newFeatureMap();
-        List someParams = (List)paramsForPR.get(pr);
-        Iterator paramsIter = someParams.iterator();
-        while(paramsIter.hasNext()){
-          ParameterDisjunction pDisj = (ParameterDisjunction)paramsIter.next();
-          if(pDisj.getValue() != null){
-            params.put(pDisj.getName(), pDisj.getValue());
+      Runnable runnable = new Runnable(){
+        public void run(){
+          if(handle.project.frame instanceof MainFrame){
+            ((MainFrame)handle.project.frame).showWaitDialog();
+          }
+          Iterator prsIter = controller.iterator();
+          while(prsIter.hasNext()){
+            ProcessingResource pr = (ProcessingResource)prsIter.next();
+            FeatureMap params = Factory.newFeatureMap();
+            List someParams = (List)paramsForPR.get(pr);
+            Iterator paramsIter = someParams.iterator();
+            while(paramsIter.hasNext()){
+              ParameterDisjunction pDisj = (ParameterDisjunction)paramsIter.next();
+              if(pDisj.getValue() != null){
+                params.put(pDisj.getName(), pDisj.getValue());
+              }
+            }
+            try{
+    //System.out.println("PR:" + pr.getFeatures().get("NAME") + "\n" + params);
+              Factory.setResourceParameters(pr, params);
+            }catch(java.beans.IntrospectionException ie){
+              JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                            "Could not set parameters for " +
+                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            ie.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              return;
+            }catch(java.lang.reflect.InvocationTargetException ite){
+              JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                            "Could not set parameters for " +
+                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            ite.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              return;
+            }catch(IllegalAccessException iae){
+              JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                            "Could not set parameters for " +
+                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            iae.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              return;
+            }catch(GateException ge){
+              JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                            "Could not set parameters for " +
+                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            ge.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+          }
+          controller.run();
+          if(handle.project.frame instanceof MainFrame){
+            ((MainFrame)handle.project.frame).hideWaitDialog();
           }
         }
-        try{
-//System.out.println("PR:" + pr.getFeatures().get("NAME") + "\n" + params);
-          Factory.setResourceParameters(pr, params);
-        }catch(java.beans.IntrospectionException ie){
-          JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                        "Could not set parameters for " +
-                                        pr.getFeatures().get("NAME") + ":\n" +
-                                        ie.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-          return;
-        }catch(java.lang.reflect.InvocationTargetException ite){
-          JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                        "Could not set parameters for " +
-                                        pr.getFeatures().get("NAME") + ":\n" +
-                                        ite.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-          return;
-        }catch(IllegalAccessException iae){
-          JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                        "Could not set parameters for " +
-                                        pr.getFeatures().get("NAME") + ":\n" +
-                                        iae.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-          return;
-        }catch(GateException ge){
-          JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                        "Could not set parameters for " +
-                                        pr.getFeatures().get("NAME") + ":\n" +
-                                        ge.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-      }
-      controller.run();
+      };
+      Thread thread = new Thread(runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 

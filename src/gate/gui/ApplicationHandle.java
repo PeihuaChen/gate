@@ -22,11 +22,11 @@ import java.util.*;
 import gate.*;
 import gate.creole.*;
 
-class ApplicationHandle extends ResourceHandle {
+class ApplicationHandle extends CustomResourceHandle {
 
   public ApplicationHandle(SerialController controller, ProjectData project) {
     super(controller, project);
-    setSmallIcon(new ImageIcon(
+    setIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/application.gif")));
     popup = new JPopupMenu();
 
