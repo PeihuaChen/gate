@@ -995,10 +995,171 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected abstract Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
     throws PersistenceException,SecurityException;
 
-  protected abstract Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+  /**
+   * helper for adopt
+   * creates a LR of type Document
+   */
+  protected Document createDocument(Document doc,SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
+
+    //delegate, set to Null
+    return createDocument(doc,null,secInfo);
+  }
+
+
+  /**
+   * helper for adopt
+   * creates a LR of type Document
+   */
+  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
+
+    //-1. preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(secInfo);
+
+    //0. check securoity settings
+    if (false == this.ac.isValidSecurityInfo(secInfo)) {
+      throw new SecurityException("Invalid security settings");
+    }
+
+    //1. get the data to be stored
+    AnnotationSet defaultAnnotations = doc.getAnnotations();
+    DocumentContent docContent = doc.getContent();
+    FeatureMap docFeatures = doc.getFeatures();
+    String docName  = doc.getName();
+    URL docURL = doc.getSourceUrl();
+    Boolean docIsMarkupAware = doc.getMarkupAware();
+    Long docStartOffset = doc.getSourceUrlStartOffset();
+    Long docEndOffset = doc.getSourceUrlEndOffset();
+    String docEncoding = null;
+    try {
+      docEncoding = (String)doc.
+        getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
+    }
+    catch(gate.creole.ResourceInstantiationException re) {
+      throw new PersistenceException("cannot create document: error getting " +
+                                     " document encoding ["+re.getMessage()+"]");
+    }
+
+
+    //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
+    Long lrID = createLR(DBHelper.DOCUMENT_CLASS,docName,secInfo,null);
+
+    //4. create a record in T_DOCUMENT for this document
+    Long docID = createDoc(lrID,
+                            docURL,
+                            docEncoding,
+                            docStartOffset,
+                            docEndOffset,
+                            docIsMarkupAware,
+                            corpusID);
+
+
+    //5. fill document content (record[s] in T_DOC_CONTENT)
+
+    //do we have content at all?
+    if (docContent.size().longValue() > 0) {
+//      updateDocumentContent(docContentID,docContent);
+      updateDocumentContent(docID,docContent);
+    }
+
+    //6. insert annotations, etc
+
+    //6.1. create default annotation set
+    createAnnotationSet(lrID,defaultAnnotations);
+
+    //6.2. create named annotation sets
+    Map namedAnns = doc.getNamedAnnotationSets();
+    //the map may be null
+    if (null != namedAnns) {
+      Set setAnns = namedAnns.entrySet();
+      Iterator itAnns = setAnns.iterator();
+
+      while (itAnns.hasNext()) {
+        Map.Entry mapEntry = (Map.Entry)itAnns.next();
+        //String currAnnName = (String)mapEntry.getKey();
+        AnnotationSet currAnnSet = (AnnotationSet)mapEntry.getValue();
+
+        //create a-sets
+        createAnnotationSet(lrID,currAnnSet);
+      }
+    }
+
+    //7. create features
+//    createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+    createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+
+    //9. create a DatabaseDocument wrapper and return it
+
+/*    Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn,
+                                              doc.getName(),
+                                              this,
+                                              lrID,
+                                              doc.getContent(),
+                                              doc.getFeatures(),
+                                              doc.getMarkupAware(),
+                                              doc.getSourceUrl(),
+                                              doc.getSourceUrlStartOffset(),
+                                              doc.getSourceUrlEndOffset(),
+                                              doc.getAnnotations(),
+                                              doc.getNamedAnnotationSets());
+*/
+    Document dbDoc = null;
+    FeatureMap params = Factory.newFeatureMap();
+
+    HashMap initData = new HashMap();
+    initData.put("JDBC_CONN",this.jdbcConn);
+    initData.put("DS",this);
+    initData.put("LR_ID",lrID);
+    initData.put("DOC_NAME",doc.getName());
+    initData.put("DOC_CONTENT",doc.getContent());
+    initData.put("DOC_FEATURES",doc.getFeatures());
+    initData.put("DOC_MARKUP_AWARE",doc.getMarkupAware());
+    initData.put("DOC_SOURCE_URL",doc.getSourceUrl());
+    initData.put("DOC_SOURCE_URL_START",doc.getSourceUrlStartOffset());
+    initData.put("DOC_SOURCE_URL_END",doc.getSourceUrlEndOffset());
+    initData.put("DOC_DEFAULT_ANNOTATIONS",doc.getAnnotations());
+    initData.put("DOC_NAMED_ANNOTATION_SETS",doc.getNamedAnnotationSets());
+
+    params.put("initData__$$__", initData);
+
+    try {
+      //here we create the persistent LR via Factory, so it's registered
+      //in GATE
+      dbDoc = (Document)Factory.createResource("gate.corpora.DatabaseDocumentImpl", params);
+    }
+    catch (gate.creole.ResourceInstantiationException ex) {
+      throw new GateRuntimeException(ex.getMessage());
+    }
+
+    return dbDoc;
+  }
+
+  protected abstract Long createLR(String lrType,
+                          String lrName,
+                          SecurityInfo si,
+                          Long lrParentID)
     throws PersistenceException,SecurityException;
 
-  protected abstract Document createDocument(Document doc,SecurityInfo secInfo)
-    throws PersistenceException,SecurityException;
+
+  protected abstract Long createDoc(Long _lrID,
+                          URL _docURL,
+                          String _docEncoding,
+                          Long _docStartOffset,
+                          Long _docEndOffset,
+                          Boolean _docIsMarkupAware,
+                          Long _corpusID)
+    throws PersistenceException;
+
+  protected abstract void updateDocumentContent(Long docID,DocumentContent content)
+    throws PersistenceException;
+
+  protected abstract void createAnnotationSet(Long lrID, AnnotationSet aset)
+    throws PersistenceException;
+
+  protected abstract void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException;
+
 
 }
