@@ -33,40 +33,70 @@ Read this documentation along with a copy of the
 <A HREF=CookBook.txt>source code</A>.
 
 <P>
-Rule 1: if it's not in the <TT>gate</TT> package, don't use it!
+Rule 1: if it's not in the <TT>gate</TT> or <TT>gate.util</TT>
+package, you probably don't want to use it directly.
 Contact the <A HREF=mailto:santa@north.pole>GATE development team</A>
 and tell them what you're trying to do, and we'll try and make that
-available at the top level. (The other packages are for internal use.)
+available at the top level.
 
 <P>
 The CookBook is set up as
 part of the GATE test suite (using the JUnit framework), so there's an easy
 way to run the examples (viz.,
 <A HREF=../gate/TestGate.html>gate.TestGate.main</A>, which will invoke the
-JUnit test runner). Also, we can use JUnit's assert methods, e.g.
+JUnit test runner). Also, we can use JUnit's assert methods; e.g.
 <TT>assert(corpus.isEmpty());</TT>
 tests that a corpus object is empty, and creates a test failure report if
-this is not the case.
+this is not the case. To add a new test class to the suite, see the
+<A HREF=../gate/util/TestTemplate.html>gate.util.TestTemplate</A> class.
 
 <P>
 Programming to the GATE Java API involves manipulating the classes and
 interfaces in the <A HREF=package-summary.html>gate package</A>. These are
-mainly interfaces; the classes that do exist are mainly to do with getting
+mainly interfaces; classes there are often to do with getting
 access to objects that implement the interfaces (without exposing those
 implementations). In other words, it's an interface-based design.
 
 <P>
-Two classes take care of instantiating objects that implement the interfaces:
-<A HREF=DataStore.html>DataStore</A> and <A HREF=Factory.html>Factory</A>.
+The <A HREF=Factory.html>Factory</A> class
+takes care of instantiating objects that implement the interfaces, via the
+<A HREF=Factory.html#createResource()>createResource</A> method and various
+other short-cut methods for popular resource types.
 
-<A HREF=DataStore.html>DataStore</A> allows the creation of objects that
-are stored in databases
-(NOT IMPLEMENTED YET!!!).
+<P>
+GATE breaks down the components of language processing systems into
+three types:
+<UL>
+<LI>
+<B>ProcessingResource (PR):</B><BR>
+a resource that is runnable, may (or may not) be invoked remotely (via
+RMI) or in parallel,
+and lives in class files.
+<LI>
+<B>LanguageResource (LR):</B><BR>
+a resource that consists of data, accessed via a Java abstraction
+layer. They typically live in relational databases or file systems, but
+may also be simple classes.
+<LI>
+<B>VisualResource (VR):</B><BR>
+a visual Java bean, component of GUIs, including of the main GATE
+gui. Like PRs they live in .class or .jar files. They are always local,
+never distributed.
+</UL>
+Each of these types is represented by an interface, e.g.
+<A HREF=../gate/LanguageResource.html>gate.LanguageResource</A>, and
+the classes that implement these interfaces are known as CREOLE resources,
+or CREOLE components. CREOLE resources are an extendable set which can be
+added to and loaded at runtime.
 
-<A HREF=Factory.html>Factory</A> provides static methods that
-construct new transient
-objects, i.e. objects whose lifespan is bounded by the current invocation of
-the program.
+<P>
+The rest of this documentation refers to methods in the code that
+provide examples of using the GATE API.
+
+<P>
+The <A HREF=#testResourceCreation()>testResourceCreation</A> method gives
+an example of creating a resource via
+<A HREF=../gate/Factory.html>gate.Factory</A>.
 
 <P>
 The <A HREF=Corpus.html>Corpus interface</A> represents collections of
@@ -74,8 +104,7 @@ The <A HREF=Corpus.html>Corpus interface</A> represents collections of
 <TT>Collection</TT> class).
 
 <P>
-The
-<A HREF=#testCorpusConstruction()>testCorpusConstruction</A> method gives
+The <A HREF=#testCorpusConstruction()>testCorpusConstruction</A> method gives
 an example of how to create a new transient Corpus object.
 
 <P>
@@ -100,7 +129,8 @@ mechanism. Simple feature maps use Java's Map interface.
 <P>
 See also the other test classes, although note that they also use methods
 that are not part of the public API (which is restricted to the <TT>gate</TT>
-package. Test classes:
+package. Test classes include:
+<A HREF=corpora/TestCreole.html>TestCreole</A>;
 <A HREF=corpora/TestCorpus.html>TestCorpus</A>;
 <A HREF=corpora/TestDocument.html>TestDocument</A>;
 <A HREF=corpora/TestAnnotation.html>TestAnnotation</A>.
@@ -120,6 +150,29 @@ public class CookBook extends TestCase
   /** Another document */
   Document doc2 = null;
 
+  /** Constructing a resource */
+  public void testResourceCreation() throws GateException {
+
+    // before creating a resource we need a feature map to store
+    // parameter values
+    FeatureMap params = Factory.newFeatureMap();
+
+    // to create a document we need a sourceUrlName parameter giving
+    // the location of the source for the document content
+    params.put(
+      "sourceUrlName",
+      Gate.getUrl("tests/doc0.html").toExternalForm()
+    );
+    Resource res = Factory.createResource("gate.Document", params);
+
+    // now we have a document
+    assert(
+      "should be document but the class is: " + res.getClass().getName(),
+      res instanceof gate.Document
+    );
+
+  } // testResourceCreation
+
   /** Constructing a corpus */
   public void testCorpusConstruction() throws GateException {
 
@@ -135,16 +188,19 @@ public class CookBook extends TestCase
   public void testAddingDocuments() throws GateException {
     corpus = Factory.newCorpus("My example corpus");
 
-    // document constructors may take a URL; if so you have
-    // to deal with URL and net-related exceptions:
-    URL u = null;
-    u = Gate.getUrl("tests/doc0.html");
+    // add a document or two....
+    corpus.add(doc1);
+    corpus.add(doc2);
 
-    // some set methods
+    // iterate the corpus members and do some random tests
     Iterator iter = corpus.iterator();
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
-      assert(u.equals(doc.getSourceUrl()));
+      assert(
+        "document url not as expected",
+        doc.getSourceUrlName().endsWith("doc0.html") ||
+          doc.getSourceUrlName().endsWith("test1.htm")
+      );
     } // while
 
   } // testAddingDocuments
@@ -189,7 +245,7 @@ public class CookBook extends TestCase
     corpus = Factory.newCorpus("My example corpus");
 
     doc1 = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
-    doc2 = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+    doc2 = Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
   } // setUp
 
   /** Construction */
