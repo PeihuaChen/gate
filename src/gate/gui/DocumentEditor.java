@@ -323,8 +323,7 @@ public class DocumentEditor extends AbstractVisualResource
         }else if(e.getPropertyName().equals("corefOptionAvailable")){
           if(((Boolean)e.getNewValue()).booleanValue()){
             if(toolbar.getComponentIndex(coreferenceVisibleBtn) == -1)
-              toolbar.add(coreferenceVisibleBtn,
-                          toolbar.getComponentCount() - 1);
+              toolbar.add(coreferenceVisibleBtn, 3);
           }else{
             toolbar.remove(coreferenceVisibleBtn);
           }
@@ -815,14 +814,15 @@ public class DocumentEditor extends AbstractVisualResource
   /**Builds all the graphical components*/
   protected void initGuiComponents(){
     //initialise GUI components
-    this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+//    this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    this.setLayout(new BorderLayout());
 
     //the toolbar
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setAlignmentX(Component.LEFT_ALIGNMENT);
     toolbar.setAlignmentY(Component.TOP_ALIGNMENT);
     toolbar.setFloatable(false);
-    this.add(toolbar);
+    this.add(toolbar, BorderLayout.NORTH);
 
     textVisibleBtn = new JToggleButton("Text", textVisible);
     toolbar.add(textVisibleBtn);
@@ -1222,10 +1222,12 @@ public class DocumentEditor extends AbstractVisualResource
           //we need the main split
           mainSplit.setLeftComponent(leftComp);
           mainSplit.setRightComponent(rightComp);
-          DocumentEditor.this.add(mainSplit);
+          DocumentEditor.this.add(mainSplit, BorderLayout.CENTER);
         }else{
-          if(leftComp != null) DocumentEditor.this.add(leftComp);
-          else if(rightComp != null)DocumentEditor.this.add(rightComp);
+          if(leftComp != null) DocumentEditor.this.add(leftComp,
+                                                       BorderLayout.CENTER);
+          else if(rightComp != null)DocumentEditor.this.add(rightComp,
+                                                            BorderLayout.CENTER);
         }
 
         DocumentEditor.this.validate();
