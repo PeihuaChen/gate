@@ -1,20 +1,22 @@
 /*
 *  final.jape
 *
-*  Copyright (c) 1998-2001, The University of Sheffield.
+* Copyright (c) 1998-2001, The University of Sheffield.
 *
 *  This file is part of GATE (see http://gate.ac.uk/), and is free
 *  software, licenced under the GNU Library General Public License,
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
-*
+*  Diana Maynard, 10 Sep 2001
+* 
 *  $Id$
 */
 
+//note: organization should be included as part of the address ??
 
 Phase:	Final
+Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs
 Options: control = appelt
 
 
@@ -22,27 +24,25 @@ Options: control = appelt
 
 Rule: PersonFinal
 Priority: 30
+({JobTitle}
+)?
 (
  {TempPerson.kind == personName}
 )
 :person
 --> 
 {
- gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation person1Ann = (gate.Annotation)personSet.iterator().next();
-
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("TempPerson");
-if (firstPerson != null && firstPerson.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features.put("rule1", person1Ann.getFeatures().get("rule"));
-  features.put("rule", "PersonFinal");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "Person",
+//removes  TempPerson annotation, gets the rule feature and adds a new Person annotation
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", personAnn.getFeatures().get("rule"));
+features.put("rule2", "PersonFinal");
+annotations.add(person.firstNode(), person.lastNode(), "Person",
 features);
+annotations.removeAll(person);
 }
+
 
 Rule:	OrgCountryFinal
 Priority: 50
@@ -50,22 +50,20 @@ Priority: 50
 // Scottish Electricity Board
 
 (
- ({TempOrganization} SPACE)?
+ ({TempOrganization})?
 
  (({Lookup.majorType == country_adj}|
-   {Lookup.majorType == location})
-  (SPACE) 
+   {Lookup.majorType == location}) 
   {TempOrganization}
  )|
  ({TempOrganization}
-  (SPACE)
   ({Token.position == startpunct})?
   ({Lookup.majorType == country_adj}|
    {Lookup.majorType == location})
   ({Token.position == endpunct})?
  )
- (SPACE {TempOrganization})?
- (SPACE {Lookup.majorType == org_ending})?
+ ({TempOrganization})?
+ ({Lookup.majorType == org_ending})?
 )
 :org
 -->
@@ -82,31 +80,8 @@ annotations.removeAll(org);
 }
  
 
-Rule:	LocOrganization
-Priority: 20
-// Ealing Police
-(
- ({TempLocation} |
-  {Lookup.majorType == country_adj})
- SPACE
-{TempOrganization}
-(SPACE {TempOrganization})?
-)
-:org
--->  
-{
-//removes TempOrg annotation, gets the rule feature and adds a new Org annotation
-gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
-gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("orgType", orgAnn.getFeatures().get("orgType"));
-features.put("rule1", orgAnn.getFeatures().get("rule"));
-features.put("rule2", "OrgCountryFinal");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
-features);
-annotations.removeAll(org);
-}
- 
+
+//note - move this rule to after final
 
 Rule: OrgFinal
 Priority: 10
@@ -120,7 +95,6 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
 gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
 features.put("rule2", "OrgFinal");
 annotations.add(org.firstNode(), org.lastNode(), "Organization",
@@ -136,7 +110,6 @@ Priority: 100
 
 (
  {TempPerson}
- (SPACE)
  ({Token.string == "airport"} |
   {Token.string == "Airport"})
 )
@@ -168,7 +141,6 @@ Priority: 10
 gate.AnnotationSet loc = (gate.AnnotationSet)bindings.get("loc");
 gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("locType",locAnn.getFeatures().get("locType"));
 features.put("rule1", locAnn.getFeatures().get("rule"));
 features.put("rule2", "LocFinal");
 annotations.add(loc.firstNode(), loc.lastNode(), "Location",
@@ -189,11 +161,11 @@ Priority: 20
  {TempDate}
  (
   ({Token.string == ","})?
-  SPACE {TempDate})?
- (SPACE | {Token.string == ":"})?
+  {TempDate})?
+ ({Token.string == ":"})?
  {TempTime}
- (SPACE {TempYear})?
- (SPACE {TempZone})?
+ ({TempYear})?
+ ({TempZone})?
 )
 :date
 -->
@@ -216,7 +188,6 @@ Priority: 15
 (
  ({Token.string == "spring"} |
   {Token.string == "Spring"})
- (SPACE)
  {TempYear.kind == positive}
 )
 :date
@@ -241,10 +212,9 @@ Priority: 10
  {TempDate}
  (
  ({Token.string == ","})?
- SPACE {TempDate})?
- SPACE
+ {TempDate})?
  {TempYear}
- (SPACE {TempDate})?
+ ({TempDate})?
 )
 :date
 -->
@@ -268,10 +238,10 @@ Priority: 10
 // 2pm 10 January 2000 +0400
 (
  {TempTime}
- (SPACE | {Token.string == ":"})?
+ ({Token.string == ":"})?
  {TempDate} 
- (SPACE {TempYear})?
- (SPACE {TempZone})?
+ ({TempYear})?
+ ({TempZone})?
 )
 :date
 -->
@@ -295,9 +265,9 @@ Priority: 10
 
 (
  {TempTime}
- (SPACE | {Token.string == ":"})? 
- (SPACE {TempYear})
- (SPACE {TempZone})?
+ ({Token.string == ":"})? 
+ ({TempYear})
+ ({TempZone})?
 )
 :date
 -->
@@ -345,12 +315,9 @@ Priority: 10
 
 (
  ({TempTime}|{TempDate}):date
- (SPACE)?
  {Token.string == "["}
  {Token.string == "mdash"}
- (SPACE)?
  {Token.string == "]"}
- (SPACE)?
 )
 ( {TempTime.kind == temp}
 ):time
@@ -364,9 +331,7 @@ Priority: 50
 //seven to nine o'clock
 (
  {TempTime.kind == timeWords}
- (SPACE)
  {Token.string == "to"}
- (SPACE)
  {TempTime.kind == positive}
 )
 :date
@@ -433,14 +398,12 @@ Rule: AddressFull
 Priority: 100
 (
  ({Street}
-  (SPACE)?
-  {Token.string == ","})? (SPACE)? (SPACE)?
+  {Token.string == ","})?
  ({TempLocation} 
- (SPACE)? 
- ({Token.string == ","})? (SPACE)? (SPACE)?
+ ({Token.string == ","})?
  )+
  ({Postcode})
- ({Token.string == ","})? (SPACE)? (SPACE)?
+ ({Token.string == ","})?
  ({TempLocation})*
 )
 :address
@@ -626,37 +589,4 @@ annotations.removeAll(spec);
 }
 
 //////////////////////////////////////////////////////
-Rule: UnknownPerson
-Priority: 5
-( 
- {Token.category == NNP}
- ((SPACE|{Token.string == "-"})
-  {Token.category == NNP})?
- (SPACE {Token.category == NNP})?
- (SPACE {Token.category == NNP})?
-):unknown
- (SPACE)
-(
- {TempPerson}
-):person
--->
-:unknown.Unknown = {kind = "PN", rule = UnknownTempPerson},
-{
-//removes TempPerson annotation, gets the rule feature and adds a new Person annotation
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("rule1", personAnn.getFeatures().get("rule"));
-features.put("rule2", "UnknownPerson");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
-features);
-annotations.removeAll(person);
-}
-
-
-
-
-
-
 

@@ -15,7 +15,7 @@
 
 
 Phase:	Number
-//Input: Token SpaceToken Lookup
+Input: Token Lookup
 Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
@@ -38,15 +38,13 @@ Macro: NUMBER_WORDS
 
 (
  (({Lookup.majorType == number} 
-   (SPACE|{Token.string == "-"})
+   ({Token.string == "-"})?
   )*
    {Lookup.majorType == number}
-   (SPACE)
    {Token.string == "and"}
-   (SPACE)
  )*
  ({Lookup.majorType == number} 
-  (SPACE|{Token.string == "-"})
+  ({Token.string == "-"})?
  )*
    {Lookup.majorType == number}
 )
@@ -65,7 +63,6 @@ Macro: AMOUNT_NUMBER
   |
   (NUMBER_WORDS)
  )
- (SPACE)?
  (MILLION_BILLION)?
 )
 
@@ -74,7 +71,6 @@ Rule:	MoneyCurrencyUnit
 // 30 pounds
   (        
       (AMOUNT_NUMBER)
-      (SPACE)?
       ({Lookup.majorType == currency_unit})
   )
 :number -->
@@ -92,9 +88,8 @@ Rule:	MoneySymbolUnit
 (   
  ({Token.symbolkind == currency}|
   {Lookup.majorType == currency_unit})
- (SPACE)?
  (AMOUNT_NUMBER)
- ((SPACE)?
+ (
   {Lookup.majorType == currency_unit}
  )?
 ) 
@@ -111,7 +106,6 @@ Macro: PERCENT
 ({Token.string == "%"} | 
  {Token.string == "percent"}|
  ({Token.string == "per"}
- SPACE
  {Token.string == "cent"})
 )
 
@@ -124,16 +118,12 @@ Rule: PercentBasic
 (
  ({Token.string == "+"}|
   {Token.string == "-"}|
-  {Token.string == "minus"} 
-  (SPACE)? 
+  {Token.string == "minus"}  
  )?
   ((AMOUNT_NUMBER|NUMBER_WORDS)
-  SPACE
   {Token.string == "point"}
-  SPACE
  )? 
  (AMOUNT_NUMBER|NUMBER_WORDS)
- (SPACE)?
  (PERCENT)
 )
 :number -->
@@ -145,16 +135,18 @@ Rule: PercentSpan
 
 (
  (AMOUNT_NUMBER|NUMBER_WORDS)
- (SPACE)
  ({Token.string == "-"} |
   {Token.string == "to"})
- (SPACE)
  (AMOUNT_NUMBER|NUMBER_WORDS)
- (SPACE)? 
  (PERCENT)
 )
 :number -->
   :number.Percent = {rule = "PercentSpan"}
+
+
+
+
+
 
 
 

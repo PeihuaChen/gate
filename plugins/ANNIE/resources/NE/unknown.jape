@@ -8,12 +8,13 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
+*  Diana Maynard, 10 Sep 2001
 * 
 *  $Id$
 */
 
 Phase:	Unknown
+Input: Location Person Date Organization Address Money Percent Token Jobtitle Lookup
 Options: control = appelt
 
 
@@ -43,7 +44,6 @@ Priority: 50
 :unknown
 -->
  :unknown.Unknown = {kind = "PN", rule = Unknown}
-
 
 
 

@@ -8,22 +8,33 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
+*  Diana Maynard, 10 Sep 2001
 * 
 *  $Id$
 */
 
 
-Phase:	Date_Pre
-Input: Token SpaceToken Lookup
+Phase:	DatePre
 Options: control = appelt
 
 ///////
-// Note: this must come before the date phase,  because it includes extra context
+// Note: this muse come before the timex phase,  because it includes extra context
 // to prevent dates being recognised erroneously in the middle of longer things
 //////
 
 
+Macro: ORDINAL
+(
+   ({Token.kind == number}
+    ({Token.string == "th"}|
+     {Token.string == "rd"}|
+     {Token.string == "nd"}|
+     {Token.string == "st"})
+    |
+   {Lookup.minorType == ordinal})
+   (SPACE
+    {Token.string == "of"})?
+)
 
 /////////////////////////////////////////////////
 
@@ -41,9 +52,30 @@ Rule: GazDate
  :date.TempDate = {rule = "GazDate"}
 
 
+Rule: PersonDateAmbig
+Priority: 100
+(
+ (ORDINAL)
+)
+:date
 
-
-
+(SPACE)
+(
+ {TempPerson.kind == personName, TempPerson.rule == PersonFull}
+):person
+-->
+:date.Date = {kind = date, rule = "PersonDateAmbig"},
+{
+//removes  TempPerson annotation, gets the rule feature and adds a new Person annotation
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule1", personAnn.getFeatures().get("rule"));
+features.put("rule2", "PersonDateAmbig");
+annotations.add(person.firstNode(), person.lastNode(), "Person",
+features);
+annotations.removeAll(person);
+}
 
 
 

@@ -14,9 +14,8 @@
 */
 
 Phase:	Loc_Context
+Input: Unknown Token Location
 Options: control = appelt
-
-
 
 
 Rule: LocConjLoc1 
@@ -26,11 +25,8 @@ Priority: 10
 {Unknown.kind == PN}
 ):loc
 (
-(SPACE)
 {Token.category == CC}
-(SPACE)
 ({Token.category == DT}
- SPACE
 )?
 {Location}
 )
@@ -50,11 +46,8 @@ Priority: 10
 
 (
  {Location}
- (SPACE)
  {Token.category == CC}
- (SPACE)
  ({Token.category == DT}
-  SPACE
  )?
 )
 (
