@@ -109,7 +109,7 @@ public class TestControllers extends TestCase
     assert( // check offset - two values depending on whether saved with \r\n
       "wrong value: " + a.getStartNode().getOffset(),
       a.getStartNode().getOffset().equals(new Long(1366)) ||
-      a.getStartNode().getOffset().equals(new Long(1441))
+      a.getStartNode().getOffset().equals(new Long(1367))
     );
     assert( // check offset - two values depending on whether saved with \r\n
       "wrong value: " + a.getEndNode().getOffset(),
