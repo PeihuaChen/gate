@@ -1,5 +1,5 @@
 /*
- *  Group.java
+ *  GroupImpl.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -10,6 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  *
+ *  $Id$
  */
 
 package gate.security;
