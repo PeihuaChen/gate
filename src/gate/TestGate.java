@@ -19,7 +19,9 @@ public class TestGate
 
   /** Main routine. */
   public static void main(String[] args) {
-    junit.textui.TestRunner.run(suite()); 
+    String a[] = new String[1];
+    a[0] = "gate.TestGate";
+    junit.ui.LoadingTestRunner.main(a);
   } // main
 
   /** GATE test suite */
