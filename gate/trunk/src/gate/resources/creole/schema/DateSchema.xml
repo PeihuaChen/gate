@@ -8,6 +8,7 @@
 		    <restriction base="string">
 			  <enumeration value="date"/>
 			  <enumeration value="time"/>
+			  <enumeration value="dateTime"/>			  
 		    </restriction>
 		</simpleType>	 
 	</attribute>
