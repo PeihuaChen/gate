@@ -345,7 +345,47 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   /** Get a list of the names of LRs of a particular type that are present. */
-  public abstract List getLrNames(String lrType) throws PersistenceException;
+  public List getLrNames(String lrType) throws PersistenceException {
+
+    Vector lrNames = new Vector();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+      stmt = this.jdbcConn.prepareStatement(
+                " SELECT lr_name " +
+                " FROM   "+this.dbSchema+"t_lang_resource LR, " +
+                "        t_lr_type LRTYPE " +
+                " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
+                "        AND LRTYPE.lrtp_type = ? " +
+                " ORDER BY lr_name desc"
+                );
+      stmt.setString(1,lrType);
+
+      //Oracle special
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        ((OraclePreparedStatement)stmt).setRowPrefetch(DBHelper.CHINK_SIZE_SMALL);
+      }
+
+      stmt.execute();
+      rs = stmt.getResultSet();
+
+      while (rs.next()) {
+        //access by index is faster
+        String lrName = rs.getString(1);
+        lrNames.add(lrName);
+      }
+
+      return lrNames;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get LR types from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
+  }
 
   /**
    * Checks if the user (identified by the sessionID)
