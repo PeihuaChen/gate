@@ -103,7 +103,7 @@ System.out.println("starting ANNIE modules...");
     FeatureMap params = Factory.newFeatureMap(); // params list for new doc
     // set the source URL parameter to a "file:..." URL string
     params.clear();
-    params.put("sourceUrl", url);
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, url);
 
     // create the document
     Document doc = (Document) Factory.createResource("gate.corpora.DocumentImpl", params);

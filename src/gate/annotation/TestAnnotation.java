@@ -49,8 +49,8 @@ public class TestAnnotation extends TestCase
     String server = TestDocument.getTestServerName();
     assertNotNull(server);
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     doc1 = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 
@@ -195,8 +195,8 @@ public class TestAnnotation extends TestCase
   /** Test type index */
   public void testTypeIndex() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
     AnnotationSet as = new AnnotationSetImpl(doc);
@@ -265,8 +265,8 @@ public class TestAnnotation extends TestCase
   /** Test the annotations set add method that uses existing nodes */
   public void testAddWithNodes() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
     AnnotationSet as = new AnnotationSetImpl(doc);
@@ -519,8 +519,8 @@ public class TestAnnotation extends TestCase
   public void testAnnotationSet() throws Exception {
     // constuct an empty AS
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 

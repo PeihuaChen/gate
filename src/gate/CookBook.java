@@ -137,8 +137,10 @@ public class CookBook extends TestCase
 
     // to create a document we need a sourceUrlName parameter giving
     // the location of the source for the document content
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
-    params.put("markupAware", new Boolean(true));
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+      Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME,
+      new Boolean(true));
     Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
     // now we have a document
@@ -343,10 +345,11 @@ public class CookBook extends TestCase
       FeatureMap params = Factory.newFeatureMap(); // params list for new doc
 
       // set the source URL parameter to a "file:..." URL string
-      params.put("sourceUrl", inFile.toURL().toExternalForm());
+      params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+        inFile.toURL().toExternalForm());
 
       // use the platform's default encoding rather than GATE's
-      params.put("encoding", "");
+      params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
       // create the document
       Document doc = (Document) Factory.createResource(
@@ -385,13 +388,16 @@ public class CookBook extends TestCase
 
       // iterate round the token annotations writing to the out file
       // NOTE: to dump all to XML: outFileWriter.write(doc.toXml(tokens));
-      AnnotationSet tokens = doc.getAnnotations("nercAS").get("Token");
+      AnnotationSet tokens = doc.getAnnotations("nercAS").
+        get(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
       Iterator iter = tokens.iterator();
       while(iter.hasNext()) {
         Annotation token = (Annotation) iter.next();
         FeatureMap tokFeats = token.getFeatures();
-        String tokStr = (String) tokFeats.get("string");
-        String tokPos = (String) tokFeats.get("category");
+        String tokStr = (String) tokFeats.
+          get(ANNIEConstants.TOKEN_STRING_FEATURE_NAME);
+        String tokPos = (String) tokFeats.
+          get(ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME);
         outFileWriter.write(tokStr + "\t" + tokPos + nl);
       }
       outFileWriter.write(doc.getFeatures().get("entitySet").toString());

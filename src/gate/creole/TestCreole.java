@@ -97,7 +97,7 @@ public class TestCreole extends TestCase
     // Create an LR
     FeatureMap params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html")
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html")
     );
     res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
@@ -108,7 +108,7 @@ public class TestCreole extends TestCase
     // Create another LR
     params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html")
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html")
     );
     res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
@@ -260,7 +260,7 @@ public class TestCreole extends TestCase
     // Create an LR
     FeatureMap params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
     Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
     List publics = reg.getPublicLrInstances();
@@ -416,19 +416,19 @@ public class TestCreole extends TestCase
           case 1:
             assertTrue(
               "Doc param 1 wrong name: " + param.getName(),
-              param.getName().equals("encoding")
+              param.getName().equals(Document.DOCUMENT_ENCODING_PARAMETER_NAME)
             );
             break;
           case 2:
             assertTrue(
               "Doc param 2 wrong name: " + param.getName(),
-              param.getName().equals("sourceUrlStartOffset")
+              param.getName().equals(Document.DOCUMENT_START_OFFSET_PARAMETER_NAME)
             );
             break;
           case 3:
             assertTrue(
               "Doc param 3 wrong name: " + param.getName(),
-              param.getName().equals("sourceUrlEndOffset")
+              param.getName().equals(Document.DOCUMENT_END_OFFSET_PARAMETER_NAME)
             );
             break;
           default:
@@ -559,20 +559,20 @@ public class TestCreole extends TestCase
           case 1:
             assertTrue(
               "Doc param 1 wrong name: " + param.getName(),
-              param.getName().equals("encoding")
+              param.getName().equals(Document.DOCUMENT_ENCODING_PARAMETER_NAME)
             );
             break;
           case 2:
             assertTrue(
               "Doc param 2 wrong name: " + param.getName(),
-              param.getName().equals("sourceUrlStartOffset")
+              param.getName().equals(Document.DOCUMENT_START_OFFSET_PARAMETER_NAME)
             );
             defaultValue = param.getDefaultValue();
             break;
           case 3:
             assertTrue(
               "Doc param 3 wrong name: " + param.getName(),
-              param.getName().equals("sourceUrlEndOffset")
+              param.getName().equals(Document.DOCUMENT_END_OFFSET_PARAMETER_NAME)
             );
             break;
           default:
@@ -662,7 +662,7 @@ public class TestCreole extends TestCase
   public void testFactory() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
-    params.put("sourceUrl", Gate.getUrl("tests/doc0.html")
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html")
     );
     Resource res =
       Factory.createResource("gate.corpora.DocumentImpl", params);

@@ -91,8 +91,8 @@ public class TestXml extends TestCase
     gate.Document keyDocument = null;
 
     FeatureMap params = Factory.newFeatureMap();
-    params.put("sourceUrl", url);
-    params.put("markupAware", "false");
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, url);
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
     keyDocument = (Document)Factory.createResource("gate.corpora.DocumentImpl",
                                                     params);
 

@@ -811,7 +811,8 @@ public class OracleDataStore extends JDBCDataStore {
     Long docEndOffset = doc.getSourceUrlEndOffset();
     String docEncoding = null;
     try {
-      docEncoding = (String)doc.getParameterValue("encoding");
+      docEncoding = (String)doc.
+        getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
     }
     catch(gate.creole.ResourceInstantiationException re) {
       throw new PersistenceException("cannot create document: error getting " +

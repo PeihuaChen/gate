@@ -26,6 +26,13 @@ import gate.util.*;
 public class Coreferencer extends AbstractLanguageAnalyser
                           implements ProcessingResource{
 
+  public static final String COREF_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String COREF_ANN_SET_PARAMETER_NAME = "annotationSetName";
+
+  public static final String COREF_TYPE_FEATURE_NAME = "ENTITY_MENTION_TYPE";
+  public static final String COREF_ANTECEDENT_FEATURE_NAME = "antecedent_offset";
+
   /** --- */
   private static final boolean DEBUG = true;
   /** --- */
@@ -135,18 +142,20 @@ public class Coreferencer extends AbstractLanguageAnalyser
       }
 
       //get the ortho-matches of the antecedent
-      List matches = (List)antecedent.getFeatures().get("matches");
+      List matches = (List)antecedent.getFeatures().
+        get(ANNOTATION_COREF_FEATURE_NAME);
       if (null == matches) {
         matches = new ArrayList();
         matches.add(antecedent.getId());
-        antecedent.getFeatures().put("matches",matches);
+        antecedent.getFeatures().
+          put(ANNOTATION_COREF_FEATURE_NAME,matches);
         //check if the document has a list of matches
         //if yes, simply add the new list to it
         //if not, create it and add the list of matches to it
         if (document.getFeatures().containsKey(
-            ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME)) {
+            DOCUMENT_COREF_FEATURE_NAME)) {
           Map matchesMap = (Map) document.getFeatures().get(
-                                ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+                                DOCUMENT_COREF_FEATURE_NAME);
           List matchesList = (List) matchesMap.get(getAnnotationSetName());
           if (matchesList == null) {
             matchesList = new ArrayList();
@@ -162,9 +171,10 @@ public class Coreferencer extends AbstractLanguageAnalyser
       }//if matches == null
 
       FeatureMap features = new SimpleFeatureMapImpl();
-      features.put("ENTITY_MENTION_TYPE","PRONOUN");
-      features.put("matches",matches);
-      features.put("antecedent_offset",antecedent.getStartNode().getOffset());
+      features.put(COREF_TYPE_FEATURE_NAME,"PRONOUN");
+      features.put(ANNOTATION_COREF_FEATURE_NAME,matches);
+      features.put(COREF_ANTECEDENT_FEATURE_NAME,
+                   antecedent.getStartNode().getOffset());
 
       Integer annID = outputSet.add(anaphor.getStartNode(),
                                     anaphor.getEndNode(),

@@ -91,8 +91,8 @@ public class TestDocument extends TestCase
 
     // test the default value of preserve content flag
     params = Factory.newFeatureMap();
-    params.put("sourceUrl", new URL(testServer + testDocument1));
-    params.put("encoding", encoding);
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, new URL(testServer + testDocument1));
+    params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
     doc =
       (Document) Factory.createResource("gate.corpora.DocumentImpl", params);
 
@@ -104,9 +104,10 @@ public class TestDocument extends TestCase
       origContent);
 
     params = Factory.newFeatureMap();
-    params.put("sourceUrl", new URL(testServer + testDocument1));
-    params.put("encoding", encoding);
-    params.put("preserveOriginalContent", new Boolean(true));
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+      new URL(testServer + testDocument1));
+    params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
+    params.put(Document.DOCUMENT_PRESERVE_CONTENT_PARAMETER_NAME, new Boolean(true));
     doc =
       (Document) Factory.createResource("gate.corpora.DocumentImpl", params);
 

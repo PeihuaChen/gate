@@ -224,7 +224,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
   class RemoveDocumentsAction extends AbstractAction{
     public RemoveDocumentsAction(){
-      super("Rmove documents", MainFrame.getIcon("remove.gif"));
+      super("Remove documents", MainFrame.getIcon("remove.gif"));
       putValue(SHORT_DESCRIPTION, "Removes selected documents from this corpus");
     }
 

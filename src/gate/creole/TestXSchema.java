@@ -45,7 +45,8 @@ public class TestXSchema extends TestCase
       Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("xmlFileUrl", Gate.getUrl("tests/xml/POSSchema.xml"));
+    parameters.put(
+      AnnotationSchema.FILE_URL_PARAM_NAME, Gate.getUrl("tests/xml/POSSchema.xml"));
 
     AnnotationSchema annotSchema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);
@@ -65,7 +66,8 @@ public class TestXSchema extends TestCase
       Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("xmlFileUrl", Gate.getUrl("tests/xml/POSSchema.xml"));
+    parameters.put(
+      AnnotationSchema.FILE_URL_PARAM_NAME, Gate.getUrl("tests/xml/POSSchema.xml"));
 
     AnnotationSchema schema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);

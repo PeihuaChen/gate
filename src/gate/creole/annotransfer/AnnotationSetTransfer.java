@@ -27,10 +27,28 @@ import gate.corpora.*;
 public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
+  public static final String
+    AST_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    AST_INPUT_AS_PARAMETER_NAME = "inputASName";
+
+  public static final String
+    AST_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+
+  public static final String
+    AST_TAG_AS_PARAMETER_NAME = "tagASName";
+
+  public static final String
+    AST_TEXT_TAG_PARAMETER_NAME = "textTagName";
+
+  public static final String DEFAULT_OUTPUT_SET_NAME = "Filtered";
+  public static final String DEFAULT_TEXT_TAG_NAME = "BODY";
+
   protected String   tagASName =  GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
-  protected String                outputASName = "Filtered";
+  protected String                outputASName = DEFAULT_OUTPUT_SET_NAME;
   protected String                inputASName = null;
-  protected String                textTagName = "BODY";
+  protected String                textTagName = DEFAULT_TEXT_TAG_NAME;
   protected gate.AnnotationSet    bodyAnnotations = null;
 
   /** Initialise this resource, and return it. */

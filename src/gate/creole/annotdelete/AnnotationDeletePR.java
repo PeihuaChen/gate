@@ -29,6 +29,12 @@ import gate.util.*;
 public class AnnotationDeletePR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
+  public static final String
+    TRANSD_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    TRANSD_ANNOT_TYPES_PARAMETER_NAME = "annotationTypes";
+
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
   protected List annotationTypes;
 

@@ -358,7 +358,7 @@ public abstract class Factory {
                                           throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
-    parameterValues.put("name", name);
+    parameterValues.put(Corpus.CORPUS_NAME_PARAMETER_NAME, name);
 //    parameterValues.put("features", Factory.newFeatureMap());
     return (Corpus) createResource("gate.corpora.CorpusImpl", parameterValues);
   } // newCorpus
@@ -368,7 +368,7 @@ public abstract class Factory {
                                           throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
-    parameterValues.put("sourceUrl", sourceUrl);
+    parameterValues.put(Document.DOCUMENT_URL_PARAMETER_NAME, sourceUrl);
     return
       (Document) createResource("gate.corpora.DocumentImpl", parameterValues);
   } // newDocument(URL)
@@ -378,8 +378,8 @@ public abstract class Factory {
                                           throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
-    parameterValues.put("sourceUrl", sourceUrl);
-    parameterValues.put("encoding", encoding);
+    parameterValues.put(Document.DOCUMENT_URL_PARAMETER_NAME, sourceUrl);
+    parameterValues.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
     return
       (Document) createResource("gate.corpora.DocumentImpl", parameterValues);
   } // newDocument(URL)
@@ -389,7 +389,7 @@ public abstract class Factory {
                                           throws ResourceInstantiationException
   {
     FeatureMap params = newFeatureMap();
-    params.put("stringContent", content);
+    params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, content);
     Document doc =
       (Document) createResource("gate.corpora.DocumentImpl", params);
 /*

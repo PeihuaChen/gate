@@ -27,6 +27,9 @@ import gate.creole.ResourceInstantiationException;
   */
 public interface Corpus extends LanguageResource, List, NameBearer {
 
+  public static final String CORPUS_NAME_PARAMETER_NAME = "name";
+  public static final String CORPUS_DOCLIST_PARAMETER_NAME = "documentsList";
+
   /**
    * Gets the names of the documents in this corpus.
    * @return a {@link List} of Strings representing the names of the documents

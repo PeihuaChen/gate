@@ -26,6 +26,36 @@ import gate.event.*;
  */
 public interface Document extends LanguageResource, Comparable {
 
+  /**
+   * The parameter name for the document URL
+   */
+  public static final String
+    DOCUMENT_URL_PARAMETER_NAME = "sourceUrl";
+
+  /**
+  * The parameter name that determines whether or not a document is markup aware
+  */
+  public static final String
+    DOCUMENT_MARKUP_AWARE_PARAMETER_NAME = "markupAware";
+
+  public static final String
+    DOCUMENT_ENCODING_PARAMETER_NAME = "encoding";
+
+  public static final String
+    DOCUMENT_PRESERVE_CONTENT_PARAMETER_NAME = "preserveOriginalContent";
+
+  public static final String
+    DOCUMENT_STRING_CONTENT_PARAMETER_NAME = "stringContent";
+
+  public static final String
+    DOCUMENT_REPOSITIONING_PARAMETER_NAME = "collectRepositioningInfo";
+
+  public static final String
+    DOCUMENT_START_OFFSET_PARAMETER_NAME = "sourceUrlStartOffset";
+
+  public static final String
+    DOCUMENT_END_OFFSET_PARAMETER_NAME = "sourceUrlEndOffset";
+
   /** Documents are identified by URLs
    */
   public URL getSourceUrl();

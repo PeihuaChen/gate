@@ -33,6 +33,30 @@ import java.io.*;
 public class DumpingPR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
+  public static final String
+    DPR_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    DPR_ANN_SET_PARAMETER_NAME = "annotationSetName";
+
+  public static final String
+    DPR_ANN_TYPES_PARAMETER_NAME = "annotationTypes";
+
+  public static final String
+    DPR_DUMP_TYPES_PARAMETER_NAME = "dumpTypes";
+
+  public static final String
+    DPR_OUTPUR_URL_PARAMETER_NAME = "outputFileUrl";
+
+  public static final String
+    DPR_INCLUDE_FEAT_PARAMETER_NAME = "includeFeatures";
+
+  public static final String
+    DPR_USE_SUFFIX_PARAMETER_NAME = "useSuffixForDumpFiles";
+
+  public static final String
+    DPR_FILE_SUFFIX_PARAMETER_NAME = "suffixForDumpFiles";
+
   private static final boolean DEBUG = false;
 
   /**

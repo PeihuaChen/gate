@@ -14,6 +14,21 @@ import java.util.*;
  */
 public class DefaultTokeniser extends AbstractLanguageAnalyser {
 
+  public static final String
+    DEF_TOK_DOCUMENT_PARAMETER_NAME = "document";
+
+  public static final String
+    DEF_TOK_ANNOT_SET_PARAMETER_NAME = "annotationSetName";
+
+  public static final String
+    DEF_TOK_TOKRULES_URL_PARAMETER_NAME = "tokeniserRulesURL";
+
+  public static final String
+    DEF_TOK_GRAMRULES_URL_PARAMETER_NAME = "transducerGrammarURL";
+
+  public static final String
+    DEF_TOK_ENCODING_PARAMETER_NAME = "encoding";
+
   public DefaultTokeniser() {
   }
 
@@ -30,9 +45,10 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
       //tokeniser
       fireStatusChanged("Creating a tokeniser");
       params = Factory.newFeatureMap();
-      if(tokeniserRulesURL != null) params.put("rulesURL",
-                                               tokeniserRulesURL);
-      params.put("encoding", encoding);
+      if(tokeniserRulesURL != null)
+        params.put(SimpleTokeniser.SIMP_TOK_RULES_URL_PARAMETER_NAME,
+                   tokeniserRulesURL);
+      params.put(SimpleTokeniser.SIMP_TOK_ENCODING_PARAMETER_NAME, encoding);
       if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
@@ -46,9 +62,10 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
       //transducer
       fireStatusChanged("Creating a Jape transducer");
       params.clear();
-      if(transducerGrammarURL != null) params.put("grammarURL",
+      if(transducerGrammarURL != null)
+       params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME,
                                                   transducerGrammarURL);
-      params.put("encoding", encoding);
+      params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features.clear();
       Gate.setHiddenAttribute(features, true);
@@ -72,15 +89,16 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
       FeatureMap params = Factory.newFeatureMap();
       fireProgressChanged(0);
       //tokeniser
-      params.put("document", document);
-      params.put("annotationSetName", annotationSetName);
+      params.put(SimpleTokeniser.SIMP_TOK_DOCUMENT_PARAMETER_NAME, document);
+      params.put(
+        SimpleTokeniser.SIMP_TOK_ANNOT_SET_PARAMETER_NAME, annotationSetName);
       tokeniser.setParameterValues(params);
 
       //transducer
       params.clear();
-      params.put("document", document);
-      params.put("inputASName", annotationSetName);
-      params.put("outputASName", annotationSetName);
+      params.put(Transducer.TRANSD_DOCUMENT_PARAMETER_NAME, document);
+      params.put(Transducer.TRANSD_INPUT_AS_PARAMETER_NAME, annotationSetName);
+      params.put(Transducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, annotationSetName);
       transducer.setParameterValues(params);
     }catch(ResourceInstantiationException rie){
       throw new ExecutionException(rie);
