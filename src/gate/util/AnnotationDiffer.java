@@ -39,8 +39,7 @@ public class AnnotationDiffer {
         Annotation keyAnn = (Annotation)keyList.get(i);
         Annotation resAnn = (Annotation)responseList.get(j);
         Choice choice = null;
-        if(significantFeaturesSet == null ||
-           significantFeaturesSet.isEmpty()){
+        if(significantFeaturesSet == null){
           //full comaptibility required
           if(keyAnn.isCompatible(resAnn)){
             choice = new Choice(i, j, CORRECT);
@@ -90,19 +89,19 @@ public class AnnotationDiffer {
   }
 
   public double getPrecisionStrict(){
-    return correctMatches / responseList.size();
+    return (double)correctMatches / responseList.size();
   }
 
   public double getRecallStrict(){
-    return correctMatches / keyList.size();
+    return (double)correctMatches / keyList.size();
   }
 
   public double getPrecisionLenient(){
-    return (correctMatches + partiallyCorrectMatches) / responseList.size();
+    return (double)(correctMatches + partiallyCorrectMatches) / responseList.size();
   }
 
   public double getRecallLenient(){
-    return (correctMatches + partiallyCorrectMatches) / keyList.size();
+    return (double)(correctMatches + partiallyCorrectMatches) / keyList.size();
   }
 
   public double getFMeasureStrict(double beta){
@@ -129,12 +128,44 @@ public class AnnotationDiffer {
     return responseList.size() - correctMatches - partiallyCorrectMatches;
   }
 
+  public void printMissmatches(){
+    //get the partial correct matches
+    Iterator iter = finalChoices.iterator();
+    while(iter.hasNext()){
+      Choice aChoice = (Choice)iter.next();
+      switch(aChoice.type){
+        case PARTIALLY_CORRECT:{
+          System.out.println("Missmatch (partially correct):");
+          System.out.println("Key: " + keyList.get(aChoice.keyIndex).toString());
+          System.out.println("Response: " + responseList.get(aChoice.responseIndex).toString());
+          break;
+        }
+      }
+    }
+
+    //get the unmatched keys
+    for(int i = 0; i < keyChoices.size(); i++){
+      List aList = (List)keyChoices.get(i);
+      if(aList == null || aList.isEmpty()){
+        System.out.println("Unmatched Key: " + keyList.get(i).toString());
+      }
+    }
+
+    //get the unmatched responses
+    for(int i = 0; i < responseChoices.size(); i++){
+      List aList = (List)responseChoices.get(i);
+      if(aList == null || aList.isEmpty()){
+        System.out.println("Unmatched Key: " + responseList.get(i).toString());
+      }
+    }
+
+  }
   /**
    * Performs some basic checks over the internal data structures from the last
    * run.
    * @throws Exception
    */
-  public void sanityCheck()throws Exception{
+  void sanityCheck()throws Exception{
     //all keys and responses should have at most one choice left
     Iterator iter =keyChoices.iterator();
     while(iter.hasNext()){
@@ -196,6 +227,7 @@ public class AnnotationDiffer {
   public java.util.Set getSignificantFeaturesSet() {
     return significantFeaturesSet;
   }
+
   public void setSignificantFeaturesSet(java.util.Set significantFeaturesSet) {
     this.significantFeaturesSet = significantFeaturesSet;
   }
