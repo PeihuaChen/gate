@@ -222,6 +222,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   final public SinglePhaseTransducer SinglePhaseTransducer() throws ParseException {
   ruleNumber = 0;
   Token phaseNameTok = null;
+  Token inputTok = null;
   SinglePhaseTransducer t = null;
   Rule newRule = null;
   bindingNameSet = new HashSet();
@@ -244,11 +245,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           jj_la1[4] = jj_gen;
           break label_3;
         }
-        jj_consume_token(ident);
+        inputTok = jj_consume_token(ident);
+                         t.addInput(inputTok.image);
       }
-      System.err.println(
-        "Ignoring `Input' - not used by JAPE. Have a nice day."
-      );
       break;
     default:
       jj_la1[5] = jj_gen;
@@ -1077,6 +1076,22 @@ existingAttrName + "\");" + nl +
     return retval;
   }
 
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(ident)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -1179,22 +1194,6 @@ existingAttrName + "\");" + nl +
     if (jj_3R_20()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 

@@ -57,6 +57,13 @@ public class State {
     */
   protected void setFileIndex(int i){ fileIndex = i; }
 
+  /** Sets the value for priority. Priority is the priority in the jape
+    *definition file of the rule that contains as right hand side the action
+    *associated to this state. This value is only intended for final states.
+    */
+  protected void setPriority(int i){ priority = i; }
+
+
   /**
   * Gets the action associated to this state.
   *@return a RightHandSide object
@@ -71,6 +78,13 @@ public class State {
   * The value for fileIndex is correct only on final states!
   */
   int getFileIndex(){return fileIndex; }
+
+  /**
+  * Returns the priority in the definition file of the rule that generated this
+  * state.
+  * This value is correct only on final states!
+  */
+  int getPriority(){return priority; }
 
   /**
   * Adds a new transition to the list of outgoing transitions for this state.
@@ -162,7 +176,8 @@ public class State {
   /**
   * The index in the definition file of the rule that was used for creating this
   * state.
-  * NOTE: this member is consistent only for FINAL STAETS!
+  * NOTE: this member is consistent only for FINAL STATES!
   */
   protected int fileIndex = 0;
+  protected int priority = -1;
 }
