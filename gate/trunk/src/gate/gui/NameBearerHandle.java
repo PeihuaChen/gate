@@ -205,9 +205,10 @@ public class NameBearerHandle implements Handle,
     if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
+      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent
+          || target instanceof com.ontotext.gate.hmm.agent.TrainHMM) {
         fillHMMActions(popup);
-      }
+      } // if
     }else if(target instanceof LanguageResource) {
       //Language Resources
       popup.addSeparator();
