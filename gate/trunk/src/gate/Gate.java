@@ -76,9 +76,6 @@ public class Gate
 
     // some of the events are actually fired by the {@link gate.Factory}
     Factory.addCreoleListener(creoleRegister);
-
-    // bring into the system the Default Annotations
-    initDefaultAnnotationSchemas();
   } // init()
 
   /** Initialise the CREOLE register. */
@@ -106,53 +103,6 @@ public class Gate
   public static void initDataStoreRegister() {
     dataStoreRegister = new DataStoreRegister();
   } // initDataStoreRegister()
-
-  /** Brings into the system, the default AnnotationSchemas. */
-  public static void initDefaultAnnotationSchemas(){
-    String resourcePath = Files.getResourcePath() + "/creole/schema/";
-    InputStream inputStream = null;
-    Properties properties = new Properties();
-    try{
-      inputStream = Files.getGateResourceAsStream(
-                                      "creole/schema/BuiltinList.properties");
-      if (inputStream == null){
-          Err.prln("Couldn't read " + resourcePath + "BuiltinList.properties !" +
-                   " Loading of default annotation schemas was aborted!");
-          return;
-      }// End if
-      // load the defaultSchemaFiles from properties file
-      properties.load(inputStream);
-      // close the input stream
-      inputStream.close();
-    } catch (IOException ex){
-      Err.prln( "I/O error for " + resourcePath +
-                "BuiltinList.properties !" +
-                "Loading of default annotation schemas was aborted!" +
-              ex);
-      return;
-    }// End try
-
-    String value = (String) properties.get("defaultSchemaFiles");
-    if (value == null){
-      Err.prln("defaultSchemaFiles key not found in " + resourcePath +
-               "BuiltinList.properties!" +
-               " Loading of default annotation schemas was aborted!");
-      return;
-    }// End if
-    FeatureMap params = Factory.newFeatureMap();
-    StringTokenizer strTokenizer = new StringTokenizer(value,",");
-    while (strTokenizer.hasMoreTokens()){
-      String schemaFileName = (String) strTokenizer.nextElement();
-      // create and add the schema File
-      try{
-        params.put("xmlFileUrl",
-                    Gate.class.getResource(resourcePath + schemaFileName));
-        Factory.createResource("gate.creole.AnnotationSchema", params);
-      } catch (ResourceInstantiationException e){
-        Err.prln("Discarded " + resourcePath + schemaFileName +" schema file.");
-      }// End try/catch
-    }// End while
-  } //initDefaultAnnotationSchemas
 
   /** Reads config data (<TT>gate.xml</TT> files). */
   public static void initConfigData() throws GateException {
