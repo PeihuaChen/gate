@@ -90,4 +90,6 @@ public interface KBProperty {
    */
   public KnowledgeBase getOntology() ;
 
+  public Object getRange();
+
 }

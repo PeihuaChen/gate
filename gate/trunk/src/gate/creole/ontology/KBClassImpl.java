@@ -111,4 +111,8 @@ public class KBClassImpl extends OClassImpl implements KBClass  {
     this.propertiesSet.add(theProperty);
     return true;
   }
+
+  public String toString() {
+    return this.getName();
+  }
 }

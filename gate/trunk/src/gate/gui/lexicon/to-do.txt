@@ -7,3 +7,18 @@ The knowledge base implementation should fire modification events.
 
 I need to talk to Valy about how best to release all these listeners on the GUI
 components because otherwise we may have memory leaks.
+
+Questions about the ontology model:
+  - do I need to model isUnique? Did this carry over to OWL?
+  - cardinality of properties in OWL? Need to model if there.
+  - is Object the best range for a DatatypeProperty? It can be String,
+  and the number classes I guess.
+  - need to model oneOf list restrictions on properties in classes
+  - how to model the differences between toClass, hasClass, hasClassQ, etc. Do
+  we need this?
+
+Export of the properties to CGs in the MIAKT modules
+
+Import of the RDF data instances and its export as CGs, assuming the ontology is
+already exported. For now will not try to merge ontology with the RDF instance
+data.
