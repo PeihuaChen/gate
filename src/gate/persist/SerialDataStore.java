@@ -232,8 +232,23 @@ extends AbstractFeatureBearer implements DataStore {
     if(currentDS == null) {  // an orphan - do the adoption
       LanguageResource res = lr;
 
-      if (lr instanceof Corpus)
-        res = new SerialCorpusImpl((Corpus) lr);
+      if (lr instanceof Corpus) {
+        FeatureMap features1 = Factory.newFeatureMap();
+        features1.put("transientSource", lr);
+        try {
+          //here we create the persistent LR via Factory, so it's registered
+          //in GATE and we remove the transient resource from which it has
+          //been created
+          res = (LanguageResource)
+            Factory.createResource("gate.corpora.SerialCorpusImpl", features1);
+          Factory.deleteResource(lr);
+
+//        res = new SerialCorpusImpl((Corpus) lr);
+        } catch (gate.creole.ResourceInstantiationException ex) {
+          throw new GateRuntimeException(ex.getMessage());
+        }
+
+      }
 
       res.setDataStore(this);
 
