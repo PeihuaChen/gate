@@ -87,14 +87,14 @@ public class TestXml extends TestCase
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      (new MimeType("text","xml")).toString()
+      new MimeType("text","xml")
     );
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-
-    docFormat.unpackMarkup (doc,"DocumentContent");
-
+    System.out.println("Parsing xml file...");
+      docFormat.unpackMarkup (doc,"DocumentContent");
+    System.out.println("DONE!");
     // graphic visualisation
 
     /*

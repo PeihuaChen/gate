@@ -9,6 +9,7 @@
 package gate.html;
 
 import java.util.*;
+import java.net.*;
 import java.io.*;
 import junit.framework.*;
 import org.w3c.www.mime.*;
@@ -31,7 +32,7 @@ public class TestHtml extends TestCase
     try{
       app.testSomething ();
     }catch (Exception e){
-      System.out.println(e);
+      e.printStackTrace (System.err);
     }
   }
 
@@ -57,24 +58,27 @@ public class TestHtml extends TestCase
     */
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
-              "http://www.dcs.shef.ac.uk/~hamish"
+              new URL("http://www.gate.ac.uk/gate2/doc/install.html")
     );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
+
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      (new MimeType("text","html")).toString()
+        new MimeType("text","html")
     );
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-    docFormat.unpackMarkup (doc,"DocumentContent");
 
+    System.out.println("Parsing HTML file...");
+      docFormat.unpackMarkup (doc,"DocumentContent");
+    System.out.println("DONE!");
     // graphic visualisation
     /*
     if (docFormat != null){
         docFormat.unpackMarkup (doc);
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
-        gate.Corpus corpus = gate.Transients.newCorpus("XML Test");
+        gate.Corpus corpus = gate.Transients.newCorpus("HTML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
     }

@@ -118,8 +118,12 @@ public abstract class DocumentFormat implements Resource
   static public DocumentFormat getDocumentFormat(MimeType mimeType) {
     DocumentFormat docFormat = null;
     try{
-      docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
+      if (mimeType.toString ().equalsIgnoreCase ("text/xml"))
+        docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
                       "gate.corpora.XmlDocumentFormat").newInstance();
+      if (mimeType.toString ().equalsIgnoreCase ("text/html"))
+        docFormat = (gate.corpora.HtmlDocumentFormat) Class.forName(
+                      "gate.corpora.HtmlDocumentFormat").newInstance();
     }catch (ClassNotFoundException e){
       System.out.println(e);
     }catch (IllegalAccessException e){
