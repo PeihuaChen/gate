@@ -15,8 +15,10 @@
 
 package gate.corpora;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
+
+import gate.util.*;
 
 /**
  * RepositioningInfo keep information about correspondence of positions
@@ -28,10 +30,16 @@ import java.util.ArrayList;
 
 public class RepositioningInfo extends ArrayList {
 
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = -2895662600168468559L;
+
   /**
    * Just information keeper inner class. No significant functionality.
    */
   public class PositionInfo implements Serializable {
+
+    /** Freeze the serialization UID. */
+    static final long serialVersionUID = -7747351720249898499L;
 
     /** Data members for one peace of text information */
     private long m_origPos, m_origLength, m_currPos, m_currLength;
@@ -151,7 +159,7 @@ public class RepositioningInfo extends ArrayList {
         currPos = currPI.getCurrentPosition();
         currLen = currPI.getCurrentLength();
 
-        if(relPos <= currPos+currLen) {
+        if(relPos < currPos+currLen) {
           if(relPos < currPos) {
             // outside the range of information
             result = -1;
@@ -185,4 +193,186 @@ public class RepositioningInfo extends ArrayList {
     long result = -1;
     return result;
   } // getOriginalPosFlow
+
+  /**
+   * Return the position info index containing <B>@param absPos</B>
+   * If there is no such position info return -1.
+   */
+  private int getIndexByOriginalPosition(long absPos) {
+    PositionInfo currPI = null;
+    int result = -1;
+
+    int size = size();
+    long origPos, origLen;
+
+    // Find with the liniear algorithm. Could be extended to binary search.
+    for(int i=0; i<size; ++i) {
+      currPI = (PositionInfo) get(i);
+      origPos = currPI.getOriginalPosition();
+      origLen = currPI.getOriginalLength();
+
+      if(absPos <= origPos+origLen) {
+        if(absPos >= origPos) {
+          result = i;
+        } // if
+        break;
+      } // if
+    } // for
+
+    return result;
+  } // getItemByOriginalPosition
+
+  /**
+   * Return the position info index containing <B>@param absPos</B>
+   * or the index of record before this position.
+   */
+  private int getIndexByOriginalPositionFlow(long absPos) {
+    PositionInfo currPI = null;
+    int result = -1;
+
+    int size = size();
+    long origPos, origLen;
+
+    // Find with the liniear algorithm. Could be extended to binary search.
+    for(int i=0; i<size; ++i) {
+      currPI = (PositionInfo) get(i);
+      origPos = currPI.getOriginalPosition();
+      origLen = currPI.getOriginalLength();
+
+      if(absPos <= origPos+origLen) {
+        // is inside of current record
+        if(absPos >= origPos) {
+          result = i;
+        }
+        else {
+          // not inside the current recort - return previous
+          result = i-1;
+        } // if
+        break;
+      } // if
+    } // for
+
+    return result;
+  } // getItemByOriginalPositionFlow
+
+  /**
+   *  Correct the RepositioningInfo structure for shrink/expand changes.
+   *  <br>
+   *
+   *  Normaly the text peaces have same sizes in both original text and
+   *  extracted text. But in some cases there are nonlinear substitutions.
+   *  For example the sequence "&lt;" is converted to "<".
+   *  <br>
+   *
+   *  The correction will split the corresponding PositionInfo structure to
+   *  3 new records - before correction, correction record and after correction.
+   *  Front and end records are the same maner like the original record -
+   *  m_origLength == m_currLength, since the middle record has different
+   *  values because of shrink/expand changes. All records after this middle
+   *  record should be corrected with the difference between these values.
+   *  <br>
+   *
+   *  All m_currPos above the current information record should be corrected
+   *  with (origLen - newLen) i.e.
+   *  <code> m_currPos -= origLen - newLen; </code>
+   *  <br>
+   *
+   *  @param originalPos Position of changed text in the original content.
+   *  @param origLen Length of changed peace of text in the original content.
+   *  @param newLen Length of new peace of text substiting the original peace.
+   */
+  public void correctInformation(long originalPos, long origLen, long newLen) {
+    PositionInfo currPI;
+    PositionInfo frontPI, correctPI, endPI;
+
+    int index = getIndexByOriginalPositionFlow(originalPos);
+
+    // correct the index when the originalPos precede all records
+    if(index == -1) {
+      index = 0;
+    } // if
+
+    // correction of all other information records
+    // All m_currPos above the current record should be corrected with
+    // (origLen - newLen) i.e. <code> m_currPos -= origLen - newLen; </code>
+
+    for(int i=index; i<size(); ++i) {
+      currPI = (PositionInfo) get(i);
+      currPI.m_currPos -= origLen - newLen;
+    } // for
+
+    currPI = (PositionInfo) get(index);
+    if(originalPos >= currPI.m_origPos
+        && currPI.m_origPos + currPI.m_origLength >= originalPos + origLen) {
+      long frontLen = originalPos - currPI.m_origPos;
+
+      frontPI = new PositionInfo(currPI.m_origPos,
+                              frontLen,
+                              currPI.m_currPos,
+                              frontLen);
+      correctPI = new PositionInfo(originalPos,
+                              origLen,
+                              currPI.m_currPos + frontLen,
+                              newLen);
+      long endLen = currPI.m_origLength - frontLen - origLen;
+      endPI = new PositionInfo(originalPos + origLen,
+                              endLen,
+                              currPI.m_currPos + frontLen + newLen,
+                              endLen);
+
+      set(index, frontPI); // substitute old element
+      if(endPI.m_origLength != 0) {
+        add(index+1, endPI); // insert new end element
+      } // if
+      add(index+1, correctPI); // insert middle new element
+    } // if - substitution range check
+  } // correctInformation
+
+  /**
+   *  Correct the original position information in the records. When some text
+   *  is shrinked/expanded by the parser. With this method is corrected the
+   *  substitution of "\r\n" with "\n".
+   */
+  public void correctInformationOriginalMove(long originalPos, long moveLen) {
+    PositionInfo currPI;
+
+    int index = getIndexByOriginalPositionFlow(originalPos);
+
+    // correct the index when the originalPos precede all records
+    if(index == -1) {
+      index = 0;
+    } // if
+
+    for(int i = index+1; i<size(); ++i) {
+      currPI = (PositionInfo) get(i);
+      currPI.m_origPos += moveLen;
+    } // for
+
+    currPI = (PositionInfo) get(index);
+    // should we split this record to two new records (inside the record)
+    if(originalPos > currPI.m_origPos
+        && originalPos < currPI.m_origPos + currPI.m_origLength) {
+      PositionInfo frontPI, endPI;
+      long frontLen = originalPos - currPI.m_origPos;
+      frontPI = new PositionInfo(currPI.m_origPos,
+                              frontLen,
+                              currPI.m_currPos,
+                              frontLen);
+
+      long endLen = currPI.m_origLength - frontLen;
+      endPI = new PositionInfo(originalPos + frontLen + moveLen,
+                              endLen,
+                              currPI.m_currPos + frontLen,
+                              endLen);
+      set(index, frontPI); // substitute old element
+      if(endPI.m_origLength != 0) {
+        add(index+1, endPI); // insert new end element
+      } // if - should add this record
+    }
+    else {
+      // correction if the position is before the current record
+      currPI.m_origPos += moveLen;
+    } // if
+  } // correctInformationOriginalMove
+
 } // class RepositioningInfo
