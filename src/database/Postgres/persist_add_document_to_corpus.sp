@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boo
 
       if not FOUND then
          raise exception ''%'',x_invalid_lr;
-      end if
+      end if;
      
       /* 2. get the corpus ID */
       select corp_id
@@ -44,7 +44,7 @@ CREATE OR REPLACE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boo
 
       if not FOUND then
          raise exception ''%'',x_invalid_lr;
-      end if
+      end if;
      
       /* 3. check if the document is not part of the corpus already */
       select count(*)
