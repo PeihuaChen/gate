@@ -199,7 +199,7 @@ public class CreoleRegisterImpl extends HashMap
   /** This is a utility method for creating CREOLE directory files
     * (typically called <CODE>creole.xml</CODE>) from a list of Jar
     * files that contain resources. The method concatenates the
-    * <CODE>creole.xml</CODE> files that the Jars contain.
+    * <CODE>resource.xml</CODE> files that the Jars contain.
     * <P>
     * If Java allowed class methods in interfaces this would be static.
     */
@@ -207,7 +207,7 @@ public class CreoleRegisterImpl extends HashMap
   {
     ////////////////////
     // dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
-    // for each jar file pick out creole.xml
+    // for each jar file pick out resource.xml
     // strip xml header
     // dump into dirfile
     // put </CREOLE-DIRECTORY> into dirfile
