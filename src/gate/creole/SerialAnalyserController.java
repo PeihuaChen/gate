@@ -54,6 +54,12 @@ public class SerialAnalyserController extends SerialController {
 
       super.execute();
 
+      //unset the doc and corpus
+      for(int j = 0; j < prList.size(); j++){
+        ((LanguageAnalyser)prList.get(j)).setDocument(null);
+        ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+      }
+
       corpus.unloadDocument(doc);
       if(!docWasLoaded) Factory.deleteResource(doc);
     }
