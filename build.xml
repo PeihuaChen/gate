@@ -6,6 +6,24 @@
     </description>
   <!-- set global properties for this build -->
   
+  <!-- ###################################################################
+                          USER MODIFYABLE OPTIONS
+       ################################################################### -->
+  
+  <!-- Set the maximum amount of memory avaialble to GATE. Default is 200 MB. --> 
+  <property name="run.max.mem" value="200m"/>
+  
+  <!-- Set the location of the tools.jar library. If not set, GATE will first
+  try to locate inside the current Java VM or, failing that, will fall back
+  to using the one included in the bin directory.
+  Remove the comment markers on the line below and edit the location.-->
+  <!-- <property name="tools.jar.location" value="bin/tools14.jar"/>  -->
+  
+  
+  <!-- ###################################################################
+                        USER MODIFYABLE OPTIONS END HERE 
+       ################################################################### -->
+  
   <!-- Directories -->
   
   <!-- Sources -->
@@ -47,21 +65,30 @@
   <fileset id="exts" dir="${extDir}">
     <include name="*.jar"/>
   </fileset>
-  
-  
-  <!-- tools.jar path -->
-  <path id="tools.jar.path" location="bin/tools14.jar"/>
-  
+    
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
 		<fileset refid="libs"/>
     <fileset refid="exts"/>
   </path>
   
+  <!-- Locate the tools.jar library -->
+  <!-- Properties are immutable in ANT so the first successful assignment wins  -->
+  <!-- First try the user set value -->
+  <available file="${tools.jar.location}"
+             property="tools.jar.path"
+             value="${tools.jar.location}"/>
+  <!-- Secondly try the location inside JVM -->
+  <available file="${java.home}/../lib/tools.jar"
+             property="tools.jar.path"
+             value="${java.home}/../lib/tools.jar"/>
+  <property name="tools.jar.path"
+            location="${binDir}/tools14.jar"/>
+  
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
     <pathelement location="${binDir}/gate.jar"/>
-    <path refid="tools.jar.path"/>
+    <pathelement location="${tools.jar.path}"/>
 		<fileset refid="libs"/>
   </path>
   
@@ -178,6 +205,7 @@
   
   <!-- Run the beast -->
   <target name="run">
+    <echo message="Using JVM at ${java.home}, tools.jar at ${tools.jar.path}."/>
     <condition property="mac.dock.name.option"
                value="-Xdock:name=&quot;GATE 3.0&quot;">
       <os family="mac"/>
@@ -190,7 +218,7 @@
           classpathref="run.class.path" 
           fork="true"
           spawn="false"
-          maxmemory="200m">
+          maxmemory="${run.max.mem}">
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
        <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
        <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
