@@ -38,7 +38,8 @@ import gate.event.*;
   * the class name of the resource.
   * @see gate.CreoleRegister
   */
-public class CreoleRegisterImpl extends HashMap implements CreoleRegister, CreoleListener
+public class CreoleRegisterImpl extends HashMap
+          implements CreoleRegister, CreoleListener
 {
   /** Debug flag */
   protected static final boolean DEBUG = false;
@@ -180,7 +181,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister, Creol
         Gate.getClassLoader().getResource("gate/resources/creole/")
       );
     } catch(IOException e) {
-      if(DEBUG) System.out.println(e);
+      if (DEBUG) Out.println(e);
       throw(new GateException(e));
     }
   } // registerBuiltins()
