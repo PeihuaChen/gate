@@ -638,23 +638,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
             fileFilter.setDescription("Known file types " + sufixes.toString());
             fileChooser.addChoosableFileFilter(fileFilter);
             fileChooser.setFileFilter(fileFilter);
-            //set the size of the filer
-//            fileChooser.doLayout();
-            Component[] comps = fileChooser.getComponents();
-            int width = 0;
-            int height = 0;
-            for(int i = 0; i < comps.length; i++){
-              Component comp = comps[i];
-              int aWidth = comp.getPreferredSize().width;
-              int aHeight = comp.getPreferredSize().height;
-              height += aHeight;
-              width = Math.max(width, aWidth);
-            }
-            Insets insets = fileChooser.getInsets();
-            Dimension dim = new Dimension(width + insets.left + insets.right,
-                                          height + insets.top + insets.bottom);
-            fileChooser.setMinimumSize(dim);
-            fileChooser.setPreferredSize(dim);
+
+//fileChooser.doLayout();
           }
 
           textField.setEditable(true);
