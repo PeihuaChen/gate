@@ -36,12 +36,18 @@ public class TestPR2 extends AbstractResource implements ProcessingResource
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; } 
 
-  /** Get the factory that created this resource. */
-  public Factory getFactory() {
-    throw new LazyProgrammerException();
-  } // getFactory()
-
   /** The features associated with this resource. */
   protected FeatureMap features;
+
+  /** Run the thing. */
+  public void run() {
+    features = Factory.newFeatureMap();
+    features.put("I", "am in a bad mood");
+  } // run
+
+  /** Initialisation */
+  public Resource init() {
+    return this;
+  } // init
    
 } // class TestPR2
