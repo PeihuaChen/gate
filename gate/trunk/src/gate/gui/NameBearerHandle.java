@@ -35,13 +35,13 @@ import gate.security.SecurityException;
 
 /**
  * Class used to store the GUI information about an open entity (resource,
- * controller, datatstore).
+ * controller, datastore).
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, large and small views, etc.
  */
 public class NameBearerHandle implements Handle,
                                          StatusListener,
-                                         ProgressListener {
+                                         ProgressListener, CreoleListener {
 
   public NameBearerHandle(NameBearer target, Window window) {
     this.target = target;
@@ -72,6 +72,7 @@ public class NameBearerHandle implements Handle,
     title = (String)target.getName();
     this.icon = MainFrame.getIcon(iconName);
 
+    Gate.getCreoleRegister().addCreoleListener(this);
     buildViews();
     // Add the CTRL +F4 key & action combination to the resource
     JComponent largeView = this.getLargeView();
@@ -871,8 +872,51 @@ public class NameBearerHandle implements Handle,
     }
   }
 
+  /**
+   * Releases the memory, removes the listeners, cleans up.
+   * Will get called when the target resource is unloaded from the system
+   */
+  protected void cleanup(){
+    //delete all the VRs that were created
+    if(largeView != null){
+      if(largeView instanceof VisualResource){
+        //we only had a view so no tabbed pane was used
+        ((VisualResource)largeView).setTarget(null);
+        ((VisualResource)largeView).setHandle(null);
+        Factory.deleteResource((VisualResource)largeView);
+      }else{
+        Component vrs[] = ((JTabbedPane)largeView).getComponents();
+        for(int i = 0; i < vrs.length; i++){
+          if(vrs[i] instanceof VisualResource){
+            ((VisualResource)vrs[i]).setTarget(null);
+            ((VisualResource)vrs[i]).setHandle(null);
+            Factory.deleteResource((VisualResource)vrs[i]);
+          }
+        }
+      }
+    }
 
+    if(smallView != null){
+      if(smallView instanceof VisualResource){
+        //we only had a view so no tabbed pane was used
+        ((VisualResource)smallView).setTarget(null);
+        ((VisualResource)smallView).setHandle(null);
+        Factory.deleteResource((VisualResource)smallView);
+      }else{
+        Component vrs[] = ((JTabbedPane)smallView).getComponents();
+        for(int i = 0; i < vrs.length; i++){
+          if(vrs[i] instanceof VisualResource){
+            ((VisualResource)vrs[i]).setTarget(null);
+            ((VisualResource)vrs[i]).setHandle(null);
+            Factory.deleteResource((VisualResource)vrs[i]);
+          }
+        }
+      }
+    }
 
+    Gate.getCreoleRegister().removeCreoleListener(this);
+    target = null;
+  }
 
   class ProxyStatusListener implements StatusListener{
     public void statusChanged(String text){
@@ -937,5 +981,22 @@ public class NameBearerHandle implements Handle,
   }
   public Window getWindow() {
     return window;
+  }
+
+  public void resourceLoaded(CreoleEvent e) {
+  }
+
+  public void resourceUnloaded(CreoleEvent e) {
+    if(getTarget() == e.getResource()) cleanup();
+  }
+
+  public void datastoreOpened(CreoleEvent e) {
+  }
+
+  public void datastoreCreated(CreoleEvent e) {
+  }
+
+  public void datastoreClosed(CreoleEvent e) {
+    if(getTarget() == e.getDatastore()) cleanup();
   }
 }//class DefaultResourceHandle
