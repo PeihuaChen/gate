@@ -47,21 +47,21 @@ class ApplicationHandle extends DefaultResourceHandle {
       rie.printStackTrace(Err.getPrintWriter());
     }
 
-    viewPopupElements = new MenuElement[]{};
+//    viewPopupElements = new MenuElement[]{};
   }//ApplicationHandle
 
   ApplicationViewer appView;
-  MenuElement[] viewPopupElements;
-
-  public JPopupMenu getPopup() {
-    //clear the local elements from popup
-    for(int i = 0; i< viewPopupElements.length; i++)
-        popup.remove((JComponent)viewPopupElements[i]);
-    //update the popup with new updated components
-    viewPopupElements = appView.getPopupElements();
-    for(int i = 0; i< viewPopupElements.length; i++)
-        popup.add((JComponent)viewPopupElements[i]);
-    return popup;
-  }//getPopup
+//  MenuElement[] viewPopupElements;
+//
+//  public JPopupMenu getPopup() {
+//    //clear the local elements from popup
+//    for(int i = 0; i< viewPopupElements.length; i++)
+//        popup.remove((JComponent)viewPopupElements[i]);
+//    //update the popup with new updated components
+//    viewPopupElements = appView.getPopupElements();
+//    for(int i = 0; i< viewPopupElements.length; i++)
+//        popup.add((JComponent)viewPopupElements[i]);
+//    return popup;
+//  }//getPopup
 
 }//ApplicationHandle class
