@@ -34,7 +34,26 @@ public class Gate
 
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
+
+    if(creoleLoader == null)
+      creoleLoader = new CreoleLoaderImpl();
+
+    // check net connection and set canReachGateHome
+    // and canReachGateAcUk appropriately
+//////////////// oana....
   } // init()
+
+  /** Is access to the GATE internal server available? */
+  private static boolean gateHomeReachable = false;
+
+  /** Is access to gate.ac.uk available? */
+  private static boolean gateAcUkReachable = false;
+
+  /** Get reachability status of GATE internal server */
+  public static boolean isGateHomeReachable() { return gateHomeReachable; }
+
+  /** Get reachability status of GATE.ac.uk public server */
+  public static boolean isGateAcUkReachable() { return gateAcUkReachable; }
 
   /** Initialise the CREOLE register. */
   public static void initCreoleRegister() throws GateException {
@@ -64,6 +83,12 @@ public class Gate
 
   /** Get the CREOLE register. */
   public static CreoleRegister getCreoleRegister() { return creoleRegister; }
+
+  /** The CREOLE loader. */
+  private static CreoleLoader creoleLoader = null;
+
+  /** Get the CREOLE register. */
+  public static CreoleLoader getCreoleLoader() { return creoleLoader; }
 
 
 } // class Gate
