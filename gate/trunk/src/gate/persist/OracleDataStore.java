@@ -3436,87 +3436,82 @@ public class OracleDataStore extends JDBCDataStore {
 
   private String getSQLQuery(List filter, String lrType, boolean count,
                               List orderByFilter, int limitcount){
-    String query="";
+    StringBuffer query = new StringBuffer("");
     sqlValues = new Vector();
-    String select = "lr_id";
     String join = getJoinQuery(orderByFilter);
+    String select = "lr_id";
     if (count){
       select = "count(*)";
     }
-    if (lrType == null){
-      query = " SELECT " + select + " " +
-                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" + join +
-                    " WHERE ";
+
+    query = query.append(" SELECT " + select + " " +
+                          " FROM  "+Gate.DB_OWNER+".t_lang_resource LR " + join +
+                          " WHERE ");
+
+    if (lrType != null){
+      query = query.append(" LR.lr_type_id = ? ");
+      if (lrType.equals(DBHelper.CORPUS_CLASS)) {
+        sqlValues.addElement(new Long(2));
+      }// if DBHelper.CORPUS_CLASS
+      if (lrType.equals(DBHelper.DOCUMENT_CLASS)) {
+        sqlValues.addElement(new Long(1));
+      }// if DBHelper.DOCUMENT_CLASS
     }
-    query = " SELECT " + select + " " +
-                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" + join +
-                    " WHERE LR.lr_type_id = ? ";
-
-    if (lrType != null && lrType.equals(DBHelper.CORPUS_CLASS)) {
-      sqlValues.addElement(new Long(2));
-    }// if DBHelper.CORPUS_CLASS
-
-    if (lrType != null && lrType.equals(DBHelper.DOCUMENT_CLASS)) {
-      sqlValues.addElement(new Long(1));
-    }// if DBHelper.DOCUMENT_CLASS
 
     if (filter!=null){
       if (lrType!=null){
-        query = query.concat(" AND ");
+        query = query.append(" AND ");
       }
       for (int i=0; i<filter.size(); i++){
-          query = query.concat(getRestrictionPartOfQuery((Restriction) filter.get(i)));
+          query = query.append(getRestrictionPartOfQuery((Restriction) filter.get(i)));
           if (i<filter.size()-1) {
-            query = query.concat(" AND ");
+            query = query.append(" AND ");
           }
       }
     }
 
     String endPartOfJoin = getEndPartOfJoin(orderByFilter);
-    query = query.concat(endPartOfJoin);
+    query = query.append(endPartOfJoin);
 
     if (limitcount>0){
-      query = "select lr_id from ( " + query + ") where rownum<"+limitcount;
+      query = query.insert(0,"select lr_id from ( ");
+      query = query.append( ") where rownum<"+limitcount);
     }
 
-    return query;
+    return query.toString();
   }
 
   private String getRestrictionPartOfQuery(Restriction restr){
-    //if (restr.getOperator()==Restriction.OPERATOR_LIMIT_ROWSET){
-    //  String r = " rownum < ? ";
-    //  sqlValues.addElement(restr.getValue());
-    //  return r;
-    //}
-    String expresion = " EXISTS ("+
+    StringBuffer expresion = new StringBuffer(
+                      " EXISTS ("+
                        " SELECT ft_id " +
                        " FROM "+Gate.DB_OWNER+".t_feature FEATURE" +
-                       " WHERE FEATURE.ft_entity_id = LR.lr_id ";
+                       " WHERE FEATURE.ft_entity_id = LR.lr_id ");
 
     if (restr.getKey() != null){
-      expresion = expresion.concat(" AND FEATURE.ft_key = ? ");
+      expresion = expresion.append(" AND FEATURE.ft_key = ? ");
       sqlValues.addElement(restr.getKey());
     }
 
     if (restr.getValue() != null){
-      expresion = expresion.concat(" AND ");
+      expresion = expresion.append(" AND ");
       switch (this.findFeatureType(restr.getValue())){
         case DBHelper.VALUE_TYPE_INTEGER:
-          expresion = expresion.concat(getNumberExpresion(restr));
+          expresion = expresion.append(getNumberExpresion(restr));
           break;
         case DBHelper.VALUE_TYPE_LONG:
-          expresion = expresion.concat(getNumberExpresion(restr));
+          expresion = expresion.append(getNumberExpresion(restr));
           break;
         default:
-          expresion = expresion.concat(" FEATURE.ft_character_value = ? ");
+          expresion = expresion.append(" FEATURE.ft_character_value = ? ");
           sqlValues.addElement(restr.getStringValue());
           break;
       }
     }
 
-    expresion = expresion.concat(" )");
+    expresion = expresion.append(" )");
 
-    return expresion;
+    return expresion.toString();
   }
 
   private String getNumberExpresion(Restriction restr){
@@ -3550,45 +3545,45 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   private String getJoinQuery(List orderByFilter){
-    String join="";
+    StringBuffer join = new StringBuffer("");
     if (orderByFilter!=null){
       for (int i = 0; i<orderByFilter.size(); i++){
-        join = join.concat(" , "+Gate.DB_OWNER+".t_feature FT"+i);
+        join = join.append(" , "+Gate.DB_OWNER+".t_feature FT"+i);
       }
     }
-    return join;
+    return join.toString();
   }
 
   private String getEndPartOfJoin(List orderByFilter){
-    String endJoin = "";
+    StringBuffer endJoin = new StringBuffer("");
     if (orderByFilter!=null && orderByFilter.size()>0){
       for (int i=0; i<orderByFilter.size(); i++){
-        endJoin = endJoin.concat(" and lr_id=FT"+i+".ft_entity_id ");
-        endJoin = endJoin.concat(" and  FT"+i+".ft_key= ? ");
+        endJoin = endJoin.append(" and lr_id=FT"+i+".ft_entity_id ");
+        endJoin = endJoin.append(" and  FT"+i+".ft_key= ? ");
         OrderByRestriction restr = (OrderByRestriction) orderByFilter.get(i);
         sqlValues.addElement(restr.getKey());
       }
-      endJoin = endJoin.concat(" order by ");
+      endJoin = endJoin.append(" order by ");
       for (int i=0; i<orderByFilter.size(); i++){
         OrderByRestriction restr = (OrderByRestriction) orderByFilter.get(i);
-        endJoin = endJoin.concat("  FT"+i+".ft_number_value ");
+        endJoin = endJoin.append("  FT"+i+".ft_number_value ");
         if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
-          endJoin = endJoin.concat(" asc, ");
+          endJoin = endJoin.append(" asc, ");
         } else {
-          endJoin = endJoin.concat(" desc, ");
+          endJoin = endJoin.append(" desc, ");
         }
-        endJoin = endJoin.concat("  FT"+i+".ft_character_value ");
+        endJoin = endJoin.append("  FT"+i+".ft_character_value ");
         if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
-          endJoin = endJoin.concat(" asc ");
+          endJoin = endJoin.append(" asc ");
         } else {
-          endJoin = endJoin.concat(" desc ");
+          endJoin = endJoin.append(" desc ");
         }
         if (i<orderByFilter.size()-1){
-          endJoin = endJoin.concat(" , ");
+          endJoin = endJoin.append(" , ");
         }
       }
     }
-    return endJoin;
+    return endJoin.toString();
   }
 }
 
