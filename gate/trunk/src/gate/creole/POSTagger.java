@@ -36,9 +36,6 @@ public class POSTagger extends AbstractLanguageAnalyser {
     TAG_INPUT_AS_PARAMETER_NAME = "inputASName";
 
   public static final String
-    TAG_OUTPUT_AS_PARAMETER_NAME = "outputASName";
-
-  public static final String
     TAG_LEXICON_URL_PARAMETER_NAME = "lexiconURL";
 
   public static final String
