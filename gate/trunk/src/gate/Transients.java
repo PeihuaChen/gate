@@ -20,7 +20,7 @@ import gate.annotation.*;
   * Resources. These are non-persistent; to save them a DataStore
   * must adopt them.
   */
-public class Transients
+public class Transients extends Factory
 {
   /** Create a new LanguageResource. */
   public static LanguageResource newLR(Class LRClass, Object[] args) {

@@ -16,5 +16,7 @@ import gate.util.*;
   */
 public interface Resource extends FeatureBearer
 {
+  /** Get the factory that created this resource. */
+  public Factory getFactory();
    
 } // interface Resource
