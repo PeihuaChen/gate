@@ -17,7 +17,7 @@ package gate.gui;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.Component;
-
+import java.net.*;
 import java.util.*;
 
 import gate.*;
@@ -32,6 +32,11 @@ class ApplicationHandle extends DefaultResourceHandle {
                            ProgressListener pListener) {
     super(controller);
     try {
+      try {
+        this.icon = new ImageIcon(new URL("gate:/img/application.gif"));
+      } catch(MalformedURLException mue){
+        mue.printStackTrace(Err.getPrintWriter());
+      }
       FeatureMap params = Factory.newFeatureMap();
       params.put("controller", controller);
       appView = (ApplicationViewer)Factory.createResource(

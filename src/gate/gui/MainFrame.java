@@ -698,7 +698,7 @@ while(listIter.hasNext()){
     DefaultMutableTreeNode node;
     DefaultMutableTreeNode parent = null;
     if(res instanceof ProcessingResource){
-      if(res instanceof Controller){
+      if(Gate.isApplication(res)){
         parent = applicationsRoot;
       }else{
         parent = processingResourcesRoot;
