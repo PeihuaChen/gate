@@ -1857,7 +1857,9 @@ public class MainFrame extends JFrame
                     userName = usrField.getText();
                     userPass = new String(pwdField.getPassword());
                     group = grpField.getText();
-                    if (userName.equals("") || userPass.equals("") || group.equals("")) {
+                    if(OkCancelDialog.userHasPressedCancel)
+                      return;
+                    if(userName.equals("") || userPass.equals("") || group.equals("")) {
                       JOptionPane.showMessageDialog(
                         MainFrame.this,
                         "You must provide non-empty user name, password and group!",
@@ -1874,7 +1876,7 @@ public class MainFrame extends JFrame
                 } catch (gate.security.SecurityException ex) {
                     JOptionPane.showMessageDialog(
                       MainFrame.this,
-                      "Authentication failed! Incorrect details entred.",
+                      ex.getMessage(),
                       "Login error",
                       JOptionPane.ERROR_MESSAGE
                       );
