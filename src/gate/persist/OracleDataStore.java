@@ -1877,6 +1877,7 @@ public class OracleDataStore extends JDBCDataStore {
       String sql = " select lr_name, " +
                    "        lrtp_type, " +
                    "        lr_id, " +
+                   "        doc_id, " +
                    "        doc_url, " +
                    "        doc_start, " +
                    "        doc_end, " +
@@ -1945,6 +1946,29 @@ public class OracleDataStore extends JDBCDataStore {
       //4.8 features
       FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_DOCUMENT);
       result.setFeatures(features);
+
+      //4.9 set the nextAnnotationID correctly
+/*      long doc_id = rs.getLong("doc_id");
+
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+      sql = " select max(ann_local_id) as max_id" +
+            " from "+Gate.DB_OWNER+".t_annotation " +
+            " where ann_doc_id = ?";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,doc_id);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        //ooops mo data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+
+      int maxAnnID = rs.getInt("max_id");
+      result.setNextAnnotationId(maxAnnID);
+*/
+
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
