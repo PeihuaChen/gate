@@ -94,12 +94,17 @@ public class Javac implements GateConstants{
     //make a copy of the arguments in case we need to call calss by class
     List argsSave = new ArrayList(args);
     args.addAll(sourceFiles);
-    //steal the Err stream
+    //save the Err stream
     PrintStream oldErr = System.err;
-    System.setErr(new PrintStream(new ByteArrayOutputStream()));
     //call the compiler for all the classes at once
     int res = -1;
     try{
+      //steal the err stream to avoid repeating error messages.
+      //if there are errors they will be shown when compiling classes 
+      //individually
+      
+      //an initial size of 10K should be plenty; it grows if required anyway
+      System.setErr(new PrintStream(new ByteArrayOutputStream(10 * 1024)));
       res = Main.compile((String[])args.toArray(new String[args.size()]));
     }catch(Throwable t){
       //if this throws exceptions then there's nothing else we can do.
