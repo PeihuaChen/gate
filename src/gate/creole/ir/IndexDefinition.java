@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 public interface IndexDefinition extends Serializable{
 
+  static final long serialVersionUID = 3632609241787241616L;
+
   /** @return String  path of index store directory*/
   public String getIndexLocation();
 

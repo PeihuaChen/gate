@@ -15,7 +15,10 @@
 package gate.creole.ir;
 
 import java.io.Serializable;
+
 public class IndexField implements Serializable{
+
+  static final long serialVersionUID = 3632609241787241616L;
 
   /** Name of field for indexing - the name of the feature key of
    *  the document should be same. */
