@@ -402,7 +402,7 @@ public class MainFrame extends JFrame {
 
     public void actionPerformed(ActionEvent e){
       CreoleRegister reg = Gate.getCreoleRegister();
-      List lrTypes = reg.getLrTypes();
+      Set lrTypes = reg.getLrTypes();
       if(lrTypes != null && !lrTypes.isEmpty()){
         HashMap resourcesByName = new HashMap();
         Iterator lrIter = lrTypes.iterator();
@@ -417,7 +417,7 @@ public class MainFrame extends JFrame {
                             "Select type of Language resource",
                             "Gate", JOptionPane.QUESTION_MESSAGE,
                             null, lrNames.toArray(),
-                            lrTypes.get(0));
+                            lrTypes.toArray()[0]);
         if(answer != null){
           ResourceData rData = (ResourceData)resourcesByName.get(answer);
           LanguageResource res = (LanguageResource)newResourceDialog.show(rData);
