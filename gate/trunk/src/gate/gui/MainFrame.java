@@ -1264,7 +1264,9 @@ public class MainFrame extends JFrame
     //build the dialog
     Component parentComp = (Component)((ArrayList)getGuiRoots()).get(0);
     JDialog dialog;
-    Window parentWindow = SwingUtilities.getWindowAncestor(parentComp);
+    Window parentWindow;
+    if(parentComp instanceof Window) parentWindow = (Window)parentComp;
+    else parentWindow = SwingUtilities.getWindowAncestor(parentComp);
     if(parentWindow instanceof Frame){
       dialog = new JDialog((Frame)parentWindow, "Please wait", true){
         protected void processWindowEvent(WindowEvent e) {
