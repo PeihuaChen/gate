@@ -38,8 +38,7 @@ public class OrthoMatcher extends AbstractProcessingResource
 
   protected static final String LOOKUPNAME = "Lookup";
   protected static final String MATCHES_FEATURE = "matches";
-
-
+  protected static final String DOC_MATCHES_FEATURE = "MatchesAnnots";
 
   /** the document for namematch */
   protected gate.Document document;
@@ -135,6 +134,10 @@ public class OrthoMatcher extends AbstractProcessingResource
       Out.prln("OrthoMatcher Warning: No annotations found for processing");
       return;
     }
+
+    //check if we've been run on this document before
+    if (document.getFeatures().containsKey(DOC_MATCHES_FEATURE))
+      cleanup();
 
     // creates the cdg list from the document
     //no need to create otherwise, coz already done in init()
@@ -287,6 +290,12 @@ public class OrthoMatcher extends AbstractProcessingResource
       Integer prevId = (Integer) prevIter.next();
       Annotation prevAnnot = (Annotation) nameAllAnnots.get(prevId);
 
+      //check if the two are from the same type or the new one is unknown
+      if (prevAnnot == null || (! prevAnnot.getType().equals(nameAnnot.getType())
+          && ! nameAnnot.getType().equals(unknownType))
+         )
+        continue;
+
       String prevAnnotString = (String) processedAnnots.get(prevId);
 
       //check if we have already matched this annotation to the new one
@@ -391,6 +400,21 @@ public class OrthoMatcher extends AbstractProcessingResource
     newAnnot.getFeatures().put(MATCHES_FEATURE, matchesList);
   }
 
+
+  protected void cleanup() {
+    document.getFeatures().remove(DOC_MATCHES_FEATURE);
+
+    Iterator iter = annotationTypes.iterator();
+    while (iter.hasNext()) {
+      String type = (String) iter.next();
+      AnnotationSet annots = nameAllAnnots.get(type);
+      if (annots == null || annots.isEmpty())
+        continue;
+      Iterator iter1 = annots.iterator();
+      while (iter1.hasNext())
+        ((Annotation) iter1.next()).getFeatures().remove(MATCHES_FEATURE);
+    } //while
+  }//cleanup
 
   /** return a person name without title */
   protected String containTitle (AnnotationSet annotSet,String annotString,
@@ -735,7 +759,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     * , and . match?
     * e.g. "Smith, Jones" == "Smith Jones"
     * Condition(s): case-insensitive match
-    * Applied to: organisation annotations only
+    * Applied to: organisation and person annotations
     */
   public boolean matchRule4(String s1,
            String s2) {
@@ -1142,8 +1166,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     }
 
     // now do the matching
-    if (largerVector.size()>=2) {
-//      Out.prln("Rule 13");
+    if (largerVector.size()>=3) {
       for (Iterator iter = smallerVector.iterator();
                               iter.hasNext() ;) {
         token1 = (String) iter.next();
@@ -1208,50 +1231,5 @@ public class OrthoMatcher extends AbstractProcessingResource
     return result;
   }//regularExpressions
 
-} // public class Namematch
+} // public class OrthoMatcher
 
-/*
- * AnnotationMatches is a class encapsulating
- * information about an annotation and
- * the annotations that it matches
- * it is used to assist in implementing the
- * "transitive" rule namematch effect
- */
-class AnnotationMatches {
-
-  /** a list of matched annotation ids */
-  private List matchedAnnots;
-
-  /** constructor */
-  AnnotationMatches() {
-   matchedAnnots = new ArrayList();
-  }
-
-  /** method to add an annotation id into the list of matched annotations */
-  void addMatchedAnnotId(String matchedId) {
-    matchedAnnots.add(matchedId);
-  }
-
-  /** method to check if an annotation (to me metched)
-    * is already in the list of matched annotations
-    */
-  boolean containsMatched(String matchedId) {
-    return matchedAnnots.contains(matchedId);
-  }
-
-  /** return the list with matches*/
-  List getMatched() {
-    return matchedAnnots;
-  }
-
-  /** the size of the matches list*/
-  int howMany(){
-    return matchedAnnots.size();
-  }
-
-  /** get the element i from the matches list */
-  String matchedAnnotAt(int i) {
-    return (String) matchedAnnots.get(i);
-  }
-
-} //class AnnotationMatches
