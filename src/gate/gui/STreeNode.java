@@ -190,16 +190,19 @@ public class STreeNode extends DefaultMutableTreeNode {
       return false;
 
     AnnotationSet addedSet = doc.getAnnotations(ADDEDSET);
-    targetAS.addAll(addedSet);
+    if (addedSet != null && !addedSet.isEmpty()) {
+      targetAS.addAll(addedSet);
+      addedSet.clear();
+    }
+    doc.removeAnnotationSet(ADDEDSET);
 
     AnnotationSet removedSet = doc.getAnnotations(REMOVEDSET);
-    if (removedSet != null &&  ! removedSet.isEmpty())
+    if (removedSet != null &&  ! removedSet.isEmpty()) {
       targetAS.removeAll(removedSet);
-
-    addedSet.clear();
-    removedSet.clear();
-    doc.removeAnnotationSet(ADDEDSET);
+      removedSet.clear();
+    }
     doc.removeAnnotationSet(REMOVEDSET);
+
     return true;
   }
 
@@ -225,6 +228,9 @@ public class STreeNode extends DefaultMutableTreeNode {
 } // STreeNode
 
 // $Log$
+// Revision 1.10  2001/12/03 14:04:04  kalina
+// code cleanup in STreeNode.java
+//
 // Revision 1.9  2001/08/07 19:03:05  kalina
 // Made the tree viewer use Token annotations to break the sentence for annotation
 //
