@@ -35,8 +35,14 @@ set termout     off
 set termout     on
 prompt >>>>>> Indexes successfully  created...
 clear buffer
- 
-set termout     off 
+
+set termout     off
+@alterIndex.sql
+set termout     on
+prompt >>>>>> Indexes altered  created...
+clear buffer
+
+set termout     off
 @createView.sql
 set termout     on
 prompt >>>>>> Views successfully  created...
