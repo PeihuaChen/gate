@@ -51,10 +51,12 @@ test: japefiles
 #	  junit.ui.LoadingTestRunner gate.TestGate
 
 # build gate.jar. recursively includes all the .jar and .zip from lib too
-jar: tcl japefiles resources
+jar: classes.jar tcl japefiles resources
 	rm -f gate.jar
-	cd ../classes && ../build/jdk.sh jar cvf ../build/gate.jar gate
-	./addjars.sh gate.jar ../lib/*.jar ../lib/*.zip
+	./jdk.sh java -cp classes.jar gate.util.JarFiles gate.jar \
+	  classes.jar ../lib/*.jar ../lib/*.zip
+classes.jar:
+	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar gate
 resources:
 	cd ../src/gate && cp -R resources ../../classes/gate
 	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
