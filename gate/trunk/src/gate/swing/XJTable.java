@@ -1,29 +1,34 @@
 /*
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2004, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Valentin Tablan 23/01/2001
+ *  XXJTable.java
+ *
+ *  Valentin Tablan, 25-Jun-2004
  *
  *  $Id$
- *
  */
 
 package gate.swing;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.*;
-import java.util.Date;
-import java.util.Vector;
-
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
-
-import gate.util.Files;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * A &quot;smarter&quot; JTable. Feaures include:
@@ -36,284 +41,507 @@ import gate.util.Files;
  * user and the gui component. This middle model is responsible for sorting the
  * rows.
  */
-public class XJTable extends JTable {
-
-  /**Default constructor*/
-  public XJTable() {
-    init();
+public class XJTable extends JTable{
+  
+  public XJTable(){
+    super();
   }
-
-  /**Constructor from model*/
-  public XJTable(TableModel model) {
-    init();
-    setModel(model);
+  
+  public XJTable(TableModel model){
+    super(model);
   }
-
-  public void setModel(TableModel model){
-    if(sorter != null) sorter.setModel(model);
-    else{
-      sorter = new TableSorter(model);
-      super.setModel(sorter);
-    }
-  }// void setModel(TableModel model)
 
   /**
-   * Returns the actual table model. Note that gateModel() will return the
-   * middle model used for sorting. This cannot be avoided because JTable
-   * expects to find the model used for the component when calling getModel().
+   * Overrides some of the defaults as defined in JTable
    */
-  public TableModel getActualModel(){
-    if(sorter != null)return sorter.getModel();
-    else return super.getModel();
-  }// public TableModel getActualModel()
-
+  protected void initializeLocalVars() {
+    super.initializeLocalVars();
+    setAutoResizeMode(AUTO_RESIZE_OFF);
+  }
+  
+  public void setModel(TableModel dataModel) {
+    sortingModel = new SortingModel(dataModel);
+    super.setModel(sortingModel);
+    newColumns();
+  }
+  
+  /**
+   * Called when the columns have changed.
+   */
+  protected void newColumns(){
+    columnData = new ArrayList(dataModel.getColumnCount());
+    for(int i = 0; i < dataModel.getColumnCount(); i++)
+      columnData.add(new ColumnData(i));
+  }
+  
+  /**
+   * This is called whenever the UI is initialised or changed
+   */
+  public void updateUI() {
+    super.updateUI();
+    getTableHeader().addMouseListener(new HeaderMouseListener());
+    fixColumnSizes();
+  }
+  
+  public Dimension getPreferredSize(){
+    int width = 0;
+    for(int i = 0; i < getColumnModel().getColumnCount(); i++)
+      width += getColumnModel().getColumn(i).getPreferredWidth();
+    int height = 0;
+    for(int i = 0; i < getRowCount(); i++)
+      height += getRowHeight(i);
+    return new Dimension(width, height);
+  }
+  
+  public Dimension getPreferredScrollableViewportSize(){
+    return getPreferredSize();
+  }
+  
+  /**
+   * Used for setting the initial sizing of the columns
+   *
+   */
+  public void fixColumnSizes(){
+    Iterator colIter = columnData.iterator();
+    while(colIter.hasNext()){
+      ((ColumnData)colIter.next()).adjustColumnWidth();
+    }
+  }
+  
+  /**
+   * Sets the custom comparator to be used for a particular column. Columns that
+   * don't have a custom comparator will be sorted using the natural order.
+   * @param column the column index.
+   * @param comparator the comparator to be used.
+   */
+  public void setComparator(int column, Comparator comparator){
+    ((ColumnData)columnData.get(column)).comparator = comparator;
+  }
+    
+  /**
+   * @return Returns the sortable.
+   */
+  public boolean isSortable(){
+    return sortable;
+  }
+  /**
+   * @param sortable The sortable to set.
+   */
+  public void setSortable(boolean sortable){
+    this.sortable = sortable;
+  }
+  /**
+   * @return Returns the sortColumn.
+   */
+  public int getSortedColumn(){
+    return sortedColumn;
+  }
+  /**
+   * @param sortColumn The sortColumn to set.
+   */
+  public void setSortedColumn(int sortColumn){
+    this.sortedColumn = sortColumn;
+  }
+  
   /**
    * Get the row in the table for a row in the model.
    */
   public int getTableRow(int modelRow){
-    for(int i = 0; i < sorter.indexes.length; i ++){
-      if(sorter.indexes[i] == modelRow) return i;
-    }
-    return -1;
+    return sortingModel.sourceToTarget(modelRow);
   }
 
-  public void tableChanged(TableModelEvent e){
-    super.tableChanged(e);
-    adjustSizes();
-  }
-
-  /**Should the sorting facility be enabled*/
-  public void setSortable(boolean isSortable){
-    this.sortable = isSortable;
-  }
-
-  protected void init(){
-    //make sure we have a model
-    if(sorter == null){
-      sorter = new TableSorter(super.getModel());
-      super.setModel(sorter);
-    }
-    //read the arrows icons
-    upIcon = new ImageIcon(getClass().getResource(Files.getResourcePath() +
-                                                  "/img/up.gif"));
-    downIcon = new ImageIcon(getClass().getResource(Files.getResourcePath() +
-                                                    "/img/down.gif"));
-
-    setColumnSelectionAllowed(false);
-    headerMouseListener = new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if(!sortable) return;
-        TableColumnModel columnModel = getColumnModel();
-        int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-        int column = convertColumnIndexToModel(viewColumn);
-        if (column != -1) {
-          if(column != sortedColumn) ascending = true;
-          else ascending = !ascending;
-          sorter.sortByColumn(column);
-          sortedColumn = column;
-        }
-        adjustSizes();
-      }
-    };
-    if(sortable) getTableHeader().addMouseListener(headerMouseListener);
-    setAutoResizeMode(AUTO_RESIZE_OFF);
-    headerRenderer =
-      new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
-
-    getTableHeader().setDefaultRenderer(headerRenderer);
-
-  }//init()
-
-
-//  protected void configureEnclosingScrollPane(){
-//    super.configureEnclosingScrollPane();
-//    //if we're into a scroll pane resize with it
-//    Container p = getParent();
-//    if (p instanceof JViewport) {
-//      Container gp = p.getParent();
-//      if (gp instanceof JScrollPane) {
-//        JScrollPane scrollPane = (JScrollPane)gp;
-//        // Make certain we are the viewPort's view and not, for
-//        // example, the rowHeaderView of the scrollPane -
-//        // an implementor of fixed columns might do this.
-//        JViewport viewport = scrollPane.getViewport();
-//        if (viewport != null && viewport.getView() == this) {
-//          scrollPane.addComponentListener(new ComponentAdapter() {
-//            public void componentResized(ComponentEvent e) {
-//              adjustSizes();
-//            }
-//
-//            public void componentShown(ComponentEvent e) {
-//              adjustSizes();
-//            }
-//          });
-//        }//if
-//      }//if
-//    }//if
-//  }// void configureEnclosingScrollPane()
-
-
-  /**Resizes all the cells so they accommodate the components at their
-   * preferred sizes.
+  /**
+   * Handles translations between an indexed data source and a permutation of 
+   * itself (like the translations between the rows in sorted table and the
+   * rows in the actual unsorted model).  
    */
-  protected void adjustSizes(){
-    int totalWidth = 0;
-    TableColumn tCol = null;
-    Dimension dim;
-    int cellWidth;
-    int cellHeight;
-    int rowMargin = getRowMargin();
+  protected class SortingModel extends AbstractTableModel 
+      implements TableModelListener{
+    
+    public SortingModel(TableModel sourceModel){
+      init(sourceModel);
+    }
+    
+    protected void init(TableModel sourceModel){
+      if(this.sourceModel != null) 
+        this.sourceModel.removeTableModelListener(this);
+      this.sourceModel = sourceModel;
+      //start with the identity order
+      int size = sourceModel.getRowCount();
+      sourceToTarget = new int[size];
+      targetToSource = new int[size];
+      for(int i = 0; i < size; i++) {
+        sourceToTarget[i] = i;
+        targetToSource[i] = i;
+      }
+      sourceModel.addTableModelListener(this);
+      if(isSortable()) setSortedColumn(0);
+    }
+    
+    /**
+     * This gets events from the source model and forwards them to the UI
+     */
+    public void tableChanged(TableModelEvent e){
+      int type = e.getType();
+      int firstRow = e.getFirstRow();
+      int lastRow = e.getLastRow();
+      int column = e.getColumn();
+      
+      //now deal with the changes in the data
+      //we have no way to "repair" the sorting on data updates so we will need
+      //to rebuild the order every time
+      
+      switch(type){
+        case TableModelEvent.UPDATE:
+          if(firstRow == TableModelEvent.HEADER_ROW){
+            //complete structure change -> reallocate the data
+            init(sourceModel);
+            fireTableChanged(new TableModelEvent(this,  
+                    firstRow, lastRow, column, type));
+            if(isSortable()) sort();
+            newColumns();
+            fixColumnSizes();
+          }else if(lastRow == Integer.MAX_VALUE){
+            //all data changed (including the number of rows)
+            init(sourceModel);
+            fireTableChanged(new TableModelEvent(this,  
+                    firstRow, lastRow, column, type));
+            if(isSortable()) sort();
+            fixColumnSizes();
+          }else{
+            //the rows should have normal values
+            //if the sortedColumn is not affected we don't care
+            if(column == sortedColumn || column == TableModelEvent.ALL_COLUMNS){
+              if(isSortable()) sort();
+            }else{
+              fireTableChanged(new TableModelEvent(this,  
+                      sourceToTarget(firstRow), 
+                      sourceToTarget(lastRow), column, type));
+              
+            }
+            if(column == TableModelEvent.ALL_COLUMNS){
+              fixColumnSizes();
+            }else{
+              ((ColumnData)columnData.get(column)).adjustColumnWidth();
+            }
+          }
+          break;
+        case TableModelEvent.INSERT:
+          //rows were inserted -> we need to rebuild
+          init(sourceModel);
+          if(firstRow == lastRow){  
+            fireTableChanged(new TableModelEvent(this,  
+                    sourceToTarget(firstRow), 
+                    sourceToTarget(lastRow), column, type));
+          }else{
+            //the real rows are not in sequence
+            fireTableDataChanged();
+          }
+          if(isSortable()) sort();
+          if(column == TableModelEvent.ALL_COLUMNS) fixColumnSizes();
+          else ((ColumnData)columnData.get(column)).adjustColumnWidth();
+          break;
+        case TableModelEvent.DELETE:
+          //rows were deleted -> we need to rebuild
+          init(sourceModel);
+          if(firstRow == lastRow){  
+            fireTableChanged(new TableModelEvent(this,  
+                    sourceToTarget(firstRow), 
+                    sourceToTarget(lastRow), column, type));
+          }else{
+            //the real rows are not in sequence
+            fireTableDataChanged();
+          }
+          if(isSortable()) sort();
+      }
+    }
+    
+    public int getRowCount(){
+      return sourceModel.getRowCount();
+    }
+    
+    public int getColumnCount(){
+      return sourceModel.getColumnCount();
+    }
+    
+    public String getColumnName(int columnIndex){
+      return sourceModel.getColumnName(columnIndex);
+    }
+    public Class getColumnClass(int columnIndex){
+      return sourceModel.getColumnClass(columnIndex);
+    }
+    
+    public boolean isCellEditable(int rowIndex, int columnIndex){
+      return sourceModel.isCellEditable(targetToSource(rowIndex),
+              columnIndex);
+    }
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex){
+      sourceModel.setValueAt(aValue, targetToSource(rowIndex), 
+              columnIndex);
+    }
+    public Object getValueAt(int row, int column){
+      return sourceModel.getValueAt(targetToSource(row), column);
+    }
+    
+    /**
+     * Sorts the table using the values in the specified column and sorting order.
+     * @param sortedColumn the column used for sorting the data.
+     * @param ascending the sorting order.
+     */
+    public void sort(){
+      List sourceData = new ArrayList(sourceModel.getRowCount());
+      //get the data in the source order
+      for(int i = 0; i < sourceModel.getRowCount(); i++){
+        sourceData.add(sourceModel.getValueAt(i, sortedColumn));
+      }
+      //get an appropriate comparator
+      Comparator comparator = ((ColumnData)columnData.
+              get(sortedColumn)).comparator;
+      if(comparator == null){
+        //use the default comparator
+        if(defaultComparator == null) 
+          defaultComparator = new DefaultComparator();
+        comparator = defaultComparator;
+      }
+      for(int i = 0; i < sourceData.size() - 1; i++){
+        for(int j = i + 1; j < sourceData.size(); j++){
+          Object o1 = sourceData.get(targetToSource(i));
+          Object o2 = sourceData.get(targetToSource(j));
+          boolean swap = ascending ?
+                  (comparator.compare(o1, o2) > 0) :
+                  (comparator.compare(o1, o2) < 0);
+          if(swap){
+            int aux = targetToSource[i];
+            targetToSource[i] = targetToSource[j];
+            targetToSource[j] = aux;
+            
+            sourceToTarget[targetToSource[i]] = i;
+            sourceToTarget[targetToSource[j]] = j;
+          }
+        }
+      }
+      
+      fireTableRowsUpdated(0, sourceData.size() -1);
+    }
 
-    //delete the current rowModel in order to get a new updated one
-    //this way we fix a bug in JTable
-//    setRowHeight(Math.max(getRowHeight(0), 1));
-    for(int column = 0; column < getColumnCount(); column ++){
+    
+//    /**
+//     * Reinitialises the internal data structures with the given sorting order.
+//     * @param order the new sorting order.
+//     */
+//    public void init(int[] order){
+//      sourceToTarget = new int[order.length];
+//      System.arraycopy(order, 0, sourceToTarget, 
+//              0, order.length);
+//      buildTargetToSourceIndex();
+//    }
+    
+    /**
+     * Converts an index from the source coordinates to the target ones.
+     * Used to propagate events from the data source (table model) to the view. 
+     * @param index the index in the source coordinates.
+     * @return the corresponding index in the target coordinates.
+     */
+    public int sourceToTarget(int index){
+      return sourceToTarget[index];
+    }
+
+    /**
+     * Converts an index from the target coordinates to the source ones. 
+     * @param index the index in the target coordinates.
+     * Used to propagate events from the view (e.g. editing) to the source
+     * data source (table model).
+     * @return the corresponding index in the source coordinates.
+     */
+    public int targetToSource(int index){
+      return targetToSource[index];
+    }
+    
+    /**
+     * Builds the reverse index based on the new sorting order.
+     */
+    protected void buildTargetToSourceIndex(){
+      targetToSource = new int[sourceToTarget.length];
+      for(int i = 0; i < sourceToTarget.length; i++)
+        targetToSource[sourceToTarget[i]] = i;
+    }
+    
+    /**
+     * The direct index
+     */
+    protected int[] sourceToTarget;
+    
+    /**
+     * The reverse index.
+     */
+    protected int[] targetToSource;
+    
+    protected TableModel sourceModel;
+  }
+  
+  protected class HeaderMouseListener extends MouseAdapter{
+    public HeaderMouseListener(){
+    }
+    
+    public void mouseClicked(MouseEvent e){
+      process(e);
+    }
+    
+    public void mousePressed(MouseEvent e){
+      process(e);
+    }
+    
+    public void mouseReleased(MouseEvent e){
+      process(e);
+    }
+    
+    protected void process(MouseEvent e){
+      int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+      final int column = convertColumnIndexToModel(viewColumn);
+      ColumnData cData = (ColumnData)columnData.get(column);
+      if((e.getID() == MouseEvent.MOUSE_PRESSED || 
+          e.getID() == MouseEvent.MOUSE_RELEASED) && 
+         e.isPopupTrigger()){
+        //show pop-up
+        cData.popup.show(e.getComponent(), e.getX(), e.getY());
+      }else if(e.getID() == MouseEvent.MOUSE_CLICKED &&
+               e.getButton() == MouseEvent.BUTTON1){
+        //normal click 
+        if(e.getClickCount() >= 2){
+          //double click -> resize
+          if(singleClickTimer != null){
+            singleClickTimer.stop();
+            singleClickTimer = null;
+          }
+          cData.adjustColumnWidth();
+        }else {
+          //possible single click -> resort
+          singleClickTimer = new Timer(CLICK_DELAY, new ActionListener(){
+            public void actionPerformed(ActionEvent evt){
+              //this is the action to be done for single click.
+              if(sortable && column != -1) {
+                ascending = (column == sortedColumn) ? !ascending : true;
+                sortedColumn = column;
+                sortingModel.sort();
+              }
+            }
+          });
+          singleClickTimer.setRepeats(false);
+          singleClickTimer.start();
+        }
+      }
+    }
+    /**
+     * How long should we wait for a second click until deciding the it's 
+     * actually a single click.
+     */
+    private static final int CLICK_DELAY = 300;
+    protected Timer singleClickTimer;
+  }
+  
+  protected class ColumnData{
+    public ColumnData(int column){
+      this.column = column;
+      popup = new JPopupMenu();
+      hideMenuItem = new JCheckBoxMenuItem("Hide", false);
+      popup.add(hideMenuItem);
+      autoSizeMenuItem = new JCheckBoxMenuItem("Autosize", true);
+//      popup.add(autoSizeMenuItem);
+      hidden = false;
+      initListeners();
+    }
+    
+    protected void initListeners(){
+      hideMenuItem.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent evt){
+          TableColumn tCol = getColumnModel().getColumn(column);
+          if(hideMenuItem.isSelected()){
+            //hide column
+            colWidth = tCol.getWidth();
+            colPreferredWidth = tCol.getPreferredWidth();
+            colMaxWidth = tCol.getMaxWidth();
+            tCol.setPreferredWidth(HIDDEN_WIDTH);
+            tCol.setMaxWidth(HIDDEN_WIDTH);
+            tCol.setWidth(HIDDEN_WIDTH);
+          }else{
+            //show column
+            tCol.setMaxWidth(colMaxWidth);
+            tCol.setPreferredWidth(colPreferredWidth);
+            tCol.setWidth(colWidth);
+          }
+        }
+      });
+      
+      autoSizeMenuItem.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent evt){
+          if(autoSizeMenuItem.isSelected()){
+            //adjust the size for this column
+            adjustColumnWidth();
+          }
+        }
+      });
+      
+    }
+    
+    public boolean isHidden(){
+      return hideMenuItem.isSelected();
+    }
+    
+    public void adjustColumnWidth(){
+      int viewColumn = convertColumnIndexToView(column);
+      TableColumn tCol = getColumnModel().getColumn(column);
+      Dimension dim;
       int width;
-      tCol = getColumnModel().getColumn(column);
+      TableCellRenderer renderer;
       //compute the sizes
       if(getTableHeader() != null){
-	      width = headerRenderer.getTableCellRendererComponent(
-	                  this, tCol.getHeaderValue(), true, true ,0 , column
-	              ).getPreferredSize().width + getColumnModel().getColumnMargin();
-	    }else{
-	    	width = 0;
-	    }
-      TableCellRenderer renderer = tCol.getCellRenderer();
+        renderer = tCol.getHeaderRenderer();
+        if(renderer == null) renderer = getTableHeader().getDefaultRenderer();
+        width = renderer.getTableCellRendererComponent(XJTable.this, 
+                tCol.getHeaderValue(), true, true ,0 , viewColumn).
+                getPreferredSize().width;
+      }else{
+        width = 0;
+      }
+      renderer = tCol.getCellRenderer();
       if(renderer == null) renderer = getDefaultRenderer(getColumnClass(column));
       for(int row = 0; row < getRowCount(); row ++){
-        if(renderer == null){
-          renderer = getDefaultRenderer(getModel().getColumnClass(column));
-        }
         if(renderer != null){
-          dim = renderer.
-                      getTableCellRendererComponent(
-                        this, getValueAt(row, column), false, false, row, column
-                      ).getPreferredSize();
-          cellWidth = dim.width;
-          cellHeight = dim.height;
-          width = Math.max(width, cellWidth);
-          //width = Math.max(width, tCol.getPreferredWidth());
-          if((cellHeight + getRowMargin()) > getRowHeight(row)){
-           setRowHeight(row, cellHeight + getRowMargin());
-          }
-        }//if(renderer != null)
-      }//for
+          dim = renderer. getTableCellRendererComponent(XJTable.this, 
+                  getValueAt(row, column), false, false, row, viewColumn).
+                  getPreferredSize();
+          width = Math.max(width, dim.width);
+          int height = dim.height;
+          if((height + getRowMargin()) > getRowHeight(row)){
+            setRowHeight(row, height + getRowMargin());
+           }          
+        }
+      }
 
       int marginWidth = getColumnModel().getColumnMargin(); 
       if(marginWidth > 0) width += marginWidth; 
       tCol.setPreferredWidth(width);
-//      tCol.setWidth(width);
-      totalWidth += width;
     }
-    int totalHeight = 0;
-    for (int row = 0; row < getRowCount(); row++)
-      totalHeight += getRowHeight(row);
-    dim = new Dimension(totalWidth, totalHeight);
-    setPreferredScrollableViewportSize(dim);
-    setPreferredSize(dim);
-
-//    //extend the last column if autoresize
-//    if(getAutoResizeMode() != AUTO_RESIZE_OFF){
-//	    Container p = getParent();
-//	    if (p instanceof JViewport) {
-//	      Container gp = p.getParent();
-//	      if (gp instanceof JScrollPane) {
-//	        JScrollPane scrollPane = (JScrollPane)gp;
-//	        // Make certain we are the viewPort's view and not, for
-//	        // example, the rowHeaderView of the scrollPane -
-//	        // an implementor of fixed columns might do this.
-//	        JViewport viewport = scrollPane.getViewport();
-//	        if (viewport == null || viewport.getView() != this) {
-//	            return;
-//	        }
-//	        int portWidth = scrollPane.getSize().width -
-//	                        scrollPane.getInsets().left -
-//	                        scrollPane.getInsets().right;
-//	        if(scrollPane.getVerticalScrollBar().isVisible())
-//	          portWidth -= scrollPane.getVerticalScrollBar().getWidth();
-//	        if(totalWidth < portWidth){
-//	          int width = tCol.getWidth() + portWidth - totalWidth - 2;
-//	          tCol.setPreferredWidth(width);
-////	          tCol.setWidth(width);
-//	        }//if(totalWidth < portWidth)
-//	      }//if (gp instanceof JScrollPane)
-//	    }//if (p instanceof JViewport)
-//    }
-  }//protected void adjustSizes()
-
-  /**
-   * Sets the column to be used as key for sorting. This column changes
-   * automatically when the user click a column header.
-   */
-  public void setSortedColumn(int column){
-    sortedColumn = column;
-    sorter.sortByColumn(sortedColumn);
+    
+    JCheckBoxMenuItem autoSizeMenuItem;
+    JCheckBoxMenuItem hideMenuItem;
+    JPopupMenu popup;
+    int column;
+    boolean hidden;
+    int colPreferredWidth;
+    int colMaxWidth;
+    int colWidth;
+    Comparator comparator;
+    private static final int HIDDEN_WIDTH = 5;
   }
-
-  /**Should the sorting be ascending or descending*/
-  public void setAscending(boolean ascending){
-    this.ascending = ascending;
-  }
-
-
-  protected TableSorter sorter;
-
-  protected Icon upIcon;
-  protected Icon downIcon;
-  int sortedColumn = -1;
-//  int oldSortedColumn = -1;
-  boolean ascending = true;
-  protected TableCellRenderer headerRenderer;
-  protected boolean sortable = true;
-  MouseListener headerMouseListener;
-//  protected TableCellRenderer savedHeaderRenderer;
-
-//classes
-
+  
   /**
-   * A sorter for TableModels. The sorter has a model (conforming to TableModel)
-   * and itself implements TableModel. TableSorter does not store or copy
-   * the data in the TableModel, instead it maintains an array of
-   * integers which it keeps the same size as the number of rows in its
-   * model. When the model changes it notifies the sorter that something
-   * has changed eg. "rowsAdded" so that its internal array of integers
-   * can be reallocated. As requests are made of the sorter (like
-   * getValueAt(row, col) it redirects them to its model via the mapping
-   * array. That way the TableSorter appears to hold another copy of the table
-   * with the rows in a different order. The sorting algorthm used is stable
-   * which means that it does not move around rows when its comparison
-   * function returns 0 to denote that they are equivalent.
-   *
-   * @version 1.5 12/17/97
-   * @author Philip Milne
+   * This is used as the default comparator for a column when a custom was
+   * not provided.
    */
-
-  class TableSorter extends TableMap {
-    int             indexes[];
-    Vector          sortingColumns = new Vector();
-
-    public TableSorter() {
-      indexes = new int[0]; // for consistency
-    }
-
-    public TableSorter(TableModel model) {
-      setModel(model);
-    }
-
-    public void setModel(TableModel model) {
-      super.setModel(model);
-      reallocateIndexes();
-    }
-
-    public int compareRowsByColumn(int row1, int row2, int column) {
-      Class type = model.getColumnClass(column);
-      TableModel data = model;
-
-      // Check for nulls.
-
-      Object o1 = data.getValueAt(row1, column);
-      Object o2 = data.getValueAt(row2, column);
-
+  protected class DefaultComparator implements Comparator{
+    
+    public int compare(Object o1, Object o2){
       // If both values are null, return 0.
       if (o1 == null && o2 == null) {
         return 0;
@@ -322,249 +550,43 @@ public class XJTable extends JTable {
       } else if (o2 == null) {
         return 1;
       }
-
-      /*
-       * We copy all returned values from the getValue call in case
-       * an optimised model is reusing one object to return many
-       * values.  The Number subclasses in the JDK are immutable and
-       * so will not be used in this way but other subclasses of
-       * Number might want to do this to save space and avoid
-       * unnecessary heap allocation.
-       */
-
-      if (type.getSuperclass() == java.lang.Number.class) {
-        Number n1 = (Number)data.getValueAt(row1, column);
-        double d1 = n1.doubleValue();
-        Number n2 = (Number)data.getValueAt(row2, column);
-        double d2 = n2.doubleValue();
-
-        if (d1 < d2) {
-          return -1;
-        } else if (d1 > d2) {
-          return 1;
-        } else {
-          return 0;
-        }
-      } else if (type == java.util.Date.class) {
-        Date d1 = (Date)data.getValueAt(row1, column);
-        long n1 = d1.getTime();
-        Date d2 = (Date)data.getValueAt(row2, column);
-        long n2 = d2.getTime();
-
-        if (n1 < n2) {
-          return -1;
-        } else if (n1 > n2) {
-          return 1;
-        } else {
-          return 0;
-        }
-      } else if (type == String.class) {
-        String s1 = (String)data.getValueAt(row1, column);
-        String s2    = (String)data.getValueAt(row2, column);
-        int result = s1.compareTo(s2);
-
-        if (result < 0) {
-          return -1;
-        } else if (result > 0) {
-          return 1;
-        } else {
-          return 0;
-        }
-      } else if (type == Boolean.class) {
-        Boolean bool1 = (Boolean)data.getValueAt(row1, column);
-        boolean b1 = bool1.booleanValue();
-        Boolean bool2 = (Boolean)data.getValueAt(row2, column);
-        boolean b2 = bool2.booleanValue();
-
-        if (b1 == b2) {
-          return 0;
-        } else if (b1) { // Define false < true
-          return 1;
-        } else {
-          return -1;
-        }
-      } else {
-        Object v1 = data.getValueAt(row1, column);
-        Object v2 = data.getValueAt(row2, column);
-        int result;
-        if(v1 instanceof Comparable){
-          try {
-            result = ((Comparable)v1).compareTo(v2);
-          } catch(ClassCastException cce) {
-            String s1 = v1.toString();
-            String s2 = v2.toString();
-            result = s1.compareTo(s2);
-          }
-        } else {
-          String s1 = v1.toString();
-          String s2 = v2.toString();
+      int result;
+      if(o1 instanceof Comparable){
+        try {
+          result = ((Comparable)o1).compareTo(o2);
+        } catch(ClassCastException cce) {
+          String s1 = o1.toString();
+          String s2 = o2.toString();
           result = s1.compareTo(s2);
         }
-
-        if (result < 0) {
-          return -1;
-        } else if (result > 0) {
-          return 1;
-        } else {
-          return 0;
-        }
+      } else {
+        String s1 = o1.toString();
+        String s2 = o2.toString();
+        result = s1.compareTo(s2);
       }
+      
+      return result;
     }
-
-    public int compare(int row1, int row2) {
-     // compares++;
-      for (int level = 0; level < sortingColumns.size(); level++) {
-        Integer column = (Integer)sortingColumns.elementAt(level);
-        int result = compareRowsByColumn(row1, row2, column.intValue());
-        if (result != 0) {
-          return ascending ? result : -result;
-        }
-      }
-      return 0;
-    }
-
-    public void reallocateIndexes() {
-      int rowCount = model.getRowCount();
-
-      // Set up a new array of indexes with the right number of elements
-      // for the new data model.
-      indexes = new int[rowCount];
-
-      // Initialise with the identity mapping.
-      for (int row = 0; row < rowCount; row++) {
-        indexes[row] = row;
-      }
-    }
-
-    public void tableChanged(TableModelEvent e) {
-      reallocateIndexes();
-      sort(sorter);
-      super.tableChanged(e);
-    }
-
-    public void checkModel() {
-      if (indexes.length != model.getRowCount()) {
-        tableChanged(null);
-        //System.err.println("Sorter not informed of a change in model.");
-      }
-    }
-
-    public void sort(Object sender) {
-      checkModel();
-      shuttlesort((int[])indexes.clone(), indexes, 0, indexes.length);
-    }
-
-    // This is a home-grown implementation which we have not had time
-    // to research - it may perform poorly in some circumstances. It
-    // requires twice the space of an in-place algorithm and makes
-    // NlogN assigments shuttling the values between the two
-    // arrays. The number of compares appears to vary between N-1 and
-    // NlogN depending on the initial order but the main reason for
-    // using it here is that, unlike qsort, it is stable.
-    public void shuttlesort(int from[], int to[], int low, int high) {
-      if (high - low < 2) {
-          return;
-      }
-      int middle = (low + high)/2;
-      shuttlesort(to, from, low, middle);
-      shuttlesort(to, from, middle, high);
-
-      int p = low;
-      int q = middle;
-
-      /* This is an optional short-cut; at each recursive call,
-      check to see if the elements in this subset are already
-      ordered.  If so, no further comparisons are needed; the
-      sub-array can just be copied.  The array must be copied rather
-      than assigned otherwise sister calls in the recursion might
-      get out of sinc.  When the number of elements is three they
-      are partitioned so that the first set, [low, mid), has one
-      element and and the second, [mid, high), has two. We skip the
-      optimisation when the number of elements is three or less as
-      the first compare in the normal merge will produce the same
-      sequence of steps. This optimisation seems to be worthwhile
-      for partially ordered lists but some analysis is needed to
-      find out how the performance drops to Nlog(N) as the initial
-      order diminishes - it may drop very quickly.  */
-
-      if (high - low >= 4 && compare(from[middle-1], from[middle]) <= 0) {
-        for (int i = low; i < high; i++) {
-          to[i] = from[i];
-        }
-        return;
-      }
-
-      // A normal merge.
-
-      for (int i = low; i < high; i++) {
-        if (q >= high || (p < middle && compare(from[p], from[q]) <= 0)) {
-          to[i] = from[p++];
-        }
-        else {
-          to[i] = from[q++];
-        }
-      }
-    }
-
-    public void swap(int i, int j) {
-      int tmp = indexes[i];
-      indexes[i] = indexes[j];
-      indexes[j] = tmp;
-    }
-
-    // The mapping only affects the contents of the data rows.
-    // Pass all requests to these rows through the mapping array: "indexes".
-
-    public Object getValueAt(int aRow, int aColumn) {
-      checkModel();
-      return model.getValueAt(indexes[aRow], aColumn);
-    }
-
-    public void setValueAt(Object aValue, int aRow, int aColumn) {
-      checkModel();
-      model.setValueAt(aValue, indexes[aRow], aColumn);
-    }
-
-    public boolean isCellEditable(int aRow, int aColumn) {
-      checkModel();
-      return model.isCellEditable(indexes[aRow], aColumn);
-    }
-
-    public void sortByColumn(int column) {
-      sortingColumns.removeAllElements();
-      sortingColumns.addElement(new Integer(column));
-      sort(this);
-      super.tableChanged(new TableModelEvent(this));
-      getTableHeader().repaint();
-    }
-  }//class TableSorter extends TableMap
-
-  class CustomHeaderRenderer extends DefaultTableCellRenderer{
-    public CustomHeaderRenderer(TableCellRenderer oldRenderer){
-      this.oldRenderer = oldRenderer;
-    }
-
-    public Component getTableCellRendererComponent(JTable table,
-                                             Object value,
-                                             boolean isSelected,
-                                             boolean hasFocus,
-                                             int row,
-                                             int column){
-
-      Component res = oldRenderer.getTableCellRendererComponent(
-                            table, value, isSelected, hasFocus, row, column);
-      if(res instanceof JLabel){
-        if(convertColumnIndexToModel(column) == sortedColumn){
-          ((JLabel)res).setIcon(ascending?upIcon:downIcon);
-        } else {
-          ((JLabel)res).setIcon(null);
-        }
-        ((JLabel)res).setHorizontalTextPosition(JLabel.LEFT);
-//        ((JLabel)res).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
-      }
-      return res;
-    }// Component getTableCellRendererComponent
-    protected TableCellRenderer oldRenderer;
-
-  }// class CustomHeaderRenderer extends DefaultTableCellRenderer
+  }
+  protected SortingModel sortingModel;
+  protected DefaultComparator defaultComparator;
+  
+  /**
+   * The column currently being sorted.
+   */
+  protected int sortedColumn = -1;
+  
+  /**
+   * is the current sort order ascending (or descending)?
+   */
+  protected boolean ascending = true;
+  /**
+   * Should this table be sortable.
+   */
+  protected boolean sortable = true;
+  
+  /**
+   * A list of {@link ColumnData} objects.
+   */
+  protected List columnData;
 }
