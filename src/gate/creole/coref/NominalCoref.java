@@ -189,31 +189,6 @@ public class NominalCoref extends AbstractCoreferencer
         }
         else if (nominal.getType().equals(JOBTITLE_CATEGORY)) {
             
-            // Don't associate it if we have no people
-            if (previousPeople.size() == 0) {
-                Out.println("no people");
-                continue;
-            }
-
-            // Don't associate it if it's part of a Person (eg President Bush)
-            if (overlapsAnnotations(nominal, people)) {
-                Out.println("overlapping annotation");
-                continue;
-            }
-            
-            // Don't associate it if it's proceeded by a generic marker
-            Annotation previousToken =
-                getPreviousAnnotation(nominal, tokens);
-            String previousValue = (String) 
-                previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-            if (previousValue.equalsIgnoreCase("a") ||
-                previousValue.equalsIgnoreCase("an") ||
-                previousValue.equalsIgnoreCase("other") ||
-                previousValue.equalsIgnoreCase("another")) {
-                Out.println("indefinite");
-                continue;
-            }            
-
             // Look into the tokens to get some info about POS.
             Object[] jobTitleTokens =
                 this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
@@ -230,6 +205,46 @@ public class NominalCoref extends AbstractCoreferencer
                 continue;
             }
             
+            // Don't associate it if it's part of a Person (eg President Bush)
+            if (overlapsAnnotations(nominal, people)) {
+                Out.println("overlapping annotation");
+                continue;
+            }
+
+            // Don't associate if it's immediately followed by a person.
+	    // Luckily we have an array of all Person annotations in order...
+	    Annotation nextAnnotation = (Annotation) nominalArray[i+1];
+	    if (nextAnnotation.getType().equals(PERSON_CATEGORY) &&
+		nextAnnotation.getStartNode().getOffset().longValue() ==
+		(nominal.getEndNode().getOffset().longValue() + 1)) {
+		Out.println("immediately followed by Person");
+		continue;
+	    }
+            
+            // Don't associate it if it's proceeded by a generic marker
+            Annotation previousToken =
+                getPreviousAnnotation(nominal, tokens);
+            String previousValue = (String) 
+                previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+            if (previousValue.equalsIgnoreCase("a") ||
+                previousValue.equalsIgnoreCase("an") ||
+                previousValue.equalsIgnoreCase("other") ||
+                previousValue.equalsIgnoreCase("another")) {
+                Out.println("indefinite");
+                continue;
+            }            
+
+            // If we have no possible antecedents, create a new Person
+	    // annotation.
+            if (previousPeople.size() == 0) {
+		FeatureMap personFeatures = new SimpleFeatureMapImpl();
+		personFeatures.put("ENTITY_MENTION_TYPE", "NOMINAL");
+		this.defaultAnnotations.add(nominal.getStartNode(),
+					    nominal.getEndNode(),
+					    PERSON_CATEGORY,
+					    personFeatures);
+                continue;
+            }
 
             // Associate this entity with the most recent Person
             int personIndex = 0;
@@ -257,14 +272,35 @@ public class NominalCoref extends AbstractCoreferencer
             anaphor2antecedent.put(nominal, previousPerson);
         }
         else if (nominal.getType().equals(ORGANIZATION_CATEGORY)) {
-            // Add each Person entity to the beginning of the people list
+            // Add each organization entity to the beginning of
+            // the organization list
             previousOrgs.add(0, nominal);
         }
         else if (nominal.getType().equals(LOOKUP_CATEGORY)) {
-            // Associate this entity with the most recent Person
-            if (previousOrgs.size() > 0) {
-                anaphor2antecedent.put(nominal, previousOrgs.get(0));
+            // Don't associate it if we have no organizations
+            if (previousOrgs.size() == 0) {
+                Out.println("no orgs");
+                continue;
             }
+
+            // Look into the tokens to get some info about POS.
+            Object[] orgNounTokens =
+                this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
+                                         nominal.getStartNode().getOffset(),
+                                         nominal.getEndNode().getOffset()).toArray();
+            java.util.Arrays.sort(orgNounTokens, new OffsetComparator());
+            Annotation lastToken = (Annotation)
+                orgNounTokens[orgNounTokens.length - 1];
+
+            // Don't associate if the org noun is not a singular noun
+            if (! lastToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME)
+                .equals("NN")) {
+                Out.println("Not a singular noun");
+                continue;
+            }
+
+            // Associate this entity with the most recent Person
+            anaphor2antecedent.put(nominal, previousOrgs.get(0));
         }
     }
 
@@ -337,7 +373,7 @@ public class NominalCoref extends AbstractCoreferencer
     }
 
     /*
-    //5. initialise the quoted text fragments
+    // initialise the quoted text fragments
     AnnotationSet sentQuotes = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
 
     //if none then return
