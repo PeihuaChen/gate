@@ -17,6 +17,7 @@ package gate.persist;
 
 import java.util.*;
 import java.sql.*;
+import java.net.*;
 
 import junit.framework.*;
 
@@ -234,19 +235,6 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
-    throws PersistenceException,SecurityException {
-
-    throw new MethodNotImplementedException();
-  }
-
-  protected Document createDocument(Document doc,SecurityInfo secInfo)
-    throws PersistenceException,SecurityException {
-
-    throw new MethodNotImplementedException();
-  }
-
-
   /**
    *  helper for adopt()
    *  never call directly
@@ -308,6 +296,36 @@ public class PostgresDataStore extends JDBCDataStore {
       DBHelper.cleanup(rset);
       DBHelper.cleanup(pstmt);
     }
+  }
+
+
+  protected Long createDoc(Long _lrID,
+                          URL _docURL,
+                          String _docEncoding,
+                          Long _docStartOffset,
+                          Long _docEndOffset,
+                          Boolean _docIsMarkupAware,
+                          Long _corpusID)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  protected void updateDocumentContent(Long docID,DocumentContent content)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  protected void createAnnotationSet(Long lrID, AnnotationSet aset)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  protected void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException {
+    throw new MethodNotImplementedException();
   }
 
 }
