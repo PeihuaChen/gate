@@ -15,6 +15,7 @@ package gate.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 import javax.swing.*;
 
 import gate.*;
@@ -106,8 +107,8 @@ public class ProtegeWrapper extends AbstractVisualResource {
     else {
       if(!(target instanceof ProtegeProjectName)){
         throw new IllegalArgumentException(
-          "The document editor can only display Gate documents!\n" +
-          "The provided resource is not a document but a: " +
+          "The Protege wrapper can only display Protege projects!\n" +
+          "The provided resource is not a Protege project but a: " +
           target.getClass().toString() + "!");
       } // if
 
@@ -115,7 +116,10 @@ public class ProtegeWrapper extends AbstractVisualResource {
       String fileName = null;
     
       if(projectFileName != null) {
-        fileName = projectFileName.getProjectName().getFile();
+        URL projectURL = projectFileName.getProjectName();
+        if(projectURL != null) {
+          fileName = projectURL.getFile();
+        }
         if(fileName != null && fileName.trim().length() == 0) {
           fileName = null;
         }
