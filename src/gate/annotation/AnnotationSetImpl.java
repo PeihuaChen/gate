@@ -69,7 +69,11 @@ implements AnnotationSet
     AnnotationSetIterator()  { iter = annotsById.values().iterator(); }
     public boolean hasNext() { return iter.hasNext(); }
     public Object next()     { return (lastNext = (Annotation) iter.next()); }
-    public void remove()     { AnnotationSetImpl.this.remove(lastNext); }
+    public void remove()     {
+      iter.remove();                    // this takes care of the ID index
+      removeFromTypeIndex(lastNext);    // remove from type index
+      removeFromOffsetIndex(lastNext);  // remove from offset indices
+    } // remove()
   }; // AnnotationSetIterator
 
   /** Get an iterator for this set */
@@ -78,13 +82,28 @@ implements AnnotationSet
   /** Remove an element from this set. */
   public boolean remove(Object o) throws ClassCastException {
     Annotation a = (Annotation) o;
+
+    boolean wasPresent = removeFromIdIndex(a);
+    removeFromTypeIndex(a);
+    removeFromOffsetIndex(a);
+
+    return wasPresent;
+  } // remove(o)
+
+  boolean removeFromIdIndex(Annotation a) {
     if(annotsById.remove(a.getId()) == null)
       return false;
+    return true;
+  } // removeFromIdIndex(a)
 
+  void removeFromTypeIndex(Annotation a) {
     if(annotsByType != null) {
       AnnotationSet sameType = (AnnotationSet) annotsByType.get(a.getType());
       if(sameType != null) sameType.remove(a);
     }
+  } // removeFromTypeIndex(a)
+
+  void removeFromOffsetIndex(Annotation a) {
     if(nodesByOffset != null) {
 // knowing when a node is no longer needed would require keeping a reference
 // count on annotations, or using a weak reference to the nodes in
@@ -97,9 +116,7 @@ implements AnnotationSet
       if(starterAnnots.isEmpty()) // no annotations start here any more
         annotsByStartNode.remove(id);
     }
-
-    return true;
-  } // remove(o)
+  } // removeFromOffsetIndex(a)
 
   /** The size of this set */
   public int size() { return annotsById.size(); }
