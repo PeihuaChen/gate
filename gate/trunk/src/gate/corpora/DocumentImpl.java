@@ -408,7 +408,7 @@ extends AbstractLanguageResource implements Document {
     // GATE document.
     FeatureMap docFeatures = this.getFeatures();
     String mimeTypeStr = null;
-    boolean addRootEndTag = false;
+    addGatePreserveFormatTag = false;
     if (  docFeatures != null &&
           null != (mimeTypeStr=(String)docFeatures.get("MimeType")) &&
           (
@@ -420,13 +420,17 @@ extends AbstractLanguageResource implements Document {
           /* don't add the root tag */
     }else{
       // Add the root start element
-      xmlDoc.append("<GatePreserveFormat>");
-      addRootEndTag = true;
+      xmlDoc.append("<GatePreserveFormat"+
+                    " xmlns:gate=\"http://www.gate.ac.uk\"" +
+                    " gate:annotMaxId=\"" +
+                    getNextAnnotationId() +
+                    "\">");
+      addGatePreserveFormatTag = true;
     }// End if
 
     xmlDoc.append(saveAnnotationSetAsXml(dumpingSet));
 
-    if (addRootEndTag){
+    if (addGatePreserveFormatTag){
       // Add the root end element
       xmlDoc.append("</GatePreserveFormat>");
     }// End if
@@ -485,7 +489,7 @@ extends AbstractLanguageResource implements Document {
     * @param aDumpAnnotationSet is a GATE annotation set prepared to be used
     * on the raw text from document content. If aDumpAnnotSet is <b>null<b>
     * then an empty string will be returned.
-    * @return The XMl document obtained from raw text + the information from
+    * @return The XML document obtained from raw text + the information from
     * the dump annotation set.
     */
   private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet){
@@ -499,7 +503,8 @@ extends AbstractLanguageResource implements Document {
 
     TreeMap offsets2CharsMap = new TreeMap();
     if (content.length()!= 0){
-      // Fill the offsets2CharsMap with all the indices where special chars appear
+      // Fill the offsets2CharsMap with all the indices where
+      // special chars appear
       buildEntityMapFromString(content,offsets2CharsMap);
     }//End if
     // The saving alghorithm is as follows:
@@ -516,31 +521,41 @@ extends AbstractLanguageResource implements Document {
       offsets.add(annot.getStartNode().getOffset());
       offsets.add(annot.getEndNode().getOffset());
     }// End while
-
+    isRootTag = false;
     // ofsets is sorted in ascending order.
     // Iterate this set in descending order and remove an offset at each
     // iteration
-    int dim = offsets.size();
     while (!offsets.isEmpty()){
       Long offset = (Long)offsets.last();
       // Remove the offset from the set
       offsets.remove(offset);
-      // Now, use it
-      // Return a list with annotations that needs to be serialized in that
+      // Now, use it.
+      // Returns a list with annotations that needs to be serialized in that
       // offset.
       List annotations = getAnnotationsForOffset(aDumpAnnotSet,offset);
-      StringBuffer tmpBuff = null;
-      tmpBuff = new StringBuffer("");
+      // Attention: the annotation are serialized from left to right
+      StringBuffer tmpBuff = new StringBuffer("");
       Stack stack = new Stack();
+      // Iterate through all these annotations and serialize them
       Iterator it = annotations.iterator();
       while(it.hasNext()){
         Annotation a = (Annotation) it.next();
+        it.remove();
+        // Test if a Ends at offset
         if ( offset.equals(a.getEndNode().getOffset()) ){
+          // Test if a Starts at offset
           if ( offset.equals(a.getStartNode().getOffset()) ){
+            // Here, the annotation a Starts and Ends at the offset
             if ( null != a.getFeatures().get("isEmptyAndSpan") &&
                  "true".equals((String)a.getFeatures().get("isEmptyAndSpan"))){
 
-              // Assert annotation a with start == end and isEmptyAndSpan
+              // Assert: annotation a with start == end and isEmptyAndSpan
+              if (offsets.isEmpty() && "".equals(tmpBuff.toString())){
+                // a is the doc's root tag to be written
+                // The annotations are serialized from left to right.
+                // The first annot in the last offset is the ROOT one
+                isRootTag = true;
+              }// End if
               tmpBuff.append(writeStartTag(a));
               stack.push(a);
             }else{
@@ -550,7 +565,7 @@ extends AbstractLanguageResource implements Document {
               aDumpAnnotSet.remove(a);
             }// End if
           }else{
-            // The annotation a ends at the offset.
+            // Here the annotation a Ends at the offset.
             // In this case empty the stack and write the end tag
             if (!stack.isEmpty()){
               while(!stack.isEmpty()){
@@ -561,7 +576,8 @@ extends AbstractLanguageResource implements Document {
             tmpBuff.append(writeEndTag(a));
           }// End if
         }else{
-          // The annotation a does NOT end at the offset.
+          // The annotation a does NOT end at the offset. Let's see if it starts
+          // at the offset
           if ( offset.equals(a.getStartNode().getOffset()) ){
             // The annotation a starts at the offset.
             // In this case empty the stack and write the end tag
@@ -570,6 +586,12 @@ extends AbstractLanguageResource implements Document {
                 Annotation a1 = (Annotation)stack.pop();
                 tmpBuff.append(writeEndTag(a1));
               }// End while
+            }// End if
+            if (offsets.isEmpty() && "".equals(tmpBuff.toString())){
+              // a is the last tag to be written
+              // The annotations are serialized from left to right.
+              // The first annot in the last offset is the ROOT one.
+              isRootTag = true;
             }// End if
             tmpBuff.append(writeStartTag(a));
             // The annotation is removed from dumped set
@@ -670,8 +692,18 @@ extends AbstractLanguageResource implements Document {
   private String writeStartTag(Annotation annot){
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
-    strBuff.append("<"+annot.getType()+" gateId=\"" +annot.getId()+"\""+
+    if (!addGatePreserveFormatTag && isRootTag){
+      strBuff.append("<"+annot.getType()+
+            " xmlns:gate=\"http://www.gate.ac.uk\"" +
+            " gate:gateId=\"" + annot.getId()+"\"" +
+            " gate:annotMaxId=\"" + getNextAnnotationId() + "\""+
                     writeFeatures(annot.getFeatures())+" >");
+      // Once the root tag was writen then there will be no other Root tag
+      isRootTag = false;
+    }else{
+      strBuff.append("<"+annot.getType()+" gate:gateId=\"" +annot.getId()+"\""+
+                    writeFeatures(annot.getFeatures())+" >");
+    }// End if
     return strBuff.toString();
   }// writeStartTag()
 
@@ -751,7 +783,10 @@ extends AbstractLanguageResource implements Document {
                        " from String, Number or Collection.(feature discarded)");
             continue;
         }// End if
-        strBuff.append(" " + key + "=\"");
+        if ("matches".equals(key))
+          strBuff.append(" gate:" + key + "=\"");
+        else
+          strBuff.append(" " + key + "=\"");
         if (java.util.Collection.class.isAssignableFrom(value.getClass())){
           Iterator valueIter = ((Collection)value).iterator();
           while(valueIter.hasNext()){
@@ -1074,6 +1109,11 @@ extends AbstractLanguageResource implements Document {
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
+  /** Sets the nextAnnotationId*/
+  public void setNextAnnotationId(int aNextAnnotationId){
+    nextAnnotationId = aNextAnnotationId;
+  }// setNextAnnotationId();
+
   /** Generate and return the next annotation ID */
   public Integer getNextAnnotationId() {
     return new Integer(nextAnnotationId++);
@@ -1137,6 +1177,17 @@ extends AbstractLanguageResource implements Document {
   protected String encoding = "UTF-8";
 
   // Data needed in toXml(AnnotationSet) methos
+
+  /** This field indicates whether or not to add the tag
+    * called GatePreserveFormat to the document. HTML, XML, SGML docs won't
+    * have this tag added
+    */
+  private boolean addGatePreserveFormatTag = false;
+
+  /** This field indicates if an annotation is the doc's root tag.
+    * It is needed when adding the namespace information
+    */
+  private boolean isRootTag = false;
 
   /** Constant used in the inner class AnnotationComparator to order
     * annotations on their start offset

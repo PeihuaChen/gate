@@ -126,27 +126,42 @@ public class XmlDocumentHandler extends DefaultHandler{
 
     // sort colector ascending on its id
     Collections.sort(colector);
-
+    Set testIdsSet = new HashSet();
     // create all the annotations (on this new document) from the collector
     while (!colector.isEmpty()){
       CustomObject obj = (CustomObject) colector.getFirst();
+      // Test to see if there are two annotation objects with the same id.
+      if (testIdsSet.contains(obj.getId())){
+        throw new GateSaxException("Found two annotations with the same Id("+
+        obj.getId()+
+        ").The document is inconsistent.");
+      }else{
+        testIdsSet.add(obj.getId());
+      }// End iff
       // create a new annotation and add it to the annotation set
       try{
         // the annotation type will be conforming with markupElementsMap
         //add the annotation to the Annotation Set
         if (markupElementsMap == null)
-          basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(),
-                      obj.getFM ()
-          );
+          basicAS.add(  obj.getId(),
+                        obj.getStart(),
+                        obj.getEnd(),
+                        obj.getElemName(),
+                        obj.getFM ());
         else {
           // get the type of the annotation from Map
           String annotationType = (String)
                                 markupElementsMap.get(obj.getElemName());
           if (annotationType != null)
-            basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
+            basicAS.add( obj.getId(),
+                         obj.getStart(),
+                         obj.getEnd(),
+                         annotationType,
+                         obj.getFM());
         }// End if
       }catch (gate.util.InvalidOffsetException e){
-        Err.prln("Error creating an annot :" + obj + " Discarded...");
+        Err.prln("InvalidOffsetException for annot :" + obj.getElemName() +
+         " with Id =" + obj.getId() + ". Discarded...");
       }// End try
       colector.remove(obj);
     }// End while
@@ -158,26 +173,47 @@ public class XmlDocumentHandler extends DefaultHandler{
     */
   public void startElement (String uri, String qName, String elemName,
                                                              Attributes atts){
-    // inform the progress listener to fire only if no of elements processed
+    // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0 && !Main.batchMode)
         fireStatusChangedEvent("Processed elements : " + elements);
 
-    // construct a SimpleFeatureMapImpl from the list of attributes
+    Integer customObjectId = null;
+    // Construct a SimpleFeatureMapImpl from the list of attributes
     FeatureMap fm = new SimpleFeatureMapImpl();
-
-    //get the name and the value of the attributes and add them to a FeaturesMAP
+    //Get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
-     String attName  = atts.getQName(i);
-     String attValue = atts.getValue(i);
-     fm.put(attName,attValue);
+      String attName  = atts.getLocalName(i);
+      String attValue = atts.getValue(i);
+      String attUri = atts.getURI(i);
+      if (attUri != null && Gate.URI.equals(attUri)){
+        if ("gateId".equals(attName)){
+          customObjectId = new Integer(attValue);
+        }// End if
+        if ("annotMaxId".equals(attName)){
+          customObjectsId = new Integer(attValue).intValue();
+        }// End if
+        if ("matches".equals(attName)){
+          StringTokenizer strTokenizer = new StringTokenizer(attValue,";");
+          List list = new ArrayList();
+          // Take all tokens,create Integers and add them to the list
+          while (strTokenizer.hasMoreTokens()){
+            String token = strTokenizer.nextToken();
+            list.add(new Integer(token));
+          }// End while
+          fm.put(attName,list);
+        }// End if
+      }else{
+        fm.put(attName,attValue);
+      }// End if
     }// End for
 
     // create the START index of the annotation
     Long startIndex = new Long(tmpDocContent.length());
 
     // initialy the Start index is equal with End index
-    CustomObject obj = new CustomObject(elemName,fm, startIndex, startIndex);
+    CustomObject obj = new CustomObject(customObjectId,elemName,fm,
+                                                 startIndex, startIndex);
 
     // put this object into the stack
     stack.push(obj);
@@ -432,12 +468,17 @@ public class XmlDocumentHandler extends DefaultHandler{
   /**This reports the the number of elements that have beed processed so far*/
   private int elements = 0;
 
-  // We need a colection to retain all the CustomObjects that will be
-  // transformed into annotation over the gate document...
-  // the transformation will take place inside onDocumentEnd() method
+  /** We need a colection to retain all the CustomObjects that will be
+    * transformed into annotation over the gate document...
+    * the transformation will take place inside onDocumentEnd() method
+    */
   private LinkedList colector = null;
 
-  protected  long customObjectsId = 0;
+  /** This is used to generate unique Ids for the CustomObjects read*/
+  protected  int customObjectsId = 0;
+
+  /** Accesor method for the customObjectsId field*/
+  public int getCustomObjectsId(){ return customObjectsId;}
 
   //////// INNER CLASS
   /**
@@ -447,13 +488,19 @@ public class XmlDocumentHandler extends DefaultHandler{
   class  CustomObject implements Comparable {
 
     // constructor
-    public CustomObject(String anElemName, FeatureMap aFm,
+    public CustomObject(Integer anId,String anElemName, FeatureMap aFm,
                            Long aStart, Long anEnd) {
       elemName = anElemName;
       fm = aFm;
       start = aStart;
       end = anEnd;
-      id = new Long(customObjectsId ++);
+      if (anId == null){
+        id = new Integer(customObjectsId ++);
+      }else{
+        id = anId;
+        if (customObjectsId <= anId.intValue())
+          customObjectsId = anId.intValue() + 1 ;
+      }// End if
     }// End CustomObject()
 
     // Methos implemented as required by Comparable interface
@@ -479,7 +526,7 @@ public class XmlDocumentHandler extends DefaultHandler{
       return end;
     }// getEnd()
 
-    public Long getId(){ return id;}
+    public Integer getId(){ return id;}
 
     // mutator
     public void setElemName(String anElemName) {
@@ -503,7 +550,7 @@ public class XmlDocumentHandler extends DefaultHandler{
     private FeatureMap fm = null;
     private Long start = null;
     private Long end  = null;
-    private Long id = null;
+    private Integer id = null;
 
   } // End inner class CustomObject
 

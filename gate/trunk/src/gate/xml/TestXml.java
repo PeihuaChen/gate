@@ -184,24 +184,12 @@ public class TestXml extends TestCase
     anElement2StringMap.put("s","\n");
 
     doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
-// doc = gate.Factory.newDocument(new URL("file:///Z:/Quick Tests/HoratioHtml/Test.html.xml"));
+ //doc = gate.Factory.newDocument(new URL("file:///z:/gu.xml"));
 
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, doc.getSourceUrl()
-    );
-
-    assert( "Bad document Format was produced. XmlDocumentFormat was expected",
-            docFormat instanceof gate.corpora.XmlDocumentFormat
-          );
-
-    // Set the maps
-    docFormat.setMarkupElementsMap(markupElementsMap);
-    docFormat.setElement2StringMap(anElement2StringMap);
-
-    docFormat.unpackMarkup (doc);
     AnnotationSet annotSet = doc.getAnnotations("Original markups");
-    assertEquals("For xcex.xml the number of annotations should be:1516",
-                                                        1516,annotSet.size());
+    assertEquals("For "+doc.getSourceUrl()+" the number of annotations"+
+    " should be:758",758,annotSet.size());
+
     gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
   } // testUnpackMarkup()
 

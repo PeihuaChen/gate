@@ -111,6 +111,8 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
           });
 
         parser.parse(xmlUri, xmlDocHandler);
+        ((DocumentImpl) doc).setNextAnnotationId(
+                                          xmlDocHandler.getCustomObjectsId());
      }// end if
     } catch (ParserConfigurationException e){
         throw

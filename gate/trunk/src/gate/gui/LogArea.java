@@ -60,16 +60,16 @@ public class LogArea extends XJTextPane {
     LogAreaOutputStream err = new LogAreaOutputStream(true);
     LogAreaOutputStream out = new LogAreaOutputStream(false);
 
-    // Redirect Err
+    // Redirecting Err
     Err.setPrintWriter(new PrintWriter(err,true));
-    // Redirect Out
+    // Redirecting Out
     Out.setPrintWriter(new PrintWriter(out,true));
-/*
-    // Corrupting System.out
+
+    // Redirecting System.out
     System.setOut(new PrintStream(out,true));
-    // Corrupting System.err
+    // Redirecting System.err
     System.setErr(new PrintStream(err,true));
-*/
+
     popup = new JPopupMenu();
     selectAllAction = new SelectAllAction();
     copyAction = new CopyAction();

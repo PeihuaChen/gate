@@ -145,6 +145,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
           });
         // parse the document handler
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
+        ((DocumentImpl) doc).setNextAnnotationId(
+                                          xmlDocHandler.getCustomObjectsId());
       }// End if
     } catch (ParserConfigurationException e){
         throw
