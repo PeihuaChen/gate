@@ -53,8 +53,8 @@ RUN=$(JAVA)
 # to javac
 #GUK all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
 #GUK	  classes resources gukjar TestJdk.jar TestResources.jar
-all: ../classes/gate/TestGate.class classes resources TestJdk.jar \
-	TestResources.jar ../doc/userguide.html 
+all: ../classes/gate/TestGate.class classes ../doc/userguide.html resources \
+	TestJdk.jar TestResources.jar
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
