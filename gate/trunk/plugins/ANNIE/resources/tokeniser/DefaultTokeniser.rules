@@ -89,11 +89,11 @@
 (CONTROL) >SpaceToken;kind=control;
 
 #symbols#
-(MODIFIER_SYMBOL|MATH_SYMBOL|OTHER_SYMBOL) + > Token;kind=symbol;
+(MODIFIER_SYMBOL|MATH_SYMBOL|OTHER_SYMBOL) > Token;kind=symbol;
 CURRENCY_SYMBOL > Token;kind=symbol;symbolkind=currency;
 
 #punctuation#
-(DASH_PUNCTUATION|CONNECTOR_PUNCTUATION|OTHER_PUNCTUATION)+ >Token;kind=punctuation;
+(DASH_PUNCTUATION|CONNECTOR_PUNCTUATION|OTHER_PUNCTUATION)>Token;kind=punctuation;
 "START_PUNCTUATION" >Token;kind=punctuation;position=startpunct;
 "END_PUNCTUATION" >Token;kind=punctuation;position=endpunct;
 

@@ -2,19 +2,27 @@
 
 
 Phase:split3
-Input: Token SpaceToken Split
+Input: Token Lookup Split SpaceToken
 Options: control = Appelt
 
-//concatenates groups of splitters
+//removes the abbreviation false splitters
 
 
 Rule: r1
- (({Split.type=="."}|{Split.type=="punctuation"})+):left
+ ({Lookup.majorType=="abbreviation"} ({Split.type=="."}):fake)
 -->
 {
-	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+	java.util.Collection toRemove = (java.util.Collection)bindings.get("fake");
 	annotations.removeAll(toRemove);
-	gate.FeatureMap features = Factory.newFeatureMap();
-	features.put("type", "multi");
-	annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
 }
+
+// A.B.C.
+Rule: r2
+ ({Token.orth=="upperInitial", Token.length=="1"} ({Split.type=="."}):fake)+
+ ({SpaceToken}|{Split})
+-->
+{
+	java.util.Collection toRemove = (java.util.Collection)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
+

@@ -31,9 +31,9 @@ import java.util.*;
  * some minor processing after running the components in order to extract the
  * results in a usable form.
  */
-public class SentenceSplitter extends Nerc{
+public class SentenceSplitter extends AbstractProcessingResource{
 
-  public Resource init()throws ResourceInstantiationException {
+  public Resource init()throws ResourceInstantiationException{
     //create all the componets
     FeatureMap params;
     FeatureMap features;
@@ -44,170 +44,209 @@ public class SentenceSplitter extends Nerc{
       }
     });
 
-    //tokeniser
-    fireStatusChanged("Creating a tokeniser");
-    params = Factory.newFeatureMap();
-//      rData = (ResourceData)Gate.getCreoleRegister().get(
-//              "gate.creole.tokeniser.DefaultTokeniser");
-//      params.putAll(rData.getParameterList().getInitimeDefaults());
-    if(tokeniserRulesURL != null) params.put("rulesURL",
-                                             tokeniserRulesURL);
-    params.put("encoding", encoding);
-    if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
-    features = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
-    tokeniser = (DefaultTokeniser)Factory.createResource(
-                    "gate.creole.tokeniser.DefaultTokeniser",
-                    params, features, listeners);
-    this.add(tokeniser);
-    tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-    fireProgressChanged(10);
-
     //gazetteer
-    fireStatusChanged("Creating a gazetteer");
+    fireStatusChanged("Creating the gazetteer");
     params = Factory.newFeatureMap();
-    params.put("caseSensitive", new Boolean(false));
     if(gazetteerListsURL != null) params.put("listsURL",
                                              gazetteerListsURL);
     params.put("encoding", encoding);
-    if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
     listeners.put("gate.event.ProgressListener",
-                  new CustomProgressListener(11, 50));
+                  new CustomProgressListener(0, 10));
 
     gazetteer = (DefaultGazetteer)Factory.createResource(
                     "gate.creole.gazetteer.DefaultGazetteer",
                     params, features, listeners);
-    this.add(gazetteer);
     gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-    fireProgressChanged(50);
+    fireProgressChanged(10);
 
     //transducer
-    fireStatusChanged("Creating a Jape transducer");
+    fireStatusChanged("Creating the JAPE transducer");
     params = Factory.newFeatureMap();
-//      rData = (ResourceData)Gate.getCreoleRegister().get(
-//              "gate.creole.Transducer");
-//      params.putAll(rData.getParameterList().getInitimeDefaults());
-    if(japeGrammarURL != null) params.put("grammarURL",
-                                          japeGrammarURL);
+    if(transducerURL != null) params.put("grammarURL", transducerURL);
     params.put("encoding", encoding);
-    if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
+
     listeners.put("gate.event.ProgressListener",
-                  new CustomProgressListener(11, 50));
-    transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
-                                                    params, features,
-                                                    listeners);
+                  new CustomProgressListener(11, 100));
+
+    transducer = (Transducer)Factory.createResource(
+                    "gate.creole.Transducer",
+                    params, features, listeners);
+    transducer.setName("Transducer " + System.currentTimeMillis());
     fireProgressChanged(100);
     fireProcessFinished();
-    this.add(transducer);
-    transducer.setName("Transducer " + System.currentTimeMillis());
+
     return this;
-  } // init()
+  }
 
   public void run(){
     try{
-      super.runSystem();
-      super.check();
-      //copy the sentence annotations to the outputSet
+      //set the runtime parameters
+      FeatureMap params;
+      if(inputASName != null && inputASName.equals("")) inputASName = null;
       if(outputASName != null && outputASName.equals("")) outputASName = null;
-      AnnotationSet outputAS = (outputASName == null) ?
-                               document.getAnnotations() :
-                               document.getAnnotations(outputASName);
-      if(tempAnnotationSetName != null &&
-         tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
-      AnnotationSet tempAS =  (tempAnnotationSetName == null) ?
-                               document.getAnnotations() :
-                               document.getAnnotations(tempAnnotationSetName);
+      try{
+        fireProgressChanged(0);
+        params = Factory.newFeatureMap();
+        params.put("document", document);
+        params.put("annotationSetName", inputASName);
+        Factory.setResourceRuntimeParameters(gazetteer, params);
 
-      if(outputAS != tempAS){
-        //we need to copy the sentence annotations.
-        outputAS.addAll(tempAS.get("Sentence"));
+        params = Factory.newFeatureMap();
+        params.put("document", document);
+        params.put("inputASName", inputASName);
+        params.put("outputASName", inputASName);
+        Factory.setResourceRuntimeParameters(transducer, params);
+      }catch(Exception e){
+        throw new ExecutionException(e);
       }
+      fireProgressChanged(5);
+
+      //run the gazetteer
+      ProgressListener pListener = new CustomProgressListener(5, 10);
+      StatusListener sListener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
+      gazetteer.addProgressListener(pListener);
+      gazetteer.addStatusListener(sListener);
+      gazetteer.run();
+      gazetteer.check();
+      gazetteer.removeProgressListener(pListener);
+      gazetteer.removeStatusListener(sListener);
+
+      //run the transducer
+      pListener = new CustomProgressListener(11, 90);
+      transducer.addProgressListener(pListener);
+      transducer.addStatusListener(sListener);
+      transducer.run();
+      transducer.check();
+      transducer.removeProgressListener(pListener);
+      transducer.removeStatusListener(sListener);
+
+      //copy the results to the output set
+      if(!inputASName.equals(outputASName)){
+        AnnotationSet inputAS = (inputASName == null) ?
+                                document.getAnnotations() :
+                                document.getAnnotations(inputASName);
+
+        AnnotationSet outputAS = (outputASName == null) ?
+                                 document.getAnnotations() :
+                                 document.getAnnotations(outputASName);
+        outputAS.addAll(inputAS.get("Sentence"));
+      }
+
+      fireProcessFinished();
     }catch(ExecutionException ee){
       executionException = ee;
     }catch(Exception e){
       executionException = new ExecutionException(e);
     }
-  }//run()
+  }
 
-  public void run1(){
-    try{
-      super.runSystem();
-      super.check();
-      //create the sentence annotations
-      if(outputASName != null && outputASName.equals("")) outputASName = null;
-      AnnotationSet outputAS = (outputASName == null) ?
-                               document.getAnnotations() :
-                               document.getAnnotations(outputASName);
 
-      if(tempAnnotationSetName != null &&
-         tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
-      AnnotationSet tempAS =  (tempAnnotationSetName == null) ?
-                               document.getAnnotations() :
-                               document.getAnnotations(tempAnnotationSetName);
-
-      //get a list of splitters
-      ArrayList splitters = new ArrayList(tempAS.get("Split"));
-      if(splitters.size() > 0){
-        //define a comparator for annotations by start offset
-        Comparator offsetComparator = new Comparator(){
-          public int compare(Object o1,
-                       Object o2){
-            Annotation a1 = (Annotation)o1;
-            Annotation a2 = (Annotation)o2;
-            return a1.getStartNode().getOffset().compareTo(
-                    a2.getStartNode().getOffset());
-          }
-        };
-        //sort the splitters by offset
-        Collections.sort(splitters, offsetComparator);
-        long startSentence = 0;
-        long endSentence = startSentence;
-
-        Iterator splitIter = splitters.iterator();
-        while(splitIter.hasNext()){
-          Annotation aSplitter = (Annotation)splitIter.next();
-          endSentence = aSplitter.getEndNode().getOffset().longValue();
-          //generate the new sentence annotation
-          FeatureMap sentenceFeatures = Factory.newFeatureMap();
-
-          //get a list of tokens
-          AnnotationSet as = tempAS.get(new Long(startSentence),
-                                        new Long(endSentence)).
-                                        get("Token");
-          if(as != null && as.size() > 0){
-            ArrayList tokens = new ArrayList(as);
-            //sort the tokens by offset
-            Collections.sort(tokens, offsetComparator);
-            sentenceFeatures.put("Tokens", tokens);
-            try{
-              outputAS.add(new Long(((Annotation)tokens.get(0)).
-                                    getStartNode().getOffset().longValue()),
-                           new Long(endSentence),
-                           "Sentence", sentenceFeatures);
-            }catch(InvalidOffsetException ioe){
-              throw new ExecutionException(ioe);
-            }
-          }//if(as != null && as.size() > 0)
-
-          startSentence = endSentence;
-        }//while(splitIter.hasNext())
-      }//if(splitters.size() > 0 && tokens.size() > 0)
-    }catch(ExecutionException ee){
-      executionException = ee;
-    }catch(Exception e){
-      executionException = new ExecutionException(e);
+  public void setTransducerURL(java.net.URL newTransducerURL) {
+    transducerURL = newTransducerURL;
+  }
+  public java.net.URL getTransducerURL() {
+    return transducerURL;
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
     }
-  }//run()
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
 
+  DefaultGazetteer gazetteer;
+  Transducer transducer;
+  private java.net.URL transducerURL;
+  private transient Vector statusListeners;
+  private transient Vector progressListeners;
+  private String encoding;
+  private java.net.URL gazetteerListsURL;
+  private gate.Document document;
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public void setEncoding(String newEncoding) {
+    encoding = newEncoding;
+  }
+  public String getEncoding() {
+    return encoding;
+  }
+  public void setGazetteerListsURL(java.net.URL newGazetteerListsURL) {
+    gazetteerListsURL = newGazetteerListsURL;
+  }
+  public java.net.URL getGazetteerListsURL() {
+    return gazetteerListsURL;
+  }
+  public void setDocument(gate.Document newDocument) {
+    document = newDocument;
+  }
+  public gate.Document getDocument() {
+    return document;
+  }
+  public void setInputASName(String newInputASName) {
+    inputASName = newInputASName;
+  }
+  public String getInputASName() {
+    return inputASName;
+  }
   public void setOutputASName(String newOutputASName) {
     outputASName = newOutputASName;
   }
-
   public String getOutputASName() {
     return outputASName;
   }
@@ -228,6 +267,10 @@ public class SentenceSplitter extends Nerc{
     int start;
     int end;
   }
-  protected String outputASName;
+
+
+
   private static final boolean DEBUG = false;
+  private String inputASName;
+  private String outputASName;
 }//public class SentenceSplitter extends Nerc

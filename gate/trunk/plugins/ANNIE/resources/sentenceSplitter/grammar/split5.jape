@@ -5,20 +5,25 @@ Phase:split5
 Input: Token Split
 Options: control = first
 
-//generates the sentence annotations
+//removes some other false splitters "(!?!?!)"
+
 
 Rule: r1
-(
- ({Token})+
- ({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"})
- ) :left
+{Token.string=="("}
+ (({Split})+):fake
+{Token.string==")"} 
 -->
-:left.Sentence = {}
+{
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
 
-Rule: r1
-(
- ({Token})+
- ) :left
-{Split.type=="CR"} 
+Rule: r2
+{Token.string=="["}
+ (({Split})+):fake
+{Token.string=="]"} 
 -->
-:left.Sentence = {}
+{
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
