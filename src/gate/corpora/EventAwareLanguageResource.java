@@ -24,7 +24,7 @@ public interface EventAwareLanguageResource {
 
   public static final int DOC_NAME = 1001;
   public static final int DOC_CONTENT = 1002;
-  public static final int DOC_FEATURES = 1003;
+  public static final int RES_FEATURES = 1003;
   public static final int DOC_MAIN = 1004;
 
   public boolean isResourceChanged(int changeType);
