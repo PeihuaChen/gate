@@ -865,7 +865,7 @@ public class AnnotationSetImpl
 
   /** Propagate changes to the document content. Has, unfortunately,
    * to be public, to allow DocumentImpls to get at it. Oh for a
-   * "friend" declaration. Doesn't thow InvalidOffsetException as
+   * "friend" declaration. Doesn't throw InvalidOffsetException as
    * DocumentImpl is the only client, and that checks the offsets
    * before calling this method.
    */
@@ -873,8 +873,6 @@ public class AnnotationSetImpl
     //make sure we have the indices computed
     indexByStartOffset();
     indexByEndOffset();
-    //each edit operation is a combination of delete and insert.
-    //first handle the delete operation
     if(end.compareTo(start) > 0){
       //get the nodes that need to be processed (the nodes internal to the
       //removed section plus the marginal ones
@@ -922,7 +920,6 @@ public class AnnotationSetImpl
         firstNode.setOffset(start);
         //add back to the offset index
         nodesByOffset.put(firstNode.getOffset(), firstNode);
-        
       }
     }
 
