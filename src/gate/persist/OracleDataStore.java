@@ -2222,7 +2222,13 @@ public class OracleDataStore extends JDBCDataStore {
       stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+
                                                     ".persist.update_document(?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
+      //do we have URL or create from string
+      if (null==doc.getSourceUrl()) {
+        stmt.setNull(2,java.sql.Types.VARCHAR);
+      }
+      else {
       stmt.setString(2,doc.getSourceUrl().toString());
+      }
       //do we have start offset?
       if (null==doc.getSourceUrlStartOffset()) {
         stmt.setNull(3,java.sql.Types.NUMERIC);
