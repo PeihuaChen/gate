@@ -301,7 +301,40 @@ public class Files {
       //System.exit(1);
     }
     return regexfinal;
-  }//find
+  } //find
 
+  /** Recursively remove a directory <B>even if it contains other files
+    * or directories<B>. Returns true when the directory and all its
+    * contents are successfully removed, else false.
+    */
+  public static boolean rmdir(File dir) {
+    if(dir == null || ! dir.isDirectory()) // only delete directories
+      return false;
+
+    // list all the members of the dir
+    String[] members = dir.list();
+
+    // return value indicating success or failure
+    boolean succeeded = true;
+
+    // for each member, if is dir then recursively delete; if file then delete
+    for(int i = 0; i<members.length; i++) {
+      File member = new File(dir, members[i]);
+
+      if(member.isFile()) {
+        if(! member.delete())
+          succeeded = false;
+      } else {
+        if(! Files.rmdir(member))
+          succeeded = false;
+      }
+    }
+
+    // delete the directory itself
+    dir.delete();
+
+    // return status value
+    return succeeded;
+  } // rmdir(File)
 
 } // class Files
