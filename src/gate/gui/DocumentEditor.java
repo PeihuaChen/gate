@@ -247,68 +247,6 @@ public class DocumentEditor extends AbstractVisualResource
     return this;
   }
 
-  /** Test code*/
-  public static void main(String[] args) {
-    try{
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      Gate.setLocalWebServer(false);
-      Gate.setNetConnected(false);
-      Gate.init();
-      JFrame frame = new JFrame("Gate Document Editor Test");
-      frame.addWindowListener(new WindowAdapter(){
-        public void windowClosing(WindowEvent e){
-          System.exit(0);
-        }
-      });
-
-      //get a document
-      FeatureMap params = Factory.newFeatureMap();
-      params.put(gate.Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME,
-        new Boolean(true));
-
-      params.put(gate.Document.DOCUMENT_URL_PARAMETER_NAME,
-                 "file:///d:/tmp/help-doc.html");
-                 //"file:///d:/tmp/F7V.xml");
-                 //"http://redmires.dcs.shef.ac.uk/admin/index.html");
-                 //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/
-                 //                                       swing/Action.html");
-                 //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt
-                 ///AWTEventMulticaster.html");
-      gate.Document doc = (gate.Document)Factory.createResource(
-                                          "gate.corpora.DocumentImpl", params);
-      //create a default tokeniser
-     params.clear();
-     params.put("rulesResourceName", "creole/tokeniser/DefaultTokeniser.rules");
-     DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
-                            "gate.creole.tokeniser.DefaultTokeniser", params);
-
-      tokeniser.setDocument(doc);
-      tokeniser.setAnnotationSetName("TokeniserAS");
-      tokeniser.execute();
-
-      DocumentEditor editor = (DocumentEditor)Factory.createResource(
-                            "gate.gui.DocumentEditor", Factory.newFeatureMap());
-      frame.getContentPane().add(editor);
-      frame.pack();
-      frame.setVisible(true);
-      editor.setTarget(doc);
-
-      //get the annotation schemas
-      params =  Factory.newFeatureMap();
-      params.put("xmlFileUrl", DocumentEditor.class.getResource(
-                              "/gate/resources/creole/schema/PosSchema.xml"));
-
-      AnnotationSchema annotSchema = (AnnotationSchema)
-         Factory.createResource("gate.creole.AnnotationSchema", params);
-      Set annotationSchemas = new HashSet();
-      annotationSchemas.add(annotSchema);
-
-    }catch(Exception e){
-      e.printStackTrace(Err.getPrintWriter());
-    }
-  }//public static void main(String[] args)
-
-
   /**
    * Initialises all the listeners that this component has to register with
    * other classes.
