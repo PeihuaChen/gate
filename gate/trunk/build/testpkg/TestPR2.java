@@ -17,7 +17,8 @@ import gate.creole.*;
 
 /** A simple ProcessingResource for testing purposes.
   */
-public class TestPR2 extends AbstractResource implements ProcessingResource
+public class TestPR2 extends AbstractProcessingResource
+implements ProcessingResource
 {
 
   /** Default Construction */
