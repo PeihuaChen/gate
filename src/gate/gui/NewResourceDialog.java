@@ -100,6 +100,10 @@ public class NewResourceDialog extends JDialog {
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = false;
+        TableCellEditor cellEditor = parametersEditor.getCellEditor();
+        if(cellEditor != null){
+          cellEditor.stopCellEditing();
+        }
         hide();
       }//public void actionPerformed(ActionEvent e)
     });
