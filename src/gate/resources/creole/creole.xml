@@ -276,7 +276,16 @@
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true">java.util.ArrayList</PARAMETER>
     </RESOURCE>
-  </CREOLE>
+
+    <RESOURCE>
+      <NAME>Annotation Dump PR</NAME>
+      <CLASS>gate.creole.dumpingPR.DumpingPR</CLASS>
+      <COMMENT>Dumps document with annotations to original format</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="annotationTypes" RUNTIME="true" DEFAULT="Person;Location;Date">java.util.ArrayList</PARAMETER>
+    </RESOURCE>
+    
   <!-- creole.xml for Controllers -->
   <CREOLE>
     <RESOURCE>
