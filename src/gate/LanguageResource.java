@@ -31,6 +31,16 @@ public interface LanguageResource extends Resource
   /** Set the data store that this LR lives in. */
   public void setDataStore(DataStore dataStore) throws PersistenceException;
 
+  /** Returns the persistence id of this LR, if it has been stored in
+   *  a datastore. Null otherwise.
+   */
+  public Object getLRPersistenceId();
+
+  /** Sets the persistence id of this LR. To be used only in the
+   *  Factory and DataStore code.
+   */
+  public void setLRPersistenceId(Object lrID);
+
   /** Save: synchonise the in-memory image of the LR with the persistent
     * image.
     */
