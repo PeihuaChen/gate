@@ -652,7 +652,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
                      "        ft_character_value, " +
                      "        ft_long_character_value, " +
                      "        ft_binary_value " +
-                     " from  "+this.jdbcSchema+"v_annotation_features " +
+                     " from  "+this.jdbcSchema+"v_annotation_features v" +
                      " where  set_id = ? " +
                      " order by ann_local_id,key ";
 
