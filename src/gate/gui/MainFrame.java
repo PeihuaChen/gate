@@ -41,7 +41,7 @@ import gate.event.*;
 import gate.persist.*;
 import gate.util.*;
 import gate.swing.*;
-import guk.im.*;
+//import guk.im.*;
 
 
 /**
@@ -486,7 +486,9 @@ public class MainFrame extends JFrame
     try{
       JMenu imMenu = null;
       Locale locale = new Locale("en", "GB");
-      Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
+      //if this fails guk is not present
+      Class.forName("guk.im.GateIMDescriptor");
+      Locale[] availableLocales = new guk.im.GateIMDescriptor().getAvailableLocales();
       //Locale[] availableLocales = Locale.getAvailableLocales();
       JMenuItem item;
       if(availableLocales != null && availableLocales.length > 1){
@@ -505,7 +507,10 @@ public class MainFrame extends JFrame
         }
       }
       if(imMenu != null) optionsMenu.add(imMenu);
-    }catch(AWTException awte){}
+    }catch(Exception e){
+      //something happened; most probably guk not present.
+      //just drop it, is not vital.
+    }
 
     menuBar.add(optionsMenu);
 
