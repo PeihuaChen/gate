@@ -32,12 +32,14 @@ import java.net.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.event.*;
 import gate.persist.*;
 import gate.util.*;
 import guk.im.*;
 
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame
+                       implements ProgressListener, StatusListener{
 
   MainFrame thisMainFrame = null;
   JMenuBar menuBar;
@@ -157,7 +159,13 @@ public class MainFrame extends JFrame {
     southBox = Box.createHorizontalBox();
     statusBar = new JLabel();
     progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+    progressBar.setStringPainted(true);
+    Dimension dim = new Dimension(300, progressBar.getPreferredSize().height);
+    progressBar.setMaximumSize(dim);
+    progressBar.setMinimumSize(dim);
+    progressBar.setPreferredSize(dim);
     southBox.add(statusBar);
+    southBox.add(Box.createHorizontalGlue());
     southBox.add(progressBar);
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
 
@@ -165,12 +173,12 @@ public class MainFrame extends JFrame {
     menuBar = new JMenuBar();
 
     JMenu fileMenu = new JMenu("File");
-    fileMenu.add(newProjectAction);
-    fileMenu.add(newLRAction);
-    fileMenu.add(newPRAction);
-    fileMenu.add(newDSAction);
-    fileMenu.add(openDSAction);
-    fileMenu.add(newApplicationAction);
+    fileMenu.add(new JGateMenuItem(newProjectAction));
+    fileMenu.add(new JGateMenuItem(newLRAction));
+    fileMenu.add(new JGateMenuItem(newPRAction));
+    fileMenu.add(new JGateMenuItem(newDSAction));
+    fileMenu.add(new JGateMenuItem(openDSAction));
+    fileMenu.add(new JGateMenuItem(newApplicationAction));
     menuBar.add(fileMenu);
 
     JMenu editMenu = new JMenu("Edit");
@@ -203,7 +211,7 @@ public class MainFrame extends JFrame {
     //TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
-    toolbar.add(newProjectAction);
+    toolbar.add(new JGateButton(newProjectAction));
 
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
 
@@ -320,8 +328,27 @@ public class MainFrame extends JFrame {
         leftSplit.setDividerLocation(0.7);
       }
     });
-
   }
+
+  public void progressChanged(int i){
+    int oldValue = progressBar.getValue();
+    if(oldValue != i){
+      SwingUtilities.invokeLater(new ProgressBarUpdater(i));
+    }
+  }
+
+  /**
+   * Called when the process is finished.
+   *
+   */
+  public void processFinished(){
+    SwingUtilities.invokeLater(new ProgressBarUpdater(0));
+  }
+
+  public void statusChanged(String text){
+    SwingUtilities.invokeLater(new StatusBarUpdater(text));
+  }
+
 
   static{
     try{
@@ -509,7 +536,7 @@ public class MainFrame extends JFrame {
   class NewProjectAction extends AbstractAction{
     public NewProjectAction(){
       super("New Project", new ImageIcon(MainFrame.class.getResource("/gate/resources/img/newProject.gif")));
-
+      putValue(SHORT_DESCRIPTION,"Create a new project");
     }
     public void actionPerformed(ActionEvent e){
       fileChooser.setDialogTitle("Select new project file");
@@ -525,7 +552,7 @@ public class MainFrame extends JFrame {
     public NewAnnotDiffAction(){
       super("Annotation Diff",
       new ImageIcon(MainFrame.class.getResource("/gate/resources/img/annDiff.gif")));
-
+      putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e){
       AnnotDiffHandle handle = new AnnotDiffHandle(thisMainFrame);
@@ -557,6 +584,7 @@ public class MainFrame extends JFrame {
   class NewApplicationAction extends AbstractAction{
     public NewApplicationAction(){
       super("New Application");
+      putValue(SHORT_DESCRIPTION,"Create a new Application");
     }
     public void actionPerformed(ActionEvent e){
       Object answer = JOptionPane.showInputDialog(
@@ -599,6 +627,7 @@ public class MainFrame extends JFrame {
   class NewLRAction extends AbstractAction{
     public NewLRAction(){
       super("Create language resource");
+      putValue(SHORT_DESCRIPTION,"Create a new language resource");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -649,6 +678,7 @@ public class MainFrame extends JFrame {
   class NewPRAction extends AbstractAction{
     public NewPRAction(){
       super("Create processing resource");
+      putValue(SHORT_DESCRIPTION,"Create a new processing resource");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -697,6 +727,7 @@ public class MainFrame extends JFrame {
   class NewDSAction extends AbstractAction{
     public NewDSAction(){
       super("Create datastore");
+      putValue(SHORT_DESCRIPTION,"Create a new Datastore");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -773,6 +804,7 @@ public class MainFrame extends JFrame {
   class OpenDSAction extends AbstractAction{
     public OpenDSAction(){
       super("Open datastore");
+      putValue(SHORT_DESCRIPTION,"Open a datastore");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -876,6 +908,63 @@ public class MainFrame extends JFrame {
       }
       return this;
     }
+  }
+
+  class ProgressBarUpdater implements Runnable{
+    ProgressBarUpdater(int newValue){
+      value = newValue;
+    }
+    public void run(){
+      progressBar.setValue(value);
+    }
+
+    int value;
+  }
+
+  class StatusBarUpdater implements Runnable{
+    StatusBarUpdater(String text){
+      this.text = text;
+    }
+    public void run(){
+      statusBar.setText(text);
+    }
+    String text;
+  }
+
+  class JGateMenuItem extends JMenuItem{
+    JGateMenuItem(javax.swing.Action a){
+      super(a);
+      this.addMouseListener(new MouseAdapter() {
+        public void mouseEntered(MouseEvent e) {
+          oldText = statusBar.getText();
+          statusChanged((String)getAction().
+                        getValue(javax.swing.Action.SHORT_DESCRIPTION));
+        }
+
+        public void mouseExited(MouseEvent e) {
+          statusChanged(oldText);
+        }
+      });
+    }
+    String oldText;
+  }
+
+  class JGateButton extends JButton{
+    JGateButton(javax.swing.Action a){
+      super(a);
+      this.addMouseListener(new MouseAdapter() {
+        public void mouseEntered(MouseEvent e) {
+          oldText = statusBar.getText();
+          statusChanged((String)getAction().
+                        getValue(javax.swing.Action.SHORT_DESCRIPTION));
+        }
+
+        public void mouseExited(MouseEvent e) {
+          statusChanged(oldText);
+        }
+      });
+    }
+    String oldText;
   }
 
   class LocaleSelectorMenuItem extends JRadioButtonMenuItem{
