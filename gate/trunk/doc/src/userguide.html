@@ -219,8 +219,6 @@ Full Unicode support including editing in a number of languages (not
 supported by native JDK; thanks to Mark Leisher for help with this).
 
 
-
-
 <!---------------------------------------------------------------------->
 <!---------------------------------------------------------------------->
 <A NAME=the-development-environment></A><H2>Development Environment</H2>
@@ -244,7 +242,6 @@ There are 6 main steps to using GATE.
 </OL>
 </P>
 
-
 <!---------------------------------------------------------------------->
 <H3>Bootstrapping New Resources</H3>
 
@@ -261,13 +258,17 @@ Java class to disk for you: select "Bootstrap" from the "Tools" menu.
 
 
 <!---------------------------------------------------------------------->
+
 <H3>Loading Language Resources</H3>
 
 <P>
 Load a language resource by right clicking on "Language Resources" and
 selecting "Create Language Resource". Select "GATE document" and a
 pop-up window will appear. Choose a name for the resource, and select
-a file or url as the value of "sourceUrl". Press Enter, make any
+a file or url as the value of "sourceUrl". Note that double clicking
+in the "values" box brings up a tree structure to enable selection of
+documents.
+ Make any
 changes to default settings as required (e.g. encoding type used) and
 click OK. The document name and icon should appear in the left hand
 pane, and can be viewed in the main window by double clicking on the
@@ -276,27 +277,24 @@ viewed. At this stage, the only annotations displayed will be those
 which are produced as a result of the text structure analysis which
 transforms a text into a GATE document, e.g. xml or html
 tags. Additional language resources can be loaded by repeating the
-procedure. 
+procedure. Note, however, that only one resource can be processed at
+a time.
 </P>
 
-<!---------------------------------------------------------------------->
 <H3>Loading Processing Resources</H3>
-
 <P>
 Right click on "Processing Resources" and select "Create processing
 resource". Select the type of resource (e.g. tokeniser, gazetteer,
 etc.) from the list of options. In the pop-up box, choose a name for
 the resource, and either select the default value for the resource, or
 select a new one. Select any other values as appropriate
-(e.g. encoding). Press Enter and click "OK". An icon should appear
+(e.g. encoding). Click "OK". An icon should appear
 under "Processing Resources" in the left hand pane. Note that it may
 take a few seconds for the resource to be loaded. Repeat this
 procedure until all necessary resources have been loaded.
 </P>
 
-<!---------------------------------------------------------------------->
 <H3>Running an Application</H3>
-
 <P>
 Once all the resources have been loaded, an application can be created
 and run. Right click on "Applications" and create a new one. Then double
@@ -314,13 +312,12 @@ select the language resource to be used (using a left click), and
 finally right click on the application and select "Run".
 </P>
 
-<!---------------------------------------------------------------------->
 <H3>Viewing the Results</H3>
-
 <P>
 Once the system has run, open the document to be
-viewed with a double click. Note that it may take a few seconds for 
-the text to be displayed if it is long.
+viewed with a double click. Note that it may take a few seconds for the text to 
+be
+displayed, especially if it is long.
 The annotation types are displayed to the right of the text. 
 Click on Default (the default annotation set) to display the
 annotation types. Then select the annotation types to be viewed. A
@@ -331,7 +328,6 @@ manually altered by double-clicking on the relevant
 annotation. Default colours and font settings can be altered in the
 same way, by double-clicking on the default button. 
 </P>
-
 <P>
 Descriptions of the annotations are simultaneously displayed in the
 bottom pane. These lists can be sorted in ascending and descending
@@ -340,7 +336,6 @@ heading. An arrow will appear indicating the direction of the sorting.
 Clicking on an entry in the table will also
 highlight the respective matching text portion. 
 </P>
-
 <P>
 Right clicking on some part of the text in the main window will bring
 up a box containing a list of the annotations associated with
@@ -351,27 +346,53 @@ has not been selected), this annotation on the right will then be
 automatically selected and all relevant text in the main window will be
 appropriately highlighted.
 </P>
-
 <P>
  Although there is no cursor displayed in the various windows, they can all be 
 scrolled
 using the keyboard arrows, as well as by using the scrollbars.
 </P>
-
 <P>
 At any time, the main viewer can also be used to display other
 information, such as Messages, by clicking on the header
 at the top of the main window. 
 </P>
-
-
-<!---------------------------------------------------------------------->
-<H3>The Evaluation Tool (Annotation Diff)</H3>
+<H3>Adding Annotations</H3>
+<P>
+In order to be able to add/edit annotations in GATE, the relevant
+ Annotation Schemata must first be loaded. This is done by selecting an
+ Annotation Schema (which is an xml file) from the Language Resources,
+ for each annotation type.
 
 <P>
-The annotation tool is activated by selecting it from the list of
-Tools (available from the "Tools" menu), and double clicking on
-it. A lower left hand pane will appear. Select the key and response
+Once the Annotation Schemata have been loaded, the annotation types that
+have a Schema present inside GATE can be added or edited. 
+To add a new annotation, 
+select the text, right click, and select an annotation set (either the
+default set, which contains the annotations already found, or create a new one).
+Then select the name of the annotation to be created.
+If the annotation can have features, another window will automatically
+open. Select a feature from the list of possible features, and click
+the arrow to transfer it to the list of current features. The feature
+values can be edited by clicking on them. The new annotation will be
+added to the annotation set, and will appear in the annotation
+description table.
+</P>
+
+<P>
+An existing annotation can be modified by selecting it from the table
+and double clicking on it to bring up the features
+window. If, however, the schema has no features defined,
+then the selected annotation cannot be edited (since there are no
+features to edit). All that can be done is to add or delete the
+annotation. An annotation can be deleted by selecting it from the
+table, right clicking on it, and selecting Delete.
+</P>
+
+
+<H3>The Evaluation Tool (Annotation Diff)</H3>
+<P>
+The annotation tool is activated by selecting it from the 
+Tools menu at the top of the window. It will appear in a new window. Select the key and response
 documents to be used (note that both must have been previously loaded
 into the system), the annotation type to be evaluated, and the
 annotation type to be used as the denominator for evaluating false
@@ -380,7 +401,6 @@ response documents are explicitly selected, even if there are no
 alternative choices of document presented. Click on "do diff", and the
 results will be displayed.
 </P>
-
 <P>
 In the main window, the key and response annotations will  be
 displayed. They can be sorted by any category by clicking on the
@@ -388,10 +408,7 @@ relevant column header. The key and response annotations will be aligned if
 their indices are identical, and are colour coded according to the legend
 displayed. 
 </P>
-
-<!------------------------>
 <H4>Evaluation metrics</H4>
-
 <P>
 Precision, recall and
 false positives are also displayed below the annotation tables, each
@@ -416,7 +433,11 @@ lenient).
 
 <P>
 This section gives documentation for the framework; see also the 
-<A HREF=javadoc/index.html>JavaDoc pages</A>. The
+<A HREF=javadoc/index.html>JavaDoc pages</A>. 
+
+
+
+The
 <A HREF=javadoc/gate/CookBook.html>CookBook</A> class gives example code for
 using the GATE API.
 
