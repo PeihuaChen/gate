@@ -16,6 +16,8 @@ package gate.gui;
 
 import java.awt.Component;
 import java.awt.AWTEvent;
+import java.awt.AWTException;
+import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.Point;
@@ -31,6 +33,7 @@ import gate.*;
 import gate.creole.*;
 import gate.persist.*;
 import gate.util.*;
+import guk.im.*;
 
 
 public class MainFrame extends JFrame {
@@ -200,9 +203,31 @@ public class MainFrame extends JFrame {
 
     //MENUS
     menuBar = new JMenuBar();
+
     JMenu fileMenu = new JMenu("File");
     fileMenu.add(newProjectAction);
     menuBar.add(fileMenu);
+
+    JMenu editMenu = new JMenu("Edit");
+    try{
+      JMenu imMenu = null;
+      Locale locale = new Locale("en", "GB");
+      Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
+      JMenuItem item;
+      if(availableLocales != null && availableLocales.length > 1){
+        imMenu = new JMenu("Input methods");
+        ButtonGroup bg = new ButtonGroup();
+        for(int i = 0; i < availableLocales.length; i++){
+          locale = availableLocales[i];
+          item = new LocaleSelectorMenuItem(locale, this);
+          imMenu.add(item);
+          bg.add(item);
+        }
+      }
+      if(imMenu != null) editMenu.add(imMenu);
+    }catch(AWTException awte){}
+
+    menuBar.add(editMenu);
 
     JMenu helpMenu = new JMenu("Help");
     menuBar.add(helpMenu);
@@ -482,12 +507,29 @@ System.out.println("No small view");
                         "Gate",
                         JOptionPane.QUESTION_MESSAGE);
       if(answer instanceof String){
-        ApplicationHandle handle = new ApplicationHandle((String)answer, currentProject);
-        appRoot.add(new DefaultMutableTreeNode(handle));
-        projectTreeModel.nodeStructureChanged(appRoot);
-        projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(appRoot)));
+        try{
+          SerialController controller =
+                (SerialController)Factory.createResource(
+                                "gate.creole.SerialController",
+                                Factory.newFeatureMap());
+          FeatureMap fm = controller.getFeatures();
+          if(fm == null){
+            controller.setFeatures(fm = Factory.newFeatureMap());
+          }
+          fm.put("NAME", answer);
 
-        currentProject.addApplication(handle);
+          ApplicationHandle handle = new ApplicationHandle(controller,
+                                                           currentProject);
+          appRoot.add(new DefaultMutableTreeNode(handle));
+          projectTreeModel.nodeStructureChanged(appRoot);
+          projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(appRoot)));
+          currentProject.addApplication(handle);
+        }catch(ResourceInstantiationException rie){
+          JOptionPane.showMessageDialog(parentFrame,
+                                        "Could not create application!\n" +
+                                         rie.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+        }
       }else{
         JOptionPane.showMessageDialog(parentFrame,
                                       "Unrecognised input!",
@@ -767,5 +809,22 @@ System.out.println("No small view");
       }
       return this;
     }
+  }
+
+  class LocaleSelectorMenuItem extends JRadioButtonMenuItem{
+    public LocaleSelectorMenuItem(Locale locale, JFrame pframe){
+      super(locale.getDisplayName());
+      this.frame = pframe;
+      me = this;
+      myLocale = locale;
+      this.addActionListener(new ActionListener()  {
+        public void actionPerformed(ActionEvent e) {
+          me.setSelected(frame.getInputContext().selectInputMethod(myLocale));
+        }
+      });
+    }
+    Locale myLocale;
+    JRadioButtonMenuItem me;
+    JFrame frame;
   }
 }
