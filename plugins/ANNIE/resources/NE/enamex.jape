@@ -4,7 +4,7 @@
 
 Phase:	Enamex
 //Input: Token SpaceToken Lookup
-Options: control = brill
+Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
 
@@ -240,20 +240,6 @@ Priority: 40
 :person -->
   :person.TempPerson = {kind = "personName", rule = "PersonLocAmbig"}
 
-Rule: FirstNameContext
-Priority: 40
-// Dear hiranya
-
-(
- {Token.string == "Dear"}
- (SPACE)
-)
-(
- ({Token.orth == upperInitial} |
-  {Token.orth == lowercase})
-)
-:person -->
-  :person.TempPerson = {kind = "personName", rule = "FirstNameContext"}
 
 ///////////////////////////////////////////////////////////////////
 // Organisation Rules
@@ -311,9 +297,13 @@ Priority: 20
 
 // Bradford & Bingley
 // Bradford & Bingley Ltd
+(
+ {POS.category == IN}
+ (SPACE)
+)?
 
 (
- ({Token.orth == upperInitial}
+ ({POS.category == NNP}
   (SPACE)? )+
 
  {Token.string == "&"}
@@ -495,23 +485,6 @@ Priority: 100
   :orgName.Temp = {kind = "notorgName", rule = "NotOrgXBase"}
 
 
-//Rule: NotOrgXBase
-//Priority: 100
-// not things like British National
-// or The University
-//(
-// (DET SPACE)?
-//)
-//(
-// ({Lookup.majorType == country_adj} | 
-//  (DET))
-// (SPACE)
-// ({Lookup.majorType == org_base}|
-//  {Lookup.majorType == govern_key})
-//)
-//:orgName -->
-//  :orgName.Temp = {kind = "notorgName", rule = "NotOrgXBase"}
-
 Rule:	OrgXBase
 Priority: 30
 
@@ -519,9 +492,6 @@ Priority: 30
 // includes govern_key e.g. academy
 // Barclays Bank
 // Royal Academy of Art
-// Staffordshire College of Technology
-// Staffordshire University
-// A Staffordshire University
 
 (
  (DET SPACE)?
@@ -599,6 +569,75 @@ Priority: 30
 -->
  :org.TempOrganization= {kind = "orgName", rule = "OrgPersonAmbig"}
 
+ 
+
+/////////////////////////////////////////////////////////////////
+// Location rules
+
+
+Rule: 	Location1
+Priority: 25
+// Lookup = city, country, province, region, water
+
+// Western Europe
+// South China sea
+
+(
+ ({Lookup.majorType == loc_key, Lookup.minorType == pre}
+  SPACE)?
+ {Lookup.majorType == location}
+ (SPACE
+  {Lookup.majorType == loc_key, Lookup.minorType == post})?
+)
+:locName -->
+  :locName.TempLocation = {kind = "locName", rule = "Location1"}
+
+
+Rule:	GazLocation
+Priority: 20
+  (
+	({Lookup.majorType == location})
+  )
+:locName
+  --> 	
+ :locName.TempLocation = {kind = "locName", rule=GazLocation}
+
+
+/////////////////////////////////////////////////////////////////
+
+// Context-based Rules
+
+
+Rule: FirstNameContext
+Priority: 40
+// Dear hiranya
+
+(
+ {Token.string == "Dear"}
+ (SPACE)
+)
+(
+ ({Token.orth == upperInitial} |
+  {Token.orth == lowercase})
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "FirstNameContext"}
+
+
+Rule:InLoc1
+
+(
+ {Token.string == "in"}
+ (SPACE)
+)
+(
+ {Lookup.majorType == location, Token.orth == allCaps}
+)
+:locName
+-->
+ :locName.TempLocation = {kind = "locName", rule = InLoc1}
+
+
 Rule:OrgContext1
 Priority: 1
 // company X
@@ -644,56 +683,37 @@ Priority: 5
 -->
  :org.TempOrganization= {kind = "orgName", rule = "OrgContext2"}
 
- 
-
-/////////////////////////////////////////////////////////////////
-// Location rules
 
 
-Rule: 	Location1
-Priority: 25
-// Lookup = city, country, province, region, water
-
-// Western Europe
-// South China sea
+Rule:JoinOrg
+Priority: 50
+// Smith joined Energis
 
 (
- ({Lookup.majorType == loc_key, Lookup.minorType == pre}
-  SPACE)?
- {Lookup.majorType == location}
- (SPACE
-  {Lookup.majorType == loc_key, Lookup.minorType == post})?
-)
-:locName -->
-  :locName.TempLocation = {kind = "locName", rule = "Location1"}
-
-
-Rule:	GazLocation
-Priority: 20
-  (
-	({Lookup.majorType == location})
-  )
-:locName
-  --> 	
- :locName.TempLocation = {kind = "locName", rule=GazLocation}
-
-
-/////////////////////////////////////////////////////////////////
-
-// Ambiguous Name/Location Rules
-
-Rule:AmbigNameLoc1
-
-(
- {Token.string == "in"}
- (SPACE)
+ ({Token.string == "joined"}|
+  {Token.string == "joining"}|
+  {Token.string == "joins"}|
+  {Token.string == "join"}
+ )
+ SPACE
 )
 (
- {Lookup.majorType == location, Token.orth == allCaps}
-)
-:locName
+ ({Token.orth == upperInitial}|
+  {Token.orth == allCaps}|
+  {Token.orth == mixedCaps}
+ )
+ (SPACE 
+  ({Token.orth == upperInitial} |
+   {Token.orth == allCaps})
+ )*
+) 
+:org
 -->
- :locName.TempLocation = {kind = "locName", rule = AmbigNameLoc1}
+ :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
+
+
+
+
 
 
 
