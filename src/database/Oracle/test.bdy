@@ -17,23 +17,6 @@
 
 create or replace package body test is
 
-  -- Private type declarations
-/*  type <TypeName> is <Datatype>;
-
-  -- Private constant declarations
-  <ConstantName> constant <Datatype> := <Value>;
-
-  -- Private variable declarations
-  <VariableName> <Datatype>;
-
-  -- Function and procedure implementations
-  function <FunctionName>(<Parameter> <Datatype>) return <Datatype> is
-    <LocalVariable> <Datatype>;
-  begin
-    <Statement>;
-    return(<Result>);
-  end;
-*/
 
   GROUP_1_ID constant number := 101;
   GROUP_2_ID constant number := 102;
@@ -72,6 +55,9 @@ create or replace package body test is
   
   begin
 
+    --first remove the previous test data
+    test.remove_test_data();
+  
     -- create groups
  
      insert into t_group(grp_id,
@@ -204,6 +190,36 @@ create or replace package body test is
 
   end;                                                                                                        
 
+
+
+  /*******************************************************************************************/
+  procedure remove_test_data
+  is
+  
+  begin
+
+     -- delete documents
+ 
+     delete from t_lang_resource
+     where  lr_id in (DOC_1_ID,DOC_2_ID,DOC_3_ID,DOC_4_ID,DOC_5_ID);
+
+
+     -- remove users in groups
+ 
+     delete from t_user_group
+     where ugrp_id in (UG_ID_1,UG_ID_2,UG_ID_3,UG_ID_4,UG_ID_5,UG_ID_6,UG_ID_7);
+
+    -- delete groups
+ 
+     delete from t_group
+     where grp_id in (GROUP_1_ID,GROUP_2_ID);
+
+     -- delete users
+ 
+     delete from t_user
+     where  usr_id in (USER_1_ID,USER_2_ID,USER_3_ID,USER_4_ID,USER_5_ID);                                  
+
+  end;                                                                                                        
 
 
 /*begin
