@@ -103,7 +103,12 @@ public class DatabaseCorpusImpl extends CorpusImpl
     }
 
     //add to doc data too
+/* Was:
     DocumentData newDocData = new DocumentData(doc.getName(),null);
+*/
+    DocumentData newDocData = new DocumentData(doc.getName(),
+                                               doc.getLRPersistenceId());
+
     this.documentData.add(newDocData);
 
     if (result) {
