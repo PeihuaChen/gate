@@ -32,7 +32,7 @@ import javax.swing.text.DefaultHighlighter;
 public class CorefEditor
     extends AbstractDocumentView
     implements ActionListener, gate.event.FeatureMapListener,
-    gate.event.DocumentListener {
+    gate.event.DocumentListener, AnnotationSetListener {
 
   // default AnnotationSet Name
   private final static String DEFAULT_ANNOTSET_NAME = "Default";
@@ -148,8 +148,13 @@ public class CorefEditor
     Map annotSetsMap = document.getNamedAnnotationSets();
     annotSetsModel = new DefaultComboBoxModel();
     if (annotSetsMap != null) {
-      annotSetsModel = new DefaultComboBoxModel(annotSetsMap.keySet().toArray());
+      Object [] array = annotSetsMap.keySet().toArray();
+      for(int i=0;i<array.length;i++) {
+        ((AnnotationSet) annotSetsMap.get((String) array[i])).addAnnotationSetListener(this);
+      }
+      annotSetsModel = new DefaultComboBoxModel(array);
     }
+    document.getAnnotations().addAnnotationSetListener(this);
     annotSetsModel.insertElementAt(DEFAULT_ANNOTSET_NAME, 0);
     annotSets.setModel(annotSetsModel);
 
@@ -308,7 +313,13 @@ public class CorefEditor
    * @param de
    */
   public void annotationSetAdded(gate.event.DocumentEvent de) {
+
     String annotSet = de.getAnnotationSetName();
+    if(annotSet == null)
+      document.getAnnotations().addAnnotationSetListener(this);
+    else
+      document.getAnnotations(annotSet).addAnnotationSetListener(this);
+
     annotSet = (annotSet == null) ? DEFAULT_ANNOTSET_NAME : annotSet;
     // find out the currently Selected annotationSetName
     String annotSetName = (String) annotSets.getSelectedItem();
@@ -338,6 +349,56 @@ public class CorefEditor
    */
   public void contentEdited(gate.event.DocumentEvent e) {
     //ignore
+  }
+
+  public void annotationAdded(AnnotationSetEvent ase) {
+    // ignore
+  }
+
+  public void annotationRemoved(AnnotationSetEvent ase) {
+    Annotation delAnnot = ase.getAnnotation();
+    Integer id = delAnnot.getId();
+    Map matchesMap = null;
+    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
+                                                  DOCUMENT_COREF_FEATURE_NAME);
+    if(matchesMap == null)
+      return;
+
+    Set keySet = matchesMap.keySet();
+    if(keySet == null)
+      return;
+
+    Iterator iter = keySet.iterator();
+    boolean found = false;
+    while(iter.hasNext()) {
+      String currSet = (String) iter.next();
+      java.util.List matches = (java.util.List) matchesMap.get(currSet);
+      if(matches == null || matches.size() == 0)
+        continue;
+      else {
+        for(int i=0;i<matches.size();i++) {
+          ArrayList ids = (ArrayList) matches.get(i);
+          if(ids.contains(id)) {
+            // found
+            // so remove this
+            found = true;
+            ids.remove(id);
+            matches.set(i, ids);
+            break;
+          }
+        }
+        if(found) {
+          matchesMap.put(currSet, matches);
+          explicitCall = true;
+          document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME,
+                                     matchesMap);
+          explicitCall = false;
+          break;
+        }
+      }
+    }
+    if(found)
+      featureMapUpdated();
   }
 
   /**
@@ -625,7 +686,23 @@ public class CorefEditor
         popupWindow.setVisible(false);
       }
       corefTree.setVisible(false);
-      highlighter.removeAllHighlights();
+
+      // remove all highlights
+      ArrayList allHighlights = new ArrayList();
+      if(typeSpecificHighlightedTags != null)
+        allHighlights.addAll(typeSpecificHighlightedTags);
+      if(highlightedTags != null) {
+        Iterator iter = highlightedTags.values().iterator();
+        while(iter.hasNext()) {
+          ArrayList highlights = (ArrayList) iter.next();
+          allHighlights.addAll(highlights);
+        }
+      }
+      for(int i=0;i<allHighlights.size();i++) {
+        highlighter.removeHighlight(allHighlights.get(i));
+      }
+
+      //highlighter.removeAllHighlights();
       highlightedTags = null;
       typeSpecificHighlightedTags = null;
       return;
@@ -636,7 +713,22 @@ public class CorefEditor
         popupWindow.setVisible(false);
       }
 
-      highlighter.removeAllHighlights();
+      // remove all highlights
+      ArrayList allHighlights = new ArrayList();
+      if(typeSpecificHighlightedTags != null)
+        allHighlights.addAll(typeSpecificHighlightedTags);
+      if(highlightedTags != null) {
+        Iterator iter = highlightedTags.values().iterator();
+        while(iter.hasNext()) {
+          ArrayList highlights = (ArrayList) iter.next();
+          allHighlights.addAll(highlights);
+        }
+      }
+      for (int i = 0; i < allHighlights.size(); i++) {
+        highlighter.removeHighlight(allHighlights.get(i));
+      }
+
+      //highlighter.removeAllHighlights();
       highlightedTags = null;
       typeSpecificHighlightedTags = null;
       if (currentAnnotSet != null) {
@@ -695,7 +787,6 @@ public class CorefEditor
    */
   private void showTypeWiseAnnotations() {
     if (typeSpecificHighlightedTags == null) {
-      typeSpecificHighlightedTags = new ArrayList();
       highlightedTypeAnnots = new ArrayList();
       typeSpecificHighlightedTags = new ArrayList();
     }
@@ -1690,9 +1781,13 @@ public class CorefEditor
           ToolTipManager.sharedInstance().registerComponent(delete);
           JButton cancel = new JButton("Close");
           cancel.setToolTipText("Closes this popup");
+          JButton changeColor = new JButton("Change Color");
+          changeColor.setToolTipText("Changes Color");
           ToolTipManager.sharedInstance().registerComponent(cancel);
+          ToolTipManager.sharedInstance().registerComponent(changeColor);
           JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
           panel.setOpaque(false);
+          panel.add(changeColor);
           panel.add(delete);
           panel.add(cancel);
           popup.setLayout(new BorderLayout());
@@ -1702,6 +1797,49 @@ public class CorefEditor
           popup.add(new JLabel("Chain \"" + node.toString() + "\""),
                     BorderLayout.NORTH);
           popup.add(panel, BorderLayout.SOUTH);
+
+          changeColor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+              String currentAnnotSet = (String) annotSets.getSelectedItem();
+              currentColors = (HashMap) colorChainsMap.get(currentAnnotSet);
+              Color colour = (Color) currentColors.get(node.toString());
+              Color col = JColorChooser.showDialog(getGUI(),
+                  "Select colour for \"" + node.toString() + "\"",
+                  colour);
+              if (col != null) {
+                Color colAlpha = new Color(col.getRed(), col.getGreen(),
+                                           col.getBlue(), 128);
+
+                // make change in the datastructures
+                currentColors.put(node.toString(),colAlpha);
+                colorChainsMap.put(currentAnnotSet, currentColors);
+                // and redraw the tree
+                corefTree.repaint();
+
+                // remove all highlights
+                ArrayList allHighlights = new ArrayList();
+                if(typeSpecificHighlightedTags != null)
+                  allHighlights.addAll(typeSpecificHighlightedTags);
+                if(highlightedTags != null) {
+                  Iterator iter = highlightedTags.values().iterator();
+                  while(iter.hasNext()) {
+                    ArrayList highlights = (ArrayList) iter.next();
+                    allHighlights.addAll(highlights);
+                  }
+                }
+                for (int i = 0; i < allHighlights.size(); i++) {
+                  highlighter.removeHighlight(allHighlights.get(i));
+                }
+
+                //highlighter.removeAllHighlights();
+                highlightedTags = null;
+                highlightAnnotations();
+                typeSpecificHighlightedTags = null;
+                showTypeWiseAnnotations();
+              }
+              popup.setVisible(false);
+            }
+          });
 
           delete.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
