@@ -41,7 +41,7 @@ public class OracleDataStore extends JDBCDataStore {
   public static final String DS_COMMENT = "GATE Oracle datastore";
 
   /** the icon for this resource */
-  public static final String DS_ICON_NAME = "ds.gif";
+  public static final String DS_ICON_NAME = "ora_ds.gif";
 
   /** Debug flag */
   private static final boolean DEBUG = false;
