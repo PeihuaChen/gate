@@ -508,7 +508,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //7. create features
-    createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
+    createFeatures(docID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //8. done
     return doc;
@@ -595,7 +595,7 @@ public class OracleDataStore extends JDBCDataStore {
       //2.1. set annotation features
       FeatureMap features = ann.getFeatures();
       Assert.assertNotNull(features);
-      createFeatures(annID,this.FEATURE_OWNER_ANNOTATION,features);
+      createFeatures(annID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
     }
   }
 
@@ -636,7 +636,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //4. create features
-    createFeatures(corpusID,this.FEATURE_OWNER_CORPUS,corp.getFeatures());
+    createFeatures(corpusID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     //5. done
     return corp;
@@ -943,33 +943,33 @@ public class OracleDataStore extends JDBCDataStore {
       //1.2 set proper data
       switch(valueType) {
 
-        case VALUE_TYPE_BOOLEAN:
+        case DBHelper.VALUE_TYPE_BOOLEAN:
 
           boolean b = ((Boolean)value).booleanValue();
           stmt.setLong(4, b ? this.ORACLE_TRUE : this.ORACLE_FALSE);
           break;
 
-        case VALUE_TYPE_INTEGER:
+        case DBHelper.VALUE_TYPE_INTEGER:
 
           stmt.setLong(4,((Integer)value).intValue());
           break;
 
-        case VALUE_TYPE_LONG:
+        case DBHelper.VALUE_TYPE_LONG:
 
           stmt.setLong(4,((Long)value).longValue());
           break;
 
-        case VALUE_TYPE_FLOAT:
+        case DBHelper.VALUE_TYPE_FLOAT:
 
           Double d = (Double)value;
           stmt.setDouble(4,d.doubleValue());
 
-        case VALUE_TYPE_BINARY:
+        case DBHelper.VALUE_TYPE_BINARY:
 
           //ignore
           //will be handled later in processing
 
-        case VALUE_TYPE_STRING:
+        case DBHelper.VALUE_TYPE_STRING:
 
           String s = (String)value;
           //does it fin into a varchar2?
@@ -1011,10 +1011,10 @@ public class OracleDataStore extends JDBCDataStore {
     // although the type may claim so
 
     //0. preconditions
-    Assert.assert(valueType == this.VALUE_TYPE_BINARY ||
-                  valueType == this.VALUE_TYPE_BINARY_ARR ||
-                  valueType == this.VALUE_TYPE_STRING ||
-                  valueType == this.VALUE_TYPE_STRING_ARR);
+    Assert.assert(valueType == DBHelper.VALUE_TYPE_BINARY ||
+                  valueType == DBHelper.VALUE_TYPE_BINARY_ARR ||
+                  valueType == DBHelper.VALUE_TYPE_STRING ||
+                  valueType == DBHelper.VALUE_TYPE_STRING_ARR);
 
 
     //1. get the row to be updated
@@ -1042,7 +1042,8 @@ public class OracleDataStore extends JDBCDataStore {
       blobValue = rsA.getBlob(2);
 
       //blob or clob?
-      if (valueType == this.VALUE_TYPE_BINARY || valueType == this.VALUE_TYPE_BINARY_ARR) {
+      if (valueType == DBHelper.VALUE_TYPE_BINARY ||
+          valueType == DBHelper.VALUE_TYPE_BINARY_ARR) {
         //blob
         throw new MethodNotImplementedException();
       }
@@ -1076,12 +1077,12 @@ public class OracleDataStore extends JDBCDataStore {
     Vector elementsToStore = new Vector();
 
     switch(valueType) {
-      case VALUE_TYPE_BINARY:
-      case VALUE_TYPE_BOOLEAN:
-      case VALUE_TYPE_FLOAT:
-      case VALUE_TYPE_INTEGER:
-      case VALUE_TYPE_LONG:
-      case VALUE_TYPE_STRING:
+      case DBHelper.VALUE_TYPE_BINARY:
+      case DBHelper.VALUE_TYPE_BOOLEAN:
+      case DBHelper.VALUE_TYPE_FLOAT:
+      case DBHelper.VALUE_TYPE_INTEGER:
+      case DBHelper.VALUE_TYPE_LONG:
+      case DBHelper.VALUE_TYPE_STRING:
         elementsToStore.add(value);
         break;
 
@@ -1095,18 +1096,18 @@ public class OracleDataStore extends JDBCDataStore {
         }
 
         //normalize , i.e. ignore arrays
-        if (valueType == this.VALUE_TYPE_BINARY_ARR)
-          valueType = this.VALUE_TYPE_BINARY;
-        else if (valueType == this.VALUE_TYPE_BOOLEAN_ARR)
-          valueType = this.VALUE_TYPE_BOOLEAN;
-        else if (valueType == this.VALUE_TYPE_FLOAT_ARR)
-          valueType = this.VALUE_TYPE_FLOAT;
-        else if (valueType == this.VALUE_TYPE_INTEGER_ARR)
-          valueType = this.VALUE_TYPE_INTEGER;
-        else if (valueType == this.VALUE_TYPE_LONG_ARR)
-          valueType = this.VALUE_TYPE_LONG;
-        else if (valueType == this.VALUE_TYPE_STRING_ARR)
-          valueType = this.VALUE_TYPE_STRING;
+        if (valueType == DBHelper.VALUE_TYPE_BINARY_ARR)
+          valueType = DBHelper.VALUE_TYPE_BINARY;
+        else if (valueType == DBHelper.VALUE_TYPE_BOOLEAN_ARR)
+          valueType = DBHelper.VALUE_TYPE_BOOLEAN;
+        else if (valueType == DBHelper.VALUE_TYPE_FLOAT_ARR)
+          valueType = DBHelper.VALUE_TYPE_FLOAT;
+        else if (valueType == DBHelper.VALUE_TYPE_INTEGER_ARR)
+          valueType = DBHelper.VALUE_TYPE_INTEGER;
+        else if (valueType == DBHelper.VALUE_TYPE_LONG_ARR)
+          valueType = DBHelper.VALUE_TYPE_LONG;
+        else if (valueType == DBHelper.VALUE_TYPE_STRING_ARR)
+          valueType = DBHelper.VALUE_TYPE_STRING;
     }
 
 
@@ -1120,7 +1121,7 @@ public class OracleDataStore extends JDBCDataStore {
         Long featID = _createFeature(entityID,entityType,key,value,valueType);
 
         //3.2. update CLOBs if needed
-        if (valueType == VALUE_TYPE_STRING) {
+        if (valueType == DBHelper.VALUE_TYPE_STRING) {
 
           //does this string fit into a varchar2 or into clob?
           String s = (String)currValue;
@@ -1132,7 +1133,7 @@ public class OracleDataStore extends JDBCDataStore {
         }
 
         //3.3. BLOBs
-        if (valueType == VALUE_TYPE_BINARY) {
+        if (valueType == DBHelper.VALUE_TYPE_BINARY) {
           throw new MethodNotImplementedException();
         }
     }
@@ -1248,7 +1249,7 @@ public class OracleDataStore extends JDBCDataStore {
       result.setSourceUrlEndOffset(end);
 
       //4.8 features
-      FeatureMap features = readFeatures((Long)lrPersistenceId,this.FEATURE_OWNER_DOCUMENT);
+      FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_DOCUMENT);
       result.setFeatures(features);
     }
     catch(SQLException sqle) {
@@ -1270,9 +1271,9 @@ public class OracleDataStore extends JDBCDataStore {
 
     //0. preconditions
     Assert.assertNotNull(entityID);
-    Assert.assert(entityType == this.FEATURE_OWNER_ANNOTATION ||
-                  entityType == this.FEATURE_OWNER_CORPUS ||
-                  entityType == this.FEATURE_OWNER_DOCUMENT);
+    Assert.assert(entityType == DBHelper.FEATURE_OWNER_ANNOTATION ||
+                  entityType == DBHelper.FEATURE_OWNER_CORPUS ||
+                  entityType == DBHelper.FEATURE_OWNER_DOCUMENT);
 
 
     PreparedStatement pstmt = null;
@@ -1300,7 +1301,7 @@ public class OracleDataStore extends JDBCDataStore {
 
       //3. fill feature map
       Vector arrFeatures = new Vector();
-      String prevKey = DBHelper.DUMMY_FEATURE_KEY;
+      String prevKey = null;
       String currKey = null;
       Object currFeature = null;
 
@@ -1321,19 +1322,19 @@ public class OracleDataStore extends JDBCDataStore {
         //Java object
         switch(valueType.intValue()) {
 
-          case JDBCDataStore.VALUE_TYPE_BOOLEAN:
+          case DBHelper.VALUE_TYPE_BOOLEAN:
             numberValue = new Boolean(rs.getBoolean(3));
             break;
 
-          case JDBCDataStore.VALUE_TYPE_FLOAT:
+          case DBHelper.VALUE_TYPE_FLOAT:
             numberValue = new Float(rs.getFloat(3));
             break;
 
-          case JDBCDataStore.VALUE_TYPE_INTEGER:
+          case DBHelper.VALUE_TYPE_INTEGER:
             numberValue = new Integer(rs.getInt(3));
             break;
 
-          case JDBCDataStore.VALUE_TYPE_LONG:
+          case DBHelper.VALUE_TYPE_LONG:
             numberValue = new Long(rs.getLong(3));
             break;
         }
@@ -1344,17 +1345,17 @@ public class OracleDataStore extends JDBCDataStore {
         Clob clobValue = rs.getClob(6);
 
         switch(valueType.intValue()) {
-          case JDBCDataStore.VALUE_TYPE_BINARY:
+          case DBHelper.VALUE_TYPE_BINARY:
             throw new MethodNotImplementedException();
 
-          case JDBCDataStore.VALUE_TYPE_BOOLEAN:
-          case JDBCDataStore.VALUE_TYPE_FLOAT:
-          case JDBCDataStore.VALUE_TYPE_INTEGER:
-          case JDBCDataStore.VALUE_TYPE_LONG:
+          case DBHelper.VALUE_TYPE_BOOLEAN:
+          case DBHelper.VALUE_TYPE_FLOAT:
+          case DBHelper.VALUE_TYPE_INTEGER:
+          case DBHelper.VALUE_TYPE_LONG:
             currFeature = numberValue;
             break;
 
-          case JDBCDataStore.VALUE_TYPE_STRING:
+          case DBHelper.VALUE_TYPE_STRING:
             //this one is tricky too
             //if the string is < 4000 bytes long then it's stored as varchar2
             //otherwise as CLOB
@@ -1374,7 +1375,7 @@ public class OracleDataStore extends JDBCDataStore {
         }//switch
 
         //new feature or part of an array?
-        if (currKey.equals(prevKey)) {
+        if (currKey != prevKey && prevKey != null) {
           //part of array
           arrFeatures.add(currFeature);
         }

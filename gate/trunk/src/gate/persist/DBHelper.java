@@ -63,8 +63,53 @@ public class DBHelper {
   public static final String DOCUMENT_CLASS = "gate.corpora.DocumentImpl";
   public static final String CORPUS_CLASS =  "gate.corpora.CorpusImpl";
 
+  //dummy key
   //hopefully no one will create a feature with such key
   public static final String DUMMY_FEATURE_KEY =  "--NO--SUCH--KEY--";
+  //dummy ID
+  public static final Long DUMMY_ID;
+
+
+  //!!! ACHTUNG !!!
+  // these 4 constants should *always* be synchronzied with the ones in the
+  // related SQL packages/scripts [for Oracle - security.spc]
+  // i.e. if u don't have a serious reason do *not* change anything
+
+  /** used to store corpus' features */
+  protected static final int FEATURE_OWNER_CORPUS  = 1;
+  /** used to store document's features */
+  protected static final int FEATURE_OWNER_DOCUMENT  = 2;
+  /** used to store annotation's features */
+  protected static final int FEATURE_OWNER_ANNOTATION  = 3;
+
+
+  /** feature value is int  */
+  public static final int VALUE_TYPE_INTEGER           = 101;
+  /** feature value is long */
+  public static final int VALUE_TYPE_LONG              = 102;
+  /** feature value is boolean */
+  public static final int VALUE_TYPE_BOOLEAN           = 103;
+  /** feature value is string less than 4000 bytes */
+  public static final int VALUE_TYPE_STRING            = 104;
+  /** feature value is binary */
+  public static final int VALUE_TYPE_BINARY            = 105;
+  /** feature value is float */
+  public static final int VALUE_TYPE_FLOAT             = 106;
+  /** feature value is array of ints */
+  public static final int VALUE_TYPE_INTEGER_ARR       = 107;
+  /** feature value is array of longs */
+  public static final int VALUE_TYPE_LONG_ARR          = 108;
+  /** feature value is array of bools */
+  public static final int VALUE_TYPE_BOOLEAN_ARR       = 109;
+  /** feature value is array of strings */
+  public static final int VALUE_TYPE_STRING_ARR        = 110;
+  /** feature value is array of binary values */
+  public static final int VALUE_TYPE_BINARY_ARR        = 111;
+  /** feature value is array of floats */
+  public static final int VALUE_TYPE_FLOAT_ARR         = 112;
+  /** feature value is array of floats */
+  public static final int VALUE_TYPE_EMPTY_ARR         = 113;
+
 
   private static final boolean DEBUG = false;
 
@@ -73,7 +118,7 @@ public class DBHelper {
   private static boolean  driversLoaded;
 
   static {
-
+    DUMMY_ID = new Long(Long.MIN_VALUE);
     driversLoaded = false;
   }
 
