@@ -232,13 +232,16 @@ create or replace package body test is
      delete from t_lang_resource;
 
      -- remove users in groups
-     delete from t_user_group;
+     delete from t_user_group
+     where ugrp_id > 0;
 
     -- delete groups
-     delete from t_group;
+     delete from t_group
+     where grp_id >0;
 
      -- delete users
-     delete from t_user;
+     delete from t_user
+     where usr_id >0;
 
   end;                                                                                                        
   
