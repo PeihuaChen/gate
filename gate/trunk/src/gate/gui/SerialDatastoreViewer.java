@@ -204,7 +204,6 @@ public class SerialDatastoreViewer extends JTree
             FeatureMap features = Factory.newFeatureMap();
             Resource res = Factory.createResource(entry.type, params, features,
                                                   null, entry.name);
-            datastore.getLr(entry.type, entry.id);
             //project.frame.resourcesTreeModel.treeChanged();
             fireProgressChanged(0);
             fireProcessFinished();
@@ -212,13 +211,6 @@ public class SerialDatastoreViewer extends JTree
             fireStatusChanged(entry.name + " loaded in " +
                               NumberFormat.getInstance().format(
                               (double)(end - start) / 1000) + " seconds");
-          }catch(gate.persist.PersistenceException pe){
-            JOptionPane.showMessageDialog(SerialDatastoreViewer.this,
-                                          "Error!\n" + pe.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
-            pe.printStackTrace(Err.getPrintWriter());
-            fireProgressChanged(0);
-            fireProcessFinished();
           } catch(ResourceInstantiationException rie){
             JOptionPane.showMessageDialog(SerialDatastoreViewer.this,
                                           "Error!\n" + rie.toString(),
