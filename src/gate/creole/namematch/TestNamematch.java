@@ -137,6 +137,7 @@ public class TestNamematch extends TestCase
 
     // the set with all the matches from the document
     List matches = namematch.getMatchesDocument();
+ //   Out.prln(matches.toString());
     if (matches != null)
       assert(matches.toString().equals("[[9, 7], [8, 6], [5, 3, 0], [4, 2]]"));
 
