@@ -20,6 +20,9 @@ create or replace package security is
   PERM_GR_GW constant number := 2;  
   PERM_GR_OW constant number := 3;
   PERM_OR_OW constant number := 4;
+  
+  ADMIN_USER_ID constant number := 0;
+  ADMIN_GROUP_ID constant number := 0;
     
   /* exceptions */
 
@@ -69,7 +72,8 @@ create or replace package security is
   /*  -- */
   procedure login(p_usr_name        IN varchar2,
                   p_usr_pass        IN varchar2,
-                  p_pref_grp_id     IN number);
+                  p_pref_grp_id     IN number,
+                  p_is_privileged   OUT boolean);
 
   /*  -- */
   procedure has_access_to_lr(p_lr_id   IN  number,

@@ -216,9 +216,11 @@ create or replace package body security is
   /*******************************************************************************************/
   procedure login(p_usr_name        IN varchar2,
                   p_usr_pass        IN varchar2,
-                  p_pref_grp_id     IN number)
+                  p_pref_grp_id     IN number,
+                  p_is_privileged   OUT boolean)
   is
     usr_cnt number;  
+    l_usr_id number;
   begin
        --valid user?
        select count(usr_id)
@@ -230,6 +232,15 @@ create or replace package body security is
           raise error.x_invalid_user_name;
        end if;
 
+       --find ID
+       --because of previous step we're sure
+       --there is such user
+       select usr_id
+       into   l_usr_id
+       from   t_user
+       where  usr_login = p_usr_name;       
+       
+       
        --valid passw?
        select count(usr_id)
        into   usr_cnt
@@ -253,6 +264,11 @@ create or replace package body security is
        if (usr_cnt = 0) then
           raise error.x_invalid_user_group;
        end if;
+       
+       --is privileged?
+       p_is_privileged := (l_usr_id = ADMIN_USER_ID and 
+                           p_pref_grp_id = ADMIN_GROUP_ID);
+       
        
   end;                                                                                                        
 
