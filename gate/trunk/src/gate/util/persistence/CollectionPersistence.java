@@ -76,4 +76,5 @@ public class CollectionPersistence implements Persistence {
 
   protected List localList;
   protected Class collectionType;
+  static final long serialVersionUID = 7908364068699089834L;
 }

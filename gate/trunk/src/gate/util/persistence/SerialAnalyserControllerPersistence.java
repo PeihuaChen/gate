@@ -56,8 +56,6 @@ public class SerialAnalyserControllerPersistence extends ControllerPersistence {
     sac.setCorpus((Corpus)PersistenceManager.getTransientRepresentation(corpus));
     return sac;
   }
-
-
-
   protected Object corpus;
+  static final long serialVersionUID = -4116973147963269225L;
 }

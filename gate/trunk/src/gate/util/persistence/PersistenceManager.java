@@ -84,7 +84,7 @@ public class PersistenceManager {
                                        ResourceInstantiationException{
       return null;
     }
-
+    static final long serialVersionUID = -8665414981783519937L;
   }
 
   /**
@@ -116,6 +116,7 @@ public class PersistenceManager {
       }
     }
     String urlString;
+    static final long serialVersionUID = 7943459208429026229L;
   }
 
   public static class ClassComparator implements Comparator{

@@ -53,4 +53,5 @@ public class DSPersistence implements Persistence{
 
   private String className;
   private String storageUrlString;
+  static final long serialVersionUID = 5952924943977701708L;
 }
