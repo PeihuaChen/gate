@@ -156,6 +156,9 @@ create or replace package persist is
 
   procedure add_document_to_corpus(p_doc_lrid     IN  number,
                                    p_corp_lrid    IN number);
+
+  procedure remove_document_from_corpus(p_doc_lrid     IN  number,
+                                        p_corp_lrid    IN number);
                                 
 end persist;
 /
