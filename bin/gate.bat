@@ -51,7 +51,7 @@ REM ######################################################################
 
 REM ######################################################################
 REM Attempt to find GATE_HOME if not already set. This procedure will fail
-REM on Windows 95/98 so this value should be already set.
+REM on Windows 95/98 so this value better be already set.
 REM Hopefully the installer did that.
 REM ######################################################################
 
