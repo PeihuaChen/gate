@@ -16,67 +16,71 @@
 
 
 Phase:quoted_text
-Input: Split Token
+Input: Token //Split
 Options: control = appelt
 
 //adds the qouted attribute to the sentence annotations
 
 Macro: QUOTE
 (
-   {Token.kind="punctuation",Token.category == "\""}
-   {Token.kind="punctuation",Token.category == "`"}
+   {Token.kind=="punctuation",Token.string == "\""} |
+   (
+      {Token.kind=="punctuation",Token.string == "`"}
+      {Token.kind=="punctuation",Token.string == "`"}
+   )
 )
 
 Macro: NON_QUOTE
 (
-   {Token.kind="word"} |
-   {Token.kind="symbol"} |
-   {Token.kind="number"} |
+   {Token.kind=="word"} |
+   {Token.kind=="symbol"} |
+   {Token.kind=="number"} |
+   {Token.kind=="space"} |
    //these are for non-quote punctuation
-   {Token.kind="punctuation",Token.string="!"} |
-   {Token.kind="punctuation",Token.string="!"} |
-   {Token.kind="punctuation",Token.string="#"} |
-   {Token.kind="punctuation",Token.string="%"} |
-   {Token.kind="punctuation",Token.string="&"} |
-   {Token.kind="punctuation",Token.string="'"} |
-   {Token.kind="punctuation",Token.string="*"} |
-   {Token.kind="punctuation",Token.string=","} |
-   {Token.kind="punctuation",Token.string="."} |
-   {Token.kind="punctuation",Token.string="/"} |
-   {Token.kind="punctuation",Token.string=":"} |
-   {Token.kind="punctuation",Token.string=";"} |
-   {Token.kind="punctuation",Token.string="\\"} |
-   {Token.kind="punctuation",Token.string="?"} |
-   {Token.kind="punctuation",Token.string="@"} |
-   {Token.kind="punctuation",Token.string="-"} |
-   {Token.kind="punctuation",Token.string="_"} |
-   {Token.kind="punctuation",Token.string="("} |
-   {Token.kind="punctuation",Token.string="["} |
-   {Token.kind="punctuation",Token.string="{"} |
-   {Token.kind="punctuation",Token.string="<<"} |
-   {Token.kind="punctuation",Token.string=")"} |
-   {Token.kind="punctuation",Token.string="]"} |
-   {Token.kind="punctuation",Token.string="}"} |
-   {Token.kind="punctuation",Token.string=">>"}
+   {Token.kind=="punctuation",Token.string=="!"} |
+   {Token.kind=="punctuation",Token.string=="!"} |
+   {Token.kind=="punctuation",Token.string=="#"} |
+   {Token.kind=="punctuation",Token.string=="%"} |
+   {Token.kind=="punctuation",Token.string=="&"} |
+   {Token.kind=="punctuation",Token.string=="'"} |
+   {Token.kind=="punctuation",Token.string=="*"} |
+   {Token.kind=="punctuation",Token.string==","} |
+   {Token.kind=="punctuation",Token.string=="."} |
+   {Token.kind=="punctuation",Token.string=="/"} |
+   {Token.kind=="punctuation",Token.string==":"} |
+   {Token.kind=="punctuation",Token.string==";"} |
+   {Token.kind=="punctuation",Token.string=="|"} |
+   {Token.kind=="punctuation",Token.string=="?"} |
+   {Token.kind=="punctuation",Token.string=="@"} |
+   {Token.kind=="punctuation",Token.string=="-"} |
+   {Token.kind=="punctuation",Token.string=="_"} |
+   {Token.kind=="punctuation",Token.string=="("} |
+   {Token.kind=="punctuation",Token.string=="["} |
+   {Token.kind=="punctuation",Token.string=="{"} |
+   {Token.kind=="punctuation",Token.string=="<<"} |
+   {Token.kind=="punctuation",Token.string==")"} |
+   {Token.kind=="punctuation",Token.string=="]"} |
+   {Token.kind=="punctuation",Token.string=="}"} |
+   {Token.kind=="punctuation",Token.string==">>"}
 )
 
 
 Rule: rule_Q1
-Priority:11
+Priority:99
 (
- {Split}
- (({Token})*) :left
- ({Token.category == "\""})
- (({Token})+) :quoted
- ({Token.category == "\""})
- (({Token})*) :right
- {Split}
+//   {Split}
+   ((NON_QUOTE)*) :left
+   (QUOTE)
+   ((NON_QUOTE)*) :quoted
+   (QUOTE)
+   ((NON_QUOTE)*) :right
+//   {Split}
 )
 -->
 {
-System.out.println("pos");
-	gate.AnnotationSet quoted = (gate.AnnotationSet)bindings.get("quoted");
-	gate.FeatureMap features = Factory.newFeatureMap();
-	features.put("firedBy","rule_Q1");
-	annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
+   gate.AnnotationSet quoted = (gate.AnnotationSet)bindings.get("quoted");
+   gate.FeatureMap features = Factory.newFeatureMap();
+   features.put("firedBy","rule_Q1");
+   annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
 }
+
