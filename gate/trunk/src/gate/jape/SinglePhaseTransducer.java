@@ -300,12 +300,20 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
     return buf.toString();
   } // toString(pad)
+//needed by fsm
+  public PrioritisedRuleList getRules(){
+    return rules;
+  }
 
 } // class SinglePhaseTransducer
 
 
 
 // $Log$
+// Revision 1.2  2000/04/14 18:02:46  valyt
+// Added some gate.fsm classes
+// added some accessor function in old jape classes
+//
 // Revision 1.1  2000/02/23 13:46:11  hamish
 // added
 //

@@ -1,0 +1,12 @@
+// fsmtestgrammar.jape
+// Valy, 14/Apr/00
+
+Phase:	None
+Options: control = appelt
+
+Rule:	FirstRule
+      (
+      {Token}
+      ) :tok1 
+  -->
+	:tok1.Name = {kind = "token"}
