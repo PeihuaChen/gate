@@ -105,8 +105,7 @@ public class NewResourceDialog extends JDialog {
         TableCellEditor cellEditor = parametersEditor.getCellEditor();
         if(cellEditor != null){
           cellEditor.stopCellEditing();
-Out.prln("Stop editing!");
-        }else Out.prln("No editor!");
+        }
         hide();
       }//public void actionPerformed(ActionEvent e)
     });
