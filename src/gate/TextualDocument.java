@@ -17,7 +17,7 @@ abstract public class TextualDocument implements Document
 {
 
   /** The contents of the document */
-  public String getContents() { return ""; }
+  public String getContent() { return ""; }
 
   /** The contents of a particular span */
   public String getContent(Annotation a) { return ""; }

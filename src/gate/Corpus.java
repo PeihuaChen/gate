@@ -10,8 +10,7 @@ package gate;
 import java.util.*;
 import gate.util.*;
 
-/** 
-  * Corpora are sets of Document. They are ordered by lexicographic collation
+/** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
   * <P>
   * TIPSTER equivalent: Collection.
@@ -19,5 +18,8 @@ import gate.util.*;
   */
 public interface Corpus extends SortedSet
 {
+   
+  /** The features of this corpus */
+  public FeatureSet getFeatureSet();
 
 } // interface Corpus

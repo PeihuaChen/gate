@@ -11,8 +11,7 @@ import java.util.*;
 import java.net.*;
 import gate.util.*;
 
-/** 
-  * Represents the commonalities between all sorts of documents.
+/** Represents the commonalities between all sorts of documents.
   */
 public interface Document
 {

@@ -13,13 +13,24 @@ import java.io.*;
 import junit.framework.*;
 import gate.util.*;
 
-/** 
-  * Tests for the Document classes
+/** Tests for the Document classes
   */
 public class TestDocument extends TestCase
 {
   /** Construction */
   public TestDocument(String name) { super(name); }
+
+  /** Base of the test server URL */
+  protected String testServer;
+
+  /** Name of test document 1 */
+  protected String testDocument1;
+
+  /** Fixture set up */
+  public void setUp() {
+    testServer = "http://derwent.dcs.shef.ac.uk:8000/";
+    testDocument1 = "tests/doc0.html";
+  } // setUp
 
   /** A test test */
   public void testSomething() {
@@ -31,7 +42,7 @@ public class TestDocument extends TestCase
     // check that the test URL is available
     URL u = null;
     try {
-      u = new URL("http", "derwent.dcs.shef.ac.uk", 8000, "tests/doc0.html");
+      u = new URL(testServer + testDocument1);
     } catch(MalformedURLException e) {
       fail(e.toString());
     }
@@ -45,7 +56,16 @@ public class TestDocument extends TestCase
       fail(e.toString());
     }
 
-    //Document doc = new TextualDocument("sfd");
+    /*
+    Document doc = new TextualDocument(testServer + testDocument1);
+    AnnotationGraph ag = new AnnotationGraphImpl();
+
+    Tokeniser t = ...   doc.getContent()
+    tokenise doc using java stream tokeniser
+
+    add several thousand token annotation
+    select a subset
+    */
   } // testLotsOfThings
 
   /** Test suite routine for the test runner */

@@ -18,21 +18,21 @@ public interface AnnotationGraph extends SortedSet
   /** find a node by ID */
   public Node getNode(String id);
 
-  /** Greatest lower bound on an annotation: the greatest anchor in the AG
-    * such that there is a node with this anchor which structurally precedes
-    * the start node of annotation a. */
-  public Long greatestLowerBound(Annotation a);
-
-  /** Least upper bound on an annotation: the smallest anchor in the AG
-    * such that there is a node with this anchor is structurally preceded
-    * by the end node of annotation a. */
-  public Long leastUpperBound(Annotation a);
-
-  /** The set of annotations overlapping a */
-  public AnnotationGraph getOverlappingAnnotations(Annotation a);
-
-  /** The set of annotations included by a */
-  public AnnotationGraph getIncludedAnnotations(Annotation a);
+//  /** Greatest lower bound on an annotation: the greatest anchor in the AG
+//    * such that there is a node with this anchor which structurally precedes
+//    * the start node of annotation a. */
+//  public Long greatestLowerBound(Annotation a);
+//
+//  /** Least upper bound on an annotation: the smallest anchor in the AG
+//    * such that there is a node with this anchor is structurally preceded
+//    * by the end node of annotation a. */
+//  public Long leastUpperBound(Annotation a);
+//
+//  /** The set of annotations overlapping a */
+//  public AnnotationGraph getOverlappingAnnotations(Annotation a);
+//
+//  /** The set of annotations included by a */
+//  public AnnotationGraph getIncludedAnnotations(Annotation a);
 
   /** Get annotations by type */
   public AnnotationGraph getAnnotations(String type);
@@ -48,11 +48,11 @@ public interface AnnotationGraph extends SortedSet
     * offset */
   public AnnotationGraph getAnnotations(String type, Long offset);
 
-  /** Get annotations by type and features */
+  /** Get annotations by type, features and offset */
   public AnnotationGraph getAnnotations(String type, FeatureSet features,
 					Long offset);
 
-  /** Get annotations by type and equivalence class */
+  /** Get annotations by type, equivalence class and offset */
   public AnnotationGraph getAnnotations(String type, String equivalenceClass,
 					Long offset);
 
