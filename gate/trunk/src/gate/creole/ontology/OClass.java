@@ -16,7 +16,8 @@
 package gate.creole.ontology;
 
 import java.util.*;
-import com.ontotext.gate.exception.NoSuchClosureTypeException;
+import gate.creole.ontology.*;
+
 
 /** interface representing a single ontology class */
 public interface OClass {

@@ -16,7 +16,7 @@
 package gate.creole.gazetteer;
 
 import gate.creole.gazetteer.*;
-import com.ontotext.gate.exception.*;
+
 
 /**specifies an entry of the type :
  * list:major:minor:language */
