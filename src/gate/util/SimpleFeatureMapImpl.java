@@ -46,49 +46,27 @@ public class SimpleFeatureMapImpl
     // null is included in everything
     if (aFeatureMap == null) return true;
 
-    if (size() < aFeatureMap.size()) return false;
-/**/
+    if (this.size() < aFeatureMap.size()) return false;
+
     SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
 
     Object key;
     Object keyValueFromAFeatureMap;
     Object keyValueFromThis;
-    int index;
-    for (int i=0; i<sfm.m_size; i++)
-    {
-      key = sfm.m_keys[i];
-//        if (key == null)
-//        continue;
-      keyValueFromAFeatureMap = sfm.m_values[i];
-      index = super.getSubsumeKey(key);
-      if (index < 0) return false;
-      keyValueFromThis = m_values[index];
 
-      if  ( (keyValueFromThis == null) ^ (keyValueFromAFeatureMap == null))
-        return false;
+    for (int i=0; i<sfm.m_size; i++) {
+      key = sfm.m_keys[i];
+      keyValueFromAFeatureMap = sfm.m_values[i];
+      keyValueFromThis = get(key);
+
+      if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
+            (keyValueFromThis != null && keyValueFromAFeatureMap == null)
+          ) return false;
 
       if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
         if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
     } // for
-/**/
-/*
-    SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
-    Object keyValueFromAFeatureMap;
-    Object keyValueFromThis;
-    Iterator iter = sfm.keySet().iterator();
-    while (iter.hasNext())
-    {
-        Object e = iter.next();
-        keyValueFromAFeatureMap = sfm.get(e);
-        keyValueFromThis = get(e);
 
-      if  ( (keyValueFromThis == null) ^ (keyValueFromAFeatureMap == null))
-        return false;
-
-      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
-        if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
-    }
-*/
     return true;
   }//subsumes()
 
@@ -111,8 +89,6 @@ public class SimpleFeatureMapImpl
     // This means that subsumes is supressed.
     if (aFeatureNamesSet.isEmpty()) return true;
 
-    if (size() < aFeatureNamesSet.size()) return false;
-
     SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
 
     Object key;
@@ -122,19 +98,9 @@ public class SimpleFeatureMapImpl
     for (int i=0; i<sfm.m_size; i++) {
       key = sfm.m_keys[i];
 
-// the additional check of the key for being in the aFeatureNamesSet
-/*      if (key == null || !aFeatureNamesSet.contains(key))
-        continue;
-*/
-/*    Iterator iter = sfm.keySet().iterator();
-    while (iter.hasNext())
-    {
-        Object e = (Map.Entry)iter.next();
-*/
       if (!aFeatureNamesSet.contains(key))
         continue;
-//        keyValueFromAFeatureMap = sfm.get(e);
-//        keyValueFromThis = get(e);
+
       keyValueFromAFeatureMap = sfm.m_values[i];
         keyValueFromThis = get(key);
 
