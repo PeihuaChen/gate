@@ -149,6 +149,8 @@ public class CreoleRegisterImpl extends HashMap
     try {
       parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
     } catch(IOException e) {
+      //it failed: remove it
+      directories.remove(directoryUrl);
       throw(new GateException("couldn't open creole.xml: " + e.toString()));
     }
   } // registerDirectories(URL)
