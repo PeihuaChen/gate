@@ -52,7 +52,9 @@ public class TestCreole extends TestCase
     CreoleRegister reg = Gate.getCreoleRegister();
     reg.clear();
     reg.getDirectories().clear();
-    reg.addDirectory(new URL("file:/z:/gate2/build/creole.xml"));
+    reg.addDirectory(
+      new URL("http://derwent.dcs.shef.ac.uk/tests/creole.xml")
+    );
     reg.registerDirectories();
 
     assert(reg.size() == 2);
