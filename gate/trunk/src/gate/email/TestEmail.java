@@ -58,7 +58,10 @@ public class TestEmail extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );
-    assert(docFormat instanceof gate.corpora.EmailDocumentFormat);
+    assert( "Bad document Format was produced.EmailDocumentFormat was expected",
+            docFormat instanceof gate.corpora.EmailDocumentFormat
+          );
+
     docFormat.unpackMarkup (doc,"DocumentContent");
   } // testUnpackMarkup()
 

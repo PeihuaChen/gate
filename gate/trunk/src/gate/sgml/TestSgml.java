@@ -64,7 +64,10 @@ public class TestSgml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
         doc, doc.getSourceUrl()
     );
-    assert(docFormat instanceof gate.corpora.SgmlDocumentFormat);
+    assert( "Bad document Format was produced. SgmlDocumentFormat was expected",
+            docFormat instanceof gate.corpora.SgmlDocumentFormat
+          );
+
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.unpackMarkup (doc,"DocumentContent");
