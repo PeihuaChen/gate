@@ -87,6 +87,15 @@ public abstract class DocumentFormat implements Resource
     * what annotation type names to use.
     */
   abstract public void unpackMarkup(Document doc);
+  /** Unpack the markup in the document. This converts markup from the
+    * native format (e.g. XML, RTF) into annotations in GATE format.
+    * Uses the markupElementsMap to determine which elements to convert, and
+    * what annotation type names to use.
+    */
+
+  abstract public void unpackMarkup(Document doc,
+                                    String  originalContentFeatureType
+  );
 
   /**
     * Returns a MymeType having as input a fileSufix
