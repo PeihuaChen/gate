@@ -834,14 +834,90 @@ public class PostgresDataStore extends JDBCDataStore {
   protected void _syncLR(LanguageResource lr)
     throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    //0.preconditions
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);;
+    Assert.assertNotNull(lr.getLRPersistenceId());
+
+    PreparedStatement pstmt = null;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_update_lr(?,?,?)");
+      pstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
+      pstmt.setString(2,lr.getName());
+      //do we have a parent resource?
+      if (lr instanceof Document &&
+          null != lr.getParent()) {
+        pstmt.setLong(3,((Long)lr.getParent().getLRPersistenceId()).longValue());
+      }
+      else {
+        pstmt.setNull(3,java.sql.Types.BIGINT);
+      }
+
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("can't set LR name in DB: [invalid LR ID]");
+        default:
+          throw new PersistenceException(
+                "can't set LR name in DB: ["+ sqle.getMessage()+"]");
+      }
+
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+
   }
 
   /** helper for sync() - never call directly */
   protected void _syncDocumentHeader(Document doc)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    Long lrID = (Long)doc.getLRPersistenceId();
+
+    PreparedStatement pstmt = null;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_update_document(?,?,?,?,?)");
+      pstmt.setLong(1,lrID.longValue());
+      pstmt.setString(2,doc.getSourceUrl().toString());
+      //do we have start offset?
+      if (null==doc.getSourceUrlStartOffset()) {
+        pstmt.setNull(3,java.sql.Types.INTEGER);
+      }
+      else {
+        pstmt.setLong(3,doc.getSourceUrlStartOffset().longValue());
+      }
+      //do we have end offset?
+      if (null==doc.getSourceUrlEndOffset()) {
+        pstmt.setNull(4,java.sql.Types.INTEGER);
+      }
+      else {
+        pstmt.setLong(4,doc.getSourceUrlEndOffset().longValue());
+      }
+
+      pstmt.setBoolean(5,doc.getMarkupAware().booleanValue());
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR :
+          throw new PersistenceException("invalid LR supplied: no such document: ["+
+                                                            sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException("can't change document data: ["+
+                                                            sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+
   }
 
   /** helper for sync() - never call directly */
@@ -855,7 +931,47 @@ public class PostgresDataStore extends JDBCDataStore {
   protected void _syncFeatures(LanguageResource lr)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(((DatabaseDataStore)lr.getDataStore()).getDatabaseID(),
+                      this.getDatabaseID());
+    Assert.assertTrue(lr instanceof Document || lr instanceof Corpus);
+    //we have to be in the context of transaction
+
+    //1, get ID  in the DB
+    Long lrID = (Long)lr.getLRPersistenceId();
+    int  entityType;
+
+    //2. delete features
+    PreparedStatement pstmt = null;
+    try {
+      Assert.assertTrue(false == this.jdbcConn.getAutoCommit());
+      pstmt = this.jdbcConn.prepareStatement("select persist_delete_features(?,?) ");
+      pstmt.setLong(1,lrID.longValue());
+
+      if (lr instanceof Document) {
+        entityType = DBHelper.FEATURE_OWNER_DOCUMENT;
+      }
+      else if (lr instanceof Corpus) {
+        entityType = DBHelper.FEATURE_OWNER_CORPUS;
+      }
+      else {
+        throw new IllegalArgumentException();
+      }
+
+      pstmt.setInt(2,entityType);
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete features in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+
+    //3. recreate them
+    createFeatures(lrID,entityType, lr.getFeatures());
   }
 
   /** helper for sync() - never call directly */
