@@ -43,7 +43,7 @@ public abstract class DocumentFormat implements Resource
   static private Map magic2MimeTypeMap = new HashMap();
 
   /** Map of markup elements to annotation types. If it is null, the
-    * unpack markup method will convert all markup, using the element names
+    * unpackMarkup() method will convert all markup, using the element names
     * for annotation types. If it is non-null, only those elements specified
     * here will be converted.
     */
@@ -93,7 +93,8 @@ public abstract class DocumentFormat implements Resource
 
   /** Find a DocumentFormat implementation that deals with a particular
     * MIME type, given the URL of the Document. If it is an HTTP URL, we 
-    * can ask the web server. Otherwise we need to use a map of magic numbers
+    * can ask the web server. If it has a recognised file extension, we
+    * can use that. Otherwise we need to use a map of magic numbers
     * to MIME types to guess the type, and then look up the format using the
     * type.
     */
