@@ -22,6 +22,9 @@ public class Batch implements JapeConstants, java.io.Serializable {
   /** The JAPE transducer. */
   private Transducer transducer;
 
+  /** A stream connected to the JAPE file (often null). */
+  private InputStream japeStream = null;
+
   /** Create non-initialised instance (private, used in main). */
   private Batch() { }
 
@@ -32,6 +35,15 @@ public class Batch implements JapeConstants, java.io.Serializable {
     */
   public Batch(String japeFileName) throws JapeException {
     this.japeFileName = japeFileName;
+    initTransducer();
+  } // full init constructor
+
+  /** Create a fully initialised instance from an InputStream connected
+    * to the JAPE file.
+    */
+  public Batch(InputStream japeStream) throws JapeException {
+    this.japeFileName = "stream";
+    this.japeStream = japeStream;
     initTransducer();
   } // full init constructor
 
@@ -47,6 +59,8 @@ public class Batch implements JapeConstants, java.io.Serializable {
       parseJape();
     else if(japeFileName.endsWith(".jar") || japeFileName.endsWith(".JAR"))
       deserialiseJape();
+    else if(japeFileName.equals("stream"))
+      parseJape(japeStream);
     else
       throw new JapeException(
         "unknown file type (not .jape, .ser or .jar):" + japeFileName
@@ -67,6 +81,18 @@ public class Batch implements JapeConstants, java.io.Serializable {
         JapeException("Batch: couldn't open JAPE file: " + e.getMessage());
     }
   } // parseJape
+
+  /** Parse a jape file from an InputStream and store the transducer. */
+  private void parseJape(InputStream japeStream) throws JapeException {
+    try {
+      gate.jape.parser.ParseCpsl parser =
+        new gate.jape.parser.ParseCpsl(japeStream);
+      transducer = parser.MultiPhaseTransducer();
+    } catch (gate.jape.parser.ParseException e) {
+      throw new
+        JapeException("Batch: error parsing transducer: " + e.getMessage());
+    }
+  } // parseJape(InputStream)
 
   /** Deserialise from a .ser file. */
   private void deserialiseJape(File japeFile) throws JapeException {
@@ -313,6 +339,9 @@ public class Batch implements JapeConstants, java.io.Serializable {
 } // class Batch
 
 // $Log$
+// Revision 1.2  2000/05/03 18:06:39  hamish
+// added construction from InputStream
+//
 // Revision 1.1  2000/02/23 13:46:04  hamish
 // added
 //
