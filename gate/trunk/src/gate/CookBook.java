@@ -32,7 +32,7 @@ import gate.creole.orthomatcher.*;
 /**
   * <P><B>NOTE: this class has been REPLACED by the GateExamples package;
   * see
-  * <A HREF=http://gate.ac.uk/GateExamples/doc/>http://gate.ac.uk/GateExamples/doc/</A>.
+  * <A HREF=http://gate.ac.uk/GateExamples/doc/>http://gate.ac.uk/GateExamples/doc/</A>.</B>
   *
   * <P>
   * This class provides examples of using the GATE APIs.
