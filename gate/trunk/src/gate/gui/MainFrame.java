@@ -594,7 +594,7 @@ while(listIter.hasNext()){
 
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
-    String hidden = (String)res.getFeatures().get("gate.hidden");
+    String hidden = (String)res.getFeatures().get("gate.HIDDEN");
     if(hidden != null && hidden.equalsIgnoreCase("true")) return;
     DefaultResourceHandle handle = new DefaultResourceHandle(res);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
