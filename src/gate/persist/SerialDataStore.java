@@ -188,6 +188,10 @@ extends AbstractFeatureBearer implements DataStore {
         new PersistenceException("Couldn't find class "+lrClassName+": "+ee);
     }
 
+    // set the dataStore property of the LR (which is transient and therefore
+    // not serialised
+    lr.setDataStore(this);
+
     return lr;
   } // getLr(id)
 
