@@ -15,7 +15,7 @@
 
 
 Phase:	Jobtitle
-Input: Lookup
+Input: Lookup Token
 Options: control = appelt
 
 Rule: Jobtitle1
