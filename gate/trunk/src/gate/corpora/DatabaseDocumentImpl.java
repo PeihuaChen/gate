@@ -377,8 +377,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   private void _getAnnotations(String name) {
 
-///System.out.print("getting aset ["+name+"] : ");
-
     AnnotationSet as = null;
 
     //preconditions
@@ -399,7 +397,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
       if (this.defaultAnnots != null) {
         //the default set is alredy read - do nothing
         //super methods will take care
-///System.out.println("already available...");
         return;
       }
     }
@@ -408,13 +405,9 @@ public class DatabaseDocumentImpl extends DocumentImpl
       if (this.namedAnnotSets.containsKey(name)) {
         //we've already read it - do nothing
         //super methods will take care
-///System.out.print("already available...");
-///AnnotationSet as1 = (AnnotationSet)this.namedAnnotSets.get(name);
-///System.out.println(" (size="+as1.size()+")...");
         return;
       }
     }
-///System.out.println("read from DB...");
 
     Long lrID = (Long)getLRPersistenceId();
     Long asetID = null;
@@ -439,108 +432,95 @@ public class DatabaseDocumentImpl extends DocumentImpl
       sql = sql + clause;
 
       pstmt = this.jdbcConn.prepareStatement(sql);
-        pstmt.setLong(1,lrID.longValue());
-        if (null != name) {
-          pstmt.setString(2,name);
-        }
-        pstmt.execute();
-        rs = pstmt.getResultSet();
-
-        if (rs.next()) {
-          //ok, there is such aset in the DB
-          asetID = new Long(rs.getLong(1));
-        }
-        else {
-          //wow, there is no such aset, so create new ...
-          //... by delegating to the super method
-          return;
-        }
-
-        //2. read annotation Features
-        HashMap featuresByAnnotationID = _readFeatures(asetID);
-
-        //3. read annotations
-        AnnotationSetImpl transSet = new AnnotationSetImpl(this);
-
-        try {
-          String sql1 = " select ann_local_id, " +
-                       "        at_name, " +
-                       "        start_offset, " +
-                       "        end_offset " +
-                       " from  "+Gate.DB_OWNER+".v_annotation  " +
-                       " where  asann_as_id = ? ";
-
-        if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
-
-        pstmt = this.jdbcConn.prepareStatement(sql1);
-        pstmt.setLong(1,asetID.longValue());
-        pstmt.execute();
-        rs = pstmt.getResultSet();
-
-        while (rs.next()) {
-          //1. read data memebers
-          Integer annID = new Integer(rs.getInt(1));
-          String type = rs.getString(2);
-          Long startOffset = new Long(rs.getLong(3));
-          Long endOffset = new Long(rs.getLong(4));
-
-          if (DEBUG) Out.println("ann_local_id=["+annID+"]");
-          if (DEBUG) Out.println("start_off=["+startOffset+"]");
-          if (DEBUG) Out.println("end_off=["+endOffset+"]");
-
-          //2. get the features
-          FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
-          //fm may should NOT be null
-          if (null == fm) {
-            fm =  new SimpleFeatureMapImpl();
-          }
-
-          //3. add to annotation set
-          transSet.add(annID,startOffset,endOffset,type,fm);
-        }//while
-        }//read the annotations
-        catch(SQLException sqle) {
-          throw new SynchronisationException("can't read content from DB: ["
-                                            + sqle.getMessage()+"]");
-        }
-        catch(InvalidOffsetException oe) {
-          throw new SynchronisationException(oe);
-        }
-        finally {
-          try {
-            DBHelper.cleanup(rs);
-            DBHelper.cleanup(pstmt);
-          }
-          catch(PersistenceException pe) {
-            throw new SynchronisationException("JDBC error: ["
-                                              + pe.getMessage()+"]");
-          }
-        }//finally
-        //1.5, create a-set
-        if (null == name) {
-          as = new DatabaseAnnotationSetImpl(this, transSet);
-        }
-        else {
-          as = new DatabaseAnnotationSetImpl(this,name, transSet);
-        }
-///System.out.println("trans_set, size=["+transSet.size()+"]");
-///System.out.println("db_set (1), size=["+as.size()+"]");
-        //1.6 add the new a-set to the list of the a-sets read from the DB
-//        this.loadedAnnotSets.add(as);
-
+      pstmt.setLong(1,lrID.longValue());
+      if (null != name) {
+        pstmt.setString(2,name);
       }
-      catch(SQLException sqle) {
-        throw new SynchronisationException("can't read annotations from DB: ["+ sqle.getMessage()+"]");
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (rs.next()) {
+        //ok, there is such aset in the DB
+        asetID = new Long(rs.getLong(1));
       }
-      finally {
-        try {
-          DBHelper.cleanup(rs);
-          DBHelper.cleanup(pstmt);
-        }
-        catch(PersistenceException pe) {
-          throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
-        }
+      else {
+        //wow, there is no such aset, so create new ...
+        //... by delegating to the super method
+        return;
       }
+
+      //1.5 cleanup
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+      //2. read annotation Features
+      HashMap featuresByAnnotationID = _readFeatures(asetID);
+
+      //3. read annotations
+      AnnotationSetImpl transSet = new AnnotationSetImpl(this);
+
+      String sql1 = " select ann_local_id, " +
+                    "        at_name, " +
+                    "        start_offset, " +
+                    "        end_offset " +
+                    " from  "+Gate.DB_OWNER+".v_annotation  " +
+                    " where  asann_as_id = ? ";
+
+      if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
+
+      pstmt = this.jdbcConn.prepareStatement(sql1);
+      pstmt.setLong(1,asetID.longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      while (rs.next()) {
+        //1. read data memebers
+        Integer annID = new Integer(rs.getInt(1));
+        String type = rs.getString(2);
+        Long startOffset = new Long(rs.getLong(3));
+        Long endOffset = new Long(rs.getLong(4));
+
+        if (DEBUG) Out.println("ann_local_id=["+annID+"]");
+        if (DEBUG) Out.println("start_off=["+startOffset+"]");
+        if (DEBUG) Out.println("end_off=["+endOffset+"]");
+
+        //2. get the features
+        FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
+        //fm should NOT be null
+        if (null == fm) {
+          fm =  new SimpleFeatureMapImpl();
+        }
+
+        //3. add to annotation set
+        transSet.add(annID,startOffset,endOffset,type,fm);
+      }//while
+
+      //1.5, create a-set
+      if (null == name) {
+        as = new DatabaseAnnotationSetImpl(this, transSet);
+      }
+      else {
+        as = new DatabaseAnnotationSetImpl(this,name, transSet);
+      }
+    }
+    catch(SQLException sqle) {
+      throw new SynchronisationException("can't read annotations from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(InvalidOffsetException oe) {
+      throw new SynchronisationException(oe);
+    }
+    catch(PersistenceException pe) {
+      throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+    }
+    finally {
+      try {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+      catch(PersistenceException pe) {
+        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+      }
+    }
 
 
     //4. update internal data members
@@ -551,7 +531,6 @@ public class DatabaseDocumentImpl extends DocumentImpl
     else {
       //named as
       this.namedAnnotSets.put(name,as);
-///System.out.println("db_set (2), size=["+as.size()+"]");
     }
 
     //don't return the new aset, the super method will take care
