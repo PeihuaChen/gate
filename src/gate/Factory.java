@@ -202,7 +202,7 @@ public abstract class Factory {
         }
         resData.addInstantiation(res);
         if(features != null) res.getFeatures().putAll(features);
-        res.getFeatures().put("gate.PARAMETERS", parameterValues);
+        res.getFeatures().put("gate.PARAMETERS(transient)", parameterValues);
 
         //fire the event
         creoleProxy.fireResourceLoaded(
@@ -288,7 +288,7 @@ public abstract class Factory {
     resData.addInstantiation(res);
     //add the features sepcified by the user
     if(features != null) res.getFeatures().putAll(features);
-    res.getFeatures().put("gate.PARAMETERS", parameterValues);
+    res.getFeatures().put("gate.PARAMETERS(transient)", parameterValues);
 
     //fire the event
     creoleProxy.fireResourceLoaded(
