@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
+import java.net.*;
 
 import net.didion.jwnl.*;
 import net.didion.jwnl.JWNLException;
@@ -43,7 +44,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   /** JWNL dictionary */
   private Dictionary wnDictionary;
   /** JWNL property file  */
-  private File       propertyFile;
+  private URL       propertyUrl;
 
 
   public IndexFileWordNetImpl() {
@@ -52,8 +53,13 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
 
+    if (null == this.propertyUrl) {
+      throw new ResourceInstantiationException("property file not set");
+    }
+
     try {
-      InputStream inProps = new FileInputStream(this.propertyFile);
+
+      InputStream inProps = this.propertyUrl.openStream();
 
       JWNL.initialize(inProps);
       this.wnDictionary = Dictionary.getInstance();
@@ -73,17 +79,22 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   }
 
 
-  public void setPropertyFile(File properties) {
+  public void setPropertyUrl(URL _propertiesUrl) {
 
     //0.
-    Assert.assertNotNull(properties);
+    Assert.assertNotNull(_propertiesUrl);
 
-    if (null != this.propertyFile) {
+    if (null != this.propertyUrl) {
       throw new GateRuntimeException("props are alredy set");
     }
 
-    this.propertyFile = properties;
+    this.propertyUrl = _propertiesUrl;
   }
+
+  public URL getPropertyUrl() {
+    return this.propertyUrl;
+  }
+
 
   /** returns the WordNet version */
   public String getVersion() {
