@@ -93,19 +93,21 @@ public class SerialAnalyserController extends SerialController {
       //this is a list of lists
       List parameters = rData.getParameterList().getRuntimeParameters();
       //remove corpus and document
+      List newParameters = new ArrayList();
       Iterator pDisjIter = parameters.iterator();
       while(pDisjIter.hasNext()){
         List aDisjunction = (List)pDisjIter.next();
-        Iterator internalParIter = aDisjunction.iterator();
+        List newDisjunction = new ArrayList(aDisjunction);
+        Iterator internalParIter = newDisjunction.iterator();
         while(internalParIter.hasNext()){
           Parameter parameter = (Parameter)internalParIter.next();
           if(parameter.getName().equals("corpus") ||
              parameter.getName().equals("document")) internalParIter.remove();
         }
-        if(aDisjunction.isEmpty()) pDisjIter.remove();
+        if(!newDisjunction.isEmpty()) newParameters.add(newDisjunction);
       }
 
-      if(AbstractResource.checkParameterValues(pr, parameters)){
+      if(AbstractResource.checkParameterValues(pr, newParameters)){
         badPRs.remove(pr);
       }
     }
