@@ -674,21 +674,31 @@ public class OracleDataStore extends JDBCDataStore {
       String type = ann.getType();
       FeatureMap annFeatures = ann.getFeatures();
 
+/*
+System.out.println("ANN>>> ["+ann.getType()+"]");
+System.out.println("START>>> ["+start+"]");
+System.out.println("END>>> ["+end+"]");
+System.out.println();
+*/
+
       //DB stuff
-      Long annID = null;
+      Long annGlobalID = null;
       try {
         stmt = this.jdbcConn.prepareCall(
-            "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?) }");
+            "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?,?,?,?) }");
         stmt.setLong(1,docID.longValue());
-        stmt.setLong(2,asetID.longValue());
-        stmt.setLong(3,start.getOffset().longValue());
-        stmt.setLong(4,end.getOffset().longValue());
-        stmt.setString(5,type);
-        stmt.registerOutParameter(6,java.sql.Types.BIGINT);
+        stmt.setLong(2,ann.getId().longValue());
+        stmt.setLong(3,asetID.longValue());
+        stmt.setLong(4,start.getId().longValue());
+        stmt.setLong(5,start.getOffset().longValue());
+        stmt.setLong(6,end.getId().longValue());
+        stmt.setLong(7,end.getOffset().longValue());
+        stmt.setString(8,type);
+        stmt.registerOutParameter(9,java.sql.Types.BIGINT);
 
         stmt.execute();
 
-        annID = new Long(stmt.getLong(6));
+        annGlobalID = new Long(stmt.getLong(9));
       }
       catch(SQLException sqle) {
         switch(sqle.getErrorCode()) {
@@ -708,7 +718,7 @@ public class OracleDataStore extends JDBCDataStore {
       //2.1. set annotation features
       FeatureMap features = ann.getFeatures();
       Assert.assertNotNull(features);
-      createFeatures(annID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+      createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
     }
   }
 
