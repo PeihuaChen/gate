@@ -13,15 +13,16 @@
  *
  */
 
-CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar,int2) RETURNS int4 AS '
+CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,float8,varchar,int2) RETURNS int4 AS '
 
    DECLARE
       p_entity_id           alias for $1;
       p_entity_type         alias for $2;
       p_key                 alias for $3;
-      p_value_number        alias for $4;
-      p_value_varchar       alias for $5;
-      p_value_type          alias for $6;
+      p_value_int           alias for $4;
+      p_value_float         alias for $5;
+      p_value_varchar       alias for $6;
+      p_value_type          alias for $7;
 
       l_feature_key_id int4;
       cnt int4;
@@ -54,7 +55,8 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
                             ft_entity_id,
                             ft_entity_type,
                             ft_key_id,
-                            ft_number_value,
+                            ft_int_value,
+                            ft_float_value,
                             ft_binary_value,
                             ft_character_value,
                             ft_value_type)
@@ -62,7 +64,8 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
              p_entity_id,
              p_entity_type,
              l_feature_key_id,
-             p_value_number,
+             p_value_int,
+             p_value_float,
              null /*empty_blob()*/,
              p_value_varchar,
              p_value_type);
