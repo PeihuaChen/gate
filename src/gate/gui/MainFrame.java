@@ -1449,7 +1449,7 @@ public class MainFrame extends JFrame
                                       listeners);
             }// End for
             // Create an application at the end.
-            Factory.createResource("gate.creole.SerialController");
+            Factory.createResource("gate.creole.SerialAnalyserController");
           }catch(gate.creole.ResourceInstantiationException ex){
             ex.printStackTrace(Err.getPrintWriter());
           }// End try
@@ -1486,7 +1486,7 @@ public class MainFrame extends JFrame
       }// End for
       try{
         // Create an application at the end.
-        Factory.createResource("gate.creole.SerialController");
+        Factory.createResource("gate.creole.SerialAnalyserController");
       }catch(gate.creole.ResourceInstantiationException ex){
         ex.printStackTrace(Err.getPrintWriter());
       }// End try
