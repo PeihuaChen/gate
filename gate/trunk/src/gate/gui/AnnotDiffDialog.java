@@ -325,7 +325,7 @@ class AnnotDiffDialog extends JFrame {
     this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
                                                             BoxLayout.Y_AXIS));
     Dimension maxDimm = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension newDim = new Dimension(2*maxDimm.width/3, 2*maxDimm.height/3);
+    Dimension newDim = new Dimension(maxDimm.width/3, maxDimm.height/3);
     annotDiff.setMaximumSize(newDim);
     annotDiff.setMinimumSize(newDim);
     annotDiff.setPreferredSize(newDim);
