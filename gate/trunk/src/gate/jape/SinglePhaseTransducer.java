@@ -215,7 +215,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
       //far each active FSM Instance, try to advance
       whileloop2:
       while(!activeFSMInstances.isEmpty()){
-        if(isInterrupted()) throw new ExecutionInterruptedException(
+        if(interrupted) throw new ExecutionInterruptedException(
           "The execution of the \"" + getName() +
           "\" Jape transducer has been abruptly interrupted!");
 
