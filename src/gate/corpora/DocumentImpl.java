@@ -529,72 +529,30 @@ extends AbstractLanguageResource implements Document, StatusReporter
     }
   }
 
+  /** Check: test 2 objects for equality */
+  protected boolean check(Object a, Object b) {
+    if( (a == null || b == null) )
+      return a == b;
+
+    return a.equals(b);
+  } // check(a,b)
+
   /** Equals */
   public boolean equals(Object other) {
     DocumentImpl doc = (DocumentImpl) other;
 
-    if(
-      (content == null && doc.content != null) ||
-      ! content.toString().equals(doc.content.toString())
-    )
-      return false;
-
-    if(
-      (defaultAnnots == null && doc.defaultAnnots != null) ||
-      ! defaultAnnots.equals(doc.defaultAnnots)
-    )
-      return false;
-
-    if(
-      (encoding == null && doc.encoding != null) ||
-      ! encoding.equals(doc.encoding)
-    )
-      return false;
-
-    if(
-      (features == null && doc.features != null) ||
-      ! features.equals(doc.features)
-    )
-      return false;
-
-    if(markupAware != doc.markupAware)
-      return false;
-
-    if(
-      (namedAnnotSets == null && doc.namedAnnotSets != null) ||
-      ! namedAnnotSets.equals(doc.namedAnnotSets)
-    )
-      return false;
-
-    if(nextAnnotationId != doc.nextAnnotationId)
-      return false;
-
-    if(nextNodeId != doc.nextNodeId)
-      return false;
-
-    if(
-      (sourceUrl == null && doc.sourceUrl != null) ||
-      ! sourceUrl.equals(doc.sourceUrl)
-    )
-      return false;
-
-    if(
-      (sourceUrlStartOffset == null && doc.sourceUrlStartOffset != null) ||
-      ! sourceUrlStartOffset.equals(doc.sourceUrlStartOffset)
-    )
-      return false;
-
-    if(
-      (sourceUrlName == null && doc.sourceUrlName != null) ||
-      ! sourceUrlName.equals(doc.sourceUrlName)
-    )
-      return false;
-
-    if(
-      (sourceUrlEndOffset == null && doc.sourceUrlEndOffset != null) ||
-      ! sourceUrlEndOffset.equals(doc.sourceUrlEndOffset)
-    )
-      return false;
+//    if(! check(content, doc.content)) return false;
+//    if(! check(defaultAnnots, doc.defaultAnnots)) return false;
+    if(! check(encoding, doc.encoding)) return false;
+//    if(! check(features, doc.features)) return false;
+    if(markupAware != doc.markupAware) return false;
+    if(! check(namedAnnotSets, doc.namedAnnotSets)) return false;
+    if(nextAnnotationId != doc.nextAnnotationId) return false;
+    if(nextNodeId != doc.nextNodeId) return false;
+    if(! check(sourceUrl, doc.sourceUrl)) return false;
+    if(! check(sourceUrlStartOffset, doc.sourceUrlStartOffset)) return false;
+    if(! check(sourceUrlName, doc.sourceUrlName)) return false;
+    if(! check(sourceUrlEndOffset, doc.sourceUrlEndOffset)) return false;
 
     return true;
   } // equals
