@@ -82,7 +82,7 @@ public class XJTable extends JTable {
     adjustSizes();
   }
 
-  /**Should the soring facility be enabled*/
+  /**Should the sorting facility be enabled*/
   public void setSortable(boolean isSortable){
     this.sortable = isSortable;
   }
@@ -166,14 +166,18 @@ public class XJTable extends JTable {
 
     //delete the current rowModel in order to get a new updated one
     //this way we fix a bug in JTable
-    setRowHeight(Math.max(getRowHeight(0), 1));
+//    setRowHeight(Math.max(getRowHeight(0), 1));
     for(int column = 0; column < getColumnCount(); column ++){
       int width;
       tCol = getColumnModel().getColumn(column);
       //compute the sizes
-      width = headerRenderer.getTableCellRendererComponent(
-                  this, tCol.getHeaderValue(), false, false,0,column
-              ).getPreferredSize().width;
+      if(getTableHeader() != null){
+	      width = headerRenderer.getTableCellRendererComponent(
+	                  this, tCol.getHeaderValue(), false, false,0,column
+	              ).getPreferredSize().width;
+	    }else{
+	    	width = 0;
+	    }
       for(int row = 0; row < getRowCount(); row ++){
         TableCellRenderer renderer = getCellRenderer(row,column);
         if(renderer == null){
@@ -188,8 +192,8 @@ public class XJTable extends JTable {
           cellHeight = dim.height;
           width = Math.max(width, cellWidth);
           //width = Math.max(width, tCol.getPreferredWidth());
-          if((cellHeight + rowMargin) > getRowHeight(row)){
-           setRowHeight(row, cellHeight + rowMargin);
+          if((cellHeight + getRowMargin()) > getRowHeight(row)){
+           setRowHeight(row, cellHeight + getRowMargin());
           }
         }//if(renderer != null)
       }//for
@@ -205,31 +209,33 @@ public class XJTable extends JTable {
     dim = new Dimension(totalWidth, totalHeight);
     setPreferredScrollableViewportSize(dim);
 
-    //extend the last column
-    Container p = getParent();
-    if (p instanceof JViewport) {
-      Container gp = p.getParent();
-      if (gp instanceof JScrollPane) {
-        JScrollPane scrollPane = (JScrollPane)gp;
-        // Make certain we are the viewPort's view and not, for
-        // example, the rowHeaderView of the scrollPane -
-        // an implementor of fixed columns might do this.
-        JViewport viewport = scrollPane.getViewport();
-        if (viewport == null || viewport.getView() != this) {
-            return;
-        }
-        int portWidth = scrollPane.getSize().width -
-                        scrollPane.getInsets().left -
-                        scrollPane.getInsets().right;
-        if(scrollPane.getVerticalScrollBar().isVisible())
-          portWidth -= scrollPane.getVerticalScrollBar().getWidth();
-        if(totalWidth < portWidth){
-          int width = tCol.getWidth() + portWidth - totalWidth - 2;
-          tCol.setPreferredWidth(width);
-          tCol.setWidth(width);
-        }//if(totalWidth < portWidth)
-      }//if (gp instanceof JScrollPane)
-    }//if (p instanceof JViewport)
+    //extend the last column if autoresize
+    if(getAutoResizeMode() != AUTO_RESIZE_OFF){
+	    Container p = getParent();
+	    if (p instanceof JViewport) {
+	      Container gp = p.getParent();
+	      if (gp instanceof JScrollPane) {
+	        JScrollPane scrollPane = (JScrollPane)gp;
+	        // Make certain we are the viewPort's view and not, for
+	        // example, the rowHeaderView of the scrollPane -
+	        // an implementor of fixed columns might do this.
+	        JViewport viewport = scrollPane.getViewport();
+	        if (viewport == null || viewport.getView() != this) {
+	            return;
+	        }
+	        int portWidth = scrollPane.getSize().width -
+	                        scrollPane.getInsets().left -
+	                        scrollPane.getInsets().right;
+	        if(scrollPane.getVerticalScrollBar().isVisible())
+	          portWidth -= scrollPane.getVerticalScrollBar().getWidth();
+	        if(totalWidth < portWidth){
+	          int width = tCol.getWidth() + portWidth - totalWidth - 2;
+//	          tCol.setPreferredWidth(width);
+	          tCol.setWidth(width);
+	        }//if(totalWidth < portWidth)
+	      }//if (gp instanceof JScrollPane)
+	    }//if (p instanceof JViewport)
+    }
   }//protected void adjustSizes()
 
   /**
@@ -246,13 +252,6 @@ public class XJTable extends JTable {
     this.ascending = ascending;
   }
 
-  public void setAutoResizeMode(int resizeMode){
-    /*
-    throw new UnsupportedOperationException(
-        "Auto resize mode not supported for " + getClass().getName() + ".\n"
-        "The default mode is AUTO_RESIZE_LAST_COLUMN");
-    */
-  }
 
   protected TableSorter sorter;
 
