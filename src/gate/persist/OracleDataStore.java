@@ -2603,15 +2603,112 @@ public class OracleDataStore extends JDBCDataStore {
    */
   public boolean lockLr(LanguageResource lr)
   throws PersistenceException,SecurityException {
-    throw new MethodNotImplementedException();
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(lr.getDataStore(),this);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lr.getLRPersistenceId())) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    //3. try to lock
+    CallableStatement cstmt = null;
+    boolean lockSucceeded = false;
+
+    try {
+      cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.lock_lr(?,?,?,?) }");
+      cstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
+      cstmt.setLong(2,this.session.getUser().getID().longValue());
+      cstmt.setLong(3,this.session.getGroup().getID().longValue());
+      cstmt.registerOutParameter(4,java.sql.Types.NUMERIC);
+      cstmt.execute();
+
+      lockSucceeded = cstmt.getLong(4) == this.ORACLE_TRUE
+                                          ? true
+                                          : false;
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("invalid LR ID supplied ["+sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't lock LR in DB : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+    }
+
+    return lockSucceeded;
   }
+
 
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
   public void unlockLr(LanguageResource lr)
   throws PersistenceException,SecurityException {
-    throw new MethodNotImplementedException();
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(lr.getDataStore(),this);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lr.getLRPersistenceId())) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    //3. try to unlock
+    CallableStatement cstmt = null;
+    boolean lockSucceeded = false;
+
+    try {
+      cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.unlock_lr(?,?) }");
+      cstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
+      cstmt.setLong(2,this.session.getUser().getID().longValue());
+      cstmt.execute();
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("invalid LR ID supplied ["+sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't unlock LR in DB : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+    }
   }
 
 }
