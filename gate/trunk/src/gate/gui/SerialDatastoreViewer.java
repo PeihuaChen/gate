@@ -30,7 +30,7 @@ import gate.persist.PersistenceException;
 import gate.security.SecurityException;
 import gate.util.*;
 
-public class SerialDatastoreViewer extends JTree
+public class SerialDatastoreViewer extends JScrollPane
                                    implements VisualResource,
                                               DatastoreListener {
 
@@ -147,9 +147,10 @@ public class SerialDatastoreViewer extends JTree
     treeRoot = new DefaultMutableTreeNode(
                  datastore.getName(), true);
     treeModel = new DefaultTreeModel(treeRoot, true);
-    setModel(treeModel);
-    setExpandsSelectedPaths(true);
-    expandPath(new TreePath(treeRoot));
+    mainTree = new JTree();
+    mainTree.setModel(treeModel);
+    mainTree.setExpandsSelectedPaths(true);
+    mainTree.expandPath(new TreePath(treeRoot));
     try {
       Iterator lrTypesIter = datastore.getLrTypes().iterator();
       CreoleRegister cReg = Gate.getCreoleRegister();
@@ -159,7 +160,7 @@ public class SerialDatastoreViewer extends JTree
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(
                                                               rData.getName());
         treeModel.insertNodeInto(node, treeRoot, treeRoot.getChildCount());
-        expandPath(new TreePath(new Object[]{treeRoot, node}));
+        mainTree.expandPath(new TreePath(new Object[]{treeRoot, node}));
         Iterator lrIDsIter = datastore.getLrIds(type).iterator();
         while(lrIDsIter.hasNext()){
           String id = (String)lrIDsIter.next();
@@ -176,16 +177,16 @@ public class SerialDatastoreViewer extends JTree
     DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
     selectionModel.setSelectionMode(
         DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
-    setSelectionModel(selectionModel);
-
+    mainTree.setSelectionModel(selectionModel);
+    getViewport().setView(mainTree);
   }//protected void initGuiComponents()
 
   protected void initListeners(){
     datastore.addDatastoreListener(this);
-    addMouseListener(new MouseAdapter() {
+    mainTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         //where inside the tree?
-        TreePath path = getPathForLocation(e.getX(), e.getY());
+        TreePath path = mainTree.getPathForLocation(e.getX(), e.getY());
         Object value = null;
         if(path != null) value = ((DefaultMutableTreeNode)
                                   path.getLastPathComponent()).getUserObject();
@@ -309,6 +310,7 @@ public class SerialDatastoreViewer extends JTree
 
   DefaultMutableTreeNode treeRoot;
   DefaultTreeModel treeModel;
+  JTree mainTree;
   DataStore datastore;
   NameBearerHandle myHandle;
   protected FeatureMap features;
@@ -357,7 +359,7 @@ public class SerialDatastoreViewer extends JTree
       node = new DefaultMutableTreeNode(resType);
       treeModel.insertNodeInto(node, parent, parent.getChildCount());
     }
-    expandPath(new TreePath(new Object[]{parent, node}));
+    mainTree.expandPath(new TreePath(new Object[]{parent, node}));
 
     //now look for the resource node
     parent = node;
