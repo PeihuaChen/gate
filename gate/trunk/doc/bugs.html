@@ -499,7 +499,7 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>Marin</TD>
     <TD>23 Jun 2003 Gate 2.1 build 1284</TD>
     <TD>NOT FIXED</TD>
-    <TD> Removing an annotation from a database set dfoes not trigger removing the underlying nodes if they're not referenced by any other annotation.
+    <TD> Removing an annotation from a database set does not trigger removing the underlying nodes if they're not referenced by any other annotation.
     On the other hand identifying that a node is not needed anymore and deleting it is not easy and will slow down annotation removal
     
     </TD>
@@ -509,6 +509,21 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+    <TD>00096</TD>
+    <TD>Persistence - Database</TD>
+    <TD>Marin</TD>
+    <TD>Marin</TD>
+    <TD>07 Jul 2003 Gate 2.1 build 1288</TD>
+    <TD>NOT FIXED</TD>
+    <TD> Documents are not properly unloaded from a database corpus because the super class intercepts the unload event (caused by improper listener registration)
+    
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
 
 
 <!------------------------------------------------------------------------->
@@ -1814,6 +1829,22 @@ gate.corpora.DocumentImpl
     <TD>clear() was not implemented for Database annotation sets. remove() using an iterator returned from a database annotation set
     was not working properly (relying on the super class' remove()). Both fixed now, though the current implementation of clear() [by default
     using the iterator's remove() is inefficient for a RDBMS - bulk delete should be perfoemed instead]  TODO
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00095</TD>
+    <TD>Persistence - Database</TD>
+    <TD>Marin</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>05 Jul 2003 Gate 2.1 build 1288</TD>
+    <TD>Database corpus sync() performance was improved by removing an unnecessary call (for creating a link between a document and a corpus in the database)
+    This call was made for every loaded document from the corpus (even for the ones such link already has been created)
     </TD>
     <TD>-</TD>
     <TD>-</TD>
