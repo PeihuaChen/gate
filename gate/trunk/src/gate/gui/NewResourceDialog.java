@@ -17,6 +17,7 @@ package gate.gui;
 import java.awt.Frame;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -63,6 +64,9 @@ public class NewResourceDialog extends JDialog {
                              new ParameterDisjunctionRenderer());
     table.setDefaultEditor(ParameterDisjunction.class,
                            new ParameterDisjunctionEditor());
+    table.setDefaultRenderer(Boolean.class,
+                             new BooleanRenderer());
+    table.setIntercellSpacing(new Dimension(10, 10));
     JScrollPane scroll = new JScrollPane(table);
     this.getContentPane().add(scroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
@@ -251,6 +255,33 @@ public class NewResourceDialog extends JDialog {
     }
   }///class FeaturesTableModel extends DefaultTableModel
 
+  class BooleanRenderer extends DefaultTableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table,
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row,
+                                                   int column){
+      Component comp = super.getTableCellRendererComponent(table,
+                                                           "",
+                                                           isSelected, hasFocus,
+                                                           row, column);
+      if(comp instanceof JLabel){
+        try{
+          JLabel label = (JLabel)comp;
+          if(((Boolean)value).booleanValue()){
+            label.setIcon(new ImageIcon(getClass().
+                          getResource("/gate/resources/img/tick.gif")));
+          }else{
+            label.setIcon(null);
+          }
+        }catch(Exception e){}
+      }
+      return comp;
+    }
+  }
+
+
   class ParameterDisjunctionRenderer extends DefaultTableCellRenderer{
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
@@ -279,7 +310,6 @@ public class NewResourceDialog extends JDialog {
       }
       return comp;
     }
-
   }
 
   class ParameterDisjunctionEditor extends DefaultCellEditor{

@@ -18,6 +18,7 @@ package gate;
 import java.util.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.*;
 
 import gnu.getopt.*;
 
@@ -48,6 +49,14 @@ public class Main {
     */
   public static void main(String[] args) throws GateException {
     Gate.init();
+    //find out the version number
+    String version = "Gate ";
+    try{
+      BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(
+                                Files.getGateResourceAsStream("version.txt")));
+      version += reader.readLine();
+    }catch(IOException ioe){}
     // process command-line options
     processArgs(args);
 
@@ -60,6 +69,7 @@ public class Main {
       if(DEBUG) Out.prln("constructing GUI");
       // run the GUI
       MainFrame frame = new MainFrame();
+      frame.setTitle(version);
       //Validate frames that have preset sizes
       frame.validate();
       //Center the window

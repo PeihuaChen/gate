@@ -75,6 +75,16 @@ public class XJTable extends JTable {
     getTableHeader().addMouseListener(listMouseListener);
     setAutoResizeMode(AUTO_RESIZE_OFF);
     headerRenderer = new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
+
+    addComponentListener(new ComponentAdapter() {
+      public void componentResized(ComponentEvent e) {
+        adjustSizes(false);
+      }
+
+      public void componentShown(ComponentEvent e) {
+        adjustSizes(false);
+      }
+    });
   }//init()
 
 
