@@ -197,7 +197,8 @@
     <mkdir dir="${outputDir}"/>
     <javac classpathref="build.class.path"
            destdir="${outputDir}" 
-           includes="guk/**" 
+           includes="guk/**"
+           encoding="UTF-8"
            debug="true"
            debuglevel="lines,source"
            source="1.4"
@@ -220,6 +221,7 @@
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
            source="1.4"
+           encoding="UTF-8"
            debug="true"
            debuglevel="lines,source"
            includes="gate/**,com/**,debugger/**"
@@ -233,6 +235,7 @@
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
+           encoding="UTF-8"
            source="1.4"
            debug="true"
            includes="gate/**,com/**,debugger/**"
