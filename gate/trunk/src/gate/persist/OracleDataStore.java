@@ -199,11 +199,56 @@ public class OracleDataStore extends JDBCDataStore {
    */
   public void sync(LanguageResource lr) throws PersistenceException {
 
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    if (false == lr instanceof Document &&
+        false == lr instanceof Corpus) {
+      //only documents and corpuses could be serialized in DB
+      throw new IllegalArgumentException("only Documents and Corpuses could "+
+                                          "be serialized in DB");
+    }
+
     // check that this LR is one of ours (i.e. has been adopted)
     if( null == lr.getDataStore() || false == lr.getDataStore().equals(this))
       throw new PersistenceException(
         "This LR is not stored in this DataStore"
       );
+
+    boolean transFailed = false;
+    try {
+      //2.5 autocommit should be FALSE because of LOBs
+      this.jdbcConn.setAutoCommit(false);
+
+      //3. perform changes, if anything goes wrong, rollback
+      if (lr instanceof Document) {
+        syncDocument((Document)lr);
+      }
+      else {
+        syncCorpus((Corpus)lr);
+      }
+
+      //4. done, commit
+      this.jdbcConn.commit();
+    }
+    catch(SQLException sqle) {
+      transFailed = true;
+      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
+    }
+    catch(PersistenceException pe) {
+      transFailed = true;
+      throw(pe);
+    }
+    finally {
+      //problems?
+      if (transFailed) {
+        try {
+          this.jdbcConn.rollback();
+        }
+        catch(SQLException sqle) {
+          throw new PersistenceException(sqle);
+        }
+      }
+    }
 
     throw new MethodNotImplementedException();
   }
@@ -233,6 +278,12 @@ public class OracleDataStore extends JDBCDataStore {
     //-1. preconditions
     Assert.assertNotNull(lr);
     Assert.assertNotNull(secInfo);
+    if (false == lr instanceof Document &&
+        false == lr instanceof Corpus) {
+      //only documents and corpuses could be serialized in DB
+      throw new IllegalArgumentException("only Documents and Corpuses could "+
+                                          "be serialized in DB");
+    }
 
     //0. check SecurityInfo
     if (false == this.ac.isValidSecurityInfo(secInfo)) {
@@ -241,7 +292,7 @@ public class OracleDataStore extends JDBCDataStore {
 
     //0.5 check the LR's current DS
     DataStore currentDS = lr.getDataStore();
-    if(currentDS == this){         // adopted already
+    if(currentDS.equals(this)){         // adopted already
       return lr;
     }
     else if(currentDS == null) {  // an orphan - do the adoption
@@ -272,26 +323,54 @@ public class OracleDataStore extends JDBCDataStore {
                                       " database (persistance ID is =["+(Long)persistID+"] )");
     }
 
-    //3. perform changes
-    //autocommit should be disabled because of LOBs
-    this.beginTrans();
+    boolean transFailed = false;
+    try {
+      //2.5 autocommit should be FALSE because of LOBs
+      this.jdbcConn.setAutoCommit(false);
 
-    if (lr instanceof Document) {
-      result =  createDocument((Document)lr,secInfo);
+      //3. perform changes, if anything goes wrong, rollback
+      if (lr instanceof Document) {
+        result =  createDocument((Document)lr,secInfo);
+      }
+      else {
+        result =  createCorpus((Corpus)lr,secInfo);
+      }
+
+      //4. done, commit
+      this.jdbcConn.commit();
     }
-    else {
-      result =  createCorpus((Corpus)lr,secInfo);
+    catch(SQLException sqle) {
+      transFailed = true;
+      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
+    }
+    catch(PersistenceException pe) {
+      transFailed = true;
+      throw(pe);
+    }
+    catch(SecurityException se) {
+      transFailed = true;
+      throw(se);
+    }
+    finally {
+      //problems?
+      if (transFailed) {
+        try {
+          this.jdbcConn.rollback();
+        }
+        catch(SQLException sqle) {
+          throw new PersistenceException(sqle);
+        }
+      }
     }
 
-    //4. commit
-    this.commitTrans();
+
 
     return result;
   }
 
 
   /** -- */
-  protected Long createLR(String lrType,
+  private Long createLR(String lrType,
                         String lrName,
                         SecurityInfo si,
                         Long lrParentID)
@@ -346,7 +425,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected void updateDocumentContent(Long docContentID,DocumentContent content)
+  private void updateDocumentContent(Long docContentID,DocumentContent content)
   throws PersistenceException {
 
     //1. get LOB locators from DB
@@ -407,7 +486,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected Document createDocument(Document doc,SecurityInfo secInfo)
+  private Document createDocument(Document doc,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //delegate, set to Null
@@ -416,7 +495,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+  private Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //-1. preconditions
@@ -518,7 +597,8 @@ public class OracleDataStore extends JDBCDataStore {
     //7. create features
     createFeatures(docID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
 
-    //8. done
+    //9. create a DatabaseDocument wrapper and return it
+
     Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn);
 
     dbDoc.setContent(doc.getContent());
@@ -548,7 +628,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected void createAnnotationSet(Long docID, AnnotationSet aset)
+  private void createAnnotationSet(Long docID, AnnotationSet aset)
     throws PersistenceException {
 
     //1. create a-set
@@ -633,7 +713,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo)
+  private Corpus createCorpus(Corpus corp,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
@@ -849,7 +929,7 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    * has some access (read/write) to the LR
    */
-  protected boolean canAccessLR(Long lrID, Session s,int mode)
+  private boolean canAccessLR(Long lrID, Session s,int mode)
     throws PersistenceException, SecurityException{
 
     Assert.assert(READ_ACCESS == mode || WRITE_ACCESS == mode);
@@ -951,7 +1031,7 @@ public class OracleDataStore extends JDBCDataStore {
     writeCLOB(src.toString(),dest);
   }
 
-  protected Long _createFeature(Long entityID, int entityType,String key,Object value, int valueType)
+  private Long _createFeature(Long entityID, int entityType,String key,Object value, int valueType)
     throws PersistenceException {
 
     //1. store in DB
@@ -1035,7 +1115,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  protected void _updateFeatureLOB(Long featID,Object value, int valueType)
+  private void _updateFeatureLOB(Long featID,Object value, int valueType)
     throws PersistenceException {
 
     //NOTE: at this point value is never an array,
@@ -1098,7 +1178,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** --- */
-  protected void createFeature(Long entityID, int entityType,String key, Object value)
+  private void createFeature(Long entityID, int entityType,String key, Object value)
     throws PersistenceException {
 
     //1. what kind of feature value is this?
@@ -1208,7 +1288,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  protected Document readDocument(Object lrPersistenceId)
+  private Document readDocument(Object lrPersistenceId)
     throws PersistenceException {
 
     //0. preconditions
@@ -1297,7 +1377,7 @@ public class OracleDataStore extends JDBCDataStore {
     return result;
   }
 
-  protected FeatureMap readFeatures(Long entityID, int entityType)
+  private FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException {
 
     //0. preconditions
@@ -1508,6 +1588,110 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     return true;
+  }
+
+
+  private void syncDocument(Document doc) throws PersistenceException {
+
+    Assert.assert(doc instanceof DatabaseDocumentImpl);
+    Assert.assert(doc.getLRPersistenceId() instanceof Long);
+
+    DatabaseDocumentImpl dbDoc = (DatabaseDocumentImpl)doc;
+    Long lrID = (Long)dbDoc.getLRPersistenceId();
+    //1. sync LR
+    // only name can be changed here
+    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_NAME)) {
+      _syncLR(lrID,dbDoc.getName());
+    }
+
+    //2. sync Document
+
+    //3. [optional] sync Content
+    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_CONTENT)) {
+      _syncDocumentContent(dbDoc);
+    }
+
+    //4. [optional] sync Features
+    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_FEATURES)) {
+      //sunc features
+    }
+
+
+    //3. [optional] sync Annotations
+
+
+    throw new MethodNotImplementedException();
+  }
+
+  private void _syncLR(Long lrID, String newName)
+    throws PersistenceException {
+
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.set_lr_name(?,?) }");
+      stmt.setLong(1,lrID.longValue());
+      stmt.setString(1,newName);
+      stmt.execute();
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("can't set LR name in DB: [invalid LR ID]");
+        default:
+          throw new PersistenceException(
+                "can't set LR name in DB: ["+ sqle.getMessage()+"]");
+      }
+
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+  }
+
+
+  private void _syncDocumentContent(Document doc)
+    throws PersistenceException {
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    Long docContID = null;
+
+    //1. read from DB
+    try {
+      String sql = " select dc_id " +
+                   " from  "+Gate.DB_OWNER+".v_content " +
+                   " where  lr_id = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)doc.getLRPersistenceId()).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("invalid LR ID supplied");
+      }
+
+      //1, get DC_ID
+      docContID = new Long(rs.getLong(1));
+
+      //2, update LOBs
+      updateDocumentContent(docContID,doc.getContent());
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("Cannot update document content ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
+  }
+
+
+  private void syncCorpus(Corpus corp) throws PersistenceException {
+    throw new MethodNotImplementedException();
   }
 
 
