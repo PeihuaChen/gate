@@ -166,17 +166,14 @@ public class DocumentEditor extends AbstractVisualResource{
   protected Object lock;
 
   /**Should the table be visible*/
-  private boolean tableVisible;
 
   /**Should the text be visible*/
-  private boolean textVisible;
 
   /**
    * Should the right hand side tree be visible. That tree is used to select
    * what types of annotations are visible in the text display, hence the name
    * filters.
    */
-  private boolean filtersVisible;
 
   /**Should this component bahave as an editor as well as an viewer*/
   private boolean editable = true;
@@ -785,55 +782,27 @@ public class DocumentEditor extends AbstractVisualResource{
    * If set to true the annotations table will be shown. The default value is
    * <b>true</b>
    */
-  public void setTableVisible(boolean newTableVisible) {
-    boolean  oldTableVisible = tableVisible;
-    tableVisible = newTableVisible;
-    propertyChangeListeners.firePropertyChange("tableVisible",
-                                               new Boolean(oldTableVisible),
-                                               new Boolean(newTableVisible));
-  }
 
   /**
    * Is the annotations table shown?
    */
-  public boolean isTableVisible() {
-    return tableVisible;
-  }
 
   /**
    * If set to true the text display will be shown. Default value is <b>true</b>
    */
-  public void setTextVisible(boolean newTextVisible) {
-    boolean  oldTextVisible = textVisible;
-    textVisible = newTextVisible;
-    propertyChangeListeners.firePropertyChange("textVisible",
-                    new Boolean(oldTextVisible), new Boolean(newTextVisible));
-  }
 
   /**
    * Is the text display shown?
    */
-  public boolean isTextVisible() {
-    return textVisible;
-  }
 
   /**
    * If set to true the right hand side tree will be displayed. Default value
    * is <b>true</b>
    */
-  public void setFiltersVisible(boolean newFiltersVisible) {
-    boolean  oldFiltersVisible = filtersVisible;
-    filtersVisible = newFiltersVisible;
-    propertyChangeListeners.firePropertyChange("filtersVisible",
-              new Boolean(oldFiltersVisible), new Boolean(newFiltersVisible));
-  }
 
   /**
    * Is the right hand side tree shown?
    */
-  public boolean isFiltersVisible() {
-    return filtersVisible;
-  }
 
   /**
    * Updates this component when the underlying document is changed. This method
