@@ -72,4 +72,15 @@ public interface Gazetteer extends gate.LanguageAnalyser,gate.ProcessingResource
    * @return the linear definition of the gazetteer */
   public LinearDefinition getLinearDefinition();
 
+  /**
+   * fires a Gazetteer Event
+   * @param ge Gazetteer Event to be fired
+   */
+  public void fireGazetteerEvent(GazetteerEvent ge) ;
+
+  /**
+   * Registers a Gazetteer Listener
+   * @param gl Gazetteer Listener to be registered
+   */
+  public void addGazetteerListener(GazetteerListener gl);
 }//interface Gazetteer

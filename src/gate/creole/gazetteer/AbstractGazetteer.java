@@ -16,10 +16,17 @@
 package gate.creole.gazetteer;
 
 import gate.*;
+import gate.creole.*;
+import gate.util.*;
+
+import java.util.*;
 
 /**AbstractGazetteer*/
 public abstract class AbstractGazetteer
   extends gate.creole.AbstractLanguageAnalyser implements Gazetteer {
+
+  /** the set of gazetteer listeners */
+  protected Set listeners = new HashSet();
 
   /** Used to store the annotation set currently being used for the newly
    * generated annotations*/
@@ -114,5 +121,29 @@ public abstract class AbstractGazetteer
     this.features = features;
   } // setFeatures
 
+  public void reInit() throws ResourceInstantiationException {
+    super.reInit();
+    fireGazetteerEvent(new GazetteerEvent(this,GazetteerEvent.REINIT));
+  }//reInit()
 
+  /**
+   * fires a Gazetteer Event
+   * @param ge Gazetteer Event to be fired
+   */
+  public void fireGazetteerEvent(GazetteerEvent ge) {
+    Iterator li = listeners.iterator();
+    while ( li.hasNext()) {
+      GazetteerListener gl = (GazetteerListener) li.next();
+      gl.processGazetteerEvent(ge);
+    }
+  }
+
+  /**
+   * Registers a Gazetteer Listener
+   * @param gl Gazetteer Listener to be registered
+   */
+  public void addGazetteerListener(GazetteerListener gl){
+    if ( null!=gl )
+      listeners.add(gl);
+  }
 }//class AbstractGazetteer
