@@ -41,15 +41,17 @@ import gate.creole.*;
 public class CustomAnnotationEditDialog extends JDialog {
 
   // Local data
-  private final static int OK = 1;
-  private final static int CANCEL = 2;
+  // Those 2 fields are used when the user press cancel, so the old annot can
+  // be recreated.
+  private String cancelAnnotType = null;
+  private FeatureMap cancelAnnotFeatureMap = null;
 
   // Internal data used in initLocalData() method
   private Annotation annot = null;
   private MyCustomFeatureBearer data = null;
   private Set annotationSchemaSet = null;
 
-  int buttonPressed = CANCEL;
+  int buttonPressed = JFileChooser.CANCEL_OPTION;
 
   // Gui Components
   JLabel annotTypeLabel = null;
@@ -177,6 +179,7 @@ public class CustomAnnotationEditDialog extends JDialog {
 
     okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+          requestFocus();
           doOk();
       }// actionPerformed();
     });// addActionListener();
@@ -198,7 +201,7 @@ public class CustomAnnotationEditDialog extends JDialog {
 
   /** This method is called when the user press the OK button */
   private void doOk(){
-    buttonPressed = OK;
+    buttonPressed = JFileChooser.APPROVE_OPTION;
 
     if ("".equals(annotTypeTextField.getText())){
       JOptionPane.showMessageDialog(this,
@@ -225,7 +228,12 @@ public class CustomAnnotationEditDialog extends JDialog {
 
   /** This method is called when the user press the CANCEL button*/
   private void doCancel(){
-    buttonPressed = CANCEL;
+    if (annot != null){
+      // Restore the old annot
+      data.setAnnotType(cancelAnnotType);
+      data.setFeatures(cancelAnnotFeatureMap);
+    }// End if
+    buttonPressed = JFileChooser.CANCEL_OPTION;
     this.hide();
   }//doCancel();
 
@@ -238,18 +246,18 @@ public class CustomAnnotationEditDialog extends JDialog {
     *  depending on what one choosed.
     */
   public int show(Annotation anAnnot){
+    if (anAnnot != null){
+      // Save old data first
+      cancelAnnotType = anAnnot.getType();
+      cancelAnnotFeatureMap = Factory.newFeatureMap();
+      cancelAnnotFeatureMap.putAll(anAnnot.getFeatures());
+    }// End iff
     annot = anAnnot;
     initLocalData();
     initGuiComponents();
     initListeners();
     super.show();
-    if (buttonPressed == CANCEL){
-      doCancel();
-      return JFileChooser.CANCEL_OPTION;
-    }else{
-      doOk();
-      return JFileChooser.APPROVE_OPTION;
-    }// End if
+    return buttonPressed ;
   }// show()
 
   // INNER CLASS

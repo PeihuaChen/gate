@@ -2103,19 +2103,29 @@ public class AnnotationEditor extends AbstractVisualResource {
    * to do the editing.
    */
   protected class EditAnnotationAction extends AbstractAction {
+    /** This represent the annotation to be modified*/
+    protected Annotation ann = null;
+    /** The annotation set that ann belongs */
+    protected AnnotationSet set = null;
+
+    /** Constructs an EditAnnotAction from an annotation and a set*/
     public EditAnnotationAction(Annotation ann, AnnotationSet set){
       super("Edit");
       this.ann = ann;
       this.set = set;
-    }
+    }// EditAnnotationAction()
 
+    /** This method takes care of how the annotation is editted*/
     public void actionPerformed(ActionEvent e){
       if(!editable) return;
-      //find an appropiate schema
+      //Find an appropiate schema if there is one
       Set annotationSchemas = getAnnotationSchemas();
+      // If there is no schema defined then Edit the annotation with the
+      // CustomAnnotationEditor
       if(annotationSchemas != null && !annotationSchemas.isEmpty()){
         Iterator schemasIter = annotationSchemas.iterator();
         boolean done = false;
+        // See if there is any schema
         while(!done && schemasIter.hasNext()){
           AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
           if(schema.getAnnotationName().equalsIgnoreCase(ann.getType())){
@@ -2146,10 +2156,22 @@ public class AnnotationEditor extends AbstractVisualResource {
       CustomAnnotationEditDialog customAnnotEditor =
                                         new CustomAnnotationEditDialog(
                                             getAnnotationSchemas());
+      // Before edditing save annotation's type (we need it later after editting)
+      String oldAnnType = ann.getType();
       // Creates a new annotation
-      if (customAnnotEditor.show(ann) == JFileChooser.APPROVE_OPTION){
-        String annotType = customAnnotEditor.getAnnotType();
-        FeatureMap annotFeat = customAnnotEditor.getFeatures();
+      // We don't need to see what the user pressed (OK or Cancel)
+      // In both cases the action bellow is valid.
+      // In cancel's case it restores the old type and features.
+      customAnnotEditor.show(ann);
+      String annotType = customAnnotEditor.getAnnotType();
+      FeatureMap annotFeat = customAnnotEditor.getFeatures();
+      if (oldAnnType != null && oldAnnType.equals(annotType)){
+        // No nedd to change the annotation.
+        // We only need to change it's features.
+        ann.setFeatures(annotFeat);
+      }else{
+        // Delete the previous annotation from the set and create another
+        // one in its place.
         Node startNode = ann.getStartNode();
         Node endNode = ann.getEndNode();
 
@@ -2158,16 +2180,13 @@ public class AnnotationEditor extends AbstractVisualResource {
 
         // Add the new one
         set.add(startNode,endNode,annotType, annotFeat);
-        SwingUtilities.invokeLater(new Runnable(){
-          public void run(){
-            annotationsTableModel.fireTableDataChanged();
-          }
-        });
       }// End if
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          annotationsTableModel.fireTableDataChanged();
+        }
+      });// End invokeLater
     }// editWithCustomEditor()
-
-    Annotation ann = null;
-    AnnotationSet set = null;
   }//class EditAnnotationAction
 
   /**
