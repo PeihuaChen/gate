@@ -24,7 +24,6 @@ import java.util.Vector;
 import com.ontotext.gate.ontology.OntologyImpl;
 
 import gate.FeatureMap;
-import gate.creole.ontology.OClass;
 import gate.creole.ontology.Ontology;
 import gate.event.FeatureMapListener;
 
