@@ -2769,6 +2769,10 @@ Out.prln("NULL size");
 //System.out.println("Set node " + tData.getSet());
         }else{
 //System.out.println("Type node " + tData.getSet() + ":" + tData.getType());
+          //the document should at least have the default annotation set
+          //if it doesn't, then something's fishy -> return;
+          if(((DefaultMutableTreeNode)stylesTreeRoot).getChildCount() == 0)
+            return;
           node = (DefaultMutableTreeNode)
             ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
           while(node != null &&
