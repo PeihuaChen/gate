@@ -84,6 +84,12 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
     */
   public void registerDirectories(URL directoryUrl) throws GateException;
 
+  /**
+   * Removes a CREOLE directory from the set of loaded directories.
+   * @param directory
+   */
+  public void removeDirectory(URL directory);
+  
   /** Register resources that are built in to the GATE distribution.
     * These resources are described by the <TT>creole.xml</TT> file in
     * <TT>resources/creole</TT>.

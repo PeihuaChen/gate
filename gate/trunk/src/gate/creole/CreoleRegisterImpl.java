@@ -20,14 +20,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import javax.swing.Icon;
 import javax.xml.parsers.*;
 
+import org.jdom.*;
+import org.jdom.input.SAXBuilder;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import gate.*;
+import gate.Gate.DirectoryInfo;
+import gate.Gate.ResourceInfo;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.gui.MainFrame;
+import gate.swing.XJTable;
 import gate.util.*;
 
 
@@ -102,7 +109,7 @@ public class CreoleRegisterImpl extends HashMap
   public Set getDirectories() {
     return Collections.unmodifiableSet(directories);
   } // getDirectories
-
+  
   /** Register all the CREOLE directories that we know of.
     * The <CODE>creole.xml</CODE> files
     * at the URLs are parsed, and <CODE>ResourceData</CODE> objects added
@@ -152,11 +159,15 @@ public class CreoleRegisterImpl extends HashMap
     try {
       parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
               directoryXmlFileUrl);
+      System.out.println("CREOLE Plugin loaded: " + directoryUrl);
     } catch(IOException e) {
       //it failed: remove it
       directories.remove(directoryUrl);
       throw(new GateException("couldn't open creole.xml: " + e.toString()));
     }
+    //add it to the list of known directories
+    if(!Gate.getKnownPlugins().contains(directoryUrl))
+       Gate.getKnownPlugins().add(directoryUrl);
   } // registerDirectories(URL)
 
   /** Parse a directory file (represented as an open stream), adding
@@ -276,6 +287,23 @@ public class CreoleRegisterImpl extends HashMap
     return super.put(key, value);
   } // put(key, value)
 
+  /**
+   * Removes a CREOLE directory from the set of loaded directories.
+   * @param directory
+   */
+  public void removeDirectory(URL directory){
+    directories.remove(directory);
+    DirectoryInfo dInfo = (DirectoryInfo)Gate.getDirectoryInfo(directory);
+    if(dInfo != null){
+      Iterator resIter = dInfo.getResourceInfoList().iterator();
+      while(resIter.hasNext()){
+        ResourceInfo rInfo = (ResourceInfo)resIter.next();
+        remove(rInfo.getResourceClassName());
+      }
+    }
+    
+  }
+  
   /** Overide HashMap's delete method to update the lists of types
     * in the register.
     */
@@ -756,6 +784,7 @@ public class CreoleRegisterImpl extends HashMap
    * Notifies all listeners that a {@link gate.Resource} has been unloaded
    * from the system
    */// fireResourceUnloaded
+  
 
   /** A list of the types of LR in the register. */
   protected Set lrTypes;

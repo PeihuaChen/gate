@@ -15,103 +15,154 @@
 
 package gate.gui;
 
+import java.awt.*;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import org.jdom.*;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import gate.Gate;
 import gate.GateConstants;
 import gate.swing.XJTable;
+import gate.util.*;
+import gate.util.Err;
 import gate.util.GateRuntimeException;
 
 /**
  * This is the user interface used for plugin management 
  */
-public class PluginManagerUI extends JPanel implements GateConstants{
+public class PluginManagerUI extends JDialog implements GateConstants{
   
-  public PluginManagerUI(){
+  public PluginManagerUI(Frame owner){
+    super(owner);
     initLocalData();
     initGUI();
     initListeners();
   }
   
+  
   protected void initLocalData(){
-    rows = new ArrayList();
-    String pluginPath = Gate.getUserConfig().getString(KNOWN_PLUGIN_PATH_KEY);
-    if(pluginPath == null || pluginPath.length() == 0){
-      //value unset -> initialise it to the locally installed plugins.
-      pluginPath = "";
-      File pluginDir = new File(System.getProperty(GATE_HOME_SYSPROP_KEY), 
-              "plugins");
-      File[] files = pluginDir.listFiles();
-      for(int i = 0; i < files.length; i++){
-        if(files[i].isDirectory() && new File(files[i], "creole.xml").exists()){
-          if(pluginPath.length() > 0) pluginPath += ";";
-          try{
-            pluginPath += files[i].toURL();
-          }catch(MalformedURLException mue){
-            throw new GateRuntimeException(mue);
-          }
-        }
-      }
-    }
-    
-    //get the list of autoloading plugins
-    String loadPluginPath = Gate.getUserConfig().getString(LOAD_PLUGIN_PATH_KEY);
-    List loadURLs = new ArrayList();
-    StringTokenizer strTok = new StringTokenizer(loadPluginPath, ";", false);
-    while(strTok.hasMoreTokens()){
-      loadURLs.add(strTok.nextToken());
-    }
-    
-    strTok = new StringTokenizer(pluginPath, ";", false);
-    while(strTok.hasMoreTokens()){
-      String aPluginString = strTok.nextToken();
-      try{
-        DirectoryHandler dHandler = new DirectoryHandler(new URL(aPluginString),
-                loadURLs.indexOf(aPluginString) >= 0);
-        rows.add(dHandler);
-      }catch(MalformedURLException mue){
-        //ignore wrong URLs
-      }
-    }
+    loadNowByURL = new HashMap();
+    loadAlwaysByURL = new HashMap();
   }
   
   protected void initGUI(){
+    setTitle("Plugin Management Console");
     mainTableModel = new MainTableModel();
-    mainTable = new XJTable(mainTableModel);
-    setLayout(new GridBagLayout());
+    mainTable = new XJTable();
+    mainTable.setSortable(false);
+    mainTable.setModel(mainTableModel);
+    mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    DeleteColumnCellRendererEditor rendererEditor = new DeleteColumnCellRendererEditor();
+    mainTable.getColumnModel().getColumn(DELETE_COLUMN).
+      setCellEditor(rendererEditor);
+    mainTable.getColumnModel().getColumn(DELETE_COLUMN).
+      setCellRenderer(rendererEditor);
+    
+    resourcesListModel = new ResourcesListModel();
+    resourcesList = new JList(resourcesListModel);
+    resourcesList.setCellRenderer(new ResourcesListCellRenderer());
+    resourcesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    //enable tooltips
+    ToolTipManager.sharedInstance().registerComponent(resourcesList);
+    getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
+    constraints.insets = new Insets(2, 2, 2, 2);
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.anchor = GridBagConstraints.WEST;
     constraints.gridy = 0;
-    add(new JScrollPane(mainTable), constraints);
+    constraints.weightx = 1;
+    getContentPane().add(new JLabel("Known CREOLE directories"), constraints);
+    getContentPane().add(new JLabel("CREOLE resources in directory"), constraints);
     
+    constraints.gridy = 1;
+    constraints.weighty = 1;
+    getContentPane().add(new JScrollPane(mainTable), constraints);
+    getContentPane().add(new JScrollPane(resourcesList), constraints);
     
+    constraints.gridy = 2;
+    constraints.weighty = 0;
+    constraints.gridwidth = 2;
+    Box hBox = Box.createHorizontalBox();
+    hBox.add(new JLabel("You can also "));
+    hBox.add(new JButton(new AddCreoleRepositoryAction()));
+    hBox.add(Box.createHorizontalGlue());
+    getContentPane().add(hBox, constraints);
+    
+    constraints.gridy = 3;
+    constraints.gridwidth = 2;
+    constraints.anchor = GridBagConstraints.CENTER;
+    constraints.fill = GridBagConstraints.NONE;
+    hBox = Box.createHorizontalBox();
+    hBox.add(new JButton(new OkAction()));
+    hBox.add(Box.createHorizontalStrut(20));
+    hBox.add(new JButton(new CancelAction()));
+    getContentPane().add(hBox, constraints);
   }
   
   protected void initListeners(){
-    
+    mainTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener(){
+     public void valueChanged(ListSelectionEvent e){
+       resourcesListModel.dataChanged();
+     }
+    });
+  }
+  
+  protected Boolean getLoadNow(URL url){
+    Boolean res = (Boolean)loadNowByURL.get(url);
+    if(res == null){
+      res = new Boolean(Gate.getCreoleRegister().getDirectories().contains(url));
+      loadNowByURL.put(url, res);
+    }
+    return res;
+  }
+  
+  protected Boolean getLoadAlways(URL url){
+    Boolean res = (Boolean)loadAlwaysByURL.get(url);
+    if(res == null){
+      res = new Boolean(Gate.getAutoloadPlugins().contains(url));
+      loadAlwaysByURL.put(url, res);
+    }
+    return res;
   }
   
   protected class MainTableModel extends AbstractTableModel{
+    public MainTableModel(){
+      localIcon = MainFrame.getIcon("loadFile.gif");
+      remoteIcon = MainFrame.getIcon("internet.gif");
+      invalidIcon = MainFrame.getIcon("param.gif");
+    }
     public int getRowCount(){
-      return rows.size();
+      return Gate.getKnownPlugins().size();
     }
     
     public int getColumnCount(){
-      return 4;
+      return 5;
     }
     
     public String getColumnName(int column){
       switch (column){
         case ICON_COLUMN: return "";
         case NAME_COLUMN: return "URL";
-        case LOAD_COLUMN: return "Load";
+        case LOAD_NOW_COLUMN: return "Load now";
+        case LOAD_ALWAYS_COLUMN: return "Load always";
         case DELETE_COLUMN: return "Delete";
         default: return null;
       }
@@ -121,57 +172,301 @@ public class PluginManagerUI extends JPanel implements GateConstants{
       switch (columnIndex){
         case ICON_COLUMN: return Icon.class;
         case NAME_COLUMN: return String.class;
-        case LOAD_COLUMN: return Boolean.class;
+        case LOAD_NOW_COLUMN: return Boolean.class;
+        case LOAD_ALWAYS_COLUMN: return Boolean.class;
         case DELETE_COLUMN: return Object.class;
         default: return null;
       }
     }
     
     public Object getValueAt(int row, int column){
-      Object rowValue = rows.get(row);
-      if(rowValue instanceof DirectoryHandler){
-        DirectoryHandler dHandler = (DirectoryHandler)rowValue;
-        switch (column){
-          case ICON_COLUMN: return dHandler.icon;
-          case NAME_COLUMN: return dHandler.url.toString();
-          case LOAD_COLUMN: return new Boolean(dHandler.load);
-          case DELETE_COLUMN: return null;
-          default: return null;
-        }
-      }else{
-        String resName = (String)rowValue;
-        switch (column){
-          case ICON_COLUMN: return null;
-          case NAME_COLUMN: return resName;
-          case LOAD_COLUMN: return null;
-          case DELETE_COLUMN: return null;
-          default: return null;
-        }
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+              (URL)Gate.getKnownPlugins().get(row));
+      switch (column){
+        case ICON_COLUMN: return
+          dInfo.isValid() ? (
+            dInfo.getUrl().getProtocol().equalsIgnoreCase("file") ? 
+            localIcon : remoteIcon) :
+          invalidIcon;
+        case NAME_COLUMN: return dInfo.getUrl().toString();
+        case LOAD_NOW_COLUMN: return  getLoadNow(dInfo.getUrl());
+        case LOAD_ALWAYS_COLUMN: return getLoadAlways(dInfo.getUrl());
+        case DELETE_COLUMN: return null;
+        default: return null;
       }
     }
     
-    protected static final int ICON_COLUMN = 0;
-    protected static final int NAME_COLUMN = 1;
-    protected static final int LOAD_COLUMN = 2;
-    protected static final int DELETE_COLUMN = 3;
-  }
-  
-  protected class DirectoryHandler{
-    public DirectoryHandler(URL url, boolean load){
-      this.url = url;
-      this.load = load;
-      icon = url.getProtocol().startsWith("file") ? 
-        MainFrame.getIcon("loadFile.gif") :
-        MainFrame.getIcon("internet.gif");
+    public boolean isCellEditable(int rowIndex, int columnIndex){
+      return columnIndex == LOAD_NOW_COLUMN || 
+        columnIndex == LOAD_ALWAYS_COLUMN ||
+        columnIndex == DELETE_COLUMN;
     }
     
-    URL url;
-    boolean load;
-    Icon icon;
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex){
+      Boolean valueBoolean = (Boolean)aValue;
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+              (URL)Gate.getKnownPlugins().get(rowIndex));
+      switch(columnIndex){
+        case LOAD_NOW_COLUMN: 
+          loadNowByURL.put(dInfo.getUrl(), valueBoolean);
+          break;
+        case LOAD_ALWAYS_COLUMN:
+          loadAlwaysByURL.put(dInfo.getUrl(), valueBoolean);
+          break;
+      }
+    }
+    
+    protected Icon localIcon;
+    protected Icon remoteIcon;
+    protected Icon invalidIcon;
   }
   
+  protected class ResourcesListModel extends AbstractListModel{
+    public Object getElementAt(int index){
+      int row = mainTable.getSelectedRow();
+      if(row == -1) return null;
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+              (URL)Gate.getKnownPlugins().get(row));
+      return (Gate.ResourceInfo)dInfo.getResourceInfoList().get(index);
+    }
+    
+    public int getSize(){
+      int row = mainTable.getSelectedRow();
+      if(row == -1) return 0;
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+              (URL)Gate.getKnownPlugins().get(row));
+      return dInfo.getResourceInfoList().size();
+    }
+    
+    public void dataChanged(){
+      fireIntervalRemoved(this, 0, getSize());
+      fireContentsChanged(this, 0, getSize());
+    }
+  }
+  
+  /**
+   * This class acts both as cell renderer  and editor for all the cells in the 
+   * delete column.
+   */
+  protected class DeleteColumnCellRendererEditor extends AbstractCellEditor 
+    implements TableCellRenderer, TableCellEditor{
+    
+    public DeleteColumnCellRendererEditor(){
+      label = new JLabel();
+      rendererDeleteButton = new JButton(MainFrame.getIcon("delete.gif"));
+      rendererDeleteButton.setMaximumSize(rendererDeleteButton.getPreferredSize());
+      editorDeleteButton = new JButton(MainFrame.getIcon("delete.gif"));
+      editorDeleteButton.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent evt){
+          int row = mainTable.getEditingRow();
+          Gate.removeKnownDirectory((URL)Gate.getKnownPlugins().
+                  get(row));
+          mainTableModel.fireTableDataChanged();
+        }
+      });
+    }
+    
+    public Component getTableCellRendererComponent(JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column){
+//      editorDeleteButton.setSelected(false);
+      switch(column){
+        case DELETE_COLUMN:
+          return rendererDeleteButton;
+        default: return null;
+      }
+    }
+    
+    public Component getTableCellEditorComponent(JTable table,
+            Object value,
+            boolean isSelected,
+            int row,
+            int column){
+      switch(column){
+        case DELETE_COLUMN:
+          return editorDeleteButton;
+        default: return null;
+      }
+    }
+    
+    public Object getCellEditorValue(){
+      return null;
+    }
+    
+    JButton editorDeleteButton;
+    JButton rendererDeleteButton;
+    JLabel label;
+  }
+  
+  protected class ResourcesListCellRenderer extends DefaultListCellRenderer{
+    public Component getListCellRendererComponent(JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus){
+      Gate.ResourceInfo rInfo = (Gate.ResourceInfo)value;
+      //prepare the renderer
+      super.getListCellRendererComponent(list, 
+              rInfo.getResourceName(), index, isSelected, cellHasFocus);
+      //add tooltip text
+      setToolTipText(rInfo.getResourceComment());
+      return this;
+    }
+  }
+  
+  
+  protected class OkAction extends AbstractAction {
+    public OkAction(){
+      super("OK");
+    }
+    public void actionPerformed(ActionEvent evt){
+      hide();
+      //update the data structures to reflect the user's choices
+      Iterator pluginIter = loadNowByURL.keySet().iterator();
+      while(pluginIter.hasNext()){
+        URL aPluginURL = (URL)pluginIter.next();
+        boolean load = ((Boolean)loadNowByURL.get(aPluginURL)).booleanValue();
+        boolean loaded = Gate.getCreoleRegister().
+            getDirectories().contains(aPluginURL); 
+        if(load && !loaded){
+          //load the directory
+          try{
+            Gate.getCreoleRegister().registerDirectories(aPluginURL);
+          }catch(GateException ge){
+            throw new GateRuntimeException(ge);
+          }
+        }
+        if(!load && loaded){
+          //remove the directory
+          Gate.getCreoleRegister().removeDirectory(aPluginURL);
+        }
+      }
+      
+      
+      pluginIter = loadAlwaysByURL.keySet().iterator();
+      while(pluginIter.hasNext()){
+        URL aPluginURL = (URL)pluginIter.next();
+        boolean load = ((Boolean)loadNowByURL.get(aPluginURL)).booleanValue();
+        boolean loaded = Gate.getAutoloadPlugins().contains(aPluginURL); 
+        if(load && !loaded){
+          //set autoload top true
+          Gate.addAutoloadPlugin(aPluginURL);
+        }
+        if(!load && loaded){
+          //set autoload to false
+          Gate.getAutoloadPlugins().remove(aPluginURL);
+        }
+      }
+      loadNowByURL.clear();
+      loadAlwaysByURL.clear();
+    }
+  }
+  
+  protected class CancelAction extends AbstractAction {
+    public CancelAction(){
+      super("Cancel");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      hide();
+      loadNowByURL.clear();
+      loadAlwaysByURL.clear();      
+    }
+  }
+
+  protected class AddCreoleRepositoryAction extends AbstractAction {
+    public AddCreoleRepositoryAction(){
+      super("Add a new CREOLE repository");
+      putValue(SHORT_DESCRIPTION,"Load a new CREOLE repository");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Box messageBox = Box.createHorizontalBox();
+      Box leftBox = Box.createVerticalBox();
+      JTextField urlTextField = new JTextField(20);
+      leftBox.add(new JLabel("Type an URL"));
+      leftBox.add(urlTextField);
+      messageBox.add(leftBox);
+
+      messageBox.add(Box.createHorizontalStrut(10));
+      messageBox.add(new JLabel("or"));
+      messageBox.add(Box.createHorizontalStrut(10));
+
+      class URLfromFileAction extends AbstractAction{
+        URLfromFileAction(JTextField textField){
+          super(null, MainFrame.getIcon("loadFile.gif"));
+          putValue(SHORT_DESCRIPTION,"Click to select a directory");
+          this.textField = textField;
+        }
+
+        public void actionPerformed(ActionEvent e){
+          JFileChooser fileChooser = MainFrame.getFileChooser(); 
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          int result = fileChooser.showOpenDialog(PluginManagerUI.this);
+          if(result == JFileChooser.APPROVE_OPTION){
+            try{
+              textField.setText(fileChooser.getSelectedFile().
+                                            toURL().toExternalForm());
+            }catch(MalformedURLException mue){
+              throw new GateRuntimeException(mue.toString());
+            }
+          }
+        }
+        JTextField textField;
+      };//class URLfromFileAction extends AbstractAction
+
+      Box rightBox = Box.createVerticalBox();
+      rightBox.add(new JLabel("Select a directory"));
+      JButton fileBtn = new JButton(new URLfromFileAction(urlTextField));
+      rightBox.add(fileBtn);
+      messageBox.add(rightBox);
+
+      int res = JOptionPane.showOptionDialog(
+                            PluginManagerUI.this, messageBox,
+                            "Enter an URL to the directory containig the " +
+                            "\"creole.xml\" file", JOptionPane.OK_CANCEL_OPTION,
+                            JOptionPane.QUESTION_MESSAGE, null, null, null);
+      if(res == JOptionPane.OK_OPTION){
+        try{
+          URL creoleURL = new URL(urlTextField.getText());
+          Gate.addKnownPlugin(creoleURL);
+          mainTableModel.fireTableDataChanged();
+        }catch(Exception ex){
+          JOptionPane.showMessageDialog(
+              PluginManagerUI.this,
+              "There was a problem with your selection:\n" +
+              ex.toString() ,
+              "Gate", JOptionPane.ERROR_MESSAGE);
+          ex.printStackTrace(Err.getPrintWriter());
+        }
+      }
+    }
+  }//class LoadCreoleRepositoryAction extends AbstractAction
 
   protected XJTable mainTable;
   protected MainTableModel mainTableModel;
-  protected List rows;
+  protected ResourcesListModel resourcesListModel;
+  protected JList resourcesList; 
+  
+  /**
+   * Map from URL to Boolean. Stores temporary values for the loadNow options.
+   */
+  protected Map loadNowByURL;
+  /**
+   * Map from URL to Boolean. Stores temporary values for the loadAlways 
+   * options.
+   */
+  protected Map loadAlwaysByURL;
+  
+  protected static final int ICON_COLUMN = 0;
+  protected static final int NAME_COLUMN = 1;
+  protected static final int LOAD_NOW_COLUMN = 2;
+  protected static final int LOAD_ALWAYS_COLUMN = 3;
+  protected static final int DELETE_COLUMN = 4;
+  
 }
