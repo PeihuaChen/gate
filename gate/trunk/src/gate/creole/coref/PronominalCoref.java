@@ -154,7 +154,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   public void setDocument(Document newDocument) {
 
     //0. precondition
-    Assert.assertNotNull(newDocument);
+//    Assert.assertNotNull(newDocument);
 
     //1. set doc for aggregated components
     this.qtTransducer.setDocument(newDocument);

@@ -65,7 +65,7 @@ public class Coreferencer extends AbstractLanguageAnalyser
   /** Set the document to run on. */
   public void setDocument(Document newDocument) {
 
-    Assert.assertNotNull(newDocument);
+//    Assert.assertNotNull(newDocument);
 
     this.pronominalModule.setDocument(newDocument);
     super.setDocument(newDocument);
