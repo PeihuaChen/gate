@@ -1216,45 +1216,6 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-  /** Get a list of the IDs of LRs of a particular type that are present. */
-  public List getLrIds(String lrType) throws PersistenceException {
-
-    Vector lrIDs = new Vector();
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    try {
-      stmt = this.jdbcConn.prepareStatement(
-                      " SELECT lr_id " +
-                      " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
-                      "        "+Gate.DB_OWNER+".t_lr_type LRTYPE " +
-                      " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                      "        AND LRTYPE.lrtp_type = ? " +
-                      " ORDER BY lr_name"
-                      );
-      stmt.setString(1,lrType);
-      ((OraclePreparedStatement)stmt).setRowPrefetch(DBHelper.CHINK_SIZE_SMALL);
-      stmt.execute();
-      rs = stmt.getResultSet();
-
-      while (rs.next()) {
-        //access by index is faster
-        Long lrID = new Long(rs.getLong(1));
-        lrIDs.add(lrID);
-      }
-
-      return lrIDs;
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't get LR types from DB: ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(rs);
-      DBHelper.cleanup(stmt);
-    }
-
-  }
-
 
 
   /** Get a list of the names of LRs of a particular type that are present. */
