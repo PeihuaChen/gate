@@ -61,6 +61,6 @@ public class TestCorpus extends TestCase
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestCorpus.class);
-  } // main
+  } // suite
 
 } // class TestCorpus

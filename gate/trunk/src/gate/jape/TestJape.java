@@ -25,7 +25,7 @@ public class TestJape extends TestCase
 
   /** Fixture set up */
   public void setUp() {
-    System.out.println("TestJape.setUp()");
+    //System.out.println("TestJape.setUp()");
   } // setUp
 
   /** Batch run */
@@ -46,7 +46,7 @@ public class TestJape extends TestCase
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestJape.class);
-  } // main
+  } // suite
 
 } // class TestJape
 
