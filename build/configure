@@ -540,7 +540,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
+  ac_dummy="${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -559,7 +559,7 @@ if test -n "$JAVAC"; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+:/bin:/usr/bin://w/jdk/jdk1.3/bin
 # Extract the first word of "java java.exe", so it can be a program name with args.
 set dummy java java.exe; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -576,7 +576,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
+  ac_dummy="${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -595,7 +595,7 @@ if test -n "$JAVA"; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+:/bin:/usr/bin://w/jdk/jdk1.3/bin
 # Extract the first word of "jar jar.exe", so it can be a program name with args.
 set dummy jar jar.exe; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -612,7 +612,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
+  ac_dummy="${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -631,7 +631,7 @@ if test -n "$JAR"; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+:/bin:/usr/bin://w/jdk/jdk1.3/bin
 # Extract the first word of "javadoc javadoc.exe", so it can be a program name with args.
 set dummy javadoc javadoc.exe; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -648,7 +648,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
+  ac_dummy="${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -667,7 +667,7 @@ if test -n "$JAVADOC"; then
 else
   echo "$ac_t""no" 1>&6
 fi
-
+:/bin:/usr/bin://w/jdk/jdk1.3/bin
 CYGPATH=echo
 # Extract the first word of "cygpath", so it can be a program name with args.
 set dummy cygpath; ac_word=$2

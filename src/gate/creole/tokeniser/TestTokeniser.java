@@ -48,7 +48,11 @@ public class TestTokeniser extends TestCase{
     );
     //create a default tokeniser
    FeatureMap params = Factory.newFeatureMap();
-   params.put("rulesURL", "gate:/creole/tokeniser/DefaultTokeniser.rules");
+   params.put("tokeniserRulesURL",
+              "gate:/creole/tokeniser/DefaultTokeniser.rules");
+   params.put("transducerGrammarURL",
+              "gate:/creole/tokeniser/postprocess.jape");
+
    params.put("encoding", "UTF-8");
    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                           "gate.creole.tokeniser.DefaultTokeniser", params);

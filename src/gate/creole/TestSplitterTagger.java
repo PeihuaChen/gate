@@ -13,6 +13,7 @@
 package gate.creole;
 
 import java.net.URL;
+import java.util.*;
 import junit.framework.*;
 
 import gate.*;
@@ -92,6 +93,10 @@ public class TestSplitterTagger extends TestCase{
     tagger.run();
     //check for exceptions
     tagger.check();
-    assert(!doc.getAnnotations("testAS").get("POS").isEmpty());
+    Iterator tokIter =doc.getAnnotations("testAS").get("Token").iterator();
+    while(tokIter.hasNext()){
+      Annotation token = (Annotation)tokIter.next();
+      assertNotNull(token.getFeatures().get("category"));
+    }
   }
 }
