@@ -32,7 +32,7 @@
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
   <property category="sys" name="InstanceVisibility" value="0" />
-  <property category="sys" name="JDK" value="java 1.3.0-C" />
+  <property category="sys" name="JDK" value="java 1.3.0 - SUN" />
   <property category="sys" name="LastTag" value="0" />
   <property category="sys" name="Libraries" value="gatelibs" />
   <property category="sys" name="MakeStable" value="0" />
