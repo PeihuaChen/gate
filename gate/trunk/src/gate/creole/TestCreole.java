@@ -23,13 +23,26 @@ public class TestCreole extends TestCase
   public TestCreole(String name) { super(name); }
 
   /** Fixture set up */
-  public void setUp() {
+  public void setUp() throws Exception {  
+    Gate.init();
+    Gate.initCreoleRegister();
   } // setUp
 
   /** A test */
   public void testSomething() throws Exception {
-    Gate.init();
-    Gate.initCreoleRegister();
+
+    CreoleRegister reg = Gate.getCreoleRegister();
+
+    assertEquals(reg.size(), 3);
+
+    assert(((ResourceData) reg.get("Sheffield Unicode Tokeniser")).getName()
+           .equals("Sheffield Unicode Tokeniser"));
+
+    String docFormatName = "Sheffield XML Document Format";
+    ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
+    assert(xmlDocFormatRD.getName().equals(docFormatName));
+    assert(xmlDocFormatRD.isAutoLoading());
+    assert(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
   } // testSomething()
 
   /** Test suite routine for the test runner */
