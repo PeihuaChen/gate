@@ -78,18 +78,17 @@ public class TestFSM extends TestCase {
     while(phases.hasMoreElements()){
       SinglePhaseTransducer phase = (SinglePhaseTransducer)phases.nextElement();
       FSM aFSM = new FSM(phase);
-      showGraph("Non-deterministic (" + phase.getName() +")",aFSM);
+      showGraph("Non-deterministic (" + phase.getName() +")",aFSM.getGML());
       aFSM.eliminateVoidTransitions();
-      showGraph("Deterministic (" + phase.getName()+")", aFSM);
+      showGraph("Deterministic (" + phase.getName()+")", aFSM.getGML());
     }
 
   }
 
   /** Opens anew window containing the visual representation of a FSM and
     *having a given title*/
-  private void showGraph(String title, FSM fsm) throws java.io.IOException,
+  static public void showGraph(String title, String gml) throws java.io.IOException,
                                  EDU.auburn.VGJ.graph.ParseError{
-    String gml = fsm.getGML();
     GMLlexer gl = new GMLlexer(new ByteArrayInputStream(gml.getBytes()));
     GMLobject go = new GMLobject(gl, null);
     Graph graph =
