@@ -245,7 +245,12 @@ Priority: 35
 // Mr Fred Jones
 // note we only allow one first and surname, 
 // but we can add more in a final phase if we find adjacent unknowns
- 
+
+( 
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}
+)
 (
  (TITLE)+
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
@@ -423,7 +428,7 @@ features);
 
 Rule: NotPersonFull
 Priority: 50
-// Det + Surname
+// do not allow Det + Surname
 (
  {Token.category == DT}|
  {Token.category == PRP}|
@@ -436,6 +441,8 @@ Priority: 50
 ):foo
 -->
 {}
+
+
 
 
 Rule: LocPersonAmbig
