@@ -67,10 +67,6 @@ public class PostgresDataStore extends JDBCDataStore {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
   }
-  public void sync(LanguageResource lr) throws gate.security.SecurityException, gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
 
 
   public List findLrIds(List constraints) throws gate.persist.PersistenceException {
@@ -141,7 +137,46 @@ public class PostgresDataStore extends JDBCDataStore {
   protected boolean canAccessLR(Long lrID,int mode)
     throws PersistenceException, SecurityException{
 
-    throw new MethodNotImplementedException();
+    //0. preconditions
+    Assert.assertTrue(DBHelper.READ_ACCESS == mode || DBHelper.WRITE_ACCESS == mode);
+
+    //1. is session initialised?
+    if (null == this.session) {
+      throw new SecurityException("user session not set");
+    }
+
+    //2.first check the session and then check whether the user is member of the group
+    if (this.ac.isValidSession(this.session) == false) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    try {
+      String sql = "select security_has_access_to_lr(?,?,?,?)";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      pstmt.setLong(2,this.session.getUser().getID().longValue());
+      pstmt.setLong(3,this.session.getGroup().getID().longValue());
+      pstmt.setLong(4,mode);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("empty result set");
+      }
+
+      return rs.getBoolean(1);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
   }
 
 
@@ -770,6 +805,66 @@ public class PostgresDataStore extends JDBCDataStore {
    *  or Object (stored as BLOB)
    */
   private void _updateFeatureLOB(Long featID,Object value, int valueType)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - saves a Corpus in the database */
+  protected void syncCorpus(Corpus corp)
+    throws PersistenceException,SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - saves a Document in the database */
+/*  protected void syncDocument(Document doc)
+    throws PersistenceException, SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+*/
+
+  /**
+   *  helper for sync()
+   *  NEVER call directly
+   */
+  protected void _syncLR(LanguageResource lr)
+    throws PersistenceException,SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncDocumentHeader(Document doc)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncDocumentContent(Document doc)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncFeatures(LanguageResource lr)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** helper for sync() - never call directly */
+  protected void _syncAnnotations(Document doc)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
