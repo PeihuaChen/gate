@@ -722,6 +722,73 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  private Long createDoc(Long _lrID,
+                          URL _docURL,
+                          String _docEncoding,
+                          Long _docStartOffset,
+                          Long _docEndOffset,
+                          Boolean _docIsMarkupAware,
+                          Long _corpusID)
+    throws PersistenceException {
+
+    CallableStatement cstmt = null;
+    Long docID = null;
+
+    try {
+      cstmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
+      cstmt.setLong(1,_lrID.longValue());
+      cstmt.setString(2,_docURL.toString());
+      //do we have doc encoding?
+      if (null == _docEncoding) {
+        cstmt.setNull(3,java.sql.Types.VARCHAR);
+      }
+      else {
+        cstmt.setString(3,_docEncoding);
+      }
+      //do we have start offset?
+      if (null==_docStartOffset) {
+        cstmt.setNull(4,java.sql.Types.NUMERIC);
+      }
+      else {
+        cstmt.setLong(4,_docStartOffset.longValue());
+      }
+      //do we have end offset?
+      if (null==_docEndOffset) {
+        cstmt.setNull(5,java.sql.Types.NUMERIC);
+      }
+      else {
+        cstmt.setLong(5,_docEndOffset.longValue());
+      }
+
+      cstmt.setBoolean(6,_docIsMarkupAware.booleanValue());
+
+      //is the document part of a corpus?
+      if (null == _corpusID) {
+        cstmt.setNull(7,java.sql.Types.BIGINT);
+      }
+      else {
+        cstmt.setLong(7,_corpusID.longValue());
+      }
+
+      //results
+      cstmt.registerOutParameter(8,java.sql.Types.BIGINT);
+
+      cstmt.execute();
+      docID = new Long(cstmt.getLong(8));
+
+      return docID;
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create document [step 4] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+    }
+
+  }
+
 
   /**
    * helper for adopt
@@ -763,13 +830,20 @@ public class OracleDataStore extends JDBCDataStore {
     Long lrID = createLR(DBHelper.DOCUMENT_CLASS,docName,secInfo,null);
 
     //4. create a record in T_DOCUMENT for this document
+    Long docID = createDoc(lrID,
+                            docURL,
+                            docEncoding,
+                            docStartOffset,
+                            docEndOffset,
+                            docIsMarkupAware,
+                            corpusID);
+/*
     CallableStatement stmt = null;
     Long docID = null;
     Long docContentID = null;
 
     try {
       stmt = this.jdbcConn.prepareCall(
-//              "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
                 "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
@@ -807,11 +881,9 @@ public class OracleDataStore extends JDBCDataStore {
 
       //results
       stmt.registerOutParameter(8,java.sql.Types.BIGINT);
-//      stmt.registerOutParameter(9,java.sql.Types.BIGINT);
 
       stmt.execute();
       docID = new Long(stmt.getLong(8));
-//      docContentID = new Long(stmt.getLong(9));
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't create document [step 4] in DB: ["+ sqle.getMessage()+"]");
@@ -819,6 +891,8 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       DBHelper.cleanup(stmt);
     }
+*/
+
 
     //5. fill document content (record[s] in T_DOC_CONTENT)
 
