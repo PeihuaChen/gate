@@ -300,6 +300,9 @@ public class CreoleXmlHandler extends DefaultHandler {
         currentAutoinstances.add(currentAutoinstanceParams);
     // End AUTOINSTANCE processing
     //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("PARAM")) {
+    // End PARAM processing
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
       resourceData.setName((String) contentStack.pop());

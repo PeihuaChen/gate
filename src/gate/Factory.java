@@ -344,7 +344,6 @@ public abstract class Factory {
     );
   } // deleteResource
 
-
   /** Create a new transient Corpus. */
   public static Corpus newCorpus(String name)
                                           throws ResourceInstantiationException

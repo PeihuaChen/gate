@@ -78,7 +78,7 @@ public class MainFrame extends JFrame
   JMenu newLrMenu;
   JMenu newPrMenu;
   JMenu newAppMenu;
-
+  JMenu loadANNIEMenu = null;
   JButton stopBtn;
   Action stopAction;
 
@@ -111,7 +111,6 @@ public class MainFrame extends JFrame
   HelpAboutAction helpAboutAction;
   NewAnnotDiffAction newAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
-
   /**
    * all the top level containers of this application; needed for changes of
    * look and feel
@@ -184,7 +183,6 @@ public class MainFrame extends JFrame
 
   /**Construct the frame*/
   public MainFrame() {
-//    thisMainFrame = this;
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
     initGuiComponents();
@@ -432,6 +430,8 @@ public class MainFrame extends JFrame
     fileMenu.add(new XJMenuItem(newDSAction, this));
     fileMenu.add(new XJMenuItem(openDSAction, this));
     fileMenu.addSeparator();
+    loadANNIEMenu = new JMenu("Load ANNIE system");
+    fileMenu.add(loadANNIEMenu);
     fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
     fileMenu.addSeparator();
 
@@ -861,6 +861,17 @@ public class MainFrame extends JFrame
         }
       }
     });
+
+    // Adding a listener for loading ANNIE with or without defaults
+    loadANNIEMenu.addMenuListener(new MenuListener(){
+      public void menuCanceled(MenuEvent e){}
+      public void menuDeselected(MenuEvent e){}
+      public void menuSelected(MenuEvent e){
+        loadANNIEMenu.removeAll();
+        loadANNIEMenu.add(new LoadANNIEWithDefaultsAction());
+        loadANNIEMenu.add(new LoadANNIEWithoutDefaultsAction());
+      }// menuSelected();
+    });//loadANNIEMenu.addMenuListener(new MenuListener()
 
     newPrsPopupMenu.addMenuListener(new MenuListener() {
       public void menuCanceled(MenuEvent e) {
@@ -1351,37 +1362,83 @@ public class MainFrame extends JFrame
   }
 */
 
+  /** This class represent an action which brings up the Annot Diff tool*/
   class NewAnnotDiffAction extends AbstractAction {
     public NewAnnotDiffAction() {
       super("Annotation Diff", getIcon("annDiff.gif"));
       putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
-/*      AnnotDiffHandle handle = new AnnotDiffHandle(thisMainFrame);
-      handle.setTooltipText("<html><b>Tool:</b> " +
-                            "Annotation diff" + "</html>");
-      handle.setTitle("Annotation Diff");
-
-      //show
-      JComponent largeView = handle.getLargeView();
-      if(largeView != null){
-        mainTabbedPane.addTab(handle.getTitle(), handle.getSmallIcon(),
-                              largeView, handle.getTooltipText());
-        mainTabbedPane.setSelectedComponent(handle.getLargeView());
-      }
-      JComponent smallView = handle.getSmallView();
-      if(smallView != null){
-        lowerScroll.getViewport().setView(smallView);
-      }else{
-        lowerScroll.getViewport().setView(null);
-      }
-      handle.setShown(true);
-*/
       AnnotDiffDialog annotDiffDialog = new AnnotDiffDialog(MainFrame.this);
       annotDiffDialog.setTitle("Annotation Diff Tool");
       annotDiffDialog.setVisible(true);
     }// actionPerformed();
   }//class NewAnnotDiffAction
+
+  /** This class represent an action which loads ANNIE with default params*/
+  class LoadANNIEWithDefaultsAction extends AbstractAction {
+    public LoadANNIEWithDefaultsAction() {
+      super("With defaults");
+    }// NewAnnotDiffAction
+    public void actionPerformed(ActionEvent e) {
+      // Loads ANNIE with defaults
+      Runnable runnable = new Runnable(){
+        public void run(){
+          Map listeners = new HashMap();
+          listeners.put("gate.event.ProgressListener", MainFrame.this);
+          listeners.put("gate.event.StatusListener", MainFrame.this);
+          FeatureMap params = Factory.newFeatureMap();
+          try{
+            // Load each PR as defined in gate.creole.AnnieConstants.PR_NAMES
+            for(int i=0; i<gate.creole.AnnieConstants.PR_NAMES.length; i++){
+              Factory.createResource( gate.creole.AnnieConstants.PR_NAMES[i],
+                                      params,
+                                      listeners);
+            }// End for
+            // Create an application at the end.
+            Factory.createResource("gate.creole.SerialController");
+          }catch(gate.creole.ResourceInstantiationException ex){
+            ex.printStackTrace(Err.getPrintWriter());
+          }// End try
+        }// run()
+      };// End Runnable
+      Thread thread = new Thread(runnable, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }// actionPerformed();
+  }//class LoadANNIEWithDefaultsAction
+
+  /** This class represent an action which loads ANNIE without default param*/
+  class LoadANNIEWithoutDefaultsAction extends AbstractAction {
+    public LoadANNIEWithoutDefaultsAction() {
+      super("Without defaults");
+    }// NewAnnotDiffAction
+    public void actionPerformed(ActionEvent e) {
+      //Load ANNIE without defaults
+      CreoleRegister reg = Gate.getCreoleRegister();
+      // Load each PR as defined in gate.creole.AnnieConstants.PR_NAMES
+      for(int i=0; i<gate.creole.AnnieConstants.PR_NAMES.length; i++){
+        ResourceData resData = (ResourceData)reg.get(
+                                  gate.creole.AnnieConstants.PR_NAMES[i]);
+        if (resData != null){
+          NewResourceDialog resourceDialog = new NewResourceDialog(
+              MainFrame.this, "Resource parameters", true );
+          resourceDialog.setTitle(
+                            "Parameters for the new " + resData.getName());
+          resourceDialog.show(resData);
+        }else{
+          Err.prln(gate.creole.AnnieConstants.PR_NAMES[i] +
+                                        " not found in Creole register");
+        }// End if
+      }// End for
+      try{
+        // Create an application at the end.
+        Factory.createResource("gate.creole.SerialController");
+      }catch(gate.creole.ResourceInstantiationException ex){
+        ex.printStackTrace(Err.getPrintWriter());
+      }// End try
+    }// actionPerformed();
+  }//class LoadANNIEWithoutDefaultsAction
 
   class NewBootStrapAction extends AbstractAction {
     public NewBootStrapAction() {

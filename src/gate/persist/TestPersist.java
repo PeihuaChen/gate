@@ -38,7 +38,7 @@ public class TestPersist extends TestCase
 
 
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
