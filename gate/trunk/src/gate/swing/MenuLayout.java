@@ -52,7 +52,6 @@ public class MenuLayout implements LayoutManager {
       componentPrefSizes[i] = target.getComponent(i).getPreferredSize();
     }
     Dimension dim = getCompositeSize(target, componentPrefSizes);
-System.out.println("Pref size: " + dim);
     return dim;
   }
 
