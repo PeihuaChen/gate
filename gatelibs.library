@@ -20,6 +20,7 @@
     <path>[lib/SunXmlParser.jar]</path>
     <path>[lib/jdom.jar]</path>
     <path>[lib/GnuGetOpt.jar]</path>
+    <path>[lib/docwiz.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
