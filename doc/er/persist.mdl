@@ -53,9 +53,6 @@
 	subsystem  	"Component View"
 	quidu      	"3BA1E1830101"
 	logical_models 	(list unit_reference_list
-	    (object Class "NewClass"
-		quid       	"3BA1E24C010A"
-		stereotype 	"Interface")
 	    (object Class "DataStore"
 		quid       	"3BA1E31200BE"
 		stereotype 	"Interface"
@@ -235,10 +232,10 @@
 			result     	"String"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
-			uid        	0)))
-	    (object Class "NewInterface"
-		quid       	"3BA1E33200D8"
-		stereotype 	"Interface")
+			uid        	0))
+		module     	"Component View::DataStore"
+		quidu      	"3BA1F7FD038F"
+		language   	"Java")
 	    (object Class "FeatureBearer"
 		quid       	"3BA1E46E01EB"
 		stereotype 	"Interface"
@@ -272,6 +269,131 @@
 			result     	"String"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "DatabaseDataStore"
+		quid       	"3BA1EBEC0302"
+		stereotype 	"Interface"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3BA207250276"
+			supplier   	"Logical View::DataStore"
+			quidu      	"3BA1E31200BE"))
+		operations 	(list Operations
+		    (object Operation "beginTrans"
+			quid       	"3BA1ED2F03D8"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "commitTrans"
+			quid       	"3BA1F8870211"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "rollbackTrans"
+			quid       	"3BA1F89301D3"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class_Utility "NewClassUtility"
+		quid       	"3BA1F7DB0160")
+	    (object Class "OracleDataStore"
+		quid       	"3BA1FA57029B"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3BA1FB060351"
+			supplier   	"Logical View::JDBCDataStore"
+			quidu      	"3BA2074B027B"))
+		operations 	(list Operations
+		    (object Operation "OracleDataStore"
+			quid       	"3BA2009D02FE"
+			parameters 	(list Parameters
+			    (object Parameter "driver"
+				type       	"String")
+			    (object Parameter "url"
+				type       	"String")
+			    (object Parameter "user"
+				type       	"String")
+			    (object Parameter "password"
+				type       	"String")
+			    (object Parameter "mode"
+				type       	"integer"))
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "SAPDataStore"
+		quid       	"3BA1FB72016B"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3BA1FBA50331"
+			supplier   	"Logical View::JDBCDataStore"
+			quidu      	"3BA2074B027B")))
+	    (object Class "PostgresDataStore"
+		quid       	"3BA1FB8902EB"
+		superclasses 	(list inheritance_relationship_list
+		    (object Inheritance_Relationship
+			quid       	"3BA1FBAB004B"
+			supplier   	"Logical View::JDBCDataStore"
+			quidu      	"3BA2074B027B")))
+	    (object Class "JDBCDataStore"
+		quid       	"3BA2074B027B"
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"3BA2076D037E"
+			supplier   	"Logical View::DatabaseDataStore"
+			quidu      	"3BA1EBEC0302"))
+		operations 	(list Operations
+		    (object Operation "JDBCDataStore"
+			quid       	"3BA2078D02EE"
+			parameters 	(list Parameters
+			    (object Parameter "driver"
+				type       	"String")
+			    (object Parameter "url"
+				type       	"String")
+			    (object Parameter "user"
+				type       	"String")
+			    (object Parameter "password"
+				type       	"String")
+			    (object Parameter "schema"
+				type       	"String")
+			    (object Parameter "catalog"
+				type       	"String")
+			    (object Parameter "mode"
+				type       	"integer"))
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "cleanup"
+			quid       	"3BA207C50136"
+			parameters 	(list Parameters
+			    (object Parameter "rs"
+				type       	"RecordSet"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
+			uid        	0)
+		    (object Operation "cleanup"
+			quid       	"3BA207D80039"
+			parameters 	(list Parameters
+			    (object Parameter "stmt"
+				type       	"Statement"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
+			uid        	0)
+		    (object Operation "connect"
+			quid       	"3BA207E600BB"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
+			uid        	0)
+		    (object Operation "disconnect"
+			quid       	"3BA207F30363"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Protected"
 			uid        	0))))
 	logical_presentations 	(list unit_reference_list
 	    (object ClassDiagram "Main"
@@ -280,67 +402,85 @@
 		zoom       	100
 		max_height 	28350
 		max_width  	21600
-		origin_x   	0
-		origin_y   	250
+		origin_x   	63
+		origin_y   	1756
 		items      	(list diagram_item_list
 		    (object ClassView "Class" "Logical View::DataStore" @1
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
-			location   	(576, 880)
+			location   	(752, 1362)
 			label      	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(575, 988)
-			    anchor_loc 	1
-			    nlines     	2
-			    max_width  	536
+			    location   	(490, 828)
+			    fill_color 	16777215
+			    nlines     	1
+			    max_width  	524
 			    justify    	0
 			    label      	"DataStore")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@1
+			    location   	(490, 778)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	524
+			    justify    	0
+			    label      	"<<Interface>>")
 			icon       	"Interface"
-			icon_style 	"Icon"
+			icon_style 	"Label"
 			line_color 	3342489
 			fill_color 	13434879
 			quidu      	"3BA1E31200BE"
 			compartment 	(object Compartment
 			    Parent_View 	@1
-			    location   	(313, 1029)
+			    location   	(490, 889)
 			    icon_style 	"Icon"
+			    fill_color 	16777215
 			    anchor     	2
 			    nlines     	21
-			    max_width  	522
-			    justify    	0)
-			width      	58
-			height     	58
+			    max_width  	522)
+			width      	542
+			height     	1192
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::FeatureBearer" @2
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
-			location   	(592, 304)
+			location   	(784, 288)
 			label      	(object ItemLabel
 			    Parent_View 	@2
-			    location   	(591, 412)
-			    anchor_loc 	1
-			    nlines     	2
-			    max_width  	288
+			    location   	(637, 154)
+			    fill_color 	16777215
+			    nlines     	1
+			    max_width  	294
 			    justify    	0
 			    label      	"FeatureBearer")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@2
+			    location   	(637, 104)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	294
+			    justify    	0
+			    label      	"<<Interface>>")
 			icon       	"Interface"
-			icon_style 	"Icon"
+			icon_style 	"Label"
 			line_color 	3342489
 			fill_color 	13434879
 			quidu      	"3BA1E46E01EB"
 			compartment 	(object Compartment
 			    Parent_View 	@2
-			    location   	(449, 453)
+			    location   	(637, 212)
 			    icon_style 	"Icon"
+			    fill_color 	16777215
 			    anchor     	2
 			    nlines     	5
-			    max_width  	281
-			    justify    	0)
-			width      	58
-			height     	58
+			    max_width  	300)
+			width      	312
+			height     	392
 			annotation 	8
 			autoResize 	TRUE)
 		    (object InheritView "" @3
@@ -349,10 +489,193 @@
 			quidu      	"3BA1E4920070"
 			client     	@1
 			supplier   	@2
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::DatabaseDataStore" @4
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1984, 1664)
+			label      	(object ItemLabel
+			    Parent_View 	@4
+			    location   	(1787, 1555)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	394
+			    justify    	0
+			    label      	"DatabaseDataStore")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@4
+			    location   	(1787, 1505)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	394
+			    justify    	0
+			    label      	"<<Interface>>")
+			icon       	"Interface"
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA1EBEC0302"
+			compartment 	(object Compartment
+			    Parent_View 	@4
+			    location   	(1787, 1616)
+			    icon_style 	"Icon"
+			    fill_color 	16777215
+			    anchor     	2
+			    nlines     	4
+			    max_width  	316)
+			width      	412
+			height     	342
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::OracleDataStore" @5
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(992, 2688)
+			label      	(object ItemLabel
+			    Parent_View 	@5
+			    location   	(803, 2607)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	378
+			    justify    	0
+			    label      	"OracleDataStore")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA1FA57029B"
+			compartment 	(object Compartment
+			    Parent_View 	@5
+			    location   	(803, 2668)
+			    icon_style 	"Icon"
+			    fill_color 	16777215
+			    anchor     	2
+			    nlines     	2
+			    max_width  	375)
+			width      	396
+			height     	186
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::SAPDataStore" @6
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1968, 2736)
+			label      	(object ItemLabel
+			    Parent_View 	@6
+			    location   	(1813, 2685)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	310
+			    justify    	0
+			    label      	"SAPDataStore")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA1FB72016B"
+			width      	328
+			height     	126
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::PostgresDataStore" @7
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(2608, 2640)
+			label      	(object ItemLabel
+			    Parent_View 	@7
+			    location   	(2414, 2589)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	388
+			    justify    	0
+			    label      	"PostgresDataStore")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA1FB8902EB"
+			width      	406
+			height     	126
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @8
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3BA207250276"
+			client     	@4
+			supplier   	@1
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::JDBCDataStore" @9
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1968, 2256)
+			label      	(object ItemLabel
+			    Parent_View 	@9
+			    location   	(1787, 2075)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	362
+			    justify    	0
+			    label      	"JDBCDataStore")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA2074B027B"
+			compartment 	(object Compartment
+			    Parent_View 	@9
+			    location   	(1787, 2136)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	6
+			    max_width  	359)
+			width      	380
+			height     	386
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @10
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3BA1FB060351"
+			client     	@5
+			supplier   	@9
+			line_style 	0)
+		    (object InheritView "" @11
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3BA1FBA50331"
+			client     	@6
+			supplier   	@9
+			line_style 	0)
+		    (object InheritView "" @12
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3BA1FBAB004B"
+			client     	@7
+			supplier   	@9
+			line_style 	0)
+		    (object RealizeView "" @13
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"3BA2076D037E"
+			client     	@9
+			supplier   	@4
 			line_style 	0)))))
     root_subsystem 	(object SubSystem "Component View"
 	quid       	"3BA1E1830101"
-	physical_models 	(list unit_reference_list)
+	physical_models 	(list unit_reference_list
+	    (object module "DataStore" "NotAModuleType" "NotAModulePart"
+		quid       	"3BA1F7FD038F"
+		stereotype 	""
+		realized_interfaces 	(list realize_rel_list
+		    (object Realize_Relationship
+			quid       	"3BA1F7FE002B"
+			supplier   	"Logical View::DataStore"
+			quidu      	"3BA1E31200BE"))
+		language   	"Java"))
 	physical_presentations 	(list unit_reference_list
 	    (object Module_Diagram "Main"
 		quid       	"3BA1E18A031E"
