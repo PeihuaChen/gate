@@ -58,12 +58,16 @@ public class BootStrap {
   /** a buffer in order to read an array of char */
   private char cbuffer[] = null;
 
-  /** determine the methods from the class that implements the resource*/
+  /** the methods from the class that implements the resource*/
   protected ArrayList listMethodsResource = null;
+
+  /** the list with the packages name where the main class can be find*/
+  protected List listPackages;
 
   /** the packages used by the class which creates the resources */
   protected Set allPackages = null;
 
+  /** the enumeration of the variables from main class*/
   protected Map fields = null;
 
   public BootStrap() {
@@ -71,6 +75,8 @@ public class BootStrap {
     names = new HashMap();
 
     listMethodsResource = new ArrayList();
+
+    listPackages = new ArrayList();
 
     buffer = new byte[BUFF_SIZE];
 
@@ -254,7 +260,6 @@ public class BootStrap {
         Class[] valException = (Class[])(currentFeature.get(2));
 
         // the form of the method
-        Out.prln("val "+valReturn.getName());
         String typeReturn = determineTypePackage(valReturn.getName());
 
 
@@ -381,7 +386,7 @@ public class BootStrap {
   } // addContent
 
   /** create the map with variants of the names... */
-  public Map createNames (String nameResource, String nameClass) {
+  public Map createNames (String namePackage, String nameClass) {
 
     // determine the name of the current user and the current day
     Calendar calendar = Calendar.getInstance();
@@ -393,12 +398,17 @@ public class BootStrap {
 
     // the a map with the variants of names and the current date
     // and the current user
+    String nameResource = (String)listPackages.get(listPackages.size()-1);
+
     names.put(nameProject,nameResource);
     names.put(nameProject.toUpperCase(),nameResource.toUpperCase());
     names.put(nameProject.toLowerCase(),nameResource.toLowerCase());
     names.put("___CLASSNAME___",nameClass);
     names.put("___DATE___",date);
     names.put("___AUTHOR___",user);
+    names.put("___PACKAGE___",namePackage);
+    names.put("___PACKAGETOP___",listPackages.get(0));
+    names.put("___RESOURCE___",nameResource);
 
     return names;
   }
@@ -413,23 +423,60 @@ public class BootStrap {
     return packages;
   }
 
+  /**
+   * */
+  public List determinePath (String namePackage)throws IOException {
+    List list = new ArrayList();
+    StringTokenizer token = new StringTokenizer(namePackage,".");
+    if (token.countTokens()>1) {
+      while (token.hasMoreTokens()) {
+        list.add(token.nextToken());
+      }
+    } else list.add(namePackage);
+    return list;
+  }
+
   /**  Creates the resource and dumps out a project structure using the
     *  structure from gate/resource/creole/templateproject/Template and the
     *  information provided by the user
-    * @nameResource is the name of the new resource
+    * @namePackage is the name of the new resource
     * @typeResource is the type of the resource (e.g.ProcessingResource,
     *  LanguageResource or VisualResource)
     * @nameClass is the name of the class which implements the resource
     * @listInterfaces is the set of the interfaces that implements the resource
     * @pathNewProject is the path where it will be the new resource
     */
-  public void createResource( String nameResource,String typeResource,
+  public void createResource( String namePackage,String typeResource,
                               String nameClass, Set listInterfaces,
                               String pathNewProject)
                               throws
-                              IOException,ClassNotFoundException, REException {
+                              IOException,ClassNotFoundException, REException,
+                              GateException {
+    // verify the input
+    // class name contains only letters
+    char[] nameClassChars = nameClass.toCharArray();
+    for (int i=0;i<nameClassChars.length;i++){
+      Character nameClassCharacter = new Character(nameClassChars[i]);
+      if (!nameClassCharacter.isLetter(nameClassChars[i]))
+        throw new GateException("Only letters in the class name");
+    }
+    // verify if it exits a directory of given path
+    File dir = new File(pathNewProject);
+    if (!dir.isDirectory())
+      throw new GateException("The folder is not a directory");
 
-    createNames(nameResource,nameClass);
+    //determine the list with packages
+    listPackages = determinePath (namePackage);
+    // determine the resource name
+    String nameResource;
+    if (listPackages.size()>0) {
+      nameResource = (String)listPackages.get(listPackages.size()-1); }
+    else {
+      nameResource = namePackage;
+    }
+
+    // create the map with the names
+    createNames(namePackage,nameClass);
 
     // determine the interfaces that the resource implements and the class
     // that it extends
@@ -456,6 +503,14 @@ public class BootStrap {
 
     Enumeration keyProperties = properties.propertyNames();
 
+    // determine the path of the main class
+    String stringPackages = "";
+    for (int i=0;i<listPackages.size();i++) {
+      stringPackages = stringPackages + listPackages.get(i)+"/";
+    }
+    if (stringPackages.length()>0)
+      stringPackages = stringPackages.substring(0,stringPackages.length()-1);
+
     // goes through all the files from the template project
     while (keyProperties.hasMoreElements()) {
 
@@ -466,28 +521,48 @@ public class BootStrap {
       StringTokenizer token = new StringTokenizer(valueKey,",");
       while (token.hasMoreTokens()) {
         String nameFile = (String)token.nextToken();
-
         // the new path of the current file from template project
-        String newPathFile = changeKeyValue(pathNewProject+"/"+nameFile);
+        String newPathFile = nameFile;
+
+        nameFile = regularExpressions(nameFile,"","___PACKAGETOP___/");
+        nameFile = regularExpressions(nameFile,"template","___PACKAGE___");
 
         if (key.compareTo("dir") == 0) {
           // the current directory is created
-          newFile = new File(newPathFile);
-          newFile.mkdir();
-
+          if (newPathFile.endsWith("___PACKAGE___")) {
+            newPathFile = newPathFile.substring(0,newPathFile.length()-14);
+            newPathFile = changeKeyValue(newPathFile);
+            for (int i=0;i<listPackages.size();i++) {
+              newPathFile = newPathFile + "/"+listPackages.get(i);
+              newFile = new File(pathNewProject+"/"+newPathFile);
+              newFile.mkdir();
+            }
+          } else {
+            newPathFile = regularExpressions(
+              newPathFile,stringPackages,"___PACKAGE___");
+            newPathFile = changeKeyValue(pathNewProject+"/"+nameFile);
+            newFile = new File(newPathFile);
+            newFile.mkdir();
+          }
         } // if
         else {
+
+          newPathFile = regularExpressions(
+            pathNewProject+"/"+newPathFile,stringPackages,"___PACKAGE___");
+          newPathFile = changeKeyValue(newPathFile);
+
           // the extension of the current file
           String extension = newPathFile.substring(newPathFile.length()-4,
-                                                      newPathFile.length());
+                                                    newPathFile.length());
 
           InputStream currentInputStream =
               Files.getGateResourceAsStream(oldResource+"/"+nameFile);
+
           if (extension.compareTo(".jav") == 0)
             newFile = new File(newPathFile+"a");
           else newFile = new File(newPathFile);
 
-          if (extension.compareTo(".jar")!=0) {
+          if (!extension.equals(".jar")) {
 
             // the content of the current file is copied on the disk
 
