@@ -50,6 +50,13 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * what annotation type names to use.
     */
   public void unpackMarkup(Document doc){
+    // create the element2String map
+    Map anElement2StringMap = null;
+    anElement2StringMap = new HashMap();
+    // populate it
+    anElement2StringMap.put("S","\n\n");
+    anElement2StringMap.put("s","\n\n");
+    setElement2StringMap(anElement2StringMap);
 	  try {
 
       // use Excerces XML parser with JAXP
@@ -71,7 +78,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       if (null != doc){
         // create a new Xml document handler
         gate.xml.XmlDocumentHandler xmlDocHandler =  new
-                    gate.xml.XmlDocumentHandler(doc, this.markupElementsMap);
+                    gate.xml.XmlDocumentHandler(doc, this.markupElementsMap,
+                                                this.element2StringMap);
         // register a status listener with it 
         xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){

@@ -53,6 +53,12 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     * here will be converted.
     */
   protected Map markupElementsMap = null;
+  /**
+    This map is used inside uppackMarkup() method...
+    When an element from the map is encounted, The corresponding string
+    element is added to the document content
+  */
+  protected Map element2StringMap = null;
 
   /** The features of this resource */
   private FeatureMap features = null;
@@ -83,15 +89,17 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     mime.addParameter ("ClassHandler","gate.corpora.XmlDocumentFormat");
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-
+    //register file sufixes
     suffixes2mimeStringMap.put("xml",mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeStringMap.put("xhtm",mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeStringMap.put("xhtml",mime.getType() + "/" + mime.getSubtype());
 
     // register HTML mime type
     mime = new MimeType("text","html");
     mime.addParameter ("ClassHandler","gate.corpora.HtmlDocumentFormat");
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-
+    //register file sufixes
     suffixes2mimeStringMap.put("htm",mime.getType() + "/" + mime.getSubtype());
     suffixes2mimeStringMap.put("html",mime.getType() + "/" + mime.getSubtype());
 
@@ -100,7 +108,7 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     mime.addParameter ("ClassHandler","gate.corpora.SgmlDocumentFormat");
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-
+    //register file sufixes
     suffixes2mimeStringMap.put("sgm",mime.getType() + "/" + mime.getSubtype());
     suffixes2mimeStringMap.put("sgml",mime.getType() + "/" + mime.getSubtype());
 
@@ -109,7 +117,7 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     mime.addParameter ("ClassHandler","gate.corpora.RtfDocumentFormat");
     // register the class with this map type
     mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
-
+    //register file sufixes
     suffixes2mimeStringMap.put("rtf",mime.getType() + "/" + mime.getSubtype());
 
   }//register
@@ -284,9 +292,17 @@ public abstract class DocumentFormat implements Resource,StatusReporter
    /** Get the markup elements map */
   public Map getMarkupElementsMap() { return markupElementsMap; }
 
+   /** Get the element 2 string map */
+  public Map getElement2StringMap() { return element2StringMap; }
+
   /** Set the markup elements map */
   public void setMarkupElementsMap(Map markupElementsMap) {
    this.markupElementsMap = markupElementsMap;
+  }
+
+  /** Set the element 2 string map */
+  public void setElement2StringMap(Map anElement2StringMap) {
+   element2StringMap = anElement2StringMap;
   }
 
   public void setFeatures(FeatureMap features){}

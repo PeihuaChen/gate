@@ -32,7 +32,8 @@ public class XmlDocumentHandler extends HandlerBase
   /**
     Constructor initialises some private fields
     */
-  public XmlDocumentHandler(gate.Document aDocument, Map  aMarkupElementsMap){
+  public XmlDocumentHandler(gate.Document aDocument, Map  aMarkupElementsMap,
+                            Map anElement2StringMap){
     // init stack
     stack = new java.util.Stack();
     // this string contains the plain text (the text without markup)
@@ -45,6 +46,10 @@ public class XmlDocumentHandler extends HandlerBase
     // if it's null all the elements from the XML documents will be transformed
     // into Gate annotation objects
     markupElementsMap = aMarkupElementsMap;
+    // this map contains the string that we want to insert iside the document
+    // content, when a certain element is found
+    // if the map is null then no string is added
+    element2StringMap = anElement2StringMap;
   }
 
   /**
@@ -137,6 +142,16 @@ public class XmlDocumentHandler extends HandlerBase
     // later, when the document ends we will use colector to create all the
     // annotations
     colector.add(obj);
+    // if element is found on Element2String map, then add the string to the
+    // end of the document content
+    if (element2StringMap != null){
+      String stringFromMap = null;
+      // test to see if element is inside the map
+      // if it is then get the string value and add it to the document content
+      stringFromMap = (String) element2StringMap.get(elemName);
+      if (stringFromMap != null)
+          tmpDocContent += stringFromMap;
+    }
   }
 
   /**
@@ -291,6 +306,11 @@ public class XmlDocumentHandler extends HandlerBase
   // into Gate annotation objects otherwise only the elements it contains will
   // be transformed
   private Map markupElementsMap = null;
+
+  // this map contains the string that we want to insert iside the document
+  // content, when a certain element is found
+  // if the map is null then no string is added 
+  private Map element2StringMap = null;
 
   // this object inducates what to do when the parser encounts an error
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
