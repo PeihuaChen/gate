@@ -265,13 +265,13 @@ implements AnnotationSet
 
   /** Get all annotations */
   public AnnotationSet get() {
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
     Iterator iter = annotsById.values().iterator();
     while (iter.hasNext()) {
       Out.prln(iter.next().toString());
     }
 
-    resultSet.addAll(annotsById.values());
+    resultSet.addAllKeepIDs(annotsById.values());
     if(resultSet.isEmpty())
       return null;
     return resultSet;
@@ -297,13 +297,13 @@ implements AnnotationSet
     if(annotsByType == null) indexByType();
 
     Iterator iter = types.iterator();
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
 
     while(iter.hasNext()) {
       String type = (String) iter.next();
       AnnotationSet as = (AnnotationSet) annotsByType.get(type);
       if(as != null)
-        resultSet.addAll(as);
+        resultSet.addAllKeepIDs(as);
       // need an addAllOfOneType method
     } // while
 
@@ -421,7 +421,7 @@ implements AnnotationSet
     //or
     //-start at a position between the start and the end offsets
     if(annotsByStartNode == null) indexByStartOffset();
-    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
     Iterator nodesIter;
     Iterator annotsIter;
     Node currentNode;
@@ -448,7 +448,7 @@ implements AnnotationSet
     while(nodesIter.hasNext()){
       currentNode = (Node)nodesIter.next();
       Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
-      if(fromPoint != null) resultSet.addAll(fromPoint);
+      if(fromPoint != null) resultSet.addAllKeepIDs(fromPoint);
     }
     return resultSet;
   }//get(startOfset, endOffset)
@@ -683,6 +683,29 @@ implements AnnotationSet
       }catch(InvalidOffsetException ioe){
         throw new IllegalArgumentException(ioe.toString());
       }
+    }
+    return changed;
+  }
+
+  /**
+   * Adds multiple annotations to this set in one go.
+   * All the objects in the provided collection should be of
+   * {@link gate.Annotation} type, otherwise a ClassCastException will be
+   * thrown.
+   * This method does not create copies of the annotations like addAll() does
+   * but simply adds the new annotations to the set.
+   * It is intended to be used solely by annotation sets in order to construct
+   * the results for various get(...) methods.
+   * @param c a collection of annotations
+   * @return <tt>true</tt> if the set has been modified as a result of this
+   * call.
+   */
+  protected boolean addAllKeepIDs(Collection c){
+    Iterator annIter = c.iterator();
+    boolean changed = false;
+    while(annIter.hasNext()){
+      Annotation a = (Annotation)annIter.next();
+      changed |= add(a);
     }
     return changed;
   }
