@@ -78,6 +78,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   /** internal or external list */
   protected boolean extLists = true;
 
+  /** matching unknowns or not*/
   protected boolean matchingUnknowns = true;
 
   /** This is an internal variable to indicate whether
@@ -1002,6 +1003,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     annotationTypes = newType;
   }//setAnnotationTypes
 
+  /** set whether to process the Unknown annotations*/
+  public void setProcessUnknown(Boolean processOrNot) {
+    this.matchingUnknowns = processOrNot.booleanValue();
+  }//setAnnotationTypes
+
   public void setOrganizationType(String newOrganizationType) {
     organizationType = newOrganizationType;
   }//setOrganizationType
@@ -1032,8 +1038,14 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     return new Boolean(extLists);
   }
 
+  /** Are we running in a case-sensitive mode?*/
   public Boolean getCaseSensitive() {
     return new Boolean(caseSensitive);
+  }
+
+  /** Return whether or not we're processing the Unknown annots*/
+  public Boolean getProcessUnknown() {
+    return new Boolean(matchingUnknowns);
   }
 
 /*
