@@ -117,7 +117,7 @@ Rule: TimeDigital1
 )
 :time
 -->
-:time.TIME = {kind = "time", rule = "TimeDigital1"}
+:time.DATE = {kind = "time", rule = "TimeDigital1"}
 
 Rule: TimeOClock
 // zehn Uhr
@@ -130,7 +130,30 @@ Rule: TimeOClock
 )
 :time2 
 -->
-:time2.TIME = {kind = "time", rule = "TimeOClock"}
+:time2.DATE = {kind = "time", rule = "TimeOClock"}
+
+Rule:TimeOClockSpan
+// von 1 bis 2 Uhr
+
+
+(
+ ({Token.string == "von"})?
+ 
+ ({Lookup.majorType == number})+
+({Token.string == "."})?
+ ({Lookup.majorType == number})+
+ 
+ {Token.string == "bis"}
+ 
+ ({Lookup.majorType == number})+
+({Token.string == "."})?
+ ({Lookup.majorType == number})+
+ {Token.string == "Uhr"}
+)
+:tag 
+-->
+:tag.DATE = {kind = "time", rule = "TimeOClockSpan"}
+
 
 
 Rule: Time_key1
@@ -152,7 +175,7 @@ Priority: 50
  {Lookup.minorType == time_key}
 ) 
 -->
-:time1.TIME = {kind = "time", rule = "Time_key1"}
+:time1.DATE = {kind = "time", rule = "Time_key1"}
 
 Rule: TimeDigitalContext1
 
@@ -166,7 +189,7 @@ Rule: TimeDigitalContext1
 )?
 {Lookup.minorType == time_key}
  -->
-:time.TIME = {rule = "TimeDigitalContext"}
+:time.DATE = {kind = "time", rule = "TimeDigitalContext"}
 
 Rule: TimeDigitalContext2
 
@@ -181,7 +204,7 @@ Rule: TimeDigitalContext2
 )
 :time
  -->
- :time.TIME = {kind = "time", rule = "TimeDigitalContext2"}
+ :time.DATE = {kind = "time", rule = "TimeDigitalContext2"}
 
 
 Rule: TimeDigitalTemp1
@@ -195,7 +218,7 @@ Rule: TimeDigitalTemp1
 :time{Lookup.majorType == number}
 
  -->
- :time.TIME = {kind = "time", rule = "TimeDigitalTemp"}
+ :time.DATE = {kind = "time", rule = "TimeDigitalTemp"}
 
 
 Rule: TimeDigitalContext1
@@ -211,7 +234,7 @@ Rule: TimeDigitalContext1
  )
 ):time
 -->
-:time.TIME = {kind = "time", rule = "TimeDigitalContext1"}
+:time.DATE = {kind = "time", rule = "TimeDigitalContext1"}
 
 
 //////////////////////////////////////////////////////////////////
@@ -226,7 +249,7 @@ Rule: Date1
 -->
 :TimeName.DATE = {kind = "date", rule = "Date1"}
 
-/*Rule: Date2
+Rule: Date2
 (
    	(
 	{Lookup.majorType == "day"}
@@ -235,12 +258,12 @@ Rule: Date1
    ({Lookup.majorType == "number"})+
 	({Token.string == "."})?
    {Lookup.majorType == "date"}
-({Token.string == ","})?
-(YEAR)?
+({Token.string == ","}
+ YEAR)?
 ):period
 -->
 :period.DATE = {kind = "date", rule = "Date2"}
-*/
+
 
 Rule: Exception1_date3
 

@@ -1,5 +1,5 @@
 Phase: Location
-Input: Lookup Token LOC
+Input: Lookup Token LOC TreeTaggerToken
 Options: control = appelt
 
 
@@ -61,6 +61,15 @@ Rule: Country1
 -->
 :CountryName.LOC = {kind = "LOC", subtype= "country", rule = "Country1"}
 
+Rule: CountryAdj
+// Englander
+(
+  {Lookup.minorType == country}
+   {Lookup.majorType == country_adj_ending}
+):tag
+-->
+:tag.LOC = {kind = "LOC", subtype = "nationality", rule = "CountryAdj"}
+
 Rule: Exception_Location1
 Priority: 20
 (
@@ -96,10 +105,8 @@ Rule: City_by_prefix
 	{Token.string == "Sankt"}
 
         )
-	(
-		{Token.orth == "upperInitial"}
-		|
-		{Token.orth == "allCaps"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 	)
 ):city_name
 -->
@@ -148,10 +155,8 @@ Rule: Country_by_republik1
 
 Rule: Country_by_republik2
 (
-	(
-	{Token.orth == "upperInitial"}
-	|
-	{Token.orth == "allCaps"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 	)
 	(
 	{Token.string == "Republik"}
@@ -165,10 +170,8 @@ Rule: Country_by_republik2
 
 Rule: Guess_location1
 (
-	(
-	{Token.orth == "upperInitial"}
-	|
-	{Token.orth == "allCaps"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 	)
 	(
 	{Token.string == "am"}
@@ -192,14 +195,14 @@ Rule: City_by_stadt
 	{Token.string == "STADT"}
 	)
 (
-	(
-	{Token.orth == "allCaps"}
-	|
-	{Token.orth == "upperInitial"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 	)
 	(
 	({Token.string == "\-"})?
-	{Token.orth == "upperInitial"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
+	)
 	)*
 ):repa
 -->
@@ -207,20 +210,16 @@ Rule: City_by_stadt
 
 Rule: Location_key1
 (
-	(
-	{Token.orth == "allCaps"}
-	|
-	{Token.orth == "upperInitial"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 	)
 	(
 	
 		(
 		{Token.string == "\-"}
 		)?
-		(
-		{Token.orth == "upperInitial"}
-		|
-		{Token.orth == "allCaps"}
+		({TreeTaggerToken.category == NN}|
+	         {TreeTaggerToken.category == NE} 
 		)
 	)*
 	(
@@ -228,16 +227,14 @@ Rule: Location_key1
 	{Lookup.minorType == "location_key"}
 	)
 	(
-	(
-	{Token.orth == "upperInitial"}
-	|
-	{Token.orth == "allCaps"}
+	({TreeTaggerToken.category == NN}|
+	 {TreeTaggerToken.category == NE}
 	)
 		(
 		({Token.string == "\-"})?
-		{Token.orth == "upperInitial"}
-		|
-		{Token.orth == "allCaps"}
+		({TreeTaggerToken.category == NN}|
+	        {TreeTaggerToken.category == NE}
+		)
 		)*
 	)*
 ):key
@@ -257,10 +254,8 @@ Priority: 20
 		(
 		{Token.string == "\-"}
 		)?
-		(
-		{Token.orth == "upperInitial"}
-		|
-		{Token.orth == "allCaps"}
+		({TreeTaggerToken.category == NN}|
+	         {TreeTaggerToken.category == NE} 
 		)
 	)*
 	(

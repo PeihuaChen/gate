@@ -71,6 +71,12 @@ Priority: 20
 	{Token.string == "geheim"}
 	|
 	{Token.string == "daheim"}
+	|
+	{Token.string == "Hauptstadt"}
+	|
+	{Token.string == "Heimatstadt"}
+	|
+	{Token.string == "Sportplatz"}
 	)
 )
 -->
@@ -171,7 +177,7 @@ Rule: Organization_key2
 	{Token.orth == "allCaps"}
 	|
 	{Token.orth == "upperInitial"}
-	)
+	)?
 	({Token.string == "\-"})
 	)*
 	{Lookup.minorType == "organization_key"}
