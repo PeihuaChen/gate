@@ -73,6 +73,7 @@ public class Nerc extends SerialController {
     if(gazetteerListsURL != null) params.put("listsURL",
                                              gazetteerListsURL);
     params.put("encoding", encoding);
+    params.put("caseSensitive", caseSensitiveGazetteer);
     if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
@@ -265,6 +266,7 @@ public class Nerc extends SerialController {
   private transient Vector progressListeners;
   private transient Vector statusListeners;
   protected String tempAnnotationSetName = "nercAS";
+  private Boolean caseSensitiveGazetteer;
 
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
@@ -312,6 +314,12 @@ public class Nerc extends SerialController {
   }
   public String getTempAnnotationSetName() {
     return tempAnnotationSetName;
+  }
+  public void setCaseSensitiveGazetteer(Boolean newCaseSensitiveGazetteer) {
+    caseSensitiveGazetteer = newCaseSensitiveGazetteer;
+  }
+  public Boolean getCaseSensitiveGazetteer() {
+    return caseSensitiveGazetteer;
   }
 
   class CustomProgressListener implements ProgressListener{
