@@ -162,7 +162,8 @@ public class NameBearerHandle implements Handle,
 
         popup.add(saveAsXmlItem);
       }else if(target instanceof Corpus){
-//        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+        corpusFiller = new CorpusFillerComponent();
+        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
       }
     }//if(resource instanceof LanguageResource)
 
@@ -264,6 +265,11 @@ public class NameBearerHandle implements Handle,
   Icon icon;
   JComponent smallView;
   JComponent largeView;
+
+  /**
+   * Component used to select the options for corpus populating
+   */
+  CorpusFillerComponent corpusFiller;
 
   StatusListener sListenerProxy;
 
@@ -611,7 +617,51 @@ public class NameBearerHandle implements Handle,
     }
 
     public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          corpusFiller.setExtensions(new ArrayList());
+          boolean answer = OkCancelDialog.showDialog(
+                                  getLargeView(),
+                                  corpusFiller,
+                                  "Select a directory and allowed extensions");
+          if(answer){
+            ExtensionFileFilter filter = new ExtensionFileFilter();
+            URL url = null;
+            try{
+              url = new URL(corpusFiller.getUrlString());
+              Iterator extIter = corpusFiller.getExtensions().iterator();
+              while(extIter.hasNext()){
+                filter.addExtension((String)extIter.next());
+              }
+              ((Corpus)target).populate(url, filter,
+                                        corpusFiller.isRecurseDirectories());
 
+            }catch(MalformedURLException mue){
+              JOptionPane.showMessageDialog(getLargeView(),
+                                            "Invalid URL!\n " +
+                                            "See \"Messages\" tab for details!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              mue.printStackTrace(Err.getPrintWriter());
+            }catch(IOException ioe){
+              JOptionPane.showMessageDialog(getLargeView(),
+                                            "I/O error!\n " +
+                                            "See \"Messages\" tab for details!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            }catch(ResourceInstantiationException rie){
+              JOptionPane.showMessageDialog(getLargeView(),
+                                            "Could not create document!\n " +
+                                            "See \"Messages\" tab for details!",
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              rie.printStackTrace(Err.getPrintWriter());
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
