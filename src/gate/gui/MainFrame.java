@@ -465,7 +465,9 @@ public class MainFrame extends JFrame
     DefaultResourceHandle handle = new DefaultResourceHandle(res);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
-      if(res instanceof Controller){
+      if(res instanceof SerialController){
+        handle = new ApplicationHandle((SerialController)res);
+        node = new DefaultMutableTreeNode(handle, false);
         resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
       }else{
         resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
@@ -1369,68 +1371,6 @@ public class MainFrame extends JFrame
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
-  }
+  }//class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
-  class TabBlinker implements Runnable{
-    public TabBlinker(JTabbedPane pane, Component comp, Color blinkColor){
-      this.tPane = pane;
-      this.tab = tPane.indexOfComponent(comp);
-      this.blinkColor = blinkColor;
-      thread = new Thread(this);
-      thread.setPriority(Thread.MIN_PRIORITY);
-    }
-
-    public void run(){
-      oldColor = tPane.getBackgroundAt(tab);
-      synchronized(this){
-        stopIt = false;
-      }
-      while(true){
-        synchronized(this){
-          if(tPane.getSelectedIndex() == tab) stopIt = true;
-          if(stopIt){
-            tPane.setBackgroundAt(tab, oldColor);
-            return;
-          }
-        }
-        SwingUtilities.invokeLater(new Runnable(){
-          public void run(){
-            if(tPane.getBackgroundAt(tab).equals(oldColor)){
-              tPane.setBackgroundAt(tab, blinkColor);
-            }else{
-              tPane.setBackgroundAt(tab, oldColor);
-            }
-          }
-        });
-        try{
-          Thread.sleep(400);
-        }catch(InterruptedException ie){}
-      }
-    }
-
-    public void stopBlinking(){
-      synchronized(this){
-        if(thread.isAlive()){
-          stopIt = true;
-        }
-      }
-    }
-
-    public void startBlinking(){
-      synchronized(this){
-        if(!thread.isAlive()){
-          thread = new Thread(this);
-          thread.setPriority(Thread.MIN_PRIORITY);
-          thread.start();
-        }
-      }
-    }
-
-    boolean stopIt;
-    JTabbedPane tPane;
-    int tab;
-    Color blinkColor;
-    Color oldColor;
-    Thread thread;
-  }//class TabBlinker implements Runnable
 }
