@@ -82,6 +82,9 @@ public class Files {
       buf[i++] = b;
     }
 
+    // close the resource stream
+    resourceStream.close();
+
     // copy the contents of buf to an array of the correct size
     byte[] bytes = new byte[i];
     for(int j=0; j<i; j++)
