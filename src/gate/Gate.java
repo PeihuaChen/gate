@@ -1114,7 +1114,7 @@ jar/classpath so it's the same as registerBuiltins
   public static void setSlugGui(boolean b) { slugGui = b; }
 
   /** Flag for Jape Debugger integration. */
-  private static boolean enableJapeDebug = false;
+  private static boolean enableJapeDebug = true;
 
   /** Should we enable Jape Debugger. */
   public static boolean isEnableJapeDebug() { return enableJapeDebug; }
