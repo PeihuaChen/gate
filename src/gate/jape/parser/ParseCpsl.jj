@@ -328,14 +328,16 @@ SinglePhaseTransducer SinglePhaseTransducer() :
 
         // control
         if(optionNameTok.image.equals("control")) {
-          if(optionValueTok.image.equals("appelt"))
+          if(optionValueTok.image.equalsIgnoreCase("appelt"))
             t.setRuleApplicationStyle(APPELT_STYLE);
-          else if(optionValueTok.image.equals("brill"))
+          else if(optionValueTok.image.equalsIgnoreCase("appelt-shortest"))
+            t.setRuleApplicationStyle(APPELT_SHORTEST_STYLE);
+          else if(optionValueTok.image.equalsIgnoreCase("brill"))
             t.setRuleApplicationStyle(BRILL_STYLE);
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill or appelt)"
+              " (should be brill, appelt or appelt-shortest)"
             );
         } // control
       }
@@ -997,6 +999,11 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.17  2001/05/17 11:50:42  valyt
+// 	Factory now handles Runtime parameters as well as inittime ones.
+//
+// 	There is a new rule application style Appelt-shortest
+//
 // Revision 1.16  2001/04/30 13:23:53  hamish
 // format
 //

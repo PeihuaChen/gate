@@ -51,6 +51,8 @@ public interface JapeConstants extends Serializable
   public int BRILL_STYLE = 1;
   /** Appelt-style rule application */
   public int APPELT_STYLE = 2;
+  /** Appelt-shortest-style rule application */
+  public int APPELT_SHORTEST_STYLE = 3;
 
   /** The default priority of a rule. */
   public int DEFAULT_PRIORITY = -1;
@@ -65,6 +67,11 @@ public interface JapeConstants extends Serializable
 
 
 // $Log$
+// Revision 1.6  2001/05/17 11:50:41  valyt
+// 	Factory now handles Runtime parameters as well as inittime ones.
+//
+// 	There is a new rule application style Appelt-shortest
+//
 // Revision 1.5  2001/04/06 17:09:49  hamish
 // save of session state via serialisation prototyped
 //

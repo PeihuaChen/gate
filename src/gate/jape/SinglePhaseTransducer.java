@@ -518,7 +518,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //System.out.println("No acceptor");
         //no rule to fire just advance to next relevant node in the
         //Annotation Graph
+//System.out.print(startNode.getOffset());
         startNode = annotations.nextNode(startNode);
+//System.out.println("->" + startNode.getOffset());
         // check to see if there are any annotations starting here
         AnnotationSet annSet = annotations.get(startNode.getOffset());
 
@@ -559,17 +561,27 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
         // just execute the longest (last) rule or the shortest one according
-        //to the options
+        //to the options564
 
-        FSMInstance currentAcceptor =
-          (preferLongestMatch.booleanValue()) ?
-          (FSMInstance)acceptingFSMInstances.last() :
-          (FSMInstance)acceptingFSMInstances.first();
+        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.last();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
         startNode = currentAcceptor.getAGPosition();
 
+      } else if(ruleApplicationStyle == APPELT_SHORTEST_STYLE) {
+//System.out.println("Appelt acceptor");
+        // AcceptingFSMInstances is an ordered structure:
+        // just execute the longest (last) rule or the shortest one according
+        //to the options564
+
+        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.first();
+        RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
+        currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
+        //advance in AG
+System.out.print(startNode.getOffset());
+        startNode = currentAcceptor.getAGPosition();
+System.out.println("->" + startNode.getOffset());
       } else throw new RuntimeException("Unknown rule application style!");
       //release all the accepting instances as they have done their job
       /*
@@ -686,6 +698,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
         ((ProgressListener) listeners.elementAt(i)).processFinished();
       }
     }
+  }
+  public int getRuleApplicationStyle() {
+    return ruleApplicationStyle;
   }
 
   /*

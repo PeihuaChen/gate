@@ -215,14 +215,16 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
         // control
         if(optionNameTok.image.equals("control")) {
-          if(optionValueTok.image.equals("appelt"))
+          if(optionValueTok.image.equalsIgnoreCase("appelt"))
             t.setRuleApplicationStyle(APPELT_STYLE);
-          else if(optionValueTok.image.equals("brill"))
+          else if(optionValueTok.image.equalsIgnoreCase("appelt-shortest"))
+            t.setRuleApplicationStyle(APPELT_SHORTEST_STYLE);
+          else if(optionValueTok.image.equalsIgnoreCase("brill"))
             t.setRuleApplicationStyle(BRILL_STYLE);
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill or appelt)"
+              " (should be brill, appelt or appelt-shortest)"
             );
         } // control
 
@@ -1112,17 +1114,6 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   final private boolean jj_3R_12() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1133,6 +1124,17 @@ existingAttrName + "\");" + nl +
     if (jj_3R_16()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }

@@ -552,7 +552,6 @@ implements JapeConstants {
   private gate.FeatureMap features;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
-  private Boolean preferLongestMatch;
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -594,14 +593,7 @@ implements JapeConstants {
       }
     }
   }
-  public void setPreferLongestMatch(Boolean newPreferLongestMatch) {
-    preferLongestMatch = newPreferLongestMatch;
-    transducer.setPreferLongestMatch(preferLongestMatch);
-  }
 
-  public Boolean getPreferLongestMatch() {
-    return preferLongestMatch;
-  }
 
   /*
   private void writeObject(ObjectOutputStream oos) throws IOException {
