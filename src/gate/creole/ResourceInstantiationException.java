@@ -35,7 +35,6 @@ import gate.util.GateException;
 public class ResourceInstantiationException extends GateException {
   /** Debug flag */
   private static final boolean DEBUG = false;
-  private Exception exception = null;
 
   public ResourceInstantiationException() {
     super();
@@ -46,38 +45,10 @@ public class ResourceInstantiationException extends GateException {
   }
 
   public ResourceInstantiationException(Exception e) {
-    this.exception = e;
+    super(e);
   }
 
-  /**
-   * Overriden so we can print the enclosed exception's stacktrace too.
-   */
-  public void printStackTrace(){
-    printStackTrace(System.err);
+  public ResourceInstantiationException(String message, Exception e) {
+    super(message, e);
   }
-
-  /**
-   * Overriden so we can print the enclosed exception's stacktrace too.
-   */
-  public void printStackTrace(java.io.PrintStream s) {
-    s.flush();
-    super.printStackTrace(s);
-    if(exception != null){
-      s.print("  Caused by:\n");
-      exception.printStackTrace(s);
-    }
-  }
-
-  /**
-   * Overriden so we can print the enclosed exception's stacktrace too.
-   */
-  public void printStackTrace(java.io.PrintWriter s) {
-    s.flush();
-    super.printStackTrace(s);
-    if(exception != null){
-      s.print("  Caused by:\n");
-      exception.printStackTrace(s);
-    }
-  }
-
 } // ResourceInstantiationException

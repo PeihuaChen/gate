@@ -27,12 +27,12 @@ public class DocumentFormatException extends GateException {
     super();
   }
   public DocumentFormatException(String aMessage, Exception anException) {
-    super(aMessage + anException);
+    super(aMessage, anException);
   }
   public DocumentFormatException(String aMessage) {
     super(aMessage);
   }
   public DocumentFormatException(Exception anException) {
     super(anException);
-  }
+  }  
 } // DocumentFormatException
