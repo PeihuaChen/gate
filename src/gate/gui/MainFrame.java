@@ -116,6 +116,9 @@ public class MainFrame extends JFrame
   NewAnnotDiffAction newAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
   NewCorpusEvalAction newCorpusEvalAction = null;
+  GenerateStoredCorpusEvalAction generateStoredCorpusEvalAction = null;
+  StoredMarkedCorpusEvalAction storedMarkedCorpusEvalAction = null;
+  CleanMarkedCorpusEvalAction cleanMarkedCorpusEvalAction = null;
 
   /**
    * Holds all the icons used in the Gate GUI indexed by filename.
@@ -237,6 +240,10 @@ public class MainFrame extends JFrame
     newAnnotDiffAction = new NewAnnotDiffAction();
     newBootStrapAction = new NewBootStrapAction();
     newCorpusEvalAction = new NewCorpusEvalAction();
+    storedMarkedCorpusEvalAction = new StoredMarkedCorpusEvalAction();
+    generateStoredCorpusEvalAction = new GenerateStoredCorpusEvalAction();
+    cleanMarkedCorpusEvalAction = new CleanMarkedCorpusEvalAction();
+
   }
 
   protected void initGuiComponents(){
@@ -557,7 +564,15 @@ public class MainFrame extends JFrame
     toolsMenu.add(newBootStrapAction);
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
-    toolsMenu.add(newCorpusEvalAction);
+    JMenu corpusEvalMenu = new JMenu("Corpus Evaluation Tools");
+    toolsMenu.add(corpusEvalMenu);
+    corpusEvalMenu.add(newCorpusEvalAction);
+    corpusEvalMenu.addSeparator();
+    corpusEvalMenu.add(generateStoredCorpusEvalAction);
+    corpusEvalMenu.addSeparator();
+    corpusEvalMenu.add(storedMarkedCorpusEvalAction);
+    corpusEvalMenu.add(cleanMarkedCorpusEvalAction);
+//    toolsMenu.add(newCorpusEvalAction);
     toolsMenu.add(
       new AbstractAction("Unicode editor", getIcon("unicode.gif")){
       public void actionPerformed(ActionEvent evt){
@@ -1384,12 +1399,10 @@ public class MainFrame extends JFrame
 
 
   /** This class represent an action which brings up the corpus evaluation tool*/
-    //DO NOT DELETE. WILL MAKE RUNNING THE EVAL TOOLS FROM GUI WORK IN NOVEMBER
-    //NEEDS PUTTING IN A SEPARATE THREAD!!!!
   class NewCorpusEvalAction extends AbstractAction {
     public NewCorpusEvalAction() {
-      super("Evaluation Tool");
-      putValue(SHORT_DESCRIPTION,"Create a new Evaluation Tool");
+      super("Default evaluation mode");
+      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool in its default mode");
     }// newCorpusEvalAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1417,6 +1430,8 @@ public class MainFrame extends JFrame
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("Finished!");
+          theTool.unloadPRs();
         }
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
@@ -1425,6 +1440,136 @@ public class MainFrame extends JFrame
       thread.start();
     }// actionPerformed();
   }//class NewCorpusEvalAction
+
+  /** This class represent an action which brings up the corpus evaluation tool*/
+  class StoredMarkedCorpusEvalAction extends AbstractAction {
+    public StoredMarkedCorpusEvalAction() {
+      super("Human marked against stored processing results");
+      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool -stored_clean");
+    }// newCorpusEvalAction
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser chooser = MainFrame.getFileChooser();
+          chooser.setDialogTitle("Please select a directory which contains " +
+                                 "the documents to be evaluated");
+          chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          chooser.setMultiSelectionEnabled(false);
+          int state = chooser.showOpenDialog(MainFrame.this);
+          File startDir = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
+
+          //first create the tool and set its parameters
+          CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
+          theTool.setStartDirectory(startDir);
+          theTool.setMarkedStored(true);
+
+          Out.prln("Evaluating human-marked documents against pre-stored results.");
+          //initialise the tool
+          theTool.init();
+          //and execute it
+          theTool.execute();
+
+          Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
+          Out.prln("Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("Finished!");
+          theTool.unloadPRs();
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable, "Eval thread");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }// actionPerformed();
+  }//class StoredMarkedCorpusEvalActionpusEvalAction
+
+  /** This class represent an action which brings up the corpus evaluation tool*/
+  class CleanMarkedCorpusEvalAction extends AbstractAction {
+    public CleanMarkedCorpusEvalAction() {
+      super("Human marked against current processing results");
+      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool -marked_clean");
+    }// newCorpusEvalAction
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser chooser = MainFrame.getFileChooser();
+          chooser.setDialogTitle("Please select a directory which contains " +
+                                 "the documents to be evaluated");
+          chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          chooser.setMultiSelectionEnabled(false);
+          int state = chooser.showOpenDialog(MainFrame.this);
+          File startDir = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
+
+          //first create the tool and set its parameters
+          CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
+          theTool.setStartDirectory(startDir);
+          theTool.setMarkedClean(true);
+
+          Out.prln("Evaluating human-marked documents against current processing results.");
+          //initialise the tool
+          theTool.init();
+          //and execute it
+          theTool.execute();
+
+          Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
+          Out.prln("Overall average recall: " + theTool.getRecallAverage());
+          Out.prln("Finished!");
+          theTool.unloadPRs();
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable, "Eval thread");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }// actionPerformed();
+  }//class CleanMarkedCorpusEvalActionpusEvalAction
+
+
+  /** This class represent an action which brings up the corpus evaluation tool*/
+  class GenerateStoredCorpusEvalAction extends AbstractAction {
+    public GenerateStoredCorpusEvalAction() {
+      super("Store corpus for future evaluation");
+      putValue(SHORT_DESCRIPTION,"Run the Evaluation Tool -generate");
+    }// newCorpusEvalAction
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
+          JFileChooser chooser = MainFrame.getFileChooser();
+          chooser.setDialogTitle("Please select a directory which contains " +
+                                 "the documents to be evaluated");
+          chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          chooser.setMultiSelectionEnabled(false);
+          int state = chooser.showOpenDialog(MainFrame.this);
+          File startDir = chooser.getSelectedFile();
+          if (state == JFileChooser.CANCEL_OPTION || startDir == null)
+            return;
+
+          //first create the tool and set its parameters
+          CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
+          theTool.setStartDirectory(startDir);
+          theTool.setGenerateMode(true);
+
+          Out.prln("Processing and storing documents for future evaluation.");
+          //initialise the tool
+          theTool.init();
+          //and execute it
+          theTool.execute();
+          Out.prln("Finished!");
+          theTool.unloadPRs();
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable, "Eval thread");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }// actionPerformed();
+  }//class GenerateStoredCorpusEvalAction
 
   /** This class represent an action which loads ANNIE with default params*/
   class LoadANNIEWithDefaultsAction extends AbstractAction
