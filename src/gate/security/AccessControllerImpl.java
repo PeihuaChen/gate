@@ -428,8 +428,10 @@ public class AccessControllerImpl
                                     grp,
                                     DEFAULT_SESSION_TIMEOUT_MIN);
 
+    //4. add session to sessions collection
+    this.sessions.put(s.getID(),s);
 
-    //4. set the session timeouts and keep alives
+    //5. set the session timeouts and keep alives
     this.sessionTimeouts.put(sessionID,new Long(DEFAULT_SESSION_TIMEOUT_MIN));
     touchSession(s); //this one changes the keepAlive time
 
