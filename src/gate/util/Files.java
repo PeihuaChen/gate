@@ -39,10 +39,7 @@ public class Files {
     return bytes;
   } // getByteArray(File)
 
-  /** Get a resource from the GATE resources directory as a String.
-    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
-    * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
-    * this method should be passed the name <TT>jape/Test11.jape</TT>.
+  /** Get a resource from the classpath as a String.
     */
   public static String getResourceAsString(String resourceName)
   throws IOException {
@@ -67,6 +64,35 @@ public class Files {
     return resourceBuffer.toString();
   } // getResourceAsString(String)
 
+  /** Get a resource from the GATE resources directory as a String.
+    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
+    * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
+    * this method should be passed the name <TT>jape/Test11.jape</TT>.
+    */
+  public static String getGateResourceAsString(String resourceName)
+  throws IOException {
+    InputStream resourceStream = getGateResourceAsStream(resourceName);
+    BufferedReader resourceReader =
+      new BufferedReader(new InputStreamReader(resourceStream));
+    StringBuffer resourceBuffer = new StringBuffer();
+
+    int i;
+
+    int charsRead = 0;
+    final int size = 1024;
+    char[] charArray = new char[size];
+
+    while( (charsRead = resourceReader.read(charArray,0,size)) != -1 )
+      resourceBuffer.append (charArray,0,charsRead);
+
+    while( (i = resourceReader.read()) != -1 )
+      resourceBuffer.append((char) i);
+
+    resourceReader.close();
+    return resourceBuffer.toString();
+  } // getGateResourceAsString(String)
+
+
   /**
     * Writes a temporary file into the default temporary directory, form an InputStream
     * a unique ID is generated and associated automaticaly with the file name...
@@ -75,7 +101,7 @@ public class Files {
   throws IOException {
     File resourceFile  = null;
     FileOutputStream resourceFileOutputStream = null;
-    
+
     // create a temporary file name
     resourceFile = File.createTempFile ("gateResource", ".tmp");
     resourceFileOutputStream = new FileOutputStream(resourceFile);
@@ -96,10 +122,7 @@ public class Files {
 
 
 
-  /** Get a resource from the GATE resources directory as a byte array.
-    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
-    * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
-    * this method should be passed the name <TT>jape/Test11.jape</TT>.
+  /** Get a resource from the classpath as a byte array.
     */
   public static byte[] getResourceAsByteArray(String resourceName)
   throws IOException, IndexOutOfBoundsException, ArrayStoreException {
@@ -131,16 +154,61 @@ public class Files {
     return bytes;
   } // getResourceAsByteArray(String)
 
+  /** Get a resource from the GATE resources directory as a byte array.
+    * The resource name should be relative to <TT>gate/resources</TT>; e.g.
+    * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
+    * this method should be passed the name <TT>jape/Test11.jape</TT>.
+    */
+  public static byte[] getGateResourceAsByteArray(String resourceName)
+  throws IOException, IndexOutOfBoundsException, ArrayStoreException {
+    InputStream resourceInputStream = getGateResourceAsStream(resourceName);
+    BufferedInputStream resourceStream =
+      new BufferedInputStream(resourceInputStream);
+    byte b;
+    final int bufSize = 1024;
+    byte[] buf = new byte[bufSize];
+    int i = 0;
+
+    // get the whole resource into buf (expanding the array as needed)
+    while( (b = (byte) resourceStream.read()) != -1 ) {
+      if(i == buf.length) {
+        byte[] newBuf = new byte[buf.length * 2];
+        System.arraycopy (buf,0,newBuf,0,i);
+        buf = newBuf;
+      }
+      buf[i++] = b;
+    }
+
+    // close the resource stream
+    resourceStream.close();
+
+    // copy the contents of buf to an array of the correct size
+    byte[] bytes = new byte[i];
+    // copy from buf to bytes
+    System.arraycopy (buf,0,bytes,0,i);
+    return bytes;
+  } // getResourceGateAsByteArray(String)
+
+
+  /** Get a resource from the classpath as an InputStream.
+    */
+  public static InputStream getResourceAsStream(String resourceName)
+  throws IOException {
+    return ClassLoader.getSystemResourceAsStream(resourceName);
+  } // getResourceAsStream(String)
+
   /** Get a resource from the GATE resources directory as an InputStream.
     * The resource name should be relative to <TT>gate/resources</TT>; e.g.
     * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
-  public static InputStream getResourceAsStream(String resourceName)
+  public static InputStream getGateResourceAsStream(String resourceName)
   throws IOException {
-//    return Class.class.getResourceAsStream("/gate/resources/" + resourceName);
-    return ClassLoader.getSystemResourceAsStream(resourceName);
+    if(resourceName.startsWith("/") || resourceName.startsWith("\\") )
+      return getResourceAsStream("gate/resources" + resourceName);
+    else return getResourceAsStream("gate/resources/" + resourceName);
   } // getResourceAsStream(String)
+
 
   /** This method takes a regular expression and a directory name and returns
     * the set of Files that match the pattern under that directory.
