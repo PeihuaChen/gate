@@ -129,6 +129,7 @@ public class ColorGenerator {
                           usedCS.baseB + usedCS.radius/2);
     usedSpacesList.addLast(usedCS);
     listToRead++;
+    res = res.brighter();
     return res;
   }
 
