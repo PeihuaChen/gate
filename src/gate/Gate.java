@@ -496,7 +496,9 @@ jar/classpath so it's the same as registerBuiltins
         res = Resource.class.isAssignableFrom(aClass) ||
               Controller.class.isAssignableFrom(aClass) ||
               DataStore.class.isAssignableFrom(aClass);
-      }catch(ClassNotFoundException cnfe){}
+      }catch(ClassNotFoundException cnfe){
+        return false;
+      }
     }
     return res;
   }
