@@ -184,8 +184,6 @@ public abstract class Factory
       res.setFeatures(fm);
     }
 
-
-
     // initialise the resource
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
     res = res.init();
@@ -212,6 +210,21 @@ public abstract class Factory
 
     return res;
   } // create(resourceClassName)
+
+  /** Delete an instance of a resource. This involves removing it from
+    * the stack of instantiations maintained by this resource type's
+    * resource data. Deletion does not guarantee that the resource will
+    * become a candidate for garbage collection, just that the GATE framework
+    * is no longer holding references to the resource.
+    *
+    * @param resource the resource to be deleted.
+    */
+  public static void deleteResource(Resource resource) {
+    ResourceData rd =
+      (ResourceData) reg.get(resource.getClass().getName());
+    List instances = rd.getInstantiations();
+    instances.remove(resource);
+  } // deleteResource
 
   /** For each paramter, set the appropriate property on the resource
     * using bean-style reflection.
