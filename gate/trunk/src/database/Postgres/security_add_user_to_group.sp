@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION security_add_user_to_group(int4,int4) RETURNS boolean
        insert into t_user_group(ugrp_id,
                                 ugrp_user_id,
                                 ugrp_group_id)
-       values (nextval(''SEQ_UGRP_ID''),
+       values (nextval(''seq_user_group''),
                p_user_id,
                p_group_id);
 

@@ -32,16 +32,16 @@ CREATE OR REPLACE FUNCTION persist_create_annotation_set(int4,varchar) RETURNS i
       if not FOUND then
          raise exception ''%d'',x_invalid_lr;
       end if;
-  
+
       /* 2. create an entry for the set */
       insert into t_annot_set(as_id,
                               as_doc_id,
                               as_name)
-      values(nextval(''SEQ_AS_ID''),
+      values(nextval(''seq_annot_set''),
              l_doc_id,
              p_as_name)
 
-      return currval(''SEQ_AS_ID'');
+      return currval(''seq_annot_set'');
 
    END;
 '
