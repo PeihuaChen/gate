@@ -36,10 +36,14 @@ public class NominalCoref extends AbstractCoreferencer
   //annotation features
   private static final String PERSON_CATEGORY = "Person";
   private static final String JOBTITLE_CATEGORY = "JobTitle";
+  private static final String ORGANIZATION_CATEGORY = "Organization";
+  private static final String LOOKUP_CATEGORY = "Lookup";
+  private static final String ORGANIZATION_NOUN_CATEGORY = "organization_noun";
+  
 
   //scope
   /** --- */
-  private static AnnotationOffsetComparator ANNOTATION_OFFSET_COMPARATOR;
+  //private static AnnotationOffsetComparator ANNOTATION_OFFSET_COMPARATOR;
   /** --- */
   private String annotationSetName;
   /** --- */
@@ -47,9 +51,9 @@ public class NominalCoref extends AbstractCoreferencer
   /** --- */
   private HashMap anaphor2antecedent;
 
-  static {
+    /*  static {
     ANNOTATION_OFFSET_COMPARATOR = new AnnotationOffsetComparator();
-  }
+    }*/
 
   /** --- */
   public NominalCoref() {
@@ -100,6 +104,9 @@ public class NominalCoref extends AbstractCoreferencer
    * are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException{
+
+    HashMap anaphorToAntecedent = new HashMap();
+    Object[] nominalArray;
       
     //0. preconditions
     if (null == this.document) {
@@ -108,6 +115,14 @@ public class NominalCoref extends AbstractCoreferencer
 
     //1. preprocess
     preprocess();
+
+    Out.println("Total annotations: " + defaultAnnotations.size());
+    
+
+    // Get a sorted array of Tokens.
+    Object[] tokens = defaultAnnotations.get(TOKEN_ANNOTATION_TYPE).toArray();
+    java.util.Arrays.sort(tokens, new OffsetComparator());
+    int currentToken = 0;
 
     // get Person entities
     //FeatureMap personConstraint = new SimpleFeatureMapImpl();
@@ -127,50 +142,174 @@ public class NominalCoref extends AbstractCoreferencer
     AnnotationSet jobTitles = 
         this.defaultAnnotations.get(jobTitleConstraint);
 
+    FeatureMap orgNounConstraint = new SimpleFeatureMapImpl();
+    orgNounConstraint.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
+                          ORGANIZATION_NOUN_CATEGORY);
+    AnnotationSet orgNouns =
+        this.defaultAnnotations.get(LOOKUP_CATEGORY, orgNounConstraint);
+
+    HashSet orgConstraint = new HashSet();
+    orgConstraint.add(ORGANIZATION_CATEGORY);
+
+    AnnotationSet organizations =
+        this.defaultAnnotations.get(orgConstraint);
+
     // combine them into a list of nominals
-    AnnotationSet nominals = people;
-    if (null == nominals) {
-      nominals = jobTitles;
+    Set nominals = new HashSet();
+    if (people != null) {
+        nominals.addAll(people);
     }
-    else if (null != people) {
-      nominals.addAll(jobTitles);
+    if (jobTitles != null) {
+        nominals.addAll(jobTitles);
+    }
+    if (orgNouns != null) {
+        nominals.addAll(orgNouns);
+    }
+    if (organizations != null) {
+        nominals.addAll(organizations);
     }
 
-    //6.do we have any nominals at all?
-    if (null == nominals) {
-      //do nothing
-      return;
-    }
+    Out.println("total nominals: " + nominals.size());
 
-    //7.sort them according to offset
-    Object[] nominalArray = nominals.toArray();
-    java.util.Arrays.sort(nominalArray,ANNOTATION_OFFSET_COMPARATOR);
-
-    //8.cleanup - ease the GC
-    nominals = jobTitles = people = null;
-
-    HashMap anaphorToAntecedent = new HashMap();
-    Annotation lastPerson = null;
-
-    //10. process all nominals
+    // sort them according to offset
+    nominalArray = nominals.toArray();
+    java.util.Arrays.sort(nominalArray, new OffsetComparator());
+    
+    ArrayList previousPeople = new ArrayList();
+    ArrayList previousOrgs = new ArrayList();
+    
+        
+    // process all nominals
     for (int i=0; i<nominalArray.length; i++) {
-      Annotation nominal = (Annotation)nominalArray[i];
+        Annotation nominal = (Annotation)nominalArray[i];
+        
+        if (nominal.getType().equals(PERSON_CATEGORY)) {
+            // Add each Person entity to the beginning of the people list
+            previousPeople.add(0, nominal);
+        }
+        else if (nominal.getType().equals(JOBTITLE_CATEGORY)) {
+            
+            // Don't associate it if we have no people
+            if (previousPeople.size() == 0) {
+                Out.println("no people");
+                continue;
+            }
 
-      if (nominal.getType().equals(PERSON_CATEGORY)) {
-          // Add each Person entity to the beginning of the people list
-          lastPerson = nominal;
-      }
-      else if (nominal.getType().equals(JOBTITLE_CATEGORY)) {
-          // Associate this entity with the most recent Person
-          if (lastPerson != null) {
-              anaphor2antecedent.put(nominal, lastPerson);
-          }
-      }
+            // Don't associate it if it's part of a Person (eg President Bush)
+            if (overlapsAnnotations(nominal, people)) {
+                Out.println("overlapping annotation");
+                continue;
+            }
+            
+            // Don't associate it if it's proceeded by a generic marker
+            Annotation previousToken =
+                getPreviousAnnotation(nominal, tokens);
+            String previousValue = (String) 
+                previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+            if (previousValue.equalsIgnoreCase("a") ||
+                previousValue.equalsIgnoreCase("an") ||
+                previousValue.equalsIgnoreCase("other") ||
+                previousValue.equalsIgnoreCase("another")) {
+                Out.println("indefinite");
+                continue;
+            }            
+
+            // Look into the tokens to get some info about POS.
+            Object[] jobTitleTokens =
+                this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
+                                         nominal.getStartNode().getOffset(),
+                                         nominal.getEndNode().getOffset()).toArray();
+            java.util.Arrays.sort(jobTitleTokens, new OffsetComparator());
+            Annotation lastToken = (Annotation)
+                jobTitleTokens[jobTitleTokens.length - 1];
+
+            // Don't associate if the job title is not a singular noun
+            if (! lastToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME)
+                .equals("NN")) {
+                Out.println("Not a singular noun");
+                continue;
+            }
+            
+
+            // Associate this entity with the most recent Person
+            int personIndex = 0;
+            
+            Annotation previousPerson =
+                (Annotation) previousPeople.get(personIndex);
+
+            // Don't associate it if the previous person is a pronoun
+            
+
+            // Don't associate if the two nominals are note the same gender
+            String personGender = (String) 
+                previousPerson.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
+            String jobTitleGender = (String) 
+                nominal.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
+            if (personGender != null && jobTitleGender != null) {
+                if (! personGender.equals(jobTitleGender)) {
+                    Out.println("wrong gender: " + personGender + " " +
+                                jobTitleGender);
+                    continue;
+                }
+            }
+
+            
+            anaphor2antecedent.put(nominal, previousPerson);
+        }
+        else if (nominal.getType().equals(ORGANIZATION_CATEGORY)) {
+            // Add each Person entity to the beginning of the people list
+            previousOrgs.add(0, nominal);
+        }
+        else if (nominal.getType().equals(LOOKUP_CATEGORY)) {
+            // Associate this entity with the most recent Person
+            if (previousOrgs.size() > 0) {
+                anaphor2antecedent.put(nominal, previousOrgs.get(0));
+            }
+        }
     }
 
     generateCorefChains(anaphor2antecedent);
   }
 
+  /**
+   * This method specifies whether a given annotation overlaps any of a 
+   * set of annotations. For instance, JobTitles occasionally are
+   * part of Person annotations.
+   * 
+   */
+  private boolean overlapsAnnotations(Annotation a,
+                                      AnnotationSet annotations) {
+      Iterator iter = annotations.iterator();
+      while (iter.hasNext()) {
+          Annotation current = (Annotation) iter.next();
+          if (a.overlaps(current)) {
+              return true;
+          }
+      }
+      
+      return false;
+  }
+                    
+  /** 
+   * This method returns the annotation before a given annotation.
+   */
+  private Annotation getPreviousAnnotation(Annotation a,
+                                           Object[] annotations) {
+      Annotation previous = null;
+      Annotation current = null;
+
+      for (int i=0;i<annotations.length;i++) {
+          current = (Annotation) annotations[i];
+          if (current.getStartNode().getOffset().longValue() >= 
+              a.getStartNode().getOffset().longValue()) {
+              return previous;
+          }
+          previous = current;
+      }
+
+      return null;
+  }
+                                             
 
   /** --- */
   public HashMap getResolvedAnaphora() {
@@ -218,36 +357,4 @@ public class NominalCoref extends AbstractCoreferencer
     */
   }
 
-  /** --- */
-  private static class AnnotationOffsetComparator implements Comparator {
-
-    private int _getOffset(Object o) {
-
-      if (o instanceof Annotation) {
-        return ((Annotation)o).getEndNode().getOffset().intValue();
-      }
-      else if (o instanceof Node) {
-        return ((Node)o).getOffset().intValue();
-      }
-      else {
-        throw new IllegalArgumentException();
-      }
-    }
-
-    public int compare(Object o1,Object o2) {
-
-      //0. preconditions
-      Assert.assertNotNull(o1);
-      Assert.assertNotNull(o2);
-      Assert.assertTrue(o1 instanceof Annotation ||
-                        o1 instanceof Node);
-      Assert.assertTrue(o2 instanceof Annotation ||
-                        o2 instanceof Node);
-
-      int offset1 = _getOffset(o1);
-      int offset2 = _getOffset(o2);
-
-      return offset1 - offset2;
-    }
-  }
 }
