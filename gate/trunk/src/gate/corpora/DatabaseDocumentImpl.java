@@ -479,12 +479,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       pstmt = this.jdbcConn.prepareStatement(sql1);
       pstmt.setLong(1,asetID.longValue());
-      //pstmt.setFetchSize(100);
-      ((OraclePreparedStatement)pstmt).setRowPrefetch(100);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(1,java.sql.Types.INTEGER);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(2,java.sql.Types.VARCHAR);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(3,java.sql.Types.BIGINT);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(4,java.sql.Types.BIGINT);
+      ((OraclePreparedStatement)pstmt).setRowPrefetch(DBHelper.CHINK_SIZE_LARGE);
       pstmt.execute();
       rs = pstmt.getResultSet();
 
@@ -597,15 +592,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
-      //pstmt.setFetchSize(100);
-      ((OraclePreparedStatement)pstmt).setRowPrefetch(100);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(1,java.sql.Types.INTEGER);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(2,java.sql.Types.VARCHAR);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(3,java.sql.Types.INTEGER);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(4,java.sql.Types.NUMERIC);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(5,java.sql.Types.VARCHAR);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(6,java.sql.Types.CLOB);
-//      ((OraclePreparedStatement)pstmt).defineColumnType(7,java.sql.Types.BLOB);
+      ((OraclePreparedStatement)pstmt).setRowPrefetch(DBHelper.CHINK_SIZE_LARGE);
       pstmt.execute();
       rs = pstmt.getResultSet();
 
