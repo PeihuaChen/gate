@@ -26,7 +26,7 @@ public class TextAttributesChooser extends JDialog {
   JButton okButton;
   JButton cancelButton;
 
-  Style currentStyle;
+  MutableAttributeSet currentStyle;
 
   boolean choice;
 
@@ -45,6 +45,8 @@ public class TextAttributesChooser extends JDialog {
   public TextAttributesChooser() {
     this(null, "", false);
   }
+
+
   void jbInit() throws Exception {
     sampleText = new JTextPane();
     sampleText.setText("Type your own sample here...");
@@ -163,9 +165,12 @@ public class TextAttributesChooser extends JDialog {
 
     fontFamilyCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
+        StyleConstants.setFontFamily(currentStyle,
+                                     (String)fontFamilyCombo.getSelectedItem());
         updateSample();
       }
     });
+
     fontSizeCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         try{
@@ -173,18 +178,22 @@ public class TextAttributesChooser extends JDialog {
         }catch(NumberFormatException nfe){
           fontSizeCombo.setSelectedIndex(3);
         }
+        StyleConstants.setFontSize(currentStyle,
+                                   Integer.parseInt((String)fontSizeCombo.getSelectedItem()));
         updateSample();
       }
     });
 
     boldChk.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
+        StyleConstants.setBold(currentStyle, boldChk.isSelected());
         updateSample();
       }
     });
 
     italicChk.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
+        StyleConstants.setItalic(currentStyle, italicChk.isSelected());
         updateSample();
       }
     });
@@ -192,6 +201,7 @@ public class TextAttributesChooser extends JDialog {
     underlineChk.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         if(underlineChk.isSelected()) strikethroughChk.setSelected(false);
+        StyleConstants.setUnderline(currentStyle, underlineChk.isSelected());
         updateSample();
       }
     });
@@ -199,6 +209,7 @@ public class TextAttributesChooser extends JDialog {
     strikethroughChk.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         if(strikethroughChk.isSelected()) underlineChk.setSelected(false);
+        StyleConstants.setStrikeThrough(currentStyle, strikethroughChk.isSelected());
         updateSample();
       }
     });
@@ -206,6 +217,7 @@ public class TextAttributesChooser extends JDialog {
     superscriptChk.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         if(superscriptChk.isSelected()) subscriptChk.setSelected(false);
+        StyleConstants.setSuperscript(currentStyle, superscriptChk.isSelected());
         updateSample();
       }
     });
@@ -213,18 +225,21 @@ public class TextAttributesChooser extends JDialog {
     subscriptChk.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         if(subscriptChk.isSelected()) superscriptChk.setSelected(false);
+        StyleConstants.setSubscript(currentStyle, subscriptChk.isSelected());
         updateSample();
       }
     });
 
     fgChooser.getSelectionModel().addChangeListener(new ChangeListener(){
       public void stateChanged(ChangeEvent e){
+        StyleConstants.setForeground(currentStyle, fgChooser.getColor());
         updateSample();
       }
     });
 
     bgChooser.getSelectionModel().addChangeListener(new ChangeListener(){
       public void stateChanged(ChangeEvent e){
+        StyleConstants.setBackground(currentStyle, bgChooser.getColor());
         updateSample();
       }
     });
@@ -251,9 +266,11 @@ public class TextAttributesChooser extends JDialog {
 
   }
 
-  public Style show(Style style){
-    currentStyle.addAttributes(style);
+  public MutableAttributeSet show(MutableAttributeSet style){
+    currentStyle = new SimpleAttributeSet(style);
+    //currentStyle.addAttributes(style);
     updateData();
+    updateSample();
     setModal(true);
     super.show();
     if(choice) return currentStyle;
@@ -274,19 +291,6 @@ public class TextAttributesChooser extends JDialog {
   }
 
   protected void updateSample(){
-    StyleConstants.setFontFamily(currentStyle,
-                                 (String)fontFamilyCombo.getSelectedItem());
-    StyleConstants.setFontSize(currentStyle,
-                               Integer.parseInt((String)fontSizeCombo.getSelectedItem()));
-    StyleConstants.setBold(currentStyle, boldChk.isSelected());
-    StyleConstants.setItalic(currentStyle, italicChk.isSelected());
-    StyleConstants.setUnderline(currentStyle, underlineChk.isSelected());
-    StyleConstants.setSuperscript(currentStyle, superscriptChk.isSelected());
-    StyleConstants.setSubscript(currentStyle, subscriptChk.isSelected());
-    StyleConstants.setStrikeThrough(currentStyle, strikethroughChk.isSelected());
-    StyleConstants.setForeground(currentStyle, fgChooser.getColor());
-    StyleConstants.setBackground(currentStyle, bgChooser.getColor());
-
     if(sampleText.getSelectedText() != null &&
        sampleText.getSelectedText().length() > 0){
       sampleText.setCharacterAttributes(currentStyle, true);
@@ -307,11 +311,19 @@ public class TextAttributesChooser extends JDialog {
           System.exit(0);
         }
       });
-      TextAttributesChooser dialog = new TextAttributesChooser(frame, "Dialog", false);
+      final TextAttributesChooser dialog = new TextAttributesChooser(frame, "Dialog", false);
       //frame.getContentPane().add(dialog.getContentPane().getComponent(0));
-      frame.setSize(200, 200);
+      JButton btn = new JButton("Display Dialog");
+      btn.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e){
+          Style style = new StyleContext().addStyle(null,null);
+          StyleConstants.setBackground(style, Color.white);
+          System.out.println(dialog.show(style));
+        }
+      });
+      frame.getContentPane().add(btn);
+      frame.pack();
       frame.setVisible(true);
-      System.out.println(dialog.show(new StyleContext().addStyle(null,null)));
 
     }catch(Exception e){
       e.printStackTrace();

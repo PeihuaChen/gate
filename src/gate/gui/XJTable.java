@@ -1,9 +1,7 @@
 package gate.gui;
 
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -37,7 +35,7 @@ public class XJTable extends JTable {
 
   public void tableChanged(TableModelEvent e){
     super.tableChanged(e);
-    adjustColumns();
+    adjustSizes(false);
   }
 
   protected void init(){
@@ -58,12 +56,13 @@ public class XJTable extends JTable {
         TableColumnModel columnModel = getColumnModel();
         int viewColumn = columnModel.getColumnIndexAtX(e.getX());
         int column = convertColumnIndexToModel(viewColumn);
-        if (e.getClickCount() == 1 && column != -1) {
+        if (column != -1) {
           if(column != sortedColumn) ascending = true;
           else ascending = !ascending;
           sorter.sortByColumn(column);
           sortedColumn = column;
         }
+        adjustSizes(true);
       }
     };
     getTableHeader().addMouseListener(listMouseListener);
@@ -72,41 +71,70 @@ public class XJTable extends JTable {
   }//init()
 
 
-  protected void adjustColumns(){
-    int width;
+  protected void adjustSizes(boolean headerOnly){
     int totalWidth = 0;
-    TableColumn tCol;
+    TableColumn tCol = null;
+    Dimension dim;
+    int cellWidth;
+    int cellHeight;
+    int rowMargin = getRowMargin();
+
+    //delete the current rowModel in order to get a new updated one
+    //this way we fix a bug in JTable
+    setRowHeight(Math.max(getRowHeight(), 10));
     for(int column = 0; column < getColumnCount(); column ++){
+      int width;
       tCol = getColumnModel().getColumn(column);
       //set the renderer
       tCol.setHeaderRenderer(headerRenderer);
-      //compute the widths
+      //compute the sizes
       width = headerRenderer.getTableCellRendererComponent(
                   this, tCol.getHeaderValue(), false, false,0,column
               ).getPreferredSize().width;
-      int cellWidth;
-      for(int row = 0; row < getRowCount(); row ++){
-        cellWidth = getCellRenderer(row,column).
-                    getTableCellRendererComponent(
-                      this, getValueAt(row, column), false, false, row, column
-                    ).getPreferredSize().width;
-        width = Math.max(width, cellWidth);
+      if(! headerOnly){
+        for(int row = 0; row < getRowCount(); row ++){
+          dim = getCellRenderer(row,column).
+                      getTableCellRendererComponent(
+                        this, getValueAt(row, column), false, false, row, column
+                      ).getPreferredSize();
+          cellWidth = dim.width;
+          cellHeight = dim.height;
+          width = Math.max(width, cellWidth);
+          if(cellHeight + rowMargin > getRowHeight(row))
+            setRowHeight(row, cellHeight + rowMargin);
+        }
       }
-      width += 10;
+      width += getColumnModel().getColumnMargin();
       tCol.setPreferredWidth(width);
+      tCol.setMinWidth(width);
       totalWidth += width;
     }
-    int totalHeight = rowHeight * getRowCount();
-    final Dimension dim = new Dimension(totalWidth, totalHeight);
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        setMinimumSize(dim);
-        setPreferredSize(dim);
-        setMaximumSize(dim);
-        Component parent = getParent();
-        if(parent != null) parent.invalidate();
+    if(! headerOnly){
+      int totalHeight = 0;
+      for (int row = 0; row < getRowCount(); row++)
+        totalHeight += getRowHeight(row);
+      dim = new Dimension(totalWidth, totalHeight);
+      setPreferredScrollableViewportSize(dim);
+  //System.out.println("View data size: " + getRowCount() + dim);
+
+      Container p = getParent();
+      if (p instanceof JViewport) {
+          Container gp = p.getParent();
+          if (gp instanceof JScrollPane) {
+              JScrollPane scrollPane = (JScrollPane)gp;
+              // Make certain we are the viewPort's view and not, for
+              // example, the rowHeaderView of the scrollPane -
+              // an implementor of fixed columns might do this.
+              JViewport viewport = scrollPane.getViewport();
+              if (viewport == null || viewport.getView() != this) {
+                  return;
+              }
+              viewport.setViewSize(dim);
+              viewport.setExtentSize(dim);
+          }
       }
-    });
+    }
+
   }
 
   public void setSortedColumn(int column){
@@ -297,7 +325,7 @@ public class XJTable extends JTable {
     }
 
     public void tableChanged(TableModelEvent e) {
-      //System.out.println("Sorter: tableChanged");
+      //System.out.println("Sorter: tableChanged " + model.getRowCount());
       reallocateIndexes();
       sort(sorter);
       super.tableChanged(e);
@@ -398,6 +426,7 @@ public class XJTable extends JTable {
     public CustomHeaderRenderer(TableCellRenderer oldRenderer){
       this.oldRenderer = oldRenderer;
     }
+
     public Component getTableCellRendererComponent(JTable table,
                                              Object value,
                                              boolean isSelected,
