@@ -13,29 +13,76 @@
   <property name="output"  location="classes"/>
   <!-- Use the new 1.3+ compiler -->
   <property name="build.compiler"  value="modern"/>
-	<!-- The CLASSPATH -->
-  <path id="project.class.path">
-		<fileset dir="lib">
-			<include name="**/*.jar"/>
-			<include name="**/*.zip"/>
-		</fileset>
-  </path>  
+	<!-- The libraries -->
+  <fileset id="libs" dir="lib">
+    <include name="**/*.jar"/>
+    <include name="**/*.zip"/>
+  </fileset>
   
+  <!-- The build CLASSPATH -->
+  <path id="build.class.path">
+		<fileset refid="libs"/>
+  </path>
+
+  <!-- tools.jar path -->
+  <path id="tools.jar" location="${java.home}/lib/tools.jar"/>
+  
+  <!-- The run CLASSPATH -->
+  <path id="run.class.path">
+    <pathelement location="${build}/gate.jar"/>
+    <pathelement path="${tools.jar}"/>
+  </path>
+  
+	<!-- Copies resources to the output directory -->
   <target name="resources">
-  </target>
+		<copy todir="${output}/gate/resources"
+		      includeEmptyDirs="true" >
+			<fileset dir="${src}/gate/resources"
+							 excludes="**/CVS,**/CVS/**,**/.cvsignore" />
+		</copy>
+		<copy file="${build}/build.txt" todir="${output}/gate/resources"/>
+		<copy file="${build}/version.txt" todir="${output}/gate/resources"/>
+	</target>
 
 
 	<!-- This target compiles all the classes -->  
   <target name="compile"
-  	  depends="resources"
           description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" 
 		       destdir="${output}"
-					 classpathref="project.class.path"/>
+					 classpathref="build.class.path"/>
+  </target>
+	
+  <!-- Make gate.jar archive -->
+	<target name="jar" depends="compile,resources">
+		<jar destfile="${build}/gate.jar" 
+         update="false"
+         index="true">
+      <fileset dir="${output}/"
+               includes="gate/**"/>
+      <zipgroupfileset refid="libs"/>
+    </jar>
+	</target>
+  
+  <!-- Everything! -->
+	<target name="all" depends="jar">
+	</target>
+  
+  <!-- Run the beast -->
+  <target name="run">
+    <java classname="gate.Main" 
+          classpathref="run.class.path" 
+          fork="true"
+          spawn="true"
+          maxmemory="200m">
+     </java>
   </target>
   
-	<target name="all" depends="compile">
-	</target>
-
+  <!-- Clear all build output -->
+  <target name="clean">
+    <delete includeemptydirs="true">
+      <fileset dir="${output}" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
+    </delete>
+  </target>
 </project>
