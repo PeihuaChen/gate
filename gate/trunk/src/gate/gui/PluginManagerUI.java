@@ -18,6 +18,7 @@ package gate.gui;
 import java.awt.*;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -85,7 +86,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     //enable tooltips
     ToolTipManager.sharedInstance().registerComponent(resourcesList);
     
-    JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+    mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     JScrollPane scroller = new JScrollPane(mainTable);
     scroller.setBorder(BorderFactory.createTitledBorder(
             scroller.getBorder(), 
@@ -99,7 +100,6 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             "CREOLE resources in directory",
             TitledBorder.LEFT, TitledBorder.ABOVE_TOP));
     mainSplit.setRightComponent(scroller);
-    mainSplit.setDividerLocation(0.75);
     
     getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
@@ -135,6 +135,11 @@ public class PluginManagerUI extends JDialog implements GateConstants{
      public void valueChanged(ListSelectionEvent e){
        resourcesListModel.dataChanged();
      }
+    });
+    mainSplit.addComponentListener(new ComponentAdapter(){
+      public void componentResized(ComponentEvent e){
+        mainSplit.setDividerLocation(0.75);
+      }
     });
   }
   
@@ -484,6 +489,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   }//class LoadCreoleRepositoryAction extends AbstractAction
 
   protected XJTable mainTable;
+  protected JSplitPane mainSplit;
   protected MainTableModel mainTableModel;
   protected ResourcesListModel resourcesListModel;
   protected JList resourcesList; 
