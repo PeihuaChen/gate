@@ -207,17 +207,6 @@
     </RESOURCE>
     <!-- creole.xml for namematch -->
     <RESOURCE>
-      <NAME>ANNIE Namematch</NAME>
-      <CLASS>gate.creole.namematch.Namematch</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true">java.util.Vector</PARAMETER>
-      <PARAMETER NAME="organizationType" DEFAULT="Organization" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="personType" DEFAULT="Person" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="extLists" RUNTIME="true" OPTIONAL="true">java.lang.Boolean</PARAMETER>
-    </RESOURCE>
-
-    <RESOURCE>
       <NAME>ANNIE OrthoMatch</NAME>
       <CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
       <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
