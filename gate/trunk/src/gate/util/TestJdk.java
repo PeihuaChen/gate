@@ -20,6 +20,8 @@ import java.io.*;
 import junit.framework.*;
 import java.net.*;
 
+import gate.*;
+
 /** Tests for the Jdk class and for GateClassLoader. The testReloading method
   * reads a class from a .jar that is reached via a URL. This is called
   * TestJdk.jar; to build it, do "make TestJdk.jar" in the build directory

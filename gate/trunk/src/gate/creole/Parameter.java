@@ -16,6 +16,7 @@
 package gate.creole;
 
 import java.util.*;
+import java.io.*;
 
 import gate.*;
 import gate.util.*;
@@ -23,7 +24,7 @@ import gate.util.*;
 
 /** Models a resource parameter.
   */
-public class Parameter
+public class Parameter implements Serializable
 {
   /** The type name of the parameter */
   String typeName;

@@ -48,7 +48,7 @@ public class CreoleRegisterImpl extends HashMap
   protected Set directories = new HashSet();
 
   /** The parser for the CREOLE directory files */
-  protected SAXParser parser = null;
+  protected transient SAXParser parser = null;
 
   /** Default constructor. Sets up directory files parser. */
   public CreoleRegisterImpl() throws GateException {

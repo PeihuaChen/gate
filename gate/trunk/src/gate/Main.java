@@ -54,10 +54,13 @@ public class Main {
     // process command-line options
     processArgs(args);
 
-    // initialise the library and load user CREOLE directories
-    //remove dependency on gate.ac.uk or localhost webservers
+    // GATE builtins should be loaded from the jar (or classes dir), not
+    // from a web server (we load them over the web during testing to
+    // make sure that users can load their own that way)
     Gate.setNetConnected(false);
     Gate.setLocalWebServer(false);
+
+    // initialise the library and load user CREOLE directories
     Gate.init();
     registerCreoleUrls();
 
@@ -93,16 +96,15 @@ public class Main {
     Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
     splash.show();
 
-
     if(DEBUG) Out.prln("constructing GUI");
 
     // run the GUI
     frame.setTitle(name + " " + version);
 
-    //Validate frames that have preset sizes
+    // Validate frames that have preset sizes
     frame.validate();
 
-    //Center the window
+    // Center the window
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = frame.getSize();
     if (frameSize.height > screenSize.height) {
@@ -115,13 +117,13 @@ public class Main {
                       (screenSize.height - frameSize.height) / 2);
     frame.setVisible(true);
 
-    //wait for 1 sec
+    // wait for 1 sec
     long timeNow = System.currentTimeMillis();
     while(timeNow - startTime < 3000){
-      try{
+      try {
         Thread.sleep(150);
         timeNow = System.currentTimeMillis();
-      }catch(InterruptedException ie){}
+      } catch(InterruptedException ie) {}
     }
     splash.hide();
 
@@ -129,7 +131,6 @@ public class Main {
 
   // find out the version and build numbers
   static {
-
     // find out the version number
     try {
       BufferedReader reader = new BufferedReader(

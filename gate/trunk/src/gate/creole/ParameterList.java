@@ -16,6 +16,7 @@
 package gate.creole;
 
 import java.util.*;
+import java.io.*;
 import gate.*;
 import gate.util.*;
 
@@ -23,7 +24,7 @@ import gate.util.*;
   * <TT>creole.xml</TT> metadata. Parameters are stored as lists
   * of disjunctions (<TT>OR'd</TT> sets in the metadata).
   */
-public class ParameterList
+public class ParameterList implements Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;

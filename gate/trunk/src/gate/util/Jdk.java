@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 04/05/00
  *
  *  $Id$
@@ -30,9 +30,11 @@ import java.util.*;
 import sun.toolsx.java.*;
 import sun.toolsx.javac.*;
 
+import gate.*;
+
 
 /** Jdk encapsulates some utilities for poking around in your Java
-  * environment. 
+  * environment.
   */
 public class Jdk {
 
@@ -120,14 +122,14 @@ public class Jdk {
       byte[] classBytes = (byte[]) iter.next();
 
     if(classBytes == null || classBytes.length == 0)
-    	throw new GateException("no bytes returned from compiler");
+      throw new GateException("no bytes returned from compiler");
 
       // possibly this test is wrong - what about sources that contain
       // multiple classes or have inner classes? at any rate we currently
       // have no way to return them
     if(iter.hasNext())
-    	throw
-	      new GateException("only compiled one class but got multiple results");
+      throw
+        new GateException("only compiled one class but got multiple results");
 
       return classBytes;
     } // while

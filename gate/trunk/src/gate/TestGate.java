@@ -19,6 +19,7 @@ import java.util.*;
 import junit.framework.*;
 import gnu.getopt.*;
 
+import gate.*;
 import gate.annotation.*;
 import gate.corpora.*;
 import gate.creole.*;
