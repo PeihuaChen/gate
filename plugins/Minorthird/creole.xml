@@ -6,8 +6,8 @@
   <RESOURCE>
   
     <NAME>CMU Minorthird</NAME>
-    <JAR>Minorthird.jar</JAR>
-    <CLASS>edu.cmu.minorthird.RunMixupWrapper</CLASS>
+    <JAR>MinorthirdWrapper.jar</JAR>
+    <CLASS>gate.minorthird.RunMixupWrapper</CLASS>
 
     <PARAMETER NAME="document"
         RUNTIME="true"
