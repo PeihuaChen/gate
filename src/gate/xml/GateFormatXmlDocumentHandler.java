@@ -123,16 +123,21 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       currentFeatureMap = null;
       return;
     }// End if
+    // Deal with Value
+    if ("Value".equals(elemName) && "Feature".equals(
+                        (String)currentElementStack.peek())){
+      // If the Value tag was empty, then an empty string will be created.
+      if (currentFeatureValue == null) currentFeatureValue = new String("");
+    }// End if
     // Deal with Feature
     if ("Feature".equals(elemName)){
-      if(currentFeatureName == null || currentFeatureValue == null){
+      if(currentFeatureName == null){
         // Cannot add the (key,value) pair to the map
         // One of them is null something was wrong in the XML file.
-        throw new GateSaxException("A feature name or value was empty." +
+        throw new GateSaxException("A feature name was empty." +
           "The annotation that cause it is " +
           currentAnnot +
           ".Please check the document with a text editor before trying again.");
-
       }else {
         if (currentFeatureMap == null){
           // The XMl file was somehow altered and a start Feature wasn't found.
