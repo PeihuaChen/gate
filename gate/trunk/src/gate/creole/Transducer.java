@@ -72,8 +72,8 @@ public class Transducer extends AbstractLanguageAnalyser {
         fireProgressChanged(0);
         batch = new Batch(grammarURL, encoding, new InternalStatusListener());
         fireProcessFinished();
-      }catch(JapeException je){
-        throw new ResourceInstantiationException(je);
+      }catch(Exception e){
+        throw new ResourceInstantiationException(e);
       }
     } else
       throw new ResourceInstantiationException (
