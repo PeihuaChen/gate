@@ -114,6 +114,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     //startNode: the node from the current matching attepmt starts.
     //initially startNode = leftMost node
     gate.Node startNode = annotations.firstNode();
+    //if there are no annotations return
+    if(startNode == null) return;
     //The last node: where the parsing will stop
     gate.Node lastNode = annotations.lastNode();
     int oldStartNodeOff = 0;
@@ -341,6 +343,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.14  2000/07/19 20:37:37  valyt
+// Changed the Files.getResourceAsStream() method in order to break the tests :)
+//
+// now it doesn't only load gate resources but the full path of the resource must be specified
+//
 // Revision 1.13  2000/07/12 11:40:19  valyt
 // *** empty log message ***
 //

@@ -138,7 +138,8 @@ public class Files {
     */
   public static InputStream getResourceAsStream(String resourceName)
   throws IOException {
-    return Class.class.getResourceAsStream("/gate/resources/" + resourceName);
+//    return Class.class.getResourceAsStream("/gate/resources/" + resourceName);
+    return ClassLoader.getSystemResourceAsStream(resourceName);
   } // getResourceAsStream(String)
 
   /** This method takes a regular expression and a directory name and returns
