@@ -50,6 +50,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   protected String                inputASName = null;
   protected String                textTagName = DEFAULT_TEXT_TAG_NAME;
   protected gate.AnnotationSet    bodyAnnotations = null;
+  protected List annotationTypes;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -91,6 +92,12 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     AnnotationSet tagAS = (tagASName == null) ?
                             document.getAnnotations() :
                             document.getAnnotations(tagASName);
+
+    //if we want to transfer only some types, then select only annotations
+    //from these types
+
+    if (annotationTypes != null && annotationTypes.size() > 0)
+      inputAS = inputAS.get(new HashSet(annotationTypes));
 
     //check if we have a BODY annotation
     //if not, just copy all
@@ -160,6 +167,14 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
 
   public String getTextTagName() {
     return textTagName;
+  }
+
+  public List getAnnotationTypes() {
+    return this.annotationTypes;
+  }
+
+  public void setAnnotationTypes(List newTypes) {
+    annotationTypes = newTypes;
   }
 
 
