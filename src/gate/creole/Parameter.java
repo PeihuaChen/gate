@@ -16,6 +16,8 @@
 package gate.creole;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import gate.Gate;
@@ -26,6 +28,16 @@ import gate.util.*;
   */
 public class Parameter implements Serializable
 {
+  /**
+   * Constructor
+   * @param baseUrl the URL to the creole.xml file that defines the resource 
+   * this parameter belongs to. This will be used a context when deriving 
+   * default values for the parameters of type URL.
+   */
+  public Parameter(URL baseUrl){
+    this.baseURL = baseUrl;
+  }
+  
   /** The type name of the parameter */
   String typeName;
 
@@ -149,6 +161,12 @@ public class Parameter implements Serializable
         value = Double.valueOf(stringValue);
       else if(typeName.equals("java.lang.Float"))
         value = Float.valueOf(stringValue);
+      else if(typeName.equals("java.net.URL"))
+        try{
+          value = new URL(baseURL, stringValue);
+        }catch(MalformedURLException mue){
+          value = null;
+        }
       else{
         //try to construct a new value from the string using a constructor
         // e.g. for URLs
@@ -232,6 +250,12 @@ public class Parameter implements Serializable
   /** Is this a run-time parameter? */
   boolean runtime = false;
 
+  /**
+   * The URL to the creole.xml file that defines the resource this parameter 
+   * belongs to. It is used for deriving default values for parameters of type
+   * {@link URL}.
+   */
+  protected URL baseURL;
   /** Set runtime status of this parameter */
   public void setRuntime(boolean runtime) { this.runtime = runtime; }
 
