@@ -11,6 +11,7 @@ package gate.annotation;
 import java.util.*;
 import java.io.*;
 import junit.framework.*;
+import java.net.*;
 
 import gate.*;
 import gate.util.*;
@@ -36,7 +37,7 @@ public class TestAnnotation extends TestCase
   public void setUp() throws IOException, InvalidOffsetException {
     String server = TestDocument.getTestServerName();
     assertNotNull(server);
-    doc1 = new DocumentImpl(server + "doc0.html");
+    doc1 = new DocumentImpl(new URL(server + "doc0.html"));
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
