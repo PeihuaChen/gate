@@ -55,22 +55,22 @@ public class TestJacl extends TestCase
     // find the list of script files in the GATE source tree
     // (the parameter to findScripts causes a dir change before the search)
     List scriptPaths = jacl.findScripts(jacl.goToGateSrcScript);
-    System.out.println("Scripts found: " + scriptPaths); 
+    // System.out.println("Scripts found: " + scriptPaths); 
 
     // refresh Jacl.java's list of GATE scripts
     // System.out.println("Updating Jacl.java....");
     // jacl.listGateScripts();
 
     // copy the scripts to the classes tree
-    System.out.println("Doing copy....");
+    // System.out.println("Doing copy....");
     jacl.copyGateScripts(scriptPaths);
 
     // load the scripts (as a test)
-    System.out.println("Doing load....");
+    // System.out.println("Doing load....");
     jacl.loadScripts(scriptPaths);
 
     // tell the world
-    System.out.println("Tcl scripts found, installed and loaded");
+    // System.out.println("Tcl scripts found, installed and loaded");
   } // testListing
 
 
