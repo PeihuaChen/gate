@@ -1094,7 +1094,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       return false;
 
 //    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
-    Out.prln("Rule 5: " + s1 + "and " + s2);
+//    Out.prln("Rule 5: " + s1 + "and " + s2);
     if (tokensLongAnnot.size()>1)
       return matchRule1((String)
                       ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(STRING_FEATURE),
