@@ -426,17 +426,34 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public abstract boolean canReadLR(Object lrID)
-    throws PersistenceException, gate.security.SecurityException;
+  public boolean canReadLR(Object lrID)
+    throws PersistenceException, SecurityException{
+
+    return canAccessLR((Long) lrID,DBHelper.READ_ACCESS);
+  }
+
 
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public abstract boolean canWriteLR(Object lrID)
-    throws PersistenceException, gate.security.SecurityException;
+  public boolean canWriteLR(Object lrID)
+    throws PersistenceException, SecurityException{
 
+    return canAccessLR((Long) lrID,DBHelper.WRITE_ACCESS);
+  }
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has some access (read/write) to the LR
+   */
+  protected boolean canAccessLR(Long lrID,int mode)
+    throws PersistenceException, SecurityException{
+
+    //abstract
+    throw new MethodNotImplementedException();
+  }
 
   /*  interface DatabaseDataStore  */
 
