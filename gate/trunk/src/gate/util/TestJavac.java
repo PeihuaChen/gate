@@ -89,11 +89,7 @@ public class TestJavac extends TestCase{
   }
 
   public void testCompileError() throws Exception {
-//    disable System.out so that the compiler can't splash its error on screen
-//    PrintStream syserr = System.err;
-//    PrintStream newSyserr = new PrintStream(new ByteArrayOutputStream());
-//    System.setErr(newSyserr);
-
+    System.err.println("Testing for a compile error:");
     String nl = Strings.getNl();
     String javaSource =
         "package foo.bar;" + nl +
