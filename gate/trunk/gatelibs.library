@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <library>
   <!--JBuilder Library Definition File-->
   <fullname>gatelibs</fullname>
@@ -7,7 +6,6 @@
     <path>[lib/gnu-regexp-1.0.8.jar]</path>
     <path>[lib/jacl.jar]</path>
     <path>[lib/JavaCC.zip]</path>
-    <path>[lib/javacompiler.jar]</path>
     <path>[lib/jigsaw.jar]</path>
     <path>[lib/junit.jar]</path>
     <path>[lib/oro.jar]</path>
@@ -23,7 +21,7 @@
     <path>[lib/orajdbc9i.zip]</path>
     <path>[lib/ontotext.jar]</path>
     <path>[lib/ext/nl.mpi.lookup.jar]</path>
+    <path>[lib/javacompiler.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
-

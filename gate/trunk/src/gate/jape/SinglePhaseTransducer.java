@@ -99,8 +99,21 @@ extends Transducer implements JapeConstants, java.io.Serializable
     else
       finishedAlready = true;
 
-    for(Iterator i = rules.iterator(); i.hasNext(); )
-      ((Rule) i.next()).finish();
+    //each rule has a RHS which has a string for java code
+    //those strings need to be compiled now
+    Map actionClasses = new HashMap(rules.size());
+    for(Iterator i = rules.iterator(); i.hasNext(); ){
+      Rule rule = (Rule)i.next();
+      rule.finish();
+      actionClasses.put(rule.getRHS().getActionClassName(),
+                        rule.getRHS().getActionClassString());
+    }
+    try{
+      Javac.loadClasses(actionClasses);
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+
     //build the finite state machine transition graph
     fsm = new FSM(this);
     //clear the old style data structures
