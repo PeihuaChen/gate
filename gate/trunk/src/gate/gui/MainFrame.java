@@ -2903,10 +2903,10 @@ public class MainFrame extends JFrame
 
         editor.setOntologyList(new Vector(ontologies));
 
-        editor.visualize();
         frame.setSize(editor.SIZE_X,editor.SIZE_Y);
         frame.setLocation(editor.POSITION_X,editor.POSITION_Y);
         frame.setVisible(true);
+        editor.visualize();
       } catch ( ResourceInstantiationException ex ) {
         ex.printStackTrace(Err.getPrintWriter());
       }
