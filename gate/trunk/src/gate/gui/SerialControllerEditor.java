@@ -345,7 +345,7 @@ public class SerialControllerEditor extends AbstractVisualResource
           List actions = new ArrayList();
           for(int i = 0; i < rows.length; i++){
             Action act =(Action)new RemovePRAction((ProcessingResource)
-                                     memberPRsTable.getValueAt(rows[i], 0));
+                                     memberPRsTable.getValueAt(rows[i], 1));
             if(act != null) actions.add(act);
           }
           Iterator actIter = actions.iterator();
