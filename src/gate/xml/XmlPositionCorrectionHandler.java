@@ -33,17 +33,22 @@ import org.xml.sax.helpers.*;
  */
 public class XmlPositionCorrectionHandler extends DefaultHandler {
 
+  /** Debug flag */
+  private static final boolean DEBUG = false;
+
   /**
    * Variables for correction of 16K parser limit for offset
    */
   protected long m_realOffset;
   private int m_lastPosition;
+  private int m_lastSize;
   private int m_multiplyer;
 
   /** Constructor for initialization of variables */
   public XmlPositionCorrectionHandler() {
     m_realOffset = 0;
     m_lastPosition = 0;
+    m_lastSize = 0;
     m_multiplyer = 0;
   } // XmlPositionCorrectionHandler
 
@@ -51,6 +56,7 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
   public void startDocument() throws org.xml.sax.SAXException {
     m_realOffset = 0;
     m_lastPosition = 0;
+    m_lastSize = 0;
     m_multiplyer = 0;
   } // startDocument
 
@@ -69,10 +75,12 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
 
     // There is 16K limit for offset. Here is the correction.
     // Will catch the bug in most cases.
-    if(m_lastPosition - offset > 0x2000) {
+    if(m_lastPosition - offset > 0x2000
+        || (offset == 0 && m_lastSize+m_lastPosition > 0x3000) ) {
         m_multiplyer++;
     }
     m_lastPosition = offset;
+    m_lastSize = len;
     m_realOffset = m_multiplyer*0x4000+offset;
   } // characters
 
