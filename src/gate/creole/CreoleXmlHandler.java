@@ -122,6 +122,15 @@ public class CreoleXmlHandler extends HandlerBase {
       currentParam.runtime =
         Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
     }
+
+    // if there are any parameters awaiting addition to the list, add them
+    // (note that they're not disjunctive or previous "/OR" would have got 'em)
+    if(elementName.toUpperCase().equals("OR")) {
+      if(! currentParamDisjunction.isEmpty()) {
+        currentParamList.addAll(currentParamDisjunction);
+        currentParamDisjunction = new ArrayList();
+      }
+    }
   } // startElement
 
   /** Utility function to throw exceptions on stack errors. */
