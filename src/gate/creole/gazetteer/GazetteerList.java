@@ -128,7 +128,7 @@ implements List {
 
       listReader.close();
     } catch (Exception x) {
-      throw new ResourceInstantiationException(x);
+      throw new ResourceInstantiationException(x.getClass()+":"+x.getMessage());
     }
     isModified = false;
   } // load ()
@@ -161,7 +161,7 @@ implements List {
       }
       listWriter.close();
     } catch (Exception x) {
-      throw new ResourceInstantiationException(x);
+      throw new ResourceInstantiationException(x.getClass()+":"+x.getMessage());
     }
     isModified = false;
   } // store()
