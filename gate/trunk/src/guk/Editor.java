@@ -25,6 +25,7 @@ import javax.swing.undo.*;
 import java.beans.*;
 import java.io.*;
 import java.util.Locale;
+import java.util.*;
 
 import guk.im.GateIM;
 import guk.im.GateIMDescriptor;
@@ -104,6 +105,11 @@ public class Editor extends JFrame {
     Locale locale = new Locale("en", "GB");
     //Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
     Locale[] availableLocales = Locale.getAvailableLocales();
+    Arrays.sort(availableLocales, new Comparator(){
+      public int compare(Object o1, Object o2){
+        return ((Locale)o1).getDisplayName().compareTo(((Locale)o2).getDisplayName());
+      }
+    });
     JMenuItem item;
     if(availableLocales != null && availableLocales.length > 1) {
       jMenuIM = new JMenu("Input methods");
