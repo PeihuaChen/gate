@@ -211,7 +211,6 @@ public class NewResourceDialog extends JDialog {
         long startTime = System.currentTimeMillis();
         FeatureMap features = Factory.newFeatureMap();
         features.put("gate.NAME", nameField.getText());
-        features.put("gate.PARAMETERS", params);
         res = Factory.createResource(rData.getClassName(), params,
                                      features, listeners);
         long endTime = System.currentTimeMillis();
