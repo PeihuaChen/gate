@@ -41,6 +41,7 @@ import gate.sgml.TestSgml;
 import gate.util.*;
 import gate.wordnet.TestWordNet;
 import gate.xml.TestXml;
+import gate.xml.TestRepositioningInfo;
 
 import gnu.getopt.Getopt;
 
@@ -252,6 +253,7 @@ public class TestGate {
 
         //test ontotext gazetteer
         suite.addTest(TestHashGazetteer.suite());
+        suite.addTest(TestRepositioningInfo.suite());
         suite.addTest(TestFlexibleGazetteer.suite());
 
       } // if(allTests)
