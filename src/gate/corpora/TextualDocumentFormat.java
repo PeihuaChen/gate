@@ -10,9 +10,11 @@ package gate.corpora;
 
 import java.util.*;
 import java.net.*;
-import org.w3c.www.mime.*;
+
 import gate.util.*;
 import gate.*;
+
+import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any

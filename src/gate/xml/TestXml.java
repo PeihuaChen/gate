@@ -107,8 +107,9 @@ public class TestXml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
-       /*
+
       // register a progress listener with it
+      /*
       docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             System.out.println(text);
@@ -117,6 +118,7 @@ public class TestXml extends TestCase
           }
       });
       */
+
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");
@@ -134,8 +136,7 @@ public class TestXml extends TestCase
     //*/
 
     // graphic visualisation
-
-    //*
+    /*
     System.out.println("Timer started...");
     if (docFormat != null){
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
@@ -143,7 +144,7 @@ public class TestXml extends TestCase
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
     }
-    //*/
+    */
 
   } // testSomething()
 

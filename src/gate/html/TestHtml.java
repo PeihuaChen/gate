@@ -63,8 +63,8 @@ public class TestHtml extends TestCase
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
              // new URL("http://www.funideas.com/visual_gallery.htm")
-            //new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
-            new URL ("http://www.w3.org/TR/REC-xml")
+            new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
+            //new URL ("http://www.w3.org/TR/REC-xml")
             //new URL ("http://www.dcs.shef.ac.uk/~cursu")
             //new URL ("http://www.webhelp.com/home.html")
             //new URL ("http://big2.hotyellow98.com/sys/signup.cgi")
@@ -108,7 +108,7 @@ public class TestHtml extends TestCase
     //*/
 
     // graphic visualisation
-    //*
+    /*
     if (docFormat != null){
         docFormat.unpackMarkup (doc);
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
@@ -116,7 +116,7 @@ public class TestHtml extends TestCase
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
     }
-    //*/
+    */
   } // testSomething()
 
   class AnnotationSetTableModel extends gate.gui.SortedTableModel{

@@ -106,16 +106,17 @@ public class TestSgml extends TestCase
     else
       System.out.println("Couldn't figure out the type for this document");
     //*/
+    /*
     // graphic visualisation
 
     if (docFormat != null){
-     //*
+
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
         gate.Corpus corpus = gate.Transients.newCorpus("SGML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
-     // */
     }
+    */
   }// testSgml
 
   class AnnotationSetTableModel extends gate.gui.SortedTableModel{
