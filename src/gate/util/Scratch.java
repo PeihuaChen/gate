@@ -323,6 +323,7 @@ public class Scratch
     Out.prln("done!");
   }
 
+
   public static class ContentPropertyReader implements PropertyReader{
     public String getPropertyValue(gate.Document doc){
       return doc.getContent().toString();
