@@ -85,10 +85,12 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
       AnnotationObject annot = (AnnotationObject) iterator.next();
       iterator.remove();
       // Create a new annotation and add it to the annotation set
+/*
       if (canCreateAnnotation(annot.getStart().longValue(),
                               annot.getEnd().longValue(),
                               docSize)
           )
+*/
         try{
           basicAS.add( annot.getStart(),
                        annot.getEnd(),
@@ -96,7 +98,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
                        annot.getFM()
           );
         }catch (gate.util.InvalidOffsetException e){
-          throw new GateSaxException(e);
+          throw new GateSaxException("Tried to add an invalid annotation !" + e);
         }
     }// End while
   }// endDocument

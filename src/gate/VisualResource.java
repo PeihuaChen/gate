@@ -25,4 +25,5 @@ import gate.util.*;
 /** Models all sorts of visual resources.
   */
 public interface VisualResource extends Resource{
+
 } // interface VisualResource

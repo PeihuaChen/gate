@@ -77,7 +77,7 @@ public class AnnotationDiff extends AbstractVisualResource{
   private XJTable diffTable = new XJTable();
 
   /** Used to represent the result of diff. See DiffSetElement class.*/
-  private Set diffSet = new HashSet();
+  private Set diffSet = null;
 
   /** These fields are used in doDiff() and detectKey(Response)Type()*/
   private Set keyPartiallySet = new HashSet();
@@ -233,6 +233,9 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Do the diff, P&R calculation and so on
     AnnotationSet keyAnnotSet = null;
     AnnotationSet responseAnnotSet = null;
+
+    if (annotationSchema == null)
+     throw new ResourceInstantiationException("No annotation schema defined !");
 
     // Get the key AnnotationSet from the keyDocument
     keyAnnotSet = keyDocument.getAnnotations().get(
@@ -479,6 +482,7 @@ public class AnnotationDiff extends AbstractVisualResource{
     int actual = aResponseAnnotList.size();
     int possible = aKeyAnnotList.size();
 
+    diffSet = new HashSet();
     // Iterate throught all elements from keyList and find those in the response
     // List which satisfies isCompatible() and isPartiallyCompatible() relations
     Iterator keyIterator = aKeyAnnotList.iterator();
