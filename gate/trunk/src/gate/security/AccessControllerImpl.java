@@ -707,7 +707,7 @@ public class AccessControllerImpl
       //1.1 read groups
       sql = " SELECT grp_name "+
             " FROM   "+Gate.DB_OWNER+".t_group "+
-            " ORDER BY grp_name DESC";
+            " ORDER BY grp_name ASC";
       rs = stmt.executeQuery(sql);
 
       while (rs.next()) {
