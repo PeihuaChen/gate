@@ -144,6 +144,18 @@ public class TestCreole extends TestCase
           feats.get("TYPE").equals("gate.gui.SomeViewer")
       );
     }
+
+    List allViews = rd.getAllViews();
+    iter = allViews.iterator();
+    while(iter.hasNext()) {
+      FeatureMap feats = (FeatureMap) iter.next();
+
+      assert(
+        "wrong type on TPR2 view",
+        feats != null && feats.size() > 0 &&
+          feats.get("TYPE").equals("gate.gui.SomeViewer")
+      );
+    }
   } // testViews()
 
   /** Utility method to check that a list of resources are all
@@ -236,6 +248,29 @@ public class TestCreole extends TestCase
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
     assert("Xml doc format not PRIVATE", xmlDocFormatRD.isPrivate());
     if(DEBUG) Out.prln(xmlDocFormatRD.getFeatures());
+
+    // Create an LR
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("features", Factory.newFeatureMap());
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+    Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
+
+    List publics = reg.getPublicLrInstances();
+    List allLrs = reg.getLrInstances();
+
+    assert(
+      "wrong number of public LR instances",
+      publics.size() == 1 && allLrs.size() == 5
+    );
+
+    if(DEBUG) {
+      Iterator iter = publics.iterator();
+      Out.prln("publics:");
+      while(iter.hasNext()) { Out.prln(iter.next()); }
+      iter = allLrs.iterator();
+      Out.prln("allLrs:");
+      while(iter.hasNext()) { Out.prln(iter.next()); }
+    }
 
   } // testToolsAndPrivate()
 
