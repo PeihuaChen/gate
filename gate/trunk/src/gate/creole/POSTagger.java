@@ -74,7 +74,9 @@ public class POSTagger extends AbstractLanguageAnalyser {
 
 
       AnnotationSet sentencesAS = inputAS.get(SENTENCE_ANNOTATION_TYPE);
-      if(sentencesAS != null && sentencesAS.size() > 0){
+      AnnotationSet tokensAS = inputAS.get(TOKEN_ANNOTATION_TYPE);
+      if(sentencesAS != null && sentencesAS.size() > 0
+         && tokensAS != null && tokensAS.size() > 0){
         long startTime = System.currentTimeMillis();
         fireStatusChanged("POS tagging " + document.getName());
         fireProgressChanged(0);
@@ -89,7 +91,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
         //read all the tokens and all the sentences
         List sentencesList = new ArrayList(sentencesAS);
         Collections.sort(sentencesList, offsetComparator);
-        List tokensList = new ArrayList(inputAS.get(TOKEN_ANNOTATION_TYPE));
+        List tokensList = new ArrayList(tokensAS);
         Collections.sort(tokensList, offsetComparator);
 
         Iterator sentencesIter = sentencesList.iterator();
@@ -166,8 +168,9 @@ public class POSTagger extends AbstractLanguageAnalyser {
           (double)(System.currentTimeMillis() - startTime) / 1000) +
           " seconds!");
       }else{
-        throw new GateRuntimeException("No sentences to process!\n" +
-                                       "Please run a sentence splitter first!");
+        throw new GateRuntimeException("No sentences or tokens to process!\n" +
+                                       "Please run a sentence splitter "+
+                                       "and tokeniser first!");
       }
 
 //OLD version
