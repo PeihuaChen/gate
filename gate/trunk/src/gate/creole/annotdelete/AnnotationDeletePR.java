@@ -90,7 +90,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       //that we want to keep
       if (setName != null && !setName.equals(markupSetName) ) {
         // skip named sets from setsToKeep
-        if(setsToKeep == null || setsToKeep.contains(setName)) continue;
+        if(setsToKeep != null && setsToKeep.contains(setName)) continue;
 
         if (annotationTypes == null || annotationTypes.isEmpty())
           document.removeAnnotationSet(setName);
