@@ -181,6 +181,8 @@
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input" RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="encoding" COMMENT="Encoding to use to read rules and lexicons"
+        OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="lexiconURL" DEFAULT="resources/heptag/lexicon"
         COMMENT="The URL for the lexicon file" OPTIONAL="true">
         java.net.URL</PARAMETER>
