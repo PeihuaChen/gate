@@ -1,14 +1,16 @@
 /*
- *  MiniPar.java
+ *  Minipar.java
  *
+ *  Copyright (c) 1998-2004, The University of Sheffield.
  *
- *  Copyright (c) 2003 the CLaC group,
- *  http://www.cs.concordia.ca/CLAC/index.shtml
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani
  *
- *  $Id: MiniPar.java
- *
+ *  $Id$
  */
 
 package minipar;
@@ -25,9 +27,7 @@ import gate.gui.MainFrame;
 
 
 /**
- * This class is the implementation of the resource TREETAGGER,
- * a wrapper for the language-independent POS tagger from
- * Universität Stuttgart, Germany
+ * This class is the implementation of the resource Minipar
  */
 public class Minipar extends AbstractLanguageAnalyser
   implements ProcessingResource {
@@ -40,57 +40,74 @@ public class Minipar extends AbstractLanguageAnalyser
   private gate.Document document;
 
   /**
-   * Get the TaggerLibDir value.
-   * @return the TaggerLibDir value.
+   * Get the MiniparDataDir value.
    */
   public URL getMiniparDataDir() {
     return miniparDataDir;
   }
 
+  /**
+   * Get the Document to process.
+   */
   public gate.Document getDocument() {
     return this.document;
   }
 
+  /**
+   * Set the Document to process
+   */
   public void setDocument(gate.Document document) {
     this.document = document;
   }
 
+ /**
+ * Get the AnnotationTypeName, new annotations are created with this name
+ */
   public String getAnnotationTypeName() {
     return this.annotationTypeName;
   }
 
+  /**
+  * Set the AnnotationTypeName, new annotations are created with this name
+  */
   public void setAnnotationTypeName(String aTypeName) {
     this.annotationTypeName = aTypeName;
   }
 
+  /**
+  * Get the AnnotationSetName, source of the annotations to be taken from and to work on
+  */
   public String getAnnotationSetName() {
     return this.annotationSetName;
   }
 
+  /**
+  * Set the AnnotationSetName, source of the annotations to be taken from and to work on
+  */
   public void setAnnotationSetName(String aSetName) {
     this.annotationSetName = aSetName;
   }
 
 
   /**
-   * Set the TaggerLibDir value.
-   * @param newTaggerLibDir The new TaggerLibDir value.
-   */
+  * Set the MiniparDataDirectory.. This is the directory that Minipar uses to collect the data for
+  * its internal processing. Default location is minipar_home/data
+  */
   public void setMiniparDataDir(URL newMiniparDataDir) {
     this.miniparDataDir = newMiniparDataDir;
   }
 
   /**
-   * Get the TreeTaggerBinary value.
-   * @return the TreeTaggerBinary value.
+   * This is the url of MiniparBinary
+   * It should be somewhere located on the drive where the user has execution rights
    */
   public URL getMiniparBinary() {
     return miniparBinary;
   }
 
   /**
-   * Set the TreeTaggerBinary value.
-   * @param newTreeTaggerBinary The new TreeTaggerBinary value.
+   * This is the url of MiniparBinary
+   * It should be somewhere located on the drive where the user has execution rights
    */
   public void setMiniparBinary(URL newMiniparBinary) {
     this.miniparBinary = newMiniparBinary;
@@ -114,6 +131,12 @@ public class Minipar extends AbstractLanguageAnalyser
     throws ResourceInstantiationException {}
 
 
+/**
+ * Minipar Binary file takes a file as an argument, which has one sentence written
+ * on one line.  It takes one sentence at a time and parses them one by one.
+ * @return The list containing annotations of type *Sentence*
+ * @throws ExecutionException
+ */
   private ArrayList saveGateSentences() throws ExecutionException {
 
     AnnotationSet allAnnotations;
@@ -341,11 +364,18 @@ public class Minipar extends AbstractLanguageAnalyser
   public void execute() throws ExecutionException {
     if(document == null)
       throw new GateRuntimeException("No document to process!");
+    if(getMiniparBinary() == null)
+      throw new GateRuntimeException("Please provide the URL for Minipar Binary");
+    if(getMiniparDataDir() == null)
+      throw new GateRuntimeException("Minipar requires the location of its data directory (By default it is %Minipar_Home%/data");
 
     ArrayList allSentences = saveGateSentences();
     runMinipar(allSentences);
   }
 
+  /**
+   * Sub class we use to store the annotation before defining its relation with other wordtoken
+   */
   private class WordToken {
     String word;
     int headNumber;
