@@ -131,7 +131,7 @@ Rule: PercentSpan
 
 (
  ({Token.kind == number}|NUMBER_WORDS)
- (SPACE)? 
+ (SPACE)
  ({Token.string == "-"} |
   {Token.string == "to"})
  (SPACE)
