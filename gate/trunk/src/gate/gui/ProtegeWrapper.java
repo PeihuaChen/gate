@@ -54,27 +54,6 @@ public class ProtegeWrapper extends AbstractVisualResource {
   private void initGuiComponents() {
     setLayout(new BorderLayout());
     protegeRootPane = new JRootPane();
-    JFrame frame = new JFrame();
-    frame.getContentPane().add(protegeRootPane);
-
-    String fileName = null;
-
-    if(projectFileName != null) {
-      fileName = projectFileName.getProjectName();
-      if(fileName != null && fileName.trim().length() == 0) {
-        fileName = null;
-      }
-    }
-
-    ProjectManager.getProjectManager().setRootPane(protegeRootPane);
-    ProjectManager.getProjectManager().loadProject(fileName);
-
-    protegeRootPane.setJMenuBar(null);
-    removeToolbar(protegeRootPane);
-    
-    JScrollPane scroll = new JScrollPane();
-    add(scroll, BorderLayout.CENTER);
-    scroll.getViewport().add(protegeRootPane);
   } // initGuiComponents()
 
   /** Find and remove the Protege toolbar */  
@@ -112,6 +91,27 @@ public class ProtegeWrapper extends AbstractVisualResource {
       } // if
 
       projectFileName = (ProtegeProjectName) target;
+      String fileName = null;
+    
+      if(projectFileName != null) {
+        fileName = projectFileName.getProjectName();
+        if(fileName != null && fileName.trim().length() == 0) {
+          fileName = null;
+        }
+      }
+
+      JFrame frame = new JFrame();
+      frame.getContentPane().add(protegeRootPane);
+
+      ProjectManager.getProjectManager().setRootPane(protegeRootPane);
+      ProjectManager.getProjectManager().loadProject(fileName);
+
+      protegeRootPane.setJMenuBar(null);
+      removeToolbar(protegeRootPane);
+      
+      JScrollPane scroll = new JScrollPane();
+      add(scroll, BorderLayout.CENTER);
+      scroll.getViewport().add(protegeRootPane);
     } // if
   } // setTarget(Object target)
   
