@@ -30,8 +30,12 @@ import gate.util.*;
 /**
  * This class provides utility methods for saving resources through
  * serialisation via static methods.
+ * 
+ * It now supports both native and xml serialization.
  */
 public class PersistenceManager {
+	
+	private static final boolean DEBUG = false;
 
   /**
    * A reference to an object; it uses the identity hashcode and the equals
@@ -452,28 +456,59 @@ public class PersistenceManager {
                                get("gate.event.StatusListener");
     long startTime = System.currentTimeMillis();
     if(pListener != null) pListener.progressChanged(0);
+    // The object output stream is used for native serialization,
+    // but the xstream and filewriter are used for XML serialization.
     ObjectOutputStream oos = null;
+    com.thoughtworks.xstream.XStream xstream = null;
+    FileWriter fileWriter = null;
     persistenceFile = file;
     try{
       //insure a clean start
       existingPersitentReplacements.clear();
       existingPersitentReplacements.clear();
 
-      oos = new ObjectOutputStream(new FileOutputStream(file));
+      if (Gate.getUseXMLSerialization()) {
+      	// Just create the xstream and the filewriter that will later be
+      	// used to serialize objects.
+      	xstream = new com.thoughtworks.xstream.XStream();
+      	fileWriter = new FileWriter(file);
+      } else {
+      	oos = new ObjectOutputStream(new FileOutputStream(file));
+      }
 
       //always write the list of creole URLs first
       List urlList = new ArrayList(Gate.getCreoleRegister().getDirectories());
       Object persistentList = getPersistentRepresentation(urlList);
-      oos.writeObject(persistentList);
-
-      //now write the object
+      
       Object persistentObject = getPersistentRepresentation(obj);
-      oos.writeObject(persistentObject);
+
+      if (Gate.getUseXMLSerialization()) {
+      	// We need to put the urls and the application itself together
+      	// as xstreams can only hold one object.
+      	GateApplication gateApplication = new GateApplication();
+      	gateApplication.urlList = persistentList;
+      	gateApplication.application  = persistentObject;
+      	
+      	// Then do the actual serialization.
+      	xstream.toXML(gateApplication, fileWriter);
+      } else {
+      	// This is for native serialization.
+      	oos.writeObject(persistentList);
+
+      	//now write the object
+        oos.writeObject(persistentObject);
+      }
+
     }finally{
       persistenceFile = null;
       if(oos != null){
         oos.flush();
         oos.close();
+      }
+      if (fileWriter != null) {
+      	// Just make sure that all the xml is written, and the file closed.
+      	fileWriter.flush();
+      	fileWriter.close();
       }
       long endTime = System.currentTimeMillis();
       if(sListener != null) sListener.statusChanged(
@@ -496,13 +531,48 @@ public class PersistenceManager {
     if(pListener != null) pListener.progressChanged(0);
     long startTime = System.currentTimeMillis();
     persistenceFile = file;
-    ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+    // Determine whether the file contains an application serialized in xml
+    // format. Otherwise we will assume that it contains native serializations.
+    boolean xmlStream = isXmlApplicationFile(file);
+    ObjectInputStream ois = null;
+    java.io.FileReader fileReader = null;
+    com.thoughtworks.xstream.XStream xstream = null;
+    // Make the appropriate kind of streams that will be used, depending on
+    // whether serialization is native or xml.
+    if (xmlStream) { 
+    	fileReader = new java.io.FileReader(file);
+    	xstream = new com.thoughtworks.xstream.XStream();
+    } else {
+    	ois = new ObjectInputStream(new FileInputStream(file));
+    }
     Object res = null;
     try{
-      //first read the list of creole URLs
-      Iterator urlIter = ((Collection)
+      Iterator urlIter;
+      // If we're using xml serialization, first read everything from
+      // the file.
+      GateApplication gateApplication = null;
+      if (xmlStream) {
+      	if (DEBUG)
+      		System.out.println("About to load application");
+      	// Actually load the application
+      	gateApplication = (GateApplication)xstream.fromXML(fileReader);
+      	fileReader.close();
+      	if (DEBUG)
+      		System.out.println("About to extract url list");
+      	// Extract an iterator to the URLs.
+      	urlIter = 
+      		((Collection)getTransientRepresentation(gateApplication.urlList))
+			.iterator();
+      	if (DEBUG)
+      		System.out.println("URL list loaded");
+      } else {
+        // first read the list of creole URLs. This is for when we are using
+      	// native serialization.
+       	urlIter = ((Collection)
+       
                           getTransientRepresentation(ois.readObject())).
                           iterator();
+      }
       while(urlIter.hasNext()){
         URL anUrl = (URL)urlIter.next();
         try{
@@ -513,9 +583,21 @@ public class PersistenceManager {
                    anUrl.toExternalForm());
         }
       }
+      
       //now we can read the saved object
-      res = ois.readObject();
-      ois.close();
+      if (xmlStream) {
+      	if (DEBUG)
+      		System.out.println("About to load application itself");
+      	// With an xml stream, we already read the object, so we just
+      	// have to extract it.
+      	res = gateApplication.application;
+      	if (DEBUG)
+      		System.out.println("Application loaded");
+      } else {
+      	// With a native stream just read the object from it.
+      	res = ois.readObject();
+      	ois.close();
+      }
 
       //ensure a fresh start
       existingTransientValues.clear();
@@ -545,7 +627,39 @@ public class PersistenceManager {
     }
   }
 
-
+  /**
+   * Determine whether the file contains a GATE application serialized 
+   * using XML.
+   * 
+   * @param file The name of the file.
+   * @return true if the file contains an xml serialized application,
+   * false otherwise.
+   */
+  private static boolean isXmlApplicationFile(File file) 
+  throws java.io.IOException {
+  	if (DEBUG) {
+  		System.out.println("Checking whether file is xml");
+  	}
+	java.io.BufferedReader fileReader = 
+  		new java.io.BufferedReader(new java.io.FileReader(file));
+  	String firstLine = fileReader.readLine();
+  	fileReader.close();
+  	
+  	if (DEBUG) {
+  		System.out.println("isXMLApplicationFile = " + 
+  				(firstLine.length() >=  STARTOFXMLAPPLICATIONFILES.length()
+				&& firstLine.substring(0, STARTOFXMLAPPLICATIONFILES.length())
+				.equals(STARTOFXMLAPPLICATIONFILES)));
+  	}
+  	
+  	return firstLine.length() >=  STARTOFXMLAPPLICATIONFILES.length()
+	&& firstLine.substring(0, STARTOFXMLAPPLICATIONFILES.length())
+	.equals(STARTOFXMLAPPLICATIONFILES);
+  }
+  
+  private static final String STARTOFXMLAPPLICATIONFILES =
+  	"<gate.util.persistence.GateApplication>";
+  
   /**
    * Sets the persistent equivalent type to be used to (re)store a given type
    * of transient objects.
