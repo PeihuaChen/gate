@@ -67,6 +67,83 @@ public class TestCreole extends TestCase
     Gate.init();
   } // tearDown
 
+  /** Test the getInstances methods on CreoleRegister */
+  public void testInstanceLists() throws Exception {
+    // misc locals
+    List l;
+    CreoleRegister cr = Gate.getCreoleRegister();
+    Iterator iter;
+    ResourceData resData = null;
+    Resource res = null;
+    int numLrInstances = 0;
+
+    // Get the lists of types
+    Set vrTypes = reg.getVrTypes();
+    Set prTypes = reg.getPrTypes();
+    Set lrTypes = reg.getLrTypes();
+
+    // The only instances of any type should be autoloading ones
+    l = cr.getVrInstances();
+    if(! allAutoloaders(l))
+      fail(" non-autoloading resources already present (1)");
+    l = cr.getLrInstances();
+    numLrInstances = l.size();
+    if(! allAutoloaders(l))
+      fail(" non-autoloading resources already present (2)");
+    l = cr.getPrInstances();
+    if(! allAutoloaders(l))
+      fail(" non-autoloading resources already present (3)");
+
+    // Create an LR
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("features", Factory.newFeatureMap());
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html")
+    );
+    res = Factory.createResource("gate.corpora.DocumentImpl", params);
+
+    // lr instances list should be one longer now
+    if(! (cr.getLrInstances().size() == numLrInstances + 1))
+      fail("wrong number of LRs");
+
+    // Create another LR
+    params = Factory.newFeatureMap();
+    params.put("features", Factory.newFeatureMap());
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html")
+    );
+    res = Factory.createResource("gate.corpora.DocumentImpl", params);
+
+    // lr instances list should be two longer now
+    if(! (cr.getLrInstances().size() == numLrInstances + 2))
+      fail("wrong number of LRs");
+
+    // we should have two instances of type document
+    l = cr.getLrInstances("gate.corpora.DocumentImpl");
+    if(l.size() != 2)
+      fail("wrong number of documents");
+  } // testInstanceLists
+
+  /** Utility method to check that a list of resources are all
+   *  auto-loading.
+   */
+  protected boolean allAutoloaders(List l) {
+    if(l != null) {
+      Resource res = null;
+      ResourceData resData = null;
+      CreoleRegister cr = Gate.getCreoleRegister();
+      Iterator iter = l.iterator();
+      while(iter.hasNext()) {
+        res = (Resource) iter.next();
+        if(DEBUG) Out.prln(res);
+        resData = (ResourceData) cr.get(res.getClass().getName());
+        if(DEBUG) Out.prln(resData);
+        if(! resData.isAutoLoading())
+          return false;
+      }
+    }
+
+    return true;
+  } // allAutoloaders
+
   /** Test resource discovery */
   public void testDiscovery() throws Exception {
 
