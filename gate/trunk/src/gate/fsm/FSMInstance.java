@@ -144,7 +144,7 @@ public class FSMInstance implements Comparable, Cloneable{
              fileIndex == otherFSM.fileIndex &&
              bindings.equals(otherFSM.bindings) &&
              FSMPosition.getAction().equals(otherFSM.FSMPosition.getAction());
-System.out.println("FSMInstance.equals() : " + result);
+      Out.println("FSMInstance.equals() : " + result);
       return result;
     }else{
       throw new ClassCastException(other.getClass().toString());
