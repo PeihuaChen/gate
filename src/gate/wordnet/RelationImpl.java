@@ -15,29 +15,29 @@
 
 package gate.wordnet;
 
-import java.util.*;
+import gate.util.*;
 
-import gate.*;
-import gate.event.*;
+class RelationImpl implements Relation {
 
+  private int type;
 
-/** Represents WordNet synset.
- */
-public interface Synset {
+  protected RelationImpl(int _type) {
+  }
 
-  public int getPOS();
+  public int getType() {
+    return this.type;
+  }
 
-  public boolean isUniqueBeginner();
+  public int getInverseType() {
+    throw new MethodNotImplementedException();
+  }
 
-  public String getGloss();
+  public String getLabel() {
+    throw new MethodNotImplementedException();
+  }
 
-  public List getWordSenses();
-
-  public WordSense getWordSense(int offset);
-
-  public List getSemanticRealtions() throws WordNetException;
-
-  public List getSemanticRealtions(int type) throws WordNetException;
+  public boolean isApplicableTo(int pos) {
+    throw new MethodNotImplementedException();
+  }
 
 }
-

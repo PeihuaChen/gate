@@ -18,9 +18,12 @@ package gate.wordnet;
 import java.util.*;
 import java.io.*;
 
-//import net.didion.jwnl.JWNL;
-//import net.didion.jwnl.dictionary.Dictionary;
-
+import net.didion.jwnl.JWNLException;
+import net.didion.jwnl.dictionary.Dictionary;
+import net.didion.jwnl.data.IndexWord;
+import net.didion.jwnl.data.POS;
+import net.didion.jwnl.data.Pointer;
+import net.didion.jwnl.data.PointerType;
 
 import junit.framework.*;
 
@@ -35,16 +38,68 @@ public class SynsetImpl implements Synset {
   private ArrayList wordSenses;
   private ArrayList semRelations;
   private String gloss;
-  private int POS;
+  private int synsetPOS;
+  Dictionary wnDictionary;
+  private long synsetOffset;
 
-  public SynsetImpl(int _POS,
-                    String _gloss,
-                    List _wordSenses,
-                    List _semRelations) {
+  public SynsetImpl(net.didion.jwnl.data.Synset jwSynset, Dictionary _wnDictionary) throws Exception {
+
+    //0.
+    Assert.assertNotNull(jwSynset);
+
+    //dictionary
+    this.wnDictionary = _wnDictionary;
+
+    //offset
+    this.synsetOffset = jwSynset.getOffset();
+
+    //pos
+    this.synsetPOS = WNHelper.POS2int(jwSynset.getPOS());
+/*
+    if (jwSynset.getPOS().equals(POS.ADJECTIVE)) {
+      this.synsetPOS = WordNet.POS_ADJECTIVE;
+    }
+    else if (jwSynset.getPOS().equals(POS.ADVERB)) {
+      this.synsetPOS = WordNet.POS_ADVERB;
+    }
+    else if (jwSynset.getPOS().equals(POS.NOUN)) {
+      this.synsetPOS = WordNet.POS_NOUN;
+    }
+    else if (jwSynset.getPOS().equals(POS.VERB)) {
+      this.synsetPOS = WordNet.POS_VERB;
+    }
+    else {
+      Assert.fail();
+    }
+*/
+    //gloss
+    this.gloss = jwSynset.getGloss();
+
+    //word senses
+    net.didion.jwnl.data.Word[] synsetWords = jwSynset.getWords();
+    this.wordSenses = new ArrayList(synsetWords.length);
+
+    for (int i= 0; i< synsetWords.length; i++) {
+
+      net.didion.jwnl.data.Word jwWord = synsetWords[i];
+      IndexWord jwIndexWord = this.wnDictionary.lookupIndexWord(jwWord.getPOS(),jwWord.getLemma());
+
+      Word gateWord = new WordImpl(jwWord.getLemma(),
+                                   jwIndexWord.getSenseCount(),
+                                   _wnDictionary);
+
+      WordSense gateWordSense = new WordSenseImpl(gateWord,
+                                                  this,
+                                                  0,
+                                                  jwWord.getIndex(),
+                                                  false);
+      this.wordSenses.add(gateWordSense);
+    }
+
   }
 
   public int getPOS(){
-    return this.POS;
+    return this.synsetPOS;
   }
 
   public boolean isUniqueBeginner(){
@@ -63,12 +118,22 @@ public class SynsetImpl implements Synset {
     return (WordSense)this.wordSenses.get(offset);
   }
 
-  public List getSemanticRealtions(){
+  public List getSemanticRealtions() throws WordNetException{
+
+    if (null == this.semRelations) {
+      _loadSemanticRealtions();
+    }
+
     return this.semRelations;
   }
 
-  public List getSemanticRealtions(int type){
+  public List getSemanticRealtions(int type) throws WordNetException{
+
     List result = new ArrayList(1);
+
+    if (null == this.semRelations) {
+      _loadSemanticRealtions();
+    }
 
     Iterator it = this.semRelations.iterator();
     while (it.hasNext()) {
@@ -80,6 +145,30 @@ public class SynsetImpl implements Synset {
     }
 
     return result;
+  }
+
+
+  private void _loadSemanticRealtions() throws WordNetException{
+
+    POS jwPOS = null;
+    jwPOS = WNHelper.int2POS(this.synsetPOS);
+
+    try {
+      net.didion.jwnl.data.Synset jwSynset = this.wnDictionary.getSynsetAt(jwPOS,this.synsetOffset);
+      Pointer[] jwPointers = jwSynset.getPointers();
+
+      for (int i= 0; i< jwPointers.length; i++) {
+        Pointer currPointer = jwPointers[i];
+        PointerType currType = currPointer.getType();
+//        currType.
+      }
+    }
+    catch(JWNLException e) {
+      throw new WordNetException(e);
+    }
+
+
+    throw new MethodNotImplementedException();
   }
 
 }

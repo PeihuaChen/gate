@@ -39,6 +39,8 @@ public interface WordNet extends LanguageResource {
 
   public Iterator getUniqueBeginners();
 
+  public List lookupWord(String lemma);
 
+  public List lookupWord(String lemma, int pos);
 }
 
