@@ -180,6 +180,67 @@ and check in.
     <!--<TH>spare1</TH>-->
     <!--<TH>spare2</TH>-->
   </TR>
+  <TR>
+    <TH>0006</TH>
+    <TH>core</TH>
+    <TH>Valy</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 NT4 1.3.1 a2build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>
+AnnotationSetImpl:
+<BR>
+Various get() methods return the actual set stored in the indexes internal
+to AnnotationSetImpl.
+If such a set obtained from a get() operation is then modified, the
+modification will be reflected by the results of all the further calls to
+the same get() method although the base AnnotationSet is not actually
+modified, hence invalid results.
+<BR>
+Probably the desired behaviour is for the returned annotation sets to be
+backed by the base annotation set so that modifications on the returned sets
+will reflect in the base set. That could cause a lot of
+ConcurrentModificationExceptions in the client code but that's their
+problem.
+{@see List.subList(start, end).clear(); }
+    </TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+  <TR>
+    <TH>0007</TH>
+    <TH>core</TH>
+    <TH>Valy</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 NT4 1.3.1 a2build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>
+    when it looks for creole.xml in the file system it downcases the whole
+    path (because it comes from a URL?)
+    </TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
+  <TR>
+    <TH>0008</TH>
+    <TH>core</TH>
+    <TH>Valy</TH>
+    <TH>___adopted_by</TH>
+    <TH>16/5/1 NT4 1.3.1 a2build499</TH>
+    <TH>___fixed_on ___date ___Gversion</TH>  
+    <TH>
+    gate.initCreoleRegister is looking in resources/gau for creole.xml
+    when gate.Main starts up - it shouldn't, as this is only for testing
+    </TH>
+    <TH>-</TH>
+    <TH>-</TH>
+    <!--<TH>spare1</TH>-->
+    <!--<TH>spare2</TH>-->
+  </TR>
 <!------------------------------------------------------------------------->
 </TABLE>
 
