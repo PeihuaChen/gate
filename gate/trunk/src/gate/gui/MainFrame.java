@@ -527,6 +527,7 @@ public class MainFrame extends JFrame
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
+    helpMenu.add(new HelpUserGuideAction());
     helpMenu.add(helpAboutAction);
     menuBar.add(helpMenu);
 
@@ -1521,6 +1522,31 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent e) {
       splash.show();
+    }
+  }
+
+  class HelpUserGuideAction extends AbstractAction {
+    public HelpUserGuideAction(){
+      super("User Guide");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try{
+        HelpFrame helpFrame = new HelpFrame();
+        helpFrame.setPage(new URL("gate:/userguide.html"));
+        helpFrame.setSize(800, 600);
+        //center on screen
+        Dimension frameSize = helpFrame.getSize();
+        Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Point ownerLocation = new Point(0, 0);
+        helpFrame.setLocation(
+                  ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
+                  ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
+
+        helpFrame.setVisible(true);
+      }catch(IOException ioe){
+        ioe.printStackTrace(Err.getPrintWriter());
+      }
     }
   }
 

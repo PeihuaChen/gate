@@ -578,8 +578,8 @@ implements Runnable, ProcessingResource{
 
     while(charIdx < length){
       currentChar = content.charAt(charIdx);
-      // Out.println(
-      // currentChar + typesMnemonics[Character.getType(currentChar)+128]);
+//      Out.println(
+//      currentChar + typesMnemonics[Character.getType(currentChar)+128]);
       nextState = graphPosition.next(((Integer)typeIds.get(
                   new Integer(Character.getType(currentChar)))).intValue());
 
