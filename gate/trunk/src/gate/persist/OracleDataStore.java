@@ -36,6 +36,9 @@ import gate.creole.ResourceData;
 
 public class OracleDataStore extends JDBCDataStore {
 
+  public static final String DS_COMMENT = "GATE Oracle datastore";
+  public static final String DS_ICON_NAME = "ds.gif";
+
   private static final boolean DEBUG = false;
 
   private static final int ORACLE_TRUE = 1;
@@ -61,7 +64,7 @@ public class OracleDataStore extends JDBCDataStore {
    * image.
    */
   public String getComment() {
-    return "GATE Oracle datastore";
+    return OracleDataStore.DS_COMMENT;
   }
 
   /**
@@ -69,7 +72,7 @@ public class OracleDataStore extends JDBCDataStore {
    * in the GUI
    */
   public String getIconName() {
-    return "ds.gif";
+    return OracleDataStore.DS_ICON_NAME;
   }
 
 
@@ -162,8 +165,9 @@ public class OracleDataStore extends JDBCDataStore {
    * @param lrClassName class name of the type of resource
    */
   public void delete(String lrClassName, Object lrId)
-  throws PersistenceException {
+  throws PersistenceException,SecurityException {
 
+    //0. preconditions
     if (false == lrId instanceof Long) {
       throw new IllegalArgumentException();
     }
@@ -174,12 +178,33 @@ public class OracleDataStore extends JDBCDataStore {
                                           " by Database data store");
     }
 
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lrId)) {
+      throw new SecurityException("insufficient privileges");
+    }
+
+    //3. try to lock document, so that we'll be sure no one is editing it
+    //NOTE: use the private method
+    if (false== _lockLr((Long)lrId)) {
+      //oops, someone is editing now
+      throw new PersistenceException("LR locked by another user");
+    }
+
     boolean transFailed = false;
     try {
-      //2.5 autocommit should be FALSE because of LOBs
+      //4. autocommit should be FALSE because of LOBs
       this.jdbcConn.setAutoCommit(false);
 
-      //3. perform changes, if anything goes wrong, rollback
+      //5. perform changes, if anything goes wrong, rollback
       if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
         deleteDocument((Long)lrId);
       }
@@ -187,7 +212,7 @@ public class OracleDataStore extends JDBCDataStore {
         deleteCorpus((Long)lrId);
       }
 
-      //4. done, commit
+      //6. done, commit
       this.jdbcConn.commit();
     }
     catch(SQLException sqle) {
@@ -210,7 +235,10 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
-    //5. delete from the list of dependent resources
+    //7, unlock
+    //do nothing - the resource does not exist anymore
+
+    //8. delete from the list of dependent resources
     boolean resourceFound = false;
     Iterator it = this.dependentResources.iterator();
     while (it.hasNext()) {
@@ -224,10 +252,12 @@ public class OracleDataStore extends JDBCDataStore {
 
     Assert.assertTrue(resourceFound);
 
-    //6. let the world know about it
+    //9. let the world know about it
     fireResourceDeleted(
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
   }
+
+
 
   private void deleteDocument(Long lrId)
   throws PersistenceException {
@@ -973,46 +1003,52 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException,SecurityException {
 
+    LanguageResource result = null;
+
+    //0. preconditions
+    Assert.assertNotNull(lrPersistenceId);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canReadLR(lrPersistenceId)) {
+      throw new SecurityException("insufficient privileges");
+    }
+
+    //3. get resource from DB
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
-      Document docResult = null;
-      docResult = readDocument(lrPersistenceId);
-
-      Assert.assertTrue(docResult instanceof DatabaseDocumentImpl);
-      Assert.assertNotNull(docResult.getDataStore());
-      Assert.assertTrue(docResult.getDataStore() instanceof DatabaseDataStore);
-      Assert.assertNotNull(docResult.getLRPersistenceId());
-
-      //register the read doc as listener for sync events
-      addDatastoreListener((DatastoreListener)docResult);
-
-      //add the resource to the list of dependent resources - i.e. the ones that the
-      //data store should take care upon closing [and call sync()]
-      this.dependentResources.add(docResult);
-
-      return docResult;
+      result = readDocument(lrPersistenceId);
+      Assert.assertTrue(result instanceof DatabaseDocumentImpl);
     }
     else if (lrClassName.equals(DBHelper.CORPUS_CLASS)) {
-      Corpus corpResult = null;
-      corpResult = readCorpus(lrPersistenceId);
-
-      Assert.assertTrue(corpResult instanceof DatabaseCorpusImpl);
-      Assert.assertNotNull(corpResult.getDataStore());
-      Assert.assertTrue(corpResult.getDataStore() instanceof DatabaseDataStore);
-      Assert.assertNotNull(corpResult.getLRPersistenceId());
-
-      //register the read doc as listener for sync events
-      addDatastoreListener((DatastoreListener)corpResult);
-
-      //add the resource to the list of dependent resources - i.e. the ones that the
-      //data store should take care upon closing [and call sync()]
-      this.dependentResources.add(corpResult);
-
-      return corpResult;
+      result = readCorpus(lrPersistenceId);
+      Assert.assertTrue(result instanceof DatabaseCorpusImpl);
     }
     else {
-      throw new IllegalArgumentException("resource class should be either Document" +
-                                          " or Corpus");
+      throw new IllegalArgumentException("resource class should be either Document or Corpus");
     }
+
+    //4. postconditions
+    Assert.assertNotNull(result.getDataStore());
+    Assert.assertTrue(result.getDataStore() instanceof DatabaseDataStore);
+    Assert.assertNotNull(result.getLRPersistenceId());
+
+    //5. register the read doc as listener for sync events
+    addDatastoreListener((DatastoreListener)result);
+
+    //6. add the resource to the list of dependent resources - i.e. the ones that the
+    //data store should take care upon closing [and call sync()]
+    this.dependentResources.add(result);
+
+    //7. done
+    return result;
   }
 
 
@@ -1200,7 +1236,7 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setLong(3,this.session.getGroup().getID().longValue());
       stmt.setLong(4,mode);
 
-      stmt.registerOutParameter(5,java.sql.Types.INTEGER);
+      stmt.registerOutParameter(5,java.sql.Types.NUMERIC);
       stmt.execute();
       int result = stmt.getInt(5);
 
@@ -2611,6 +2647,20 @@ public class OracleDataStore extends JDBCDataStore {
     Assert.assertNotNull(lr.getLRPersistenceId());
     Assert.assertEquals(lr.getDataStore(),this);
 
+    //1. delegate
+    return _lockLr((Long)lr.getLRPersistenceId());
+  }
+
+  /**
+   * Try to acquire exlusive lock on a resource from the persistent store.
+   * Always call unlockLR() when the lock is no longer needed
+   */
+  private boolean _lockLr(Long lrID)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrID);
+
     //1. check session
     if (null == this.session) {
       throw new SecurityException("session not set");
@@ -2621,7 +2671,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //2. check permissions
-    if (false == canWriteLR(lr.getLRPersistenceId())) {
+    if (false == canWriteLR(lrID)) {
       throw new SecurityException("no write access granted to the user");
     }
 
@@ -2631,7 +2681,7 @@ public class OracleDataStore extends JDBCDataStore {
 
     try {
       cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.lock_lr(?,?,?,?) }");
-      cstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
+      cstmt.setLong(1,lrID.longValue());
       cstmt.setLong(2,this.session.getUser().getID().longValue());
       cstmt.setLong(3,this.session.getGroup().getID().longValue());
       cstmt.registerOutParameter(4,java.sql.Types.NUMERIC);
