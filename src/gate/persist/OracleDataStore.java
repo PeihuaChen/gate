@@ -399,7 +399,8 @@ public class OracleDataStore extends JDBCDataStore {
                     "from "+gate.Gate.DB_OWNER+".t_doc_content dc , " +
                             gate.Gate.DB_OWNER+".t_document doc " +
                     "where  dc.dc_id = doc.doc_content_id " +
-                    "       and doc.doc_content_id = ? " +
+//--was                    "       and doc.doc_content_id = ? " +
+                    "       and doc.doc_id = ? " +
                     "for update ";
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,docID.longValue());
@@ -2264,13 +2265,14 @@ public class OracleDataStore extends JDBCDataStore {
   /** helper for sync() - never call directly */
   protected void _syncDocumentContent(Document doc)
     throws PersistenceException {
-
+/*
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     Long docContID = null;
 
     //1. read from DB
     try {
+
       String sql = " select dc_id " +
                    " from  "+Gate.DB_OWNER+".v_content " +
                    " where  lr_id = ? ";
@@ -2286,10 +2288,13 @@ public class OracleDataStore extends JDBCDataStore {
 
       //1, get DC_ID
       docContID = new Long(rs.getLong(1));
-
+*/
       //2, update LOBs
-      updateDocumentContent(docContID,doc.getContent());
+      //was: updateDocumentContent(docContID,doc.getContent());
+      Long docID = (Long)doc.getLRPersistenceId();
+      updateDocumentContent(docID,doc.getContent());
 
+/*
     }
     catch(SQLException sqle) {
       throw new PersistenceException("Cannot update document content ["+
@@ -2299,6 +2304,8 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
     }
+ */
+
   }
 
 
