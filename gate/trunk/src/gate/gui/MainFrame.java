@@ -1916,7 +1916,7 @@ public class MainFrame extends JFrame
 
     public NewResourceAction(ResourceData rData) {
       super(rData.getName());
-      putValue(SHORT_DESCRIPTION,"Create a new " + rData.getName());
+      putValue(SHORT_DESCRIPTION, rData.getComment());
       this.rData = rData;
     } // NewResourceAction(ResourceData rData)
 
@@ -2018,12 +2018,14 @@ public class MainFrame extends JFrame
             try{
               gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
             }catch(ResourceInstantiationException rie){
+              processFinished();
               JOptionPane.showMessageDialog(MainFrame.this,
                               "Error!\n"+
                                rie.toString(),
                                "Gate", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }catch(Exception ex){
+              processFinished();
               JOptionPane.showMessageDialog(MainFrame.this,
                               "Error!\n"+
                                ex.toString(),

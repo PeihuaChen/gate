@@ -523,6 +523,20 @@
       <ICON>controller.gif</ICON>
     </RESOURCE>
 
+    <RESOURCE>
+      <NAME>Conditional Pipeline</NAME>
+      <COMMENT>A simple serial controller for conditionally ran PRs</COMMENT>
+      <CLASS>gate.creole.ConditionalSerialController</CLASS>
+      <ICON>controller.gif</ICON>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Conditional Corpus Pipeline</NAME>
+      <COMMENT>A serial controller for conditionally ran PR pipelines over corpora</COMMENT>
+      <CLASS>gate.creole.ConditionalSerialAnalyserController</CLASS>
+      <ICON>controller.gif</ICON>
+    </RESOURCE>
+
   </CREOLE>
 
   <!-- creole.xml for Visual Resources -->

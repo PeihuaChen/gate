@@ -92,7 +92,8 @@ public class TestJavac extends TestCase{
   public void testCompileError() throws Exception {
     // disable System.out so that the compiler can't splash its error on screen
     PrintStream syserr = System.err;
-    System.setErr(new PrintStream(new ByteArrayOutputStream()));
+    PrintStream newSyserr = new PrintStream(new ByteArrayOutputStream());
+    System.setErr(newSyserr);
 
     String nl = Strings.getNl();
     String javaSource =
@@ -116,9 +117,10 @@ public class TestJavac extends TestCase{
     }catch(GateException ge){
       gotException = true;
     }finally{
-      System.err.flush();
+      newSyserr.flush();
       // re-enable System.out
       System.setErr(syserr);
+      newSyserr.close();
     }
     assertTrue("Garbage java code did not raise an exception!",
                gotException);
