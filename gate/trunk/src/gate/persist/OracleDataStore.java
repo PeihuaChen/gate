@@ -545,15 +545,8 @@ public class OracleDataStore extends JDBCDataStore {
 
     //2. check the LR's current DS
     DataStore currentDS = lr.getDataStore();
-    if(currentDS == null) {  // an orphan - do the adoption
-      //do not set the datastore on the lr, because actually it should
-      //remain transient. The DS should only be set on the one that is
-      //saved in Oracle
-//      lr.setDataStore(this);
-      // let the world know
-      //fireResourceAdopted(
-      //    new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
-      //);
+    if(currentDS == null) {
+      // an orphan - do the adoption (later)
     }
     else if(currentDS.equals(this)){         // adopted already
       return lr;
@@ -593,7 +586,8 @@ public class OracleDataStore extends JDBCDataStore {
 //System.out.println("result ID=["+result.getLRPersistenceId()+"]");
       }
       else {
-        result =  createCorpus((Corpus)lr,secInfo);
+        //adopt each document from the corpus in a separate transaction context
+        result =  createCorpus((Corpus)lr,secInfo,true);
       }
 
       //7. done, commit
@@ -1060,7 +1054,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** creates a LR of type Corpus  */
-  private Corpus createCorpus(Corpus corp,SecurityInfo secInfo)
+  private Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
     throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
@@ -1094,7 +1088,19 @@ public class OracleDataStore extends JDBCDataStore {
       // same DataStore
       if (doc.getLRPersistenceId() == null) {
         //transient document
+
+        //now this is a bit ugly patch, the transaction related functionality
+        //should not be in this method
+        if (newTransPerDocument) {
+          beginTrans();
+        }
+
         Document dbDoc = createDocument(doc,corpusID,secInfo);
+
+        if (newTransPerDocument) {
+          commitTrans();
+        }
+
         dbDocs.add(dbDoc);
       }
       else if (doc.getDataStore().equals(this)) {
