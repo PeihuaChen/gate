@@ -6337,6 +6337,7 @@ approves VBZ
 approximate JJ
 approximates VBZ
 apt JJ
+aqua JJ
 arbitrates VBZ
 arcane JJ
 arch VBP NN
@@ -8317,6 +8318,7 @@ cuts NNS VBZ
 cutthroat JJ
 cutting VBG NN VBG|NN JJ
 cutting-tools NNS
+cyan JJ
 cycling NN VBG
 cyclosporine NN JJ
 d SYM LS
@@ -10520,6 +10522,7 @@ greeted VBN VBD
 greeting VBG NN
 greets VBZ
 grew VBD VBN
+grey JJ NN
 gridlocked JJ VBN
 grill VBP
 grim JJ
@@ -11175,6 +11178,7 @@ indicates VBZ
 indict VB
 indicted VBN VBD
 indifferent JJ
+indigo JJ
 indirect JJ
 indirectness NN
 individual JJ NN
@@ -11568,6 +11572,7 @@ kept VBD VBN
 ketchup NN VB|IN
 key JJ NN VB
 keyed JJ VBN
+khaki JJ
 kick VBP VB NN
 kicked VBD VBN
 kicks VBZ NNS
@@ -12111,6 +12116,7 @@ markets NNS VBZ
 marketwide JJ
 markka FW NNS
 marks NNS VBZ
+maroon JJ
 marred VBN
 married VBN JJ VBD
 marry VB
@@ -12585,6 +12591,7 @@ natural-resources NNS
 naughtier JJR
 naval JJ
 navigate VB
+navy JJ NN
 naysay VB
 near IN JJ RB
 near-monopolies NNS
@@ -12873,6 +12880,7 @@ old-line NN JJ
 old-timers NNS
 older JJR
 oldest JJS
+olive NN JJ
 omit VB VBP
 omits VBZ
 omitted VBN VBD
@@ -13414,7 +13422,7 @@ pinch NN VB
 pinched VBN VBD
 pine VBP
 ping VB NN
-pink JJ
+pink JJ NN
 pinned VBN
 pinning VBG NN
 pinpoint VB
