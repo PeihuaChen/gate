@@ -603,6 +603,7 @@ Priority: 20
 
 /////////////////////////////////////////////////////////////////
 
+
 // Context-based Rules
 
 
@@ -634,87 +635,4 @@ Rule:InLoc1
 :locName
 -->
  :locName.TempLocation = {kind = "locName", rule = InLoc1}
-
-
-Rule:OrgContext1
-Priority: 1
-// company X
-
-(
- {Token.string == "company"}
- (SPACE)
-)
-(
- ({Token.orth == upperInitial} |
-  {Token.orth == allCaps})
- (SPACE 
-  ({Token.orth == upperInitial} |
-   {Token.orth == allCaps})
- )*
-)
-:org
--->
- :org.TempOrganization= {kind = "orgName", rule = "OrgContext1"}
-
-Rule: OrgContext2
-Priority: 5
-
-// Telstar laboratory
-// Medici offices
-
-(
- ({Token.orth == upperInitial} |
-  {Token.orth == allCaps})
- (SPACE 
-  ({Token.orth == upperInitial} |
-   {Token.orth == allCaps})
- )*
-): org
-(SPACE
- ({Token.string == "offices"} |
- {Token.string == "Offices"} |
- {Token.string == "laboratory"} | 
- {Token.string == "Laboratory"} |
- {Token.string == "laboratories"} |
- {Token.string == "Laboratories"})
-)
--->
- :org.TempOrganization= {kind = "orgName", rule = "OrgContext2"}
-
-
-
-Rule:JoinOrg
-Priority: 50
-// Smith joined Energis
-
-(
- ({Token.string == "joined"}|
-  {Token.string == "joining"}|
-  {Token.string == "joins"}|
-  {Token.string == "join"}
- )
- SPACE
-)
-(
- ({Token.orth == upperInitial}|
-  {Token.orth == allCaps}|
-  {Token.orth == mixedCaps}
- )
- (SPACE 
-  ({Token.orth == upperInitial} |
-   {Token.orth == allCaps})
- )*
-) 
-:org
--->
- :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
-
-
-
-
-
-
-
-
-
 

@@ -314,13 +314,27 @@ Priority: 10
 -->
  :ident.Identifier = {rule = "IdentifierFinal"}
 
-
-// Unknown Proper Name
+//////////////////////////////////////////////////////
+Rule: UnknownTempPerson
+Priority: 5
+( 
+ {POS.category == NNP}
+ ((SPACE|{Token.string == "-"})
+  {POS.category == NNP})*
+):unknown
+ (SPACE)
+(
+ {TempPerson}
+):person
+-->
+ :unknown.Unknown = {kind = "PN", rule = UnknownTempPerson},
+ :person.Person = {rule = UnknownTempPerson}
 
 Rule:Unknown
 ( 
  {POS.category == NNP}
- (SPACE {POS.category == NNP})*
+ ((SPACE|{Token.string == "-"})
+  {POS.category == NNP})*
 ) 
 :unknown
 -->
