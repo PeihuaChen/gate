@@ -513,7 +513,7 @@ jar/classpath so it's the same as registerBuiltins
     "<!-- " + GATE_DOT_XML + ": GATE configuration data -->" + nl +
     "<GATE>" + nl +
     "" + nl +
-    "<!-- NOTE: the next line may be overwritten by the GUI!!! -->" + nl +
+    "<!-- NOTE: the next element may be overwritten by the GUI!!! -->" + nl +
     "<" + userConfigElement + "/>" + nl +
     "" + nl +
     "</GATE>" + nl;
