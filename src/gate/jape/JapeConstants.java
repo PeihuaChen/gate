@@ -54,7 +54,7 @@ public interface JapeConstants extends Serializable
   /** Appelt-shortest-style rule application */
   public int FIRST_STYLE = 3;
   /** The phase finishes on the first match */
-  public int ONCE_STYLE = 3;
+  public int ONCE_STYLE = 4;
 
 
   /** The default priority of a rule. */
@@ -70,7 +70,11 @@ public interface JapeConstants extends Serializable
 
 
 // $Log$
+// Revision 1.9  2002/04/23 10:30:47  valyt
+// bugfix: confusion between "once" and "first" application style
+//
 // Revision 1.8  2002/04/22 11:45:57  valyt
+//
 // ONCE mode added to Jape
 //
 // Revision 1.7  2001/05/17 16:02:41  valyt
