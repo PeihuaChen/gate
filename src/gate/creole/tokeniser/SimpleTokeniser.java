@@ -585,7 +585,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     else annotationSet = document.getAnnotations(annotationSetName);
 
     fireStatusChanged(
-        "Tokenising " + document.getSourceUrl().getFile() + "...");
+        "Tokenising " + document.getName() + "...");
 
     String content = document.getContent().toString();
     int length = content.length();
