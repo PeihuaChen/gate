@@ -19,6 +19,8 @@ import java.util.*;
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
+import java.net.URL;
+import java.io.*;
 
 /**
  * This class is the implementation of a processing resource which
@@ -43,6 +45,8 @@ public class DumpingPR extends AbstractLanguageAnalyser
    * Whether or not to include the annotation features during export
    */
   protected boolean includeFeatures = false;
+
+  protected java.net.URL outputFileUrl;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -97,7 +101,25 @@ public class DumpingPR extends AbstractLanguageAnalyser
   } // execute()
 
   protected void write2File(AnnotationSet exportSet) {
-    Out.prln(document.toXml(exportSet, includeFeatures));
+    File outputFile = new File(outputFileUrl.getFile());
+    try {
+      // Prepare to write into the xmlFile using UTF-8 encoding
+      OutputStreamWriter writer = new OutputStreamWriter(
+                            new FileOutputStream(outputFile),"UTF-8");
+
+      // Write (test the toXml() method)
+      // This Action is added only when a gate.Document is created.
+      // So, is for sure that the resource is a gate.Document
+      writer.write(document.toXml(exportSet, includeFeatures));
+      writer.flush();
+      writer.close();
+    } catch (IOException ex) {
+      throw new GateRuntimeException("Dumping PR: Error writing document "
+                                     + document.getName() + ": "
+                                     + ex.getMessage());
+    }
+
+
   }
 
   /**get the name of the annotation set*/
@@ -116,6 +138,14 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   public void setAnnotationTypes(List newTypes) {
     annotationTypes = newTypes;
+  }
+
+  public URL getOutputFileUrl() {
+    return this.outputFileUrl;
+  }
+
+  public void setOutputFileUrl(URL file) {
+    outputFileUrl = file;
   }
 
 } // class AnnotationSetTransfer

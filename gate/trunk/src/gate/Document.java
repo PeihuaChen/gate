@@ -143,9 +143,18 @@ public interface Document extends LanguageResource, Comparable {
     * if they will cause a crosed over situation.
     * @param aSourceAnnotationSet is an annotation set containing all the
     * annotations that will be combined with the original marup set.
+    * @param includeFeatures determines whether or not features and gate IDs
+    * of the annotations should be included as attributes on the tags or not.
+    * If false, then only the annotation types are exported as tags, with no
+    * attributes.
     * @return a string representing an XML document containing the original
     * markup + dumped annotations form the aSourceAnnotationSet
     */
+  public String toXml(Set aSourceAnnotationSet, boolean includeFeatures);
+
+  /**
+   * Equivalent to toXml(aSourceAnnotationSet, true).
+   */
   public String toXml(Set aSourceAnnotationSet);
 
   /** Make changes to the content.
