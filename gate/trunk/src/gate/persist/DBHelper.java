@@ -63,6 +63,8 @@ public class DBHelper {
   public static final String DOCUMENT_CLASS = "gate.corpora.DocumentImpl";
   public static final String CORPUS_CLASS =  "gate.corpora.CorpusImpl";
 
+  //hopefully no one will create a feature with such key
+  public static final String DUMMY_FEATURE_KEY =  "--NO--SUCH--KEY--";
 
   private static final boolean DEBUG = false;
 
