@@ -83,6 +83,9 @@ create or replace package error is
 
   x_insufficient_privileges EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_insufficient_privileges, -20118);
+
+  x_invalid_annotation_set EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_annotation_set, -20119);
                            
 end error;
 /
