@@ -321,14 +321,14 @@ public class DatabaseDocumentImpl extends DocumentImpl
     */
   public AnnotationSet getAnnotations(String name) {
 
+    //0. preconditions
+    Assert.assertNotNull(name);
+
     //1. read from DB if the set is there at all
     _getAnnotations(name);
 
     //2. is there such set in the DB?
     if (false == this.namedAnnotSets.keySet().contains(name)) {
-      //add the set name to the list with the recently created sets
-      this.addedAnotationSets.add(name);
-
       //create a DatabaseAnnotationSetImpl
       //NOTE: we create the set and then delegate to the super mehtod, otherwise
       //the super mehtod will create AnnotationSetImpl instead of DatabaseAnnotationSetImpl
@@ -337,6 +337,9 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       //add to internal collection
       this.namedAnnotSets.put(name,aset);
+
+      //add the set name to the list with the recently created sets
+      this.addedAnotationSets.add(name);
 
       //3. fire events
       DocumentEvent evt = new DocumentEvent(this, DocumentEvent.ANNOTATION_SET_ADDED, name);
