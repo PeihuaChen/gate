@@ -46,4 +46,9 @@ public interface AnnotationVisualResource extends VisualResource {
    */
   public void okAction() throws GateException;
 
+  /**
+   * Checks whether this viewer/editor can handle a specific annotation type.
+   */
+  public boolean canDisplay(String annotationType);
+
 }//public interface AnnotationVisualResource extends VisualResource
