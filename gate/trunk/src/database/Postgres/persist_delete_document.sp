@@ -20,10 +20,10 @@ CREATE OR REPLACE FUNCTION persist_delete_document(int4) RETURNS boolean AS '
       l_doc_id int4;
       l_content_id int4;
 
-      x_invalid_lr varchar = ''x_invalid_lr'';
-      C_FEATURE_OWNER_CORPUSint4 = 1;
-      C_FEATURE_OWNER_DOCUMENT int4 = 2;
-      C_FEATURE_OWNER_ANNOTATION int4 = 3;
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
+      C_FEATURE_OWNER_CORPUS constant int4 := 1;
+      C_FEATURE_OWNER_DOCUMENT constant int4 := 2;
+      C_FEATURE_OWNER_ANNOTATION constant int4 := 3;
 
    BEGIN
       /* 0. get doc_id */

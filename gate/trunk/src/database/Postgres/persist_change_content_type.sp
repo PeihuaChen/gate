@@ -19,11 +19,11 @@ CREATE OR REPLACE FUNCTION persist_change_content_type(int4,int2) RETURNS boolea
       p_cont_id alias for $1;
       p_new_type alias for $2;
 
-      x_invalid_content_type varchar = ''x_invalid_content_type'';
+      x_invalid_content_type constant varchar := ''x_invalid_content_type'';
 
-      C_CHARACTER_CONTENT  int4 = 1;
-      C_BINARY_CONTENT     int4 = 2;
-      C_EMPTY_CONTENT      int4 = 3;
+      C_CHARACTER_CONTENT  constant int4 := 1;
+      C_BINARY_CONTENT     constant int4 := 2;
+      C_EMPTY_CONTENT      constant int4 := 3;
 
 
    BEGIN

@@ -18,13 +18,13 @@ CREATE OR REPLACE FUNCTION persist_is_valid_feature_type(int4) RETURNS boolean A
    DECLARE
       p_type alias for $1;
 
-      C_VALUE_TYPE_NULL       int4 = 100;
-      C_VALUE_TYPE_INTEGER    int4 = 101;
-      C_VALUE_TYPE_LONG       int4 = 102;
-      C_VALUE_TYPE_BOOLEAN    int4 = 103;
-      C_VALUE_TYPE_STRING     int4 = 104;
-      C_VALUE_TYPE_BINARY     int4 = 105;
-      C_VALUE_TYPE_FLOAT      int4 = 106;
+      C_VALUE_TYPE_NULL       constant int4 := 100;
+      C_VALUE_TYPE_INTEGER    constant int4 := 101;
+      C_VALUE_TYPE_LONG       constant int4 := 102;
+      C_VALUE_TYPE_BOOLEAN    constant int4 := 103;
+      C_VALUE_TYPE_STRING     constant int4 := 104;
+      C_VALUE_TYPE_BINARY     constant int4 := 105;
+      C_VALUE_TYPE_FLOAT      constant int4 := 106;
 
    BEGIN
 

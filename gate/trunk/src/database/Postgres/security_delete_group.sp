@@ -17,7 +17,8 @@ CREATE OR REPLACE FUNCTION security_delete_group(int4) RETURNS boolean AS '
 
    DECLARE
       p_grp_id alias for $1;
-      x_group_owns_resources varchar = ''x_group_owns_resources'';
+
+      x_group_owns_resources constant varchar := ''x_group_owns_resources'';
 
    BEGIN
       /* check for documents

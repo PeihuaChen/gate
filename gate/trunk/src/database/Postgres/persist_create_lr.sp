@@ -29,8 +29,8 @@ CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4
       l_lr_type int4;
       l_lr_id int4;
 
-      x_incomplete_data varchar = ''incomplete data'';
-      x_invalid_lr_type varchar = ''invalid LR type supplied'';
+      x_incomplete_data constant varchar := ''incomplete data'';
+      x_invalid_lr_type constant varchar := ''invalid LR type supplied'';
 
    BEGIN
 

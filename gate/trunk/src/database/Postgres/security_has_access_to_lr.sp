@@ -28,16 +28,16 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
       l_locking_user int4;
       l_access_mode int4;
 
-      C_READ_ACCESS int2 = 0;
-      C_WRITE_ACCESS int2 = 1;
+      C_READ_ACCESS constant int2 := 0;
+      C_WRITE_ACCESS constant int2 := 1;
 
-      C_PERM_WR_GW int2 = 1;
-      C_PERM_GR_GW int2 = 2;
-      C_PERM_GR_OW int2 = 3;
-      C_PERM_OR_OW int2 = 4;
+      C_PERM_WR_GW constant int2 := 1;
+      C_PERM_GR_GW constant int2 := 2;
+      C_PERM_GR_OW constant int2 := 3;
+      C_PERM_OR_OW constant int2 := 4;
 
-      x_invalid_argument varchar = ''x_invalid_argument'';
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_argument constant varchar := ''x_invalid_argument'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* preconditions */

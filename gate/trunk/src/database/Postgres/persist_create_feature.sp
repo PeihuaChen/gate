@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
       l_feature_key_id int4;
       cnt int4;
 
-      x_invalid_feature_type varchar = ''x_invalid_feature_type'';
+      x_invalid_feature_type constant varchar := ''x_invalid_feature_type'';
 
    BEGIN
       if (false = persist_is_valid_feature_type(p_value_type)) then

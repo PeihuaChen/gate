@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION persist_update_lr(int4,varchar,int4) RETURNS boolean 
       p_lr_parent_id alias for $3;
 
       cnt int4;
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* 1. is there such LR? */

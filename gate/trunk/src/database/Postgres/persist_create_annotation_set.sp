@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation_set(int4,varchar) RETURNS i
       p_as_name alias for $2;
 
       l_doc_id int4;
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* 1. get the DOC_ID */

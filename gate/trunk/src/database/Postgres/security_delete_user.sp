@@ -19,7 +19,8 @@ CREATE OR REPLACE FUNCTION security_delete_user(int4) RETURNS boolean AS '
    DECLARE
       p_usr_id alias for $1;
       has_documents boolean;
-      x_user_owns_resources varchar = ''x_user_owns_resources'';
+
+      x_user_owns_resources constant varchar := ''x_user_owns_resources'';
 
    BEGIN
        /* check for documents

@@ -24,10 +24,10 @@ CREATE OR REPLACE FUNCTION security_login(varchar,varchar,int4) RETURNS boolean 
       cnt int4;
       l_usr_id int4;
 
-      x_invalid_user_name_or_pass varchar = ''x_invalid_user_name_or_pass'';
-      x_invalid_user_group varchar = ''x_invalid_user_group'';
-      C_ADMIN_USER_ID int4 = 0;
-      C_ADMIN_GROUP_ID int4 = 0;
+      x_invalid_user_name_or_pass constant varchar := ''x_invalid_user_name_or_pass'';
+      x_invalid_user_group constant varchar := ''x_invalid_user_group'';
+      C_ADMIN_USER_ID constant int4 := 0;
+      C_ADMIN_GROUP_ID constant int4 := 0;
 
    BEGIN
       /* find ID

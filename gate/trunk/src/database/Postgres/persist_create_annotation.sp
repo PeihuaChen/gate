@@ -33,7 +33,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
       l_ann_global_id        int4;
       l_test                 boolean;
 
-      x_invalid_lr varchar = ''x_invalid_lr'';
+      x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
       /* 0. get the DOC_ID */
