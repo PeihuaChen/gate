@@ -32,4 +32,16 @@ public interface ConditionalController extends Controller{
    * @return a Collection object.
    */
   public Collection getRunningStrategies();
+
+  /**
+   * Populates this controller with the appropiate running strategies from a
+   * collection of running strategies
+   * (optional operation).
+   *
+   * Controllers that are serializable must implement this method needed by GATE
+   * to restore their contents.
+   * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
+   * 	       is not supported by this controller.
+   */
+  public void setRunningStrategies(Collection strategies);
 }
