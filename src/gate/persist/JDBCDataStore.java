@@ -148,7 +148,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
       LanguageResource lr = (LanguageResource)this.dependentResources.elementAt(0);
       sync(lr);
       //unload UI component
-      Factory.deleteResource(lr);
+//      Factory.deleteResource(lr);
     }
 
     //1. close security factory
