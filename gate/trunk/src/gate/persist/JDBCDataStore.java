@@ -39,6 +39,8 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   /** jdbc url for the database */
   private   String      dbURL;
   protected String      dbSchema;
+  protected String      datastoreComment;
+  protected String      iconName;
 
   /** jdbc driver name */
 //  private   String      driverName;
@@ -81,15 +83,24 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   /*  interface DataStore  */
 
   /**
-   * Returns the comment displayed by the GUI for this DataStore
+   * Save: synchonise the in-memory image of the LR with the persistent
+   * image.
    */
-  public abstract String getComment();
+  public String getComment() {
+
+    Assert.assertNotNull(this.datastoreComment);
+    return this.datastoreComment;
+  }
 
   /**
    * Returns the name of the icon to be used when this datastore is displayed
    * in the GUI
    */
-  public abstract String getIconName();
+  public String getIconName() {
+    Assert.assertNotNull(this.iconName);
+    return this.iconName;
+  }
+
 
 
   /** Get the name of an LR from its ID. */
