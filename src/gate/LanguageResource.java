@@ -31,21 +31,25 @@ public interface LanguageResource extends Resource, Serializable
     *@param ds The datastore object which holds the information regarding the
     *persistence mechanism intended for storing this language resource.
   */
-  public boolean canLiveIn(DataStore ds);
+//  public boolean canLiveIn(DataStore ds);
+    //moved this in setupDS
 
-  /**This method is intended for the persistence capable language resources
-    *that are not happy with the structure of the database intended for them
-    *to be stored in. It allows for the language resource to build the necessary
-    *structures that it requires in the provided datastore.
-    *This call will normally be forwarded to a static method on the class that
-    *knows how to store this kind of objects, depending on the type of the
-    *datastore.
-    *If the execution of this method raises no exceptions, a subsequent call to
-    *"canLiveIn" for the same datastore object should return "true".
+  /**This method allows the persistence capable language resources
+    *to check the datastore intended for them to be stored in and to create
+    *the appropriate structures.
     *@param ds The datastore object which holds the information regarding the
     *persistence mechanism intended for storing this language resource.
+    *@return true if the structure of the database is valid for storage or
+    *if the structure of the database has been successfuly altered so it is now
+    *ready to store this kind of language resource;
+    *false if the database could not be altered such that it complies with the
+    *request (e.g. one of the tables exists and has a different structure).
     */
-  public void setupDS(DataStore ds);
+//it seems I cannot implement a method in an interface with a static method.
+//On the other hand I cannot declare a method as being static in an interface.
+//I need setupDS to be static so I implemented this method in all
+//LanguageResource implementers but I had to delete it from here :-(
+//  public boolean setupDS(DataStore ds);
 
   /**If the last execution of "canLiveIn" returned false, this method can be
     *used to find out out details about the failure.
