@@ -314,7 +314,7 @@ public class CorpusImpl extends AbstractLanguageResource
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
                               String encoding, boolean recurseDirectories)
-                     throws IOException, ResourceInstantiationException{
+                     throws IOException {
     //check input
     if(!directory.getProtocol().equalsIgnoreCase("file"))
       throw new IllegalArgumentException(
@@ -351,8 +351,20 @@ public class CorpusImpl extends AbstractLanguageResource
           params.put("sourceUrl", aFile.toURL());
           if(encoding != null) params.put("encoding", encoding);
 
-          corpus.add(Factory.createResource(DocumentImpl.class.getName(),
-                                            params, null, docName));
+          try {
+            corpus.add(
+              Factory.createResource(
+                DocumentImpl.class.getName(), params, null, docName
+              )
+            );
+          } catch(ResourceInstantiationException e) {
+            String nl = Strings.getNl();
+            Err.prln(
+              "WARNING: Corpus.populate could not intantiate document" + nl +
+              "  Document name was: " + docName + nl +
+              "  Exception was: " + e + nl + nl
+            );
+          }
           if(sListener != null) sListener.statusChanged(
             aFile.getName() + " read");
         }
