@@ -70,6 +70,9 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   }
 
   protected void initListeners(){
+/*
+//kalina: I commented it, because we want the corpus viewer to show only the
+//document names and not add the documents to memory
     documentsList.addListSelectionListener(new ListSelectionListener(){
       public void valueChanged(ListSelectionEvent e){
         featuresEditor.setTarget(
@@ -78,13 +81,13 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         );
       }
     });
-
+*/
     documentsList.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
           int row = documentsList.locationToIndex(e.getPoint());
           if(row != -1){
-            Resource lr = (Resource) corpus.get(row);
+            Document doc = (Document) corpus.get(row);
           }
         }
       }
@@ -113,9 +116,11 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     corpus.addCorpusListener(this);
 
     docListModel.clear();
-    Iterator corpusIter = corpus.iterator();
-    while(corpusIter.hasNext()){
-      docListModel.addElement(corpusIter.next());
+    java.util.List docNamesList = corpus.getDocumentNames();
+    Iterator namesIter = docNamesList.iterator();
+    while(namesIter.hasNext()){
+      String docName = (String) namesIter.next();
+      docListModel.addElement(docName);
     }
 
     if(!docListModel.isEmpty())
@@ -133,10 +138,11 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         Document doc = e.getDocument();
         //let's find where it should go
         int docPosition = 0;
-        Iterator iter = corpus.iterator();
-        while(iter.hasNext() && iter.next() != doc) docPosition++;
+        Iterator iter = corpus.getDocumentNames().iterator();
+        while(iter.hasNext() && ! iter.next().equals(doc.getName()))
+          docPosition++;
         int[] selIdxs = documentsList.getSelectedIndices();
-        docListModel.insertElementAt(doc, docPosition);
+        docListModel.insertElementAt(doc.getName(), docPosition);
         //restore selection
         for(int i = 0; i < selIdxs.length; i++){
           if(selIdxs[i] >= docPosition) selIdxs[i]++;
@@ -149,7 +155,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   public void documentRemoved(final CorpusEvent e) {
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        docListModel.removeElement(e.getDocument());
+        docListModel.removeElement(e.getDocument().getName());
       }
     });
   }
@@ -162,8 +168,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
                                               boolean isSelected,
                                               boolean cellHasFocus){
       //prepare the renderer
-      Document doc = (Document)value;
-      super.getListCellRendererComponent(list, doc.getName(), index,
+      String docName = (String)value;
+      super.getListCellRendererComponent(list, docName, index,
                                          isSelected, cellHasFocus);
       setIcon(MainFrame.getIcon("lr.gif"));
       return this;
@@ -219,9 +225,9 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     }
 
     public void actionPerformed(ActionEvent e){
-      Object[] selectedDocs = documentsList.getSelectedValues();
-      for(int i = 0; i < selectedDocs.length; i++){
-        corpus.remove(selectedDocs[i]);
+      int[] selectedIndexes = documentsList.getSelectedIndices();
+      for(int i = 0; i < selectedIndexes.length; i++){
+        corpus.remove(i);
       }
       documentsList.clearSelection();
     }
