@@ -42,7 +42,6 @@ public interface OInstance{
    */
   public Object getUserData();
 
-/*
   public void setDifferentFrom(OInstance theIndividual);
 
   public Set getDifferentFrom();
@@ -54,5 +53,5 @@ public interface OInstance{
   public void setSameIndividualAs(OInstance theIndividual);
 
   public Set getSameIndividualAs();
-*/
+
 }
