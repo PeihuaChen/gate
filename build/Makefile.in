@@ -29,11 +29,12 @@ CYGPATHP=	@CYGPATHP@
 
 # a list of packages used in documentation generation. including a
 # package that contains no classes causes javadoc to bomb
-PKGS=	gate gate.annotation gate.corpora gate.creole \
-	gate.creole.gazetteer gate.creole.tokeniser \
-	gate.db gate.email gate.fsm gate.gui gate.html \
-	gate.jape gate.jape.parser gate.config \
-	gate.sgml gate.util gate.xml guk guk.im gate.persist
+PKGS=	gate gate.annotation gate.config gate.corpora gate.creole \
+	gate.creole.gazetteer gate.creole.namematch \
+	gate.creole.nerc gate.creole.tokeniser \
+	gate.db gate.email gate.event gate.fsm gate.gui gate.html \
+	gate.jape gate.jape.parser gate.persist gate.sgml gate.swing \
+	gate.util gate.xml guk guk.im  
 
 # classpath to build compile commands from
 CP=	-classpath \
