@@ -77,7 +77,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
           ).toExternalForm();
         mainURL = new URL(defaultListsURLStr);
       }else mainURL = new URL(listsURLStr);
-      Reader reader = new InputStreamReader(mainURL.openStream());
+      Reader reader = new InputStreamReader(mainURL.openStream(), encoding);
 
       BufferedReader bReader = new BufferedReader(reader);
       String line = bReader.readLine();
@@ -148,7 +148,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
     BufferedReader listReader;
 
     listReader = new BufferedReader(new InputStreamReader(
-                            (new URL(mainURL, listName)).openStream()));
+                            (new URL(mainURL, listName)).openStream(), encoding));
 
     Lookup lookup = new Lookup(majorType, minorType, languages);
     String line = listReader.readLine();
@@ -448,6 +448,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
   private transient Vector progressListeners;
   /**    */
   private transient Vector statusListeners;
+  private String encoding = "UTF-8";
   /**    */
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
@@ -493,6 +494,12 @@ public class DefaultGazetteer extends AbstractProcessingResource
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
       }
     }
+  }
+  public void setEncoding(String newEncoding) {
+    encoding = newEncoding;
+  }
+  public String getEncoding() {
+    return encoding;
   }
 
 } // DefaultGazetteer

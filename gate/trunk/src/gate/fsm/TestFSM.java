@@ -58,9 +58,9 @@ public class TestFSM extends TestCase {
     */
 
     Gate.init();
-    String resPath = Files.getResourcePath() +  "/jape/combined/";
-    String resName = "brian-soc-loc1.jape";
-    batch = new Batch(resPath, resName);
+    batch = new Batch(TestFSM.class.getResource(
+          Files.getResourcePath() +  "/jape/combined/brian-soc-loc1.jape"),
+          "UTF-8");
 
 
     transducer = (MultiPhaseTransducer)batch.getTransducer();

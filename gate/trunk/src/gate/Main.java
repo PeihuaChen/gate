@@ -63,6 +63,8 @@ public class Main {
       Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
       splash.show();
 
+      Gate.setNetConnected(false);
+      Gate.setLocalWebServer(false);
       Gate.init();
 
       if(DEBUG) Out.prln("constructing GUI");

@@ -335,8 +335,11 @@ public class AnnotationEditDialog extends JDialog {
     if (annotSchema == null) return null;
 
     if ( annotSchema.getFeatureSchemaSet() == null ||
-         annotSchema.getFeatureSchemaSet().size() == 0)
-      return Factory.newFeatureMap();
+         annotSchema.getFeatureSchemaSet().size() == 0){
+      responseMap = Factory.newFeatureMap();
+      responseMap.putAll(featureMap);
+      return responseMap;
+    }
 
     this.setTitle(annotSchema.getAnnotationName());
     initLocalData();

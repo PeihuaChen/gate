@@ -109,7 +109,7 @@ public class TestJape extends TestCase
     } catch(gate.util.InvalidOffsetException ioe) {
       ioe.printStackTrace(Err.getPrintWriter());
     }
-
+/*
     // run the parser test
     Batch batch = null;
     // String japeFileName = "/gate/jape/Test11.jape";
@@ -118,7 +118,9 @@ public class TestJape extends TestCase
     InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
-    batch = new Batch(japeFileStream);
+*/
+    Batch batch = new Batch(TestJape.class.getResource(
+              Files.getResourcePath() + "/jape/TestABC.jape"), "UTF-8");
     // test code: print the first line of the jape stream
     // Out.println(
     //   new BufferedReader(new InputStreamReader(japeFileStream)).readLine()
@@ -225,7 +227,8 @@ public class TestJape extends TestCase
 
     try {
       Out.print("Opening Jape grammar... ");
-      Batch batch = new Batch("jape/combined/", "main.jape");
+      Batch batch = new Batch(TestJape.class.getResource(
+        Files.getResourcePath() + "/jape/combined/main.jape"), "UTF-8");
       /*
       Batch batch = new Batch("jape/combined/", "brian-soc-loc1.jape");
       Batch batch =

@@ -1,7 +1,7 @@
 Zulu Standard Time
 Zone Standard Time
 ZST
-Z . S . T .
+Z.S.T.
 Western time
 Western Time
 Western Standard Time
@@ -14,9 +14,9 @@ West Coast Time
 WST
 WDT
 WCT
-W . S . T .
-W . D . T .
-W . C . T .
+W.S.T.
+W.D.T.
+W.C.T.
 Southern time
 Southern Time
 Pacific time
@@ -24,18 +24,18 @@ Pacific Time
 Pacific Day Time
 Pacific Daily Time
 PDT
-P . D. T .
+P.D.T.
 Northern time
 Northern Time
 Middle Eastern Time
 MET
-M . E . T .
+M.E.T.
 Greenwich Time
 Greenwich Meantime
 Greenwich MeanTime
 Greenwich Mean Time
 GMT
-G . M . T .
+G.M.T.
 Eastern time
 Eastern Time
 Eastern Standard Time
@@ -49,10 +49,10 @@ ET
 EST
 EDT
 ECT
-E . T .
-E . S . T .
-E . D . T .
-E . C . T .
+E.T.
+E.S.T.
+E.D.T.
+E.C.T.
 Central Time
 Central Standard Time
 Central European Time
@@ -61,9 +61,10 @@ Central Daily Time
 CST
 CET
 CDT
-C . S . T .
-C . E . T .
-C . D . T .
+C.S.T.
+C.E.T.
+C.D.T.
 British Summer Time
 BST
-B . S . T .
+B.S.T.
+

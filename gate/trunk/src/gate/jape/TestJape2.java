@@ -91,7 +91,7 @@ public class TestJape2 {
     } catch(ResourceInstantiationException e) {
       usage("couldn't open collection: " + e);
     }
-
+/*
     // run the parser test
     message("parsing the .jape file (or deserialising the .ser file)");
     Batch batch = null;
@@ -99,12 +99,14 @@ public class TestJape2 {
     } catch(JapeException e) {
       usage("can't create transducer " + e.getMessage());
     }
+*/
     /*Transducer transducer = parseJape(japeName);
     //Out.println(transducer);
     if(transducer == null)
       System.exit(1);*/
 
     // test the transducers from the parser
+/*
     message("running the transducer");
     try { batch.transduce(coll); } catch(JapeException e) {
       usage("couldn't run transducer " + e.getMessage());
@@ -114,7 +116,7 @@ public class TestJape2 {
 
     message("done\n\r");
     //System.exit(0);
-
+*/
   } // main
 
 
@@ -253,6 +255,10 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.9  2001/02/08 13:46:06  valyt
+// Added full Unicode support for the gazetteer and Jape
+// converted the gazetteer files to UTF-8
+//
 // Revision 1.8  2001/01/30 14:18:02  hamish
 // fixed some hard-coded paths
 //

@@ -17,6 +17,7 @@
 package gate.jape;
 
 import java.util.*;
+import java.net.*;
 import com.objectspace.jgl.*;
 import gate.annotation.*;
 import gate.gui.*;
@@ -91,28 +92,25 @@ public abstract class Transducer implements java.io.Serializable,
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
   }
-
-  public void setFileName(String fileName) { this.fileName = fileName; }
-
-  public void setDirName(String dirName) { this.dirName = dirName;}
-
-  public void setFromResource(boolean fromResource) {
-    this.fromResource = fromResource;
+  public void setBaseURL(java.net.URL newBaseURL) {
+    baseURL = newBaseURL;
+  }
+  public java.net.URL getBaseURL() {
+    return baseURL;
   }
 
-  public String getFileName() { return fileName;}
 
-  public String getDirName() { return dirName; }
 
-  public boolean getFromResource() { return fromResource;}
+
+
 
   private List myProgressListeners = new LinkedList();
 
   private List myStatusListeners = new LinkedList();
 
-  private String fileName, dirName;
 
-  private boolean fromResource;
+  private URL baseURL;
+
   //ProcessProgressReporter implementation ends here
 
 } // class Transducer
@@ -120,6 +118,10 @@ public abstract class Transducer implements java.io.Serializable,
 
 
 // $Log$
+// Revision 1.10  2001/02/08 13:46:07  valyt
+// Added full Unicode support for the gazetteer and Jape
+// converted the gazetteer files to UTF-8
+//
 // Revision 1.9  2001/01/21 20:51:32  valyt
 // Added the DocumentEditor class and the necessary changes to the gate API
 //

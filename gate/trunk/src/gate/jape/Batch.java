@@ -25,6 +25,7 @@ package gate.jape;
 import java.util.*;
 import java.util.jar.*;
 import java.io.*;
+import java.net.*;
 import com.objectspace.jgl.*;
 
 import gate.annotation.*;
@@ -37,21 +38,25 @@ import gate.creole.*;
   * Construction will parse or deserialise a transducer as required.
   */
 public class Batch
-extends AbstractProcessingResource
-implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
-           StatusReporter, ProcessingResource
+implements JapeConstants, ProcessProgressReporter, StatusReporter
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
   /** The name of the transducer file, a .jape or .ser. */
-  private String japeFileName;
+//  private String japeFileName;
+
+  /** The URL that points to a .jape file */
+  private URL japeURL;
+
+  /**The encoding used for reading the grammar file(s)*/
+  private String encoding;
 
   /** The JAPE transducer. */
   private Transducer transducer;
 
   /** A stream connected to the JAPE file (often null). */
-  private InputStream japeStream = null;
+//  private InputStream japeStream = null;
 
   /** Create non-initialised instance (private, used in main). */
   private Batch() { }
@@ -61,22 +66,48 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
     * file. This may be an absolute path, or may a .jar
     * that lives somewhere on the classpath.
     */
+  public Batch(URL url, String encoding) throws JapeException {
+    this.japeURL = url;
+    this.encoding =  encoding;
+    parseJape();
+    if(transducer != null) transducer.addStatusListener(new StatusListener() {
+      public void statusChanged(String text){
+        fireStatusChangedEvent(text);
+      }
+    });
+  } // full init constructor
+
+  public Batch(URL url, String encoding, StatusListener sListener)
+         throws JapeException {
+    this(url, encoding);
+    this.addStatusListener(sListener);
+  } // full init constructor
+
+
+  /** Create a fully initialised instance.
+    * <P><CODE>japeFileName</CODE>: the name of a .jape or .ser transducer
+    * file. This may be an absolute path, or may a .jar
+    * that lives somewhere on the classpath.
+    */
+/*
   public Batch(String japeFileName) throws JapeException {
     this.japeFileName = japeFileName;
     initTransducer();
   } // full init constructor
-
+*/
+/*
   public Batch(String japeFileName, StatusListener sListener)
                                                         throws JapeException {
     this.japeFileName = japeFileName;
     this.addStatusListener(sListener);
     initTransducer();
   } // full init constructor
-
+*/
 
   /** Create a fully initialised instance from an InputStream connected
     * to the JAPE file.
     */
+/*
   public Batch(InputStream japeStream) throws JapeException {
     if(japeStream == null)
       throw new JapeException(
@@ -86,22 +117,24 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
     this.japeStream = japeStream;
     initTransducer();
   } // full init constructor
-
+*/
   /** Create a fully initialised instance from a resource path and resource
     * name.
     */
+/*
   public Batch(String resPath, String resName) throws JapeException {
     fromResource = true;
     this.japeFileName = resName;
     this.resPath = resPath;
     initTransducer();
   } // full init constructor
-
+*/
 
   /** Get the transducer. */
   public Transducer getTransducer() { return transducer; }
 
   /** Instantiate transducer member as necessary. */
+/*
   private void initTransducer()
   throws JapeException {
     if(fromResource) {
@@ -118,19 +151,18 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
       throw new JapeException(
         "unknown file type (not .jape, .ser or .jar):" + japeFileName
       );
-
     if(transducer != null) transducer.addStatusListener(new StatusListener() {
       public void statusChanged(String text){
         fireStatusChangedEvent(text);
       }
     });
-  } // getTransducer
-
-  /** Parse a jape file and store the transducer. */
+  }
+*/
+  /** Parse a jape file from {@link japeURLString} and store the transducer. */
   private void parseJape() throws JapeException {
     try {
       gate.jape.parser.ParseCpsl parser =
-        new gate.jape.parser.ParseCpsl(japeFileName);
+        new gate.jape.parser.ParseCpsl(japeURL, encoding);
       StatusListener listener = new StatusListener(){
         public void statusChanged(String text){
           fireStatusChangedEvent(text);
@@ -149,6 +181,7 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
   } // parseJape
 
   /** Parse a jape file from an InputStream and store the transducer. */
+/*
   private void parseJape(InputStream japeStream) throws JapeException {
     try {
       gate.jape.parser.ParseCpsl parser =
@@ -162,8 +195,9 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
         JapeException("Batch: couldn't read JAPE stream: " + e.getMessage());
     }
   } // parseJape(InputStream)
-
+*/
   /** Parse a jape file from a resource and store the transducer. */
+/*
   private void parseJape(String resPath, String resName) throws JapeException {
     try {
       gate.jape.parser.ParseCpsl parser =
@@ -177,9 +211,10 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
         JapeException("Batch: couldn't read JAPE resource: " + e.getMessage());
     }
   } // parseJape(resPath, resName)
-
+*/
 
   /** Deserialise from a .ser file. */
+/*
   private void deserialiseJape(File japeFile) throws JapeException {
 
     // set up a file input stream
@@ -195,8 +230,9 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
     // call the input stream deserialise method
     deserialiseJape(japeInputStream);
   } // deserialiseJape(File)
-
+*/
   /** Deserialise from a JAR file. */
+/*
   private void deserialiseJape() throws JapeException {
     // find the jar from CLASSPATH
     //SearchPath classPath =
@@ -221,8 +257,9 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
     // call the input stream deserialise method
     deserialiseJape(japeInputStream);
   } // deserialiseJape()
-
+*/
   /** Create a transducer from an object input stream (deserialisation). */
+/*
   private void deserialiseJape(InputStream japeInputStream)
   throws JapeException {
     try {
@@ -240,11 +277,13 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
       );
     }
   } // deserialise(OIS)
-
+*/
   /** Create a .ser name from a .jar name. */
+/*
   private String jarNameToSerName(String jarName) {
     return jarName.substring(0, jarName.length() - 4) + ".ser";
   } // jarNameToSerName
+*/
 
   /** Process the given collection. */
   public void transduce(Corpus coll) throws JapeException {
@@ -421,13 +460,6 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
 */
   } // main
 
-  public void run(){
-  }
-
-  public Resource init(){
-    return this;
-  }
-
 
   /** Whether to print progress messages or not. */
   private boolean verbose = false;
@@ -488,10 +520,10 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
   //ProcessProgressReporter implementation ends here
 
   /** Are we initialising from a resource? */
-  private boolean fromResource = false;
+//  private boolean fromResource = false;
 
   /** Path to the resources tree */
-  private String resPath = null;
+//  private String resPath = null;
 
   private List myProgressListeners = new LinkedList();
 
@@ -501,6 +533,10 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
 } // class Batch
 
 // $Log$
+// Revision 1.19  2001/02/08 13:46:06  valyt
+// Added full Unicode support for the gazetteer and Jape
+// converted the gazetteer files to UTF-8
+//
 // Revision 1.18  2001/01/21 20:51:31  valyt
 // Added the DocumentEditor class and the necessary changes to the gate API
 //
