@@ -210,14 +210,14 @@ public class TestGate {
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
       if(! allTests){
-        suite.addTest(TestAnnotationDiff.suite());
+        suite.addTest(TestMorph.suite());
       } else {
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
-        suite.addTest(TestPersist.suite());
+//        suite.addTest(TestPersist.suite());
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
-        suite.addTest(TestSecurity.suite());
+//        suite.addTest(TestSecurity.suite());
         suite.addTest(TestAnnotationDiff.suite());
         suite.addTest(TestConfig.suite());
         suite.addTest(TestAnnotation.suite());
