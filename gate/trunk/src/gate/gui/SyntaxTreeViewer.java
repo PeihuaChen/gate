@@ -44,7 +44,9 @@ feature. Still when it creates annotations, these will have this feature added. 
 
 
 Newly added tree nodes to the tree are automatically added to the document
-as annotations. Deleted nodes are automatically deleted from the document
+as annotations (the document is obtained automatically from the annotation set
+passed to the viewer with setAnnotations).
+Deleted nodes are automatically deleted from the document
 annotations too. <P>
 
 In order to have appropriate behaviour always put this component inside a
@@ -57,6 +59,33 @@ scroll pane or something similar that provides scrollers. Example code: <BREAK>
 
 To get an idea how to use the component, look at the main function which is also
 the test for this bean. <P>
+
+The trick of using the viewer is that it needs to be constructed first, then shown,
+and only after that set the annotations. This is due to painting and size issues.
+Example code: <BREAK>
+<PRE>
+    final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
+    //if we need GATE Unicode support
+    syntaxTreeViewer1.setUnicodeSupportEnabled(true);
+
+    frame.show(); //show the frame that contains the tree viewer
+    ...
+    //finally set the annotations on the tree viewer
+    syntaxTreeViewer1.setTreeAnnotations(annots);
+</PRE><P>
+
+When more than one annotations of type textAnnotationType (e.g., tokens) are
+passed to the viewer in setTreeAnnotations, these annotations are treated as
+separate leafs which together constitute the text to be annotated. For example,
+if the three tokens - this, is, silly - are passed to the viewer, it will take
+their offsets and corresponding texts and add them to the viewer as separate
+leafs separated by spaces - this is silly. This functionality however has not
+been tested extensively and I suspect it might not work properly. <P>
+
+The default way is to pass just one annotation of type textAnnotationType which
+corresponds to the entire sentence or utterance to be annotated with syntax tree
+information. Then the viewer automatically tokenises it and creates the leaves.
+This is well-tested and is the usual way.  <P>
 
 */
 
@@ -108,7 +137,8 @@ public class SyntaxTreeViewer extends JPanel
   private Document document = null;
 //the document to which the annotations belong
 
-  private static BasicUnicodeButtonUI buttonUI = new BasicUnicodeButtonUI();
+  private static BasicUnicodeButtonUI buttonUI = null;
+  private boolean unicodeSupportEnabled = false;
 
   private SyntaxTreeViewer() {   //override so we can't be constructed like that!
   }
@@ -116,6 +146,19 @@ public class SyntaxTreeViewer extends JPanel
   //CONSTRUCTORS
   public SyntaxTreeViewer(String annotType) {
   	treeNodeAnnotationType = annotType;
+    try  {
+      jbInit();
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  public SyntaxTreeViewer(String annotType, boolean unicodeSupport) {
+  	treeNodeAnnotationType = annotType;
+    unicodeSupportEnabled = unicodeSupport;
+    if (unicodeSupportEnabled)
+       buttonUI = new BasicUnicodeButtonUI();
     try  {
       jbInit();
     }
@@ -159,13 +202,14 @@ public class SyntaxTreeViewer extends JPanel
     final String text = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628 \u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
     final Document doc = Transients.newDocument(text);
 
-//  that works too but only use if you have the test file there.    
+//  that works too but only use if you have the test file there.
 //    final Document doc = Transients.newDocument(new URL("file:///z:/temp/weird.txt"), "UTF-8");
 
 
     final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
+    syntaxTreeViewer1.setUnicodeSupportEnabled(true);
     //need to set the document here!!!!
-     
+
 
 		JFrame frame = new JFrame();
 
@@ -319,18 +363,27 @@ public class SyntaxTreeViewer extends JPanel
     AnnotationSet utterances =
     	treeAnnotations.get(textAnnotationType);
 
-		if (utterances.size() > 1)
-    	System.out.println("Tree Viewer can't display more than one utterance/sentence at a time! Using only first annotation");
-    else if (utterances.size() == 0) {
+		if (utterances.size() == 0) {
       System.out.println("No annotations of type " + textAnnotationType + " passed so can't display anything!");
       return;
     }
 
-    //we have our utterance now
-    utterance = (Annotation) utterances.iterator().next();
+    //if we have one annotation only then we try to tokenise it
+    //before showing it. The idea is that it must be the whole
+    //utterance or sentence.
+    if (utterances.size() == 1) {
 
-    //let's process that into leaves
-    utterances2Trees();
+      //we have our utterance now
+      utterance = (Annotation) utterances.iterator().next();
+
+      //let's process that into leaves
+      utterances2Trees();
+    } else {
+    //we have many annotations of the major type. These must be tokens
+    //so they get converted into leafs straight away, one token into 1 leaf.
+      tokens2Tree(utterances);
+    }
+
 
     //sort them from left to right first
     AnnotationSet nodeAnnotations = treeAnnotations.get(treeNodeAnnotationType);
@@ -482,6 +535,44 @@ public class SyntaxTreeViewer extends JPanel
 
   } //utterance2Trees
 
+  /**
+  * Converts the given tokens into a set of leaf nodes
+  * this needs testing as I've never used it
+  */
+  private void tokens2Tree(AnnotationSet tokens) {
+    Document doc = tokens.getDocument();
+
+    Insets insets = this.getInsets();
+    int buttonX = insets.left;   //the starting X position for the buttons
+    int buttonY = this.getHeight() - 20 - insets.bottom; //the starting Y position
+
+    Iterator i = tokens.iterator();
+    while (i.hasNext()) {
+      Annotation annot = (Annotation) i.next();
+
+      //create the leaf node
+      STreeNode node = new STreeNode(annot.getStartNode().getOffset().intValue(),
+                                     annot.getEndNode().getOffset().intValue());
+      node.setAllowsChildren(false); //make it a leaf
+      node.setUserObject(doc.getContent().toString().substring(
+                                     annot.getStartNode().getOffset().intValue(),
+                                     annot.getEndNode().getOffset().intValue()));
+                                     //set the text
+      node.setLevel(0);
+      leaves.put(new Integer(node.getID()), node); //add to hash table of leaves
+
+      //create the corresponding button
+      buttonX = createButton4Node(node, buttonX, buttonY);
+
+    }
+
+    this.setSize(buttonX, buttonY + 20 + insets.bottom);
+    this.setPreferredSize(this.getSize());
+
+
+  } //tokens2Tree
+
+
 
   /**
    * Returns the X position where another button can start if necessary.
@@ -492,7 +583,9 @@ public class SyntaxTreeViewer extends JPanel
 
     JButton button = new JButton((String) node.getUserObject());
     button.setBorderPainted(false);
-    button.setUI(buttonUI);
+    //change the button UI so it supports Unicode (only if we need to)
+    if (unicodeSupportEnabled)
+      button.setUI(buttonUI);
 
     FontMetrics fm = button.getFontMetrics(button.getFont());
 
@@ -1049,6 +1142,13 @@ public class SyntaxTreeViewer extends JPanel
     textAnnotationType = newTextAnnotationType;
   }
 
+  public void setUnicodeSupportEnabled(boolean newUnicodeSupportEnabled) {
+    unicodeSupportEnabled = newUnicodeSupportEnabled;
+    if (unicodeSupportEnabled)
+       buttonUI = new BasicUnicodeButtonUI();
+    this.repaint();
+  }
+
 
 
 
@@ -1098,6 +1198,11 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.5  2000/09/28 14:26:09  kalina
+// Added even more documentation (is this me?!) and allowed several tokens to be
+// passed instead of a whole utterance/sentence for annotation. Needs good testing this
+// but will do it when somebody tries using this functionality.
+//
 // Revision 1.4  2000/09/28 13:16:12  kalina
 // Added some documentation
 //
