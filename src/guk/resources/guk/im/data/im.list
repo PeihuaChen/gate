@@ -18,6 +18,7 @@ tcode.gim	ja	--	TCode
 hangul.gim	ko	--	Standard Hangul
 2901-94.gim	fa	--	ISIRI\ 2901-94
 crlpers.gim	fa	--	CRL Phonetic
+crlurdu.gim	pk	--	CRL Urdu
 yawerty.gim	ru	--	YAWERTY (Phonetic)
 yawerty1.gim	ru	--	CRL YAWERTY (Phonetic)
 sercroc.gim	sh	--	Cyrillic MLT
