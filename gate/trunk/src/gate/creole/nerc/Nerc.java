@@ -143,22 +143,34 @@ public class Nerc extends SerialController {
       }
       fireProgressChanged(5);
       ProgressListener pListener = new CustomProgressListener(5, 15);
+      StatusListener sListener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
+
       tokeniser.addProgressListener(pListener);
+      tokeniser.addStatusListener(sListener);
       tokeniser.run();
       tokeniser.check();
       tokeniser.removeProgressListener(pListener);
+      tokeniser.removeStatusListener(sListener);
 
       pListener = new CustomProgressListener(15, 25);
       gazetteer.addProgressListener(pListener);
+      gazetteer.addStatusListener(sListener);
       gazetteer.run();
       gazetteer.check();
       gazetteer.removeProgressListener(pListener);
+      gazetteer.removeStatusListener(sListener);
 
       pListener = new CustomProgressListener(25, 90);
       transducer.addProgressListener(pListener);
+      transducer.addStatusListener(sListener);
       transducer.run();
       transducer.check();
       transducer.removeProgressListener(pListener);
+      transducer.removeStatusListener(sListener);
 
 
       EntitySet entitySet =
