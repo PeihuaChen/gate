@@ -16,12 +16,15 @@
 package gate.persist;
 
 import java.util.*;
-
 import java.sql.*;
 
+import junit.framework.*;
+
 import gate.LanguageResource;
-import gate.security.SecurityInfo;
+import gate.security.*;
+import gate.security.SecurityException;
 import gate.util.*;
+import gate.corpora.*;
 
 public class PostgresDataStore extends JDBCDataStore {
 
@@ -46,20 +49,11 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-/*
-  public SecurityInfo getSecurityInfo(LanguageResource parm1) throws gate.persist.PersistenceException {
-    throw new MethodNotImplementedException();
-  }
-*/
-
   public List findLrIds(List constraints, String lrType) throws gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
   }
-  public boolean lockLr(LanguageResource parm1) throws gate.persist.PersistenceException, gate.security.SecurityException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
+
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId) throws gate.security.SecurityException, gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
@@ -79,9 +73,60 @@ public class PostgresDataStore extends JDBCDataStore {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
   }
-  public void unlockLr(LanguageResource parm1) throws gate.persist.PersistenceException, gate.security.SecurityException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
+
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  public void unlockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(lr.getDataStore(),this);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lr.getLRPersistenceId())) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    //3. try to unlock
+    PreparedStatement pstmt = null;
+    boolean lockSucceeded = false;
+
+    try {
+      String sql = " select persist_unlock_lr(?,?) ";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
+      pstmt.setLong(2,this.session.getUser().getID().longValue());
+      pstmt.execute();
+      //we don't care about the result set
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("invalid LR ID supplied ["+sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't unlock LR in DB : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
   }
 
 
@@ -103,5 +148,82 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
+  /**
+   * Try to acquire exlusive lock on a resource from the persistent store.
+   * Always call unlockLR() when the lock is no longer needed
+   */
+  public boolean lockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(lr.getDataStore(),this);
+
+    //1. delegate
+    return _lockLr((Long)lr.getLRPersistenceId());
+  }
+
+
+  /**
+   *  helper for lockLR()
+   *  never call directly
+   */
+  private boolean _lockLr(Long lrID)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrID);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lrID)) {
+      throw new SecurityException("no write access granted to the user");
+    }
+
+    //3. try to lock
+    PreparedStatement pstmt = null;
+    ResultSet rset = null;
+    boolean lockSucceeded = false;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement(" select persist_lock_lr(?,?,?) ");
+      pstmt.setLong(1,lrID.longValue());
+      pstmt.setLong(2,this.session.getUser().getID().longValue());
+      pstmt.setLong(3,this.session.getGroup().getID().longValue());
+
+      pstmt.execute();
+      rset = pstmt.getResultSet();
+      rset.next();
+
+      lockSucceeded = rset.getBoolean(4);
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR:
+          throw new PersistenceException("invalid LR ID supplied ["+sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException(
+                "can't lock LR in DB : ["+ sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(rset);
+      DBHelper.cleanup(pstmt);
+    }
+
+    return lockSucceeded;
+  }
 
 }
