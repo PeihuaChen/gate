@@ -1,4 +1,4 @@
-/*
+  /*
  *  JDBCDataStore.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
@@ -21,6 +21,8 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.event.*;
+import gate.security.SecurityException;
+
 
 public class JDBCDataStore
 extends AbstractFeatureBearer implements DatabaseDataStore{
@@ -31,9 +33,9 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
 
   /** --- */
-  private Connection  jdbcConn;
-  private URL         dbURL;
-  private String      driverName;
+  protected Connection  jdbcConn;
+  private   URL         dbURL;
+  private   String      driverName;
 
 
   /** Do not use this class directly - use one of the subclasses */
@@ -253,6 +255,25 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** Get a list of the names of LRs of a particular type that are present. */
   public List getLrNames(String lrType) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   *  has read access to the LR
+   */
+  public boolean canReadLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException{
+
+    throw new MethodNotImplementedException();
+  }
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has write access to the LR
+   */
+  public boolean canWriteLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException{
+
     throw new MethodNotImplementedException();
   }
 
