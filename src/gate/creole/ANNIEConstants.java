@@ -22,6 +22,7 @@ public interface ANNIEConstants {
    * This is an array of strings containing all class names for all ANNIE PRs
    */
   public static final String[] PR_NAMES = {
+    "gate.creole.annotdelete.AnnotationDeletePR",
     "gate.creole.tokeniser.DefaultTokeniser",
     "gate.creole.gazetteer.DefaultGazetteer",
     "gate.creole.splitter.SentenceSplitter",
