@@ -14,7 +14,6 @@
 */
 
 Phase:	Name
-//Input: Token SpaceToken Lookup
 Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
@@ -48,12 +47,18 @@ Macro: INITIALS2
 
 Macro: FIRSTNAME
 // first name from gaz, or initials
+//(
+// {Lookup.majorType == person_first, Lookup.minorType == male}|
+// {Lookup.majorType == person_first, Lookup.minorType == female}|
+// (INITIALS)
+//)
+
 (
- {Lookup.majorType == person_first, Lookup.minorType == male}|
- {Lookup.majorType == person_first, Lookup.minorType == female}|
+ ({FirstPerson.gender == male} |
+  {FirstPerson.gender == female})
+ |
  (INITIALS)
 )
-
 Macro: FIRSTNAMEAMBIG
 //ambiguous first name from gaz - some rules might exclude these 
 (
@@ -93,7 +98,6 @@ Priority: 50
 gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
 features.put("kind", "personName");
 features.put("rule", "GazPerson");
 annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
@@ -104,8 +108,7 @@ features);
 Rule:	GazPersonFirst
 Priority: 20
 (
- {Lookup.majorType == person_first, Lookup.minorType == male}|
- {Lookup.majorType == person_first, Lookup.minorType == female}
+ {FirstPerson}
 )
 :person 
 ( 
@@ -117,7 +120,7 @@ Priority: 20
 gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "personName");
 features.put("rule", "GazPersonFirst");
 annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
@@ -178,37 +181,23 @@ Priority: 40
 )
 ({Token.length == "1"})
 :personName2
- -->{
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "PersonFirstContext2");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
-features);
-}
-
-
-Rule: 	PersonFirstTitle
-Priority: 20
-// Sir Steve
-// Mr Fred
-(
- (TITLE)
- (FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
-):person
--->
+ -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "PersonFirstTitle");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonFirstContext2");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
+
 
 Rule:	PersonTitle
 Priority: 15
@@ -225,37 +214,53 @@ Priority: 15
 )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "PersonTitle");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+// create an annotation set consisting of all the annotations for person 
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+// create an annotation set consisting of the annotation matching FirstPerson
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+// if the annotation type FirstPerson doesn't exist, do nothing
+if (firstPerson != null && firstPerson.size()>0)
+{
+// if it does exist, take the first element in the set
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+//propagate gender feature (and value) from FirstPerson
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+// create some new features
+  features.put("kind", "personName");
+  features.put("rule", "PersonTitle");
+// create a TempPerson annotation and add the features we've created
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
-Rule:	Silly
+Rule:	PersonFirstTitle
 Priority: 50
+// Mr Jones
 // Mr Fred
 
 (
  (TITLE)
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
-  (SPACE)? 
  )
 )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "Silly");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonFirstTitle");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
 
 Rule: 	FirstPersonStop
 Priority: 20
@@ -272,15 +277,20 @@ Priority: 20
 )
 -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "FirstPersonStop");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "FirstPersonStop");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
 
 Rule: NotFirstPersonStop
 Priority: 50
@@ -329,15 +339,20 @@ Priority: 10
 )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "PersonFull");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonFull");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
 
 Rule: NotPersonFullReverse
 Priority: 20
@@ -368,13 +383,17 @@ Priority: 5
 )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "PersonFullReverse");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonFullReverse");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -389,15 +408,20 @@ Priority: 50
  )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "PersonSaint");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonSaint");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
 
 Rule: PersonLocAmbig
 Priority: 40
@@ -411,15 +435,20 @@ Priority: 40
 )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personName");
-features.put("rule", "personLocAmbig");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
+if (firstPerson != null && firstPerson.size()>0)
+{
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+}
+  features.put("kind", "personName");
+  features.put("rule", "PersonLocAmbig");
+annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
 
 ///////////////////////////////////////////////////////////////////
 // Organisation Rules
