@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION persist_unlock_lr(int4,int4) RETURNS boolean AS '
 
      if not FOUND then
         raise exception ''%'',x_invalid_lr;
-     end if
+     end if;
     
      /* is the reource locked by us? */
      if (l_locking_user_id = p_usr_id or
