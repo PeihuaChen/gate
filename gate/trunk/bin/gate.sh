@@ -5,44 +5,58 @@
 E=""
 [ x$1 = x-debug ] && E=echo
 
+
 # set NLS_LANG for Oracle
 NLS_LANG=AMERICAN_AMERICA.UTF8
 
-# set LOCAT to where we hope gate.jar etc. are located
-if [ x$GATE_HOME != x ]
-then
-  LOCAT=$GATE_HOME/bin
-else
-  LOCAT=`(cd \`dirname $0\` && pwd)`
-fi
+# set GATE_HOME to the parent directory if not already set.
+[ x${GATE_HOME} = x ] &&  GATE_HOME=`(cd .. && pwd)`
+
 
 # set TOOLSJAR to where we hope tools.jar is are located
-TOOLSJAR=$LOCAT/tools14.jar
+[ x${TOOLSJAR} = x ] &&
+[ -f ${JAVA_HOME}/lib/tools.jar ] && TOOLSJAR=${JAVA_HOME}/lib/tools.jar
 
-# set SITEGATEXML to where we thing gate.xml is (or "" if not around)
-SITEGATEXML=""
-if [ x$GATE_CONFIG != x ]
-then
-  SITEGATEXML="$GATE_CONFIG"
-else
-  [ -f $LOCAT/gate.xml ] && SITEGATEXML="$LOCAL/gate.xml"
-fi
-[ -f "$SITEGATEXML" ] || SITEGATEXML=""
+[ x${TOOLSJAR} = x ] && TOOLSJAR=${GATE_HOME}/bin/tools14.jar
 
-# set GATEJAR and GUK to gate.jar and ext locations
-GATEJAR=${LOCAT}/gate.jar
-GUK=${LOCAT}/ext
-[ ! -f $GATEJAR ] && GATEJAR=${LOCAT}/../build/gate.jar
-[ ! -f $GUK/guk.jar ] && GUK=${LOCAT}/../lib/ext
+
+# set GATE_CONFIG to where we think gate.xml is (or "" if not around)
+# if not already set
+[ x${GATE_CONFIG} = x ] && GATE_CONFIG=${GATE_HOME}/bin/gate.xml
+
+
+# set GATEJAR and EXTDIR to gate.jar and ext locations
+GATEJAR=${GATE_HOME}/bin/gate.jar
+
+EXTDIR=
+
+[ x${EXTDIR} = x ] &&
+[ -f ${GATE_HOME}/bin/ext/guk.jar ] && EXTDIR=${GATE_HOME}/bin/ext
+
+[ x${EXTDIR} = x ] &&
+[ -f ${GATE_HOME}/lib/ext/guk.jar ] && EXTDIR=${GATE_HOME}/lib/ext
+
 
 # set JAVA
-JAVA=$LOCAT/../jre1.4/bin/java
-[ ! -f $JAVA ] && JAVA=$JAVA_HOME/bin/java
-[ ! -f $JAVA ] && JAVA=java
+[ x${JAVA} = x ] &&
+[ -f ${JAVA_HOME}/bin/java ] && JAVA=${JAVA_HOME}/bin/java
+
+[ x${JAVA} = x ] &&
+[ -f ${JAVA_HOME}/bin/java.exe ] && JAVA=${JAVA_HOME}/bin/java.exe
+
+[ x${JAVA} = x ] &&
+[ -f ${GATE_HOME}/jre1.4/bin/java ] && JAVA=${GATE_HOME}/jre1.4/bin/java
+
+[ x${JAVA} = x ] &&
+[ -f ${GATE_HOME}/jre1.4/bin/java.exe ] && JAVA=${GATE_HOME}/jre1.4/bin/java.exe
+
+[ x${JAVA} = x ] && JAVA=java
+
 
 # set CLASSPATH
 OLD_CLASSPATH=$CLASSPATH
 CLASSPATH="${GATEJAR}:${TOOLSJAR}:$CLASSPATH"
+
 
 # munge filenames if we're on cygwin
 CYG=false
@@ -50,21 +64,21 @@ case `uname` in CYGWIN*) CYG=true ;; esac
 if [ $CYG = true ]
 then
   # change all the vars except JAVA (cygwin uses it to start java)
-  LOCAT=`cygpath -w $LOCAT`
-  [ x$SITEGATEXML != x ] && SITEGATEXML=`cygpath -w $SITEGATEXML`
+  [ x$GATE_CONFIG != x ] && GATE_CONFIG=`cygpath -w $GATE_CONFIG`
   GATEJAR=`cygpath -w $GATEJAR`
-  GUK=`cygpath -w $GUK`
+  EXTDIR=`cygpath -w $EXTDIR`
   CLASSPATH="`cygpath -w -p ${GATEJAR}`;${OLD_CLASSPATH}"
 fi
 
+
 # if we have a site gate.xml set a var including the -i
 FLAGS=""
-if [ x$SITEGATEXML != x ]
+if [ x$GATE_CONFIG != x ]
 then
-  FLAGS="-i $SITEGATEXML"
+  FLAGS="-i $GATE_CONFIG"
 fi
+
 
 # run the beast
 $E ${JAVA} -Xmx200m \
-  -Djava.ext.dirs=${GUK} -classpath $CLASSPATH gate.Main $FLAGS $* 
-
+  -Djava.ext.dirs=${EXTDIR} -classpath $CLASSPATH gate.Main $FLAGS $*
