@@ -31,6 +31,7 @@ org_ending.lst:org_ending
 org_pre.lst:org_pre
 organization.lst:organization
 person_ambig.lst:person_first:ambig
+person_ending.lst:person_ending
 person_female.lst:person_first:female
 person_female_cap.lst:person_first:female
 person_female_lower.lst:person_first:female

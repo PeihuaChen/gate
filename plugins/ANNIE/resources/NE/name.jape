@@ -84,13 +84,9 @@ Macro: UPPER
 
 Macro: PERSONENDING
 (
- ({Token.string == "Jr"} ({Token.string == "."})? ) |
- ({Token.string == "jr"} ({Token.string == "."})? ) |
- ({Token.string == "Sr"} ({Token.string == "."})? ) |
- ({Token.string == "sr"} ({Token.string == "."})? ) |
- {Token.string == "II"} |
- {Token.string == "III"}
+ {Lookup.majorType == person_ending}
 )
+
 
 Macro: DET
 (
@@ -985,8 +981,6 @@ if (loc != null && loc.size()>0)
 annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
-
-
 
 /////////////////////////////////////////////////////////////////
 
