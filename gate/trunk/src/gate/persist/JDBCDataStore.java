@@ -1133,6 +1133,7 @@ System.out.println("trans failed ...rollback");
     //3. for each document in the corpus call createDocument()
     Iterator itDocuments = corp.iterator();
     Vector dbDocs = new Vector();
+
     while (itDocuments.hasNext()) {
       Document doc = (Document)itDocuments.next();
 
@@ -1147,6 +1148,12 @@ System.out.println("trans failed ...rollback");
           beginTrans();
         }
 
+        //do call iterator::remove before the call to createDocument because
+        //...there is a factory::deleteResource() call for the transient document there
+        //...and the iterator gets confused
+        itDocuments.remove();
+
+        //create doc in database and return DB ddoc
         Document dbDoc = createDocument(doc,corpusID,secInfo);
 
         if (newTransPerDocument) {
@@ -1170,6 +1177,9 @@ System.out.println("trans failed ...rollback");
                                               )
                            );
 
+        //10.
+        //DON'T make explicit Factory call, since createDocument called above
+        ///...takes care to call Factory.deleteResource for the transient document
       }
       else if (doc.getDataStore().equals(this)) {
         //persistent doc from the same DataStore
@@ -1386,6 +1396,10 @@ System.out.println("trans failed ...rollback");
     catch (gate.creole.ResourceInstantiationException ex) {
       throw new GateRuntimeException(ex.getMessage());
     }
+
+    //unload the transient document
+System.out.println("unloading "+doc.getName() +"...");
+    Factory.deleteResource(doc);
 
     return dbDoc;
   }
