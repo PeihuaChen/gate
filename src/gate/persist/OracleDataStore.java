@@ -611,7 +611,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //7. create features
-    createFeatures(docID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+    createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //9. create a DatabaseDocument wrapper and return it
 
@@ -785,7 +785,7 @@ System.out.println();
     }
 
     //4. create features
-    createFeatures(corpusID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
+    createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     //5. done
     return corp;
