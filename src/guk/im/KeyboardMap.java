@@ -119,10 +119,10 @@ public class KeyboardMap implements Runnable{
     currentKey = new Key(ch, currentModifiers);
     currentGui = new KeyGUI(sKey, '2', '\"',(JLabel)labelForKey.get(currentKey));
     GUIforString.put(sKey, currentGui);
-    if(shift) ch = '£'; else ch = '3';
+    if(shift) ch = 'Â£'; else ch = '3';
     sKey = "3";
     currentKey = new Key(ch, currentModifiers);
-    currentGui = new KeyGUI(sKey, '3', '£',(JLabel)labelForKey.get(currentKey));
+    currentGui = new KeyGUI(sKey, '3', 'Â£',(JLabel)labelForKey.get(currentKey));
     GUIforString.put(sKey, currentGui);
     if(shift) ch = '$'; else ch = '4';
     sKey = "4";
@@ -159,10 +159,10 @@ public class KeyboardMap implements Runnable{
     currentKey = new Key(ch, currentModifiers);
     currentGui = new KeyGUI(sKey, '0', ')',(JLabel)labelForKey.get(currentKey));
     GUIforString.put(sKey, currentGui);
-    if(shift) ch = '¬'; else ch = '`';
+    if(shift) ch = 'Â¬'; else ch = '`';
     sKey = "`";
     currentKey = new Key(ch, currentModifiers);
-    currentGui = new KeyGUI(sKey, '`', '¬',(JLabel)labelForKey.get(currentKey));
+    currentGui = new KeyGUI(sKey, '`', 'Â¬',(JLabel)labelForKey.get(currentKey));
     GUIforString.put(sKey, currentGui);
     if(shift) ch = '_'; else ch = '-';
     sKey = "-";
@@ -499,7 +499,7 @@ public class KeyboardMap implements Runnable{
                           }
 
 
-                          case '¬':{
+                          case 'Â¬':{
                             key += '`';
                             break;
                           }
@@ -511,7 +511,7 @@ public class KeyboardMap implements Runnable{
                             key += '2';
                             break;
                           }
-                          case '£':{
+                          case 'Â£':{
                             key += '3';
                             break;
                           }
@@ -749,7 +749,7 @@ public class KeyboardMap implements Runnable{
                           }
 
 
-                          case '¬':{
+                          case 'Â¬':{
                             key += '`';
                             break;
                           }
@@ -761,7 +761,7 @@ public class KeyboardMap implements Runnable{
                             key += '2';
                             break;
                           }
-                          case '£':{
+                          case 'Â£':{
                             key += '3';
                             break;
                           }
