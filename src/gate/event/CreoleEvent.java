@@ -62,19 +62,19 @@ public class CreoleEvent extends GateEvent {
   }
 
   /**Event type that marks the loading of a new resource into the Gate system*/
-  public static int RESOURCE_LOADED = 1;
+  public static final int RESOURCE_LOADED = 1;
 
   /**Event type that marks the unloading of a resource from the Gate system*/
-  public static int RESOURCE_UNLOADED = 2;
+  public static final int RESOURCE_UNLOADED = 2;
 
   /**Event type that marks the creation of a new datastore*/
-  public static int DATASTORE_CREATED = 3;
+  public static final int DATASTORE_CREATED = 3;
 
   /**Event type that mark the opening of a datastore*/
-  public static int DATASTORE_OPENED = 4;
+  public static final int DATASTORE_OPENED = 4;
 
   /**Event type that mark the closing of a datastore*/
-  public static int DATASTORE_CLOSED = 5;
+  public static final int DATASTORE_CLOSED = 5;
 
   private gate.Resource resource;
   private DataStore datastore;
