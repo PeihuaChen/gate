@@ -375,7 +375,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
             File file = fileChooser.getSelectedFile();
             try{
               MainFrame.lockGUI("Saving dataset...");
-              FileWriter fw = new FileWriter(file, false);
+              FileWriter fw = new FileWriter(file.getCanonicalPath(), false);
               fw.write(dataset.toString());
               fw.flush();
               fw.close();
@@ -416,7 +416,8 @@ public class Wrapper implements MLEngine, ActionsPublisher {
             File file = fileChooser.getSelectedFile();
             try{
               MainFrame.lockGUI("Saving ML model...");
-              save(new GZIPOutputStream(new FileOutputStream(file)));
+              save(new GZIPOutputStream(
+                   new FileOutputStream(file.getCanonicalPath(), false)));
             }catch(IOException ioe){
               JOptionPane.showMessageDialog(null,
                               "Error!\n"+
