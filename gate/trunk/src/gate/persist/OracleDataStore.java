@@ -3348,7 +3348,6 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
-
   /** Get a list of LRs that satisfy some set or restrictions */
   public List findLrs(List constraints) throws PersistenceException {
     return findLrs(constraints,null);
@@ -3359,7 +3358,123 @@ public class OracleDataStore extends JDBCDataStore {
    *  of a particular type
    */
   public List findLrs(List constraints, String lrType) throws PersistenceException {
-    throw new MethodNotImplementedException();
+      Vector lrs = new Vector();
+      PreparedStatement stmt = null;
+      ResultSet rs = null;
+
+      try {
+        String sql = getSQLQuery(constraints,lrType);
+        stmt = this.jdbcConn.prepareStatement(sql);
+        stmt.execute();
+        rs = stmt.getResultSet();
+
+        while (rs.next()) {
+          long lr_ID = rs.getLong(1);
+          LanguageResource lr = getLr(lrType,new Long(lr_ID));
+          lrs.addElement(lr);
+        }
+        return lrs;
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
+      }
+      catch (SecurityException e){
+        e.printStackTrace();
+      }
+
+      return lrs;
+    }
+
+  private String getSQLQuery(List filter, String lrType){
+    String query="";
+    if (lrType == null){
+      query = " SELECT lr_id " +
+                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
+                    " WHERE ";
+    }
+    if (lrType != null && lrType.equals(DBHelper.CORPUS_CLASS)) {
+      query = " SELECT lr_id " +
+                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
+                    " WHERE LR.lr_type_id = 2 ";
+
+    }// if DBHelper.CORPUS_CLASS
+
+    if (lrType != null && lrType.equals(DBHelper.DOCUMENT_CLASS)) {
+      query = " SELECT lr_id " +
+                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
+                    " WHERE LR.lr_type_id = 1 ";
+
+    }// if DBHelper.DOCUMENT_CLASS
+
+    if (filter!=null){
+      if (lrType!=null){
+        query = query.concat(" AND ");
+      }
+
+      for (int i=0; i<filter.size(); i++){
+          query = query.concat(getRestrictionPartOfQuery((Restriction) filter.get(i)));
+          if (i<filter.size()-1) {
+            query = query.concat(" AND ");
+          }
+      }
+    }
+
+    return query;
+  }
+
+  private String getRestrictionPartOfQuery(Restriction restr){
+    String expresion = " EXISTS ("+
+                       " SELECT ft_id " +
+                       " FROM "+Gate.DB_OWNER+".t_feature FEATURE" +
+                       " WHERE FEATURE.ft_entity_id = LR.lr_id ";
+
+    if (restr.getKey() != null){
+      expresion = expresion.concat(" AND FEATURE.ft_key = '" + restr.getKey() + "'");
+    }
+
+    if (restr.getValue() != null){
+      expresion = expresion.concat(" AND ");
+      switch (this.findFeatureType(restr.getValue())){
+        case DBHelper.VALUE_TYPE_INTEGER:
+          expresion = expresion.concat(getNumberExpresion(restr));
+          break;
+        case DBHelper.VALUE_TYPE_LONG:
+          expresion = expresion.concat(getNumberExpresion(restr));
+          break;
+        default:
+          expresion = expresion.concat(" FEATURE.ft_character_value = '" + restr.getStringValue() + "'");
+          break;
+      }
+    }
+
+    expresion = expresion.concat(" )");
+
+    return expresion;
+  }
+
+  private String getNumberExpresion(Restriction restr){
+    String expr = "";
+    switch (restr.getOperator()){
+      case Restriction.OPERATOR_EQUATION:
+        expr = expr.concat(" FEATURE.ft_number_value  =" + restr.getStringValue());
+        break;
+      case Restriction.OPERATOR_BIGGER:
+        expr = expr.concat(" FEATURE.ft_number_value  <" + restr.getStringValue());
+        break;
+      case Restriction.OPERATOR_LESS:
+        expr = expr.concat(" FEATURE.ft_number_value  >" + restr.getStringValue());
+        break;
+      case Restriction.OPERATOR_EQUATION_OR_BIGGER:
+        expr = expr.concat(" FEATURE.ft_number_value  >=" + restr.getStringValue());
+        break;
+      case Restriction.OPERATOR_EQUATION_OR_LESS:
+        expr = expr.concat(" FEATURE.ft_number_value  <=" + restr.getStringValue());
+        break;
+      default:
+        expr = expr.concat(" 0=0 ");
+        break;
+    }
+    return expr;
   }
 
 }
