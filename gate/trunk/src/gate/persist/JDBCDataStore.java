@@ -385,6 +385,9 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
           return DBHelper.VALUE_TYPE_STRING_ARR;
       }
     }
+    else if (value instanceof Serializable) {
+      return DBHelper.VALUE_TYPE_BINARY;
+    }
 
     //this should never happen
     throw new IllegalArgumentException();
