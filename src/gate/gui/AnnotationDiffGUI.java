@@ -405,6 +405,7 @@ public class AnnotationDiffGUI extends JFrame{
       super("Do Diff");
       putValue(SHORT_DESCRIPTION, "Performs the diff");
     }
+    
     public void actionPerformed(ActionEvent evt){
       Set keys = keySet.get((String)annTypeCombo.getSelectedItem());
       Set responses = resSet.get((String)annTypeCombo.getSelectedItem());
