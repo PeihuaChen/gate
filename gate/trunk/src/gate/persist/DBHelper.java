@@ -26,6 +26,8 @@ public class DBHelper {
   private static final String jdbcPostgresDriverName = "postgresql.Driver";
   private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
 
+  private static final boolean DEBUG = true;
+
   private static boolean  driversLoaded;
 
   static {
@@ -85,6 +87,13 @@ public class DBHelper {
 
     loadDrivers();
     Connection conn = DriverManager.getConnection(connectURL);
+
+    if (DEBUG) {
+      DatabaseMetaData meta = conn.getMetaData();
+      gate.util.Out.println(
+            "JDBC driver name=["+meta.getDriverName() +
+            "] version=["+ meta.getDriverVersion() +"]");
+    }
 
     return conn;
   }
