@@ -907,18 +907,21 @@ public class SerialControllerEditor extends AbstractVisualResource
           try {
             controller.execute();
           }catch(ExecutionInterruptedException eie){
+            MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
               "Interrupted!\n" + eie.toString(),
               "Gate", JOptionPane.ERROR_MESSAGE);
           }catch(ExecutionException ee) {
             ee.printStackTrace(Err.getPrintWriter());
+            MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
               "Execution error while running \"" + controller.getName() +
               "\" :\nSee \"Messages\" tab for details!",
               "Gate", JOptionPane.ERROR_MESSAGE);
           }catch(Exception e){
+            MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(SerialControllerEditor.this,
                                           "Unhandled execution error!\n " +
                                           "See \"Messages\" tab for details!",
