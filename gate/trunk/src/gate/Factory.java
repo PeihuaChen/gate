@@ -175,6 +175,7 @@ public abstract class Factory
     BeanInfo resBeanInfo =
       Introspector.getBeanInfo(resource.getClass(), Object.class);
     PropertyDescriptor[] properties = resBeanInfo.getPropertyDescriptors();
+
     // for each property of the resource bean
     if(properties != null)
       for(int i = 0; i<properties.length; i++) {
@@ -200,19 +201,20 @@ public abstract class Factory
         numParametersSet++;
       } // for each property
 
-    //get all the events the bean can fire
-    //a list of triplets: [removeListenerMethod, listener]
+    // get all the events the bean can fire
+    // a list of pairs: [removeListenerMethod, listener]
     List removeListenersData = null;
     EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
 
-    //add the listeners for the initialisation phase
+    // add the listeners for the initialisation phase
     if(events != null) {
       EventSetDescriptor event;
       removeListenersData = new ArrayList();
+
       for(int i = 0; i < events.length; i++) {
         event = events[i];
 
-        //did we get such a listener?
+        // did we get such a listener?
         Object listener = parameters.get(event.getListenerType().getName());
         if(listener != null){
           Method addListener = event.getAddListenerMethod();
@@ -222,8 +224,9 @@ public abstract class Factory
           args[0] = listener;
           addListener.invoke(resource, args);
           numParametersSet++;
-          removeListenersData.add(new Object[]{event.getRemoveListenerMethod(),
-                                               listener});
+          removeListenersData.add(
+            new Object[] { event.getRemoveListenerMethod(), listener }
+          );
         }
       } // for each event
     }   // if events != null
