@@ -398,7 +398,7 @@ public class NameBearerHandle implements Handle,
         staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
         staticPopupItems.add(null);
         staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
-        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
+//        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
         if (target instanceof IndexedCorpus){
           staticPopupItems.add(null);
           staticPopupItems.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
