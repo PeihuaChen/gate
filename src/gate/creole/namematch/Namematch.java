@@ -327,6 +327,8 @@ public class Namematch extends AbstractProcessingResource
             // i.e has the namematcher run on the same doc b4?
             Annotation annot = nameAnnots.get(new Integer(annot_id));
             if (annot!=null) {
+              if (!matchesVector.contains(new Integer(annot_id)))
+                matchesVector.add(annot_id);
               FeatureMap attr = annot.getFeatures();
               attr.remove("matches");
               attr.put("matches", matchesVector);
@@ -338,7 +340,9 @@ public class Namematch extends AbstractProcessingResource
 
     // set the matches of the document
     determineMatchesDocument();
+
     return;
+
   } // run()
 
   /** all the matches from the current document are placed in a list */
@@ -400,6 +404,17 @@ public class Namematch extends AbstractProcessingResource
         if (matchesAnnotation.size()>0)
           matchesDocument.add(matchesAnnotation);
     } // for
+
+    FeatureMap aFeatureMap = null;
+    if (matchesDocument != null){
+      // If the Gate Document doesn't have a feature map atached then
+      // We will create and set one.
+      if(document.getFeatures() == null){
+            aFeatureMap = Factory.newFeatureMap();
+            document.setFeatures(aFeatureMap);
+      }// end if
+      document.getFeatures().put("MatchesAnnots",matchesDocument);
+    }
   }//   public void determineMatchesDocument()
 
   public void check() throws ExecutionException {
