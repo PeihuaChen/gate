@@ -757,10 +757,6 @@ public class MainFrame extends JFrame
               // Create a CloseViewAction and a menu item based on it
               CloseViewAction cva = new CloseViewAction(handle);
               XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
-              // Add an accelerator ATL+F4 for this action
-              menuItem.setAccelerator(
-                    KeyStroke.getKeyStroke(KeyEvent.VK_H,
-                                           ActionEvent.CTRL_MASK));
               popup.insert(menuItem, 1);
               popup.insert(new JPopupMenu.Separator(), 2);
 
@@ -879,6 +875,12 @@ public class MainFrame extends JFrame
             if(done){
               Handle handle = (Handle)node.getUserObject();
               JPopupMenu popup = handle.getPopup();
+              // Create a CloseViewAction and a menu item based on it
+              CloseViewAction cva = new CloseViewAction(handle);
+              XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
+              popup.insert(menuItem, 1);
+              popup.insert(new JPopupMenu.Separator(), 2);
+              
               popup.show(mainTabbedPane, e.getX(), e.getY());
             }
           }
