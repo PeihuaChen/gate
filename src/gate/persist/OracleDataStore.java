@@ -451,16 +451,17 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
+/*  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
     //open a new transaction
     return _adopt(lr,secInfo,true);
   }
-
+*/
   /** helper for adopt()
    *  @param openNewTrans shows if a new transaction should be started or the adopt
    *  is performed in the context of an already opened transaction
    */
+/*
   private LanguageResource _adopt(LanguageResource lr,
                                   SecurityInfo secInfo,
                                   boolean openNewTrans)
@@ -541,12 +542,6 @@ public class OracleDataStore extends JDBCDataStore {
         commitTrans();
       }
     }
-/*
-    catch(SQLException sqle) {
-      transFailed = true;
-      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
-    }
-*/
     catch(PersistenceException pe) {
       transFailed = true;
       throw(pe);
@@ -559,13 +554,6 @@ public class OracleDataStore extends JDBCDataStore {
       //problems?
       if (transFailed) {
         rollbackTrans();
-/*        try {
-          this.jdbcConn.rollback();
-        }
-        catch(SQLException sqle) {
-          throw new PersistenceException(sqle);
-        }
-*/
       }
     }
 
@@ -590,18 +578,18 @@ public class OracleDataStore extends JDBCDataStore {
 
     return result;
   }
-
+*/
 
 
   /**
    *  helper for adopt()
    *  never call directly
    */
-  private Long createLR(String lrType,
-                        String lrName,
-                        SecurityInfo si,
-                        Long lrParentID)
-  throws PersistenceException,SecurityException {
+  protected Long createLR(String lrType,
+                          String lrName,
+                          SecurityInfo si,
+                          Long lrParentID)
+    throws PersistenceException,SecurityException {
 
     //0. preconditions
     Assert.assertNotNull(lrName);
@@ -721,7 +709,7 @@ public class OracleDataStore extends JDBCDataStore {
    * helper for adopt
    * creates a LR of type Document
    */
-  private Document createDocument(Document doc,SecurityInfo secInfo)
+  protected Document createDocument(Document doc,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //delegate, set to Null
@@ -734,7 +722,7 @@ public class OracleDataStore extends JDBCDataStore {
    * helper for adopt
    * creates a LR of type Document
    */
-  private Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //-1. preconditions
@@ -1000,7 +988,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** creates a LR of type Corpus  */
-  private Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
+  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
     throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
