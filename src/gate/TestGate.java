@@ -26,7 +26,7 @@ import gate.db.*;
 public class TestGate
 {
   /** Main routine. */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ClassNotFoundException {
     String a[] = new String[1];
     a[0] = "gate.TestGate";
     // use the next line if you're running with output to console in text mode:
@@ -34,8 +34,15 @@ public class TestGate
 
     if(args.length > 0 && args[0].equals("-t")) // text runner mode
       junit.textui.TestRunner.main(a);
-    else
-      junit.ui.LoadingTestRunner.main(a);
+    else {
+      junit.ui.TestRunner.main(a);
+      // the DB tests fail under this one (doesn't load oracle driver,
+      // even after the Class.forName call)
+      //Class c = null;
+      //c = Class.forName("oracle.jdbc.driver.OracleDriver");
+      //c = null;
+      //junit.ui.LoadingTestRunner.main(a);
+    }
   } // main
 
   /** GATE test suite. Every test case class has to be
