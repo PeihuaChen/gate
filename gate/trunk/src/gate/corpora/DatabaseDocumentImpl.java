@@ -248,13 +248,15 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       }
     }
 
-    //2. delegate
+    //2. read annotations
     for (int i=0; i< annNames.size(); i++) {
       //delegate because of the data is already read getAnnotations() will just return
       getAnnotations(name);
     }
 
-    throw new MethodNotImplementedException();
+    //3. delegate to the parent method
+    return super.getNamedAnnotationSets();
+
   } // getNamedAnnotationSets
 
 
