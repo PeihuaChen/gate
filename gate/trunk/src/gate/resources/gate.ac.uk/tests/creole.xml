@@ -1,15 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-<!-- COPY BACK TO GATE RESOURCES ************ -->
-
-
-<!-- creole.xml directory file for testpkg resources -->
+<!-- creole.xml directory file for testing resources -->
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
 
@@ -43,8 +34,53 @@
       <AUTOLOAD/>
     </RESOURCE>
 
+  </CREOLE>
+
+  <!-- creole.xml for tokeniser -->
+  <CREOLE>
+    <RESOURCE>
+      <NAME>Sheffield Unicode Tokeniser</NAME>
+      <JAR>ShefUniTok.jar</JAR>
+      <CLASS>gate.creole.Tokeniser</CLASS>
+    </RESOURCE>
   </CREOLE> 
 
+  <!-- creole.xml for doc formats -->
+  <CREOLE>
+    <RESOURCE>
+      <NAME>Sheffield XML Document Format</NAME>
+      <JAR>ShefDocumentFormats.jar</JAR>
+      <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
+      <AUTOLOAD/>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Sheffield Email Document Format</NAME>
+      <JAR>ShefDocumentFormats.jar</JAR>
+      <CLASS>gate.corpora.EmailDocumentFormat</CLASS>
+      <AUTOLOAD/>
+    </RESOURCE>
+  </CREOLE> 
+
+  <!-- documents -->
+  <CREOLE>
+
+    <RESOURCE>
+      <NAME>GATE document</NAME>
+      <CLASS>gate.corpora.DocumentImpl</CLASS>
+      <INTERFACE>gate.Document</INTERFACE>
+
+      <PARAMETER-LIST>
+
+        <PARAMETER
+	  NAME="sourceUrl" COMMENT="Source URL">java.lang.String</PARAMETER>
+
+        <PARAMETER NAME="encoding" OPTIONAL="true"
+	  COMMENT="Encoding">java.lang.String</PARAMETER>
+
+      </PARAMETER-LIST>
+    </RESOURCE>
+
+  </CREOLE>
+
 </CREOLE-DIRECTORY>
-
-
