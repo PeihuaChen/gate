@@ -33,6 +33,10 @@ public class MenuLayoutTest extends JFrame {
       //uncomment below for crazy sizes
 //      bigMenuItem.setFont(bigMenuItem.getFont().deriveFont(
 //          12 + (float)Math.random() * 10));
+      if(i > 100){
+        bigMenuItem.setFont(bigMenuItem.getFont().deriveFont((float)20));
+      }
+
       bigMenu.add(bigMenuItem);
     }
   }
