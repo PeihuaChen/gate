@@ -89,6 +89,8 @@ public class MainFrame extends JFrame
   JToolBar toolbar;
 
   static JFileChooser fileChooser;
+
+  ApperanceDialog appearanceDialog;
   TabBlinker logBlinker;
 //  MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
@@ -328,13 +330,31 @@ while(listIter.hasNext()){
     }catch(AWTException awte){}
     menuBar.add(editMenu);
 
-    JMenu viewMenu = new JMenu("View");
-    //fileMenu.add(new JGateMenuItem(newProjectAction));
+    appearanceDialog = new ApperanceDialog(this, "Fonts", true);
+
+    JMenu optionsMenu = new JMenu("Options");
+    optionsMenu.add(new AbstractAction("Fonts"){
+      public void actionPerformed(ActionEvent evt){
+        appearanceDialog.show();
+      }
+    });
+    menuBar.add(optionsMenu);
 
 
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.add(newBootStrapAction);
     toolsMenu.add(newAnnotDiffAction);
+    try{
+      toolsMenu.add(
+        new AbstractAction("Unicode editor",
+                           new ImageIcon(new URL("gate:/img/unicode.gif"))){
+        public void actionPerformed(ActionEvent evt){
+          new guk.Editor();
+        }
+      });
+    }catch(MalformedURLException mue){
+      mue.printStackTrace(Err.getPrintWriter());
+    }
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");

@@ -321,7 +321,6 @@ public class Editor extends JFrame {
         if(res == JOptionPane.OK_OPTION){
           frame.setVisible(false);
           frame.dispose();
-          System.exit(0);
         }
       }
     };
