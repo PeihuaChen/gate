@@ -282,7 +282,8 @@ public class TestPersist extends TestCase
   /** Test the DS register. */
   public void testDSR() throws Exception {
     DataStoreRegister dsr = Gate.getDataStoreRegister();
-    assert("DSR has wrong number elements (not 0)", dsr.size() == 0);
+    assert("DSR has wrong number elements (not 0): " + dsr.size(),
+           dsr.size() == 0);
 
     // create a temporary directory; because File.createTempFile actually
     // writes the bloody thing, we need to delete it from disk before calling

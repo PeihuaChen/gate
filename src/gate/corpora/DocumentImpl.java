@@ -603,17 +603,16 @@ extends AbstractLanguageResource implements Document{
     DocumentImpl doc = (DocumentImpl) other;
 
 // PENDING EQUALS IMPLS
-//    if(! check(content, doc.content)) return false;
-//    if(! check(defaultAnnots, doc.defaultAnnots)) return false;
+    if(! check(content, doc.content)) return false;
+    if(! check(defaultAnnots, doc.defaultAnnots)) return false;
     if(! check(encoding, doc.encoding)) return false;
-//    if(! check(features, doc.features)) return false;
+    if(! check(features, doc.features)) return false;
     if(!markupAware.equals(doc.markupAware)) return false;
     if(! check(namedAnnotSets, doc.namedAnnotSets)) return false;
     if(nextAnnotationId != doc.nextAnnotationId) return false;
     if(nextNodeId != doc.nextNodeId) return false;
     if(! check(sourceUrl, doc.sourceUrl)) return false;
     if(! check(sourceUrlStartOffset, doc.sourceUrlStartOffset)) return false;
-//    if(! check(sourceUrlName, doc.sourceUrlName)) return false;
     if(! check(sourceUrlEndOffset, doc.sourceUrlEndOffset)) return false;
 
     return true;

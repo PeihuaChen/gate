@@ -726,8 +726,10 @@ implements AnnotationSet
       AnnotationSet annotSet = (AnnotationSet) other;
 
       // verify the documents which belong to
-      if ((doc == null)^ (annotSet.getDocument() == null)) return false;
-      if ((doc != null)&& (!doc.equals(annotSet.getDocument()))) return false;
+//this leads to cyclic checks Document -> AnnotationSet -> Document
+//REMOVED!
+//      if ((doc == null)^ (annotSet.getDocument() == null)) return false;
+//      if ((doc != null)&& (!doc.equals(annotSet.getDocument()))) return false;
 
       // verify the name of the AnnotationSets
       if ((name == null)^ (annotSet.getName() == null)) return false;
