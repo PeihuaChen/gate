@@ -1,10 +1,10 @@
-
-//Title:        FSM tester
-//Version:
-//Copyright:    Copyright (c) 2000
-//Author:       Valentin Tablan
-//Company:      NLP group, DCS, University of Sheffield
-//Description:  test class for the FSM (finite state machine) package
+/*
+*	TestFSM.java
+*
+*	Valentin Tablan, 11/Apr/2000
+*
+*	$Id$
+*/
 package gate.fsm;
 
 import gate.jape.*;
@@ -60,25 +60,25 @@ public class TestFSM extends TestCase {
 
   private void showGraph(String title, FSM fsm) throws java.io.IOException,
                                  EDU.auburn.VGJ.graph.ParseError{
-      String gml = fsm.getGML();
-      GMLlexer gl = new GMLlexer(new StringBufferInputStream(gml));
-      GMLobject go = new GMLobject(gl, null);
-      Graph graph =
-            new Graph(go.getGMLSubObject("graph", GMLobject.GMLlist, false));
-      GraphWindow graph_editing_window = new GraphWindow(graph);
-      // Here the algorithms are added.
-      TreeAlgorithm talg = new TreeAlgorithm('d');
-      graph_editing_window.addAlgorithm(talg, "Tree Down");
-      talg = new TreeAlgorithm('u');
-      graph_editing_window.addAlgorithm(talg, "Tree Up");
-      talg = new TreeAlgorithm('l');
-      graph_editing_window.addAlgorithm(talg, "Tree Left");
-      talg = new TreeAlgorithm('r');
-      graph_editing_window.addAlgorithm(talg, "Tree Right");
-      graph_editing_window.setTitle(title);
-      graph_editing_window.pack();
-      graph_editing_window.show();
-      graph_editing_window.applyAlgorithm("Tree Right");
+    String gml = fsm.getGML();
+    GMLlexer gl = new GMLlexer(new StringBufferInputStream(gml));
+    GMLobject go = new GMLobject(gl, null);
+    Graph graph =
+          new Graph(go.getGMLSubObject("graph", GMLobject.GMLlist, false));
+    GraphWindow graph_editing_window = new GraphWindow(graph);
+    // Here the algorithms are added.
+    TreeAlgorithm talg = new TreeAlgorithm('d');
+    graph_editing_window.addAlgorithm(talg, "Tree Down");
+    talg = new TreeAlgorithm('u');
+    graph_editing_window.addAlgorithm(talg, "Tree Up");
+    talg = new TreeAlgorithm('l');
+    graph_editing_window.addAlgorithm(talg, "Tree Left");
+    talg = new TreeAlgorithm('r');
+    graph_editing_window.addAlgorithm(talg, "Tree Right");
+    graph_editing_window.setTitle(title);
+    graph_editing_window.pack();
+    graph_editing_window.show();
+    graph_editing_window.applyAlgorithm("Tree Right");
   }
 
   public static void main(String[] args) {
@@ -91,7 +91,7 @@ public class TestFSM extends TestCase {
       e.printStackTrace(System.err);
     }
   }
-  
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestFSM.class);
