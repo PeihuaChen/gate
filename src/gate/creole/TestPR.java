@@ -234,8 +234,8 @@ public class TestPR extends TestCase
     tagger.execute();
     annots = doc3.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 1443.",
-      annots.size() == 1443);
+      " Token annotations with category feature, instead of the expected 1446.",
+      annots.size() == 1446);
     Factory.deleteResource(tagger);
   }//testTagger()
 
