@@ -34,7 +34,6 @@ import junit.framework.Assert;
 
 import com.ontotext.gate.vr.Gaze;
 import com.ontotext.gate.vr.OntologyEditorImpl;
-import com.sun.java.swing.SwingUtilities2;
 
 import gate.*;
 import gate.creole.*;
