@@ -713,17 +713,36 @@ public class ShellSlacFrame extends MainFrame {
       int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
       if(res == fileChooser.APPROVE_OPTION) {
         File file = fileChooser.getSelectedFile();
-        if(file != null) 
-          try {
-            Factory.newDocument(file.toURL());
-          } catch (MalformedURLException mex) {
-            mex.printStackTrace();
-          } catch (ResourceInstantiationException rex) {
-            rex.printStackTrace();
-          } // catch
+        Runnable run = new ImportRunnable(file);
+        Thread thread = new Thread(run, "");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
       } // if
     } // actionPerformed(ActionEvent e)
   } // class ImportDocumentAction extends AbstractAction
+
+  /** Object to run ExportAll in a new Thread */  
+  private class ImportRunnable implements Runnable {
+    File file;
+    ImportRunnable(File targetFile) {
+      file = targetFile;
+    } // ImportRunnable(File targetDirectory)
+    
+    public void run() {
+      if(file != null) {
+        MainFrame.lockGUI("Import file...");
+        try {
+          Factory.newDocument(file.toURL());
+        } catch (MalformedURLException mex) {
+          mex.printStackTrace();
+        } catch (ResourceInstantiationException rex) {
+          rex.printStackTrace();
+        } finally {
+          MainFrame.unlockGUI();
+        } // finally
+      } // if
+    } // run()
+  } // ImportRunnable
 
   /** Export current document action */
   class ExportDocumentAction extends AbstractAction {
