@@ -91,7 +91,7 @@ public class Javac implements GateConstants{
     args.add("UTF-8");
     args.add("-d");
     args.add(classesDir.getAbsolutePath());
-    //make a copy of the arguments in case we need to call calss by class
+    //make a copy of the arguments in case we need to call class by class
     List argsSave = new ArrayList(args);
     args.addAll(sourceFiles);
     //save the Err stream
