@@ -1252,34 +1252,68 @@ public class MainFrame extends JFrame
   public synchronized static void lockGUI(final String message){
     //check whether GUI is up
     if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
-
+    //if the GUI is locked unlock it so we can show the new message
     unlockGUI();
-    //this call needs to return so we'll show the dialog from a different thread
-    new Thread(new Runnable(){
-      public void run(){
-        Object[] options = new Object[]{new JButton(new StopAction())};
-        JOptionPane pane = new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
-                                           JOptionPane.DEFAULT_OPTION,
-                                           null, options, null);
 
-        //build the dialog
-        JDialog dialog = pane.createDialog((Component)
-                                           ((ArrayList)getGuiRoots()).get(0),
-                                           "Please wait...");
-        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        guiLock = dialog;
+    //build the dialog contents
+    Object[] options = new Object[]{new JButton(new StopAction())};
+    JOptionPane pane = new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
+                                       JOptionPane.DEFAULT_OPTION,
+                                       null, options, null);
+
+    //build the dialog
+    Component parentComp = (Component)((ArrayList)getGuiRoots()).get(0);
+    JDialog dialog;
+    Window parentWindow = SwingUtilities.getWindowAncestor(parentComp);
+    if(parentWindow instanceof Frame){
+      dialog = new JDialog((Frame)parentWindow, "Please wait", true){
+        protected void processWindowEvent(WindowEvent e) {
+          getToolkit().beep();
+        }
+      };
+    }else if(parentWindow instanceof Dialog){
+      dialog = new JDialog((Dialog)parentWindow, "Please wait", true){
+        protected void processWindowEvent(WindowEvent e) {
+          getToolkit().beep();
+        }
+      };
+    }else{
+      dialog = new JDialog(JOptionPane.getRootFrame(), "Please wait", true){
+        protected void processWindowEvent(WindowEvent e) {
+          getToolkit().beep();
+        }
+      };
+    }
+    dialog.getContentPane().setLayout(new BorderLayout());
+    dialog.getContentPane().add(pane, BorderLayout.CENTER);
+    dialog.pack();
+    dialog.setLocationRelativeTo(parentComp);
+    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    guiLock = dialog;
+
+    //this call needs to return so we'll show the dialog from a different thread
+    //the Swing thread sounds good for that
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
         guiLock.show();
       }
-    }).start();
+    });
+
+    //this call should not return until the dialog is up to ensure proper
+    //sequentiality for lock - unlock calls
+    while(!guiLock.isShowing()){
+      try{
+        Thread.sleep(100);
+      }catch(InterruptedException ie){}
+    }
   }
 
   public synchronized static void unlockGUI(){
-//    try{
-//      throw new Exception("foo");
-//    }catch(Exception e){
-//      e.printStackTrace();
-//    }
+    //check whether GUI is up
+    if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
+
     if(guiLock != null) guiLock.hide();
+    guiLock = null;
   }
 
 
