@@ -485,7 +485,7 @@ public class JapeGUI extends JFrame {
 //System.out.println(type);
   }
 
-  class AnnotationSetTableModel extends SortedTableModel{
+  class AnnotationSetTableModel extends gate.gui.SortedTableModel{
     public AnnotationSetTableModel(AnnotationSet as){
       setData (as, new AnnotationSetComparator());
     }
@@ -543,7 +543,7 @@ public class JapeGUI extends JFrame {
       return null;
     }
 
-    class AnnotationSetComparator extends SortedTableComparator{
+    class AnnotationSetComparator extends gate.gui.SortedTableComparator{
 
       public AnnotationSetComparator(){
       }
