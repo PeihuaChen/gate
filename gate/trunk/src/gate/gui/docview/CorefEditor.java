@@ -1809,7 +1809,7 @@ public class CorefEditor
           return;
 
         // see if user clicked the right click
-        if (me.getModifiers() == 4) {
+        if (SwingUtilities.isRightMouseButton(me)) {
           // it is right click
           // we need to show the popup window
           final JPopupMenu popup = new JPopupMenu();
