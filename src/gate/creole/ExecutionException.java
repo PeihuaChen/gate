@@ -36,5 +36,18 @@ public class ExecutionException extends GateException {
 
   public ExecutionException(Exception e) {
     super(e.toString());
+    this.exception = e;
   }
+
+  /**
+   * Gets the exception that caused this ExecutionException to be raised.
+   * It is often the case that an ExecutionException is used to wrap another
+   * exception that occured during the execution of a Gate module. This method
+   * gives access to tha initial exception.
+   */
+  public Exception getException(){
+    return exception;
+  }
+
+  Exception exception;
 } // ExecutionException

@@ -53,6 +53,11 @@ import gate.event.*;
   * In all cases, where a resource or a directory is added which is
   * already present in the register, the new silently overwrites the old.
   *
+  * The CreoleRegister notifies all registered listeners of all
+  * {@link gate.event.CreoleEvent}s that occur in the system regardless of
+  * whether they were initially fired by the {@link Factory}, the
+  * {@link DataStoreRegister} or the {@link CreoleRegister} itself.
+  *
   * @see gate.util.Gate
   * @see gate.creole.ResourceData
   */

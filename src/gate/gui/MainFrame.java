@@ -232,20 +232,6 @@ public class MainFrame extends JFrame
     leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                resourcesTreeScroll, lowerScroll);
 
-    //popups
-    appsPopup = new JPopupMenu();
-    appsPopup.add(newApplicationAction);
-
-    lrsPopup = new JPopupMenu();
-    lrsPopup.add(newLRAction);
-
-    prsPopup = new JPopupMenu();
-    prsPopup.add(newPRAction);
-
-    dssPopup = new JPopupMenu();
-    dssPopup.add(newDSAction);
-    dssPopup.add(openDSAction);
-    // <- new version
 
     // Create a new logArea and redirect the Out and Err output to it.
     logArea = new LogArea();
@@ -360,13 +346,24 @@ public class MainFrame extends JFrame
 
 
     JMenu fileMenu = new JMenu("File");
-    //fileMenu.add(new JGateMenuItem(newProjectAction));
-    fileMenu.add(new XJMenuItem(newLRAction, this));
-    fileMenu.add(new XJMenuItem(newPRAction, this));
+
+    newLrMenu = new JMenu("New language resource");
+    fileMenu.add(newLrMenu);
+    newPrMenu = new JMenu("New processing resource");
+    fileMenu.add(newPrMenu);
+    fileMenu.add(new XJMenuItem(newApplicationAction, this));
+    fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(newDSAction, this));
     fileMenu.add(new XJMenuItem(openDSAction, this));
-    fileMenu.add(new XJMenuItem(newApplicationAction, this));
+    fileMenu.addSeparator();
+    fileMenu.add(new AbstractAction("Exit"){
+      public void actionPerformed(ActionEvent evt){
+        System.exit(0);
+      }
+    });
     menuBar.add(fileMenu);
+
+
 
     JMenu optionsMenu = new JMenu("Options");
     appearanceDialog = new ApperanceDialog(this, "Fonts", true, targets);
@@ -427,6 +424,7 @@ public class MainFrame extends JFrame
       JMenu imMenu = null;
       Locale locale = new Locale("en", "GB");
       Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
+      //Locale[] availableLocales = Locale.getAvailableLocales();
       JMenuItem item;
       if(availableLocales != null && availableLocales.length > 1){
         imMenu = new JMenu("Input methods");
@@ -470,6 +468,21 @@ public class MainFrame extends JFrame
     menuBar.add(helpMenu);
 
     this.setJMenuBar(menuBar);
+
+    //popups
+    appsPopup = new JPopupMenu();
+    appsPopup.add(newApplicationAction);
+
+    lrsPopup = new JPopupMenu();
+    lrsPopup.add(newLRAction);
+
+    prsPopup = new JPopupMenu();
+    prsPopup.add(newPRAction);
+
+    dssPopup = new JPopupMenu();
+    dssPopup.add(newDSAction);
+    dssPopup.add(openDSAction);
+
   }
 
   protected void initListeners(){
@@ -627,6 +640,63 @@ public class MainFrame extends JFrame
         });
       }
     });
+
+    newLrMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+      public void menuDeselected(MenuEvent e) {
+      }
+      public void menuSelected(MenuEvent e) {
+        newLrMenu.removeAll();
+        //find out the available types of LRs and repopulate the menu
+        CreoleRegister reg = Gate.getCreoleRegister();
+        List lrTypes = reg.getPublicLrTypes();
+        if(lrTypes != null && !lrTypes.isEmpty()){
+          HashMap resourcesByName = new HashMap();
+          Iterator lrIter = lrTypes.iterator();
+          while(lrIter.hasNext()){
+            ResourceData rData = (ResourceData)reg.get(lrIter.next());
+            resourcesByName.put(rData.getName(), rData);
+          }
+          List lrNames = new ArrayList(resourcesByName.keySet());
+          Collections.sort(lrNames);
+          lrIter = lrNames.iterator();
+          while(lrIter.hasNext()){
+            ResourceData rData = (ResourceData)resourcesByName.get(lrIter.next());
+            newLrMenu.add(new NewResourceAction(rData));
+          }
+        }
+      }
+    });
+
+    newPrMenu.addMenuListener(new MenuListener() {
+      public void menuCanceled(MenuEvent e) {
+      }
+      public void menuDeselected(MenuEvent e) {
+      }
+      public void menuSelected(MenuEvent e) {
+        newPrMenu.removeAll();
+        //find out the available types of LRs and repopulate the menu
+        CreoleRegister reg = Gate.getCreoleRegister();
+        List lrTypes = reg.getPublicPrTypes();
+        if(lrTypes != null && !lrTypes.isEmpty()){
+          HashMap resourcesByName = new HashMap();
+          Iterator lrIter = lrTypes.iterator();
+          while(lrIter.hasNext()){
+            ResourceData rData = (ResourceData)reg.get(lrIter.next());
+            resourcesByName.put(rData.getName(), rData);
+          }
+          List lrNames = new ArrayList(resourcesByName.keySet());
+          Collections.sort(lrNames);
+          lrIter = lrNames.iterator();
+          while(lrIter.hasNext()){
+            ResourceData rData = (ResourceData)resourcesByName.get(lrIter.next());
+            newPrMenu.add(new NewResourceAction(rData));
+          }
+        }
+      }
+    });
+
   }
 
   public void progressChanged(int i) {
@@ -1040,6 +1110,22 @@ public class MainFrame extends JFrame
       }
     }
 
+  }
+
+  class NewResourceAction extends AbstractAction {
+    public NewResourceAction(ResourceData rData) {
+      super(rData.getName());
+      putValue(SHORT_DESCRIPTION,"Create a new " + rData.getName());
+      this.rData = rData;
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+      newResourceDialog.setTitle(
+                          "Parameters for the new " + rData.getName());
+      newResourceDialog.show(rData);
+    }
+
+    ResourceData rData;
   }
 
   class NewLRAction extends AbstractAction {
