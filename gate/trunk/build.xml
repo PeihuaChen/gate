@@ -6,24 +6,6 @@
     </description>
   <!-- set global properties for this build -->
   
-  <!-- ###################################################################
-                          USER MODIFYABLE OPTIONS
-       ################################################################### -->
-  
-  <!-- Set the maximum amount of memory avaialble to GATE. Default is 200 MB. --> 
-  <property name="run.max.mem" value="200m"/>
-  
-  <!-- Set the location of the tools.jar library. If not set, GATE will first
-  try to locate inside the current Java VM or, failing that, will fall back
-  to using the one included in the bin directory.
-  Remove the comment markers on the line below and edit the location.-->
-  <!-- <property name="tools.jar.location" value="bin/tools14.jar"/>  -->
-  
-  
-  <!-- ###################################################################
-                        USER MODIFYABLE OPTIONS END HERE 
-       ################################################################### -->
-  
   <!-- Directories -->
   
   <!-- Sources -->
@@ -65,30 +47,21 @@
   <fileset id="exts" dir="${extDir}">
     <include name="*.jar"/>
   </fileset>
-    
+  
+  
+  <!-- tools.jar path -->
+  <path id="tools.jar.path" location="bin/tools14.jar"/>
+  
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
 		<fileset refid="libs"/>
     <fileset refid="exts"/>
   </path>
   
-  <!-- Locate the tools.jar library -->
-  <!-- Properties are immutable in ANT so the first successful assignment wins  -->
-  <!-- First try the user set value -->
-  <available file="${tools.jar.location}"
-             property="tools.jar.path"
-             value="${tools.jar.location}"/>
-  <!-- Secondly try the location inside JVM -->
-  <available file="${java.home}/../lib/tools.jar"
-             property="tools.jar.path"
-             value="${java.home}/../lib/tools.jar"/>
-  <property name="tools.jar.path"
-            location="${binDir}/tools14.jar"/>
-  
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
     <pathelement location="${binDir}/gate.jar"/>
-    <pathelement location="${tools.jar.path}"/>
+    <path refid="tools.jar.path"/>
 		<fileset refid="libs"/>
   </path>
   
@@ -134,6 +107,12 @@
 			<fileset dir="${srcDir}/gate/resources"
 							 excludes="**/CVS,**/CVS/**,**/.cvsignore" />
 		</copy>
+		<!-- This is for the debugger's icons -->
+		<copy todir="${outputDir}/debugger/gui/icons"
+		      includeEmptyDirs="true" >
+			<fileset dir="${srcDir}/debugger/gui/icons"
+							 excludes="**/CVS,**/CVS/**,**/.cvsignore" />
+		</copy>
 		<copy file="${buildDir}/build.txt" todir="${outputDir}/gate/resources"/>
 		<copy file="${buildDir}/version.txt" todir="${outputDir}/gate/resources"/>
 		<copy todir="${outputDir}/gate/util"
@@ -170,7 +149,7 @@
     <javac srcdir="${srcDir}" 
 		       destdir="${outputDir}"
            source="1.4"
-           includes="gate/**,com/**"
+           includes="gate/**,com/**,debugger/**"
 					 classpathref="build.class.path"/>
   </target>
 
@@ -183,7 +162,7 @@
 		       destdir="${outputDir}"
            source="1.4"
            debug="true"
-           includes="gate/**,com/**"
+           includes="gate/**,com/**,debugger/**"
 					 classpathref="build.class.path"/>
   </target>
 
@@ -194,7 +173,7 @@
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
-               includes="gate/**,com/**"/>
+               includes="gate/**,com/**,debugger/**"/>
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
 	</target>
@@ -205,25 +184,12 @@
   
   <!-- Run the beast -->
   <target name="run">
-    <echo message="Using JVM at ${java.home}, tools.jar at ${tools.jar.path}."/>
-    <condition property="mac.dock.name.option"
-               value="-Xdock:name=GATE 3.0">
-      <os family="mac"/>
-    </condition>
-    <condition property="mac.dock.name.option"
-               value="">
-      <not><os family="mac"/></not>
-    </condition>    
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
           spawn="false"
-          maxmemory="${run.max.mem}">
-       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
-       <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
-       <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
-       <jvmarg value="-Dcom.apple.mrj.application.live-resize=true"/>
-       <jvmarg value="${mac.dock.name.option}"/>
+          maxmemory="200m">
+       <jvmarg value="-Djava.ext.dirs=${extDir}"/>   
      </java>
   </target>
   
@@ -360,7 +326,6 @@
       <sysproperty key="gate.home" value="${basedir}"/>
       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>      
       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
-      <jvmarg value="-Xmx200m"/>
       <formatter type="plain"
                  usefile="false"/>
       <formatter type="xml"
@@ -419,7 +384,6 @@
                   prefix="${src.dirname}">
         <include name="*"/>
         <include name="bin/**"/>
-        <exclude name="bin/gate.jar"/>
         <include name="build/**"/>
         <exclude name="build/*.jar"/>
         <include name="classes"/>
@@ -463,9 +427,6 @@
       <zipfileset dir="${basedir}"
                   prefix="${all.dirname}"
                   excludes="${distDirname},${distDirname}/**"/>
-      <zipfileset dir="${basedir}"
-                  prefix="${doc.dirname}"
-                  file="../sale/tao/tao.pdf"/>
     </zip>
   </target>
   
