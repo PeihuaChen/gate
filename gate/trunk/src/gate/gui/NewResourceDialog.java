@@ -110,6 +110,10 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(buttonsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
     setSize(400, 300);
+    nameField.setNextFocusableComponent(table);
+    table.setNextFocusableComponent(okBtn);
+    okBtn.setNextFocusableComponent(cancelBtn);
+    cancelBtn.setNextFocusableComponent(nameField);
   }// protected void initGuiComponents()
 
 
@@ -197,6 +201,7 @@ public class NewResourceDialog extends JDialog {
                     tableScroll.getInsets().right;
       tableScroll.setPreferredSize(dim);
     }
+    nameField.requestFocus();
     pack();
     super.show();
     if(userCanceled) return null;
@@ -389,6 +394,10 @@ public class NewResourceDialog extends JDialog {
   }//class ParameterDisjunctionRenderer
 
 
+  /**
+   * A renderer that displays a File Open button next to a text field.
+   * Used for setting URLs from files.
+   */
   class CustomObjectRenderer extends ObjectRenderer {
     CustomObjectRenderer() {
       button = new JButton(MainFrame.getIcon("loadFile.gif"));
@@ -406,9 +415,11 @@ public class NewResourceDialog extends JDialog {
                                                    int column) {
       //prepare the renderer
       if(value == null){
-        //ensure a reasonable space is reserved (20 spaces)
-        super.getTableCellRendererComponent(table, "                    ",
-                                            isSelected, hasFocus, row, column);
+        //ensure a reasonable space is reserved (40 spaces)
+        super.getTableCellRendererComponent(
+          table,
+          "                                        ",
+          isSelected, hasFocus, row, column);
       }else{
         super.getTableCellRendererComponent(table, value, isSelected,
                                             hasFocus, row, column);

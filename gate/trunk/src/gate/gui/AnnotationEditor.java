@@ -1697,7 +1697,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             TypeData tData = getTypeData(setName, type);
             if(asEvt.getType() == asEvt.ANNOTATION_ADDED){
               if(tData != null){
-                tData.annotations.add(ann);
+//                tData.annotations.add(ann);
                 if(tData.getVisible()){
                   //update the table
                   data.add(tData.range.end, ann);
@@ -1879,7 +1879,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
     }
 
-    int sleepInterval = 500;
+    int sleepInterval = 100;
     boolean stop = false;
     protected java.util.List eventQueue;
     protected long lastEvent = 0;
