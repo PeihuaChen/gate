@@ -1,5 +1,5 @@
 #########################################################################
-# configure.in, from GATE 1 configure.in
+# configure.in, from GATE configure.in
 #########################################################################
 # Hamish, 30/4/1, 23/1/01, 12/6/96
 # $Id$
@@ -24,14 +24,13 @@ echo '***' 1>&2
 
 
 # Chumley St. John
-AC_PATH_PROG(JAVAC, javac javac.exe, javac, /bin:/usr/bin://w/jdk/jdk1.3/bin)
-AC_PATH_PROG(JAVA, java java.exe, java, /bin:/usr/bin://w/jdk/jdk1.3/bin)
-AC_PATH_PROG(JAR, jar jar.exe, jar, /bin:/usr/bin://w/jdk/jdk1.3/bin)
-AC_PATH_PROG(JAVADOC, javadoc javadoc.exe, javadoc, /bin:/usr/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVAC, javac javac.exe, javac, ${JAVA_HOME}/bin:/usr/local/java/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVA, java java.exe, java, ${JAVA_HOME}/bin:/usr/local/java/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAR, jar jar.exe, jar, ${JAVA_HOME}/bin:/usr/local/java/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
+AC_PATH_PROG(JAVADOC, javadoc javadoc.exe, javadoc, ${JAVA_HOME}/bin:/usr/local/java/bin:/bin:/usr/bin://w/jdk/jdk1.4/bin://w/jdk/jdk1.3/bin)
 CYGPATH=echo
 AC_PATH_PROG(CYGPATH, cygpath, echo)
 CYGPATHP=$CYGPATH
-
 
 # Just what is this beast we're running on?
 AC_CANONICAL_SYSTEM

@@ -42,6 +42,9 @@ public class BootStrap {
   /** the name of jar resource*/
   protected static final String nameProject = "Template";
 
+  /** new line for different platforms*/
+  protected static final String newLine = Strings.getNl();
+
   /** a map from the variants of the names of the files and the
     * directories of the empty project to the variants of the names of the
     * files and the directories the new project
@@ -157,7 +160,7 @@ public class BootStrap {
     // the features of every method
     List methodsInterfaces = new ArrayList();
     if (interfacesList!=null) {
-      interfacesAndClass = interfacesAndClass+ "\n"+ "  implements ";
+      interfacesAndClass = interfacesAndClass+ newLine+ "  implements ";
       Iterator iter = interfacesList.iterator();
       while (iter.hasNext()) {
         String nameInterface =(String)iter.next();
@@ -304,7 +307,7 @@ public class BootStrap {
           else {declaration = declaration+" {}" ;}
         } // if
         else {
-          declaration = declaration + "\n"+ "                throws ";
+          declaration = declaration + newLine+ "                throws ";
           for (int k=0;k<valException.size();k++) {
             declaration = declaration + determineTypePackage((String)
                                                     valException.get(k));
@@ -348,7 +351,7 @@ public class BootStrap {
     // go through all methods
     Iterator iterator = listMethodsResource.iterator();
     while (iterator.hasNext()) {
-      methodsFields = methodsFields + "\n" + (String)iterator.next()+"\n";
+      methodsFields = methodsFields + newLine + (String)iterator.next()+newLine;
     }
 
     // go through all fields
@@ -358,12 +361,12 @@ public class BootStrap {
       Integer index = (Integer)iter.next();
       String type = (String)fields.get(index);
       if (type.endsWith("[]"))
-        methodsFields = methodsFields + "\n" + "protected " + type +" " +
+        methodsFields = methodsFields + newLine + "protected " + type +" " +
                        type.substring(0,type.length()-2).toLowerCase() +
                         index.toString() +";";
 
       else
-        methodsFields = methodsFields + "\n" + "protected " + type +" " +
+        methodsFields = methodsFields + newLine + "protected " + type +" " +
                         type.toLowerCase() + index.toString() +";";
         i+=1;
     }
@@ -437,7 +440,7 @@ public class BootStrap {
          (!currentPackage.equals("gate.creole.*"))&&
          (!currentPackage.equals("gate.util.*"))&&
          (!currentPackage.equals("java.util.*")))
-          packages = packages + "\n" + "import "+ currentPackage+";";
+          packages = packages + newLine + "import "+ currentPackage+";";
     }// while
     return packages;
   }
@@ -475,6 +478,22 @@ public class BootStrap {
       throw new GateException("The folder is not a directory");
   }
 
+  /***/
+  public void executableFile(String nameFile)
+                                    throws IOException,InterruptedException{
+    String osName = System.getProperty("os.name" );
+    if( !osName.startsWith("Windows") ){
+      Runtime rt = Runtime.getRuntime();
+      Process proc = rt.exec("chmod 711 "+nameFile);
+
+      // any error???
+      int exitVal = proc.waitFor();
+      if (exitVal!=0)
+        Out.prln("Warning: it is necessary to make executable the "+
+          "following file: " + nameFile);
+    }//if
+  }// executableFile
+
   /**  Creates the resource and dumps out a project structure using the
     *  structure from gate/resource/creole/templateproject/Template and the
     *  information provided by the user
@@ -491,7 +510,7 @@ public class BootStrap {
                               Set interfacesList,String pathNewProject)
                               throws
                               IOException,ClassNotFoundException, REException,
-                              GateException {
+                              GateException,InterruptedException {
     // the current file created by the system
     File newFile = null;
 
@@ -585,6 +604,7 @@ public class BootStrap {
 
           // the current file for writing characters
           newFile = new File(pathNewProject+newPathFile);
+
           //create a filewriter for writing
           FileWriter fileWriter = new FileWriter(newFile);
 
@@ -607,6 +627,11 @@ public class BootStrap {
            currentInputStream.close();
            // close the file for writing
            fileWriter.close();
+
+          // change sh files in executable
+          if (newPathFile.endsWith("configure")||newPathFile.endsWith(".sh"))
+            executableFile(pathNewProject+newPathFile);
+
         }//while
       }//if
     }//while
@@ -614,6 +639,9 @@ public class BootStrap {
   } // modify
 
   public static void main(String[] args) {
+    System.out.println(System.getProperty("path.separator"));
+    System.out.println("intre");
+    System.out.println(System.getProperty("java.class.path"));
     BootStrap bootStrap = new BootStrap();
     Set interfaces = new HashSet();
     interfaces.add("gate.Document");
@@ -622,13 +650,15 @@ public class BootStrap {
     try{
     try{
     try{
+    try{
+
     bootStrap.createResource("morph","creole.sheffield.ac.lisa","LanguageResource",
       "Documente", interfaces, "z:/test");
     } catch (GateException ge) {ge.printStackTrace(Err.getPrintWriter());}
     } catch (REException ree) {ree.printStackTrace(Err.getPrintWriter());}
     } catch (ClassNotFoundException cnfe) {cnfe.printStackTrace(Err.getPrintWriter());}
     } catch (IOException ioe) {ioe.printStackTrace(Err.getPrintWriter());}
-
+    } catch (InterruptedException ie){ie.printStackTrace(Err.getPrintWriter());}
   }// main
 
 } // class BootStrap
@@ -739,3 +769,4 @@ class FeatureMethod {
     return  hashCodeRes;
   }// hashCode
 }// class FeatureMethod
+
