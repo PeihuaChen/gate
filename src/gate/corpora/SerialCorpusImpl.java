@@ -141,6 +141,7 @@ public class SerialCorpusImpl extends
       //3. remove the document from the memory
       //do this, only if the saving has succeeded
       documents.set(index, null);
+
     } catch (PersistenceException ex) {
         throw new GateRuntimeException("Error unloading document from corpus"
                       + "because document sync failed: " + ex.getMessage());
