@@ -88,7 +88,7 @@ gukjar: classes.jar ../classes/guk/Editor.class
 	rm -f ../lib/ext/guk.jar
 	cd ../classes && $(JAR) cf `$(CYGPATH) ../lib/ext/guk.jar` guk
 	cd ../src/guk/resources && \
-	  $(JAR) uf `$(CYGPATH)` ../../../lib/ext/guk.jar` `ls |grep -v CVS`
+	  $(JAR) uf `$(CYGPATH) ../../../lib/ext/guk.jar` `ls |grep -v CVS`
 
 # just the gate classes in a jar
 classes.jar: classes
@@ -117,6 +117,11 @@ tcl:
 	done; echo '} }' >> ../src/gate/util/ScriptsList.tcl
 	cp ../src/gate/util/ScriptsList.tcl ../classes/gate/util/ScriptsList.tcl
 
+# run the main interface
+run: 
+	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
+	  -Duser.home='Z:\' -Xmx200m gate.Main
+
 # run the Jacl Tcl shell
 jaclsh:
 	$(RUN) -Djava.compiler=none $(CP) tcl.lang.Shell
@@ -124,11 +129,6 @@ jaclsh:
 # run the GUK editor
 gukdemo: 
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` guk.Editor
-
-# run the main interface
-run: 
-	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
-	  -Xmx200m gate.Main
 
 # make the javadoc documentation
 docs:
