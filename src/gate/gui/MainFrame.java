@@ -199,7 +199,6 @@ public class MainFrame extends JFrame
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
     Out.prln("Gate 2 started at: " + new Date().toString());
-
     mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
     logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
@@ -819,6 +818,7 @@ public class MainFrame extends JFrame
       putValue(SHORT_DESCRIPTION,"Create a new Application");
     }
     public void actionPerformed(ActionEvent e) {
+
       Object answer = JOptionPane.showInputDialog(
                         MainFrame.this,
                         "Please provide a name for the new application:",
