@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Cristian URSU, 29 September 2000
  *
  *  $Id$
@@ -21,13 +21,17 @@ import java.io.*;
   * methods.
   */
 public class Out {
-
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** A printwriter to delegate to */
   private static PrintWriter out = new PrintWriter(System.out,true);
 
+  /** Don't construct any of these */
   private Out() {}
+
+  /** Flush the output stream. */
+  public static void flush() { out.flush(); }
 
   /** This sets a new printWriter*/
   public static void setPrintWriter(PrintWriter aPrintWriter){
@@ -43,7 +47,7 @@ public class Out {
   ////////////////////////////////////////////////
 
   // print
-  
+
   /** @see java.io.PrintWriter#print(boolean) */
   public static void print(boolean b) {
     out.print(b);
@@ -153,7 +157,7 @@ public class Out {
   // pr and prln uses print and println so further modifications
   // must be done to print and println only
   ////////////////////////////////////////////////////////////////
-  
+
   /** @see java.io.PrintWriter#print(boolean) */
   public static void pr(boolean b) {
     print(b);
