@@ -268,7 +268,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
             if(filterOptionsString != null && filterOptionsString.length() > 0){
               if(!(aFilter instanceof OptionHandler)){
                 throw new ResourceInstantiationException(
-                  filterClassName + " cannot handle optins!");
+                  filterClassName + " cannot handle options!");
               }
               options = parseOptions(filterOptionsString);
               ((OptionHandler)aFilter).setOptions(options);
@@ -430,7 +430,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
   protected class SaveDatasetAsArffAction extends javax.swing.AbstractAction{
     public SaveDatasetAsArffAction(){
       super("Save dataset as ARFF");
-      putValue(SHORT_DESCRIPTION, "Saves the ML model to a file in ARFF format");
+      putValue(SHORT_DESCRIPTION, "Saves the dataset to a file in ARFF format");
     }
 
     public void actionPerformed(java.awt.event.ActionEvent evt){
