@@ -240,16 +240,16 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     try {
-      String sql = " select v1.as_id " +
-                   " from  "+Gate.DB_OWNER+".v_annotation_set v1 " +
-                   " where  v1.lr_id = ? ";
+      String sql = " select as_id " +
+                   " from  "+Gate.DB_OWNER+".v_annotation_set " +
+                   " where  lr_id = ? ";
       //do we have aset name?
       String clause = null;
       if (null != name) {
-        clause =   "        and v1.as_name = ? ";
+        clause =   "        and as_name = ? ";
       }
       else {
-        clause =   "        and v1.as_name is null ";
+        clause =   "        and as_name is null ";
       }
       sql = sql + clause;
 
@@ -280,7 +280,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         }
       }
       catch(SQLException sqle) {
-        throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
+        throw new SynchronisationException("can't read annotations from DB: ["+ sqle.getMessage()+"]");
       }
       finally {
         try {
@@ -299,11 +299,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
       try {
         String sql = " select ann_id, " +
-                     "        at_name " +
-                     "        start_offset " +
+                     "        at_name, " +
+                     "        start_offset, " +
                      "        end_offset " +
                      " from  "+Gate.DB_OWNER+".v_annotation  " +
-                     " where  asann_as_id_id = ? ";
+                     " where  asann_as_id = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
