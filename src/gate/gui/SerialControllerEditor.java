@@ -606,6 +606,19 @@ public class SerialControllerEditor extends AbstractVisualResource
         }
       });
     }//if conditional
+    if(analyserMode){
+      corpusCombo.addPopupMenuListener(new PopupMenuListener() {
+                    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                      corpusComboModel.fireDataChanged();
+                    }
+
+                    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                    }
+
+                    public void popupMenuCanceled(PopupMenuEvent e) {
+                    }
+                  });
+    }
   }//protected void initListeners()
 
 
@@ -959,8 +972,6 @@ public class SerialControllerEditor extends AbstractVisualResource
     void fireDataChanged(){
       fireContentsChanged(this, 0, getSize());
     }
-
-    Object selectedItem = null;
   }
 
   /**
