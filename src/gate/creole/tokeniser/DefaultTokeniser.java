@@ -86,7 +86,9 @@ import EDU.auburn.VGJ.graph.ParseError;
 public class DefaultTokeniser implements Runnable, ProcessingResource,
                                          ProcessProgressReporter,
                                          StatusReporter{
-  protected DefaultTokeniser(){
+  public DefaultTokeniser()throws IOException,
+                                     TokeniserException {
+    this(Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
   }
 
   /**Constructs a DefaultTokeniser from the file with the name specified by
