@@ -1083,8 +1083,159 @@ System.out.println("trans failed ...rollback");
     return si;
   }
 
-  protected abstract Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
-    throws PersistenceException,SecurityException;
+  /** creates a LR of type Corpus  */
+  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
+    throws PersistenceException,SecurityException {
+
+    //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
+    Long lrID = createLR(DBHelper.CORPUS_CLASS,corp.getName(),secInfo,null);
+
+    //2.create am entry in the T_COPRUS table
+    Long corpusID = null;
+    //DB stuff
+    CallableStatement cstmt = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    try {
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.create_corpus(?,?) }");
+        cstmt.setLong(1,lrID.longValue());
+        cstmt.registerOutParameter(2,java.sql.Types.BIGINT);
+        cstmt.execute();
+        corpusID = new Long(cstmt.getLong(2));
+      }
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+        pstmt = this.jdbcConn.prepareStatement("select persist_create_corpus(?) ");
+        pstmt.setLong(1,lrID.longValue());
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        if (false == rs.next()) {
+          throw new PersistenceException("empty result set");
+        }
+
+        corpusID = new Long(rs.getLong(1));
+      }
+      else {
+        Assert.fail();
+      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create corpus [step 2] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+      DBHelper.cleanup(pstmt);
+      DBHelper.cleanup(rs);
+    }
+
+    //3. for each document in the corpus call createDocument()
+    Iterator itDocuments = corp.iterator();
+    Vector dbDocs = new Vector();
+    while (itDocuments.hasNext()) {
+      Document doc = (Document)itDocuments.next();
+
+      //3.1. ensure that the document is either transient or is from the ...
+      // same DataStore
+      if (doc.getLRPersistenceId() == null) {
+        //transient document
+
+        //now this is a bit ugly patch, the transaction related functionality
+        //should not be in this method
+        if (newTransPerDocument) {
+          beginTrans();
+        }
+
+        Document dbDoc = createDocument(doc,corpusID,secInfo);
+
+        if (newTransPerDocument) {
+          commitTrans();
+        }
+
+        dbDocs.add(dbDoc);
+        //8. let the world know
+        fireResourceAdopted(new DatastoreEvent(this,
+                                                DatastoreEvent.RESOURCE_ADOPTED,
+                                                dbDoc,
+                                                dbDoc.getLRPersistenceId()
+                                              )
+                            );
+
+        //9. fire also resource written event because it's now saved
+        fireResourceWritten(new DatastoreEvent(this,
+                                                DatastoreEvent.RESOURCE_WRITTEN,
+                                                dbDoc,
+                                                dbDoc.getLRPersistenceId()
+                                              )
+                           );
+
+      }
+      else if (doc.getDataStore().equals(this)) {
+        //persistent doc from the same DataStore
+        fireResourceAdopted(
+            new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
+                               doc,
+                               doc.getLRPersistenceId()));
+
+        //6. fire also resource written event because it's now saved
+        fireResourceWritten(
+          new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
+                              doc,
+                              doc.getLRPersistenceId()));
+      }
+      else {
+        //persistent doc from other datastore
+        //skip
+        gate.util.Err.prln("document ["+doc.getLRPersistenceId()+"] is adopted from another "+
+                            " datastore. Skipped.");
+      }
+    }
+
+    //4. create features
+    if (this.dbType == DBHelper.ORACLE_DB) {
+      createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
+    }
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
+    }
+    else {
+      Assert.fail();
+    }
+
+
+    //5. create a DatabaseCorpusImpl and return it
+///    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
+///                                             this,
+///                                              lrID,
+///                                              corp.getFeatures(),
+///                                              dbDocs);
+///
+
+    Corpus dbCorpus = null;
+    FeatureMap params = Factory.newFeatureMap();
+    HashMap initData = new HashMap();
+
+    initData.put("DS",this);
+    initData.put("LR_ID",lrID);
+    initData.put("CORP_NAME",corp.getName());
+    initData.put("CORP_FEATURES",corp.getFeatures());
+    initData.put("CORP_SUPPORT_LIST",dbDocs);
+
+    params.put("initData__$$__", initData);
+
+    try {
+      //here we create the persistent LR via Factory, so it's registered
+      //in GATE
+      dbCorpus = (Corpus)Factory.createResource("gate.corpora.DatabaseCorpusImpl", params);
+    }
+    catch (gate.creole.ResourceInstantiationException ex) {
+      throw new GateRuntimeException(ex.getMessage());
+    }
+
+    //6. done
+    return dbCorpus;
+  }
 
   /**
    * helper for adopt

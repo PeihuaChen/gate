@@ -263,12 +263,12 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
 
-  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
+/*  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
     throws PersistenceException,SecurityException {
 
     throw new MethodNotImplementedException();
   }
-
+*/
   /**
    *  helper for adopt()
    *  never call directly
