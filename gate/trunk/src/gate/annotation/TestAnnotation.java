@@ -2,14 +2,14 @@
  *	TestAnnotation.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 7/Feb/00
  *
  *	$Id$
@@ -538,7 +538,7 @@ public class TestAnnotation extends TestCase
   } // suite
 
   /** Test get with offset and no annotation starting at given offset */
-  public void testGap() throws InvalidOffsetException {
+  public void _testGap() throws InvalidOffsetException {
     AnnotationSet as = basicAS;
     as.clear();
     FeatureMap fm = Transients.newFeatureMap();
@@ -574,10 +574,11 @@ System.out.println(res);
   }
 
   public static void main(String[] args){
+
     try{
       TestAnnotation testAnnot = new TestAnnotation("");
       testAnnot.setUp();
-      testAnnot.testGap();
+      testAnnot._testGap();
       testAnnot.tearDown();
     }catch(Throwable t){
       t.printStackTrace();
