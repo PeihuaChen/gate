@@ -20,7 +20,7 @@ import gate.util.*;
 import gate.jape.*;
 
 
-
+/** A small toy inteface for Jape testing and tweaking */
 public class JapeGUI extends JFrame {
 
   public JapeGUI() {
@@ -32,7 +32,7 @@ public class JapeGUI extends JFrame {
       e.printStackTrace();
     }
     corpus = Transients.newCorpus("JapeGUI");
-    
+
   }
 
   public static void main(String[] args) {
@@ -43,7 +43,7 @@ public class JapeGUI extends JFrame {
   private void jbInit() throws Exception {
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
-    textViewBox = Box.createVerticalBox();
+    textViewPane = new JPanel(new BorderLayout());
     northBox = Box.createHorizontalBox();
     this.getContentPane().setLayout(borderLayout1);
     statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -94,7 +94,7 @@ public class JapeGUI extends JFrame {
     typesPanel.setLayout(flowLayout1);
 //    textViewScroll.setPreferredSize(new Dimension(32767, 32767));
     textViewScroll.setPreferredSize(null);
-    typesPanel.setPreferredSize(null);
+//    typesPanel.setPreferredSize(null);
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
@@ -109,13 +109,15 @@ public class JapeGUI extends JFrame {
     northBox.add(japeLoadBtn, null);
     northBox.add(runBtn, null);
     this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
-    centerTabPane.add(textViewBox, "Text View");
-    textViewBox.add(textViewScroll, null);
-    textViewBox.add(typesPanel, null);
+    centerTabPane.add(textViewPane, "Text View");
+    textViewPane.add(textViewScroll, BorderLayout.CENTER);
+    textViewPane.add(typesPanel, BorderLayout.SOUTH);
     centerTabPane.add(tableViewScroll, "Table View");
     textViewScroll.getViewport().add(text, null);
     setSize(800,600);
-
+    validate();
+    textViewScroll.setPreferredSize(new Dimension(textViewPane.getSize().width,
+                                    textViewPane.getSize().height - 30));
     japeFilter = new ExtensionFileFilter();
     japeFilter.addExtension("jape");
     japeFilter.setDescription(".jape Files");
@@ -128,7 +130,7 @@ public class JapeGUI extends JFrame {
   void collectionAddBtn_actionPerformed(ActionEvent e) {
     //multi file selection enabled only in JDK 1.3
     if(System.getProperty("java.version").compareTo("1.3") >=0 ){
-      //java 1.3
+      //java 1.3 or better
       filer.setMultiSelectionEnabled(true);
       filer.setDialogTitle("Select document(s) to add...");
       filer.setSelectedFiles(null);
@@ -296,6 +298,7 @@ public class JapeGUI extends JFrame {
       typeLabel.setBackground(Color.black);
       typeLabel.setForeground(Color.white);
       typeButton.add(typeLabel);
+      typeButton.setToolTipText(currentType);
       typeButton.setBackground(new Color(randomGen.nextInt()));
       typeButton.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -431,7 +434,7 @@ public class JapeGUI extends JFrame {
   JMenuBar jMenuBar1 = new JMenuBar();
 
   Box westBox;
-  Box textViewBox;
+  JPanel textViewPane;
   Box northBox;
   Box southBox;
 
