@@ -19,6 +19,7 @@ import java.util.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.*;
+import java.net.*;
 import javax.swing.*;
 
 import gnu.getopt.*;
@@ -46,80 +47,106 @@ public class Main {
     * <UL>
     * <LI>
     * <B>-h</B> display a short help message
+    * <B>-d URL</B> define URL to be a location for CREOLE resoures
     * </UL>
     */
   public static void main(String[] args) throws GateException {
     // process command-line options
     processArgs(args);
 
+    // initialise the library and load user CREOLE directories
+    Gate.init();
+    registerCreoleUrls();
+
     // run the interface or do batch processing
     if(batchMode) {
       if(DEBUG) Out.prln("running batch process");
       batchProcess();
+    } else {
+      runGui();
     }
-    else {
-      MainFrame frame = new MainFrame();
-      long startTime = System.currentTimeMillis();
-      Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
-      splash.show();
-
-      Gate.setNetConnected(false);
-      Gate.setLocalWebServer(false);
-      Gate.init();
-
-      if(DEBUG) Out.prln("constructing GUI");
-      // run the GUI
-
-      frame.setTitle(name + " " + version);
-      //Validate frames that have preset sizes
-      frame.validate();
-      //Center the window
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      Dimension frameSize = frame.getSize();
-      if (frameSize.height > screenSize.height) {
-        frameSize.height = screenSize.height;
-      }
-      if (frameSize.width > screenSize.width) {
-        frameSize.width = screenSize.width;
-      }
-      frame.setLocation((screenSize.width - frameSize.width) / 2,
-                        (screenSize.height - frameSize.height) / 2);
-      frame.setVisible(true);
-
-      //wait for 1 sec
-      long timeNow = System.currentTimeMillis();
-      while(timeNow - startTime < 3000){
-        try{
-          Thread.sleep(150);
-          timeNow = System.currentTimeMillis();
-        }catch(InterruptedException ie){}
-      }
-      splash.hide();
-    }
-
   } // main
 
-  static{
-      //find out the version number
-      try{
-        BufferedReader reader = new BufferedReader(
-                                  new InputStreamReader(
-                                  Files.getGateResourceAsStream("version.txt")));
-        Main.version = reader.readLine();
-      }catch(IOException ioe){
-        Main.version = "2.0";
+  /** Register any CREOLE URLs that we got on the command line */
+  private static void registerCreoleUrls() {
+    CreoleRegister reg = Gate.getCreoleRegister();
+    Iterator iter = pendingCreoleUrls.iterator();
+    while(iter.hasNext()) {
+      URL u = (URL) iter.next();
+      try {
+        reg.registerDirectories(u);
+      } catch(GateException e) {
+        Err.prln("Couldn't register CREOLE directory: " + u);
+        Err.prln(e);
+        System.exit(STATUS_ERROR);
       }
+    }
+  } // registerCreoleUrls()
 
-      //find out the build number
+  /** Run the user interface */
+  private static void runGui() {
+    MainFrame frame = new MainFrame();
+    long startTime = System.currentTimeMillis();
+    Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
+    splash.show();
+
+
+    if(DEBUG) Out.prln("constructing GUI");
+
+    // run the GUI
+    frame.setTitle(name + " " + version);
+
+    //Validate frames that have preset sizes
+    frame.validate();
+
+    //Center the window
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension frameSize = frame.getSize();
+    if (frameSize.height > screenSize.height) {
+      frameSize.height = screenSize.height;
+    }
+    if (frameSize.width > screenSize.width) {
+      frameSize.width = screenSize.width;
+    }
+    frame.setLocation((screenSize.width - frameSize.width) / 2,
+                      (screenSize.height - frameSize.height) / 2);
+    frame.setVisible(true);
+
+    //wait for 1 sec
+    long timeNow = System.currentTimeMillis();
+    while(timeNow - startTime < 3000){
       try{
-        BufferedReader reader = new BufferedReader(
-                                  new InputStreamReader(
-                                  Files.getGateResourceAsStream("build.txt")));
-        Main.build = reader.readLine();
-      }catch(IOException ioe){
-        Main.build = "0000";
-      }
-  }
+        Thread.sleep(150);
+        timeNow = System.currentTimeMillis();
+      }catch(InterruptedException ie){}
+    }
+    splash.hide();
+
+  } // runGui()
+
+  // find out the version and build numbers
+  static {
+
+    // find out the version number
+    try {
+      BufferedReader reader = new BufferedReader(
+        new InputStreamReader(Files.getGateResourceAsStream("version.txt"))
+      );
+      Main.version = reader.readLine();
+    } catch(IOException ioe) {
+      Main.version = "2.0";
+    }
+
+    // find out the build number
+    try{
+      BufferedReader reader = new BufferedReader(
+        new InputStreamReader(Files.getGateResourceAsStream("build.txt"))
+      );
+      Main.build = reader.readLine();
+    } catch(IOException ioe) {
+      Main.build = "0000";
+    }
+  } // static initialiser finding build and version
 
 
 /**
@@ -245,7 +272,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hc:ba:df:p:v::");
+    Getopt g = new Getopt("GATE main", args, "hd:");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -255,6 +282,23 @@ public class Main {
           usage();
           System.exit(STATUS_NORMAL);
           break;
+        // -d creole-dir
+        case 'd':
+          String urlString = g.getOptarg();
+          URL u = null;
+          try {
+            u = new URL(urlString);
+          } catch(MalformedURLException e) {
+            Err.prln("Bad URL: " + urlString);
+            Err.prln(e);
+            System.exit(STATUS_ERROR);
+          }
+          pendingCreoleUrls.add(u);
+          Out.prln(
+            "CREOLE Directory " + urlString + " queued for registration"
+          );
+          break;
+
 
 
 /*
@@ -317,13 +361,13 @@ public class Main {
 
         case '?':
           // leave the warning to getopt
-	        System.exit(STATUS_ERROR);
+          System.exit(STATUS_ERROR);
           break;
 
         default:
           // shouldn't happen!
           Err.prln("getopt() returned " + c + "\n");
-	        System.exit(STATUS_ERROR);
+          System.exit(STATUS_ERROR);
           break;
       } // getopt switch
 
@@ -467,8 +511,8 @@ public class Main {
   public static void usage() {
     Out.prln(
       "Usage: java gate.Main " +
-      "[ -h [-a annotator(s)] -b -c collname [-d] " +
-      "[-f file(s)] [-v [classname(s)]] -p creolepath]"
+      "[ -h [-d CREOLE-URL]" +
+      ""
     );
   } // usage()
 
@@ -481,5 +525,8 @@ public class Main {
       "http://gate.ac.uk/gate/doc/userguide.html"
     );
   } // help()
+
+  /** The list of pending URLs to add to the CREOLE register */
+  private static List pendingCreoleUrls = new ArrayList();
 
 } // class Main
