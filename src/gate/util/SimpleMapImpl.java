@@ -354,6 +354,22 @@ transient Object g_akey = null;
     return newMap;
   } // clone
 
+  public String toString() {
+    int max = size() - 1;
+    StringBuffer buf = new StringBuffer();
+    Iterator i = entrySet().iterator();
+
+    buf.append("{");
+    for (int j = 0; j <= max; j++) {
+        Entry e = (Entry) (i.next());
+        buf.append(e.getKey() + "=" + e.getValue());
+        if (j < max)
+      buf.append(", ");
+    }
+    buf.append("}");
+    return buf.toString();
+  }
+
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -6747241616127229116L;
