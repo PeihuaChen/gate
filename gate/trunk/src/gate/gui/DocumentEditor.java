@@ -377,7 +377,7 @@ public class DocumentEditor extends AbstractVisualResource
               stylesTreeModel.nodeChanged(node);
             // Check if the click indicates a shortcut to create an annotation
             }else if( e.getClickCount() == 1 &&
-                      clickedComp instanceof JTextComponent &&
+                      clickedComp instanceof JLabel &&
                       isTextSelected()){
               // Here create an annotation with the selected text into the
               // target annotation set
@@ -3062,7 +3062,7 @@ Out.prln("NULL size");
 
   /**
    * This class handles the blinking for the selected annotations in the
-   * text display. On creation
+   * text display.
    */
   class SelectionBlinker implements Runnable{
     public void run(){
