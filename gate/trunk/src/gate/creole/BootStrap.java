@@ -432,8 +432,10 @@ public class BootStrap {
   } // addContent
 
   /** create the map with variants of the names... */
-  public Map createNames (String namePackage, String nameClass,
-                                                        String stringPackages) {
+  public Map createNames ( String packageName,
+                           String resourceName,
+                           String className,
+                           String stringPackages) {
 
     // determine the name of the current user and the current day
     Calendar calendar = Calendar.getInstance();
@@ -445,18 +447,16 @@ public class BootStrap {
 
     // the a map with the variants of names and the current date
     // and the current user
-    String nameResource = (String)listPackages.get(listPackages.size()-1);
-
-    names.put(nameProject,nameResource);
-    names.put(nameProject.toUpperCase(),nameResource.toUpperCase());
-    names.put(nameProject.toLowerCase(),nameResource.toLowerCase());
-    names.put("___CLASSNAME___",nameClass);
+    names.put(nameProject,resourceName);
+    names.put(nameProject.toUpperCase(),resourceName.toUpperCase());
+    names.put(nameProject.toLowerCase(),resourceName.toLowerCase());
+    names.put("___CLASSNAME___",className);
     names.put("___DATE___",date);
     names.put("___AUTHOR___",user);
     names.put("___ALLPACKAGE___",stringPackages);
-    names.put("___PACKAGE___",namePackage);
+    names.put("___PACKAGE___",packageName);
     names.put("___PACKAGETOP___",listPackages.get(0));
-    names.put("___RESOURCE___",nameResource);;
+    names.put("___RESOURCE___",resourceName);;
     names.put(
       "___GATECLASSPATH___",
       System.getProperty("path.separator") +
@@ -467,7 +467,7 @@ public class BootStrap {
     oldNames.put("___PACKAGETOP___","template");
 
     return names;
-  }
+  }// End createNames()
 
   /** determine all the packages */
   public String namesPackages (Set listPackages) {
@@ -498,6 +498,7 @@ public class BootStrap {
   /**  Creates the resource and dumps out a project structure using the
     *  structure from gate/resource/creole/templateproject/Template and the
     *  information provided by the user
+    * @resourceName is the name of the resource
     * @namePackage is the name of the new resource
     * @typeResource is the type of the resource (e.g.ProcessingResource,
     *  LanguageResource or VisualResource)
@@ -505,9 +506,9 @@ public class BootStrap {
     * @listInterfaces is the set of the interfaces that implements the resource
     * @pathNewProject is the path where it will be the new resource
     */
-  public void createResource( String namePackage,String typeResource,
-                              String nameClass, Set listInterfaces,
-                              String pathNewProject)
+  public void createResource( String resourceName,String namePackage,
+                              String typeResource,String nameClass,
+                              Set listInterfaces,String pathNewProject)
                               throws
                               IOException,ClassNotFoundException, REException,
                               GateException {
@@ -525,14 +526,7 @@ public class BootStrap {
       throw new GateException("The folder is not a directory");
 
     //determine the list with packages
-    listPackages = determinePath (namePackage);
-    // determine the resource name
-    String nameResource;
-    if (listPackages.size()>0) {
-      nameResource = (String)listPackages.get(listPackages.size()-1); }
-    else {
-      nameResource = namePackage;
-    }
+    listPackages = determinePath(namePackage);
 
     // determine the path of the main class
     String stringPackages = "";
@@ -541,7 +535,7 @@ public class BootStrap {
     }
 
     // create the map with the names
-    createNames(namePackage,nameClass,stringPackages);
+    createNames(namePackage,resourceName,nameClass,stringPackages);
 
     // determine the interfaces that the resource implements and the class
     // that it extends

@@ -35,6 +35,7 @@ public class BootStrapDialog extends JDialog{
   BootStrap bootStrapWizard = null;
   // Local data
   String resourceName = null;
+  String packageName = null;
   String resourceType = null;
   Map    resourceTypes = null;
   String className = null;
@@ -45,6 +46,9 @@ public class BootStrapDialog extends JDialog{
   // GUI components
   JLabel     resourceNameLabel = null;
   JTextField resourceNameTextField = null;
+
+  JLabel     packageNameLabel = null;
+  JTextField packageNameTextField = null;
 
   JLabel     resourceTypesLabel = null;
   JComboBox  resourceTypesComboBox = null;
@@ -75,6 +79,7 @@ public class BootStrapDialog extends JDialog{
   }//BootStrapDialog
 
   private void doCreateResource(){
+    // Collect the  resourceName and signal ERROR if something goes wrong
     resourceName = resourceNameTextField.getText();
     if (resourceName == null || "".equals(resourceName)){
       thisBootStrapDialog.setModal(false);
@@ -86,6 +91,19 @@ public class BootStrapDialog extends JDialog{
       return;
     }// End if
 
+    // Collect the  packageName and signal ERROR if something goes wrong
+    packageName = packageNameTextField.getText();
+    if (packageName == null || "".equals(packageName)){
+      thisBootStrapDialog.setModal(false);
+      JOptionPane.showMessageDialog(mainFrame,
+                      "A package name must be provided",
+                      "ERROR !",
+                      JOptionPane.ERROR_MESSAGE);
+      thisBootStrapDialog.setModal(true);
+      return;
+    }// End if
+
+    // Collect the  className and signal ERROR if something goes wrong
     className = classNameTextField.getText();
     if (className == null || "".equals(className)){
       thisBootStrapDialog.setModal(false);
@@ -97,6 +115,7 @@ public class BootStrapDialog extends JDialog{
       return;
     }// End if
 
+    // Collect the pathNewproject and signal ERROR if something goes wrong
     pathNewProject = chooseFolderTextField.getText();
     if (pathNewProject == null || "".equals(pathNewProject)){
       thisBootStrapDialog.setModal(false);
@@ -108,6 +127,7 @@ public class BootStrapDialog extends JDialog{
       return;
     }// End if
 
+    // Collect the  resourceType and signal ERROR if something goes wrong
     resourceType = (String)resourceTypesComboBox.getSelectedItem();
     resourceInterfaces = this.getSelectedInterfaces();
 
@@ -140,10 +160,9 @@ public class BootStrapDialog extends JDialog{
     this.getContentPane().setLayout(
         new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
     this.setModal(true);
-    // init resource name
-    resourceNameLabel =
-      new JLabel("Resource package, e.g. sheffield.creole.morph");
-    resourceNameLabel.setToolTipText("The Java package of the resource" +
+    // Init resource name
+    resourceNameLabel = new JLabel("Resource name, e.g. myMorph");
+    resourceNameLabel.setToolTipText("The name of the resource" +
                                      " you want to create");
     resourceNameLabel.setOpaque(true);
     resourceNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -155,7 +174,21 @@ public class BootStrapDialog extends JDialog{
                               resourceNameTextField.getPreferredSize().height);
     resourceNameTextField.setPreferredSize(dim);
     resourceNameTextField.setMinimumSize(dim);
-//    resourceNameTextField.setMaximumSize(dim);
+
+    // Init package name
+    packageNameLabel =
+      new JLabel("Resource package, e.g. sheffield.creole.morph");
+    packageNameLabel.setToolTipText("The Java package of the resource" +
+                                     " you want to create");
+    packageNameLabel.setOpaque(true);
+    packageNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    packageNameTextField = new JTextField();
+    packageNameTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
+    packageNameTextField.setColumns(40);
+    dim = new Dimension( packageNameTextField.getPreferredSize().width,
+                         packageNameTextField.getPreferredSize().height);
+    packageNameTextField.setPreferredSize(dim);
+    packageNameTextField.setMinimumSize(dim);
 
     // init resourceTypesComboBox
     resourceTypesLabel = new JLabel("Resource type");
@@ -223,9 +256,13 @@ public class BootStrapDialog extends JDialog{
     createResourceButton = new JButton("Finish");
     // init cancel
     cancelButton = new JButton("Cancel");
+    fileChooser = new JFileChooser();
+
+    // ARANGE the components
     // Put all those components at their place
     Box mainBox = new Box(BoxLayout.Y_AXIS);
 
+    // resourceName
     Box currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(resourceNameLabel);
     currentBox.add(resourceNameTextField);
@@ -233,6 +270,15 @@ public class BootStrapDialog extends JDialog{
 
     mainBox.add(Box.createRigidArea(new Dimension(0,10)));
 
+    // packageName
+    currentBox = new Box(BoxLayout.Y_AXIS);
+    currentBox.add(packageNameLabel);
+    currentBox.add(packageNameTextField);
+    mainBox.add(currentBox);
+
+    mainBox.add(Box.createRigidArea(new Dimension(0,10)));
+
+    // resourceTypes
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(resourceTypesLabel);
     currentBox.add(resourceTypesComboBox);
@@ -240,6 +286,7 @@ public class BootStrapDialog extends JDialog{
 
     mainBox.add(Box.createRigidArea(new Dimension(0,10)));
 
+    // className
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(classNameLabel);
     currentBox.add(classNameTextField);
@@ -247,6 +294,7 @@ public class BootStrapDialog extends JDialog{
 
     mainBox.add(Box.createRigidArea(new Dimension(0,10)));
 
+    // interfaces
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(interfacesLabel);
     currentBox.add(interfacesTextField);
@@ -254,6 +302,7 @@ public class BootStrapDialog extends JDialog{
 
     mainBox.add(Box.createRigidArea(new Dimension(0,10)));
 
+    // folderName
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(chooseFolderLabel);
     JPanel tmpBox = new JPanel();
@@ -269,19 +318,47 @@ public class BootStrapDialog extends JDialog{
     tmpBox = new JPanel();
     tmpBox.setLayout(new BoxLayout(tmpBox,BoxLayout.X_AXIS));
     tmpBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    tmpBox.add(Box.createRigidArea(new Dimension(90,0)));
+    tmpBox.add(Box.createHorizontalGlue());
     tmpBox.add(createResourceButton);
-    tmpBox.add(Box.createRigidArea(new Dimension(20,0)));
+    tmpBox.add(Box.createRigidArea(new Dimension(25,0)));
     tmpBox.add(cancelButton);
+    tmpBox.add(Box.createHorizontalGlue());
     mainBox.add(tmpBox);
 
     // Add a space
+    this.getContentPane().add(Box.createVerticalGlue());
     this.getContentPane().add(Box.createRigidArea(new Dimension(0,5)));
     this.getContentPane().add(mainBox);
     this.getContentPane().add(Box.createRigidArea(new Dimension(0,5)));
+    this.getContentPane().add(Box.createVerticalGlue());
 
     this.pack();
-    fileChooser = new JFileChooser();
+    ////////////////////////////////
+    // Center it on screen
+    ///////////////////////////////
+    Dimension ownerSize;
+    Point ownerLocation;
+    if(getOwner() == null){
+      ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+      ownerLocation = new Point(0, 0);
+    }else{
+      ownerSize = getOwner().getSize();
+      ownerLocation = getOwner().getLocation();
+      if(ownerSize.height == 0 ||
+         ownerSize.width == 0 ||
+         !getOwner().isVisible()){
+        ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+        ownerLocation = new Point(0, 0);
+      }
+    }
+    //Center the window
+    Dimension frameSize = getSize();
+    if (frameSize.height > ownerSize.height)
+      frameSize.height = ownerSize.height;
+    if (frameSize.width > ownerSize.width)
+      frameSize.width = ownerSize.width;
+    setLocation(ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
+                ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
   }//initGuiComponents
 
   /**
@@ -352,15 +429,17 @@ public class BootStrapDialog extends JDialog{
       try{
         bootStrapWizard = new BootStrap();
         bootStrapWizard.createResource(resourceName,
+                                       packageName,
                                        resourceType,
                                        className,
                                        resourceInterfaces,
                                        pathNewProject);
         thisBootStrapDialog.hide();
         JOptionPane.showMessageDialog(mainFrame,
-                                    "Creation succeeded !",
-                                    "DONE !",
-                                    JOptionPane.DEFAULT_OPTION);
+                                      resourceName + " creation succeeded !\n" +
+                                      "Look for it in " + pathNewProject,
+                                      "DONE !",
+                                      JOptionPane.DEFAULT_OPTION);
       }catch (Exception e){
         thisBootStrapDialog.setModal(false);
         e.printStackTrace(Err.getPrintWriter());
@@ -369,7 +448,7 @@ public class BootStrapDialog extends JDialog{
                      "BootStrap error !",
                      JOptionPane.ERROR_MESSAGE);
         thisBootStrapDialog.setModal(true);
-      }
+      }// End try
     }// run();
   }//CreateResourceRunner
 
