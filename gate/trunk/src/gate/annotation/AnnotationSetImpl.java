@@ -812,7 +812,6 @@ implements AnnotationSet
     * before calling this method.
     */
   public void edit(Long start, Long end, DocumentContent replacement) {
-Out.prln("Edit at " + start + " - " + end);
     long s = start.longValue(), e = end.longValue();
     long rlen = // length of the replacement value
       ( (replacement == null) ? 0 : replacement.size().longValue() );
