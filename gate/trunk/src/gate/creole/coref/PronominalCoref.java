@@ -40,7 +40,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private static final String PLEON_GRAMMAR_URL = "gate://gate/creole/coref/pleonasm.jape";
 
   //annotation types
-  private static final String QUOTED_TEXT_TYPE = "Quoted Text";
+  private static final String QUOTED_TEXT_TYPE = "QuotedText";
   private static final String PLEONASTIC_TYPE = "PleonasticIt";
 
   //annotation features
