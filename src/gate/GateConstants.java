@@ -84,6 +84,9 @@ public interface GateConstants {
   /** Property to set slug application from command line */
   public static final String APPLICATION_JAVA_PROPERTY_NAME = "gate.slug.app";
 
+  /** Property to set slug annotation types for export Inline */
+  public static final String ANNOT_TYPE_TO_EXPORT = "annotTypesToExport";
+
   /** The key for the feature keeping the IndexDefinition*/
   public static final String
     CORPUS_INDEX_DEFINITION_FEATURE_KEY = "Index_definition_feature_key";
