@@ -536,6 +536,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       closestQuoteIndex = -closestQuoteIndex -1 -1;
     }
 
+    //still not good?
+    if (closestQuoteIndex < 0) {
+      closestQuoteIndex = 0;
+    }
+
     //get closest Quote
     Quote quoteContext = this.quotedText[closestQuoteIndex];
 
