@@ -154,6 +154,7 @@ public class NameBearerHandle implements Handle,
     }else if(target instanceof LanguageResource) {
       //Language Resources
       popup.addSeparator();
+      popup.add(new XJMenuItem(new RenameAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
       if(target instanceof gate.corpora.DocumentImpl){
@@ -574,6 +575,26 @@ public class NameBearerHandle implements Handle,
       }
     }
   }
+
+  class RenameAction extends AbstractAction {
+    public RenameAction(){
+      super("Rename");
+      putValue(SHORT_DESCRIPTION, "Rename this language resource");
+    }
+    public void actionPerformed(ActionEvent e){
+      LanguageResource lr = (LanguageResource)target;
+
+      String newName = JOptionPane.showInputDialog(
+                                     getLargeView(),
+                                    "Please enter the LR's new name");
+
+      //don't change if nothing selected
+      if (newName == null || newName.equals(""))
+        return;
+      lr.setName(newName);
+
+    }//public void actionPerformed(ActionEvent e)
+  }//class RenameAction
 
 
 
