@@ -23,6 +23,7 @@ import junit.framework.*;
 
 import gate.Gate;
 import gate.GateConstants;
+import gate.util.Err;
 
 public class TestWordNet extends TestCase {
 
@@ -56,7 +57,7 @@ public class TestWordNet extends TestCase {
     String wnConfigFile = (String)Gate.getUserConfig().
                           get(GateConstants.WORDNET_CONFIG_FILE);
     if(wnConfigFile == null){
-//      Err.prln("WordNet not present. Test aborted...");
+      Err.prln("WordNet not present. Test aborted...");
       return;
     }
     //test synset access - read all senses for a word and compare them with the entries from the
@@ -133,7 +134,7 @@ public class TestWordNet extends TestCase {
     String wnConfigFile = (String)Gate.getUserConfig().
                           get(GateConstants.WORDNET_CONFIG_FILE);
     if(wnConfigFile == null){
-//      Err.prln("WordNet not present. Test aborted...");
+      Err.prln("WordNet not present. Test aborted...");
       return;
     }
 
@@ -221,7 +222,7 @@ public class TestWordNet extends TestCase {
     String wnConfigFile = (String)Gate.getUserConfig().
                           get(GateConstants.WORDNET_CONFIG_FILE);
     if(wnConfigFile == null){
-//      Err.prln("WordNet not present. Test aborted...");
+      Err.prln("WordNet not present. Test aborted...");
       return;
     }
 
