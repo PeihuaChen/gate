@@ -24,9 +24,20 @@ import gate.gui.OkCancelDialog;
 
 public class ChooseSynsetPanel extends JPanel {
 
+  public ChooseSynsetPanel(LexicalKnowledgeBase theLex, boolean isEdit) {
+    if (theLex == null)
+      throw new GateRuntimeException("To view/edit synsets please provide a valid lexicon");
+    isEditable = isEdit;
+    lexKB = theLex;
+    initLocalData();
+    initGuiComponents();
+    initListeners();
+  }
+
   public ChooseSynsetPanel(LexicalKnowledgeBase theLex) {
     if (theLex == null)
       throw new GateRuntimeException("To view/edit synsets please provide a valid lexicon");
+    isEditable = true;
     lexKB = theLex;
     initLocalData();
     initGuiComponents();
@@ -65,11 +76,14 @@ public class ChooseSynsetPanel extends JPanel {
 
     POSTextLabel.setText("Part of Speech");
 
-    addSynsetButton = new JButton(addSynsetAction);
-    addSynsetButton.setText("Add");
+    if (isEditable) {
+      addSynsetButton = new JButton(addSynsetAction);
+      addSynsetButton.setText("Add");
 
-    removeSynsetButton = new JButton(removeSynsetAction);
-    removeSynsetButton.setText("Remove");
+      removeSynsetButton = new JButton(removeSynsetAction);
+      removeSynsetButton.setText("Remove");
+    }
+
 
     this.add(mainBox, null);
     mainBox.add(leftBox, null);
@@ -90,11 +104,13 @@ public class ChooseSynsetPanel extends JPanel {
     definitionScroller.setMinimumSize(new Dimension(300, 150));
     rightBox.add(definitionScroller, null);
 
-    Box buttonBox = Box.createHorizontalBox();
-    buttonBox.add(addSynsetButton, null);
-    buttonBox.add(Box.createHorizontalStrut(20));
-    buttonBox.add(removeSynsetButton, null);
-    rightBox.add(buttonBox);
+    if (isEditable) {
+      Box buttonBox = Box.createHorizontalBox();
+      buttonBox.add(addSynsetButton, null);
+      buttonBox.add(Box.createHorizontalStrut(20));
+      buttonBox.add(removeSynsetButton, null);
+      rightBox.add(buttonBox);
+    }
 
     leftBox.add(Box.createVerticalGlue());
     leftBox.add(Box.createHorizontalGlue());
@@ -265,6 +281,8 @@ public class ChooseSynsetPanel extends JPanel {
      */
    protected Action removeSynsetAction;
 
+   protected boolean isEditable  = true;
+
    public static void main(String[] args) {
 
    JFrame frame = new JFrame();
@@ -272,7 +290,7 @@ public class ChooseSynsetPanel extends JPanel {
    frame.setSize(250, 200);
 
    frame.setLocation(200, 300);
-   frame.getContentPane().add(new ChooseSynsetPanel(new NLGLexiconImpl()));
+   frame.getContentPane().add(new ChooseSynsetPanel(new NLGLexiconImpl(), false));
    frame.pack();
 
    frame.setVisible(true);
