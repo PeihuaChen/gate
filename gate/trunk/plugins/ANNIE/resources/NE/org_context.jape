@@ -1,0 +1,176 @@
+// org_context.jape
+// diana, 11 June 01
+
+Phase:	Org_Context
+Options: control = appelt
+
+
+//Macro:PNUNKNOWN
+//(
+// ({Token.orth == upperInitial} |
+//  {Token.orth == allCaps})
+// (SPACE 
+//  ({Token.orth == upperInitial} |
+//   {Token.orth == allCaps})
+// )*
+//)
+
+
+
+Rule:OrgContext1
+Priority: 1
+// company X
+// company called X
+
+(
+ {Token.string == "company"}
+ (SPACE)
+ (({Token.string == "called"}|
+   {Token.string == "dubbed"}|
+   {Token.string == "named"}
+  )
+  (SPACE)
+ )?
+)
+(
+ {Unknown.kind == PN}
+)
+:org
+-->
+ :org.Organization = {rule = "OrgContext1"}
+
+Rule: OrgContext2
+Priority: 5
+
+// Telstar laboratory
+// Medici offices
+(
+ {Unknown.kind == PN}
+): org
+(SPACE
+ ({Token.string == "offices"} |
+ {Token.string == "Offices"} |
+ {Token.string == "laboratory"} | 
+ {Token.string == "Laboratory"} |
+ {Token.string == "laboratories"} |
+ {Token.string == "Laboratories"})
+)
+-->
+ :org.Organization= {rule = "OrgContext2"}
+
+Rule:OrgContext3
+Priority: 5
+// X shares
+
+(
+ {Unknown.kind == PN}
+):org
+( 
+ (SPACE)
+ {Token.string == "shares"}
+)
+-->
+ :org.Organization= {rule = "OrgContext3"}
+
+Rule:OrgContext4
+Priority: 10
+// shares in X
+
+( 
+ {Token.string == "shares"}
+ (SPACE)
+ {Token.string == "in"}
+ (SPACE)
+)
+(
+ {Unknown.kind == PN}
+):org
+-->
+ :org.Organization= {rule = "OrgContext4"}
+
+Rule: OrgContext5
+Priority: 10
+// officials at X
+
+(
+ ({Token.string == "officials"}|
+  {Token.string == "Officials"})
+ SPACE
+ {Token.string == "at"}
+ SPACE
+)
+(
+ {Unknown.kind == PN}
+):org
+-->
+ :org.Organization= {rule = "OrgContext5"}
+
+Rule:JoinOrg
+Priority: 50
+// Smith joined Energis
+
+(
+ ({Token.string == "joined"}|
+  {Token.string == "joining"}|
+  {Token.string == "joins"}|
+  {Token.string == "join"}
+ )
+ SPACE
+)
+( 
+ {Unknown.kind ==PN}
+)
+:org
+-->
+ :org.Organization= {rule = "joinOrg"}
+
+
+Rule:OrgPerson
+Priority: 20
+// Nokia Vice-President William Plummer
+
+(
+ {Unknown.kind == PN}
+):org 
+(
+ ({Token.string == "'"}
+  ({Token.string == "s"})?
+ )?
+ SPACE
+ {Person}
+)
+--> 
+ :org.Organization= {rule = "OrgJobPerson"}
+
+Rule: OrgConjOrg1
+Priority: 10
+
+(
+ {Unknown.kind == PN}
+):org
+(
+ (SPACE)
+ {POS.category == CC}
+ (SPACE)
+ {Organization}
+)
+-->
+ :org.Organization= {rule = "OrgConjOrg1"}
+
+
+Rule: OrgConjOrg2
+Priority: 10
+
+(
+ {Organization}
+ (SPACE)
+ {POS.category == CC}
+ (SPACE)
+)
+
+(
+ {Unknown.kind == PN}
+):org
+-->
+ :org.Organization= {rule = "OrgConjOrg2"}
+
