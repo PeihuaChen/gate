@@ -66,6 +66,7 @@ public class XJTable extends JTable{
     columnData = new ArrayList(dataModel.getColumnCount());
     for(int i = 0; i < dataModel.getColumnCount(); i++)
       columnData.add(new ColumnData(i));
+    adjustSizes();
   }
   
   /**
@@ -101,6 +102,7 @@ public class XJTable extends JTable{
     while(colIter.hasNext()){
       ((ColumnData)colIter.next()).adjustColumnWidth();
     }
+    repaint();
   }
   
   /**
@@ -283,7 +285,7 @@ public class XJTable extends JTable{
           //rows were deleted -> we need to rebuild
           init(sourceModel);
           fireTableDataChanged();
-          if(isSortable()) sort();
+//          if(isSortable()) sort();
       }
     }
     
