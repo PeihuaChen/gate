@@ -74,6 +74,7 @@ public class TestConfig extends TestCase
 
   /** Test config loading */
   public void testConfigReading() throws Exception {
+    System.out.println("Reading GATE config from : " + Gate.getUrl("tests/gate.xml"));
     readConfig(Gate.getUrl("tests/gate.xml"));
 
     // check that we got the CREOLE dir entry; then remove it
@@ -83,7 +84,7 @@ public class TestConfig extends TestCase
     assertTrue(
       "CREOLE register doesn't contain URL from test gate.xml",
       dirs != null && ! dirs.isEmpty() &&
-      dirs.contains(new URL("http://somewhere.on.the.net/creole/"))
+      dirs.contains(new URL("http://gate.ac.uk/tests/"))
     );
 
     // we should have a GATECONFIG entry on Gate
