@@ -69,23 +69,28 @@ public class Parameter implements Serializable
    */
   public Object calculateValueFromString(String stringValue)
   throws ParameterException {
+    //if we have no string we can't construct a value
+    if(stringValue == null || stringValue.length() == 0) return null;
     Object value = null;
 
     // get the Class for the parameter via Class.forName or CREOLE register
     Class paramClass = getParameterClass();
 
+
     // Test if the paramClass is a collection and if it is, try to
     // construct the param as a collection of items specified in the
     // default string value...
-    if (Collection.class.isAssignableFrom(paramClass)){
-      // Create an collection object bellonging to  paramClass
+    if (Collection.class.isAssignableFrom(paramClass) &&
+        (!paramClass.isInterface())){
+      // Create an collection object belonging to paramClass
       Collection colection = null;
       try{
         colection = (Collection)paramClass.getConstructor(new Class[]{}).
                                   newInstance(new Object[]{});
       } catch(Exception ex){
-          throw new ParameterException("Could not construct an object of "
-            + typeName + " for param " + name);
+          throw new ParameterException("Could not construct an object of type "
+            + typeName + " for param " + name +
+            "\nProblem was: " + ex.toString());
       }// End try
       // If an itemClassName was specified then try to create objects belonging
       // to this class and add them to the collection. Otherwise add the
