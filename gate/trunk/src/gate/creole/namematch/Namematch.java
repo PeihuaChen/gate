@@ -244,6 +244,8 @@ public class Namematch extends AbstractProcessingResource
               if (annotationType.equals(personType)) {
                 annotString1 = containTitle(nameAllAnnots, annotString1,annot1);
                 annotString2 = containTitle(nameAllAnnots, annotString2,annot2);
+//                Out.prln("Annot1 without title" + annotString1);
+//                Out.prln("Annot2 without title" + annotString2);
               }
 
               if (annotString1.length()>=annotString2.length()) {
@@ -552,7 +554,7 @@ public class Namematch extends AbstractProcessingResource
   public void createLists() throws IOException {
     InputStream inputStream = Files.getGateResourceAsStream(
                                               "creole/namematcher/listsNM.def");
-    InputStreamReader inputStreamReader = new InputStreamReader (
+     InputStreamReader inputStreamReader = new InputStreamReader (
                                                     inputStream);
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
@@ -619,7 +621,7 @@ public class Namematch extends AbstractProcessingResource
     if (!matchRule0(longName, shortName)) {
       if (
            (// rules for all annotations
-              matchRule1(longName, shortName, true)
+              matchRule1(longName, shortName, false)
            ||
               matchRule2(longName, shortName)
            ||
@@ -656,8 +658,12 @@ public class Namematch extends AbstractProcessingResource
                  ||
                     matchRule7(longName, shortName)
                  ||
-                    matchRule12(shortName, longName))
-                )// rules for person annotations
+                    matchRule12(shortName, longName)
+                 || //kalina: added this, so it matches names when contain more
+                    //than one first and one last name
+                    matchRule13(shortName, longName)
+                )
+            )// rules for person annotations
            ) // if
         return true;
       } // if (!matchRule0
@@ -748,8 +754,14 @@ public class Namematch extends AbstractProcessingResource
   public boolean matchRule1(String s1,
            String s2,
            boolean MatchCase) {
-    if (MatchCase == true) return s1.equalsIgnoreCase(s2);
-    return s1.equals(s2) ;
+    boolean matched = false;
+    if (MatchCase == true)
+        matched = s1.equalsIgnoreCase(s2);
+    else matched =  s1.equals(s2) ;
+//kalina: do not remove, nice for debug
+//    if (matched)
+//        Out.prln("Rule1: Matched " + s1 + "and " + s2);
+    return matched;
   }//matchRule1
 
 
@@ -821,6 +833,7 @@ public class Namematch extends AbstractProcessingResource
     boolean allTokensMatch = true;
 
     if (tokens1.countTokens() == tokens2.countTokens()) {
+//      Out.prln("Rule 4");
       while (tokens1.hasMoreTokens()) {
   if (!tokens1.nextToken().equalsIgnoreCase(tokens2.nextToken())) {
     allTokensMatch = false;
@@ -845,6 +858,7 @@ public class Namematch extends AbstractProcessingResource
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
 
+//    Out.prln("Rule 5");
     if (tokens1.countTokens()>1)
       return matchRule1(tokens1.nextToken(),s2,true);
 
@@ -893,6 +907,11 @@ public class Namematch extends AbstractProcessingResource
     * e.g. "R.H. Macy & Co." == "Macy"
     * Condition(s): case-sensitive match
     * Applied to: organisation and person annotations only
+    *
+    * kalina: That rule is responsible for matching Hamish Cunningham and
+    * Cunningham for Person-s, because it's been changed, so that the connector
+    * actually being there is unnecessary. Took me absolutely f***ing ages
+    * to find out that this particular rule is responsible for that.
     */
   public boolean matchRule7(String s1,
            String s2) {
@@ -909,7 +928,10 @@ public class Namematch extends AbstractProcessingResource
     }
 
     //now match previous_token with other name
-    if (previous_token != null) return matchRule1(previous_token,s2,false);
+    if (previous_token != null) {
+//      Out.prln("Rule7");
+      return matchRule1(previous_token,s2,false);
+    }
     return false;
   }//matchRule7
 
@@ -1116,6 +1138,7 @@ public class Namematch extends AbstractProcessingResource
     String s2_FirstAndLastTokens = null;
 
     if (tokens1.countTokens()>1 && tokens2.countTokens()>1) {
+//     Out.prln("Rule 12");
 
       // get first and last tokens of s1
       s1_FirstAndLastTokens = tokens1.nextToken();
@@ -1145,7 +1168,7 @@ public class Namematch extends AbstractProcessingResource
     *               - if N is the number of tokens of the longest
     *                 name, then N-1 tokens should be matched
     * Condition(s): case-sensitive match
-    * Applied to: organisation annotations only
+    * Applied to: organisation or person annotations only
     */
   public boolean matchRule13(String s1,
             String s2) {
@@ -1170,14 +1193,21 @@ public class Namematch extends AbstractProcessingResource
         token1 = tokens1.nextToken();
         if(!tokens1.hasMoreTokens()
           &&  cdg.containsKey(token1)) cdg1=token1;
-        else v1.add(token1);
+        else {
+        //kalina: move it to lower case, so we match irrespective of case
+        token1 = token1.toLowerCase();
+        v1.add(token1);
+        }
     }
 
     while (tokens2.hasMoreTokens()) {
       token2 = tokens2.nextToken();
       if(!tokens2.hasMoreTokens()
           &&  cdg.containsKey(token2)) cdg2=token2;
-          else v2.add(token2);
+          else {
+            token2 = token2.toLowerCase();
+            v2.add(token2);
+          }
     }
 
 
@@ -1198,7 +1228,8 @@ public class Namematch extends AbstractProcessingResource
     }
 
     // now do the matching
-    if (largerVector.size()>=3) {
+    if (largerVector.size()>=2) {
+//      Out.prln("Rule 13");
       for (Iterator iter = smallerVector.iterator();
                               iter.hasNext() ;) {
         token1 = (String) iter.next();
