@@ -38,6 +38,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
   /** jdbc url for the database */
   private   String      dbURL;
+  protected String      dbSchema;
 
   /** jdbc driver name */
   private   String      driverName;
@@ -103,6 +104,8 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     }
     else {
       this.dbURL = storageUrl;
+      this.dbSchema = DBHelper.getSchemaPrefix(this.dbURL);
+      Assert.assertNotNull(this.dbSchema);
     }
 
   }

@@ -44,6 +44,7 @@ public class AccessControllerImpl
 
   private Connection  jdbcConn;
   private String      jdbcURL;
+  private String      jdbcSchema;
 
   private HashMap     usersByID;
   private HashMap     usersByName;
@@ -77,6 +78,9 @@ public class AccessControllerImpl
 
     this.refCnt = 0;
     this.jdbcURL = jdbcURL;
+    this.jdbcSchema = DBHelper.getSchemaPrefix(this.jdbcURL);
+
+    Assert.assertNotNull(this.jdbcSchema);
 
     sessions = new HashMap();
     sessionLastUsed = new HashMap();
@@ -869,7 +873,7 @@ public class AccessControllerImpl
       //1.1 read groups
       sql = " SELECT grp_id, " +
             "        grp_name "+
-            " FROM   "+Gate.DB_OWNER+".t_group";
+            " FROM   "+this.jdbcSchema+"t_group";
       rs = stmt.executeQuery(sql);
 
 
@@ -888,7 +892,7 @@ public class AccessControllerImpl
       //1.2 read users
       sql = " SELECT usr_id, " +
             "        usr_login "+
-            " FROM   "+Gate.DB_OWNER+".t_user";
+            " FROM   "+this.jdbcSchema+"t_user";
       rs = stmt.executeQuery(sql);
 
       while (rs.next()) {
@@ -905,7 +909,7 @@ public class AccessControllerImpl
       //1.3 read user/group relations
       sql = " SELECT    UGRP_GROUP_ID, " +
             "           UGRP_USER_ID "+
-            " FROM      "+Gate.DB_OWNER+".t_user_group " +
+            " FROM      "+this.jdbcSchema+"t_user_group " +
             " ORDER BY  UGRP_GROUP_ID asc";
       rs = stmt.executeQuery(sql);
 
