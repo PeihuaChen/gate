@@ -121,9 +121,11 @@ create or replace package body persist is
      --1. create a document_content entry
      insert into t_doc_content(dc_id,
                                dc_encoding_id,
-                               dc_content)
+                               dc_character_content,
+                               dc_binary_content)
      values(seq_doc_content.nextval,
             p_encoding,
+            empty_clob(),
             empty_blob())
      returning dc_id into p_content_id;
      
