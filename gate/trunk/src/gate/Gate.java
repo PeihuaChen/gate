@@ -106,6 +106,9 @@ public class Gate implements GateConstants
       classLoader = new GateClassLoader();
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
+    if(knownPlugins == null) knownPlugins = new ArrayList();
+    if(autoloadPlugins == null) autoloadPlugins = new ArrayList();
+    if(pluginData == null) pluginData = new HashMap();
     // init the creole register
     initCreoleRegister();
     // init the data store register
@@ -150,7 +153,6 @@ public class Gate implements GateConstants
     //load loadable plugins
     
     //process the known plugins list
-    knownPlugins = new ArrayList();
     String knownPluginsPath = (String)getUserConfig().get(KNOWN_PLUGIN_PATH_KEY);
     if(knownPluginsPath != null && knownPluginsPath.length() > 0){
       StringTokenizer strTok = new StringTokenizer(knownPluginsPath, ";", false);
@@ -182,7 +184,6 @@ public class Gate implements GateConstants
     }
     //we now have a full list of known plugins
     //get the information about the plugins
-    pluginData = new HashMap();
     Iterator pluginIter = knownPlugins.iterator();
     while(pluginIter.hasNext()){
       URL aPluginURL = (URL)pluginIter.next();
@@ -191,7 +192,6 @@ public class Gate implements GateConstants
     }
     
     //process the autoload plugins
-    autoloadPlugins = new ArrayList();
     String pluginPath = getUserConfig().getString(LOAD_PLUGIN_PATH_KEY);
     //can be overridden by system property
     String prop = System.getProperty(LOAD_PLUGIN_PATH_SYSPROP_KEY);
