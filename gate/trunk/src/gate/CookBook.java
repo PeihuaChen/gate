@@ -161,13 +161,14 @@ public class CookBook extends TestCase
       res instanceof gate.Document
     );
     Document doc = (Document) res;
-    AnnotationSet markupAnnotations = doc.getAnnotations();
+    AnnotationSet markupAnnotations = doc.getAnnotations("Original markups");
+    //this is useless as doc.getAnnotations() will never return null!
     assertNotNull("no markup annotations on doc " + doc, markupAnnotations);
     int numMarkupAnnotations = markupAnnotations.size();
     if(DEBUG)
       Out.prln("annotations on doc after unpack= " + numMarkupAnnotations);
     assert(
-      "wrong number annots on doc: " + numMarkupAnnotations,
+      "wrong number annots on doc: " + doc + numMarkupAnnotations,
       numMarkupAnnotations == 27
     );
 
