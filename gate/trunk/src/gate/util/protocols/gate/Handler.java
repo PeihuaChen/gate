@@ -48,18 +48,6 @@ public class Handler extends URLStreamHandler {
           return actualURL.openConnection();
         }
       }
-//      
-//      Iterator pluginIter = Gate.getCreoleRegister().getDirectories().iterator();
-//      while(pluginIter.hasNext()){
-//        actualURL = new URL((URL)pluginIter.next(), "/resources/" + u.getPath());
-//        try{
-//          URLConnection conn = actualURL.openConnection();
-//          return conn;
-//        }catch(IOException ioe){
-//          //it didn't work this time.
-//          actualURL = null;
-//        }
-//      }
     }
     if(actualURL == null) throw new FileNotFoundException(u.toExternalForm());
     return actualURL.openConnection();
