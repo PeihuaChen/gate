@@ -1,4 +1,3 @@
-
 ADMINISTRATION
 AGENCE
 AGENCES
@@ -23,6 +22,7 @@ Bank
 Banque
 Board
 Brotherhood
+Building Society
 Bureau
 CAISSE
 CATHEDRAL
@@ -83,10 +83,12 @@ GUILD
 Group
 Groupe
 Guild
+HEALTH AUTHORITY
 HOME
 HOSPITAL
 HOTEL
 HOTELS
+Health Authority
 Home
 Hospital
 Hotel
@@ -101,10 +103,14 @@ LABORATOIRE
 LABORATOIRES
 LABORATORIES
 LABORATORY
+LOCAL AUTHORITY
+LOCAL HEALTH AUTHORITY
 Laboratoire
 Laboratoires
 Laboratories
 Laboratory
+Local Authority
+Local Health Authority
 MAGAZINE
 MINISTERE
 MINISTRY
@@ -133,6 +139,10 @@ Partners
 Partnership
 Party
 Plant
+REGIONAL AUTHORITY
+REGIONAL HEALTH AUTHORITY
+Regional Authority
+Regional Health Authority
 SCHOOL
 SERVICE
 SOCIETY
@@ -169,3 +179,7 @@ state university
 syndicat
 université
 état
+
+
+
+
