@@ -19,7 +19,7 @@ import java.util.*;
 
   /** A state of the finite state machine that is the kernel tokeniser
     */
-class FSMState{
+class FSMState implements java.io.Serializable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;

@@ -47,7 +47,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
 
-  private java.util.List myStatusListeners = new java.util.LinkedList();
+  private transient java.util.List myStatusListeners = new java.util.LinkedList();
 
   /** Position of the current rule */
   private int ruleNumber;

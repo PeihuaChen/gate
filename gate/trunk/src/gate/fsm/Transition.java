@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Valentin Tablan, 11/Apr/2000
  *
  *  $Id$
@@ -18,6 +18,7 @@ package gate.fsm;
 import gate.jape.*;
 
 import java.util.*;
+import java.io.*;
 
 /**
   * This class implements a Finite State Machine transition.
@@ -27,7 +28,7 @@ import java.util.*;
   * A transition can also hold information about the label that should be bound
   * to the symbols (annotations) consumed during the state transition.
   */
-public class Transition {
+public class Transition implements Serializable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -128,5 +129,5 @@ public class Transition {
   /** Static member used for generating unique IDs for the objects of type
     * Transition*/
   private static int index = 0;
-  
+
 } // Transition

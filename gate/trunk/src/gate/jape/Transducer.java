@@ -18,7 +18,10 @@ package gate.jape;
 
 import java.util.*;
 import java.net.*;
+import java.io.*;
+
 import com.objectspace.jgl.*;
+
 import gate.annotation.*;
 import gate.util.*;
 import gate.event.*;
@@ -28,7 +31,7 @@ import gate.*;
 /**
   * Represents a single or multiphase transducer.
   */
-public abstract class Transducer implements java.io.Serializable
+public abstract class Transducer implements Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -102,9 +105,9 @@ public abstract class Transducer implements java.io.Serializable
 
 
 
-  private List myProgressListeners = new LinkedList();
+  private transient List myProgressListeners = new LinkedList();
 
-  private List myStatusListeners = new LinkedList();
+  private transient List myStatusListeners = new LinkedList();
 
 
   private URL baseURL;
@@ -115,67 +118,3 @@ public abstract class Transducer implements java.io.Serializable
 
 
 
-// $Log$
-// Revision 1.11  2001/03/06 20:11:14  valyt
-// <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
-//
-// Cleaned up some obsolete classes
-//
-// Revision 1.10  2001/02/08 13:46:07  valyt
-// Added full Unicode support for the gazetteer and Jape
-// converted the gazetteer files to UTF-8
-//
-// Revision 1.9  2001/01/21 20:51:32  valyt
-// Added the DocumentEditor class and the necessary changes to the gate API
-//
-// Revision 1.8  2000/11/08 16:35:04  hamish
-// formatting
-//
-// Revision 1.7  2000/10/26 10:45:31  oana
-// Modified in the code style
-//
-// Revision 1.6  2000/10/16 16:44:34  oana
-// Changed the comment of DEBUG variable
-//
-// Revision 1.5  2000/10/10 15:36:37  oana
-// Changed System.out in Out and System.err in Err;
-// Added the DEBUG variable seted on false;
-// Added in the header the licence;
-//
-// Revision 1.4  2000/07/12 14:19:19  valyt
-// Testing CVS
-//
-// Revision 1.3  2000/07/04 14:37:39  valyt
-// Added some support for Jape-ing in a different annotations et than the default one;
-// Changed the L&F for the JapeGUI to the System default
-//
-// Revision 1.2  2000/07/03 21:00:59  valyt
-// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
-// (it looks great :) )
-//
-// Revision 1.1  2000/02/23 13:46:13  hamish
-// added
-//
-// Revision 1.1.1.1  1999/02/03 16:23:03  hamish
-// added gate2
-//
-// Revision 1.11  1998/11/01 21:21:42  hamish
-// use Java arrays in transduction where possible
-//
-// Revision 1.10  1998/10/29 12:09:09  hamish
-// added serializable
-//
-// Revision 1.9  1998/09/18 13:36:03  hamish
-// made Transducer a class
-//
-// Revision 1.8  1998/08/19 20:21:47  hamish
-// new RHS assignment expression stuff added
-//
-// Revision 1.7  1998/08/12 15:39:46  hamish
-// added padding toString methods
-//
-// Revision 1.6  1998/08/10 14:16:43  hamish
-// fixed consumeblock bug and added batch.java
-//
-// Revision 1.5  1998/08/07 16:18:49  hamish
-// parser pretty complete, with backend link done

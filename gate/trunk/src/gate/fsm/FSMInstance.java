@@ -19,6 +19,7 @@ import gate.annotation.AnnotationSetImpl;
 import gate.util.*;
 
 import java.util.*;
+import java.io.*;
 
 /**
   * The objects of this class represent instances of working Finite State
@@ -31,7 +32,7 @@ import java.util.*;
   *  note that a set of bindings is an object of type Map that maps names
   * (java.lang.String) to bags of annotations (gate.AnnotationSet)
   */
-public class FSMInstance implements Comparable, Cloneable{
+public class FSMInstance implements Comparable, Cloneable, Serializable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;

@@ -35,16 +35,73 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) {
+    Scratch oneOfMe = new Scratch();
     try{
-      Gate.init();
-      doIt();
+      oneOfMe.doIt();
     } catch (Exception e) {
       e.printStackTrace(Out.getPrintWriter());
     }
 
   } // main
 
-  public static void doIt() throws Exception{
+  public void doIt() throws Exception {
+    long startTime = System.currentTimeMillis();
+
+    Out.prln("gate init");
+    Gate.setLocalWebServer(false);
+    Gate.setNetConnected(false);
+    Gate.init();
+
+    Out.prln((System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+    Out.prln("creating resources");
+
+    // a controller
+    Controller c1 = (Controller) Factory.createResource(
+      "gate.creole.SerialController",
+      Factory.newFeatureMap()
+    );
+
+    //get a document
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
+//    params.put("sourceUrl", new File("z:\\tmp\\zxc.txt").toURL());
+    params.put("markupAware", "false");
+    Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
+
+    //create a default tokeniser
+    params = Factory.newFeatureMap();
+    params.put("rulesURL", "gate:/creole/tokeniser/DefaultTokeniser.rules");
+    params.put("encoding", "UTF-8");
+    params.put("document", doc);
+    ProcessingResource tokeniser = (ProcessingResource) Factory.createResource(
+      "gate.creole.tokeniser.DefaultTokeniser", params
+    );
+
+    //create a default gazetteer
+    params = Factory.newFeatureMap();
+    params.put("document", doc);
+    params.put("listsURL", "gate:/creole/gazeteer/default/lists.def");
+    ProcessingResource gaz = (ProcessingResource) Factory.createResource(
+      "gate.creole.gazetteer.DefaultGazetteer", params
+    );
+
+    //create a default transducer
+    params = Factory.newFeatureMap();
+    params.put("document", doc);
+    //params.put("grammarURL", new File("z:\\tmp\\main.jape").toURL());
+    ProcessingResource trans = (ProcessingResource) Factory.createResource(
+      "gate.creole.Transducer", params
+    );
+
+    // get the controller to encapsulate the tok and gaz
+    c1.add(tokeniser);
+    c1.add(gaz);
+    c1.add(trans);
+
+    Out.prln((System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+    Out.prln("dumping state");
+
     // create a File to store the state in
     File stateFile = new File("z:\\tmp", "SerialisedGateState.ser");
 
@@ -53,14 +110,46 @@ public class Scratch
       ObjectOutputStream oos = new ObjectOutputStream(
         new FileOutputStream(stateFile)
       );
-      oos.writeObject(Gate.getCreoleRegister());
+      oos.writeObject(new SessionState());
       oos.close();
     } catch(IOException e) {
       throw new GateException("Couldn't write to state file: " + e);
     }
 
     Out.prln(System.getProperty("user.home"));
+
+    Out.prln((System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+    Out.prln("reinstating");
+
+    try {
+      FileInputStream fis = new FileInputStream(stateFile);
+      ObjectInputStream ois = new ObjectInputStream(fis);
+      SessionState state = (SessionState) ois.readObject();
+      ois.close();
+    } catch(IOException e) {
+      throw
+        new GateException("Couldn't read file "+stateFile+": "+e);
+    } catch(ClassNotFoundException ee) {
+      throw
+        new GateException("Couldn't find class: "+ee);
+    }
+
+    Out.prln((System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+    Out.prln("done");
   } // doIt
+
+  class SessionState implements Serializable {
+    SessionState() {
+      cr = Gate.getCreoleRegister();
+      dsr = Gate.getDataStoreRegister();
+    }
+
+    CreoleRegister cr;
+
+    DataStoreRegister dsr;
+
+    // other state from Gate? and elsewhere?
+  }
 
   /** Generate a random integer for file naming. */
   protected static int random() {

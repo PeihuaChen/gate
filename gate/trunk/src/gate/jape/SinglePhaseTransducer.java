@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
+import java.io.*;
 import com.objectspace.jgl.*;
 
 import gate.annotation.*;
@@ -650,156 +651,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   java.util.Set input = new java.util.HashSet();
 
+  /*
+  private void writeObject(ObjectOutputStream oos) throws IOException {
+    Out.prln("writing spt");
+    oos.defaultWriteObject();
+    Out.prln("finished writing spt");
+  } // writeObject
+  */
+
+
 } // class SinglePhaseTransducer
-
-
-
-// $Log$
-// Revision 1.26  2001/02/20 12:25:49  valyt
-// Fixed the Jpae priorities bug
-//
-// Revision 1.25  2001/01/21 20:51:31  valyt
-// Added the DocumentEditor class and the necessary changes to the gate API
-//
-// Revision 1.24  2000/11/20 12:53:58  valyt
-// A new faster Jape
-//
-// Revision 1.23  2000/11/08 16:35:04  hamish
-// formatting
-//
-// Revision 1.22  2000/10/26 10:45:31  oana
-// Modified in the code style
-//
-// Revision 1.21  2000/10/18 13:26:47  hamish
-// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
-//     parameter list fed to createResource.
-//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
-//     moved createResource from CR to Factory
-//     removed Transients; use Factory instead
-//
-// Revision 1.20  2000/10/16 16:44:34  oana
-// Changed the comment of DEBUG variable
-//
-// Revision 1.19  2000/10/11 16:37:40  valyt
-// Fixed the tests
-//
-// Revision 1.18  2000/10/10 16:13:53  valyt
-// Fixed a small bug in AnnotationSetImpl
-//
-// Revision 1.17  2000/10/10 15:36:37  oana
-// Changed System.out in Out and System.err in Err;
-// Added the DEBUG variable seted on false;
-// Added in the header the licence;
-//
-// Revision 1.16  2000/09/12 13:40:52  valyt
-// Fixed a bug in Jape (the input specification didn't work properly)
-//
-// Revision 1.15  2000/09/10 18:30:26  valyt
-// Added support for:
-// 	rules priority
-// 	input specification
-// in Jape
-//
-// Revision 1.14  2000/07/19 20:37:37  valyt
-// Changed the Files.getResourceAsStream() method in order to break the tests :)
-//
-// now it doesn't only load gate resources but the full path of the resource must be specified
-//
-// Revision 1.13  2000/07/12 11:40:19  valyt
-// *** empty log message ***
-//
-// Revision 1.12  2000/07/04 14:37:39  valyt
-// Added some support for Jape-ing in a different annotations et than the default one;
-// Changed the L&F for the JapeGUI to the System default
-//
-// Revision 1.11  2000/07/03 21:00:59  valyt
-// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
-// (it looks great :) )
-//
-// Revision 1.10  2000/06/26 14:45:50  valyt
-// Fixed the haunting bug in Jape: it works OK now
-// Reversed Jape to using the Java object management instead of our custom made object pooling:
-// aparently it works faster if the VM deletes and creates new objects than when we try to re-use them. I imagine it is a 1.3 issue: the hotspot improves object creation/deletion times.
-//
-// Revision 1.9  2000/06/22 13:50:28  valyt
-// Changed TestJdk to accommodate linux
-//
-// Revision 1.8  2000/05/24 10:22:23  valyt
-// Added Jape GUI
-//
-// Revision 1.7  2000/05/17 19:56:14  valyt
-// Killed some bugs in Jape.
-// It looks like it's working
-// (so I think it's dangerous to test it anymore :) )
-//
-// Revision 1.6  2000/05/17 17:08:49  valyt
-// First working (?) version of jape.
-//
-// Revision 1.5  2000/05/12 14:14:16  valyt
-// Done some work on jape....almost done :)
-//
-// Revision 1.4  2000/05/08 14:14:36  valyt
-// Moved the ORACLE tests to derwent
-//
-// Revision 1.3  2000/05/05 12:51:12  valyt
-// Got rid of deprecation warnings
-//
-// Revision 1.2  2000/04/14 18:02:46  valyt
-// Added some gate.fsm classes
-// added some accessor function in old jape classes
-//
-// Revision 1.1  2000/02/23 13:46:11  hamish
-// added
-//
-// Revision 1.1.1.1  1999/02/03 16:23:02  hamish
-// added gate2
-//
-// Revision 1.16  1998/11/13 13:17:18  hamish
-// merged in the doc length bug fix
-//
-// Revision 1.15  1998/11/12 17:47:28  kalina
-// A bug fixed, wasn't restoring the document length
-//
-// Revision 1.14  1998/11/05 13:36:30  kalina
-// moved to use array of JdmAttributes for selectNextAnnotation instead of a sequence
-//
-// Revision 1.13  1998/11/01 23:18:45  hamish
-// use new instead of clear on containers
-//
-// Revision 1.12  1998/11/01 21:21:41  hamish
-// use Java arrays in transduction where possible
-//
-// Revision 1.11  1998/10/30 15:31:08  kalina
-// Made small changes to make compile under 1.2 and 1.1.x
-//
-// Revision 1.10  1998/10/29 12:13:06  hamish
-// reorganised appelt transduction to be more efficient
-// and accurate in the way it resets rules
-//
-// Revision 1.9  1998/10/01 16:06:39  hamish
-// new appelt transduction style, replacing buggy version
-//
-// Revision 1.8  1998/09/26 09:19:20  hamish
-// added cloning of PE macros
-//
-// Revision 1.7  1998/09/18 13:36:02  hamish
-// made Transducer a class
-//
-// Revision 1.6  1998/09/17 10:24:04  hamish
-// added options support, and Appelt-style rule application
-//
-// Revision 1.5  1998/08/19 20:21:44  hamish
-// new RHS assignment expression stuff added
-//
-// Revision 1.4  1998/08/18 12:43:08  hamish
-// fixed SPT bug, not advancing newPosition
-//
-// Revision 1.3  1998/08/12 15:39:44  hamish
-// added padding toString methods
-//
-// Revision 1.2  1998/08/10 14:16:41  hamish
-// fixed consumeblock bug and added batch.java
-//
-// Revision 1.1  1998/08/07 16:18:46  hamish
-// parser pretty complete, with backend link done
-//

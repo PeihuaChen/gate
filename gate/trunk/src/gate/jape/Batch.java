@@ -38,7 +38,7 @@ import gate.creole.*;
   * Construction will parse or deserialise a transducer as required.
   */
 public class Batch
-implements JapeConstants{
+implements JapeConstants {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -60,6 +60,13 @@ implements JapeConstants{
   /** Create non-initialised instance (private, used in main). */
   private Batch() { }
 
+  /** A serializable listener */
+  class SerialStatusListener implements StatusListener, Serializable {
+    public void statusChanged(String text){
+      fireStatusChangedEvent(text);
+    }
+  }; // SerialStatusListener
+
   /** Create a fully initialised instance.
     * <P><CODE>japeFileName</CODE>: the name of a .jape or .ser transducer
     * file. This may be an absolute path, or may a .jar
@@ -69,11 +76,8 @@ implements JapeConstants{
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null) transducer.addStatusListener(new StatusListener() {
-      public void statusChanged(String text){
-        fireStatusChangedEvent(text);
-      }
-    });
+    if(transducer != null)
+      transducer.addStatusListener(new SerialStatusListener());
   } // full init constructor
 
   public Batch(URL url, String encoding, StatusListener sListener)
@@ -83,11 +87,8 @@ implements JapeConstants{
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null) transducer.addStatusListener(new StatusListener() {
-      public void statusChanged(String text){
-        fireStatusChangedEvent(text);
-      }
-    });
+    if(transducer != null)
+      transducer.addStatusListener(new SerialStatusListener());
   } // full init constructor
 
 
@@ -170,11 +171,7 @@ implements JapeConstants{
     try {
       gate.jape.parser.ParseCpsl parser =
         new gate.jape.parser.ParseCpsl(japeURL, encoding);
-      StatusListener listener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChangedEvent(text);
-        }
-      };
+      StatusListener listener = new SerialStatusListener();
       parser.addStatusListener(listener);
       transducer = parser.MultiPhaseTransducer();
       transducer.removeStatusListener(listener);
@@ -532,141 +529,18 @@ implements JapeConstants{
   /** Path to the resources tree */
 //  private String resPath = null;
 
-  private List myProgressListeners = new LinkedList();
+  private transient List myProgressListeners = new LinkedList();
 
-  private List myStatusListeners = new LinkedList();
+  private transient List myStatusListeners = new LinkedList();
   private gate.FeatureMap features;
+
+  /*
+  private void writeObject(ObjectOutputStream oos) throws IOException {
+    Out.prln("writing batch");
+    oos.defaultWriteObject();
+    Out.prln("finished writing batch");
+  } // writeObject
+  */
 
 } // class Batch
 
-// $Log$
-// Revision 1.21  2001/03/08 20:11:35  valyt
-// Added "select URL as file" facility
-// redesigned the listeners setting in Factory to make it more flexible and better looking
-// recompiled Jape to conform with the changes
-//
-// Revision 1.20  2001/03/06 20:11:14  valyt
-//
-// <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
-//
-// Cleaned up some obsolete classes
-//
-// Revision 1.19  2001/02/08 13:46:06  valyt
-// Added full Unicode support for the gazetteer and Jape
-// converted the gazetteer files to UTF-8
-//
-// Revision 1.18  2001/01/21 20:51:31  valyt
-// Added the DocumentEditor class and the necessary changes to the gate API
-//
-// Revision 1.17  2000/11/10 18:53:57  hamish
-// implemented exception policy for PRs, PRs.check, and
-// added AbstractProcessingResource
-//
-// Revision 1.16  2000/11/10 12:35:25  valyt
-// Made the tokeniser and gazetter reset after each run.
-//
-// Maybe all the processing resources should do that?
-//
-// Revision 1.15  2000/11/08 16:35:02  hamish
-// formatting
-//
-// Revision 1.14  2000/10/26 10:45:30  oana
-// Modified in the code style
-//
-// Revision 1.13  2000/10/23 21:50:41  hamish
-// cleaned up exception handling in gate.creole and added
-// ResourceInstantiationException;
-//
-// changed Factory.newDocument(URL u) to use the new instantiation
-// facilities;
-//
-// added COMMENT to resource metadata / ResourceData;
-//
-// changed Document and DocumentImpl to follow beans style, and moved
-// constructor logic to init(); changed all the Factory newDocument methods to
-// use the new resource creation stuff;
-//
-// added builtin document and corpus metadata to creole/creole.xml (copied from
-// gate.ac.uk/tests/creole.xml);
-//
-// changed Corpus to the new style too;
-//
-// removed CreoleRegister.init()
-//
-// Revision 1.12  2000/10/18 13:26:47  hamish
-// Factory.createResource now working, with a utility method that uses
-// reflection (via java.beans.Introspector) to set properties on a resource
-// from the
-//     parameter list fed to createResource.
-//     resources may now have both an interface and a class; they are indexed
-//     by interface type; the class is used to instantiate them
-//     moved createResource from CR to Factory
-//     removed Transients; use Factory instead
-//
-// Revision 1.11  2000/10/16 16:44:33  oana
-// Changed the comment of DEBUG variable
-//
-// Revision 1.10  2000/10/10 15:36:35  oana
-// Changed System.out in Out and System.err in Err;
-// Added the DEBUG variable seted on false;
-// Added in the header the licence;
-//
-// Revision 1.9  2000/07/18 12:09:33  valyt
-// Removed muse from the gate tree
-//
-// Revision 1.8  2000/07/12 17:55:39  valyt
-// *** empty log message ***
-//
-// Revision 1.7  2000/07/04 14:37:39  valyt
-// Added some support for Jape-ing in a different annotations et than the
-// default one;
-// Changed the L&F for the JapeGUI to the System default
-//
-// Revision 1.6  2000/07/03 21:00:59  valyt
-// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
-// (it looks great :) )
-//
-// Revision 1.5  2000/06/09 16:54:33  hamish
-// support for grammars coming from resources
-//
-// Revision 1.4  2000/05/05 11:17:47  hamish
-// use new parser constructor for streams
-//
-// Revision 1.3  2000/05/05 10:32:25  hamish
-// added some error handling
-//
-// Revision 1.2  2000/05/03 18:06:39  hamish
-// added construction from InputStream
-//
-// Revision 1.1  2000/02/23 13:46:04  hamish
-// added
-//
-// Revision 1.1.1.1  1999/02/03 16:23:01  hamish
-// added gate2
-//
-// Revision 1.8  1998/10/30 14:06:43  hamish
-// added getTransducer
-//
-// Revision 1.7  1998/10/29 12:03:23  hamish
-// completely rewrittern, to handle .ser and .jar as
-// well as .jape, and to encapsulate a transducer to allow
-// repeated applications; methods for documents, colls and files and
-// strings added
-//
-// Revision 1.6  1998/08/19 20:21:37  hamish
-// new RHS assignment expression stuff added
-//
-// Revision 1.5  1998/08/18 12:43:05  hamish
-// fixed SPT bug, not advancing newPosition
-//
-// Revision 1.4  1998/08/17 10:26:18  hamish
-// not much
-//
-// Revision 1.3  1998/08/12 19:05:41  hamish
-// fixed multi-part CG bug; set reset to real reset and fixed multi-doc bug
-//
-// Revision 1.2  1998/08/12 15:39:31  hamish
-// added padding toString methods
-//
-// Revision 1.1  1998/08/10 14:16:36  hamish
-// fixed consumeblock bug and added batch.java
