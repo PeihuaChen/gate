@@ -32,6 +32,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
   private static final boolean DEBUG = false;
+  private static final String OUTPUT_FILE_EXTENSION = ".gate";
 
   /**
    * A list of annotation types, which are to be dumped into the output file
@@ -135,9 +136,9 @@ public class DumpingPR extends AbstractLanguageAnalyser
     try {
       URL sourceURL = new URL(source);
       StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
+      tempBuff.append(this.OUTPUT_FILE_EXTENSION);
 //      tempBuff.insert(sourceURL.getFile().lastIndexOf("."), "_gate_output");
 //      tempBuff.insert(0, sourceURL.getPath());
-      tempBuff.append(".gate");
       String outputPath = tempBuff.toString();
       if (DEBUG)
         Out.prln(outputPath);
