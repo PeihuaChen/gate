@@ -386,56 +386,69 @@ public class MainFrame extends JFrame
       this, "Resource parameters", true
     );
     waitDialog = new WaitDialog(this, "");
+    
+    
     //build the Help->About dialog
     JPanel splashBox = new JPanel();
-    splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
-    splashBox.setBackground(Color.white);
+    splashBox.setBackground(Color.WHITE);
+    
+    splashBox.setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.weightx = 0;
+    constraints.weighty = 0;
+    constraints.insets = new Insets(2, 2, 2, 2);
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.anchor = GridBagConstraints.CENTER;
 
-    JLabel gifLbl = new JLabel(getIcon("gateSplash.gif"));
-    Box box = new Box(BoxLayout.X_AXIS);
-    box.add(Box.createHorizontalGlue());
-    box.add(gifLbl);
-    box.add(Box.createHorizontalGlue());
-    splashBox.add(box);
+    constraints.gridy = 0;
+    constraints.gridwidth = 2;
+    constraints.fill = GridBagConstraints.NONE;
+    JLabel gifLbl = new JLabel(getIcon("gateHeader.gif"));
+    splashBox.add(gifLbl, constraints);
 
-    gifLbl = new JLabel(getIcon("gateHeader.gif"));
-    box = new Box(BoxLayout.X_AXIS);
-    box.add(gifLbl);
-    box.add(Box.createHorizontalGlue());
-    splashBox.add(box);
-    splashBox.add(Box.createVerticalStrut(10));
+    constraints.gridy = 1;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridwidth = 1;
+    constraints.gridheight = 1;
+    
+    gifLbl = new JLabel(getIcon("gateSplash.gif"));
+    splashBox.add(gifLbl, constraints);
+    
+    gifLbl = new JLabel(getIcon("sponsors.gif"));
+    splashBox.add(gifLbl, constraints);
+    constraints.gridy = 2;
+    constraints.gridwidth = 2;
+    constraints.anchor = GridBagConstraints.CENTER;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    JLabel htmlLbl = new JLabel(
+            "<HTML><CENTER>" +
+            "<B>Hamish Cunningham, Valentin Tablan, Kalina Bontcheva, Diana Maynard,</B>" +
+            "<BR>Niraj Aswani, Mike Dowman, Marin Dimitrov, Bobby Popov, Yaoyong Li, Akshay Java," +
+            "<BR>Wim Peters, Ian Roberts, Mark Greenwood, Angus Roberts, Andrey Shafirin," +
+            "<BR>Horacio Saggion, Cristian Ursu, Atanas Kiryakov, Angel Kirilov, Damyan Ognyanoff," +
+            "<BR>Dimitar Manov, Milena Yankova, Oana Hamza, Robert Gaizauskas, Mark Hepple," +
+            "<BR>Mark Leisher, Fang Huang, Kevin Humphreys, Yorick Wilks." +            
+            "</CENTER></HTML>");
+    htmlLbl.setHorizontalAlignment(SwingConstants.CENTER);
+    splashBox.add(htmlLbl, constraints);
+    
+    constraints.gridy = 3;
+    htmlLbl = new JLabel(
+            "<HTML><FONT color=\"blue\">Version <B>"
+            + Main.version + "</B></FONT>" +
+            ", <FONT color=\"red\">build <B>" + Main.build + "</B></FONT>" +
+            "<P><B>JVM version</B>: " + System.getProperty("java.version") +
+            " from " + System.getProperty("java.vendor") +
+            "</HTML>"
+          );
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    splashBox.add(htmlLbl, constraints);
 
-    JLabel verLbl = new JLabel(
-      "<HTML><FONT color=\"blue\">Version <B>"
-      + Main.version + "</B></FONT>" +
-      ", <FONT color=\"red\">build <B>" + Main.build + "</B></FONT></HTML>"
-    );
-    box = new Box(BoxLayout.X_AXIS);
-    box.add(Box.createHorizontalGlue());
-    box.add(verLbl);
-
-    splashBox.add(box);
-    splashBox.add(Box.createVerticalStrut(10));
-
-    verLbl = new JLabel(
-"<HTML>" +
-"<B>Hamish Cunningham, Valentin Tablan, Kalina Bontcheva, Diana Maynard,</B>" +
-"<BR>Niraj Aswani, Mike Dowman, Marin Dimitrov, Bobby Popov, Yaoyong Li, Akshay Java," +
-"<BR>Wim Peters, Ian Roberts, Mark Greenwood, Angus Roberts, Andrey Shafirin," +
-//"<BR>XXX," +
-//"<BR>XXX," +
-"<BR>Horacio Saggion, Cristian Ursu, Atanas Kiryakov, Angel Kirilov, Damyan Ognyanoff," +
-"<BR>Dimitar Manov, Milena Yankova, Oana Hamza, Robert Gaizauskas, Mark Hepple," +
-"<BR>Mark Leisher, Fang Huang, Kevin Humphreys, Yorick Wilks." +
-"<P><B>JVM version</B>: " + System.getProperty("java.version") +
-" from " + System.getProperty("java.vendor")
-    );
-    box = new Box(BoxLayout.X_AXIS);
-    box.add(verLbl);
-    box.add(Box.createHorizontalGlue());
-
-    splashBox.add(box);
-
+    
+    constraints.gridy = 4;
+    constraints.gridwidth = 2;
+    constraints.fill = GridBagConstraints.NONE;
     JButton okBtn = new JButton("OK");
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -443,14 +456,7 @@ public class MainFrame extends JFrame
       }
     });
     okBtn.setBackground(Color.white);
-    box = new Box(BoxLayout.X_AXIS);
-    box.add(Box.createHorizontalGlue());
-    box.add(okBtn);
-    box.add(Box.createHorizontalGlue());
-
-    splashBox.add(Box.createVerticalStrut(10));
-    splashBox.add(box);
-    splashBox.add(Box.createVerticalStrut(10));
+    splashBox.add(okBtn, constraints);
     splash = new Splash(this, splashBox);
 
 
