@@ -141,4 +141,6 @@ public class DocumentContentImpl implements DocumentContent
   /** For ranges */
   public DocumentContentImpl(String s) { content = s; }
 
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = -1426940535575467461L;
 } // class DocumentContentImpl

@@ -119,4 +119,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
   /** The features associated with this corpus. */
   protected FeatureMap features;
 
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = 404036675903473841L;
+
 } // class CorpusImpl

@@ -19,10 +19,12 @@ import java.util.*;
 
 public class ApplicationViewer extends AbstractVisualResource {
 
-  public ApplicationViewer(Controller controller, ProjectData project) {
+  public ApplicationViewer(Controller controller, ApplicationHandle handle) {
     if(controller instanceof SerialController){
       this.controller = (SerialController)controller;
-      this.project = project;
+      this.handle = handle;
+      this.project = handle.project;
+      this.popup = handle.popup;
       initLocalData();
       initGuiComponents();
       initListeners();
@@ -117,19 +119,13 @@ public class ApplicationViewer extends AbstractVisualResource {
     mainBox.add(scroller);
 
     this.add(mainBox, BorderLayout.CENTER);
-    popup = new JPopupMenu();
-    JMenu addMenu = new JMenu("Add");
-    Iterator addActionsIter = addActionForPR.values().iterator();
-    while(addActionsIter.hasNext()){
-      addMenu.add((Action)addActionsIter.next());
-    }
-    JMenu remMenu = new JMenu("Remove");
-    Iterator remActionsIter = removeActionForPR.values().iterator();
-    while(remActionsIter.hasNext()){
-      remMenu.add((Action)remActionsIter.next());
-    }
+
+    popup.add(new RunAction());
+    addMenu = new JMenu("Add");
+    removeMenu = new JMenu("Remove");
+    updateActions();
     popup.add(addMenu);
-    popup.add(remMenu);
+    popup.add(removeMenu);
   }
 
   protected void initListeners(){
@@ -310,6 +306,38 @@ public class ApplicationViewer extends AbstractVisualResource {
       }
     });
   }//protected void initListeners()
+
+  protected void updateActions(){
+    Iterator prIter = project.getPRList().iterator();
+    while(prIter.hasNext()){
+      ProcessingResource pr = (ProcessingResource)
+                              ((PRHandle)prIter.next()).getResource();
+      if(!addActionForPR.containsKey(pr)){
+        AddPRAction addAction = new AddPRAction(pr);
+        RemovePRAction remAction = new RemovePRAction(pr);
+        remAction.setEnabled(false);
+        addActionForPR.put(pr, addAction);
+        removeActionForPR.put(pr, remAction);
+      }
+    }
+    addMenu.removeAll();
+    removeMenu.removeAll();
+    Iterator addActionsIter = addActionForPR.values().iterator();
+    while(addActionsIter.hasNext()){
+      addMenu.add((Action)addActionsIter.next());
+    }
+
+    Iterator remActionsIter = removeActionForPR.values().iterator();
+    while(remActionsIter.hasNext()){
+      removeMenu.add((Action)remActionsIter.next());
+    }
+  }
+
+  public JPopupMenu getPopup(){
+System.out.println("Get popup");
+    updateActions();
+    return popup;
+  }
 
   protected String getResourceName(Resource res){
     ResourceData rData = (ResourceData)Gate.getCreoleRegister().
@@ -797,9 +825,12 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   SerialController controller;
   ProjectData project;
+  ApplicationHandle handle;
   JTreeTable mainTreeTable;
   PRsAndParamsTTModel mainTTModel;
   JPopupMenu popup;
+  JMenu addMenu;
+  JMenu removeMenu;
   XJTable modulesTable;
   ModulesTableModel modulesTableModel;
   JButton addModuleBtn;

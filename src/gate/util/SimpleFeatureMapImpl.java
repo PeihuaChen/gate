@@ -60,4 +60,6 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
     return true;
   }//includedIn
 
+ /** Freeze the serialization UID. */
+  static final long serialVersionUID = -2747241616127229116L;
 } // class SimpleFeatureMapImpl

@@ -557,7 +557,8 @@ extends AbstractLanguageResource implements Document, StatusReporter
 
   /** Equals */
   public boolean equals(Object other) {
-    if(other == null)return false;
+    if(other == null ||
+       !(other instanceof DocumentImpl))return false;
     DocumentImpl doc = (DocumentImpl) other;
 
 // PENDING EQUALS IMPLS
@@ -685,4 +686,6 @@ Out.prln("hashcode: " + code);
     stringContent = newStringContent;
   }
 
+   /** Freeze the serialization UID. */
+  static final long serialVersionUID = -8456893608311510260L;
 } // class DocumentImpl
