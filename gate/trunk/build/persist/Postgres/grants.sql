@@ -17,23 +17,23 @@
 
 
 
-grant select on  SEQ_ANNOTATION to group GATE_USER_GROUP;
-grant select on  SEQ_ANNOTATION_TYPE to group GATE_USER_GROUP;
-grant select on  SEQ_ANNOT_SET to group GATE_USER_GROUP;
-grant select on  SEQ_AS_ANNOTATION to group GATE_USER_GROUP;
-grant select on  SEQ_CORPUS to group GATE_USER_GROUP;
-grant select on  SEQ_CORPUS_DOCUMENT to group GATE_USER_GROUP;
-grant select on  SEQ_DOCUMENT to group GATE_USER_GROUP;
-grant select on  SEQ_DOC_CONTENT to group GATE_USER_GROUP;
-grant select on  SEQ_DOC_ENCODING to group GATE_USER_GROUP;
-grant select on  SEQ_FEATURE to group GATE_USER_GROUP;
-grant select on  SEQ_FEATURE_KEY to group GATE_USER_GROUP;
-grant select on  SEQ_GROUP to group GATE_USER_GROUP;
-grant select on  SEQ_LANG_RESOURCE to group GATE_USER_GROUP;
-grant select on  SEQ_LR_TYPE to group GATE_USER_GROUP;
-grant select on  SEQ_NODE to group GATE_USER_GROUP;
-grant select on  SEQ_USER to group GATE_USER_GROUP;
-grant select on  SEQ_USER_GROUP to group GATE_USER_GROUP;
+grant select,update on  SEQ_ANNOTATION to group GATE_USER_GROUP;
+grant select,update on  SEQ_ANNOTATION_TYPE to group GATE_USER_GROUP;
+grant select,update on  SEQ_ANNOT_SET to group GATE_USER_GROUP;
+grant select, update on  SEQ_AS_ANNOTATION to group GATE_USER_GROUP;
+grant select, update on  SEQ_CORPUS to group GATE_USER_GROUP;
+grant select, update on  SEQ_CORPUS_DOCUMENT to group GATE_USER_GROUP;
+grant select, update on  SEQ_DOCUMENT to group GATE_USER_GROUP;
+grant select, update on  SEQ_DOC_CONTENT to group GATE_USER_GROUP;
+grant select, update on  SEQ_DOC_ENCODING to group GATE_USER_GROUP;
+grant select, update on  SEQ_FEATURE to group GATE_USER_GROUP;
+grant select, update on  SEQ_FEATURE_KEY to group GATE_USER_GROUP;
+grant select, update on  SEQ_GROUP to group GATE_USER_GROUP;
+grant select, update on  SEQ_LANG_RESOURCE to group GATE_USER_GROUP;
+grant select, update on  SEQ_LR_TYPE to group GATE_USER_GROUP;
+grant select, update on  SEQ_NODE to group GATE_USER_GROUP;
+grant select, update on  SEQ_USER to group GATE_USER_GROUP;
+grant select, update on  SEQ_USER_GROUP to group GATE_USER_GROUP;
 
 grant select,insert,update,delete on  T_ANNOTATION to group GATE_USER_GROUP;
 grant select,insert,update,delete on  T_ANNOTATION_TYPE to group GATE_USER_GROUP;
