@@ -71,7 +71,8 @@ public class ApplicationViewer extends AbstractVisualResource
     popup.add(removeMenu);
   }//setHandle
 
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException{
+    super.init();
     initLocalData();
     initGuiComponents();
     initListeners();
