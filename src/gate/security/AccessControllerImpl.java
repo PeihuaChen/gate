@@ -869,13 +869,17 @@ public class AccessControllerImpl
     //2. create USerImpl's and GroupImpl's and put them in collections
 
     //2.1 create Groups
+    Vector toBeInitializedGroups = new Vector();
+
     Enumeration enGroups = groupNames.keys();
     while (enGroups.hasMoreElements()) {
       Long grpId = (Long)enGroups.nextElement();
-      Vector grpMembers = (Vector)groupMembers.get(grpId);
+//      Vector grpMembers = (Vector)groupMembers.get(grpId);
       String grpName = (String)groupNames.get(grpId);
 
-      GroupImpl grp = new GroupImpl(grpId,grpName,grpMembers,this,this.jdbcConn);
+      //note that the Vector with group members is empty
+      //will beinitalized later (ugly hack for bad desgin)
+      GroupImpl grp = new GroupImpl(grpId,grpName,new Vector(),this,this.jdbcConn);
       //register as listener for thsi group
       //we care only about name changes
       grp.registerObjectModificationListener(this,ObjectModificationEvent.OBJECT_MODIFIED);
@@ -883,16 +887,23 @@ public class AccessControllerImpl
       //add to collection
       this.groupsByID.put(grp.getID(),grp);
       this.groupsByName.put(grp.getName(),grp);
+
+      //add to vector of the objects to be initialized
+      toBeInitializedGroups.add(grp);
     }
 
-    //2.1 create Users
+    //2.2 create Users
+    Vector toBeInitializedUsers = new Vector();
+
     Enumeration enUsers = userNames.keys();
     while (enUsers.hasMoreElements()) {
       Long usrId = (Long)enUsers.nextElement();
-      Vector usrGroups = (Vector)userGroups.get(usrId);
+//      Vector usrGroups = (Vector)userGroups.get(usrId);
       String usrName = (String)userNames.get(usrId);
 
-      UserImpl usr = new UserImpl(usrId,usrName,usrGroups,this,this.jdbcConn);
+      //note that the Vector with user's group is empty
+      //will be initalized later (ugly hack for bad desgin)
+      UserImpl usr = new UserImpl(usrId,usrName,new Vector(),this,this.jdbcConn);
       //register as listener for thsi user
       //we care only about user changing name
       usr.registerObjectModificationListener(this,ObjectModificationEvent.OBJECT_MODIFIED);
@@ -900,7 +911,28 @@ public class AccessControllerImpl
       //add to collection
       this.usersByID.put(usr.getID(),usr);
       this.usersByName.put(usr.getName(),usr);
+
+      //add to vector of the objects to be initialized
+      toBeInitializedUsers.add(usr);
     }
+
+    //3. the hack itself:
+    //all the groups and users are not fully initialized yet
+    //(the groups/users Vectors are empty)
+    //initialize them now
+
+    //3.1 initialize groups
+    for (int i=0; i< toBeInitializedGroups.size(); i++) {
+      GroupImpl grp = (GroupImpl)toBeInitializedGroups.elementAt(i);
+      grp.setUsers((Vector)groupMembers.get(grp.getID()));
+    }
+
+    //3.2 initialize users
+    for (int i=0; i< toBeInitializedUsers.size(); i++) {
+      UserImpl usr = (UserImpl)toBeInitializedUsers.elementAt(i);
+      usr.setGroups((Vector)userGroups.get(usr.getID()));
+    }
+
   }
 
 
