@@ -182,9 +182,14 @@ public class XmlDocumentHandler extends DefaultHandler{
     FeatureMap fm = new SimpleFeatureMapImpl();
     //Get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
-      String attName  = atts.getLocalName(i);
+      String attName  = getMyLocalName(atts.getQName(i));
       String attValue = atts.getValue(i);
-      String attUri = atts.getURI(i);
+// the line bellow should be used if the parser from java 4 would work well
+// with namespaces...
+// because it doesn't the methods getMyLocalName() and detMyURI() are some
+// workarrounds
+//      String attUri = atts.getURI(i);
+      String attUri = getMyURI(atts.getQName(i));
       if (attUri != null && Gate.URI.equals(attUri)){
         if ("gateId".equals(attName)){
           customObjectId = new Integer(attValue);
@@ -427,6 +432,33 @@ public class XmlDocumentHandler extends DefaultHandler{
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
+
+  /** This method is a workaround of the java 4 non namespace supporting parser
+    * It receives a qualified name and returns its local name.
+    * For eg. if it receives gate:gateId it will return gateId
+    */
+  private String getMyLocalName(String aQName){
+    if (aQName == null) return "";
+    StringTokenizer strToken = new StringTokenizer(aQName,":");
+    if (strToken.countTokens()<= 1) return aQName;
+    // The nr of tokens is >= than 2
+    // Skip the first token which is the QName
+    strToken.nextToken();
+    return strToken.nextToken();
+  }//getMyLocalName()
+
+  /** Also a workaround for URI identifier. If the QName is gate it will return
+    *  GATE's. Otherwhise it will return the empty string
+    */
+  private String getMyURI(String aQName){
+    if (aQName == null) return "";
+    StringTokenizer strToken = new StringTokenizer(aQName,":");
+    if (strToken.countTokens()<= 1) return "";
+    // If first token is "gate" then return GATE's URI
+    if ("gate".equalsIgnoreCase(strToken.nextToken()))
+      return Gate.URI;
+    return "";
+  }// getMyURI()
 
   // XmlDocumentHandler member data
 

@@ -128,17 +128,21 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       if(currentFeatureName == null || currentFeatureValue == null){
         // Cannot add the (key,value) pair to the map
         // One of them is null something was wrong in the XML file.
-        Out.prln("A key or a value was null. The feature wasn't added into" +
-                " the feature map");
+        throw new GateSaxException("A feature name or value was empty." +
+          "The annotation that cause it is " +
+          currentAnnot +
+          ".Please check the document with a text editor before trying again.");
 
       }else {
         if (currentFeatureMap == null){
           // The XMl file was somehow altered and a start Feature wasn't found.
-          Out.prln("Abnormal behavior: A feature map wasn't created. Creating" +
-                " one... A start Feature element is missing");
-          currentFeatureMap = Factory.newFeatureMap();
+          throw new GateSaxException("Document not consistent. A start"+
+          " feature element is missing. " +
+          "The annotation that cause it is " +
+          currentAnnot +
+          "Please check the document with a text editor before trying again.");
+//          currentFeatureMap = Factory.newFeatureMap();
         }// End if
-//        Err.prln("Feature name="+currentFeatureName+" value=" + currentFeatureValue);
         currentFeatureMap.put(currentFeatureName,currentFeatureValue);
       }// End if
       // Reset the Name & Value pair.
@@ -150,7 +154,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if ("GateDocumentFeatures".equals(elemName)){
       if (currentFeatureMap == null)
         currentFeatureMap = Factory.newFeatureMap();
-//      Err.prln("Setting features for doc :" + currentFeatureMap);
       doc.setFeatures(currentFeatureMap);
       currentFeatureMap = null;
       return;
@@ -171,8 +174,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
                                    annot.getElemName(),
                                    annot.getFM());
         }catch (gate.util.InvalidOffsetException e){
-          Err.prln("Tried to add an invalid annotation(" +
-          annot + ") ! Discarded !");
+          throw new GateSaxException(e);
         }// End try
       }// End while
       // The colector is empty and ready for the next AnnotationSet
@@ -271,12 +273,15 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
           Integer id = new Integer(attValue);
           Long offset = (Long)id2Offset.get(id);
           if (offset == null){
-            currentAnnot.setStart(new Long(0));
-            Out.prln("Warning: Couldn't found Node with id = " + id +
-            ".It was specified in annot " + currentAnnot.getElemName() +
+//            currentAnnot.setStart(new Long(0));
+            throw new GateRuntimeException("Couldn't found Node with id = " +
+            id +
+            ".It was specified in annot " +
+            currentAnnot+
             " as a start node!" +
-            "Annot was created with this node reset to 0." +
-            "Data might not have the same consistency");
+            "Check the document with a text editor or something"+
+            " before trying again.");
+
           }else
             currentAnnot.setStart(offset);
          }// Endif
@@ -284,21 +289,26 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
           Integer id = new Integer(attValue);
           Long offset = (Long) id2Offset.get(id);
           if (offset == null){
-            currentAnnot.setEnd(new Long(0));
-            Out.prln("Warning: Couldn't found Node with id = " + id +
-            ".It was specified in annot " + currentAnnot.getElemName() +
+//            currentAnnot.setEnd(new Long(0));
+            throw new GateRuntimeException("Couldn't found Node with id = " +
+            id+
+            ".It was specified in annot " +
+            currentAnnot+
             " as a end node!" +
-            "Annot was created with this node reset to 0." +
-            "Data might not have the same consistency");
+            "Check the document with a text editor or something"+
+            " before trying again.");
           }else
             currentAnnot.setEnd(offset);
          }// End if
        } catch (NumberFormatException e){
-          currentAnnot.setStart(new Long(0));
-          currentAnnot.setEnd(new Long(0));
-          Out.prln("Warning: Offsets problems(cannot create Integers from"+
-          " id[" + attValue + "]) in annot " + currentAnnot.getElemName() +
-          ".Setting them to (0,0). Data might loose consistency.");
+//          currentAnnot.setStart(new Long(0));
+//          currentAnnot.setEnd(new Long(0));
+          throw new GateRuntimeException("Offsets problems.Couldn't create"+
+          " Integers from" + " id[" +
+          attValue + "]) in annot " +
+          currentAnnot+
+          "Check the document with a text editor or something,"+
+          " before trying again");
        }// End try
       }// End For
     }// End if
@@ -335,26 +345,31 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   }//processTextOfTextWithNodesElement
 
   /** This method deals with a Text belonging to Name element. */
-  private void processTextOfNameElement(String text){
+  private void processTextOfNameElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)
-      Out.prln("GATE XML FORMAT WARNING:" +
-      " Found a Name element that is not enclosed into a Feature one." +
-      " Discarding...");
+      throw new GateSaxException("Gate xml format processing error:" +
+      " Found a Name element that is not enclosed into a Feature one while" +
+      " analyzing the annotation " +
+      currentAnnot +
+      "Please check the document with a text editor or something before" +
+      " trying again.");
     else{
       currentFeatureName = text;
     }// End If
   }//processTextOfNameElement();
 
   /** This method deals with a Text belonging to Value element. */
-  private void processTextOfValueElement(String text){
+  private void processTextOfValueElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)
-      Out.prln("GATE XML FORMAT WARNING:" +
-      " Found a Value element that is not enclosed into a Feature one." +
-      " Discarding...");
+      throw new GateSaxException("Gate xml format processing error:" +
+      " Found a Value element that is not enclosed into a Feature one while" +
+      " analyzing the annotation " +
+      currentAnnot+
+      "Please check the document with a text editor or something before" +
+      " trying again.");
     else{
       currentFeatureValue = text;
     }// End If
-
   }//processTextOfValueElement();
 
   /**
@@ -510,6 +525,12 @@ class  AnnotationObject{
     end = anEnd;
   }
 
+  public String toString(){
+    return " [type=" + elemName +
+    " startNode=" + start+
+    " endNode=" + end+
+    " features="+ fm +"] ";
+  }
   // data fields
   private String elemName = null;
 

@@ -193,7 +193,8 @@ extends AbstractLanguageResource implements Document {
        } //if format != null
       } catch(DocumentFormatException e) {
         throw new ResourceInstantiationException(
-          "Couldn't unpack markup in document " + sourceUrl.toExternalForm() + e
+          "Couldn't unpack markup in document " + sourceUrl.toExternalForm() +
+          " " + e
         );
       }
     } // if markup aware
