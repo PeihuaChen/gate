@@ -670,49 +670,47 @@ public class CorpusBenchmarkTool {
       //add precison and recall to the sums
       updateStatistics(annotDiff, annotType);
 
-      if (annotDiff.getFMeasureAverage() != 1.0) {
-        Out.prln("<TD> Annotation type: " + annotType + "</TD>");
+      Out.prln("<TD> Annotation type: " + annotType + "</TD>");
 
-        AnnotationDiff annotDiff1 =
-          measureDocs(markedDoc, persDoc, annotType);
-        AnnotationDiff annotDiff2 =
-          measureDocs(markedDoc, cleanDoc, annotType);
+      AnnotationDiff annotDiff1 =
+        measureDocs(markedDoc, persDoc, annotType);
+      AnnotationDiff annotDiff2 =
+        measureDocs(markedDoc, cleanDoc, annotType);
 
-        Out.prln("<TD>" + annotDiff.getPrecisionAverage()
-                + "</TD>");
-        //check the precision first
-        if (annotDiff.getPrecisionAverage() != 1.0) {
-          if (annotDiff1 != null &&
-              annotDiff2!= null &&
-              annotDiff1.getPrecisionAverage()<annotDiff2.getPrecisionAverage()
-             )
-            Out.prln("<P> Precision increase on human-marked from " +
-                     annotDiff1.getPrecisionAverage() + " to " +
-                     annotDiff2.getPrecisionAverage() + "</P>");
-          else if (annotDiff1 != null && annotDiff2 != null)
-            Out.prln("<P> Precision decrease on human-marked from " +
-                     annotDiff1.getPrecisionAverage() + " to " +
-                     annotDiff2.getPrecisionAverage() + "</P>");
-        }//if precision
+      Out.prln("<TD>" + annotDiff.getPrecisionAverage()
+              + "</TD>");
+      //check the precision first
+      if (annotDiff.getPrecisionAverage() != 1.0) {
+        if (annotDiff1 != null &&
+            annotDiff2!= null &&
+            annotDiff1.getPrecisionAverage()<annotDiff2.getPrecisionAverage()
+           )
+          Out.prln("<P> Precision increase on human-marked from " +
+                   annotDiff1.getPrecisionAverage() + " to " +
+                   annotDiff2.getPrecisionAverage() + "</P>");
+        else if (annotDiff1 != null && annotDiff2 != null)
+          Out.prln("<P> Precision decrease on human-marked from " +
+                   annotDiff1.getPrecisionAverage() + " to " +
+                   annotDiff2.getPrecisionAverage() + "</P>");
+      }//if precision
 
-        Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
-        //check the recall now
-        if (annotDiff.getRecallAverage() != 1.0) {
-          if (annotDiff1 != null &&
-              annotDiff2!= null &&
-              annotDiff1.getRecallAverage()<annotDiff2.getRecallAverage()
-             )
-            Out.prln("<P> Recall increase on human-marked from " +
-                     annotDiff1.getRecallAverage() + " to " +
-                     annotDiff2.getRecallAverage() + "</P>");
-          else if (annotDiff1 != null && annotDiff2 != null)
-            Out.prln("<P> Recall decrease on human-marked from " +
-                     annotDiff1.getRecallAverage() + " to " +
-                     annotDiff2.getRecallAverage() + "</P>");
+      Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
+      //check the recall now
+      if (annotDiff.getRecallAverage() != 1.0) {
+        if (annotDiff1 != null &&
+            annotDiff2!= null &&
+            annotDiff1.getRecallAverage()<annotDiff2.getRecallAverage()
+           )
+          Out.prln("<P> Recall increase on human-marked from " +
+                   annotDiff1.getRecallAverage() + " to " +
+                   annotDiff2.getRecallAverage() + "</P>");
+        else if (annotDiff1 != null && annotDiff2 != null)
+          Out.prln("<P> Recall decrease on human-marked from " +
+                   annotDiff1.getRecallAverage() + " to " +
+                   annotDiff2.getRecallAverage() + "</P>");
 
-        }//if recall
+      }//if recall
 
-      }//if the f-measure is not 1.0
       Out.prln("</TR>");
     }//for loop through annotation types
     Out.prln("</TABLE>");
@@ -738,22 +736,20 @@ public class CorpusBenchmarkTool {
       //add precison and recall to the sums
       updateStatistics(annotDiff, annotType);
 
-      if (annotDiff.getFMeasureAverage() != 1.0) {
-        Out.prln("<TD>" + annotType + "</TD>");
+      Out.prln("<TD>" + annotType + "</TD>");
 
-        Out.prln("<TD>" + annotDiff.getPrecisionAverage() + "</TD>");
-        Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
-        //check the recall now
-        if ( isVerboseMode
-             &&
-             ((annotDiff.getRecallAverage() < threshold
-               ||
-               annotDiff.getRecallAverage() < threshold)
-             )
+      Out.prln("<TD>" + annotDiff.getPrecisionAverage() + "</TD>");
+      Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
+      //check the recall now
+      if ( isVerboseMode
+           &&
+           ((annotDiff.getRecallAverage() < threshold
+             ||
+             annotDiff.getRecallAverage() < threshold)
            )
-          printAnnotations(annotDiff, keyDoc, respDoc);
+         )
+        printAnnotations(annotDiff, keyDoc, respDoc);
 
-      }//if the f-measure is not 1.0
       Out.prln("</TR>");
     }//for loop through annotation types
     Out.prln("</TABLE>");
