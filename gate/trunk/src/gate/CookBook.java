@@ -35,9 +35,7 @@ part of the GATE test suite (using the JUnit framework), so there's an easy
 way to run the examples (viz.,
 <A HREF=../gate/TestGate.html>gate.TestGate.main</A>, which will invoke the
 JUnit test runner). Also, we can use JUnit's assert methods, e.g.
-<PRE>
-assert(corpus.isEmpty());
-</PRE>
+<TT>assert(corpus.isEmpty());</TT>
 tests that a corpus object is empty, and creates a test failure report if
 this is not the case.
 
