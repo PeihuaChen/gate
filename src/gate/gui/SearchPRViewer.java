@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.text.*;
 import javax.swing.*;
 import javax.swing.table.*;
+import java.awt.event.*;
 import javax.swing.border.*;
 
 import gate.*;
@@ -58,6 +59,38 @@ public class SearchPRViewer extends AbstractVisualResource
   }
 
   protected void initListeners(){
+    resultsTable.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if(e.getClickCount() == 2){
+          //where inside the table
+          selectDocument((String)resultsTable.getValueAt(
+                            resultsTable.rowAtPoint(e.getPoint()), 0));
+        }
+      }
+    });
+  }
+
+  /**
+   * Tries to load (if necessary) and select (i.e. bring to front) a document
+   * based on its name.
+   */
+  protected void selectDocument(String documentName){
+    Corpus corpus = target.getCorpus();
+    int i = 0;
+    for(;
+        i < corpus.size() &&
+        (!corpus.getDocumentName(i).equals(documentName));
+        i++);
+    if(corpus.getDocumentName(i).equals(documentName)){
+      //trigger document loading if needed
+      Document doc = (Document)corpus.get(i);
+      //try to select the document
+      Component root = SwingUtilities.getRoot(this);
+      if(root instanceof MainFrame){
+        MainFrame mainFrame = (MainFrame)root;
+        mainFrame.select(doc);
+      }
+    }
   }
 
   /**
@@ -137,10 +170,27 @@ public class SearchPRViewer extends AbstractVisualResource
     public Object getValueAt(int rowIndex, int columnIndex){
       QueryResult aResult = (QueryResult)results.get(rowIndex);
       switch(columnIndex){
-        case DOC_NAME_COLUMN: return aResult.getDocumentID();
+        case DOC_NAME_COLUMN: return guessDocName(aResult.getDocumentID()).
+                                     toString();
         case DOC_SCORE_COLUMN: return new Float(aResult.getScore());
         default: return null;
       }
+    }
+
+    /**
+     * Attempts to guess the document name from the ID returned by the searcher
+     */
+    protected Object guessDocName(Object docID){
+      //the doc ID is most likely the persistence ID for the doc
+      Corpus corpus = target.getCorpus();
+      DataStore ds = corpus.getDataStore();
+      if(ds != null){
+        try{
+          return ds.getLrName(docID);
+        }catch(Exception e){}
+      }
+      //we couldn't guess anything
+      return docID;
     }
 
     static private final int DOC_NAME_COLUMN = 0;
