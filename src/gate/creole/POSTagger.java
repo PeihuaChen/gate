@@ -81,8 +81,6 @@ public class POSTagger extends AbstractLanguageAnalyser {
         long startTime = System.currentTimeMillis();
         fireStatusChanged("POS tagging " + document.getName());
         fireProgressChanged(0);
-long start, prepTime = 0 , posTime = 0, postTime = 0;
-start = System.currentTimeMillis();
         //prepare the input for HepTag
         List sentenceForTagger = new ArrayList();
         List sentencesForTagger = new ArrayList(1);
@@ -104,9 +102,7 @@ start = System.currentTimeMillis();
         Annotation currentToken = (Annotation)tokensIter.next();
         int sentIndex = 0;
         int sentCnt = sentencesAS.size();
-prepTime += System.currentTimeMillis() - start;
         while(sentencesIter.hasNext()){
-start = System.currentTimeMillis();
           Annotation currentSentence = (Annotation)sentencesIter.next();
           tokensInCurrentSentence.clear();
           sentenceForTagger.clear();
@@ -120,12 +116,8 @@ start = System.currentTimeMillis();
             currentToken = (Annotation)(tokensIter.hasNext() ?
                                        tokensIter.next() : null);
           }
-prepTime += System.currentTimeMillis() - start;
-start = System.currentTimeMillis();
           //run the POS tagger
           List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
-posTime += System.currentTimeMillis() - start;
-start = System.currentTimeMillis();
           //add the results
           //make sure no malfunction accured
           if(taggerResults.size() != tokensInCurrentSentence.size())
@@ -140,11 +132,9 @@ start = System.currentTimeMillis();
             ((Annotation)tokIter.next()).getFeatures().
               put(TOKEN_CATEGORY_FEATURE_NAME ,((String[])resIter.next())[1]);
           }
-postTime += System.currentTimeMillis() - start;
           fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentencesIter.hasNext())
         if(currentToken != null){
-start = System.currentTimeMillis();
           //we have remaining tokens after the last sentence
           tokensInCurrentSentence.clear();
           sentenceForTagger.clear();
@@ -155,12 +145,8 @@ start = System.currentTimeMillis();
             currentToken = (Annotation)(tokensIter.hasNext() ?
                                         tokensIter.next() : null);
           }
-prepTime += System.currentTimeMillis() - start;
-start = System.currentTimeMillis();
           //run the POS tagger
           List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
-posTime += System.currentTimeMillis() - start;
-start = System.currentTimeMillis();
           //add the results
           //make sure no malfunction accured
           if(taggerResults.size() != tokensInCurrentSentence.size())
@@ -175,7 +161,6 @@ start = System.currentTimeMillis();
             ((Annotation)tokIter.next()).getFeatures().
               put(TOKEN_CATEGORY_FEATURE_NAME ,((String[])resIter.next())[1]);
           }
-postTime += System.currentTimeMillis() -start;
         }//if(currentToken != null)
         fireProcessFinished();
         fireStatusChanged(
@@ -183,9 +168,6 @@ postTime += System.currentTimeMillis() -start;
           NumberFormat.getInstance().format(
           (double)(System.currentTimeMillis() - startTime) / 1000) +
           " seconds!");
-Out.prln("POS preparation time:" + prepTime);
-Out.prln("POS execution time:" + posTime);
-Out.prln("POS after execution time:" + postTime);
       }else{
         throw new GateRuntimeException("No sentences to process!\n" +
                                        "Please run a sentence splitter first!");
