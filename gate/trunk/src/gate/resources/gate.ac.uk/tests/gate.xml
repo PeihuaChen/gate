@@ -9,7 +9,7 @@
 
 <GATE>
 
-<CREOLE-DIRECTORY>http://somewhere.on.the.net/creole/</CREOLE-DIRECTORY> 
+<CREOLE-DIRECTORY>http://gate.ac.uk/tests/</CREOLE-DIRECTORY> 
 
 <SYSTEM NAME="Print Out Tokens">
   <CONTROLLER>none</CONTROLLER>
