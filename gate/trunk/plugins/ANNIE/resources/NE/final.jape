@@ -333,8 +333,8 @@ Priority: 5
 Rule:Unknown
 ( 
  {POS.category == NNP}
- ((SPACE|{Token.string == "-"})
-  {POS.category == NNP})*
+// ((SPACE|{Token.string == "-"})
+// {POS.category == NNP})*
 ) 
 :unknown
 -->
