@@ -287,7 +287,7 @@ public class XJTable extends JTable{
           //rows were deleted -> we need to rebuild
           init(sourceModel);
           fireTableDataChanged();
-//          if(isSortable()) sort();
+          if(isSortable()) sort();
       }
     }
     
