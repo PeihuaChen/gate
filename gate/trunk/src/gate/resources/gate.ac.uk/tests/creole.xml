@@ -50,21 +50,31 @@
 
   </CREOLE>
 
-  <!-- creole.xml for tokeniser -->
+   <!-- creole.xml for tokeniser -->
   <CREOLE>
     <RESOURCE>
-      <NAME>Gate Unicode Tokeniser</NAME>
+      <NAME>ANNIE Unicode Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
+      <COMMENT>A customisable tokeniser.</COMMENT>
 
-      <OR>
-	<PARAMETER DEFAULT="creole/tokeniser/DefaultTokeniser.rules"
-	           NAME="rulesResourceName">java.lang.String</PARAMETER>
-	<PARAMETER NAME="rulesURL">java.lang.String</PARAMETER>
-      </OR>
+      <PARAMETER NAME="tokeniserRulesURL"
+                 DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules"
+                 COMMENT="The URL for the rules file">java.net.URL</PARAMETER>
+      <PARAMETER NAME="transducerGrammarURL"
+                 DEFAULT="gate:/creole/tokeniser/postprocess.jape"
+                 COMMENT="The URL for the postprocessing transducer"
+                 >java.net.URL</PARAMETER>
+      <PARAMETER NAME="encoding"
+                 COMMENT="The encoding used for reading the definitions"
+                 DEFAULT="UTF-8">java.lang.String</PARAMETER>
       <PARAMETER NAME="document"
-	RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+                 COMMENT="The document to be tokenised"
+                 RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
-		 OPTIONAL="true">java.lang.String</PARAMETER>
+                 COMMENT=
+                  "The annotation set to be used for the generated annotations"
+                 OPTIONAL="true">java.lang.String</PARAMETER>
+      <ICON>shefTokeniser.gif</ICON>
     </RESOURCE>
   </CREOLE>
 

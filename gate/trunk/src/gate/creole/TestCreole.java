@@ -205,7 +205,7 @@ public class TestCreole extends TestCase
     ResourceData rd = (ResourceData)
       reg.get("gate.creole.tokeniser.DefaultTokeniser");
     assertNotNull("couldn't find unicode tok in register of resources", rd);
-    assert(rd.getName().equals("Gate Unicode Tokeniser"));
+    assert(rd.getName().equals("ANNIE Unicode Tokeniser"));
 
     String docFormatName = "gate.corpora.XmlDocumentFormat";
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
