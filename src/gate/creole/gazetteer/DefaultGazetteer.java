@@ -186,7 +186,9 @@ public class DefaultGazetteer extends AbstractProcessingResource
     for(int i = 0; i< text.length(); i++) {
       isSpace = Character.isWhitespace(text.charAt(i));
       if(isSpace) currentChar = new Character(' ');
-      else currentChar = new Character(text.charAt(i));
+      else currentChar = (caseSensitive.booleanValue()) ?
+                          new Character(text.charAt(i)) :
+                          new Character(Character.toUpperCase(text.charAt(i))) ;
       nextState = currentState.next(currentChar);
       if(nextState == null){
         nextState = new FSMState(this);
@@ -296,9 +298,11 @@ public class DefaultGazetteer extends AbstractProcessingResource
     while(charIdx < length) {
       if(Character.isWhitespace(content.charAt(charIdx)))
         currentChar = new Character(' ');
-      else currentChar = new Character(content.charAt(charIdx));
+      else currentChar = (caseSensitive.booleanValue()) ?
+                         new Character(content.charAt(charIdx)) :
+                         new Character(Character.toUpperCase(
+                                       content.charAt(charIdx)));
       nextState = currentState.next(currentChar);
-
       if(null == nextState) {
         //the matching stopped
         if(null != lastMatchingState &&
@@ -446,6 +450,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * lists dtaht define this Gazetteer
    */
   private java.net.URL listsURL;
+  private Boolean caseSensitive;
 
   /**    */
   protected void fireProgressChanged(int e) {
@@ -504,6 +509,12 @@ public class DefaultGazetteer extends AbstractProcessingResource
   }
   public java.net.URL getListsURL() {
     return listsURL;
+  }
+  public void setCaseSensitive(Boolean newCaseSensitive) {
+    caseSensitive = newCaseSensitive;
+  }
+  public Boolean getCaseSensitive() {
+    return caseSensitive;
   }
 
 } // DefaultGazetteer
