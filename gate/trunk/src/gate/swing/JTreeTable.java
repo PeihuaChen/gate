@@ -11,7 +11,7 @@
  *  $Id$
  *
  */
-package gate.gui;
+package gate.swing;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -47,7 +47,7 @@ public class JTreeTable extends XJTable {
    * Constructs a JTreeTable from a model
    */
   public JTreeTable(TreeTableModel model) {
-  	super();
+    super();
     this.treeTableModel = model;
 
     // Create the tree. It will be used by the table renderer to generate
@@ -56,15 +56,15 @@ public class JTreeTable extends XJTable {
     tree.setModel(treeTableModel);
     tree.setEditable(false);
     // Install a tableModel representing the visible rows in the tree.
-    super.setModel(new TreeTableModelAdapter(treeTableModel, tree));
+    super.setModel(new TreeTableModelAdapter(treeTableModel));
 
     // Force the JTable and JTree to share their row selection models.
     tree.setSelectionModel(new DefaultTreeSelectionModel() {
       //extend the constructor
       {
-		    setSelectionModel(listSelectionModel);
-	    }
-	  });
+        setSelectionModel(listSelectionModel);
+      }
+    });
 
     //Install the renderer
     //getColumnModel().getColumn(0).setCellRenderer(new TreeTableCellRenderer());
@@ -96,6 +96,14 @@ public class JTreeTable extends XJTable {
 
   public JTree getTree(){
     return tree;
+  }
+
+  public void expandPath(TreePath path){
+    tree.expandPath(path);
+  }
+
+  public void expandRow(int row){
+    tree.expandRow(row);
   }
 /*
   public void setTreeCellRenderer(TreeCellRenderer renderer){
@@ -318,10 +326,7 @@ public class JTreeTable extends XJTable {
    * A wrapper that reads a TreeTableModel and behaves as a TableModel
    */
   class TreeTableModelAdapter extends AbstractTableModel{
-    public TreeTableModelAdapter(TreeTableModel treeTableModel, JTree tree) {
-//      this.tree = tree;
-//      this.treeTableModel = treeTableModel;
-
+    public TreeTableModelAdapter(TreeTableModel treeTableModel) {
       tree.addTreeExpansionListener(new TreeExpansionListener() {
         // Don't use fireTableRowsInserted() here;
         // the selection model would get  updated twice.

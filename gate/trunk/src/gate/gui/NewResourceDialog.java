@@ -26,8 +26,10 @@ import javax.swing.event.*;
 import java.util.*;
 import java.net.URL;
 import java.io.IOException;
+
 import gate.*;
 import gate.util.*;
+import gate.swing.*;
 import gate.creole.*;
 
 public class NewResourceDialog extends JDialog {

@@ -11,7 +11,7 @@
  *  $Id$
  *
  */
-package gate.gui;
+package gate.swing;
 
 import javax.swing.table.*;
 import javax.swing.event.TableModelListener;

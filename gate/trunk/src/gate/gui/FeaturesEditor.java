@@ -16,6 +16,7 @@ package gate.gui;
 
 import gate.*;
 import gate.util.*;
+import gate.swing.*;
 
 import javax.swing.*;
 import java.awt.BorderLayout;

@@ -12,7 +12,7 @@
  *
  */
 
-package gate.gui;
+package gate.swing;
 
 import java.awt.*;
 import java.awt.event.*;

@@ -26,6 +26,7 @@ import gate.util.*;
 import gate.annotation.*;
 import gate.*;
 import gate.gui.*;
+import gate.swing.*;
 import gate.creole.*;
 
 /**

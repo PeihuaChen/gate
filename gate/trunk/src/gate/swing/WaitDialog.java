@@ -13,7 +13,7 @@
  *  $Id$
  */
 
-package gate.gui;
+package gate.swing;
 
 import java.awt.*;
 import javax.swing.*;

@@ -19,6 +19,7 @@ import gate.corpora.TestDocument;
 import gate.creole.tokeniser.DefaultTokeniser;
 import gate.creole.*;
 import gate.event.*;
+import gate.swing.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
