@@ -67,7 +67,7 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
              p_value_varchar,
              p_value_type);
 
-      return currval(''seq_feature_key'');
+      return currval(''seq_feature'');
 
    END;
 '
