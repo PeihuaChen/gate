@@ -464,8 +464,8 @@ create or replace package body persist is
     where  lr_id = p_lr_id;
 
   exception
-       when NO_DATA_FOUND then
-          raise error.x_invalid_lr;
+    when NO_DATA_FOUND then
+       raise error.x_invalid_lr;
 
   end;                                                                                                        
 
@@ -493,6 +493,35 @@ create or replace package body persist is
      select seq_annotation.nextval into p_id8 from dual;
      select seq_annotation.nextval into p_id9 from dual;
      select seq_annotation.nextval into p_id10 from dual;
+  end;
+
+
+  /*******************************************************************************************/
+  procedure update_document(p_lr_id        IN number,
+                            p_url          IN varchar2,
+                            p_start_offset IN number,
+                            p_end_offset   IN number,
+                            p_is_mrk_aware IN number)
+  is
+    cnt number;
+  begin
+     
+     -- 1. get the doc_id
+     select count(doc_id)
+     into   cnt
+     from   t_document
+     where  doc_lr_id = p_lr_id;
+     
+     if (cnt = 0) then
+        raise error.x_invalid_lr;                              
+     end if;
+     
+     update t_document
+     set    doc_url = p_url,
+            doc_start = p_start_offset,
+            doc_end = p_end_offset,
+            doc_is_markup_aware = p_is_mrk_aware
+     where  doc_lr_id = p_lr_id;     
   end;
   
 /*begin

@@ -109,6 +109,13 @@ create or replace package persist is
                        p_id8        out number,
                        p_id9        out number,
                        p_id10       out number);     
+
+
+  procedure update_document(p_lr_id        IN number,
+                            p_url          IN varchar2,
+                            p_start_offset IN number,
+                            p_end_offset   IN number,
+                            p_is_mrk_aware IN number);
                                 
 end persist;
 /
