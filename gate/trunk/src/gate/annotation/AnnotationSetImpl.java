@@ -365,6 +365,64 @@ implements AnnotationSet
   }//get(startOfset, endOffset)
 
 
+  /**
+    * Select annotations by offset. This returns the set of annotations
+    * of the given type
+    * that overlap totaly or partially with the interval defined by the two
+    * provided offsets.The result will include all the annotations that either:
+    * <ul>
+    * <li>start before the start offset and end strictly after it</li>
+    * <li>OR</li>
+    * <li>start at a position between the start and the end offsets</li>
+    */
+  public AnnotationSet get(String neededType, Long startOffset, Long endOffset) {
+    //the result will include all the annotations that either:
+    //-start before the start offset and end strictly after it
+    //or
+    //-start at a position between the start and the end offsets
+    if(annotsByStartNode == null) indexByStartOffset();
+    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    Iterator nodesIter;
+    Iterator annotsIter;
+    Node currentNode;
+    Annotation currentAnnot;
+    //find all the annots that start strictly before the start offset and end
+    //strictly after it
+    nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
+    while(nodesIter.hasNext()){
+      currentNode = (Node)nodesIter.next();
+      Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
+      if(fromPoint != null){
+        annotsIter = (fromPoint).iterator();
+        while(annotsIter.hasNext()){
+          currentAnnot = (Annotation)annotsIter.next();
+          if(currentAnnot.getType().equals(neededType) &&
+             currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0
+            ) {
+            resultSet.add(currentAnnot);
+          }//if
+        }//while
+      }
+    }
+    //find all the annots that start at or after the start offset but strictly
+    //before the end offset
+    nodesIter = nodesByOffset.subMap(startOffset, endOffset).values().iterator();
+    while(nodesIter.hasNext()){
+      currentNode = (Node)nodesIter.next();
+      Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
+      if(fromPoint != null) {
+        annotsIter = (fromPoint).iterator();
+        while(annotsIter.hasNext()){
+          currentAnnot = (Annotation)annotsIter.next();
+          if(currentAnnot.getType().equals(neededType)) {
+            resultSet.add(currentAnnot);
+          }//if
+        }//while
+      } //if
+    }
+    return resultSet;
+  }//get(type, startOfset, endOffset)
+
 
   /** Select annotations by type, features and offset */
   public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
