@@ -221,22 +221,6 @@ problem.
   </TR>
 
 
-  <TR>
-    <TD>00026</TD>
-    <TD>gui</TD>
-    <TD>Kalina</TD>
-    <TD>Valentin</TD>
-    <TD>alpha3</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>there is a problem with the OKCancelDialog and the tabbed panel it puts inside. Basically, because the tabbedPabel grows to fit the size of the editors, this creates a problem when these editors exceed the screen. The dialog does not fit on it any more and the tabs are gone, you cannot see anything!
-    All of this is due to the token sets of annotations that you add on the sentence annotations. If easier, maybe change those to annotation Ids instead and avoid tackling the issue, because it only occurs when the annotation has an excessively long feature. Whatever.</TD>
-    <TD>Run Nerc on a document of choice, then double click any Sentence.
-At that point, the treeviewer gets constructed on the first pane and Cristi&prime;s annotation viewer gets constructed in the next. However, his viewer does not control its Size and Preferred size, neither it has a scroller. So the tab panel decides to make itself as big as his viewer and nothing shows on screen, because the treeviewer is only small and is not visible, just as the tabs themselves.</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
 
   <TR>
     <TD>00031</TD>
@@ -827,6 +811,23 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+
+<TR>
+    <TD>00026</TD>
+    <TD>gui</TD>
+    <TD>Kalina</TD>
+    <TD>Valentin</TD>
+    <TD>alpha3</TD>
+    <TD>27 Feb 2002 Beta1</TD>
+    <TD>there is a problem with the OKCancelDialog and the tabbed panel it puts inside. Basically, because the tabbedPabel grows to fit the size of the editors, this creates a problem when these editors exceed the screen. The dialog does not fit on it any more and the tabs are gone, you cannot see anything!
+    All of this is due to the token sets of annotations that you add on the sentence annotations. If easier, maybe change those to annotation Ids instead and avoid tackling the issue, because it only occurs when the annotation has an excessively long feature. Whatever.</TD>
+    <TD>Run Nerc on a document of choice, then double click any Sentence.
+At that point, the treeviewer gets constructed on the first pane and Cristi&prime;s annotation viewer gets constructed in the next. However, his viewer does not control its Size and Preferred size, neither it has a scroller. So the tab panel decides to make itself as big as his viewer and nothing shows on screen, because the treeviewer is only small and is not visible, just as the tabs themselves.</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 
   <TR>
     <TD>00027</TD>
