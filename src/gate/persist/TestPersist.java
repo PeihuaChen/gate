@@ -465,6 +465,8 @@ public class TestPersist extends TestCase
     doc.getFeatures().put("hi there", new Integer(23232));
     doc.getFeatures().put("LONG STRING", this.VERY_LONG_STRING);
     doc.getFeatures().put("NULL feature",null);
+    doc.getFeatures().put("BINARY feature",new Dummy(101,"101",true,101.101f));
+
     //create a complex feature - array of strings
     Vector complexFeature = new Vector();
     complexFeature.add("string 1");
@@ -518,6 +520,7 @@ public class TestPersist extends TestCase
     corp.getFeatures().put("my LONG feature ", new Long("123456789"));
     corp.getFeatures().put("my LONG STRING feature", this.VERY_LONG_STRING);
     corp.getFeatures().put("my NULL feature", null);
+    corp.getFeatures().put("my BINARY feature",new Dummy(101,"101",true,101.101f));
     return corp;
   }
 
@@ -1251,8 +1254,44 @@ public class TestPersist extends TestCase
       test.testDB_UseCase103();
       test.tearDown();
 
+      if (DEBUG) {
+        Err.println("done.");
+      }
     }catch(Exception e){
       e.printStackTrace();
     }
   }
 } // class TestPersist
+
+
+class Dummy implements Serializable {
+
+  static final long serialVersionUID = 3632609241787241900L;
+
+  public int     intValue;
+  public String  stringValue;
+  public boolean boolValue;
+  public float   floatValue;
+
+
+  public Dummy(int _int, String _string, boolean _bool, float _float) {
+
+    this.intValue = _int;
+    this.stringValue= _string;
+    this.boolValue = _bool;
+    this.floatValue = _float;
+  }
+
+  public boolean equals(Object obj) {
+    Dummy d2 = (Dummy)obj;
+
+    return  this.intValue == d2.intValue &&
+            this.stringValue.equals(d2.stringValue)  &&
+            this.boolValue == d2.boolValue &&
+            this.floatValue == d2.floatValue;
+  }
+
+  public String toString() {
+    return "Dummy: intV=["+this.intValue+"], stringV=["+this.stringValue+"], boolV=["+this.boolValue+"], floatV = ["+this.floatValue+"]";
+  }
+}
