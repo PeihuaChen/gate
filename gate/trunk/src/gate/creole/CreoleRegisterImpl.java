@@ -175,9 +175,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       parseDirectory(
         Files.getGateResourceAsStream("creole/creole.xml"),
         Gate.getClassLoader().getResource("gate/resources/creole/")
-// Gate.getUrl("creole/")
       );
-// Out.prln(Gate.getClassLoader().getResource("gate/resources/creole/"));
     } catch(IOException e) {
       if(DEBUG) System.out.println(e);
       throw(new GateException(e));

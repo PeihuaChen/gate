@@ -32,6 +32,7 @@ import gate.email.*;
 import gate.html.*;
 import gate.sgml.*;
 import gate.util.*;
+import gate.config.*;
 
 
 /** Top-level entry point for GATE test suite;
@@ -149,6 +150,8 @@ public class TestGate {
     TestSuite suite = new TestSuite();
 
    // suite.addTest(TestAnnotationDiff.suite());
+    suite.addTest(TestBumpyStack.suite());
+    suite.addTest(TestConfig.suite());                //*
     suite.addTest(TestAnnotation.suite());
     suite.addTest(TestEmail.suite());
     suite.addTest(TestXml.suite());
@@ -168,7 +171,8 @@ public class TestGate {
     suite.addTest(TestCorpus.suite());
     suite.addTest(TestDB.suite());
     suite.addTest(TestTokeniser.suite());
-    suite.addTest(TestGazetteer.suite());
+    suite.addTest(TestGazetteer.suite());   //*/
+
     return suite;
   } // suite
 

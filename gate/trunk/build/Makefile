@@ -21,7 +21,7 @@
 PKGS=	gate gate.annotation gate.corpora gate.creole \
 	gate.creole.gazetteer gate.creole.tokeniser \
 	gate.db gate.email gate.fsm gate.gui gate.html \
-	gate.jape gate.jape.parser \
+	gate.jape gate.jape.parser gate.config \
 	gate.sgml gate.util gate.xml
 
 # classpath to build compile commands from
@@ -170,10 +170,10 @@ japefiles:
 
 # make the resources test jar
 TestResources.jar: testpkg/TestPR1.java testpkg/TestPR2.java \
-	testpkg/creole.xml
-	./jdk.sh javac -classpath ../classes -d testpkg testpkg/Test*.java
+	testpkg/creole.xml testpkg/PrintOutTokens.java
+	./jdk.sh javac -classpath ../classes -d testpkg testpkg/*.java
 	cd testpkg && ../jdk.sh jar cvf ../TestResources.jar \
-	  testpkg/Test*.class creole.xml
+	  testpkg/*.class creole.xml
 
 # make the testpkg.Dummy jar used by TestJdk to test class reloading
 TestJdk.jar: testpkg/Dummy.java

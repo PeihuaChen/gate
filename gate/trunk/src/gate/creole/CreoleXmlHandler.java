@@ -32,8 +32,12 @@ import gate.util.*;
   */
 public class CreoleXmlHandler extends HandlerBase {
 
-  /** A stack to stuff data onto for reading back at element ends */
-  private Stack elementStack = new Stack();
+  /** A stack to stuff PCDATA onto for reading back at element ends.
+   *  (Probably redundant to have a stack as we only push one item
+   *  onto it. Probably. Ok, so I should check, but a) it works, b)
+   *  I'm bald already and c) life is short.)
+   */
+  private Stack contentStack = new Stack();
 
   /** The current resource data object */
   private ResourceData resourceData;
@@ -71,11 +75,11 @@ public class CreoleXmlHandler extends HandlerBase {
   /** Called when the SAX parser encounts the end of the XML document */
   public void endDocument() throws GateSaxException {
     if(DEBUG) Out.prln("end document");
-    if(! elementStack.isEmpty()) {
+    if(! contentStack.isEmpty()) {
       StringBuffer errorMessage =
         new StringBuffer("document ended but element stack not empty:");
-      while(! elementStack.isEmpty())
-        errorMessage.append((String) elementStack.pop());
+      while(! contentStack.isEmpty())
+        errorMessage.append(Strings.getNl()+"  "+(String) contentStack.pop());
       throw new GateSaxException(errorMessage.toString());
     }
   } // endDocument
@@ -90,10 +94,13 @@ public class CreoleXmlHandler extends HandlerBase {
       );
     }
 
+    // create a new ResourceData when it's a RESOURCE element
     if(elementName.toUpperCase().equals("RESOURCE")) {
       resourceData = new ResourceData();
       resourceData.setFeatures(Factory.newFeatureMap());
     }
+
+    // record the attributes of this element
     currentAttributes = atts;
 
     // process attributes of parameter elements
@@ -117,7 +124,7 @@ public class CreoleXmlHandler extends HandlerBase {
   /** Utility function to throw exceptions on stack errors. */
   private void checkStack(String methodName, String elementName)
   throws GateSaxException {
-    if(elementStack.isEmpty())
+    if(contentStack.isEmpty())
       throw new GateSaxException(
         methodName + " called for element " + elementName + " with empty stack"
       );
@@ -132,11 +139,13 @@ public class CreoleXmlHandler extends HandlerBase {
   throws GateSaxException {
     if(DEBUG) Out.prln("endElement: " + elementName);
 
+    //////////////////////////////////////////////////////////////////
     if(elementName.toUpperCase().equals("RESOURCE")) {
+//******************************
+// here should check that the resource has all mandatory elements, e.g. class name
+//******************************
+
       // add the new resource data object to the creole register
-      //******************************
-      // check that the resource has all mandatory elements, e.g. class name
-      //******************************
       if(resourceData.getInterfaceName() != null) // index by intf if present
         register.put(resourceData.getInterfaceName(), resourceData);
       else // index by class name
@@ -158,14 +167,17 @@ public class CreoleXmlHandler extends HandlerBase {
 
       if(DEBUG) Out.println("added: " + resourceData);
 
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
-      resourceData.setName((String) elementStack.pop());
+      resourceData.setName((String) contentStack.pop());
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("JAR")) {
       checkStack("endElement", "JAR");
 
       // add jar file name
-      String jarFileName = (String) elementStack.pop();
+      String jarFileName = (String) contentStack.pop();
       resourceData.setJarFileName(jarFileName);
 
       // add jar file URL if there is one
@@ -188,11 +200,13 @@ public class CreoleXmlHandler extends HandlerBase {
           throw new GateSaxException("bad URL " + jarFileUrl + e);
         }
       }
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("XML")) {
       checkStack("endElement", "XML");
 
       // add XML file name
-      String xmlFileName = (String) elementStack.pop();
+      String xmlFileName = (String) contentStack.pop();
       resourceData.setXmlFileName(xmlFileName);
 
       // add xml file URL if there is one
@@ -210,44 +224,64 @@ public class CreoleXmlHandler extends HandlerBase {
           throw new GateSaxException("bad URL " + xmlFileUrl + e);
         }
       }
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
-      resourceData.setClassName((String) elementStack.pop());
+      resourceData.setClassName((String) contentStack.pop());
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("COMMENT")) {
       checkStack("endElement", "COMMENT");
-      resourceData.setComment((String) elementStack.pop());
+      resourceData.setComment((String) contentStack.pop());
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("INTERFACE")) {
       checkStack("endElement", "INTERFACE");
-      resourceData.setInterfaceName((String) elementStack.pop());
+      resourceData.setInterfaceName((String) contentStack.pop());
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PARAMETER-LIST")) {
       resourceData.addParameterList(currentParamList);
       currentParamList = new ArrayList();
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PARAMETER")) {
       checkStack("endElement", "PARAMETER");
-      currentParam.valueString = (String) elementStack.pop();
+      currentParam.valueString = (String) contentStack.pop();
       currentParamList.add(currentParam);
       currentParam = new Parameter();
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("AUTOLOAD")) {
       resourceData.setAutoLoading(true);
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE")) {
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE-DIRECTORY")) {
+
+    //////////////////////////////////////////////////////////////////
     } else { // arbitrary elements get added as features of the resource data
       if(resourceData != null)
         resourceData.getFeatures().put(
           elementName.toUpperCase(),
-          ((elementStack.isEmpty()) ? null : (String) elementStack.pop())
+          ((contentStack.isEmpty()) ? null : (String) contentStack.pop())
         );
     }
+    //////////////////////////////////////////////////////////////////
+
   } // endElement
 
-  /** Called when the SAX parser encounts text in the XML doc */
+  /** Called when the SAX parser encounts text (PCDATA) in the XML doc */
   public void characters(char[] text, int start, int length)
   throws SAXException {
 
     String content = new String(text, start, length);
 
-    // not sure why this gets called when all that text is is spaces...
-    // but don't want to do anything with them, hence this loop:
+    // this gets called when all that text is is spaces...
+    // don't want to do anything with them, hence this loop:
     boolean isSpaces = true;
     char contentChars[] = content.toCharArray();
 
@@ -259,7 +293,7 @@ public class CreoleXmlHandler extends HandlerBase {
 
     if(isSpaces) return;
 
-    elementStack.push(content);
+    contentStack.push(content);
 
     if(DEBUG) Out.println(content);
 

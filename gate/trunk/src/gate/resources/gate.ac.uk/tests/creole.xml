@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
+<!-- TESTS TESTS TESTS TESTS TESTS -->
+
 <!-- creole.xml directory file for testing resources -->
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
@@ -32,6 +34,15 @@
       <JAR>TestResources.jar</JAR>
       <CLASS>testpkg.TestPR2</CLASS>
       <AUTOLOAD/>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Sheffield Test PR 3 (Print Out Tokens)</NAME>
+      <JAR>TestResources.jar</JAR>
+      <CLASS>testpkg.PrintOutTokens</CLASS>
+      <PARAMETER-LIST>
+	<PARAMETER RUNTIME="true">gate.Document</PARAMETER>
+      </PARAMETER-LIST>
     </RESOURCE>
 
   </CREOLE>

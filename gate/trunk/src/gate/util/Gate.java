@@ -21,6 +21,7 @@ import java.io.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.config.*;
 
 /** The class is responsible for initialising the GATE libraries, and
   * providing access to singleton utility objects, such as the GATE class
@@ -42,18 +43,64 @@ public class Gate
 
   /** Initialisation - must be called by all clients before using
     * any other parts of the library. Also initialises the CREOLE
-    * register.
+    * register and reads config data (<TT>gate.xml</TT> files).
     * @see #initCreoleRegister
     */
   public static void init() throws GateException {
+    // create class loader and creole register if they're null
     if(classLoader == null)
       classLoader = new GateClassLoader();
-
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
 
+    // read gate.xml files; this must come before creole register
+    // initialisation in order for the CREOLE-DIR elements to have and effect
+    initConfigData();
+
+    // init the creole register
     initCreoleRegister();
   } // init()
+
+  /** Initialise the CREOLE register. */
+  public static void initCreoleRegister() throws GateException {
+
+    // register the builtin CREOLE directories
+    for(int i=0; i<builtinCreoleDirectoryUrls.length; i++)
+      try {
+        creoleRegister.addDirectory(
+          new URL(builtinCreoleDirectoryUrls[i])
+        );
+      } catch(MalformedURLException e) {
+        throw new GateException(e);
+      }
+
+    // add the GATE base URL creole directory
+    creoleRegister.addDirectory(Gate.getUrl("creole/"));
+    creoleRegister.registerDirectories();
+
+    // register the resources that are actually in gate.jar
+    creoleRegister.registerBuiltins();
+  } // initCreoleRegister
+
+  /** Reads config data (<TT>gate.xml</TT> files). */
+  public static void initConfigData() throws GateException {
+    ConfigDataProcessor configProcessor = new ConfigDataProcessor();
+
+    // url of the builtin config data (for error messages)
+    URL configUrl =
+      Gate.getClassLoader().getResource("gate/resources/gate.xml");
+
+    // open a stream to the builtin config data file
+    InputStream configStream = null;
+    try {
+      configStream = Files.getGateResourceAsStream("gate.xml");
+    } catch(IOException e) {
+      throw new GateException(
+        "Couldn't open builtin config data file: " + configUrl + " " + e
+      );
+    }
+    configProcessor.parseConfigFile(configStream, configUrl);
+  } // initConfigData()
 
   /** Get a URL that points to either an HTTP server or a file system
     * that contains GATE files (such as test cases). The following locations
@@ -94,7 +141,7 @@ public class Gate
           tryNetServer("derwent.dcs.shef.ac.uk", 80, "/gate.ac.uk/") ||
           tryNetServer("gate.ac.uk", 80, "/")
         ) {
-            if(DEBUG) Out.prln("getUrlBase() returned " + urlBase);
+            if(DEBUG) Out.prln("getUrl() returned " + urlBase);
             return urlBase;
         }
       } // if isNetConnected() ...
@@ -233,27 +280,6 @@ public class Gate
 
   /** The URL base for GATE files, e.g. <TT>http://gate.ac.uk/</TT>. */
   private static URL urlBase = null;
-
-  /** Initialise the CREOLE register. */
-  public static void initCreoleRegister() throws GateException {
-
-    // register the builtin CREOLE directories
-    for(int i=0; i<builtinCreoleDirectoryUrls.length; i++)
-      try {
-        creoleRegister.addDirectory(
-          new URL(builtinCreoleDirectoryUrls[i])
-        );
-      } catch(MalformedURLException e) {
-        throw new GateException(e);
-      }
-
-    // add the GATE base URL creole directory
-    creoleRegister.addDirectory(Gate.getUrl("creole/"));
-    creoleRegister.registerDirectories();
-
-    // register the resources that are actually in gate.jar
-    creoleRegister.registerBuiltins();
-  } // initCreoleRegister
 
   /** Class loader used e.g. for loading CREOLE modules, of compiling
     * JAPE rule RHSs.

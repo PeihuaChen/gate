@@ -90,17 +90,23 @@ public class ResourceData extends AbstractFeatureBearer {
   /** Get method for the resource name */
   public String getName() { return name; }
 
+  /** The stack of instantiations */
+  protected BumpyStack instantiationStack = new BumpyStack();
+
   /** Get the list of instantiations of resources */
-  public Set getInstantiations() {
-    throw new LazyProgrammerException();
+  public BumpyStack getInstantiations() {
+    return instantiationStack;
   } // getInstantiations
 
   /** Add an instantiation of the resource to the register of these */
   public void addInstantiation(Resource resource) {
-///////////////
-// maintain stack of instantiations
-////////////////
+    instantiationStack.push(resource);
   } // addInstantiation
+
+  /** Bump an instantiation to the top of the instantiation stack */
+  public void bumpInstantiation(Resource resource) {
+    instantiationStack.bump(resource);
+  } // bumpInstantiation
 
   /** The class name of the resource */
   protected String className;

@@ -2,16 +2,20 @@
 <!-- TEST gate.xml -->
 <!-- $Id$ -->
 
+<!-- this file is used by the test suite; it is read from a
+     web server if we're net connected, or from the gate2/classes
+     directory, or from gate.jar, depending on which day of the
+     week it is -->
+
 <GATE>
 
 <CREOLE-DIRECTORY>http://somewhere.on.the.net/creole/</CREOLE-DIRECTORY> 
 
-<SYSTEM>
-  <NAME>Print Out Tokens</NAME>
+<SYSTEM NAME="Print Out Tokens">
   <CONTROLLER>gate.creole.SerialController</CONTROLLER>
   <LR sourceUrlName="http://gate.ac.uk/tests/doc0.html">gate.Document</LR>
-  <PR>gate.creole.Tokeniser</PR>
-  <PR>testpkg.PrintTokens</PR>
+  <PR>gate.creole.tokeniser.DefaultTokeniser</PR>
+  <PR>testpkg.PrintOutTokens</PR>
 </SYSTEM>
 
 </GATE>

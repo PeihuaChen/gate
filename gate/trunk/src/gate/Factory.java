@@ -63,7 +63,7 @@ public abstract class Factory
       resClass = resData.getResourceClass();
     } catch(ClassNotFoundException e) {
       throw new ResourceInstantiationException(
-        "Couldn't get resource class from the resource data: " + e
+        "Couldn't get resource class from the resource data:"+Strings.getNl()+e
       );
     }
 
@@ -136,12 +136,16 @@ public abstract class Factory
           if(DEBUG) Out.prln("Removing listeners for  " + res.toString());
           ((Method)data[0]).invoke(res, new Object[]{data[1]});
         } catch(Exception e) {
-          if(DEBUG) Out.prln("Failed to remove listeners for " + res.toString());
-          throw new ResourceInstantiationException("Parameterisation failure "
-                                                   + e);
+          if(DEBUG) Out.prln("Failed to remove listeners for " + res);
+          throw new ResourceInstantiationException(
+            "Failed to remove listeners for " + e
+          );
         }
       }
     }
+
+    // record the instantiation on the resource data's stack
+    resData.addInstantiation(res);
 
     return res;
   } // create(resourceClassName)
@@ -196,37 +200,40 @@ public abstract class Factory
         numParametersSet++;
       } // for each property
 
-      //get all the events the bean can fire
-      //a list of triplets: [removeListenerMethod, listener]
-      List removeListenersData = null;
-      EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
-      //add the listeners for the initialisation phase
-      if(events != null){
-        EventSetDescriptor event;
-        removeListenersData = new ArrayList();
-        for(int i = 0; i < events.length; i++) {
-          event = events[i];
-          //did we get such a listener?
-          Object listener = parameters.get(event.getListenerType().getName());
-          if(listener != null){
-            Method addListener = event.getAddListenerMethod();
-            // call the set method with the parameter value
-            Object[] args = new Object[1];
-            args[0] = listener;
-            addListener.invoke(resource, args);
-            numParametersSet++;
-            removeListenersData.add(new Object[]{event.getRemoveListenerMethod(),
-                                                 listener});
-          }
+    //get all the events the bean can fire
+    //a list of triplets: [removeListenerMethod, listener]
+    List removeListenersData = null;
+    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+
+    //add the listeners for the initialisation phase
+    if(events != null) {
+      EventSetDescriptor event;
+      removeListenersData = new ArrayList();
+      for(int i = 0; i < events.length; i++) {
+        event = events[i];
+
+        //did we get such a listener?
+        Object listener = parameters.get(event.getListenerType().getName());
+        if(listener != null){
+          Method addListener = event.getAddListenerMethod();
+
+          // call the set method with the parameter value
+          Object[] args = new Object[1];
+          args[0] = listener;
+          addListener.invoke(resource, args);
+          numParametersSet++;
+          removeListenersData.add(new Object[]{event.getRemoveListenerMethod(),
+                                               listener});
         }
-      }
+      } // for each event
+    }   // if events != null
 
+    // did we set all the parameters?
+    if(numParametersSet != parameters.size())
+      throw new GateException(
+        "couldn't set all the parameters of resource " + resource
+      );
 
-      // did we set all the parameters?
-      if(numParametersSet != parameters.size())
-        throw new GateException(
-          "couldn't set all the parameters of resource " + resource
-        );
     return removeListenersData;
   } // setResourceParameters
 
