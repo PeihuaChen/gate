@@ -68,13 +68,22 @@ public class LuceneIndexManager implements IndexManager{
                                            new SimpleAnalyzer(), true);
 
       for(int i = 0; i<corpus.size(); i++) {
+        boolean isLoaded = corpus.isDocumentLoaded(i);
         gate.Document gateDoc = (gate.Document) corpus.get(i);
         writer.addDocument(getLuceneDoc(gateDoc));
+        if (!isLoaded) {
+          corpus.unloadDocument(gateDoc);
+        }
       }//for (all documents)
 
       writer.close();
+      corpus.sync();
     } catch (java.io.IOException ioe){
       throw new IndexException(ioe.getMessage());
+    } catch (gate.persist.PersistenceException pe){
+      pe.printStackTrace();
+    } catch (gate.security.SecurityException se){
+      se.printStackTrace();
     }
   }
 
