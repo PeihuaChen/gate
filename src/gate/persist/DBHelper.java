@@ -25,7 +25,7 @@ public class DBHelper {
 
   /** class name of the Oracle jdbc driver */
   private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
-//  private static final String jdbcPostgresDriverName = "postgresql.Driver";
+  private static final String jdbcPostgresDriverName = "org.postgresql.Driver";
 //  private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
 
   public static final int CHINK_SIZE_SMALL = 30;
@@ -208,7 +208,7 @@ public class DBHelper {
 
     if (!driversLoaded) {
       Class.forName(jdbcOracleDriverName);
-//      Class.forName(jdbcPostgresDriverName);
+      Class.forName(jdbcPostgresDriverName);
 //      Class.forName(jdbcSapDBDriverName);
 
       driversLoaded = true;
@@ -257,6 +257,25 @@ public class DBHelper {
 
     loadDrivers();
     Connection conn = DriverManager.getConnection(connectURL);
+
+    if (DEBUG) {
+      DatabaseMetaData meta = conn.getMetaData();
+      gate.util.Err.println(
+            "JDBC driver name=["+meta.getDriverName() +
+            "] version=["+ meta.getDriverVersion() +"]");
+    }
+
+    return conn;
+  }
+
+  /**
+   *  connects to DB
+   */
+  public static Connection connect(String connectURL, String user, String pass)
+    throws SQLException,ClassNotFoundException{
+
+    loadDrivers();
+    Connection conn = DriverManager.getConnection(connectURL, user, pass);
 
     if (DEBUG) {
       DatabaseMetaData meta = conn.getMetaData();
