@@ -336,10 +336,20 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     if (false == this.addedAnnotations.contains(ann)) {
       this.updatedAnnotations.add(ann);
     }
+
+    //sanity check
+    Assert.assertTrue(false == this.removedAnnotations.contains(ann));
   }
+
 
   /** Add an existing annotation. Returns true when the set is modified. */
   public boolean add(Object o) throws ClassCastException {
+
+    //check if this annotation was removed beforehand
+    //if so then just delete it from the list of annotations waiting for persistent removal
+    if (this.removedAnnotations.contains(o)) {
+      this.removedAnnotations.remove(o);
+    }
 
     boolean result = super.add(o);
 
