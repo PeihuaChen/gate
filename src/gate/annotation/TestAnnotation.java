@@ -503,13 +503,16 @@ public class TestAnnotation extends TestCase
     assertTrue(! basicAS.contains(a1));
     assertTrue(! basicAS.containsAll(a1a2));
 
+    //this will not work anymore as the semantics of addAll has changed (new
+    //annotations are created in order to avoid ID clashes
+/*
     basicAS.addAll(a1a2);
     assertTrue(basicAS.contains(a2));
     assertTrue(basicAS.containsAll(a1a2));
 
     assertTrue(basicAS.retainAll(a1a2));
     assertTrue(basicAS.equals(a1a2));
-
+*/
     basicAS.clear();
     assertTrue(basicAS.isEmpty());
 
