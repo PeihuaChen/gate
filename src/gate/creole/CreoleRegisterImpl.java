@@ -70,9 +70,6 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 
   } // default constructor
 
-  /** Removes all resources and forgets all directories. */
-  public void clear() { directories.clear(); super.clear(); }
-
   /** Add a CREOLE directory URL to the register and to the GATE classloader.
     * The directory is <B>not</B> registered.
     */
@@ -199,5 +196,42 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     // put </CREOLE-DIRECTORY> into dirfile
     throw new LazyProgrammerException();
   } // createCreoleDirectoryFile
+
+  /** Overide HashMap's put method to maintain a list of all the
+    * types of LR in the register.
+    */
+  public Object put(Object key, Object value) {
+    ResourceData rd = (ResourceData) value;
+    if(LanguageResource.class.isAssignableFrom(rd.getClass()))
+      lrTypes.add(rd.getClassName());
+
+    return super.put(key, value);
+  } // put(key, value)
+
+  /** Overide HashMap's delete method to update the list of type of LR
+    * in the register.
+    */
+  public Object remove(Object key) {
+    ResourceData rd = (ResourceData) get(key);
+    if(LanguageResource.class.isAssignableFrom(rd.getClass()))
+      lrTypes.remove(rd.getClassName());
+
+    return super.remove(key);
+  } // remove(Object)
+
+  /** Overide HashMap's clear to update the list of LR types in the register,
+    * and remove all resources and forgets all directories.
+    */
+  public void clear() {
+    lrTypes.clear();
+    directories.clear();
+    super.clear();
+  } // clear()
+
+  /** Get the list of types of LR in the register. */
+  public List getLrTypes() { return lrTypes; }
+
+  /** A list of the types of LR in the register. */
+  protected List lrTypes = new ArrayList();
 
 } // class CreoleRegisterImpl

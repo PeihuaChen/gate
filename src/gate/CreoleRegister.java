@@ -25,7 +25,7 @@ import gate.util.*;
 /** The CREOLE register records the set of resources that are currently
   * known to the system. Each member of the register is a
   * <A HREF=creole/ResourceData.html>ResourceData</A> object, indexed by
-  * the class name or interface name of the resource.
+  * the class name of the resource.
   * <P>
   * The register is accessible from the static method
   * <A HREF=util/Gate.html#getCreoleRegister()>gate.util.Gate.getCreoleRegister
