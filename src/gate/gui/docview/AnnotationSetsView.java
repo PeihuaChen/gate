@@ -1021,6 +1021,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void mouseMoved(MouseEvent e){
       //this triggers select annotation leading to edit annotation or new 
       //annotation actions
+      //ignore if CTRL pressed
+      if((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) return;
       mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
       mouseMovementTimer.restart();
     }
