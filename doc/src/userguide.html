@@ -258,7 +258,6 @@ Java class to disk for you: select "Bootstrap" from the "Tools" menu.
 
 
 <!---------------------------------------------------------------------->
-
 <H3>Loading Language Resources</H3>
 
 <P>
@@ -277,11 +276,12 @@ viewed. At this stage, the only annotations displayed will be those
 which are produced as a result of the text structure analysis which
 transforms a text into a GATE document, e.g. xml or html
 tags. Additional language resources can be loaded by repeating the
-procedure. Note, however, that only one resource can be processed at
-a time.
+procedure.
 </P>
 
+<!---------------------------------------------------------------------->
 <H3>Loading Processing Resources</H3>
+
 <P>
 Right click on "Processing Resources" and select "Create processing
 resource". Select the type of resource (e.g. tokeniser, gazetteer,
@@ -294,6 +294,7 @@ take a few seconds for the resource to be loaded. Repeat this
 procedure until all necessary resources have been loaded.
 </P>
 
+<!---------------------------------------------------------------------->
 <H3>Running an Application</H3>
 <P>
 Once all the resources have been loaded, an application can be created
@@ -312,12 +313,14 @@ select the language resource to be used (using a left click), and
 finally right click on the application and select "Run".
 </P>
 
+<!---------------------------------------------------------------------->
 <H3>Viewing the Results</H3>
+
 <P>
 Once the system has run, open the document to be
 viewed with a double click. Note that it may take a few seconds for the text to 
 be
-displayed, especially if it is long.
+displayed if it is long.
 The annotation types are displayed to the right of the text. 
 Click on Default (the default annotation set) to display the
 annotation types. Then select the annotation types to be viewed. A
@@ -328,6 +331,7 @@ manually altered by double-clicking on the relevant
 annotation. Default colours and font settings can be altered in the
 same way, by double-clicking on the default button. 
 </P>
+
 <P>
 Descriptions of the annotations are simultaneously displayed in the
 bottom pane. These lists can be sorted in ascending and descending
@@ -336,6 +340,7 @@ heading. An arrow will appear indicating the direction of the sorting.
 Clicking on an entry in the table will also
 highlight the respective matching text portion. 
 </P>
+
 <P>
 Right clicking on some part of the text in the main window will bring
 up a box containing a list of the annotations associated with
@@ -346,17 +351,23 @@ has not been selected), this annotation on the right will then be
 automatically selected and all relevant text in the main window will be
 appropriately highlighted.
 </P>
+
 <P>
  Although there is no cursor displayed in the various windows, they can all be 
 scrolled
 using the keyboard arrows, as well as by using the scrollbars.
 </P>
+
 <P>
 At any time, the main viewer can also be used to display other
 information, such as Messages, by clicking on the header
 at the top of the main window. 
 </P>
+
+
+<!---------------------------------------------------------------------->
 <H3>Adding Annotations</H3>
+
 <P>
 In order to be able to add/edit annotations in GATE, the relevant
  Annotation Schemata must first be loaded. This is done by selecting an
@@ -389,7 +400,9 @@ table, right clicking on it, and selecting Delete.
 </P>
 
 
+<!---------------------------------------------------------------------->
 <H3>The Evaluation Tool (Annotation Diff)</H3>
+
 <P>
 The annotation tool is activated by selecting it from the 
 Tools menu at the top of the window. It will appear in a new window. Select the key and response
@@ -401,6 +414,7 @@ response documents are explicitly selected, even if there are no
 alternative choices of document presented. Click on "do diff", and the
 results will be displayed.
 </P>
+
 <P>
 In the main window, the key and response annotations will  be
 displayed. They can be sorted by any category by clicking on the
@@ -408,7 +422,10 @@ relevant column header. The key and response annotations will be aligned if
 their indices are identical, and are colour coded according to the legend
 displayed. 
 </P>
+
+<!--------------------------->
 <H4>Evaluation metrics</H4>
+
 <P>
 Precision, recall and
 false positives are also displayed below the annotation tables, each
