@@ -505,6 +505,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   //CreoleListener implementation
   public void resourceLoaded(CreoleEvent e) {
+    if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
@@ -513,6 +514,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   }// public void resourceLoaded
 
   public void resourceUnloaded(CreoleEvent e) {
+    if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
       ProcessingResource pr = (ProcessingResource)e.getResource();
       if(controller.getPRs().contains(pr)){

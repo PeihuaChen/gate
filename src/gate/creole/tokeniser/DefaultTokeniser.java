@@ -12,7 +12,7 @@ import java.util.*;
  * The simple tokeniser tokenises the document and the transducer processes its
  * output.
  */
-public class DefaultTokeniser extends AbstractProcessingResource {
+public class DefaultTokeniser extends AbstractLanguageAnalyser {
 
   public DefaultTokeniser() {
   }
@@ -175,17 +175,9 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   private java.net.URL tokeniserRulesURL;
   private String encoding;
   private java.net.URL transducerGrammarURL;
-  private gate.Document document;
   private String annotationSetName;
 
 
-
-  public void setDocument(gate.Document document) {
-    this.document = document;
-  }
-  public gate.Document getDocument() {
-    return document;
-  }
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }

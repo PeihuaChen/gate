@@ -49,7 +49,7 @@ import gate.*;
  * will generate annotations of type Lookup having the attributes specified in
  * the definition file.
  */
-public class DefaultGazetteer extends AbstractProcessingResource
+public class DefaultGazetteer extends AbstractLanguageAnalyser
              implements ProcessingResource {
 
   /** Debug flag
@@ -395,21 +395,6 @@ public class DefaultGazetteer extends AbstractProcessingResource
 
 
   /**
-   * Sets the URL to be used for reading the Gazetteer lists
-   *
-   * @param newListsURLStr
-   */
-  /**
-   * Gets the URL used for reading the lists of this Gazetteer
-   */
-  /**
-   * Sets the document to be processed by the next run
-   */
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }
-
-  /**
    * Sets the AnnotationSet that will be used at the next run for the newly
    * produced annotations.
    */
@@ -427,10 +412,6 @@ public class DefaultGazetteer extends AbstractProcessingResource
   Set fsmStates;
 
   protected FeatureMap features  = null;
-
-  /** Used to store the document currently being parsed
-   */
-  protected Document document;
 
   /** Used to store the annotation set currently being used for the newly
    * generated annotations
@@ -470,9 +451,6 @@ public class DefaultGazetteer extends AbstractProcessingResource
   }
   public String getAnnotationSetName() {
     return annotationSetName;
-  }
-  public gate.Document getDocument() {
-    return document;
   }
 
 } // DefaultGazetteer

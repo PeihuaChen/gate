@@ -31,7 +31,7 @@ import java.util.*;
  * some minor processing after running the components in order to extract the
  * results in a usable form.
  */
-public class SentenceSplitter extends AbstractProcessingResource{
+public class SentenceSplitter extends AbstractLanguageAnalyser{
 
   public Resource init()throws ResourceInstantiationException{
     //create all the componets
@@ -175,7 +175,6 @@ public class SentenceSplitter extends AbstractProcessingResource{
   private java.net.URL transducerURL;
   private String encoding;
   private java.net.URL gazetteerListsURL;
-  private gate.Document document;
 
 
   public void setEncoding(String newEncoding) {
@@ -190,15 +189,10 @@ public class SentenceSplitter extends AbstractProcessingResource{
   public java.net.URL getGazetteerListsURL() {
     return gazetteerListsURL;
   }
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }
-  public gate.Document getDocument() {
-    return document;
-  }
   public void setInputASName(String newInputASName) {
     inputASName = newInputASName;
   }
+
   public String getInputASName() {
     return inputASName;
   }

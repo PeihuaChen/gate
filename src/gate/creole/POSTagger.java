@@ -27,7 +27,7 @@ import java.text.NumberFormat;
 /**
  * This class is a wrapper for HepTag, Mark Hepple's POS tagger.
  */
-public class POSTagger extends AbstractProcessingResource {
+public class POSTagger extends AbstractLanguageAnalyser {
 
   public POSTagger() {
   }
@@ -145,12 +145,6 @@ public class POSTagger extends AbstractProcessingResource {
   public java.net.URL getRulesURL() {
     return rulesURL;
   }
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }
-  public gate.Document getDocument() {
-    return document;
-  }
   public void setInputASName(String newInputASName) {
     inputASName = newInputASName;
   }
@@ -167,7 +161,6 @@ public class POSTagger extends AbstractProcessingResource {
   protected hepple.postag.POSTagger tagger;
   private java.net.URL lexiconURL;
   private java.net.URL rulesURL;
-  private gate.Document document;
   private String inputASName;
   private String outputASName;
 }

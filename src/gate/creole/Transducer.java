@@ -27,7 +27,7 @@ import java.io.*;
  * A cascaded multi-phase transducer using the Jape language which is a
  * variant of the CPSL language.
  */
-public class Transducer extends AbstractProcessingResource {
+public class Transducer extends AbstractLanguageAnalyser {
 
   /**
    * Default constructor. Does nothing apart from calling the default
@@ -138,22 +138,6 @@ public class Transducer extends AbstractProcessingResource {
   }
 
   /**
-   * Sets the document to be processed through this transducer.
-   * @param a {@link gate.Document} to be processed.
-   */
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }
-
-  /**
-   * Gets the document currently set as target for this transducer.
-   * @return a {@link gate.Document}
-   */
-  public gate.Document getDocument() {
-    return document;
-  }
-
-  /**
    *
    * Sets the encoding to be used for reding the input file(s) forming the Jape
    * grammar. Note that if the input grammar is a multi-file one than the same
@@ -227,10 +211,6 @@ public class Transducer extends AbstractProcessingResource {
    */
   private java.net.URL grammarURL;
 
-  /**
-   * The {@link gate.Document} curently set as target for this transducer.
-   */
-  private gate.Document document;
 
   /**
    * The actual JapeTransducer used for processing the document(s).
