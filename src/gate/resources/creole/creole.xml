@@ -51,7 +51,7 @@
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Oracle Corpus</NAME>
+      <NAME>GATE Oracle Corpus</NAME>
       <CLASS>gate.corpora.DatabaseCorpusImpl</CLASS>
       <COMMENT>GATE persistent corpus (Oracle)</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
