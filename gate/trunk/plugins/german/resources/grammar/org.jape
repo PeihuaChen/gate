@@ -1,0 +1,215 @@
+Phase: Organization
+Input: Lookup Token
+Options: control = appelt
+
+Rule: ORG1
+(
+
+	{Lookup.minorType == "main"}
+
+
+):OrgName
+-->
+:OrgName.ORG = {kind = "ORG", rule = "ORG1"}
+
+Rule: Company1
+(
+
+	{Lookup.minorType == "company"}
+	{Lookup.minorType == "orgtype"}
+
+):OrgName
+-->
+:OrgName.ORG = {kind = "ORG", subtype= "company", rule = "Company1"}
+
+Rule: Company2
+(
+
+	{Lookup.minorType == "company"}
+
+
+):OrgName
+-->
+:OrgName.ORG = {kind = "ORG", subtype= "company", rule = "Company2"}
+
+Rule: Guess_Company1
+(
+	({Token.orth == upperInitial})+
+	{Lookup.minorType == "orgtype"}
+
+):OrgName
+-->
+:OrgName.ORG = {kind = "ORG", subtype= "company", rule = "Guess_Company1"}
+
+Rule: Exception_to_guess_Company1
+Priority: 20
+
+{Lookup.minorType == "stop"}
+(
+({Token.orth == upperInitial})+
+{Lookup.minorType == "orgtype"}
+
+):OrgName
+-->
+{}
+
+Rule: Guess_Company1_annie
+(
+	({Token.orth == upperInitial})+
+	{Lookup.minorType == "annie_orgtype"}
+
+):OrgName
+-->
+:OrgName.ORG = {kind = "ORG", subtype= "company", rule = "Guess_Company1_annie"}
+
+Rule: Exception_to_guess_Company1_annie
+Priority: 20
+
+{Lookup.minorType == "stop"}
+(
+({Token.orth == upperInitial})+
+{Lookup.minorType == "annie_orgtype"}
+
+):OrgName
+-->
+{}
+
+Rule: Guess_Organization1
+Priority: 20
+(
+	{Lookup.minorType == "orgtype_prefix"}
+	(
+	{Token.orth == upperInitial}
+	|
+	{Token.orth == "allCaps"}
+	)
+	(
+	({Token.string == "\-"})?
+	(
+	{Token.orth == upperInitial}
+	|
+	{Token.orth == "allCaps"}
+	)
+	)*
+
+
+):OrgName2
+-->
+:OrgName2.ORG = {kind = "ORG", rule = "Guess_Organization1"}
+
+Rule: Exception1_to_guess_Organization2
+Priority: 20
+(
+	{Lookup.minorType == "stop"}
+	{Lookup.minorType == "city"}
+
+
+)
+-->
+{}
+
+Rule: Exception2_to_guess_Organization2
+Priority: 20
+(
+	{Lookup.majorType == "location"}
+	{Lookup.minorType == "city"}
+
+
+)
+-->
+{}
+
+Rule: Exception3_to_guess_Organization2
+Priority: 20
+(
+	{Token.string == "New York"}
+)
+-->
+{}
+
+Rule: Exception4_to_guess_Organization2
+Priority: 20
+(
+	{Token.orth == "upperInitial"}
+	{Token.orth == "allCaps"}
+)
+-->
+{}
+
+Rule: Exception5_to_guess_Organization2
+Priority: 20
+(
+	(
+	{Token.string == "Bad"}
+	|
+	{Token.string == "Großraum"}
+	|
+	{Token.string == "Kreis"}
+	|
+	{Token.string == "Stadt"}
+	|
+	{Token.string == "Land"}
+	|
+	{Token.string == "Landes"}
+	|
+	{Token.string == "Sankt"}
+	|
+	{Token.string == "Herzogtum"}
+	|
+	{Token.string == "Großherzogtum"}
+	|
+	{Token.string == "Nähe"}
+
+	)
+	{Token.orth == "upperInitial"}
+)
+-->
+{}
+
+Rule: Guess_Organization2
+(
+	({Token.orth == upperInitial})+
+	{Lookup.minorType == "city"}
+
+
+):OrgName3
+-->
+:OrgName3.ORG = {kind = "ORG", rule = "Guess_Organization2"}
+
+Rule: Org_by_gesellschaft
+(
+	(
+	{Token.string == "Gesellschaft"}
+	|
+	{Token.string == "GESELLSCHAFT"}
+	)
+	(
+	{Token.orth == "allCaps"}
+	|
+	{Token.orth == "upperInitial"}
+	)
+	(
+	({Token.string == "-"})?
+	{Token.orth == "upperInitial"}
+	)*
+):ges
+-->
+:ges.ORG = {kind = "org", rule = "org_by_gesellschaft"}
+
+Rule: Organization_key1
+(
+
+(
+	{Lookup.minorType == "organization_key"}
+	({Token.string == "\-"})?
+		(
+		{Token.orth == "upperInitial"}
+		|
+		{Token.orth == "allCaps"}
+		)
+)
+	
+):key
+-->
+:key.ORG = {kind = "ORG", rule = "organization_key1"}
+
