@@ -16,15 +16,24 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util gate.annotation gate.corpora gate.jape \
-	gate.jape.parser gate.db gate.fsm gate.gui gate.jape.gui \
-	gate.creole.tokeniser gate.html gate.xml
+# a list of packages used in documentation generation. including a
+# package that contains no classes causes javadoc to bomb
+PKGS=	gate gate.annotation gate.corpora \
+	gate.creole.gazeteer gate.creole.tokeniser \
+	gate.db gate.email gate.fsm gate.gui gate.html \
+	gate.jape gate.jape.gui gate.jape.parser \
+	gate.sgml gate.util gate.xml
+
+# classpath to build compile commands from
 CP=	-classpath \
 ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:
+
+# sourcepath to build compile commands from
 SP=	-sourcepath ../src
+
+# compile command
 #COMPILE=./jdk.sh -s -g:none javac -Xdepend -Xstdout -O
-COMPILE=./jdk.sh -s -g:none javac -O \
--d ../classes $(SP) $(CP)
+COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
 
 # "all" builds the .class files. 
 # having the main test class as first target, and -Xdepend in the (1.2)
@@ -55,8 +64,12 @@ jar: classes.jar tcl japefiles resources
 	rm -f gate.jar
 	./jdk.sh java -cp classes.jar gate.util.JarFiles gate.jar \
 	  classes.jar ../lib/*.jar ../lib/*.zip
+
+# just the gate classes in a jar
 classes.jar:
 	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar gate
+
+# copy the resources directory into "classes"
 resources:
 	cd ../src/gate && cp -R resources ../../classes/gate
 	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
@@ -96,6 +109,8 @@ internaldocs:
 	  javadoc $(SP) $(CP) -private -use \
 	  -d ../doc/javadoc/internal $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
+
+# convert the source to HTML using the java2html utility (if installed)
 java2html:
 	rm -f ../doc/internal/java2html/*.html
 	echo '<!--AUTOGEN!--><HTML><HEAD><TITLE>GATE code</TITLE></HEAD><BODY>' \
@@ -135,6 +150,7 @@ japefiles:
 	cd ../src && for f in `find . -name '*.jape' -print |grep -v resources`; \
 	do cp $$f ../classes/$$f; done
 
+# jape grammar documentation
 ../src/gate/jape/parser/ParseCpsl.html: ../src/gate/jape/parser/ParseCpsl.jj \
   ../src/gate/jape/parser/ParseCpslPlain.html
 	cd ../src/gate/jape/parser; \
@@ -142,6 +158,7 @@ japefiles:
 	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
 	  COM.sun.labs.jjdoc.JJDocMain -ONE_TABLE=false ParseCpsl.jj
 
+# jape grammar documentation
 ../src/gate/jape/parser/ParseCpslPlain.html: \
   ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
@@ -153,5 +170,17 @@ TestJdk.jar: testpkg/Dummy.java
 	$(COMPILE) testpkg/Dummy.java
 	cd ../classes && ../build/jdk.sh jar cvf TestJdk.jar testpkg; \
 	mv TestJdk.jar ../build; rm -r testpkg
+
+# make a list of gate packages
+gatepackages:
+	cd ../src; \
+	for f in `find gate -print`; do \
+	  [ -d $$f ] || continue; \
+	  case $$f in \
+	    *CVS) continue;; \
+	    gate/resources*) continue;; \
+	  esac; \
+	  echo $$f |sed 's,/,.,g'; \
+	done
 
 ############################################################################
