@@ -15,24 +15,11 @@
 package gate.event;
 
 
-public class ObjectModificationListener implements GateListener {
+public interface ObjectModificationListener extends GateListener {
 
-  public ObjectModificationListener() {
-  }
+  public void objectCreated(ObjectModificationEvent e);
 
-  public void processGateEvent(GateEvent e) {
-    /**@todo: Implement this gate.event.GateListener method*/
-    throw new java.lang.UnsupportedOperationException("Method processGateEvent() not yet implemented.");
-  }
+  public void objectModified(ObjectModificationEvent e);
 
-  public void objectCreated(Object o) {
-  }
-
-  public void objectModified(Object o) {
-  }
-
-  public void objectDeleted(Object o) {
-  }
-
-
+  public void objectDeleted(ObjectModificationEvent e);
 }
