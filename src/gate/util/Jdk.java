@@ -88,10 +88,12 @@ public class Jdk {
     sun.toolsx.javac.Main compiler = new sun.toolsx.javac.Main(
       System.out, "gate.util.Jdk"
     );
-    String argv[] = new String[3];
-    argv[0] = "-nodisk";
-    argv[1] = className;
-    argv[2] = javaCode;
+    String argv[] = new String[5];
+    argv[0] = "-classpath";
+    argv[1] = System.getProperty("java.class.path");
+    argv[2] = "-nodisk";
+    argv[3] = className;
+    argv[4] = javaCode;
     compiler.compile(argv);
     List compilerOutput = compiler.getCompilerOutput();
 
