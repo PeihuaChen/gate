@@ -68,7 +68,7 @@
   <property category="sys" name="DefaultPackage" value="gate.gui" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
-  <property category="sys" name="DocPath" value="doc/javadoc" />
+  <property category="sys" name="DocPath" value="doc\javadoc" />
   <property category="sys" name="EventMatch" value="false" />
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
