@@ -349,14 +349,14 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Add the tableScroll to the diffPanel
     this.add(scrollPane);
 
-    // ADD the LEGENDA
+    // ADD the LEGEND
     //Lay out the JLabels from left to right.
     Box infoBox = new Box(BoxLayout.X_AXIS);
     // Keep the components together
     //box.add(Box.createHorizontalGlue());
 
     Box box = new Box(BoxLayout.Y_AXIS);
-    JLabel jLabel = new JLabel("LEGENDA");
+    JLabel jLabel = new JLabel("LEGEND");
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     jLabel.setOpaque(true);
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
