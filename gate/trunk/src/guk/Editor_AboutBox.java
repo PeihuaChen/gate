@@ -52,9 +52,10 @@ public class Editor_AboutBox extends JDialog implements ActionListener {
       e.printStackTrace();
     }
     pack();
-  }
+  }// Editor_AboutBox(Frame parent)
+
   /**Component initialization*/
-  private void jbInit() throws Exception  {
+  private void jbInit() throws Exception {
     //imageLabel.setIcon(new ImageIcon(EditorFrame_AboutBox.class.getResource("[Your Image]")));
     this.setTitle("About");
     setResizable(false);
@@ -84,14 +85,16 @@ public class Editor_AboutBox extends JDialog implements ActionListener {
     insetsPanel1.add(button1, null);
     panel1.add(insetsPanel1, BorderLayout.SOUTH);
     panel1.add(panel2, BorderLayout.NORTH);
-  }
+  }// jbInit()
+
   /**Overridden so we can exit when window is closed*/
   protected void processWindowEvent(WindowEvent e) {
     if (e.getID() == WindowEvent.WINDOW_CLOSING) {
       cancel();
     }
     super.processWindowEvent(e);
-  }
+  }// processWindowEvent(WindowEvent e)
+
   /**Close the dialog*/
   void cancel() {
     dispose();
@@ -101,5 +104,5 @@ public class Editor_AboutBox extends JDialog implements ActionListener {
     if (e.getSource() == button1) {
       cancel();
     }
-  }
-}
+  }// actionPerformed(ActionEvent e)
+}// class Editor_AboutBox extends JDialog implements ActionListener
