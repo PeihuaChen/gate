@@ -61,8 +61,10 @@ public class CorpusBenchmarkTool {
       Out.prln("Loading gazetteer <P>");
       params.clear();
       String listsURL = this.configs.getProperty("gazetteerListsURL");
-      if (listsURL != null && !listsURL.equals(""))
+      if (listsURL != null && !listsURL.equals("")) {
         params.put("listsURL", listsURL);
+        Out.prln("Running gazetteer on lists in: " + listsURL + "<P>");
+      }
       String caseSensitive = this.configs.getProperty("gazetteerCaseSensitive");
       if (caseSensitive != null && !caseSensitive.equals(""))
         params.put("caseSensitive", new Boolean(caseSensitive));
@@ -112,8 +114,10 @@ public class CorpusBenchmarkTool {
       Out.prln("Loading grammars for transducer <P>");
       params.clear();
       String grammarURL = this.configs.getProperty("grammarURL");
-      if (grammarURL != null && !grammarURL.equals(""))
+      if (grammarURL != null && !grammarURL.equals("")) {
         params.put("grammarURL", grammarURL);
+        Out.prln("Running transducer on grammars in: " + grammarURL + "<P>");
+      }
       params.put("inputASName", annotSetName);
       params.put("outputASName", annotSetName);
       transducer = (ANNIETransducer) Factory.createResource(
