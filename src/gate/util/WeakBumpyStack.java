@@ -145,7 +145,7 @@ public class WeakBumpyStack extends AbstractList
    * Checks the queue for any new weak references that have been cleared and
    * queued and removes them from the underlying stack.
    *
-   * This method should be called by every public method before relising its
+   * This method should be called by every public method before realising its
    * internal logic.
    */
   protected void processQueue(){
