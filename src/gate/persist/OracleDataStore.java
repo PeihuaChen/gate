@@ -30,6 +30,7 @@ import gate.util.*;
 import gate.event.*;
 import gate.security.*;
 import gate.security.SecurityException; //hide the more general exception
+import gate.corpora.*;
 
 public class OracleDataStore extends JDBCDataStore {
 
@@ -649,6 +650,12 @@ public class OracleDataStore extends JDBCDataStore {
    */
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
+
+    Document docResult = null;
+//    CorpusImpl corpResult  = null;
+
+    docResult = readDocument(lrPersistenceId);
+
     throw new MethodNotImplementedException();
   }
 
@@ -1166,6 +1173,130 @@ public class OracleDataStore extends JDBCDataStore {
     throws PersistenceException, SecurityException {
 
     throw new MethodNotImplementedException();
+  }
+
+
+  protected Document readDocument(Object lrPersistenceId)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrPersistenceId);
+
+    if (false == lrPersistenceId instanceof Long) {
+      throw new IllegalArgumentException();
+    }
+
+    // 1. dummy document to be initialized
+    Document result = new DocumentImpl();
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    //3. read from DB
+    try {
+      String sql = " select v1.lr_name, " +
+                   "        v1.lrtp_type, " +
+                   "        v1.lr_id, " +
+                   "        v2.doc_url, " +
+                   "        v2.doc_is_markup_aware " +
+                   " from  "+Gate.DB_OWNER+".v_lr v1, " +
+                   "       "+Gate.DB_OWNER+".v_document v2, " +
+                   " where  v2.doc_lr_id = v1.lr_id " +
+                   "        and v1.lr_id = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lrPersistenceId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      rs.next();
+
+      //4. fill data
+
+      //4.1 name
+      String lrName = rs.getString("lr_name");
+      Assert.assertNotNull(lrName);
+      result.setName(lrName);
+
+      //4.2. markup aware
+      long markup = rs.getLong("doc_is_markup_aware");
+      Assert.assert(markup == this.ORACLE_FALSE || markup == this.ORACLE_TRUE);
+      if (markup == this.ORACLE_FALSE) {
+        result.setMarkupAware(Boolean.FALSE);
+      }
+      else {
+        result.setMarkupAware(Boolean.TRUE);
+      }
+
+      //4.3 datastore
+      result.setDataStore(this);
+
+      //4.4. persist ID
+      Long persistID = new Long(rs.getLong("lr_id"));
+      result.setLRPersistenceId(persistID);
+
+      //4.5  source url
+      String url = rs.getString("doc_url");
+      result.setSourceUrl(new URL(url));
+
+      //4.6 features
+      FeatureMap features = readFeatures((Long)lrPersistenceId,this.FEATURE_OWNER_DOCUMENT);
+      result.setFeatures(features);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(Exception e) {
+      throw new PersistenceException(e);
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+    return result;
+  }
+
+  protected FeatureMap readFeatures(Long entityID, int entityType)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(entityID);
+    Assert.assert(entityType == this.FEATURE_OWNER_ANNOTATION ||
+                  entityType == this.FEATURE_OWNER_CORPUS ||
+                  entityType == this.FEATURE_OWNER_DOCUMENT);
+
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    //1. read from DB
+    try {
+      String sql = " select v1.*, " +
+                   " from  "+Gate.DB_OWNER+".v_feature v1 " +
+                   " where  v1.ft_entity_id = ? " +
+                   "        and v1.ft_enetity_type = ?";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,entityID.longValue());
+      pstmt.setLong(2,entityType);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      //3. create feature map
+      while (rs.next()) {
+      }
+
+      throw new MethodNotImplementedException();
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't read features from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
   }
 
 }
