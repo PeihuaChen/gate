@@ -19,14 +19,14 @@ import gate.Document;
 
 public class QueryResult{
 
-  private Long docID;
+  private Object docID;
   private float relevace;
   private List fieldValues;
 
   public QueryResult(Document doc,float relevance, List fieldNames){
   }
 
-  public Long getDocumentID(){
+  public Object getDocumentID(){
     return docID;
   }
 

@@ -18,9 +18,11 @@ import java.util.Iterator;
 
 public interface IndexDefinition{
 
-  public DocumentAnalyzer getAnalyzer();
+  public void setIndexLocation(String location);
 
-  public int getIndexType();
+  public String getIndexLocation();
+
+  public DocumentAnalyzer getAnalyzer();
 
   public Iterator getIndexFields();
 

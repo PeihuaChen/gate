@@ -22,14 +22,8 @@ public interface IndexedCorpus extends Corpus{
 
   public IndexDefinition getIndexDefinition();
 
-  public IndexStatistics getIndexStatistics();
+  public void setIndexManager(IndexManager im);
 
-  public void optimizeIndex();
-
-  public void createIndex();
-
-  public void deleteIndex();
-
-  boolean isSearchable();
+  public IndexManager getIndexManager();
 
 }

@@ -18,6 +18,8 @@ import java.util.List;
 
 public interface Search{
 
+  public void setCorpus(IndexedCorpus ic);
+
   public QueryResultList search(String query);
 
   public QueryResultList search(String query, int limit);

@@ -18,18 +18,9 @@ import java.util.*;
 
 public class DefaultIndexDefinition implements IndexDefinition{
 
-  private String location;
-  private int indexType;
   private DocumentAnalyzer analyzer;
   private List fields;
-
-  public String getIndexLocation(){
-    return location;
-  }
-
-  public void setIndexLocation(String location){
-    this.location = location;
-  }
+  private String location;
 
   public DocumentAnalyzer getAnalyzer(){
     return analyzer;
@@ -39,12 +30,12 @@ public class DefaultIndexDefinition implements IndexDefinition{
     this.analyzer = analyzer;
   }
 
-  public int getIndexType(){
-    return indexType;
+  public void setIndexLocation(String location){
+    this.location = location;
   }
 
-  public void setIndexType(int type){
-    this.indexType = type;
+  public String getIndexLocation(){
+    return location;
   }
 
   public Iterator getIndexFields(){
