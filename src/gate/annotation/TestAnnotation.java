@@ -414,6 +414,14 @@ public class TestAnnotation extends TestCase
     assertEquals(null, basicAS.get(new Integer(0)));
   } // testRemove()
 
+  public void testRemoveInexistant() throws Exception{
+    basicAS.add(new Long(0), new Long(10), "Foo", emptyFeatureMap);
+    Annotation ann = (Annotation)basicAS.get("Foo").iterator().next();
+    basicAS.remove(ann);
+    //the second remove should do nothing...
+    basicAS.remove(ann);
+  }
+
   /** Test iterator remove */
   public void testIteratorRemove() {
     AnnotationSet asBuf = basicAS.get("T1");
