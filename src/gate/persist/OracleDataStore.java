@@ -29,7 +29,7 @@ import gate.*;
 import gate.util.*;
 import gate.event.*;
 import gate.security.*;
-
+import gate.security.SecurityException; //hide the more general exception
 
 public class OracleDataStore extends JDBCDataStore {
 
@@ -216,7 +216,16 @@ public class OracleDataStore extends JDBCDataStore {
 
   /** Adopt a resource for persistence. */
   public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
-  throws PersistenceException,gate.security.SecurityException {
+  throws PersistenceException,SecurityException {
+
+    //-1. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertNotNull(secInfo);
+
+    //0. check SecurityInfo
+    if (false == this.ac.isValidSecurityInfo(secInfo)) {
+      throw new SecurityException("Invalid security settings supplied");
+    }
 
     //1. is the LR one of Document or Corpus?
     if (false == lr instanceof Document &&
@@ -234,10 +243,10 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     if (lr instanceof Document) {
-      return createDocument((Document)lr);
+      return createDocument((Document)lr,secInfo);
     }
     else {
-      return createCorpus((Corpus)lr);
+      return createCorpus((Corpus)lr,secInfo);
     }
 
   }
@@ -247,13 +256,13 @@ public class OracleDataStore extends JDBCDataStore {
   protected Long createLR(Session s,
                         String lrType,
                         String lrName,
-                        int accessMode,
+                        SecurityInfo si,
                         Long lrParentID)
-  throws PersistenceException,gate.security.SecurityException {
+  throws PersistenceException,SecurityException {
 
     //1. check the session
     if (this.ac.isValidSession(s) == false) {
-      throw new gate.security.SecurityException("invalid session provided");
+      throw new SecurityException("invalid session provided");
     }
 
     //2. create a record in DB
@@ -266,7 +275,7 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setLong(2,s.getGroup().getID().longValue());
       stmt.setString(3,lrType);
       stmt.setString(4,lrName);
-      stmt.setInt(5,accessMode);
+      stmt.setInt(5,si.getAccessMode());
       stmt.setLong(6,lrParentID.longValue());
       //Oracle numbers are BIGNINT
       stmt.registerOutParameter(7,java.sql.Types.BIGINT);
@@ -341,17 +350,26 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected LanguageResource createDocument(Document doc)
-  throws PersistenceException {
+  protected LanguageResource createDocument(Document doc,SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
 
     //delegate, set to Null
-    return createDocument(doc,null);
+    return createDocument(doc,null,secInfo);
   }
 
 
   /** -- */
-  protected LanguageResource createDocument(Document doc, Long corpusID)
-  throws PersistenceException {
+  protected LanguageResource createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
+
+    //-1. preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(secInfo);
+
+    //0. check securoity settings
+    if (false == this.ac.isValidSecurityInfo(secInfo)) {
+      throw new SecurityException("Invalid security settings");
+    }
 
     //1. get the data to be stored
     AnnotationSet defaultAnnotations = doc.getAnnotations();
@@ -374,7 +392,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
     //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
-    Long lrID = null;//this.createLR(this.session,"gate.corpora.DocumentImpl",?,?);
+    Long lrID = createLR(this.session,DBHelper.DOCUMENT_CLASS,docName,secInfo,null);
 
     //4. create a record in T_DOCUMENT for this document
     CallableStatement stmt = null;
@@ -432,7 +450,6 @@ public class OracleDataStore extends JDBCDataStore {
     //7. create features
     createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
 
-    //8. commit?
     throw new MethodNotImplementedException();
   }
 
@@ -515,11 +532,11 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected LanguageResource createCorpus(Corpus corp)
-  throws PersistenceException {
+  protected LanguageResource createCorpus(Corpus corp,SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
-    Long lrID = null; //createLR(this.session,"gate.corpora.CorpusImpl",?,?);
+    Long lrID = createLR(this.session,DBHelper.CORPUS_CLASS,corp.getName(),secInfo,null);
 
     //2.create am entry in the T_COPRUS table
     Long corpusID = null;
@@ -545,7 +562,7 @@ public class OracleDataStore extends JDBCDataStore {
     while (itDocuments.hasNext()) {
       Document doc = (Document)itDocuments.next();
 
-      createDocument(doc,corpusID);
+      createDocument(doc,corpusID,secInfo);
     }
 
     //4. create features
@@ -702,7 +719,7 @@ public class OracleDataStore extends JDBCDataStore {
    *  has read access to the LR
    */
   public boolean canReadLR(Object lrID, Session s)
-    throws PersistenceException, gate.security.SecurityException{
+    throws PersistenceException, SecurityException{
 
     return canAccessLR((Long) lrID,s,READ_ACCESS);
   }
@@ -712,7 +729,7 @@ public class OracleDataStore extends JDBCDataStore {
    * has write access to the LR
    */
   public boolean canWriteLR(Object lrID, Session s)
-    throws PersistenceException, gate.security.SecurityException{
+    throws PersistenceException, SecurityException{
 
     return canAccessLR((Long) lrID,s,WRITE_ACCESS);
   }
@@ -723,13 +740,13 @@ public class OracleDataStore extends JDBCDataStore {
    * has some access (read/write) to the LR
    */
   protected boolean canAccessLR(Long lrID, Session s,int mode)
-    throws PersistenceException, gate.security.SecurityException{
+    throws PersistenceException, SecurityException{
 
     Assert.assert(READ_ACCESS == mode || WRITE_ACCESS == mode);
 
     //first check the session and then check whether the user is member of the group
     if (this.ac.isValidSession(s) == false) {
-      throw new gate.security.SecurityException("invalid session supplied");
+      throw new SecurityException("invalid session supplied");
     }
 
     CallableStatement stmt = null;
@@ -1074,7 +1091,7 @@ public class OracleDataStore extends JDBCDataStore {
 
   /** set security information for LR . */
   public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
-    throws PersistenceException, gate.security.SecurityException {
+    throws PersistenceException, SecurityException {
 
     throw new MethodNotImplementedException();
   }
