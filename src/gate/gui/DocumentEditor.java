@@ -698,7 +698,7 @@ public class DocumentEditor extends AbstractVisualResource{
     toolbar.add(typesTreeVisibleBtn);
 
     coreferenceVisibleBtn = new JToggleButton("Coreference", coreferenceVisible);
-//    toolbar.add(coreferenceVisibleBtn);
+    toolbar.add(coreferenceVisibleBtn);
     toolbar.add(Box.createHorizontalGlue());
 
     //The text
