@@ -25,19 +25,8 @@ import gate.creole.*;
 /** Execute a list of PRs serially.
   */
 public class SerialController
-extends AbstractProcessingResource implements Controller
+extends ArrayList implements Controller, List
 {
-  /** The list of resources the controller runs. */
-  protected List resourceList = new ArrayList();
-
-  /** Get the list of resources the controller runs. */
-  public List getResourceList() { return resourceList; }
-
-  /** Set the list of resources the controller runs. */
-  public void setResourceList(List resourceList) {
-    this.resourceList = resourceList;
-  } // setResourceList
-
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     return this;
@@ -45,7 +34,7 @@ extends AbstractProcessingResource implements Controller
 
   /** Run the Processing Resources in sequence. */
   public void run() {
-    Iterator iter = resourceList.iterator();
+    Iterator iter = iterator();
     while(iter.hasNext()) {
       ProcessingResource pr = (ProcessingResource) iter.next();
       ResourceData rd =
@@ -69,5 +58,29 @@ extends AbstractProcessingResource implements Controller
     } // for each PR in the resourceList
 
   } // run()
+
+  /** Trigger any exception that was caught when <CODE>run()</CODE> was
+    * invoked. If there is an exception stored it is cleared by this call.
+    */
+  public void check() throws ExecutionException {
+    if(executionException != null) {
+      ExecutionException e = executionException;
+      executionException = null;
+      throw e;
+    }
+  } // check()
+
+  /** Any exception caught during run() invocations are stored here. */
+  protected ExecutionException executionException  = null;
+
+  /** Get the feature set */
+  public FeatureMap getFeatures() { return features; }
+
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features) { this.features = features; }
+
+  /** The feature set */
+  protected FeatureMap features;
+
 
 } // class SerialController

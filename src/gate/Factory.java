@@ -223,7 +223,6 @@ public abstract class Factory
   {
     // the number of parameters that we manage to set on the bean
     int numParametersSet = 0;
-    StringBuffer unsetParameters = new StringBuffer();
     if(DEBUG) {
       Out.prln("setResourceParameters, params = ");
       Iterator iter = parameterValues.entrySet().iterator();
@@ -241,14 +240,14 @@ public abstract class Factory
         // get the property's set method, or continue
         PropertyDescriptor prop = properties[i];
         Method setMethod = prop.getWriteMethod();
-        if(setMethod == null) {
-          unsetParameters.append(prop.getDisplayName() + "; ");
+        if(setMethod == null)
           continue;
-        }
 
         // get the parameter value for this property, or continue
         Object paramValue = parameterValues.get(prop.getName());
-        if(paramValue == null) continue;
+        if(paramValue == null)  {
+          continue;
+        }
 
         // call the set method with the parameter value
         Object[] args = new Object[1];
@@ -295,11 +294,13 @@ public abstract class Factory
     }   // if events != null
 
     // did we set all the parameters?
+    // Where the number of parameters that
+    // are successfully set on the resource != the number of parameter
+    // values, throw an exception
     if(numParametersSet != parameterValues.size())
       throw new GateException(
         "couldn't set all the parameters of resource " +
-        resource.getClass().getName() +
-        ": unset parameters were: " + unsetParameters.toString()
+        resource.getClass().getName()
       );
 
     return removeListenersData;
@@ -371,6 +372,7 @@ public abstract class Factory
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
+    dsReg.add(ds);
     return ds;
   } // openDataStore()
 
@@ -384,6 +386,7 @@ public abstract class Factory
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
     ds.open();
+    dsReg.add(ds);
     return ds;
   } // createDataStore()
 
@@ -402,7 +405,6 @@ public abstract class Factory
     if(dsReg == null) // static init ran before Gate.init....
       dsReg = Gate.getDataStoreRegister();
     godfreyTheDataStore.setStorageUrl(storageUrl);
-    dsReg.add(godfreyTheDataStore);
 
     return godfreyTheDataStore;
   } // instantiateDS(URL)

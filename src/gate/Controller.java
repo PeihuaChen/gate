@@ -23,12 +23,7 @@ import gate.creole.*;
 
 /** Models the execution of groups of ProcessingResources.
   */
-public interface Controller extends ProcessingResource
+public interface Controller extends Collection, ProcessingResource
 {
-  /** Get the list of resources the controller runs. */
-  public List getResourceList();
-
-  /** Set the list of resources the controller runs. */
-  public void setResourceList(List resourceList);
 
 } // interface Controller

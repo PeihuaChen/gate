@@ -196,6 +196,7 @@ public class ConfigXmlHandler extends HandlerBase {
   protected void createResource(String resourceTypeName, List resourceList)
   throws GateSaxException
   {
+    if(DEBUG) Out.prln(resourceTypeName + ": " + currentAttributeMap);
     try {
       resourceList.add(
         Factory.createResource(
