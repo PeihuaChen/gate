@@ -189,10 +189,21 @@ public class AccessControllerImpl
   }
 
   /** --- */
-  public Group createGroup(String name)
-    throws PersistenceException {
+  public Group createGroup(String name,Session s)
+    throws PersistenceException, SecurityException {
 
     Assert.assertNotNull(name);
+
+    //-1. check session
+    if (false == isValidSession(s)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //0. check privileges
+    if (false == s.isPrivilegedSession()) {
+      throw new SecurityException("insufficient privileges");
+    }
+
 
     //1. create group in DB
     CallableStatement stmt = null;
@@ -311,10 +322,20 @@ public class AccessControllerImpl
   }
 
   /** --- */
-  public User createUser(String name, String passwd)
+  public User createUser(String name, String passwd,Session s)
     throws PersistenceException,SecurityException {
 
     Assert.assertNotNull(name);
+
+    //-1. check session
+    if (false == isValidSession(s)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //0. check privileges
+    if (false == s.isPrivilegedSession()) {
+      throw new SecurityException("insufficient privileges");
+    }
 
     //1. create user in DB
     CallableStatement stmt = null;
