@@ -229,6 +229,13 @@
       <CLASS>gate.creole.SerialController</CLASS>
       <ICON>controller.gif</ICON>
     </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Gate Serial Analyser Controller</NAME>
+      <CLASS>gate.creole.SerialAnalyserController</CLASS>
+      <ICON>controller.gif</ICON>
+    </RESOURCE>
+
   </CREOLE>
 
   <!-- creole.xml for Visual Resources -->

@@ -135,6 +135,10 @@ public class ParameterDisjunction implements CreoleListener {
     return params;
   }
 
+  public Parameter getParameter(){
+    return params[selectedIndex];
+  }
+
   /**
    * Called when a resource has been unloaded from the system;
    * If any of the parameters has this resource as value then the value will be

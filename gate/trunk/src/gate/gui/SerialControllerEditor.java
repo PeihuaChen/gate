@@ -43,6 +43,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       target.getClass().toString() +
       " is not a gate.creole.SerialController!");
     this.controller = (SerialController)target;
+    analyserMode = controller instanceof SerialAnalyserController;
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -124,7 +125,6 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setSortable(false);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
-//    memberPRsTable.setDefaultRenderer(Boolean.class, new BooleanRenderer());
     memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
 
     final int width2 = new JLabel("Selected Processing resources").
@@ -158,6 +158,19 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(Box.createHorizontalGlue());
 
     add(topBox);
+
+    if(analyserMode){
+      //we need to add the corpus combo
+      corpusCombo = new JComboBox(new CorporaComboModel());
+      corpusCombo.setRenderer(new ResourceRenderer());
+      if(corpusCombo.getModel().getSize() > 0) corpusCombo.setSelectedIndex(0);
+      Box horBox = Box.createHorizontalBox();
+      horBox.add(new JLabel("Corpus:"));
+      horBox.add(Box.createHorizontalStrut(5));
+      horBox.add(corpusCombo);
+      horBox.add(Box.createHorizontalGlue());
+      add(horBox);
+    }
 
     parametersPanel = new JPanel();
     parametersPanel.setLayout(new BoxLayout(parametersPanel, BoxLayout.Y_AXIS));
@@ -453,8 +466,26 @@ public class SerialControllerEditor extends AbstractVisualResource
 
       parametersBorder.setTitle("Parameters for the \"" + pr.getName() +
                                 "\" " + rData.getName());
-      parametersEditor.init(pr, rData.getParameterList().
-                                getRuntimeParameters());
+
+      //this is a list of lists
+      List parameters = rData.getParameterList().getRuntimeParameters();
+
+      if(analyserMode){
+        //remove corpus and document
+        Iterator pDisjIter = parameters.iterator();
+        while(pDisjIter.hasNext()){
+          List aDisjunction = (List)pDisjIter.next();
+          Iterator internalParIter = aDisjunction.iterator();
+          while(internalParIter.hasNext()){
+            Parameter parameter = (Parameter)internalParIter.next();
+            if(parameter.getName().equals("corpus") ||
+               parameter.getName().equals("document")) internalParIter.remove();
+          }
+          if(aDisjunction.isEmpty()) pDisjIter.remove();
+        }
+      }
+
+      parametersEditor.init(pr, parameters);
     }else{
       parametersBorder.setTitle("No selected processing resource");
       parametersEditor.init(null, null);
@@ -579,6 +610,51 @@ public class SerialControllerEditor extends AbstractVisualResource
     NameComparator nameComparator = new NameComparator();
   }//protected class LoadedPRsTableModel extends AbstractTableModel
 
+  /**
+   * A model for a combobox containing the loaded corpora in the system
+   */
+  protected class CorporaComboModel extends AbstractListModel
+                                  implements ComboBoxModel{
+    public int getSize(){
+      //get all corpora regardless of their actual type
+      java.util.List loadedDocuments = null;
+      try{
+        loadedDocuments = Gate.getCreoleRegister().
+                               getAllPublicInstances("gate.Corpus");
+      }catch(GateException ge){
+        ge.printStackTrace(Err.getPrintWriter());
+      }
+
+      return loadedDocuments == null ? 0 : loadedDocuments.size();
+    }
+
+    public Object getElementAt(int index){
+      //get all corpora regardless of their actual type
+      java.util.List loadedDocuments = null;
+      try{
+        loadedDocuments = Gate.getCreoleRegister().
+                               getAllPublicInstances("gate.Corpus");
+      }catch(GateException ge){
+        ge.printStackTrace(Err.getPrintWriter());
+      }
+      return loadedDocuments == null? null : loadedDocuments.get(index);
+    }
+
+    public void setSelectedItem(Object anItem){
+      if(anItem == null) selectedItem = null;
+      else selectedItem = anItem;
+    }
+
+    public Object getSelectedItem(){
+      return selectedItem;
+    }
+
+    void fireDataChanged(){
+      fireContentsChanged(this, 0, getSize());
+    }
+
+    Object selectedItem = null;
+  }
 
   /**
    * Table model for all the processing resources in the controller.
@@ -702,6 +778,19 @@ public class SerialControllerEditor extends AbstractVisualResource
               return;
           }
 
+          if(analyserMode){
+            //set the corpus
+            Corpus corpus = (Corpus)corpusCombo.getSelectedItem();
+            if(corpus == null){
+              JOptionPane.showMessageDialog(
+                SerialControllerEditor.this,
+                "No corpus provided!\n" +
+                "Please select a corpus and try again!",
+                "Gate", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+            ((SerialAnalyserController)controller).setCorpus(corpus);
+          }
           //check the runtime parameters
           List badPRs;
           try{
@@ -856,6 +945,12 @@ public class SerialControllerEditor extends AbstractVisualResource
   /** A border for the {@link parametersPanel} */
   TitledBorder parametersBorder;
 
+  /**
+   * A combobox that allows selection of a corpus from the list of loaded
+   * corpora.
+   */
+  JComboBox corpusCombo;
+
   /**The "Add PR" menu; part of the popup menu*/
   JMenu addMenu;
 
@@ -864,6 +959,8 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   /** Action that runs the application*/
   RunAction runAction;
+
+  boolean analyserMode = false;
 
   private transient Vector statusListeners;
   private transient Vector progressListeners;
