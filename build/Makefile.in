@@ -101,7 +101,8 @@ test: japefiles
 jar: tcl japefiles resources classes.jar
 	rm -f gate.jar
 	$(RUN) -cp classes.jar gate.util.JarFiles gate.jar classes.jar \
-	  `for f in ../lib/*.jar ../lib/*.zip; do echo \`$(CYGPATH) $$f\`; done`
+	  `for f in ../lib/*.jar ../lib/*.zip; \
+	  do echo \`$(CYGPATH) $$f\` |grep -v 'orajdbc2.zip'; done`
 
 # create guk.jar and put in the lib/ext directory
 gukjar: classes.jar ../classes/guk/Editor.class
