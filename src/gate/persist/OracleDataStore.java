@@ -142,28 +142,11 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /**
-   * Delete the data store. <B>NOTE:</B> for some data stores
-   * deletion is an system administrator task; in such cases this
-   * method will throw an UnsupportedOperationException.
-   */
-  public void delete()
-  throws PersistenceException, UnsupportedOperationException {
-
-    //0. user session should be set
-/*    if (null == this.session) {
-      throw new SecurityException("user session not set");
-    }
-*/
-    super.delete();
-  }
-
-
-
-  /**
    * Delete a resource from the data store.
    * @param lrId a data-store specific unique identifier for the resource
    * @param lrClassName class name of the type of resource
    */
+/*
   public void delete(String lrClassName, Object lrId)
   throws PersistenceException,SecurityException {
     //0. preconditions
@@ -204,7 +187,6 @@ public class OracleDataStore extends JDBCDataStore {
     boolean transFailed = false;
     try {
       //4. autocommit should be FALSE because of LOBs
-//      this.jdbcConn.setAutoCommit(false);
       beginTrans();
 
       //5. perform changes, if anything goes wrong, rollback
@@ -216,7 +198,6 @@ public class OracleDataStore extends JDBCDataStore {
       }
 
       //6. done, commit
-//      this.jdbcConn.commit();
       commitTrans();
     }
     catch(PersistenceException pe) {
@@ -226,7 +207,6 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       //problems?
       if (transFailed) {
-//          this.jdbcConn.rollback();
         rollbackTrans();
       }
     }
@@ -260,14 +240,14 @@ public class OracleDataStore extends JDBCDataStore {
       Err.prln("can't unload resource from GUI...");
     }
   }
-
+*/
 
 
   /**
    *  helper method for delete()
    *  never call it directly beause proper events will not be fired
    */
-  private void deleteDocument(Long lrId)
+  protected void deleteDocument(Long lrId)
   throws PersistenceException {
 
     //0. preconditions
@@ -296,7 +276,7 @@ public class OracleDataStore extends JDBCDataStore {
    *  helper method for delete()
    *  never call it directly beause proper events will not be fired
    */
-  private void deleteCorpus(Long lrId)
+  protected void deleteCorpus(Long lrId)
   throws PersistenceException {
 
     Long ID = (Long)lrId;
@@ -3017,7 +2997,7 @@ public class OracleDataStore extends JDBCDataStore {
   /**
    *   unloads a LR from the GUI
    */
-  private void unloadLR(Long lrID)
+/*  protected void unloadLR(Long lrID)
   throws GateException{
 
     //0. preconfitions
@@ -3037,6 +3017,7 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
   }
+*/
 
     /** Get a list of LRs that satisfy some set or restrictions
      *
