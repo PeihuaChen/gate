@@ -36,7 +36,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
                                                 CreoleListener {
 
   /** --- */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /** jdbc url for the database */
   private   String      dbURL;
@@ -1159,6 +1159,8 @@ System.out.println("trans failed ...rollback");
   protected abstract void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException;
 
+  protected abstract void createFeatures(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException;
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
@@ -1448,8 +1450,157 @@ System.out.println("trans failed ...rollback");
   }
 
   /** helper for sync() - never call directly */
-  protected abstract void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
-    throws PersistenceException;
+  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    //0.preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(as);
+    Assert.assertNotNull(changes);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(as instanceof DatabaseAnnotationSetImpl);
+    Assert.assertTrue(changes.size() > 0);
+
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    CallableStatement cstmt = null;
+    Long lrID = (Long)doc.getLRPersistenceId();
+    Long asetID = null;
+
+    try {
+      //1. get the a-set ID in the database
+      String sql = " select as_id  " +
+                   " from  "+this.dbSchema+"v_annotation_set " +
+                   " where  lr_id = ? ";
+      //do we have aset name?
+      String clause = null;
+      String name = as.getName();
+      if (null != name) {
+        clause =   "        and as_name = ? ";
+      }
+      else {
+        clause =   "        and as_name is null ";
+      }
+      sql = sql + clause;
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      if (null != name) {
+        pstmt.setString(2,name);
+      }
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (rs.next()) {
+        asetID = new Long(rs.getLong("as_id"));
+      }
+      else {
+        throw new PersistenceException("cannot find annotation set with" +
+                                      " name=["+name+"] , LRID=["+lrID+"] in database");
+      }
+
+      //cleanup
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+      //3. insert the new annotations from this set
+
+      //3.1. prepare call
+      if (this.dbType == DBHelper.ORACLE_DB) {
+
+        cstmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?,?,?,?) }");
+
+        Long annGlobalID = null;
+        Iterator it = changes.iterator();
+
+        while (it.hasNext()) {
+
+          //3.2. insert annotation
+          Annotation ann = (Annotation)it.next();
+
+          Node start = (Node)ann.getStartNode();
+          Node end = (Node)ann.getEndNode();
+          String type = ann.getType();
+
+          cstmt.setLong(1,lrID.longValue());
+          cstmt.setLong(2,ann.getId().longValue());
+          cstmt.setLong(3,asetID.longValue());
+          cstmt.setLong(4,start.getId().longValue());
+          cstmt.setLong(5,start.getOffset().longValue());
+          cstmt.setLong(6,end.getId().longValue());
+          cstmt.setLong(7,end.getOffset().longValue());
+          cstmt.setString(8,type);
+          cstmt.registerOutParameter(9,java.sql.Types.BIGINT);
+
+          cstmt.execute();
+          annGlobalID = new Long(cstmt.getLong(9));
+
+          //3.3. set annotation features
+          FeatureMap features = ann.getFeatures();
+          Assert.assertNotNull(features);
+  //        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+          createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+        }
+      }
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+
+        sql = "select persist_create_annotation(?,?,?,?,?,?,?,?)";
+        pstmt = this.jdbcConn.prepareStatement(sql);
+
+        Long annGlobalID = null;
+        Iterator it = changes.iterator();
+
+        while (it.hasNext()) {
+
+          //3.2. insert annotation
+          Annotation ann = (Annotation)it.next();
+
+          Node start = (Node)ann.getStartNode();
+          Node end = (Node)ann.getEndNode();
+          String type = ann.getType();
+
+          pstmt.setLong(1,lrID.longValue());
+          pstmt.setLong(2,ann.getId().longValue());
+          pstmt.setLong(3,asetID.longValue());
+          pstmt.setLong(4,start.getId().longValue());
+          pstmt.setLong(5,start.getOffset().longValue());
+          pstmt.setLong(6,end.getId().longValue());
+          pstmt.setLong(7,end.getOffset().longValue());
+          pstmt.setString(8,type);
+          pstmt.execute();
+
+          rs = pstmt.getResultSet();
+
+          if (false == rs.next()) {
+            throw new PersistenceException("empty result set");
+          }
+          annGlobalID = new Long(rs.getLong(1));
+
+          //3.3. set annotation features
+          FeatureMap features = ann.getFeatures();
+          Assert.assertNotNull(features);
+          createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+//          createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+        }
+      }
+
+      else {
+        throw new IllegalArgumentException();
+      }
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't add annotations in DB : ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+      DBHelper.cleanup(cstmt);
+    }
+  }
 
   /** helper for sync() - never call directly */
   protected abstract void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
