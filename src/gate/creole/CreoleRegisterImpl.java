@@ -352,7 +352,7 @@ public class CreoleRegisterImpl extends HashMap
   public List getLrInstances(String resourceTypeName) {
     ResourceData resData = (ResourceData) get(resourceTypeName);
     if(resData == null)
-      return new ArrayList();
+      return Collections.unmodifiableList(new ArrayList());
 
     return Collections.unmodifiableList(resData.getInstantiations());
   } // getLrInstances
@@ -361,7 +361,7 @@ public class CreoleRegisterImpl extends HashMap
   public List getPrInstances(String resourceTypeName) {
     ResourceData resData = (ResourceData) get(resourceTypeName);
     if(resData == null)
-      return new ArrayList();
+      return Collections.unmodifiableList(new ArrayList());
 
     return Collections.unmodifiableList(resData.getInstantiations());
   } // getPrInstances
@@ -370,7 +370,7 @@ public class CreoleRegisterImpl extends HashMap
   public List getVrInstances(String resourceTypeName) {
     ResourceData resData = (ResourceData) get(resourceTypeName);
     if(resData == null)
-      return new ArrayList();
+      return Collections.unmodifiableList(new ArrayList());
 
     return Collections.unmodifiableList(resData.getInstantiations());
   } // getVrInstances
@@ -512,10 +512,20 @@ public class CreoleRegisterImpl extends HashMap
         throw new GateRuntimeException(
           "Couldn't get resource data for VR called " + vrClassName
         );
+      Class vrResourceClass = null;
+      try{
+        vrResourceClass = vrResourceData.getResourceClass();
+      } catch(ClassNotFoundException ex){
+        throw new GateRuntimeException(
+          "Couldn't create a class object for VR called " + vrClassName
+        );
+      }// End try
       // Test if VR can display all types of annotations
       if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
            vrResourceData.getAnnotationTypeDisplayed() == null &&
-           vrResourceData.getResourceDisplayed() == null ){
+           vrResourceData.getResourceDisplayed() == null &&
+           gate.creole.AnnotationVisualResource.class.
+                                          isAssignableFrom(vrResourceClass)){
 
           responseList.add(vrClassName);
           if (vrResourceData.isMainView())

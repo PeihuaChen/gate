@@ -51,9 +51,9 @@ public class Scratch
     }
 */
     CreoleRegister reg = Gate.getCreoleRegister();
-//System.out.println("VRs for " + reg.getAnnotationVRs ("Tree"));
-//System.out.println("VRs for " + reg.getAnnotationVRs ());
-System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
+System.out.println("VRs for " + reg.getAnnotationVRs ("Tree"));
+System.out.println("VRs for " + reg.getAnnotationVRs ());
+//System.out.println(reg.getLargeVRsForResource("gate.corpora.DocumentImpl"));
   } // main
 
   /** Example of using an exit-time hook. */
