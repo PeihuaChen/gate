@@ -828,7 +828,7 @@ ex.printStackTrace();
       //add precison and recall to the sums
       updateStatistics(annotDiff, annotType);
 
-      Out.prln("<TD> Annotation type: " + annotType + "</TD>");
+      Out.prln("<TD> " + annotType + "</TD>");
 
       AnnotationDiff annotDiff1 =
         measureDocs(markedDoc, persDoc, annotType);
@@ -839,16 +839,16 @@ ex.printStackTrace();
           annotDiff!= null &&
           annotDiff1.getPrecisionAverage()<annotDiff.getPrecisionAverage()
          )
-        Out.prln("<P> Precision increase on human-marked from " +
+        Out.prln("<P><Font color=blue> Precision increase on human-marked from " +
                  annotDiff1.getPrecisionAverage() + " to " +
-                 annotDiff.getPrecisionAverage() + "</P>");
+                 annotDiff.getPrecisionAverage() + "</Font></P>");
       else if (annotDiff1 != null
                && annotDiff != null
                && annotDiff1.getPrecisionAverage()
                    > annotDiff.getPrecisionAverage())
-        Out.prln("<P> Precision decrease on human-marked from " +
+        Out.prln("<P><Font color=red> Precision decrease on human-marked from " +
                  annotDiff1.getPrecisionAverage() + " to " +
-                 annotDiff.getPrecisionAverage() + "</P>");
+                 annotDiff.getPrecisionAverage() + "</Font></P>");
       Out.prln("</TD>");
 
       Out.prln("<TD>" + annotDiff.getRecallAverage());
@@ -857,16 +857,16 @@ ex.printStackTrace();
           annotDiff!= null &&
           annotDiff1.getRecallAverage()<annotDiff.getRecallAverage()
          )
-        Out.prln("<P> Recall increase on human-marked from " +
+        Out.prln("<P><Font color=blue> Recall increase on human-marked from " +
                  annotDiff1.getRecallAverage() + " to " +
-                 annotDiff.getRecallAverage() + "</P>");
+                 annotDiff.getRecallAverage() + "</Font></P>");
       else if (annotDiff1 != null
                && annotDiff != null
                && annotDiff1.getRecallAverage()
                    > annotDiff.getRecallAverage())
-        Out.prln("<P> Recall decrease on human-marked from " +
+        Out.prln("<P><Font color=red> Recall decrease on human-marked from " +
                  annotDiff1.getRecallAverage() + " to " +
-                 annotDiff.getRecallAverage() + "</P>");
+                 annotDiff.getRecallAverage() + "</Font></P>");
 
       Out.prln("</TD>");
 
