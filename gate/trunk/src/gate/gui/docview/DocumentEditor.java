@@ -19,8 +19,6 @@ import java.util.List;
 
 import javax.swing.*;
 
-import weka.classifiers.trees.adtree.Splitter;
-
 import gate.*;
 import gate.creole.*;
 import gate.gui.ActionsPublisher;
@@ -54,7 +52,7 @@ public class DocumentEditor extends AbstractVisualResource
       }
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
-        initViews();
+        if(!viewsInited) initViews();
 //System.out.println("Docedit shown");        
       }
     });
@@ -64,6 +62,7 @@ public class DocumentEditor extends AbstractVisualResource
   
   
   protected void initViews(){
+    viewsInited = true;
     //start building the UI
     setLayout(new BorderLayout());
     JProgressBar progressBar = new JProgressBar();
@@ -352,19 +351,12 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void setRightView(DocumentView view){
     horizontalSplit.setRightComponent(view == null ? null : view.getGUI());
-Component left = horizontalSplit.getLeftComponent();
-Component right = horizontalSplit.getRightComponent();
-System.out.println(left == null ? "null" : left.getPreferredSize().toString());
-System.out.println(right == null ? "null" : right.getPreferredSize().toString());
-    horizontalSplit.resetToPreferredSizes();
-//		updateSplitLocation(horizontalSplit);
-    
     updateBar(rightBar);
     validate();
   }  
   
 
-  protected void updateSplitLocation(JSplitPane split){
+  protected void updateSplitLocation(JSplitPane split, int foo){
     Component left = split.getLeftComponent();
     Component right = split.getRightComponent();
     if(left == null){
@@ -531,5 +523,7 @@ System.out.println(right == null ? "null" : right.getPreferredSize().toString())
    * <code>-1</code> if none is active.
    */
   protected int bottomViewIdx = -1;
+  
+  protected boolean viewsInited = false;
 
 }
