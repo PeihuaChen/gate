@@ -401,7 +401,7 @@
 
     <!--  creole.xml for the coreferencer -->
     <RESOURCE>
-      <NAME>Coreferencer</NAME>
+      <NAME>ANNIE Coreferencer</NAME>
       <CLASS>gate.creole.coref.Coreferencer</CLASS>
       <COMMENT>Coreference resolution component</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
