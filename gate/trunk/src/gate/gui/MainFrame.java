@@ -199,6 +199,17 @@ public class MainFrame extends JFrame
       fileChooser = new JFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
       guiRoots.add(fileChooser);
+
+      //the JFileChooser seems to size itself better once it's been added to a
+      // top level container such as a dialog.
+      JDialog dialog = new JDialog(this, "", true);
+      java.awt.Container contentPane = dialog.getContentPane();
+      contentPane.setLayout(new BorderLayout());
+      contentPane.add(fileChooser, BorderLayout.CENTER);
+      dialog.pack();
+      dialog.getContentPane().removeAll();
+      dialog.dispose();
+      dialog = null;
     }
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
