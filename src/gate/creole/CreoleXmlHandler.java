@@ -21,6 +21,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 import javax.xml.parsers.*;
 import java.net.*;
+import java.io.*;
 
 import gate.*;
 import gate.util.*;

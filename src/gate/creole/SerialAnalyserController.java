@@ -15,7 +15,7 @@
 package gate.creole;
 
 import gate.*;
-
+import gate.util.*;
 
 import java.util.*;
 
@@ -57,6 +57,22 @@ public class SerialAnalyserController extends SerialController {
     }
   }
 
+  /**
+   * Overidden from {@link SerialController} to only allow
+   * {@link LanguageAnalyser}s as components.
+   */
+  public void add(ProcessingResource pr){
+    if(pr instanceof LanguageAnalyser){
+      super.add(pr);
+    }else{
+      throw new GateRuntimeException(getClass().getName() +
+                                     "only accepts " +
+                                     LanguageAnalyser.class.getName() +
+                                     "s as components\n" +
+                                     pr.getClass().getName() +
+                                     " is not!");
+    }
+  }
   /**
    * Sets the current document to the memeber PRs
    */

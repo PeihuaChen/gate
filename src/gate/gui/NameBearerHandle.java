@@ -421,6 +421,7 @@ public class NameBearerHandle implements Handle,
                               "Gate", JOptionPane.QUESTION_MESSAGE,
                               null, dsNames.toArray(),
                               dsNames.get(0));
+          if(answer == null) return;
           DataStore ds = (DataStore)dsByName.get(answer);
           if (ds == null){
             Err.prln("The datastore does not exists. Saving procedure" +

@@ -68,7 +68,7 @@ public class LogArea extends XJTextPane {
     // Redirecting System.out
     System.setOut(new PrintStream(out,true));
     // Redirecting System.err
-    System.setErr(new PrintStream(err,true));
+//    System.setErr(new PrintStream(err,true));
     popup = new JPopupMenu();
     selectAllAction = new SelectAllAction();
     copyAction = new CopyAction();
@@ -113,6 +113,31 @@ public class LogArea extends XJTextPane {
     }// actionPerformed();
   }// End class CopyAction
 
+  /**
+   * A runnable that adds a bit of text to the area; needed so we can write
+   * from the Swing thread.
+   */
+  protected class SwingWriter implements Runnable{
+    SwingWriter(String text, Style style){
+      this.text = text;
+      this.style = style;
+    }
+
+    public void run(){
+      try{
+        if(getDocument().getLength() > 0){
+          Rectangle place = modelToView(getDocument().getLength() - 1);
+          if(place != null) scrollRectToVisible(place);
+        }
+        getDocument().insertString(getDocument().getLength(), text, style);
+      } catch(BadLocationException e){
+          e.printStackTrace(System.err);
+      }// End try
+    }
+    String text;
+    Style style;
+  }
+
   /** Inner class that defines the behaviour of clear all action.*/
   protected class ClearAllAction extends AbstractAction{
     public ClearAllAction(){
@@ -133,15 +158,12 @@ public class LogArea extends XJTextPane {
   class LogAreaOutputStream extends OutputStream{
     /** This field dictates the style on how to write */
     private boolean isErr = false;
-    /** This is the styled Document form LogArea*/
-    private StyledDocument styledDoc = null;
     /** Char style*/
     private Style style = null;
 
     /** Constructs an Out or Err LogAreaOutputStream*/
     public LogAreaOutputStream(boolean anIsErr){
       isErr = anIsErr;
-      styledDoc = getStyledDocument();
       if (isErr){
         style = addStyle("error", getStyle("default"));
         StyleConstants.setForeground(style, Color.red);
@@ -160,14 +182,7 @@ public class LogArea extends XJTextPane {
       // Convert the byte to a char before put it into the log area
       char c = (char)charCode;
       // Insert it in the log Area
-      try{
-        Rectangle place = modelToView(styledDoc.getLength());
-        if(place != null)
-          scrollRectToVisible(place);
-        styledDoc.insertString(styledDoc.getLength(),String.valueOf(c),style);
-      } catch(BadLocationException e){
-        e.printStackTrace(Err.getPrintWriter());
-      }// End try
+      SwingUtilities.invokeLater(new SwingWriter(String.valueOf(c), style));
     }// write(int charCode)
 
     /** Writes an array of bytes into the LogArea,
@@ -175,17 +190,8 @@ public class LogArea extends XJTextPane {
      */
     public void write(byte[] data, int offset, int length){
       // Insert the string to the log area
-      try{
-        Rectangle place = modelToView(styledDoc.getLength());
-        if(place != null)
-          scrollRectToVisible(place);
-        styledDoc.insertString( styledDoc.getLength(),
-                                new String(data,offset,length),
-                                style);
-
-      } catch(BadLocationException e){
-          e.printStackTrace(Err.getPrintWriter());
-      }// End try
+      SwingUtilities.invokeLater(new SwingWriter(new String(data,offset,length),
+                                                 style));
     }// write(byte[] data, int offset, int length)
   }//End class LogAreaOutputStream
 }//End class LogArea

@@ -58,6 +58,11 @@ public class DocumentEditor extends AbstractVisualResource{
   private gate.Document document;
 
   /**
+   * The new document; it will become active when the component is displayed
+   */
+  private gate.Document newDocument;
+
+  /**
    * A random colour generator used to generate initial default colours for
    * highlighting various types of annotations.
    */
@@ -314,6 +319,23 @@ public class DocumentEditor extends AbstractVisualResource{
       }
     });
 
+//    addComponentListener(new ComponentAdapter() {
+//      public void componentHidden(ComponentEvent e) {
+//
+//      }
+//
+//      public void componentMoved(ComponentEvent e) {
+//      }
+//
+//      public void componentResized(ComponentEvent e) {
+//        this_documentChanged();
+//      }
+//
+//      public void componentShown(ComponentEvent e) {
+//        this_documentChanged();
+//      }
+//    });
+
     textVisibleBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         setTextVisible(textVisibleBtn.isSelected());
@@ -357,16 +379,17 @@ public class DocumentEditor extends AbstractVisualResource{
             y -= cellRect.y;
             Component cellComp = stylesTree.getCellRenderer().
                                  getTreeCellRendererComponent(stylesTree,
-                                                              node, false,
+                                                              node, true,
                                                               false, false,
-                                                              0, false);
-            //cellComp.setSize(cellComp.getPreferredSize());
+                                                              0, true);
+//            cellComp.setSize(cellRect.width, cellRect.height);
             cellComp.setBounds(cellRect);
             Component clickedComp = cellComp.getComponentAt(x, y);
 
             if(clickedComp instanceof JCheckBox){
               nData.setVisible(! nData.getVisible());
-              stylesTreeModel.nodeChanged(node);
+              stylesTree.repaint(cellRect);
+//              stylesTreeModel.nodeChanged(node);
             }else if(clickedComp instanceof JTextComponent &&
                      e.getClickCount() == 2){
               if(styleChooser == null){
@@ -747,6 +770,7 @@ public class DocumentEditor extends AbstractVisualResource{
     corefCombo = new JComboBox(corefComboModel = new CorefComboModel());
     corefCombo.setAlignmentX(Component.LEFT_ALIGNMENT);
     corefList = new JList(corefListModel = new CorefListModel());
+    corefList.setCellRenderer(new CorefListRenderer());
     corefList.setAlignmentX(Component.LEFT_ALIGNMENT);
     corefListScroll = new JScrollPane(corefList);
     corefListScroll.setOpaque(true);
@@ -862,6 +886,7 @@ public class DocumentEditor extends AbstractVisualResource{
         "The provided resource is not a document but a: " +
         target.getClass().toString() + "!");
     }
+//    newDocument = (gate.Document)target;
     gate.Document  oldDocument = document;
     document = (gate.Document)target;
     //this needs to be executed even if the new document equals(oldDocument)
@@ -885,6 +910,8 @@ public class DocumentEditor extends AbstractVisualResource{
    * events {@see #DelayedListener}.
    */
   protected void this_documentChanged(){
+//    if(document == newDocument) return;
+//    else document = newDocument;
     Runnable runnable = new Runnable(){
       public void run(){
         initLocalData();
@@ -1288,6 +1315,7 @@ public class DocumentEditor extends AbstractVisualResource{
           fireDataChanged();
         }
       });
+      coloursList = new ArrayList();
     }
 
     public int getSize(){
@@ -1321,6 +1349,66 @@ public class DocumentEditor extends AbstractVisualResource{
     void fireDataChanged(){
       fireContentsChanged(this, 0, getSize());
     }
+
+    Color getColor(int row){
+      if(row >= coloursList.size()){
+        for(int i = coloursList.size(); i <= row; i++){
+          coloursList.add(i, colGenerator.getNextColor());
+        }
+      }
+      return (Color)coloursList.get(row);
+
+    }
+
+    ArrayList coloursList;
+  }
+
+  class CorefListRenderer extends JCheckBox implements ListCellRenderer{
+    public CorefListRenderer(){
+      setOpaque(true);
+    }
+
+    public Component getListCellRendererComponent(JList list,
+                                                  Object value,
+                                                  int index,
+                                                  boolean isSelected,
+                                                  boolean cellHasFocus){
+      if (isSelected) {
+        setForeground(list.getSelectionForeground());
+        setBackground(list.getSelectionBackground());
+      }else{
+        setForeground(list.getForeground());
+        setBackground(list.getBackground());
+      }
+      setFont(list.getFont());
+      if (cellHasFocus) {
+        setBorder( UIManager.getBorder("Table.focusCellHighlightBorder") );
+      }else{
+        setBorder(noFocusBorder);
+      }
+      setText(getNameForCorefList((java.util.List) value));
+      return this;
+    }
+
+    String getNameForCorefList(java.util.List list){
+      if(list == null || list.isEmpty()) return null;
+      Integer id = (Integer)list.get(0);
+      String setName = (String)corefCombo.getSelectedItem();
+      AnnotationSet set = setName.equals("Default") ?
+                          document.getAnnotations() :
+                          document.getAnnotations(setName);
+      Annotation ann = set.get(id);
+
+      String name = null;
+      try{
+        name = document.getContent().
+                        getContent(ann.getStartNode().getOffset(),
+                                   ann.getEndNode().getOffset()).toString();
+      }catch(InvalidOffsetException ioe){
+      }
+      return name;
+    }
+    Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
   }
 
 
@@ -1386,9 +1474,11 @@ public class DocumentEditor extends AbstractVisualResource{
       visibleChk = new JCheckBox("",false);
       visibleChk.setOpaque(false);
       textComponent = new JTextPane();
-      selectedBorder = BorderFactory.createLineBorder(Color.blue);
+      selectedBorder = BorderFactory.createLineBorder(Color.blue, 1);
+      normalBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
       setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
       setOpaque(false);
+      spacer = Box.createHorizontalStrut(3);
     }
 
     public Component getTreeCellRendererComponent(JTree tree,
@@ -1399,56 +1489,66 @@ public class DocumentEditor extends AbstractVisualResource{
                                               int row,
                                               boolean hasFocus){
       removeAll();
+      add(spacer);
+
       //the text pane needs to be sized for modelToView() to work
-      textComponent.setSize(10, 10);
-      if(value instanceof DefaultMutableTreeNode){
-        TypeData nData = (TypeData)
-                              ((DefaultMutableTreeNode)value).getUserObject();
-        if(nData != null) {
-          textComponent.selectAll();
-          textComponent.replaceSelection(nData.getTitle());
-          textComponent.selectAll();
-          textComponent.setCharacterAttributes(nData.getAttributes(), true);
+      textComponent.setSize(1000, 1000);
 
-          if(nData.getType() != null) {
-            visibleChk.setSelected(nData.getVisible());
-            add(visibleChk);
-          }
-          if(selected) setBorder(selectedBorder);
-          else setBorder(null);
+      TypeData nData = (TypeData)
+                            ((DefaultMutableTreeNode)value).getUserObject();
+      javax.swing.text.Document doc = textComponent.getDocument();
+
+      if(nData != null){
+        try{
+          doc.remove(0, doc.getLength());
+          doc.insertString(0, " " + nData.getTitle() + " ",
+                           nData.getAttributes());
+        }catch(BadLocationException ble){
+          ble.printStackTrace();
         }
-      } else {
-        textComponent.selectAll();
-        textComponent.replaceSelection(value.toString());
-      }
 
-      textComponent.setPreferredSize(null);
-      textComponent.setSize(textComponent.getPreferredSize());
+        if(nData.getType() != null) {
+          visibleChk.setSelected(nData.getVisible());
+          add(visibleChk);
+        }
+      }else{
+        try{
+          doc.remove(0, doc.getLength());
+          doc.insertString(0, " " + value.toString() + " ",
+                           textComponent.getStyle("default"));
+        }catch(BadLocationException ble){
+          ble.printStackTrace();
+        }
+      }
+      setTextComponentSize(textComponent);
       add(textComponent);
-      setPreferredSize(null);
-      setSize(getPreferredSize());
+      if(selected) setBorder(selectedBorder);
+      else setBorder(normalBorder);
       return this;
     }//public Component getTreeCellRendererComponent
 
-    /**
-     * Overrides <code>JComponent.getPreferredSize</code> to
-     * return slightly wider preferred size value.
-     */
-/*
-    public Dimension getPreferredSize() {
-      Dimension retDimension = super.getPreferredSize();
-      Insets borderInsets = selectedBorder.getBorderInsets(this);
-      if(retDimension != null) {
-          retDimension = new Dimension(retDimension.width + 3 +
-                                       borderInsets.left +
-                                       borderInsets.right,
-                                       retDimension.height +
-                                       borderInsets.top +
-                                       borderInsets.bottom);
+   protected void setTextComponentSize(JTextComponent comp){
+      try{
+        Rectangle rect = comp.modelToView(0);
+        int length = comp.getDocument().getLength();
+        if(length > 0){
+          Rectangle rect2 = comp.modelToView(length - 1);
+          if(rect2 != null){
+            //this mutates rect
+            rect = SwingUtilities.computeUnion(rect2.x, rect2.y, rect2.width,
+                                        rect2.height, rect);
+          }
+        }
+        Insets insets = comp.getInsets();
+        Dimension dim = new Dimension(rect.width + insets.left +
+                                      insets.right + 5,
+                                      rect.height + insets.top + insets.bottom);
+        comp.setPreferredSize(dim);
+      }catch(BadLocationException ble){
+        ble.printStackTrace();
       }
-      return retDimension;
     }
-*/
+
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
@@ -1543,10 +1643,139 @@ public class DocumentEditor extends AbstractVisualResource{
                                                             boolean newValue) {}
 
     Border selectedBorder;
+    Border normalBorder;
     JCheckBox visibleChk;
     JTextPane textComponent;
+    Component spacer;
   }//class NodeRenderer extends JPanel implements TreeCellRenderer
 
+  /**
+   * Displays an entry in the right hand side tree.
+   * <strong><a name="override">Implementation Note:</a></strong>
+   * This class overrides
+   * <code>revalidate</code>,
+   * <code>repaint</code>,
+   * and
+   * <code>firePropertyChange</code>
+   * solely to improve performance.
+   * If not overridden, these frequently called methods would execute code paths
+   * that are unnecessary for a tree cell renderer.
+   */
+/*
+  class NodeRenderer1 extends JPanel implements TreeCellRenderer{
+
+    public NodeRenderer1(){
+      visibleChk = new JCheckBox("",false);
+      visibleChk.setOpaque(false);
+      typeComponent = new JTextPane();
+      setComponent = new JTextPane();
+      selectedBorder = BorderFactory.createLineBorder(Color.blue);
+      normalBorder = BorderFactory.createEmptyBorder(1,1,1,1);
+
+      setPanel = new LazyJPanel();
+      setPanel.setOpaque(false);
+      setPanel.setLayout(new BoxLayout(setPanel, BoxLayout.X_AXIS));
+      setPanel.add(setComponent);
+      typePanel = new LazyJPanel();
+      typePanel.setOpaque(false);
+      typePanel.setLayout(new BoxLayout(typePanel, BoxLayout.X_AXIS));
+      typePanel.add(visibleChk);
+      typePanel.add(typeComponent);
+    }
+
+    public Component getTreeCellRendererComponent(JTree tree,
+                                              Object value,
+                                              boolean selected,
+                                              boolean expanded,
+                                              boolean leaf,
+                                              int row,
+                                              boolean hasFocus){
+      JComponent renderer = null;
+      TypeData nData = (TypeData)
+                            ((DefaultMutableTreeNode)value).getUserObject();
+      if(nData != null){
+        if(nData.getType() != null) {
+          visibleChk.setSelected(nData.getVisible());
+          typeComponent.setSize(1000, 1000);
+          javax.swing.text.Document doc = typeComponent.getDocument();
+          try{
+            doc.remove(0, doc.getLength());
+            doc.insertString(0, nData.getTitle(), nData.getAttributes());
+          }catch(BadLocationException ble){
+            ble.printStackTrace();
+          }
+          setTextComponentSize(typeComponent);
+//          typePanel.removeAll();
+//          typePanel.add(visibleChk);
+//          typePanel.add(typeComponent);
+          renderer = typePanel;
+        }else{
+          setComponent.setSize(1000, 1000);
+          javax.swing.text.Document doc = setComponent.getDocument();
+          try{
+            doc.remove(0, doc.getLength());
+            doc.insertString(0, nData.getTitle(), nData.getAttributes());
+          }catch(BadLocationException ble){
+            ble.printStackTrace();
+          }
+          setTextComponentSize(setComponent);
+//          setPanel.removeAll();
+//          setPanel.add(setComponent);
+          renderer = setPanel;
+        }
+      }else{
+        setComponent.setSize(1000, 1000);
+        javax.swing.text.Document doc = setComponent.getDocument();
+        try{
+          doc.remove(0, doc.getLength());
+          doc.insertString(0, value.toString(), setComponent.getStyle("default"));
+        }catch(BadLocationException ble){
+          ble.printStackTrace();
+        }
+        setTextComponentSize(setComponent);
+//        setPanel.removeAll();
+//        setPanel.add(setComponent);
+        renderer = setPanel;
+      }
+      if(selected) renderer.setBorder(selectedBorder);
+      else renderer.setBorder(normalBorder);
+      return renderer;
+    }//public Component getTreeCellRendererComponent
+
+    protected void setTextComponentSize(JTextComponent comp){
+      try{
+        Rectangle rect = comp.modelToView(0);
+        int length = comp.getDocument().getLength();
+        if(length > 0){
+          Rectangle rect2 = comp.modelToView(length - 1);
+          if(rect2 != null){
+Out.pr("Rect2.x " + rect2.x);
+            //this mutates rect
+            rect = SwingUtilities.computeUnion(rect2.x, rect2.y, rect2.width,
+                                        rect2.height, rect);
+Out.prln("Rect.width " + rect.width);
+          }else{
+Out.prln("NULL size");
+          }
+        }
+        Insets insets = comp.getInsets();
+        Dimension dim = new Dimension(rect.width + insets.left + insets.right,
+                                      rect.height + insets.top + insets.bottom);
+        comp.setPreferredSize(dim);
+      }catch(BadLocationException ble){
+        ble.printStackTrace();
+      }
+    }
+
+    Border selectedBorder;
+    Border normalBorder;
+    JCheckBox visibleChk;
+    JTextPane setComponent;
+    JTextPane typeComponent;
+    JPanel setPanel;
+    JPanel typePanel;
+  }//class NodeRenderer extends JPanel implements TreeCellRenderer
+*/
   /**
    * Holds the GUI metadata for a given annotation type. An annotation type is
    * uniquely identified by the name of its AnnotationSet and the name of the
