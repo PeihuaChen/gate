@@ -27,6 +27,8 @@ import gate.*;
 import gate.util.*;
 import gate.persist.*;
 import gate.annotation.*;
+import gate.creole.*;
+import gate.event.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl {
 
@@ -48,6 +50,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   private Integer sequencePool[];
   private int poolMarker;
+
+  /**
+   * The listener for the events coming from the features.
+   */
+  protected EventsHandler eventHandler;
 
   public static final int DOC_NAME = 1001;
   public static final int DOC_CONTENT = 1002;
@@ -112,6 +119,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       //add them all to the DBAnnotationSet
       setAnnotations(currSet.getName(),currSet);
     }
+
+    //3. add the listeners for the features
+    if (eventHandler == null)
+      eventHandler = new EventsHandler();
+    this.features.addGateListener(eventHandler);
   }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
@@ -693,9 +705,19 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features) {
+    //1. save them first, so we can remove the listener
+    FeatureMap oldFeatures = this.features;
+
     super.setFeatures(features);
 
     this.featuresChanged = true;
+
+    //4. sort out the listeners
+    if (eventHandler != null)
+      oldFeatures.removeGateListener(eventHandler);
+    else
+      eventHandler = new EventsHandler();
+    this.features.addGateListener(eventHandler);
   }
 
   /** Sets the name of this resource*/
@@ -850,5 +872,28 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     this.documentChanged = true;
     super.setMarkupAware(newMarkupAware);
   }
+
+  /**
+   * All the events from the features are handled by
+   * this inner class.
+   */
+  class EventsHandler implements gate.event.GateListener {
+    public void processGateEvent(GateEvent e){
+      if (e.getType() != GateEvent.FEATURES_UPDATED)
+        return;
+      //tell the document that its features have been updated
+      featuresChanged = true;
+    }
+  }
+
+  /**
+   * Overriden to remove the features listener, when the document is closed.
+   */
+  public void cleanup() {
+    super.cleanup();
+    if (eventHandler != null)
+      this.features.removeGateListener(eventHandler);
+  }///inner class EventsHandler
+
 
 }
