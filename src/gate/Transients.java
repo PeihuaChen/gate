@@ -34,6 +34,11 @@ public class Transients
   /** Create a new Document. */
   public static Document newDocument(URL u) throws IOException {
     return new DocumentImpl(u);
-  } // newDocument
+  } // newDocument  
+
+  /** Create a new FeatureMap. */
+  public static FeatureMap newFeatureMap() {
+    return new SimpleFeatureMapImpl();
+  } // newFeatureMap
 
 } // class Transients
