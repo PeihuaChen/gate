@@ -532,17 +532,79 @@ public class AccessControllerImpl
   }
 
   /** -- */
-  public List listUsers()
-    throws PersistenceException {
-
-    throw new MethodNotImplementedException();
-  }
-
-  /** -- */
   public List listGroups()
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    //1. read all groups from DB
+    Statement stmt = null;
+    ResultSet rs = null;
+    String    sql;
+    Vector    result = new Vector();
+
+    try {
+      stmt = this.jdbcConn.createStatement();
+
+      //1.1 read groups
+      sql = " SELECT grp_name "+
+            " FROM   "+Gate.DB_OWNER+".t_group "+
+            " ORDER BY grp_name DESC";
+      rs = stmt.executeQuery(sql);
+
+      while (rs.next()) {
+        //access by index is faster
+        //first column index is 1
+        String grp_name = rs.getString(1);
+        result.add(grp_name);
+      }
+
+      return result;
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException("cannot read groups from DB :["+
+                                        sqle.getMessage() +"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
+  }
+
+  /** -- */
+  public List listUsers()
+    throws PersistenceException {
+
+    //1. read all users from DB
+    Statement stmt = null;
+    ResultSet rs = null;
+    String    sql;
+    Vector    result = new Vector();
+
+    try {
+      stmt = this.jdbcConn.createStatement();
+
+      //1.1 read groups
+      sql = " SELECT usr_login "+
+            " FROM   "+Gate.DB_OWNER+".t_user "+
+            " ORDER BY usr_login DESC";
+      rs = stmt.executeQuery(sql);
+
+      while (rs.next()) {
+        //access by index is faster
+        //first column index is 1
+        String usr_name = rs.getString(1);
+        result.add(usr_name);
+      }
+
+      return result;
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException("cannot read groups from DB :["+
+                                        sqle.getMessage() +"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
   }
 
 
