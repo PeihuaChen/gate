@@ -25,6 +25,7 @@ import junit.framework.*;
 import gate.*;
 import gate.util.Err;
 import gate.util.GateException;
+import gate.util.SimpleFeatureMapImpl;
 
 /** Tests for the Document classes
   */
@@ -155,6 +156,19 @@ public class TestDocument extends TestCase
     */
   } // testLotsOfThings
 
+  
+  public void testDocRender() throws Exception
+  {
+      Document doc = Factory.newDocument("Hi Mom");
+      doc.getAnnotations().add(new Long(0), new Long(2),
+          "Foo", new SimpleFeatureMapImpl());
+      String content = doc.toXml(doc.getAnnotations(), false);
+
+      // Will fail, content is "<Foo>Hi Mom</Foo>"
+      assertEquals("<Foo>Hi</Foo> Mom", content);
+  }
+  
+  
   /** The reason this is method begins with verify and not with test is that it
    *  gets called by various other test methods. It is somehow a utility test
    *  method. It should be called on all gate documents having annotation sets.
