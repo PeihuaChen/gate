@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- TEST gate.xml -->
+<!-- $Id$ -->
+
+<GATE>
+
+<CREOLE-DIRECTORY>http://somewhere.on.the.net/creole/</CREOLE-DIRECTORY> 
+
+<SYSTEM>
+  <NAME>Print Out Tokens</NAME>
+  <CONTROLLER>gate.creole.SerialController</CONTROLLER>
+  <LR sourceUrlName="http://gate.ac.uk/tests/doc0.html">gate.Document</LR>
+  <PR>gate.creole.Tokeniser</PR>
+  <PR>testpkg.PrintTokens</PR>
+</SYSTEM>
+
+</GATE>
