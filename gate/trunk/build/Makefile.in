@@ -53,7 +53,8 @@ RUN=$(JAVA)
 # javac options, means that most classes get compiled by a single call
 # to javac
 all: ../classes/guk/Editor.class ../classes/gate/TestGate.class \
-	  classes resources gukjar TestJdk.jar TestResources.jar
+	  classes ../doc/userguide.html resources gukjar \
+	  TestJdk.jar TestResources.jar
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
