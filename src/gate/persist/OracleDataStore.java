@@ -873,6 +873,7 @@ System.out.println();
 
     //3. for each document in the corpus call createDocument()
     Iterator itDocuments = corp.iterator();
+    Vector dbDocs = new Vector();
     while (itDocuments.hasNext()) {
       Document doc = (Document)itDocuments.next();
 
@@ -880,6 +881,7 @@ System.out.println();
       // same DataStore
       if (doc.getLRPersistenceId() == null || doc.getDataStore().equals(this)) {
         Document dbDoc = createDocument(doc,corpusID,secInfo);
+        dbDocs.add(dbDoc);
       }
       else {
         //skip others
@@ -890,6 +892,8 @@ System.out.println();
 
     //4. create features
     createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
+
+    //5. create a DatabaseCorpusImpl and return it
 
     //5. set the corpus persistence ID
     corp.setLRPersistenceId(corpusID);
@@ -1794,24 +1798,25 @@ System.out.println();
     Assert.assertTrue(doc.getLRPersistenceId() instanceof Long);
 
     Long lrID = (Long)doc.getLRPersistenceId();
+    EventAwareLanguageResource dbDoc = (EventAwareLanguageResource)doc;
     //1. sync LR
     // only name can be changed here
-    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_NAME)) {
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_NAME)) {
       _syncLR(lrID,doc.getName());
     }
 
     //2. sync Document
-    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_MAIN)) {
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_MAIN)) {
       _syncDocument(doc);
     }
 
     //3. [optional] sync Content
-    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_CONTENT)) {
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_CONTENT)) {
       _syncDocumentContent(doc);
     }
 
     //4. [optional] sync Features
-    if (true == ((EventAwareDocument)doc).isDocumentChanged(DatabaseDocumentImpl.DOC_FEATURES)) {
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_FEATURES)) {
       _syncFeatures(doc);
     }
 
