@@ -73,7 +73,8 @@ public class TestControllers extends TestCase
 
     //create a default tokeniser
     FeatureMap params = Factory.newFeatureMap();
-    params.put("rulesResourceName", "creole/tokeniser/DefaultTokeniser.rules");
+    params.put("rulesURL", "gate:/creole/tokeniser/DefaultTokeniser.rules");
+    params.put("encoding", "UTF-8");
     params.put("document", doc);
     ProcessingResource tokeniser = (ProcessingResource) Factory.createResource(
       "gate.creole.tokeniser.DefaultTokeniser", params
@@ -82,7 +83,7 @@ public class TestControllers extends TestCase
     //create a default gazetteer
     params = Factory.newFeatureMap();
     params.put("document", doc);
-    params.put("listsURL", new URL("gate:/creole/gazeteer/default/lists.def"));
+    params.put("listsURL", "gate:/creole/gazeteer/default/lists.def");
     ProcessingResource gaz = (ProcessingResource) Factory.createResource(
       "gate.creole.gazetteer.DefaultGazetteer", params
     );
