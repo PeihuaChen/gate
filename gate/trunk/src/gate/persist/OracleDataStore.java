@@ -3429,7 +3429,6 @@ public class OracleDataStore extends JDBCDataStore {
       try {
         String sql = getSQLQuery(constraints,lrType, true, null, -1);
         stmt = this.jdbcConn.prepareCall(sql);
-
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3509,11 +3508,13 @@ public class OracleDataStore extends JDBCDataStore {
     StringBuffer expresion = new StringBuffer(
                       " EXISTS ("+
                        " SELECT ft_id " +
-                       " FROM "+Gate.DB_OWNER+".t_feature FEATURE" +
+                       " FROM "+Gate.DB_OWNER+".t_feature FEATURE, " +
+                       Gate.DB_OWNER + ".t_feature_key FTK" +
                        " WHERE FEATURE.ft_entity_id = LR.lr_id ");
 
     if (restr.getKey() != null){
-      expresion = expresion.append(" AND FEATURE.ft_key = ? ");
+      expresion = expresion.append(" AND FTK.fk_id = FEATURE.ft_key_id ");
+      expresion = expresion.append(" AND FTK.fk_string = ? ");
       sqlValues.addElement(restr.getKey());
     }
 
@@ -3573,6 +3574,7 @@ public class OracleDataStore extends JDBCDataStore {
     if (orderByFilter!=null){
       for (int i = 0; i<orderByFilter.size(); i++){
         join = join.append(" , "+Gate.DB_OWNER+".t_feature FT"+i);
+        join = join.append(" , "+Gate.DB_OWNER+".t_feature_key FTK"+i);
       }
     }
     return join.toString();
@@ -3583,7 +3585,8 @@ public class OracleDataStore extends JDBCDataStore {
     if (orderByFilter!=null && orderByFilter.size()>0){
       for (int i=0; i<orderByFilter.size(); i++){
         endJoin = endJoin.append(" and lr_id=FT"+i+".ft_entity_id ");
-        endJoin = endJoin.append(" and  FT"+i+".ft_key= ? ");
+        endJoin = endJoin.append(" and  FT"+i+".ft_key_id = FTK"+i+".fk_id ");
+        endJoin = endJoin.append(" and  FTK"+i+".fk_string= ? ");
         OrderByRestriction restr = (OrderByRestriction) orderByFilter.get(i);
         sqlValues.addElement(restr.getKey());
       }
