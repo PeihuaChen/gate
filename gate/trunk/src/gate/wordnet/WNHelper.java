@@ -24,6 +24,7 @@ final class WNHelper {
   private WNHelper() {
   }
 
+  /** converts GATE pos to JWNL pos */
   public static POS int2POS(int pos) {
 
     POS result = null;
@@ -53,6 +54,7 @@ final class WNHelper {
     return result;
   }
 
+  /** converts JWNL pos to GATE pos */
   public static int POS2int(POS pos) {
 
     int result;
@@ -77,6 +79,8 @@ final class WNHelper {
     return result;
   }
 
+
+  /** converts JWNL pointer type to GATE pointer type */
   public static int PointerType2int(PointerType pt) {
 
     //0.
@@ -142,6 +146,7 @@ final class WNHelper {
   }
 
 
+  /** converts GATE pointer type to JWNL pointer type */
   public static PointerType int2PointerType(int type) {
 
     switch(type) {
@@ -205,6 +210,7 @@ final class WNHelper {
     }
   }
 
+  /** checks if relation is semantic one */
   public static boolean isValidSemanticPointer(int _type) {
     return _type == Relation.REL_ATTRIBUTE ||
           _type == Relation.REL_CAUSE ||
@@ -222,6 +228,7 @@ final class WNHelper {
           _type == Relation.REL_VERB_GROUP;
   }
 
+  /** checks if relation is lexical one */
   public static boolean isValidLexicalPointer(int _type) {
         return _type == Relation.REL_ANTONYM ||
                _type == Relation.REL_PERTAINYM ||
@@ -229,6 +236,8 @@ final class WNHelper {
                _type == Relation.REL_SEE_ALSO;
   }
 
+
+  /** converts JWNL adjective position to GATE  adjective position*/
   public static int AdjPosition2int(net.didion.jwnl.data.Adjective adj) {
 
     int result;

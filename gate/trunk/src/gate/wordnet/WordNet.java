@@ -30,17 +30,22 @@ public interface WordNet extends LanguageResource {
   public static final int POS_NOUN       = 1003;
   public static final int POS_VERB       = 1004;
 
+  /** returns the WordNet version */
   public String getVersion();
 
 /*  public Iterator getSynsets(); */
 
+  /** returns all synsets for specific POS */
   public Iterator getSynsets(int pos)
     throws WordNetException;
 
+  /** returns all unique beginners */
   public Iterator getUniqueBeginners();
 
+  /** returns list of WordSense-s for specific lemma */
   public List lookupWord(String lemma) throws WordNetException;
 
+  /** returns list of WordSense-s for specific lemma of the specified POS */
   public List lookupWord(String lemma, int pos) throws WordNetException;
 }
 

@@ -25,20 +25,28 @@ import gate.event.*;
  */
 public interface Synset {
 
+  /** returns the part-of-speech for this synset, see WordNet::POS_XXX constants */
   public int getPOS();
 
+  /** is this synset a UB - i.e. has no hypernym */
   public boolean isUniqueBeginner() throws WordNetException;
 
+  /** textual description of the synset */
   public String getGloss();
 
+  /** offset in index files */
   public long getOffset();
 
+  /** WordSenses contained in this synset */
   public List getWordSenses();
 
+  /** get specific WordSense according to its order in the synset - most important senses come first  */
   public WordSense getWordSense(int offset);
 
+  /** get the SemanticRelation-s of this synset */
   public List getSemanticRelations() throws WordNetException;
 
+  /** get the SemanticRelation-s of specific type (HYPERNYm) for this synset */
   public List getSemanticRelations(int type) throws WordNetException;
 
 }

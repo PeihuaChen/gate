@@ -25,14 +25,19 @@ import gate.event.*;
  */
 public interface Adjective extends WordSense {
 
+  /** adjective - prenominal (attributive) position  */
   public static final int ADJ_POS_ATTRIBUTIVE = 10001;
 
+  /** adjective -  immediately postnominal position */
   public static final int ADJ_POS_IMMEDIATE_POSTNOMINAL  = 10002;
 
+  /** adjective - predicate position */
   public static final int ADJ_POS_PREDICATIVE  = 10003;
 
+  /** adjective - position unknown */
   public static final int ADJ_POS_NONE = 10004;
 
+  /** returns the syntactic position of the adjective in relation to noun that it modifies */
   public int getAdjectivePosition();
 
 }

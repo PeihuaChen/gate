@@ -25,10 +25,13 @@ import gate.event.*;
  */
 public interface Word {
 
+  /** returns the senses of this word */
   public List getWordSenses() throws WordNetException;
 
+  /** returns the lemma of this word */
   public String getLemma();
 
+  /** returns the number of senses of this word (not necessarily loading them from storage) */
   public int getSenseCount();
 
 }

@@ -59,30 +59,39 @@ public class WordSenseImpl implements WordSense {
     this.wnDictionary = _wnDict;
   }
 
+  /** returns the Word of this WordSense */
   public Word getWord() {
     return this.word;
   }
 
+  /** part-of-speech for this sense (inherited from the containing synset) */
   public int getPOS() {
     return this.synset.getPOS();
   }
 
+  /** synset of this sense */
   public Synset getSynset() {
     return this.synset;
   }
 
+  /** order of this sense relative to the word - i.e. most important senses of the same word come first */
   public int getSenseNumber() {
     return this.senseNumber;
   }
 
+  /** order of this sense relative to the synset- i.e. most important senses of the same synset come first */
   public int getOrderInSynset() {
     return this.orderInSynset;
   }
 
+
+  /** appears in SEMCOR? */
   public boolean isSemcor() {
     return this.isSemcor;
   }
 
+
+  /** return the Lex relations this sense participates in */
   public List getLexicalRelations() throws WordNetException {
 
     if (null == this.lexRelations) {
@@ -92,6 +101,8 @@ public class WordSenseImpl implements WordSense {
     return this.lexRelations;
   }
 
+
+  /** return the Lex relations (of the specified type) this sense participates in */
   public List getLexicalRelations(int type) throws WordNetException {
 
     List result = new ArrayList(1);

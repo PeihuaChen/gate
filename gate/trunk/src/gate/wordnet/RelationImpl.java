@@ -21,22 +21,31 @@ class RelationImpl implements Relation {
 
   private int type;
 
+  /** never use directly - instantiate one of the ancestors only */
   protected RelationImpl(int _type) {
     this.type = _type;
   }
 
+
+  /** returns the type of the relation - one of REL_XXX*/
   public int getType() {
     return this.type;
   }
 
+
+  /** returns a symbol for the relation, e.g. "@" */
   public String getSymbol() {
     return WNHelper.int2PointerType(this.type).getKey();
   }
 
+
+  /** returns a label for the relation, e.g. "HYPERNYM" */
   public String getLabel() {
     return WNHelper.int2PointerType(this.type).getLabel();
   }
 
+
+  /** returns the inverse relation (Hyponym  <-> Hypernym, etc)*/
   public int getInverseType() {
 
     switch(this.type) {
@@ -71,6 +80,7 @@ class RelationImpl implements Relation {
   }
 
 
+  /** checks if the relation is applicab;le to specific POS - see REL_XXX comments */
   public boolean isApplicableTo(int pos) {
     return WNHelper.int2PointerType(this.type).appliesTo(WNHelper.int2POS(pos));
   }

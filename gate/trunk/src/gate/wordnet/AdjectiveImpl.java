@@ -17,6 +17,9 @@ package gate.wordnet;
 
 import net.didion.jwnl.dictionary.Dictionary;
 
+/** Represents WordNet adjective
+ *  implements interface Adjective
+ */
 public class AdjectiveImpl extends WordSenseImpl
                           implements Adjective {
 
@@ -34,6 +37,7 @@ public class AdjectiveImpl extends WordSenseImpl
     this.adjPosition = _adjPosition;
   }
 
+  /** returns the syntactic position of the adjective in relation to noun that it modifies */
   public int getAdjectivePosition() {
     return this.adjPosition;
   }
