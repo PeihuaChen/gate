@@ -19,6 +19,7 @@ import gate.swing.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.Frame;
 import java.awt.Font;
@@ -138,11 +139,36 @@ public class OptionsDialog extends JDialog {
         "Save session on exit",
         Gate.getUserConfig().getBoolean(GateConstants.SAVE_SESSION_ON_EXIT).
         booleanValue());
+
+    includeFeaturesOnPreserveFormatChk = new JCheckBox(
+      "Include annotation features for \"Save preserving format\"",
+      Gate.getUserConfig().
+      getBoolean(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT).
+      booleanValue());
+
+    JPanel vBox = new JPanel();
+    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
+    vBox.add(includeFeaturesOnPreserveFormatChk);
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createEtchedBorder() , " Advanced features "));
+    advancedBox.add(vBox);
     advancedBox.add(Box.createVerticalStrut(10));
-    advancedBox.add(saveOptionsChk);
-    advancedBox.add(Box.createVerticalStrut(10));
-    advancedBox.add(saveSessionChk);
-    advancedBox.add(Box.createVerticalStrut(10));
+
+
+    vBox = new JPanel();
+    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.add(saveOptionsChk);
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.add(saveSessionChk);
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createEtchedBorder() , " Session persistence "));
+    advancedBox.add(vBox);
+
+
+
     mainTabbedPane.add("Advanced", advancedBox);
 
     Box buttonsBox = Box.createHorizontalBox();
@@ -330,6 +356,9 @@ public class OptionsDialog extends JDialog {
                      new Boolean(saveOptionsChk.isSelected()));
       userConfig.put(GateConstants.SAVE_SESSION_ON_EXIT,
                      new Boolean(saveSessionChk.isSelected()));
+      userConfig.put(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT,
+                     new Boolean(includeFeaturesOnPreserveFormatChk.
+                                 isSelected()));
       hide();
     }// void actionPerformed(ActionEvent evt)
   }
@@ -444,6 +473,13 @@ public class OptionsDialog extends JDialog {
    * The "Save Session on close" checkbox
    */
   JCheckBox saveSessionChk;
+
+  /**
+   * The "Include Annotation Features in Save Preserving Format" checkbox
+   */
+  JCheckBox includeFeaturesOnPreserveFormatChk;
+
+
   /**
    * The name of the look and feel class
    */
