@@ -573,6 +573,11 @@ public class DocumentEditor extends AbstractVisualResource
             int end = ((Long)annotationsTable.getModel().
                        getValueAt(rows[i], 3)
                       ).intValue();
+
+            // compute correction for new line breaks in long lines
+            start += longLinesCorrection(start);
+            end += longLinesCorrection(end);
+                      
             //bring the annotation in view
             try{
               Rectangle startRect = textPane.modelToView(start);
@@ -1073,6 +1078,119 @@ public class DocumentEditor extends AbstractVisualResource
   }
 
   /**
+   * Get positions of cut points inside a very large text without new line
+   */
+  private Vector getBreakPositions(String content) {
+    Vector breakPositions = new Vector();
+
+    int lastNewLinePos = -1;
+    int spacePos = -1;
+    int unbreakedLineSize = 0;
+    char ch;
+    int contentSize = content.length();
+    
+    for(int i=0; i<contentSize; ++i) {
+      ch = content.charAt(i);
+      
+      switch(ch) {
+        case '\n' :
+            unbreakedLineSize = 0;
+            spacePos = -1;
+          break;
+        case '\r' :
+            unbreakedLineSize = 0;
+            spacePos = -1;
+          break;
+        case '\t' :
+            spacePos = i;
+            ++unbreakedLineSize;
+          break;
+        case ' ' :
+            spacePos = i;
+            ++unbreakedLineSize;
+          break;
+
+        default:
+          if(unbreakedLineSize >= MAX_LINE_SIZE) {
+            // insert break
+            if(spacePos == -1) {
+              // break without space
+              spacePos = i;
+            } // if
+            
+            breakPositions.add(new Integer(spacePos+1));
+            unbreakedLineSize = i - spacePos;
+            spacePos = -1;
+          }
+          else {
+            ++unbreakedLineSize;
+          } // if
+      } // switch
+    } // for
+    
+    return breakPositions;
+  } // getBreakPositions(String content)
+
+  /** Max unbreaked line size */
+  private final int MAX_LINE_SIZE = 2048;  
+
+  /**
+   * Cut very long lines to pieces not grater than MAX_LINE_SIZE
+   * This is a correction of SWING problem with very long lines of text
+   * <BR>
+   * Return positions of new line insertion.
+   */
+  private Vector correctLongLines(StringBuffer buff) {
+    // analyze for long unbreaked line of text
+    Vector breaks = getBreakPositions(buff.toString());
+//if(breaks.size() > 0) System.out.println("Breaks: "+breaks);
+
+    Integer currentBreak;
+    int intValue;
+    // put new line in break positions
+    for(int i = breaks.size()-1; i>=0; --i) {
+      currentBreak = (Integer) breaks.get(i);
+      intValue = currentBreak.intValue();
+      buff.insert(intValue, '\n');
+    } // for
+        
+    if(breaks.size() > 0) { 
+      return breaks;
+    }
+    else {
+      return null;
+    }
+  } // correctLongLines(StringBuffer buff)
+  
+  /** Compute correction for additional new line in very long lines of text */
+  private int longLinesCorrection(int position) {
+    int result = 0;
+    
+    if(longLinesCorrectionPositions != null) {
+      boolean underPosition = true;
+      Integer current;
+      Iterator it = longLinesCorrectionPositions.iterator();
+      
+      while(underPosition && it.hasNext()) {
+        current = (Integer) it.next();
+        if(position > (current.intValue()+result)) {
+          // cross this new line point
+          ++result;
+        }
+        else {
+          // all new lines computed
+          underPosition = false;
+        } // if
+      } // while
+    } // if
+    
+    return result;
+  } // int longLinesCorrection(int position)
+
+  /** Keep cut places in very long lines inside document */
+  private Vector longLinesCorrectionPositions;
+  
+  /**
    * Updates this component when the underlying document is changed. This method
    * is only triggered when the document is changed to a new one and not when
    * the internal data from the document changes. For the document internal
@@ -1094,8 +1212,17 @@ public class DocumentEditor extends AbstractVisualResource
                                            enum.nextElement());
     }
     if(document == null) return;
-    textPane.setText(document.getContent().toString());
 
+    // check for very long lines of text in order to correct SWING bug
+    String documentContent = document.getContent().toString();
+    StringBuffer buffContent = new StringBuffer(documentContent);
+    // cut very long lines to pieces not grater than MAX_LINE_SIZE
+    longLinesCorrectionPositions = correctLongLines(buffContent);
+    if(longLinesCorrectionPositions != null) {
+      documentContent = buffContent.toString();
+    } // if
+    
+    textPane.setText(documentContent);
     //listen for events from the document content editor
     textPane.getDocument().addDocumentListener(new SwingDocumentListener());
 
@@ -1167,11 +1294,18 @@ public class DocumentEditor extends AbstractVisualResource
     int i = 0;
     int lastValue = 0;
     int value;
+    
+    int start, end;
     Iterator annIter = annotations.iterator();
     while(annIter.hasNext()){
       Annotation ann = (Annotation)annIter.next();
-      textPane.select(ann.getStartNode().getOffset().intValue(),
-                      ann.getEndNode().getOffset().intValue());
+      start = ann.getStartNode().getOffset().intValue();
+      end = ann.getEndNode().getOffset().intValue(); 
+      // compute correction for new line breaks in long lines
+      start += longLinesCorrection(start);
+      end += longLinesCorrection(end);
+      
+      textPane.select(start, end);
       textPane.setCharacterAttributes(style, true);
       value = i * 100 / size;
       if(value - lastValue >= 5){
