@@ -34,6 +34,35 @@ create or replace package body security is
   end;
 */
 
+  
+  READ_ACCESS constant   number := 0;
+  WRITE_ACCESS constant number := 1;
+
+  ORACLE_TRUE  constant number := 1;
+  ORACLE_FALSE constant number := 0;
+  
+  PERM_WR_GW constant number := 1;
+  PERM_GR_GW constant number := 2; 
+  PERM_GR_OW constant number := 3; 
+  PERM_OR_OW constant number := 4; 
+
+  
+  /*******************************************************************************************/  
+  function is_member_of_group(p_user_id number,p_grp_id number) 
+     return boolean 
+  is
+    cnt number;
+  begin
+     
+    select count(ugrp_id)
+    into   cnt
+    from   t_user_group
+    where  ugrp_user_id = p_user_id
+           and ugrp_group_id = p_grp_id;
+  
+    return (cnt > 0);
+  end;
+  
   /*******************************************************************************************/
   procedure set_group_name(p_group_id  IN number,
                            p_new_name  IN varchar2)
@@ -110,7 +139,7 @@ create or replace package body security is
     where  grp_name = p_grp_name;
   
     if (grp_cnt > 0) then
-       raise x_duplicate_group_name;
+       raise error.x_duplicate_group_name;
     end if;  
     
     insert into t_group(grp_id,
@@ -130,10 +159,11 @@ create or replace package body security is
        delete from t_user_group
        where  ugrp_group_id = p_grp_id;
        
-       --set LRs owned by group as orphan
+       --set LRs owned by group as OWNER_READ/OWNER_WRITE
        update t_lang_resource
-       set    lr_owner_id = null
-       where  lr_owner_id = p_grp_id;
+       set    lr_owner_group_id = null,
+              lr_access_mode = PERM_OR_OW
+       where  lr_owner_group_id = p_grp_id;
        
        --delete the group
        delete from t_group
@@ -154,7 +184,7 @@ create or replace package body security is
     where  usr_login = p_usr_name;
   
     if (usr_cnt > 0) then
-       raise x_duplicate_user_name;
+       raise error.x_duplicate_user_name;
     end if;  
     
     insert into t_user(usr_id,
@@ -176,7 +206,13 @@ create or replace package body security is
        delete from t_user_group
        where  ugrp_user_id = p_usr_id;
        
-       --set LRs locked by group as orphan
+       --set LRs owned by user as orphan
+       update t_lang_resource
+       set    lr_owner_user_id = null,
+              lr_access_mode = PERM_GR_GW
+       where  lr_owner_user_id = p_usr_id;
+
+       --set LRs locked by user as orphan
        update t_lang_resource
        set    lr_locking_user_id = null
        where  lr_locking_user_id = p_usr_id;
@@ -201,7 +237,7 @@ create or replace package body security is
        where  usr_login = p_usr_name;
        
        if (usr_cnt = 0) then
-          raise x_invalid_user_name;
+          raise error.x_invalid_user_name;
        end if;
 
        --valid passw?
@@ -211,7 +247,7 @@ create or replace package body security is
        where  usr_pass= p_usr_pass;
        
        if (usr_cnt = 0) then
-          raise x_invalid_user_pass;
+          raise error.x_invalid_user_pass;
        end if;
 
        --valid group?
@@ -225,11 +261,133 @@ create or replace package body security is
        
        
        if (usr_cnt = 0) then
-          raise x_invalid_user_pass;
+          raise error.x_invalid_user_pass;
        end if;
        
   end;                                                                                                        
-  
+
+  procedure has_access_to_lr(p_lr_id   IN  number,
+                             p_usr_id  IN  number,
+                             p_grp_id  IN  number,
+                             p_mode    IN  number,                             
+                             p_result  OUT boolean)
+  is
+    cnt          number;
+    owner_group  number;
+    owner_user   number;
+    locking_user number;
+    access_mode  number;
+    
+  begin
+       
+       --preconditions
+       if (p_mode <> READ_ACCESS and p_mode <> WRITE_ACCESS) then
+          raise error.x_invalid_argument;
+       end if;
+       
+       select nvl(lr_owner_user_id,0),
+              nvl(lr_owner_group_id,0),
+              nvl(lr_locking_user_id,0),
+              lr_access_mode
+       into   owner_user, 
+              owner_group,
+              locking_user,
+              access_mode
+       from   t_lang_resource
+       where  lr_id = p_lr_id;
+
+       
+       if (p_mode = WRITE_ACCESS) then
+       
+          --is the document locked?
+          if locking_user <> 0 then 
+             
+             if locking_user <> p_usr_id then
+                --locked by someone else, fail
+                p_result := false;
+             else
+                --locked by me, success             
+                p_result := true;
+             end if;
+             
+             return;
+          
+          else                       
+             --not locked but check permissions
+             -- write access is granted :
+             -- 1a. permissions are USER_WRITE && OWNER_USER == p_usr_id
+             -- 1b. permissions are GROUP_WRITE && 
+             --       member_of(p_usr_id,OWNER_GROUP) && 
+             --       OWNER_GROUP == p_grp_id
+             
+             --user is owner, and permisssions are OWNER_WRITE
+             if (owner_user = p_usr_id and 
+                 (access_mode = PERM_GR_OW or access_mode = PERM_OR_OW)) then
+                -- case 1a
+                p_result := true;
+                return;
+             end if;
+             
+             --user is in owning group
+             if (is_member_of_group(p_usr_id,owner_group) and
+                 owner_group = p_grp_id                   and 
+                 (access_mode = PERM_GR_GW or access_mode = PERM_WR_GW)) then
+                -- case 1b                 
+                p_result := true;
+                return;
+             end if;
+
+             --fail             
+             p_result := false;
+             return;
+                         
+          end if;
+
+       else   
+          -- read access request
+          -- check read persmissions
+          -- read access is granted :
+          -- 1a. permissions are USER_READ && OWNER_USER == p_usr_id
+          -- 1b. permissions are GROUP_READ && member_of(p_usr_id,OWNER_GROUP)
+          -- 1c. permissions are WORLD_READ
+          
+          if (access_mode = PERM_WR_GW) then
+             -- case 1c
+             p_result := true;
+             return;             
+          end if;
+          
+          if ((access_mode = PERM_GR_GW or access_mode = PERM_GR_OW) and 
+               is_member_of_group(p_usr_id,owner_group)              and
+               owner_group = p_grp_id)  then
+             -- case 1b
+             p_result := true;
+             return;             
+          end if;
+
+          if (access_mode = PERM_WR_GW) then
+             -- case 1c
+             p_result := true;
+             return;             
+          end if;
+          
+          --fail
+          p_result := false;
+          return;                       
+       
+       end if;
+       
+       
+       
+       
+   exception
+       --do we have such LR?       
+       when NO_DATA_FOUND then
+          raise error.x_invalid_lr; 
+       
+       
+  end;
+
 /*begin
   -- Initialization
   <Statement>; */

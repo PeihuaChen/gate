@@ -45,6 +45,12 @@ create or replace package security is
   x_invalid_user_group EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_invalid_user_group, -20104);
 
+  x_invalid_lr EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_lr, -20105);
+
+  x_invalid_access_mode EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_access_mode, -20106);
+  
   /* Group related functionality */
   
   /*  -- */
@@ -91,6 +97,13 @@ create or replace package security is
   procedure login(p_usr_name        IN varchar2,
                   p_usr_pass        IN varchar2,
                   p_pref_grp_id     IN number);
+
+  /*  -- */
+  procedure has_access_to_lr(p_lr_id   IN  number,
+                             p_usr_id  IN  number,
+                             p_grp_id  IN  number,
+                             p_mode    IN  number,                             
+                             p_result  OUT boolean);
                            
 end security;
 /
