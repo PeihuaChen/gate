@@ -395,19 +395,30 @@ public class AnnotationEditor extends AbstractVisualResource {
           //add delete option
           JPopupMenu popup = new JPopupMenu();
           class DeleteAnnotationAction extends AbstractAction{
-            public DeleteAnnotationAction(AnnotationSet set, Annotation ann){
-              super("Delete");
-              this.ann = ann;
-              this.set = set;
+            public DeleteAnnotationAction(){
+              super("Delete selected");
             }
 
             public void actionPerformed(ActionEvent e){
-              set.remove(ann);
-            }
-            AnnotationSet set;
-            Annotation ann;
-          }
-          popup.add(new DeleteAnnotationAction(set, ann));
+              int[] rows = annotationsTable.getSelectedRows();
+              annotationsTable.clearSelection();
+              for(int i = 0; i < rows.length; i++){
+                int row = rows[i];
+                //find the annotation
+                Annotation ann = (Annotation)annotationsTable.
+                                    getModel().getValueAt(row, -1);
+                //find the annotation set
+                String setName = (String)annotationsTable.getModel().
+                                                            getValueAt(row, 1);
+                AnnotationSet set = setName.equals("<Default>")?
+                                    document.getAnnotations() :
+                                    document.getAnnotations(setName);
+                set.remove(ann);
+              }//for(int i = 0; i < rows.length; i++)
+            }//public void actionPerformed(ActionEvent e)
+          }//class DeleteAnnotationAction extends AbstractAction
+
+          popup.add(new DeleteAnnotationAction());
           popup.add(editAnnAct);
           popup.show(annotationsTable, e.getX(), e.getY());
         }
@@ -1580,132 +1591,164 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
     }
 
-    public void run() {
-      boolean tableChanged = false;
-      while(!stop){
-        synchronized(eventQueue) {
-          if((System.currentTimeMillis() - lastEvent) > sleepInterval){
-            GateEvent currentEvent;
-            while(! eventQueue.isEmpty()) {
-              currentEvent = (GateEvent)eventQueue.remove(0);
-              //process the current event
-              if(currentEvent instanceof gate.event.DocumentEvent) {
-                //document event
-                gate.event.DocumentEvent docEvt =
-                  (gate.event.DocumentEvent)currentEvent;
-                if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED) {
-                  throw new UnsupportedOperationException(
-                    "DocumentEditor -> Annotation set removed");
-                }else if(docEvt.getType() == docEvt.ANNOTATION_SET_ADDED){
-                  addAnnotationSet(document.getAnnotations(
-                                          docEvt.getAnnotationSetName()),0,0);
-                }
-              }else if(currentEvent instanceof AnnotationSetEvent){
-                //annotation set event
-                AnnotationSetEvent asEvt = (AnnotationSetEvent)currentEvent;
-                AnnotationSet set = (AnnotationSet)asEvt.getSource();
-                String setName = set.getName();
-                if(setName == null) setName = "<Default>";
-                Annotation ann = asEvt.getAnnotation();
-                String type = ann.getType();
-                TypeData tData = getTypeData(setName, type);
+    protected void processEventQueue(){
+      synchronized(eventQueue) {
+        GateEvent currentEvent;
+        boolean tableChanged = false;
+        while(! eventQueue.isEmpty()) {
+          currentEvent = (GateEvent)eventQueue.remove(0);
+          //process the current event
+          if(currentEvent instanceof gate.event.DocumentEvent) {
+            //document event
+            gate.event.DocumentEvent docEvt =
+              (gate.event.DocumentEvent)currentEvent;
+            if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED) {
+              throw new UnsupportedOperationException(
+                "DocumentEditor -> Annotation set removed");
+            }else if(docEvt.getType() == docEvt.ANNOTATION_SET_ADDED){
+              addAnnotationSet(document.getAnnotations(
+                                      docEvt.getAnnotationSetName()),0,0);
+            }
+          }else if(currentEvent instanceof AnnotationSetEvent){
+            //annotation set event
+            AnnotationSetEvent asEvt = (AnnotationSetEvent)currentEvent;
+            AnnotationSet set = (AnnotationSet)asEvt.getSource();
+            String setName = set.getName();
+            if(setName == null) setName = "<Default>";
+            Annotation ann = asEvt.getAnnotation();
+            String type = ann.getType();
+            TypeData tData = getTypeData(setName, type);
 
-                if(asEvt.getType() == asEvt.ANNOTATION_ADDED){
-                  if(tData != null){
-                    tData.annotations.add(ann);
-                    if(tData.getVisible()){
-                      //update the table
-                      data.add(tData.range.end, ann);
-                      tData.range.end++;
-                      Iterator rangesIter = ranges.
-                                            subList(
-                                                ranges.indexOf(tData.range) + 1,
-                                                    ranges.size()).
-                                            iterator();
-                      while(rangesIter.hasNext()){
-                        Range aRange = (Range) rangesIter.next();
-                        aRange.start++;
-                        aRange.end++;
-                      }//while(rangesIter.hasNext())
-                      tableChanged = true;
+            if(asEvt.getType() == asEvt.ANNOTATION_ADDED){
+              if(tData != null){
+//                tData.annotations.add(ann);
+                if(tData.getVisible()){
+                  //update the table
+                  data.add(tData.range.end, ann);
+                  tData.range.end++;
+                  Iterator rangesIter = ranges.
+                                        subList(
+                                            ranges.indexOf(tData.range) + 1,
+                                                ranges.size()).
+                                        iterator();
+                  while(rangesIter.hasNext()){
+                    Range aRange = (Range) rangesIter.next();
+                    aRange.start++;
+                    aRange.end++;
+                  }//while(rangesIter.hasNext())
+                  tableChanged = true;
 
-                      //update the text
-                      textPane.select(ann.getStartNode().getOffset().intValue(),
-                                      ann.getEndNode().getOffset().intValue());
-                      textPane.setCharacterAttributes(
-                                  textPane.getStyle("_" + setName + "." +
-                                                    type + "_"), true);
-                    }
-                  } else {
-                    //new type
-                    Map setMap = (Map)typeDataMap.get(setName);
-                    if(setMap == null){
-                      setMap = new HashMap();
-                      typeDataMap.put(setName, setMap);
-                    }
-                    tData = new TypeData(setName, type, false);
-                    tData.setAnnotations(set.get(type));
-                    setMap.put(type, tData);
-                    DefaultMutableTreeNode typeNode =
-                              new DefaultMutableTreeNode(tData, false);
-
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                      ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
-                    while(node != null &&
-                      !((TypeData)node.getUserObject()).getSet().equals(setName))
-                      node = node.getNextSibling();
-                    //we have to add typeNode to node
-                    //find the right place
-                    int i = 0;
-                    while (i < node.getChildCount() &&
-                          ((TypeData)
-                            ((DefaultMutableTreeNode)node.getChildAt(i)).
-                            getUserObject()
-                          ).getType().compareTo(tData.getType())<0) i++;
-                    stylesTreeModel.insertNodeInto(typeNode, node, i);
-                  }
-                } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
-                  tData .annotations.remove(ann);
-                  if(tData.getVisible()){
-                    //update the annotations table
-                    data.remove(ann);
-                    //shorten the range conatining the annotation
-                    tData.range.end--;
-                    //shift all the remaining ranges
-                    Iterator rangesIter = ranges.
-                                        subList(ranges.indexOf(tData.range) + 1,
-                                        ranges.size()).
-                                          iterator();
-                    while(rangesIter.hasNext()){
-                      Range aRange = (Range) rangesIter.next();
-                      aRange.start--;
-                      aRange.end--;
-                    }//while(rangesIter.hasNext())
-                    tableChanged = true;
-                    //update the text
-                    //hide the highlight
-                    textPane.select(ann.getStartNode().getOffset().intValue(),
-                                    ann.getEndNode().getOffset().intValue());
-                    textPane.setCharacterAttributes(
-                              textPane.getStyle("default"), true);
-                  }//if(tData.getVisible())
+                  //update the text
+                  textPane.select(ann.getStartNode().getOffset().intValue(),
+                                  ann.getEndNode().getOffset().intValue());
+                  textPane.setCharacterAttributes(
+                              textPane.getStyle("_" + setName + "." +
+                                                type + "_"), true);
                 }
               } else {
-                //unknown event type
+                //new type
+                Map setMap = (Map)typeDataMap.get(setName);
+                if(setMap == null){
+                  setMap = new HashMap();
+                  typeDataMap.put(setName, setMap);
+                }
+                tData = new TypeData(setName, type, false);
+                tData.setAnnotations(set.get(type));
+                setMap.put(type, tData);
+                DefaultMutableTreeNode typeNode =
+                          new DefaultMutableTreeNode(tData, false);
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                  ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
+                while(node != null &&
+                  !((TypeData)node.getUserObject()).getSet().equals(setName))
+                  node = node.getNextSibling();
+                //we have to add typeNode to node
+                //find the right place
+                int i = 0;
+                while (i < node.getChildCount() &&
+                      ((TypeData)
+                        ((DefaultMutableTreeNode)node.getChildAt(i)).
+                        getUserObject()
+                      ).getType().compareTo(tData.getType())<0) i++;
+                stylesTreeModel.insertNodeInto(typeNode, node, i);
               }
-            }//while(! eventQueue.isEmpty())
-            if(tableChanged) {
-              SwingUtilities.invokeLater(new Runnable() {
-                public void run(){
-                  if(annotationsTableModel != null){
-                    annotationsTableModel.fireTableDataChanged();
+            } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
+System.out.println("Remove an annotation of type " + type +" from set " + setName + "!");
+//              tData.annotations.remove(ann);
+              if(tData.getVisible()){
+                //update the annotations table
+                data.remove(ann);
+                //shorten the range conatining the annotation
+                tData.range.end--;
+                //shift all the remaining ranges
+                Iterator rangesIter = ranges.
+                                    subList(ranges.indexOf(tData.range) + 1,
+                                    ranges.size()).
+                                      iterator();
+                while(rangesIter.hasNext()){
+                  Range aRange = (Range) rangesIter.next();
+                  aRange.start--;
+                  aRange.end--;
+                }//while(rangesIter.hasNext())
+                tableChanged = true;
+                //update the text
+                //hide the highlight
+                textPane.select(ann.getStartNode().getOffset().intValue(),
+                                ann.getEndNode().getOffset().intValue());
+                textPane.setCharacterAttributes(
+                          textPane.getStyle("default"), true);
+              }//if(tData.getVisible())
+              if(tData.annotations.isEmpty()){
+System.out.println("No more annotations of type " + type +"!");
+                //no more annotations of this type -> delete the node
+                //first find the set
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                  ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
+                while(node != null &&
+                  !((TypeData)node.getUserObject()).getSet().equals(setName))
+                  node = node.getNextSibling();
+                if(node != null){
+                  node = (DefaultMutableTreeNode)node.getFirstChild();
+                  while(node != null &&
+                    !((TypeData)node.getUserObject()).getType().equals(type))
+                    node = node.getNextSibling();
+                  if(node != null){
+                    stylesTreeModel.removeNodeFromParent(node);
                   }
                 }
-              });
-              tableChanged = false;
-            }
+              }//if(tData.getAnnotations().isEmpty())
+            }//if(asEvt.getType() == asEvt.ANNOTATION_REMOVED)
+          } else {
+            //unknown event type
           }
-        }//synchronized(eventQueue)
+        }//while(! eventQueue.isEmpty())
+        if(tableChanged) {
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run(){
+              if(annotationsTableModel != null){
+                annotationsTableModel.fireTableDataChanged();
+              }
+            }
+          });
+          tableChanged = false;
+        }
+      }//synchronized(eventQueue)
+    }//protected processEventQueue()
+
+    public void run() {
+      while(!stop){
+        if((System.currentTimeMillis() - lastEvent) > sleepInterval){
+          //process IN THE GUI THREAD the events queued so far
+          Runnable runnable = new Runnable(){
+            public void run(){
+              processEventQueue();
+            }
+          };
+          SwingUtilities.invokeLater(runnable);
+        }
+
+        //take a break now...
         try {
           Thread.sleep(sleepInterval);
         } catch(InterruptedException ie) {
@@ -1713,7 +1756,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
     }
 
-    int sleepInterval = 200;
+    int sleepInterval = 500;
     boolean stop = false;
     protected java.util.List eventQueue;
     protected long lastEvent = 0;
