@@ -16,6 +16,7 @@ package gate.creole.ir;
 
 public class IndexException extends Exception{
 
+  /** Consructor of the class.*/
   public IndexException(String msg){
     super(msg);
   }

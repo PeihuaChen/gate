@@ -87,6 +87,7 @@ public class TestIndex extends TestCase{
     return new TestSuite(TestIndex.class);
   } // suite
 
+  /** Create new index. */
   public void testIndex_01() throws IndexException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
@@ -103,6 +104,7 @@ public class TestIndex extends TestCase{
 
   }
 
+  /** Optimize existing index. */
   public void testIndex_02() throws IndexException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
@@ -115,6 +117,7 @@ public class TestIndex extends TestCase{
     ic.getIndexManager().optimizeIndex();
   }
 
+  /** Search in existing index. */
   public void testIndex_10() throws IndexException, SearchException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
@@ -145,7 +148,8 @@ public class TestIndex extends TestCase{
 
   }
 
-    public void testIndex_101() throws IndexException{
+  /** Delete index. */
+  public void testIndex_101() throws IndexException{
     IndexedCorpus ic = (IndexedCorpus) corpus;
     DefaultIndexDefinition did = new DefaultIndexDefinition();
     did.setIndexType(GateConstants.IR_LUCENE_INVFILE);

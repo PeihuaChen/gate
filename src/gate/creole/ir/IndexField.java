@@ -16,24 +16,34 @@ package gate.creole.ir;
 
 public class IndexField{
 
+  /** Name of field for indexing - the name of the feature key of
+   *  the document should be same. */
   private String fieldName;
+
+  /** Reader object for this field. Can be NULL. */
   private PropertyReader propReader;
+
+  /** If set to true then the value should not be modified by the analyzer. */
   private boolean isPreseved;
 
+  /** Constructor of the class. */
   public IndexField(String name, PropertyReader rdr, boolean preseved) {
     this.fieldName = name;
     this.propReader = rdr;
     this.isPreseved = preseved;
   }
 
+  /** @return String name of the field.*/
   public String getName(){
     return fieldName;
   }
 
+  /** @return Reader object for this field or null */
   public PropertyReader getReader(){
     return propReader;
   }
 
+  /** @return boolean preservation of value */
   public boolean isPreseved(){
     return isPreseved;
   }
