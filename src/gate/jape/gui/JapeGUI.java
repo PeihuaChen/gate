@@ -278,9 +278,9 @@ public class JapeGUI extends JFrame {
                            "ms\n");
 
         statusBar.setText("Tokenizing all the documents...");
-        DefaultTokeniser tokeniser = null;
+        gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
         try{
-          tokeniser =new DefaultTokeniser(
+          tokeniser =new gate.creole.tokeniser.DefaultTokeniser(
             Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
         }catch(IOException ioe){
           System.err.println("Cannot read the tokeniser rules!" +
@@ -418,8 +418,10 @@ public class JapeGUI extends JFrame {
       }
       typesPanel.repaint();
       //create the table
-      tableView = new JTable(new AnnotationSetTableModel(currentDoc.getAnnotations()));
+      tableView = new SortedTable();
+      tableView.setTableModel(new AnnotationSetTableModel(currentDoc.getAnnotations()));
       tableViewScroll.getViewport().add(tableView, null);
+
     }
     validate();
   }
@@ -483,13 +485,9 @@ public class JapeGUI extends JFrame {
 //System.out.println(type);
   }
 
-  class AnnotationSetTableModel extends javax.swing.table.AbstractTableModel{
+  class AnnotationSetTableModel extends SortedTableModel{
     public AnnotationSetTableModel(AnnotationSet as){
-      annotations = as.toArray();
-    }
-
-    public int getRowCount(){
-      return annotations.length;
+      setData (as, new AnnotationSetComparator());
     }
 
     public int getColumnCount(){
@@ -499,19 +497,19 @@ public class JapeGUI extends JFrame {
     public String getColumnName(int column){
       switch(column){
         case 0:{
-          return "Start";
+          return "Start" + addSortOrderString(0);
         }
         case 1:{
-          return "End";
+          return "End" + addSortOrderString(1);
         }
         case 2:{
-          return "Type";
+          return "Type" + addSortOrderString(2);
         }
         case 3:{
-          return "Features";
+          return "Features" + addSortOrderString(3);
         }
         case 4:{
-          return "Text";
+          return "Text" + addSortOrderString(4);
         }
       }
       return null;
@@ -520,9 +518,9 @@ public class JapeGUI extends JFrame {
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return false;
     }
-    
+
     public Object getValueAt(int row, int column){
-      gate.Annotation currentAnn = (gate.Annotation)annotations[row];
+      gate.Annotation currentAnn = (gate.Annotation) m_data.get(row);
       switch(column){
         case 0:{
           return currentAnn.getStartNode().getOffset();
@@ -544,7 +542,59 @@ public class JapeGUI extends JFrame {
       }
       return null;
     }
-    Object[] annotations;
+
+    class AnnotationSetComparator extends SortedTableComparator{
+
+      public AnnotationSetComparator(){
+      }
+      public int compare(Object o1, Object o2){
+        if ( !(o1 instanceof gate.Annotation) ||
+             !(o2 instanceof gate.Annotation)) return 0;
+
+        gate.Annotation a1 = (gate.Annotation) o1;
+        gate.Annotation a2 = (gate.Annotation) o2;
+        int result = 0;
+
+        switch(this.getSortCol()){
+          case 0: // Start
+          {
+            Long l1 = a1.getStartNode().getOffset();
+            Long l2 = a2.getStartNode().getOffset();
+            result = l1.compareTo(l2);
+          }break;
+          case 1: // End
+          {
+            Long l1 = a1.getEndNode().getOffset();
+            Long l2 = a2.getEndNode().getOffset();
+            result  = l1.compareTo(l2);
+          }break;
+          case 2: // Type
+          {
+            String s1 = a1.getType();
+            String s2 = a2.getType();
+            result = s1.compareTo(s2);
+          }break;
+          case 3: // Features
+          {
+            String fm1 = a1.getFeatures().toString();
+            String fm2 = a2.getFeatures().toString();
+            result = fm1.compareTo(fm2);
+          }break;
+          case 4: // Text
+          {
+            String text1 = currentDoc.getContent().toString().substring(
+              a1.getStartNode().getOffset().intValue(),
+              a1.getEndNode().getOffset().intValue());
+            String text2 = currentDoc.getContent().toString().substring(
+              a2.getStartNode().getOffset().intValue(),
+              a2.getEndNode().getOffset().intValue());
+            result = text1.compareTo(text2);
+          }break;
+        }// switch
+        if (!this.getSortOrder()) result = -result;
+        return result;
+      }//compare
+    }
   }
 
   //Gui members
@@ -587,7 +637,7 @@ public class JapeGUI extends JFrame {
   Random randomGen = new Random();
   boolean corpusIsDirty = false;
   JTabbedPane centerTabPane = new JTabbedPane();
-  JTable tableView;
+  SortedTable tableView;
   JScrollPane tableViewScroll = new JScrollPane();
   javax.swing.table.TableModel tm;
   long startCorpusLoad = 0, startCorpusTokenization = 0,

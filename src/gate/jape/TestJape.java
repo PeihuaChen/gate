@@ -137,9 +137,9 @@ public class TestJape extends TestCase
     }
 
     //tokenize all documents
-    DefaultTokeniser tokeniser = null;
+    gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
     try{
-      tokeniser =new DefaultTokeniser(
+      tokeniser =new gate.creole.tokeniser.DefaultTokeniser(
         Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
     }catch(IOException ioe){
       System.err.println("Cannot read the tokeniser rules!" +
