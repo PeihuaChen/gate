@@ -5,7 +5,7 @@
   <property category="build" name="CopyExtensions.1" value="txt" />
   <property category="build" name="CopyExtensions.2" value="xml" />
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime" name="ConfigurationCount" value="7" />
+  <property category="runtime" name="ConfigurationCount" value="6" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext" />
@@ -20,49 +20,72 @@
   <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.1" name="application.class" value="gate.Main" />
   <property category="runtime.1" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext -Xmx200m" />
+  <property category="runtime.1" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.1" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.1" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.1" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.1" name="jsprunner.docbase" value="." />
   <property category="runtime.1" name="jsprunner.jspfile" value="." />
   <property category="runtime.2" name="ConfigurationName" value="Text mode (-t)" />
   <property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.2" name="application.class" value="gate.TestGate" />
   <property category="runtime.2" name="application.parameters" value="-t" />
-  <property category="runtime.2" name="application.vmparameters" value="-Djava.compiler=NONE" />
+  <property category="runtime.2" name="application.vmparameters" value="-Djava.compiler=NONE -Xmx150m" />
+  <property category="runtime.2" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.2" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.2" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.2" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.2" name="jsprunner.docbase" value="." />
   <property category="runtime.2" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.2" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
   <property category="runtime.3" name="ConfigurationName" value="Text mode, no net connection (-t -n)" />
   <property category="runtime.3" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.3" name="application.class" value="gate.TestGate" />
   <property category="runtime.3" name="application.parameters" value="-t -n" />
-  <property category="runtime.3" name="application.vmparameters" value="-Djava.compiler=NONE" />
+  <property category="runtime.3" name="application.vmparameters" value="-Djava.compiler=NONE -Xmx150m" />
+  <property category="runtime.3" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.3" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.3" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.3" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.3" name="jsprunner.docbase" value="." />
   <property category="runtime.3" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.3" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
   <property category="runtime.4" name="ConfigurationName" value="No net connection (-n)" />
   <property category="runtime.4" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.4" name="application.class" value="gate.TestGate" />
   <property category="runtime.4" name="application.parameters" value="-n" />
-  <property category="runtime.4" name="application.vmparameters" value="-Djava.compiler=NONE" />
+  <property category="runtime.4" name="application.vmparameters" value="-Djava.compiler=NONE -Xmx150m" />
+  <property category="runtime.4" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.4" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.4" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.4" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.4" name="jsprunner.docbase" value="." />
   <property category="runtime.4" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.4" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
   <property category="runtime.5" name="ConfigurationName" value="No net connection and no local server (-N)" />
   <property category="runtime.5" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.5" name="application.class" value="gate.TestGate" />
   <property category="runtime.5" name="application.parameters" value="-N" />
-  <property category="runtime.5" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
+  <property category="runtime.5" name="application.vmparameters" value="-Xint -Xmx150m -Djava.compiler=NONE" />
+  <property category="runtime.5" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.5" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.5" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.5" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.5" name="jsprunner.docbase" value="." />
   <property category="runtime.5" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.5" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
   <property category="runtime.6" name="ConfigurationName" value="Text mode, no net connection and no local server (-t -N)" />
   <property category="runtime.6" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.6" name="application.class" value="gate.TestGate" />
   <property category="runtime.6" name="application.parameters" value="-N -t" />
-  <property category="runtime.6" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
+  <property category="runtime.6" name="application.vmparameters" value="-Xint -Djava.compiler=NONE -Xmx150m" />
+  <property category="runtime.6" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.6" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.6" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.6" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.6" name="jsprunner.docbase" value="." />
   <property category="runtime.6" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
-  <property category="runtime.7" name="ConfigurationName" value="gate.Main" />
-  <property category="runtime.7" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
-  <property category="runtime.7" name="application.class" value="gate.Main" />
-  <property category="runtime.7" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
-  <property category="runtime.7" name="jsprunner.docbase" value="." />
-  <property category="runtime.7" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.6" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
   <property category="sys" name="AuthorLabel" value="@author" />
   <property category="sys" name="BackupPath" value="bak" />
   <property category="sys" name="BeansInstantiate" value="false" />
@@ -74,14 +97,14 @@
   <property category="sys" name="CopyrightLabel" value="Copyright:" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
-  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
+  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
   <property category="sys" name="EventMatch" value="false" />
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
   <property category="sys" name="InstanceVisibility" value="4" />
-  <property category="sys" name="JDK" value="SUN java 1.3.0-C" />
-  <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener" />
-  <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener" />
+  <property category="sys" name="JDK" value="SUN java 1.3.1-b24" />
+  <property category="sys" name="JbxEventListener0" value="gate.event.StatusListener" />
+  <property category="sys" name="JbxEventListener1" value="gate.event.ProgressListener" />
   <property category="sys" name="JbxEventListener2" value="gate.event.StatusListener" />
   <property category="sys" name="JbxEventListener3" value="gate.event.ProgressListener" />
   <property category="sys" name="JbxEventListener4" value="gate.event.DocumentListener" />
