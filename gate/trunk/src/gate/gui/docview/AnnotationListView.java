@@ -142,6 +142,10 @@ public class AnnotationListView extends AbstractDocumentView
           return;
         }
 
+        if(!table.isRowSelected(table.rowAtPoint(me.getPoint()))) {
+          return;
+        }
+
         if(me.getModifiers() == 4) {
           final JPopupMenu popup = new JPopupMenu();
           JButton delete = new JButton("Delete");
