@@ -17,10 +17,15 @@ package gate.wordnet;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.io.*;
 
 import net.didion.jwnl.*;
+import net.didion.jwnl.JWNLException;
 import net.didion.jwnl.dictionary.Dictionary;
+import net.didion.jwnl.data.IndexWordSet;
+import net.didion.jwnl.data.IndexWord;
+import net.didion.jwnl.data.Word;
 //import net.didion.jwnl.data.POS;
 
 import junit.framework.*;
@@ -85,37 +90,11 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   }
 
 
-  public Iterator getSynsets() {
-    throw new MethodNotImplementedException();
-  }
-
-
   public Iterator getSynsets(int _pos)
     throws WordNetException {
 
     net.didion.jwnl.data.POS pos = WNHelper.int2POS(_pos);
-/*    switch(POS) {
 
-      case WordNet.POS_ADJECTIVE:
-        pos = net.didion.jwnl.data.POS.ADJECTIVE;
-        break;
-
-      case WordNet.POS_ADVERB:
-        pos = net.didion.jwnl.data.POS.ADVERB;
-        break;
-
-      case WordNet.POS_NOUN:
-        pos = net.didion.jwnl.data.POS.NOUN;
-        break;
-
-      case WordNet.POS_VERB:
-        pos = net.didion.jwnl.data.POS.VERB;
-        break;
-
-      default:
-        throw new IllegalArgumentException();
-    }
-*/
     try {
       net.didion.jwnl.data.Synset jwnSynset = null;
 
@@ -192,14 +171,66 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   }
 
 
-  public List lookupWord(String lemma){
-    throw new MethodNotImplementedException();
+  public List lookupWord(String lemma) throws WordNetException {
+
+    try {
+      IndexWord[] jwIndexWordArr = this.wnDictionary.lookupAllIndexWords(lemma).getIndexWordArray();
+      return _lookupWord(lemma,jwIndexWordArr);
+    }
+    catch(JWNLException jex) {
+      throw new WordNetException(jex);
+    }
   }
 
-  public List lookupWord(String lemma, int pos){
-    throw new MethodNotImplementedException();
+  public List lookupWord(String lemma, int pos) throws WordNetException {
+
+    try {
+      IndexWord jwIndexWord = this.wnDictionary.lookupIndexWord(WNHelper.int2POS(pos), lemma);
+
+      IndexWord[] jwIndexWordArr = new IndexWord[1];
+      jwIndexWordArr[0] = jwIndexWord;
+
+      return _lookupWord(lemma,jwIndexWordArr);
+    }
+    catch(JWNLException jex) {
+      throw new WordNetException(jex);
+    }
   }
 
+
+  private List _lookupWord(String lemma, IndexWord[] jwIndexWords) throws WordNetException{
+
+    List result = new ArrayList();
+
+    try {
+      for (int i=0; i< jwIndexWords.length; i++) {
+        IndexWord iw = jwIndexWords[i];
+        net.didion.jwnl.data.Synset[] jwSynsetArr = iw.getSenses();
+
+        for (int j=0; j< jwSynsetArr.length; j++) {
+          net.didion.jwnl.data.Synset jwSynset = jwSynsetArr[j];
+          Synset gateSynset = new SynsetImpl(jwSynset,this.wnDictionary);
+          //find the word of interest
+          List wordSenses = gateSynset.getWordSenses();
+
+          Iterator itSenses = wordSenses.iterator();
+          while (itSenses.hasNext()) {
+            WordSense currSynsetMember = (WordSense)itSenses.next();
+            if (currSynsetMember.getWord().getLemma().equalsIgnoreCase(lemma)) {
+              //found match
+              result.add(currSynsetMember);
+              break;
+            }
+          }
+        }
+      }
+    }
+    catch(JWNLException jex) {
+      throw new WordNetException(jex);
+    }
+
+    return result;
+  }
 
   class SynsetIterator implements java.util.Iterator {
 
@@ -222,8 +253,8 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     public Object next() {
 
       net.didion.jwnl.data.Synset jwnlSynset = (net.didion.jwnl.data.Synset)this.it.next();
-//      SynsetImpl synset = new SynsetImpl();
-      throw new UnsupportedOperationException();
+      Synset gateSynset = new SynsetImpl(jwnlSynset, wnDictionary);
+      return gateSynset;
     }
   }
 }
