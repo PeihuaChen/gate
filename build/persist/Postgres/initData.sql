@@ -15,21 +15,22 @@
  */
 
     /* init the DB parameters */
-/*     insert into t_parameter(par_id,
+     insert into t_parameter(par_id,
                                                   par_key,
-                                                  par_value_string)
+                                                  par_value_number)
      values (1,
                     'DB_GUID',
-                    rawtohex(sys_guid()));
+                    random()*1024*1024*1024);
+
 
     insert into t_parameter(par_id,
                                                   par_key,
                                                   par_value_date)
-*/
+
 
      values (2,
                     'DB_CREATION_TIME',
-                    sysdate);
+                    now());
 
      /* init the LR_TYPE table */
 
