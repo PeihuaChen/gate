@@ -41,6 +41,9 @@ public interface Document extends LanguageResource, Comparable
     */
   public AnnotationSet getAnnotations(String name);
 
+  /**Returns a map with all the named annotation sets and their names*/
+  public Map getNamedAnnotationSets();
+
   /** Make changes to the content. */
   public void edit(Long start, Long end, DocumentContent replacement)
     throws InvalidOffsetException;

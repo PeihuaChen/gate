@@ -288,6 +288,36 @@ implements AnnotationSet
     return id;
   } // add(start, end, type, features)
 
+  /** Create and add an annotation from database read data
+    * In this case the id is already known being previously fetched from the
+    * database*/
+  public void add(
+    Integer id, Long start, Long end, String type, FeatureMap features
+  ) throws InvalidOffsetException {
+    // are the offsets valid?
+    if(! doc.isValidOffsetRange(start, end))
+      throw new InvalidOffsetException();
+
+    // the set has to be indexed by position in order to add, as we need
+    // to find out if nodes need creating or if they exist already
+    if(nodesByOffset == null) indexByStartOffset();
+
+    // find existing nodes
+    Node startNode  = (Node) nodesByOffset.getNextOf(start);
+    Node endNode    = (Node) nodesByOffset.getNextOf(end);
+
+    // if appropriate nodes don't already exist, create them
+    if(startNode == null || ! startNode.getOffset().equals(start))
+      startNode = new NodeImpl(doc.getNextNodeId(), start);
+    if(endNode == null   || ! endNode.getOffset().equals(end))
+      endNode = new NodeImpl(doc.getNextNodeId(), end);
+
+    // construct an annotation
+    Annotation a = new AnnotationImpl(id, startNode, endNode, type, features);
+    add(a);
+
+  } // add(id, start, end, type, features)
+
   /** Construct the positional index. */
   public void indexByType() {
     if(annotsByType != null) return;

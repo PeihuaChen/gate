@@ -266,6 +266,11 @@ public class DocumentImpl implements Document
     return orderingString.toString();
   } // getOrderingString()
 
+  /**Returns a map with all the named annotation sets and their names*/
+  public Map getNamedAnnotationSets(){
+    return namedAnnotSets;
+  }
+
 
 //Persistence stuff
   public boolean isPersistent(){
@@ -274,25 +279,29 @@ public class DocumentImpl implements Document
   }
 
   public boolean isPersistenceCapable(){
-    //There isn't yet a persistent implementation for corpora so return false
-    return false;
-  }
-/*
-  public boolean canLiveIn(DataStore ds){
-    return false;
-  }
-*/
-  public String getErrorMessage(){
-    return null;
+    return true;
   }
 
+  public String getErrorMessage(){
+    return gate.db.Checker.errMsg;
+  };
+
   public static boolean setupDS(DataStore ds){
-    //Do nothing!
-    return false;
+    //We only have one type of persistent corpora so we don't need to check
+    //the datastore type here.
+    return gate.db.DocumentWrapper.setupDatabase(ds);
   }
 
   public LRDBWrapper getDBWrapper(DataStore ds){
-    return null;
+    //We only have one type of persistent corpora so we don't need to check
+    //the datastore type here.
+    LRDBWrapper ret;
+    try{
+      ret = new gate.db.DocumentWrapper(ds, this);
+    }catch(IOException ioe){
+      ret = null;
+    }
+    return ret;
   }
 //END persistence stuff
 
