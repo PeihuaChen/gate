@@ -135,7 +135,7 @@ public class Nerc extends SerialController {
         params = Factory.newFeatureMap();
         params.put("document", document);
         params.put("inputASName", "nercAS");
-        params.put("outputASName", "entities");
+        params.put("outputASName", "nercAS");
         Factory.setResourceParameters(transducer, params);
       }catch(Exception e){
         throw new ExecutionException("Couldn't set parameters: " + e);
@@ -149,10 +149,11 @@ public class Nerc extends SerialController {
       EntitySet entitySet =
         new EntitySet(document.getSourceUrl().getFile(),
                       document,
-                      document.getAnnotations("entities").
+                      document.getAnnotations("nercAS").
                       get(new HashSet(Arrays.asList(
                         new String[]{"Address", "Date", "Identifier",
                                      "Location", "Organization", "Person"}))));
+
       document.getFeatures().put("entitySet", entitySet);
     }catch(ExecutionException ee){
       executionException = ee;
