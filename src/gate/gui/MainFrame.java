@@ -298,6 +298,7 @@ public class MainFrame extends JFrame
     progressBar.setMinimumSize(dim);
     progressBar.setPreferredSize(dim);
     Box tempBox = Box.createHorizontalBox();
+    southBox.add(new JLabel(" "));
     southBox.add(statusBar);
     southBox.add(Box.createHorizontalGlue());
     southBox.add(progressBar);
