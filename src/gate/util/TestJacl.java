@@ -40,7 +40,7 @@ public class TestJacl extends TestCase
     Jacl jacl = new Jacl();
     jacl.loadScripts();
 
-    // try running a script (assumes we are run from within gate2
+    // try running a script (assumes we are run from within gate
     // directory hierarchy)
     Interp interp = jacl.getInterp();
     interp.eval("GATE::findScripts");

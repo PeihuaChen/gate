@@ -229,7 +229,7 @@ public class TestJape extends TestCase
       /*
       Batch batch = new Batch("jape/combined/", "brian-soc-loc1.jape");
       Batch batch =
-        new Batch("z:/gate2/src/gate/resources/jape/combined/main.jape");
+        new Batch("z:/gate/src/gate/resources/jape/combined/main.jape");
       Batch batch = new Batch("jape/", "Country.jape");
       */
       startCorpusTransduce = (new Date()).getTime();

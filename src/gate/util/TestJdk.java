@@ -85,7 +85,7 @@ public class TestJdk extends TestCase
 
     /* if you want to write it to disk...
     FileOutputStream outFile =
-      new FileOutputStream("z:\\gate2\\classes\\gate\\util\\X.class");
+      new FileOutputStream("z:\\gate\\classes\\gate\\util\\X.class");
     outFile.write(classBytes);
     outFile.close();
     */
@@ -110,8 +110,8 @@ public class TestJdk extends TestCase
 
     // try and get the bytes from the usual place on NT
     try {
-      File sf = new File("z:\\gate2\\src\\gate\\util\\X.java");
-      File bf = new File("z:\\gate2\\classes\\gate\\util\\X.class");
+      File sf = new File("z:\\gate\\src\\gate\\util\\X.java");
+      File bf = new File("z:\\gate\\classes\\gate\\util\\X.class");
       thisClassBytes = Files.getByteArray(bf);
       thisClassSource = Files.getString(sf);
     } catch(IOException e) {
@@ -120,10 +120,10 @@ public class TestJdk extends TestCase
     // try and get them from the usual Solaris place
     if(thisClassBytes == null || thisClassBytes.length == 0)
       try {
-        File sf = new File("/share/nlp/projects/gate/webpages/gate.ac.uk/gate2"+
+        File sf = new File("/share/nlp/projects/gate/webpages/gate.ac.uk/gate"+
                             "/src/gate/util/TestJdk.java"
         );
-        File bf = new File("/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/"
+        File bf = new File("/share/nlp/projects/gate/webpages/gate.ac.uk/gate/"
                             +"classes/gate/util/TestJdk.class"
         );
         thisClassBytes = Files.getByteArray(bf);

@@ -31,7 +31,7 @@ import gate.creole.*;
 /**
   * Second test harness for JAPE.
   * Uses the Sheffield Tokeniser and Gazetteer, and must be run
-  * from the gate2 directory.
+  * from the gate directory.
   * @author Hamish Cunningham
   */
 public class TestJape2 {
@@ -173,7 +173,7 @@ public class TestJape2 {
 
 
   /**
-    * Must be run from the gate2 directory.
+    * Must be run from the gate directory.
     * Parse the .jape file.
     */
     /*
@@ -253,6 +253,9 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.8  2001/01/30 14:18:02  hamish
+// fixed some hard-coded paths
+//
 // Revision 1.7  2000/11/08 16:35:04  hamish
 // formatting
 //

@@ -46,15 +46,15 @@ public class Jacl
   /** Local fashion for newlines */
   private String nl = Strings.getNl();
 
-  /** Some Tcl code to get us into the gate2/src directory (from gate2
+  /** Some Tcl code to get us into the gate/src directory (from gate
     * or a subdir).
     */
   String goToGateSrcScript =
     "set WD [pwd]                                                       "+nl+
-    "if { ! [string match \"*gate2*\" $WD] } {                          "+nl+
-    "  error \"not in the gate2 directories\"                           "+nl+
+    "if { ! [string match \"*gate*\" $WD] } {                          "+nl+
+    "  error \"not in the gate directories\"                           "+nl+
     "}                                                                  "+nl+
-    "while { [file tail $WD] != \"gate2\" } { cd ..; set WD [pwd] }     "+nl+
+    "while { [file tail $WD] != \"gate\" } { cd ..; set WD [pwd] }     "+nl+
     "cd src                                                             "+nl;
 
   /** Some Tcl code to find all the .tcl files under a directory. */
