@@ -130,6 +130,13 @@ public class DumpingPR extends AbstractLanguageAnalyser
     if(document == null)
       throw new GateRuntimeException("No document to process!");
 
+    //if we're saving into standOffXML, then the rest of the settings do
+    //not matter because that toXML method saves everything
+    if (this.useStandOffXML) {
+      write2File();
+      return;
+    }
+
     AnnotationSet allAnnots;
     // get the annotations from document
     if ((annotationSetName == null)|| (annotationSetName.equals("")))
@@ -142,13 +149,6 @@ public class DumpingPR extends AbstractLanguageAnalyser
       Out.prln("DumpingPR Warning: No annotations found for export. "
                + "Including only those from the Original markups set.");
       write2File(null);
-      return;
-    }
-
-    //if we're saving into standOffXML, then the rest of the settings do
-    //not matter because that toXML method saves everything
-    if (this.useStandOffXML) {
-      write2File();
       return;
     }
 
