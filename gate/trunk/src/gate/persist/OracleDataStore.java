@@ -72,7 +72,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** Get the name of an LR from its ID. */
-  public String getLrName(String lrId)
+  public String getLrName(Object lrId)
     throws PersistenceException {
    throw new MethodNotImplementedException();
 /*    CallableStatement stmt = null;
@@ -144,7 +144,7 @@ public class OracleDataStore extends JDBCDataStore {
    * @param lrId a data-store specific unique identifier for the resource
    * @param lrClassName class name of the type of resource
    */
-  public void delete(String lrClassName, String lrId)
+  public void delete(String lrClassName, Object lrId)
   throws PersistenceException {
     throw new MethodNotImplementedException();
   }
@@ -183,7 +183,7 @@ public class OracleDataStore extends JDBCDataStore {
    * <B>Don't use this method - use Factory.createResource with
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
-  public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
     throw new MethodNotImplementedException();
   }
@@ -233,20 +233,20 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Long lrID, Session s)
+  public boolean canReadLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
-    return canAccessLR(lrID,s,READ_ACCESS);
+    return canAccessLR((Long) lrID,s,READ_ACCESS);
   }
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Long lrID, Session s)
+  public boolean canWriteLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
-    return canAccessLR(lrID,s,WRITE_ACCESS);
+    return canAccessLR((Long) lrID,s,WRITE_ACCESS);
   }
 
 
