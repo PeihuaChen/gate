@@ -29,15 +29,30 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.creole.*;
 
+/** This class visually adds/edits features from an annotation*/
 public class AnnotationEditDialog extends JDialog {
 
   // Local data
+  private final static int OK = 1;
+  private final static int CANCEL = 2;
+
+  // This two fields comes form the show() method
   AnnotationSchema annotSchema = null;
+  FeatureMap featureMap = null;
+
+  /** This field is returned when a featureMap was editted or created*/
+  FeatureMap responseMap = null;
+
   FeaturesTableModel tableModel = null;
   Map name2featureSchemaMap = null;
 
+  DefaultListModel listModel = null;
+
+  int buttonPressed = CANCEL;
+
   // Gui Components
   JTable  featuresTable = null;
+  JScrollPane featuresTableScroll = null;
   JButton removeFeatButton = null;
   JButton addFeatButton = null;
   JList   featureSchemaList = null;
@@ -49,78 +64,248 @@ public class AnnotationEditDialog extends JDialog {
     * @param anAnnotationSchema object from which this dialog configures
     * @param aModal (wheter or not this dialog is modal)
     */
-  public AnnotationEditDialog( Frame aFrame,
-                               AnnotationSchema anAnnotationSchema,
-                               boolean aModal) {
+  public AnnotationEditDialog( Frame aFrame,boolean aModal) {
 
-    super(aFrame, anAnnotationSchema.getAnnotationName(), aModal);
-    annotSchema = anAnnotationSchema;
+    super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
 
-    initLocalData();
-    initGuiComponents();
+    buildGuiComponents();
     initListeners();
   }//AnnotationEditDialog
 
   /** Init local data*/
   protected void initLocalData(){
 
+    // Create the response feature Map
+    responseMap = Factory.newFeatureMap();
+
+    if (featureMap == null)
+      featureMap = Factory.newFeatureMap();
+
+    // Construct a set of feature names from feature schema
+    Map fSNames2FSMap = new HashMap();
+
+    listModel = new DefaultListModel();
     // Init name2featureSchemaMap
+    // If the feature map provided was null, then we are in the creation mode
     Set featuresSch = annotSchema.getFeatureSchemaSet();
     if (featuresSch != null){
       Iterator iter = featuresSch.iterator();
       while (iter.hasNext()){
         FeatureSchema fs = (FeatureSchema) iter.next();
-        name2featureSchemaMap.put(fs.getFeatureName(),fs);
+        // If the featureMap doesn't contain the feature from FeatureSchema then
+        // add the featureSchema to the list
+        if (fs != null){
+          fSNames2FSMap.put(fs.getFeatureName(),fs);
+          if( !featureMap.containsKey(fs.getFeatureName())){
+              name2featureSchemaMap.put(fs.getFeatureName(),fs);
+              listModel.addElement(fs.getFeatureName());
+          }// end if
+        }// end if
       }// end while
     }// end if
 
+    // Init the table model
+    Set tableData = new HashSet();
+    Iterator iterator = featureMap.keySet().iterator();
+    while (iterator.hasNext()){
+      String key = (String) iterator.next();
+      // If in featureMap there is a key contained into fSNames2FSMap then
+      // add this feature to the table model together with its corresponding
+      // FeatureSchema
+      if (fSNames2FSMap.keySet().contains(key)){
+        // Add it to the table model
+        Object value = featureMap.get(key);
+        tableData.add(new RowData(value,(FeatureSchema)fSNames2FSMap.get(key)));
+      } else
+        // Add it to the responseFeatureMap
+        // It might be a feature detected by the nameMatcher module, etc.
+        // Those features must be preserved.
+        responseMap.put(key,featureMap.get(key));
+    }// end while
+
+    tableModel = new FeaturesTableModel(tableData);
+
   }// initLocalData();
 
-  /** Init GUI components*/
-  protected void initGuiComponents(){
-    this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
-                                                  BoxLayout.Y_AXIS));
-    //name field
+  /** This method creates the GUI components and paces them into the layout*/
+  protected void buildGuiComponents(){
+    this.getContentPane().setLayout(new BoxLayout( this.getContentPane(),
+                                                   BoxLayout.Y_AXIS));
+    //create the main box
     Box componentsBox = Box.createHorizontalBox();
-    Box cancelOkBox = Box.createHorizontalBox();
 
     componentsBox.add(Box.createHorizontalStrut(5));
     // add the feature table
+    featuresTable = new JTable();
+    featuresTable.setSelectionMode(
+                  ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    featuresTable.setModel(new FeaturesTableModel(new HashSet()));
+    featuresTableScroll = new JScrollPane(featuresTable);
 
+    componentsBox.add(featuresTableScroll);
     componentsBox.add(Box.createHorizontalStrut(10));
 
     // add the remove put buttons
+    Box buttBox = Box.createVerticalBox();
+    removeFeatButton = new JButton("->");
+    addFeatButton = new JButton("<-");
+
+    buttBox.add(removeFeatButton);
+    buttBox.add(Box.createVerticalStrut(10));
+    buttBox.add(addFeatButton);
+
+    componentsBox.add(buttBox);
 
     componentsBox.add(Box.createHorizontalStrut(10));
 
     // add the Feature Schema list
+    featureSchemaList = new JList();
+    featureSchemaList.setSelectionMode(
+                  ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+    componentsBox.add(featureSchemaList);
 
     componentsBox.add(Box.createHorizontalStrut(5));
 
-    // Add the buttons
+    // Add the Ok and Cancel buttons
 
     this.getContentPane().add(componentsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
+
+    Box cancelOkBox = Box.createHorizontalBox();
+    JButton okButton = new JButton("Ok");
+    JButton cancelButton = new JButton("Cancel");
+
+    cancelOkBox.add(okButton);
+    cancelOkBox.add(Box.createHorizontalStrut(15));
+    cancelOkBox.add(cancelButton);
+
     this.getContentPane().add(cancelOkBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
 
     setSize(400, 300);
+  }//buildGuiComponents();
+
+  /** Init GUI components with values taken from local data*/
+  protected void initGuiComponents(){
+
+    featuresTable.setModel(tableModel);
+    featureSchemaList.setModel(listModel);
+
   }//initGuiComponents()
 
   /** Init all the listeners*/
   protected void initListeners(){
 
+    okButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doOk();
+      }
+    });
+
+    cancelButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doCancel();
+      }
+    });
+
+    // ->
+    removeFeatButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doRemoveFeatures();
+      }
+    });
+
+    // <-
+    addFeatButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        doAddFeatures();
+      }
+    });
   }//initListeners()
+
+  /** This method remove a feature from the table and adds it to the list*/
+  private void doRemoveFeatures(){
+    int[] selectedRows = featuresTable.getSelectedRows();
+
+    if (selectedRows.length == 0) return;
+
+    for (int i=0; i < selectedRows.length; i++)
+      doRemoveFeature(selectedRows[i]);
+
+    tableModel.fireTableDataChanged();
+
+
+  }// doRemoveFeatures();
+
+  /** This removes the feature @ rowIndex*/
+  private void doRemoveFeature(int rowIndex){
+   RowData rd =  (RowData) tableModel.data.get(rowIndex);
+   if (rd != null)
+    name2featureSchemaMap.put(rd.getFeatureSchema().getFeatureName(),
+                                                      rd.getFeatureSchema());
+
+   listModel.addElement(rd.getFeatureSchema().getFeatureName());
+   tableModel.data.remove(rowIndex);
+  }// doRemoveFeature();
+
+  /** This method adds a feature from the list to the table*/
+  private void doAddFeatures(){
+    Object[] selectedFeaturesName = featureSchemaList.getSelectedValues();
+    for (int i = 0 ; i < selectedFeaturesName.length; i ++){
+      doAddFeature((String) selectedFeaturesName[i]);
+    }// end for
+    tableModel.fireTableDataChanged();
+  }//doAddFeatures();
+
+  private void doAddFeature(String aFeatureName){
+      FeatureSchema fs=(FeatureSchema) name2featureSchemaMap.get(aFeatureName);
+
+      // Remove the feature schema from the list
+      name2featureSchemaMap.remove(aFeatureName);
+      listModel.removeElement(aFeatureName);
+
+      Object value = null;
+      if (fs.isDefault() || fs.isFixed())
+        value = fs.getFeatureValue();
+      if (value == null && fs.isEnumeration()){
+        Iterator iter = fs.getPermissibleValues().iterator();
+        if (iter.hasNext()) value = iter.next();
+      }
+      tableModel.data.add(new RowData(value,fs));
+  }// doAddFeature();
+
+  /** This method is called when the user press the OK button*/
+  private void doOk(){
+    buttonPressed = OK;
+    this.hide();
+  }//doOk();
+
+  /** This method is called when the user press the CANCEL button*/
+  private void doCancel(){
+    buttonPressed = CANCEL;
+    this.hide();
+  }//doCancel();
 
   /** This method displays the AnnotationEditDialog in edit mode*/
   public FeatureMap show(FeatureMap aFeatMap, AnnotationSchema anAnnotSchema){
-    return null;
+    featureMap = aFeatMap;
+    annotSchema = anAnnotSchema;
+
+    if (annotSchema == null) return null;
+
+    initLocalData();
+    initGuiComponents();
+    super.show();
+    if (buttonPressed == CANCEL)
+      return null;
+    else  return null; //construcResponseFM();
   }// show()
 
   /** This method displays the AnnotationEditDialog in creating mode*/
-  public FeatureMap  show(AnnotationSchema anAnnotSchema){
-    return null;
+  public FeatureMap show(AnnotationSchema anAnnotSchema){
+    return show(null,anAnnotSchema);
   }// show()
 
 /*
@@ -164,11 +349,14 @@ public class AnnotationEditDialog extends JDialog {
   }
 */
 
-  //inner classes
-
+  // Inner classes
+  // TABLE MODEL
   protected class FeaturesTableModel extends AbstractTableModel{
 
-    public FeaturesTableModel(){
+    ArrayList data = null;
+
+    public FeaturesTableModel(Set aData){
+      data = new ArrayList(aData);
     }// FeaturesTableModel
 
     public void fireTableDataChanged(){
@@ -176,17 +364,16 @@ public class AnnotationEditDialog extends JDialog {
     }
 
     public int getColumnCount(){return 3;}
-/*
+
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
-        case 0: return ParameterDisjunction.class;
-        case 1: return String.class;
-        case 2: return Boolean.class;
-        case 3: return String.class;
+        case 0: return String.class;
+        case 1: return Object.class;
+        case 2: return String.class;
         default: return Object.class;
       }
     }//getColumnClass()
-*/
+
     public String getColumnName(int columnIndex){
       switch(columnIndex){
         case 0: return "Name";
@@ -204,34 +391,32 @@ public class AnnotationEditDialog extends JDialog {
 //        ParameterDisjunction pDisj =
 //                      (ParameterDisjunction)params.get(rowIndex);
 //        return pDisj.size() > 1;
-  return true;
+        return false;
     }//isCellEditable
 
     public int getRowCount(){
-    return 0;
+      return data.size();
     }//getRowCount()
+
 
     public Object getValueAt( int rowIndex,
                               int columnIndex){
-/*
-      ParameterDisjunction pDisj =
-                    (ParameterDisjunction)params.get(rowIndex);
+
+      RowData rd = (RowData) data.get(rowIndex);
+
       switch(columnIndex){
-        case 0: return pDisj;
-        case 1: return pDisj.getType();
-        case 2: return pDisj.getRequired();
+        case 0: return rd.getFeatureSchema().getFeatureName();
+        case 1: return (rd.getValue() == null)? new String(""): rd.getValue();
+        case 2: return rd.getFeatureSchema().getValueClassName();
         default: return "?";
       }
-*/
-  return new String();
     }//getValueAt
 
     public void setValueAt( Object aValue,
                             int rowIndex,
                             int columnIndex){
 
-//      ParameterDisjunction pDisj =
-//                    (ParameterDisjunction)params.get(rowIndex);
+      RowData rd = (RowData) data.get(rowIndex);
       switch(columnIndex){
         case 0:{
 
@@ -240,6 +425,7 @@ public class AnnotationEditDialog extends JDialog {
         case 1:{
           // adaug in table model a randul i, valoarea citita
           // Mai intiai se face conversia la tipul dorit
+
           break;
         }
         case 2:{
@@ -253,6 +439,35 @@ public class AnnotationEditDialog extends JDialog {
       }
     }
   }///class FeaturesTableModel extends DefaultTableModel
+
+  class RowData {
+
+    private Object value = null;
+    private FeatureSchema featSchema = null;
+
+    /** Constructor*/
+    RowData(Object aValue, FeatureSchema aFeatureSchema){
+      value = aValue;
+      featSchema = aFeatureSchema;
+    }//RowData
+
+    public void setValue(Object aValue){
+      value = aValue;
+    }// setValue();
+
+    public Object getValue(){
+      return value;
+    }//getValue()
+
+    public void setFeatureSchema(FeatureSchema aFeatureSchema){
+      featSchema = aFeatureSchema;
+    }// setFeatureSchema();
+
+    public FeatureSchema getFeatureSchema(){
+      return featSchema;
+    }//getFeatureSchema()
+
+  }// RowData
 
   // The EDITOR RENDERER
 
