@@ -31,30 +31,15 @@ public class Jacl
 {
   /** Main routine. */
   public static void main(String[] args) throws TclException {
-    System.out.println("Looking for GATE Tcl scripts...");
-
     // construct a Tcl interpreter
     Jacl jacl = new Jacl();
-
-    // find the list of script files in the GATE source tree
-    // (the parameter to findScripts causes a dir change before the search)
-    List scriptPaths = jacl.findScripts(jacl.goToGateSrcScript);
-    System.out.println("Scripts found: " + scriptPaths); 
 
     // refresh Jacl.java's list of GATE scripts
     System.out.println("Updating Jacl.java....");
     jacl.listGateScripts();
 
-    // copy the scripts to the classes tree
-    System.out.println("Doing copy....");
-    jacl.copyGateScripts(scriptPaths);
-
-    // load the scripts (as a test)
-    System.out.println("Doing load....");
-    jacl.loadScripts(scriptPaths);
-
     // tell the world
-    System.out.println("Tcl scripts found, installed and loaded");
+    System.out.println("...done");
   } // main
 
 
@@ -73,7 +58,7 @@ public class Jacl
   /** Some Tcl code to get us into the gate2/src directory (from gate2
     * or a subdir).
     */
-  private String goToGateSrcScript =
+  String goToGateSrcScript =
     "set WD [pwd]                                                       "+nl+
     "if { ! [string match \"*gate2*\" $WD] } {                          "+nl+
     "  error \"not in the gate2 directories\"                           "+nl+
@@ -256,6 +241,8 @@ public class Jacl
   };
 
 } // class Jacl
+
+
 
 
 
