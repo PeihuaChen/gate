@@ -12,7 +12,7 @@
   <property category="runtime.1" name="ConfigurationName" value="Main GUI" />
   <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.1" name="application.class" value="gate.Main" />
-  <property category="runtime.1" name="application.vmparameters" value="-Xmx200m -Djava.ext.dirs=z:/gate/lib/ext" />
+  <property category="runtime.1" name="application.vmparameters" value="-Djava.ext.dirs=z:/gate/lib/ext" />
   <property category="runtime.1" name="jsprunner.docbase" value="." />
   <property category="runtime.1" name="jsprunner.jspfile" value="." />
   <property category="runtime.2" name="ConfigurationName" value="Text mode (-t)" />
@@ -93,7 +93,7 @@
   <property category="sys" name="VersionLabel" value="@version" />
   <property category="sys" name="WorkingDirectory" value="." />
   <property category="sys" name="warn.auto.packages" value="false" />
+  <file path="src/gate/resources/creole/creole.xml" />
   <file path="gate2.html" />
-  <file path="GukAppletExample.html" />
 </project>
 

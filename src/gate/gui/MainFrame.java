@@ -55,6 +55,7 @@ public class MainFrame extends JFrame
   JScrollPane projectTreeScroll;
   JScrollPane lowerScroll;
   /*To be removed ->*/
+/*
   JTree projectTree;
   DefaultTreeModel projectTreeModel;
   DefaultMutableTreeNode projectTreeRoot;
@@ -63,6 +64,7 @@ public class MainFrame extends JFrame
   DefaultMutableTreeNode lrRoot;
   DefaultMutableTreeNode prRoot;
   DefaultMutableTreeNode dsRoot;
+*/
   /* <- To be removed*/
   //new version
   JPopupMenu appsPopup;
@@ -478,6 +480,7 @@ public class MainFrame extends JFrame
     }
   }
 
+/*
   void remove(CustomResourceHandle handle){
     DefaultMutableTreeNode parent = null;
     if(handle instanceof ApplicationHandle){
@@ -502,7 +505,7 @@ public class MainFrame extends JFrame
     if(view == lowerScroll.getViewport().getView())
       lowerScroll.getViewport().removeAll();
   }
-
+*/
   /**File | Exit action performed*/
   public void jMenuFileExit_actionPerformed(ActionEvent e) {
     System.exit(0);
@@ -527,6 +530,7 @@ public class MainFrame extends JFrame
   /**
    * Makes the necessary GUI adjustements when a new project becomes current.
    */
+/*
   protected void setCurrentProject(ProjectData project){
     if(currentProject == project) return;
     currentProject = project;
@@ -634,6 +638,7 @@ public class MainFrame extends JFrame
       node = node.getNextSibling();
     }
   }//protected void setCurrentProject(ProjectData project)
+*/
 
   synchronized void showWaitDialog(){
     Point location = getLocationOnScreen();

@@ -44,13 +44,13 @@ public class ProjectData {
   public void remove(CustomResourceHandle handle){
     if(handle instanceof ApplicationHandle){
       appList.remove(handle);
-      frame.remove(handle);
+//      frame.remove(handle);
     }else if(handle instanceof LRHandle){
       lrList.remove(handle);
-      frame.remove(handle);
+//      frame.remove(handle);
     }else if(handle instanceof PRHandle){
       prList.remove(handle);
-      frame.remove(handle);
+//      frame.remove(handle);
     }
   }
 

@@ -116,10 +116,7 @@ implements Runnable, ProcessingResource{
     Reader rulesReader;
     try{
       if(rulesURL != null){
-        rulesReader = new InputStreamReader(rulesURL.openStream());
-      }else if(rulesResourceName != null){
-        rulesReader = new InputStreamReader(
-                    Files.getGateResourceAsStream(rulesResourceName));
+        rulesReader = new InputStreamReader(rulesURL.openStream(), encoding);
       }else{
         //no init data, Scream!
         throw new ResourceInstantiationException(
@@ -754,6 +751,12 @@ implements Runnable, ProcessingResource{
   }
   public String getRulesResourceName() {
     return rulesResourceName;
+  }
+  public void setEncoding(String newEncoding) {
+    encoding = newEncoding;
+  }
+  public String getEncoding() {
+    return encoding;
   }// fireProcessFinishedEvent
   //ProcessProgressReporter implementation ends here
 
@@ -838,6 +841,7 @@ implements Runnable, ProcessingResource{
   protected gate.Document document;
   private String rulesResourceName;
   private java.net.URL rulesURL;
+  private String encoding;
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}
