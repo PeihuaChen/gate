@@ -1622,6 +1622,7 @@ ex.printStackTrace();
     annotationSchema.setAnnotationName(annotType);
     // create an annotation diff
     AnnotationDiff annotDiff = new AnnotationDiff();
+    annotDiff.setTextMode(new Boolean(true));
     annotDiff.setAnnotationSchema(annotationSchema);
     annotDiff.setKeyDocument(keyDoc);
     annotDiff.setResponseDocument(respDoc);
@@ -1629,7 +1630,6 @@ ex.printStackTrace();
     annotDiff.setResponseAnnotationSetName(outputSetName);
     // set feature names set for annotation diff
     annotDiff.setKeyFeatureNamesSet(diffFeaturesSet);
-    annotDiff.setTextMode(new Boolean(true));
     annotDiff.init();
 
     return annotDiff;
