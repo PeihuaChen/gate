@@ -24,10 +24,12 @@ public class SearchPR extends AbstractProcessingResource
 
   private IndexedCorpus corpus = null;
   private String query  = null;
-  private Search searcher = null;
+  private String searcherClassName = null;
   private QueryResultList resultList = null;
   private int limit = -1;
   private List fieldNames = null;
+
+  private Search searcher = null;
 
   /** Constructor of the class*/
   public SearchPR(){
@@ -87,8 +89,14 @@ public class SearchPR extends AbstractProcessingResource
     this.query = query;
   }
 
-  public void setSearcher(Search searcher){
-    this.searcher = searcher;
+  public void setSearcherClassName(String name){
+    this.searcherClassName = name;
+    try {
+      searcher = (Search) Class.forName(searcherClassName).newInstance();
+    }
+    catch(Exception e){
+      e.printStackTrace();
+    }
   }
 
   public void setLimit(int limit){
