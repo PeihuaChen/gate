@@ -625,13 +625,18 @@ public class NameBearerHandle implements Handle,
                                   corpusFiller,
                                   "Select a directory and allowed extensions");
           if(answer){
-            ExtensionFileFilter filter = new ExtensionFileFilter();
             URL url = null;
             try{
               url = new URL(corpusFiller.getUrlString());
-              Iterator extIter = corpusFiller.getExtensions().iterator();
-              while(extIter.hasNext()){
-                filter.addExtension((String)extIter.next());
+              java.util.List extensions = corpusFiller.getExtensions();
+              ExtensionFileFilter filter = null;
+              if(extensions == null || extensions.isEmpty()) filter = null;
+              else{
+                filter = new ExtensionFileFilter();
+                Iterator extIter = corpusFiller.getExtensions().iterator();
+                while(extIter.hasNext()){
+                  filter.addExtension((String)extIter.next());
+                }
               }
               ((Corpus)target).populate(url, filter,
                                         corpusFiller.isRecurseDirectories());
