@@ -39,7 +39,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   private   URL         dbURL;
   private   String      driverName;
 
-  private   AccessController ac;
+  protected   AccessController ac;
 
 
   /** Do not use this class directly - use one of the subclasses */
@@ -297,7 +297,13 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   public void beginTrans()
     throws PersistenceException,UnsupportedOperationException{
 
-    throw new MethodNotImplementedException();
+    try {
+      this.jdbcConn.setAutoCommit(false);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("cannot begin transaction, DB error is: ["
+                                                      +sqle.getMessage()+"]");
+    }
   }
 
 
@@ -305,14 +311,28 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   public void commitTrans()
     throws PersistenceException,UnsupportedOperationException{
 
-    throw new MethodNotImplementedException();
+    try {
+      this.jdbcConn.commit();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("cannot commit transaction, DB error is: ["
+                                                      +sqle.getMessage()+"]");
+    }
+
   }
 
   /** --- */
   public void rollbackTrans()
     throws PersistenceException,UnsupportedOperationException{
 
-    throw new MethodNotImplementedException();
+    try {
+      this.jdbcConn.rollback();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("cannot commit transaction, DB error is: ["
+                                                      +sqle.getMessage()+"]");
+    }
+
   }
 
   /** --- */
