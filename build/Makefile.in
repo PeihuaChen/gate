@@ -172,6 +172,19 @@ clean:
 	rm -rf ../classes/guk `find ../classes/* -print |grep -v CVS` \
 	  `find .. -name '*.~*' -print`
 
+# create distributions
+distrib:
+	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-build$${B}; \
+	cd ../.. && cp -R gate $${N} && \
+	rm -rf `find $${N} -name internal -print` && \
+	BINFILES="$${N}/build/gate.sh $${N}/build/gate.bat $${N}/build/gate.jar $${N}/lib/ext/guk.jar `find $${N} -name '*.html' -print |grep -v $${N}'\/src\/'` $${N}/doc/gateHeader.gif"; \
+	tar cf - $${N} |gzip -c >$${N}--ALL.tgz && \
+	>makedistrib.binary-files && \
+	for f in $${BINFILES}; do echo $$f >>makedistrib.binary-files; done && \
+	tar -cf - -T makedistrib.binary-files \
+	|gzip -c >$${N}--BINARY.tgz && \
+	rm -rf $${N} makedistrib.binary-files
+
 # make a pretty list of the gate source, missing class files etc.
 list:
 	@ ./list.sh
