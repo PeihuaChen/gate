@@ -434,6 +434,14 @@ public class Wrapper implements MLEngine, ActionsPublisher {
     return datasetDefinition;
   }
 
+  public void saveDatasetAsARFF(FileWriter writer){
+    try {
+      writer.write(dataset.toString());
+      writer.flush();
+    } catch (IOException ioe) {
+      throw new GateRuntimeException(ioe.getMessage());
+    }
+  }
 
   protected class SaveDatasetAsArffAction extends javax.swing.AbstractAction{
     public SaveDatasetAsArffAction(){
@@ -453,8 +461,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
             try{
               MainFrame.lockGUI("Saving dataset...");
               FileWriter fw = new FileWriter(file.getCanonicalPath(), false);
-              fw.write(dataset.toString());
-              fw.flush();
+              saveDatasetAsARFF(fw);
               fw.close();
             }catch(IOException ioe){
               JOptionPane.showMessageDialog(null,
