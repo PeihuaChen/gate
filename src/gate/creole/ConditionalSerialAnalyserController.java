@@ -30,7 +30,7 @@ import java.util.*;
  * analyser controller.
  */
 public class ConditionalSerialAnalyserController
-       extends ConditionalSerialController {
+       extends ConditionalSerialController implements CorpusController {
 
   public gate.Corpus getCorpus() {
     return corpus;

@@ -65,31 +65,31 @@ public class ShellSlacFrame extends MainFrame {
   private static final boolean DEBUG = false;
 
   /** Shell GUI application */
-  private SerialAnalyserController application = null;
+  private CorpusController application = null;
 
   /** Shell GUI corpus */
   private Corpus corpus = null;
   private Corpus oneDocCorpus = null;
-  
+
   /** Shell GUI documents DataStore */
   private DataStore dataStore = null;
-  
+
   /** Keep this action for enable/disable the menu item */
   private Action saveAction = null;
   /** Keep this action for enable/disable the menu item */
   private Action runOneAction = null;
   private Action runAction = null;
-  
+
   /** Default corpus resource name */
   public static final String DEFAULT_SLUG_CORPUS_NAME = "SLUG Corpus";
   public static final String ONE_DOC_SLUG_CORPUS_NAME = "SLUG One Doc Corpus";
-  
+
   /** New frame */
   public ShellSlacFrame() {
     super(true);
 //    guiRoots.clear();
 //    guiRoots.add(this);
-    
+
     initShellSlacLocalData();
     initShellSlacGuiComponents();
   } // ShellSlacFrame
@@ -97,16 +97,16 @@ public class ShellSlacFrame extends MainFrame {
   protected void initShellSlacLocalData(){
     createCorpus();
 //    createDefaultApplication();
-    String applicationURL = 
+    String applicationURL =
       System.getProperty(GateConstants.APPLICATION_JAVA_PROPERTY_NAME);
     if(applicationURL != null) {
       createDefaultApplication(applicationURL);
-    } 
+    }
     else {
       // create default ANNIE
       createDefaultApplication();
     } // if
-    
+
     dataStore = null;
   } // initLocalData
 
@@ -127,7 +127,7 @@ public class ShellSlacFrame extends MainFrame {
       action = new NewResourceAction(rDataDocument);
       action.putValue(action.NAME, "New Document");
       action.putValue(action.SHORT_DESCRIPTION,"Create a new document");
-    
+
       fileMenu.add(new XJMenuItem(action, this));
 
     } // if
@@ -157,7 +157,7 @@ public class ShellSlacFrame extends MainFrame {
     action = new LoadResourceFromFileAction();
     action.putValue(action.NAME, "Load application");
     fileMenu.add(new XJMenuItem(action, this));
-    
+
     action = new RestoreDefaultApplicationAction();
     fileMenu.add(new XJMenuItem(action, this));
 
@@ -166,7 +166,7 @@ public class ShellSlacFrame extends MainFrame {
 */
 
     fileMenu.addSeparator();
-    
+
 //    action = new ExitGateAction();
     // define exit action without save of session
     action = new AbstractAction () {
@@ -197,7 +197,7 @@ public class ShellSlacFrame extends MainFrame {
     runAction = action;
     analyseMenu.add(new XJMenuItem(action, this));
     retMenuBar.add(analyseMenu);
-    
+
     JMenu toolsMenu = new JMenu("Tools");
     createToolsMenuItems(toolsMenu);
     retMenuBar.add(toolsMenu);
@@ -210,7 +210,7 @@ public class ShellSlacFrame extends MainFrame {
   } // createMenuBar()
 
   /** Should check for registered Creole components and populate menu.
-   *  <BR> In first version is hardcoded. */  
+   *  <BR> In first version is hardcoded. */
   private void createToolsMenuItems(JMenu toolsMenu) {
     toolsMenu.add(new NewAnnotDiffAction());
     toolsMenu.add(
@@ -223,14 +223,14 @@ public class ShellSlacFrame extends MainFrame {
     /*add the ontology editor to the tools menu ontotext.bp */
     toolsMenu.add(newOntologyEditorAction);
   } // createToolsMenuItems()
-  
+
   /** Find ResourceData for "Create Document" menu item. */
   private ResourceData getDocumentResourceData() {
     ResourceData result = null;
-    
+
     CreoleRegister reg = Gate.getCreoleRegister();
     List lrTypes = reg.getPublicLrTypes();
-    
+
     if(lrTypes != null && !lrTypes.isEmpty()){
       Iterator lrIter = lrTypes.iterator();
       while(lrIter.hasNext()){
@@ -238,13 +238,13 @@ public class ShellSlacFrame extends MainFrame {
         if("gate.corpora.DocumentImpl".equalsIgnoreCase(rData.getClassName())) {
           result = rData;
           break;
-        } // if    
+        } // if
       } // while
     } // if
-    
+
     return result;
   } // getDocumentResourceData()
-  
+
   /** Here default ANNIE is created. Could be changed. */
   private void createDefaultApplication() {
     // Loads ANNIE with defaults
@@ -273,26 +273,26 @@ public class ShellSlacFrame extends MainFrame {
       throw new GateRuntimeException("Error in creating build in corpus.");
     } // catch
   } // createCorpus()
-  
+
   /** Override base class method */
   public void resourceLoaded(CreoleEvent e) {
     super.resourceLoaded(e);
 
     Resource res = e.getResource();
 
-    if(res instanceof SerialAnalyserController) {
+    if(res instanceof CorpusController) {
       if(application != null) {
         // remove old application
         Factory.deleteResource(application);
       } // if
-      application = (SerialAnalyserController) res;
-      
+      application = (CorpusController) res;
+
       runOneAction.setEnabled(true);
       runAction.setEnabled(true);
-      if(corpus != null) 
+      if(corpus != null)
         application.setCorpus(corpus);
     } // if
-    
+
     if(res instanceof Corpus) {
       Corpus resCorpus = (Corpus) res;
 
@@ -313,16 +313,16 @@ public class ShellSlacFrame extends MainFrame {
       showDocument(doc);
     } // if
   }// resourceLoaded();
-  
+
   /** Find in resource tree and show the document */
   protected void showDocument(Document doc) {
-    // should find NameBearerHandle for document and call 
+    // should find NameBearerHandle for document and call
     Handle handle = null;
     Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
     boolean done = false;
     DefaultMutableTreeNode node = resourcesTreeRoot;
     Object obj;
-    
+
     while(!done && nodesEnum.hasMoreElements()){
       node = (DefaultMutableTreeNode)nodesEnum.nextElement();
       obj = node.getUserObject();
@@ -333,7 +333,7 @@ public class ShellSlacFrame extends MainFrame {
           && doc == (Document)obj;
       } // if
     } // while
-    
+
     if(done){
       select(handle);
     } // if
@@ -343,7 +343,7 @@ public class ShellSlacFrame extends MainFrame {
    *  Save corpus on datastore open. */
   public void datastoreOpened(CreoleEvent e){
     super.datastoreOpened(e);
-    if(corpus == null) return; 
+    if(corpus == null) return;
 
     DataStore ds = e.getDatastore();
     try {
@@ -387,10 +387,10 @@ public class ShellSlacFrame extends MainFrame {
     }
     if(done)
       result = (Handle)node.getUserObject();
-      
+
     return result;
   } // getSelectedResource()
-  
+
   /** Export All store of documents from SLUG corpus */
   private void saveDocuments(File targetDir) {
     if(corpus == null || corpus.size() == 0) return;
@@ -400,14 +400,14 @@ public class ShellSlacFrame extends MainFrame {
     URL fileURL;
     String fileName = null;
     int index;
-    
+
     MainFrame.lockGUI("Export all documents...");
 
     target = target+File.separatorChar;
     for(int i=0; i<corpus.size(); ++i) {
       doc = (Document) corpus.get(i);
       fileURL = doc.getSourceUrl();
-      if(fileURL != null) 
+      if(fileURL != null)
         fileName = fileURL.toString();
         index = fileName.lastIndexOf('/');
         if(index != -1) {
@@ -419,7 +419,7 @@ public class ShellSlacFrame extends MainFrame {
       // create full file name
       fileName = target + fileName+".xml";
       try{
-    
+
         // Prepare to write into the xmlFile using UTF-8 encoding
         OutputStreamWriter writer = new OutputStreamWriter(
                         new FileOutputStream(new File(fileName)),"UTF-8");
@@ -436,13 +436,13 @@ public class ShellSlacFrame extends MainFrame {
         MainFrame.unlockGUI();
       } // finally
     } // for
-    
+
     MainFrame.unlockGUI();
   } // saveDocuments(File targetDir)
-  
+
 //------------------------------------------------------------------------------
 //  Inner classes section
-  
+
   /** Run the current application SLAC */
   class RunApplicationAction extends AbstractAction {
     public RunApplicationAction() {
@@ -464,7 +464,7 @@ public class ShellSlacFrame extends MainFrame {
   class RunApplicationOneDocumentAction extends AbstractAction {
     public RunApplicationOneDocumentAction() {
       super("Analyse", getIcon("menu_controller.gif"));
-      putValue(SHORT_DESCRIPTION, 
+      putValue(SHORT_DESCRIPTION,
           "Run the application to process current document");
     } // RunApplicationOneDocumentAction()
 
@@ -479,13 +479,13 @@ public class ShellSlacFrame extends MainFrame {
           Document doc = (Document) target;
           oneDocCorpus.clear();
           oneDocCorpus.add(doc);
-          
+
           application.setCorpus(oneDocCorpus);
-  
+
           SerialControllerEditor editor = new SerialControllerEditor();
           editor.setTarget(application);
           editor.runAction.actionPerformed(null);
-        } // if - Document        
+        } // if - Document
       } // if
     } // actionPerformed(ActionEvent e)
   } // class RunApplicationOneDocumentAction extends AbstractAction
@@ -527,7 +527,7 @@ public class ShellSlacFrame extends MainFrame {
     public void actionPerformed(ActionEvent e) {
       JComponent resource;
       for(int i=mainTabbedPane.getTabCount()-1; i>0; --i) {
-    
+
         resource = (JComponent) mainTabbedPane.getComponentAt(i);
         if (resource != null){
           Action act = resource.getActionMap().get("Close resource");
@@ -588,7 +588,7 @@ public class ShellSlacFrame extends MainFrame {
 
       // should open a datastore
       dataStore = openSerialDataStore();
-      
+
       if(dataStore != null) {
         // load from datastore
         List corporaIDList = null;
@@ -603,7 +603,7 @@ public class ShellSlacFrame extends MainFrame {
         } catch (PersistenceException pex) {
           pex.printStackTrace();
         } // catch
-        
+
         features = Factory.newFeatureMap();
         features.put(DataStore.LR_ID_FEATURE_NAME, docID);
         features.put(DataStore.DATASTORE_FEATURE_NAME, dataStore);
@@ -614,7 +614,7 @@ public class ShellSlacFrame extends MainFrame {
           features.put(DataStore.LR_ID_FEATURE_NAME, docID);
           doc = null;
           try {
-            doc = (Document) 
+            doc = (Document)
               Factory.createResource("gate.corpora.DocumentImpl", features);
           } catch (gate.creole.ResourceInstantiationException rex) {
             rex.printStackTrace();
@@ -623,10 +623,10 @@ public class ShellSlacFrame extends MainFrame {
           if(doc != null) corpus.add(doc);
         } // for
       } // if
-      
+
     } // actionPerformed(ActionEvent e)
   } // class LoadAllDocumentAction extends AbstractAction
-  
+
   class TestStoreAction extends AbstractAction {
     public TestStoreAction() {
       super("Test Store application");
@@ -642,22 +642,22 @@ public class ShellSlacFrame extends MainFrame {
           long startTime = System.currentTimeMillis();
           oos.writeObject(application);
           long endTime = System.currentTimeMillis();
-  
+
           System.out.println("Storing completed in " +
             NumberFormat.getInstance().format(
             (double)(endTime - startTime) / 1000) + " seconds");
-  
+
           ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
           Object object;
           startTime = System.currentTimeMillis();
           object = ois.readObject();
           endTime = System.currentTimeMillis();
-          application = (SerialAnalyserController) object;
-  
+          application = (CorpusController) object;
+
           System.out.println("Loading completed in " +
             NumberFormat.getInstance().format(
             (double)(endTime - startTime) / 1000) + " seconds");
-  
+
         } catch (Exception ex) {
           ex.printStackTrace();
         } // catch
@@ -679,7 +679,7 @@ public class ShellSlacFrame extends MainFrame {
       int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
       if(res == fileChooser.APPROVE_OPTION) {
         File file = fileChooser.getSelectedFile();
-        
+
         String str = "";
         char chArr[] = new char[1024];
 
@@ -691,13 +691,13 @@ public class ShellSlacFrame extends MainFrame {
         } catch (Exception ex) {
           // do nothing - some error, so we shouldn't read file anyway
         } // catch
-        
+
         boolean isGateXmlDocument = false;
         // Detect whether or not is a GateXmlDocument
         if(str.indexOf("<GateDocument") != -1  ||
            str.indexOf(" GateDocument") != -1)
           isGateXmlDocument = true;
-        
+
         if(isGateXmlDocument) {
           Runnable run = new ImportRunnable(file);
           Thread thread = new Thread(run, "");
@@ -705,9 +705,9 @@ public class ShellSlacFrame extends MainFrame {
           thread.start();
         }
         else {
-          JOptionPane.showMessageDialog(ShellSlacFrame.this, 
+          JOptionPane.showMessageDialog(ShellSlacFrame.this,
               "The import file '"+file.getAbsolutePath()+"'\n"
-              +"is not a SLUG document.", 
+              +"is not a SLUG document.",
               "Import error",
               JOptionPane.WARNING_MESSAGE);
         } // if
@@ -715,13 +715,13 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class ImportDocumentAction extends AbstractAction
 
-  /** Object to run ExportAll in a new Thread */  
+  /** Object to run ExportAll in a new Thread */
   private class ImportRunnable implements Runnable {
     File file;
     ImportRunnable(File targetFile) {
       file = targetFile;
     } // ImportRunnable(File targetDirectory)
-    
+
     public void run() {
       if(file != null) {
         MainFrame.lockGUI("Import file...");
@@ -780,19 +780,19 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class ExportAllDocumentAction extends AbstractAction
 
-  /** Object to run ExportAll in a new Thread */  
+  /** Object to run ExportAll in a new Thread */
   private class ExportAllRunnable implements Runnable {
     File directory;
     ExportAllRunnable(File targetDirectory) {
       directory = targetDirectory;
     } // ExportAllRunnable(File targetDirectory)
-    
+
     public void run() {
       saveDocuments(directory);
     } // run()
   } // ExportAllRunnable
 
-  /** Load application from file */  
+  /** Load application from file */
   private class ApplicationLoadRun implements Runnable {
     private String appURL;
     private MainFrame appFrame;
@@ -800,11 +800,11 @@ public class ShellSlacFrame extends MainFrame {
       appURL = url;
       appFrame = frame;
     }
-    
+
     public void run(){
       File file = new File(appURL);
-      boolean appLoaded = false;  
-      
+      boolean appLoaded = false;
+
       appFrame.lockGUI("Application from '"+appURL+"' is being loaded...");
       if( file.exists() ) {
         try {
@@ -822,18 +822,18 @@ public class ShellSlacFrame extends MainFrame {
 
       if(!appLoaded) {
         // file do not exist. Show a message
-        JOptionPane.showMessageDialog(ShellSlacFrame.this, 
+        JOptionPane.showMessageDialog(ShellSlacFrame.this,
             "The application file '"+appURL+"'\n"
             +"from parameter -Dgate.slug.app\n"
             +"is missing or corrupted."
-            +"Create default application.", 
+            +"Create default application.",
             "Load application error",
             JOptionPane.WARNING_MESSAGE);
-            
+
         createDefaultApplication();
       } // if
     } // run
-  } // class ApplicationLoadRun implements Runnable 
+  } // class ApplicationLoadRun implements Runnable
 
   /** Create default ANNIE */
   public class ANNIERunnable implements Runnable {
@@ -841,30 +841,30 @@ public class ShellSlacFrame extends MainFrame {
     ANNIERunnable(MainFrame parent) {
       parentFrame = parent;
     }
-    
+
     public void run(){
       AbstractAction action = new LoadANNIEWithDefaultsAction();
       action.actionPerformed(new ActionEvent(parentFrame, 1, "Load ANNIE"));
     }
   } // ANNIERunnable
-  
+
   class AboutPaneDialog extends JDialog {
     public AboutPaneDialog(Frame frame, String title, boolean modal) {
       super(frame, title, modal);
     } // AboutPaneDialog
-    
+
     public boolean setURL(URL url) {
       boolean success = false;
       // try to show in JEditorPane
       try {
         Container pane = getContentPane();
-        
+
         JScrollPane scroll = new JScrollPane();
         JEditorPane editor = new JEditorPane(url);
         editor.setEditable(false);
         scroll.getViewport().add(editor);
         pane.add(scroll, BorderLayout.CENTER);
-        
+
         JButton ok = new JButton("Close");
         ok.addActionListener( new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -881,7 +881,7 @@ public class ShellSlacFrame extends MainFrame {
       return success;
     } // setURL
   } // class AboutPaneDialog
-  
+
   /** Dummy Help About dialog */
   class HelpAboutSlugAction extends AbstractAction {
     public HelpAboutSlugAction() {
@@ -889,20 +889,20 @@ public class ShellSlacFrame extends MainFrame {
     } // HelpAboutSlugAction()
 
     public void actionPerformed(ActionEvent e) {
-      
+
       // Set about box content from Java properties
       String aboutText = "Slug application.";
-      String aboutURL = 
+      String aboutURL =
         System.getProperty(GateConstants.ABOUT_URL_JAVA_PROPERTY_NAME);
-        
+
       boolean canShowInPane = false;
-      
+
       if(aboutURL != null) {
         try {
           URL url = new URL(aboutURL);
 
-          AboutPaneDialog dlg = 
-            new AboutPaneDialog(ShellSlacFrame.this, 
+          AboutPaneDialog dlg =
+            new AboutPaneDialog(ShellSlacFrame.this,
                                 "Slug application about", true);
           canShowInPane = dlg.setURL(url);
           if(canShowInPane) {
@@ -919,7 +919,7 @@ public class ShellSlacFrame extends MainFrame {
               content.append(line);
               line = reader.readLine();
             } while (line != null);
-            
+
             if(content.length() != 0) {
               aboutText = content.toString();
             } // if
@@ -934,9 +934,9 @@ public class ShellSlacFrame extends MainFrame {
         } // catch
       } // if
 
-          
-      if(!canShowInPane) JOptionPane.showMessageDialog(ShellSlacFrame.this, 
-          aboutText, 
+
+      if(!canShowInPane) JOptionPane.showMessageDialog(ShellSlacFrame.this,
+          aboutText,
           "Slug application about",
           JOptionPane.INFORMATION_MESSAGE);
     } // actionPerformed(ActionEvent e)
