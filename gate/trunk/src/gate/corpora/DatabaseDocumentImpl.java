@@ -252,14 +252,24 @@ public class DatabaseDocumentImpl extends DocumentImpl
         Blob   blb = rs.getBlob("dc_binary_content");
         long   contentType = rs.getLong("dc_content_type");
 
-        Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType);
+        //binary documents are not supported yet
+        Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType ||
+                          DBHelper.EMPTY_CONTENT == contentType);
 
         StringBuffer buff = new StringBuffer();
         OracleDataStore.readCLOB(clb,buff);
 
         //2. set data members that were not previously initialized
-        this.content = new DocumentContentImpl(buff.toString());
         this.encoding = encoding;
+
+        //be aware than document content may be empty
+        if (null != buff) {
+          this.content = new DocumentContentImpl(buff.toString());
+        }
+        else {
+          this.content = new DocumentContentImpl();
+        }
+
       }
 
       else if (this.dbType == DBHelper.POSTGRES_DB) {
@@ -273,13 +283,22 @@ public class DatabaseDocumentImpl extends DocumentImpl
         String content = rs.getString("dc_character_content");
         long   contentType = rs.getLong("dc_content_type");
 
-        Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType);
+        //binary documents are not supported yet
+        Assert.assertTrue(DBHelper.CHARACTER_CONTENT == contentType ||
+                          DBHelper.EMPTY_CONTENT == contentType);
 
         //2. set data members that were not previously initialized
-        this.content = new DocumentContentImpl(content);
-        this.encoding = encoding;
-      }
 
+        this.encoding = encoding;
+
+        //be aware than document content may be empty
+        if (null != content) {
+          this.content = new DocumentContentImpl(content);
+        }
+        else {
+          this.content = new DocumentContentImpl();
+        }
+      }
       else {
         Assert.fail();
       }
