@@ -144,6 +144,13 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
    */
   private Boolean collectRepositioningInfo = new Boolean(false);
 
+  /**
+   * This is a variable which contains the latest crossed over annotation
+   * found during export with preserving format, i.e., toXml(annotations)
+   * method.
+   */
+  private Annotation crossedOverAnnotation = null;
+
   /** Default construction. Content left empty. */
   public DocumentImpl() {
     content = new DocumentContentImpl();
@@ -567,12 +574,29 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
         Annotation currentAnnot = (Annotation) iter.next();
         if(insertsSafety(dumpingSet,currentAnnot)){
           dumpingSet.add(currentAnnot);
-        }else{
-          Out.prln("Warning: Annotation with ID=" + currentAnnot.getId() +
-          ", startOffset=" + currentAnnot.getStartNode().getOffset() +
-          ", endOffset=" + currentAnnot.getEndNode().getOffset() +
-          ", type=" + currentAnnot.getType()+ " was found to violate the" +
-          " crossed over condition. It will be discarded");
+        }else if (crossedOverAnnotation != null){
+          try {
+            Out.prln("Warning: Annotations were found to violate the " +
+            "crossed over condition: \n" +
+            "1. [" +
+            getContent().getContent(
+                           crossedOverAnnotation.getStartNode().getOffset(),
+                           crossedOverAnnotation.getEndNode().getOffset()) +
+            " (" + crossedOverAnnotation.getType() + ": " +
+            crossedOverAnnotation.getStartNode().getOffset() +
+            ";" + crossedOverAnnotation.getEndNode().getOffset() +
+            ")]\n" +
+            "2. [" +
+            getContent().getContent(
+                           currentAnnot.getStartNode().getOffset(),
+                           currentAnnot.getEndNode().getOffset()) +
+            " (" + currentAnnot.getType() + ": " +
+            currentAnnot.getStartNode().getOffset() +
+            ";" + currentAnnot.getEndNode().getOffset() +
+            ")]\nThe second one will be discarded.\n"  );
+          } catch (gate.util.InvalidOffsetException ex) {
+            throw new GateRuntimeException(ex.getMessage());
+          }
         }// End if
       }// End while
     }// End if
@@ -635,11 +659,20 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   private boolean insertsSafety(AnnotationSet aTargetAnnotSet,
                                                 Annotation aSourceAnnotation){
 
-    if (aTargetAnnotSet == null || aSourceAnnotation == null) return false;
+    if (aTargetAnnotSet == null || aSourceAnnotation == null) {
+      this.crossedOverAnnotation = null;
+      return false;
+    }
     if (aSourceAnnotation.getStartNode() == null ||
-        aSourceAnnotation.getStartNode().getOffset()== null) return false;
+        aSourceAnnotation.getStartNode().getOffset()== null) {
+      this.crossedOverAnnotation = null;
+      return false;
+    }
     if (aSourceAnnotation.getEndNode() == null ||
-        aSourceAnnotation.getEndNode().getOffset()== null) return false;
+        aSourceAnnotation.getEndNode().getOffset()== null) {
+      this.crossedOverAnnotation = null;
+      return false;
+    }
 
     // Get the start and end offsets
     Long start = aSourceAnnotation.getStartNode().getOffset();
@@ -661,8 +694,14 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       long s1 = ann.getStartNode().getOffset().longValue();
       long e1 = ann.getEndNode().getOffset().longValue();
 
-      if (s1<s2 && s2<e1 && e1<e2) return false;
-      if (s2<s1 && s1<e2 && e2<e1) return false;
+      if (s1<s2 && s2<e1 && e1<e2) {
+        this.crossedOverAnnotation = ann;
+        return false;
+      }
+      if (s2<s1 && s1<e2 && e2<e1) {
+        this.crossedOverAnnotation = ann;
+        return false;
+      }
     }// End while
     return true;
   }// insertsSafety()
