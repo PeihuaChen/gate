@@ -711,6 +711,7 @@ public class NameBearerHandle implements Handle,
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
+if(preserveFormat) System.out.println("Preserve option set!");
           try{
             //we need a directory
             JFileChooser filer = MainFrame.getFileChooser();
