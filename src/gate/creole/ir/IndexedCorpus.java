@@ -16,14 +16,14 @@ package gate.creole.ir;
 
 import gate.Corpus;
 
-public interface IndexedCorpus extends Corpus{
+public interface IndexedCorpus {
 
   public void setIndexDefinition(IndexDefinition definition);
 
   public IndexDefinition getIndexDefinition();
 
-  public void setIndexManager(IndexManager im);
-
   public IndexManager getIndexManager();
+
+  public IndexStatistics getIndexStatistics();
 
 }
