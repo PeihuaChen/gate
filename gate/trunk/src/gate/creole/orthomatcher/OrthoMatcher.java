@@ -27,7 +27,7 @@ import java.net.*;
 import gnu.regexp.*;
 
 public class OrthoMatcher extends AbstractLanguageAnalyser
-                          implements AnnieConstants{
+                          implements ANNIEConstants{
 
   protected static final String CDGLISTNAME = "cdg";
   protected static final String ALIASLISTNAME = "alias";

@@ -17,6 +17,7 @@ package gate.creole;
 
 import gate.*;
 import gate.creole.orthomatcher.*;
+import gate.creole.ANNIEConstants;
 import gate.util.*;
 
 import java.util.*;
@@ -26,7 +27,8 @@ import java.io.*;
 /** This class implements a APF xml exporter. It works on documents or corpora
   * to export them in the APF format.
   */
-public class APFormatExporter extends AbstractLanguageAnalyser{
+public class APFormatExporter extends AbstractLanguageAnalyser
+                              implements ANNIEConstants{
   /** Debug flag */
   private static final boolean DEBUG = false;
   /** Constructor does nothing. This PR is bean like initialized*/
@@ -166,12 +168,11 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
 
     Map entitiesMap = null;
     if ( document.getFeatures() == null ||
-         document.getFeatures().get(AnnieConstants.DOCUMENT_COREF_FEATURE_NAME)
-          == null)
+         document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME)== null)
       entitiesMap = new HashMap();
     else
       entitiesMap = (Map)document.getFeatures().
-                              get(AnnieConstants.DOCUMENT_COREF_FEATURE_NAME);
+                                        get(DOCUMENT_COREF_FEATURE_NAME);
     Map namedAnnotSetMap = null;
     if (document.getNamedAnnotationSets() == null)
       namedAnnotSetMap = new HashMap();
