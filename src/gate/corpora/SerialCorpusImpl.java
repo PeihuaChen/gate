@@ -44,18 +44,18 @@ public class SerialCorpusImpl extends
   static final long serialVersionUID = 3632609241787241616L;
 
   private transient Vector corpusListeners;
-  private transient Corpus transientCorpus;
   private java.util.List docDataList = null;
 
   //here I keep document index as key (same as the index in docDataList
   //which defines the document order) and Documents as value
-  private transient java.util.HashMap documents = null;
+  private transient List documents = null;
 
   public SerialCorpusImpl(){
     docDataList = new ArrayList();
 
     //make sure we fire events when docs are added/removed/etc
-    documents = new VerboseHashMap();
+    documents = new ArrayList();
+
     Gate.getCreoleRegister().addCreoleListener(this);
   }
 
@@ -67,7 +67,6 @@ public class SerialCorpusImpl extends
    * be null, so the new functionality will be used instead.
    */
   public SerialCorpusImpl(Corpus tCorpus){
-    transientCorpus = tCorpus;
     //copy the corpus name and features from the one in memory
     this.setName(tCorpus.getName());
     this.setFeatures(tCorpus.getFeatures());
@@ -78,8 +77,11 @@ public class SerialCorpusImpl extends
     while (iter.hasNext())
       docDataList.add(new DocumentData((String) iter.next(), null));
 
+    //copy all the documents from the transient corpus
+    documents = new ArrayList();
+    documents.addAll(tCorpus);
+
     //make sure we fire events when docs are added/removed/etc
-    documents = new VerboseHashMap();
     Gate.getCreoleRegister().addCreoleListener(this);
   }
 
@@ -89,9 +91,6 @@ public class SerialCorpusImpl extends
    * in this corpus.
    */
   public List getDocumentNames(){
-    if (transientCorpus != null)
-      return transientCorpus.getDocumentNames();
-
     List docsNames = new ArrayList();
     Iterator iter = docDataList.iterator();
     while (iter.hasNext()) {
@@ -107,6 +106,7 @@ public class SerialCorpusImpl extends
   public void setDocumentPersistentID(int index, Object persID){
     if (index >= docDataList.size()) return;
     ((DocumentData)docDataList.get(index)).setPersistentID(persID);
+    if (DEBUG) Out.prln("IDs are now: " + docDataList);
   }
 
   /**
@@ -116,17 +116,51 @@ public class SerialCorpusImpl extends
    * <tt>index</tt> in this corpus.<P>
    */
   public String getDocumentName(int index){
-    if (transientCorpus != null)
-      return transientCorpus.getDocumentName(index);
+    if (index >= docDataList.size()) return "No such document";
 
     return ((DocumentData) docDataList.get(index)).getDocumentName();
+  }
+
+  /**
+   * Unloads the document from memory, but calls sync() first, to store the
+   * changes
+   */
+  public void unloadDocumentAt(int index) {
+    //1. check whether its been loaded and is a persistent one
+    // if a persistent doc is not loaded, there's nothing we need to do
+    if ( (! isDocumentLoaded(index)) && isPersistentDocument(index))
+      return;
+
+    //2. sync the document before releasing it from memory, because the
+    //creole register garbage collects all LRs which are not used any more
+    Document doc = (Document) documents.get(index);
+    try {
+      //if the document is not already adopted, we need to do that first
+      if (doc.getLRPersistenceId() == null) {
+        doc = (Document) this.getDataStore().adopt(doc, null);
+        this.getDataStore().sync(doc);
+        this.setDocumentPersistentID(index, doc.getLRPersistenceId());
+      } else //if it is adopted, just sync it
+        this.getDataStore().sync(doc);
+
+      //3. remove the document from the memory
+      //do this, only if the saving has succeeded
+      documents.remove(index);
+    } catch (PersistenceException ex) {
+        throw new GateRuntimeException("Error unloading document from corpus"
+                      + "because document sync failed: " + ex.getMessage());
+    } catch (gate.security.SecurityException ex1) {
+        throw new GateRuntimeException("Error unloading document from corpus"
+                      + "because of document access error: " + ex1.getMessage());
+    }
+
   }
 
   /**
    * This method NEEDS IMPLEMENTING
    */
   public void unloadDocument(Document doc) {
-    throw new MethodNotImplementedException();
+//    documents.remove(new Integer(index));
   }
 
   /**
@@ -134,7 +168,7 @@ public class SerialCorpusImpl extends
    */
   public boolean isDocumentLoaded(int index) {
     if (documents == null || documents.isEmpty()) return false;
-    return (documents.get(new Integer(index)) != null);
+    return documents.get(index) != null;
   }
 
   /**
@@ -184,8 +218,8 @@ public class SerialCorpusImpl extends
     Resource res = e.getResource();
     if (! (res instanceof Document))
       return;
-    //remove all occurences
-    while(contains(res)) remove(res);
+    //unload all occurences, but no need to remove them from the corpus too
+    while(contains(res)) unloadDocument((Document) res);
   }
   public void datastoreOpened(CreoleEvent e) {
   }
@@ -199,27 +233,17 @@ public class SerialCorpusImpl extends
   //java docs will be automatically copied from the List interface.
 
   public int size() {
-    if (transientCorpus != null)
-      return transientCorpus.size();
-
     return docDataList.size();
   }
 
   public boolean isEmpty() {
-    if (transientCorpus != null)
-      return transientCorpus.isEmpty();
-
     return docDataList.isEmpty();
   }
 
   public boolean contains(Object o){
     //return true if:
-    // - the transient corpus contains the object
     // - the document data list contains a document with such a name
     //   and persistent id
-
-    if (transientCorpus != null)
-      return transientCorpus.contains(o);
 
     if (! (o instanceof Document))
       return false;
@@ -240,54 +264,46 @@ public class SerialCorpusImpl extends
   }
 
   public Iterator iterator(){
-    if (transientCorpus != null)
-      return transientCorpus.iterator();
+    return new Iterator(){
+      Iterator docDataIter = docDataList.iterator();
 
-      return new Iterator(){
-        Iterator docDataIter = docDataList.iterator();
+      public boolean hasNext() {
+        return docDataIter.hasNext();
+      }
 
-        public boolean hasNext() {
-          return docDataIter.hasNext();
-        }
+      public Object next(){
 
-        public Object next(){
+        //try finding a document with the same name and persistent ID
+        DocumentData docData = (DocumentData) docDataIter.next();
+        int index = docDataList.indexOf(docData);
+        return SerialCorpusImpl.this.get(index);
+      }
 
-          //try finding a document with the same name and persistent ID
-          DocumentData docData = (DocumentData) docDataIter.next();
-          int index = docDataList.indexOf(docData);
-          return SerialCorpusImpl.this.get(index);
-        }
+      public void remove() {
+        throw new UnsupportedOperationException("SerialCorpusImpl does not " +
+                    "support remove in the iterators");
+      }
+    }; //return
 
-        public void remove() {
-          throw new UnsupportedOperationException("SerialCorpusImpl does not " +
-                      "support remove in the iterators");
-        }
-      };
+  }//iterator
 
+  public String toString() {
+    return "document data " + docDataList.toString() + " documents " + documents;
   }
 
   public Object[] toArray(){
-    if (transientCorpus != null)
-      return transientCorpus.toArray();
-
     //there is a problem here, because some docs might not be instantiated
     throw new MethodNotImplementedException(
                 "toArray() is not implemented for SerialCorpusImpl");
   }
 
   public Object[] toArray(Object[] a){
-    if (transientCorpus != null)
-      return transientCorpus.toArray(a);
-
     //there is a problem here, because some docs might not be instantiated
     throw new MethodNotImplementedException(
                 "toArray(Object[] a) is not implemented for SerialCorpusImpl");
   }
 
   public boolean add(Object o){
-    if (transientCorpus != null)
-      return transientCorpus.add(o);
-
     if (! (o instanceof Document) || o == null)
       return false;
     Document doc = (Document) o;
@@ -299,14 +315,16 @@ public class SerialCorpusImpl extends
     DocumentData docData = new DocumentData(doc.getName(),
                                             doc.getLRPersistenceId());
     boolean result = docDataList.add(docData);
-    documents.put(new Integer(docDataList.size()-1), doc);
+    documents.add(doc);
+    fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
+                                      doc,
+                                      documents.size()-1,
+                                      CorpusEvent.DOCUMENT_ADDED));
+
     return result;
   }
 
   public boolean remove(Object o){
-    if (transientCorpus != null)
-      return transientCorpus.remove(o);
-
     if (! (o instanceof Document))
       return false;
     Document doc = (Document) o;
@@ -326,7 +344,11 @@ public class SerialCorpusImpl extends
 
     if(found && index < docDataList.size()) { //we found it, so remove it
       docDataList.remove(index);
-      documents.remove(new Integer(index));
+      Document oldDoc =  (Document) documents.remove(index);
+      fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+                                          oldDoc,
+                                          index,
+                                          CorpusEvent.DOCUMENT_REMOVED));
     }
 
     return found;
@@ -376,9 +398,6 @@ public class SerialCorpusImpl extends
   }
 
   public boolean equals(Object o){
-    if (transientCorpus != null)
-      return transientCorpus.equals(o);
-
     if (! (o instanceof SerialCorpusImpl))
       return false;
     SerialCorpusImpl oCorpus = (SerialCorpusImpl) o;
@@ -387,41 +406,101 @@ public class SerialCorpusImpl extends
     if (oCorpus == this)
       return true;
     if ((oCorpus.lrPersistentId == this.lrPersistentId ||
-         oCorpus.lrPersistentId.equals(this.lrPersistentId)) &&
-        oCorpus.name.equals(this.name) &&
-        oCorpus.dataStore.equals(dataStore) &&
+         oCorpus.lrPersistentId.equals(this.lrPersistentId))
+        &&
+        oCorpus.name.equals(this.name)
+        &&
+        (oCorpus.dataStore == this.dataStore
+          || oCorpus.dataStore.equals(this.dataStore))
+        &&
         oCorpus.docDataList.equals(docDataList))
       return true;
     return false;
   }
 
   public int hashCode(){
-    if (transientCorpus != null)
-      return transientCorpus.hashCode();
     return docDataList.hashCode();
   }
 
   public Object get(int index){
-    if (transientCorpus != null)
-      return transientCorpus.get(index);
+      if (index >= docDataList.size())
+        return null;
 
-    return documents.get(new Integer(index));
+      Object res = documents.get(index);
+
+      if (DEBUG) Out.prln("SerialCorpusImpl: get(): index "
+                          + index + "result: " + res);
+
+      //if the document is null, then I must get it from the DS
+      if (res == null) {
+        FeatureMap features = Factory.newFeatureMap();
+        features.put(DataStore.DATASTORE_FEATURE_NAME, this.dataStore);
+        try {
+          features.put(DataStore.LR_ID_FEATURE_NAME,
+                      ((DocumentData)docDataList.get(index)).getPersistentID());
+          Resource lr = Factory.createResource( "gate.corpora.DocumentImpl",
+                                                features);
+          if (DEBUG) Out.prln("Loaded document :" + lr.getName());
+          //change the result to the newly loaded doc
+          res = lr;
+
+          //finally replace the doc with the instantiated version
+          documents.set(index, lr);
+        } catch (ResourceInstantiationException ex) {
+          Err.prln("Error reading document inside a serialised corpus.");
+          throw new GateRuntimeException(ex.getMessage());
+        }
+      }
+
+      return res;
   }
 
   public Object set(int index, Object element){
     throw new gate.util.MethodNotImplementedException();
+        //fire the 2 events
+/*        fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+                                            oldDoc,
+                                            ((Integer) key).intValue(),
+                                            CorpusEvent.DOCUMENT_REMOVED));
+        fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
+                                          newDoc,
+                                          ((Integer) key).intValue(),
+                                          CorpusEvent.DOCUMENT_ADDED));
+*/
   }
 
-  public void add(int index, Object element){
-    throw new gate.util.MethodNotImplementedException();
+  public void add(int index, Object o){
+    if (! (o instanceof Document) || o == null)
+      return;
+    Document doc = (Document) o;
+
+    //add the document with its index in the docDataList
+    //in this case, since it's going to be added to the end
+    //the index will be the size of the docDataList before
+    //the addition
+    DocumentData docData = new DocumentData(doc.getName(),
+                                            doc.getLRPersistenceId());
+    docDataList.add(index, docData);
+
+    //PROBLEM: I need to change the documents to a list, so the
+    //order gets automatically changed with inserts.
+    documents.add(index, doc);
+    fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
+                                      doc,
+                                      index,
+                                      CorpusEvent.DOCUMENT_ADDED));
+
   }
 
   public Object remove(int index){
-    if (transientCorpus != null)
-      return transientCorpus.remove(index);
-
     docDataList.remove(index);
-    return documents.remove(new Integer(index));
+    Document res = (Document) documents.remove(index);
+    fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+                                        res,
+                                        index,
+                                        CorpusEvent.DOCUMENT_REMOVED));
+    return res;
+
   }
 
   public int indexOf(Object o){
@@ -440,6 +519,10 @@ public class SerialCorpusImpl extends
     throw new gate.util.MethodNotImplementedException();
   }
 
+  /**
+   * persistent Corpus does not support this method as all
+   * the documents might no be in memory
+   */
   public List subList(int fromIndex, int toIndex){
     throw new gate.util.MethodNotImplementedException();
   }
@@ -453,13 +536,16 @@ public class SerialCorpusImpl extends
   private void readObject(ObjectInputStream s)
       throws IOException, ClassNotFoundException {
     s.defaultReadObject();
-    documents = new VerboseHashMap();
+    documents = new ArrayList(docDataList.size());
+    for (int i = 0; i < docDataList.size(); i++)
+      documents.add(null);
   }//readObject
 
   /**
    * Class used for the documents structure. This is a {@link java.util.HashMap}
    * that fires events when elements are added/removed/set
    */
+/*
   protected class VerboseHashMap extends HashMap{
     static final long serialVersionUID = -3320104879514836097L;
 
@@ -468,6 +554,10 @@ public class SerialCorpusImpl extends
       Iterator iter = this.keySet().iterator();
       while (iter.hasNext())
         remove(iter.next());
+    }
+
+    public boolean isNullValue(Object key) {
+      return (super.get(key) == null);
     }
 
     public Object put(Object key, Object value) {
@@ -503,12 +593,11 @@ public class SerialCorpusImpl extends
     }  //put
 
     public Object remove(Object key){
+      //the remove event is now fired from the SerialCorpusImpl class, because
+      //I want to be able to remove values, so I can unload documents from
+      //memory, but that should not make anybody think that the document
+      //has been removed from the corpus
       Document oldDoc = (Document) super.remove(key);
-      fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
-                                          oldDoc,
-                                          ((Integer) key).intValue(),
-                                          CorpusEvent.DOCUMENT_REMOVED));
-
       return oldDoc;
     }//public Object remove(Object key)
 
@@ -545,6 +634,7 @@ public class SerialCorpusImpl extends
     }//public Object get(Object key)
 
   }//protected class VerboseHashMap extends HashMap
+*/
 
   protected class DocumentData implements Serializable {
     //fix the ID for serialisation

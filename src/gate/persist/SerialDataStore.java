@@ -339,8 +339,12 @@ extends AbstractFeatureBearer implements DataStore {
       //corresponding document IDs
       for (int i = 0; i < corpus.size(); i++) {
         //if the document is not in memory, there's little point in saving it
-        if (! corpus.isDocumentLoaded(i) && corpus.isPersistentDocument(i))
+        if ( (!corpus.isDocumentLoaded(i)) && corpus.isPersistentDocument(i))
           continue;
+        if (DEBUG) Out.prln("Saving document at position " + i);
+        if (DEBUG) Out.prln("Document in memory " + corpus.isDocumentLoaded(i));
+        if (DEBUG) Out.prln("is persistent? "+ corpus.isPersistentDocument(i));
+        if (DEBUG) Out.prln("Document name at position" + corpus.getDocumentName(i));
         Document doc = (Document) corpus.get(i);
         try {
           //if the document is not already adopted, we need to do that first
@@ -439,6 +443,8 @@ extends AbstractFeatureBearer implements DataStore {
     // not serialised)
     lr.setDataStore(this);
     lr.setLRPersistenceId(lrPersistenceId);
+
+    if (DEBUG) Out.prln("LR read in memory: " + lr);
 
     return lr;
   } // getLr(id)
