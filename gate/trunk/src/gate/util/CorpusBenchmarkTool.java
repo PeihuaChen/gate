@@ -868,7 +868,7 @@ public class CorpusBenchmarkTool {
       try {
         evaluateDocuments(persDoc, cleanDoc, markedDoc, errDir);
       } catch (gate.creole.ResourceInstantiationException ex) {
-ex.printStackTrace();
+        ex.printStackTrace();
         Out.prln("Evaluate failed on document: " + cleanDoc.getName());
       }
       if (persDoc != null)
@@ -1737,9 +1737,6 @@ ex.printStackTrace();
         && keyDoc.getAnnotations().get(annotType) == null)
       return null;
 
-    // create the annotation schema needed for AnnotationDiff
-    AnnotationSchema annotationSchema = new AnnotationSchema();
-
     // create an annotation diff
     AnnotationDiffer annotDiffer = new AnnotationDiffer();
     // set the feature names set for annotation differ
@@ -1750,9 +1747,9 @@ ex.printStackTrace();
       keys = keyDoc.getAnnotations();
       responses = respDoc.getAnnotations();
     } else {
-      keys = keyDoc.getAnnotations(annotSetName).get();
+      keys = keyDoc.getAnnotations(annotSetName)/*.get()*/;
       System.out.println("Keys : "+keys.size());
-      responses = respDoc.getAnnotations(outputSetName).get();
+      responses = respDoc.getAnnotations(outputSetName)/*.get()*/;
       System.out.println("Resp : "+responses.size());
     }
 

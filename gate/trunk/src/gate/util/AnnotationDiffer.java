@@ -285,7 +285,7 @@ public class AnnotationDiffer {
    *
    * @param pairing the pairing to be added
    * @param index the index in the list of pairings
-   * @param listOfPairings the list of {@link Pairing}s where the 
+   * @param listOfPairings the list of {@link Pairing}s where the
    * pairing should be added
    */
   protected void addPairing(PairingImpl pairing, int index, List listOfPairings){
@@ -491,15 +491,15 @@ public class AnnotationDiffer {
   public Set getAnnotationsOfType(int type) {
     switch(type) {
       case CORRECT_TYPE:
-        return correctAnnotations;
+        return (correctAnnotations == null)? new HashSet() : correctAnnotations;
       case PARTIALLY_CORRECT_TYPE:
-        return partiallyCorrectAnnotations;
+        return (partiallyCorrectAnnotations == null) ? new HashSet() : partiallyCorrectAnnotations;
       case SPURIOUS_TYPE:
-        return spuriousAnnotations;
+        return (spuriousAnnotations == null) ? new HashSet() : spuriousAnnotations;
       case MISSING_TYPE:
-        return missingAnnotations;
+        return (missingAnnotations == null) ? new HashSet() : missingAnnotations;
       default:
-        return null;
+        return new HashSet();
     }
   }
 
