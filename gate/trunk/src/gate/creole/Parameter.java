@@ -59,7 +59,8 @@ public class Parameter
     return defaultValue;
   } // calculateDefaultValue()
 
-  /** Calculate and return the default value for this parameter */
+  /** Calculate and return the value for this parameter starting from a String
+   */
   public Object calculateValueFromString(String stringValue)
   throws ParameterException {
     Object value = null;
@@ -81,8 +82,18 @@ public class Parameter
         value = Double.valueOf(stringValue);
       else if(typeName.equals("java.lang.Float"))
         value = Float.valueOf(stringValue);
-      else
-        throw new ParameterException("Unsupported parameter type " + typeName);
+      else{
+        //try to construct a new value from the string using a constructor
+        // e.g. for URLs
+        try{
+          if(!paramClass.isAssignableFrom(String.class)){
+            value = paramClass.getConstructor(new Class[]{String.class}).
+                         newInstance(new Object[]{stringValue});
+          }
+        }catch(Exception e){
+          throw new ParameterException("Unsupported parameter type " + typeName);
+        }
+      }
 
     // resource types
     } else {

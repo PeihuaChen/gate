@@ -254,6 +254,23 @@ public abstract class Factory
           continue;
         }
 
+        //convert the parameter to the right type eg String -> URL
+        Class propertyType = prop.getPropertyType();
+        Class paramType = paramValue.getClass();
+        try{
+          if(!propertyType.isAssignableFrom(paramType)){
+            if(DEBUG) Out.pr("Converted " + paramValue.getClass());
+            paramValue = propertyType.getConstructor(new Class[]{paramType}).
+                         newInstance(new Object[]{paramValue});
+            if(DEBUG) Out.prln(" to " + paramValue.getClass());
+          }
+        }catch(NoSuchMethodException nsme){
+          if(DEBUG) Out.prln("...Error while converting: " + nsme.toString());
+          continue;
+        }catch(InstantiationException ie){
+          if(DEBUG) Out.prln("...Error while converting: " + ie.toString());
+          continue;
+        }
         // call the set method with the parameter value
         Object[] args = new Object[1];
         args[0] = paramValue;

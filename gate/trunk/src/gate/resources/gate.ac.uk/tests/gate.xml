@@ -13,7 +13,7 @@
 
 <SYSTEM NAME="Print Out Tokens">
   <CONTROLLER>gate.creole.SerialController</CONTROLLER>
-  <LR sourceUrlName="http://gate.ac.uk/tests/doc0.html">gate.corpora.DocumentImpl</LR>
+  <LR sourceUrl="gate:/gate.ac.uk/tests/doc0.html">gate.corpora.DocumentImpl</LR>
   <PR rulesResourceName="creole/tokeniser/DefaultTokeniser.rules">gate.creole.tokeniser.DefaultTokeniser</PR>
   <PR>testpkg.PrintOutTokens</PR>
 </SYSTEM>

@@ -81,13 +81,13 @@ public interface Document extends LanguageResource, Comparable {
    *
    *  @param b markup awareness status.
    */
-  public void setMarkupAware(boolean b);
+  public void setMarkupAware(Boolean b);
 
   /** Get the markup awareness status of the Document.
    *
    *  @return whether the Document is markup aware.
    */
-  public boolean isMarkupAware();
+  public Boolean getMarkupAware();
 
   /** Returns a GateXml document
     * @return a string representing a Gate Xml document

@@ -178,7 +178,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
       sourceUrlName = sourceUrl.toExternalForm();
 */
     // set up a DocumentFormat if markup unpacking required
-    if(isMarkupAware()) {
+    if(getMarkupAware().booleanValue()) {
       DocumentFormat docFormat =
         DocumentFormat.getDocumentFormat(this, sourceUrl);
       try {
@@ -299,7 +299,6 @@ extends AbstractLanguageResource implements Document, StatusReporter
   } // getAnnotations(name)
 
   /** Is the document markup-aware? */
-  protected boolean markupAware = false;
 
   /** Make the document markup-aware. This will trigger the creation
    *  of a DocumentFormat object at Document initialisation time; the
@@ -308,13 +307,15 @@ extends AbstractLanguageResource implements Document, StatusReporter
    *
    *  @param b markup awareness status.
    */
-  public void setMarkupAware(boolean b) { this.markupAware = b; }
+  public void setMarkupAware(Boolean newMarkupAware) {
+      this.markupAware = newMarkupAware;
+  }
 
   /** Get the markup awareness status of the Document.
    *  <B>Documents are markup-aware by default.</B>
    *  @return whether the Document is markup aware.
    */
-  public boolean isMarkupAware() { return markupAware; }
+  public Boolean getMarkupAware() { return markupAware; }
 
   /** Returns a GateXml document
     * @return a string representing a Gate Xml document
@@ -535,6 +536,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
   private transient Vector documentListeners;
   private transient Vector gateListeners;
   private String stringContent;
+  private Boolean markupAware = new Boolean(false);
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
@@ -562,7 +564,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
 //    if(! check(defaultAnnots, doc.defaultAnnots)) return false;
     if(! check(encoding, doc.encoding)) return false;
 //    if(! check(features, doc.features)) return false;
-    if(markupAware != doc.markupAware) return false;
+    if(!markupAware.equals(doc.markupAware)) return false;
     if(! check(namedAnnotSets, doc.namedAnnotSets)) return false;
     if(nextAnnotationId != doc.nextAnnotationId) return false;
     if(nextNodeId != doc.nextNodeId) return false;
@@ -583,7 +585,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
     code += memberCode;
     memberCode = (features == null) ? 0 : features.hashCode();
     code += memberCode;
-    code += (markupAware) ? 0 : 1;
+    code += (markupAware.booleanValue()) ? 0 : 1;
     memberCode = (namedAnnotSets == null) ? 0 : namedAnnotSets.hashCode();
     code += memberCode;
     code += nextAnnotationId;
