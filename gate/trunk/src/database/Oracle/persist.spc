@@ -15,6 +15,8 @@ create or replace package persist is
  *  $Id$
  *
  */  
+
+  ENCODING_UTF constant varchar2(16) := 'UTF8';
   
   procedure get_timestamp(p_timestamp  OUT number);
 
