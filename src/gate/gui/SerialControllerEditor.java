@@ -28,6 +28,7 @@ import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.Dimension;
 import java.awt.Component;
+import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -44,7 +45,9 @@ public class SerialControllerEditor extends AbstractVisualResource
       target.getClass().toString() +
       " is not a gate.creole.SerialController!");
     this.controller = (SerialController)target;
-    analyserMode = controller instanceof SerialAnalyserController;
+    analyserMode = controller instanceof SerialAnalyserController ||
+                   controller instanceof ConditionalSerialAnalyserController;
+    conditionalMode = controller instanceof ConditionalController;
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -140,6 +143,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setSortable(false);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
+    memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
     memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
 
     final int width2 = new JLabel("Selected Processing resources").
@@ -174,6 +178,56 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     add(topBox);
 
+    if(conditionalMode){
+      JPanel middleBox = new JPanel();
+      middleBox.setLayout(new BoxLayout(middleBox, BoxLayout.X_AXIS));
+      middleBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      runBtnGrp = new ButtonGroup();
+      yes_RunRBtn = new JRadioButton("Yes", true);
+      yes_RunRBtn.setHorizontalTextPosition(AbstractButton.LEFT);
+      runBtnGrp.add(yes_RunRBtn);
+      no_RunRBtn = new JRadioButton("No", false);
+      no_RunRBtn.setHorizontalTextPosition(AbstractButton.LEFT);
+      runBtnGrp.add(no_RunRBtn);
+      conditional_RunRBtn = new JRadioButton("If value of feature", false);
+      conditional_RunRBtn.setHorizontalTextPosition(AbstractButton.LEFT);
+      runBtnGrp.add(conditional_RunRBtn);
+
+      featureNameTextField = new JTextField("", 25);
+      featureNameTextField.setMaximumSize(
+                           new Dimension(Integer.MAX_VALUE,
+                                         featureNameTextField.getPreferredSize().
+                                         height));
+      featureValueTextField = new JTextField("", 25);
+      featureValueTextField.setMaximumSize(
+                           new Dimension(Integer.MAX_VALUE,
+                                         featureValueTextField.getPreferredSize().
+                                         height));
+
+      middleBox.add(new JLabel(MainFrame.getIcon("greenBall.gif")));
+      middleBox.add(yes_RunRBtn);
+      middleBox.add(Box.createHorizontalStrut(5));
+
+      middleBox.add(new JLabel(MainFrame.getIcon("redBall.gif")));
+      middleBox.add(no_RunRBtn);
+      middleBox.add(Box.createHorizontalStrut(5));
+
+      middleBox.add(new JLabel(MainFrame.getIcon("yellowBall.gif")));
+      middleBox.add(conditional_RunRBtn);
+      middleBox.add(Box.createHorizontalStrut(5));
+
+      middleBox.add(featureNameTextField);
+      middleBox.add(Box.createHorizontalStrut(5));
+      middleBox.add(new JLabel("is"));
+      middleBox.add(Box.createHorizontalStrut(5));
+      middleBox.add(featureValueTextField);
+      middleBox.add(Box.createHorizontalStrut(5));
+      middleBox.setBorder(BorderFactory.
+                          createTitledBorder(BorderFactory.createEtchedBorder(),
+                                            "Run ?"));
+
+      add(middleBox);
+    }//if conditional mode
     if(analyserMode){
       //we need to add the corpus combo
       corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
@@ -181,9 +235,19 @@ public class SerialControllerEditor extends AbstractVisualResource
       corpusCombo.setMaximumSize(new Dimension(Integer.MAX_VALUE,
                                                corpusCombo.getPreferredSize().
                                                height));
-      if(((SerialAnalyserController)controller).getCorpus() != null){
-        corpusCombo.setSelectedItem(((SerialAnalyserController)controller).
-                                     getCorpus());
+      Corpus corpus = null;
+      if(controller instanceof SerialAnalyserController){
+        corpus = ((SerialAnalyserController)controller).getCorpus();
+      }else if(controller instanceof ConditionalSerialAnalyserController){
+        corpus = ((ConditionalSerialAnalyserController)controller).getCorpus();
+      }else{
+        throw new GateRuntimeException("Controller editor in analyser mode " +
+                                       "but the target controller is not an " +
+                                       "analyser!");
+      }
+
+      if(corpus != null){
+        corpusCombo.setSelectedItem(corpus);
       }else{
         if(corpusCombo.getModel().getSize() > 1) corpusCombo.setSelectedIndex(1);
         else corpusCombo.setSelectedIndex(0);
@@ -402,15 +466,15 @@ public class SerialControllerEditor extends AbstractVisualResource
           //edit parameters on click
           if(SwingUtilities.isLeftMouseButton(e) /*&& e.getClickCount() == 2*/){
             ProcessingResource pr = (ProcessingResource)
-                                    memberPRsTableModel.getValueAt(row, 0);
-            showParamsEditor(pr);
+                                    memberPRsTableModel.getValueAt(row, 1);
+            selectPR(row);
           }else if(SwingUtilities.isRightMouseButton(e)){
             JPopupMenu popup = new JPopupMenu();
             popup.add(new AbstractAction("Edit parameters"){
               public void actionPerformed(ActionEvent e){
                 ProcessingResource pr = (ProcessingResource)
-                                        memberPRsTableModel.getValueAt(row, 0);
-                showParamsEditor(pr);
+                                        memberPRsTableModel.getValueAt(row, 1);
+                selectPR(row);
               }
             });
             popup.show(memberPRsTable, e.getPoint().x, e.getPoint().y);
@@ -455,6 +519,92 @@ public class SerialControllerEditor extends AbstractVisualResource
         buildInternalMenus();
       }
     });
+
+    final ActionListener executionModeActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if(selectedPRRunStrategy != null &&
+           selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+          AnalyserRunningStrategy strategy =
+            (AnalyserRunningStrategy)selectedPRRunStrategy;
+          if(yes_RunRBtn.isSelected()){
+            strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
+            featureNameTextField.setEditable(false);
+            featureValueTextField.setEditable(false);
+          }else if(no_RunRBtn.isSelected()){
+            strategy.setRunMode(RunningStrategy.RUN_NEVER);
+            featureNameTextField.setEditable(false);
+            featureValueTextField.setEditable(false);
+          }else if(conditional_RunRBtn.isSelected()){
+            strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
+            featureNameTextField.setEditable(true);
+            featureValueTextField.setEditable(true);
+
+            String str = featureNameTextField.getText();
+            strategy.setFeatureName(str == null || str.length()==0 ?
+                                    null : str);
+            str = featureValueTextField.getText();
+            strategy.setFeatureValue(str == null || str.length()==0 ?
+                                    null : str);
+          }
+        }
+        memberPRsTable.repaint();
+      }
+    };
+
+    yes_RunRBtn.addActionListener(executionModeActionListener);
+
+    no_RunRBtn.addActionListener(executionModeActionListener);
+
+    conditional_RunRBtn.addActionListener(executionModeActionListener);
+
+    featureNameTextField.getDocument().addDocumentListener(
+    new javax.swing.event.DocumentListener() {
+      public void insertUpdate(javax.swing.event.DocumentEvent e) {
+        changeOccured(e);
+      }
+
+      public void removeUpdate(javax.swing.event.DocumentEvent e) {
+        changeOccured(e);
+      }
+
+      public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        changeOccured(e);
+      }
+
+      protected void changeOccured(javax.swing.event.DocumentEvent e){
+        if(selectedPRRunStrategy != null &&
+           selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+          AnalyserRunningStrategy strategy =
+            (AnalyserRunningStrategy)selectedPRRunStrategy;
+          strategy.setFeatureName(featureNameTextField.getText());
+        }
+      }
+    });
+
+    featureValueTextField.getDocument().addDocumentListener(
+    new javax.swing.event.DocumentListener() {
+      public void insertUpdate(javax.swing.event.DocumentEvent e) {
+        changeOccured(e);
+      }
+
+      public void removeUpdate(javax.swing.event.DocumentEvent e) {
+        changeOccured(e);
+      }
+
+      public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        changeOccured(e);
+      }
+
+      protected void changeOccured(javax.swing.event.DocumentEvent e){
+        if(selectedPRRunStrategy != null &&
+           selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+          AnalyserRunningStrategy strategy =
+            (AnalyserRunningStrategy)selectedPRRunStrategy;
+          strategy.setFeatureValue(featureValueTextField.getText());
+        }
+      }
+    });
+
   }//protected void initListeners()
 
   /**
@@ -495,6 +645,68 @@ public class SerialControllerEditor extends AbstractVisualResource
         if(act.isEnabled()) removeMenu.add(act);
       }
     }// while
+  }
+
+  /**
+   * Called when a PR has been selected in the memeber PRs table;
+   * @param pr
+   */
+  protected void selectPR(int index){
+    ProcessingResource pr = (ProcessingResource)
+                            ((java.util.List)controller.getPRs()).get(index);
+    showParamsEditor(pr);
+    selectedPR = pr;
+    if(conditionalMode){
+      //update the state of the run strategy buttons
+      selectedPRRunStrategy = (RunningStrategy)
+                                 ((List)((ConditionalController)controller).
+                                          getRunningStrategies()).get(index);
+      int runMode = selectedPRRunStrategy.getRunMode();
+
+      if(selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+        yes_RunRBtn.setEnabled(true);
+        no_RunRBtn.setEnabled(true);
+        conditional_RunRBtn.setEnabled(true);
+
+        featureNameTextField.setText(
+              ((AnalyserRunningStrategy)selectedPRRunStrategy).
+              getFeatureName());
+        featureValueTextField.setText(
+              ((AnalyserRunningStrategy)selectedPRRunStrategy).
+              getFeatureValue());
+      }else{
+        yes_RunRBtn.setEnabled(false);
+        no_RunRBtn.setEnabled(false);
+        conditional_RunRBtn.setEnabled(false);
+
+        featureNameTextField.setText("");
+        featureValueTextField.setText("");
+      }
+
+      featureNameTextField.setEditable(false);
+      featureValueTextField.setEditable(false);
+
+      switch(selectedPRRunStrategy.getRunMode()){
+        case RunningStrategy.RUN_ALWAYS:{
+          yes_RunRBtn.setSelected(true);
+          break;
+        }
+
+        case RunningStrategy.RUN_NEVER:{
+          no_RunRBtn.setSelected(true);
+          break;
+        }
+
+        case RunningStrategy.RUN_CONDITIONAL:{
+          conditional_RunRBtn.setSelected(true);
+          if(selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+            featureNameTextField.setEditable(true);
+            featureValueTextField.setEditable(true);
+          }
+          break;
+        }
+      }//switch
+    }
   }
 
   /**
@@ -715,12 +927,25 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     //use the controller for data caching
     public void setSelectedItem(Object anItem){
+      if(controller instanceof SerialAnalyserController)
       ((SerialAnalyserController)controller).
+        setCorpus((Corpus)(anItem.equals("<none>") ? null : anItem));
+      else if(controller instanceof ConditionalSerialAnalyserController)
+      ((ConditionalSerialAnalyserController)controller).
         setCorpus((Corpus)(anItem.equals("<none>") ? null : anItem));
     }
 
     public Object getSelectedItem(){
-      Corpus corpus = ((SerialAnalyserController)controller).getCorpus();
+      Corpus corpus = null;
+      if(controller instanceof SerialAnalyserController){
+        corpus = ((SerialAnalyserController)controller).getCorpus();
+      }else if(controller instanceof ConditionalSerialAnalyserController){
+        corpus = ((ConditionalSerialAnalyserController)controller).getCorpus();
+      }else{
+        throw new GateRuntimeException("Controller editor in analyser mode " +
+                                       "but the target controller is not an " +
+                                       "analyser!");
+      }
       return (corpus == null ? (Object)"<none>" : (Object)corpus);
     }
 
@@ -732,9 +957,28 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
 
   /**
+   *  Renders JLabel by simply displaying them
+   */
+  class LabelRenderer implements TableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table,
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row,
+                                                   int column){
+      return (JLabel) value;
+    }
+  }
+
+  /**
    * Table model for all the processing resources in the controller.
    */
   class MemberPRsTableModel extends AbstractTableModel{
+    MemberPRsTableModel(){
+      green = new JLabel(MainFrame.getIcon("greenBall.gif"));
+      red = new JLabel(MainFrame.getIcon("redBall.gif"));
+      yellow = new JLabel(MainFrame.getIcon("yellowBall.gif"));
+    }
     public int getRowCount(){
       return controller.getPRs().size();
     }
@@ -743,9 +987,21 @@ public class SerialControllerEditor extends AbstractVisualResource
       ProcessingResource pr = (ProcessingResource)
                               ((List)controller.getPRs()).get(row);
       switch(column){
-        case 0 : return pr;
-//        case 1 : return new Boolean(checkRuntimeParameters(pr));
-        case 1 : {
+        case 0 : {
+          if(conditionalMode){
+            RunningStrategy strategy = (RunningStrategy)
+                                 ((List)((ConditionalController)controller).
+                                          getRunningStrategies()).get(row);
+            switch(strategy.getRunMode()){
+              case RunningStrategy.RUN_ALWAYS : return green;
+              case RunningStrategy.RUN_NEVER : return red;
+              case RunningStrategy.RUN_CONDITIONAL : return yellow;
+            }
+          }
+          return green;
+        }
+        case 1 : return pr;
+        case 2 : {
           ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                                     get(pr.getClass().getName());
           if(rData == null) return pr.getClass();
@@ -756,23 +1012,25 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     public int getColumnCount(){
-      return 2;
+      return 3;
     }
 
     public String getColumnName(int columnIndex){
       switch(columnIndex){
-        case 0 : return "Name";
+        case 0 : return "!";
+        case 1 : return "Name";
 //        case 1 : return "!";
-        case 1 : return "Type";
+        case 2 : return "Type";
         default: return "?";
       }
     }
 
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
-        case 0 : return ProcessingResource.class;
+        case 0 : return JLabel.class;
+        case 1 : return ProcessingResource.class;
 //        case 1 : return Boolean.class;
-        case 1 : return String.class;
+        case 2 : return String.class;
         default: return Object.class;
       }
     }
@@ -783,6 +1041,8 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
     }
+
+    protected JLabel green, red, yellow;
   }//protected class MemeberPRsTableModel extends AbstractTableModel
 
   /** Adds a PR to the controller*/
@@ -864,7 +1124,10 @@ public class SerialControllerEditor extends AbstractVisualResource
                 "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }
-            ((SerialAnalyserController)controller).setCorpus(corpus);
+            if(controller instanceof SerialAnalyserController)
+              ((SerialAnalyserController)controller).setCorpus(corpus);
+            else if(controller instanceof ConditionalSerialAnalyserController)
+              ((ConditionalSerialAnalyserController)controller).setCorpus(corpus);
           }
           //check the runtime parameters
           List badPRs;
@@ -1021,6 +1284,36 @@ public class SerialControllerEditor extends AbstractVisualResource
   TitledBorder parametersBorder;
 
   /**
+   * Button for run always.
+   */
+  JRadioButton yes_RunRBtn;
+
+  /**
+   * Button for never run.
+   */
+  JRadioButton no_RunRBtn;
+
+  /**
+   * Button for conditional run.
+   */
+  JRadioButton conditional_RunRBtn;
+
+  /**
+   * The group for run strategy buttons;
+   */
+  ButtonGroup runBtnGrp;
+
+  /**
+   * Text field for the feature name for conditional run.
+   */
+  JTextField featureNameTextField;
+
+  /**
+   * Text field for the feature value for conditional run.
+   */
+  JTextField featureValueTextField;
+
+  /**
    * A combobox that allows selection of a corpus from the list of loaded
    * corpora.
    */
@@ -1037,7 +1330,25 @@ public class SerialControllerEditor extends AbstractVisualResource
   /** Action that runs the application*/
   RunAction runAction;
 
+  /**
+   * Is the controller displayed an analyser controller?
+   */
   boolean analyserMode = false;
+
+  /**
+   * Is the controller displayed conditional?
+   */
+  boolean conditionalMode = false;
+
+  /**
+   * The PR currently selected (having its parameters set)
+   */
+  ProcessingResource selectedPR = null;
+
+  /**
+   * The running strategy for the selected PR.
+   */
+  RunningStrategy selectedPRRunStrategy = null;
 
   private transient Vector statusListeners;
   private transient Vector progressListeners;
