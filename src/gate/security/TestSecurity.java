@@ -42,9 +42,9 @@ public class TestSecurity extends TestCase
 
   /** JDBC URL */
   private static final String JDBC_URL =
-            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
+//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //"jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
   private boolean exceptionThrown = false;
 
