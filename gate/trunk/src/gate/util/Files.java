@@ -55,8 +55,6 @@ public class Files {
     while( (charsRead = resourceReader.read(charArray,0,size)) != -1 )
       resourceBuffer.append (charArray,0,charsRead);
 
-
-
     resourceReader.close();
     return resourceBuffer.toString();
   } // getResourceAsString(String)
@@ -69,27 +67,22 @@ public class Files {
   throws IOException {
     // create a temporary file name
     File resourceFile  = null;
-    FileWriter resourceFileWriter = null;
-    BufferedReader resourceReader = null;
+    FileOutputStream resourceFileOutputStream = null;
 
     resourceFile = File.createTempFile ("gateResource", ".tmp");
-    resourceFileWriter = new FileWriter(resourceFile);
+    resourceFileOutputStream = new FileOutputStream(resourceFile);
     resourceFile.deleteOnExit ();
-    resourceReader = new BufferedReader(new InputStreamReader(contentStream));
+    //resourceReader = new BufferedReader(new InputStreamReader(contentStream));
 
-    int charsRead = 0;
-    int fileWriterOffset = 0;
+    int bytesRead = 0;
+    int fileOffset = 0;
     final int readSize = 1024;
-    char[] chars = new char[readSize];
-
-    while( (charsRead = resourceReader.read(chars,0,readSize)) != -1 ){
-      resourceFileWriter.write (chars,fileWriterOffset,charsRead);
-      fileWriterOffset += charsRead;
+    byte[] bytes = new byte[readSize];
+    while( (bytesRead = contentStream.read(bytes,0,readSize) ) != -1 ){
+      resourceFileOutputStream.write(bytes,fileOffset, bytesRead);
+      fileOffset += bytesRead;
     }
-
-
-    resourceFileWriter.close();
-    resourceReader.close ();
+    resourceFileOutputStream.close();
     contentStream.close ();
     return resourceFile;
   }

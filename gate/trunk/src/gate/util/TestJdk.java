@@ -56,7 +56,7 @@ public class TestJdk extends TestCase
       "  public static String getSomething() { return \"something\"; }" + nl +
       "} " + nl
       ;
-
+    Gate.init();
     byte[] classBytes = jdk.compile(javaSource, "gate/util/X.java");
     assert(
       "no bytes returned from compiler",

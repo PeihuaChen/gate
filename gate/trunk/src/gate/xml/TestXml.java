@@ -65,7 +65,7 @@ public class TestXml extends TestCase
     gate.Document doc = gate.Transients.newDocument(
               new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
     );
-
+    
 
     /*
     gate.Document doc = gate.Transients.newDocument(
