@@ -122,5 +122,4 @@ Rule: NewLine
   features.put("string", text);
   features.put("length", Integer.toString(text.length()));
   annotations.add(toRemove.firstNode(), toRemove.lastNode(), "SpaceToken", features);
-  System.out.println("New spacetoken: " + text.length());
 }
