@@ -22,13 +22,18 @@ import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
 import gate.swing.XJTable;
 import gate.util.GateRuntimeException;
+import java.awt.*;
 import java.awt.Component;
+import java.awt.GridBagLayout;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -54,9 +59,51 @@ public class AnnotationListView extends AbstractDocumentView
     table.setSortedColumn(START_COL);
     scroller = new JScrollPane(table);
     
+    mainPanel = new JPanel();
+    mainPanel.setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+    
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+    constraints.weightx = 1;
+    constraints.weighty = 1;
+    constraints.fill= GridBagConstraints.BOTH;
+    mainPanel.add(scroller, constraints);
+    
+    constraints.gridy = 1;
+    constraints.weightx = 0;
+    constraints.weighty = 0;
+    constraints.fill= GridBagConstraints.NONE;
+    constraints.anchor = GridBagConstraints.WEST;
+    statusLabel = new JLabel();
+    mainPanel.add(statusLabel, constraints);
+    initListeners();
     
   }
   
+  protected void initListeners(){
+    tableModel.addTableModelListener(new TableModelListener(){
+      public void tableChanged(TableModelEvent e){
+        statusLabel.setText(
+                Integer.toString(tableModel.getRowCount()) + 
+                " Annotations (" +
+                Integer.toString(table.getSelectedRowCount()) +
+                " selected)");
+      }
+    });
+    
+    table.getSelectionModel().
+      addListSelectionListener(new ListSelectionListener(){
+        public void valueChanged(ListSelectionEvent e){
+          statusLabel.setText(
+                  Integer.toString(tableModel.getRowCount()) + 
+                  " Annotations (" +
+                  Integer.toString(table.getSelectedRowCount()) +
+                  "selected)");
+        }
+    });
+    
+  }
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#registerHooks()
    */
@@ -75,7 +122,7 @@ public class AnnotationListView extends AbstractDocumentView
    * @see gate.gui.docview.DocumentView#getGUI()
    */
   public Component getGUI() {
-    return scroller;
+    return mainPanel;
   }
   
   /* (non-Javadoc)
