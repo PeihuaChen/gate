@@ -7,13 +7,15 @@
  */
 
 package gate;
+
+import oracle.jdbc.driver.OracleDriver;
 import java.util.*;
 import junit.framework.*;
 import gate.annotation.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.db.*;
-import oracle.jdbc.driver.OracleDriver;
+
 
 /** Top-level entry point for GATE test suite.
   * "main" will run the JUnit test runner interface.
