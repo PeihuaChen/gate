@@ -461,10 +461,12 @@ public class MainFrame extends JFrame
     verLbl = new JLabel(
 "<HTML>" +
 "<B>Hamish Cunningham, Valentin Tablan, Kalina Bontcheva, Diana Maynard,</B>" +
-"<BR>Cristian Ursu, Marin Dimitrov, Oana Hamza, Horacio Saggion," +
-"<BR>Atanas Kiryakov, Angel Kirilov, Bobby Popov, Damyan Ognyanoff," +
-"<BR>Robert Gaizauskas, Mark Hepple, Mark Leisher, " +
-"Kevin Humphreys, Yorick Wilks." +
+"<BR>Niraj Aswani, Mike Dowman, Marin Dimitrov, Bobby Popov, Yaoyong Li, Akshay Java," +
+"<BR>Wim Peters, Mark Greenwood, Angus Roberts, Andrey Shafirin, Horacio Saggion," +
+//"<BR>XXX," +
+//"<BR>XXX," +
+"<BR>Cristian Ursu, Atanas Kiryakov, Angel Kirilov, Damyan Ognyanoff, Dimitar Manov," +
+"<BR>Oana Hamza, Robert Gaizauskas, Mark Hepple, Mark Leisher, Kevin Humphreys, Yorick Wilks." +
 "<P><B>JVM version</B>: " + System.getProperty("java.version") +
 " from " + System.getProperty("java.vendor")
     );
