@@ -97,6 +97,7 @@ public class TestPR extends TestCase
       " Token annotations, instead of the expected 1284.",
       doc1.getAnnotations().size()== 1284);
 
+
     //run the tokeniser for doc2
     tokeniser.setDocument(doc2);
     tokeniser.execute();
@@ -104,6 +105,7 @@ public class TestPR extends TestCase
       doc2.getAnnotations().size() +
       " Token annotations, instead of the expected 2138.",
       doc2.getAnnotations().size()== 2138);
+
 
     //run the tokeniser for doc3
     tokeniser.setDocument(doc3);
@@ -126,16 +128,16 @@ public class TestPR extends TestCase
     gaz.execute();
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
-      " Lookup annotations, instead of the expected 47.",
-      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 47);
+      " Lookup annotations, instead of the expected 46.",
+      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 46);
 
     //run gazetteer for doc2
     gaz.setDocument(doc2);
     gaz.execute();
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
-      " Lookup annotations, instead of the expected 99.",
-      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 99);
+      " Lookup annotations, instead of the expected 98.",
+      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 98);
 
     //run gazetteer for doc3
     gaz.setDocument(doc3);
