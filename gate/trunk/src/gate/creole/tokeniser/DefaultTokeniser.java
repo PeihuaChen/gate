@@ -692,17 +692,6 @@ implements Runnable, ProcessingResource{
       ((StatusListener)listenersIter.next()).statusChanged(text);
   } // fireStatusChangedEvent
 
-  //ProcessProgressReporter implementation
-  /**    */
-  public void addProcessProgressListener(ProgressListener listener) {
-    myProgressListeners.add(listener);
-  } // addProcessProgressListener
-
-  /**    */
-  public void removeProcessProgressListener(ProgressListener listener) {
-    myProgressListeners.remove(listener);
-  } // removeProcessProgressListener
-
   /**    */
   protected void fireProgressChangedEvent(int i) {
     Iterator listenersIter = myProgressListeners.iterator();
@@ -758,6 +747,20 @@ implements Runnable, ProcessingResource{
   }
   public String getEncoding() {
     return encoding;
+  }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
   }// fireProcessFinishedEvent
   //ProcessProgressReporter implementation ends here
 
@@ -843,6 +846,7 @@ implements Runnable, ProcessingResource{
   private String rulesResourceName;
   private java.net.URL rulesURL;
   private String encoding;
+  private transient Vector progressListeners;
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}
@@ -897,6 +901,24 @@ implements Runnable, ProcessingResource{
     ignoreTokens.add("\t");
     ignoreTokens.add("\f");
 
-  } // static initializer
+  }
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }/// static initializer
 
 } // class DefaultTokeniser
