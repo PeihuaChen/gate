@@ -23,6 +23,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import java.util.*;
+import java.lang.reflect.*;
 
 import gate.*;
 import gate.annotation.*;
@@ -336,10 +337,12 @@ public class AnnotationEditDialog extends JDialog {
 
     if ( annotSchema.getFeatureSchemaSet() == null ||
          annotSchema.getFeatureSchemaSet().size() == 0){
+
       responseMap = Factory.newFeatureMap();
-      responseMap.putAll(featureMap);
+      if (featureMap != null)
+        responseMap.putAll(featureMap);
       return responseMap;
-    }
+    }// End if
 
     this.setTitle(annotSchema.getAnnotationName());
     initLocalData();
@@ -486,12 +489,118 @@ public class AnnotationEditDialog extends JDialog {
       switch(columnIndex){
         case 0:{break;}
         case 1:{
-          //String className = rd.getFeatureSchema().getValueClassName();
-          rd.setValue(aValue);
-          // adaug in table model a randul i, valoarea citita
-          // Mai intiai se face conversia la tipul dorit
+          // Try to perform type conversion
+          String className = null;
+          String aValueClassName = null;
+          // Need to create an object belonging to class "className" based on
+          // the string object "aValue"
+          if (aValue == null){
+            rd.setValue("?");
+/*            JOptionPane.showMessageDialog(null,
+                                      "No value to set!",
+                                      "Error", JOptionPane.ERROR_MESSAGE);
+*/
+             return;
+          }// End if
+          // Get the class name the final object must belong
+          className = rd.getFeatureSchema().getValueClassName();
+          // Get the class name that aValue object belongs to.
+          aValueClassName = aValue.getClass().toString();
+          // If there is no class to convert to, let the aValue object as it is
+          // and return.
+          if (className == null){
+              rd.setValue(aValue);
+/*              JOptionPane.showMessageDialog(null,
+        "No type to convert to! The value will be saved with its current type!",
+        "Warning", JOptionPane.WARNING_MESSAGE);
+*/
+              return;
+          }// End if
+
+          // If both classes are the same, then return. There is nothing to
+          // convert to
+          if (className.equals(aValueClassName)){
+            rd.setValue(aValue);
+            return;
+          }// End if
+          // If the class "aValue" object belongs to is not String then return.
+          // This method tries to convert a string to various other types.
+          if (!"class java.lang.String".equals(aValueClassName)){
+            rd.setValue(aValue);
+/*            JOptionPane.showMessageDialog(null,
+   "No type conversion will be performed! The current value type is not String",
+        "Warning", JOptionPane.WARNING_MESSAGE);
+*/
+            return;
+          }// End if
+
+          // The aValue object belonging to java.lang.String needs to be
+          // converted into onother object belonging to "className"
+          Class  classObj = null;
+          try{
+            // Create a class object from className
+            classObj = Class.forName(className);
+          }catch (ClassNotFoundException cnfex){
+            rd.setValue(aValue);
+/*            JOptionPane.showMessageDialog(null,
+                                          cnfex.toString(),
+                                          "Error", JOptionPane.ERROR_MESSAGE);
+*/
+
+            return;
+          }// End catch
+          // Get its list of constructors
+          Constructor[] constrArray = classObj.getConstructors();
+          if (constrArray == null){
+            rd.setValue(aValue);
+            return;
+          }// End if
+
+          // Search for the constructo which takes only one String parameter
+          boolean found = false;
+          Constructor constructor = null;
+          for (int i=0; i<constrArray.length; i++){
+            constructor = constrArray[i];
+            if ( constructor.getParameterTypes().length == 1 &&
+                 "class java.lang.String".equals(
+                                constructor.getParameterTypes()[0].toString())
+               ){
+                  found = true;
+                  break;
+            }// End if
+          }// End for
+
+          if (!found){
+            rd.setValue(aValue);
+/*            JOptionPane.showMessageDialog(null,
+               "Couldn't find a constructor to take a string param. for the " +
+                        className +
+                        " type!",
+                       "Warning", JOptionPane.WARNING_MESSAGE);
+*/
+            return;
+          }// End if
+          try{
+            // Try to create an object with this constructor
+            Object[] paramsArray = new Object[1];
+            paramsArray[0] = aValue;
+            Object newValueObject = constructor.newInstance(paramsArray);
+
+            rd.setValue(newValueObject);
+
+          } catch (Exception e){
+            rd.setValue("");
+/*            JOptionPane.showMessageDialog(null,
+                          "Couldn't construct an object of type " +
+                          className +
+                          "from the current value!",
+                          "Error", JOptionPane.ERROR_MESSAGE);
+*/
+          }// End catch
+
+//          rd.setValue(aValue);
           break;
-        }
+        }// End case
         case 2:{break;}
         case 3:{break;}
         default:{}
@@ -536,15 +645,7 @@ public class AnnotationEditDialog extends JDialog {
      JComboBox cb = null;
      JTextField tf = null;
 
-    public FeaturesEditor(){
-/*
-      addFocusListener(new FocusAdapter() {
-        public void focusLost(FocusEvent e) {
-          fireEditingStopped();
-        }
-      });
-      */
-    }
+    public FeaturesEditor(){}
 
     public Component getTableCellEditorComponent(JTable table,
                                              Object value,
