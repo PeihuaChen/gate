@@ -11,6 +11,10 @@ clear buffer
 pause >>>>>> Indexes successfully  created. Press ENTER to continue...
 clear buffer
  
+@../../../src/database/Oracle/views.sql
+pause >>>>>> Views successfully  created. Press ENTER to continue...
+clear buffer
+
 @../../../src/database/Oracle/error.spc 
 pause >>>>>> Package ERROR successfully  created. Press ENTER to continue...
 clear buffer
