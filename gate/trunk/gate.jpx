@@ -2,13 +2,20 @@
 
 <!--JBuilder XML Project-->
 <project>
+  <property category="build" name="CopyExtensions.1" value="txt" />
+  <property category="build" name="CopyExtensions.2" value="xml" />
   <property category="idl" name="ProcessIDL" value="false" />
   <property category="runtime" name="ConfigurationCount" value="7" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext" />
+  <property category="runtime.0" name="appserver.ejbJarsSaved" value="1" />
+  <property category="runtime.0" name="appserver.parameters" value="-jts -jns -jss -jdb" />
+  <property category="runtime.0" name="appserver.servername" value="ejbcontainer" />
+  <property category="runtime.0" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.0" name="jsprunner.docbase" value="." />
   <property category="runtime.0" name="jsprunner.jspfile" value="W%|/JBuilder4/bin" />
+  <property category="runtime.0" name="jsprunner.launchuri" value="/W%|/JBuilder4/bin" />
   <property category="runtime.1" name="ConfigurationName" value="Main GUI" />
   <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.1" name="application.class" value="gate.Main" />
@@ -68,11 +75,11 @@
   <property category="sys" name="DefaultPackage" value="gate.gui.LazyTabbedPane" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
-  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
+  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
   <property category="sys" name="EventMatch" value="false" />
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
-  <property category="sys" name="InstanceVisibility" value="0" />
+  <property category="sys" name="InstanceVisibility" value="4" />
   <property category="sys" name="JDK" value="SUN java 1.3.0-C" />
   <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener" />
   <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener" />
@@ -93,6 +100,11 @@
   <property category="sys" name="VersionLabel" value="@version" />
   <property category="sys" name="WorkingDirectory" value="." />
   <property category="sys" name="warn.auto.packages" value="false" />
+  <property category="team" name="ignorePath.0" value="classes/dependency cache" />
+  <property category="team" name="ignorePath.1" value="classes/gate" />
+  <property category="team" name="ignorePath.2" value="classes/guk" />
+  <property category="team" name="ignorePath.3" value="doc/userguide.html" />
+  <property category="team" name="ignorePath.4" value="build/testpkg/testpkg" />
   <file path="src/gate/resources/creole/creole.xml" />
 </project>
 
