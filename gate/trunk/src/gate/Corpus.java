@@ -22,16 +22,33 @@ import gate.event.*;
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url. TIPSTER equivalent: Collection.
   */
-public interface Corpus extends LanguageResource, SortedSet {
+public interface Corpus extends LanguageResource, List, NameBearer {
 
-  /** Get the name of the corpus. */
-  public String getName();
+  /**
+   * Gets the names of the documents in this corpus.
+   * @return a {@link List} of Strings representing the names of the documents
+   * in this corpus.
+   */
+  public List getDocumentNames();
 
-  /** Set the name of the corpus. */
-  public void setName(String name);
+  /**
+   * Gets the name of a document in this corpus.
+   * @param index the index of the document
+   * @return a String value representing the name of the document at
+   * <tt>index</tt> in this corpus.
+   */
+  public String getDocumentName(int index);
 
+  /**
+   * Removes one of the listeners registered with this corpus.
+   * @param l the listener to be removed.
+   */
   public void removeCorpusListener(CorpusListener l);
 
+  /**
+   * Registers a new {@link CorpusListener} with this corpus.
+   * @param l the listener to be added.
+   */
   public void addCorpusListener(CorpusListener l);
 
 } // interface Corpus
