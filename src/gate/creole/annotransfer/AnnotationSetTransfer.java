@@ -83,7 +83,7 @@ public class AnnotationSetTransfer extends AbstractProcessingResource
       Long start = bodyAnn.getStartNode().getOffset();
       Long end = bodyAnn.getEndNode().getOffset();
 
-      AnnotationSet annots2Copy = inputAS.get(start, end);
+      AnnotationSet annots2Copy = inputAS.getContained(start, end);
       outputAS.addAll(annots2Copy);
     }
 
