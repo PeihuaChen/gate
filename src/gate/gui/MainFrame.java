@@ -1938,6 +1938,9 @@ public class MainFrame extends JFrame
                   grp = ac.findGroup(group);
                   usr = ac.findUser(userName);
                   mySession = ac.login(userName, userPass, grp.getID());
+
+                  //save here the user name, pass and group in local gate.xml
+
                 } catch (gate.security.SecurityException ex) {
                     JOptionPane.showMessageDialog(
                       MainFrame.this,

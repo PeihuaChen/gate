@@ -703,10 +703,17 @@ public class NameBearerHandle implements Handle,
             SecurityInfo si = null;
             //check whether the datastore supports security data
             //serial ones do not for example
-            if (securityData != null)
-              si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,
+            if (securityData != null) {
+              //first get the type of access from the user
+              if(!AccessRightsDialog.showDialog(window))
+                return;
+              int accessType = AccessRightsDialog.getSelectedMode();
+              if(accessType < 0)
+                return;
+              si = new SecurityInfo(accessType,
                                     (User) securityData.get("user"),
                                     (Group) securityData.get("group"));
+            }//if security info
             LanguageResource lr = ds.adopt((LanguageResource)target,si);
             ds.sync(lr);
 
