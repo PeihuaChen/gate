@@ -100,7 +100,7 @@ public class DocumentContentImpl implements DocumentContent
       toRead -= readLength;
     }
 
-    //close reader
+    //4.close reader
     uReader.close();
 
     content = new String(buf);
