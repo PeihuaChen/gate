@@ -15,8 +15,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
-import gate.event.ProgressListener;
-import gate.event.StatusListener;
+import gate.event.*;
 
 
 public abstract class AbstractController extends AbstractResource
@@ -133,6 +132,8 @@ public abstract class AbstractController extends AbstractResource
     }
   }
 
+
+
   /**
    * Notifies all the {@link gate.event.ProgressListener}s of a progress change
    * event.
@@ -233,6 +234,22 @@ public abstract class AbstractController extends AbstractResource
     return name;
   }
 
+  public synchronized void removeControllerListener(ControllerListener l) {
+    if (controllerListeners != null && controllerListeners.contains(l)) {
+      Vector v = (Vector) controllerListeners.clone();
+      v.removeElement(l);
+      controllerListeners = v;
+    }
+  }
+
+  public synchronized void addControllerListener(ControllerListener l) {
+    Vector v = controllerListeners == null ? new Vector(2) : (Vector) controllerListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      controllerListeners = v;
+    }
+  }
+
   protected String name;
 
   /**
@@ -248,5 +265,29 @@ public abstract class AbstractController extends AbstractResource
   private transient Vector progressListeners;
 
 
+  /**
+   * The list of {@link gate.event.ControllerListener}s registered with this
+   * resource
+   */
+  private transient Vector controllerListeners;
+
   protected boolean interrupted = false;
+  protected void fireResourceAdded(ControllerEvent e) {
+    if (controllerListeners != null) {
+      Vector listeners = controllerListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ControllerListener) listeners.elementAt(i)).resourceAdded(e);
+      }
+    }
+  }
+  protected void fireResourceRemoved(ControllerEvent e) {
+    if (controllerListeners != null) {
+      Vector listeners = controllerListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ControllerListener) listeners.elementAt(i)).resourceRemoved(e);
+      }
+    }
+  }
 }
