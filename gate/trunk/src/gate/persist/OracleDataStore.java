@@ -18,6 +18,10 @@ package gate.persist;
 import java.sql.*;
 import java.net.*;
 import java.util.*;
+import java.io.*;
+
+import oracle.sql.CLOB;
+import oracle.sql.BLOB;
 
 import junit.framework.*;
 
@@ -34,6 +38,8 @@ public class OracleDataStore extends JDBCDataStore {
 
   private static final int READ_ACCESS = 0;
   private static final int WRITE_ACCESS = 1;
+
+  private static final int INTERNAL_BUFFER_SIZE = 16*1024;
 
   public OracleDataStore() {
   }
@@ -564,5 +570,41 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+  /** --- */
+  protected void readCLOB(java.sql.Clob src, StringBuffer dest)
+    throws SQLException, IOException {
+
+    int readLength = 0;
+    char[] readBuffer = new char[INTERNAL_BUFFER_SIZE];
+
+    //1. empty the buffer
+    dest.delete(0,dest.length());
+
+    //2. get Oracle CLOB
+    CLOB clo = (CLOB)src;
+
+    //3. get Unicode stream
+    Reader input = clo.getCharacterStream();
+
+    //4. read
+    BufferedReader buffInput = new BufferedReader(input,INTERNAL_BUFFER_SIZE);
+
+    while ((readLength = buffInput.read(readBuffer, 0, INTERNAL_BUFFER_SIZE)) != -1) {
+      dest.append(readBuffer, 0, readLength);
+    }
+
+    //5.close streams
+    buffInput.close();
+    input.close();
+
+  }
+
+
+  /** --- */
+  protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
+    throws SQLException {
+
+    throw new MethodNotImplementedException();
+  }
 
 }
