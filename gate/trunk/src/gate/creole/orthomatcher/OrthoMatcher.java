@@ -72,9 +72,6 @@ public class OrthoMatcher extends AbstractProcessingResource
    *  the newly matched annotation matches all the others
    *  This is needed, because organizations can share
    *  first/last tokens like News and be different
-   *
-   * I have not implemented this yet, but might need to
-   * Let's see how it tests
    */
   private   boolean allMatchingNeeded = false;
 
@@ -417,7 +414,6 @@ public class OrthoMatcher extends AbstractProcessingResource
         //if unknown annotation, we need to change to the new type
         if (nameAnnot.getType().equals(unknownType)) {
           matchedUnknown = true;
-//          annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
           if (prevAnnot.getType().equals(unknownType))
             annots2Remove.put(nameAnnot.getId(),
                               annots2Remove.get(prevAnnot.getId()));
@@ -473,7 +469,17 @@ public class OrthoMatcher extends AbstractProcessingResource
 //      if (newAnnot.getType().equals(unknownType))
 //        Out.prln("Matching new " + annotString + " with annots " + toMatchList);
       toMatchList.remove(prevAnnot.getId());
-      return matchOtherAnnots(toMatchList, newAnnot, annotString);
+
+      /**
+       * Check whether we need to ensure that there is a match with the rest
+       * of the matching annotations, because the rule requires that
+       * transtivity is not assummed.
+       */
+      if (allMatchingNeeded) {
+        allMatchingNeeded = false;
+        return matchOtherAnnots(toMatchList, newAnnot, annotString);
+      } else
+        return true;
     }
     return false;
   }
@@ -1163,6 +1169,7 @@ public class OrthoMatcher extends AbstractProcessingResource
 //      if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
 //        Out.prln("Rule7");
       return matchRule1(previous_token,s2,caseSensitive);
+
     }
     return false;
   }//matchRule7
@@ -1244,10 +1251,16 @@ public class OrthoMatcher extends AbstractProcessingResource
                       ((Annotation) tokensLongAnnot.get(
                           tokensLongAnnot.size()-1)).getFeatures().get(STRING_FEATURE);
 //    Out.prln("Converted to " + s1_short);
-    if (tokensLongAnnot.size()>1)
-      return matchRule1(s1_short,
-                      s2,
-                      caseSensitive);
+    if (tokensLongAnnot.size()>1) {
+      boolean matched = matchRule1(s1_short, s2, caseSensitive);
+      //we need to make sure all names match, instead of assuming transitivity,
+      //to avoid matching BBC News with News then News with ITV News, which
+      //by transitivity leads to BBC News matching ITV News which is not what
+      //we want
+      if (matched)
+        allMatchingNeeded = true;
+      return matched;
+    } //if
 
     return false;
   }//matchRule9
