@@ -14,69 +14,8 @@
 */
 
 Phase:	Url
-Input:  Token Lookup SpaceToken
+Input:  Lookup SpaceToken Token UrlPre
 Options: control = appelt
-
-
-// Email rules
-
-Rule:Emailaddress1
-Priority: 50
-(
- (
-  {Token.kind == word}|
-  {Token.kind == number}|
-  {Token.string == "_"}
- )
- ({Token.string == "."}
-  ({Token.kind == word}|
-   {Token.kind == number}|
-   {Token.string == "_"}
-  )
- )?
- {Token.string == "@"}		
- (
-  {Token.kind == word}|
-  {Token.kind == symbol}|
-  {Token.kind == punctuation}|
-  {Token.kind == number}
- )
- ({Token.string == "."})?
- (
-  {Token.kind == word}|
-  {Token.kind == symbol}|
-  {Token.kind == punctuation}|
-  {Token.kind == number}
- )?
- ({Token.string == "."})?
-(
-  {Token.kind == word}|
-  {Token.kind == symbol}|
-  {Token.kind == punctuation}|
-  {Token.kind == number}
- )?
-({Token.string == "."})?
- (
-  {Token.string == "."}		
-  (
-   {Token.kind == word}|
-   {Token.kind == number}	
-  )
-  ({Token.string == "."})?
-  (
-   {Token.kind == word}|
-   {Token.kind == number}	
-  )?
-  ({Token.string == "."})?
-  (
-   {Token.kind == word}|
-   {Token.kind == number}	
-  )?
- )
-)
-:emailAddress -->
-  :emailAddress.Email= {kind = "emailAddress", rule = "Emailaddress1"}
-
 
 
 
@@ -86,33 +25,17 @@ Priority: 50
 // ftp://amazon.com
 // www.amazon.com
 
+
+
 Rule: Url1
 Priority: 50
 
-(	((({Token.string == "http"}	|
-	   {Token.string == "ftp"})
-	   {Token.string == ":"}
-	   {Token.string == "/"}
-           {Token.string == "/"})	|
-	 ({Token.string == "www"}
-          {Token.string == "."})	
-	)			
-	
-	({Token.orth == lowercase}	|
-        {Token.orth == upperInitial}	|
-        {Token.kind == number}		|
-        {Token.kind == punctuation}	|
-        {Token.kind == symbol}		|
-	{Token.string == "."})+ 
-	
-	({Token.orth == lowercase}	|
-        {Token.orth == upperInitial}	|
-        {Token.kind == number}		|
-        {Token.kind == punctuation}	|
-        {Token.kind == symbol}		|
-	{Token.string == "/"}		|
-        {Token.string == "."})*
-):urlAddress -->
+(	
+ {UrlPre}
+ ({Token})*
+):urlAddress 
+({SpaceToken})
+-->
 :urlAddress.Url = {kind = "urlAddress", rule = "Url1"}
 
 Rule: UrlContext
@@ -143,3 +66,4 @@ Priority: 20
 :urlAddress 
 -->
  :urlAddress.Url = {kind = "urlAddress", rule = "UrlContext"}
+
