@@ -20,6 +20,8 @@ create or replace package test is
   procedure create_test_data;
 
   procedure remove_test_data;  
+  
+  procedure remove_all_data;    
 
 end test;
 /
