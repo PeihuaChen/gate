@@ -123,9 +123,15 @@ public class TestSecurity extends TestCase
     Assert.assert(myGroup.getUsers().contains(myUser));
 
     //5. change group name
+    String oldName = myGroup.getName();
     myGroup.setName("my new group", adminSession);
     //is the name changed?
     Assert.assertEquals("my new group",myGroup.getName());
+    //test objectModification propagation
+    //[does change of group name reflect change of keys in the collections
+    //of the security factory?]
+    Assert.assertNotNull(ac.findGroup("my new group"));
+    Assert.assertNull(oldName);
 
 
     //6. get users
