@@ -3749,22 +3749,33 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
-    /** Get a list of LRs that satisfy some set or restrictions */
+    /** Get a list of LRs that satisfy some set or restrictions
+     *
+     *  @param constraints list of Restriction objects
+     */
   public List findLrIds(List constraints) throws PersistenceException {
     return findLrIds(constraints,null);
   }
 
   /**
-   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  Get a list of LRs IDs that satisfy some set or restrictions and are
    *  of a particular type
+   *
+   * @param constraints list of Restriction objects
+   * @param lrType type of Lrs. DBHelper.DOCUMENT_CLASS or DBHelper.CORPUS_CLASS
    */
   public List findLrIds(List constraints, String lrType) throws PersistenceException {
     return findLrIds(constraints, lrType, null, -1);
   }
 
   /**
-   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  Get a list of LRs IDs that satisfy some set or restrictions and are
    *  of a particular type
+   *
+   * @param constraints list of Restriction objects
+   * @param lrType type of Lrs. DBHelper.DOCUMENT_CLASS or DBHelper.CORPUS_CLASS
+   * @param orderByConstraints liat of OrderByRestriction objects
+   * @param limitcount limit returning objects -1 for unlimited
    */
   public List findLrIds(List constraints, String lrType,
                       List orderByConstraints, int limitcount) throws PersistenceException {
@@ -3811,7 +3822,12 @@ public class OracleDataStore extends JDBCDataStore {
         DBHelper.disconnect(conn, true);
       }
     }
-
+  /**
+   * Return count of LRs which matches the constraints.
+   *
+   * @param constraints list of Restriction objects
+   * @param lrType type of Lrs. DBHelper.DOCUMENT_CLASS or DBHelper.CORPUS_CLASS
+   */
   public long getLrsCount(List constraints, String lrType) throws PersistenceException {
       Vector lrs = new Vector();
       CallableStatement stmt = null;
@@ -3923,8 +3939,14 @@ public class OracleDataStore extends JDBCDataStore {
           expresion = expresion.append(getNumberExpresion(restr, sqlValues));
           break;
         default:
-          expresion = expresion.append(" FEATURE.ft_character_value = ? ");
-          sqlValues.addElement(restr.getStringValue());
+          if (restr.getOperator()==Restriction.OPERATOR_EQUATION){
+            expresion = expresion.append(" FEATURE.ft_character_value = ? ");
+            sqlValues.addElement(restr.getStringValue());
+          }
+          if (restr.getOperator()==Restriction.OPERATOR_LIKE){
+            expresion = expresion.append(" upper(FEATURE.ft_character_value) like ? ");
+            sqlValues.addElement("%"+restr.getStringValue().toUpperCase()+"%");
+          }
           break;
       }
     }
