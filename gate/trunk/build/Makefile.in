@@ -158,7 +158,7 @@ scratch:
 # make the user guide
 ../doc/userguide.html: ../doc/src/userguide.html
 	cp $? $@ && cd ../doc && \
-	$(RUN) -cp `$(CYGPATHP) ../lib/Bib2HTML.jar:../lib/jgl3.1.0.jar` \
+	$(RUN) -cp `$(CYGPATHP) ../build/lib/Bib2HTML.jar:../build/lib/jgl3.1.0.jar` \
 	  Bib2HTML.RunBib2HTML ../doc/bib/big.bib userguide.html && \
 	rm userguide.html.bak
 
@@ -184,7 +184,7 @@ internaldocs:
 # convert the source to HTML using the java2html utility
 java2html:
 	rm -rf ../doc/internal/java2html/[a-zA]*
-	$(RUN) -classpath `$(CYGPATH) ../lib/j2h.jar` j2h \
+	$(RUN) -classpath `$(CYGPATH) lib/j2h.jar` j2h \
 	  -d `$(CYGPATH) ../doc/java2html` -js `$(CYGPATH) ../src` \
 	  -jd `$(CYGPATH) ../doc/javadoc` -m 4 -t 2 -n "GATE source"
 
