@@ -20,11 +20,11 @@ public interface Search{
 
   public void setCorpus(IndexedCorpus ic);
 
-  public QueryResultList search(String query);
+  public QueryResultList search(String query) throws IndexException, SearchException;
 
-  public QueryResultList search(String query, int limit);
+  public QueryResultList search(String query, int limit) throws IndexException, SearchException;
 
-  public QueryResultList search(String query, List fieldNames);
+  public QueryResultList search(String query, List fieldNames) throws IndexException, SearchException;
 
-  public QueryResultList search(String query, int limit, List fieldNames);
+  public QueryResultList search(String query, int limit, List fieldNames) throws IndexException, SearchException;
 }
