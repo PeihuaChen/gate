@@ -542,6 +542,13 @@ public class AnnotationEditor extends AbstractVisualResource {
                 while(asIter.hasNext()){
                   AnnotationSet as = (AnnotationSet)asIter.next();
                   menu = new JMenu("Add to " + as.getName());
+                  menu.add(new NewCustomAnnotationPopupItem(
+                                                     start,
+                                                     end,
+                                                     as));
+
+                  menu.addSeparator();
+
                   schemasIter = getAnnotationSchemas().iterator();
                   while(schemasIter.hasNext()){
                     AnnotationSchema schema =
@@ -550,7 +557,6 @@ public class AnnotationEditor extends AbstractVisualResource {
                   }
                   popup.add(menu);
                 }
-
               }
 
               //Add to a new AnnotationSet
