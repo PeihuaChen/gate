@@ -161,9 +161,10 @@ public class Nerc extends SerialController {
       if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
                     new CustomProgressListener(66, 100));
-      transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
-                                                      params, features,
-                                                      listeners);
+      transducer = (ANNIETransducer)Factory.createResource(
+                                              "gate.creole.ANNIETransducer",
+                                              params, features,
+                                              listeners);
       if (! Main.batchMode) {//fire events if not in batch mode
         fireProgressChanged(100);
         fireProcessFinished();
@@ -380,7 +381,7 @@ public class Nerc extends SerialController {
   protected POSTagger tagger;
 
   /** The Jape transducer used by this NERC */
-  protected Transducer transducer;
+  protected ANNIETransducer transducer;
 
 
   private static final boolean DEBUG = false;
