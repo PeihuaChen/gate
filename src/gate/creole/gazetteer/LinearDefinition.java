@@ -38,13 +38,13 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   private URL url;
 
   /** set of lists as strings*/
-  private Set lists = new HashSet();
+  private List lists = new ArrayList();
 
   /** a mapping between a list and a node */
   private Map nodesByList = new HashMap();
 
   /** a map of gazetteer lists by nodes. this is loaded on loadLists*/
-  private Map gazListsByNode;
+  private Map gazListsByNode = new HashMap();
 
   /** flag whether the definition has been modified after loading */
   private boolean isModified = false;
@@ -59,37 +59,65 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    */
   public Map loadLists() throws ResourceInstantiationException {
     try {
-      if ( null == gazListsByNode ) {
-        gazListsByNode = new HashMap();
-        Iterator inodes = nodes.iterator();
-        while (inodes.hasNext()) {
-          LinearNode node = (LinearNode)inodes.next();
+      gazListsByNode = new HashMap();
+      Iterator inodes = nodes.iterator();
+      while (inodes.hasNext()) {
+        LinearNode node = (LinearNode)inodes.next();
 
-          GazetteerList list = new GazetteerList();
-          String path = url.getPath();
-          int slash = path.lastIndexOf("/");
-          if (-1 == slash ) {
-            slash = 0;
-          } else {
-            path = path.substring(0,slash+1);
-          }
-          URL lurl = new URL(url,node.getList());
-          list.setURL(lurl);
-          list.load();
+        GazetteerList list = new GazetteerList();
+        String path = url.getPath();
+        int slash = path.lastIndexOf("/");
+        if (-1 == slash ) {
+          slash = 0;
+        } else {
+          path = path.substring(0,slash+1);
+        }
+        URL lurl = new URL(url,node.getList());
+        list.setURL(lurl);
+        list.load();
 
-          gazListsByNode.put(node,list);
-        } // while inodes
-      } // if null
+        gazListsByNode.put(node,list);
+      } // while inodes
     } catch (Exception ex) {
       throw new ResourceInstantiationException(ex);
     }
     return gazListsByNode;
   }  // loadLists()
 
+  /** Loads a single gazetteer list given a name
+   *  @param listName the name of the list to be loaded
+   *  @return the loaded gazetteer list
+   *  @throws ResourceInstantiationException*/
+  public GazetteerList loadSingleList(String listName)
+  throws ResourceInstantiationException {
+    GazetteerList list = new GazetteerList();
+    try {
+      String path = url.getPath();
+      int slash = path.lastIndexOf("/");
+      if (-1 == slash ) {
+        slash = 0;
+      } else {
+        path = path.substring(0,slash+1);
+      }
+      URL lurl = new URL(url,listName);
+      list.setURL(lurl);
+      list.load();
+    } catch (MalformedURLException murle ) {
+      throw new ResourceInstantiationException(murle);
+    }
+    return list;
+  } // loadSingleList
+
   /**get the lists by node map
-   * @return a map of nodes vs lists */
-  public Map getListsByNode() {
+   * @return a map of nodes vs lists*/
+  public Map getListsByNode(){
     return gazListsByNode;
+  }
+
+  /** get a map of lists names vs nodes
+   *  @return a map of lists names vs nodes*/
+  public Map getNodesByListNames() {
+     return nodesByList;
   }
 
   /**returns the value of the isModified flag.
@@ -168,21 +196,62 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   } // store();
 
   /**
-   * note that a new set is created so the adding and removing of lists will
+   * note that a new list is created so the adding and removing of lists will
    * not affect the internal members. Also there is no setLists method since the leading
    * member of the class is nodes, and lists cannot be added individually without being
    * associated with a node.
-   * @return a set of the lists in this
+   * @return a list of the gazetteer lists names
    */
-  public Set getLists() {
-    return new HashSet(lists);
+  public List getLists() {
+    return new ArrayList(lists);
   }
 
-  /** get the nodes of the definition as a set
-   *  @return set of the nodes of the definition*/
-  public Set getNodes() {
-    return new HashSet(nodes);
+  /** get the nodes of the definition as a list
+   *  @return the list of nodes */
+  public List getNodes() {
+    return new ArrayList(nodes);
   }
+
+
+  /** Gets the set of all major types in this definition
+   * @return the set of all major types present in this definition*/
+  public Set getMajors() {
+    Set result = new HashSet();
+    for ( int i = 0 ; i < nodes.size() ; i++ )
+    {
+      String maj = ((LinearNode)nodes.get(i)).getMajorType();
+      if (null!= maj)
+        result.add(maj);
+    }
+    return result;
+  } // getMajors
+
+  /** Gets the set of all minor types in this definition
+   * @return the set of all minor types present in this definition*/
+  public Set getMinors() {
+    Set result = new HashSet();
+    for ( int i = 0 ; i < nodes.size() ; i++ ) {
+      String min = ((LinearNode)nodes.get(i)).getMinorType();
+      if (null!=min)
+        result.add(min);
+    }
+    result.add("");
+    return result;
+  } // getMinors()
+
+  /** Gets the set of all languages in this definition
+   * @return the set of all languages present in this definition*/
+  public Set getLanguages() {
+    Set result = new HashSet();
+    for ( int i = 0 ; i < nodes.size() ; i++ ) {
+      String lang = ((LinearNode)nodes.get(i)).getLanguage();
+      if (null!=lang)
+        result.add(lang);
+    }
+    result.add("");
+    return result;
+  } // getMinors()
+
 
   /*---implementation of interface java.util.List---*/
   public boolean addAll(int index, Collection c) {
@@ -213,10 +282,16 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     if (o instanceof LinearNode) {
       String list = ((LinearNode)o).getList();
       if (!nodesByList.containsKey(list)) {
-        nodes.add(index,o);
-        nodesByList.put(list,o);
-        lists.add(list);
-        isModified = true;
+        try {
+          GazetteerList gl = loadSingleList(list);
+          gazListsByNode.put(o,gl);
+          nodes.add(index,o);
+          nodesByList.put(list,o);
+          lists.add(list);
+          isModified = true;
+        } catch (ResourceInstantiationException x) {
+          // do nothing since the list ain't real
+        }
       } // if unique
     } // if a linear node
   }
@@ -229,6 +304,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       String list = ((LinearNode)result).getList();
       lists.remove(list);
       nodesByList.remove(list);
+      gazListsByNode.remove(result);
       isModified |= (size != nodes.size());
     }
     return result;
@@ -288,10 +364,16 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     if (o instanceof LinearNode) {
       String list = ((LinearNode)o).getList();
       if (!nodesByList.containsKey(list)) {
-        result = nodes.add(o);
-        nodesByList.put(list,o);
-        lists.add(list);
-        isModified=true;
+        try {
+          GazetteerList gl = loadSingleList(list);
+          gazListsByNode.put(o,gl);
+          result = nodes.add(o);
+          nodesByList.put(list,o);
+          lists.add(list);
+          isModified=true;
+        } catch (ResourceInstantiationException x) {
+          result = false;
+        }
       } // if unique
     } // if a linear node
     return result;
@@ -305,6 +387,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       String list = ((LinearNode)o).getList();
       lists.remove(list);
       nodesByList.remove(list);
+      gazListsByNode.remove(o);
       isModified |= (size != nodes.size());
     } // if linear node
     return result;
@@ -363,6 +446,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     nodes.clear();
     lists.clear();
     nodesByList.clear();
+    gazListsByNode.clear();
     isModified = true;
   }
 

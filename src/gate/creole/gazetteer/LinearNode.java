@@ -122,13 +122,13 @@ public class LinearNode {
   public String toString() {
     String result = list+':'+major;
 
-    if ( null!=minor )
+    if ( (null!=minor)  && (0 != minor.length()))
       result += ':'+minor;
 
-    if ( null!=language ) {
-      if (null==minor)
+    if ( (null!=language) && (0 != language.length())) {
+      if ((null==minor) || (0 == minor.length()) )
         result +=':';
-      result += ':'+minor;
+      result += ':'+language;
     }
     return result;
   }
