@@ -306,17 +306,17 @@ public class CreoleRegisterImpl extends HashMap
    * @param directory
    */
   public void removeDirectory(URL directory){
-    directories.remove(directory);
-    DirectoryInfo dInfo = (DirectoryInfo)Gate.getDirectoryInfo(directory);
-    if(dInfo != null){
-      Iterator resIter = dInfo.getResourceInfoList().iterator();
-      while(resIter.hasNext()){
-        ResourceInfo rInfo = (ResourceInfo)resIter.next();
-        remove(rInfo.getResourceClassName());
+    if(directories.remove(directory)){
+      DirectoryInfo dInfo = (DirectoryInfo)Gate.getDirectoryInfo(directory);
+      if(dInfo != null){
+        Iterator resIter = dInfo.getResourceInfoList().iterator();
+        while(resIter.hasNext()){
+          ResourceInfo rInfo = (ResourceInfo)resIter.next();
+          remove(rInfo.getResourceClassName());
+        }
       }
       System.out.println("CREOLE plugin unloaded: " + directory);
     }
-    
   }
   
   /** Overide HashMap's delete method to update the lists of types
