@@ -95,5 +95,17 @@ create or replace package persist is
   procedure change_content_type(p_cont_id        in number,
                                 p_new_type       in number);     
 
+                                
+  procedure get_id_lot(p_id1        out number,
+                       p_id2        out number,
+                       p_id3        out number,
+                       p_id4        out number,
+                       p_id5        out number,
+                       p_id6        out number,
+                       p_id7        out number,
+                       p_id8        out number,
+                       p_id9        out number,
+                       p_id10       out number);     
+                                
 end persist;
 /
