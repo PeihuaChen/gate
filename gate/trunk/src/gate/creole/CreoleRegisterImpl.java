@@ -389,7 +389,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     return publics;
   } // getPublics
 
-  /**Gets a list of all non private types from alist of types*/
+  /** Gets a list of all non private types from alist of types*/
   protected List getPublicTypes(Collection types){
     Iterator iter = types.iterator();
     List publics = new ArrayList();
@@ -399,7 +399,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       if(rData != null && !rData.isPrivate()) publics.add(oneType);
     }
     return publics;
-  }
+  } // getPublicTypes
 
   /**
    * Removes a {@link gate.event.CreoleListener} previously registered with this
@@ -419,13 +419,16 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
    * from the system.
    */
   public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v = creoleListeners == null ? new Vector(2) :
-                                         (Vector) creoleListeners.clone();
-    if (!v.contains(l)) {
+    Vector v =
+      creoleListeners == null
+      ? new Vector(2)
+      : (Vector) creoleListeners.clone();
+
+    if (! v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
     }
-  }
+  } // addCreoleListener
 
   /**
    * Notifies all listeners that a new {@link gate.Resource} has been loaded
@@ -439,7 +442,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
         ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
       }
     }
-  }
+  } // fireResourceLoaded
 
   /**
    * Notifies all listeners that a {@link gate.Resource} has been unloaded
@@ -453,7 +456,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
         ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
       }
     }
-  }
+  } // fireResourceUnloaded
 
   /** A list of the types of LR in the register. */
   protected Set lrTypes = new HashSet();

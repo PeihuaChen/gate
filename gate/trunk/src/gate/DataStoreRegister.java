@@ -42,4 +42,28 @@ public class DataStoreRegister extends HashSet {
     return names;
   } // getDataStoreClassNames()
 
+  /**
+   * Adds the specified element to this set if it is not already
+   * present. Overriden here for event registration code.
+   */
+  public boolean add(Object o) {
+    return super.add(o);
+  } // add
+
+  /**
+   * Removes the given element from this set if it is present.
+   * Overriden here for event registration code.
+   */
+  public boolean remove(Object o) {
+    return super.remove(o);
+  } // remove
+
+  /**
+   * Removes all of the elements from this set.
+   * Overriden here for event registration code.
+   */
+  public void clear() {
+    super.clear();
+  } // clear
+
 } // class DataStoreRegister
