@@ -2,14 +2,14 @@
  *	TestCreole.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 16/Mar/00
  *
  *	$Id$
@@ -43,11 +43,12 @@ public class TestCreole extends TestCase
   /** Fixture set up */
   public void setUp() throws Exception {
     // Initialise the creole register
+    //Gate.init();
     Gate.initCreoleRegister();
   } // setUp
 
-  /** Test resource registration */
-  public void testRegister() throws Exception {
+  /** Test resource discovery */
+  public void testDiscovery() throws Exception {
 
     CreoleRegister reg = Gate.getCreoleRegister();
     if(DEBUG) {
@@ -64,7 +65,7 @@ public class TestCreole extends TestCase
     assert(xmlDocFormatRD.getName().equals(docFormatName));
     assert(xmlDocFormatRD.isAutoLoading());
     assert(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
-  } // testRegister()
+  } // testDiscovery()
 
   /** Test resource loading */
   public void testLoading() throws Exception {
@@ -91,8 +92,8 @@ public class TestCreole extends TestCase
     ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
     assert(pr1rd != null & pr2rd != null);
 
-    CreoleLoader loader = Gate.getCreoleLoader();
-    ProcessingResource pr1 = (ProcessingResource) loader.load(pr1rd);
+    //CreoleLoader loader = Gate.getCreoleLoader();
+    //ProcessingResource pr1 = (ProcessingResource) loader.load(pr1rd);
 
     reg.clear();
   } // testLoading()
