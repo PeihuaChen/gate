@@ -70,7 +70,6 @@ public class Parameter implements Serializable
   public Object calculateValueFromString(String stringValue)
   throws ParameterException {
     //if we have no string we can't construct a value
-    if(stringValue == null || stringValue.length() == 0) return null;
     Object value = null;
 
     // get the Class for the parameter via Class.forName or CREOLE register
