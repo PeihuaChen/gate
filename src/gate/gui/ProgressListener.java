@@ -18,13 +18,23 @@ package gate.gui;
 import java.util.*;
 
 /** This interface describes objects that can register themselves as listeners
-  * to ProcessProgressReporters.
-  * They need to be able to handle progress change and process finished events.
-  */
+ * to ProcessProgressReporters.
+ * They need to be able to handle progress change and process finished events.
+ * 
+ */
 public interface ProgressListener extends EventListener{
 
+  /** 
+   * Called when the progress has changed
+   * 
+   * @param i 
+   */
   public void progressChanged(int i);
 
+  /** 
+   * Called when the process is finished.
+   * 
+   */
   public void processFinished();
 
 } // ProgressListener

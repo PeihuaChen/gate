@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Valentin Tablan, 11/07/2000
  *
  *  $Id$
@@ -17,11 +17,20 @@ package gate.gui;
 import java.awt.*;
 import java.util.*;
 
+/**
+ * This class is used to generate random colours that are evenly distributed in the colours space.
+ *
+ */
 public class ColorGenerator {
 
-  /** Debug flag */
+  /** Debug flag
+   */
   private static final boolean DEBUG = false;
 
+  /**
+   * Creates a new ColorGenerator
+   *
+   */
   public ColorGenerator() {
     for(int i = 0; i < 8; i++)availableSpacesList[i] = new LinkedList();
     ColorSpace usedCS = new ColorSpace(0,0,0,255);
@@ -64,6 +73,10 @@ public class ColorGenerator {
   //    Color foo = getNextColor();
   }
 
+  /**
+   * Gets the next random colouor
+   *
+   */
   public Color getNextColor(){
     ColorSpace usedCS;
     listToRead = listToRead % 8;
@@ -118,7 +131,20 @@ public class ColorGenerator {
     return res;
   }
 
+  /**
+   * Represents a colur space. A colour space is a cube in a tridimiensional
+   * space (where the axes represent red/green/blue values) defined by a point
+   * and a radius(the length of the edge).
+   */
   class ColorSpace{
+    /**
+     * Creates a new ColorSpace
+     *
+     * @param r
+     * @param g
+     * @param b
+     * @param radius
+     */
     ColorSpace(int r, int g, int b, int radius){
       baseR = r;
       baseG = g;
@@ -126,14 +152,20 @@ public class ColorGenerator {
       this.radius = radius;
     }
 
+    /**      *
+     */
     int baseR, baseG, baseB;
+    /**      */
     int radius;
   }
 
+  /**    */
   LinkedList[] availableSpacesList = new LinkedList[8];
 
+  /**    */
   LinkedList usedSpacesList = new LinkedList();
 
+  /**    */
   int listToRead = 0;
 
 } // ColorGenerator

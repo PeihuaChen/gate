@@ -16,6 +16,9 @@
  */
 package gate.util;
 
+/**
+ * Exception used to signal a runtime exception within Gate.
+ */
 public class GateRuntimeException extends RuntimeException {
 
   public GateRuntimeException() {

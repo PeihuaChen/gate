@@ -20,16 +20,33 @@ import java.io.*;
 import gate.gui.*;
 
 
+/**
+ * Class used to simulate the behaviour of a progress bar on an OutputStream.
+ *
+ */
 public class ProgressPrinter implements ProgressListener {
 
-  /** Debug flag */
+  /** Debug flag
+   */
   private static final boolean DEBUG = false;
 
+  /**
+   * Constructor.
+   *
+   * @param out the stream used for output
+   * @param numberOfSteps the number of steps until the process is over (the
+   *     number of characters printed for a full run)
+   */
   public ProgressPrinter(PrintStream out, int numberOfSteps) {
     this.out = out;
     this.numberOfSteps = numberOfSteps;
   }
 
+  /**
+   * Constructor. Uses the default number of steps.
+   *
+   * @param out
+   */
   public ProgressPrinter(PrintStream out) {
     this.out = out;
   }
@@ -57,12 +74,18 @@ public class ProgressPrinter implements ProgressListener {
     }
   }
 
+  /**    *
+   */
   int currentValue = 0;
 
+  /**    *
+   */
   int numberOfSteps = 70;
 
+  /**    */
   PrintStream out;
 
+  /**    */
   boolean started = false;
 
 } // class ProgressPrinter

@@ -7,25 +7,35 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Valentin Tablan, 12/07/2000
  *
  *  $Id$
  */
- 
+
 package gate.gui;
 
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
+/**
+ * A small window used to show messages to the user during processing. This component is intended as a nicer alternative
+ * to a status bar/progress bar.
+ * The window has its own thread for updating the animated pictures displayed.
+ *
+ */
 public class WaitDialog extends JWindow implements Runnable {
 
-  /** Debug flag */
+  /** Debug flag
+   */
   private static final boolean DEBUG = false;
 
+  /**    *
+   */
   Box centerBox;
 
+  /**    */
   public WaitDialog(Frame frame, String title) {
     super(frame);
     this.icon = new ImageIcon(ClassLoader.getSystemResource(
@@ -40,6 +50,11 @@ public class WaitDialog extends JWindow implements Runnable {
     }
   }
 
+  /**
+   * Shows the window containing labels for the texts provided as attributes.
+   *
+   * @param texts
+   */
   public synchronized void showDialog(String[] texts) {
     centerBox.removeAll();
 
@@ -60,6 +75,11 @@ public class WaitDialog extends JWindow implements Runnable {
     show();
   }
 
+  /**
+   * Shows the window containing the components provided as attributes.
+   *
+   * @param components
+   */
   public synchronized void showDialog(Component[] components) {
     centerBox.removeAll();
     for(int i =0; i < components.length; i++){
@@ -77,6 +97,7 @@ public class WaitDialog extends JWindow implements Runnable {
     show();
   }
 
+  /**    */
   void jbInit() throws Exception {
     JPanel centerPanel = new JPanel();
     centerBox = Box.createVerticalBox();
@@ -95,10 +116,16 @@ public class WaitDialog extends JWindow implements Runnable {
 
   }
 
+  /**
+   * Hides the window.
+   *
+   */
   public void goAway() {
     stop = true;
   }
 
+  /**    *
+   */
   public void run() {
     while(!stop){
       try{
@@ -114,10 +141,15 @@ public class WaitDialog extends JWindow implements Runnable {
     this.setVisible(false);
   }
 
+
   boolean stop = false;
+
   BorderLayout borderLayout1 = new BorderLayout();
+
   Frame frame;
+
   JLabel picture;
+
   Icon icon;
-  
+
 } // class WaitDialog

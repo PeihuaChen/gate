@@ -79,6 +79,10 @@ public interface Document extends LanguageResource, Comparable {
    */
   public AnnotationSet getAnnotations(String name);
 
+  /** Returns a map with the named annotation sets
+    */
+  public Map getNamedAnnotationSets();
+
   /** Make the document markup-aware. This will trigger the creation
    *  of a DocumentFormat object at Document initialisation time; the
    *  DocumentFormat object will unpack the markup in the Document and

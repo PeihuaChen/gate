@@ -18,12 +18,12 @@
 package gate;
 
 import java.util.*;
-import java.awt.*;
+import javax.swing.*;
 
 import gate.util.*;
 
 /** Models all sorts of visual resources.
   */
 public interface VisualResource extends Resource{
-   public Component getGui();
+   public JComponent getGUI();
 } // interface VisualResource

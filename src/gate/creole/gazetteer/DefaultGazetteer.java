@@ -27,93 +27,54 @@ import gate.gui.*;
 import gate.*;
 
 /** This component is responsible for doing lists lookup. The implementaion is
-  * based on finite state machines.
-  * The phrases to be recognised should be listed in a set of files, one for
-  * each type of occurences.
-  * The gazeteer is build with the information from a file that contains the set
-  * of lists (which are files as well) and the associated type for each list.
-  * The file defining the set of lists should have the following syntax:
-  * each list definition should be written on its own line and should contain:
-  * <ol>
-  * <li>the file name (required) </li>
-  * <li>the major type (required) </li>
-  * <li>the minor type (optional)</li>
-  * <li>the language(s) (optional) </li>
-  * </ol>
-  * The elements of each definition are separated by &quot;:&quot;.
-  * The following is an example of a valid definition: <br>
-  * <code>personmale.lst:person:male:english</code>
-  * Each list file named in the lists definition file is just a list containing
-  * one entry per line.
-  * When this gazetter will be run over some input text (a Gate document) it
-  * will generate annotations of type Lookup having the attributes specified in
-  * the definition file.
-  */
-public class DefaultGazetteer extends AbstractLanguageAnalyser
-implements ProcessingResource {
+ * based on finite state machines.
+ * The phrases to be recognised should be listed in a set of files, one for
+ * each type of occurences.
+ * The gazeteer is build with the information from a file that contains the set
+ * of lists (which are files as well) and the associated type for each list.
+ * The file defining the set of lists should have the following syntax:
+ * each list definition should be written on its own line and should contain:
+ * <ol>
+ * <li>the file name (required) </li>
+ * <li>the major type (required) </li>
+ * <li>the minor type (optional)</li>
+ * <li>the language(s) (optional) </li>
+ * </ol>
+ * The elements of each definition are separated by &quot;:&quot;.
+ * The following is an example of a valid definition: <br>
+ * <code>personmale.lst:person:male:english</code>
+ * Each list file named in the lists definition file is just a list containing
+ * one entry per line.
+ * When this gazetter will be run over some input text (a Gate document) it
+ * will generate annotations of type Lookup having the attributes specified in
+ * the definition file.
+ */
+public class DefaultGazetteer extends AbstractProcessingResource
+             implements ProcessingResource {
 
-  /** Debug flag */
+  /** Debug flag
+   */
   private static final boolean DEBUG = false;
 
   /** Build a gazetter using the default lists from the agte resources
-    * {@see init()}
-    */
+   * {@see init()}
+   */
   public DefaultGazetteer(){
-//    this("gate/resources/creole/gazeteer/default/", "lists.def");
   }
 
-  /** Builds a gazetter reading the definitions of the lists from the specified
-    * file.
-    * @param fileName a string representing the name of the file
-    * {@see init()}
-    */
-/*
-  public DefaultGazetteer(String fileName) throws IOException,
-                                                 FileNotFoundException,
-                                                 GazetteerException
-  {
-    File defsFile = new File(fileName);
-    resPath = defsFile.getParent();
-    if(!(resPath.endsWith("/") ||
-       resPath.endsWith("\\"))) resPath += "/";
-    initialState = new FSMState(this);
-
-    reader = new FileReader(defsFile);
-
-  }//public DefaultGazeteer(String fileName)
-*/
-  /** Builds a gazetteer reading the lists from the classpath.
-    * @param resourcePath the path to the file containing the definitions of the
-    * lists.
-    * @param resourceName the name of the file containing the definitions of the
-    * lists.
-    * {@see init()}
-    */
-/*
-  public DefaultGazetteer(String resourcePath, String resourceName)
-         throws IOException, GazetteerException
-  {
-    initialState = new FSMState(this);
-    fromResource = true;
-    if(resourcePath.endsWith("/") ||
-       resourcePath.endsWith("\\")) resPath = resourcePath;
-    else resPath = resourcePath + "/";
-    reader = new InputStreamReader(Files.getResourceAsStream(
-                                                      resPath + resourceName));
-  } // public DefaultGazeteer(String resourcePath, String resourceName)
-
-*/
-  /** Does the actual loading and prsing of the lists. This method must be
-    * called before the gazetteer can be used
-    */
+  /** Does the actual loading and parsing of the lists. This method must be
+   * called before the gazetteer can be used
+   */
   public Resource init()throws ResourceInstantiationException{
     try{
       initialState = new FSMState(this);
 
       if(listsURLStr == null){
-        String defaultListsURLStr = this.getClass().getResource(
+        String defaultListsURLStr =
+          this.getClass().getResource(
                           Files.getResourcePath() +
-                          "/creole/gazeteer/default/lists.def").toExternalForm();
+                          "/creole/gazeteer/default/lists.def"
+          ).toExternalForm();
         mainURL = new URL(defaultListsURLStr);
       }else mainURL = new URL(listsURLStr);
       Reader reader = new InputStreamReader(mainURL.openStream());
@@ -141,17 +102,23 @@ implements ProcessingResource {
     return this;
   }
 
+  /**
+   * Resets this resource preparing it for a new run
+   */
   public void reset(){
     document = null;
     annotationSet = null;
   }
 
   /** Reads one lists (one file) of phrases
-    * @param listDesc the line from the definition file
-    * @add if <b>true</b> will add the phrases found in the list to the ones
-    * recognised by this gazetter, if <b>false</b> the phrases found in the list
-    * will be removed from the list of phrases recognised by this gazetteer.
-    */
+   *
+   * @param listDesc the line from the definition file
+   * @param add
+   * @add if <b>true</b> will add the phrases found in the list to the ones
+   *     recognised by this gazetter, if <b>false</b> the phrases found in the
+   *     list will be removed from the list of phrases recognised by this
+   *     gazetteer.
+   */
   void readList(String listDesc, boolean add) throws FileNotFoundException,
                                         IOException,
                                         GazetteerException{
@@ -193,10 +160,11 @@ implements ProcessingResource {
   } // void readList(String listDesc)
 
   /** Adds one phrase to the list of phrases recognised by this gazetteer
-    * @param text the phrase to be added
-    * @param lookup the description of the annotation to be added when this
-    * phrase is recognised
-    */
+   *
+   * @param text the phrase to be added
+   * @param lookup the description of the annotation to be added when this
+   *     phrase is recognised
+   */
   public void addLookup(String text, Lookup lookup) {
     Character currentChar;
     FSMState currentState = initialState;
@@ -223,9 +191,10 @@ implements ProcessingResource {
   } // addLookup
 
   /** Removes one phrase to the list of phrases recognised by this gazetteer
-    * @param text the phrase to be removed
-    * @param lookup the description of the annotation associated to this phrase
-    */
+   *
+   * @param text the phrase to be removed
+   * @param lookup the description of the annotation associated to this phrase
+   */
   public void removeLookup(String text, Lookup lookup) {
     Character currentChar;
     FSMState currentState = initialState;
@@ -246,8 +215,8 @@ implements ProcessingResource {
 
 
   /** Returns a string representation of the deterministic FSM graph using
-    * GML.
-    */
+   * GML.
+   */
   public String getFSMgml() {
     String res = "graph[ \ndirected 1\n";
     String nodes = "", edges = "";
@@ -268,10 +237,12 @@ implements ProcessingResource {
   } // getFSMgml
 
   //no doc required: javadoc will copy it from the interface
+  /**    */
   public FeatureMap getFeatures(){
     return features;
   } // getFeatures
 
+  /**    */
   public void setFeatures(FeatureMap features){
     this.features = features;
   } // setFeatures
@@ -279,8 +250,8 @@ implements ProcessingResource {
 
 
   /** The method that does the actual input. This method should never be called
-    * by the user; the {@link doLookup()} methodshould be used instead.
-    */
+   * by the user; the {@link doLookup()} methodshould be used instead.
+   */
   public void run(){
     //check the input
     if(document == null) {
@@ -394,43 +365,37 @@ implements ProcessingResource {
     fireStatusChanged("Tokenisation complete!");
   } // run
 
-  /*
-  public static void main(String[] args){
-    try{
-      DefaultGazeteer dg = new
-                          DefaultGazeteer("d:/tmp/gaztest/extension/lists.def");
-      gate.fsm.TestFSM.showGraph(
-                            "Tokeniser graph (deterministic)", dg.getFSMgml());
 
-      Document doc = Factory.newDocument(
-                          new URL("file:///d:/tmp/gaztest/extension/long.lst"));
-      dg.doLookup(doc, false);
-      Out.println(doc.getAnnotations());
-    }catch(Exception e){
-      e.printStackTrace(Err.getPrintWriter());
-    }
-  }//public static void main(String[] args)
-  */
-
-
+  /**
+   * Sets the URL to be used for reading the Gazetteer lists
+   *
+   * @param newListsURLStr
+   */
   public void setListsURLStr(String newListsURLStr) {
     listsURLStr = newListsURLStr;
   }
+  /**
+   * Gets the URL used for reading the lists of this Gazetteer
+   */
   public String getListsURLStr() {
     return listsURLStr;
   }
+  /**
+   * Sets the document to be processed by the next run
+   */
   public void setDocument(gate.Document newDocument) {
     document = newDocument;
   }
-  public gate.Document getDocument() {
-    return document;
-  }
+
+  /**
+   * Sets the AnnotationSet that will be used at the next run for the newly
+   * produced annotations.
+   */
   public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
     annotationSet = newAnnotationSet;
   }
-  public gate.AnnotationSet getAnnotationSet() {
-    return annotationSet;
-  }
+
+  /**    */
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector) progressListeners.clone();
@@ -438,6 +403,8 @@ implements ProcessingResource {
       progressListeners = v;
     }
   }
+
+  /**    */
   public synchronized void addProgressListener(ProgressListener l) {
     Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
     if (!v.contains(l)) {
@@ -446,29 +413,42 @@ implements ProcessingResource {
     }
   }
 
-  /** The initial state of the FSM that backs this gazetteer */
+  /** The initial state of the FSM that backs this gazetteer
+   */
   FSMState initialState;
 
-  /** A set containing all the states of the FSM backing the gazetteer */
+  /** A set containing all the states of the FSM backing the gazetteer
+   */
   Set fsmStates = new HashSet();
-
 
   protected FeatureMap features  = null;
 
+  /**
+   * The value of this property is the URL that will be used for reading the lists dtaht define this Gazetteer
+   *
+   */
   protected String listsURLStr = null;
 
+  /**
+   * The URL used while parsing the lists. It points to the main file that
+   * refers to the files containing the actual lists.
+   */
   protected URL mainURL = null;
 
-  /** Used to store the document currently being parsed */
+  /** Used to store the document currently being parsed
+   */
   protected Document document;
 
   /** Used to store the annotation set currently being used for the newly
-    * generated annotations
-    */
+   * generated annotations
+   */
   protected AnnotationSet annotationSet;
 
+  /**    */
   private transient Vector progressListeners;
+  /**    */
   private transient Vector statusListeners;
+  /**    */
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -478,6 +458,7 @@ implements ProcessingResource {
       }
     }
   }
+  /**    */
   protected void fireProcessFinished() {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
@@ -487,6 +468,7 @@ implements ProcessingResource {
       }
     }
   }
+  /**    */
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
       Vector v = (Vector) statusListeners.clone();
@@ -494,6 +476,7 @@ implements ProcessingResource {
       statusListeners = v;
     }
   }
+  /**    */
   public synchronized void addStatusListener(StatusListener l) {
     Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
     if (!v.contains(l)) {
@@ -501,6 +484,7 @@ implements ProcessingResource {
       statusListeners = v;
     }
   }
+  /**    */
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;

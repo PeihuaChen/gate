@@ -95,7 +95,7 @@ public class TestAnnotationDiff extends TestCase
 
     JFrame jFrame = new JFrame("AnnotationDiff GUI");
     JScrollPane tableScroll = new JScrollPane();
-    tableScroll.getViewport().add(annotDiff.getGui(),null);
+    tableScroll.getViewport().add(annotDiff.getGUI(),null);
     jFrame.getContentPane().add(tableScroll, BorderLayout.CENTER);
     jFrame.setSize(500,300);
     jFrame.setVisible(true);
