@@ -26,6 +26,7 @@ import gate.creole.tokeniser.*;
 import gate.creole.gazetteer.*;
 import gate.creole.splitter.*;
 import gate.creole.orthomatcher.*;
+import gate.creole.annotransfer.*;
 import gate.annotation.*;
 
 public class CorpusBenchmarkTool {
@@ -40,16 +41,19 @@ public class CorpusBenchmarkTool {
 
   public void initPRs() {
     try {
+      FeatureMap params = Factory.newFeatureMap();
+
       //create a default tokeniser
       Out.prln("Loading tokeniser <P>");
-      FeatureMap params = Factory.newFeatureMap();
       String rulesURL = this.configs.getProperty("tokeniserRulesURL");
       if (rulesURL != null && !rulesURL.equals(""))
         params.put("tokeniserRulesURL", rulesURL);
       String grammarsURL = this.configs.getProperty("tokeniserGrammarURL");
       if (grammarsURL != null && !grammarsURL.equals(""))
         params.put("transducerGrammarURL", grammarsURL);
-      params.put("annotationSetName", annotSetName);
+      //the annots are put in temp, as they are going to be transfered to the
+      //new set
+      params.put("annotationSetName", "temp");
       tokeniser = (DefaultTokeniser) Factory.createResource(
                       "gate.creole.tokeniser.DefaultTokeniser", params);
 
@@ -59,9 +63,19 @@ public class CorpusBenchmarkTool {
       String listsURL = this.configs.getProperty("gazetteerListsURL");
       if (listsURL != null && !listsURL.equals(""))
         params.put("listsURL", listsURL);
-      params.put("annotationSetName", annotSetName);
+      params.put("annotationSetName", "temp");
       gazetteer = (DefaultGazetteer) Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer", params);
+
+      //create the Annotation set transfer
+      Out.prln("Loading annotation set transfer <P>");
+      params.clear();
+      params.put("inputASName", "temp");
+      params.put("outputASName", annotSetName);
+      //by default make it transfer all annotations
+      params.put("textTagName", "");
+      setTransfer = (AnnotationSetTransfer) Factory.createResource(
+                      "gate.creole.annotransfer.AnnotationSetTransfer", params);
 
       //create a splitter
       Out.prln("Loading sentence splitter <P>");
@@ -221,12 +235,16 @@ public class CorpusBenchmarkTool {
       try {
         InputStream inputStream = new FileInputStream(propFile);
         corpusTool.configs.load(inputStream);
+        String thresholdString = corpusTool.configs.getProperty("threshold");
+        if (thresholdString != null && !thresholdString.equals(""))
+          corpusTool.threshold = (new Double(thresholdString)).doubleValue();
+        String setName = corpusTool.configs.getProperty("annotSetName");
+        if (setName != null && !setName.equals(""))
+          corpusTool.annotSetName = setName;
       } catch (IOException ex) {
         //just ignore the file and go on with the defaults
         corpusTool.configs = new Properties();
       }
-      corpusTool.threshold = (new Double(
-                  corpusTool.configs.getProperty("threshold"))).doubleValue();
     } else
       corpusTool.configs = new Properties();
 
@@ -657,6 +675,12 @@ public class CorpusBenchmarkTool {
       gazetteer.setDocument(doc);
       gazetteer.execute();
 
+      String textTagName = configs.getProperty("astTEXTTagName");
+      if (textTagName != null && !textTagName.equals(""))
+        setTransfer.setTextTagName(textTagName);
+      setTransfer.setDocument(doc);
+      setTransfer.execute();
+
       splitter.setDocument(doc);
       splitter.execute();
 
@@ -973,6 +997,7 @@ public class CorpusBenchmarkTool {
   private POSTagger tagger;
   private ANNIETransducer transducer;
   private OrthoMatcher orthomatcher;
+  private AnnotationSetTransfer setTransfer;
 
   //collect the sum of all precisions and recalls of all docs
   //and the number of docs, so I can calculate the average for

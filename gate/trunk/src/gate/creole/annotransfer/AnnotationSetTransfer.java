@@ -82,8 +82,12 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
 
     //get the BODY annotation
     bodyAnnotations = tagAS.get(textTagName);
-    if (bodyAnnotations == null || bodyAnnotations.isEmpty())
+    if (bodyAnnotations == null || bodyAnnotations.isEmpty()) {
+      Out.prln("AST Warning: No text annotations of type " + textTagName +
+        " found, so transferring all annotations to the target set");
+      outputAS.addAll(inputAS);
       return;
+    }
 
     Iterator bodyIter = bodyAnnotations.iterator();
     while (bodyIter.hasNext()) {
