@@ -31,7 +31,8 @@ import gate.creole.*;
 import gate.event.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl
-                                  implements DatastoreListener{
+                                  implements DatastoreListener,
+                                              EventAwareDocument{
 
   private static final boolean DEBUG = false;
 
@@ -57,10 +58,11 @@ public class DatabaseDocumentImpl extends DocumentImpl
    */
   protected EventsHandler eventHandler;
 
-  public static final int DOC_NAME = 1001;
+/*  public static final int DOC_NAME = 1001;
   public static final int DOC_CONTENT = 1002;
   public static final int DOC_FEATURES = 1003;
   public static final int DOC_MAIN = 1004;
+*/
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -911,6 +913,16 @@ public class DatabaseDocumentImpl extends DocumentImpl
    * Called by a datastore when a resource has been deleted
    */
   public void resourceDeleted(DatastoreEvent evt){
+
+    Assert.assertNotNull(evt);
+    Assert.assertNotNull(evt.getResourceID());
+
+    //unregister self as listener from the DataStore
+    if (evt.getResourceID().equals(this.getLRPersistenceId())) {
+      //someone deleted this document
+      getDataStore().removeDatastoreListener(this);
+    }
+
   }//resourceDeleted
 
   /**
