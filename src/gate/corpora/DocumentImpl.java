@@ -271,7 +271,6 @@ public class DocumentImpl implements Document
     return namedAnnotSets;
   }
 
-
 //Persistence stuff
   public boolean isPersistent(){
   //This class does not define persistent objects.
@@ -330,5 +329,5 @@ public class DocumentImpl implements Document
   protected AnnotationSet defaultAnnots;
 
   /** Named sets of annotations */
-  protected HashMap namedAnnotSets;
+  protected Map namedAnnotSets;
 } // class DocumentImpl
