@@ -3,7 +3,7 @@ create or replace package security is
 /*
  *  security.pck
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2002, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -16,9 +16,13 @@ create or replace package security is
  */
   
 
+  /*  World Read / Group Write access */  
   PERM_WR_GW constant number := 1;
+  /*  Group Read / Group Write access */    
   PERM_GR_GW constant number := 2;  
+  /*  Group Read / Owner Write access */    
   PERM_GR_OW constant number := 3;
+  /*  Owner Read / Owner Write access */    
   PERM_OR_OW constant number := 4;
   
   ADMIN_USER_ID constant number := 0;
@@ -28,7 +32,6 @@ create or replace package security is
   WRITE_ACCESS constant number := 1;
     
   /* exceptions */
-
   
   /* Group related functionality */
   
