@@ -36,28 +36,28 @@ CYGPATHP=$CYGPATH
 
 
 # tools.jar
-JAVAC_DIR=`dirname \`dirname $JAVAC\``
-if test ${JAVAC_DIR} = . -o ${JAVAC_DIR} = /usr/local -o  ${JAVAC_DIR} = /usr -o  ${JAVAC_DIR} = /bin
-then
-  echo "can't find tools.jar in the tree with javac; trying to guess java version"
-  JVER=`${JAVA} -version 2>&1`
-  case ${JVER} in
-    java\ version\ "1.4*) TVER=tools14.jar ;;
-    java\ version\ "1.3*) TVER=tools13.jar ;;
-    *1.4*) TVER=tools14.jar ;;
-    *1.3*) TVER=tools13.jar ;;
-    *) TVER=tools14.jar ;;
-  esac
-  TOOLSJAR=../bin/${TVER}
-else
-  TOOLSJAR=`find $JAVAC_DIR -follow -name tools.jar -print`
-fi
-if test ! -f "$TOOLSJAR"
-then
-  echo "Can't find tools.jar; JAVAC_DIR=${JAVAC_DIR}; TOOLSJAR=${TOOLSJAR}; try setting JAVA_HOME?"
-  exit 1
-fi
-echo tools.jar is ${TOOLSJAR}
+#JAVAC_DIR=`dirname \`dirname $JAVAC\``
+#if test ${JAVAC_DIR} = . -o ${JAVAC_DIR} = /usr/local -o  ${JAVAC_DIR} = /usr -o  ${JAVAC_DIR} = /bin
+#then
+#  echo "can't find tools.jar in the tree with javac; trying to guess java version"
+#  JVER=`${JAVA} -version 2>&1`
+#  case ${JVER} in
+#    java\ version\ "1.4*) TVER=tools14.jar ;;
+#    java\ version\ "1.3*) TVER=tools13.jar ;;
+#   *1.4*) TVER=tools14.jar ;;
+#    *1.3*) TVER=tools13.jar ;;
+#    *) TVER=tools14.jar ;;
+#  esac
+#  TOOLSJAR=../bin/${TVER}
+#else
+#  TOOLSJAR=`find $JAVAC_DIR -follow -name tools.jar -print`
+#fi
+#if test ! -f "$TOOLSJAR"
+#then
+#  echo "Can't find tools.jar; JAVAC_DIR=${JAVAC_DIR}; TOOLSJAR=${TOOLSJAR}; try setting JAVA_HOME?"
+#  exit 1
+#fi
+#echo tools.jar is ${TOOLSJAR}
 
 
 # Just what is this beast we're running on?
