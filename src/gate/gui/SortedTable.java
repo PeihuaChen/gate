@@ -24,6 +24,7 @@ import gate.util.*;
 
 /** This class implements the behaviour of a SortedTable
   * The user has to provide a SortedTableModel implementation
+  *@deprecated  As of 21 Jan 2001, replaced by {@link XJTable}
   */
 public class SortedTable extends JTable {
 

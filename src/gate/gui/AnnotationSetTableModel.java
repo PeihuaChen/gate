@@ -16,7 +16,9 @@
 package gate.gui;
 
 import gate.*;
-  /** This class implements a SortedTableModel*/
+  /** This class implements a SortedTableModel
+   *@deprecated  As of 21 Jan 2001, replaced by {@link XJTable}
+   */
   public class AnnotationSetTableModel extends gate.gui.SortedTableModel {
 
     /** Debug flag */

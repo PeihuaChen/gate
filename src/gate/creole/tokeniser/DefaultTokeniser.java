@@ -898,8 +898,3 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // static initializer
 
 } // class DefaultTokeniser
-
-
-
-
-

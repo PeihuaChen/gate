@@ -21,6 +21,7 @@ import java.util.*;
 
 /** This class has to be implemented and used with the implementation of a
   * SortedTableModel.
+  * @deprecated  As of 21 Jan 2001, replaced by {@link XJTable}
   */
 public abstract class SortedTableComparator implements Comparator {
 

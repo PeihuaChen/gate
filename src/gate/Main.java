@@ -16,9 +16,13 @@
 package gate;
 
 import java.util.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
 import gnu.getopt.*;
 
 import gate.util.*;
+import gate.gui.*;
 
 
 /** Top-level entry point for the GATE command-line and GUI interfaces.
@@ -43,7 +47,10 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
-
+    //This will eventually go out
+    Gate.setLocalWebServer(false);
+    Gate.setNetConnected(false);
+    Gate.init();
     // process command-line options
     processArgs(args);
 
@@ -54,11 +61,26 @@ public class Main {
     }
     else {
       if(DEBUG) Out.prln("constructing GUI");
-// run the GUI
+      // run the GUI
+      MainFrame frame = new MainFrame();
+      //Validate frames that have preset sizes
+      frame.validate();
+      //Center the window
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      Dimension frameSize = frame.getSize();
+      if (frameSize.height > screenSize.height) {
+        frameSize.height = screenSize.height;
+      }
+      if (frameSize.width > screenSize.width) {
+        frameSize.width = screenSize.width;
+      }
+      frame.setLocation((screenSize.width - frameSize.width) / 2,
+                        (screenSize.height - frameSize.height) / 2);
+      frame.setVisible(true);
     }
 
     // shut down with normal exit status
-    System.exit(STATUS_NORMAL);
+    //System.exit(STATUS_NORMAL);
 
   } // main
 
