@@ -310,6 +310,12 @@ public class XJTable extends JTable{
      * @param ascending the sorting order.
      */
     public void sort(){
+      //save the selection
+      int[] rows = getSelectedRows();
+      //convert to model co-ordinates
+      for(int i = 0; i < rows.length; i++) rows[i] = rowViewToModel(rows[i]);
+      clearSelection();
+      
       List sourceData = new ArrayList(sourceModel.getRowCount());
       //get the data in the source order
       for(int i = 0; i < sourceModel.getRowCount(); i++){
@@ -342,6 +348,14 @@ public class XJTable extends JTable{
         }
       }
       fireTableRowsUpdated(0, sourceData.size() -1);
+      //restore selection
+      //convert to model co-ordinates
+      for(int i = 0; i < rows.length; i++){
+        rows[i] = rowModelToView(rows[i]);
+        getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+      }
+      
+      
     }
 
     
