@@ -10,7 +10,8 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util gate.annotation gate.corpora gate.jape gate.jape.parser
+PKGS=	gate gate.util gate.annotation gate.corpora gate.jape \
+	gate.jape.parser gate.db
 CP=	-classpath \
 ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip
 SP=	-sourcepath ../src
@@ -31,6 +32,8 @@ depend:
 test:
 	./jdk.sh java -Djava.compiler=none -classpath gate.jar \
 	  junit.textui.TestRunner gate.TestGate
+#	  junit.ui.TestRunner gate.TestGate
+#	  junit.ui.LoadingTestRunner gate.TestGate
 
 jar:
 	rm -f gate.jar
@@ -57,6 +60,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.20  2000/02/23 16:59:01  hamish
+# added db pkg
+#
 # Revision 1.19  2000/02/23 13:49:13  hamish
 # added ora jdbc driver to CP
 #
