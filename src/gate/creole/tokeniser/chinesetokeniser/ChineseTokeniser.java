@@ -141,6 +141,10 @@ public class ChineseTokeniser
         document.getContent().toString(),
         encoding);
 
+    if(encoding.equals("UTF8")) {
+      encoding = "UTF-8";
+    }
+
     // now we need to create a temporary document
     // and copy all the contents of sourceDoc to this temporary document
     // so that we'll provide this document to the segmenter
@@ -189,7 +193,13 @@ public class ChineseTokeniser
 
     // so space tokens have been added, now we need to map all the newly added
     // features from tokeniser to the new document to the original one
-    AnnotationSet anns = tempDoc.getAnnotations();
+    AnnotationSet anns;
+    if(annotationSetName == null || annotationSetName.length() == 0) {
+      anns = tempDoc.getAnnotations();
+    } else {
+      anns = tempDoc.getAnnotations(annotationSetName);
+    }
+
     List tokens = new ArrayList(anns.get());
     Comparator offsetComparator = new OffsetComparator();
     Collections.sort(tokens, offsetComparator);
