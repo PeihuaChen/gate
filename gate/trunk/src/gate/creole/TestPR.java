@@ -348,8 +348,8 @@ public class TestPR extends TestCase
 
     annots = doc3.getAnnotations().get(null,fType);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+ annots.size() +
-      " annotations with matches feature, instead of the expected 22.",
-      annots.size() == 22);
+      " annotations with matches feature, instead of the expected 24.",
+      annots.size() == 24);
     Factory.deleteResource(orthomatcher);
   }//testOrthomatcher
 
