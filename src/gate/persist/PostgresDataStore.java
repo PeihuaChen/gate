@@ -41,12 +41,6 @@ public class PostgresDataStore extends JDBCDataStore {
     this.iconName = DS_ICON_NAME;
   }
 
-
-  public boolean canWriteLR(Object lrID) throws gate.security.SecurityException, gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
-
   public void setSecurityInfo(LanguageResource parm1, SecurityInfo parm2) throws gate.persist.PersistenceException, gate.security.SecurityException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
