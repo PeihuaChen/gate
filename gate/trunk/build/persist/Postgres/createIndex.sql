@@ -67,6 +67,21 @@ CREATE INDEX xt_feature_01 on  t_feature
 )
 ;
 
+CREATE INDEX xt_feature_02 on  t_feature
+(
+       ft_key_id,
+       ft_int_value
+)
+;
+
+CREATE INDEX xt_feature_03 on  t_feature
+(
+       ft_key_id,
+       ft_character_value
+)
+;
+
+
 CREATE UNIQUE INDEX xt_feature_key_01 on  t_feature_key
 (
 	fk_string
