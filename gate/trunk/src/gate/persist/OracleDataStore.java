@@ -627,7 +627,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** creates a LR of type Corpus  */
-  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
+/*  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
     throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
@@ -718,12 +718,12 @@ public class OracleDataStore extends JDBCDataStore {
     createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     //5. create a DatabaseCorpusImpl and return it
-/*    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
-                                             this,
-                                              lrID,
-                                              corp.getFeatures(),
-                                              dbDocs);
-*/
+///    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
+///                                             this,
+///                                              lrID,
+///                                              corp.getFeatures(),
+///                                              dbDocs);
+///
 
     Corpus dbCorpus = null;
     FeatureMap params = Factory.newFeatureMap();
@@ -750,7 +750,7 @@ public class OracleDataStore extends JDBCDataStore {
     return dbCorpus;
   }
 
-
+*/
 
   /**
    * Get a resource from the persistent store.
