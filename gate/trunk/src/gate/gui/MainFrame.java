@@ -58,19 +58,7 @@ public class MainFrame extends JFrame
   JTabbedPane mainTabbedPane;
   JScrollPane projectTreeScroll;
   JScrollPane lowerScroll;
-  /*To be removed ->*/
-/*
-  JTree projectTree;
-  DefaultTreeModel projectTreeModel;
-  DefaultMutableTreeNode projectTreeRoot;
-  DefaultMutableTreeNode lowerTreeRoot;
-  DefaultMutableTreeNode appRoot;
-  DefaultMutableTreeNode lrRoot;
-  DefaultMutableTreeNode prRoot;
-  DefaultMutableTreeNode dsRoot;
-*/
-  /* <- To be removed*/
-  //new version
+
   JPopupMenu appsPopup;
   JPopupMenu lrsPopup;
   JPopupMenu prsPopup;
