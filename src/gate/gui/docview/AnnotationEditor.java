@@ -27,6 +27,7 @@ import gate.*;
 import gate.creole.AnnotationSchema;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
 import gate.util.*;
 import gate.util.GateException;
@@ -186,28 +187,36 @@ public class AnnotationEditor{
   
   protected void initBottomWindow(Window parent){
     bottomWindow = new JWindow(parent);
-
-    JPanel pane = new JPanel();
-    pane.setLayout(new GridBagLayout());
-    pane.setBackground(UIManager.getLookAndFeelDefaults().
+    bottomWindow.getContentPane().setLayout(new GridBagLayout());
+    bottomWindow.getContentPane().setBackground(
+            UIManager.getLookAndFeelDefaults().
             getColor("ToolTip.background"));
-    pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-    pane.add(new JLabel("Features will show here"));
-    bottomWindow.getContentPane().add(pane);    
+//    bottomWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.weightx = 1;
+    constraints.weighty = 1;
+    featuresEditor = new FeaturesSchemaEditor();
+    featuresEditor.setBackground(UIManager.getLookAndFeelDefaults().
+            getColor("ToolTip.background"));
+//    featuresEditor.getTableHeader().setBackground(UIManager.getLookAndFeelDefaults().
+//            getColor("ToolTip.background"));
+    bottomWindow.getContentPane().add(new JScrollPane(featuresEditor), constraints);
+//    bottomWindow.getContentPane().add(featuresEditor, constraints);
   }
 
   protected void initListeners(){
-    topWindow.addMouseListener(new MouseAdapter(){
+    MouseListener windowMouseListener = new MouseAdapter(){
       public void mouseEntered(MouseEvent evt){
         hideTimer.stop();
       }
-    });
+    };
+    topWindow.getRootPane().addMouseListener(windowMouseListener);
+    bottomWindow.addMouseListener(windowMouseListener);
+    featuresEditor.addMouseListener(windowMouseListener);
     
-    bottomWindow.addMouseListener(new MouseAdapter(){
-      public void mouseEntered(MouseEvent evt){
-        hideTimer.stop();
-      }
-    });
+    
     
     typeCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
@@ -268,20 +277,26 @@ public class AnnotationEditor{
    Collections.sort(typeList);
    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
    typeCombo.setSelectedItem(annType);
+   
+   featuresEditor.setFeatures(ann.getFeatures());
+   featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
   }
   
+  public boolean isShowing(){
+    return topWindow.isShowing();
+  }
   
   /**
    * Shows the UI(s) involved in annotation editing.
    *
    */
-  public void show(){
+  public void show(boolean autohide){
     //hide the windows is present
     hide();
     topWindow.pack();
     bottomWindow.pack();
-    Dimension topSize = topWindow.getSize();
-    Dimension bottomSize = bottomWindow.getSize();
+    Dimension topSize = topWindow.getPreferredSize();
+    Dimension bottomSize = bottomWindow.getPreferredSize();
     int width = Math.max(topSize.width, bottomSize.width);
     topWindow.setSize(width, topSize.height);
     bottomWindow.setSize(width, bottomSize.height);
@@ -296,7 +311,7 @@ public class AnnotationEditor{
 //    }catch(BadLocationException ble){
 //      throw new GateRuntimeException(ble);
 //    }
-    hideTimer.restart();
+    if(autohide) hideTimer.restart();
   }
   
   protected void placeWindows(){
@@ -329,6 +344,7 @@ public class AnnotationEditor{
     topWindow.setVisible(false);
     bottomWindow.setVisible(false);
   }
+  
   /**
    * Base class for actions on annotations.
    */
@@ -515,7 +531,9 @@ public class AnnotationEditor{
   
   protected JWindow topWindow;
   protected JWindow bottomWindow;
+
   protected JComboBox typeCombo;
+  protected FeaturesSchemaEditor featuresEditor;
   
   protected StartOffsetLeftAction solAction;
   protected StartOffsetRightAction sorAction;
