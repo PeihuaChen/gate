@@ -533,7 +533,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     longAnnot = prevAnnot;
     shortAnnot = newAnnot;
 
-    if (shortName.length()>=longName.length()) {
+    if (shortName.length()>longName.length()) {
       String temp = longName;
       longName = shortName;
       shortName = temp;
@@ -1654,6 +1654,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
     return false;
   }//matchRule15
+
 
   /** Tables for namematch info
     * (used by the namematch rules)
