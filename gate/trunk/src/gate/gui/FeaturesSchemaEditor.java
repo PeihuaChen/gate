@@ -19,8 +19,6 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,6 @@ import gate.creole.FeatureSchema;
 import gate.swing.XJTable;
 import gate.util.*;
 import gate.util.GateRuntimeException;
-import gate.util.Strings;
 
 /**
  */
