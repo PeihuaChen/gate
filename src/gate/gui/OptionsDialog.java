@@ -159,6 +159,20 @@ public class OptionsDialog extends JDialog {
       )
       addSpaceOnMarkupUnpackChk.setSelected(false);
 
+    ButtonGroup bGroup = new ButtonGroup();
+    doceditInsertAppendChk = new JCheckBox("Append (default)");
+    bGroup.add(doceditInsertAppendChk);
+    doceditInsertPrependChk = new JCheckBox("Prepend");
+    bGroup.add(doceditInsertPrependChk);
+    doceditInsertAppendChk.setSelected(Gate.getUserConfig().
+        getBoolean(GateConstants.DOCEDIT_INSERT_APPEND).booleanValue());
+    doceditInsertPrependChk.setSelected(Gate.getUserConfig().
+        getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND).booleanValue());
+    //if none set then set the default one
+    if(!(doceditInsertAppendChk.isSelected()||
+         doceditInsertPrependChk.isSelected()))
+      doceditInsertAppendChk.setSelected(true);
+
     JPanel vBox = new JPanel();
     vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
     vBox.add(includeFeaturesOnPreserveFormatChk);
@@ -182,7 +196,17 @@ public class OptionsDialog extends JDialog {
         BorderFactory.createEtchedBorder() , " Session persistence "));
     advancedBox.add(vBox);
 
-
+    vBox = new JPanel();
+    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.add(doceditInsertAppendChk);
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.add(doceditInsertPrependChk);
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createEtchedBorder() ,
+        " Document editor insert behaviour "));
+    advancedBox.add(vBox);
 
     mainTabbedPane.add("Advanced", advancedBox);
 
@@ -377,6 +401,10 @@ public class OptionsDialog extends JDialog {
       userConfig.put(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
                      new Boolean(addSpaceOnMarkupUnpackChk.
                                  isSelected()));
+      userConfig.put(GateConstants.DOCEDIT_INSERT_APPEND,
+                     new Boolean(doceditInsertAppendChk.isSelected()));
+      userConfig.put(GateConstants.DOCEDIT_INSERT_PREPEND,
+                     new Boolean(doceditInsertPrependChk.isSelected()));
       hide();
     }// void actionPerformed(ActionEvent evt)
   }
@@ -501,6 +529,12 @@ public class OptionsDialog extends JDialog {
    * The "Add extra space markup unpack if needed" checkbox
    */
   JCheckBox addSpaceOnMarkupUnpackChk;
+
+  /** The Docedit append checkbox */
+  JCheckBox doceditInsertAppendChk;
+
+  /** The Docedit prepend checkbox */
+  JCheckBox doceditInsertPrependChk;
 
   /**
    * The name of the look and feel class
