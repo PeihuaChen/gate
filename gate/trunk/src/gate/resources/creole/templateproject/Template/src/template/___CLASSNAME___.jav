@@ -18,6 +18,8 @@
 package ___PACKAGE___;
 
 import gate.*;
+import gate.creole.*;
+import ___packages___.*;
 
 /** This class creates the resource Template*/
 public class ___CLASSNAME___ {
