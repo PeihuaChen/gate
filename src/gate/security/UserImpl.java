@@ -105,7 +105,8 @@ public class UserImpl
    *  user is member of  */
   public List getGroups() {
 
-    return groups;
+    Vector copy = new Vector(groups.subList(0,groups.size()-1));
+    return copy;
   }
 
   /** changes user name
@@ -310,6 +311,8 @@ public class UserImpl
 
         //1.check that the groupis not already in collection
         Assert.assert(false == this.groups.contains(grp));
+        //1.1 verify grp
+        Assert.assert(grp instanceof Group);
         //2.add group to collection
         this.groups.add(grp);
         //3. the group has laredy registered
