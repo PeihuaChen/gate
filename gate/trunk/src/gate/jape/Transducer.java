@@ -77,8 +77,21 @@ public abstract class Transducer implements java.io.Serializable,
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
   }
+
+  public void setFileName(String fileName){ this.fileName = fileName; }
+  public void setDirName(String dirName){ this.dirName = dirName;}
+  public void setFromResource(boolean fromResource){
+    this.fromResource = fromResource;
+  }
+
+  public String getFileName(){ return fileName;}
+  public String getDirName(){return dirName;}
+  public boolean getFromResource(){return fromResource;}
+
   private List myProgressListeners = new LinkedList();
   private List myStatusListeners = new LinkedList();
+  private String fileName, dirName;
+  private boolean fromResource;
   //ProcessProgressReporter implementation ends here
 
 } // class Transducer
@@ -86,6 +99,9 @@ public abstract class Transducer implements java.io.Serializable,
 
 
 // $Log$
+// Revision 1.4  2000/07/12 14:19:19  valyt
+// Testing CVS
+//
 // Revision 1.3  2000/07/04 14:37:39  valyt
 // Added some support for Jape-ing in a different annotations et than the default one;
 // Changed the L&F for the JapeGUI to the System default
