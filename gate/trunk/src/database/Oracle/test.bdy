@@ -140,53 +140,6 @@ create or replace package body test is
      values(UG_ID_7,USER_5_ID,GROUP_2_ID);
                  
                     
-     -- create documents
- 
-     insert into t_lang_resource(lr_id,
-                                 lr_type_id,
-                                 lr_owner_group_id,
-                                 lr_owner_user_id,                                 
-                                 lr_name,
-                                 lr_access_mode,
-                                 lr_parent_id)
-     values(DOC_1_ID,LR_TYPE_1_ID,GROUP_1_ID,null,'doc1',ACCESS_WORLD_GROUP,null);                             
-
-
-     insert into t_lang_resource(lr_id,
-                                 lr_type_id,
-                                 lr_owner_group_id,
-                                 lr_owner_user_id,                                 
-                                 lr_name,
-                                 lr_access_mode,
-                                 lr_parent_id)
-     values(DOC_2_ID,LR_TYPE_1_ID,null,USER_2_ID,'doc2',ACCESS_OWNER_OWNER,null);                             
-
-     insert into t_lang_resource(lr_id,
-                                 lr_type_id,
-                                 lr_owner_group_id,
-                                 lr_owner_user_id,                                 
-                                 lr_name,
-                                 lr_access_mode,
-                                 lr_parent_id)
-     values(DOC_3_ID,LR_TYPE_1_ID,GROUP_2_ID,null,'doc3',ACCESS_GROUP_GROUP,null);                             
-
-     insert into t_lang_resource(lr_id,
-                                 lr_type_id,
-                                 lr_owner_group_id,
-                                 lr_owner_user_id,                                 
-                                 lr_name,
-                                 lr_access_mode,
-                                 lr_parent_id)
-     values(DOC_4_ID,LR_TYPE_1_ID,GROUP_2_ID,USER_5_ID,'doc4',ACCESS_GROUP_OWNER,null);                             
-
-     insert into t_lang_resource(lr_id,
-                                 lr_type_id,
-                                 lr_owner_group_id,
-                                 lr_owner_user_id,                                 
-                                 lr_name,
-                                 lr_access_mode,
-                                 lr_parent_id)
-     values(DOC_5_ID,LR_TYPE_1_ID,GROUP_1_ID,null,'doc5',ACCESS_GROUP_GROUP,null);                             
 
   end;                                                                                                        
 
@@ -197,12 +150,6 @@ create or replace package body test is
   is
   
   begin
-
-     -- delete documents
- 
-     delete from t_lang_resource
-     where  lr_id in (DOC_1_ID,DOC_2_ID,DOC_3_ID,DOC_4_ID,DOC_5_ID);
-
 
      -- remove users in groups
  
