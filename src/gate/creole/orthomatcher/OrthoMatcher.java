@@ -40,6 +40,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   protected static final String GENDER_FEATURE = "gender";
   protected static final String KIND_FEATURE = "kind";
   protected static final String STRING_FEATURE = "string";
+  protected static final String PUNCTUATION_VALUE = "punctuation";
   protected static final String THE_VALUE = "The";
 
 
@@ -995,8 +996,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         matched = s1.equalsIgnoreCase(s2);
     else matched =  s1.equals(s2) ;
 //kalina: do not remove, nice for debug
-//    if (matched && (s2.equalsIgnoreCase("m") || s1.equalsIgnoreCase("m")))
-//        Out.prln("Rule1: Matched " + s1 + "and " + s2);
+    if (matched && (s2.startsWith("Kenneth") || s1.startsWith("Kenneth")))
+        Out.prln("Rule1: Matched " + s1 + "and " + s2);
     return matched;
   }//matchRule1
 
@@ -1067,7 +1068,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     Iterator tokensShortAnnotIter = tokensShortAnnot.iterator();
     while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
       Annotation token = (Annotation) tokensLongAnnotIter.next();
-      if (((String)token.getFeatures().get(KIND_FEATURE)).equals("punctuation"))
+      if (((String)token.getFeatures().get(KIND_FEATURE)).equals(PUNCTUATION_VALUE))
         continue;
 //      Out.prln("Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
       if (! token.getFeatures().get(STRING_FEATURE).equals(
@@ -1076,7 +1077,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         break;
       } // if (!tokensLongAnnot.nextToken()
     } // while
-//    Out.prln("result is: " + allTokensMatch);
+//    if (allTokensMatch)
+//      Out.prln("rule4 fired. result is: " + allTokensMatch);
     return allTokensMatch;
   }//matchRule4
 
@@ -1095,8 +1097,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         ((Annotation) tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
       return false;
 
-//    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
-//    Out.prln("Rule 5: " + s1 + "and " + s2);
+    if (s1.startsWith("Kenneth") || s2.startsWith("Kenneth"))
+      Out.prln("Rule 5: " + s1 + "and " + s2);
     if (tokensLongAnnot.size()>1)
       return matchRule1((String)
                       ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(STRING_FEATURE),
@@ -1500,10 +1502,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   public boolean matchRule15(String s1,
             String s2) {
 
-
-    String token1 = null;
-    String token2 = null;
-
     int matched_tokens = 0;
 
     // if names < 2 words then rule is invalid
@@ -1514,16 +1512,22 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 //    }
 
     // now do the matching
+    Annotation token1, token2;
     for (int i=0; i < tokensShortAnnot.size() && matched_tokens == 0; i++) {
+      token1 = (Annotation) tokensShortAnnot.get(i);
+      //first check if not punctuation, because we need to skip it
+      if (token1.getFeatures().get(KIND_FEATURE).equals(PUNCTUATION_VALUE))
+        continue;
 
-      for (int j=0; j<tokensLongAnnot.size() && matched_tokens ==0; j++)
+      for (int j=0; j<tokensLongAnnot.size() && matched_tokens ==0; j++) {
 //      Out.prln("i = " + i);
-        if ( ((Annotation) tokensLongAnnot.get(j)).getFeatures(
-                                                   ).get(STRING_FEATURE).equals(
-             ((Annotation) tokensShortAnnot.get(i)).getFeatures(
-                                                   ).get(STRING_FEATURE)) ) {
+        token2 = (Annotation) tokensLongAnnot.get(j);
+        if (token2.getFeatures().get(KIND_FEATURE).equals(PUNCTUATION_VALUE))
+          continue;
+        if ( token1.getFeatures().get(STRING_FEATURE).equals(
+             token2.getFeatures().get(STRING_FEATURE)) )
           matched_tokens++;
-      }
+      }//for
     } // for
 
     if (matched_tokens > 0)
