@@ -273,7 +273,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
       return;
     }
 
-    if(annotationSetName == null) annotationSet = document.getAnnotations();
+    if(annotationSetName == null ||
+       annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
     fireStatusChanged("Doing lookup in " +

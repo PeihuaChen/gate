@@ -19,6 +19,7 @@ import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.Point;
@@ -159,6 +160,12 @@ public class MainFrame extends JFrame
     this.getContentPane().setLayout(new BorderLayout());
     this.setSize(new Dimension(800, 600));
     this.setTitle(Main.name + " " + Main.version);
+    try{
+      this.setIconImage(Toolkit.getDefaultToolkit().getImage(
+            new URL("gate:/img/gateIcon.gif")));
+    }catch(MalformedURLException mue){
+      mue.printStackTrace(Err.getPrintWriter());
+    }
 
 
 //    resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot);
