@@ -116,6 +116,10 @@ public class HtmlDocumentHandler extends ParserCallback {
     return ampCodingInfo;
   } // getRepositioningInfo
 
+  /** The text inside the STYLE tag is processed with <code>handleText()</code>.
+   *  We should skip inserting of this text in the document. */
+  private boolean isInsideStyleTag = false;
+
   /** This method is called when the HTML parser encounts the beginning
     * of a tag that means that the tag is paired by an end tag and it's
     * not an empty one.
@@ -124,6 +128,11 @@ public class HtmlDocumentHandler extends ParserCallback {
     // Fire the status listener if the elements processed exceded the rate
     if (0 == (++elements % ELEMENTS_RATE))
       fireStatusChangedEvent("Processed elements : " + elements);
+
+    // Start of STYLE tag
+    if(HTML.Tag.STYLE.equals(t)) {
+      isInsideStyleTag = true;
+    } // if
 
     // Construct a feature map from the attributes list
     FeatureMap fm = Factory.newFeatureMap();
@@ -169,6 +178,11 @@ public class HtmlDocumentHandler extends ParserCallback {
   public void handleEndTag(HTML.Tag t, int pos){
     // obj is for internal use
     CustomObject obj = null;
+
+    // end of STYLE tag
+    if(HTML.Tag.STYLE.equals(t)) {
+      isInsideStyleTag = false;
+    } // if
 
     // If the stack is not empty then we get the object from the stack
     if (!stack.isEmpty()){
@@ -284,6 +298,10 @@ public class HtmlDocumentHandler extends ParserCallback {
   /** This method is called when the HTML parser encounts text (PCDATA)
     */
   public void handleText(char[] text, int pos){
+
+    // Skip the STYLE tag content
+    if(isInsideStyleTag) return;
+
     // create a string object based on the reported text
     String content = new String(text);
     StringBuffer contentBuffer = new StringBuffer("");
