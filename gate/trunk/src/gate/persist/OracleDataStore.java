@@ -1564,7 +1564,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
     catch(SQLException sqle) {
         throw new PersistenceException("Can't read database parameter ["+
-                                          DBHelper.DB_PARAMETER_GUID+"]");
+                                          sqle.getMessage()+"]");
     }
     finally {
       DBHelper.cleanup(rs);
