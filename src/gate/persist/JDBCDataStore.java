@@ -34,10 +34,6 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
                                                 CreoleListener {
 
   /** --- */
-/*  private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
-  private static final String jdbcPostgresDriverName = "postgresql.Driver";
-  private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
-*/
   private static final boolean DEBUG = false;
 
   /** --- */
@@ -533,5 +529,15 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
     return this.session;
   }
+
+  /** Get a list of LRs that satisfy some set or restrictions */
+  public abstract List findLrIds(List constraints) throws PersistenceException;
+
+  /**
+   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  of a particular type
+   */
+  public abstract List findLrIds(List constraints, String lrType)
+  throws PersistenceException;
 
 }
