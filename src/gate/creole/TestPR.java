@@ -522,7 +522,7 @@ public class TestPR extends TestCase
         annotDiffer.setSignificantFeaturesSet(significantFeatures);
         annotDiffer.calculateDiff(keyDocument.getAnnotations().get(annotType),
                                   responseDocument.getAnnotations().get(annotType));
-//        annotDiffer.printMissmatches();
+        if(DEBUG) annotDiffer.printMissmatches();
 
         assertTrue(annotType+ " precision strict in "+
           responseDocument.getSourceUrl().getFile()+
