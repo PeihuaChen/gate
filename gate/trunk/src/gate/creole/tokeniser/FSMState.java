@@ -1,42 +1,71 @@
 package gate.creole.tokeniser;
 
 import java.util.*;
-  /** A state of the finite state machine that is the actual tokeniser
+  /** A state of the finite state machine that is the kernel tokeniser
     */
   class FSMState{
-    public FSMState(){
-    }
 
+    /**Creates a new FSMState belonging to a specified tokeniser
+      *@param owner the tokeniser that contains this new state
+      */
     public FSMState(DefaultTokeniser owner){
       myIndex = index++;
       owner.fsmStates.add(this);
     }
 
-    void put(UnicodeType type, FSMState state){
-      if(null == type) put(DefaultTokeniser.maxTypeId, state);
-      else put(type.type, state);
-    }
-
+    /**Returns the value of the transition function of this state for a given
+      *Unicode type.
+      *As this state can belong to a non-deterministic automaton, the result
+      *will be a set.
+      */
     Set nextSet(UnicodeType type){
       if(null == type) return transitionFunction[DefaultTokeniser.maxTypeId];
       else return transitionFunction[type.type];
     }
 
+    /**Returns the value of the transition function of this state for a given
+      *Unicode type specified using the internal ids used by the tokeniser.
+      *As this state can belong to a non-deterministic automaton, the result
+      *will be a set.
+      */
     Set nextSet(int type){
       return transitionFunction[type];
     }
 
+    /**Adds a new transition to the transition function of this state
+      *@param type the restriction for the new transition; if <code>null</code>
+      * this transition will be unrestricted.
+      *@param state the vaule of the transition function for the given type
+      */
+    void put(UnicodeType type, FSMState state){
+      if(null == type) put(DefaultTokeniser.maxTypeId, state);
+      else put(type.type, state);
+    }
+
+    /**Adds a new transition to the transition function of this state
+      *@param index the internal index of the Unicode type representing the
+      *restriction for the new transition;
+      *@param state the vaule of the transition function for the given type
+      */
     void put(int index, FSMState state){
       if(null == transitionFunction[index])
         transitionFunction[index] = new HashSet();
       transitionFunction[index].add(state);
     }
 
+    /**Sets the RHS string value*/
     void setRhs(String rhs){this.rhs = rhs;}
+
+    /**Gets the RHS string value*/
     String getRhs(){return rhs;}
+
+    /**Checks whether this state is a final one*/
     boolean isFinal() {return (null != rhs);}
+
+    /**Gets the unique id of this state*/
     int getIndex(){return myIndex;}
 
+    /**Returns a GML representation of all the edges emerging from this state*/
     String getEdgesGML(){
       String res = "";
       Set nextSet;
@@ -57,27 +86,26 @@ import java.util.*;
           }//while(nextSetIter.hasNext())
         }
       };
-/*
-      Iterator transIter = transitions.iterator();
-      BasicPatternElement bpe;
-      while(transIter.hasNext()){
-        Transition currentTrans = (Transition)transIter.next();
-        res += "edge [ source " + myIndex +
-               " target " + currentTrans.getTarget().getIndex() +
-               " label \"" + currentTrans.shortDesc() + ":";
-               bpe = currentTrans.getConstraints();
-               if(bpe == null) res += "null";
-               else res += bpe.shortDesc();
-               res += " :" + currentTrans.getBindings() +
-               "\" ]\n";
-      }
-*/
       return res;
     }
+
+    /**The transition function of this state. It's an array mapping from int
+      *(the ids used internally by the tokeniser for the Unicode types) to sets
+      *of states.
+      */
     Set[] transitionFunction = new Set[DefaultTokeniser.maxTypeId + 1];
+
+    /**The RHS string value from which the annotation associated to final states
+      *is constructed.
+      */
     String rhs;
+
+    /**the unique index of this state*/
     int myIndex;
+
+    /**used for generating unique ids*/
     static int index;
+
     static{
       index = 0;
     }

@@ -193,9 +193,16 @@ class DFSMState{ //extends FSMState{
   /**The transition function of this state.
     */
   DFSMState[] transitionFunction = new DFSMState[DefaultTokeniser.maxTypeId];
+  /**The string of the RHS of the rule from which the token description is built
+    */
   String rhs;
+
+  /**The unique index of this state*/
   int myIndex;
+
+  /**Used to generate unique indices for all the objects of this class*/
   static int index;
+  
   static{
     index = 0;
   }
