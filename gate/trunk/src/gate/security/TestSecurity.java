@@ -39,6 +39,8 @@ public class TestSecurity extends TestCase
             "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
 //"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB"
 
+  private boolean exceptionThrown = false;
+
   /** Construction */
   public TestSecurity(String name) throws GateException { super(name); }
 
@@ -131,20 +133,25 @@ public class TestSecurity extends TestCase
     //[does change of group name reflect change of keys in the collections
     //of the security factory?]
     Assert.assertNotNull(ac.findGroup("my new group"));
-    Assert.assertNull(oldName);
+    //check that there is nothing hashed
+    //with the old key
+    exceptionThrown = false;
+    try { ac.findGroup(oldName); }
+    catch(SecurityException sex) {exceptionThrown = true;}
+    Assert.assert(exceptionThrown);
 
 
     //6. get users
     List myUsers = myGroup.getUsers();
     Assert.assertNotNull(myUsers);
     for (int i = 0; i< myUsers.size(); i++) {
-      User myUser1 = ac.findUser((Long) myUsers.get(i));
-      if (i == 0)
-        Assert.assertEquals(myUser1.getName(), "myUser");
-      else
-        Assert.fail("Found more groups for user "
-                            + myUser1 + "than should have been!");
-      Out.prln("are equals? " + myUser1.equals(myUser));
+      //verify that there are no junk users
+      //i.e. evry user in the collection is known by the security factory
+      User myUser1 = ac.findUser(((User)myUsers.get(i)).getID());
+      //verify that the user is aware he's nmember of the group
+      Assert.assert(myUser1.getGroups().contains(myGroup));
+
+
     }//for
 
     //7. change name again
@@ -166,7 +173,7 @@ public class TestSecurity extends TestCase
     Assert.assert(false == ac.isValidSession(mySession));
 
     //10. try to perform an operation with invalid session
-    boolean exceptionThrown = false;
+    exceptionThrown = false;
     try {
       myGroup.removeUser(myUser,mySession);
     }
