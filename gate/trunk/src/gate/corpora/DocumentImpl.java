@@ -619,6 +619,17 @@ extends AbstractLanguageResource implements Document {
       }// End if
       // Insert tmpBuff to the location where it belongs in docContStrBuff
       docContStrBuff.insert(offset.intValue(),tmpBuff.toString());
+    }// End while(!offsets.isEmpty())
+    // Need to replace the entities in the remaining text, if there is any text
+    // So, if there are any more items in offsets2CharsMap they need to be
+    // replaced
+    while (!offsets2CharsMap.isEmpty()){
+      Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+      // Replace the char with its entity
+      docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
+      (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+      // remove the offset from the map
+      offsets2CharsMap.remove(offsChar);
     }// End while
     return docContStrBuff.toString();
   }// saveAnnotationSetAsXml()
@@ -933,7 +944,6 @@ extends AbstractLanguageResource implements Document {
       // Fill the offsets2CharsMap with all the indices where special chars appear
       buildEntityMapFromString(aText,offsets2CharsMap);
     }//End if
-
     // Construct the offsetsSet for all nodes belonging to this document
     TreeSet offsetsSet = new TreeSet();
     Iterator annotSetIter = this.getAnnotations().iterator();
@@ -992,6 +1002,17 @@ extends AbstractLanguageResource implements Document {
       // Now it is safe to insert the node
       textWithNodes.insert(offsetValue,strNode);
     }// end while
+    // Need to replace the entities in the remaining text, if there is any text
+    // So, if there are any more items in offsets2CharsMap they need to be
+    // replaced
+    while (!offsets2CharsMap.isEmpty()){
+      Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+      // Replace the char with its entity
+      textWithNodes.replace(offsChar.intValue(),offsChar.intValue()+1,
+      (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+      // remove the offset from the map
+      offsets2CharsMap.remove(offsChar);
+    }// End while
     return textWithNodes.toString();
   }//textWithNodes()
 
