@@ -531,6 +531,21 @@ public class AccessControllerImpl
     return true;
   }
 
+  /** -- */
+  public List listUsers()
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** -- */
+  public List listGroups()
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+
 
   /*  private methods */
 
@@ -730,6 +745,9 @@ public class AccessControllerImpl
       this.usersByName.put(usr.getName(),usr);
     }
   }
+
+
+
 
 
   /* ObjectModificationListener methods */
