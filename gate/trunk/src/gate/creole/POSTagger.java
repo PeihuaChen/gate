@@ -106,7 +106,7 @@ public class POSTagger extends AbstractProcessingResource {
             String category = ((String[])sentenceFromTagger.get(i))[1];
             Annotation token = (Annotation)tokens.get(i);
             token.getFeatures().put("category", category);
-          }//for(i = 0; i<= locations.size(); i++)
+          }//for(i = 0; i<= sentence.size(); i++)
         }//while(sentIter.hasNext())
       }else{
         throw new GateRuntimeException("No sentences to process!\n" +
