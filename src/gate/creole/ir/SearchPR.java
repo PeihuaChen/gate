@@ -85,8 +85,16 @@ public class SearchPR extends AbstractProcessingResource
     this.corpus = corpus;
   }
 
+  public IndexedCorpus getCoprus() {
+    return this.corpus;
+  }
+
   public void setQuery(String query) {
     this.query = query;
+  }
+
+  public String getQuery() {
+    return this.query;
   }
 
   public void setSearcherClassName(String name){
@@ -99,15 +107,33 @@ public class SearchPR extends AbstractProcessingResource
     }
   }
 
-  public void setLimit(int limit){
-    this.limit = limit;
+  public String getSearcherClassName(){
+
+    return this.searcher.getClass().getName();
   }
 
-  private void setFieldNames(List fieldNames){
+  public void setLimit(Integer limit){
+    this.limit = limit.intValue();
+  }
+
+  public Integer getLimit(){
+    return new Integer(this.limit);
+  }
+
+  public void setFieldNames(List fieldNames){
     this.fieldNames = fieldNames;
   }
 
-  private QueryResultList getResult(){
+  public List getFieldNames(){
+    return this.fieldNames;
+  }
+
+  public QueryResultList getResult(){
     return resultList;
   }
+
+  public void setResult(QueryResultList qr){
+    throw new UnsupportedOperationException();
+  }
+
 }
