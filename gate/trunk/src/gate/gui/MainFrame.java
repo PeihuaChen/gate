@@ -724,6 +724,28 @@ public class MainFrame extends JFrame
                       MainFrame.this));
             popup.show(resourcesTree, e.getX(), e.getY());
           }else if(popup != null){
+            if(handle != null){
+              // Create a CloseViewAction and a menu item based on it
+              CloseViewAction cva = new CloseViewAction(handle);
+              XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
+              // Add an accelerator ATL+F4 for this action
+              menuItem.setAccelerator(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_H,
+                                           ActionEvent.CTRL_MASK));
+              popup.insert(menuItem, 1);
+              popup.insert(new JPopupMenu.Separator(), 2);
+
+              popup.insert(new XJMenuItem(new RenameResourceAction(path),
+                                          MainFrame.this), 3);
+
+              // Put the action command in the component's action map
+              if (handle.getLargeView() != null){
+                handle.getLargeView().getActionMap().
+                                      put("Hide current view",cva);
+              }
+            }
+
+
             popup.show(resourcesTree, e.getX(), e.getY());
           }
         } else if(SwingUtilities.isLeftMouseButton(e)) {
@@ -1170,26 +1192,26 @@ public class MainFrame extends JFrame
     handle.addProgressListener(MainFrame.this);
     handle.addStatusListener(MainFrame.this);
 
-    JPopupMenu popup = handle.getPopup();
-
-    // Create a CloseViewAction and a menu item based on it
-    CloseViewAction cva = new CloseViewAction(handle);
-    XJMenuItem menuItem = new XJMenuItem(cva, this);
-    // Add an accelerator ATL+F4 for this action
-    menuItem.setAccelerator(KeyStroke.getKeyStroke(
-                                      KeyEvent.VK_H, ActionEvent.CTRL_MASK));
-    popup.insert(menuItem, 1);
-    popup.insert(new JPopupMenu.Separator(), 2);
-
-    popup.insert(new XJMenuItem(
-                  new RenameResourceAction(
-                      new TreePath(resourcesTreeModel.getPathToRoot(node))),
-                  MainFrame.this) , 3);
-
-    // Put the action command in the component's action map
-    if (handle.getLargeView() != null)
-      handle.getLargeView().getActionMap().put("Hide current view",cva);
-
+//    JPopupMenu popup = handle.getPopup();
+//
+//    // Create a CloseViewAction and a menu item based on it
+//    CloseViewAction cva = new CloseViewAction(handle);
+//    XJMenuItem menuItem = new XJMenuItem(cva, this);
+//    // Add an accelerator ATL+F4 for this action
+//    menuItem.setAccelerator(KeyStroke.getKeyStroke(
+//                                      KeyEvent.VK_H, ActionEvent.CTRL_MASK));
+//    popup.insert(menuItem, 1);
+//    popup.insert(new JPopupMenu.Separator(), 2);
+//
+//    popup.insert(new XJMenuItem(
+//                  new RenameResourceAction(
+//                      new TreePath(resourcesTreeModel.getPathToRoot(node))),
+//                  MainFrame.this) , 3);
+//
+//    // Put the action command in the component's action map
+//    if (handle.getLargeView() != null)
+//      handle.getLargeView().getActionMap().put("Hide current view",cva);
+//
   }// resourceLoaded();
 
 
