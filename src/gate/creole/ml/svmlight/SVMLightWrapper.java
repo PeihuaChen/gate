@@ -28,7 +28,7 @@ import java.util.List;
 public class SVMLightWrapper
     implements MLEngine, gate.gui.ActionsPublisher {
 
-  static boolean DEBUG = true;
+  static boolean DEBUG = false;
 
   /**
    * This constructor sets up action list so that these actions (loading and
@@ -76,6 +76,10 @@ public class SVMLightWrapper
    * This is the only configuration file option for SVM Light.
    */
    private void extractAndCheckOptions() {
+     if (optionsElement == null) { 
+       classifierOptions = "";
+       return;
+     }
      classifierOptions = optionsElement.getChildTextTrim("CLASSIFIER-OPTIONS");
      if (classifierOptions == null)
      	classifierOptions = "";
@@ -551,41 +555,15 @@ public class SVMLightWrapper
    * options.)
    */
    java.lang.String[] optionsString2OptionsList(String optionsString) {
-     java.util.List optionsList = new java.util.ArrayList();
-     int positionInString = 0;
-
-     // Keep going till we've extracted everything from the string.
-     while (positionInString<optionsString.length()) {
-       // Fist skip any white space.
-       while (positionInString < optionsString.length() && (
-       		optionsString.charAt(positionInString)==' '
-              || optionsString.charAt(positionInString)=='\t')) {
-         ++positionInString;
-       }
-         
-       int startOfOption = positionInString;
-
-       // Then find the end of the option.
-       while (positionInString < optionsString.length()
-              && optionsString.charAt(positionInString) != ' '
-              && optionsString.charAt(positionInString) != '\t')
-         ++positionInString;
-
-       // So long as there is an option to extract.
-       if (startOfOption != positionInString) {
-         optionsList.add(optionsString.substring(startOfOption,
-                                                 positionInString));
-       }
-
-     }
-
+     
+     String[] optionsArray1 = optionsString.split("\\s");
      // Make an array with enough space for all the options plus the two
      // filenames, plus the name of the command.
-     java.lang.String[] optionsArray= new java.lang.String[optionsList.size()+3];
+     java.lang.String[] optionsArray= new java.lang.String[optionsArray1.length+3];
 
      optionsArray[0] = "svm_learn";
-     for (int i=0; i < optionsList.size(); ++i) {
-       optionsArray[i+1] = (java.lang.String)optionsList.get(i);
+     for (int i=0; i < optionsArray1.length; ++i) {
+       optionsArray[i+1] = optionsArray1[i];
      }
      optionsArray[optionsArray.length-2] = trainingDataFile.getPath();
      optionsArray[optionsArray.length-1] = modelFile.getPath();
