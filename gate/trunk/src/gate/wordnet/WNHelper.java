@@ -16,6 +16,7 @@
 package gate.wordnet;
 
 import net.didion.jwnl.data.POS;
+import net.didion.jwnl.data.PointerType;
 
 final class WNHelper {
 
@@ -73,6 +74,134 @@ final class WNHelper {
     }
 
     return result;
+  }
+
+  public static int PointerType2int(PointerType pt) {
+
+    //0.
+    if (null == pt) {
+      throw new IllegalArgumentException();
+    }
+
+    if (pt.equals(PointerType.ANTONYM)) {
+      return Relation.REL_ANTONYM;
+    }
+    else if (pt.equals(PointerType.ATTRIBUTE)) {
+      return Relation.REL_ATTRIBUTE;
+    }
+    else if (pt.equals(PointerType.CAUSE)) {
+      return Relation.REL_CAUSE;
+    }
+    else if (pt.equals(PointerType.DERIVED)) {
+      return Relation.REL_DERIVED_FROM_ADJECTIVE;
+    }
+    else if (pt.equals(PointerType.ENTAILMENT)) {
+      return Relation.REL_ENTAILMENT;
+    }
+    else if (pt.equals(PointerType.HYPERNYM)) {
+      return Relation.REL_HYPERNYM;
+    }
+    else if (pt.equals(PointerType.HYPONYM)) {
+      return Relation.REL_HYPONYM;
+    }
+    else if (pt.equals(PointerType.MEMBER_HOLONYM)) {
+      return Relation.REL_MEMBER_HOLONYM;
+    }
+    else if (pt.equals(PointerType.MEMBER_MERONYM)) {
+      return Relation.REL_MEMBER_MERONYM;
+    }
+    else if (pt.equals(PointerType.PARTICIPLE_OF)) {
+      return Relation.REL_PARTICIPLE_OF_VERB;
+    }
+    else if (pt.equals(PointerType.PART_HOLONYM)) {
+      return Relation.REL_PART_HOLONYM;
+    }
+    else if (pt.equals(PointerType.PART_MERONYM)) {
+      return Relation.REL_PART_MERONYM;
+    }
+    else if (pt.equals(PointerType.SIMILAR_TO)) {
+      return Relation.REL_SIMILAR_TO;
+    }
+    else if (pt.equals(PointerType.SEE_ALSO)) {
+      return Relation.REL_SEE_ALSO;
+    }
+    else if (pt.equals(PointerType.SUBSTANCE_MERONYM)) {
+      return Relation.REL_SUBSTANCE_MERONYM;
+    }
+    else if (pt.equals(PointerType.SUBSTANCE_HOLONYM)) {
+      return Relation.REL_SUBSTANCE_HOLONYM;
+    }
+    else if (pt.equals(PointerType.VERB_GROUP)) {
+      return Relation.REL_VERB_GROUP;
+    }
+    else{
+        throw new IllegalArgumentException();
+    }
+
+  }
+
+
+  public static PointerType int2PointerType(int type) {
+
+    switch(type) {
+
+      case Relation.REL_ANTONYM:
+        return PointerType.ANTONYM;
+
+      case Relation.REL_ATTRIBUTE:
+        return PointerType.ATTRIBUTE;
+
+      case Relation.REL_CAUSE:
+        return PointerType.CAUSE;
+
+      case Relation.REL_DERIVED_FROM_ADJECTIVE:
+        return PointerType.DERIVED;
+
+      case Relation.REL_ENTAILMENT:
+        return PointerType.ENTAILMENT;
+
+      case Relation.REL_HYPERNYM:
+        return PointerType.HYPERNYM;
+
+      case Relation.REL_HYPONYM:
+        return PointerType.HYPONYM;
+
+      case Relation.REL_MEMBER_HOLONYM:
+        return PointerType.MEMBER_HOLONYM;
+
+      case Relation.REL_MEMBER_MERONYM:
+        return PointerType.MEMBER_MERONYM;
+
+      case Relation.REL_PARTICIPLE_OF_VERB:
+        return PointerType.PARTICIPLE_OF;
+
+      case Relation.REL_PART_HOLONYM:
+        return PointerType.PART_HOLONYM;
+
+      case Relation.REL_PART_MERONYM:
+        return PointerType.PART_MERONYM;
+
+      case Relation.REL_PERTAINYM:
+        return null;
+
+      case Relation.REL_SEE_ALSO:
+        return PointerType.SEE_ALSO;
+
+      case Relation.REL_SIMILAR_TO:
+        return PointerType.SIMILAR_TO;
+
+      case Relation.REL_SUBSTANCE_HOLONYM:
+        return PointerType.SUBSTANCE_HOLONYM;
+
+      case Relation.REL_SUBSTANCE_MERONYM:
+        return PointerType.SUBSTANCE_MERONYM;
+
+      case Relation.REL_VERB_GROUP:
+        return PointerType.VERB_GROUP;
+
+      default:
+        throw new IllegalArgumentException();
+    }
   }
 
 }
