@@ -3,7 +3,7 @@
 pause >>>>>> Tables and sequences created. Press ENTER to continue...
 clear buffer
 
-
+ 
 @../../../src/database/Oracle/error.spc 
 pause >>>>>> Package ERROR created. Press ENTER to continue...
 clear buffer
@@ -24,6 +24,10 @@ clear buffer
 
 @initData_Oracle.sql 
 pause >>>>>> Lookup tables initialized. Press ENTER to continue...
+clear buffer
+
+@grants.sql 
+pause >>>>>> Access to GATEADMIN objects granted to GATEUSER. Press ENTER to continue...
 clear buffer
 
 PROMPT
