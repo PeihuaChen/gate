@@ -20,6 +20,7 @@ import gate.creole.tokeniser.DefaultTokeniser;
 import gate.creole.*;
 import gate.event.*;
 import gate.swing.*;
+import gate.print.*;
 
 import gnu.regexp.*;
 
@@ -840,7 +841,7 @@ public class DocumentEditor extends AbstractVisualResource
 
     //printing
     toolbar.add(Box.createHorizontalStrut(20));
-//    toolbar.add(new PrintAction());
+    toolbar.add(new PrintAction());
     toolbar.add(new SearchAction());
 
 
@@ -3627,9 +3628,8 @@ Out.prln("NULL size");
   protected class PrintAction extends AbstractAction{
     public PrintAction(){
       super("Print");
-    }// EditAnnotationAction()
+    }
 
-    /** This method takes care of how the dumping is done*/
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
         public void run(){
@@ -3637,24 +3637,21 @@ Out.prln("NULL size");
 
           if (printerJob.printDialog()) {
             try{
-              PageFormat pageFormat = printerJob.pageDialog(printerJob.defaultPage());
-              Printable printable = new Printable(){
-                public int print(Graphics graphics, PageFormat pageFormat,
-                                 int pageIndex)throws PrinterException{
-                  if(pageIndex == 0){
-                    JTextPane printPane = new JTextPane(textPane.getStyledDocument());
-                    JScrollPane scroller = new JScrollPane(printPane);
-                    scroller.setSize((int)pageFormat.getImageableHeight(),
-                                     (int)pageFormat.getImageableHeight());
-                    scroller.validate();
 
-                    textPane.printAll(graphics);
-                    return Printable.PAGE_EXISTS;
-                  }else return Printable.NO_SUCH_PAGE;
-                }
-              };
-              printerJob.setPrintable(printable , pageFormat);
+//              PageFormat pageFormat = printerJob.pageDialog(printerJob.defaultPage());
+              PageFormat pageFormat = printerJob.defaultPage();
+              Pageable pageable = new JComponentPrinter(textPane, pageFormat);
+              printerJob.setPageable(pageable);
+
               printerJob.print();
+              //fire the events
+              StatusListener sListener = (StatusListener)MainFrame.
+                                         getListeners().
+                                         get("gate.event.StatusListener");
+              if(sListener != null){
+                sListener.statusChanged("Document printed!");
+              }
+
             }catch(Exception ex) {
               ex.printStackTrace();
             }
