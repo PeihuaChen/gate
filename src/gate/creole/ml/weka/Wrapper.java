@@ -22,6 +22,7 @@ import org.jdom.Element;
 
 import weka.core.*;
 import weka.classifiers.*;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.filters.*;
 
 import gate.creole.ml.*;
@@ -161,8 +162,13 @@ public class Wrapper implements MLEngine, ActionsPublisher {
           //confidence set; use probability distribution
 
           double[] distribution = null;
-          distribution = ((DistributionClassifier)classifier).
-                                  distributionForInstance(instance);
+          try{
+            distribution = classifier.distributionForInstance(instance);
+          }catch(Exception e){
+            //if the classifier cannot return a distribution it will throw
+            //a java.lang.Exception
+            throw new ExecutionException(e);
+          }
 
           List res = new ArrayList();
           for(int i = 0; i < distribution.length; i++){
@@ -290,11 +296,13 @@ public class Wrapper implements MLEngine, ActionsPublisher {
             "Could not parse confidence threshold value: " +
             anElement.getTextTrim() + "!");
         }
-        if(!(classifier instanceof DistributionClassifier)){
-          throw new GateException(
-            "Cannot use confidence threshold with classifier: " +
-            classifier.getClass().getName() + "!");
-        }
+        //in the new version of WEKA all classifiers might be distribution
+        //classifiers - there is no way to distinguish between them
+//        if(!(classifier instanceof DistributionClassifier)){
+//          throw new GateException(
+//            "Cannot use confidence threshold with classifier: " +
+//            classifier.getClass().getName() + "!");
+//        }
       }
 
     }
@@ -322,7 +330,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         }else{
           //VALUES element present but no values defined -> String attribute
           aWekaAttribute = new weka.core.Attribute(aGateAttr.getName(),
-                                                   null);
+                                                   (FastVector)null);
         }
       }else{
         if(aGateAttr.getFeature() == null){
