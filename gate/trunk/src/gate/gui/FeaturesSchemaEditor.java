@@ -425,9 +425,10 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           if(feature.isSchemaFeature()){
             Set permValues = schema.getFeatureSchema(feature.name).
               getPermissibleValues();
-            if(permValues != null) fValues.addAll(permValues);
+            fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);
+          Collections.sort(fValues);
           for(Iterator valIter = fValues.iterator(); 
               valIter.hasNext(); 
               comboModel.addElement(valIter.next()));
