@@ -22,6 +22,7 @@ import gate.creole.AbstractVisualResource;
 import gate.creole.ProtegeProjectName;
 // Protege import
 import edu.stanford.smi.protege.ui.*;
+import edu.stanford.smi.protege.model.*;
 
 /**
  *  This class wrap the Protege application to show it as VR in GATE
@@ -112,6 +113,21 @@ public class ProtegeWrapper extends AbstractVisualResource {
       JScrollPane scroll = new JScrollPane();
       add(scroll, BorderLayout.CENTER);
       scroll.getViewport().add(protegeRootPane);
+      
+      // set KnowledgeBase object
+      Project prj = null;
+      KnowledgeBase knBase = null;
+      
+      prj = ProjectManager.getProjectManager().getCurrentProject();
+      if(projectFileName != null && prj != null) {
+        knBase = prj.getKnowledgeBase();
+        projectFileName.setKnowledgeBase(knBase);
+// Some debug information about KnowledgeBase instance        
+System.out.println("KnBase name: "+knBase.getName());
+System.out.println("KnBase root cls: "+knBase.getRootClses());
+System.out.println("KnBase cls count: "+knBase.getClsCount());
+      } // if
+      
     } // if
   } // setTarget(Object target)
   
