@@ -98,7 +98,8 @@ public class XJTable extends JTable{
   }
   
   /**
-   * Used for setting the initial sizing of the columns
+   * Sets the preferred widths for the columns and rows based or the preferred
+   * sizes of the renderers.
    *
    */
   public void fixColumnSizes(){
