@@ -1211,31 +1211,6 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
-
-  /**
-   * Checks if the user (identified by the sessionID)
-   *  has read access to the LR
-   */
-/*  public boolean canReadLR(Object lrID)
-    throws PersistenceException, SecurityException{
-
-    return canAccessLR((Long) lrID,DBHelper.READ_ACCESS);
-  }
-*/
-
-
-  /**
-   * Checks if the user (identified by the sessionID)
-   * has write access to the LR
-   */
-/*  public boolean canWriteLR(Object lrID)
-    throws PersistenceException, SecurityException{
-
-    return canAccessLR((Long) lrID,DBHelper.WRITE_ACCESS);
-  }
-*/
-
-
   /**
    * Checks if the user (identified by the sessionID)
    * has some access (read/write) to the LR
