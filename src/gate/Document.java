@@ -17,7 +17,7 @@ import gate.util.*;
 public interface Document
 {
   /** Documents are identified by URLs */
-  public Url getUrl();
+  public URL getUrl();
 
   /** The annotation graphs for this document */
   public Set getAnnotationGraphs();
