@@ -589,6 +589,7 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Add the tableScroll to the diffPanel
     this.add(diffTable);
 
+
     // ADD the LEGEND
     //Lay out the JLabels from left to right.
     //Box infoBox = new Box(BoxLayout.X_AXIS);

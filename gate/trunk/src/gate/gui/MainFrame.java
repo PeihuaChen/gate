@@ -1421,6 +1421,10 @@ public class MainFrame extends JFrame
           //first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
+          Boolean verboseMode = Gate.getUserConfig().
+              getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE);
+          if (verboseMode != null && verboseMode.booleanValue())
+            theTool.setVerboseMode(true);
 
           Out.prln("Please wait while GATE tools are initialised.");
           //initialise the tool
@@ -1465,6 +1469,10 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setMarkedStored(true);
+          Boolean verboseMode = Gate.getUserConfig().
+              getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE);
+          if (verboseMode != null && verboseMode.booleanValue())
+            theTool.setVerboseMode(true);
 
           Out.prln("Evaluating human-marked documents against pre-stored results.");
           //initialise the tool
@@ -1509,6 +1517,10 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setMarkedClean(true);
+          Boolean verboseMode = Gate.getUserConfig().
+              getBoolean(GateConstants.CORPUS_EVAL_TOOL_VERBOSE_MODE);
+          if (verboseMode != null && verboseMode.booleanValue())
+            theTool.setVerboseMode(true);
 
           Out.prln("Evaluating human-marked documents against current processing results.");
           //initialise the tool
