@@ -83,8 +83,8 @@ public class UserImpl implements User {
       }
 
       stmt = this.conn.prepareCall("{ call security.set_user_name(?,?)} ");
-      stmt.setLong(0,this.id.longValue());
-      stmt.setString(1,newName);
+      stmt.setLong(1,this.id.longValue());
+      stmt.setString(2,newName);
       stmt.execute();
       //release stmt???
     }
@@ -107,8 +107,8 @@ public class UserImpl implements User {
       }
 
       stmt = this.conn.prepareCall("{ call security.set_user_password(?,?)} ");
-      stmt.setLong(0,this.id.longValue());
-      stmt.setString(1,newPass);
+      stmt.setLong(1,this.id.longValue());
+      stmt.setString(2,newPass);
       stmt.execute();
       //release stmt???
     }
