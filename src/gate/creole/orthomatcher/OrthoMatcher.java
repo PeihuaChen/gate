@@ -347,7 +347,16 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         continue;
       }
 
+      //check if we should do sub-string matching in case it's hyphenated
+      //for example US-led
+      if (tokens.size() == 1
+          && "hyphen".equals(unknown.getFeatures().get(this.KIND_FEATURE))) {
+        if (matchHyphenatedUnknowns(unknown, unknownString, iter))
+          continue;
+      }//if
+
       matchWithPrevious(unknown, unknownString);
+
     } //while though unknowns
 
     if (! annots2Remove.isEmpty()) {
@@ -370,6 +379,51 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         mList.add(newID);
       }//while
     }//if
+  }
+
+  private boolean matchHyphenatedUnknowns(Annotation unknown, String unknownString,
+                                       Iterator iter){
+    boolean matched = false;
+
+    //only take the substring before the hyphen
+    int stringEnd = unknownString.indexOf("-");
+    unknownString = unknownString.substring(0, stringEnd);
+    //check if we've already matched this string
+    //because only exact match of the substring are considered
+    if (processedAnnots.containsValue(unknownString)) {
+      matched = true;
+      Annotation matchedAnnot = updateMatches(unknown, unknownString);
+      //only do the matching if not a person, because we do not match
+      //those on sub-strings
+      iter.remove();
+      String newType;
+      if (matchedAnnot.getType().equals(unknownType))
+        newType = (String)annots2Remove.get(matchedAnnot.getId());
+      else
+        newType = matchedAnnot.getType();
+
+      Integer newID = new Integer(-1);
+      try {
+        newID = nameAllAnnots.add(
+          unknown.getStartNode().getOffset(),
+          new Long(unknown.getStartNode().getOffset().longValue()
+                  + stringEnd),
+          newType,
+          unknown.getFeatures()
+        );
+      } catch (InvalidOffsetException ex) {
+        throw new GateRuntimeException(ex.getMessage());
+      }
+      nameAllAnnots.remove(unknown);
+
+      //change the id in the matches list
+      List mList = (List)unknown.getFeatures().
+                   get(ANNOTATION_COREF_FEATURE_NAME);
+      mList.remove(unknown.getId());
+      mList.add(newID);
+
+    }
+    return matched;
   }
 
   protected void matchWithPrevious(Annotation nameAnnot, String annotString) {
@@ -395,7 +449,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (matchedAlready(nameAnnot, prevAnnot) )
         continue;
 
-      // determine the title from annotation string
       //now changed to a rule, here we just match by gender
       if (prevAnnot.getType().equals(personType)) {
         String prevGender = (String) prevAnnot.getFeatures().get(GENDER_FEATURE);
@@ -444,6 +497,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
   protected boolean matchAnnotations(Annotation newAnnot, String annotString,
                                      Annotation prevAnnot) {
+    //do not match two annotations that overlap
+    if (newAnnot.overlaps(prevAnnot))
+      return false;
 
     // find which annotation string of the two is longer
     //  this is useful for some of the matching rules
