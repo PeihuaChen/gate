@@ -32,6 +32,7 @@ import gate.security.*;
 import gate.security.SecurityException; //hide the more general exception
 import gate.corpora.*;
 import gate.annotation.*;
+import gate.creole.ResourceData;
 
 public class OracleDataStore extends JDBCDataStore {
 
@@ -447,6 +448,8 @@ public class OracleDataStore extends JDBCDataStore {
       )
     );
 
+    //unload the transient LR, so the user realises it is no longer valid
+    Factory.deleteResource(lr);
 
     return result;
   }
@@ -709,6 +712,7 @@ public class OracleDataStore extends JDBCDataStore {
                                               doc.getAnnotations(),
                                               doc.getNamedAnnotationSets());
 /*
+    dbDoc.setConnection(this.jdbcConn);
     dbDoc.setContent(doc.getContent());
     dbDoc.setDataStore(this);
     dbDoc.setFeatures(doc.getFeatures());
@@ -731,6 +735,7 @@ public class OracleDataStore extends JDBCDataStore {
       ((DatabaseDocumentImpl)dbDoc).setAnnotations(currSet.getName(),currSet);
     }
 */
+
     return dbDoc;
   }
 
