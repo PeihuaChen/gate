@@ -1770,7 +1770,9 @@ candid JJ
 canine JJ
 canned JJ VBN
 canning NN VBG
+cannot MD
 canny JJ
+cant MD
 cantonal JJ
 canvas NN
 canvassed VBN
@@ -3220,6 +3222,7 @@ dictates VBZ
 dictating NN
 dictatorial JJ
 did VBD
+didnt VBD
 die VB VBP NN
 die-hards NNS
 died VBD VBN
@@ -3970,6 +3973,7 @@ erases VBZ
 erect VB
 erected VBD VBN
 erembal NNP
+erm UH
 erode VB VBP
 eroded VBN VBD
 erodes VBZ
@@ -5516,7 +5520,7 @@ hyperventilating NN
 hyping NN VBG
 hypnotized VBN
 hypothesized VBN
-i NNP NNS FW
+i PRP NNP NNS FW
 i.e. FW
 i860 NN
 ice-baggers NNS

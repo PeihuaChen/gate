@@ -2882,6 +2882,7 @@ Intent NN
 Interactive NNP JJ
 Intercepting VBG
 Interest NN NNP
+Interesting JJ
 Interestingly RB
 Interior NNP JJ
 Interleukin-3 NN
@@ -5693,6 +5694,7 @@ Well-Seasoned JJ
 Well-Tempered JJ
 Well-to-Do JJ
 Wendy NNP NN
+Went VBD
 Were VBD VB
 West NNP JJ NN NNPS
 Westamerica NNP NN
