@@ -202,6 +202,9 @@ public class CorpusBenchmarkTool {
           "information when precision/recall are lower than " +
           corpusTool.getThreshold() +"<P>");
         corpusTool.setVerboseMode(true);
+      } else if (args[i].equals("-moreinfo")) {
+        Out.prln("Show more details in document table...<P>");
+        corpusTool.setMoreInfo(true);
       }
       i++; //just ignore the option, which we do not recognise
     }//while
@@ -232,6 +235,8 @@ public class CorpusBenchmarkTool {
     if (! corpusTool.getGenerateMode())
       corpusTool.printStatistics();
 
+    Out.prln("Overall average precision: " + corpusTool.getPrecisionAverage());
+    Out.prln("Overall average recall: " + corpusTool.getRecallAverage());
     Out.prln("Finished! <P>");
     Out.prln("</BODY>");
     Out.prln("</HTML>");
@@ -256,13 +261,22 @@ public class CorpusBenchmarkTool {
     isVerboseMode = mode;
   }//setVerboseMode
 
+  public void setMoreInfo(boolean mode) {
+    isMoreInfoMode = mode;
+  } // setMoreInfo
+
+  public boolean getMoreInfo() {
+    return isMoreInfoMode;
+  } // getMoreInfo
+
   public void setMarkedStored(boolean mode) {
     isMarkedStored = mode;
-  }//
+  }// setMarkedStored
+
 
   public boolean getMarkedStored() {
     return isMarkedStored;
-  }//
+  }// getMarkedStored
 
   public void setMarkedClean(boolean mode) {
     isMarkedClean = mode;
@@ -833,6 +847,13 @@ ex.printStackTrace();
       AnnotationDiff annotDiff1 =
         measureDocs(markedDoc, persDoc, annotType);
 
+      if (isMoreInfoMode) {
+        Out.prln("<TD>" + annotDiff.getCorrectCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getPartiallyCorrectCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getMissingCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getSpuriousCount() + "</TD>");
+      }
+
       Out.prln("<TD>" + annotDiff.getPrecisionAverage());
       //check the precision first
       if (annotDiff1 != null &&
@@ -910,6 +931,13 @@ ex.printStackTrace();
 
       Out.prln("<TD>" + annotType + "</TD>");
 
+      if(isMoreInfoMode) {
+        Out.prln("<TD>" + annotDiff.getCorrectCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getPartiallyCorrectCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getMissingCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff.getSpuriousCount() + "</TD>");
+      }
+
       Out.prln("<TD>" + annotDiff.getPrecisionAverage() + "</TD>");
       Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
       //check the recall now
@@ -932,12 +960,18 @@ ex.printStackTrace();
 
   protected void printTableHeader() {
     Out.prln("<TABLE BORDER=1");
+    Out.pr("<TR> <TD><B>Annotation Type</B></TD> ");
+
+    if(isMoreInfoMode)
+     Out.pr("<TD><B>Correct</B></TD> <TD><B>Partially Correct</B></TD> "
+             + "<TD><B>Missing</B></TD> <TD><B>Spurious<B></TD>");
+
+    Out.pr("<TD><B>Precision</B></TD> <TD><B>Recall</B></TD>");
+
     if (isVerboseMode)
-      Out.prln("<TR> <TD><B>Annotation Type</B></TD> <TD><B>Precision</B></TD> "
-              + "<TD><B>Recall</B></TD> <TD><B>Annotations<B></TD>");
-    else
-      Out.prln("<TR> <TD><B>Annotation Type</B></TD> <TD><B>Precision</B></TD> "
-              + "<TD><B>Recall</B></TD>");
+      Out.pr("<TD><B>Annotations</B></TD>");
+
+    Out.prln("</TR>");
   }
 
   protected void updateStatistics(AnnotationDiff annotDiff, String annotType){
@@ -1222,7 +1256,17 @@ ex.printStackTrace();
    * run in evaluate mode
    */
   private boolean isGenerateMode = false;
+
+  /**
+   * If true - show annotations for docs below threshold
+   */
   private boolean isVerboseMode = false;
+
+  /**
+   * If true - show more info in document table
+   */
+  private boolean isMoreInfoMode = false;
+
 
   /**
    * If true, the corpus tool will evaluate stored against the human-marked
@@ -1241,6 +1285,7 @@ ex.printStackTrace();
 
   /** String to print when wrong command-line args */
   private static String usage =
-    "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] [-verbose] directory-name application";
+    "usage: CorpusBenchmarkTool [-generate|-marked_stored|-marked_clean] "
+    +"[-verbose] [-moreinfo] directory-name application";
 
 }
