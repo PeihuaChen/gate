@@ -491,7 +491,6 @@ public class NameBearerHandle implements Handle,
           if(ds == ownDS){
             ds.sync((LanguageResource)target);
           }else{
-            //TODO: change the null for SecurityInfo
             FeatureMap securityData = (FeatureMap)
                          Gate.getDataStoreRegister().getSecurityData(ds);
             SecurityInfo si = null;
