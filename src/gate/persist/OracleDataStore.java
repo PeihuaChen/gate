@@ -3294,4 +3294,18 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
+  /** Get a list of LRs that satisfy some set or restrictions */
+  public List findLrs(List constraints) throws PersistenceException {
+    return findLrs(constraints,null);
+  }
+
+  /**
+   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  of a particular type
+   */
+  public List findLrs(List constraints, String lrType) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
 }
