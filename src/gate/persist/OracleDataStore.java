@@ -90,35 +90,6 @@ public class OracleDataStore extends JDBCDataStore {
     this.iconName = DS_ICON_NAME;
   }
 
-  /** Get the name of an LR from its ID. */
-  public String getLrName(Object lrId)
-    throws PersistenceException {
-
-    if (false == lrId instanceof Long) {
-      throw new IllegalArgumentException();
-    }
-
-    Long ID = (Long)lrId;
-
-    CallableStatement stmt = null;
-
-    try {
-      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.get_lr_name(?,?) }");
-      stmt.setLong(1,ID.longValue());
-      stmt.registerOutParameter(2,java.sql.Types.VARCHAR);
-      stmt.execute();
-      String result = stmt.getString(2);
-
-      return result;
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't get LR name from DB: ["+ sqle.getMessage()+"]");
-    }
-    finally {
-      DBHelper.cleanup(stmt);
-    }
-  }
-
 
 
   /** Set the URL for the underlying storage mechanism. */
