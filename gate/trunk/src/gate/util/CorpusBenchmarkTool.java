@@ -134,6 +134,20 @@ public class CorpusBenchmarkTool {
     }
   }//initPRs
 
+  public void unloadPRs() {
+    //we have nothing to unload if no PRs are loaded
+    if (isMarkedStored)
+      return;
+
+    Factory.deleteResource(this.tokeniser);
+    Factory.deleteResource(this.gazetteer);
+    Factory.deleteResource(this.setTransfer);
+    Factory.deleteResource(this.splitter);
+    Factory.deleteResource(this.tagger);
+    Factory.deleteResource(this.transducer);
+    Factory.deleteResource(this.orthomatcher);
+  }
+
   public void execute() {
     execute(startDir);
   }
@@ -403,6 +417,8 @@ public class CorpusBenchmarkTool {
         processDocument(doc);
         LanguageResource lr = sds.adopt(doc, null);
         sds.sync(lr);
+        Factory.deleteResource(doc);
+        Factory.deleteResource(lr);
       }//for
       sds.close();
     } catch (java.net.MalformedURLException ex) {
