@@ -33,6 +33,7 @@ public class SimpleErrorHandler implements ErrorHandler {
   public SimpleErrorHandler() {
 	  super();
   }
+
   /**
     * error method comment.
     */
@@ -43,6 +44,7 @@ public class SimpleErrorHandler implements ErrorHandler {
     Err.println("This is recoverable error. ");
 
   }
+
   /**
     * fatalError method comment.
     */
@@ -52,6 +54,7 @@ public class SimpleErrorHandler implements ErrorHandler {
                                                ex.getLineNumber() + ": " + ex);
     Err.println("This is fatal error. ");
   }
+
   /**
     * warning method comment.
     */
@@ -61,4 +64,5 @@ public class SimpleErrorHandler implements ErrorHandler {
                                                ex.getLineNumber() + ": " + ex);
     Err.println("This is just a warning. ");
   }
-}
+  
+} // class SimpleErrorHandler

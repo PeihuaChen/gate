@@ -17,10 +17,11 @@
 
 package gate.util;
 
-/**Raised when there is an attempt to read an inexistant object from the
-  *database(i.e. when an invalid object ID occurs).
+/** Raised when there is an attempt to read an inexistant object from the
+  * database(i.e. when an invalid object ID occurs).
   */
 public class NoSuchObjectException extends GateException {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

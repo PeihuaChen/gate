@@ -22,16 +22,15 @@ import gate.util.*;
 
 /** The content of Documents.
   */
-public interface DocumentContent
-{
+public interface DocumentContent {
+
   /** The contents under a particular span. */
   public DocumentContent getContent(Long start, Long end)
     throws InvalidOffsetException;
- 
+
   /** The size of this content (e.g. character length for textual
     * content).
     */
   public Long size();
-
 
 } // interface DocumentContent

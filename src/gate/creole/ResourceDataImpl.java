@@ -53,6 +53,7 @@ implements ResourceData {
       s.append(Strings.getNl() + "    ");
       List paramList = (List) iter.next();
       Iterator iter2 = paramList.iterator();
+
       while(iter2.hasNext())
         s.append( (Parameter) iter2.next() + Strings.getNl() + "    " );
     }

@@ -29,7 +29,8 @@ import gate.util.*;
   * <A HREF=ResourceData.html>ResourceData</A> object.
   * <P>
   * The register is accessible from the static method
-  * <A HREF=util/Gate.html#getCreoleRegister()>gate.util.Gate.getCreoleRegister</A>;
+  * <A HREF=util/Gate.html#getCreoleRegister()>gate.util.Gate.getCreoleRegister
+  * </A>;
   * there is only one per application of the GATE framework.
   * <P>
   * Clients use the register by adding URLs (using the

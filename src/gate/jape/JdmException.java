@@ -20,9 +20,9 @@
 package gate.jape;
 
 /**
-THIS CLASS SHOULDN'T BE HERE. Please let's all ignore it, and maybe
-it will go away.
-*/
+  * THIS CLASS SHOULDN'T BE HERE. Please let's all ignore it, and maybe
+  * it will go away.
+  */
 public class JdmException extends gate.util.GateException {
 
   /** Debug flag */

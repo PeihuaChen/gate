@@ -44,18 +44,18 @@ public class TestXml extends TestCase
   } // setUp
 
 
-  public static void main(String args[]){
+  public static void main(String args[]) {
     TestXml app = new TestXml("TestXml");
-    try{
+    try {
       app.testUnpackMarkup();
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace (Err.getPrintWriter());
     }
-  }
+  } // main
 
 
   /** A test */
-  public void testUnpackMarkup() throws Exception{
+  public void testUnpackMarkup() throws Exception {
     assert(true);
 
     // create the markupElementsMap map

@@ -134,7 +134,8 @@ implements JapeConstants, java.io.Serializable
   } // matches
 
   /** Apply the RHS of this rule (LHS must have been matched first). */
-  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations)
+                                                          throws JapeException {
     // the righthand side does the transduction, using bindings from lhs */
     if(DEBUG) Out.println("applying rule " + name);
 //    rhs.transduce(doc);
@@ -179,7 +180,7 @@ implements JapeConstants, java.io.Serializable
     StringBuffer buf = new StringBuffer(
       pad + "Rule: name(" + name + "); position(" + position + "); priority(" +
       priority + "); pendingPosition(" + pendingPosition + "); " +
-      "weFinished(" + weFinished + "); lhs(" + newline + 
+      "weFinished(" + weFinished + "); lhs(" + newline +
       lhs.toString(newPad) + newline + pad + "); rhs(" + newline +
       rhs.toString(newPad) + newline + pad + ");"
     );
@@ -189,7 +190,7 @@ implements JapeConstants, java.io.Serializable
     return buf.toString();
   } // toString
 
-//needed by FSM
+  //needed by FSM
   public LeftHandSide getLHS(){
     return lhs;
   }
@@ -200,6 +201,7 @@ implements JapeConstants, java.io.Serializable
   //StatusReporter VOID Implementation
   public void addStatusListener(StatusListener listener){}
   public void removeStatusListener(StatusListener listener){}
+
   //ProcessProgressReporter VOID implementation
   public void addProcessProgressListener(ProgressListener listener){}
   public void removeProcessProgressListener(ProgressListener listener){}
@@ -209,6 +211,9 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.8  2000/10/26 10:45:31  oana
+// Modified in the code style
+//
 // Revision 1.7  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //

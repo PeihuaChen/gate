@@ -58,7 +58,8 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(gate.Document doc){
+  public void unpackMarkup(gate.Document doc) {
+
     // create an EmailDocumentHandler
     EmailDocumentHandler emailDocHandler = null;
     emailDocHandler = new gate.email.EmailDocumentHandler( doc,
@@ -66,15 +67,17 @@ public class EmailDocumentFormat extends TextualDocumentFormat
                                                         this.element2StringMap
                                                         );
     // register a status listener with it
-    emailDocHandler.addStatusListener(new StatusListener(){
-      public void statusChanged(String text){
+    emailDocHandler.addStatusListener(new StatusListener() {
+      public void statusChanged(String text) {
         // this is implemented in DocumentFormat.java and inherited here
         fireStatusChangedEvent(text);
       }
     });
+
     // call the method that creates annotations on the gate document
     emailDocHandler.annotateMessages();
-  }//unpackMarkup
+
+  } // unpackMarkup
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -84,11 +87,13 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup(gate.Document doc,
-                                    String  originalContentFeatureType){
+                                    String  originalContentFeatureType) {
 
      FeatureMap fm = doc.getFeatures ();
+
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
+
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);

@@ -272,5 +272,5 @@ public class Out {
       out.flush();
   } // padPr(String,int)
 
-} //Out
+} // Out
 

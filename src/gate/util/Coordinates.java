@@ -17,6 +17,7 @@
 package gate.util;
 
 public class Coordinates {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -65,4 +66,5 @@ public class Coordinates {
   public String toString() {
     return "x1=" + x1 + ";y1=" + y1 + ";x2=" + x2 + ";y2=" + y2;
   }
-} 
+  
+} // class Coordinates

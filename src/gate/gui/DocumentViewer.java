@@ -39,7 +39,8 @@ public class DocumentViewer extends JPanel {
   JScrollPane textScroll = new JScrollPane();
   JSplitPane centerSplit = new JSplitPane();
   JTextPane textPane = new JTextPane();
-  //Create the popup menu containing all possible annotation types.
+
+  // Create the popup menu containing all possible annotation types.
   JPopupMenu popupMenu = new JPopupMenu();
 
   Document document;
@@ -71,43 +72,51 @@ public class DocumentViewer extends JPanel {
     textPane.setText(document.getContent().toString());
     tableView = new SortedTable();
     tableView.setTableModel(new AnnotationSetTableModel(document,
-                                                        document.getAnnotations()
+                                                       document.getAnnotations()
                                                         )
                             );
-    initPopupMenu(popupMenu);                        
+    initPopupMenu(popupMenu);
+
     // add a mouse listener to textPane component in order
     // to catch the right click event
-    textPane.addMouseListener(new java.awt.event.MouseAdapter(){
-      public void mousePressed( MouseEvent e){
+    textPane.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed( MouseEvent e) {
         maybeShowPopup(e);
       }
-      public void mouseReleased( MouseEvent e){
+
+      public void mouseReleased( MouseEvent e) {
         maybeShowPopup(e);
       }
-      private void maybeShowPopup( MouseEvent e){
-        if (e.isPopupTrigger() && null != textPane.getSelectedText()){
+
+      private void maybeShowPopup( MouseEvent e) {
+        if (e.isPopupTrigger() && null != textPane.getSelectedText()) {
           popupMenu.show(e.getComponent(),e.getX(), e.getY());
         }
       }
     });
 
     tableView.addMouseListener(new java.awt.event.MouseAdapter() {
-
       public void mousePressed(MouseEvent e) {
         tableView_mousePressed(e);
       }
     });
+
     this.addComponentListener(new java.awt.event.ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         this_componentResized(e);
       }
     });
-    typeButtonsScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    typeButtonsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+    typeButtonsScroll.setHorizontalScrollBarPolicy(
+                                        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    typeButtonsScroll.setVerticalScrollBarPolicy(
+                                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     tableScroll.getViewport().add(tableView, null);
+
     //create the types buttons
     typesBox.removeAll();
-    LinkedList typeList = new LinkedList(document.getAnnotations().getAllTypes());
+    LinkedList typeList =
+      new LinkedList(document.getAnnotations().getAllTypes());
     Collections.sort(typeList);
     Iterator typesIter = typeList.iterator();
     String currentType;
@@ -115,38 +124,46 @@ public class DocumentViewer extends JPanel {
     LinkedList allButtons = new LinkedList();
     JButton typeButton, clearButton = new JButton();
     JLabel buttonLabel = new JLabel("Clear all");
+
     buttonLabel.setBackground(Color.black);
     buttonLabel.setForeground(Color.white);
     buttonLabel.setOpaque(true);
     buttonLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
     clearButton.add(buttonLabel,SwingConstants.CENTER);
     clearButton.setName("");
     clearButton.setBackground(Color.black);
     clearButton.setForeground(Color.white);
     clearButton.setHorizontalAlignment(JButton.CENTER);
+
     clearButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         typeButtonPressed("", null);
       }
     });
+
     ColorGenerator colGen = new ColorGenerator();
-      if(maxWidth < clearButton.getPreferredSize().width)
-        maxWidth = clearButton.getPreferredSize().width;
+    if(maxWidth < clearButton.getPreferredSize().width)
+      maxWidth = clearButton.getPreferredSize().width;
+
     while(typesIter.hasNext()){
       currentType = (String) typesIter.next();
       typeButton = new JButton();
+
       buttonLabel = new JLabel(currentType);
       buttonLabel.setBackground(Color.white);
       buttonLabel.setForeground(Color.black);
       buttonLabel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED));
       buttonLabel.setOpaque(true);
       buttonLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
       typeButton.add(buttonLabel, SwingConstants.CENTER);
       typeButton.setName(currentType);
-//      typeButton.setForeground(Color.white);
+      // typeButton.setForeground(Color.white);
       typeButton.setBackground(colGen.getNextColor());
       typeButton.setToolTipText(currentType);
       typeButton.setHorizontalAlignment(JButton.CENTER);
+
       typeButton.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if(e.getSource() instanceof Container){
@@ -165,34 +182,45 @@ public class DocumentViewer extends JPanel {
         maxWidth = typeButton.getPreferredSize().width;
       allButtons.add(typeButton);
     }//while(typesIter.hasNext())
-    Dimension bdim = new Dimension(maxWidth, clearButton.getPreferredSize().height);
-    Dimension ldim = new Dimension(maxWidth -10, clearButton.getPreferredSize().height -4);
+
+    Dimension bdim =
+      new Dimension(maxWidth, clearButton.getPreferredSize().height);
+    Dimension ldim =
+      new Dimension(maxWidth -10, clearButton.getPreferredSize().height -4);
+
     clearButton.setMinimumSize(bdim);
     clearButton.setMaximumSize(bdim);
+
     ((JLabel)clearButton.getComponent(0)).setMinimumSize(ldim);
     ((JLabel)clearButton.getComponent(0)).setMaximumSize(ldim);
 
     typesBox.add(clearButton);
-//    Collections.sort(allButtons, new ButtonComparator());
+    // Collections.sort(allButtons, new ButtonComparator());
+
     Iterator buttonsIter = allButtons.iterator();
     while(buttonsIter.hasNext()){
       typeButton = (JButton)buttonsIter.next();
-      bdim = new Dimension(maxWidth, typeButton.getPreferredSize().height);
-      ldim = new Dimension(maxWidth -10, typeButton.getPreferredSize().height -4);
+      bdim =
+        new Dimension(maxWidth, typeButton.getPreferredSize().height);
+      ldim =
+        new Dimension(maxWidth -10, typeButton.getPreferredSize().height -4);
+
       typeButton.setMinimumSize(bdim);
       typeButton.setMaximumSize(bdim);
       typeButton.setPreferredSize(bdim);
+
       ((JLabel)typeButton.getComponent(0)).setMinimumSize(ldim);
       ((JLabel)typeButton.getComponent(0)).setMaximumSize(ldim);
       typesBox.add(typeButton);
     }//while(buttonsIter.hasNext())
+
     typeButtonsScroll.getViewport().add(typesBox, null);
-/*
+    /*
     typeButtonsScroll.setPreferredSize(
       new Dimension(maxWidth +
                     typeButtonsScroll.getVerticalScrollBar().getWidth() + 5,
                     typeButtonsScroll.getSize().height));
-*/
+    */
     typeButtonsScroll.setPreferredSize(
       new Dimension(maxWidth +
                     (new JScrollBar()).getPreferredSize().width + 6,
@@ -202,15 +230,16 @@ public class DocumentViewer extends JPanel {
     centerSplit.add(tableScroll, JSplitPane.BOTTOM);
     textScroll.getViewport().add(textPane, null);
     RepaintManager repaintManager = RepaintManager.currentManager(textPane);
-//    repaintManager.setDoubleBufferingEnabled(false);
-//    textPane.setDebugGraphicsOptions(DebugGraphics.LOG_OPTION);
+
+    // repaintManager.setDoubleBufferingEnabled(false);
+    // textPane.setDebugGraphicsOptions(DebugGraphics.LOG_OPTION);
     this.add(typeButtonsScroll, BorderLayout.EAST);
 
     this.add(centerSplit, BorderLayout.CENTER);
   }
 
-  /** Initializes the popup menu with annotation types*/
-  private void initPopupMenu( JPopupMenu aPopupMenu){
+  /** Initializes the popup menu with annotation types */
+  private void initPopupMenu( JPopupMenu aPopupMenu) {
     ActionListener anActionListener  = new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         //:TODO: here call the method showDialog for the selected item
@@ -224,32 +253,33 @@ public class DocumentViewer extends JPanel {
     menuItem = new JMenuItem("Token");
     menuItem.addActionListener(anActionListener);
     aPopupMenu.add(menuItem);
-  }//initPopupMenu
+  } // initPopupMenu
 
-  public void setDocument(Document doc){
+  public void setDocument(Document doc) {
     this.document = doc;
   }
-  
+
   public void documentHasChanged(){
-    try  {
+    try {
       jbInit();
-    }
-    catch(Exception ex) {
+    } catch(Exception ex) {
       ex.printStackTrace();
     }
     this_componentResized(null);
   }
 
-  void typeButtonPressed(String type, Color col){
-    if(type.equals("")){
+  void typeButtonPressed(String type, Color col) {
+
+    if(type.equals("")) {
       textPane.getHighlighter().removeAllHighlights();
       tableView.clearSelection();
       selectionTag = null;
-    }else{
+    } else {
       AnnotationSet as = document.getAnnotations().get(type);
       Iterator annIter = as.iterator();
       gate.Annotation currentAnn;
       int start, end;
+
       try{
         Highlighter.HighlightPainter hp =
           new javax.swing.text.DefaultHighlighter.DefaultHighlightPainter(col);
@@ -259,32 +289,34 @@ public class DocumentViewer extends JPanel {
           end = currentAnn.getEndNode().getOffset().intValue();
           textPane.getHighlighter().addHighlight(start, end, hp);
         }
-      }catch(javax.swing.text.BadLocationException ble){
+      } catch(javax.swing.text.BadLocationException ble) {
         ble.printStackTrace(Err.getPrintWriter());
       }
+
       for(int i = 0; i < tableView.getRowCount(); i++)
         if(tableView.getModel().getValueAt(i, 2).equals(type))
           tableView.addRowSelectionInterval(i,i);
     }
 
-//Out.println(type);
+  // Out.println(type);
   }
 
   void this_componentResized(ComponentEvent e) {
+
     if(textPane.getHeight() + 10 > centerSplit.getHeight() /2)
       centerSplit.setDividerLocation(0.5);
     else centerSplit.setDividerLocation(textPane.getHeight() + 10);
     validate();
   }
 
-  class ButtonComparator implements Comparator{
-    public int compare(Object one, Object two){
+  class ButtonComparator implements Comparator {
+    public int compare(Object one, Object two) {
       return ((JButton)one).getName().compareTo(((JButton)two).getName());
     }
   }
 
   void tableView_mousePressed(MouseEvent e) {
-    try{
+    try {
       int start = ((Long)tableView.getModel().getValueAt(
                     tableView.rowAtPoint(e.getPoint()), 0)).intValue();
       int end = ((Long)tableView.getModel().getValueAt(
@@ -301,17 +333,22 @@ public class DocumentViewer extends JPanel {
           textScroll.getViewport().getSize().getWidth()));
       long ly = Math.round(Math.min(y, textPane.getSize().getHeight() -
           textScroll.getViewport().getSize().getHeight()));
+
       if(lx < 0) lx = 0;
       if(ly < 0) ly =0;
       textScroll.getViewport().setViewPosition(new Point((int)lx,(int)ly));
+
       //remove the previous selection highlight
       if(selectionTag != null)
         textPane.getHighlighter().removeHighlight(selectionTag);
+
       //highlight the selected element
       selectionTag =
         textPane.getHighlighter().addHighlight(start, end, selectionHP);
-    }catch(javax.swing.text.BadLocationException ble){
+
+    } catch(javax.swing.text.BadLocationException ble) {
       ble.printStackTrace(Err.getPrintWriter());
     }
   }
-}
+
+} // class DocumentViewer

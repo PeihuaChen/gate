@@ -122,11 +122,11 @@ public class TestJdk extends TestCase
     // try and get them from the usual Solaris place
     if(thisClassBytes == null || thisClassBytes.length == 0)
       try {
-        File sf = new File(
-"/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/src/gate/util/TestJdk.java"
+        File sf = new File("/share/nlp/projects/gate/webpages/gate.ac.uk/gate2"+
+                            "/src/gate/util/TestJdk.java"
         );
-        File bf = new File(
-"/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/classes/gate/util/TestJdk.class"
+        File bf = new File("/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/"
+                            +"classes/gate/util/TestJdk.class"
         );
         thisClassBytes = Files.getByteArray(bf);
         thisClassSource = Files.getString(sf);
@@ -142,12 +142,12 @@ public class TestJdk extends TestCase
     byte[] compiledBytes =
       jdk.compile(thisClassSource, "gate/util/TestJdk.java");
 
-// testing the binary to see if it is the same as the one on
-// disk doesn't work accross platforms as various strings to
-// do with source, libraries and so on get embedded. the
-// best test would be to do a javap and check compatibility,
-// but life is finite, so:
-if(true) return;
+    // testing the binary to see if it is the same as the one on
+    // disk doesn't work accross platforms as various strings to
+    // do with source, libraries and so on get embedded. the
+    // best test would be to do a javap and check compatibility,
+    // but life is finite, so:
+    if(true) return;
 
     assert(
       "compiled binary doesn't equal on-disk binary",
@@ -188,13 +188,14 @@ if(true) return;
   } // suite
 
   public static void main(String[] args){
-    try{
+    try {
       TestJdk testJdk = new TestJdk("");
       testJdk.setUp();
       testJdk.testCompiler();
       testJdk.testCompiler2();
       testJdk.testFinder();
       testJdk.testReloading();
-    }catch (Exception e) {e.printStackTrace(Err.getPrintWriter());}
+    } catch (Exception e) {e.printStackTrace(Err.getPrintWriter());}
   }
+
 } // class TestJdk

@@ -31,6 +31,7 @@ import java.net.*;
   * The loader is also used for creating JAPE RHS action classes.
   */
 public class GateClassLoader extends URLClassLoader {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -112,7 +113,7 @@ public class GateClassLoader extends URLClassLoader {
 
     // ask the new reloader to load the class
     return cachedReloader.loadClass(name, true);
-    
+
   } // reloadClass(String name)
 
   /** A cache used by the reloadClass method to store the last new

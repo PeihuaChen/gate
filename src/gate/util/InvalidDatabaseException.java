@@ -16,9 +16,10 @@
  */
 
 package gate.util;
-/**Used to signal an attempt to connect to a database in an invalid format,
-  *that is a database tha does not have the right structure (see Gate2
-  *documentation for details on required database structure).
+
+/** Used to signal an attempt to connect to a database in an invalid format,
+  * that is a database tha does not have the right structure (see Gate2
+  * documentation for details on required database structure).
   */
 public class InvalidDatabaseException extends GateException {
 
@@ -32,5 +33,5 @@ public class InvalidDatabaseException extends GateException {
     super(s);
   }
 
-}//InvalidDatabaseException
+} // InvalidDatabaseException
 

@@ -88,16 +88,28 @@ implements AnnotationSet
     * method.
     */
   class AnnotationSetIterator implements Iterator {
+
     private Iterator iter;
+
     private Annotation lastNext = null;
+
     AnnotationSetIterator()  { iter = annotsById.values().iterator(); }
+
     public boolean hasNext() { return iter.hasNext(); }
+
     public Object next()     { return (lastNext = (Annotation) iter.next()); }
+
     public void remove()     {
-      iter.remove();                    // this takes care of the ID index
-      removeFromTypeIndex(lastNext);    // remove from type index
-      removeFromOffsetIndex(lastNext);  // remove from offset indices
+      // this takes care of the ID index
+      iter.remove();
+
+      // remove from type index
+      removeFromTypeIndex(lastNext);
+
+      // remove from offset indices
+      removeFromOffsetIndex(lastNext);
     } // remove()
+
   }; // AnnotationSetIterator
 
   /** Get an iterator for this set */
@@ -105,6 +117,7 @@ implements AnnotationSet
 
   /** Remove an element from this set. */
   public boolean remove(Object o) throws ClassCastException {
+
     Annotation a = (Annotation) o;
 
     boolean wasPresent = removeFromIdIndex(a);
@@ -116,16 +129,21 @@ implements AnnotationSet
 
   /** Remove from the ID index. */
   boolean removeFromIdIndex(Annotation a) {
+
     if(annotsById.remove(a.getId()) == null)
       return false;
+
     return true;
   } // removeFromIdIndex(a)
 
   /** Remove from the type index. */
   void removeFromTypeIndex(Annotation a) {
     if(annotsByType != null) {
+
       AnnotationSet sameType = (AnnotationSet) annotsByType.get(a.getType());
+
       if(sameType != null) sameType.remove(a);
+
       if(sameType.isEmpty()) // none left of this type
         annotsByType.remove(a.getType());
     }
@@ -134,10 +152,11 @@ implements AnnotationSet
   /** Remove from the offset indices. */
   void removeFromOffsetIndex(Annotation a) {
     if(nodesByOffset != null) {
-// knowing when a node is no longer needed would require keeping a reference
-// count on annotations, or using a weak reference to the nodes in
-// nodesByOffset
+    // knowing when a node is no longer needed would require keeping a reference
+    // count on annotations, or using a weak reference to the nodes in
+    // nodesByOffset
     }
+
     if(annotsByStartNode != null) {
       Integer id = a.getStartNode().getId();
       AnnotationSet starterAnnots = (AnnotationSet) annotsByStartNode.get(id);
@@ -145,6 +164,7 @@ implements AnnotationSet
       if(starterAnnots.isEmpty()) // no annotations start here any more
         annotsByStartNode.remove(id);
     }
+
     if(annotsByEndNode != null) {
       Integer id = a.getEndNode().getId();
       AnnotationSet endingAnnots = (AnnotationSet) annotsByEndNode.get(id);
@@ -152,6 +172,7 @@ implements AnnotationSet
       if(endingAnnots.isEmpty()) // no annotations start here any more
         annotsByEndNode.remove(id);
     }
+
   } // removeFromOffsetIndex(a)
 
   /** The size of this set */
@@ -180,16 +201,18 @@ implements AnnotationSet
 
   /** Select annotations by a set of types. Expects a Set of String. */
   public AnnotationSet get(Set types) throws ClassCastException {
+
     if(annotsByType == null) indexByType();
 
     Iterator iter = types.iterator();
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
+
     while(iter.hasNext()) {
       String type = (String) iter.next();
       AnnotationSet as = (AnnotationSet) annotsByType.get(type);
       if(as != null)
         resultSet.addAll(as);
-// need an addAllOfOneType method
+      // need an addAllOfOneType method
     } // while
 
     if(resultSet.isEmpty())
@@ -235,27 +258,35 @@ implements AnnotationSet
       return null;
 
     AnnotationSet res = (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+
     //get ready for next test
     nextNode = (Node) nodesByOffset.getNextOf(new Long(offset.longValue() + 1));
+
     //skip all the nodes that have no starting annotations
     while(res == null && nextNode != null){
       res = (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+
       //get ready for next test
-      nextNode = (Node) nodesByOffset.getNextOf(new Long(nextNode.getOffset().longValue() + 1));
+      nextNode = (Node) nodesByOffset.getNextOf(
+        new Long(nextNode.getOffset().longValue() + 1)
+      );
     };
+
     //res it either null (no suitable node found) or the correct result
     return res;
   } // get(offset)
 
   /** Select annotations by type, features and offset */
-  public AnnotationSet get(String type, FeatureMap constraints, Long offset)
-  {
+  public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
+
     // select by offset
     AnnotationSet nextAnnots = (AnnotationSet) get(offset);
+
     if(nextAnnots == null) return null;
 
     // select by type and constraints from the next annots
     return nextAnnots.get(type, constraints);
+
   } // get(type, constraints, offset)
 
   /** Get the node with the smallest offset */
@@ -267,17 +298,20 @@ implements AnnotationSet
 
   /** Get the node with the largest offset */
   public Node lastNode() {
+
     indexByStartOffset();
     indexByEndOffset();
+
     if(nodesByOffset.isEmpty())return null;
     else return (Node) nodesByOffset.get(nodesByOffset.lastKey());
+
   } // lastNode
 
   /**
-  * Get the first node that is relevant for this annotation set and which has
-  * the offset larger than the one of the node provided.
-  */
-  public Node nextNode(Node node){
+    * Get the first node that is relevant for this annotation set and which has
+    * the offset larger than the one of the node provided.
+    */
+  public Node nextNode(Node node) {
     indexByStartOffset();
     indexByEndOffset();
     return (Node)nodesByOffset.getNextOf(
@@ -288,8 +322,8 @@ implements AnnotationSet
   /** Create and add an annotation with pre-existing nodes,
     * and return its id
     */
-  public Integer add(Node start, Node end, String type, FeatureMap features)
-  {
+  public Integer add(Node start, Node end, String type, FeatureMap features) {
+
     // the id of the new annotation
     Integer id = doc.getNextAnnotationId();
 
@@ -315,6 +349,7 @@ implements AnnotationSet
   public Integer add(
     Long start, Long end, String type, FeatureMap features
   ) throws InvalidOffsetException {
+
     // are the offsets valid?
     if(! doc.isValidOffsetRange(start, end))
       throw new InvalidOffsetException();
@@ -339,10 +374,12 @@ implements AnnotationSet
 
   /** Create and add an annotation from database read data
     * In this case the id is already known being previously fetched from the
-    * database*/
+    * database
+    */
   public void add(
     Integer id, Long start, Long end, String type, FeatureMap features
   ) throws InvalidOffsetException {
+
     // are the offsets valid?
     if(! doc.isValidOffsetRange(start, end))
       throw new InvalidOffsetException();
@@ -369,17 +406,21 @@ implements AnnotationSet
 
   /** Construct the positional index. */
   public void indexByType() {
+
     if(annotsByType != null) return;
 
     annotsByType = new HashMap();
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
-    while(annotIter.hasNext())
+
+    while (annotIter.hasNext())
       addToTypeIndex( (Annotation) annotIter.next() );
+
   } // indexByType()
 
   /** Construct the positional indices for annotation start */
   public void indexByStartOffset() {
+
     if(annotsByStartNode != null) return;
 
     if(nodesByOffset == null)
@@ -388,12 +429,15 @@ implements AnnotationSet
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
+
     while(annotIter.hasNext())
       addToStartOffsetIndex( (Annotation) annotIter.next() );
+
   } // indexByStartOffset()
 
   /** Construct the positional indices for annotation end */
   public void indexByEndOffset() {
+
     if(annotsByEndNode != null) return;
 
     if(nodesByOffset == null)
@@ -402,8 +446,10 @@ implements AnnotationSet
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
+
     while(annotIter.hasNext())
       addToEndOffsetIndex( (Annotation) annotIter.next() );
+
   } // indexByEndOffset()
 
   /** Add an annotation to the type index. Does nothing if the index
@@ -414,6 +460,7 @@ implements AnnotationSet
 
     String type = a.getType();
     AnnotationSet sameType = (AnnotationSet) annotsByType.get(type);
+
     if(sameType == null) {
       sameType = new AnnotationSetImpl(doc);
       annotsByType.put(type, sameType);
@@ -448,6 +495,7 @@ implements AnnotationSet
     // get the annotations that start at the same node, or create new set
     AnnotationSet thisNodeAnnots =
       (AnnotationSet) annotsByStartNode.get(startNode.getId());
+
     if(thisNodeAnnots == null) {
       thisNodeAnnots = new AnnotationSetImpl(doc);
       annotsByStartNode.put(startNode.getId(), thisNodeAnnots);
@@ -475,6 +523,7 @@ implements AnnotationSet
     // get the annotations that start at the same node, or create new set
     AnnotationSet thisNodeAnnots =
       (AnnotationSet) annotsByEndNode.get(endNode.getId());
+
     if(thisNodeAnnots == null) {
       thisNodeAnnots = new AnnotationSetImpl(doc);
       annotsByEndNode.put(startNode.getId(), thisNodeAnnots);
@@ -505,8 +554,11 @@ implements AnnotationSet
       Node n = (Node) replacedAreaNodesIter.next();
 
       // remove from nodes map
-if(true)
-throw new LazyProgrammerException("this next call tries to remove from a map based on the value; note index is key; also note that some nodes may have no index....");
+      if(true)
+        throw new LazyProgrammerException("this next call tries to remove " +
+          "from a map based on the value; note index is key; also note that " +
+          "some nodes may have no index....");
+
       nodesByOffset.remove(n);
 
       // remove annots that start at this node
@@ -543,7 +595,7 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
   /** Get a set of java.lang.String objects representing all the annotation
     * types present in this annotation set.
     */
-  public Set getAllTypes(){
+  public Set getAllTypes() {
     indexByType();
     return annotsByType.keySet();
   }
@@ -552,7 +604,7 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
     return super.clone();
   }
   /** String representation of the set */
-/*  public String toString() {
+  /*public String toString() {
 
     // annotsById
     SortedSet sortedAnnots = new TreeSet();
@@ -574,13 +626,13 @@ throw new LazyProgrammerException("this next call tries to remove from a map bas
     return
       "AnnotationSetImpl: " +
       "name=" + name +
-//      "; doc.getURL()=" + doc +
+    //  "; doc.getURL()=" + doc +
       "; annotsById=" + aBI +
-//      "; annotsByType=" + aBT +
+    //  "; annotsByType=" + aBT +
       "; "
       ;
   } // toString()
-*/
+  */
 
   /** The name of this set */
   String name = null;

@@ -94,7 +94,7 @@ public class JarFiles {
     * @param destinationJar the jar that will collect all the entries
     * from source jar
     * @param sourceJar doesn't need any explanation ... DOES it?
-   */
+    */
   private void addJar(JarOutputStream destinationJar, JarFile sourceJar)
                                                        throws GateException {
     try {
@@ -177,7 +177,7 @@ public class JarFiles {
                    Err.println("USAGE : JarFiles arg0 arg1 ... argN" +
                                     "(must be at least 2 args)");
                    //System.exit(1);
-    }else{
+    } else {
       JarFiles jarFiles = new JarFiles();
       Set filesToMerge = new HashSet();
       for (int i=1; i<args.length; i++) {

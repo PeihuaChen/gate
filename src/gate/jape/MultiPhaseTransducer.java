@@ -67,7 +67,7 @@ implements JapeConstants, java.io.Serializable
   /** Change the phase order to the one specified in a list of names. */
   public void orderPhases(String[] phaseNames) {
     Err.println("oops: MPT.orderPhases not done yet :-(");
-  /*
+    /*
     // for each phaseName
     //   destructively get the phase and add to new array map
     // errors: any phaseName not in phases,
@@ -95,19 +95,23 @@ implements JapeConstants, java.io.Serializable
   } // finish
 
   /** Transduce the document by running each phase in turn. */
-  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations)
+                                                          throws JapeException {
     ProgressListener pListener = new ProgressListener(){
       public void processFinished(){
         donePhases ++;
         if(donePhases == phasesCnt) fireProcessFinishedEvent();
       }
+
       public void progressChanged(int i){
         int value = (donePhases * 100 + i)/phasesCnt;
         fireProgressChangedEvent(value);
       }
+
       int phasesCnt = phases.size();
       int donePhases = 0;
     };
+
     StatusListener sListener = new StatusListener(){
       public void statusChanged(String text){
         fireStatusChangedEvent(text);
@@ -167,13 +171,18 @@ implements JapeConstants, java.io.Serializable
 
     return buf.toString();
   } // toString
-//needed by FSM
+
+  //needed by FSM
   public Array getPhases(){ return phases; }
+  
 } // class MultiPhaseTransducer
 
 
 
 // $Log$
+// Revision 1.9  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.8  2000/10/18 13:26:47  hamish
 // Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
 //     parameter list fed to createResource.

@@ -24,6 +24,7 @@ package gate.util;
   * sources such as the Java core API.)
   */
 public class GateException extends Exception {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

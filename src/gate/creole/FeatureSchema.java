@@ -27,6 +27,7 @@ import gate.util.*;
   * @see gate.creole.AnnotationSchema class.
   */
 public class FeatureSchema {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -38,6 +39,7 @@ public class FeatureSchema {
 
   /** The default feature value */
   String featureDefaultValue = null;
+
   /** The use of that feature can be one of:
     *  prohibited | optional | required | default | fixed : optional
     */
@@ -95,7 +97,7 @@ public class FeatureSchema {
     return featurePermissibleValuesSet.addAll(aPermisibleValuesSet);
   }
 
- /** Adds a value to the enumeration of permissible value for an
+  /** Adds a value to the enumeration of permissible value for an
     * feature of this type. Returns false, i.e. fails, if the
     * class name of the feature value does not match the class name
     * of the given object
@@ -108,13 +110,14 @@ public class FeatureSchema {
     return featurePermissibleValuesSet.add(obj);
   }
 
-  /**
-    * This method transforms a feature to its XSchema representation
+  /** This method transforms a feature to its XSchema representation
     */
   public String toXSchema(Map aJava2XSchemaMap){
+
     StringBuffer schemaString = new StringBuffer();
     schemaString.append("<attribute name=\"" + featureName + "\" ");
     schemaString.append("use=\"" + featureUse + "\"");
+
     // If there are no permissible values that means that the type must
     // be specified as an attribute for the attribute element
     if (!isEnumeration())
@@ -126,27 +129,30 @@ public class FeatureSchema {
                                                                      "\">\n");
       Iterator featurePermissibleValuesSetIterator =
                                featurePermissibleValuesSet.iterator();
+
       while (featurePermissibleValuesSetIterator.hasNext()){
         String featurePermissibleValue =
                     (String) featurePermissibleValuesSetIterator.next();
         schemaString.append("   <enumeration value=\"" +
                             featurePermissibleValue + "\"/>\n");
       }// end while
+
       schemaString.append("  </restriction>\n");
       schemaString.append(" </simpleType>\n");
       schemaString.append("</attribute>\n");
-    }// end if else
-    return schemaString.toString();
-  }// end toXSchema
 
-  /**
-    * This method is used to see if the feature has a default value
+    }// end if else
+
+    return schemaString.toString();
+  } // end toXSchema
+
+  /** This method is used to see if the feature has a default value
     * @return true if the feature has a default value
     * @return false if the feature doesn't have a default value
     */
   public boolean isDefaultValue(){
     return "".equals(featureDefaultValue);
-  }//hasDefaultValue
+  } // hasDefaultValue
 
   /**
     * This method is used to check if the feature is required.
@@ -154,34 +160,34 @@ public class FeatureSchema {
     */
   public boolean isRequired(){
     return "required".equals("featureUse");
-  }//isRequired
-  /**
-    * This method is used to check if the feature is default.
+  } // isRequired
+
+  /** This method is used to check if the feature is default.
     * @return true if the feature is default. Otherwhise returns false
     */
   public boolean isDefault(){
     return "default".equals("featureUse");
-  }//isDefault
-  /**
-    * This method is used to check if the feature is fixed.
+  } // isDefault
+
+  /** This method is used to check if the feature is fixed.
     * @return true if the feature is fixed. Otherwhise returns false
     */
   public boolean isFixed(){
     return "fixed".equals("featureUse");
-  }//isFixed
-  /**
-    * This method is used to check if the feature is optional.
+  } // isFixed
+
+  /** This method is used to check if the feature is optional.
     * @return true if the optional is fixed. Otherwhise returns false
     */
   public boolean isOptional(){
     return "optional".equals("featureUse");
-  }//isOptional
-  /**
-    * This method is used to check if the feature is prohibited.
+  } // isOptional
+
+  /** This method is used to check if the feature is prohibited.
     * @return true if the prohibited is fixed. Otherwhise returns false
     */
   public boolean isProhibited(){
     return "prohibited".equals("featureUse");
-  }//isProhibited
+  } // isProhibited
 
-}//FeatureSchema
+} // FeatureSchema

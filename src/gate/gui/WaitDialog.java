@@ -21,7 +21,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
-public class WaitDialog extends JWindow implements Runnable{
+public class WaitDialog extends JWindow implements Runnable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -42,11 +42,13 @@ public class WaitDialog extends JWindow implements Runnable{
     }
   }
 
-  public synchronized void showDialog(String[] texts){
+  public synchronized void showDialog(String[] texts) {
     centerBox.removeAll();
+
     for(int i =0; i < texts.length; i++){
       centerBox.add(new JLabel(texts[i]));
     }
+
     centerBox.validate();
     pack();
     Point loc = frame.getLocation();
@@ -60,7 +62,7 @@ public class WaitDialog extends JWindow implements Runnable{
     show();
   }
 
-  public synchronized void showDialog(Component[] components){
+  public synchronized void showDialog(Component[] components) {
     centerBox.removeAll();
     for(int i =0; i < components.length; i++){
       centerBox.add(components[i]);
@@ -85,6 +87,7 @@ public class WaitDialog extends JWindow implements Runnable{
     centerPanel.setBackground(Color.white);
     centerBox.setBackground(Color.white);
     picture = new JLabel(icon);
+
     centerPanel.add(centerBox, BorderLayout.CENTER);
     centerPanel.add(picture, BorderLayout.WEST);
     centerPanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);
@@ -94,10 +97,11 @@ public class WaitDialog extends JWindow implements Runnable{
 
   }
 
-  public void goAway(){
+  public void goAway() {
     stop = true;
   }
-  public void run(){
+
+  public void run() {
     while(!stop){
       try{
         Thread.sleep(300);
@@ -117,4 +121,5 @@ public class WaitDialog extends JWindow implements Runnable{
   Frame frame;
   JLabel picture;
   Icon icon;
-}
+  
+} // class WaitDialog

@@ -19,7 +19,6 @@
 
 package gate.jape;
 
-
 /**
   * A mutable wrapper for int, so you can return
   * integer values via a method parameter. If public data members bother you

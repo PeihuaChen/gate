@@ -9,7 +9,7 @@
  *  
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU, 07/July/2000
  *
  *	$Id$
@@ -17,7 +17,6 @@
 
 // modify this according with your package
 package gate.util;
-
 
 /**
  * TemplateLaxErrorHandler
@@ -31,36 +30,42 @@ import org.xml.sax.*;
 // modify the class name the way you want
 public class TemplateLaxErrorHandler extends LaxErrorHandler {
 
-/** Debug flag */
-private static final boolean DEBUG = false;
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
-/**
- * TemplateLaxErrorHandler constructor comment.
- */
-public TemplateLaxErrorHandler() {super();}
-/**
- * error method comment.
- */
-public void error(SAXParseException ex) throws SAXException{
-  // do something with the error
-	File fInput = new File (ex.getSystemId());
-	Err.println("e: " + fInput.getPath() + ": line " + ex.getLineNumber() + ": " + ex);
-}
-/**
- * fatalError method comment.
- */
-public void fatalError(SAXParseException ex) throws SAXException{
-  // do something with the fatalError
-	File fInput = new File(ex.getSystemId());
-	Err.println("E: " + fInput.getName() + ": line " + ex.getLineNumber() + ": " + ex);
-}
-/**
- * warning method comment.
- */
-public void warning(SAXParseException ex) throws SAXException {
-  // do something with the warning.
-	File fInput = new File(ex.getSystemId());
-	Err.println("w: " + fInput.getName() + ": line " + ex.getLineNumber() + ": " + ex);
-}
+  /**
+    * TemplateLaxErrorHandler constructor comment.
+    */
+  public TemplateLaxErrorHandler() {super();}
 
-}// TemplateLaxErrorHandler
+  /**
+    * error method comment.
+    */
+  public void error(SAXParseException ex) throws SAXException{
+    // do something with the error
+    File fInput = new File (ex.getSystemId());
+    Err.println("e: " + fInput.getPath() + ": line " +
+      ex.getLineNumber() + ": " + ex);
+  } // error
+
+  /**
+    * fatalError method comment.
+    */
+  public void fatalError(SAXParseException ex) throws SAXException{
+    // do something with the fatalError
+    File fInput = new File(ex.getSystemId());
+    Err.println("E: " + fInput.getName() + ": line " +
+      ex.getLineNumber() + ": " + ex);
+  } // fatalError
+
+  /**
+    * warning method comment.
+    */
+  public void warning(SAXParseException ex) throws SAXException {
+    // do something with the warning.
+    File fInput = new File(ex.getSystemId());
+    Err.println("w: " + fInput.getName() + ": line " +
+      ex.getLineNumber() + ": " + ex);
+  } // warning
+
+} // TemplateLaxErrorHandler

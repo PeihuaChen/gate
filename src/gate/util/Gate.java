@@ -208,6 +208,7 @@ public class Gate
     StringBuffer basePath = new StringBuffer(urlBase.toExternalForm());
     String urlBaseName =
       basePath.substring(0, basePath.length() - aGateResourceName.length());
+
     if(DEBUG) Out.prln("tryFileSystem: " + urlBaseName);
 
     urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");

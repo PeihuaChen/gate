@@ -94,7 +94,8 @@ public class Files {
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
   public static String getGateResourceAsString(String resourceName)
-  throws IOException {
+    throws IOException {
+
     InputStream resourceStream = getGateResourceAsStream(resourceName);
     BufferedReader resourceReader =
       new BufferedReader(new InputStreamReader(resourceStream));
@@ -116,14 +117,14 @@ public class Files {
     return resourceBuffer.toString();
   } // getGateResourceAsString(String)
 
-
   /**
     * Writes a temporary file into the default temporary directory,
     * form an InputStream a unique ID is generated and associated automaticaly
     * with the file name...
     */
   public static File writeTempFile(InputStream contentStream)
-  throws IOException {
+    throws IOException {
+
     File resourceFile  = null;
     FileOutputStream resourceFileOutputStream = null;
 
@@ -139,7 +140,6 @@ public class Files {
     while( (bytesRead = contentStream.read(bytes,0,readSize) ) != -1 )
       resourceFileOutputStream.write(bytes,0, bytesRead);
 
-
     resourceFileOutputStream.close();
     contentStream.close ();
     return resourceFile;
@@ -150,7 +150,8 @@ public class Files {
   /** Get a resource from the classpath as a byte array.
     */
   public static byte[] getResourceAsByteArray(String resourceName)
-  throws IOException, IndexOutOfBoundsException, ArrayStoreException {
+    throws IOException, IndexOutOfBoundsException, ArrayStoreException {
+
     InputStream resourceInputStream = getResourceAsStream(resourceName);
     BufferedInputStream resourceStream =
       new BufferedInputStream(resourceInputStream);
@@ -186,7 +187,8 @@ public class Files {
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
   public static byte[] getGateResourceAsByteArray(String resourceName)
-  throws IOException, IndexOutOfBoundsException, ArrayStoreException {
+    throws IOException, IndexOutOfBoundsException, ArrayStoreException {
+
     InputStream resourceInputStream = getGateResourceAsStream(resourceName);
     BufferedInputStream resourceStream =
       new BufferedInputStream(resourceInputStream);
@@ -210,6 +212,7 @@ public class Files {
 
     // copy the contents of buf to an array of the correct size
     byte[] bytes = new byte[i];
+
     // copy from buf to bytes
     System.arraycopy (buf,0,bytes,0,i);
     return bytes;
@@ -219,7 +222,8 @@ public class Files {
   /** Get a resource from the classpath as an InputStream.
     */
   public static InputStream getResourceAsStream(String resourceName)
-  throws IOException {
+    throws IOException {
+
     return  ClassLoader.getSystemResourceAsStream(resourceName);
 //    return Gate.getClassLoader().getResourceAsStream(resourceName);
   } // getResourceAsStream(String)
@@ -231,7 +235,8 @@ public class Files {
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
     */
   public static InputStream getGateResourceAsStream(String resourceName)
-  throws IOException {
+    throws IOException {
+
     if(resourceName.startsWith("/") || resourceName.startsWith("\\") )
       return getResourceAsStream(resourcePath + resourceName);
     else return getResourceAsStream(resourcePath + "/" + resourceName);
@@ -241,21 +246,21 @@ public class Files {
   /** This method takes a regular expression and a directory name and returns
     * the set of Files that match the pattern under that directory.
     */
-  public static Set Find(String regex, String pathFile){
+  public static Set Find(String regex, String pathFile) {
     Set regexfinal = new HashSet();
     String[] tab;
     File file = null;
     PrintStream printstr = null;
     Object obj = new Object();
     //open a file
-    try{
+    try {
       file = new File(pathFile);
-    }catch(NullPointerException npe){
+    } catch(NullPointerException npe) {
       npe.printStackTrace(Err.getPrintWriter());
       //System.exit(1);
     }
     //generate a regular expression
-    try{
+    try {
       RE regexp = new RE("^"+regex);
       if (file.isDirectory()){
         tab = file.list();
@@ -267,14 +272,14 @@ public class Files {
           }
         }
       }
-      else{
+      else {
         if (file.isFile()){
-          if (regexp.getMatch(pathFile) != null){
+          if (regexp.getMatch(pathFile) != null) {
             regexfinal.add(file.getAbsolutePath());
         }
       }
     }
-    }catch(REException ree){
+    } catch(REException ree) {
       ree.printStackTrace(Err.getPrintWriter());
       //System.exit(1);
     }

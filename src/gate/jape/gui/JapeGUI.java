@@ -80,15 +80,19 @@ public class JapeGUI extends JFrame implements ProgressListener,
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
     northBox = Box.createHorizontalBox();
+
     this.getContentPane().setLayout(borderLayout1);
     statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+
     statusBar.setMaximumSize(new Dimension(30000, 17));
     statusBar.setMinimumSize(new Dimension(200, 17));
     statusBar.setPreferredSize(new Dimension(30000, 17));
     statusBar.setToolTipText("Status bar");
+
     progressBar.setMaximumSize(new Dimension(300, 16));
     progressBar.setMinimumSize(new Dimension(300, 16));
     progressBar.setPreferredSize(new Dimension(300, 16));
+
     collectionAddBtn.setText("Add Document(s)");
     collectionAddBtn.addActionListener(new java.awt.event.ActionListener() {
 
@@ -96,12 +100,14 @@ public class JapeGUI extends JFrame implements ProgressListener,
         collectionAddBtn_actionPerformed(e);
       }
     });
+
     japeLoadBtn.setText("Open grammar");
     japeLoadBtn.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         japeLoadBtn_actionPerformed(e);
       }
     });
+
     this.setTitle("Jape 2.0");
     this.addWindowListener(new WindowListener(this));
     runBtn.setText("Run!");
@@ -111,16 +117,19 @@ public class JapeGUI extends JFrame implements ProgressListener,
         runBtn_actionPerformed(e);
       }
     });
+
     text.setEditorKit(new RawEditorKit());
     text.setBorder(BorderFactory.createLoweredBevelBorder());
     text.setEditable(false);
     text.setEnabled(true);
     text.setPreferredSize(new Dimension(textViewScroll.getSize().width - 10,
                                         32000));
+
     jLabel1.setHorizontalTextPosition(SwingConstants.LEFT);
     jLabel1.setText("Collection:");
     jLabel2.setHorizontalTextPosition(SwingConstants.LEFT);
     jLabel2.setText("Grammar:");
+
     grammarLbl.setHorizontalTextPosition(SwingConstants.LEFT);
     grammarLbl.setText("...");
     corpusList.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -128,12 +137,12 @@ public class JapeGUI extends JFrame implements ProgressListener,
         corpusList_mouseClicked(e);
       }
     });
-//    corpusListModel.addElement("      ");
+    //corpusListModel.addElement("      ");
     corpusList.setModel(corpusListModel);
     typesPanel.setLayout(flowLayout1);
-//    textViewScroll.setPreferredSize(new Dimension(32767, 32767));
-//    textViewScroll.setPreferredSize(null);
-//    typesPanel.setPreferredSize(null);
+    //textViewScroll.setPreferredSize(new Dimension(32767, 32767));
+    //textViewScroll.setPreferredSize(null);
+    //typesPanel.setPreferredSize(null);
     logTextArea.setDisabledTextColor(Color.lightGray);
     logTextArea.setEditable(false);
     tokRulesBtn.setText("Load Tokeniser Rules");
@@ -151,20 +160,26 @@ public class JapeGUI extends JFrame implements ProgressListener,
       }
     });
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
+
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
+
     this.getContentPane().add(westBox, BorderLayout.WEST);
     corpusList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
     westBox.add(jLabel1, null);
     westBox.add(corpusList, null);
     westBox.add(jLabel2, null);
     westBox.add(grammarLbl, null);
+
     this.getContentPane().add(northBox, BorderLayout.NORTH);
+
     northBox.add(collectionAddBtn, null);
     northBox.add(japeLoadBtn, null);
     northBox.add(tokRulesBtn, null);
     northBox.add(gazeteerBtn, null);
     northBox.add(runBtn, null);
+
     this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
     textViewPane.setDividerLocation(400);
     centerTabPane.add(textViewPane, "Text View");
@@ -176,8 +191,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
     logScrollPane.getViewport().add(logTextArea, null);
     setSize(800,600);
     validate();
-//    textViewScroll.setPreferredSize(new Dimension(textViewPane.getSize().width,
-//                                    textViewPane.getSize().height - 30));
+    //textViewScroll.setPreferredSize(new Dimension(textViewPane.getSize().width
+    //                                    ,textViewPane.getSize().height - 30));
     japeFilter = new ExtensionFileFilter();
     japeFilter.addExtension("jape");
     japeFilter.setDescription("Jape grammars");
@@ -199,7 +214,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
   void collectionAddBtn_actionPerformed(ActionEvent e) {
     Document currDoc = null;
     //multi file selection enabled only in JDK 1.3
-    if(System.getProperty("java.version").compareTo("1.3") >=0 ){
+    if(System.getProperty("java.version").compareTo("1.3") >=0 ) {
       //java 1.3 or better
       filer.setMultiSelectionEnabled(true);
       filer.setDialogTitle("Select document(s) to add...");
@@ -207,6 +222,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
       filer.setFileFilter(filer.getAcceptAllFileFilter());
       int res = filer.showDialog(this, "Open");
       File[] selectedFiles;
+
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFiles = filer.getSelectedFiles();
         if(selectedFiles != null){
@@ -217,15 +233,15 @@ public class JapeGUI extends JFrame implements ProgressListener,
               corpus.add(currDoc);
               corpusFiles.add(selectedFiles[i].toURL().toExternalForm());
             }
-          }catch(java.net.MalformedURLException mue){
+          } catch(java.net.MalformedURLException mue) {
             mue.printStackTrace(Err.getPrintWriter());
-          }catch(ResourceInstantiationException ioe){
+          } catch(ResourceInstantiationException ioe) {
             ioe.printStackTrace(Err.getPrintWriter());
           }
         }//if(selectedFiles != null)
       }
 
-    }else{
+    } else {
       //java 1.2
       filer.setMultiSelectionEnabled(false);
       filer.setDialogTitle("Select ONE document to add...");
@@ -233,29 +249,35 @@ public class JapeGUI extends JFrame implements ProgressListener,
       filer.setFileFilter(filer.getAcceptAllFileFilter());
       int res = filer.showDialog(this, "Open");
       File selectedFile;
-      if(res == JFileChooser.APPROVE_OPTION){
+
+      if(res == JFileChooser.APPROVE_OPTION) {
         selectedFile = filer.getSelectedFile();
-        if(selectedFile != null){
-          try{
+
+        if(selectedFile != null) {
+          try {
               if(corpus == null)
                 corpus = Factory.newCorpus("Jape 2.0");
               currDoc = Factory.newDocument(selectedFile.toURL());
               corpus.add(currDoc);
               corpusFiles.add(selectedFile.toURL().toExternalForm());
-          }catch(java.net.MalformedURLException mue){
+          } catch(java.net.MalformedURLException mue) {
             mue.printStackTrace(Err.getPrintWriter());
-          }catch(ResourceInstantiationException ioe){
+          } catch(ResourceInstantiationException ioe) {
             ioe.printStackTrace(Err.getPrintWriter());
           }
         }//if(selectedFile != null)
+
       }
-    }//java 1.2
+
+    } // java 1.2
     corpusListModel.clear();
     Iterator docsIter = corpus.iterator();
-    while(docsIter.hasNext()){
+
+    while(docsIter.hasNext()) {
       currentDoc = (Document) docsIter.next();
       corpusListModel.addElement(currentDoc.getSourceUrl().getFile());
     }
+
     if(currDoc != null) currentDoc = currDoc;
     updateAll();
   }
@@ -266,8 +288,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
     filer.setMultiSelectionEnabled(false);
     filer.setSelectedFile(null);
     filer.setSelectedFiles(null);
+
     int res = filer.showOpenDialog(this);
-    if(res == JFileChooser.APPROVE_OPTION){
+    if(res == JFileChooser.APPROVE_OPTION) {
       grammarFile = filer.getSelectedFile();
       grammarLbl.setText(grammarFile.getName());
     }
@@ -282,38 +305,41 @@ public class JapeGUI extends JFrame implements ProgressListener,
     startJapeFileOpen = 0;
     startCorpusTransduce = 0;
     endProcess = 0;
-    if(corpus.isEmpty() || grammarFile == null|| tokeniserRulesFile == null){
+    if(corpus.isEmpty() || grammarFile == null|| tokeniserRulesFile == null) {
       statusBar.setText("Missing corpus, grammar or tokeniser rules!");
       return;
     }
     logTextArea.append("Started at: " + (new Date()) + "\n");
     startCorpusLoad = System.currentTimeMillis();
 
-    if(corpusIsDirty){
+    if(corpusIsDirty) {
       statusBar.setText("Reloading the corpus...");
       corpus.clear();
+
       int progress = 0;
       int fileCnt = corpusFiles.size();
       Iterator filesIter = corpusFiles.iterator();
       try{
-        while(filesIter.hasNext()){
+
+        while(filesIter.hasNext()) {
               progressBar.setValue(progress++/fileCnt);
               corpus.add(Factory.newDocument(
                 new URL((String)filesIter.next()))
               );
               progressBar.setValue(progress/fileCnt);
             }
-      }catch(java.net.MalformedURLException mue){
+      } catch(java.net.MalformedURLException mue) {
         progressBar.setValue(0);
         statusBar.setText(mue.toString());
         mue.printStackTrace(Err.getPrintWriter());
-      }catch(ResourceInstantiationException ioe){
+      } catch(ResourceInstantiationException ioe) {
         progressBar.setValue(0);
         statusBar.setText(ioe.toString());
         ioe.printStackTrace(Err.getPrintWriter());
       }
       progressBar.setValue(0);
     }
+
     //tokenize all documents
     startCorpusTokenization = System.currentTimeMillis();
     logTextArea.append("corpus loading time: " +
@@ -322,19 +348,21 @@ public class JapeGUI extends JFrame implements ProgressListener,
 
     int docCnt = corpus.size();
     statusBar.setText("Tokenizing all the documents...");
-    try{
+
+    try {
       tokeniser =new DefaultTokeniser(tokeniserRulesFile.getAbsolutePath());
-    }catch(IOException ioe){
+    } catch(IOException ioe) {
       Err.println("Cannot read the tokeniser rules!" +
                          "\nAre the Gate resources in place?");
-    }catch(TokeniserException te){
+    } catch(TokeniserException te) {
       te.printStackTrace(Err.getPrintWriter());
     }
+
     tokeniser.addProcessProgressListener(this);
     tokeniser.addStatusListener(this);
 
     Iterator docIter = corpus.iterator();
-    while(docIter.hasNext()){
+    while(docIter.hasNext()) {
       currentDoc = (Document)docIter.next();
       tokeniser.tokenise(currentDoc, false);
     }
@@ -347,8 +375,8 @@ public class JapeGUI extends JFrame implements ProgressListener,
     docCnt = corpus.size();
     statusBar.setText("Doing gazeteer lookup...");
     startLookup = startLookupLoad;
-    try{
-      if(null != gazeteerListDefFile){
+    try {
+      if(null != gazeteerListDefFile) {
         gazetteer =new DefaultGazetteer(gazeteerListDefFile.getAbsolutePath());
         gazetteer.addProcessProgressListener(this);
         gazetteer.addStatusListener(this);
@@ -363,14 +391,13 @@ public class JapeGUI extends JFrame implements ProgressListener,
           gazetteer.doLookup(currentDoc, false);
         }
       }
-    }catch(IOException ioe){
+    } catch(IOException ioe) {
       Err.println("Cannot read the gazeteer lists!" +
                          "\nAre the Gate resources in place?");
-    }catch(GazetteerException ge){
+    } catch(GazetteerException ge){
       ge.printStackTrace(Err.getPrintWriter());
     }
-//============================
-
+    //============================
 
     //do the jape stuff
     try { Gate.init(); } catch(Exception e) { Err.println(e); }
@@ -379,7 +406,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     logTextArea.append("gazeteer lookup time: " +
                        (startJapeFileOpen - startLookup) +
                        "ms\n");
-    try{
+    try {
       statusBar.setText("Opening Jape grammar...");
       InputStream japeFileStream = new FileInputStream(grammarFile);
       if(japeFileStream == null)
@@ -395,12 +422,13 @@ public class JapeGUI extends JFrame implements ProgressListener,
       endProcess = System.currentTimeMillis();
       logTextArea.append("transducing time: " +
                          (endProcess - startCorpusTransduce) + "ms\n");
-    }catch(FileNotFoundException fnfe){
+    } catch(FileNotFoundException fnfe) {
       fnfe.printStackTrace(Err.getPrintWriter());
-    }catch(JapeException je){
+    } catch(JapeException je) {
       je.printStackTrace(Err.getPrintWriter());
     }
     statusBar.setText("");
+
     //select the first document
     docIter = corpus.iterator();
     if(docIter.hasNext()){
@@ -413,6 +441,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     updateAll();
     corpusIsDirty = true;
   }
+
   void runBtn_actionPerformed(ActionEvent e) {
     //We need to run all the actions in a different thread so the interface
     //doesn't freeze
@@ -420,13 +449,14 @@ public class JapeGUI extends JFrame implements ProgressListener,
     thread.start();
   }
 
-  public void tokenize(Document doc){
+  public void tokenize(Document doc) {
     String content = doc.getContent().toString();
     BreakIterator bi = BreakIterator.getWordInstance();
     bi.setText(content);
     int start = bi.first();
     FeatureMap fm;
-    try{
+
+    try {
       for (int end = bi.next();
            end != BreakIterator.DONE;
            start = end, end = bi.next())
@@ -437,17 +467,18 @@ public class JapeGUI extends JFrame implements ProgressListener,
           doc.getAnnotations().add(new Long(start),
                                    new Long(end),
                                    "Token", fm);
-//Out.println("Token: " + content.substring(start, end));
+      //Out.println("Token: " + content.substring(start, end));
         }
       }//for
-    }catch(InvalidOffsetException ioe){
+    } catch(InvalidOffsetException ioe) {
     }
   }
 
   void updateAll(){
-    if(currentDoc == null){
+
+    if(currentDoc == null) {
       text.setText("");
-    }else{
+    } else {
       //display the current document
       text.getHighlighter().removeAllHighlights();
       text.setText(currentDoc.getContent().toString());
@@ -455,9 +486,11 @@ public class JapeGUI extends JFrame implements ProgressListener,
       typesPanel.removeAll();
       Iterator typesIter = currentDoc.getAnnotations().getAllTypes().iterator();
       String currentType;
+
       ColorGenerator colGen = new ColorGenerator();
       JButton typeButton = new JButton();
       JLabel typeLabel = new JLabel("Clear all");
+
       typeLabel.setBackground(Color.black);
       typeLabel.setForeground(Color.white);
       typeLabel.setOpaque(true);
@@ -469,8 +502,10 @@ public class JapeGUI extends JFrame implements ProgressListener,
         }
       });
       typesPanel.add(typeButton);
-      while(typesIter.hasNext()){
+
+      while(typesIter.hasNext()) {
         currentType = (String) typesIter.next();
+
         typeButton = new JButton();
         typeLabel = new JLabel(currentType);
         typeLabel.setBackground(Color.white);
@@ -480,6 +515,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
         typeButton.setToolTipText(currentType);
         typeButton.setBackground(colGen.getNextColor());
         typeButton.addActionListener(new java.awt.event.ActionListener() {
+
           public void actionPerformed(ActionEvent e) {
             if(e.getSource() instanceof Container){
               Container cont = (Container) e.getSource();
@@ -500,7 +536,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
       typesPanel.repaint();
       //create the table
       tableView = new SortedTable();
-      tableView.setTableModel(new AnnotationSetTableModel(currentDoc,currentDoc.getAnnotations()));
+      tableView.setTableModel(new AnnotationSetTableModel(
+                                         currentDoc,currentDoc.getAnnotations())
+                                         );
       tableViewScroll.getViewport().add(tableView, null);
 
     }
@@ -508,20 +546,24 @@ public class JapeGUI extends JFrame implements ProgressListener,
   }
 
   void corpusList_mouseClicked(MouseEvent e) {
+
     //find out what document we're talking about
     int docIdx = corpusList.locationToIndex(e.getPoint());
     corpusList.setSelectedIndex(docIdx);
     docIdx++;//just a trick to use the same variable
+
     Iterator docIter = corpus.iterator();
     while(docIter.hasNext() && docIdx >0 ){
       currentDoc = (Document)docIter.next();
       docIdx--;
     }
-    if(docIdx != 0){
+
+    if(docIdx != 0) {
       throw(new RuntimeException(
                 "The user has selected an unexistant document! :)"));
     }
-    if((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0){
+
+    if((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
       JPopupMenu docListPopup = new JPopupMenu();
       JMenuItem delPopup = new JMenuItem("Drop document");
       docListPopup.add(delPopup);
@@ -537,36 +579,37 @@ public class JapeGUI extends JFrame implements ProgressListener,
         }
       });
       docListPopup.show(corpusList, e.getPoint().x, e.getPoint().y);
-    }else{
+    } else {
       updateAll();
     }
   }
 
-  void typeButtonPressed(String type, Color col){
-    if(type.equals("")){
+  void typeButtonPressed(String type, Color col) {
+
+    if(type.equals("")) {
       text.getHighlighter().removeAllHighlights();
-    }else{
+    } else {
       AnnotationSet as = currentDoc.getAnnotations().get(type);
       Iterator annIter = as.iterator();
       gate.Annotation currentAnn;
       int start, end;
-      try{
+
+      try {
         while(annIter.hasNext()){
           currentAnn = (gate.Annotation)annIter.next();
           start = currentAnn.getStartNode().getOffset().intValue();
           end = currentAnn.getEndNode().getOffset().intValue();
           text.getHighlighter().addHighlight(start, end,
             new javax.swing.text.DefaultHighlighter.DefaultHighlightPainter(col));
-//                javax.swing.text.DefaultHighlighter.DefaultPainter);
+            //  javax.swing.text.DefaultHighlighter.DefaultPainter);
         }
-      }catch(javax.swing.text.BadLocationException ble){
+      } catch(javax.swing.text.BadLocationException ble) {
         ble.printStackTrace(Err.getPrintWriter());
       }
     }
 
-//Out.println(type);
+  //Out.println(type);
   }
-
 
   //Gui members
   JMenuBar jMenuBar1 = new JMenuBar();
@@ -628,7 +671,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
   JButton tokRulesBtn = new JButton();
 
   void this_windowClosing(WindowEvent e) {
-    // System.exit(0);
+   // System.exit(0);
   }
 
   void tokRulesBtn_actionPerformed(ActionEvent e) {
@@ -644,9 +687,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
   }
 
   //ProgressListener implementation
-  public void progressChanged(int i){
-    if(lastProgress != i){
-//Out.println(i);
+  public void progressChanged(int i) {
+    if(lastProgress != i) {
+    //Out.println(i);
       progressBar.setValue(i);
       if(System.currentTimeMillis() - lastProgressUpdate > 300){
         progressBar.paintImmediately(progressBar.getVisibleRect());
@@ -656,28 +699,29 @@ public class JapeGUI extends JFrame implements ProgressListener,
     }
   }
 
-  public void processFinished(){
+  public void processFinished() {
     progressBar.setValue(0);
     progressBar.paintImmediately(progressBar.getVisibleRect());
   }
 
   //StatusListener implementation
-  public void statusChanged(String text){
+  public void statusChanged(String text) {
     statusBar.setText(text);
-//    if(System.currentTimeMillis() - lastStatusUpdate > 300){
+    // if(System.currentTimeMillis() - lastStatusUpdate > 300){
       statusBar.paintImmediately(statusBar.getVisibleRect());
-//      lastStatusUpdate = System.currentTimeMillis();
-//    }
+      //lastStatusUpdate = System.currentTimeMillis();
+    //}
   }
+
   long lastStatusUpdate = 0;
   long lastProgressUpdate = 0;
   int lastProgress = 0;
   JButton gazeteerBtn = new JButton();
 
   static{
-    try{
+    try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    }catch(Exception e){}
+    } catch(Exception e) {}
   }
 
   void gazeteerBtn_actionPerformed(ActionEvent e) {
@@ -692,9 +736,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     }
   }
 
-}
-
-
+} // class JapeGUI
 
 class WindowListener extends java.awt.event.WindowAdapter {
   JapeGUI adaptee;
@@ -706,4 +748,5 @@ class WindowListener extends java.awt.event.WindowAdapter {
   public void windowClosing(WindowEvent e) {
     adaptee.this_windowClosing(e);
   }
-}
+
+} // class WindowListener

@@ -19,7 +19,7 @@ package gate.gui;
 
 import java.util.*;
 
-public abstract class SortedTableComparator implements Comparator{
+public abstract class SortedTableComparator implements Comparator {
 
     /** Debug flag */
     private static final boolean DEBUG = false;
@@ -28,24 +28,27 @@ public abstract class SortedTableComparator implements Comparator{
     private int m_sortCol;
     private boolean m_sortAsc;
 
-    public SortedTableComparator(){
+    public SortedTableComparator() {
       m_sortCol = 0;
       m_sortAsc = true;
     }
 
     // mutator
-    public void setSortCol(int sortCol){
+    public void setSortCol(int sortCol) {
       m_sortCol = sortCol;
     }
-    public void setSortOrder(boolean sortAsc){
+
+    public void setSortOrder(boolean sortAsc) {
       m_sortAsc = sortAsc;
     }
 
     // accessor
-    public int getSortCol(){
+    public int getSortCol() {
       return m_sortCol;
     }
-    public boolean getSortOrder(){
+
+    public boolean getSortOrder() {
       return m_sortAsc;
     }
-}
+    
+} // SortedTableComparator

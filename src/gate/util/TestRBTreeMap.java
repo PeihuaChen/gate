@@ -44,21 +44,25 @@ public class TestRBTreeMap extends TestCase
     Object result;
     Long key;
     String expected;
+
     //try the first entry
     key=new Long(10);
     expected="Ten";
     result=myTree.get(key);
     assertEquals(expected,result);
+
     //try some entry
     key=new Long(30);
     expected="Thirty";
     result=myTree.get(key);
     assertEquals(expected,result);
+
     //try the last entry
     key=new Long(50);
     expected="Fifty";
     result=myTree.get(key);
     assertEquals(expected,result);
+
     //try the last entry
     key=new Long(15);
     result=myTree.get(key);
@@ -101,6 +105,7 @@ public class TestRBTreeMap extends TestCase
 
     //empty the tree
     myTree=new RBTreeMap();
+
     //try glb=lub=null
     key=new Long(15);
     expected=new Object[]{null,null};
@@ -113,6 +118,7 @@ public class TestRBTreeMap extends TestCase
     Object result;
     Long key;
     String expected;
+
     //try the first entry
     key=new Long(5);
     expected="Ten";
@@ -151,4 +157,5 @@ public class TestRBTreeMap extends TestCase
 
 
   private RBTreeMap myTree;
+  
 } // class TestRBTreeMap

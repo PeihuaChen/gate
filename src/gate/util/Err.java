@@ -31,12 +31,12 @@ public class Err {
   private Err() {}
 
   /** This sets a new printWriter*/
-  public static void setPrintWriter(PrintWriter aPrintWriter){
+  public static void setPrintWriter(PrintWriter aPrintWriter) {
     err = aPrintWriter;
   }//setPrintWriter
 
   /** This sets a new printWriter*/
-  public static PrintWriter getPrintWriter(){
+  public static PrintWriter getPrintWriter() {
     return err;
   }
 
@@ -82,7 +82,7 @@ public class Err {
   /** @see java.io.PrintWriter#print(char[]) */
   public static void print(char s[]) {
     err.print(s);
-    err.flush();    
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(java.lang.String) */
@@ -150,7 +150,7 @@ public class Err {
   // pr and prln uses print and println so further modifications
   // must be done to print and println only
   ////////////////////////////////////////////////////////////////
-  
+
   /** @see java.io.PrintWriter#print(boolean) */
   public static void pr(boolean b) {
     print(b);
@@ -267,5 +267,5 @@ public class Err {
       err.flush();
   } // padPr(String,int)
 
-} //Out
+} //Err
 

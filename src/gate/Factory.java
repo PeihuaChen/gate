@@ -55,12 +55,13 @@ public abstract class Factory
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln(resClass.getName() + " is an LR");
 
-//if the DS param is set, find an appropriate data store wrapper and:
-//resClass = dataStoreWrapperClass
-//if none available then
-//throw new ResourceInstantiationException(
-//  "Unknown wrapper class " + dataStoreWrapperClass
-//);      OR maybe UnknownDataStoreException
+    //if the DS param is set, find an appropriate data store wrapper and:
+    /* resClass = dataStoreWrapperClass
+       if none available then
+       throw new ResourceInstantiationException(
+         "Unknown wrapper class " + dataStoreWrapperClass
+       );      OR maybe UnknownDataStoreException
+    */
 
     // type-specific stuff for PRs
     } else if(ProcessingResource.class.isAssignableFrom(resClass)) {

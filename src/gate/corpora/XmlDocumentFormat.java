@@ -65,21 +65,25 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     // create the element2String map
     Map anElement2StringMap = null;
     anElement2StringMap = new HashMap();
+
     // populate it
     anElement2StringMap.put("S","\n\n");
     anElement2StringMap.put("s","\n\n");
     setElement2StringMap(anElement2StringMap);
+
 	  try {
 
       // use Excerces XML parser with JAXP
-      //System.setProperty("javax.xml.parsers.SAXParserFactory",
+      // System.setProperty("javax.xml.parsers.SAXParserFactory",
       //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
 		  // Get a parser factory.
 		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+
 		  // Set up the factory to create the appropriate type of parser
 
       // non validating one
 		  saxParserFactory.setValidating(false);
+
       // non namesapace aware one
 		  saxParserFactory.setNamespaceAware(false);
 
@@ -88,10 +92,12 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 
       // use it
       if (null != doc){
+
         // create a new Xml document handler
         gate.xml.XmlDocumentHandler xmlDocHandler =  new
                     gate.xml.XmlDocumentHandler(doc, this.markupElementsMap,
                                                 this.element2StringMap);
+
         // register a status listener with it
         xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -99,6 +105,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
             fireStatusChangedEvent(text);
           }
         });
+
         // parse the document handler
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
       }
@@ -120,10 +127,13 @@ public class XmlDocumentFormat extends TextualDocumentFormat
                                     String  originalContentFeatureType){
 
      FeatureMap fm = doc.getFeatures ();
+
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
+
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }
-}//class XmlDocumentFormat
+
+} // class XmlDocumentFormat

@@ -22,8 +22,8 @@ import java.io.*;
 import java.util.*;
 
 /**
-* This class 
-*/
+  * This class
+  */
 public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter{
 
   /** Debug flag */
@@ -36,6 +36,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter{
     String name = f.getName();
     if(f.isDirectory()) return true;
     boolean res = false;
+
     if(name.indexOf('.') != -1){
       String extension = name.substring(name.indexOf('.')+1,name.length());
       Iterator extIter = acceptedExtensions.iterator();
@@ -46,19 +47,20 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter{
     return res;
   }
 
-  public String getDescription(){
+  public String getDescription() {
     return description;
   }
 
-  public void addExtension(String ext){
+  public void addExtension(String ext) {
     acceptedExtensions.add(ext);
   }
 
-  public void setDescription(String desc){
+  public void setDescription(String desc) {
     description = desc;
   }
 
   private Set acceptedExtensions = new HashSet();
+
   private String description;
 
-}
+} // ExtensionFileFilter
