@@ -463,12 +463,16 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       //3. read annotations
       AnnotationSetImpl transSet = new AnnotationSetImpl(this);
+      String hint = "/*+ use_nl(v.t_annotation v.t_as_annotation) " +
+                    "     use_nl(v.t_annotation_type v.t_annotation) "+
+                    " */";
 
-      String sql1 = " select ann_local_id, " +
+      String sql1 = " select "+hint+
+                    "        ann_local_id, " +
                     "        at_name, " +
                     "        start_offset, " +
                     "        end_offset " +
-                    " from  "+Gate.DB_OWNER+".v_annotation  " +
+                    " from  "+Gate.DB_OWNER+".v_annotation  v" +
                     " where  asann_as_id = ? ";
 
       if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
