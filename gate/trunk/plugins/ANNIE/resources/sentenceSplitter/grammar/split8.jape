@@ -1,0 +1,14 @@
+// Valentin Tablan, 18/05/2001
+
+
+Phase:split8
+Input: Sentence Token
+Options: control = appelt
+
+//creates the last sentence
+
+Rule: r1
+({Sentence})*
+(({Token})+):left
+-->
+left.Sentence={}
