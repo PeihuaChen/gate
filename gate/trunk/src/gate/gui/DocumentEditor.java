@@ -1,5 +1,4 @@
-/*  AnnotationEditor.java
- *
+/*
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -299,7 +298,7 @@ public class DocumentEditor extends AbstractVisualResource{
           if(path != null){
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.
                                          getLastPathComponent();
-            TypeData nData = (TypeData)(node).getUserObject();
+            TypeData nData = (TypeData)node.getUserObject();
             //where inside the cell?
             Rectangle cellRect = stylesTree.getPathBounds(path);
             x -= cellRect.x;
@@ -2084,28 +2083,31 @@ public class DocumentEditor extends AbstractVisualResource{
 
       }
 
-      //show the modal dialog
-      JOptionPane optionPane = new JOptionPane(tabbedPane,
-                                               JOptionPane.PLAIN_MESSAGE,
-                                               JOptionPane.OK_CANCEL_OPTION);
-      optionPane.setIcon(null);
-      JDialog dialog =  optionPane.createDialog(DocumentEditor.this,
-                                                "Edit annotation");
-      dialog.pack();
-      dialog.show();
-
-      //if OK notify the selected editor to save the data
-      if(((Integer)optionPane.getValue()).intValue() == optionPane.OK_OPTION){
-        try{
-          ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
-                                      getSelectedComponent()/*).getViewport().
-                                                              getView()*/
-           ).okAction();
-        }catch(GateException ge){
-          ge.printStackTrace(Err.getPrintWriter());
+      //show the modal dialog until the data is OK or the user cancels
+      boolean allOK = false;
+      while(!allOK){
+        if(OkCancelDialog.showDialog(DocumentEditor.this,
+                                     tabbedPane, "Edit Annotation")){
+          try{
+            ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
+                                        getSelectedComponent()/*).getViewport().
+                                                                getView()*/
+             ).okAction();
+             allOK = true;
+          }catch(GateException ge){
+            JOptionPane.showMessageDialog(
+              DocumentEditor.this,
+              "There was an error:\n" +
+              ge.toString(),
+              "Gate", JOptionPane.ERROR_MESSAGE);
+//            ge.printStackTrace(Err.getPrintWriter());
+            allOK = false;
+          }
+        }else{
+          allOK = true;
         }
-      }
-    }
+      }//while(!allOK)
+    }//public void actionPerformed(ActionEvent e)
 
     protected AnnotationSet set;
     protected Annotation annotation;
@@ -2201,32 +2203,32 @@ public class DocumentEditor extends AbstractVisualResource{
 
       }
 
-      //show the modal dialog
-      JOptionPane optionPane = new JOptionPane(tabbedPane,
-                                               JOptionPane.PLAIN_MESSAGE,
-                                               JOptionPane.OK_CANCEL_OPTION);
-      optionPane.setIcon(null);
-      JDialog dialog =  optionPane.createDialog(DocumentEditor.this,
-                                                "Edit the new annotation");
-      dialog.pack();
-      dialog.show();
-
-      //if OK notify the selected editor to save the data
-      if(((Integer)optionPane.getValue()).intValue() == optionPane.OK_OPTION){
-        try{
-          ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
-                                      getSelectedComponent()/*).getViewport().
-                                                              getView()*/
-           ).okAction();
-        }catch(GateException ge){
-          JOptionPane.showMessageDialog(
-            DocumentEditor.this,
-            "There was an error:\n" +
-            ge.toString(),
-            "Gate", JOptionPane.ERROR_MESSAGE);
-          ge.printStackTrace(Err.getPrintWriter());
+      //show the modal dialog until the data is OK or the user cancels
+      boolean allOK = false;
+      while(!allOK){
+        if(OkCancelDialog.showDialog(DocumentEditor.this,
+                                     tabbedPane, "Edit Annotation")){
+          try{
+            ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
+                                        getSelectedComponent()/*).getViewport().
+                                                                getView()*/
+             ).okAction();
+             allOK = true;
+          }catch(GateException ge){
+            JOptionPane.showMessageDialog(
+              DocumentEditor.this,
+              "There was an error:\n" +
+              ge.toString(),
+              "Gate", JOptionPane.ERROR_MESSAGE);
+//            ge.printStackTrace(Err.getPrintWriter());
+            allOK = false;
+          }
+        }else{
+          allOK = true;
         }
-      }
+      }//while(!allOK)
+
+
     }//public void actionPerformed(ActionEvent e)
 
     AnnotationSet set;
