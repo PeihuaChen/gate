@@ -242,12 +242,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
           }// end if
         }// end if
       }// end while
-      featureSchemaList.setVisibleRowCount(featuresSch.size());
     }// end if
 
     // Init the table model
     Set tableData = new HashSet();
     Iterator iterator = currentAnnotFeaturesMap.keySet().iterator();
+System.out.println("Fetures " + currentAnnotFeaturesMap);
     while (iterator.hasNext()){
       String key = (String) iterator.next();
       // If in currentAnnotFeaturesMap there is a key contained into
@@ -318,6 +318,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     featureSchemaList = new JList();
     featureSchemaList.setSelectionMode(
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    Set featuresSch = currentAnnotSchema.getFeatureSchemaSet();
+    if(featuresSch != null){
+      featureSchemaList.setVisibleRowCount(featuresSch.size());
+    }
     featuresListScroll = new JScrollPane(featureSchemaList);
 
     box = Box.createVerticalBox();
@@ -330,9 +334,9 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     componentsBox.add(box);
     componentsBox.add(Box.createHorizontalStrut(5));
 
-    this.add(componentsBox);
-    this.add(Box.createVerticalStrut(5));
     this.add(annotSchBox);
+    this.add(Box.createVerticalStrut(5));
+    this.add(componentsBox);
   }//buildGuiComponents();
 
   /** Init GUI components with values taken from local data*/
