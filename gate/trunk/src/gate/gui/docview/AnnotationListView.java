@@ -136,6 +136,7 @@ public class AnnotationListView extends AbstractDocumentView
             AnnotationHandler aHandler = (AnnotationHandler)
               annotationHandlerByTag.get(tag);
             textView.addBlinkingHighlight(aHandler.ann);
+            textView.scrollAnnotationToVisible(aHandler.ann);
           }
         }
     });
