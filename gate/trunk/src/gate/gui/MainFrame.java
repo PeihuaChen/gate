@@ -1572,8 +1572,8 @@ public class MainFrame extends JFrame
           theTool.init();
           //and execute it
           theTool.execute();
-          Out.prln("Finished!");
           theTool.unloadPRs();
+          Out.prln("Finished!");
         }
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
