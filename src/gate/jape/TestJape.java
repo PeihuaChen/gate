@@ -29,7 +29,35 @@ public class TestJape extends TestCase
     //System.out.println("TestJape.setUp()");
   } // setUp
 
+  /** Test using the large "combined" grammar from the gate/resources
+    * tree.
+    */
+  public void testCombined() throws IOException, GateException {
+    Corpus c = Transients.newCorpus("TestJape corpus");
+    c.add(
+      Transients.newDocument("http://derwent.dcs.shef.ac.uk/tests/doc0.html")
+    );
 
+    //add some annotations on the first (only) document in corpus c
+    Document doc = (Document) c.first();
+    AnnotationSet defaultAS = doc.getAnnotations();
+    FeatureMap feat = Transients.newFeatureMap();
+    defaultAS.add(new Long( 2), new Long( 4), "A",feat);
+    defaultAS.add(new Long( 4), new Long(6), "B",feat);
+    defaultAS.add(new Long(6), new Long(8), "C",feat);
+    defaultAS.add(new Long(8), new Long(10), "C",feat);
+
+    // run the parser test
+    Batch batch = null;
+    batch = new Batch("jape/combined/", "main.jape");
+
+    // test the transducers
+    batch.transduce(c);
+System.out.println(batch.getTransducer());
+
+    // check the results
+    doc = (Document)c.first();
+  } // testCombined()
 
   /** Batch run */
   public void testBatch() throws JapeException, IOException {

@@ -1,6 +1,15 @@
-// Batch.java - transducer class
-// Hamish Cunningham, 10/08/98
-// $Id$
+/*
+ * Batch.java - transducer class
+ * Hamish Cunningham, 10/08/98
+ * $Id$
+ *
+ * DEVELOPER NOTES:
+ *
+ * This is one that got away; the relation between constructors,
+ * initTransducer and parseTransducer are totally screwy and get worse
+ * every time I add something (e.g. support for resource loading).
+ * We should probably junk this whole thing and start again....
+ */
 
 package gate.jape;
 
@@ -51,21 +60,33 @@ public class Batch implements JapeConstants, java.io.Serializable {
     initTransducer();
   } // full init constructor
 
+  /** Create a fully initialised instance from a resource path and resource
+    * name.
+    */
+  public Batch(String resPath, String resName) throws JapeException {
+    fromResource = true;
+    this.japeFileName = resName;
+    this.resPath = resPath;
+    initTransducer();
+  } // full init constructor
+
+
   /** Get the transducer. */
   public Transducer getTransducer() { return transducer; }
 
   /** Instantiate transducer member as necessary. */
   private void initTransducer()
   throws JapeException {
-    if(japeFileName.endsWith(".ser") || japeFileName.endsWith(".SER"))
+    if(fromResource) {
+      parseJape(resPath, japeFileName);
+    } else if(japeFileName.endsWith(".ser") || japeFileName.endsWith(".SER"))
       deserialiseJape(new File(japeFileName));
     else if(japeFileName.endsWith(".jape") || japeFileName.endsWith(".JAPE"))
       parseJape();
     else if(japeFileName.endsWith(".jar") || japeFileName.endsWith(".JAR"))
       deserialiseJape();
-    else if(japeFileName.equals("stream")) {
+    else if(japeFileName.equals("stream"))
       parseJape(japeStream);
-    }
     else
       throw new JapeException(
         "unknown file type (not .jape, .ser or .jar):" + japeFileName
@@ -100,7 +121,23 @@ public class Batch implements JapeConstants, java.io.Serializable {
       throw new
         JapeException("Batch: couldn't read JAPE stream: " + e.getMessage());
     }
-  } // parseJape(InputStream)
+  } // parseJape(InputStream) 
+
+  /** Parse a jape file from a resource and store the transducer. */
+  private void parseJape(String resPath, String resName) throws JapeException {
+    try {
+      gate.jape.parser.ParseCpsl parser =
+        new gate.jape.parser.ParseCpsl(resPath, resName);
+      transducer = parser.MultiPhaseTransducer();
+    } catch (gate.jape.parser.ParseException e) {
+      throw new
+        JapeException("Batch: error parsing transducer: " + e.getMessage());
+    } catch (java.io.IOException e) {
+      throw new
+        JapeException("Batch: couldn't read JAPE resource: " + e.getMessage());
+    }
+  } // parseJape(resPath, resName)
+
 
   /** Deserialise from a .ser file. */
   private void deserialiseJape(File japeFile) throws JapeException {
@@ -344,9 +381,18 @@ public class Batch implements JapeConstants, java.io.Serializable {
     if(verbose) System.out.println("Batch: " + mess);
   } // message
 
+  /** Are we initialising from a resource? */
+  private boolean fromResource = false;
+
+  /** Path to the resources tree */
+  private String resPath = null;
+
 } // class Batch
 
 // $Log$
+// Revision 1.5  2000/06/09 16:54:33  hamish
+// support for grammars coming from resources
+//
 // Revision 1.4  2000/05/05 11:17:47  hamish
 // use new parser constructor for streams
 //

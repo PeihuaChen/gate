@@ -42,8 +42,31 @@ import gate.jape.*;
   */
 public class ParseCpsl implements JapeConstants {
 
-  /**
-    * Construct from a file name and macros map
+  /** Construct from a resource path, jape name and macros map. The resource
+    * path is relative to the gate resources directory. E.g. resourcePath
+    * might be "jape/combined/" and japeName "main.jape".
+    */
+  public ParseCpsl(
+    String resourcePath, String japeName, HashMap existingMacrosMap
+  ) throws IOException {  
+    this(new InputStreamReader(
+      Files.getResourceAsStream(resourcePath + japeName)
+    ));
+    this.macrosMap = existingMacrosMap; 
+    fileName = japeName;
+    dirName = resourcePath;
+    fromResource = true;
+  } // resource path, resource name and macros constructor
+
+  /** Construct from a resource path and jape name. The resource
+    * path is relative to the gate resources directory. E.g. resourcePath
+    * might be "jape/combined/" and japeName "main.jape".
+    */
+  public ParseCpsl(String resourcePath, String japeName) throws IOException { 
+    this(resourcePath, japeName, new HashMap());
+  } // resource path and resource name constructor
+
+  /** Construct from a file name and macros map
     */
   public ParseCpsl(String cpslFileName, HashMap existingMacrosMap)
   throws IOException {
@@ -51,8 +74,7 @@ public class ParseCpsl implements JapeConstants {
     this.macrosMap = existingMacrosMap;
   } // file and macros constructor
 
-  /**
-    * Construct from a file name
+  /** Construct from a file name
     */
   public ParseCpsl(String cpslFileName) throws IOException {
     this(
@@ -65,8 +87,7 @@ public class ParseCpsl implements JapeConstants {
     dirName = f.getParent();
   } // ParseCpsl filename constructor
 
-  /**
-    * Construct from a grammar name and input stream
+  /** Construct from a grammar name and input stream
     */
   public ParseCpsl(String cpslFileName, InputStream cpslStream)
   throws IOException {
@@ -87,12 +108,15 @@ public class ParseCpsl implements JapeConstants {
   private int ruleNumber;
 
   /** A list of all the bindings we made this time, for checking
-    * the RHS during parsing. 
+    * the RHS during parsing.
     */
   private HashSet bindingNameSet = null;
 
   /** A table of macro definitions. */
   private HashMap macrosMap;
+
+  /** Are we compiling from a resource? */
+  private boolean fromResource = false;
 
 } // class ParseCpsl
 
@@ -215,29 +239,44 @@ MultiPhaseTransducer MultiPhaseTransducer() :
       (
         phaseNameTok=<ident>
         {
-          // check file exists
-          String fileName = dirName + File.separatorChar + phaseNameTok.image;
-          File phaseFile = new File(fileName);
-          if(!phaseFile.exists())
-            phaseFile = new File(fileName + ".jape");
-          if(!phaseFile.exists())
-            throw(
-              new ParseException(
-                "Can't find file " + phaseFile.getAbsolutePath()
-              )
-            );
-
-          // construct a parser and parse it, adding the resultant spt to m
           ParseCpsl parser = null;
-          try {
-            parser = new ParseCpsl(phaseFile.getAbsolutePath(), macrosMap);
-          } catch (IOException e) {
-            throw(
-              new ParseException(
-                "Can't open file " + phaseFile.getAbsolutePath()
-              )
-            );
-          }
+
+          if(fromResource) { // the grammar is from a resource file
+            String resName = phaseNameTok.image + ".jape";
+
+            // construct a parser and parse it
+            try {
+              parser = new ParseCpsl(dirName, resName, macrosMap);
+            } catch (IOException e) {
+              throw(new ParseException("Can't open resource "+dirName+resName));
+            }
+
+          } else { // not from resource
+            // check file exists
+            String fileName = dirName + File.separatorChar + phaseNameTok.image;
+            File phaseFile = new File(fileName);
+            if(!phaseFile.exists())
+              phaseFile = new File(fileName + ".jape");
+            if(!phaseFile.exists())
+              throw(
+                new ParseException(
+                  "Can't find file " + phaseFile.getAbsolutePath()
+                )
+              );
+
+            // construct a parser and parse it
+            try {
+              parser = new ParseCpsl(phaseFile.getAbsolutePath(), macrosMap);
+            } catch (IOException e) {
+              throw(
+                new ParseException(
+                  "Can't open file " + phaseFile.getAbsolutePath()
+                )
+              );
+            }
+          } // not from resource
+
+          // adding the resultant spt to m
           if(parser != null) {
             s = parser.SinglePhaseTransducer();
             if(s != null)
@@ -957,6 +996,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.7  2000/06/09 16:54:34  hamish
+// support for grammars coming from resources
+//
 // Revision 1.6  2000/05/05 12:51:12  valyt
 // Got rid of deprecation warnings
 //
