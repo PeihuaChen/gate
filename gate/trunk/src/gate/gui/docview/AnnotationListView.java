@@ -18,9 +18,14 @@ package gate.gui.docview;
 import gate.*;
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.creole.*;
+import gate.creole.AnnotationVisualResource;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
+import gate.gui.ResizableVisualResource;
 import gate.swing.XJTable;
+import gate.util.*;
+import gate.util.Err;
 import gate.util.GateRuntimeException;
 import java.awt.*;
 import java.awt.Component;
@@ -53,6 +58,7 @@ public class AnnotationListView extends AbstractDocumentView
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
+    editorsCache = new HashMap();
     tableModel = new AnnotationTableModel();
     table = new XJTable(tableModel);
     table.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
@@ -134,24 +140,26 @@ public class AnnotationListView extends AbstractDocumentView
         }
     });
 
-    /* Niraj */
     table.addMouseListener(new MouseListener() {
-      public void mouseClicked(MouseEvent me) {
+      public void mouseClicked(final MouseEvent me) {
+        int viewRow = table.rowAtPoint(me.getPoint());
+        final int modelRow = viewRow == -1 ?
+                             viewRow : 
+                             table.rowViewToModel(viewRow);
+        
         // right click
-        if(table.getSelectedRows().length == 0) {
-          return;
-        }
-
-        if(!table.isRowSelected(table.rowAtPoint(me.getPoint()))) {
-          return;
-        }
-
         if(javax.swing.SwingUtilities.isRightMouseButton(me)) {
-          final JPopupMenu popup = new JPopupMenu();
-          JButton delete = new JButton("Delete");
-          delete.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-              int [] rows = table.getSelectedRows();
+          JPopupMenu popup = new JPopupMenu();
+          
+          Action deleteAction = new AbstractAction("Delete"){
+            public void actionPerformed(ActionEvent evt){
+              int[] rows = table.getSelectedRows();
+              if(rows == null || rows.length == 0){
+                //no selection -> use row under cursor
+                if(modelRow == -1) return;
+                rows = new int[]{modelRow};
+              }
+
               ArrayList handlers = new ArrayList();
 
               for(int i = 0; i < rows.length; i++){
@@ -166,12 +174,41 @@ public class AnnotationListView extends AbstractDocumentView
                 aHandler.set.remove(aHandler.ann);
                 removeAnnotation(tag);
               }
-              popup.hide();
-              popup.setVisible(false);
             }
-          });
-
-          popup.add(delete);
+          };
+          popup.add(deleteAction);
+          
+          //add the custom edit actions
+          if(modelRow != -1){
+            AnnotationHandler aHandler = (AnnotationHandler)
+            annotationHandlerByTag.get(tagList.get(modelRow));
+            List editorClasses = Gate.getCreoleRegister().
+              getAnnotationVRs(aHandler.ann.getType());
+            if(editorClasses != null && editorClasses.size() > 0){
+              popup.addSeparator();
+              Iterator editorIter = editorClasses.iterator();
+              while(editorIter.hasNext()){
+                String editorClass = (String) editorIter.next();
+                AnnotationVisualResource editor = (AnnotationVisualResource)
+                  editorsCache.get(editorClass);
+                if(editor == null){
+                  //create the new type of editor
+                  try{
+                    editor = (AnnotationVisualResource)
+                             Factory.createResource(editorClass);
+                    editorsCache.put(editorClass, editor);
+                  }catch(ResourceInstantiationException rie){
+                    rie.printStackTrace(Err.getPrintWriter());
+                  }
+                }
+                popup.add(new EditAnnotationAction(aHandler.set, 
+                        aHandler.ann, editor));
+              }
+            }
+          }
+          
+          
+          
           popup.show(table, me.getX(), me.getY());
         }
       }
@@ -384,6 +421,51 @@ public class AnnotationListView extends AbstractDocumentView
     AnnotationSet set;
   }
 
+  protected class EditAnnotationAction extends AbstractAction{
+    public EditAnnotationAction(AnnotationSet set, Annotation ann, 
+            AnnotationVisualResource editor){
+      this.set = set;
+      this.ann = ann;
+      this.editor = editor;
+      ResourceData rData =(ResourceData)Gate.getCreoleRegister().
+          get(editor.getClass().getName()); 
+      if(rData != null){
+        title = rData.getName();
+        putValue(NAME, "Edit with " + title);
+        putValue(SHORT_DESCRIPTION, rData.getComment());
+      }
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      JScrollPane scroller = new JScrollPane((Component)editor); 
+      editor.setTarget(set);
+      editor.setAnnotation(ann);
+      JOptionPane optionPane = new JOptionPane(scroller,
+              JOptionPane.QUESTION_MESSAGE, 
+              JOptionPane.OK_CANCEL_OPTION, 
+              null, new String[]{"OK", "Cancel"});
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      scroller.setMaximumSize(new Dimension((int)(screenSize.width * .75), 
+              (int)(screenSize.height * .75)));
+      JDialog dialog = optionPane.createDialog(AnnotationListView.this.getGUI(),
+              title);
+      dialog.setModal(true);
+      dialog.setResizable(true);
+      dialog.setVisible(true);
+      try{
+        if(optionPane.getValue().equals("OK")) editor.okAction();
+        else editor.cancelAction();
+      }catch(GateException ge){
+        throw new GateRuntimeException(ge);
+      }
+    }
+    
+    String title;
+    Annotation ann;
+    AnnotationSet set;
+    AnnotationVisualResource editor;
+  }
+  
   protected XJTable table;
   protected AnnotationTableModel tableModel;
   protected JScrollPane scroller;
@@ -392,6 +474,11 @@ public class AnnotationListView extends AbstractDocumentView
   protected JPanel mainPanel;
   protected JLabel statusLabel;
   protected TextualDocumentView textView;
+  /**
+   * A map that stores instantiated annotations editors in order to avoid the 
+   * delay of building them at each request;
+   */
+  protected Map editorsCache;
 
   private static final int TYPE_COL = 0;
   private static final int SET_COL = 1;
