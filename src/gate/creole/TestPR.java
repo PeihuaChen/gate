@@ -44,30 +44,7 @@ public class TestPR extends TestCase
 
   protected static List annotationTypes = new ArrayList(10);
 
-  /** Construction */
-  public TestPR(String name) { super(name); }
-
-  /** Fixture set up */
-  public void setUp() throws Exception {
-    //get 3 documents
-    if (doc1 == null)
-      doc1 = Factory.newDocument(
-        new URL(TestDocument.getTestServerName() +
-        "tests/ft-bt-03-aug-2001.html")
-      );
-
-    if (doc2 == null)
-      doc2 = Factory.newDocument(
-        new URL(TestDocument.getTestServerName() +
-          "tests/gu-Am-Brit-4-aug-2001.html")
-      );
-
-    if (doc3 == null)
-      doc3 = Factory.newDocument(
-        new URL(TestDocument.getTestServerName() +
-          "tests/in-outlook-09-aug-2001.html")
-      );
-
+  static{
     annotationTypes.add(ANNIEConstants.SENTENCE_ANNOTATION_TYPE);
     annotationTypes.add(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE);
     annotationTypes.add(ANNIEConstants.LOCATION_ANNOTATION_TYPE);
@@ -76,6 +53,35 @@ public class TestPR extends TestCase
     annotationTypes.add(ANNIEConstants.MONEY_ANNOTATION_TYPE);
     annotationTypes.add(ANNIEConstants.LOOKUP_ANNOTATION_TYPE);
     annotationTypes.add(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
+    try{
+      //get 3 documents
+      if (doc1 == null)
+        doc1 = Factory.newDocument(
+            new URL(TestDocument.getTestServerName() +
+                    "tests/ft-bt-03-aug-2001.html")
+            );
+
+      if (doc2 == null)
+        doc2 = Factory.newDocument(
+            new URL(TestDocument.getTestServerName() +
+                    "tests/gu-Am-Brit-4-aug-2001.html")
+            );
+
+      if (doc3 == null)
+        doc3 = Factory.newDocument(
+            new URL(TestDocument.getTestServerName() +
+                    "tests/in-outlook-09-aug-2001.html")
+            );
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+  }
+
+  /** Construction */
+  public TestPR(String name) { super(name); }
+
+  /** Fixture set up */
+  public void setUp() throws Exception {
   } // setUp
 
   /** Put things back as they should be after running tests.
@@ -437,18 +443,15 @@ public class TestPR extends TestCase
     compareAnnots(document,doc3);
   } // testAllPR()
 
-  public void compareAnnots(Document keyDocument, Document responseDocument)
+  public void compareAnnots1(Document keyDocument, Document responseDocument)
               throws Exception{
-
-    // create annotation schema
-    AnnotationSchema annotationSchema = new AnnotationSchema();
-    String annotType = null;
-
     // organization type
     Iterator iteratorTypes = annotationTypes.iterator();
     while (iteratorTypes.hasNext()){
       // get the type of annotation
-      annotType = (String)iteratorTypes.next();
+      String annotType = (String)iteratorTypes.next();
+      // create annotation schema
+      AnnotationSchema annotationSchema = new AnnotationSchema();
 
       annotationSchema.setAnnotationName(annotType);
 
@@ -497,6 +500,44 @@ public class TestPR extends TestCase
         annotDiff.getFMeasureAverage()== 1.0);
      }//while
    }// public void compareAnnots
+
+   public void compareAnnots(Document keyDocument, Document responseDocument)
+                throws Exception{
+      // organization type
+      Iterator iteratorTypes = annotationTypes.iterator();
+      while (iteratorTypes.hasNext()){
+        // get the type of annotation
+        String annotType = (String)iteratorTypes.next();
+
+        // create an annotation diff
+        AnnotationDiffer annotDiffer = new AnnotationDiffer();
+        Set significantFeatures = new HashSet(Arrays.asList(
+                      new String[]{"NMRule", "kind", "orgType", "rule",
+                                   "rule1", "rule2", "locType", "gender",
+                                   "majorType", "minorType", "category",
+                                   "length", "orth", "string", "subkind",
+                                   "symbolkind"}));
+        annotDiffer.setSignificantFeaturesSet(significantFeatures);
+        annotDiffer.calculateDiff(keyDocument.getAnnotations().get(annotType),
+                                  responseDocument.getAnnotations().get(annotType));
+
+        assertTrue(annotType+ " precision strict in "+
+          responseDocument.getSourceUrl().getFile()+
+          " is "+ annotDiffer.getPrecisionStrict()+ " instead of 1.0 ",
+          annotDiffer.getPrecisionStrict()== 1.0);
+
+        assertTrue(annotType+" recall strict in "
+          +responseDocument.getSourceUrl().getFile()+
+          " is " + annotDiffer.getRecallStrict()+ " instead of 1.0 ",
+          annotDiffer.getRecallStrict()== 1.0);
+
+        assertTrue(annotType+" f-measure strict in "
+          +responseDocument.getSourceUrl().getFile()+
+          " is "+ annotDiffer.getFMeasureStrict(0.5)+ " instead of 1.0 ",
+          annotDiffer.getFMeasureStrict(0.5)== 1.0);
+      }//while
+     }// public void compareAnnots
+
 
   /** Test suite routine for the test runner */
   public static Test suite() {
