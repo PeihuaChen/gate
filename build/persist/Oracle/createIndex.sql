@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Tue Oct 16 12:59:57 2001
+ *  auto generated: Tue Oct 16 17:12:49 2001
  *
  *  $Id$
  *
@@ -25,6 +25,17 @@ CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON T_ANNOTATION_TYPE
 CREATE UNIQUE INDEX XT_DOC_ENCODING_01 ON T_DOC_ENCODING
 (
        ENC_NAME                       
+);
+
+CREATE UNIQUE INDEX XT_DOCUMENT_01 ON T_DOCUMENT
+(
+       DOC_LR_ID                      
+);
+
+CREATE INDEX XT_FEATURE_01 ON T_FEATURE
+(
+       FT_ENTITY_ID                   ,
+       FT_ENTITY_TYPE                 
 );
 
 CREATE UNIQUE INDEX XT_GROUP_01 ON T_GROUP
