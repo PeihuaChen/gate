@@ -83,7 +83,7 @@ create or replace package security is
                              p_usr_id  IN  number,
                              p_grp_id  IN  number,
                              p_mode    IN  number,                             
-                             p_result  OUT boolean);
+                             p_result  OUT number);
 
   /*  -- */                           
   function can_delete_group(p_grp_id     IN  number)

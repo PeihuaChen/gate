@@ -277,7 +277,7 @@ create or replace package body security is
                              p_usr_id  IN  number,
                              p_grp_id  IN  number,
                              p_mode    IN  number,                             
-                             p_result  OUT boolean)
+                             p_result  OUT number)
   is
     cnt          number;
     owner_group  number;
@@ -311,10 +311,10 @@ create or replace package body security is
              
              if locking_user <> p_usr_id then
                 --locked by someone else, fail
-                p_result := false;
+                p_result := ORACLE_FALSE;
              else
                 --locked by me, success             
-                p_result := true;
+                p_result := ORACLE_TRUE;
              end if;
              
              return;
@@ -331,7 +331,7 @@ create or replace package body security is
              if (owner_user = p_usr_id and 
                  (access_mode = PERM_GR_OW or access_mode = PERM_OR_OW)) then
                 -- case 1a
-                p_result := true;
+                p_result := ORACLE_TRUE;
                 return;
              end if;
              
@@ -340,12 +340,12 @@ create or replace package body security is
                  owner_group = p_grp_id                   and 
                  (access_mode = PERM_GR_GW or access_mode = PERM_WR_GW)) then
                 -- case 1b                 
-                p_result := true;
+                p_result := ORACLE_TRUE;
                 return;
              end if;
 
              --fail             
-             p_result := false;
+             p_result := ORACLE_FALSE;
              return;
                          
           end if;
@@ -360,7 +360,7 @@ create or replace package body security is
           
           if (access_mode = PERM_WR_GW) then
              -- case 1c
-             p_result := true;
+             p_result := ORACLE_TRUE;
              return;             
           end if;
           
@@ -368,18 +368,18 @@ create or replace package body security is
                is_member_of_group(p_usr_id,owner_group)              and
                owner_group = p_grp_id)  then
              -- case 1b
-             p_result := true;
+             p_result := ORACLE_TRUE;
              return;             
           end if;
 
           if (access_mode = PERM_WR_GW) then
              -- case 1c
-             p_result := true;
+             p_result := ORACLE_TRUE;
              return;             
           end if;
           
           --fail
-          p_result := false;
+          p_result := ORACLE_FALSE;
           return;                       
        
        end if;
