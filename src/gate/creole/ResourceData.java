@@ -47,17 +47,17 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** String representation */
   public String toString() {
     int noInst = (instantiationStack == null) ? 0: instantiationStack.size();
+/*
     int noSmallViews = (smallViews == null) ? 0: smallViews.size();
     int noViews = (views == null) ? 0: views.size();
-
+*/
     StringBuffer s = new StringBuffer(
       "ResourceDataImpl, name=" + name + "; className=" + className +
       "; jarFileName=" + jarFileName + "; jarFileUrl=" + jarFileUrl +
       "; xmlFileName=" + xmlFileName + "; xmlFileUrl=" + xmlFileUrl +
       "; isAutoLoading=" + autoLoading + "; numberInstances=" + noInst +
-      "; isPrivate=" + priv +"; numberSmallViewsRegistered=" + noSmallViews +
-      "; isTool="+ tool + "; validityMessage=" + validityMessage +
-      "; numberViewsRegistered=" + noViews +
+      "; isPrivate=" + priv +"; isTool="+ tool +
+      "; validityMessage=" + validityMessage +
       "; interfaceName=" + interfaceName +
       "; guiType=" + guiType +
       "; mainViewer=" + isMainView +
@@ -256,117 +256,6 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** Is the resource a tool? */
   public boolean isTool() { return tool; }
-
-  /** Add a view (a feature map minimally defining the view's
-    * TYPE and TITLE).
-    */
-  public void addView(FeatureMap viewFeatures) {
-    String small = (String) viewFeatures.get("SMALL");
-    if(small != null && small.toUpperCase().equals("TRUE"))
-      smallViews.add(viewFeatures);
-    else
-      views.add(viewFeatures);
-  } // addView(FeatureMap)
-
-  /** Get the views registered for this resource. Each member of the
-    * list is a FeatureMap with a TYPE attribute giving the class name
-    * of the viewer. Other data to be passed to the viewer is present as
-    * other features on the map.
-    * <P>
-    * This list excludes views that have the SMALL attribute set true.
-    */
-  public List getViews() { return views; }
-
-  /** Get the views registered for this resource. Each member of the
-    * list is a FeatureMap with a TYPE attribute giving the class name
-    * of the viewer. Other data to be passed to the viewer is present as
-    * other features on the map.
-    * <P>
-    * This list contains only those views that have the SMALL attribute
-    * set true.
-    */
-  public List getSmallViews() { return smallViews; }
-
-  /** Get all the (not small) views of this resource and those Resource classes
-    * that it inherits from. The method uses reflection to traverse the
-    * inheritance tree as far as gate.Resource; for each inherited class,
-    * if it is itself a resource, its views are added to the list.
-    * <P>
-    * Each member of the
-    * list is a FeatureMap with a TYPE attribute giving the class name
-    * of the vcvs upiewer. Other data to be passed to the viewer is present as
-    * other features on the map.
-    */
-  public List getAllViews() { return getAllViews(false); }
-
-  /** Get all the small views of this resource and those Resource classes that
-    * it inherits from. The method uses reflection to traverse the
-    * inheritance tree as far as gate.Resource; for each inherited class,
-    * if it is itself a resource, its views are added to the list.
-    * <P>
-    * Each member of the
-    * list is a FeatureMap with a TYPE attribute giving the class name
-    * of the vcvs upiewer. Other data to be passed to the viewer is present as
-    * other features on the map.
-    */
-  public List getAllSmallViews() { return getAllViews(true); }
-
-  /** Get all the views of this resource and those Resource classes that
-    * it inherits from. The method uses reflection to traverse the
-    * inheritance tree as far as gate.Resource; for each inherited class,
-    * if it is itself a resource, its views are added to the list.
-    * <P>
-    * Each member of the
-    * list is a FeatureMap with a TYPE attribute giving the class name
-    * of the vcvs upiewer. Other data to be passed to the viewer is present as
-    * other features on the map.
-    * @param small If true then small views are returned; else non-small views
-    */
-  public List getAllViews(boolean small) {
-    List allViews = new ArrayList();
-    CreoleRegister reg = Gate.getCreoleRegister();
-
-    // add all the views for the current class
-    if(small)
-      allViews.addAll(smallViews);
-    else
-      allViews.addAll(views);
-
-    // get the class for this resource or give up
-    Class resClass = null;
-    try { resClass = getResourceClass(); } catch(ClassNotFoundException e) { }
-    if(resClass == null) return allViews; // no inherited views
-
-    // iterate over all superclasses up to gate.Resource
-    for(
-        Class superClass = resClass.getSuperclass()    // iterate up from super
-      ;
-        superClass != null &&                          // top of the tree
-        ! superClass.getName().equals("gate.Resource")
-      ;
-        superClass = superClass.getSuperclass()        // on to the next
-    ) {
-      if(Resource.class.isAssignableFrom(superClass)) {
-        ResourceData superResData =
-          (ResourceData) reg.get(superClass.getName());
-        if(superResData == null) continue;
-
-        if(small)
-          allViews.addAll(superResData.getSmallViews());
-        else
-          allViews.addAll(superResData.getViews());
-      }
-    } // for
-
-    return allViews;
-  } // getAllViews(boolean)
-
-  /** The list of views registered for this resource */
-  protected List views = new ArrayList();
-
-  /** The list of small views registered for this resource */
-  protected List smallViews = new ArrayList();
-
   /** Is this a valid resource data configuration? If not, leave an
     * error message that can be returned by <TT>getValidityMessage()</TT>.
     */
@@ -385,31 +274,41 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** Get validity statues message. */
   public String getValidityMessage() { return validityMessage; }
 
-  // Fields added for GUI tag
   /////////////////////////////////////////////////////
+  // Fields added for GUI element
+  /////////////////////////////////////////////////////
+  /** This type indicates that the resource is not a GUI */
   public static final int NULL_GUI = 0;
+  /**This type indicates that the resource goes into the large area of GATE GUI*/
   public static final int LARGE_GUI = 1;
+  /**This type indicates that the resource goes into the small area of GATE GUI*/
   public static final int SMALL_GUI = 2;
-
+  /** A filed which can have one of the 3 predefined values. See above.*/
   protected int guiType = NULL_GUI;
+  /** Whether or not this viewer will be the default one*/
   protected boolean isMainView = false;
+  /** The full class name of the resource displayed by this viewer.*/
   protected String resourceDisplayed = null;
+  /** The full type name of the annotation displayed by this viewer.*/
   protected String annotationTypeDisplayed = null;
-
+  /** A simple mutator for guiType field*/
   public void setGuiType(int aGuiType){guiType = aGuiType;}
+  /** A simple accessor for guiType field*/
   public int getGuiType(){return guiType;}
-
+  /** A simple mutator for isMainView field*/
   public void setIsMainView(boolean mainView){isMainView = mainView;}
+  /** A simple accessor for isMainView field*/
   public boolean isMainView(){return isMainView;}
-
+  /** A simple mutator for resourceDisplayed field*/
   public void setResourceDisplayed(String aResourceDisplayed){
     resourceDisplayed = aResourceDisplayed;
   }// setResourceDisplayed
+  /** A simple accessor for resourceDisplayed field*/
   public String getResourceDisplayed(){return resourceDisplayed;}
-
+  /** A simple mutator for annotationTypeDisplayed field*/
   public void setAnnotationTypeDisplayed(String anAnnotationTypeDisplayed){
     annotationTypeDisplayed = anAnnotationTypeDisplayed;
   }// setAnnotationTypeDisplayed
+  /** A simple accessor for annotationTypeDisplayed field*/
   public String getAnnotationTypeDisplayed(){return annotationTypeDisplayed;}
-
 } // ResourceData
