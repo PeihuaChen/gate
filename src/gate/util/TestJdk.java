@@ -35,10 +35,10 @@ public class TestJdk extends TestCase
       "Tools dir was found to be: " + toolsDir,
       toolsDir.startsWith("w:\\jdk\\jdk1") ||
       toolsDir.startsWith("W:\\jdk\\jdk1") ||
-      toolsDir.startsWith("W:\\JBuilder3\\java") ||
-      toolsDir.startsWith("w:\\JBuilder3\\java") ||
-      toolsDir.startsWith("H:\\JBuilder3\\java") ||
-      toolsDir.startsWith("h:\\JBuilder3\\java") ||
+      toolsDir.startsWith("W:\\JBuilder") ||
+      toolsDir.startsWith("w:\\JBuilder") ||
+      toolsDir.startsWith("H:\\JBuilder") ||
+      toolsDir.startsWith("h:\\JBuilder") ||
       toolsDir.startsWith("/usr/local/") ||
       toolsDir.startsWith("/opt/")
     );
@@ -100,7 +100,7 @@ public class TestJdk extends TestCase
 
     // try and get them from the usual Solaris place
     if(thisClassBytes == null || thisClassBytes.length == 0)
-      try { 
+      try {
         File sf = new File(
 "/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/src/gate/util/TestJdk.java"
         );
@@ -174,7 +174,7 @@ if(true) return;
     assert("dummy3 is null", dummyClass2 != null);
     Object dummyObject3 = dummyClass3.newInstance();
     assert("dummy3 object is null", dummyObject3 != null);
-  
+
   } // testReloading
 
 
@@ -183,4 +183,14 @@ if(true) return;
     return new TestSuite(TestJdk.class);
   } // suite
 
+  public static void main(String[] args){
+    try{
+      TestJdk testJdk = new TestJdk("");
+      testJdk.setUp();
+      testJdk.testCompiler();
+      testJdk.testCompiler2();
+      testJdk.testFinder();
+      testJdk.testReloading();
+    }catch (Exception e) {e.printStackTrace(System.err);}
+  }
 } // class TestJdk

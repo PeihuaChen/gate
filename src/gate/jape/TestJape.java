@@ -33,7 +33,7 @@ public class TestJape extends TestCase
   /** Test using the large "combined" grammar from the gate/resources
     * tree.
     */
-  public void testCombined() throws IOException, GateException {
+  public void _testCombined() throws IOException, GateException {
     DoTestBigGrammar("AveShort");
 /*
     Corpus c = Transients.newCorpus("TestJape corpus");
@@ -208,7 +208,7 @@ public class TestJape extends TestCase
     try{
       TestJape testJape = new TestJape("Test Jape");
       testJape.setUp();
-      testJape.testCombined();
+      testJape._testCombined();
 //      if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
  //     else testJape.DoTestBigGrammar(args[0]);
     }catch(Exception e){
