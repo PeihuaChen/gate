@@ -43,9 +43,10 @@ public class TestJdk extends TestCase
   } // testFinder()
 
   /** Jdk compiler */
-  public void testCompiler() throws Exception {
+  public void testCompiler() throws GateException {
     String nl = Strings.getNl();
     String javaSource =
+      "package gate.util;" + nl +
       "import java.io.*;" + nl +
       "public class X {" + nl +
       "  public X() { /*System.out.println(\"X construcing\");*/ } " + nl +
@@ -55,42 +56,75 @@ public class TestJdk extends TestCase
       "} " + nl
       ;
 
-    sun.toolsx.javac.Main compiler = new sun.toolsx.javac.Main(
-      System.out, "TestJdk"
+    byte[] classBytes = jdk.compile(javaSource, "gate/util/X.java");
+    assert(
+      "no bytes returned from compiler",
+      classBytes != null && classBytes.length > 0
     );
-    String argv[] = new String[3];
-    argv[0] = "-nodisk";
-    argv[1] = "X.java";
-    argv[2] = javaSource;
-    compiler.compile(argv);
-    List compilerOutput = compiler.getCompilerOutput();
 
-    Iterator iter = compilerOutput.iterator();
-    while(iter.hasNext()) {
-      byte[] classBytes = (byte[]) iter.next();
-      assert(
-	"no bytes returned from compiler",
-	classBytes != null && classBytes.length > 0
-      );
+    /* if you want to write it to disk...
+    FileOutputStream outFile =
+      new FileOutputStream("z:\\gate2\\classes\\gate\\util\\X.class");
+    outFile.write(classBytes);
+    outFile.close();
+    */
 
-      /* if you want to write it to disk...
-      FileOutputStream outFile = 
-        new FileOutputStream("z:\\gate2\\build\\X.class");
-      outFile.write(classBytes);
-      outFile.close();
-      */
-
-      // try and instantiate one
-      Class theXClass = jdk.defineClass("X", classBytes);
-      Object theXObject = jdk.instantiateClass(theXClass);
-      assert("couldn't instantiate the X class", theXObject != null);
-      assert(
-        "X instantiated wrongly",
-	theXObject.getClass().getName().equals("X")
-      );
-    } // while
+    // try and instantiate one
+    Class theXClass = jdk.defineClass("gate/util/X", classBytes);
+    Object theXObject = jdk.instantiateClass(theXClass);
+    assert("couldn't instantiate the X class", theXObject != null);
+    assert(
+      "X instantiated wrongly, name = " + theXObject.getClass().getName(),
+      theXObject.getClass().getName().equals("gate.util.X")
+    );
 
   } // testCompiler()
+
+  /** Jdk compiler test 2. Does nothing if it can't find the
+    * gate class files in the usual places.
+    */
+  public void testCompiler2() throws GateException {
+    byte[] thisClassBytes = null;
+    String thisClassSource = null;
+
+    // try and get the bytes from the usual place on NT
+    try {
+      File sf = new File("z:\\gate2\\src\\gate\\util\\X.java");
+      File bf = new File("z:\\gate2\\classes\\gate\\util\\X.class");
+      thisClassBytes = Files.getByteArray(bf);
+      thisClassSource = Files.getString(sf);
+    } catch(IOException e) {
+    }
+
+    // try and get them from the usual Solaris place
+    if(thisClassBytes == null || thisClassBytes.length == 0)
+      try { 
+        File sf = new File(
+"/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/src/gate/util/TestJdk.java"
+        );
+        File bf = new File(
+"/share/nlp/projects/gate/webpages/gate.ac.uk/gate2/classes/gate/util/TestJdk.class"
+        );
+        thisClassBytes = Files.getByteArray(bf);
+        thisClassSource = Files.getString(sf);
+      } catch(IOException e) {
+
+        // we couldn't find the bytes; in an ideal world we'd get it
+        // from gate.jar....
+        return;
+      }
+
+    // compile the source
+    Jdk jdk = new Jdk();
+    byte[] compiledBytes =
+      jdk.compile(thisClassSource, "gate/util/TestJdk.java");
+    assert(
+      "compiled binary doesn't equal on-disk binary",
+      compiledBytes.equals(thisClassBytes)
+    );
+
+  } // testCompiler2()
+
 
   /** Test suite routine for the test runner */
   public static Test suite() {

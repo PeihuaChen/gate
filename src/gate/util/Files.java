@@ -23,5 +23,16 @@ public class Files {
     return new String(textBytes);
   } // getString(File)
 
+  /** Get a byte array representing the contents of a binary file. */
+  public static byte[] getByteArray(File binaryFile) throws IOException {
+    FileInputStream fis = new FileInputStream(binaryFile);
+    int len = (int) binaryFile.length();
+    byte[] bytes = new byte[len];
+    fis.read(bytes, 0, len);
+    fis.close();
+    return bytes;
+  } // getByteArray(File)
+
+
 } // class Files
 
