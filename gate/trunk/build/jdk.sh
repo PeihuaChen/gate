@@ -26,6 +26,13 @@ case `uname -a` in
   *) SYS=unix ;;
 esac
 
+# process -n
+if [ x$1 = x-n ]
+then
+  SILENT=yes
+  shift
+fi
+
 # process -s
 if [ x$1 = x-s ]
 then
@@ -68,5 +75,5 @@ then
 fi
 
 # run the command
-echo ${JAVABASE}/bin/${COMMAND} ${COMMOPTS} ${SUBS}
+[ x$SILENT = x ] && echo ${JAVABASE}/bin/${COMMAND} ${COMMOPTS} ${SUBS}
 ${JAVABASE}/bin/${COMMAND} ${COMMOPTS} ${SUBS}
