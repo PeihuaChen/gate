@@ -7,7 +7,7 @@ html, body {
   background: #fff;
   color: #000;
   font-family: sans-serif;
-  font-weight: bold;
+/*  font-weight: bold; */
 }
 
 
@@ -28,6 +28,7 @@ div.banner {
   margin-left: 0px;
   padding: 0.09em;
   text-align: center;
+  font-weight: bold; 
 }
 div.banner a:link, div.banner {
   background: #A0D0F0;
