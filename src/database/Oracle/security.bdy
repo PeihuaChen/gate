@@ -14,7 +14,7 @@ create or replace package body security is
  *
  *  $Id$
  *
- */
+ */ 
 
   
   ORACLE_TRUE  constant number := 1;
@@ -264,7 +264,8 @@ create or replace package body security is
        select count(usr_id)
        into   usr_cnt
        from   t_user
-       where  usr_login = p_usr_name;
+       where  usr_login = p_usr_name
+              and usr_pass= p_usr_pass;
        
        if (usr_cnt = 0) then
           raise error.x_invalid_user_name;
@@ -276,28 +277,15 @@ create or replace package body security is
        select usr_id
        into   l_usr_id
        from   t_user
-       where  usr_login = p_usr_name;       
+       where  usr_login = p_usr_name
+              and usr_pass= p_usr_pass;       
        
-       
-       --valid passw?
-       select count(usr_id)
-       into   usr_cnt
-       from   t_user
-       where  usr_pass= p_usr_pass;
-       
-       if (usr_cnt = 0) then
-          raise error.x_invalid_user_pass;
-       end if;
-
        --valid group?
        select count(ugrp_id)
        into   usr_cnt
-       from   t_user_group UG,
-              t_user U
-       where  UG.ugrp_group_id = p_pref_grp_id
-              and UG.ugrp_user_id = U.usr_id
-              and U.usr_login = p_usr_name;
-       
+       from   t_user_group
+       where  ugrp_group_id = p_pref_grp_id
+              and ugrp_user_id = l_usr_id;       
        
        if (usr_cnt = 0) then
           raise error.x_invalid_user_group;
