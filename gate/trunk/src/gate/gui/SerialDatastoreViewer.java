@@ -172,6 +172,10 @@ public class SerialDatastoreViewer extends JTree
     } catch(PersistenceException pe) {
       throw new GateRuntimeException(pe.toString());
     }
+    DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
+    selectionModel.setSelectionMode(
+        DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
+    setSelectionModel(selectionModel);
 
   }//protected void initGuiComponents()
 

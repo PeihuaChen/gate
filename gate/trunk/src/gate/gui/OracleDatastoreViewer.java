@@ -167,6 +167,11 @@ public class OracleDatastoreViewer extends JTree
       throw new GateRuntimeException(pe.toString());
     }
 
+    DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
+    selectionModel.setSelectionMode(
+        DefaultTreeSelectionModel.SINGLE_TREE_SELECTION);
+    setSelectionModel(selectionModel);
+
   }//protected void initGuiComponents()
 
   protected void initListeners(){
