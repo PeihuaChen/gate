@@ -25,21 +25,35 @@ public class TestDocument extends TestCase
   public TestDocument(String name) { super(name); }
 
   /** Base of the test server URL */
-  protected String testServer;
+  protected static String testServer = "http://derwent.dcs.shef.ac.uk:8000/";
 
   /** Name of test document 1 */
   protected String testDocument1;
 
   /** Fixture set up */
   public void setUp() {
-    testServer = "http://derwent.dcs.shef.ac.uk:8000/";
     testDocument1 = "tests/doc0.html";
   } // setUp
 
-  /** A test test */
-  public void testSomething() {
-    assertEquals(1, 1);
-  } // testSomething
+  /** Get the name of the test server */
+  public static String getTestServerName() { return testServer; }
+
+  /** Test ordering */
+  public void testCompareTo() {
+    Document doc1 = null;
+    Document doc2 = null;
+    Document doc3 = null;
+    try {
+      doc1 = new DocumentImpl(testServer + "tests/def/");
+      doc2 = new DocumentImpl(testServer + "tests/defg/");
+      doc3 = new DocumentImpl(testServer + "tests/abc/");
+    } catch (IOException e) {
+    }
+
+    assert(doc1.compareTo(doc2) < 0);
+    assert(doc1.compareTo(doc1) == 0);
+    assert(doc1.compareTo(doc3) > 0);
+  } // testCompareTo()
 
   /** A comprehensive test */
   public void testLotsOfThings() {

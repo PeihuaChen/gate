@@ -22,18 +22,24 @@ public class DocumentContentImpl implements DocumentContent
 {
   /** Default construction */
   public DocumentContentImpl() {
+    content = new String();
   } // default construction
-  
+
   /** Contruction from URL and offsets. */
-  public DocumentContentImpl(URL u, Long start, Long end) {
+  public DocumentContentImpl(URL u, Long start, Long end) throws IOException
+  {
     BufferedReader uReader = null;
-    try {
-      uReader = new BufferedReader(new InputStreamReader(u.openStream()));
-      uReader.readLine();
-    } catch(UnknownHostException e) { // no network connection
-      return;
-    } catch(IOException e) {
+    StringBuffer buf = new StringBuffer();
+    char c;
+
+    uReader = new BufferedReader(new InputStreamReader(u.openStream()));
+    while( true ) {
+      int i = uReader.read();
+      if(i == -1) break;
+      buf.append((char) i);
     }
+
+      content = new String(buf);
   } // Contruction from URL and offsets */
 
 
@@ -53,7 +59,16 @@ public class DocumentContentImpl implements DocumentContent
     * content).
     */
   public Long size() {
-    return new Long(100000);
+    return new Long(content.length());
   } // size()
+
+
+  /** Just for now - later we have to cater for different types of
+    * content.
+    */
+  String content;
+
+  /** For ranges */
+  DocumentContentImpl(String s) { content = s; }
 
 } // class DocumentContentImpl

@@ -9,7 +9,9 @@
 package gate.annotation;
 
 import java.util.*;
+import java.io.*;
 import junit.framework.*;
+
 import gate.*;
 import gate.util.*;
 import gate.corpora.*;
@@ -31,8 +33,8 @@ public class TestAnnotation extends TestCase
   protected FeatureMap emptyFeatureMap;
 
   /** Fixture set up */
-  public void setUp() throws InvalidOffsetException {
-    doc1 = new gate.corpora.DocumentImpl();
+  public void setUp() throws IOException, InvalidOffsetException {
+    doc1 = new DocumentImpl(TestDocument.getTestServerName() + "doc0.html");
 
     emptyFeatureMap = new SimpleFeatureMapImpl();
 
@@ -159,8 +161,9 @@ public class TestAnnotation extends TestCase
   } // testExceptions()
 
   /** Test type index */
-  public void testTypeIndex() throws InvalidOffsetException {
-    Document doc = new DocumentImpl();
+  public void testTypeIndex() throws IOException, InvalidOffsetException {
+    Document doc =
+      new DocumentImpl(TestDocument.getTestServerName() + "doc0.html");
     AnnotationSet as = new AnnotationSetImpl(doc);
     AnnotationSet asBuf;
     Integer newId;
@@ -388,9 +391,10 @@ public class TestAnnotation extends TestCase
   } // testSetMethods()
 
   /** Test AnnotationSetImpl */
-  public void testAnnotationSet() throws InvalidOffsetException {
+  public void testAnnotationSet() throws IOException, InvalidOffsetException {
     // constuct an empty AS
-    Document doc = new DocumentImpl();
+    Document doc =
+      new DocumentImpl(TestDocument.getTestServerName() + "doc0.html");
     AnnotationSet as = new AnnotationSetImpl(doc);
     assertEquals(as.size(), 0);
 
