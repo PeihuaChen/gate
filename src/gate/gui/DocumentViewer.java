@@ -26,6 +26,7 @@ import gate.*;
 import gate.gui.*;
 import gate.util.*;
 
+//import guk.*;
 
 public class DocumentViewer extends JPanel {
 
@@ -65,7 +66,8 @@ public class DocumentViewer extends JPanel {
     typesBox = Box.createVerticalBox();
     this.setLayout(borderLayout1);
     centerSplit.setOrientation(JSplitPane.VERTICAL_SPLIT);
-    textPane.setEditorKit(new RawEditorKit());
+    //textPane.setEditorKit(new RawEditorKit());
+    //textPane.setEditorKit(new UnicodeStyledEditorKit(GUK.getFontSet()));
     textPane.setEditable(false);
     textPane.setText(document.getContent().toString());
     tableView = new SortedTable();
