@@ -82,12 +82,17 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     //loop through the sets and delete them all unless they're original markups
     List setNames = new ArrayList(namedSets.keySet());
     Iterator iter = setNames.iterator();
+    String setName;
+
     while (iter.hasNext()) {
-      String setName = (String) iter.next();
+      setName = (String) iter.next();
       //check first whether this is the original markups or one of the sets
       //that we want to keep
-      if (! setName.equals(markupSetName) && !setsToKeep.contains(setName) ) {
-        if(annotationTypes == null || annotationTypes.isEmpty())
+      if (setName != null && !setName.equals(markupSetName) ) {
+        // skip named sets from setsToKeep
+        if(setsToKeep == null || setsToKeep.contains(setName)) continue;
+
+        if (annotationTypes == null || annotationTypes.isEmpty())
           document.removeAnnotationSet(setName);
         else
           removeSubSet(document.getAnnotations(setName));
