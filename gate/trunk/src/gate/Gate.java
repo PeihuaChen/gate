@@ -477,7 +477,10 @@ jar/classpath so it's the same as registerBuiltins
    * Returns a new unique string
    */
   public synchronized static String genSym() {
-    return Long.toString(lastSym++);
+    StringBuffer buff = new StringBuffer(Integer.toHexString(lastSym++).
+                                         toUpperCase());
+    for(int i = buff.length(); i <= 4; i++) buff.insert(0, '0');
+    return buff.toString();
   } // getDataStoreRegister
 
 
