@@ -65,6 +65,7 @@ public class ShellSlacFrame extends MainFrame {
 
   /** Shell GUI corpus */
   private Corpus corpus = null;
+  private Corpus oneDocCorpus = null;
   
   /** Shell GUI documents DataStore */
   private DataStore dataStore = null;
@@ -72,7 +73,12 @@ public class ShellSlacFrame extends MainFrame {
   /** Keep this action for enable/disable the menu item */
   private Action saveAction = null;
   /** Keep this action for enable/disable the menu item */
+  private Action runOneAction = null;
   private Action runAction = null;
+  
+  /** Default corpus resource name */
+  public static final String DEFAULT_SLUG_CORPUS_NAME = "SLUG Corpus";
+  public static final String ONE_DOC_SLUG_CORPUS_NAME = "SLUG One Doc Corpus";
   
   /** New frame */
   public ShellSlacFrame() {
@@ -120,9 +126,13 @@ public class ShellSlacFrame extends MainFrame {
     
       fileMenu.add(new XJMenuItem(action, this));
 
-      fileMenu.add(new XJMenuItem(new CloseSelectedDocumentAction(), this));
     } // if
+
+    fileMenu.add(new XJMenuItem(new CloseSelectedDocumentAction(), this));
+
+    fileMenu.addSeparator();
     
+/*
     action = new StoreAllDocumentAction();
     action.setEnabled(false);
     saveAction = action;
@@ -132,16 +142,6 @@ public class ShellSlacFrame extends MainFrame {
     action = new LoadAllDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
 
-/*
-    fileMenu.addSeparator();
-    
-    action = new RunApplicationAction();
-    if(application == null) {
-      action.setEnabled(false);
-    } // if
-    runAction = action;
-    fileMenu.add(new XJMenuItem(action, this));
-    
     action = new LoadResourceFromFileAction();
     action.putValue(action.NAME, "Load application");
     fileMenu.add(new XJMenuItem(action, this));
@@ -159,16 +159,25 @@ public class ShellSlacFrame extends MainFrame {
     fileMenu.add(new XJMenuItem(action, this));
     retMenuBar.add(fileMenu);
 
-    JMenu toolsMenu = new JMenu("Tools");
+    JMenu analyseMenu = new JMenu("Analyse");
+
+    action = new RunApplicationOneDocumentAction();
+    if(application == null) {
+      action.setEnabled(false);
+    } // if
+    runOneAction = action;
+    analyseMenu.add(new XJMenuItem(action, this));
+    retMenuBar.add(analyseMenu);
 
     action = new RunApplicationAction();
     if(application == null) {
       action.setEnabled(false);
     } // if
     runAction = action;
-    toolsMenu.add(new XJMenuItem(action, this));
-    toolsMenu.addSeparator();
+    analyseMenu.add(new XJMenuItem(action, this));
+    retMenuBar.add(analyseMenu);
     
+    JMenu toolsMenu = new JMenu("Tools");
     createToolsMenuItems(toolsMenu);
     retMenuBar.add(toolsMenu);
 
@@ -273,7 +282,8 @@ public class ShellSlacFrame extends MainFrame {
   /** Create corpus for application */
   private void createCorpus() {
     try {
-      Factory.newCorpus("Shell SLAC Corpus");
+      Factory.newCorpus(DEFAULT_SLUG_CORPUS_NAME);
+      Factory.newCorpus(ONE_DOC_SLUG_CORPUS_NAME);
     } catch (ResourceInstantiationException ex) {
       ex.printStackTrace();
       throw new GateRuntimeException("Error in creating build in corpus.");
@@ -293,15 +303,24 @@ public class ShellSlacFrame extends MainFrame {
       } // if
       application = (SerialAnalyserController) res;
       
+      runOneAction.setEnabled(true);
       runAction.setEnabled(true);
       if(corpus != null) 
         application.setCorpus(corpus);
     } // if
     
     if(res instanceof Corpus) {
-      corpus = (Corpus) res;
-      if(application != null)
-        application.setCorpus(corpus);
+      Corpus resCorpus = (Corpus) res;
+
+      if(DEFAULT_SLUG_CORPUS_NAME.equals(resCorpus.getName())) {
+        corpus = resCorpus;
+        if(application != null)
+          application.setCorpus(corpus);
+      } // if
+
+      if(ONE_DOC_SLUG_CORPUS_NAME.equals(resCorpus.getName())) {
+        oneDocCorpus = resCorpus;
+      } // if
     } // if
 
     if(res instanceof Document) {
@@ -366,24 +385,75 @@ public class ShellSlacFrame extends MainFrame {
     } // catch
   } // datastoreOpened(CreoleEvent e)
 
+  private Handle getSelectedResource() {
+    JComponent largeView = (JComponent)
+                                mainTabbedPane.getSelectedComponent();
+
+    Handle result = null;
+    Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+    boolean done = false;
+    DefaultMutableTreeNode node = resourcesTreeRoot;
+    while(!done && nodesEnum.hasMoreElements()){
+      node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+      done = node.getUserObject() instanceof Handle &&
+             ((Handle)node.getUserObject()).getLargeView()
+              == largeView;
+    }
+    if(done)
+      result = (Handle)node.getUserObject();
+      
+    return result;
+  } // getSelectedResource()
+  
 //------------------------------------------------------------------------------
 //  Inner classes section
   
   /** Run the current application SLAC */
   class RunApplicationAction extends AbstractAction {
     public RunApplicationAction() {
-      super("Process Documents", getIcon("menu_controller.gif"));
+      super("Analyse All", getIcon("menu_controller.gif"));
       putValue(SHORT_DESCRIPTION, "Run the application to process documents");
     } // RunApplicationAction()
 
     public void actionPerformed(ActionEvent e) {
       if (application != null) {
+        application.setCorpus(corpus);
         SerialControllerEditor editor = new SerialControllerEditor();
         editor.setTarget(application);
         editor.runAction.actionPerformed(null);
       } // if
     } // actionPerformed(ActionEvent e)
   } // class RunApplicationAction extends AbstractAction
+
+  /** Run the current application SLAC on current document */
+  class RunApplicationOneDocumentAction extends AbstractAction {
+    public RunApplicationOneDocumentAction() {
+      super("Analyse", getIcon("menu_controller.gif"));
+      putValue(SHORT_DESCRIPTION, 
+          "Run the application to process current document");
+    } // RunApplicationOneDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+      if (application != null) {
+        Handle handle = getSelectedResource();
+        if(handle == null) return;
+        Object target = handle.getTarget();
+        if(target == null) return;
+
+        if(target instanceof Document) {
+          Document doc = (Document) target;
+          oneDocCorpus.clear();
+          oneDocCorpus.add(doc);
+          
+          application.setCorpus(oneDocCorpus);
+  
+          SerialControllerEditor editor = new SerialControllerEditor();
+          editor.setTarget(application);
+          editor.runAction.actionPerformed(null);
+        } // if - Document        
+      } // if
+    } // actionPerformed(ActionEvent e)
+  } // class RunApplicationOneDocumentAction extends AbstractAction
 
   class RestoreDefaultApplicationAction extends AbstractAction {
     public RestoreDefaultApplicationAction() {
@@ -540,6 +610,16 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class TestStoreAction extends AbstractAction
 
+/* Save as XML current document
+          JComponent resource = (JComponent)
+                                        mainTabbedPane.getSelectedComponent();
+          if (resource != null){
+            Action act = resource.getActionMap().get("Save As XML");
+            if (act != null)
+              act.actionPerformed(null);
+          }// End if
+*/  
+  
   class HelpAboutSlugAction extends AbstractAction {
     public HelpAboutSlugAction() {
       super("About");
