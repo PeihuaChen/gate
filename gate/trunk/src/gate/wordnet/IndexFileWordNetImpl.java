@@ -18,9 +18,9 @@ package gate.wordnet;
 import java.util.Iterator;
 import java.io.*;
 
-import net.didion.jwnl.JWNL;
+import net.didion.jwnl.*;
 import net.didion.jwnl.dictionary.Dictionary;
-//import net.didion.jwnl.data;
+//import net.didion.jwnl.data.POS;
 
 import junit.framework.*;
 
@@ -84,8 +84,43 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   }
 
 
-  public Iterator getSynsets(int POS) {
-    throw new MethodNotImplementedException();
+  public Iterator getSynsets(int POS)
+    throws WordNetException {
+
+    net.didion.jwnl.data.POS pos = null;
+
+    switch(POS) {
+
+      case WordNet.POS_ADJECTIVE:
+        pos = net.didion.jwnl.data.POS.ADJECTIVE;
+        break;
+
+      case WordNet.POS_ADVERB:
+        pos = net.didion.jwnl.data.POS.ADVERB;
+        break;
+
+      case WordNet.POS_NOUN:
+        pos = net.didion.jwnl.data.POS.NOUN;
+        break;
+
+      case WordNet.POS_VERB:
+        pos = net.didion.jwnl.data.POS.VERB;
+        break;
+
+      default:
+        throw new IllegalArgumentException();
+    }
+
+    try {
+      net.didion.jwnl.data.Synset jwnSynset = null;
+
+      Iterator itSynsets = this.wnDictionary.getSynsetIterator(pos);
+      return new SynsetIterator(itSynsets);
+    }
+    catch(JWNLException jwne) {
+      throw new WordNetException(jwne);
+    }
+
   }
 
   public Iterator getUniqueBeginners() {
@@ -172,6 +207,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     public Object next() {
 
       net.didion.jwnl.data.Synset jwnlSynset = (net.didion.jwnl.data.Synset)this.it.next();
+//      SynsetImpl synset = new SynsetImpl();
       throw new UnsupportedOperationException();
     }
   }
