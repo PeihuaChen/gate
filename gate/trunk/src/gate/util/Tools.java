@@ -28,3 +28,4 @@ public class Tools {
     return new Long(new Date().getTime());
   }
 }
+
