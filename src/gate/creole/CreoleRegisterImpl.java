@@ -144,13 +144,12 @@ public class CreoleRegisterImpl extends HashMap
 
     // add the URL
     //if already present do nothing
-    if(directories.add(directoryUrl)){
-      // parse the directory file
-      try {
-        parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
-      } catch(IOException e) {
-        throw(new GateException("couldn't open creole.xml: " + e.toString()));
-      }
+    directories.add(directoryUrl);
+    // parse the directory file
+    try {
+      parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
+    } catch(IOException e) {
+      throw(new GateException("couldn't open creole.xml: " + e.toString()));
     }
   } // registerDirectories(URL)
 
@@ -249,7 +248,8 @@ public class CreoleRegisterImpl extends HashMap
     } else if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("VR: " + resClass);
       if(vrTypes == null) vrTypes = new LinkedList(); // for deserialisation
-      vrTypes.add(rd.getClassName());
+      //we have to simulate Set behaviour as this is a list
+      if(!vrTypes.contains(rd.getClassName())) vrTypes.add(rd.getClassName());
     }else if(Controller.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("Controller: " + resClass);
       if(controllerTypes == null) controllerTypes = new HashSet(); // for deserialisation
