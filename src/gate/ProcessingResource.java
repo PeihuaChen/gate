@@ -28,5 +28,5 @@ import gate.creole.*;
 public interface ProcessingResource extends Resource, Runnable
 {
   /** Trigger any exception that was caught when run() was invoked. */
-  public void check() throws ProcessingResourceRuntimeException;
+  public void check() throws ExecutionException;
 } // interface ProcessingResource

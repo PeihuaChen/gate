@@ -214,7 +214,7 @@ public class TestCreole extends TestCase
     boolean gotExceptionAsExpected = false;
     try {
       defaultPr.check();
-    } catch(ProcessingResourceRuntimeException e) {
+    } catch(ExecutionException e) {
       gotExceptionAsExpected = true;
     }
 

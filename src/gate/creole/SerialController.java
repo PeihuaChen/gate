@@ -53,7 +53,7 @@ extends AbstractProcessingResource implements Controller
       pr.run();
       try {
         pr.check();
-      } catch(ProcessingResourceRuntimeException e) {
+      } catch(ExecutionException e) {
         runtimeException = e;
         return;
       }
