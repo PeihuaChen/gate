@@ -14,6 +14,7 @@ package gate.gui.docview;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.*;
@@ -23,6 +24,7 @@ import javax.swing.*;
 import gate.*;
 import gate.creole.*;
 import gate.gui.ActionsPublisher;
+import gate.swing.VerticalTextIcon;
 import gate.util.GateRuntimeException;
 import gate.util.Out;
 
@@ -39,13 +41,6 @@ public class DocumentEditor extends AbstractVisualResource
     return new ArrayList();
   }
 
-  /* (non-Javadoc)
-   * @see gate.Resource#cleanup()
-   */
-  public void cleanup() {
-    // TODO Auto-generated method stub
-    super.cleanup();
-  }
 
   /* (non-Javadoc)
    * @see gate.Resource#init()
@@ -60,14 +55,112 @@ public class DocumentEditor extends AbstractVisualResource
       }
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
-Out.prln("Docedit shown");
         initViews();
       }
     });
 
     return this;
   }
+  
+  
+  protected void initViews(){
+    //start building the UI
+    setLayout(new BorderLayout());
+    JProgressBar progressBar = new JProgressBar();
+    progressBar.setStringPainted(true);
+    progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, progressBar.getPreferredSize().height));
+    add(progressBar, BorderLayout.CENTER);
 
+    progressBar.setString("Building views");
+    progressBar.setValue(10);
+
+    //create the skeleton UI
+    topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, null, null);
+    topSplit.setDividerLocation(0.3);
+    bottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplit, null);
+    bottomSplit.setDividerLocation(0.7);
+    horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottomSplit, null);
+    horizontalSplit.setDividerLocation(0.7);
+
+    //create the bars
+    topBar = new JToolBar(JToolBar.HORIZONTAL);
+    topBar.setFloatable(false);
+    add(topBar, BorderLayout.NORTH);
+
+    bottomBar = new JToolBar(JToolBar.HORIZONTAL);
+    bottomBar.setFloatable(false);
+    add(bottomBar, BorderLayout.SOUTH);
+
+    leftBar = new JToolBar(JToolBar.VERTICAL);
+    leftBar.setFloatable(false);
+    add(leftBar, BorderLayout.WEST);
+
+    rightBar = new JToolBar(JToolBar.VERTICAL);
+    rightBar.setFloatable(false);
+    add(rightBar, BorderLayout.EAST);
+
+    progressBar.setValue(40);
+    //parse all Creole resources and look for document views
+    Set vrSet = Gate.getCreoleRegister().getVrTypes();
+    Iterator vrIter = vrSet.iterator();
+    centralViews = new ArrayList();
+    verticalViews = new ArrayList();
+    horizontalViews = new ArrayList();
+
+    while(vrIter.hasNext()){
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                           get(vrIter.next());
+      try{
+        if(DocumentView.class.isAssignableFrom(rData.getResourceClass())){
+          //create the resource
+          DocumentView aView = (DocumentView)Factory.
+                               createResource(rData.getClassName());
+          aView.setTarget(document);
+          //add the view
+          addView(aView, rData.getName());
+        }
+      }catch(ClassNotFoundException cnfe){
+        cnfe.printStackTrace();
+      }catch(ResourceInstantiationException rie){
+            rie.printStackTrace();
+      }
+    }
+    //select the main central view only
+    if(centralViews.size() > 0) setCentralView(0);
+    
+    //populate the main VIEW
+    remove(progressBar);
+    progressBar = null;
+    add(horizontalSplit, BorderLayout.CENTER);
+
+  }
+  
+
+  /**
+   * Registers a new view by adding it to the right list and creating the 
+   * activation button for it.
+   * @param view
+   */
+  protected void addView(DocumentView view, String name){
+    switch(view.getType()){
+      case DocumentView.CENTRAL :
+        centralViews.add(view);
+      	leftBar.add(new ViewButton(view, name));
+        break;
+      case DocumentView.VERTICAL :
+        verticalViews.add(view);
+      	rightBar.add(new ViewButton(view, name));
+        break;
+      case DocumentView.HORIZONTAL :
+        horizontalViews.add(view);
+      	topBar.add(new ViewButton(view, name));
+      	bottomBar.add(new ViewButton(view, name));
+      default :
+        throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
+    }
+  }
+  
+  
   /**
    * Gets the currently showing top view
    * @return a {@link DocumentView} object.
@@ -90,17 +183,20 @@ Out.prln("Docedit shown");
       oldView.setActive(false);
     }
     topViewIdx = index;
-    DocumentView newView = (DocumentView)horizontalViews.get(topViewIdx);
-    //hide if shown at the bottom
-    if(bottomViewIdx == topViewIdx){
-      setBottomView(null);
-      bottomViewIdx  = -1;
-    }
-    //show the new view
-    setTopView(newView);
-    //activate if necessary
-    if(!newView.isActive()){
-      newView.setActive(true);
+    if(topViewIdx == -1) setTopView(null);
+    else{
+	    DocumentView newView = (DocumentView)horizontalViews.get(topViewIdx);
+	    //hide if shown at the bottom
+	    if(bottomViewIdx == topViewIdx){
+	      setBottomView(null);
+	      bottomViewIdx  = -1;
+	    }
+	    //show the new view
+	    setTopView(newView);
+	    //activate if necessary
+	    if(!newView.isActive()){
+	      newView.setActive(true);
+	    }
     }
   }
 
@@ -110,7 +206,7 @@ Out.prln("Docedit shown");
    * @param view the new view to be shown.
    */
   protected void setTopView(DocumentView view){
-    topSplit.setTopComponent(view.getGUI());
+    topSplit.setTopComponent(view == null ? null : view.getGUI());
   }
 
   /**
@@ -135,12 +231,15 @@ Out.prln("Docedit shown");
       oldView.setActive(false);
     }
     centralViewIdx = index;
-    DocumentView newView = (DocumentView)centralViews.get(centralViewIdx);
-    //show the new view
-    setCentralView(newView);
-    //activate if necessary
-    if(!newView.isActive()){
-      newView.setActive(true);
+    if(centralViewIdx == -1) setCentralView(null);
+    else{
+	    DocumentView newView = (DocumentView)centralViews.get(centralViewIdx);
+	    //show the new view
+	    setCentralView(newView);
+	    //activate if necessary
+	    if(!newView.isActive()){
+	      newView.setActive(true);
+	    }
     }
   }
 
@@ -150,7 +249,7 @@ Out.prln("Docedit shown");
    * @param view the new view to be shown.
    */
   protected void setCentralView(DocumentView view){
-    topSplit.setBottomComponent(view.getGUI());
+    topSplit.setBottomComponent(view == null ? null : view.getGUI());
   }
   
   
@@ -176,17 +275,21 @@ Out.prln("Docedit shown");
       oldView.setActive(false);
     }
     bottomViewIdx = index;
-    DocumentView newView = (DocumentView)horizontalViews.get(bottomViewIdx);
-    //hide if shown at the top
-    if(topViewIdx == bottomViewIdx){
-      setTopView(null);
-      topViewIdx  = -1;
-    }
-    //show the new view
-    setBottomView(newView);
-    //activate if necessary
-    if(!newView.isActive()){
-      newView.setActive(true);
+    if(bottomViewIdx == -1){
+      setBottomView(null);
+    }else{
+	    DocumentView newView = (DocumentView)horizontalViews.get(bottomViewIdx);
+	    //hide if shown at the top
+	    if(topViewIdx == bottomViewIdx){
+	      setTopView(null);
+	      topViewIdx  = -1;
+	    }
+	    //show the new view
+	    setBottomView(newView);
+	    //activate if necessary
+	    if(!newView.isActive()){
+	      newView.setActive(true);
+	    }
     }
   }
 
@@ -196,7 +299,7 @@ Out.prln("Docedit shown");
    * @param view the new view to be shown.
    */
   protected void setBottomView(DocumentView view){
-    bottomSplit.setBottomComponent(view.getGUI());
+    bottomSplit.setBottomComponent(view == null ? null : view.getGUI());
   }
   
   
@@ -222,12 +325,15 @@ Out.prln("Docedit shown");
       oldView.setActive(false);
     }
     rightViewIdx = index;
-    DocumentView newView = (DocumentView)verticalViews.get(rightViewIdx);
-    //show the new view
-    setRightView(newView);
-    //activate if necessary
-    if(!newView.isActive()){
-      newView.setActive(true);
+    if(rightViewIdx == -1) setRightView(null);
+    else{
+	    DocumentView newView = (DocumentView)verticalViews.get(rightViewIdx);
+	    //show the new view
+	    setRightView(newView);
+	    //activate if necessary
+	    if(!newView.isActive()){
+	      newView.setActive(true);
+	    }
     }
   }
 
@@ -237,7 +343,7 @@ Out.prln("Docedit shown");
    * @param view the new view to be shown.
    */
   protected void setRightView(DocumentView view){
-    horizontalSplit.setRightComponent(view.getGUI());
+    horizontalSplit.setRightComponent(view == null ? null : view.getGUI());
   }  
   
 //  protected void setCentralView(DocumentView view){
@@ -259,94 +365,60 @@ Out.prln("Docedit shown");
     this.document = (Document)target;
   }
 
-  protected void initViews(){
-    //start building the UI
-    setLayout(new BorderLayout());
-    JProgressBar progressBar = new JProgressBar();
-    progressBar.setStringPainted(true);
-    progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, progressBar.getPreferredSize().height));
-    add(progressBar, BorderLayout.CENTER);
 
-    progressBar.setString("Building views");
-    progressBar.setValue(10);
-
-    //create the skeleton UI
-    topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, null, null);
-    bottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplit, null);
-    horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottomSplit, null);
-
-    //create the bars
-    topBar = new JToolBar(JToolBar.HORIZONTAL);
-    topBar.setFloatable(false);
-    add(topBar, BorderLayout.NORTH);
-
-    bottomBar = new JToolBar(JToolBar.HORIZONTAL);
-    bottomBar.setFloatable(false);
-    add(bottomBar, BorderLayout.SOUTH);
-
-    leftBar = new JToolBar(JToolBar.VERTICAL);
-    leftBar.setFloatable(false);
-    add(leftBar, BorderLayout.WEST);
-
-    rightBar = new JToolBar(JToolBar.VERTICAL);
-    rightBar.setFloatable(false);
-    add(rightBar, BorderLayout.EAST);
-
-    progressBar.setValue(40);
-    //parse all Creole resources and look for document views
-    Set vrSet = Gate.getCreoleRegister().getVrTypes();
-    Iterator vrIter = vrSet.iterator();
-    views = new ArrayList();
-    centralViews = new ArrayList();
-    verticalViews = new ArrayList();
-    horizontalViews = new ArrayList();
-
-    while(vrIter.hasNext()){
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                           get(vrIter.next());
-      try{
-        if(DocumentView.class.isAssignableFrom(rData.getResourceClass())){
-          //create the resource
-          DocumentView aView = (DocumentView)Factory.
-                               createResource(rData.getClassName());
-          aView.setTarget(document);
-          views.add(aView);
-          //add the view
-          switch(aView.getType()){
-            case DocumentView.CENTRAL :
-              centralViews.add(aView);
-//              setCentralComponent(aView.getGUI());
-              break;
-            case DocumentView.VERTICAL :
-              verticalViews.add(aView);
-              break;
-            case DocumentView.HORIZONTAL :
-              horizontalViews.add(aView);
-            default :
-              throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
+  protected class ViewButton extends JToggleButton{
+    public ViewButton(DocumentView aView, String name){
+      super();
+      setSelected(false);
+      setBorder(null);
+      this.view = aView;
+      if(aView.getType() == DocumentView.HORIZONTAL){
+        setText(name);
+      }else if(aView.getType() == DocumentView.CENTRAL){
+        setIcon(new VerticalTextIcon(this, name, VerticalTextIcon.ROTATE_LEFT));
+      }else if(aView.getType() == DocumentView.VERTICAL){
+        setIcon(new VerticalTextIcon(this, name, 
+                										 VerticalTextIcon.ROTATE_RIGHT));
+      }
+      addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent evt){
+          if(isSelected()){
+            //show this new view
+            switch(view.getType()){
+              case DocumentView.CENTRAL:
+                setCentralView(centralViews.indexOf(view));
+                break;
+              case DocumentView.VERTICAL:
+                setRightView(verticalViews.indexOf(view));
+                break;
+              case DocumentView.HORIZONTAL:
+                if(ViewButton.this.getParent() == topBar){
+                  setTopView(horizontalViews.indexOf(view));
+                }else{
+                  setBottomView(horizontalViews.indexOf(view));
+                }
+                break;
+            }
+          }else{
+            //hide this view
+            switch(view.getType()){
+              case DocumentView.CENTRAL:
+                setCentralView(-1);
+                break;
+              case DocumentView.VERTICAL:
+                setRightView(-1);
+                break;
+              case DocumentView.HORIZONTAL:
+                if(ViewButton.this.getParent() == topBar){
+                  setTopView(-1);
+                }else{
+                  setBottomView(-1);
+                }
+                break;
+            }
           }
         }
-      }catch(ClassNotFoundException cnfe){
-        cnfe.printStackTrace();
-      }catch(ResourceInstantiationException rie){
-            rie.printStackTrace();
-      }
-
-    }
-
-    //populate the main VIEW
-    remove(progressBar);
-    progressBar = null;
-    add(horizontalSplit, BorderLayout.CENTER);
-
-  }
-
-  protected static class ViewButton extends JButton{
-    public ViewButton(DocumentView view){
-      super();
-      this.view = view;
-      if(view.getType() == DocumentView.HORIZONTAL){
-      }
+      });
     }
     protected DocumentView view;
   }
@@ -362,10 +434,6 @@ Out.prln("Docedit shown");
 
   protected Document document;
 
-  /**
-   * A list of {@link DocumentView} objects representing the components
-   */
-  protected List views;
 
   /**
    * A list of {@link DocumentView} objects of type {@link DocumentView#CENTRAL}
