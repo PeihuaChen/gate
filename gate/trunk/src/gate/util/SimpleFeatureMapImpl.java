@@ -118,9 +118,10 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
    *  can keep track of what's updated
    */
   public Object put(Object key, Object value) {
-    //first tell the world if they're listening
+    Object res = super.put( key,  value);
+    //tell the world if they're listening
     fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
-    return super.put( key,  value);
+    return res;
   }
 
   /**
@@ -128,9 +129,10 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
    *  can keep track of what's updated
    */
   public Object remove(Object key) {
-    //first tell the world if they're listening
+    Object res = super.remove( key);
+    //tell the world if they're listening
     fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
-    return super.remove( key);
+    return res;
   }
 
   /**
@@ -138,9 +140,9 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
    *  can keep track of what's updated
    */
   public void clear() {
-    //first tell the world if they're listening
-    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
     super.clear();
+    //tell the world if they're listening
+    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
   }
 
 
