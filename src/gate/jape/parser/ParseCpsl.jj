@@ -372,6 +372,13 @@ SinglePhaseTransducer SinglePhaseTransducer() :
             t.setDebugMode(true);
           else t.setDebugMode(false);
         }
+        else if(optionNameTok.image.equalsIgnoreCase("matchGroup")) {
+          if(optionValueTok.image.equalsIgnoreCase("true") ||
+             optionValueTok.image.equalsIgnoreCase("yes") ||
+             optionValueTok.image.equalsIgnoreCase("y"))
+            t.setMatchGroupMode(true);
+          else t.setMatchGroupMode(false);
+        }
       }
     )*
   )?
@@ -1031,7 +1038,12 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.28  2004/03/23 15:16:40  nasso
+// [angel]
+// Add new matchGroup mode.
+//
 // Revision 1.27  2003/10/31 15:54:19  valyt
+//
 // better error hadling (moved compile error handling out of ParseCpsl.jj)
 //
 // Revision 1.26  2002/04/22 11:45:58  valyt
