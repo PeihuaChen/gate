@@ -287,8 +287,21 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       ampIndex = content.indexOf('&', ampIndex+1);
       if(ampIndex != -1) {
         semiIndex = content.indexOf(';', ampIndex+1);
-        if(semiIndex != -1) {
+        // have semicolon and it is near enough for amp codding
+        if(semiIndex != -1 && (semiIndex-ampIndex) < 8) {
           info.addPositionInfo(ampIndex, semiIndex-ampIndex+1, 0, 1);
+        }
+        else {
+          // no semicolon or it is too far
+          // analyse for amp codding without semicolon
+          int maxEnd = Math.min(ampIndex+8, content.length());
+          String ampCandidate = content.substring(ampIndex, maxEnd);
+          int ampCodingSize = analyseAmpCodding(ampCandidate);
+
+          if(ampCodingSize != -1) {
+            info.addPositionInfo(ampIndex, ampCodingSize, 0, 1);
+          } // if
+
         } // if - semicolon found
       } // if - ampersand found
     } while (ampIndex != -1);
@@ -306,6 +319,76 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       } while(index != -1);
     } // if
   } // collectInformationForAmpCodding
+
+  /**
+   * This function compute size of the ampersand codded sequence when
+   * semicolin is not present.
+   */
+  private int analyseAmpCodding(String content) {
+    int result = -1;
+
+    try {
+      char ch = content.charAt(1);
+
+      switch(ch) {
+        case 'l' : // &lt
+        case 'L' : // &lt
+          if(content.charAt(2) == 't' || content.charAt(2) == 'T') {
+            result = 3;
+          } // if
+          break;
+        case 'g' : // &gt
+        case 'G' : // &gt
+          if(content.charAt(2) == 't' || content.charAt(2) == 'T') {
+            result = 3;
+          } // if
+          break;
+        case 'a' : // &amp
+        case 'A' : // &amp
+          if(content.substring(2, 4).equalsIgnoreCase("mp")) {
+            result = 4;
+          } // if
+          break;
+        case 'q' : // &quot
+        case 'Q' : // &quot
+          if(content.substring(2, 5).equalsIgnoreCase("uot")) {
+            result = 5;
+          } // if
+          break;
+        case '#' : // #number (example &#145, &#x4C38)
+          int endIndex = 2;
+          boolean hexCoded = false;
+          if(content.charAt(2) == 'x' || content.charAt(2) == 'X') {
+            // Hex codding
+            ++endIndex;
+            hexCoded = true;
+          } // if
+
+          while (endIndex < 8
+                  && isNumber(content.charAt(endIndex), hexCoded) ) {
+            ++endIndex;
+          } // while
+          result = endIndex;
+          break;
+      } // switch
+    } catch (StringIndexOutOfBoundsException ex) {
+      // do nothing
+    } // catch
+
+    return result;
+  } // analyseAmpCodding
+
+  /** Check for numeric range. If hex is true the A..F range is included */
+  private boolean isNumber(char ch, boolean hex) {
+    if(ch >= '0' && ch <= '9') return true;
+
+    if(hex) {
+      if(ch >= 'A' && ch <= 'F') return true;
+      if(ch >= 'a' && ch <= 'f') return true;
+    } // if
+
+    return false;
+  } // isNumber
 
   /** HTML parser perform substitution of multiple whitespaces (WS) with
    *  a single WS. To create correct repositioning information structure we
@@ -1037,14 +1120,17 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       }// End while
 
       long originalPosition = -1;
-      if ( a != null && offset.equals(a.getEndNode().getOffset()) ) {
+      boolean backPositioning =
+        a != null && offset.equals(a.getEndNode().getOffset());
+      if ( backPositioning ) {
         // end of the annotation correction
         originalPosition =
           repositioning.getOriginalPos(offset.intValue(), true);
-      }
-      else {
+      } // if
+
+      if(originalPosition == -1) {
         originalPosition = repositioning.getOriginalPos(offset.intValue());
-      } //
+      } // if
 
       // Insert tmpBuff to the location where it belongs in docContStrBuff
       if(originalPosition != -1 && originalPosition <= originalContentSize ) {
@@ -1053,7 +1139,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       else {
         Out.prln("Error in the repositioning. The offset ("+offset.intValue()
         +") could not be positioned in the original document. \n"
-        +"Calculated position is: "+originalPosition);
+        +"Calculated position is: "+originalPosition
+        +" placed back: "+backPositioning);
       } // if
 
     }// End while(!offsets.isEmpty())
