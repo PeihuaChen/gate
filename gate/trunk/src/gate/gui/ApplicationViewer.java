@@ -821,15 +821,16 @@ public class ApplicationViewer extends AbstractVisualResource
               }
             }
             try{
-    //System.out.println("PR:" + pr.getName() + "\n" + params);
+System.out.println("PR:" + pr.getName());// + "\n" + params);
               Factory.setResourceParameters(pr, params);
             }catch(ResourceInstantiationException ie){
-              JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                            "Could not set parameters for " +
-                                            pr.getName() +
-                                            ":\n" + ie.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+ie.printStackTrace();
               ie.printStackTrace(Err.getPrintWriter());
+              JOptionPane.showMessageDialog(
+                ApplicationViewer.this,
+                "Could not set parameters for " + pr.getName() + ":\n" +
+                "See the \"Messages\" tab for details",
+                "Gate", JOptionPane.ERROR_MESSAGE);
               fireProcessFinished();
               return;
             }
@@ -893,20 +894,21 @@ public class ApplicationViewer extends AbstractVisualResource
             try {
               pr.check();
             } catch(ExecutionException ee) {
-              JOptionPane.showMessageDialog(
-                ApplicationViewer.this,
-                "Execution error while running \"" + pr.getName() + "\" :\n " +
-                ee.toString(), "Gate", JOptionPane.ERROR_MESSAGE);
               ee.printStackTrace(Err.getPrintWriter());
               Exception exc = ee.getException();
               if(exc != null){
                 Err.prln("===> from:");
                 exc.printStackTrace(Err.getPrintWriter());
               }
+              JOptionPane.showMessageDialog(
+                ApplicationViewer.this,
+                "Execution error while running \"" + pr.getName() + "\" :\n " +
+                "See \"Messages\" tab for details!",
+                "Gate", JOptionPane.ERROR_MESSAGE);
             }catch(Exception e){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                            "Unhandled execution error:\n " +
-                                            e.toString(),
+                                            "Unhandled execution error!\n " +
+                                            "See \"Messages\" tab for details!",
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(Err.getPrintWriter());
             }//catch
@@ -918,11 +920,11 @@ public class ApplicationViewer extends AbstractVisualResource
                             " run in " +
                             NumberFormat.getInstance().format(
                             (double)(endTime - startTime) / 1000) + " seconds");
-//          MainFrame.getInstance().hideWaitDialog();
         }
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable);
+                                 runnable,
+                                 "ApplicationViewer1");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }//public void actionPerformed(ActionEvent e)

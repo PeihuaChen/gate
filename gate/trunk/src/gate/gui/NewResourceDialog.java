@@ -201,6 +201,7 @@ public class NewResourceDialog extends JDialog {
                     tableScroll.getInsets().right;
       tableScroll.setPreferredSize(dim);
     }
+    requestFocus();
     nameField.requestFocus();
     pack();
     super.show();

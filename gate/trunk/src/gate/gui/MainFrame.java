@@ -265,7 +265,8 @@ public class MainFrame extends JFrame
 
     animator = new CartoonMinder(animationPane);
     Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                               animator);
+                               animator,
+                               "MainFrame1");
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
 
@@ -1236,7 +1237,8 @@ public class MainFrame extends JFrame
         }
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable);
+                                 runnable,
+                                 "MainFrame2");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -1288,7 +1290,8 @@ public class MainFrame extends JFrame
         }//public void run()
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable);
+                                 runnable,
+                                 "MainFrame3");
       thread.setPriority(thread.MIN_PRIORITY);
       thread.start();
     }
@@ -1353,7 +1356,8 @@ public class MainFrame extends JFrame
         }//public void run()
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable);
+                                 runnable,
+                                 "MainFrame4");
       thread.setPriority(thread.MIN_PRIORITY);
       thread.start();
     }

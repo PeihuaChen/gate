@@ -123,6 +123,7 @@ public class Nerc extends SerialController {
    */
   protected void runSystem() throws ExecutionException{
     FeatureMap params;
+System.out.println("AS name:" + tempAnnotationSetName + ":");
     if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
     try{
       fireProgressChanged(0);
@@ -142,7 +143,7 @@ public class Nerc extends SerialController {
       params.put("outputASName", tempAnnotationSetName);
       Factory.setResourceParameters(transducer, params);
     }catch(Exception e){
-      throw new ExecutionException("Couldn't set parameters: " + e);
+      throw new ExecutionException(e);
     }
     fireProgressChanged(5);
     ProgressListener pListener = new CustomProgressListener(5, 15);

@@ -620,7 +620,8 @@ public class AnnotationEditor extends AbstractVisualResource {
     typeDataMap = new HashMap();
 
     eventHandler = new DelayedListener();
-    new Thread(Thread.currentThread().getThreadGroup(), eventHandler).start();
+    new Thread(Thread.currentThread().getThreadGroup(), eventHandler,
+               "AnnotationEditor1").start();
 
   }//protected void initLocalData()
 
@@ -739,7 +740,8 @@ public class AnnotationEditor extends AbstractVisualResource {
     selectionHighlighter.install(textPane);
 
     Thread thread  = new Thread(Thread.currentThread().getThreadGroup(),
-                                new SelectionBlinker());
+                                new SelectionBlinker(),
+                                "AnnotationEditor2");
 
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
@@ -933,7 +935,8 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
     };
     Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                               runnable);
+                               runnable,
+                               "AnnotationEditor3");
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
   }//protected void this_documentChanged()
@@ -1512,7 +1515,8 @@ public class AnnotationEditor extends AbstractVisualResource {
         }//public void run()
       };//Runnable runnable = new Runnable()
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                   runnable);
+                                   runnable,
+                                   "AnnotationEditor4");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }//public void setVisible(boolean isVisible)
@@ -2017,7 +2021,8 @@ public class AnnotationEditor extends AbstractVisualResource {
             }
           };
           Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                     runnable);
+                                     runnable,
+                                     "AnnotationEditor5");
           thread.start();
         }
       });

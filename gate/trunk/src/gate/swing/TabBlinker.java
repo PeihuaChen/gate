@@ -24,7 +24,8 @@ public class TabBlinker implements Runnable{
       this.tab = tPane.indexOfComponent(comp);
       this.blinkColor = blinkColor;
       thread = new Thread(Thread.currentThread().getThreadGroup(),
-                          this);
+                          this,
+                          "TabBlinker1");
       thread.setPriority(Thread.MIN_PRIORITY);
     }// TabBlinker(JTabbedPane pane, Component comp, Color blinkColor)
 
@@ -68,7 +69,8 @@ public class TabBlinker implements Runnable{
       synchronized(this){
         if(!thread.isAlive()){
           thread = new Thread(Thread.currentThread().getThreadGroup(),
-                              this);
+                              this,
+                              "TabBlinker2");
           thread.setPriority(Thread.MIN_PRIORITY);
           thread.start();
         }
