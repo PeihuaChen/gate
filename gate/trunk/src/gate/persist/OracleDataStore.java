@@ -204,6 +204,59 @@ public class OracleDataStore extends JDBCDataStore {
   /** Adopt a resource for persistence. */
   public LanguageResource adopt(LanguageResource lr)
   throws PersistenceException {
+
+    if (false == lr instanceof Document &&
+        false == lr instanceof Corpus) {
+
+      throw new IllegalArgumentException("Database datastore is implemented only for "+
+                                        "Documents and Corpora");
+    }
+
+    if (lr instanceof Document) {
+      return adoptDocument((Document)lr);
+    }
+    else {
+      return adoptCorpus((Corpus)lr);
+    }
+
+  }
+
+
+  private LanguageResource adoptDocument(Document doc)
+  throws PersistenceException {
+
+    AnnotationSet docAnnotations = doc.getAnnotations();
+    DocumentContent docContent = doc.getContent();
+    FeatureMap docFeatures = doc.getFeatures();
+    String docName  = doc.getName();
+    URL docURL = doc.getSourceUrl();
+    Boolean docIsMarkupAware = doc.getMarkupAware();
+    Long docStartOffset = doc.getSourceUrlStartOffset();
+    Long docEndOffset = doc.getSourceUrlEndOffset();
+
+    //is the document already stored in this storage?
+    Object persistID = doc.getLRPersistenceId();
+    if (persistID != null) {
+      throw new PersistenceException("This document is already stored in the " +
+                                      " database (persistance ID is =["+(Long)persistID+"] )");
+    }
+
+
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call persist.create_lr() }");
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
+    }
+
+    throw new MethodNotImplementedException();
+  }
+
+  private LanguageResource adoptCorpus(Corpus doc)
+  throws PersistenceException {
+
     throw new MethodNotImplementedException();
   }
 
