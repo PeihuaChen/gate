@@ -254,7 +254,8 @@ public class OracleDataStore extends JDBCDataStore {
     boolean transFailed = false;
     try {
       //4. autocommit should be FALSE because of LOBs
-      this.jdbcConn.setAutoCommit(false);
+//      this.jdbcConn.setAutoCommit(false);
+      beginTrans();
 
       //5. perform changes, if anything goes wrong, rollback
       if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
@@ -265,12 +266,13 @@ public class OracleDataStore extends JDBCDataStore {
       }
 
       //6. done, commit
-      this.jdbcConn.commit();
+//      this.jdbcConn.commit();
+      commitTrans();
     }
-    catch(SQLException sqle) {
-      transFailed = true;
-      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
-    }
+//    catch(SQLException sqle) {
+//      transFailed = true;
+//      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
+//    }
     catch(PersistenceException pe) {
       transFailed = true;
       throw(pe);
@@ -278,12 +280,8 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       //problems?
       if (transFailed) {
-        try {
-          this.jdbcConn.rollback();
-        }
-        catch(SQLException sqle) {
-          throw new PersistenceException(sqle);
-        }
+//          this.jdbcConn.rollback();
+        rollbackTrans();
       }
     }
 
@@ -440,7 +438,8 @@ public class OracleDataStore extends JDBCDataStore {
     try {
       //2. autocommit should be FALSE because of LOBs
       if (openNewTrans) {
-        this.jdbcConn.setAutoCommit(false);
+//        this.jdbcConn.setAutoCommit(false);
+        beginTrans();
       }
 
       //3. perform changes, if anything goes wrong, rollback
@@ -453,13 +452,15 @@ public class OracleDataStore extends JDBCDataStore {
 
       //4. done, commit
       if (openNewTrans) {
-        this.jdbcConn.commit();
+//        this.jdbcConn.commit();
+        commitTrans();
       }
     }
-    catch(SQLException sqle) {
+/*    catch(SQLException sqle) {
       transFailed = true;
       throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
     }
+*/
     catch(PersistenceException pe) {
       transFailed = true;
       throw(pe);
@@ -467,12 +468,13 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       //problems?
       if (transFailed) {
-        try {
-          this.jdbcConn.rollback();
-        }
-        catch(SQLException sqle) {
-          throw new PersistenceException(sqle);
-        }
+        rollbackTrans();
+  //      try {
+//          this.jdbcConn.rollback();
+//        }
+//        catch(SQLException sqle) {
+//          throw new PersistenceException(sqle);
+//        }
       }
     }
 
@@ -581,7 +583,8 @@ public class OracleDataStore extends JDBCDataStore {
     try {
       //5 autocommit should be FALSE because of LOBs
       if (openNewTrans) {
-        this.jdbcConn.setAutoCommit(false);
+//        this.jdbcConn.setAutoCommit(false);
+        beginTrans();
       }
 
       //6. perform changes, if anything goes wrong, rollback
@@ -595,13 +598,16 @@ public class OracleDataStore extends JDBCDataStore {
 
       //7. done, commit
       if (openNewTrans) {
-        this.jdbcConn.commit();
+//        this.jdbcConn.commit();
+        commitTrans();
       }
     }
+/*
     catch(SQLException sqle) {
       transFailed = true;
       throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
     }
+*/
     catch(PersistenceException pe) {
       transFailed = true;
       throw(pe);
@@ -613,12 +619,14 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       //problems?
       if (transFailed) {
-        try {
+        rollbackTrans();
+/*        try {
           this.jdbcConn.rollback();
         }
         catch(SQLException sqle) {
           throw new PersistenceException(sqle);
         }
+*/
       }
     }
 
