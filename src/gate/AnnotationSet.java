@@ -53,6 +53,12 @@ public interface AnnotationSet extends Set
     */
   public AnnotationSet get(Long offset);
 
+  /** Get the node with the smallest offset */
+  public Node firstNode();
+
+  /** Get the node with the largest offset */
+  public Node lastNode();
+
   /** Get the name of this set. */
   public String getName();
 
