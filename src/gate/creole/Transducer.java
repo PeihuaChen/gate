@@ -70,18 +70,13 @@ public class Transducer extends AbstractProcessingResource {
       if(document == null) throw new ParameterException("No document provided!");
       if(inputASName != null && inputASName.equals("")) inputASName = null;
       if(outputASName != null && outputASName.equals("")) outputASName = null;
-      if(inputASName == null && outputASName == null){
-         batch.transduce(document);
-      }else{
-        if(inputASName == null || outputASName == null){
-          throw new ParameterException("Either both inputAS (was " +
-                                       inputASName + ") and outputAS (was " +
-                                       outputASName +
-                                       ") or neither of them need to be set!");
-        }
-        batch.transduce(document, document.getAnnotations(inputASName),
+      batch.transduce(document,
+                      inputASName == null ?
+                        document.getAnnotations() :
+                        document.getAnnotations(inputASName),
+                      outputASName == null ?
+                        document.getAnnotations() :
                         document.getAnnotations(outputASName));
-      }
     }catch(Exception e){
       executionException = new ExecutionException(e);
     }

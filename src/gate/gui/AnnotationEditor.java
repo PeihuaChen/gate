@@ -671,7 +671,7 @@ public class AnnotationEditor extends AbstractVisualResource {
 
     selectionHighlighterPainter = new DefaultHighlighter.
                                       DefaultHighlightPainter(
-                                        textPane.getBackground()
+                                        Color.blue
                                       );
 
     Thread thread  = new Thread(Thread.currentThread().getThreadGroup(),

@@ -31,6 +31,7 @@ public class DSHandle extends DefaultResourceHandle {
     super.setIcon(new ImageIcon(getClass().
                            getResource("/gate/resources/img/ds.gif")));
     this.datastore = datastore;
+    tooltipText = "Type : Gate datastore";
     initLocalData();
     initGuiComponents();
     initListeners();

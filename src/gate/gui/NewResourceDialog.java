@@ -27,6 +27,7 @@ import javax.swing.border.*;
 import java.util.*;
 import java.net.URL;
 import java.io.IOException;
+import java.text.*;
 
 import gate.*;
 import gate.util.*;
@@ -50,8 +51,10 @@ public class NewResourceDialog extends JDialog {
   protected void initLocalData(){
     params = new ArrayList();
     listeners = new HashMap();
-    listeners.put("gate.event.ProgressListener", getParent());
-    listeners.put("gate.event.StatusListener", getParent());
+    if(getParent() instanceof gate.event.ProgressListener)
+      listeners.put("gate.event.ProgressListener", getParent());
+    if(getParent() instanceof gate.event.StatusListener)
+      listeners.put("gate.event.StatusListener", getParent());
   }
 
   protected void initGuiComponents(){
@@ -197,17 +200,32 @@ public class NewResourceDialog extends JDialog {
         }
       }
       Resource res;
+      gate.event.StatusListener sListener = (gate.event.StatusListener)
+                                  listeners.get("gate.event.StatusListener");
+      if(sListener != null) sListener.statusChanged("Loading " +
+                                                    nameField.getText() +
+                                                    "...");
+
       try{
+        long startTime = System.currentTimeMillis();
         FeatureMap features = Factory.newFeatureMap();
         features.put("gate.NAME", nameField.getText());
         res = Factory.createResource(rData.getClassName(), params,
                                      features, listeners);
+        long endTime = System.currentTimeMillis();
+        if(sListener != null) sListener.statusChanged(
+            nameField.getText() + " loaded in " +
+            NumberFormat.getInstance().format(
+            (double)(endTime - startTime) / 1000) + " seconds");
       }catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getOwner(),
                                       "Resource could not be created!\n" +
                                       rie.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
         res = null;
+        if(sListener != null) sListener.statusChanged("Error loading " +
+                                                      nameField.getText() +
+                                                      "!");
       }
       if(getParent() instanceof MainFrame){
         ((MainFrame)getParent()).hideWaitDialog();

@@ -48,6 +48,7 @@ class DefaultResourceHandle implements ResourceHandle{
       }catch(MalformedURLException mue){
         mue.printStackTrace(Err.getPrintWriter());
       }
+      tooltipText = "Type : " + rData.getName();
     }else{
       try{
         this.icon = new ImageIcon(new URL("gate:/img/lr.gif"));

@@ -949,7 +949,7 @@ existingAttrName + "\");" + nl +
       }
     }
     jj_consume_token(rightBrace);
-    blockBuffer.append("      doc.getAnnotations().add(" + nl);
+    blockBuffer.append("      annotations.add(" + nl);
     blockBuffer.append("        " + annotSetName + ".firstNode(), ");
     blockBuffer.append(annotSetName + ".lastNode(), " + nl);
     blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
