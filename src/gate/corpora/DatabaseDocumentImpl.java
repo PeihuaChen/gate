@@ -39,6 +39,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   private boolean     contentChanged;
   private boolean     featuresChanged;
   private boolean     nameChanged;
+  private boolean     documentChanged;
 
   //this one should be the same as the values returned
   //in persist.get_id_lot PL/SQL package
@@ -51,6 +52,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   public static final int DOC_NAME = 1001;
   public static final int DOC_CONTENT = 1002;
   public static final int DOC_FEATURES = 1003;
+  public static final int DOC_MAIN = 1004;
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -66,6 +68,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     this.contentChanged = false;
     this.featuresChanged = false;
     this.nameChanged = false;
+    this.documentChanged = false;
 
     sequencePool = new Integer[this.SEQUENCE_POOL_SIZE];
     poolMarker = this.SEQUENCE_POOL_SIZE;
@@ -781,6 +784,8 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         return this.featuresChanged;
       case DatabaseDocumentImpl.DOC_NAME:
         return this.nameChanged;
+      case DatabaseDocumentImpl.DOC_MAIN:
+        return this.documentChanged;
       default:
         throw new IllegalArgumentException();
     }
@@ -799,4 +804,47 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       this.namedAnnotSets.put(setName,annSet);
     }
   }
+
+  /** Set method for the document's URL */
+  public void setSourceUrl(URL sourceUrl) {
+
+    this.documentChanged = true;
+    super.setSourceUrl(sourceUrl);
+  } // setSourceUrl
+
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method sets the
+    * end offset.
+    */
+  public void setSourceUrlEndOffset(Long sourceUrlEndOffset) {
+
+    this.documentChanged = true;
+    super.setSourceUrlEndOffset(sourceUrlEndOffset);
+  } // setSourceUrlStartOffset
+
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method sets the
+    * start offset.
+    */
+  public void setSourceUrlStartOffset(Long sourceUrlStartOffset) {
+
+    this.documentChanged = true;
+    super.setSourceUrlStartOffset(sourceUrlStartOffset);
+  } // setSourceUrlStartOffset
+
+  /** Make the document markup-aware. This will trigger the creation
+   *  of a DocumentFormat object at Document initialisation time; the
+   *  DocumentFormat object will unpack the markup in the Document and
+   *  add it as annotations. Documents are <B>not</B> markup-aware by default.
+   *
+   *  @param b markup awareness status.
+   */
+  public void setMarkupAware(Boolean newMarkupAware) {
+
+    this.documentChanged = true;
+    super.setMarkupAware(newMarkupAware);
+  }
+
 }

@@ -800,17 +800,24 @@ System.out.println();
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
-    Document docResult = null;
-//    CorpusImpl corpResult  = null;
+    if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
+      Document docResult = null;
+      docResult = readDocument(lrPersistenceId);
 
-    docResult = readDocument(lrPersistenceId);
+      Assert.assertTrue(docResult instanceof DatabaseDocumentImpl);
+      Assert.assertNotNull(docResult.getDataStore());
+      Assert.assertTrue(docResult.getDataStore() instanceof DatabaseDataStore);
+      Assert.assertNotNull(docResult.getLRPersistenceId());
 
-    Assert.assertTrue(docResult instanceof DatabaseDocumentImpl);
-    Assert.assertNotNull(docResult.getDataStore());
-    Assert.assertTrue(docResult.getDataStore() instanceof DatabaseDataStore);
-    Assert.assertNotNull(docResult.getLRPersistenceId());
-
-    return docResult;
+      return docResult;
+    }
+    else if (lrClassName.equals(DBHelper.CORPUS_CLASS)) {
+      throw new MethodNotImplementedException();
+    }
+    else {
+      throw new IllegalArgumentException("resource class should be either Document" +
+                                          " or Corpus");
+    }
   }
 
 
@@ -1667,6 +1674,9 @@ System.out.println();
     }
 
     //2. sync Document
+    if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_MAIN)) {
+      _syncDocument(dbDoc);
+    }
 
     //3. [optional] sync Content
     if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_CONTENT)) {
@@ -1712,6 +1722,32 @@ System.out.println();
     }
   }
 
+  private void _syncDocument(Document doc)
+    throws PersistenceException {
+
+/*    Long lrID = (Long)doc.getLRPersistenceId();
+
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+
+                                                    ".persist.update_document(?,?,?,?,?) }");
+      stmt.setLong(1,ID.longValue());
+      stmt.registerOutParameter(2,java.sql.Types.VARCHAR);
+      stmt.execute();
+      String result = stmt.getString(2);
+
+      return result;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get LR name from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+*/
+    throw new MethodNotImplementedException();
+  }
 
   private void _syncDocumentContent(Document doc)
     throws PersistenceException {
