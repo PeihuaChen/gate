@@ -123,7 +123,8 @@ public class DocumentContentImpl implements DocumentContent
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
-  // the same content
+  /* two documents are the same if their contents is the same
+   */
   public boolean equals(Object other) {
     if (!(other instanceof DocumentContentImpl)) return false;
 
