@@ -275,6 +275,8 @@ public class AnnotationDiffer {
       while(iter.hasNext()){
         ((Choice)iter.next()).remove();
       }
+      sameKeyChoices.add(this);
+      sameResponseChoices.add(this);
     }
 
     /**
