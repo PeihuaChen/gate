@@ -47,6 +47,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
 
     // The Gate document
     doc = aDocument;
+    currentAnnotationSet = doc.getAnnotations();
   }//GateFormatXmlDocumentHandler
 
   /**
@@ -73,48 +74,7 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
 
-    // If basicAs is null then get the default AnnotationSet,
-    // based on the gate document.
-    if (basicAS == null)
-      basicAS = doc.getAnnotations();
-
-
-    // Create and add annotation to the basicAs
-    Iterator iterator = colector.iterator();
-    while (iterator.hasNext()){
-      AnnotationObject annot = (AnnotationObject) iterator.next();
-      iterator.remove();
-      // Create a new annotation and add it to the annotation set
-/*
-      if (canCreateAnnotation(annot.getStart().longValue(),
-                              annot.getEnd().longValue(),
-                              docSize)
-          )
-*/
-        try{
-          basicAS.add( annot.getStart(),
-                       annot.getEnd(),
-                       annot.getElemName(),
-                       annot.getFM()
-          );
-        }catch (gate.util.InvalidOffsetException e){
-          throw new GateSaxException("Tried to add an invalid annotation !" + e);
-        }
-    }// End while
   }// endDocument
-
-  /**
-    * This method verifies if an Annotation can be created.
-    */
-  private boolean canCreateAnnotation(long start,
-                                      long end,
-                                      long gateDocumentSize){
-
-    if (start < 0 || end < 0 ) return false;
-    if (start > end ) return false;
-    if ((start > gateDocumentSize) || (end > gateDocumentSize)) return false;
-    return true;
-  }// canCreateAnnotation
 
   /**
     * This method is called when the SAX parser encounts the beginning of an
@@ -128,11 +88,6 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
 
     // Set the curent element being processed
     currentElementStack.add(elemName);
-    if ("GateDocument".equals(elemName))
-      processGateDocumentElement(atts);
-
-    if ("TextWithNodes".equals(elemName))
-      processTextWithNodesElement(atts);
 
     if ("AnnotationSet".equals(elemName))
       processAnnotationSetElement(atts);
@@ -140,8 +95,8 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     if ("Annotation".equals(elemName))
       processAnnotationElement(atts);
 
-    if ("Features".equals(elemName))
-      processFeaturesElement(atts);
+    if ("Feature".equals(elemName))
+      processFeatureElement(atts);
 
     if ("Node".equals(elemName))
       processNodeElement(atts);
@@ -152,11 +107,73 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     * XML element.
     */
   public void endElement(String elemName) throws SAXException{
+    currentElementStack.pop();
+    // Deal with Annotation
     if ("Annotation".equals(elemName)){
+      if (currentFeatureMap == null)
+        currentFeatureMap = Factory.newFeatureMap();
+      currentAnnot.setFM(currentFeatureMap);
       colector.add(currentAnnot);
       currentAnnot = null;
+      currentFeatureMap = null;
+      return;
     }// End if
-    currentElementStack.pop();
+    // Deal with Feature
+    if ("Feature".equals(elemName)){
+      if(currentFeatureName == null || currentFeatureValue == null){
+        // Cannot add the (key,value) pair to the map
+        // One of them is null something was wrong in the XML file.
+        Out.prln("A key or a value was null. The feature wasn't added into" +
+                " the feature map");
+      }else {
+        if (currentFeatureMap == null){
+          // The XMl file was somehow altered and a start Feature wasn't found.
+          Out.prln("Abnormal behavior: A feature map wasn't created. Creating" +
+                " one... A start Feature element is missing");
+          currentFeatureMap = Factory.newFeatureMap();
+        }// End if
+//        Err.prln("Feature name="+currentFeatureName+" value=" + currentFeatureValue);
+        currentFeatureMap.put(currentFeatureName,currentFeatureValue);
+      }// End if
+      // Reset the Name & Value pair.
+      currentFeatureName = null;
+      currentFeatureValue = null;
+      return;
+    }//End if
+    // Deal GateDocumentFeatures
+    if ("GateDocumentFeatures".equals(elemName)){
+      if (currentFeatureMap == null)
+        currentFeatureMap = Factory.newFeatureMap();
+//      Err.prln("Setting features for doc :" + currentFeatureMap);
+      doc.setFeatures(currentFeatureMap);
+      currentFeatureMap = null;
+      return;
+    }// End if
+
+    // Deal with AnnotationSet
+    if ("AnnotationSet".equals(elemName)){
+      // Create and add annotations to the currentAnnotationSet
+      Iterator iterator = colector.iterator();
+      while (iterator.hasNext()){
+        AnnotationObject annot = (AnnotationObject) iterator.next();
+        // Clear the annot from the colector
+        iterator.remove();
+        // Create a new annotation and add it to the annotation set
+        try{
+          currentAnnotationSet.add(annot.getStart(),
+                                   annot.getEnd(),
+                                   annot.getElemName(),
+                                   annot.getFM());
+        }catch (gate.util.InvalidOffsetException e){
+          Err.prln("Tried to add an invalid annotation(" +
+          annot + ") ! Discarded !");
+        }// End try
+      }// End while
+      // The colector is empty and ready for the next AnnotationSet
+      return;
+    }// End if
+
+
   }//endElement
 
   /**
@@ -167,8 +184,18 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   public void characters( char[] text,int start,int length) throws SAXException{
     // Create a string object based on the reported text
     String content = new String(text, start, length);
-    if ("TextWithNodes".equals((String)currentElementStack.peek()))
+    if ("TextWithNodes".equals((String)currentElementStack.peek())){
       processTextOfTextWithNodesElement(content);
+      return;
+    }// End if
+    if ("Name".equals((String)currentElementStack.peek())){
+      processTextOfNameElement(content);
+      return;
+    }// End if
+    if ("Value".equals((String)currentElementStack.peek())){
+      processTextOfValueElement(content);
+      return;
+    }// End if
   }//characters
 
   /**
@@ -207,33 +234,18 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
 
   // Custom methods section
 
-  /** This method deals with a GateDocument element.
-    * If the element has attributes then it creates a FeatureMap for them.
-    */
-  private void processGateDocumentElement(AttributeList atts){
-    // If there are attributes attached to GateDocument element then process
-    // them.
+
+  /** This method deals with a AnnotationSet element. */
+  private void processAnnotationSetElement(AttributeList atts){
     if (atts != null){
-      documentFeatures = new SimpleFeatureMapImpl();
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
        String attName  = atts.getName(i);
        String attValue = atts.getValue(i);
-       // Put them into the map
-       documentFeatures.put(attName,attValue);
-      }// End For
-
-      // Set the document features
-      doc.setFeatures(documentFeatures);
+       if ("Name".equals(attName))
+          currentAnnotationSet = doc.getAnnotations(attValue);
+      }// End for
     }// End if
-  }// processGateDocumentElement
-
-  /** This method deals with a TextWithNodes element. */
-  private void processTextWithNodesElement(AttributeList atts){
-  }//processTextWithNodesElement
-
-  /** This method deals with a AnnotationSet element. */
-  private void processAnnotationSetElement(AttributeList atts){
   }//processAnnotationSetElement
 
   /** This method deals with a Annotation element. */
@@ -287,21 +299,11 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   }//processAnnotationElement
 
   /** This method deals with a Features element. */
-  private void processFeaturesElement(AttributeList atts){
-    FeatureMap fm = new SimpleFeatureMapImpl();
-    if (atts != null){
-      for (int i = 0; i < atts.getLength(); i++){
-       // Extract name and value
-       String attName  = atts.getName(i);
-       String attValue = atts.getValue(i);
-       // Add them to the fm
-       fm.put(attName,attValue);
-      }// End for
-    }// End if
-    // Set the fm to the current Annotation
-    if (currentAnnot != null)
-      currentAnnot.setFM(fm);
-  }//processFeaturesElement
+  private void processFeatureElement(AttributeList atts){
+    // The first time feature is calle it will create a features map.
+    if (currentFeatureMap == null)
+      currentFeatureMap = Factory.newFeatureMap();
+  }//processFeatureElement
 
   /** This method deals with a Node element. */
   private void processNodeElement(AttributeList atts){
@@ -325,6 +327,29 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   private void processTextOfTextWithNodesElement(String text){
     tmpDocContent.append(text);
   }//processTextOfTextWithNodesElement
+
+  /** This method deals with a Text belonging to Name element. */
+  private void processTextOfNameElement(String text){
+    if (currentFeatureMap == null)
+      Out.prln("GATE XML FORMAT WARNING:" +
+      " Found a Name element that is not enclosed into a Feature one." +
+      " Discarding...");
+    else{
+      currentFeatureName = text;
+    }// End If
+  }//processTextOfNameElement();
+
+  /** This method deals with a Text belonging to Value element. */
+  private void processTextOfValueElement(String text){
+    if (currentFeatureMap == null)
+      Out.prln("GATE XML FORMAT WARNING:" +
+      " Found a Value element that is not enclosed into a Feature one." +
+      " Discarding...");
+    else{
+      currentFeatureValue = text;
+    }// End If
+
+  }//processTextOfValueElement();
 
   /**
     * This method is called when the SAX parser encounts a comment
@@ -426,9 +451,12 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   private List colector = null;
   private Map id2Offset = new TreeMap();
 
-  private FeatureMap documentFeatures = null;
   private Stack currentElementStack = new Stack();
   private AnnotationObject currentAnnot = null;
+  private FeatureMap  currentFeatureMap = null;
+  private String currentFeatureName = null;
+  private String currentFeatureValue = null;
+  private AnnotationSet currentAnnotationSet = null;
 
 }//XmlDocumentHandler
 

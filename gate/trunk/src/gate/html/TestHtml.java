@@ -59,7 +59,9 @@ public class TestHtml extends TestCase
     markupElementsMap.put ("A","link");
     markupElementsMap.put ("a","link");
     */
-   doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
+  doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
+//doc = gate.Factory.newDocument(new URL("file:///d:/tmp/home.html"));
+
    // get the docFormat that deals with it.
    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
                                                         doc, doc.getSourceUrl()
@@ -72,6 +74,18 @@ public class TestHtml extends TestCase
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.unpackMarkup (doc,"DocumentContent");
+/*
+    // Save it as XML
+    File xmlFile = null;
+    xmlFile = Files.writeTempFile(null);
+
+    OutputStreamWriter writer = new OutputStreamWriter(
+                    new FileOutputStream(xmlFile),"UTF-8");
+    // Write (test the toXml() method)
+    writer.write(doc.toXml());
+    writer.flush();
+    writer.close();
+*/
   } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */
