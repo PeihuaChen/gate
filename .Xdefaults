@@ -1,0 +1,45 @@
+#ifdef COLOR
+*customization: -color
+#endif
+
+emacs*Background: DarkSlateGray
+emacs*Foreground: Wheat
+emacs*pointerColor: Orchid
+emacs*cursorColor: Orchid
+emacs*bitmapIcon: on
+emacs*font: fixed
+emacs.geometry: 80x25
+
+Seyon.modems: /dev/modem
+
+xterm*background: Black
+xterm*foreground: Wheat
+xterm*cursorColor: Orchid
+xterm*reverseVideo: false
+xterm*scrollBar: true
+xterm*reverseWrap: true
+xterm*font: fixed
+xterm*fullCursor: true
+xterm*scrollTtyOutput: off
+xterm*scrollKey: on
+xterm*VT100.Translations: #override\n\
+	<KeyPress>Prior : scroll-back(1,page)\n\
+	<KeyPress>Next : scroll-forw(1,page)
+xterm*titleBar: false
+
+xterm_color*background: Black
+xterm_color*foreground: Wheat
+xterm_color*cursorColor: Orchid
+xterm_color*reverseVideo: false
+xterm_color*scrollBar: true
+xterm_color*saveLines: 5000
+xterm_color*reverseWrap: true
+xterm_color*font: fixed
+xterm_color.geometry: 80x25+20+20
+xterm_color*fullCursor: true
+xterm_color*scrollTtyOutput: off
+xterm_color*scrollKey: on
+xterm_color*VT100.Translations: #override\n\
+	<KeyPress>Prior : scroll-back(1,page)\n\
+	<KeyPress>Next : scroll-forw(1,page)
+xterm_color*titleBar: false
