@@ -43,6 +43,20 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+    Map listsMap = new HashMap();
+    listsMap.put("blah", new ArrayList());
+    List theList = (List)listsMap.get("blah");
+    System.out.println(theList);
+    theList.add("object");
+    theList = (List)listsMap.get("blah");
+    System.out.println(theList);
+    
+    
+    
+    File home = new File("z:/gate/plugins");
+    File tok = new File(home, "ANNIE/resources/tokeniser/Default.rul");
+    System.out.println(tok);
+    
     Preferences prefRoot = Preferences.userNodeForPackage(AnnotationSetsView.class);
     System.out.println(prefRoot.keys().length);
     prefRoot.removeNode();
