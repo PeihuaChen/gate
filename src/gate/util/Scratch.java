@@ -23,7 +23,7 @@ public class Scratch
 {
 
   public static void main(String args[]) {
-    doIt();
+   // doIt();
   } // main
 
   public static void doIt() {
@@ -31,7 +31,5 @@ public class Scratch
   } // doIt
 
 } // class Scratch
-
-
 
 
