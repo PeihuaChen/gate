@@ -67,7 +67,7 @@ include Makefile.dep
 
 # regenerate Makefile.dep
 depend:
-	: ./makejdepend.sh ../src/gate >Makefile.dep
+	./makejdepend.sh ../src/gate >Makefile.dep
 	for f in gate.sh; do \
 	  sed -e 's,___CYGPATH___,$(CYGPATH),' -e 's,___JAVA___,$(JAVA),' \
 	    -e 's,___GATEHOME___,'`pwd`',' -e 's,___CYGPATHP___,$(CYGPATHP),' \
