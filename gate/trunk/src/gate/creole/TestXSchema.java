@@ -45,15 +45,11 @@ public class TestXSchema extends TestCase
       Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("xmlFileUrl", resData.getXmlFileUrl());
+    parameters.put("xmlFileUrl", Gate.getUrl("tests/xml/POSSchema.xml"));
 
     AnnotationSchema annotSchema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);
-/*
-    // Create an annoatationSchema from a URL.
-    URL url = Gate.getUrl("tests/xml/POSSchema.xml");
-    annotSchema.fromXSchema(url);
-*/
+
     String s = annotSchema.toXSchema();
     // write back the XSchema fom memory
     // File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
@@ -69,7 +65,7 @@ public class TestXSchema extends TestCase
       Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("xmlFileUrl", resData.getXmlFileUrl());
+    parameters.put("xmlFileUrl", Gate.getUrl("tests/xml/POSSchema.xml"));
 
     AnnotationSchema schema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);

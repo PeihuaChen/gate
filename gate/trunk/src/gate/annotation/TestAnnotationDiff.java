@@ -59,13 +59,11 @@ public class TestAnnotationDiff extends TestCase
       Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("xmlFileUrl", resData.getXmlFileUrl());
+    parameters.put("xmlFileUrl", Gate.getUrl("tests/xml/POSSchema.xml"));
 
     AnnotationSchema annotationSchema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);
 
-    URL url = Gate.getUrl("tests/xml/POSSchema.xml");
-    annotationSchema.fromXSchema(url);
 
     // Load the xml Key Document and unpack it
     gate.Document keyDocument =
