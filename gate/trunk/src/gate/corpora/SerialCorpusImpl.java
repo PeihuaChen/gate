@@ -743,34 +743,4 @@ public class SerialCorpusImpl extends
       this.dataStore.addDatastoreListener(this);
 
   }//readObject
-
-  public class DocumentData implements Serializable {
-    //fix the ID for serialisation
-    static final long serialVersionUID = 4192762901421847525L;
-
-    DocumentData(String name, Object ID){
-      docName = name;
-      persistentID = ID;
-    }
-
-    public String getDocumentName() {
-      return docName;
-    }
-
-    public Object getPersistentID() {
-      return persistentID;
-    }
-
-    public void setPersistentID(Object newID) {
-      persistentID = newID;
-    }
-
-    public String toString() {
-      return new String("DocumentData: " + docName + ", " + persistentID);
-    }
-
-    String docName;
-    Object persistentID;
-  }
-
 }
