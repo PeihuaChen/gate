@@ -15,13 +15,13 @@
       <JAR>TestResources.jar</JAR>
       <CLASS>testpkg.TestPR1</CLASS>
 
+      <PARAMETER DEFAULT="" COMMENT="a param comment"
+	OPTIONAL="true" NAME="some other param">param2</PARAMETER>
       <OR>
 	<PARAMETER RUNTIME="trUe" NAME="HOOPY DOOPY">param0</PARAMETER>
 	<PARAMETER DEFAULT="a default"
 	  OPTIONAL="false" NAME="someparam">param1</PARAMETER>
       </OR>
-      <PARAMETER DEFAULT="" COMMENT="a param comment"
-	OPTIONAL="true" NAME="some other param">param2</PARAMETER>
 
       <SOME-ARBITRARY-RESOURCE-FEATURE/>
     </RESOURCE>
