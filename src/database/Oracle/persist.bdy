@@ -129,12 +129,13 @@ create or replace package body persist is
   
      --0. get encoding ID if any, otherwise create a new
      -- entry in T_DOC_ENCODING
-     select count(enc_id),enc_id
-     into   cnt,l_encoding_id
+     select count(enc_id)
+     into   cnt
      from   t_doc_encoding
      where  enc_name = l_encoding;         
      
-     if (l_encoding_id is null) then
+     if (cnt = 0) then
+
        --oops new encoding
        --add it 
        insert into t_doc_encoding(enc_id,
@@ -142,6 +143,15 @@ create or replace package body persist is
        values (seq_doc_encoding.nextval,
                l_encoding)
        returning enc_id into l_encoding_id;
+
+     else
+
+       --get encoding id
+       select enc_id
+       into   l_encoding_id
+       from   t_doc_encoding
+       where  enc_name = l_encoding;                
+
      end if;
      
      
