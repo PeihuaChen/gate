@@ -60,7 +60,7 @@ public class TestFSM extends TestCase {
     */
 
     Gate.init();
-    String resPath = "gate/resources/jape/combined/";
+    String resPath = Files.getResourcePath() +  "/jape/combined/";
     String resName = "brian-soc-loc1.jape";
     batch = new Batch(resPath, resName);
 

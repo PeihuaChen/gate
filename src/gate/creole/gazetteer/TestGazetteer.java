@@ -57,10 +57,16 @@ public class TestGazetteer extends TestCase {
     );
 
     //create a default gazetteer
-    DefaultGazetteer gaz = new DefaultGazetteer();
+    FeatureMap params = Factory.newFeatureMap();
+    DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
+                          "gate.creole.gazetteer.DefaultGazetteer", params);
     gaz.init();
+
+    //runtime stuff
+    gaz.setDocument(doc);
     AnnotationSet gazAS = doc.getAnnotations("GazetteerAS");
-    gaz.doLookup(doc, gazAS, false);
+    gaz.setAnnotationSet(gazAS);
+    gaz.run();
     assert(!gazAS.isEmpty());
   }
 
