@@ -72,7 +72,7 @@ public class DocumentEditor extends AbstractVisualResource
       }
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
-Out.prln("Docedit shown");        
+Out.prln("Docedit shown");
         initViews();
       }
     });
@@ -113,7 +113,7 @@ Out.prln("Docedit shown");
 
     progressBar.setString("Building views");
     progressBar.setValue(10);
-    
+
     //create the skeleton UI
     topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, null, null);
     bottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplit, null);
@@ -144,7 +144,7 @@ Out.prln("Docedit shown");
     centralViews = new ArrayList();
     verticalViews = new ArrayList();
     horizontalViews = new ArrayList();
-    
+
     while(vrIter.hasNext()){
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                            get(vrIter.next());
@@ -163,7 +163,7 @@ Out.prln("Docedit shown");
               break;
             case DocumentView.VERTICAL :
               verticalViews.add(aView);
-            	break;
+              break;
             case DocumentView.HORIZONTAL :
               horizontalViews.add(aView);
             default :
@@ -184,12 +184,13 @@ Out.prln("Docedit shown");
     add(horizontalSplit, BorderLayout.CENTER);
 
   }
-  
+
   protected static class ViewButton extends JButton{
     public ViewButton(DocumentView view, int type){
       super();
       this.view = view;
-      if(type == DocumentView.HORIZONTAL)
+      if(type == DocumentView.HORIZONTAL){
+      }
     }
     protected DocumentView view;
   }
@@ -209,11 +210,11 @@ Out.prln("Docedit shown");
    * A list of {@link DocumentView} objects representing the components
    */
   protected List views;
-  
+
   protected List centralViews;
-  
+
   protected List verticalViews;
-  
+
   protected List horizontalViews;
 
 }
