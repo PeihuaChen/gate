@@ -169,7 +169,7 @@ public class Editor extends JFrame {
           int res1 = filer.showOpenDialog(frame);
           if(res1 == filer.APPROVE_OPTION){
             //we have the file, what's the encoding?
-            Object[] encodings = { "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
+            Object[] encodings = { "Unicode", "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
                                    "ISO-8859-1", "US-ASCII"};
             JComboBox encodingsCombo = new JComboBox(encodings);
             encodingsCombo.setEditable(true);
@@ -235,7 +235,7 @@ public class Editor extends JFrame {
           if(file == null) saveAsAction.actionPerformed(null);
           else {
             //get the encoding
-            Object[] encodings = { "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
+            Object[] encodings = { "Unicode", "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
                                    "ISO-8859-1", "US-ASCII"};
             JComboBox encodingsCombo = new JComboBox(encodings);
             encodingsCombo.setEditable(true);
