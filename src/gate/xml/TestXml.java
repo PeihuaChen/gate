@@ -11,10 +11,7 @@ package gate.xml;
 import java.util.*;
 import java.io.*;
 import junit.framework.*;
-
-// xml tools
-import javax.xml.parsers.*;
-import org.xml.sax.*;
+import org.w3c.www.mime.*;
 
 /** Test class for XML facilities
   *
@@ -28,7 +25,7 @@ public class TestXml extends TestCase
   public void setUp() {
   } // setUp
 
-  /*
+
   public static void main(String args[]){
     TestXml app = new TestXml("TestXml");
     try{
@@ -37,39 +34,45 @@ public class TestXml extends TestCase
       System.out.println(e);
     }
   }
-  */
   
+
   /** A test */
   public void testSomething() throws Exception{
     assert(true);
 
-	  try {
+    // create the markupElementsMap map
+    Map markupElementsMap = new HashMap();
 
-		  // Get a "parser factory", an an object that creates parsers
-		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+    markupElementsMap.put ("S","Sentence");
+    markupElementsMap.put ("s","Sentence");
+    markupElementsMap.put ("W","Word");
+    markupElementsMap.put ("w","Word");
+    markupElementsMap.put ("p","Paragraph");
+    markupElementsMap.put ("h1","Header 1");
+    markupElementsMap.put ("H1","Header 1");
+    markupElementsMap.put ("A","link");
+    markupElementsMap.put ("a","link");
 
-		  // Set up the factory to create the appropriate type of parser
+    // create a new gate document
+    gate.Document doc = gate.Transients.newDocument(
+              "http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml");
+    // get the docFormat that deals with it.
+    // the parameter MimeType doesn't affect right now the behaviour
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
+      (new MimeType("text","xml")).toString());
 
-      // non validating one
-		  saxParserFactory.setValidating(false);
-      // non namesapace aware one
-		  saxParserFactory.setNamespaceAware(false);
+    // set's the map
+    //docFormat.setMarkupElementsMap(markupElementsMap);
 
-      // create it
-		  SAXParser parser = saxParserFactory.newSAXParser();
-
-      // use it
-		  //parser.parse(new File("V:\\XMLFILES\\TEST\\Sentence.xml"),
-      //     new CustomDocumentHandler("file:///V:/XMLFILES/TEST/Sentence.xml") );
-
-		  parser.parse("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml",
-           new CustomDocumentHandler("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml"));
-
-	  } catch (Exception ex) {
-		  System.err.println("Exception : " + ex);
-		  //System.exit(2);
-	  }
-
+    // graphic visualisation
+    if (docFormat != null){
+        docFormat.unpackMarkup (doc);
+        gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
+        gate.Corpus corpus = gate.Transients.newCorpus("XML Test");
+        corpus.add(doc);
+        japeGUI.setCorpus(corpus);
+    }
+    
   } // testSomething()
 
   /** Test suite routine for the test runner */

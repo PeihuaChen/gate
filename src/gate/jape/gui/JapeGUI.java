@@ -40,6 +40,24 @@ public class JapeGUI extends JFrame {
     japeGUI.invokedStandalone = true;
   }
 
+  public void setCorpus(Corpus corpus){
+    this.corpus = corpus;
+    corpusListModel.clear();
+    Iterator docsIter = corpus.iterator();
+    while(docsIter.hasNext()){
+      currentDoc = (Document) docsIter.next();
+      corpusListModel.addElement(currentDoc.getSourceURL().getFile());
+    }
+    //select the first document
+    Iterator docIter = corpus.iterator();
+    if(docIter.hasNext()){
+      currentDoc = (Document)docIter.next();
+      corpusList.setSelectedIndex(0);
+    }
+    //repaint what needs to be repainted
+    updateAll();
+  }
+
   private void jbInit() throws Exception {
     southBox = Box.createHorizontalBox();
     westBox = Box.createVerticalBox();
@@ -78,6 +96,8 @@ public class JapeGUI extends JFrame {
     text.setEditorKit(new RawEditorKit());
     text.setBorder(BorderFactory.createLoweredBevelBorder());
     text.setEnabled(false);
+    text.setPreferredSize(new Dimension(textViewScroll.getSize().width - 10,
+                                        32000));
     jLabel1.setHorizontalTextPosition(SwingConstants.LEFT);
     jLabel1.setText("Collection:");
     jLabel2.setHorizontalTextPosition(SwingConstants.LEFT);

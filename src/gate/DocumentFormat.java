@@ -47,7 +47,7 @@ public abstract class DocumentFormat implements Resource
     * for annotation types. If it is non-null, only those elements specified
     * here will be converted.
     */
-  private Map markupElementsMap = null;
+  protected Map markupElementsMap = null;
 
   /** The features of this resource */
   private FeatureMap features = null;
@@ -67,7 +67,19 @@ public abstract class DocumentFormat implements Resource
   /** This method populates the various maps of MIME type to format,
     * file suffix and magic numbers.
     */
-  private void register() { }
+  private void register() {
+    // create a new mime type
+    /*
+    MimeType mime = new MimeType("text","xml");
+    mime.addParameter ("Class","gate.corpora.XmlDocumentFormat");
+
+    // register the class with this map type
+    mime2ClassMap.put (mime.toString (), "");
+
+    mime = new MimeType("text","html");
+    mime2ClassMap.put (mime, "gate.corpora.htmlDocumentFormat");
+    */
+  }
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -76,11 +88,37 @@ public abstract class DocumentFormat implements Resource
     */
   abstract public void unpackMarkup(Document doc);
 
+  /**
+    * Returns a MymeType having as input a fileSufix
+    */
+  static private MimeType  getMimeType(String fileSufix){
+    // for the beginning
+    return MimeType.TEXT;
+  }
+
+    /**
+    * Returns a MymeType having as input a url
+    */
+  static private MimeType  getMimeType(URL url){
+    return MimeType.TEXT;
+  }
+
   /** Find a DocumentFormat implementation that deals with a particular
     * MIME type, given that type.
     */
   static public DocumentFormat getDocumentFormat(MimeType mimeType) {
-    return null;
+    DocumentFormat docFormat = null;
+    try{
+      docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
+                      "gate.corpora.XmlDocumentFormat").newInstance();
+    }catch (ClassNotFoundException e){
+      System.out.println(e);
+    }catch (IllegalAccessException e){
+      System.out.println(e);
+    }catch (InstantiationException e){
+      System.out.println(e);
+    }
+    return docFormat;
   } // getDocumentFormat(MimeType)
 
   /** Find a DocumentFormat implementation that deals with a particular
@@ -88,24 +126,30 @@ public abstract class DocumentFormat implements Resource
     * from.
     */
   static public DocumentFormat getDocumentFormat(String fileSuffix) {
-    return null;
+    return getDocumentFormat (getMimeType (fileSuffix));
   } // getDocumentFormat(String)
 
   /** Find a DocumentFormat implementation that deals with a particular
-    * MIME type, given the URL of the Document. If it is an HTTP URL, we 
+    * MIME type, given the URL of the Document. If it is an HTTP URL, we
     * can ask the web server. If it has a recognised file extension, we
     * can use that. Otherwise we need to use a map of magic numbers
     * to MIME types to guess the type, and then look up the format using the
     * type.
     */
   static public DocumentFormat getDocumentFormat(URL url) {
-    return null;
+    return getDocumentFormat (getMimeType (url));
   } // getDocumentFormat(URL)
 
   /** Get the feature set */
   public FeatureMap getFeatures() { return features; }
 
-  /** Set the feature set */
-  public void setFeatures(FeatureMap features) { this.features = features; }
+   /** Get the markup elements map */
+  public Map getMarkupElementsMap() { return markupElementsMap; }
 
+  /** Set the markup elements map */
+  public void setMarkupElementsMap(Map markupElementsMap) {
+   this.markupElementsMap = markupElementsMap;
+  }
+
+  public void setFeatures(FeatureMap features){}
 } // class DocumentFormat

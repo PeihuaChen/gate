@@ -57,6 +57,7 @@ public class DocumentContentImpl implements DocumentContent
     String repl = ((DocumentContentImpl) replacement).content;
     StringBuffer newContent = new StringBuffer(content);
     newContent.replace(s, e, repl);
+    content = newContent.toString();
   } // edit(start,end,replacement)
 
   /** The contents under a particular span. */
@@ -114,6 +115,6 @@ public class DocumentContentImpl implements DocumentContent
   String content;
 
   /** For ranges */
-  DocumentContentImpl(String s) { content = s; }
+  public DocumentContentImpl(String s) { content = s; }
 
 } // class DocumentContentImpl
