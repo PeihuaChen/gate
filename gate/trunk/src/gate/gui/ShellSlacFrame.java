@@ -69,8 +69,8 @@ public class ShellSlacFrame extends MainFrame {
   /** New frame */
   public ShellSlacFrame() {
     super(true);
-    guiRoots.clear();
-    guiRoots.add(this);
+//    guiRoots.clear();
+//    guiRoots.add(this);
     
     initShellSlacLocalData();
     initShellSlacGuiComponents();
@@ -211,8 +211,33 @@ public class ShellSlacFrame extends MainFrame {
     if(res instanceof Document) {
       Document doc = (Document) res;
       corpus.add(doc);
+      showDocument(doc);
     } // if
   }// resourceLoaded();
+  
+  protected void showDocument(Document doc) {
+    // should find NameBearerHandle for document and call 
+    Handle handle = null;
+    Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+    boolean done = false;
+    DefaultMutableTreeNode node = resourcesTreeRoot;
+    Object obj;
+    
+    while(!done && nodesEnum.hasMoreElements()){
+      node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+      obj = node.getUserObject();
+      if(obj instanceof Handle) {
+        handle = (Handle)obj;
+        obj = handle.getTarget();
+        done = obj instanceof Document
+          && doc == (Document)obj;
+      } // if
+    } // while
+    
+    if(done){
+      select(handle);
+    } // if
+  } // showDocument(Document doc)
   
   class RunApplicationAction extends AbstractAction {
     public RunApplicationAction() {
