@@ -41,8 +41,8 @@ docs:
 	  -d ../doc/javadoc/internal $(PKGS)
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
-	cp ../src/gate/CookBook.java ../doc/javadoc/gate
-	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate
+	cp ../src/gate/CookBook.java ../doc/javadoc/gate/CookBook.txt
+	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
 
 clean:
 	rm -rf ../classes/gate `find .. -name '*.~*' -print`
@@ -54,6 +54,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.17  2000/02/18 16:04:00  hamish
+# made cookbook source a .txt
+#
 # Revision 1.16  2000/02/18 15:56:36  hamish
 # added copy of CookBook source code to docs
 #
