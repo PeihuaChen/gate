@@ -38,6 +38,7 @@ public class LRHandle extends ResourceHandle {
       AnnotationEditor annView = new AnnotationEditor();
       annView.setDocument((Document)resource);
       view.add("Annotations", annView);
+      view.setSelectedComponent(annView);
     }
   }
 

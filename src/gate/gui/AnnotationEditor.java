@@ -375,6 +375,7 @@ public class AnnotationEditor extends AbstractVisualResource{
     textPane.setEditorKit(new CustomStyledEditorKit());
     Style defaultStyle = textPane.getStyle("default");
     StyleConstants.setBackground(defaultStyle, Color.white);
+    StyleConstants.setFontFamily(defaultStyle, "Arial Unicode MS");
     textScroll = new JScrollPane(textPane);
 
     annotationsTableModel = new AnnotationsTableModel();

@@ -23,8 +23,16 @@ public class PRHandle extends ResourceHandle {
 
   public PRHandle(ProcessingResource res, ProjectData project) {
     super(res, project);
-    setSmallIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/pr.gif")));
+    if(res instanceof gate.creole.tokeniser.DefaultTokeniser){
+      setSmallIcon(new ImageIcon(
+             getClass().getResource("/gate/resources/img/shefTokeniser.gif")));
+    }else if(res instanceof gate.creole.gazetteer.DefaultGazetteer){
+      setSmallIcon(new ImageIcon(
+             getClass().getResource("/gate/resources/img/shefGazetteer.gif")));
+    }else{
+      setSmallIcon(new ImageIcon(
+             getClass().getResource("/gate/resources/img/genericPr.gif")));
+    }
     popup = new JPopupMenu();
     popup.add(new ClosePRAction());
   }
