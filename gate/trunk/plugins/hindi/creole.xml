@@ -201,7 +201,7 @@
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input"
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="lexiconURL" DEFAULT="resources/tagger/hindi_lexicon_new"
+      <PARAMETER NAME="lexiconURL" DEFAULT="resources/tagger/hindi_lexicon"
         COMMENT="The URL for the lexicon file"
         >java.net.URL</PARAMETER>
       <PARAMETER NAME="rulesURL" DEFAULT="resources/tagger/ruleset"
