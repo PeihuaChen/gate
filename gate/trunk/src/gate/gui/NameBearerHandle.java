@@ -49,6 +49,8 @@ public class NameBearerHandle implements Handle,
   public NameBearerHandle(NameBearer target, Window window) {
     this.target = target;
     this.window = window;
+    actionPublishers = new ArrayList();
+
     sListenerProxy = new ProxyStatusListener();
     String iconName = null;
     if(target instanceof Resource){
@@ -75,6 +77,9 @@ public class NameBearerHandle implements Handle,
     this.icon = MainFrame.getIcon(iconName);
 
     Gate.getCreoleRegister().addCreoleListener(this);
+
+    if(target instanceof ActionsPublisher) actionPublishers.add(target);
+
     buildViews();
     // Add the CTRL +F4 key & action combination to the resource
     JComponent largeView = this.getLargeView();
@@ -120,7 +125,30 @@ public class NameBearerHandle implements Handle,
   }
 
   public JPopupMenu getPopup() {
-    return buildPopup();
+    JPopupMenu popup = new JPopupMenu();
+    //first add the static items
+    Iterator itemIter = staticPopupItems.iterator();
+    while(itemIter.hasNext()){
+      JMenuItem anItem = (JMenuItem)itemIter.next();
+      if(anItem == null) popup.addSeparator();
+      else popup.add(anItem);
+    }
+
+    //next add the dynamic list from the target and its editors
+    Iterator publishersIter = actionPublishers.iterator();
+    while(publishersIter.hasNext()){
+      ActionsPublisher aPublisher = (ActionsPublisher)publishersIter.next();
+      Iterator actionIter = aPublisher.getActions().iterator();
+      while(actionIter.hasNext()){
+        Action anAction = (Action)actionIter.next();
+        if(anAction == null) popup.addSeparator();
+        else{
+          popup.add(new XJMenuItem(anAction, sListenerProxy));
+        }
+      }
+    }
+
+    return popup;
   }
 
   public String getTooltipText() {
@@ -140,126 +168,126 @@ public class NameBearerHandle implements Handle,
   }
 
   /** Fill Protege save, save as and save in format actions */
-  private void fillProtegeActions(JPopupMenu popup) {
+  private void fillProtegeActions(List popupItems) {
     Action action;
 
-    popup.addSeparator();
+    popupItems.add(null);
 
     action = new edu.stanford.smi.protege.action.SaveProject();
     action.putValue(action.NAME, "Save Protege");
     action.putValue(action.SHORT_DESCRIPTION, "Save protege project");
     // Add Save Protege action
-    popup.add(action);
+    popupItems.add(action);
 
     action = new edu.stanford.smi.protege.action.SaveAsProject();
     action.putValue(action.NAME, "Save Protege As...");
     action.putValue(action.SHORT_DESCRIPTION, "Save protege project as");
     // Add Save as... Protege action
-    popup.add(action);
+    popupItems.add(action);
 
     action = new edu.stanford.smi.protege.action.ChangeProjectStorageFormat();
     // Add Save in format... Protege action
-    popup.add(action);
+    popupItems.add(action);
 
-    popup.addSeparator();
+    popupItems.add(null);
     action = new edu.stanford.smi.protege.action.BuildProject();
     // Add Import... Protege action
-    popup.add(action);
+    popupItems.add(action);
   } // fillProtegeActions(gate.gui.ProtegeWrapper protege)
 
   /** Fill HMM Save and Save As... actions */
-  private void fillHMMActions(JPopupMenu popup) {
+  private void fillHMMActions(List popupItems) {
     Action action;
 
     com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR =
       (com.ontotext.gate.hmm.agent.AlternativeHMMAgent) target;
 
-    popup.addSeparator();
+    popupItems.add(null);
     action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
     action.putValue(action.SHORT_DESCRIPTION,
       "Save trained HMM model into PR URL file");
     // Add Save trained HMM model action
-    popup.add(action);
+    popupItems.add(action);
 
     action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
     action.putValue(action.SHORT_DESCRIPTION,
       "Save trained HMM model into new file");
     // Add Save As... trained HMM model action
-    popup.add(action);
+    popupItems.add(action);
   } // fillHMMActions(gate.gui.ProtegeWrapper protege)
 
 
-  protected JPopupMenu buildPopup(){
-    //build the popup
-    JPopupMenu popup = new JPopupMenu();
-    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
-    closeItem.setAccelerator(KeyStroke.getKeyStroke(
-                                KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
-    popup.add(closeItem);
-
-    if(target instanceof ProcessingResource){
-      popup.addSeparator();
-      popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-      if(target instanceof gate.ml.DataCollector){
-        popup.add(new DumpArffAction());
-      }
-      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
-        fillHMMActions(popup);
-      } // if
-    }else if(target instanceof LanguageResource) {
-      //Language Resources
-      popup.addSeparator();
-      popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
-      popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
-      if(target instanceof gate.TextualDocument){
-        XJMenuItem saveAsXmlItem =
-                         new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
-        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
-                                        KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-
-        popup.add(saveAsXmlItem);
-        XJMenuItem savePreserveFormatItem =
-                         new XJMenuItem(new DumpPreserveFormatAction(),
-                                        sListenerProxy);
-        popup.add(savePreserveFormatItem);
-      }else if(target instanceof Corpus){
-        popup.addSeparator();
-        corpusFiller = new CorpusFillerComponent();
-        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
-        popup.addSeparator();
-        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
-        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
-        if (target instanceof IndexedCorpus){
-          popup.addSeparator();
-          popup.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
-          popup.add(new XJMenuItem(new OptimizeIndexAction(), sListenerProxy));
-          popup.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
-        }
-      }
-      if (target instanceof gate.creole.ProtegeProjectName){
-        fillProtegeActions(popup);
-      }// End if
-    }else if(target instanceof Controller){
-      //Applications
-      popup.addSeparator();
-      popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
-    }
-
-    //add the custom actions from the resource if any are provided
-    if(target instanceof ActionsPublisher){
-      Iterator actionsIter = ((ActionsPublisher)target).getActions().iterator();
-      while(actionsIter.hasNext()){
-        Action anAction = (Action)actionsIter.next();
-        if(anAction == null) popup.addSeparator();
-        else{
-          if(window instanceof StatusListener)
-            popup.add(new XJMenuItem(anAction, (StatusListener)window));
-          else popup.add(anAction);
-        }
-      }
-    }
-    return popup;
-  }
+//  protected JPopupMenu buildPopup(){
+//    //build the popup
+//    JPopupMenu popup = new JPopupMenu();
+//    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
+//    closeItem.setAccelerator(KeyStroke.getKeyStroke(
+//                                KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
+//    popup.add(closeItem);
+//
+//    if(target instanceof ProcessingResource){
+//      popup.addSeparator();
+//      popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
+//      if(target instanceof gate.ml.DataCollector){
+//        popup.add(new DumpArffAction());
+//      }
+//      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
+//        fillHMMActions(popup);
+//      } // if
+//    }else if(target instanceof LanguageResource) {
+//      //Language Resources
+//      popup.addSeparator();
+//      popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+//      popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+//      if(target instanceof gate.TextualDocument){
+//        XJMenuItem saveAsXmlItem =
+//                         new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
+//        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
+//                                        KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+//
+//        popup.add(saveAsXmlItem);
+//        XJMenuItem savePreserveFormatItem =
+//                         new XJMenuItem(new DumpPreserveFormatAction(),
+//                                        sListenerProxy);
+//        popup.add(savePreserveFormatItem);
+//      }else if(target instanceof Corpus){
+//        popup.addSeparator();
+//        corpusFiller = new CorpusFillerComponent();
+//        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+//        popup.addSeparator();
+//        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
+//        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
+//        if (target instanceof IndexedCorpus){
+//          popup.addSeparator();
+//          popup.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
+//          popup.add(new XJMenuItem(new OptimizeIndexAction(), sListenerProxy));
+//          popup.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
+//        }
+//      }
+//      if (target instanceof gate.creole.ProtegeProjectName){
+//        fillProtegeActions(popup);
+//      }// End if
+//    }else if(target instanceof Controller){
+//      //Applications
+//      popup.addSeparator();
+//      popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
+//    }
+//
+//    //add the custom actions from the resource if any are provided
+//    if(target instanceof ActionsPublisher){
+//      Iterator actionsIter = ((ActionsPublisher)target).getActions().iterator();
+//      while(actionsIter.hasNext()){
+//        Action anAction = (Action)actionsIter.next();
+//        if(anAction == null) popup.addSeparator();
+//        else{
+//          if(window instanceof StatusListener)
+//            popup.add(new XJMenuItem(anAction, (StatusListener)window));
+//          else popup.add(anAction);
+//        }
+//      }
+//    }
+//    return popup;
+//  }
 
 
   protected void buildViews() {
@@ -287,6 +315,8 @@ public class NameBearerHandle implements Handle,
           view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)largeView).add((Component)view, rData.getName());
+          //if view provide actions, add it to the list of action puiblishers
+          if(view instanceof ActionsPublisher) actionPublishers.add(view);
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
         }
@@ -319,6 +349,7 @@ public class NameBearerHandle implements Handle,
           view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)smallView).add((Component)view, rData.getName());
+          if(view instanceof ActionsPublisher) actionPublishers.add(view);
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
         }
@@ -330,6 +361,62 @@ public class NameBearerHandle implements Handle,
       }
     }
     fireStatusChanged("Views built!");
+
+    //build the static part of the popup
+    staticPopupItems = new ArrayList();
+
+    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
+    closeItem.setAccelerator(KeyStroke.getKeyStroke(
+                                KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
+    staticPopupItems.add(closeItem);
+
+    if(target instanceof ProcessingResource){
+      staticPopupItems.add(null);
+      staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
+      if(target instanceof gate.ml.DataCollector){
+        staticPopupItems.add(new DumpArffAction());
+      }
+      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
+        fillHMMActions(staticPopupItems);
+      } // if
+    }else if(target instanceof LanguageResource) {
+      //Language Resources
+      staticPopupItems.add(null);
+      staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+      staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+      if(target instanceof gate.TextualDocument){
+        XJMenuItem saveAsXmlItem =
+                         new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
+        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
+                                        KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+
+        staticPopupItems.add(saveAsXmlItem);
+        XJMenuItem savePreserveFormatItem =
+                         new XJMenuItem(new DumpPreserveFormatAction(),
+                                        sListenerProxy);
+        staticPopupItems.add(savePreserveFormatItem);
+      }else if(target instanceof Corpus){
+        staticPopupItems.add(null);
+        corpusFiller = new CorpusFillerComponent();
+        staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+        staticPopupItems.add(null);
+        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
+        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
+        if (target instanceof IndexedCorpus){
+          staticPopupItems.add(null);
+          staticPopupItems.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
+          staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(), sListenerProxy));
+          staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
+        }
+      }
+      if (target instanceof gate.creole.ProtegeProjectName){
+        fillProtegeActions(staticPopupItems);
+      }// End if
+    }else if(target instanceof Controller){
+      //Applications
+      staticPopupItems.add(null);
+      staticPopupItems.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
+    }
   }//protected void buildViews
 
   public String toString(){ return title;}
@@ -353,6 +440,19 @@ public class NameBearerHandle implements Handle,
   String title;
   String tooltipText;
   NameBearer target;
+
+  /**
+   * Stores all the action providers for this resource.
+   * They will be questioned when the getPopup() method is called.
+   */
+  protected List actionPublishers;
+
+  /**
+   * A list of menu items that constitute the static part of the popup.
+   * Null values are used for separators.
+   */
+  protected List staticPopupItems;
+
   /**
    * The top level GUI component this hadle belongs to.
    */
