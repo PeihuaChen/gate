@@ -173,7 +173,7 @@ jar/classpath so it's the same as registerBuiltins
     configProcessor.parseConfigFile(configStream, configUrl);
 
     // parse the user's config file (if it exists)
-    String userConfigName = getUserConfigFile();
+    String userConfigName = getUserConfigFileName();
     File userConfigFile = null;
     URL userConfigUrl = null;
     if(DEBUG) { Out.prln("loading user config from " + userConfigName); }
@@ -536,7 +536,7 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static void writeUserConfig() throws GateException {
     // the user's config file
-    String configFileName = getUserConfigFile();
+    String configFileName = getUserConfigFileName();
     File configFile = new File(configFileName);
 
     // create if not there, then update
@@ -564,7 +564,7 @@ jar/classpath so it's the same as registerBuiltins
    * Get the name of the user's <TT>gate.xml</TT> config file (this
    * doesn't guarantee that file exists!).
    */
-  public static String getUserConfigFile() {
+  public static String getUserConfigFileName() {
     String filePrefix = "";
     if(runningOnUnix()) filePrefix = ".";
 
@@ -572,7 +572,21 @@ jar/classpath so it's the same as registerBuiltins
       System.getProperty("user.home") + Strings.getFileSep() +
       filePrefix + GATE_DOT_XML;
     return userConfigName;
-  } // getUserConfigFile
+  } // getUserConfigFileName
+
+  /**
+   * Get the name of the user's <TT>gate.ser</TT> session state file (this
+   * doesn't guarantee that file exists!).
+   */
+  public static String getUserSessionFileName() {
+    String filePrefix = "";
+    if(runningOnUnix()) filePrefix = ".";
+
+    String userSessionName =
+      System.getProperty("user.home") + Strings.getFileSep() +
+      filePrefix + GATE_DOT_SER;
+    return userSessionName;
+  } // getUserSessionFileName
 
   /**
    * This method tries to guess if we are on a UNIX system. It does this
