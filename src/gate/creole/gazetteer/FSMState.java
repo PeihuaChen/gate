@@ -100,11 +100,16 @@ class FSMState implements Serializable {
 
   /** The transition function of this state.
    */
-  Map transitionFunction = new HashMap();
+// NASO
+//  Map transitionFunction = new HashMap();
+  Map transitionFunction = new HashMap(4);
+
 
   /**    *
    */
-  Set lookupSet = new HashSet();
+// NASO
+//  Set lookupSet = new HashSet();
+  Set lookupSet = new HashSet(4);
 
   /**
    * The unique id of this state. This value is never used by the algorithms but
