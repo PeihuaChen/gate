@@ -387,6 +387,7 @@ public class MainFrame extends JFrame
       "<B>Hamish Cunningham, Valentin Tablan, Cristian Ursu, " +
       "Kalina Bontcheva</B>,<BR>" +
       "Diana Maynard, Marin Dimitrov, Horacio Saggion, Oana Hamza,<BR>" +
+      "Atanas Kiryakov, Bobby Popov, Damyan Ognyanoff,<BR>" +
       "Robert Gaizauskas, Mark Hepple, Mark Leisher, Kevin Humphreys,<BR>" +
       "Yorick Wilks." +
       "<P><B>JVM version</B>: " + System.getProperty("java.version") +
