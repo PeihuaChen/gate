@@ -52,6 +52,9 @@ public class AccessControllerImpl
   private HashMap     groupsByName;
 
   private static Random r;
+  private boolean isPooled;
+
+  private int refCnt;
 
   /** --- */
   private Vector omModificationListeners;
@@ -69,6 +72,8 @@ public class AccessControllerImpl
 
   /** --- */
   public AccessControllerImpl() {
+
+    this.refCnt = 0;
 
     sessions = new HashMap();
     sessionLastUsed = new HashMap();
@@ -91,77 +96,86 @@ public class AccessControllerImpl
 
     Assert.assertNotNull(url);
 
-    try {
+    synchronized(this) {
+      if (refCnt++ == 0) {
+        //open connection
+        try {
+          //1. get connection to the database
+          jdbcConn = DBHelper.connect(url);
 
-      //1. get connection to the database
-      jdbcConn = DBHelper.connect(url);
+          Assert.assertNotNull(jdbcConn);
 
-      Assert.assertNotNull(jdbcConn);
+          //2. initialize group/user collections
+          //init, i.e. read users and groups from DB
+          init();
+        }
+        catch(SQLException sqle) {
+          throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");
+        }
+        catch(ClassNotFoundException clse) {
+          throw new PersistenceException("cannot locate JDBC driver ["+ clse.getMessage() +"]");
+        }
+      }
+    }
 
-      //2. initialize group/user collections
-      //init, i.e. read users and groups from DB
-      init();
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");
-    }
-    catch(ClassNotFoundException clse) {
-      throw new PersistenceException("cannot locate JDBC driver ["+ clse.getMessage() +"]");
-    }
+
   }
 
   /** --- */
   public void close()
     throws PersistenceException{
 
-    //0. Invalidate all sessions
-    this.sessions.clear();
-    this.sessionLastUsed.clear();
-    this.sessionTimeouts.clear();
+    if (--this.refCnt == 0) {
 
-    //1. deregister self as listener for groups
-    Set groupMappings = this.groupsByName.entrySet();
-    Iterator itGroups = groupMappings.iterator();
+      //0. Invalidate all sessions
+      this.sessions.clear();
+      this.sessionLastUsed.clear();
+      this.sessionTimeouts.clear();
 
-    while (itGroups.hasNext()) {
-      Map.Entry mapEntry = (Map.Entry)itGroups.next();
-      GroupImpl  grp = (GroupImpl)mapEntry.getValue();
-      grp.unregisterObjectModificationListener(this,
+      //1. deregister self as listener for groups
+      Set groupMappings = this.groupsByName.entrySet();
+      Iterator itGroups = groupMappings.iterator();
+
+      while (itGroups.hasNext()) {
+        Map.Entry mapEntry = (Map.Entry)itGroups.next();
+        GroupImpl  grp = (GroupImpl)mapEntry.getValue();
+        grp.unregisterObjectModificationListener(this,
                                                ObjectModificationEvent.OBJECT_MODIFIED);
-    }
+      }
 
-    //1.1. deregister self as listener for users
-    Set userMappings = this.usersByName.entrySet();
-    Iterator itUsers = userMappings.iterator();
+      //1.1. deregister self as listener for users
+      Set userMappings = this.usersByName.entrySet();
+      Iterator itUsers = userMappings.iterator();
 
-    while (itUsers.hasNext()) {
-      Map.Entry mapEntry = (Map.Entry)itUsers.next();
-      UserImpl  usr = (UserImpl)mapEntry.getValue();
-      usr.unregisterObjectModificationListener(this,
+      while (itUsers.hasNext()) {
+        Map.Entry mapEntry = (Map.Entry)itUsers.next();
+        UserImpl  usr = (UserImpl)mapEntry.getValue();
+        usr.unregisterObjectModificationListener(this,
                                              ObjectModificationEvent.OBJECT_MODIFIED);
+      }
+
+      //1.2 release all listeners registered for this object
+      this.omCreationListeners.removeAllElements();
+      this.omDeletionListeners.removeAllElements();
+      this.omModificationListeners.removeAllElements();
+
+      //2. delete all groups/users collections
+      this.groupsByID.clear();
+      this.groupsByName.clear();
+      this.usersByID.clear();
+      this.groupsByName.clear();
+
+      //3.close connection (if not pooled)
+      try {
+        if (false == this.isPooled) {
+          this.jdbcConn.close();
+        }
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't close connection to DB:["+
+                                        sqle.getMessage()+"]");
+      }
     }
-
-    //1.2 release all listeners registered for this object
-    this.omCreationListeners.removeAllElements();
-    this.omDeletionListeners.removeAllElements();
-    this.omModificationListeners.removeAllElements();
-
-
-    //2. delete all groups/users collections
-    this.groupsByID.clear();
-    this.groupsByName.clear();
-    this.usersByID.clear();
-    this.groupsByName.clear();
-
-    //3.close connection
-    try {
-      this.jdbcConn.close();
-    }
-    catch(SQLException sqle) {
-      throw new PersistenceException("can't close connection to DB:["+
-                                      sqle.getMessage()+"]");
-    }
-
   }
 
   /** --- */
@@ -1206,6 +1220,15 @@ public class AccessControllerImpl
       default:
         throw new IllegalArgumentException();
     }
+  }
+
+  public void finalize() {
+    //close connection
+    try {
+      this.jdbcConn.close();
+    }
+    catch(SQLException sqle) {}
+
   }
 
 }
