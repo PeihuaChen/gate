@@ -15,6 +15,7 @@
 
 package gate.corpora;
 
+import java.net.URL;
 import gate.*;
 import gate.Document;
 import gate.DocumentFormat;
@@ -26,7 +27,10 @@ import gate.util.DocumentFormatException;
 public class PdfDocumentFormat extends DocumentFormat{
 
   
-  /** Initialise this resource, and return it. */
+  /** 
+   * Initialise this resource, and return it.
+   * Registers this format unpacker with the system. 
+   */
   public Resource init() throws ResourceInstantiationException{
     // Register plain text mime type
     MimeType mime = new MimeType("application","pdf");
@@ -59,7 +63,14 @@ public class PdfDocumentFormat extends DocumentFormat{
    */
   public void unpackMarkup(Document doc)
                                      throws DocumentFormatException{
-    doc.setContent(new DocumentContentImpl("Created from PDF"));
+    //get the original file
+    URL fileURL = doc.getSourceUrl();
+    //parse the original file into a text
+    String extractedContent = "Created from PDF";
+    //TODO Implement the PDF unpacking. 
+    
+    //set the content on the document
+    doc.setContent(new DocumentContentImpl(extractedContent));
   }
 
   
