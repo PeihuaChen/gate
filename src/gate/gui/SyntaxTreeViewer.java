@@ -1410,9 +1410,9 @@ class FocusButton extends JButton {
     super(text, icon);
   }// public FocusButton
 
-  public boolean isManagingFocus() {
-    return true;
-  }// public boolean isManagingFocus()
+//  public boolean isManagingFocus() {
+//    return true;
+//  }// public boolean isManagingFocus()
 
   public void processComponentKeyEvent(KeyEvent e) {
     super.processComponentKeyEvent(e);
@@ -1432,6 +1432,9 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.23  2003/08/27 15:53:03  valyt
+// removed deprecation warning
+//
 // Revision 1.22  2003/01/28 10:01:16  marin
 // [marin] bugfixes from Kali
 //
