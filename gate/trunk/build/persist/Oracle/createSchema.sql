@@ -39,7 +39,7 @@ clear buffer
 set termout     off
 @alterIndex.sql
 set termout     on
-prompt >>>>>> Indexes altered  created...
+prompt >>>>>> Indexes successfully altered...
 clear buffer
 
 set termout     off
@@ -49,13 +49,19 @@ prompt >>>>>> Views successfully  created...
 clear buffer
 
 set termout     off
-@../../../src/database/Oracle/error.spc 
+@createType.sql
+set termout     on
+prompt >>>>>> Types successfully  created...
+clear buffer
+
+set termout     off
+@../../../src/database/Oracle/error.spc
 set termout     on
 prompt >>>>>> Package ERROR successfully  created...
 clear buffer
 
 set termout     off
-@../../../src/database/Oracle/security.spc 
+@../../../src/database/Oracle/security.spc
 @../../../src/database/Oracle/security.bdy
 set termout     on
 prompt >>>>>> Package SECURITY successfully  created...
