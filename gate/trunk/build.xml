@@ -5,61 +5,120 @@
     </description>
   <!-- set global properties for this build -->
   
+  <!-- Directories -->
+  
   <!-- Sources -->
-  <property name="src" location="src"/>
-  <!-- Files required by hte build process -->
-  <property name="build" location="build"/>
+  <property name="srcDir" location="src"/>
+  
+  <!-- Files required by the build process -->
+  <property name="buildDir" location="build"/>
+  
   <!-- Output directory for the build process -->
-  <property name="output"  location="classes"/>
+  <property name="outputDir"  location="classes"/>
+
+  <!-- Libraries directory for the build process -->
+  <property name="libDir"  location="lib"/>
+  
+  <!-- Libraries directory for the build process -->
+  <property name="extDir"  location="lib/ext"/>
+  
+  
   <!-- Use the new 1.3+ compiler -->
   <property name="build.compiler"  value="modern"/>
+
 	<!-- The libraries -->
-  <fileset id="libs" dir="lib">
-    <include name="**/*.jar"/>
-    <include name="**/*.zip"/>
+  <fileset id="libs" dir="${libDir}">
+    <include name="*.jar"/>
+    <include name="*.zip"/>
   </fileset>
+
+	<!-- The extensions -->
+  <fileset id="exts" dir="${extDir}">
+    <include name="*.jar"/>
+  </fileset>
+  
+  
+  <!-- tools.jar path -->
+  <path id="tools.jar" location="${java.home}/lib/tools.jar"/>
   
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
 		<fileset refid="libs"/>
+    <fileset refid="exts"/>
   </path>
-
-  <!-- tools.jar path -->
-  <path id="tools.jar" location="${basedir}/bin/tools14.jar"/>
   
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
-    <pathelement location="${build}/gate.jar"/>
-    <path refid="tools.jar"/>
+    <pathelement location="${buildDir}/gate.jar"/>
+    <pathelement path="${tools.jar}"/>
   </path>
+  
+  <!-- Prints out some information messages -->
+  <echo level="info">
+    This is the ANT build script for gate (http://gate.ac.uk).
+    The following targets are available
+      -compile: compiles all the .java files
+      -resources: copies the resources to the output directory (${outputDir})
+      -jar: creates the gate.jar archive
+      -run: starts GATE
+      -clean: cleans up the output from all previous builds
+      -guk: compiles the GUK classes and builds the guk.jar archive
+      -gukdemo: starts the GUK Editor (a.k.a. GATE Unicode Editor)
+      
+      -all (default target): compiles GUK and GATE classes and makes the gate.jar archive.
+  </echo>
   
 	<!-- Copies resources to the output directory -->
   <target name="resources">
-		<copy todir="${output}/gate/resources"
+		<copy todir="${outputDir}/gate/resources"
 		      includeEmptyDirs="true" >
-			<fileset dir="${src}/gate/resources"
+			<fileset dir="${srcDir}/gate/resources"
 							 excludes="**/CVS,**/CVS/**,**/.cvsignore" />
 		</copy>
-		<copy file="${build}/build.txt" todir="${output}/gate/resources"/>
-		<copy file="${build}/version.txt" todir="${output}/gate/resources"/>
+		<copy file="${buildDir}/build.txt" todir="${outputDir}/gate/resources"/>
+		<copy file="${buildDir}/version.txt" todir="${outputDir}/gate/resources"/>
 	</target>
 
 
+	<!-- This target compiles the GUK classes which are required by the main  
+       GATE compile task -->  
+  <target name="guk">
+    <javac classpathref="build.class.path"
+           destdir="${outputDir}" 
+           includes="guk/**" 
+           srcdir="${srcDir}"/>
+		<jar destfile="${libDir}/ext/guk.jar" 
+         update="false"
+         index="false">
+      <fileset dir="${outputDir}"
+               includes="guk/**"/>
+    </jar>
+		<jar destfile="${libDir}/ext/guk.jar" 
+         update="true"
+         index="true">
+      <fileset dir="${srcDir}/guk/resources"
+               excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
+    </jar>
+  </target>
+
 	<!-- This target compiles all the classes -->  
   <target name="compile"
+          depends="guk"
           description="compile the source " >
-    <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" 
-		       destdir="${output}"
+    <!-- Compile the java code from ${srcDir} into ${buildDir} -->
+    <javac srcdir="${srcDir}" 
+		       destdir="${outputDir}"
+           includes="gate/**"
 					 classpathref="build.class.path"/>
   </target>
+
 	
   <!-- Make gate.jar archive -->
 	<target name="jar" depends="compile,resources">
-		<jar destfile="${build}/gate.jar" 
+		<jar destfile="${buildDir}/gate.jar" 
          update="false"
          index="true">
-      <fileset dir="${output}/"
+      <fileset dir="${outputDir}/"
                includes="gate/**"/>
       <zipgroupfileset refid="libs"/>
     </jar>
@@ -76,13 +135,25 @@
           fork="true"
           spawn="true"
           maxmemory="200m">
+       <jvmarg value="-Djava.ext.dirs=${extDir}"/>   
+     </java>
+  </target>
+  
+  <!-- Run the GUK editor -->
+  <target name="gukdemo">
+    <java classname="guk.Editor" 
+          fork="true"
+          spawn="false">
+      <jvmarg value="-Djava.ext.dirs=${extDir}"/>
      </java>
   </target>
   
   <!-- Clear all build output -->
   <target name="clean">
     <delete includeemptydirs="true">
-      <fileset dir="${output}" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
+      <fileset dir="${outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
     </delete>
   </target>
+  
+  
 </project>
