@@ -2,14 +2,14 @@
  *	CreoleRegister.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *  Hamish Cunningham, 31/Aug/2000
  *
  *  $Id$
@@ -37,7 +37,11 @@ import gate.util.*;
   * pointing to CREOLE directories. A <B>CREOLE directory</B> is a URL at
   * which resides a file called <CODE>creole.xml</CODE> describing
   * the resources present, and one or more Jar files implementing
-  * those resources.
+  * those resources. E.g., the CREOLE resources at
+  * <A HREF=http://gate.ac.uk/>gate.ac.uk</A> are registered by Gate.init()
+  * by registering the directory URL
+  * <A HREF=http://gate.ac.uk/creole/>http://gate.ac.uk/creole/</A>, under
+  * which lives a file called creole.xml.
   * <P>
   * To register resources clients use the <CODE>registerDirectories</CODE>
   * methods. When resources have been registered they can be accessed via
