@@ -185,9 +185,9 @@ public class Main {
     // find out the version number
     try {
       InputStream ver = Files.getGateResourceAsStream("version.txt");
-//      if (ver==null) {
-//        throw new IOException();
-//      }
+      if (ver==null) {
+        throw new IOException();
+      }
       BufferedReader reader = new BufferedReader(new InputStreamReader(ver));
       Main.version = reader.readLine();
     } catch(IOException ioe) {
