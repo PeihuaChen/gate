@@ -169,6 +169,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
         try {
           setMethod.invoke(resource, args);
         } catch(Exception e) {
+          e.printStackTrace(Err.getPrintWriter());
           throw new ResourceInstantiationException(
             "couldn't invoke set method for " + paramaterName +
             " on " + resource.getClass().getName() + ": " + e);

@@ -36,11 +36,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** The "action class" we create to implement the action. Has a static
-    * method that performs the action of the RHS.
-    */
-  transient private Class theActionClass;
-
   /** An instance of theActionClass. */
   transient private Object theActionObject;
 
@@ -84,8 +79,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     */
   private HashSet blockNames;
 
-  /** For debugging. */
+  /** Returns the string for the java code */
   public String getActionClassString() { return actionClassString.toString(); }
+
+  public String getActionClassName() { return actionClassQualifiedName; }
 
   /** The LHS of our rule, where we get bindings from. */
   private LeftHandSide lhs;
@@ -174,39 +171,19 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   public void createActionClass() throws JapeException {
     // terminate the class string
     actionClassString.append("  }" + nl + "}" + nl);
-
-    // create class:
-    // contruct a file name from the class name
-    // write the action class string out into the file
-    // call javac on the class
-    // call the gate class loader to load the resultant class
-    // read in the bytes if the compiled file for later serialisation
-    // create an instance of the class
-    /* writeActionClass();
-    compileActionClass();
-    loadActionClass();
-    readActionClass();
-    instantiateActionClass();
-    */
-    //Out.println(actionClassString);
-    try {
-      actionClassBytes = new Jdk().compile(
-        actionClassString.toString(),
-        actionClassJavaFileName
-      );
-    } catch(GateException e) {
-      String nl = Strings.getNl();
-      String actionWithNumbers =
-        Strings.addLineNumbers(actionClassString.toString());
-      throw new JapeException(
-        "Couldn't create action class: " + nl + e + nl +
-        "offending code was: " + nl + actionWithNumbers + nl
-      );
-    }
-    defineActionClass();
-    instantiateActionClass();
-
-    //Debug.pr(this, "RightHandSide: action class loaded ok");
+//    try {
+//      Javac.loadClass(actionClassString.toString(),
+//                           actionClassJavaFileName);
+//    } catch(GateException e) {
+//      String nl = Strings.getNl();
+//      String actionWithNumbers =
+//        Strings.addLineNumbers(actionClassString.toString());
+//      throw new JapeException(
+//        "Couldn't create action class: " + nl + e + nl +
+//        "offending code was: " + nl + actionWithNumbers + nl
+//      );
+//    }
+//    instantiateActionClass();
   } // createActionClass
 
   /** Write out the action class file. */
@@ -224,158 +201,14 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     }
   } // writeActionClass
 
-  /** Compile the action class. First tries to use the sun.tools.javac
-    * class directly via reflection. If that fails, tries to exec javac
-    * as an external process.
-    */
-  public void compileActionClass() throws JapeException {
-    if(debug) Out.println("RightHandSide: trying to compile action");
-
-    // see if we can find the sun compiler class
-    Class sunCompilerClass = null;
-    try {
-      sunCompilerClass = Class.forName("sun.tools.javac.Main");
-    } catch(ClassNotFoundException e) {
-      sunCompilerClass = null;
-    }
-
-    // if it's 1.2, we can't support the compiler class at present
-    String jversion = System.getProperty("java.version");
-    if(jversion == null || jversion.startsWith("1.2"))
-      sunCompilerClass = null;
-
-    // if we have the sun compiler class, try to use it directly
-    if(sunCompilerClass != null) {
-      // none-reflection version:
-      // sun.tools.javac.Main compiler =
-      //   new sun.tools.javac.Main(System.err, "RhsCompiler");
-      // String toBeCompiled[] = new String[1];
-      // toBeCompiled[0] = actionClassJavaFileName;
-      // boolean compiledOk = compiler.compile(toBeCompiled);
-
-      Boolean compiledOk = new Boolean(false);
-      try {
-        // get the compiler constructor
-        Class[] consTypes = new Class[2];
-        consTypes[0] = OutputStream.class;
-        consTypes[1] = String.class;
-        Constructor compilerCons = sunCompilerClass.getConstructor(consTypes);
-
-        // get an instance of the compiler
-        Object[] consArgs = new Object[2];
-        consArgs[0] = System.err;
-        consArgs[1] = "RhsCompiler";
-        Object sunCompiler = compilerCons.newInstance(consArgs);
-
-        // get the compile method
-        Class[] compilerTypes = new Class[1];
-        compilerTypes[0] = String[].class;
-        Method compileMethod = sunCompilerClass.getDeclaredMethod(
-          "compile", compilerTypes
-        );
-
-        // call the compiler
-        String toBeCompiled[] = new String[1];
-        toBeCompiled[0] = actionClassJavaFileName;
-        Object[] compilerArgs = new Object[1];
-        compilerArgs[0] = toBeCompiled;
-        compiledOk = (Boolean) compileMethod.invoke(sunCompiler, compilerArgs);
-
-      // any exceptions mean the reflection stuff failed, as the compile
-      // method doesn't throw any. so (apart from RuntimeExceptions) we just
-      // print a warning and go on to try execing javac
-      } catch(RuntimeException e) { // rethrow runtime exceptions as they are
-        throw e;
-      } catch(Exception e) { // print out other sorts, and try javac exec
-        compiledOk = new Boolean(false);
-        Err.println(
-          "Warning: RHS compiler error: " + e.toString()
-        );
-      }
-      if(debug) Out.println("RightHandSide: action compiled ok");
-      if(compiledOk.booleanValue())
-        return;
-    }
-
-    // no sun compiler: try execing javac as an external process
-    Runtime runtime = Runtime.getRuntime();
-    try {
-      String actionCompileCommand = new String(
-        "javac -classpath " +
-        System.getProperty("java.class.path") +
-        " " + actionClassJavaFileName
-      );
-      if(debug) Out.println("doing " + actionCompileCommand);
-
-      Process actionCompile = runtime.exec(actionCompileCommand);
-      //InputStream stdout = actionCompile.getInputStream();
-      //InputStream stderr = actionCompile.getErrorStream();
-      actionCompile.waitFor();
-
-      //Out.flush();
-      //while(stdout.available() > 0)
-      //  Out.print((char) stdout.read());
-      //while(stderr.available() > 0)
-      //  Out.print((char) stderr.read());
-      //Out.flush();
-      if(debug) Out.println("process complete");
-
-    } catch(Exception e) {
-      throw new JapeException(
-        "couldn't compile " + actionClassJavaFileName + ": " + e.toString()
-      );
-    }
-  } // compileActionClass
-
-  /** Read action class bytes, for storing during serialisation. */
-  public void readActionClass() throws JapeException {
-    try {
-      File f = new File(actionClassClassFileName);
-      FileInputStream fis = new FileInputStream(actionClassClassFileName);
-      actionClassBytes = new byte[(int) f.length()];
-      fis.read(actionClassBytes, 0, (int) f.length());
-      fis.close();
-    } catch(IOException e) {
-      throw(new JapeException("couldn't read action class bytes: " + e));
-    }
-  } // readActionClass
-
-  /** Load the action class. */
-  public void loadActionClass() throws JapeException {
-    //Debug.pr(this, "RightHandSide: trying to load the action class");
-    try {
-      theActionClass =
-        Gate.getClassLoader().loadClass(actionClassClassFileName, true);
-    } catch(Exception e) {
-      e.printStackTrace();
-      throw new JapeException(
-        "couldn't load " + actionClassClassFileName + ": " + e.getMessage()
-      );
-    }
-  } // loadActionClass
-
-  /** Define the action class (after deserialisation). */
-  public void defineActionClass() throws JapeException {
-    //Debug.pr(this, "RightHandSide: trying to define the action class");
-    try {
-      theActionClass = Gate.getClassLoader().defineGateClass(
-        actionClassQualifiedName, actionClassBytes, 0, actionClassBytes.length
-      );
-    } catch(ClassFormatError e) {
-      e.printStackTrace();
-      throw new JapeException(
-        "couldn't define " + actionClassName + ": " + e
-      );
-
-    }
-    Gate.getClassLoader().resolveGateClass(theActionClass);
-  } // defineActionClass
 
   /** Create an instance of the action class. */
   public void instantiateActionClass() throws JapeException {
 
     try {
-      theActionObject = theActionClass.newInstance();
+      theActionObject = Gate.getClassLoader().
+                        loadClass(actionClassQualifiedName).
+                        newInstance();
     } catch(Exception e) {
       throw new JapeException(
         "couldn't create instance of action class " + actionClassName + ": "
@@ -405,7 +238,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   public void transduce(Document doc, AnnotationSet annotations,
                         java.util.Map bindings) throws JapeException {
     if(theActionObject == null) {
-      defineActionClass();
       instantiateActionClass();
     }
 
@@ -474,7 +306,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.22  2002/02/26 10:30:07  valyt
+// new compile solution
+//
 // Revision 1.21  2002/02/12 11:39:03  valyt
+//
 // removed sate and status members for Jape generated classes
 //
 // Revision 1.20  2002/02/04 13:59:04  hamish
