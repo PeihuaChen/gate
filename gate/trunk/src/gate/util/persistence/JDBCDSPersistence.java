@@ -47,7 +47,7 @@ public class JDBCDSPersistence extends DSPersistence {
     super.extractDataFromSource(source);
 
     JDBCDataStore ds = (JDBCDataStore)source;
-    Map securityData = Gate.getDataStoreRegister().getSecurityData(ds);
+    Map securityData = DataStoreRegister.getSecurityData(ds);
     userName = ((User)securityData.get("user")).getName();
     userGroup = ((Group)securityData.get("group")).getName();
   }
@@ -183,7 +183,7 @@ public class JDBCDSPersistence extends DSPersistence {
       FeatureMap securityData = Factory.newFeatureMap();
       securityData.put("user", usr);
       securityData.put("group", grp);
-      reg.addSecurityData(ds, securityData);
+      DataStoreRegister.addSecurityData(ds, securityData);
 
     } catch(PersistenceException pe) {
       JOptionPane.showMessageDialog(null, "Datastore open error!\n " +

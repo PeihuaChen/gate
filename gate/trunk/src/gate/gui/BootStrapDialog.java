@@ -389,8 +389,8 @@ public class BootStrapDialog extends JDialog{
       public void actionPerformed(ActionEvent e){
         // choose folder code
         fileChooser.setDialogTitle("Select the path for this resource");
-        fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
-        if(fileChooser.showOpenDialog(mainFrame) == fileChooser.APPROVE_OPTION){
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if(fileChooser.showOpenDialog(mainFrame) == JFileChooser.APPROVE_OPTION){
           pathNewProject = fileChooser.getSelectedFile().toString();
           fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
         }// End if

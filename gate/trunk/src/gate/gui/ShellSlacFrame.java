@@ -106,8 +106,8 @@ public class ShellSlacFrame extends MainFrame {
     ResourceData rDataDocument = getDocumentResourceData();
     if(rDataDocument != null) {
       action = new NewResourceAction(rDataDocument);
-      action.putValue(action.NAME, "New Document");
-      action.putValue(action.SHORT_DESCRIPTION,"Create a new document");
+      action.putValue(Action.NAME, "New Document");
+      action.putValue(Action.SHORT_DESCRIPTION,"Create a new document");
 
       fileMenu.add(new XJMenuItem(action, this));
 
@@ -116,8 +116,8 @@ public class ShellSlacFrame extends MainFrame {
     // Open All... action - open multiple files from directory
     corpusFiller = new CorpusFillerComponent();
     action = new PopulateCorpusAction();
-    action.putValue(action.NAME, "New Documents...");
-    action.putValue(action.SHORT_DESCRIPTION,"Create multiple documents");
+    action.putValue(Action.NAME, "New Documents...");
+    action.putValue(Action.SHORT_DESCRIPTION,"Create multiple documents");
     fileMenu.add(new XJMenuItem(action, this));
 
     fileMenu.add(new XJMenuItem(new CloseSelectedDocumentAction(), this));
@@ -174,7 +174,7 @@ public class ShellSlacFrame extends MainFrame {
         System.exit(0);
       }
     };
-    action.putValue(action.NAME, "Exit");
+    action.putValue(Action.NAME, "Exit");
     fileMenu.add(new XJMenuItem(action, this));
     retMenuBar.add(fileMenu);
 
@@ -679,7 +679,7 @@ public class ShellSlacFrame extends MainFrame {
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
       int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
-      if(res == fileChooser.APPROVE_OPTION) {
+      if(res == JFileChooser.APPROVE_OPTION) {
         File file = fileChooser.getSelectedFile();
 
         String str = "";
@@ -890,7 +890,7 @@ public class ShellSlacFrame extends MainFrame {
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
       int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
-      if(res == fileChooser.APPROVE_OPTION) {
+      if(res == JFileChooser.APPROVE_OPTION) {
         File directory = fileChooser.getSelectedFile();
         if(directory != null && directory.isDirectory()) {
           Runnable run = new ExportAllRunnable(directory);
@@ -915,7 +915,7 @@ public class ShellSlacFrame extends MainFrame {
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
       int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
-      if(res == fileChooser.APPROVE_OPTION) {
+      if(res == JFileChooser.APPROVE_OPTION) {
         File directory = fileChooser.getSelectedFile();
         if(directory != null && directory.isDirectory()) {
           Document currentDoc;
@@ -978,7 +978,7 @@ public class ShellSlacFrame extends MainFrame {
       File file = new File(appURL);
       boolean appLoaded = false;
 
-      appFrame.lockGUI("Application from '"+appURL+"' is being loaded...");
+      MainFrame.lockGUI("Application from '"+appURL+"' is being loaded...");
       if( file.exists() ) {
         try {
           gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
@@ -991,7 +991,7 @@ public class ShellSlacFrame extends MainFrame {
           ioex.printStackTrace();
         } // catch
       } // if
-      appFrame.unlockGUI();
+      MainFrame.unlockGUI();
 
       if(!appLoaded) {
         // file do not exist. Show a message

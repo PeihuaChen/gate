@@ -176,14 +176,14 @@ public class NameBearerHandle implements Handle,
     popupItems.add(null);
 
     action = new edu.stanford.smi.protege.action.SaveProject();
-    action.putValue(action.NAME, "Save Protege");
-    action.putValue(action.SHORT_DESCRIPTION, "Save protege project");
+    action.putValue(Action.NAME, "Save Protege");
+    action.putValue(Action.SHORT_DESCRIPTION, "Save protege project");
     // Add Save Protege action
     popupItems.add(new XJMenuItem(action, this));
 
     action = new edu.stanford.smi.protege.action.SaveAsProject();
-    action.putValue(action.NAME, "Save Protege As...");
-    action.putValue(action.SHORT_DESCRIPTION, "Save protege project as");
+    action.putValue(Action.NAME, "Save Protege As...");
+    action.putValue(Action.SHORT_DESCRIPTION, "Save protege project as");
     // Add Save as... Protege action
     popupItems.add(new XJMenuItem(action, this));
 
@@ -206,13 +206,13 @@ public class NameBearerHandle implements Handle,
 
     popupItems.add(null);
     action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
-    action.putValue(action.SHORT_DESCRIPTION,
+    action.putValue(Action.SHORT_DESCRIPTION,
       "Save trained HMM model into PR URL file");
     // Add Save trained HMM model action
     popupItems.add(new XJMenuItem(action, sListenerProxy));
 
     action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
-    action.putValue(action.SHORT_DESCRIPTION,
+    action.putValue(Action.SHORT_DESCRIPTION,
       "Save trained HMM model into new file");
     // Add Save As... trained HMM model action
     popupItems.add(new XJMenuItem(action, sListenerProxy));
@@ -719,13 +719,13 @@ if(preserveFormat) System.out.println("Preserve option set!");
             JFileChooser filer = MainFrame.getFileChooser();
             filer.setDialogTitle(
                 "Select the directory that will contain the corpus");
-            filer.setFileSelectionMode(filer.DIRECTORIES_ONLY);
+            filer.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             filer.setFileFilter(filer.getAcceptAllFileFilter());
 
             if (filer.showDialog(getLargeView() != null ?
                                      getLargeView() :
                                      getSmallView(),
-                                     "Select") == filer.APPROVE_OPTION){
+                                     "Select") == JFileChooser.APPROVE_OPTION){
 
               File dir = filer.getSelectedFile();
               //create the top directory if needed
@@ -993,9 +993,9 @@ if(preserveFormat) System.out.println("Preserve option set!");
       JFileChooser fileChooser = MainFrame.getFileChooser();
 
       fileChooser.setDialogTitle("Select a file for ARFF dump");
-      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       if (fileChooser.showSaveDialog(largeView) ==
-                                            fileChooser.APPROVE_OPTION){
+                                            JFileChooser.APPROVE_OPTION){
         final File file = fileChooser.getSelectedFile();
         Thread thread = new Thread(new Runnable(){
           public void run(){
@@ -1035,9 +1035,9 @@ if(preserveFormat) System.out.println("Preserve option set!");
       JFileChooser fileChooser = MainFrame.getFileChooser();
 
       fileChooser.setDialogTitle("Select a file for this resource");
-      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       if (fileChooser.showSaveDialog(largeView) ==
-                                            fileChooser.APPROVE_OPTION){
+                                            JFileChooser.APPROVE_OPTION){
         final File file = fileChooser.getSelectedFile();
           Runnable runnable = new Runnable(){
             public void run(){
@@ -1129,7 +1129,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                   + " seconds");
               }else{
                 FeatureMap securityData = (FeatureMap)
-                             Gate.getDataStoreRegister().getSecurityData(ds);
+                             DataStoreRegister.getSecurityData(ds);
                 SecurityInfo si = null;
                 //check whether the datastore supports security data
                 //serial ones do not for example

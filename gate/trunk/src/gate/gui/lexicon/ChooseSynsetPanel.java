@@ -74,7 +74,7 @@ public class ChooseSynsetPanel extends JPanel {
     synsetList = new JList(synsetListModel);
     synsetList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-    this.posComboBox = new JComboBox(lexKB.POS_TYPES);
+    this.posComboBox = new JComboBox(Lexicon.POS_TYPES);
     posComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE,
                                     posComboBox.getPreferredSize().height));
     mainBox = Box.createHorizontalBox();

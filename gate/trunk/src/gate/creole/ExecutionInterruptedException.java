@@ -12,8 +12,6 @@
  */
 package gate.creole;
 
-import gate.Executable;
-
 /**
  * Thrown by {@link Executable}s after they have stopped their execution
  * as a result of a call to their interrupt() method.

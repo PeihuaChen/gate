@@ -253,7 +253,7 @@ public class CorpusBenchmarkTool {
     corpusTool.init();
     corpusWordCount = 0;
 
-    Out.prln("Measuring annotaitions of types: " + corpusTool.annotTypes + "<P>");
+    Out.prln("Measuring annotaitions of types: " + CorpusBenchmarkTool.annotTypes + "<P>");
 
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();

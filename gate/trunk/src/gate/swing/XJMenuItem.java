@@ -40,7 +40,7 @@ public class XJMenuItem extends JMenuItem {
 
   public XJMenuItem(Action a, StatusListener listener){
     super(a);
-    this.description = (String)a.getValue(a.SHORT_DESCRIPTION);
+    this.description = (String)a.getValue(Action.SHORT_DESCRIPTION);
     this.listener = listener;
     initListeners();
   }// XJMenuItem(Action a, StatusListener listener)

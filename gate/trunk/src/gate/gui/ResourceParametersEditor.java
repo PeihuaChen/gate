@@ -106,7 +106,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     Gate.getCreoleRegister().addCreoleListener(this);
     addKeyListener(new KeyAdapter() {
       public void keyTyped(KeyEvent e) {
-        if(e.getKeyCode() == e.VK_ENTER){
+        if(e.getKeyCode() == KeyEvent.VK_ENTER){
           if(getEditingColumn() == -1 && getEditingRow() == -1){
             getParent().dispatchEvent(e);
           }
@@ -592,7 +592,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           fileChooser.setDialogTitle("Select a file");
           int res = fileChooser.showOpenDialog(ResourceParametersEditor.this);
-          if(res == fileChooser.APPROVE_OPTION){
+          if(res == JFileChooser.APPROVE_OPTION){
             try {
               textField.setText(fileChooser.getSelectedFile().
                                 toURL().toExternalForm());

@@ -163,7 +163,7 @@ implements JapeConstants, java.io.Serializable
 
   /** Clean up (delete action class files, for e.g.). */
   public void cleanUp() {
-    rhs.cleanUp();
+    RightHandSide.cleanUp();
   } // cleanUp
 
 
@@ -209,6 +209,10 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.15  2004/03/25 13:23:04  valyt
+// 
+// Style: static access to static members
+//
 // Revision 1.14  2004/03/25 13:01:14  valyt
 // Imports optimisation throughout the Java sources
 // (to get rid of annoying warnings in Eclipse)

@@ -78,13 +78,13 @@ public class TestPersist extends TestCase
 
   /** Fixture set up */
   public void setUp() throws Exception {
-    if (! Gate.getDataStoreRegister().getConfigData().containsKey("url-test"))
+    if (! DataStoreRegister.getConfigData().containsKey("url-test"))
       throw new GateRuntimeException("DB URL not configured in gate.xml");
     else
       JDBC_URL_1 =
-        (String) Gate.getDataStoreRegister().getConfigData().get("url-test");
+        (String) DataStoreRegister.getConfigData().get("url-test");
       JDBC_URL_2 =
-        (String) Gate.getDataStoreRegister().getConfigData().get("url-test1");
+        (String) DataStoreRegister.getConfigData().get("url-test1");
   } // setUp
 
   /** Put things back as they should be after running tests
@@ -497,10 +497,10 @@ public class TestPersist extends TestCase
   private DatabaseDataStore _createDS() {
 
     DatabaseDataStore ds = null;
-    if (this.dbType == DBHelper.ORACLE_DB) {
+    if (TestPersist.dbType == DBHelper.ORACLE_DB) {
       ds = new OracleDataStore();
     }
-    else if (this.dbType == DBHelper.POSTGRES_DB) {
+    else if (TestPersist.dbType == DBHelper.POSTGRES_DB) {
       ds = new PostgresDataStore();
     }
     else {
@@ -513,16 +513,16 @@ public class TestPersist extends TestCase
 
   private void prepareDB(String db) {
 
-    if (this.JDBC_URL_1.indexOf(db) > 0 ) {
-      this.JDBC_URL = this.JDBC_URL_1;
+    if (TestPersist.JDBC_URL_1.indexOf(db) > 0 ) {
+      TestPersist.JDBC_URL = TestPersist.JDBC_URL_1;
     }
     else {
-      this.JDBC_URL = this.JDBC_URL_2;
+      TestPersist.JDBC_URL = TestPersist.JDBC_URL_2;
     }
 
-    Assert.assertNotNull("jdbc url not set for Oracle or Postgres",this.JDBC_URL);
+    Assert.assertNotNull("jdbc url not set for Oracle or Postgres",TestPersist.JDBC_URL);
 
-    this.dbType = DBHelper.getDatabaseType(JDBC_URL);
+    TestPersist.dbType = DBHelper.getDatabaseType(JDBC_URL);
   }
 
 
@@ -535,7 +535,7 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
 
     //2. get test document
@@ -543,7 +543,7 @@ public class TestPersist extends TestCase
     Assert.assertNotNull(transDoc);
 
     //3. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     ac.open();
     Assert.assertNotNull(ac);
 
@@ -583,7 +583,7 @@ public class TestPersist extends TestCase
       String asetName = (String)it.next();
       AnnotationSet transAset = (AnnotationSet)transDocNamedSets.get(asetName);
       AnnotationSet asetNew = new AnnotationSetImpl(transAset);
-      this.sample_namedASets.put(transAset.getName(),asetNew);
+      TestPersist.sample_namedASets.put(transAset.getName(),asetNew);
     }
 
 
@@ -596,7 +596,7 @@ public class TestPersist extends TestCase
     Assert.assertEquals(sample_defaultASet, ((DatabaseDocumentImpl)lr).getAnnotations());
 
     sampleDoc_lrID = (Long)lr.getLRPersistenceId();
-    if (DEBUG) Out.prln("lr id: " + this.sampleDoc_lrID);
+    if (DEBUG) Out.prln("lr id: " + TestPersist.sampleDoc_lrID);
 
     //8.close
     ac.close();
@@ -617,11 +617,11 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
 
     //3. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -645,7 +645,7 @@ public class TestPersist extends TestCase
 ///Err.println(">>>");
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 ///Err.println("<<<");
     //3. check name
@@ -703,7 +703,7 @@ public class TestPersist extends TestCase
 
 
     //10. iterate named annotations
-    Iterator itOld =  this.sample_namedASets.keySet().iterator();
+    Iterator itOld =  TestPersist.sample_namedASets.keySet().iterator();
     while (itOld.hasNext()) {
       String asetName = (String)itOld.next();
       AnnotationSet asetOld = (AnnotationSet)sample_namedASets.get(asetName);
@@ -731,7 +731,7 @@ public class TestPersist extends TestCase
     Map namedNew = dbDoc.getNamedAnnotationSets();
 
     Assert.assertNotNull(namedNew);
-    Assert.assertTrue(namedNew.size() == this.sample_namedASets.size());
+    Assert.assertTrue(namedNew.size() == TestPersist.sample_namedASets.size());
 
     Iterator itNames = namedNew.keySet().iterator();
     while (itNames.hasNext()) {
@@ -763,7 +763,7 @@ public class TestPersist extends TestCase
     LanguageResource lr = null;
 
     //0. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -780,7 +780,7 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
 
     //1.5 set DS session
@@ -790,7 +790,7 @@ public class TestPersist extends TestCase
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
     Document dbDoc = (Document)lr;
     Document doc2 = null;
@@ -808,7 +808,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertEquals(newName,dbDoc.getName());
@@ -842,7 +842,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertEquals(fm,dbDoc.getFeatures());
@@ -859,7 +859,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertEquals(newURL,dbDoc.getSourceUrl());
@@ -877,7 +877,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertEquals(newStart,dbDoc.getSourceUrlStartOffset());
@@ -898,7 +898,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertEquals(newMA,doc2.getMarkupAware());
@@ -917,7 +917,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertEquals(contNew,dbDoc.getContent());
@@ -934,7 +934,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     String encNew = (String)doc2.
@@ -960,7 +960,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     AnnotationSet doc2Set = doc2.getAnnotations("TEST SET");
@@ -987,7 +987,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     doc2Set = doc2.getAnnotations("TEST SET");
@@ -1020,7 +1020,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
@@ -1047,7 +1047,7 @@ public class TestPersist extends TestCase
 //--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
     params.clear();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     Assert.assertTrue(false == doc2.getNamedAnnotationSets().containsKey(dummySetName));
@@ -1078,7 +1078,7 @@ public class TestPersist extends TestCase
     LanguageResource lr = null;
 
     //0. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -1095,14 +1095,14 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
     ds.setSession(usrSession);
 
     //2. read LR
     FeatureMap params = Factory.newFeatureMap();
     params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
-    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    params.put(DataStore.LR_ID_FEATURE_NAME, TestPersist.sampleDoc_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     //2.5 get exclusive lock
@@ -1132,7 +1132,7 @@ public class TestPersist extends TestCase
     //descr : create a corpus
 
     //0. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -1149,7 +1149,7 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
     ds.setSession(usrSession);
 
@@ -1166,8 +1166,8 @@ public class TestPersist extends TestCase
     Assert.assertTrue(result instanceof DatabaseCorpusImpl);
     Assert.assertNotNull(result.getLRPersistenceId());
 
-    this.sampleCorpus =  result;
-    this.sampleCorpus_lrID = (Long)result.getLRPersistenceId();
+    TestPersist.sampleCorpus =  result;
+    TestPersist.sampleCorpus_lrID = (Long)result.getLRPersistenceId();
 
     //6.close
     ac.close();
@@ -1188,7 +1188,7 @@ public class TestPersist extends TestCase
     LanguageResource lr = null;
 
     //0. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -1205,7 +1205,7 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
     ds.setSession(usrSession);
 
@@ -1252,7 +1252,7 @@ public class TestPersist extends TestCase
     LanguageResource lr = null;
 
     //0. get security factory & login
-    AccessController ac = Factory.createAccessController(this.JDBC_URL);
+    AccessController ac = Factory.createAccessController(TestPersist.JDBC_URL);
     Assert.assertNotNull(ac);
     ac.open();
 
@@ -1269,7 +1269,7 @@ public class TestPersist extends TestCase
     //1. open data storage
     DatabaseDataStore ds = this._createDS();
     Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
+    ds.setStorageUrl(TestPersist.JDBC_URL);
     ds.open();
     ds.setSession(usrSession);
 

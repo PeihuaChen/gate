@@ -192,7 +192,7 @@ public class UserImpl
     ObjectModificationEvent e = new ObjectModificationEvent(
                                           this,
                                           ObjectModificationEvent.OBJECT_MODIFIED,
-                                          this.OBJECT_CHANGE_NAME);
+                                          User.OBJECT_CHANGE_NAME);
 
     //5. update member variable
     this.name = newName;
