@@ -143,39 +143,41 @@ public class TestPR extends TestCase
     splitter.execute();
     assert("Found in ft-bt-03-aug-2001.html "+
       doc1.getAnnotations().get("Sentence").size() +
-      " Sentence annotations, instead of the expected 27.",
-      doc1.getAnnotations().get("Sentence").size()== 27);
+      " Sentence annotations, instead of the expected 22.",
+      doc1.getAnnotations().get("Sentence").size()== 22);
 
     assert("Found in ft-bt-03-aug-2001.html "+
       doc1.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 45.",
-      doc1.getAnnotations().get("Split").size()== 45);
+      " Split annotations, instead of the expected 36.",
+      doc1.getAnnotations().get("Split").size()== 36);
+
 
     //run splitter for doc2
     splitter.setDocument(doc2);
     splitter.execute();
     assert("Found in gu-Am-Brit-4-aug-2001.html "+
       doc2.getAnnotations().get("Sentence").size() +
-      " Sentence annotations, instead of the expected 64.",
-      doc2.getAnnotations().get("Sentence").size()== 64);
+      " Sentence annotations, instead of the expected 53.",
+      doc2.getAnnotations().get("Sentence").size()== 53);
 
     assert("Found in gu-Am-Brit-4-aug-2001.html "+
       doc2.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 88.",
-      doc2.getAnnotations().get("Split").size()== 88);
+      " Split annotations, instead of the expected 71.",
+      doc2.getAnnotations().get("Split").size()== 71);
 
     //run splitter for doc3
     splitter.setDocument(doc3);
     splitter.execute();
+
     assert("Found in in-outlook-09-aug-2001.html "+
       doc3.getAnnotations().get("Sentence").size() +
-      " Sentence annotations, instead of the expected 87.",
-      doc3.getAnnotations().get("Sentence").size()== 87);
+      " Sentence annotations, instead of the expected 65.",
+      doc3.getAnnotations().get("Sentence").size()== 65);
 
     assert("Found in in-outlook-09-aug-2001.html "+
       doc3.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 109.",
-      doc3.getAnnotations().get("Split").size()== 109);
+      " Split annotations, instead of the expected 85.",
+      doc3.getAnnotations().get("Split").size()== 85);
     Factory.deleteResource(splitter);
   }//testSplitter
 
@@ -195,26 +197,24 @@ public class TestPR extends TestCase
                   doc1.getAnnotations().get("Token", fType);
 
     assert("Found in ft-bt-03-aug-2001.html "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 657.",
-      annots.size() == 657);
+      " Token annotations with category feature, instead of the expected 675.",
+      annots.size() == 675);
 
     //run the tagger for doc2
     tagger.setDocument(doc2);
     tagger.execute();
     annots = doc2.getAnnotations().get("Token", fType);
-
     assert("Found in gu-Am-Brit-4-aug-2001.html "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 1081.",
-      annots.size() == 1081);
+      " Token annotations with category feature, instead of the expected 1131.",
+      annots.size() == 1131);
 
     //run the tagger for doc3
     tagger.setDocument(doc3);
     tagger.execute();
     annots = doc3.getAnnotations().get("Token", fType);
-
     assert("Found in in-outlook-09-aug-2001.html "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 1376.",
-      annots.size() == 1376);
+      " Token annotations with category feature, instead of the expected 1426.",
+      annots.size() == 1426);
     Factory.deleteResource(tagger);
   }//testTagger()
 
@@ -222,7 +222,6 @@ public class TestPR extends TestCase
     FeatureMap params = Factory.newFeatureMap();
     ANNIETransducer transducer = (ANNIETransducer) Factory.createResource(
                           "gate.creole.ANNIETransducer", params);
-
 
     //run the transducer for doc1
     transducer.setDocument(doc1);
@@ -333,29 +332,27 @@ public class TestPR extends TestCase
 
     annots = doc3.getAnnotations().get(null,fType);
     assert("Found in in-outlook-09-aug-2001.html "+ annots.size() +
-      " annotations with matches feature, instead of the expected 22.",
-      annots.size() == 22);
+      " annotations with matches feature, instead of the expected 20.",
+      annots.size() == 20);
     Factory.deleteResource(orthomatcher);
   }//testOrthomatcher
 
   /** A test for comparing the annotation sets*/
-/*  public void testAllPR() throws Exception {
+  public void testAllPR() throws Exception {
 
     // verify if the saved data store is the same with the just processed file
     // first document
-    URL storageDir =
-    //      new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/ft/");
-    Gate.setLocalWebServer(false);
-   //Gate.setNetConnected(false);
-   Out.prln(Gate.getUrl("tests/ft"));
+    String urlBaseName = Gate.locateGateFiles();
+    URL urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");
+    URL storageDir = null;
+    storageDir = new URL(urlBase, "tests/ft");
 
-      new URL("gate:/gate.ac.uk/tests/ft/");
     //open the data store
     DataStore ds = Factory.openDataStore
                     ("gate.persist.SerialDataStore", storageDir);
     //get LR id
     String lr_id_feature_map = (String)ds.getLrIds
-                                ("gate.corpora.DocumentImpl").get(1);
+                                ("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
     Document document =
       (Document) ds.getLr("gate.corpora.DocumentImpl", lr_id_feature_map);
@@ -364,20 +361,54 @@ public class TestPR extends TestCase
     // get the annotation set from the first processed document
     AnnotationSet annotSet1 = doc1.getAnnotations();
     // compare the annotation set
-    assert("The annotation set from data store and processed document are " +
-      "not equal for ft-bt-03-aug-2001.html ",annotSet.equals(annotSet1));
+    // assert("The annotation set from data store and processed document are " +
+    //      "not equal for ft-bt-03-aug-2001.html ",annotSet.equals(annotSet1));
+    assert("The Organization set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Organization").equals(annotSet1.get("Organization")));
+
+    assert("The Location set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Location").equals(annotSet1.get("Location")));
+
+    assert("The Person set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Person").equals(annotSet1.get("Person")));
+
+    assert("The Date set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Date").equals(annotSet1.get("Date")));
+
+    assert("The Money set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Money").equals(annotSet1.get("Money")));
+
+    assert("The Token set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Token").equals(annotSet1.get("Token")));
+
+    assert("The Lookup set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Lookup").equals(annotSet1.get("Lookup")));
+
+    assert("The Sentence set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Sentence").equals(annotSet1.get("Sentence")));
+
+    assert("The Split set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Split").equals(annotSet1.get("Split")));
 
     // second document
-    storageDir =
-      new URL("gate:/gate.ac.uk/tests/gu/");
-//      new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/gu/");
+    storageDir = null;
+    storageDir = new URL(urlBase, "tests/gu");
 
     //open the data store
     ds = Factory.openDataStore
                     ("gate.persist.SerialDataStore", storageDir);
     //get LR id
     lr_id_feature_map = (String)ds.getLrIds
-                                ("gate.corpora.DocumentImpl").get(1);
+                                ("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
     document =
       (Document) ds.getLr("gate.corpora.DocumentImpl", lr_id_feature_map);
@@ -385,20 +416,54 @@ public class TestPR extends TestCase
     annotSet = document.getAnnotations();
     // get the annotation set from the second processed document
     AnnotationSet annotSet2 = doc2.getAnnotations();
-    assert("The annotation set from data store and processed document are " +
-      "not equal for gu-Am-Brit-4-aug-2001.html ",annotSet.equals(annotSet2));
+    /*assert("The annotation set from data store and processed document are " +
+      "not equal for gu-Am-Brit-4-aug-2001.html ",annotSet.equals(annotSet2));*/
+    assert("The Organization set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Organization").equals(annotSet2.get("Organization")));
+
+    assert("The Location set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Location").equals(annotSet2.get("Location")));
+
+    assert("The Person set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Person").equals(annotSet2.get("Person")));
+
+    assert("The Date set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Date").equals(annotSet2.get("Date")));
+
+    assert("The Money set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Money").equals(annotSet2.get("Money")));
+
+    assert("The Token set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Token").equals(annotSet2.get("Token")));
+
+    assert("The Lookup set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Lookup").equals(annotSet2.get("Lookup")));
+
+    assert("The Sentence set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Sentence").equals(annotSet2.get("Sentence")));
+
+    assert("The Split set from data store and processed " +
+      "document are not equal for gu-Am-Brit-4-aug-2001.html ",
+      annotSet.get("Split").equals(annotSet2.get("Split")));
 
     // third document
-    storageDir =
-      new URL("gate:/gate.ac.uk/tests/in/");
-//       new URL("file:///Z:/gate/src/gate/resources/gate.ac.uk/tests/in/");
+    storageDir = null;
+    storageDir = new URL(urlBase, "tests/in");
 
     //open the data store
     ds = Factory.openDataStore
                     ("gate.persist.SerialDataStore", storageDir);
     //get LR id
     lr_id_feature_map = (String)ds.getLrIds
-                                ("gate.corpora.DocumentImpl").get(1);
+                                ("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
     document =
       (Document) ds.getLr("gate.corpora.DocumentImpl", lr_id_feature_map);
@@ -406,10 +471,46 @@ public class TestPR extends TestCase
     annotSet = document.getAnnotations();
     // get the annotation set from the third processed document
     AnnotationSet annotSet3 = doc3.getAnnotations();
-    assert("The annotation set from data store and processed document are " +
-      "not equal for in-outlook-09-aug-2001.html  ",annotSet.equals(annotSet3));
+/*    assert("The annotation set from data store and processed document are " +
+      "not equal for in-outlook-09-aug-2001.html  ",annotSet.equals(annotSet3));*/
+    assert("The Organization set from data store and processed " +
+      "document are not equal for ft-bt-03-aug-2001.html ",
+      annotSet.get("Organization").equals(annotSet3.get("Organization")));
+
+    assert("The Location set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Location").equals(annotSet3.get("Location")));
+
+    assert("The Person set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Person").equals(annotSet3.get("Person")));
+
+    assert("The Date set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Date").equals(annotSet3.get("Date")));
+
+    assert("The Money set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Money").equals(annotSet3.get("Money")));
+
+    assert("The Token set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Token").equals(annotSet3.get("Token")));
+
+    assert("The Lookup set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Lookup").equals(annotSet3.get("Lookup")));
+
+    assert("The Sentence set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Sentence").equals(annotSet3.get("Sentence")));
+
+    assert("The Split set from data store and processed " +
+      "document are not equal for in-outlook-09-aug-2001.html ",
+      annotSet.get("Split").equals(annotSet3.get("Split")));
+
   } // testAllPR()
-*/
+
 
   /** Test suite routine for the test runner */
   public static Test suite() {
@@ -423,11 +524,11 @@ public class TestPR extends TestCase
       testPR.setUp();
       testPR.testTokenizer();
       testPR.testGazetteer();
-//      testPR.testSplitter();
+      testPR.testSplitter();
       testPR.testTagger();
       testPR.testTransducer();
       testPR.testOrthomatcher();
-      //testPR.testAllPR();
+      testPR.testAllPR();
       testPR.tearDown();
     } catch(Exception e) {
       e.printStackTrace();
