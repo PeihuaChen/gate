@@ -1100,11 +1100,33 @@ public class OracleDataStore extends JDBCDataStore {
     createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     //5. create a DatabaseCorpusImpl and return it
-    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
+/*    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
                                              this,
                                               lrID,
                                               corp.getFeatures(),
                                               dbDocs);
+*/
+
+    Corpus dbCorpus = null;
+    FeatureMap params = Factory.newFeatureMap();
+    HashMap initData = new HashMap();
+
+    initData.put("DS",this);
+    initData.put("LR_ID",lrID);
+    initData.put("CORP_NAME",corp.getName());
+    initData.put("CORP_FEATURES",corp.getFeatures());
+    initData.put("CORP_SUPPORT_LIST",dbDocs);
+
+    params.put("initData__$$__", initData);
+
+    try {
+      //here we create the persistent LR via Factory, so it's registered
+      //in GATE
+      dbCorpus = (Corpus)Factory.createResource("gate.corpora.DatabaseCorpusImpl", params);
+    }
+    catch (gate.creole.ResourceInstantiationException ex) {
+      throw new GateRuntimeException(ex.getMessage());
+    }
 
     //6. done
     return dbCorpus;
