@@ -70,7 +70,7 @@ public class Splash extends JWindow {
    * Displays the splash screen centered in the owner's space or centered on
    * the screen if no owner or owner not shown.
    */
-  public void show(){
+  public void showSplash(){
     Dimension ownerSize;
     Point ownerLocation;
     if(getOwner() == null){
