@@ -10,7 +10,6 @@
     <path>[lib/JavaCC.zip]</path>
     <path>[lib/javacompiler.jar]</path>
     <path>[lib/jaxp.jar]</path>
-    <path>[lib/jgl3.1.0.jar]</path>
     <path>[lib/jigsaw.jar]</path>
     <path>[lib/junit.jar]</path>
     <path>[lib/orajdbc2.zip]</path>
