@@ -1,4 +1,4 @@
-/*
+
  *  DDL script for PostgreSQL 7.2
  *
  *  Copyright (c) 1998-2002, The University of Sheffield.
@@ -15,128 +15,128 @@
  *
  */
 
-drop sequence  seq_ft_id ;
-create sequence  seq_ft_id
+drop sequence  seq_feature ;
+create sequence  seq_feature
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20;
 
-drop sequence  seq_fk_id ;
-create sequence  seq_fk_id
+drop sequence  seq_feature_key ;
+create sequence  seq_feature_key
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence   seq_usr_id ;
-create sequence  seq_usr_id
+drop sequence   seq_user ;
+create sequence  seq_user
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_grp_id ;
-create sequence  seq_grp_id
+drop sequence    seq_group ;
+create sequence  seq_group
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_ugrp_id ;
-create sequence  seq_ugrp_id
+drop sequence    seq_user_group ;
+create sequence  seq_user_group
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_enc_id ;
-create sequence  seq_enc_id
+drop sequence    seq_doc_encoding ;
+create sequence  seq_doc_encoding
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_dc_id ;
-create sequence  seq_dc_id
+drop sequence    seq_doc_content ;
+create sequence  seq_doc_content
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_lrtp_id ;
-create sequence  seq_lrtp_id
+drop sequence    seq_lr_type ;
+create sequence  seq_lr_type
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_lr_id ;
-create sequence  seq_lr_id
+drop sequence    seq_lang_resource ;
+create sequence  seq_lang_resource
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_doc_id ;
-create sequence  seq_doc_id
+drop sequence    seq_document ;
+create sequence  seq_document
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_node_global_id ;
-create sequence  seq_node_global_id
+drop sequence    seq_node ;
+create sequence  seq_node
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence    seq_at_id ;
-create sequence  seq_at_id
+drop sequence    seq_annotation_type ;
+create sequence  seq_annotation_type
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence  seq_ann_global_id ;
-create sequence  seq_ann_global_id
+drop sequence  seq_annotation ;
+create sequence  seq_annotation
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence  seq_as_id ;
-create sequence  seq_as_id
+drop sequence  seq_annot_set ;
+create sequence  seq_annot_set
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence  seq_asann_id ;
-create sequence  seq_asann_id
+drop sequence  seq_as_annotation ;
+create sequence  seq_as_annotation
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence  seq_corp_id ;
-create sequence  seq_corp_id
+drop sequence  seq_corpus ;
+create sequence  seq_corpus
        start 1
        increment 1
        maxvalue 2147483647
@@ -144,16 +144,16 @@ create sequence  seq_corp_id
        cache 20 ;
 
 
-drop sequence  seq_cd_id ;
-create sequence  seq_cd_id
+drop sequence  seq_corpus_document ;
+create sequence  seq_corpus_document
        start 1
        increment 1
        maxvalue 2147483647
        minvalue 1
        cache 20 ;
 
-drop sequence  seq_par_id ;
-create sequence  seq_par_id
+drop sequence  seq_parameter ;
+  create sequence  seq_parameter
        start 1
        increment 1
        maxvalue 2147483647
