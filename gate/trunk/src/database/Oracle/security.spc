@@ -90,6 +90,12 @@ create or replace package security is
   /*  -- */                           
   function can_delete_user(p_usr_id     IN  number)
      return boolean;
+
+  /*  -- */                           
+  function is_valid_security_data(p_perm_mode  IN  number,
+                                  p_group_id   IN  number,
+                                  p_user_id    IN  number)
+     return boolean;
                            
 end security;
 /
