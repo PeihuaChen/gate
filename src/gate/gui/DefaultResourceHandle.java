@@ -243,8 +243,6 @@ public class DefaultResourceHandle implements ResourceHandle {
           // Prepare to write into the xmlFile using UTF-8 encoding
           OutputStreamWriter writer = new OutputStreamWriter(
                           new FileOutputStream(selectedFile),"UTF-8");
- //         OutputStreamWriter writer = new OutputStreamWriter(
- //                                       new FileOutputStream(selectedFile));
 
           // Write (test the toXml() method)
           // This Action is added only when a gate.Document is created.
