@@ -1335,7 +1335,73 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     throws PersistenceException,SecurityException;
 
   /** helper for sync() - saves a Document in the database */
-  protected abstract void syncDocument(Document doc)
-    throws PersistenceException, SecurityException;
+  /** helper for sync() - saves a Document in the database */
+  protected void syncDocument(Document doc)
+    throws PersistenceException, SecurityException {
+
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(doc.getLRPersistenceId() instanceof Long);
+
+    Long lrID = (Long)doc.getLRPersistenceId();
+    EventAwareLanguageResource dbDoc = (EventAwareLanguageResource)doc;
+    //1. sync LR
+    // only name can be changed here
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
+      _syncLR(doc);
+    }
+
+    //2. sync Document
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_MAIN)) {
+      _syncDocumentHeader(doc);
+    }
+
+    //3. [optional] sync Content
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_CONTENT)) {
+      _syncDocumentContent(doc);
+    }
+
+    //4. [optional] sync Features
+    if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_FEATURES)) {
+      _syncFeatures(doc);
+    }
+
+    //5. [optional] delete from DB named sets that were removed from the document
+    Collection removedSets = ((EventAwareDocument)dbDoc).getRemovedAnnotationSets();
+    Collection addedSets = ((EventAwareDocument)dbDoc).getAddedAnnotationSets();
+    if (false == removedSets.isEmpty() || false == addedSets.isEmpty()) {
+      _syncAnnotationSets(doc,removedSets,addedSets);
+    }
+
+    //6. [optional] sync Annotations
+    _syncAnnotations(doc);
+  }
+
+
+  /**
+   *  helper for sync()
+   *  NEVER call directly
+   */
+  protected abstract void _syncLR(LanguageResource lr)
+    throws PersistenceException,SecurityException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncDocumentHeader(Document doc)
+    throws PersistenceException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncDocumentContent(Document doc)
+    throws PersistenceException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncFeatures(LanguageResource lr)
+    throws PersistenceException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+    throws PersistenceException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncAnnotations(Document doc)
+    throws PersistenceException;
 
 }
