@@ -120,6 +120,14 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     //register file sufixes
     suffixes2mimeStringMap.put("rtf",mime.getType() + "/" + mime.getSubtype());
 
+    // register E-mail mime type
+    mime = new MimeType("text","email");
+    mime.addParameter ("ClassHandler","gate.corpora.EmailDocumentFormat");
+    // register the class with this map type
+    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+    //register file sufixes
+    suffixes2mimeStringMap.put("eml",mime.getType() + "/" + mime.getSubtype());
+
   }//register
 
   /** Unpack the markup in the document. This converts markup from the
