@@ -178,7 +178,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestJdk.suite());
+        suite.addTest(TestJape.suite());
       } else {
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
