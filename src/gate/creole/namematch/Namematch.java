@@ -77,6 +77,8 @@ public class Namematch extends AbstractProcessingResource
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     cbuffer = new char[BUFF_SIZE];
+    organizationType = "Organization";
+    personType = "Person";
     extLists = new Boolean(false);
     annotationTypes.add("Organization");
     annotationTypes.add("Person");
@@ -137,7 +139,6 @@ public class Namematch extends AbstractProcessingResource
     // the "unknown" annotations
     AnnotationSet nameAnnotsUnknown;
     nameAnnotsUnknown = nameAllAnnots.get("Unknown", Factory.newFeatureMap());
-
     // go through all the annotation types
     Iterator iterAnnotationTypes = annotationTypes.iterator();
     while (iterAnnotationTypes.hasNext()) {
@@ -234,7 +235,7 @@ public class Namematch extends AbstractProcessingResource
               String shortName = null;
 
               // determine the title from annotation string
-              if (annotationType.equals("Person")) {
+              if (annotationType.equals(personType)) {
                 annotString1 = containTitle(nameAllAnnots, annotString1,annot1);
                 annotString2 = containTitle(nameAllAnnots, annotString2,annot2);
               }
@@ -404,7 +405,8 @@ public class Namematch extends AbstractProcessingResource
     if (nameAnnotsUnknown!=null) {
       nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
                       Factory.newFeatureMap());
-      nameAllAnnots.addAll(nameAnnotsUnknown);
+      if (nameAnnotsUnknown!=null)
+       nameAllAnnots.addAll(nameAnnotsUnknown);
     }
 
     // set the matches of the document
