@@ -43,7 +43,7 @@
 \i persist_add_document_to_corpus.sp
 \i persist_remove_doc_from_corpus.sp
 \i persist_lock_lr.sp
-\i persist_update_document_content
+\i persist_update_document_content.sp
 \i security_is_member_of_group.sp
 \i security_set_group_name.sp
 \i security_add_user_to_group.sp
