@@ -107,7 +107,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
 
-    loadedPRsTable.setIntercellSpacing(new Dimension(5, 5));
+//    loadedPRsTable.setIntercellSpacing(new Dimension(5, 5));
     final int width1 = new JLabel("Loaded Processing resources").
                 getPreferredSize().width + 10;
     JScrollPane scroller = new JScrollPane(){
@@ -144,7 +144,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
     memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
-    memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
+//    memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
 
     final int width2 = new JLabel("Selected Processing resources").
                            getPreferredSize().width + 10;
