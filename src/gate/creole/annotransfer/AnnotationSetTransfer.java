@@ -73,6 +73,13 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                             document.getAnnotations() :
                             document.getAnnotations(tagASName);
 
+    //check if we have a BODY annotation
+    //if not, just copy all
+    if (textTagName == null || textTagName.equals("")) {
+      outputAS.addAll(inputAS);
+      return;
+    }
+
     //get the BODY annotation
     bodyAnnotations = tagAS.get(textTagName);
     if (bodyAnnotations == null || bodyAnnotations.isEmpty())
@@ -89,7 +96,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     }
 
 
-  } // run()
+  } // execute()
 
   public void setTagASName(String newTagASName) {
     tagASName = newTagASName;
