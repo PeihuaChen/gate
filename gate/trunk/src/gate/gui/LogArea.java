@@ -156,19 +156,17 @@ public class LogArea extends XJTextPane {
     /** Writes an int which must be a the code of a char, into the LogArea,
      *  using the style specified in constructor. The int is downcast to a byte.
      */
-    public synchronized void write(int charCode){
+    public void write(int charCode){
       // charCode int must be a char. Let us be sure of that
       charCode &= 0x000000FF;
       // Convert the byte to a char before put it into the log area
       char c = (char)charCode;
       // Insert it in the log Area
       try{
-          synchronized(styledDoc){
-            Rectangle place = modelToView(styledDoc.getLength());
-            if(place != null)
-              scrollRectToVisible(place);
-            styledDoc.insertString(styledDoc.getLength(),String.valueOf(c),style);
-          }// End synchronize
+        Rectangle place = modelToView(styledDoc.getLength());
+        if(place != null)
+          scrollRectToVisible(place);
+        styledDoc.insertString(styledDoc.getLength(),String.valueOf(c),style);
       } catch(BadLocationException e){
         e.printStackTrace(Err.getPrintWriter());
       }// End try
@@ -177,17 +175,16 @@ public class LogArea extends XJTextPane {
     /** Writes an array of bytes into the LogArea,
      *  using the style specified in constructor.
      */
-    public synchronized void write(byte[] data, int offset, int length){
+    public void write(byte[] data, int offset, int length){
       // Insert the string to the log area
       try{
-          synchronized(styledDoc){
-            Rectangle place = modelToView(styledDoc.getLength());
-            if(place != null)
-              scrollRectToVisible(place);
-            styledDoc.insertString( styledDoc.getLength(),
-                                    new String(data,offset,length),
-                                    style);
-          } // End synchronize
+        Rectangle place = modelToView(styledDoc.getLength());
+        if(place != null)
+          scrollRectToVisible(place);
+        styledDoc.insertString( styledDoc.getLength(),
+                                new String(data,offset,length),
+                                style);
+
       } catch(BadLocationException e){
           e.printStackTrace(Err.getPrintWriter());
       }// End try
