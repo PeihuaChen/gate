@@ -51,21 +51,43 @@ public class AnnotationDiffer {
         Annotation keyAnn = (Annotation)keyList.get(i);
         Annotation resAnn = (Annotation)responseList.get(j);
         PairingImpl choice = null;
-        if(significantFeaturesSet == null){
-          //full comaptibility required
-          if(keyAnn.isCompatible(resAnn)){
-            choice = new PairingImpl(i, j, CORRECT);
-          }else if(keyAnn.isPartiallyCompatible(resAnn)){
-            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
-          }
-        }else{
-          //compatibility tests restricted to a set of features
+        if(keyAnn.coextensive(resAnn)){
+          //we have full overlap -> CORRECT or WRONG
           if(keyAnn.isCompatible(resAnn, significantFeaturesSet)){
+            //we have a full match
             choice = new PairingImpl(i, j, CORRECT);
-          }else if(keyAnn.isPartiallyCompatible(resAnn, significantFeaturesSet)){
+          }else{
+            //the two annotations are coextensive but don't match
+            //we have a missmatch
+            choice = new PairingImpl(i, j, WRONG);
+          }
+        }else if(keyAnn.overlaps(resAnn)){
+          //we have partial overlap -> PARTIALLY_CORRECT or WRONG
+          if(keyAnn.isPartiallyCompatible(resAnn, significantFeaturesSet)){
             choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
+          }else{
+            choice = new PairingImpl(i, j, WRONG);
           }
         }
+        
+//        // >>>>>>
+//        if(significantFeaturesSet == null){
+//          //full comaptibility required
+//          if(keyAnn.isCompatible(resAnn)){
+//            choice = new PairingImpl(i, j, CORRECT);
+//          }else if(keyAnn.isPartiallyCompatible(resAnn)){
+//            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
+//          }
+//        }else{
+//          //compatibility tests restricted to a set of features
+//          if(keyAnn.isCompatible(resAnn, significantFeaturesSet)){
+//            choice = new PairingImpl(i, j, CORRECT);
+//          }else if(keyAnn.isPartiallyCompatible(resAnn, significantFeaturesSet)){
+//            choice = new PairingImpl(i, j, PARTIALLY_CORRECT);
+//          }
+//        }
+//        // <<<<<<
+        
         //add the new choice if any
         if (choice != null) {
           addPairing(choice, i, keyChoices);
@@ -102,8 +124,27 @@ public class AnnotationDiffer {
           partiallyCorrectMatches++;
           break;
         }
+        case WRONG:{
+          if(bestChoice.getKey() != null){
+            //we have a missed key
+            if(missingAnnotations == null) missingAnnotations = new HashSet();
+            missingAnnotations.add(bestChoice.getKey());
+            missing ++;
+          }
+          if(bestChoice.getResponse() != null){
+            //we have a spurious response
+            if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
+            spuriousAnnotations.add(bestChoice.getResponse());
+            spurious ++;
+          }
+          break;
+        }
+        default:{
+          throw new GateRuntimeException("Invalid pairing type: " + 
+                  bestChoice.type);
+        }
       }
-    }
+    } 
     //add choices for the incorrect matches (MISSED, SPURIOUS)
     //get the unmatched keys
     for(int i = 0; i < keyChoices.size(); i++){
@@ -414,8 +455,18 @@ public class AnnotationDiffer {
 	  public int compare(Object o1, Object o2){
 	    PairingImpl first = (PairingImpl)o1;
 	    PairingImpl second = (PairingImpl)o2;
+      //compare by score
       int res = first.getScore() - second.getScore();
+      //compare by type
       if(res == 0) res = first.getType() - second.getType();
+      //compare by completeness (a wrong match with both key and response 
+      //is "better" than one with only key or response
+      if(res == 0){
+        res = (first.getKey() == null ? 0 : 1) +
+              (first.getResponse() == null ? 0 : 1) +
+              (second.getKey() == null ? 0 : -1) +
+              (second.getResponse() == null ? 0 : -1);
+      }
       return res;
 	  }
 	}
@@ -507,7 +558,7 @@ public class AnnotationDiffer {
   public HashSet correctAnnotations, partiallyCorrectAnnotations, missingAnnotations, spuriousAnnotations;
 
 
-  /** A correct type when all annotation are corect represented by Green color*/
+  /** A correct type when all annotation are correct represented by Green color*/
   public static final int CORRECT_TYPE = 1;
   /** A partially correct type when all annotation are corect represented
    *  by Blue color*/
