@@ -304,7 +304,7 @@ public class EmailDocumentHandler{
 */
    if (canCreateAnnotation(anAnnotationStart,anAnnotationEnd,documentSize)){
       if (aFeatureMap == null)
-          aFeatureMap = new SimpleFeatureMapImpl();
+          aFeatureMap = Factory.newFeatureMap();
       basicAS.add( new Long(anAnnotationStart),
                    new Long(anAnnotationEnd),
                    anAnnotationName.toLowerCase(),

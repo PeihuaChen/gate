@@ -169,7 +169,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
      FeatureMap fm = doc.getFeatures ();
 
      if (fm == null)
-        fm = new SimpleFeatureMapImpl();
+        fm = Factory.newFeatureMap();
 
      fm.put(originalContentFeature, doc.getContent().toString());
      doc.setFeatures(fm);

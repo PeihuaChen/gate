@@ -115,7 +115,7 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
                                                 throws DocumentFormatException{
      FeatureMap fm = doc.getFeatures ();
      if (fm == null)
-        fm = new SimpleFeatureMapImpl();
+        fm = Factory.newFeatureMap();
 
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);

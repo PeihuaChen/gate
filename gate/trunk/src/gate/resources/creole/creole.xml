@@ -11,7 +11,7 @@
       <INTERFACE>gate.Document</INTERFACE>
       <COMMENT>GATE document</COMMENT>
       <OR>
-        <PARAMETER NAME="sourceUrl" COMMENT="Source URL" SUFFIXES="txt;xml;html;sgml;mail;rtf;sgm;htm">java.net.URL</PARAMETER>
+        <PARAMETER NAME="sourceUrl" COMMENT="Source URL" SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf">java.net.URL</PARAMETER>
         <PARAMETER NAME="stringContent" COMMENT="The content of the document">java.lang.String</PARAMETER>
       </OR>
       <PARAMETER COMMENT="Should the document read the original markup" NAME="markupAware" DEFAULT="true">java.lang.Boolean</PARAMETER>

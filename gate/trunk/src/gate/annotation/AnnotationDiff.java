@@ -483,6 +483,8 @@ public class AnnotationDiff extends AbstractVisualResource{
                                     get(annotationSchema.getAnnotationName());
 
     if (keyAnnotSet == null)
+      // The diff will run with an empty set.All annotations from response
+      // would be spurious.
       keyAnnotList = new LinkedList();
     else
       // The alghoritm will modify this annotation set. It is better to make a
@@ -498,7 +500,9 @@ public class AnnotationDiff extends AbstractVisualResource{
                                     get(annotationSchema.getAnnotationName());
 
     if (responseAnnotSet == null)
-        responseAnnotList = new LinkedList();
+      // The diff will run with an empty set.All annotations from key
+      // would be missing.
+      responseAnnotList = new LinkedList();
     else
       // The alghoritm will modify this annotation set. It is better to make a
       // separate copy of them.

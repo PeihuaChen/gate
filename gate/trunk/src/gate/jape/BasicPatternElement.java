@@ -170,7 +170,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
             "BPE.matches attr: " + constraintAttrs[j].toString()
           );
       }
-      FeatureMap features = new SimpleFeatureMapImpl();
+      FeatureMap features = Factory.newFeatureMap();
       for(int j = constraintAttrs.length - 1; j >= 0; j--)
         features.put(constraintAttrs[j].getName(), constraintAttrs[j].getValue());
       AnnotationSet match = doc.getAnnotations().get(
