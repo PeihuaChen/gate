@@ -156,7 +156,7 @@ public class TestGate {
       ////////////////////////////////////////////////
 
       // set this true to run all tests; false to run the just one below
-      boolean allTests = false;
+      boolean allTests = true;
 
       if(! allTests)
          suite.addTest(TestPersist.suite());
