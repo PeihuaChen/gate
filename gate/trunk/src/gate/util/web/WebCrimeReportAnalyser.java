@@ -267,6 +267,10 @@ public class WebCrimeReportAnalyser {
 
         String xmlDocumentNamedEntities = doc.toXml(uniqueNamedEntities, true);
         //String xmlDocumentChunks = doc.toXml(uniqueChunks,true);
+        
+        //delete the used resources 
+        Factory.deleteResource(doc);
+        Factory.deleteResource(corpus);
         return xmlDocumentNamedEntities;
         
     }
