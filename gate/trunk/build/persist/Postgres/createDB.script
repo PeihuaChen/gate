@@ -1,0 +1,61 @@
+/*
+ *
+ *  Copyright (c) 1998-2002, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Marin Dimitrov, 29/Mar/2002
+ *
+ *  $Id$
+ *
+ */
+
+
+\i createSequence.sql
+
+\i createTable.sql
+
+\i createIndex.sql
+
+\i createView.sql
+
+\i initData.sql
+
+\i persist_create_document.sp
+\i persist_create_lr.sp
+\i persist_delete_corpus.sp
+\i persist_delete_document.sp
+\i persist_create_annotation_set.sp
+\i persist_create_annotation.sp
+\i persist_create_corpus.sp
+\i persist_is_valid_feature_type.sp
+\i persist_create_feature.sp
+\i persist_change_content_type.sp
+\i persist_update_lr.sp
+\i persist_update_document.sp
+\i persist_delete_features.sp
+\i persist_delete_annotation.sp
+\i persist_unlock_lr.sp
+\i persist_delete_annotation_set.sp
+\i persist_add_document_to_corpus.sp
+\i persist_remove_doc_from_corpus.sp
+\i persist_lock_lr.sp
+\i security_is_member_of_group.sp
+\i security_set_group_name.sp
+\i security_add_user_to_group.sp
+\i security_remove_user_from_group.sp
+\i security_set_user_name.sp
+\i security_is_valid_security_data.sp
+\i security_set_user_password.sp
+\i security_create_group.sp
+\i security_delete_group.sp
+\i security_create_user.sp
+\i security_delete_user.sp
+\i security_login.sp
+\i security_has_access_to_lr.sp
+\i security_can_delete_group.sp
+\i security_can_delete_user.sp
+
