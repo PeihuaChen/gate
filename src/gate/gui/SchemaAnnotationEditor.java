@@ -140,11 +140,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       if (currentAnnot.getType().equals(currentAnnotSchema.getAnnotationName())){
         currentAnnot.setFeatures(responseMap);
       }else{
-        currentAnnotSet.remove(currentAnnot);
         currentAnnotSet.add( currentStartOffset,
                              currentEndOffset,
                              currentAnnotSchema.getAnnotationName(),
                              responseMap);
+        currentAnnotSet.remove(currentAnnot);
       }// End if
     }// End if
   }//okAction();
