@@ -59,4 +59,15 @@ class ApplicationHandle extends ResourceHandle {
     public void actionPerformed(ActionEvent e){
     }
   }
+
+  class CloseAction extends AbstractAction{
+    public CloseAction(){
+      super("Close");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      project.remove(myself);
+    }
+  }
+
 }

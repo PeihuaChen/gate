@@ -49,6 +49,7 @@ public class LRHandle extends ResourceHandle {
     }
 
     public void actionPerformed(ActionEvent e){
+      project.remove(myself);
     }
   }
 

@@ -33,10 +33,11 @@ public class ApplicationViewer extends AbstractVisualResource {
   protected void initGuiComponents(){
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     tableModel = new PRListTableModel();
-    table = new JTable(tableModel);
+    table = new XJTable(tableModel);
     table.setDefaultRenderer(ProcessingResource.class, new PRRenderer());
     table.setDefaultEditor(ProcessingResource.class, new PREditor());
-    table.setRowMargin(5);
+    table.setIntercellSpacing(new Dimension(10, 10));
+    table.setSortable(false);
     JScrollPane scroll = new JScrollPane(table);
     this.add(scroll);
   }
@@ -45,7 +46,7 @@ public class ApplicationViewer extends AbstractVisualResource {
   }
 
 
-  JTable table;
+  XJTable table;
   PRListTableModel tableModel;
 
   SerialController controller;
@@ -130,7 +131,7 @@ public class ApplicationViewer extends AbstractVisualResource {
         name = "< Add new... >";
       }
       return super.getTableCellRendererComponent(table, name, isSelected,
-                                                 hasFocus, row, column);
+                                                 hasFocus, 0, 0);
     }
   }
 
