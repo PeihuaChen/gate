@@ -57,7 +57,8 @@ public class NameBearerHandle implements Handle,
           else if(target instanceof ProcessingResource) iconName = "pr.gif";
           else if(target instanceof Controller) iconName = "controller.gif";
         }
-        tooltipText = "Type : " + rData.getName();
+        tooltipText = "<HTML> <b>" + rData.getComment() + "</b><br>(<i>" +
+                      rData.getClassName() + "</i>)</HTML>";
       } else {
         this.icon = MainFrame.getIcon("lr.gif");
       }
