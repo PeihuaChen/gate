@@ -41,6 +41,15 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   public MappingDefinition() {
   }
 
+  /**@return a list of all the ontology urls present in this mapping def   */
+  public List getUrls() {
+    Set result = new HashSet();
+    for ( int i = 0 ; i < nodes.size() ; i++ ) {
+      result.add(((MappingNode)nodes.get(i)).getOntologyID());
+    } // for
+    return new ArrayList(result);
+  }  // getUrls()
+
   /** get the url
    *  @return the url */
   public URL getURL() {
