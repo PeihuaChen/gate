@@ -12,21 +12,20 @@
  */
 package gate.gui.docview;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
+
+import weka.classifiers.trees.adtree.Splitter;
 
 import gate.*;
 import gate.creole.*;
 import gate.gui.ActionsPublisher;
 import gate.swing.VerticalTextIcon;
 import gate.util.GateRuntimeException;
-import gate.util.Out;
 
 /**
  * This is the GATE Document viewer/editor. This class is only the shell of the
@@ -56,6 +55,7 @@ public class DocumentEditor extends AbstractVisualResource
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
         initViews();
+//System.out.println("Docedit shown");        
       }
     });
 
@@ -76,11 +76,11 @@ public class DocumentEditor extends AbstractVisualResource
 
     //create the skeleton UI
     topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, null, null);
-    topSplit.setDividerLocation(0.3);
+    topSplit.setResizeWeight(0.3);
     bottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplit, null);
-    bottomSplit.setDividerLocation(0.7);
+    bottomSplit.setResizeWeight(0.7);
     horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottomSplit, null);
-    horizontalSplit.setDividerLocation(0.7);
+    horizontalSplit.setResizeWeight(0.7);
 
     //create the bars
     topBar = new JToolBar(JToolBar.HORIZONTAL);
@@ -130,9 +130,8 @@ public class DocumentEditor extends AbstractVisualResource
     
     //populate the main VIEW
     remove(progressBar);
-    progressBar = null;
     add(horizontalSplit, BorderLayout.CENTER);
-
+    validate();
   }
   
 
@@ -191,12 +190,12 @@ public class DocumentEditor extends AbstractVisualResource
 	      setBottomView(null);
 	      bottomViewIdx  = -1;
 	    }
-	    //show the new view
-	    setTopView(newView);
 	    //activate if necessary
 	    if(!newView.isActive()){
 	      newView.setActive(true);
 	    }
+	    //show the new view
+	    setTopView(newView);
     }
   }
 
@@ -207,6 +206,9 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void setTopView(DocumentView view){
     topSplit.setTopComponent(view == null ? null : view.getGUI());
+    topSplit.resetToPreferredSizes();
+    updateBar(topBar);
+    validate();
   }
 
   /**
@@ -234,12 +236,12 @@ public class DocumentEditor extends AbstractVisualResource
     if(centralViewIdx == -1) setCentralView(null);
     else{
 	    DocumentView newView = (DocumentView)centralViews.get(centralViewIdx);
-	    //show the new view
-	    setCentralView(newView);
 	    //activate if necessary
 	    if(!newView.isActive()){
 	      newView.setActive(true);
 	    }
+	    //show the new view
+	    setCentralView(newView);
     }
   }
 
@@ -250,6 +252,9 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void setCentralView(DocumentView view){
     topSplit.setBottomComponent(view == null ? null : view.getGUI());
+    topSplit.resetToPreferredSizes();
+    updateBar(leftBar);
+    validate();
   }
   
   
@@ -284,12 +289,12 @@ public class DocumentEditor extends AbstractVisualResource
 	      setTopView(null);
 	      topViewIdx  = -1;
 	    }
-	    //show the new view
-	    setBottomView(newView);
 	    //activate if necessary
 	    if(!newView.isActive()){
 	      newView.setActive(true);
 	    }
+	    //show the new view
+	    setBottomView(newView);
     }
   }
 
@@ -300,6 +305,9 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void setBottomView(DocumentView view){
     bottomSplit.setBottomComponent(view == null ? null : view.getGUI());
+    bottomSplit.resetToPreferredSizes();
+    updateBar(bottomBar);
+    validate();
   }
   
   
@@ -328,12 +336,12 @@ public class DocumentEditor extends AbstractVisualResource
     if(rightViewIdx == -1) setRightView(null);
     else{
 	    DocumentView newView = (DocumentView)verticalViews.get(rightViewIdx);
-	    //show the new view
-	    setRightView(newView);
 	    //activate if necessary
 	    if(!newView.isActive()){
 	      newView.setActive(true);
 	    }
+	    //show the new view
+	    setRightView(newView);
     }
   }
 
@@ -344,20 +352,37 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void setRightView(DocumentView view){
     horizontalSplit.setRightComponent(view == null ? null : view.getGUI());
+Component left = horizontalSplit.getLeftComponent();
+Component right = horizontalSplit.getRightComponent();
+System.out.println(left == null ? "null" : left.getPreferredSize().toString());
+System.out.println(right == null ? "null" : right.getPreferredSize().toString());
+    horizontalSplit.resetToPreferredSizes();
+//		updateSplitLocation(horizontalSplit);
+    
+    updateBar(rightBar);
+    validate();
   }  
   
-//  protected void setCentralView(DocumentView view){
-//    topSplit.setBottomComponent(view.getGUI());
-//  }
-//
-//  protected void setBottomView(DocumentView view){
-//    bottomSplit.setBottomComponent(view.getGUI());
-//  }
-//
-//  protected void setRightView(DocumentView view){
-//    horizontalSplit.setRightComponent(view.getGUI());
-//  }
 
+  protected void updateSplitLocation(JSplitPane split){
+    Component left = split.getLeftComponent();
+    Component right = split.getRightComponent();
+    if(left == null){
+      split.setDividerLocation(0);
+      return;
+    }
+    if(right == null){ 
+      split.setDividerLocation(1);
+      return;
+    }
+    Dimension leftPS = left.getPreferredSize();
+    Dimension rightPS = right.getPreferredSize();
+    double location = split.getOrientation() == JSplitPane.HORIZONTAL_SPLIT ? 
+      (double)leftPS.width / (leftPS.width + rightPS.width) :
+      (double)leftPS.height / (leftPS.height + rightPS.height);
+    split.setDividerLocation(location);
+  }
+  
   /* (non-Javadoc)
    * @see gate.VisualResource#setTarget(java.lang.Object)
    */
@@ -365,6 +390,18 @@ public class DocumentEditor extends AbstractVisualResource
     this.document = (Document)target;
   }
 
+  /**
+   * Updates the selected state of the buttons on one of the toolbars. 
+   * @param toolbar
+   */
+  protected void updateBar(JToolBar toolbar){
+    Component btns[] = toolbar.getComponents();
+    if(btns != null){
+      for(int i = 0; i < btns.length; i++){
+        ((ViewButton)btns[i]).updateSelected();
+      }
+    }
+  }
 
   protected class ViewButton extends JToggleButton{
     public ViewButton(DocumentView aView, String name){
@@ -380,6 +417,7 @@ public class DocumentEditor extends AbstractVisualResource
         setIcon(new VerticalTextIcon(this, name, 
                 										 VerticalTextIcon.ROTATE_RIGHT));
       }
+      
       addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           if(isSelected()){
@@ -420,7 +458,25 @@ public class DocumentEditor extends AbstractVisualResource
         }
       });
     }
-    protected DocumentView view;
+    
+    public void updateSelected(){
+      switch(view.getType()){
+        case DocumentView.CENTRAL:
+          setSelected(getCentralView() == view);
+          break;
+        case DocumentView.VERTICAL:
+          setSelected(getRightView() == view);
+          break;
+        case DocumentView.HORIZONTAL:
+          if(ViewButton.this.getParent() == topBar){
+            setSelected(getTopView() == view);
+          }else{
+            setSelected(getBottomView() == view);
+          }
+          break;
+      }
+    }
+    DocumentView view;
   }
 
   protected JSplitPane horizontalSplit;
