@@ -30,7 +30,12 @@ import gate.creole.*;
   */
 public class Gate
 {
-  /** Debugging flag. */
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will speed up the progam a little bit.
+    */
   private static final boolean DEBUG = false;
 
   /** The list of builtin URLs to search for CREOLE resources. */
@@ -55,13 +60,10 @@ public class Gate
     // DERWENT
     try{
       // ask the web server from derwent if it's alive
-      URL url = new URL("http://derwent.dcs.shef.ac.uk");
-      url.getContent();
+      Socket socket = new Socket("derwent.dcs.shef.ac.uk",80);
+      // If no exception occured then the web server is alive
       // set the gateHomeReachable
       gateHomeReachable = true;
-
-    } catch (MalformedURLException exception1){
-      throw new GateException("The URL for derwent is malformed !");
     } catch (IOException exception2){
       gateHomeReachable = false;
     }
@@ -69,8 +71,8 @@ public class Gate
     //GATE.AC.UK
     try{
       // ask the web server from gate machine if it's alive
-      URL url = new URL("http://www.gate.ac.uk");
-      url.getContent();
+      Socket socket = new Socket("gate.ac.uk",80);
+      // If no exception occured then the web server is alive
       // set the gateHomeReachable
       gateAcUkReachable = true;
 
