@@ -15,7 +15,7 @@ import gate.util.*;
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.
   */
-public interface Annotation extends FeatureBearer, IdBearer {
+public interface Annotation extends FeatureBearer, IdBearer, Comparable {
 
   /** The type of the annotation (corresponds to TIPSTER "name"). */
   public String getType();
@@ -25,5 +25,8 @@ public interface Annotation extends FeatureBearer, IdBearer {
 
   /** The end node. */
   public Node getEndNode();
+
+  /** Ordering */
+  public int compareTo(Object o) throws ClassCastException;
 
 } // interface Annotation
