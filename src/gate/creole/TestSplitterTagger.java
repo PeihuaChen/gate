@@ -17,6 +17,7 @@ import junit.framework.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.tokeniser.*;
 import gate.corpora.TestDocument;
 import gate.util.*;
 import gate.creole.splitter.*;
@@ -45,14 +46,27 @@ public class TestSplitterTagger extends TestCase{
   } // suite
 
 
+
   public void testSplitterTagger() throws Exception{
     //get a document
     Document doc = Factory.newDocument(
       new URL(TestDocument.getTestServerName() + "tests/doc0.html")
     );
 
-    //create a splitter
+    //tokenise the document
+    //create a tokeniser
     FeatureMap params = Factory.newFeatureMap();
+    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
+                          "gate.creole.tokeniser.DefaultTokeniser", params);
+    //runtime stuff
+    tokeniser.setDocument(doc);
+    tokeniser.setAnnotationSetName("testAS");
+    tokeniser.run();
+    tokeniser.check();
+
+
+    //create a splitter
+    params = Factory.newFeatureMap();
     SentenceSplitter splitter = (SentenceSplitter) Factory.createResource(
                           "gate.creole.splitter.SentenceSplitter", params);
 
