@@ -13,7 +13,10 @@ import java.io.*;
 import junit.framework.*;
 import java.net.*;
 
-/** Tests for the Jdk class and for GateClassLoader.
+/** Tests for the Jdk class and for GateClassLoader. The testReloading method
+  * reads a class from a .jar that is reached via a URL. This is called
+  * TestJdk.jar; to build it, do "make TestJdk.jar" in the build directory
+  * (the source for the class lives there, under "testpkg").
   */
 public class TestJdk extends TestCase
 {
@@ -158,19 +161,21 @@ if(true) return;
 */
 
     GateClassLoader loader = Gate.getClassLoader();
-    loader.addURL(new URL("http://www.dcs.shef.ac.uk/~hamish/TestJdk.jar"));
+    loader.addURL(new URL("http://derwent.dcs.shef.ac.uk/tests/TestJdk.jar"));
+    //loader.addURL(new URL("file:/build/TestJdk.jar"));
 
-    Class dummyClass1 = loader.loadClass("gate.util.Dummy");
+
+    Class dummyClass1 = loader.loadClass("testpkg.Dummy");
     assert("dummy1 is null", dummyClass1 != null);
     Object dummyObject1 = dummyClass1.newInstance();
     assert("dummy1 object is null", dummyObject1 != null);
 
-    Class dummyClass2 = loader.reloadClass("gate.util.Dummy");
+    Class dummyClass2 = loader.reloadClass("testpkg.Dummy");
     assert("dummy2 is null", dummyClass2 != null);
     Object dummyObject2 = dummyClass2.newInstance();
     assert("dummy2 object is null", dummyObject2 != null);
 
-    Class dummyClass3 = loader.reloadClass("gate.util.Dummy");
+    Class dummyClass3 = loader.reloadClass("testpkg.Dummy");
     assert("dummy3 is null", dummyClass2 != null);
     Object dummyObject3 = dummyClass3.newInstance();
     assert("dummy3 object is null", dummyObject3 != null);
