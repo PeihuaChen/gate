@@ -52,7 +52,7 @@ public class WordNetViewer extends AbstractVisualResource
 
   public WordNetViewer(){
     jbInit();
-    initResources();
+    //initResources();
   }
 
   private void initResources(){
