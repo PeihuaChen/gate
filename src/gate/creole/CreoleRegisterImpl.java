@@ -37,13 +37,13 @@ import gate.util.*;
 public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 {
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  protected static final boolean DEBUG = false;
 
   /** The set of CREOLE directories (URLs). */
-  private Set directories = new HashSet();
+  protected Set directories = new HashSet();
 
   /** The parser for the CREOLE directory files */
-  private SAXParser parser = null;
+  protected SAXParser parser = null;
 
   /** Default constructor. Sets up directory files parser. */
   public CreoleRegisterImpl() throws GateException {
@@ -146,11 +146,6 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     // this will create ResourceData entries in the register
     try {
       HandlerBase handler = new CreoleXmlHandler(this, directoryUrl);
-      //URL resUrl =
-      //  Gate.getClassLoader().getSystemResource("gate/resources/creole/creole.xml");
-      //Out.prln(resUrl.toExternalForm());
-      //Out.prln(resUrl.toString());
-      //parser.parse(resUrl.toExternalForm(), handler);*/
       parser.parse(directoryStream, handler);
       if(DEBUG) {
         Out.prln(
@@ -158,7 +153,6 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
           ((directoryUrl == null) ? "null" : directoryUrl.toString())
         );
       }
-      //parser.parse("http://gate.ac.uk/creole/creole.xml", handler);
     } catch (IOException e) {
       throw(new GateException(e));
     } catch (SAXException e) {
@@ -174,7 +168,10 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     */
   public void registerBuiltins() throws GateException {
     try {
-      parseDirectory(Files.getGateResourceAsStream("creole/creole.xml"), null);
+      parseDirectory(
+        Files.getGateResourceAsStream("creole/creole.xml"),
+        Gate.getUrl("creole/")
+      );
     } catch(IOException e) {
       if(DEBUG) System.out.println(e);
       throw(new GateException(e));

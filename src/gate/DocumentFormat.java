@@ -2,14 +2,14 @@
  *	DocumentFormat.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 25/May/2000
  *
  *	$Id$
@@ -80,7 +80,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
 
   /** listeners for status report */
   protected List myStatusListeners = new LinkedList();
-  
+
   static{
     register();
   }
@@ -100,7 +100,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
     MimeType mime = new MimeType("text","xml");
     mime.addParameter ("ClassHandler","gate.corpora.XmlDocumentFormat");
     // register the class with this map type
-    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     //register file sufixes
     suffixes2mimeStringMap.put("xml",mime.getType() + "/" + mime.getSubtype());
     suffixes2mimeStringMap.put("xhtm",mime.getType() + "/" + mime.getSubtype());
@@ -110,7 +110,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
     mime = new MimeType("text","html");
     mime.addParameter ("ClassHandler","gate.corpora.HtmlDocumentFormat");
     // register the class with this map type
-    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     //register file sufixes
     suffixes2mimeStringMap.put("htm",mime.getType() + "/" + mime.getSubtype());
     suffixes2mimeStringMap.put("html",mime.getType() + "/" + mime.getSubtype());
@@ -119,7 +119,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
     mime = new MimeType("text","sgml");
     mime.addParameter ("ClassHandler","gate.corpora.SgmlDocumentFormat");
     // register the class with this map type
-    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     //register file sufixes
     suffixes2mimeStringMap.put("sgm",mime.getType() + "/" + mime.getSubtype());
     suffixes2mimeStringMap.put("sgml",mime.getType() + "/" + mime.getSubtype());
@@ -369,7 +369,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
     myStatusListeners.remove(listener);
   }
   // this is a bug in Soraris on JDK 1.21.
-  // it has to be protected not public 
+  // it has to be protected not public
   public void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())

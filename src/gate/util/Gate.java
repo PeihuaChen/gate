@@ -43,7 +43,9 @@ public class Gate
   };
 
   /** Initialisation - must be called by all clients before using
-    * any other parts of the library.
+    * any other parts of the library. Also initialises the CREOLE
+    * register.
+    * @see #initCreoleRegister
     */
   public static void init() throws GateException {
     if(classLoader == null)
@@ -51,6 +53,8 @@ public class Gate
 
     if(creoleRegister == null)
       creoleRegister = new CreoleRegisterImpl();
+
+    initCreoleRegister();
   } // init()
 
   /** Get a URL that points to either an HTTP server or a file system

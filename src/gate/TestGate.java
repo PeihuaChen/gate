@@ -24,7 +24,6 @@ import gnu.getopt.*;
 import gate.annotation.*;
 import gate.corpora.*;
 import gate.creole.*;
-import gate.util.*;
 import gate.db.*;
 import gate.jape.*;
 import gate.fsm.*;
@@ -32,6 +31,7 @@ import gate.xml.*;
 import gate.email.*;
 import gate.html.*;
 import gate.sgml.*;
+import gate.util.*;
 
 
 /** Top-level entry point for GATE test suite;
@@ -132,13 +132,12 @@ public class TestGate
     */
   public static Test suite() throws Exception {
     // inialise the library.
-    // normally we would also call initCreoleRegister, but that's
-    // done in TestCreole
     Gate.init();
 
     TestSuite suite = new TestSuite();
-    suite.addTest(TestCreole.suite());  //*
-    suite.addTest(TestXSchema.suite());
+    suite.addTest(TestCreole.suite());
+    suite.addTest(TestXSchema.suite());  //*
+    suite.addTest(CookBook.suite());
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
@@ -153,7 +152,6 @@ public class TestGate
     suite.addTest(TestAnnotation.suite());
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
-    suite.addTest(CookBook.suite());
     suite.addTest(TestDB.suite());      //*/
 
     return suite;
