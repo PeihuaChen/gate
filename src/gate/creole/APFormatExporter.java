@@ -302,17 +302,24 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     if (ann == null) return;
     String entityMentionType = "NAME";
     String entityMentionRole = null;
+    String entityMentionReference = null;
+
     FeatureMap fm = ann.getFeatures();
     if (fm != null){
       if( null != fm.get("ENTITY_MENTION_TYPE"))
         entityMentionType = (String) fm.get("ENTITY_MENTION_TYPE");
+
       entityMentionRole = (String) fm.get("ROLE");
+      entityMentionReference = (String) fm.get("REFERENCE");
     }// End if
-    if(entityMentionRole != null)
-      xmlDoc.append("      <entity_mention TYPE=\""+entityMentionType+"\""+
-      " ROLE=\"" + entityMentionRole + "\">\n");
-    else
-      xmlDoc.append("      <entity_mention TYPE=\""+entityMentionType+"\">\n");
+    String str1 = (entityMentionRole == null)? "" :
+                                      ("ROLE=\"" + entityMentionRole + "\"");
+    String str2 = (entityMentionReference == null)? "" :
+                             ("REFERENCE=\"" + entityMentionReference + "\"");
+
+    xmlDoc.append("      <entity_mention TYPE=\"" + entityMentionType+"\"" +
+     str1 + " " + str2+">\n"
+    );
     // extent
     xmlDoc.append("        <extent>\n");
     xmlDoc.append("          <charseq>\n");
