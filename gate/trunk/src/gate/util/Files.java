@@ -75,13 +75,12 @@ public class Files {
     //resourceReader = new BufferedReader(new InputStreamReader(contentStream));
 
     int bytesRead = 0;
-    int fileOffset = 0;
     final int readSize = 1024;
     byte[] bytes = new byte[readSize];
-    while( (bytesRead = contentStream.read(bytes,0,readSize) ) != -1 ){
-      resourceFileOutputStream.write(bytes,fileOffset, bytesRead);
-      fileOffset += bytesRead;
-    }
+    while( (bytesRead = contentStream.read(bytes,0,readSize) ) != -1 )
+      resourceFileOutputStream.write(bytes,0, bytesRead);
+
+
     resourceFileOutputStream.close();
     contentStream.close ();
     return resourceFile;
