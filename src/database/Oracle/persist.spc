@@ -88,7 +88,10 @@ create or replace package persist is
   
   function is_valid_feature_type(p_type          IN number)
      return boolean;
-     
+
+  
+  procedure change_content_type(p_cont_id        in number,
+                                p_new_type       in number);     
 
 end persist;
 /
