@@ -122,7 +122,7 @@ public class SimpleFeatureMapImpl
    */
   public Object put(Object key, Object value) {
     Object result = super.put(key, value);
-    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
+    this.fireMapUpdatedEvent();
     return result;
   } // put
 
@@ -132,14 +132,14 @@ public class SimpleFeatureMapImpl
    */
   public Object remove(Object key) {
     Object result = super.remove(key);
-    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
+    this.fireMapUpdatedEvent();
     return result;
   } // remove
 
   public void clear() {
     super.clear();
     //tell the world if they're listening
-    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
+    this.fireMapUpdatedEvent();
   } // clear
 
   // Views
@@ -154,39 +154,39 @@ public class SimpleFeatureMapImpl
 //////////////////THE EVENT HANDLING CODE//////////////
 //Needed so an annotation can listen to its features//
 //and update correctly the database//////////////////
-  private transient Vector gateListeners;
+  private transient Vector mapListeners;
   /**
    *
    * Removes a gate listener
    */
-  public synchronized void removeGateListener(GateListener l) {
-    if (gateListeners != null && gateListeners.contains(l)) {
-      Vector v = (Vector) gateListeners.clone();
+  public synchronized void removeFeatureMapListener(FeatureMapListener l) {
+    if (mapListeners != null && mapListeners.contains(l)) {
+      Vector v = (Vector) mapListeners.clone();
       v.removeElement(l);
-      gateListeners = v;
+      mapListeners = v;
     }
   }
   /**
    *
    * Adds a gate listener
    */
-  public synchronized void addGateListener(GateListener l) {
-    Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
+  public synchronized void addFeatureMapListener(FeatureMapListener l) {
+    Vector v = mapListeners == null ? new Vector(2) : (Vector) mapListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
-      gateListeners = v;
+      mapListeners = v;
     }
   }
   /**
    *
    * @param e
    */
-  protected void fireGateEvent (GateEvent e) {
-    if (gateListeners != null) {
-      Vector listeners = gateListeners;
+  protected void fireMapUpdatedEvent () {
+    if (mapListeners != null) {
+      Vector listeners = mapListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((GateListener) listeners.elementAt(i)).processGateEvent(e);
+        ((FeatureMapListener) listeners.elementAt(i)).featureMapUpdated();
       }
     }
   }//fireAnnotationUpdated

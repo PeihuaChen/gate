@@ -60,7 +60,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     //3. add the listeners for the features
     if (eventHandler == null)
       eventHandler = new EventsHandler();
-    this.features.addGateListener(eventHandler);
+    this.features.addFeatureMapListener(eventHandler);
 
 
     //4. add self as listener for the data store, so that we'll know when the DS is
@@ -252,10 +252,10 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
     //4. sort out the listeners
     if (eventHandler != null)
-      oldFeatures.removeGateListener(eventHandler);
+      oldFeatures.removeFeatureMapListener(eventHandler);
     else
       eventHandler = new EventsHandler();
-    this.features.addGateListener(eventHandler);
+    this.features.addFeatureMapListener(eventHandler);
   }
 
 
@@ -263,10 +263,8 @@ public class DatabaseCorpusImpl extends CorpusImpl
    * All the events from the features are handled by
    * this inner class.
    */
-  class EventsHandler implements gate.event.GateListener {
-    public void processGateEvent(GateEvent e){
-      if (e.getType() != GateEvent.FEATURES_UPDATED)
-        return;
+  class EventsHandler implements gate.event.FeatureMapListener {
+    public void featureMapUpdated(){
       //tell the document that its features have been updated
       featuresChanged = true;
     }
@@ -278,7 +276,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
   public void cleanup() {
     super.cleanup();
     if (eventHandler != null)
-      this.features.removeGateListener(eventHandler);
+      this.features.removeFeatureMapListener(eventHandler);
   }///inner class EventsHandler
 
 }

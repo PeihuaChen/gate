@@ -50,11 +50,11 @@ public interface FeatureMap extends Map
    *
    * Removes a gate listener
    */
-  public void removeGateListener(GateListener l);
+  public void removeFeatureMapListener(FeatureMapListener l);
   /**
    *
    * Adds a gate listener
    */
-  public void addGateListener(GateListener l);
+  public void addFeatureMapListener(FeatureMapListener l);
 
 } // interface FeatureMap

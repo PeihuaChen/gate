@@ -128,7 +128,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     //3. add the listeners for the features
     if (eventHandler == null)
       eventHandler = new EventsHandler();
-    this.features.addGateListener(eventHandler);
+    this.features.addFeatureMapListener(eventHandler);
 
     //4. add self as listener for the data store, so that we'll know when the DS is
     //synced and we'll clear the isXXXChanged flags
@@ -732,10 +732,10 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     //4. sort out the listeners
     if (eventHandler != null)
-      oldFeatures.removeGateListener(eventHandler);
+      oldFeatures.removeFeatureMapListener(eventHandler);
     else
       eventHandler = new EventsHandler();
-    this.features.addGateListener(eventHandler);
+    this.features.addFeatureMapListener(eventHandler);
   }
 
   /** Sets the name of this resource*/
@@ -903,10 +903,8 @@ public class DatabaseDocumentImpl extends DocumentImpl
    * All the events from the features are handled by
    * this inner class.
    */
-  class EventsHandler implements gate.event.GateListener {
-    public void processGateEvent(GateEvent e){
-      if (e.getType() != GateEvent.FEATURES_UPDATED)
-        return;
+  class EventsHandler implements gate.event.FeatureMapListener {
+    public void featureMapUpdated(){
       //tell the document that its features have been updated
       featuresChanged = true;
     }
@@ -918,7 +916,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
   public void cleanup() {
     super.cleanup();
     if (eventHandler != null)
-      this.features.removeGateListener(eventHandler);
+      this.features.removeFeatureMapListener(eventHandler);
   }///inner class EventsHandler
 
 

@@ -173,14 +173,14 @@ public class AnnotationImpl extends AbstractFeatureBearer
   public void setFeatures(FeatureMap features) {
     //I need to remove first the old features listener if any
     if (eventHandler != null)
-      this.features.removeGateListener(eventHandler);
+      this.features.removeFeatureMapListener(eventHandler);
 
     this.features = features;
 
     //if someone cares about the annotation changes, then we need to
     //track the events from the new feature
     if (! annotationListeners.isEmpty())
-      this.features.addGateListener(eventHandler);
+      this.features.addFeatureMapListener(eventHandler);
 
     //finally say that the annotation features have been updated
     fireAnnotationUpdated(new AnnotationEvent(
@@ -392,7 +392,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
       FeatureMap features = getFeatures();
       if (eventHandler == null)
         eventHandler = new EventsHandler();
-      features.addGateListener(eventHandler);
+      features.addFeatureMapListener(eventHandler);
     }
 
     if (!v.contains(l)) {
@@ -447,10 +447,8 @@ public class AnnotationImpl extends AbstractFeatureBearer
    * All the events from the features are handled by
    * this inner class.
    */
-  class EventsHandler implements gate.event.GateListener {
-    public void processGateEvent(GateEvent e){
-      if (e.getType() != GateEvent.FEATURES_UPDATED)
-        return;
+  class EventsHandler implements gate.event.FeatureMapListener {
+    public void featureMapUpdated(){
       //tell the annotation listeners that my features have been updated
       fireAnnotationUpdated(new AnnotationEvent(
                                   AnnotationImpl.this,

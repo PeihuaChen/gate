@@ -1003,11 +1003,9 @@ public class DocumentEditor extends AbstractVisualResource
   protected void this_documentChanged(){
     initLocalData();
     annotationsTableModel.fireTableDataChanged();
-    document.getFeatures().addGateListener(new GateListener(){
-      public void processGateEvent(GateEvent e){
-        if(e.getType() == e.FEATURES_UPDATED){
+    document.getFeatures().addFeatureMapListener(new FeatureMapListener(){
+      public void featureMapUpdated(){
           updateCorefTree();
-        }
       }
     });
     updateCorefTree();
