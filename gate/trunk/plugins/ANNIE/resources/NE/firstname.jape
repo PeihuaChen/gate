@@ -9,7 +9,7 @@
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
 *  Diana Maynard, 02 Aug 2001
-* 
+*
 *  $Id$
 */
 
@@ -28,7 +28,22 @@ Rule: FirstName
 gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("minorType"));
+
+//find out if the gender is unambiguous
+String gender = (String)personAnn.getFeatures().get("minorType");
+boolean ambig = false;
+gate.FeatureMap constraints = Factory.newFeatureMap();
+constraints.put("majorType", "person_first");
+Iterator lookupsIter =  inputAS.get(personAnn.getStartNode().getOffset()).get("Lookup", constraints).iterator();
+while(!ambig && lookupsIter.hasNext()){
+  gate.Annotation anAnnot = (gate.Annotation)lookupsIter.next();
+  //we're only interested in annots of the same length
+  if(anAnnot.getEndNode().getOffset().equals(personAnn.getEndNode().getOffset())){
+    ambig = !gender.equals(anAnnot.getFeatures().get("minorType"));
+  }
+}
+if(!ambig) features.put("gender", gender);
+
 features.put("rule", "FirstName");
 annotations.add(person.firstNode(), person.lastNode(), "FirstPerson",
 features);
