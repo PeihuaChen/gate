@@ -22,6 +22,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
 
 import gate.*;
 import gate.creole.AnnotationSchema;
@@ -165,20 +166,18 @@ public class AnnotationEditor{
 
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     topWindow.getContentPane().add(pane);
-    hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        topWindow.hide();
-      }
-    });
-    hideTimer.setRepeats(false);
-    topWindow.addMouseListener(new MouseAdapter(){
-      public void mouseEntered(MouseEvent evt){
-        hideTimer.stop();
-      }
-    });
   }
   
   protected void initBottomWindow(Window parent){
+    bottomWindow = new JWindow(parent);
+
+    JPanel pane = new JPanel();
+    pane.setLayout(new GridBagLayout());
+    pane.setBackground(UIManager.getLookAndFeelDefaults().
+            getColor("ToolTip.background"));
+    pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    pane.add(new JLabel("Features will show here"));
+    bottomWindow.getContentPane().add(pane);    
   }
 
   protected void initGUI(){
@@ -193,6 +192,25 @@ public class AnnotationEditor{
       initData();
       initTopWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
       initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+      
+      hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
+        public void actionPerformed(ActionEvent evt){
+          hide();
+        }
+      });
+      hideTimer.setRepeats(false);
+      
+      topWindow.addMouseListener(new MouseAdapter(){
+        public void mouseEntered(MouseEvent evt){
+          hideTimer.stop();
+        }
+      });
+      bottomWindow.addMouseListener(new MouseAdapter(){
+        public void mouseEntered(MouseEvent evt){
+          hideTimer.stop();
+        }
+      });
+      
       inited = true;
     }
   }
@@ -213,6 +231,7 @@ public class AnnotationEditor{
    sorAction.setAnnotation(ann, set);
    eolAction.setAnnotation(ann, set);
    eorAction.setAnnotation(ann, set);
+   delAction.setAnnotation(ann, set);
    
   }
   
@@ -222,26 +241,59 @@ public class AnnotationEditor{
    *
    */
   public void show(){
+    //hide the windows is present
+    hide();
+    topWindow.pack();
+    bottomWindow.pack();
+    Dimension topSize = topWindow.getSize();
+    Dimension bottomSize = bottomWindow.getSize();
+    int width = Math.max(topSize.width, bottomSize.width);
+    topWindow.setSize(width, topSize.height);
+    bottomWindow.setSize(width, bottomSize.height);
+    placeWindows();
+    topWindow.setVisible(true);
+    bottomWindow.setVisible(true);
+//    try{
+//	    highlight = textPane.getHighlighter().
+//	    	addHighlight(ann.getStartNode().getOffset().intValue(),
+//	    	             ann.getEndNode().getOffset().intValue(),
+//	                     DefaultHighlighter.DefaultPainter);
+//    }catch(BadLocationException ble){
+//      throw new GateRuntimeException(ble);
+//    }
+    hideTimer.restart();
+  }
+  
+  protected void placeWindows(){
     //calculate position
-    int x, y;
+    int x, yTop, yBottom;
     try{
 		  Rectangle startRect = textPane.modelToView(ann.getStartNode().
 		    getOffset().intValue());
 		  x = startRect.x;
-		  y = startRect.y;
+		  yTop = startRect.y;
+		  Rectangle endRect = textPane.modelToView(ann.getEndNode().
+				    getOffset().intValue());
+		  yBottom = endRect.y + endRect.height;
     }catch(BadLocationException ble){
       //this should never occur
       throw new GateRuntimeException(ble);
     }
     Point topLeft = textPane.getLocationOnScreen();
-    topWindow.pack();
     topWindow.setLocation(x + topLeft.x, 
-                          y + topLeft.y - topWindow.getSize().height);
-    topWindow.setVisible(true);
-    topWindow.pack();
-    hideTimer.restart();
+            yTop + topLeft.y - topWindow.getSize().height); 
+    bottomWindow.setLocation(x + topLeft.x, yBottom + topLeft.y); 
+    
   }
   
+  public void hide(){
+//    if(highlight != null){ 
+//      textPane.getHighlighter().removeHighlight(highlight);
+//      highlight = null;
+//    }
+    topWindow.setVisible(false);
+    bottomWindow.setVisible(false);
+  }
   /**
    * Base class for actions on annotations.
    */
@@ -399,7 +451,8 @@ public class AnnotationEditor{
     }
     
     public void actionPerformed(ActionEvent evt){
-      
+      set.remove(ann);
+      hide();
     }
   }
   
@@ -417,9 +470,11 @@ public class AnnotationEditor{
   protected Timer hideTimer;
   protected static final int HIDE_DELAY = 1500;
   protected static final int SHIFT_INCREMENT = 5;
-  protected static final int CTRL_SHIFT_INCREMENT = 5;
+  protected static final int CTRL_SHIFT_INCREMENT = 10;
   
   protected boolean inited = false;
+  
+  protected Object highlight;
   
   /**
    * Stores the Annotation schema objects available in the system.
