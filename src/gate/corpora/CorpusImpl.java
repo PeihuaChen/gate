@@ -158,6 +158,14 @@ public class CorpusImpl extends AbstractLanguageResource
     ArrayList data;
   }
 
+  /**
+   * This method returns true when the document is already loaded in memory
+   */
+  public boolean isDocumentLoaded(int index) {
+    return true;
+  }
+
+
   protected void clearDocList() {
     if (supportList == null)
       return;

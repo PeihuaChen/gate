@@ -80,6 +80,15 @@ public interface Corpus extends LanguageResource, List, NameBearer {
                        String encoding, boolean recurseDirectories)
                        throws IOException, ResourceInstantiationException;
 
+
+  /**
+   * This method returns true when the document is already loaded in memory.
+   * The transient corpora will always return true as they can only contain
+   * documents that are present in the memory.
+   */
+  public boolean isDocumentLoaded(int index);
+
+
   /**
    * Removes one of the listeners registered with this corpus.
    * @param l the listener to be removed.

@@ -201,7 +201,7 @@ public class MainFrame extends JFrame
       guiRoots.add(fileChooser);
 
       //the JFileChooser seems to size itself better once it's been added to a
-      // top level container such as a dialog.
+      //top level container such as a dialog.
       JDialog dialog = new JDialog(this, "", true);
       java.awt.Container contentPane = dialog.getContentPane();
       contentPane.setLayout(new BorderLayout());
