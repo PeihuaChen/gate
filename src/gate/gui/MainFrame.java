@@ -1527,14 +1527,19 @@ public class MainFrame extends JFrame
 
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("project.gif"));
+        setToolTipText("Gate");
       } else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications.gif"));
+        setToolTipText("Gate applications");
       } else if(value == languageResourcesRoot) {
         setIcon(MainFrame.getIcon("lrs.gif"));
+        setToolTipText("Language Resources");
       } else if(value == processingResourcesRoot) {
         setIcon(MainFrame.getIcon("prs.gif"));
+        setToolTipText("Processing Resources");
       } else if(value == datastoresRoot) {
         setIcon(MainFrame.getIcon("dss.gif"));
+        setToolTipText("Gate Datastores");
       }else{
         //not one of the default root nodes
         value = ((DefaultMutableTreeNode)value).getUserObject();

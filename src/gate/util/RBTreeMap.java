@@ -20,7 +20,7 @@ import java.util.*;
   * closest neighbours in the case of a failed search.
   */
 public class RBTreeMap extends AbstractMap
-	             implements SortedMap, Cloneable, java.io.Serializable
+               implements SortedMap, Cloneable, java.io.Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -928,6 +928,7 @@ public class RBTreeMap extends AbstractMap
       return (fromStart || compare(key, fromKey) >= 0) &&
                  (toEnd     || compare(key, toKey)   <= 0);
     }
+    static final long serialVersionUID = 4333473260468321526L;
   } // SubMap
 
   // Types of Iterators

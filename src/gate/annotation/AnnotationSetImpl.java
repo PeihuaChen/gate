@@ -135,6 +135,7 @@ implements AnnotationSet
       }
       return res;
     }//public Object remove(Object key)
+    static final long serialVersionUID = -4832487354063073511L;
   }//protected class VerboseHashMap extends HashMap
 
   /** Get an iterator for this set */
