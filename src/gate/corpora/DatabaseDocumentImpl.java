@@ -25,7 +25,7 @@ import junit.framework.*;
 import gate.*;
 import gate.util.*;
 import gate.persist.*;
-
+import gate.annotation.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl {
 
@@ -71,7 +71,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     return super.getContent();
   }
 
-  protected void _readContent() {
+  private void _readContent() {
 
     Long lrID = (Long)getLRPersistenceId();
     //0. preconditions
@@ -179,7 +179,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   }
 
 
-  protected void _getAnnotations(String name) {
+  private void _getAnnotations(String name) {
 
     //have we already read this set?
     if (this.annotSetsRead.containsKey(name)) {
@@ -189,15 +189,70 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     }
     else {
       Long lrID = (Long)getLRPersistenceId();
+      Long asetID = null;
       //0. preconditions
       Assert.assertNotNull(lrID);
 
       //1. read a-set info
-
-
-      //2. read annotations
       PreparedStatement pstmt = null;
       ResultSet rs = null;
+      try {
+        String sql = " select v1.as_id " +
+                     " from  "+Gate.DB_OWNER+".v_annotation_set v1 " +
+                     " where  v1.lr_id = ? ";
+        //do we have aset name?
+        String clause = null;
+        if (null != name) {
+          clause =   "        and v1.as_name = ? ";
+        }
+        else {
+          clause =   "        and v1.as_name is null ";
+        }
+        sql = sql + clause;
+
+        pstmt = this.jdbcConn.prepareStatement(sql);
+        pstmt.setLong(1,lrID.longValue());
+        if (null != name) {
+          pstmt.setString(2,name);
+        }
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        if (rs.next()) {
+          //ok, there is such aset in the DB
+          asetID = new Long(rs.getString(1));
+        }
+        else {
+          //wow, there is no such aset, so create new ...
+          //... by delegating to the super method
+          return;
+        }
+
+        //1.5, create a-set
+        if (null == name) {
+          AnnotationSet as = new AnnotationSetImpl(this);
+        }
+        else {
+          AnnotationSet as = new AnnotationSetImpl(this,name);
+        }
+      }
+      catch(SQLException sqle) {
+        throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        try {
+          DBHelper.cleanup(rs);
+          DBHelper.cleanup(pstmt);
+        }
+        catch(PersistenceException pe) {
+          throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+        }
+      }
+
+      //read Features
+      HashMap featuresByAnnotationID = _readFeatures(asetID);
+
+      //3. read annotations
 
       try {
         String sql = " select v1.ann_id, " +
@@ -210,17 +265,13 @@ public class DatabaseDocumentImpl extends DocumentImpl {
                      "        and v2.and as_name = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
-      pstmt.setLong(1,lrID.longValue());
-      if (null == name) {
-        pstmt.setNull(2,java.sql.Types.VARCHAR);
-      }
-      else {
-        pstmt.setString(2,name);
-      }
+      pstmt.setLong(1,asetID.longValue());
       pstmt.execute();
       rs = pstmt.getResultSet();
 
-      rs.next();
+      while (rs.next()) {
+        //Annotation ann = new AnnotationImpl();
+      }
 
       //3, add to a-set
 
@@ -247,5 +298,216 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     }
   }
 
+
+
+
+  private HashMap _readFeatures(Long asetID) {
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    //1
+    String      prevKey = DBHelper.DUMMY_FEATURE_KEY;
+    String      currKey = null;
+
+    Long        prevAnnID = null;
+    Long        currAnnID = null;
+
+    Object      currFeatureValue = null;
+    Vector      currFeatureArray = new Vector();
+
+    HashMap     currFeatures = new HashMap();
+    FeatureMap  annFeatures = null;
+
+    HashMap     featuresByAnnotID = new HashMap();
+
+    //2. read the features from DB
+    try {
+      String sql = " select annotation_id, " +
+                   "        ft_key, " +
+                   "        ft_value_type, " +
+                   "        ft_number_value, " +
+                   "        ft_character_value, " +
+                   "        ft_long_character_value, " +
+                   "        ft_binary_value " +
+                   " from  "+Gate.DB_OWNER+".v_annotation_features " +
+                   " where  set_id = ? " +
+                   " order by annotation_id,ft_key ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,asetID.longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      while (rs.next()) {
+        //NOTE: because there are LOBs in the resulset
+        //the columns should be read in the order they appear
+        //in the query
+
+        currAnnID = new Long(rs.getLong(1));
+
+        //2.1 is this a new Annotation?
+        if (currAnnID != prevAnnID && prevAnnID != null) {
+          //new one
+          //2.1.1 normalize the hashmap with the features, and add
+          //the elements into a new FeatureMap
+          annFeatures = new SimpleFeatureMapImpl();
+          Set entries = currFeatures.entrySet();
+          Iterator itFeatureArrays = entries.iterator();
+
+          while(itFeatureArrays.hasNext()) {
+            Map.Entry currEntry = (Map.Entry)itFeatureArrays.next();
+            String key = (String)currEntry.getKey();
+            Vector val = (Vector)currEntry.getValue();
+
+            //add to feature map normalized array
+            Assert.assert(val.size() >= 1);
+
+            if (val.size() == 1) {
+              //the single elemnt of the array
+              annFeatures.put(key,val.firstElement());
+            }
+            else {
+              //the whole array
+              annFeatures.put(key,val);
+            }
+          }//while
+
+          //2.1.2. add the featuremap for this annotation to the hashmap
+          featuresByAnnotID.put(prevAnnID,annFeatures);
+          //2.1.3. clear temp hashtable with feature vectors
+          currFeatures.clear();
+          prevAnnID = currAnnID;
+        }//if
+
+        currKey = rs.getString(2);
+        Long valueType = new Long(rs.getLong(3));
+
+        //we don't quite know what is the type of the NUMBER
+        //stored in DB
+        Object numberValue = null;
+
+        //for all numeric types + boolean -> read from DB as appropriate
+        //Java object
+        switch(valueType.intValue()) {
+
+          case DBHelper.VALUE_TYPE_BOOLEAN:
+            numberValue = new Boolean(rs.getBoolean(4));
+            break;
+
+          case DBHelper.VALUE_TYPE_FLOAT:
+            numberValue = new Float(rs.getFloat(4));
+            break;
+
+          case DBHelper.VALUE_TYPE_INTEGER:
+            numberValue = new Integer(rs.getInt(4));
+            break;
+
+          case DBHelper.VALUE_TYPE_LONG:
+            numberValue = new Long(rs.getLong(4));
+            break;
+
+          default:
+            //do nothing, will be handled in the next switch statement
+        }
+
+        //don't forget to read the rest of the current row
+        String stringValue = rs.getString(5);
+        Clob clobValue = rs.getClob(6);
+        Blob blobValue = rs.getBlob(7);
+
+        switch(valueType.intValue()) {
+
+          case DBHelper.VALUE_TYPE_BINARY:
+            throw new MethodNotImplementedException();
+
+          case DBHelper.VALUE_TYPE_BOOLEAN:
+          case DBHelper.VALUE_TYPE_FLOAT:
+          case DBHelper.VALUE_TYPE_INTEGER:
+          case DBHelper.VALUE_TYPE_LONG:
+            currFeatureValue = numberValue;
+            break;
+
+          case DBHelper.VALUE_TYPE_STRING:
+            //this one is tricky too
+            //if the string is < 4000 bytes long then it's stored as varchar2
+            //otherwise as CLOB
+            if (null == stringValue) {
+              //oops, we got CLOB
+              StringBuffer temp = new StringBuffer();
+              OracleDataStore.readCLOB(clobValue,temp);
+              currFeatureValue = temp.toString();
+            }
+            else {
+              currFeatureValue = stringValue;
+            }
+            break;
+
+          default:
+            throw new SynchronisationException("Invalid feature type found in DB");
+        }//switch
+
+        //ok, we got the key/value pair now
+        //2.2 is this a new feature key?
+        if (false == currFeatures.containsKey(currKey)) {
+          //new key
+          Vector keyValue = new Vector();
+          keyValue.add(currFeatureValue);
+        }
+        else {
+          //key is present, append to existing vector
+          ((Vector)currFeatures.get(currKey)).add(currFeatureValue);
+        }
+
+        prevKey = currKey;
+      }//while
+
+
+      //2.3 process the last Annotation left
+      annFeatures = new SimpleFeatureMapImpl();
+
+      Set entries = currFeatures.entrySet();
+      Iterator itFeatureArrays = entries.iterator();
+
+      while(itFeatureArrays.hasNext()) {
+        Map.Entry currEntry = (Map.Entry)itFeatureArrays.next();
+        String key = (String)currEntry.getKey();
+        Vector val = (Vector)currEntry.getValue();
+
+        //add to feature map normalized array
+        Assert.assert(val.size() >= 1);
+
+        if (val.size() == 1) {
+          //the single elemnt of the array
+          annFeatures.put(key,val.firstElement());
+        }
+        else {
+          //the whole array
+          annFeatures.put(key,val);
+        }
+      }//while
+
+      //2.3.1. add the featuremap for this annotation to the hashmap
+      featuresByAnnotID.put(prevAnnID,annFeatures);
+
+      //3. return the hashmap
+      return featuresByAnnotID;
+    }
+    catch(SQLException sqle) {
+      throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(IOException sqle) {
+      throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      try {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(pstmt);
+      }
+      catch(PersistenceException pe) {
+        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
+      }
+    }
+  }
 
 }
