@@ -32,7 +32,7 @@
      -- init the LR_TYPE table
      
      insert into t_lr_type(lrtp_id,lrtp_type)
-     values(1,'gate.corpora.DocumentImpl');
+     values(1,'gate.corpora.DatabaseDocumentImpl');
      
      --
      insert into t_lr_type(lrtp_id,lrtp_type)
