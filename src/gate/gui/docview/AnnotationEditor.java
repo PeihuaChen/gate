@@ -266,6 +266,7 @@ public class AnnotationEditor{
    String annType = ann.getType();
    Set types = new HashSet(schemasByType.keySet());
    types.add(annType);
+   types.addAll(set.getAllTypes());
    java.util.List typeList = new ArrayList(types);
    Collections.sort(typeList);
    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
