@@ -63,7 +63,7 @@ public class SortedTable extends JTable{
                                    + "; cellWidth = " + cellWidth);
             */
             //XXX: Before Swing 1.1 Beta 2, use setMinWidth instead.
-            int width = Math.max(headerWidth, cellWidth) + 10;
+            int width = Math.max(40, cellWidth) + 10;
             if ((column.getMaxWidth() < (width + 1)) && ((width + 1) > 0))
               column.setMaxWidth(width + 1);
             column.setPreferredWidth(width);
