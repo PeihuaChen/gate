@@ -103,13 +103,13 @@ public class PronominalCoref extends AbstractProcessingResource
     constraint.put("category",PRP_CATEGORY);
     AnnotationSet personalPronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraint);
     //sort them according to offset
-    Annotation[] arrPersonalPronouns = (Annotation[])personalPronouns.toArray();
+    Object[] arrPersonalPronouns = personalPronouns.toArray();
     java.util.Arrays.sort(arrPersonalPronouns,ANNOTATION_COMPARATOR);
 
     int prnSentIndex = 0;
 
     for (int i=0; i< arrPersonalPronouns.length; i++) {
-      Annotation currPronoun = arrPersonalPronouns[i];
+      Annotation currPronoun = (Annotation)arrPersonalPronouns[i];
       while (this.textSentences[prnSentIndex].getEndOffset().longValue() <
                                       currPronoun.getStartNode().getOffset().longValue()) {
         prnSentIndex++;
@@ -136,13 +136,18 @@ public class PronominalCoref extends AbstractProcessingResource
 
     String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
 
-    if (strPronoun.equalsIgnoreCase("HE")) {
+    if (strPronoun.equalsIgnoreCase("HE") ||
+        strPronoun.equalsIgnoreCase("HIS")) {
       return _resolve$HE$HIM$HIS$(currPronoun,prnSentIndex);
     }
-//    else if (strPronoun.equalsIgnoreCase("HE")) {
-//    }
+    else if (strPronoun.equalsIgnoreCase("SHE") ||
+              strPronoun.equalsIgnoreCase("HER")) {
+      return this._resolve$SHE$HER$(currPronoun,prnSentIndex);
+    }
     else {
-      throw new IllegalArgumentException();
+//      throw new MethodNotImplementedException();
+      gate.util.Err.println("["+strPronoun+"] is not handled yet...");
+      return null;
     }
   }
 
@@ -184,12 +189,50 @@ public class PronominalCoref extends AbstractProcessingResource
         }
       }
     }
-
+gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
     return bestAntecedent;
   }
 
-  private Annotation _resolve$SHE$HER$(String pronoun) {
-    throw new MethodNotImplementedException();
+
+  private Annotation _resolve$SHE$HER$(Annotation pronoun, int sentenceIndex) {
+
+    //0. preconditions
+    Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY));
+    String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
+    Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
+                      pronounString.equalsIgnoreCase("HER"));
+
+    //1.
+    boolean antecedentFound = false;
+    int scopeFirstIndex = sentenceIndex - SENTENCES_IN_SCOPE;
+    int currSentenceIndex = sentenceIndex;
+    Annotation bestAntecedent = null;
+
+    while (currSentenceIndex >= scopeFirstIndex || antecedentFound == false) {
+      Sentence currSentence = this.textSentences[currSentenceIndex];
+      AnnotationSet persons = currSentence.getPersons();
+
+      Iterator it = persons.iterator();
+      while (it.hasNext()) {
+        Annotation currPerson = (Annotation)it.next();
+        String gender = (String)currPerson.getFeatures().get(PERSON_GENDER);
+
+        if (null != gender && gender.equalsIgnoreCase("FEMALE")) {
+          //hit
+          antecedentFound = true;
+
+          if (null == bestAntecedent ||
+              currPerson.getStartNode().getOffset().longValue() >
+                                  bestAntecedent.getStartNode().getOffset().longValue()) {
+            bestAntecedent = currPerson;
+          }
+        }
+      }
+    }
+
+gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
+    return bestAntecedent;
   }
 
   private Annotation _resolve$IT$ITS$(String pronoun) {
@@ -205,13 +248,13 @@ public class PronominalCoref extends AbstractProcessingResource
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_TYPE);
 
     this.textSentences = new Sentence[sentenceAnnotations.size()];
-    Annotation[]  sentenceArray = (Annotation[])sentenceAnnotations.toArray();
+    Object[]  sentenceArray = sentenceAnnotations.toArray();
 
     java.util.Arrays.sort(sentenceArray,ANNOTATION_COMPARATOR);
 
     for (int i=0; i< sentenceArray.length; i++) {
 
-      Annotation currSentence = sentenceArray[i];
+      Annotation currSentence = (Annotation)sentenceArray[i];
       Long sentStartOffset = currSentence.getStartNode().getOffset();
       Long sentEndOffset = currSentence.getEndNode().getOffset();
 
@@ -316,7 +359,7 @@ public class PronominalCoref extends AbstractProcessingResource
     }
 
     public Long getEndOffset() {
-      return this.startOffset;
+      return this.endOffset;
     }
 
     public AnnotationSet getPersons() {
