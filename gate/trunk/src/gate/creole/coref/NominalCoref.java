@@ -107,7 +107,7 @@ public class NominalCoref extends AbstractCoreferencer
 
     HashMap anaphorToAntecedent = new HashMap();
     Object[] nominalArray;
-      
+
     //0. preconditions
     if (null == this.document) {
       throw new ExecutionException("[coreference] Document is not set!");
@@ -183,9 +183,15 @@ public class NominalCoref extends AbstractCoreferencer
     for (int i=0; i<nominalArray.length; i++) {
         Annotation nominal = (Annotation)nominalArray[i];
         
+	// Find the current place in the tokens array
+	currentToken = advanceTokenPosition(nominal, currentToken, tokens);
+
+	Out.print("processing nominal [" + stringValue(nominal) + "] ");
+
         if (nominal.getType().equals(PERSON_CATEGORY)) {
             // Add each Person entity to the beginning of the people list
             previousPeople.add(0, nominal);
+	    Out.println("added person");
         }
         else if (nominal.getType().equals(JOBTITLE_CATEGORY)) {
             
@@ -211,19 +217,8 @@ public class NominalCoref extends AbstractCoreferencer
                 continue;
             }
 
-            // Don't associate if it's immediately followed by a person.
-	    // Luckily we have an array of all Person annotations in order...
-	    Annotation nextAnnotation = (Annotation) nominalArray[i+1];
-	    if (nextAnnotation.getType().equals(PERSON_CATEGORY) &&
-		nextAnnotation.getStartNode().getOffset().longValue() ==
-		(nominal.getEndNode().getOffset().longValue() + 1)) {
-		Out.println("immediately followed by Person");
-		continue;
-	    }
-            
             // Don't associate it if it's proceeded by a generic marker
-            Annotation previousToken =
-                getPreviousAnnotation(nominal, tokens);
+            Annotation previousToken = (Annotation) tokens[currentToken - 1];
             String previousValue = (String) 
                 previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
             if (previousValue.equalsIgnoreCase("a") ||
@@ -234,6 +229,33 @@ public class NominalCoref extends AbstractCoreferencer
                 continue;
             }            
 
+            // Don't associate if it's immediately followed by a person.
+	    // Luckily we have an array of all Person annotations in order...
+	    Annotation nextAnnotation = (Annotation) nominalArray[i+1];
+	    if (nextAnnotation.getType().equals(PERSON_CATEGORY)) {
+		// Get all tokens between this and the next person
+		int interveningTokens =
+		    countInterveningTokens(nominal, nextAnnotation,
+					   currentToken, tokens);
+		if (interveningTokens == 0) {
+		    // There is nothing between the job title and the person,
+		    // like "Chairman Gates" -- do nothing.
+		    Out.println("immediately followed by Person");
+		    continue;
+		}
+		else if (interveningTokens == 1) {
+		    if (getFollowingToken(nominal, currentToken, tokens)
+			.getFeatures().get(TOKEN_STRING_FEATURE_NAME)
+			.equals(",")) {
+			anaphor2antecedent.put(nominal, nextAnnotation);
+			Out.println("associating with " +
+				    stringValue(nextAnnotation));
+			continue;
+		    }
+		}
+		    
+	    }
+            
             // If we have no possible antecedents, create a new Person
 	    // annotation.
             if (previousPeople.size() == 0) {
@@ -243,6 +265,7 @@ public class NominalCoref extends AbstractCoreferencer
 					    nominal.getEndNode(),
 					    PERSON_CATEGORY,
 					    personFeatures);
+		Out.println("creating as new Person");
                 continue;
             }
 
@@ -268,6 +291,9 @@ public class NominalCoref extends AbstractCoreferencer
                 }
             }
 
+	    Out.println("associating with " +
+			previousPerson.getFeatures()
+			.get(TOKEN_STRING_FEATURE_NAME));
             
             anaphor2antecedent.put(nominal, previousPerson);
         }
@@ -275,6 +301,7 @@ public class NominalCoref extends AbstractCoreferencer
             // Add each organization entity to the beginning of
             // the organization list
             previousOrgs.add(0, nominal);
+	    Out.println("added organization");
         }
         else if (nominal.getType().equals(LOOKUP_CATEGORY)) {
             // Don't associate it if we have no organizations
@@ -299,6 +326,7 @@ public class NominalCoref extends AbstractCoreferencer
                 continue;
             }
 
+	    Out.println("organization noun");
             // Associate this entity with the most recent Person
             anaphor2antecedent.put(nominal, previousOrgs.get(0));
         }
@@ -325,27 +353,82 @@ public class NominalCoref extends AbstractCoreferencer
       
       return false;
   }
-                    
-  /** 
-   * This method returns the annotation before a given annotation.
-   */
-  private Annotation getPreviousAnnotation(Annotation a,
-                                           Object[] annotations) {
-      Annotation previous = null;
-      Annotation current = null;
 
-      for (int i=0;i<annotations.length;i++) {
-          current = (Annotation) annotations[i];
-          if (current.getStartNode().getOffset().longValue() >= 
-              a.getStartNode().getOffset().longValue()) {
-              return previous;
-          }
-          previous = current;
+  private int advanceTokenPosition(Annotation target, int currentPosition,
+				   Object[] tokens) {
+      long targetOffset = target.getStartNode().getOffset().longValue();
+      long currentOffset = ((Annotation) tokens[currentPosition])
+	  .getStartNode().getOffset().longValue();
+
+      if (targetOffset > currentOffset) {
+	  while (targetOffset > currentOffset) {
+	      currentPosition++;
+	      currentOffset = ((Annotation) tokens[currentPosition])
+		  .getStartNode().getOffset().longValue();
+	  }
       }
-
-      return null;
+      else if (targetOffset < currentOffset) {
+	  while (targetOffset < currentOffset) {
+	      currentPosition--;
+	      currentOffset = ((Annotation) tokens[currentPosition])
+		  .getStartNode().getOffset().longValue();
+	  }
+      }
+      
+      return currentPosition;
   }
-                                             
+
+  private int countInterveningTokens(Annotation first, Annotation second,
+				     int currentPosition, Object[] tokens) {
+    int interveningTokens = 0;
+
+    long startOffset = first.getEndNode().getOffset().longValue();
+    long endOffset = second.getStartNode().getOffset().longValue();
+    
+    long currentOffset = ((Annotation) tokens[currentPosition])
+      .getStartNode().getOffset().longValue();
+    
+    while (currentOffset < endOffset) {
+      if (currentOffset > startOffset) {
+        interveningTokens++;
+      }
+      currentPosition++;
+      currentOffset = ((Annotation) tokens[currentPosition])
+	.getStartNode().getOffset().longValue();
+    }
+    return interveningTokens;
+  }
+
+  private Annotation getFollowingToken(Annotation current, int currentPosition,
+				       Object[] tokens) {
+    long endOffset = current.getEndNode().getOffset().longValue();
+    long currentOffset = ((Annotation) tokens[currentPosition])
+      .getStartNode().getOffset().longValue();
+    while (currentOffset <= endOffset) {
+      currentPosition++;
+      currentOffset = ((Annotation) tokens[currentPosition])
+	.getStartNode().getOffset().longValue();
+    }
+    return (Annotation) tokens[currentPosition];
+  }
+	
+  private String stringValue(Annotation ann) {
+    Object[] tokens =
+      this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
+	       		          ann.getStartNode().getOffset(),
+				  ann.getEndNode().getOffset()).toArray();
+    java.util.Arrays.sort(tokens, new OffsetComparator());
+	
+    StringBuffer output = new StringBuffer();
+    for (int i=0;i<tokens.length;i++) {
+      Annotation token = (Annotation) tokens[i];
+      output.append(token.getFeatures().get(TOKEN_STRING_FEATURE_NAME));
+      if (i < tokens.length - 1) {
+        output.append(" ");
+      }
+    }
+    return output.toString();
+  }
 
   /** --- */
   public HashMap getResolvedAnaphora() {
