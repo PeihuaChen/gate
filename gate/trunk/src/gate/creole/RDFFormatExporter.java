@@ -282,12 +282,11 @@ System.out.println("exporting ["+ann+"]");
           if (null != matches) {
             //try to get equiv instance
             if (instanceMatches.containsKey(matches)) {
-System.out.println("equiv found");
               DAMLInstance equivInstance = (DAMLInstance)instanceMatches.get(matches);
+//annInstance.prop_equivalentTo().add(equivInstance);
 //              annInstance.prop_sameIndividualAs().add((DAMLCommon)equivInstance);
             }
             else {
-System.out.println("first in chain");
               //first entry of the coref chain
               instanceMatches.put(matches,annInstance);
             }
@@ -298,8 +297,9 @@ System.out.println("first in chain");
       }//while
 
       //print the model into file
-      instanceModel.write(output,"RDF/XML-ABBREV");
-
+      RDFWriter rdfWriter = new RDFWriterFImpl().getWriter("RDF/XML-ABBREV");
+      rdfWriter.setNsPrefix("gate",this.ontologyLocation.toString()+"#");
+      rdfWriter.write(instanceModel,output,null);
   }
 
   private HashMap ontology2hashmap(DAMLModel ontology) throws Exception {
