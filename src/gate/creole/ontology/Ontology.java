@@ -19,6 +19,7 @@ package gate.creole.ontology;
 import java.net.*;
 import java.util.*;
 import gate.*;
+import gate.creole.ResourceInstantiationException;
 
 /**defines the interface of an ontology*/
 public interface Ontology extends LanguageResource{
@@ -27,7 +28,7 @@ public interface Ontology extends LanguageResource{
    *  afterwards loaded by the URL if not found
    *  @param someUrl the url of the ontology
    *  @return the retrieved or loaded ontology*/
-  public Ontology getOntology(URL someUrl);
+  public Ontology getOntology(URL someUrl) throws ResourceInstantiationException;
 
   /** get the url of this ontology
    * @return the url of this ontology */
@@ -40,12 +41,12 @@ public interface Ontology extends LanguageResource{
   /**load this ontology. according to different storages - different implementations
    * are expected.
    * should take care of the modifiedAfterLoading member */
-  public void load();
+  public void load() throws ResourceInstantiationException ;
 
   /**store this ontology. according to different storages - different implementations
    * are expected.
    * should take care of the modifiedAfterLoading member */
-  public void store();
+  public void store() throws ResourceInstantiationException;
 
   /**set the URI of the ontology
    * @param theURI  the URI to be set */
