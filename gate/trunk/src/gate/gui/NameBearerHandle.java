@@ -54,6 +54,7 @@ public class NameBearerHandle implements Handle,
         if(iconName == null){
           if(target instanceof LanguageResource) iconName = "lr.gif";
           else if(target instanceof ProcessingResource) iconName = "pr.gif";
+          else if(target instanceof Controller) iconName = "controller.gif";
         }
         tooltipText = "Type : " + rData.getName();
       } else {
@@ -62,10 +63,6 @@ public class NameBearerHandle implements Handle,
     }else if(target instanceof DataStore){
       iconName = ((DataStore)target).getIconName();
       tooltipText = ((DataStore)target).getComment();
-    }else if(target instanceof Controller){
-      iconName = "application.gif";
-      tooltipText = ((Controller)target).getName() + " (" +
-                    target.getClass().getName() + ")";
     }
 
     popup = null;

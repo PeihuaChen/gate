@@ -124,7 +124,7 @@ public class XJTable extends JTable {
 
   protected void configureEnclosingScrollPane(){
     super.configureEnclosingScrollPane();
-    //if we're into a scroll panere resize with it
+    //if we're into a scroll pane resize with it
     Container p = getParent();
     if (p instanceof JViewport) {
       Container gp = p.getParent();
@@ -221,7 +221,7 @@ public class XJTable extends JTable {
         if(scrollPane.getVerticalScrollBar().isVisible())
           portWidth -= scrollPane.getVerticalScrollBar().getWidth();
         if(totalWidth < portWidth){
-          int width = tCol.getWidth() + portWidth - totalWidth;
+          int width = tCol.getWidth() + portWidth - totalWidth - 2;
           tCol.setPreferredWidth(width);
           tCol.setWidth(width);
         }//if(totalWidth < portWidth)

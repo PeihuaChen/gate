@@ -39,11 +39,6 @@ public class NewResourceDialog extends JDialog {
 
   public NewResourceDialog(Frame frame, String title, boolean modal) {
     super(frame, title, modal);
-    if(frame instanceof MainFrame){
-      fileChooser = ((MainFrame)frame).fileChooser;
-    }else{
-      fileChooser = new JFileChooser();
-    }
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -51,7 +46,6 @@ public class NewResourceDialog extends JDialog {
   }// public NewResourceDialog(Frame frame, String title, boolean modal)
 
   protected void initLocalData(){
-    params = new ArrayList();
     listeners = new HashMap();
     if(getParent() instanceof gate.event.ProgressListener)
       listeners.put("gate.event.ProgressListener", getParent());
@@ -80,24 +74,8 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(Box.createVerticalStrut(5));
 
     //parameters table
-    tableModel = new ParametersTableModel();
-    table = new XJTable(tableModel);
-    table.setDefaultRenderer(ParameterDisjunction.class,
-                             new ParameterDisjunctionRenderer());
-    table.setDefaultRenderer(Boolean.class,
-                             new BooleanRenderer());
-    table.setDefaultRenderer(Object.class,
-                             new CustomObjectRenderer());
-    table.setDefaultRenderer(String.class,
-                             new DefaultTableCellRenderer());
-
-    table.setDefaultEditor(ParameterDisjunction.class,
-                           new ParameterDisjunctionEditor());
-    table.setDefaultEditor(Object.class,
-                           new CustomEditor());
-
-    table.setIntercellSpacing(new Dimension(5, 5));
-    tableScroll = new JScrollPane(table);
+    parametersEditor = new ResourceParametersEditor();
+    tableScroll = new JScrollPane(parametersEditor);
     this.getContentPane().add(tableScroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
     this.getContentPane().add(Box.createVerticalGlue());
@@ -114,34 +92,16 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(buttonsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
     setSize(400, 300);
-    nameField.setNextFocusableComponent(table);
-    table.setNextFocusableComponent(okBtn);
+    nameField.setNextFocusableComponent(parametersEditor);
+    parametersEditor.setNextFocusableComponent(okBtn);
     okBtn.setNextFocusableComponent(cancelBtn);
     cancelBtn.setNextFocusableComponent(nameField);
   }// protected void initGuiComponents()
 
 
   protected void initListeners(){
-    addComponentListener(new ComponentAdapter() {
-      public void componentResized(ComponentEvent e) {
-        //fire a resize on table. It will automatically resize itself to the
-        //right size
-        table.setSize(table.getSize().width + 1,
-                      table.getSize().height + 1);
-      }// public void componentResized(ComponentEvent e)
-    });
-
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        try {
-          if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
-            table.editingStopped(new ChangeEvent(
-                                  table.getCellEditor(table.getEditingRow(),
-                                                    table.getEditingColumn())));
-          }
-        } catch(Exception ex) {
-          return;
-        }
         userCanceled = false;
         String name = nameField.getText();
         if(name == null || name.length() == 0){
@@ -157,54 +117,29 @@ public class NewResourceDialog extends JDialog {
     cancelBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = true;
-        if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
-          table.editingCanceled(new ChangeEvent(
-                                table.getCellEditor(table.getEditingRow(),
-                                                    table.getEditingColumn())));
-        }
         hide();
       }//public void actionPerformed(ActionEvent e)
     });
   }//protected void initListeners()
 
-  ParametersTableModel tableModel;
-  XJTable table;
-  JScrollPane tableScroll;
-  JComboBox parametersCombo;
   JButton okBtn, cancelBtn;
   JTextField nameField;
+  ResourceParametersEditor parametersEditor;
+  JScrollPane tableScroll;
   ResourceData resourceData;
   Resource resource;
 
-
   boolean userCanceled;
-  ArrayList params;
-  JFileChooser fileChooser;
   Map listeners;
 
   public synchronized void show(ResourceData rData) {
     this.resourceData = rData;
     setLocationRelativeTo(getParent());
     nameField.setText("");
-    ParameterList pList = rData.getParameterList();
-    Iterator parIter = pList.getInitimeParameters().iterator();
-    params.clear();
-    while(parIter.hasNext()){
-      params.add(new ParameterDisjunction((List)parIter.next()));
-    }
-    tableModel.fireTableDataChanged();
+    parametersEditor.init(null,
+                          rData.getParameterList().getInitimeParameters());
 
-    table.setPreferredSize(null);
-
-    Dimension dim = table.getPreferredSize();
-    if(dim != null){
-      dim.height += table.getTableHeader().getPreferredSize().height +
-                    tableScroll.getInsets().top +
-                    tableScroll.getInsets().bottom;
-      dim.width +=  tableScroll.getInsets().left +
-                    tableScroll.getInsets().right;
-      tableScroll.setPreferredSize(dim);
-    }
+    validate();
     pack();
 
     requestFocus();
@@ -215,14 +150,8 @@ public class NewResourceDialog extends JDialog {
       Runnable runnable = new Runnable(){
         public void run(){
           //create the new resource
-          FeatureMap params = Factory.newFeatureMap();
-          for(int i=0; i< tableModel.getRowCount(); i++){
-            ParameterDisjunction pDisj = (ParameterDisjunction)
-                                         tableModel.getValueAt(i,0);
-            if(pDisj.getValue() != null){
-              params.put(pDisj.getName(), pDisj.getValue());
-            }
-          }
+          FeatureMap params = parametersEditor.getParameterValues();
+
           Resource res;
           gate.event.StatusListener sListener = (gate.event.StatusListener)
                                       listeners.get("gate.event.StatusListener");
@@ -272,396 +201,5 @@ public class NewResourceDialog extends JDialog {
       thread.start();
     }
   }// public synchronized Resource show(ResourceData rData)
-
-  int getRowCnt(){
-    return params.size();
-  }
-
-  //inner classes
-  protected class ParametersTableModel extends AbstractTableModel{
-
-    public ParametersTableModel(){
-    }
-
-    public void fireTableDataChanged(){
-      super.fireTableDataChanged();
-    }// public void fireTableDataChanged()
-
-    public int getColumnCount(){return 4;}
-
-    public Class getColumnClass(int columnIndex){
-      switch(columnIndex){
-        case 0: return ParameterDisjunction.class;
-        case 1: return String.class;
-        case 2: return Boolean.class;
-        case 3: return Object.class;
-        default: return Object.class;
-      }
-    }// public Class getColumnClass(int columnIndex)
-
-    public String getColumnName(int columnIndex){
-      switch(columnIndex){
-        case 0: return "Name";
-        case 1: return "Type";
-        case 2: return "Required";
-        case 3: return "Value";
-        default: return "?";
-      }
-    }//public String getColumnName(int columnIndex)
-
-    public boolean isCellEditable(int rowIndex,
-                              int columnIndex) {
-        if(columnIndex == 3) return true;
-        if(columnIndex == 1 || columnIndex == 2) return false;
-        ParameterDisjunction pDisj =
-                      (ParameterDisjunction)params.get(rowIndex);
-        return pDisj.size() > 1;
-    }// public boolean isCellEditable
-
-    public int getRowCount(){
-      return getRowCnt();
-    }// public int getRowCount()
-
-    public Object getValueAt(int rowIndex,
-                         int columnIndex) {
-      ParameterDisjunction pDisj =
-                    (ParameterDisjunction)params.get(rowIndex);
-      switch(columnIndex){
-        case 0: return pDisj;
-        case 1: return pDisj.getType();
-        case 2: return pDisj.getRequired();
-        case 3: return pDisj.getValue();
-        default: return "?";
-      }
-    }// public Object getValueAt
-
-    public void setValueAt(Object aValue,
-                       int rowIndex,
-                       int columnIndex){
-      ParameterDisjunction pDisj =
-                    (ParameterDisjunction)params.get(rowIndex);
-      switch(columnIndex){
-        case 0:{
-          pDisj.setSelectedIndex(((Integer)aValue).intValue());
-          break;
-        }
-        case 1:{
-          break;
-        }
-        case 2:{
-          break;
-        }
-        case 3:{
-          pDisj.setValue((String)aValue);
-          break;
-        }
-        default:{}
-      }
-    }// public void setValueAt
-  }///class FeaturesTableModel extends DefaultTableModel
-
-  class ParameterDisjunctionRenderer extends DefaultTableCellRenderer {
-    public ParameterDisjunctionRenderer(){
-      combo = new JComboBox();
-      class CustomRenderer extends JLabel implements ListCellRenderer {
-        public Component getListCellRendererComponent(JList list,
-                                                      Object value,
-                                                      int index,
-                                                      boolean isSelected,
-                                                      boolean cellHasFocus){
-
-          setText(text);
-          setIcon(MainFrame.getIcon(iconName));
-          return this;
-        }
-      };
-      combo.setRenderer(new CustomRenderer());
-    }
-
-    public Component getTableCellRendererComponent(JTable table,
-                                                   Object value,
-                                                   boolean isSelected,
-                                                   boolean hasFocus,
-                                                   int row,
-                                                   int column) {
-      ParameterDisjunction pDisj = (ParameterDisjunction)value;
-      text = pDisj.getName();
-      String type = pDisj.getType();
-      iconName = "param.gif";
-      if(Gate.getCreoleRegister().containsKey(type)){
-        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
-        if(rData != null) iconName = rData.getIcon();
-      }
-      if(pDisj.size() > 1){
-        combo.setModel(new DefaultComboBoxModel(new Object[]{text}));
-        return combo;
-      }
-      //prepare the renderer
-      Component comp = super.getTableCellRendererComponent(table,
-                                                           text,
-                                                           isSelected, hasFocus,
-                                                           row, column);
-      setIcon(MainFrame.getIcon(iconName));
-      return this;
-    }// public Component getTableCellRendererComponent
-
-    //combobox used for OR parameters
-    JComboBox combo;
-    String iconName;
-    String text;
-  }//class ParameterDisjunctionRenderer
-
-
-  /**
-   * A renderer that displays a File Open button next to a text field.
-   * Used for setting URLs from files.
-   */
-  class CustomObjectRenderer extends ObjectRenderer {
-    CustomObjectRenderer() {
-      button = new JButton(MainFrame.getIcon("loadFile.gif"));
-      button.setToolTipText("Set from file...");
-      textButtonBox = new JPanel();
-      textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
-      textButtonBox.setOpaque(false);
-    }// CustomObjectRenderer()
-
-    public Component getTableCellRendererComponent(JTable table,
-                                                   Object value,
-                                                   boolean isSelected,
-                                                   boolean hasFocus,
-                                                   int row,
-                                                   int column) {
-      //prepare the renderer
-      if(value == null){
-        //ensure a reasonable space is reserved (40 spaces)
-        super.getTableCellRendererComponent(
-          table,
-          "                                        " +
-          "                                        ",
-          isSelected, hasFocus, row, column);
-      }else{
-        super.getTableCellRendererComponent(table, value, isSelected,
-                                            hasFocus, row, column);
-      }
-
-      String type = (String)table.getValueAt(row, 1);
-      if(type.equals("java.net.URL")){
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        textButtonBox.removeAll();
-        textButtonBox.add(this);
-        textButtonBox.add(Box.createHorizontalGlue());
-        textButtonBox.add(button);
-        return textButtonBox;
-      }else{
-        setMaximumSize(getPreferredSize());
-        return this;
-      }
-
-//      return this;
-    }// public Component getTableCellRendererComponent
-
-    JButton button;
-    JPanel textButtonBox;
-  }//class ObjectRenderer extends DefaultTableCellRenderer
-
-  class ParameterDisjunctionEditor extends DefaultCellEditor{
-    public ParameterDisjunctionEditor(){
-      super(new JComboBox());
-      combo = (JComboBox)super.getComponent();
-      class CustomRenderer extends JLabel implements ListCellRenderer {
-        public CustomRenderer(){
-          setOpaque(true);
-        }
-        public Component getListCellRendererComponent(JList list,
-                                                      Object value,
-                                                      int index,
-                                                      boolean isSelected,
-                                                      boolean cellHasFocus){
-          if (isSelected) {
-              setBackground(list.getSelectionBackground());
-              setForeground(list.getSelectionForeground());
-          }
-          else {
-              setBackground(list.getBackground());
-              setForeground(list.getForeground());
-          }
-
-          setFont(list.getFont());
-
-          setText((String)value);
-
-          String iconName = "param.gif";
-          Object[] params = pDisj.getParameters();
-          for(int i = 0; i < params.length; i++){
-            Parameter param = (Parameter)params[i];
-            if(param.getName().equals(value)){
-              String type = param.getTypeName();
-              if(Gate.getCreoleRegister().containsKey(type)){
-                ResourceData rData = (ResourceData)
-                                     Gate.getCreoleRegister().get(type);
-                if(rData != null) iconName = rData.getIcon();
-              }
-              break;
-            }//if(params[i].getName().equals(value))
-          }//for(int i = 0; params.length; i++)
-
-          setIcon(MainFrame.getIcon(iconName));
-          return this;
-        }
-      };//class CustomRenderer extends JLabel implements ListCellRenderer
-      combo.setRenderer(new CustomRenderer());
-
-    }// public ParameterDisjunctionEditor()
-
-    public Component getTableCellEditorComponent(JTable table,
-                                             Object value,
-                                             boolean isSelected,
-                                             int row,
-                                             int column){
-     pDisj = (ParameterDisjunction)value;
-     combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
-     return combo;
-    }// public Component getTableCellEditorComponent
-
-    public Object getCellEditorValue(){
-      return new Integer(combo.getSelectedIndex());
-    }
-    JComboBox combo;
-    ParameterDisjunction pDisj;
-  }// class ParameterDisjunctionEditor extends DefaultCellEditor
-
-  class CustomEditor extends DefaultCellEditor{
-    CustomEditor(){
-      super(new JTextField(10));
-      setClickCountToStart(1);
-      textField = (JTextField)getComponent();
-      button = new JButton(MainFrame.getIcon("loadFile.gif"));
-      button.setToolTipText("Set from file...");
-      textButtonBox = Box.createHorizontalBox();
-
-      button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          fileChooser.setDialogTitle("Select file");
-          fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
-          int res = fileChooser.showOpenDialog(NewResourceDialog.this);
-          if(res == fileChooser.APPROVE_OPTION){
-            try{
-              textField.setText(fileChooser.getSelectedFile().
-                                toURL().toExternalForm());
-            }catch(IOException ioe){}
-          }
-        }//public void actionPerformed(ActionEvent e)
-      });
-    }// CustomEditor()
-
-    public Component getTableCellEditorComponent(JTable table,
-                                                 Object value,
-                                                 boolean isSelected,
-                                                 int row,
-                                                 int column) {
-      String type = (String)table.getValueAt(row, 1);
-      if(type.equals("java.net.URL")){
-        textButtonBox.removeAll();
-        textButtonBox.add(super.getTableCellEditorComponent(table, value,
-                                                            isSelected,
-                                                            row, column));
-        textButtonBox.add(button);
-        return textButtonBox;
-      } else {
-        return super.getTableCellEditorComponent(table, value, isSelected,
-                                                 row, column);
-      }
-    }// public Component getTableCellEditorComponent
-
-    JButton button;
-    JTextField textField;
-    Box textButtonBox;
-  }// class CustomEditor extends DefaultCellEditor
-
-  class ParameterDisjunction {
-    /**
-     * gets a list of {@link gate.creole.Parameter}
-     */
-    public ParameterDisjunction(List options){
-      this.options = options;
-      Iterator paramsIter = options.iterator();
-      names = new String[options.size()];
-      int i = 0;
-      while(paramsIter.hasNext()){
-        names[i++] = ((Parameter)paramsIter.next()).getName();
-      }
-      values = new Object[options.size()];
-      setSelectedIndex(0);
-    }
-
-    public void setSelectedIndex(int index){
-      selectedIndex = index;
-      currentParameter = (Parameter)options.get(selectedIndex);
-      if(values[selectedIndex] == null){
-        try{
-          values[selectedIndex] = currentParameter.getDefaultValue();
-        }catch(Exception e){
-          values[selectedIndex] = "";
-        }
-      }
-      tableModel.fireTableDataChanged();
-    }
-
-    public int size(){
-      return options.size();
-    }
-
-    public Boolean getRequired(){
-      return new Boolean(!currentParameter.isOptional());
-    }
-
-    public String getName(){
-      return currentParameter.getName();
-    }
-
-    public String getComment(){
-      return currentParameter.getComment();
-    }
-
-    public String getType(){
-      return currentParameter.getTypeName();
-    }
-
-    public String[] getNames(){
-      return names;
-    }
-
-    public Object[] getParameters(){
-      return options.toArray();
-    }
-
-    public void setValue(String stringValue){
-      Object oldValue = values[selectedIndex];
-      try{
-        values[selectedIndex] = currentParameter.
-                                calculateValueFromString(stringValue);
-      }catch(Exception e){
-        values[selectedIndex] = oldValue;
-        JOptionPane.showMessageDialog(getOwner(),
-                                      "Invalid value!\n" +
-                                      "Is it the right type?",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }
-    }
-
-    public Object getValue(){
-      return values[selectedIndex];
-    }
-
-
-    int selectedIndex;
-    List options;
-    boolean required;
-    String typeName;
-    String name;
-    String[] names;
-    Parameter currentParameter;
-    Object[] values;
-  }// class ParameterDisjunction
 
 }//class NewResourceDialog
