@@ -140,7 +140,26 @@ public class Coreferencer extends AbstractLanguageAnalyser
         matches = new ArrayList();
         matches.add(antecedent.getId());
         antecedent.getFeatures().put("matches",matches);
-      }
+        //check if the document has a list of matches
+        //if yes, simply add the new list to it
+        //if not, create it and add the list of matches to it
+        if (document.getFeatures().containsKey(
+            ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME)) {
+          Map matchesMap = (Map) document.getFeatures().get(
+                                ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+          List matchesList = (List) matchesMap.get(getAnnotationSetName());
+          if (matchesList == null) {
+            matchesList = new ArrayList();
+            matchesMap.put(getAnnotationSetName(), matchesList);
+          }
+          matchesList.add(matches);
+        } else {
+          Map matchesMap = new HashMap();
+            List matchesList = new ArrayList();
+            matchesMap.put(getAnnotationSetName(), matchesList);
+            matchesList.add(matches);
+        }//if else
+      }//if matches == null
 
       FeatureMap features = new SimpleFeatureMapImpl();
       features.put("ENTITY_MENTION_TYPE","PRONOUN");
