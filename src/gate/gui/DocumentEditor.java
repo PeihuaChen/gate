@@ -32,6 +32,7 @@ import java.awt.*;
 import java.awt.font.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.awt.print.*;
 
 import java.beans.*;
 import java.util.*;
@@ -830,7 +831,16 @@ public class DocumentEditor extends AbstractVisualResource
 
     coreferenceVisibleBtn = new JToggleButton("Coreference", coreferenceVisible);
     if(isCorefOptionAvailable()) toolbar.add(coreferenceVisibleBtn);
+
+
+    //printing
+//    toolbar.add(Box.createHorizontalStrut(20));
+//    toolbar.add(new PrintAction());
+
+
+
     toolbar.add(Box.createHorizontalGlue());
+
 
     //The text
     textPane = new XJTextPane();
@@ -3354,6 +3364,37 @@ Out.prln("NULL size");
       }// End for
     }// constructAnnotationsToDump()
   }//class DumpAsXmlAction
+
+  protected class PrintAction extends AbstractAction{
+    public PrintAction(){
+      super("Print");
+    }// EditAnnotationAction()
+
+    /** This method takes care of how the dumping is done*/
+    public void actionPerformed(ActionEvent e){
+      PrinterJob printerJob = PrinterJob.getPrinterJob();
+
+      if (printerJob.printDialog()) {
+        try{
+          PageFormat pageFormat = printerJob.pageDialog(printerJob.defaultPage());
+          Printable printable = new Printable(){
+            public int print(Graphics graphics, PageFormat pageFormat,
+                             int pageIndex)throws PrinterException{
+              if(pageIndex == 0){
+                textScroll.getViewport().printAll(graphics);
+                return Printable.PAGE_EXISTS;
+              }else return Printable.NO_SUCH_PAGE;
+            }
+          };
+          printerJob.setPrintable(printable , pageFormat);
+          printerJob.print();
+        }catch(Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    }
+  }
+
 
   /**
    * The action that is fired when the user wants to edit an annotation.
