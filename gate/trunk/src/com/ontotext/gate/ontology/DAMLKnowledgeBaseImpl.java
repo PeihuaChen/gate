@@ -280,7 +280,10 @@ public class DAMLKnowledgeBaseImpl extends OntologyImpl  {
           HashMap propertiesMap = new HashMap();
 
           while (propIter.hasNext()) {
-            DAMLProperty property = (DAMLProperty) propIter.next();
+            Object prop = propIter.next();
+            if (! (prop instanceof DAMLProperty))
+              continue;
+            DAMLProperty property = (DAMLProperty) prop;
             if (property.getLocalName() == null)
               continue;
             String propName = property.getLocalName();
@@ -336,7 +339,10 @@ public class DAMLKnowledgeBaseImpl extends OntologyImpl  {
 
           Iterator superIter = theClass.getSuperClasses();
           while (superIter.hasNext()) {
-            DAMLClass superClass = (DAMLClass) superIter.next();
+            Object supClass = superIter.next();
+            if (! (supClass instanceof DAMLClass) )
+              continue;
+            DAMLClass superClass = (DAMLClass) supClass;
             if (superClass.isRestriction()) {
               DAMLRestriction restriction = (DAMLRestriction) superClass;
               if (DEBUG) {
