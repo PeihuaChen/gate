@@ -310,7 +310,7 @@ public class OptionsDialog extends JDialog {
     initListeners();
     pack();
     setLocationRelativeTo(getOwner());
-    super.setVisible(true);
+    super.show();
   }
 
   public static void main(String args[]){

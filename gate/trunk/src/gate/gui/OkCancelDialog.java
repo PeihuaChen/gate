@@ -103,7 +103,7 @@ public class OkCancelDialog extends JDialog {
     setModal(true);
     userHasPressedOK = false;
     userHasPressedCancel = false;
-    super.setVisible(true);
+    super.show();
   }
 
   /**
