@@ -129,12 +129,17 @@ implements JapeConstants, java.io.Serializable
 
     return buf.toString();
   } // toString
-
+//needed by FSM
+  public Array getPhases(){ return phases; }
 } // class MultiPhaseTransducer
 
 
 
 // $Log$
+// Revision 1.2  2000/04/14 18:02:46  valyt
+// Added some gate.fsm classes
+// added some accessor function in old jape classes
+//
 // Revision 1.1  2000/02/23 13:46:08  hamish
 // added
 //
