@@ -210,6 +210,19 @@ public class Main {
           frame.setTitle(title);
         } // if
 
+        // Set icon from Java properties
+        // iconName could be absolute or "gate:/img/....gif"
+        String iconName = 
+          System.getProperty(GateConstants.APP_ICON_JAVA_PROPERTY_NAME);
+        if(iconName != null) {
+          try {
+            frame.setIconImage(Toolkit.getDefaultToolkit().getImage(
+                  new URL(iconName)));
+          } catch(MalformedURLException mue){
+            mue.printStackTrace(Err.getPrintWriter());
+          }
+        } // if
+
         // Validate frames that have preset sizes
         frame.validate();
 
