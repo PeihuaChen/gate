@@ -38,7 +38,8 @@ PKGS=	\
 	gate.email gate.event gate.fsm gate.gui gate.html gate.jape \
 	gate.jape.parser gate.persist gate.security \
 	gate.sgml gate.swing gate.util gate.util.persistence \
-	gate.util.protocols.classpath gate.util.protocols.gate gate.xml
+	gate.util.protocols.classpath gate.util.protocols.gate gate.xml \
+	guk guk.im
 
 # classpath to build compile commands from
 # NOTE that some cygpath versions are buggy and can't take long paths, so
