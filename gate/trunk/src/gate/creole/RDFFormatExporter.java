@@ -120,7 +120,7 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
 
   /** Run the resource and does the entire export process*/
   public void execute() throws ExecutionException{
-System.out.println("execute called...");
+
     // Check if the thing can be run
     if(document == null) {
       throw new ExecutionException("No document found to export in APF format!");
@@ -148,7 +148,7 @@ System.out.println("execute called...");
                                     document.getName() +
                                     EXPORT_EXTS[this.exportFormat]);
     }
-System.out.println("export path:" +exportFilePathStr);
+//System.out.println("export path:" +exportFilePathStr);
     // Prepare to write into the xmlFile
     FileWriter  writer = null;
     try{
@@ -163,7 +163,7 @@ System.out.println("export path:" +exportFilePathStr);
   } // execute()
 
   private void annotations2ontology(Writer output) throws Exception {
-System.out.println("a2o called...");
+
     DAMLModel ontologyModel, instanceModel;
     HashMap ontologies = new HashMap();
     HashMap instanceMatches = new HashMap();
@@ -203,7 +203,6 @@ System.out.println("a2o called...");
         defaultClasses.put(className.toLowerCase(),cls);
       }
 
-System.out.println("exporting: "+this.exportedTypes);
       Iterator itTypes = this.exportedTypes.iterator();
       while (itTypes.hasNext()) {
 
@@ -235,7 +234,6 @@ System.out.println("exporting: "+this.exportedTypes);
               Assert.assertNotNull(damlClass);
             }
             else {
-System.out.println("ignoring ["+ann+"]");
               continue;
             }
           }
@@ -274,14 +272,11 @@ System.out.println("ignoring ["+ann+"]");
 
           //create instance of proper type only if new
           if (instanceNames.contains(instanceName)) {
-System.out.println(">> duplicate - ignoring");
             continue;
           }
 
           DAMLInstance annInstance = instanceModel.createDAMLInstance(damlClass,instanceName);
           instanceNames.add(instanceName);
-System.out.println("============================");
-System.out.println("creating = ["+annInstance+"]");
 
           //check orhtographic matches
           List matches = (List)ann.getFeatures().get("matches");
@@ -290,14 +285,11 @@ System.out.println("creating = ["+annInstance+"]");
             if (instanceMatches.containsKey(matches)) {
               DAMLInstance equivInstance = (DAMLInstance)instanceMatches.get(matches);
 
-System.out.println("equiv is = ["+equivInstance+"]");
               //make sure we don't have duplicated name
               annInstance.prop_sameIndividualAs().add(equivInstance);
-System.out.println("setting SAMEINDIV prop to is = ["+equivInstance+"]");
             }
             else {
               //first entry of the coref chain
-System.out.println("no equiv!");
               instanceMatches.put(matches,annInstance);
             }
           }
