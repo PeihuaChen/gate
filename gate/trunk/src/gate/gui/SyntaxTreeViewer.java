@@ -26,6 +26,40 @@ import gate.util.*;
 import gate.*;
 import java.net.URL;
 
+/**
+The SyntaxTreeViewer works by getting an annotation set of all annotations that
+need to be displayed (both text and tree nodes) as an AnnotationSet property
+called treeAnnotations. The types of annotations used by the viewer can be
+configured although it also has default values. <P>
+
+The textAnnotationType property specifies the type
+of annotation which is used to get the text from (e.g. token, utterance);
+default value - utterance. The treeNodeAnnotationType is the name of the
+annotations which encode the SyntaxTreeNodes; default - SyntaxTreeNode. The
+component assumes that the annotations of type treeNodeAnnotationType have
+features called: cat with a value String; consists which is a Vector either empty
+or with annotation ids of the node's children; and text which contains the text
+covered by this annotation. The component will work fine even without the last
+feature. Still when it creates annotations, these will have this feature added. <P>
+
+
+Newly added tree nodes to the tree are automatically added to the document
+as annotations. Deleted nodes are automatically deleted from the document
+annotations too. <P>
+
+In order to have appropriate behaviour always put this component inside a
+scroll pane or something similar that provides scrollers. Example code: <BREAK>
+<PRE>
+    JScrollPane scroller = new JScrollPane(syntaxTreeViewer1);
+    scroller.setPreferredSize(syntaxTreeViewer1.getPreferredSize());
+		frame.getContentPane().add(scroller, BorderLayout.CENTER);
+</PRE>
+
+To get an idea how to use the component, look at the main function which is also
+the test for this bean. <P>
+
+*/
+
 
 public class SyntaxTreeViewer extends JPanel
     implements Scrollable, ActionListener, MouseListener{
@@ -795,6 +829,10 @@ public class SyntaxTreeViewer extends JPanel
     menuItem.addActionListener(this);
     popup.add(menuItem);
 
+    menuItem = new JMenuItem("DET");
+    menuItem.addActionListener(this);
+    popup.add(menuItem);
+
     menuItem = new JMenuItem("VP");
     menuItem.addActionListener(this);
     popup.add(menuItem);
@@ -820,6 +858,10 @@ public class SyntaxTreeViewer extends JPanel
     popup.add(menuItem);
 
     menuItem = new JMenuItem("Adv");
+    menuItem.addActionListener(this);
+    popup.add(menuItem);
+
+    menuItem = new JMenuItem("PropN");
     menuItem.addActionListener(this);
     popup.add(menuItem);
 
@@ -1056,6 +1098,9 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.4  2000/09/28 13:16:12  kalina
+// Added some documentation
+//
 // Revision 1.3  2000/09/21 14:23:45  kalina
 // Fixed some small bug in main(). To test just run the component itself.
 //
@@ -1064,40 +1109,4 @@ class FocusButton extends JButton {
 //
 // Revision 1.1  2000/09/20 17:03:37  kalina
 // Added the tree viewer from the prototype. It works now with the new annotation API.
-//
-// Revision 1.9  1999/08/24 15:54:01  kalina
-// Made applet to work well with the tree viewer
-//
-// Revision 1.8  1999/08/23 18:37:03  kalina
-// made the applet run all right in appletviewers
-//
-// Revision 1.7  1999/08/23 14:13:38  kalina
-// Fixed resizing bugs in tree viewers
-//
-// Revision 1.6  1999/08/20 21:11:57  kalina
-// Fixed most bugs and TreeViewer can now import and export annotations correctly
-// There is still a delete bug somewhere.
-//
-// Revision 1.5  1999/08/18 17:55:24  kalina
-// Added annotation export for the TreeViewer. Annotation import is the only thing that remains.
-//
-// Revision 1.4  1999/08/13 17:56:31  kalina
-// Fixed the annotation of nodes in the TreeViewer to be done with click
-//
-// Revision 1.3  1999/08/12 16:10:12  kalina
-// Added a new tree stereotype. Not in final version but would do for testing.
-//
-// Improved the tree viewer to allow dynamic creation of all nodes.
-// Now I can build many trees or one tree; can delete non-terminal nodes; select/unselect nodes for annotation
-// Overlapping trees are not a big problem too :-) Not wonderfully drawn but would do.
-//
-// Revision 1.2  1999/08/09 18:00:53  kalina
-// Made the tree viewer to display an utterance/sentence annotation to start annotating them
-//
-// Revision 1.1  1999/08/06 16:22:49  kalina
-// Added for the first time. A first test with 3 buttons and lines in between.
-// Also scroll bar and mouse events. Ready for the full story :-)
-// Swing's not that bad after all. Needed only a day and a SUn tutorial to
-// figure it out.
-//
 
