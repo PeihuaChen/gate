@@ -238,7 +238,7 @@ implements AnnotationSet
 
 
 
-    private Annotation lastNext = null;
+    protected Annotation lastNext = null;
 
 
 
