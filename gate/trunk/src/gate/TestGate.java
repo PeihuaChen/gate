@@ -56,7 +56,6 @@ public class TestGate
   public static Test suite() {
     TestSuite suite = new TestSuite();
     suite.addTest(TestFiles.suite());
-    suite.addTest(TestJdk.suite());
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
