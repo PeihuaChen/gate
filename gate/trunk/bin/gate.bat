@@ -88,4 +88,5 @@ set RUN=%JAVA% -Xmx200m -Djava.ext.dirs=%GUK% -classpath %CLASSPATH% gate.Main %
 
 echo RUN: %RUN%
 %RUN%
+pause
 
