@@ -282,7 +282,15 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // matches
 
   /** Create a string representation of the object. */
-  public String toString() { return toString(""); }
+  public String toString() {
+    StringBuffer result = new StringBuffer("{");
+    Constraint[] constraints = getConstraints();
+    for(int i = 0; i<constraints.length; i++){
+      result.append(constraints[i].shortDesc() + ",");
+    }
+    result.setCharAt(result.length() -1, '}');
+    return result.toString();
+  }
 
   /** Create a string representation of the object. */
   public String toString(String pad) {

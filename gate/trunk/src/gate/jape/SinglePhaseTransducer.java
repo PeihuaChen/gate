@@ -102,11 +102,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
       ((Rule) i.next()).finish();
     //build the finite state machine transition graph
     fsm = new FSM(this);
+    //convert it to deterministic
+    fsm.eliminateVoidTransitions();
     //clear the old style data structures
     rules.clear();
     rules = null;
   } // finish
-
 
   private void addAnnotationsByOffset(Map map, SortedSet keys, Set annotations){
     Iterator annIter = annotations.iterator();
@@ -124,13 +125,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
     }
   }//private void addAnnotationsByOffset()
 
+
   /**
     * Transduce a document using the annotation set provided and the current
     * rule application style.
     */
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
-
     if (! Main.batchMode) //fire events if not in batch mode
       fireProgressChanged(0);
 
@@ -168,6 +169,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     // of the document content covered by the matched annotations
     java.util.SortedSet acceptingFSMInstances = new java.util.TreeSet();
     FSMInstance currentFSM;
+
 
     //find the first node of the document
     Node startNode = ((Annotation)
@@ -225,6 +227,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           //if we're only looking for the shortest stop here
           if(ruleApplicationStyle == FIRST_STYLE) break whileloop2;
         }
+
         //get all the annotations that start where the current FSM finishes
         SortedSet offsetsTailSet = offsets.tailSet(
                                     currentFSM.getAGPosition().getOffset());
@@ -234,56 +237,69 @@ extends Transducer implements JapeConstants, java.io.Serializable
         }else{
           paths = (List)annotationsByOffset.get(offsetsTailSet.first());
         }
+//System.out.println("Paths: " + paths + "\n^localInputIndex: " + localInputIndex);
         if(!paths.isEmpty()){
-          Set matchResults = currentFSM.getFSMPosition().attemptMatch(paths);
-          if(matchResults != null &&
-             !matchResults.isEmpty()){
-            Iterator resultsIter = matchResults.iterator();
-            while(resultsIter.hasNext()){
-              Object[] oneMatch = (Object[])resultsIter.next();
-              FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
-              //set the FSM position
-              newFSMI.setFSMPosition((State)oneMatch[2]);
-
-              //set the AG position
-              List matchedAnns = (List)oneMatch[0];
-              Node endNode = ((Annotation)matchedAnns.get(0)).getEndNode();
-              for(int i = 1; i < matchedAnns.size(); i++){
-                Node otherEndNode = ((Annotation)matchedAnns.get(i)).
-                                    getEndNode();
-                if(endNode.getOffset().compareTo(otherEndNode.getOffset()) < 0)
-                  endNode = otherEndNode;
+          Iterator pathsIter = paths.iterator();
+          Annotation onePath;
+          State currentState = currentFSM.getFSMPosition();
+          Iterator transitionsIter;
+          FeatureMap features = Factory.newFeatureMap();
+          //foreach possible annotation
+          while(pathsIter.hasNext()){
+            onePath = (Annotation)pathsIter.next();
+            transitionsIter = currentState.getTransitions().iterator();
+            Transition currentTransition;
+            Constraint[] currentConstraints;
+            transitionsWhile:
+            while(transitionsIter.hasNext()){
+              currentTransition = (Transition)transitionsIter.next();
+              //check if the current transition can use the curent annotation (path)
+              currentConstraints =
+                           currentTransition.getConstraints().getConstraints();
+              String annType;
+              //we assume that all annotations in a contraint are of the same type
+              for(int i = 0; i<currentConstraints.length; i++){
+                annType = currentConstraints[i].getAnnotType();
+                //if wrong type try next transition
+                if(!annType.equals(onePath.getType()))continue transitionsWhile;
+                features.clear();
+                features.putAll(currentConstraints[i].getAttributeSeq());
               }
-              newFSMI.setAGPosition(endNode);
-
-              //update the bindings
-              Map bindings = newFSMI.getBindings();
-              if(oneMatch[1] != null){
-                Iterator labelsIter = ((List)oneMatch[1]).iterator();
+              if(onePath.getFeatures().entrySet().containsAll(features.entrySet())){
+                //we have a match
+  //System.out.println("Match!");
+                //create a new FSMInstance, advance it over the current annotation
+                //take care of the bindings  and add it to ActiveFSM
+                FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
+                newFSMI.setAGPosition(onePath.getEndNode());
+                newFSMI.setFSMPosition(currentTransition.getTarget());
+                //bindings
+                java.util.Map binds = newFSMI.getBindings();
+                java.util.Iterator labelsIter =
+                                   currentTransition.getBindings().iterator();
+                String oneLabel;
+                AnnotationSet boundAnnots, newSet;
                 while(labelsIter.hasNext()){
-                  Object oneLabel = labelsIter.next();
-                  AnnotationSet boundAnns = (AnnotationSet)bindings.get(oneLabel);
-                  if(boundAnns == null){
-                    boundAnns = new AnnotationSetImpl(doc);
+                  oneLabel = (String)labelsIter.next();
+                  boundAnnots = (AnnotationSet)binds.get(oneLabel);
+                  if(boundAnnots != null){
+                    newSet = new AnnotationSetImpl(boundAnnots);
                   }else{
-                    boundAnns = new AnnotationSetImpl(boundAnns);
+                    newSet = new AnnotationSetImpl(doc);
                   }
-                  boundAnns.addAll(matchedAnns);
-                  bindings.put(oneLabel, boundAnns);
+                  newSet.add(onePath);
+                  binds.put(oneLabel, newSet);
                 }//while(labelsIter.hasNext())
-              }
-              activeFSMInstances.addLast(newFSMI);
-
-            }//while(resultsIter.hasNext())
-          }//if(!matchResults.isEmpty())
-        }//if(!paths.isEmpty())
+                activeFSMInstances.addLast(newFSMI);
+              }//if match
+            }//while(transitionsIter.hasNext())
+          }//while(pathsIter.hasNext())
+        }//if(paths != null)
       }//while(!activeFSMInstances.isEmpty())
 
 
       //FIRE THE RULE
-
       Long lastAGPosition = null;
-
       if(acceptingFSMInstances.isEmpty()){
         //no rule to fire, advance to the next input offset
         lastAGPosition = new Long(startNodeOff + 1);
@@ -337,6 +353,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //        }
 //      }
       else throw new RuntimeException("Unknown rule application style!");
+
+
       //advance on input
       SortedSet OffsetsTailSet = offsets.tailSet(lastAGPosition);
       if(OffsetsTailSet.isEmpty()){
@@ -387,7 +405,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce1(Document doc, AnnotationSet annotationSet)
                                                           throws JapeException {
-/*
     if (! Main.batchMode) //fire events if not in batch mode
       fireProgressChanged(0);
 
@@ -417,7 +434,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     FSM fsm = new FSM(this);
 
     //convert it to deterministic
-    fsm.minimise();
+    fsm.eliminateVoidTransitions();
 
 
     //define data structures
@@ -598,10 +615,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
           // System.out.println("done");
         }
 
-//        AnnotationSet res = annotations.get(startNode.getOffset());
-//        if(!res.isEmpty())
-//          startNode = ((Annotation)res.iterator().next()).getStartNode();
-//        else startNode = lastNode;
+      /*
+        AnnotationSet res = annotations.get(startNode.getOffset());
+        if(!res.isEmpty())
+          startNode = ((Annotation)res.iterator().next()).getStartNode();
+        else startNode = lastNode;
+      */
       } else if(ruleApplicationStyle == BRILL_STYLE) {
         // fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
@@ -639,9 +658,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
       } else throw new RuntimeException("Unknown rule application style!");
       //release all the accepting instances as they have done their job
-//        Iterator acceptors = acceptingFSMInstances.iterator();
-//        while(acceptors.hasNext())
-//        FSMInstance.returnInstance((FSMInstance)acceptors.next());
+      /*
+        Iterator acceptors = acceptingFSMInstances.iterator();
+        while(acceptors.hasNext())
+        FSMInstance.returnInstance((FSMInstance)acceptors.next());
+      */
       acceptingFSMInstances.clear();
       startNodeOff = startNode.getOffset().intValue();
 
@@ -653,8 +674,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     // FSMInstance.clearInstances();
     if (! Main.batchMode) //fire events if not in batch mode
       fireProcessFinished();
-*/
-
   } // transduce
 
 
@@ -669,7 +688,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce2(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
-/*
     if (! Main.batchMode) //fire events if not in batch mode
       fireProgressChanged(0);
 
@@ -913,7 +931,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     // FSMInstance.clearInstances();
     if (! Main.batchMode) //fire events if not in batch mode
       fireProcessFinished();
-*/
   } // transduce
 
 
