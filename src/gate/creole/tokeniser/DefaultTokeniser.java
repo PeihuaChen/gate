@@ -516,7 +516,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     *should be used instead.
     */
   public void run(){
-    fireStatusChangedEvent("Tokenising " + doc.getSourceURL().getFile() + "...");
+    fireStatusChangedEvent("Tokenising " + doc.getSourceUrl().getFile() + "...");
     String content = doc.getContent().toString();
     int length = content.length();
     char currentChar;
@@ -544,7 +544,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
         }
         charIdx ++;
       }else{//we have a match!
-        newTokenFm = Transients.newFeatureMap();
+        newTokenFm = Factory.newFeatureMap();
         if(null == lastMatchingState){
           tokenString = content.substring(tokenStart, tokenStart +1);
           newTokenFm.put("type","UNKNOWN");
@@ -596,7 +596,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
 
     if(null != lastMatchingState){
       tokenString = content.substring(tokenStart, lastMatch + 1);
-      newTokenFm = Transients.newFeatureMap();
+      newTokenFm = Factory.newFeatureMap();
       newTokenFm.put("string", tokenString);
       newTokenFm.put("length", Integer.toString(tokenString.length()));
       for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
@@ -656,14 +656,11 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     try{
       DefaultTokeniser dt = new DefaultTokeniser(Files.getResourceAsStream(
                             "creole/tokeniser/DefaultTokeniser.rules"));
-      Document doc = Transients.newDocument("Germany England and France   are countries that use ... $$$.");
+      Document doc = Factory.newDocument("Germany England and France   are countries that use ... $$$.");
       dt.tokenise(doc, false);
     }catch(Exception ex){ex.printStackTrace(Err.getPrintWriter());}
   }
 */
-  public Factory getFactory(){
-    return new Transients();
-  }
 
   protected FeatureMap features  = null;
   protected List myProgressListeners = new LinkedList();

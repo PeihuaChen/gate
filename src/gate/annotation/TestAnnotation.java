@@ -1,5 +1,5 @@
 /*
- *	TestAnnotation.java
+ *  TestAnnotation.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
  *
@@ -10,9 +10,9 @@
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
- *	Hamish Cunningham, 7/Feb/00
+ *  Hamish Cunningham, 7/Feb/00
  *
- *	$Id$
+ *  $Id$
  */
 
 package gate.annotation;
@@ -536,7 +536,7 @@ public class TestAnnotation extends TestCase
   public void _testGap() throws InvalidOffsetException {
     AnnotationSet as = basicAS;
     as.clear();
-    FeatureMap fm = Transients.newFeatureMap();
+    FeatureMap fm = Factory.newFeatureMap();
     fm.put("A", "B");
     as.add(new Long(0), new Long(10), "foo", fm);
     as.add(new Long(11), new Long(20), "foo", fm);
@@ -563,7 +563,7 @@ public class TestAnnotation extends TestCase
 //    if(annotations == null) annotations = new AnnotationSetImpl(doc);
 System.out.println("Actual input:" + annotations.getAllTypes() + "\n" + annotations);
 
-    AnnotationSet res = annotations.get("foo", Transients.newFeatureMap(), new Long(10));
+    AnnotationSet res = annotations.get("foo", Factory.newFeatureMap(), new Long(10));
 System.out.println(res);
     assert(!res.isEmpty());
   }

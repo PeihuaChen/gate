@@ -74,7 +74,7 @@ public class TestSgml extends TestCase
     markupElementsMap.put ("a","link");
     */
 
-    doc = gate.Transients.newDocument(Gate.getUrl("tests/sgml/Hds.sgm"));
+    doc = gate.Factory.newDocument(Gate.getUrl("tests/sgml/Hds.sgm"));
 
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour

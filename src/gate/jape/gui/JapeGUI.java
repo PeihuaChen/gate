@@ -2,14 +2,14 @@
  *	JapeGUI.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Valentin Tablan, 22/May/2000
  *
  *	$Id$
@@ -48,7 +48,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     catch(Exception e) {
       e.printStackTrace();
     }
-    corpus = Transients.newCorpus("JapeGUI");
+    corpus = Factory.newCorpus("JapeGUI");
 
   }
 
@@ -63,7 +63,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     Iterator docsIter = corpus.iterator();
     while(docsIter.hasNext()){
       currentDoc = (Document) docsIter.next();
-      corpusListModel.addElement(currentDoc.getSourceURL().getFile());
+      corpusListModel.addElement(currentDoc.getSourceUrl().getFile());
     }
     //select the first document
     Iterator docIter = corpus.iterator();
@@ -209,10 +209,10 @@ public class JapeGUI extends JFrame implements ProgressListener,
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFiles = filer.getSelectedFiles();
         if(selectedFiles != null){
-          if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
+          if(corpus == null) corpus = Factory.newCorpus("Jape 2.0");
           try{
             for(int i=0; i< selectedFiles.length; i++){
-              currDoc = Transients.newDocument(selectedFiles[i].toURL());
+              currDoc = Factory.newDocument(selectedFiles[i].toURL());
               corpus.add(currDoc);
               corpusFiles.add(selectedFiles[i].toURL().toExternalForm());
             }
@@ -235,9 +235,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFile = filer.getSelectedFile();
         if(selectedFile != null){
-          if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
+          if(corpus == null) corpus = Factory.newCorpus("Jape 2.0");
           try{
-              currDoc = Transients.newDocument(selectedFile.toURL());
+              currDoc = Factory.newDocument(selectedFile.toURL());
               corpus.add(currDoc);
               corpusFiles.add(selectedFile.toURL().toExternalForm());
           }catch(java.net.MalformedURLException mue){
@@ -252,7 +252,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
     Iterator docsIter = corpus.iterator();
     while(docsIter.hasNext()){
       currentDoc = (Document) docsIter.next();
-      corpusListModel.addElement(currentDoc.getSourceURL().getFile());
+      corpusListModel.addElement(currentDoc.getSourceUrl().getFile());
     }
     if(currDoc != null) currentDoc = currDoc;
     updateAll();
@@ -296,7 +296,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
       try{
         while(filesIter.hasNext()){
               progressBar.setValue(progress++/fileCnt);
-              corpus.add(Transients.newDocument(
+              corpus.add(Factory.newDocument(
                 new URL((String)filesIter.next()))
               );
               progressBar.setValue(progress/fileCnt);
@@ -430,7 +430,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
            start = end, end = bi.next())
       {
         if(!Character.isWhitespace(content.charAt(start))){
-          fm = Transients.newFeatureMap();
+          fm = Factory.newFeatureMap();
           fm.put("string", content.substring(start, end));
           doc.getAnnotations().add(new Long(start),
                                    new Long(end),
@@ -526,9 +526,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
       delPopup.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent e) {
           //delete the document from the list
-          corpusListModel.removeElement(currentDoc.getSourceURL().getFile());
+          corpusListModel.removeElement(currentDoc.getSourceUrl().getFile());
           corpus.remove(currentDoc);
-          corpusFiles.remove(currentDoc.getSourceURL().toExternalForm());
+          corpusFiles.remove(currentDoc.getSourceUrl().toExternalForm());
           if(corpus.isEmpty()) currentDoc = null;
           else currentDoc = (Document)corpus.first();
           updateAll();

@@ -77,11 +77,11 @@ public class TestEmail extends TestCase
     markupElementsMap.put ("a","link");
     */
 
-    doc = gate.Transients.newDocument(Gate.getUrl("tests/email/test.eml"));
+    doc = gate.Factory.newDocument(Gate.getUrl("tests/email/test.eml"));
 
     // get a document format that deals with e-mails
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, doc.getSourceURL()
+      doc, doc.getSourceUrl()
     );
     assert(docFormat instanceof gate.corpora.EmailDocumentFormat);
 

@@ -132,7 +132,7 @@ public class STreeNode extends DefaultMutableTreeNode {
     if ( ! this.getAllowsChildren())
 			return false;
 
-    FeatureMap attribs = Transients.newFeatureMap();
+    FeatureMap attribs = Factory.newFeatureMap();
     //the text spanned by the annotation is stored as the userObject of the tree node
     //comes from the default Swing tree node
     Vector consists = new Vector();
@@ -182,6 +182,13 @@ public class STreeNode extends DefaultMutableTreeNode {
 }
 
 // $Log$
+// Revision 1.4  2000/10/18 13:26:47  hamish
+// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+//     parameter list fed to createResource.
+//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     moved createResource from CR to Factory
+//     removed Transients; use Factory instead
+//
 // Revision 1.3  2000/10/16 16:44:32  oana
 // Changed the comment of DEBUG variable
 //

@@ -94,7 +94,7 @@ public class CreoleXmlHandler extends HandlerBase {
 
     if(elementName.toUpperCase().equals("RESOURCE")) {
       resourceData = new ResourceDataImpl();
-      resourceData.setFeatures(Transients.newFeatureMap());
+      resourceData.setFeatures(Factory.newFeatureMap());
     }
     currentAttributes = atts;
 
@@ -136,7 +136,13 @@ public class CreoleXmlHandler extends HandlerBase {
 
     if(elementName.toUpperCase().equals("RESOURCE")) {
       // add the new resource data object to the creole register
-      register.put(resourceData.getName(), resourceData);
+//******************************
+// check that the resource has all mandatory elements, e.g. class name
+//******************************
+      if(resourceData.getInterfaceName() != null) // index by intf if present
+        register.put(resourceData.getInterfaceName(), resourceData);
+      else // index by class name
+        register.put(resourceData.getClassName(), resourceData);
       if(DEBUG) Out.println("added: " + resourceData);
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
@@ -170,6 +176,9 @@ public class CreoleXmlHandler extends HandlerBase {
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
       resourceData.setClassName((String) elementStack.pop());
+    } else if(elementName.toUpperCase().equals("INTERFACE")) {
+      checkStack("endElement", "INTERFACE");
+      resourceData.setInterfaceName((String) elementStack.pop());
     } else if(elementName.toUpperCase().equals("PARAMETER-LIST")) {
       resourceData.addParameterList(currentParamList);
       currentParamList = new ArrayList();

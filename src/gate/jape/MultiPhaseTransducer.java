@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -27,7 +27,7 @@ import gate.*;
 
 
 /**
-  * Represents a complete CPSL grammar, with a phase name, options and 
+  * Represents a complete CPSL grammar, with a phase name, options and
   * rule set (accessible by name and by sequence).
   * Implements a transduce method taking a Document as input.
   * Constructs from String or File.
@@ -117,7 +117,7 @@ implements JapeConstants, java.io.Serializable
     for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance()) {
       Transducer t = (Transducer) i.get();
       try {
-        fireStatusChangedEvent("Transducing " + doc.getSourceURL().getFile() +
+        fireStatusChangedEvent("Transducing " + doc.getSourceUrl().getFile() +
                                " (Phase: " + t.getName() + ")...");
         t.addProcessProgressListener(pListener);
         t.addStatusListener(sListener);
@@ -127,7 +127,7 @@ implements JapeConstants, java.io.Serializable
         fireStatusChangedEvent("");
       } catch(JapeException e) {
         String errorMessage = new String(
-          "Error transducing document " + doc.getSourceURL() +
+          "Error transducing document " + doc.getSourceUrl() +
           ", phase " + t.getName() + Strings.getNl() + e.getMessage()
         );
         throw(new JapeException(errorMessage));
@@ -174,6 +174,13 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.8  2000/10/18 13:26:47  hamish
+// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+//     parameter list fed to createResource.
+//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     moved createResource from CR to Factory
+//     removed Transients; use Factory instead
+//
 // Revision 1.7  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //

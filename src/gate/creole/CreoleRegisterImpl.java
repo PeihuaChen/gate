@@ -38,8 +38,8 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 {
   /** Initialise a resource, and return it. */
   public Resource init(Resource resource) {
-    throw new LazyProgrammerException();
-    //return resource;
+//throw new LazyProgrammerException();
+    return resource;
   } // init(Resource)
 
   /** Debug flag */

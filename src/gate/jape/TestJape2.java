@@ -120,7 +120,7 @@ public class TestJape2 {
     // create or overwrite the collection
     Corpus collection = null;
     File collDir = new File(collName);
-    collection = Transients.newCorpus(
+    collection = Factory.newCorpus(
       collDir.getAbsolutePath()
     );
 
@@ -130,13 +130,13 @@ public class TestJape2 {
       String fname = (String) i.get();
 
       File f = new File(fname);
-      FeatureMap attrs = Transients.newFeatureMap();
+      FeatureMap attrs = Factory.newFeatureMap();
       Document doc = null;
 
       try {
         AnnotationSet annots = new AnnotationSetImpl(doc);
         collection.add(
-          Transients.newDocument(f.getAbsolutePath())
+          Factory.newDocument(f.getAbsolutePath())
         );
       } catch(IOException e) {
 	      e.printStackTrace();
@@ -246,6 +246,13 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.4  2000/10/18 13:26:48  hamish
+// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+//     parameter list fed to createResource.
+//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     moved createResource from CR to Factory
+//     removed Transients; use Factory instead
+//
 // Revision 1.3  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //

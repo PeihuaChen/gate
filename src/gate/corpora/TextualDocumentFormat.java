@@ -69,10 +69,4 @@ public class TextualDocumentFormat extends DocumentFormat
     Out.println("UNPACK called from TextualDocumentFormat");
   }
 
-  /** Get the factory that created this object. */
-  public Factory getFactory() {
-    throw new LazyProgrammerException();
-  } // getFactory()
-
-
 } // class TextualDocumentFormat
