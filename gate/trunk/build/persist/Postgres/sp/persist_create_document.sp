@@ -36,6 +36,10 @@ RETURNS int4 AS   '
       l_content_id int4;
       l_doc_id int4;
 
+      C_CHARACTER_CONTENT  constant int4 := 1;
+      C_BINARY_CONTENT     constant int4 := 2;
+      C_EMPTY_CONTENT      constant int4 := 3;
+
 
    BEGIN
 
@@ -84,7 +88,7 @@ RETURNS int4 AS   '
              l_encoding_id,
              null /*empty_clob()*/,
              null /*empty_blob()*/,
-             0 /*persist.EMPTY_CONTENT*/);
+             C_EMPTY_CONTENT /*persist.EMPTY_CONTENT*/);
 
       /* get the ID */
       select currval(''seq_doc_content'')

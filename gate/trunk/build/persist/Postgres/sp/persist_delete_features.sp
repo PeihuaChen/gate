@@ -14,14 +14,18 @@
  */
 
 
-CREATE OR REPLACE FUNCTION persist_delete_features(int4,int2) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION persist_delete_features(int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_ent_id     alias for $1;
-      p_ent_type   alias for $2;
+      p_ent_type_4   alias for $2;
+      
+      p_ent_type int2;
 
    BEGIN
-
+      /*downcast the params */
+      p_ent_type = cast(p_ent_type_4 as int2);
+      
       delete from t_feature
       where  ft_entity_id = p_ent_id
       and    ft_entity_type = p_ent_type;
