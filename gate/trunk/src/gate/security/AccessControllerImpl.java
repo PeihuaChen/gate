@@ -214,10 +214,14 @@ public class AccessControllerImpl
       DBHelper.cleanup(stmt);
     }
 
-    //2. create GroupImpl for the new group and put in collections
+    //2. create GroupImpl for the new group and
     // users list is empty
     GroupImpl grp = new GroupImpl(new_id,name,new Vector(),this,this.jdbcConn);
 
+    //3. register as objectModification listener for this group
+    grp.registerObjectModificationListener(this);
+
+    //4.put in collections
     this.groupsByID.put(new_id,grp);
     this.groupsByName.put(name,grp);
 
@@ -304,10 +308,14 @@ public class AccessControllerImpl
       DBHelper.cleanup(stmt);
     }
 
-    //2. create UserImpl for the new user and put in collections
+    //2. create UserImpl for the new user
     // groups list is empty
     UserImpl usr = new UserImpl(new_id,name,new Vector(),this,this.jdbcConn);
 
+    //3. register as objectModification listener for this group
+    usr.registerObjectModificationListener(this);
+
+    //4. put in collections
     this.usersByID.put(new_id,usr);
     this.usersByName.put(name,usr);
 
