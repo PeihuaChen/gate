@@ -18,7 +18,7 @@ package gate.fsm;
 import java.util.*;
 
 import gate.jape.*;
-
+import gate.util.*;
 /**
   * This class implements a standard Finite State Machine.
   * It is used for both deterministic and non-deterministic machines.
@@ -29,44 +29,20 @@ public class FSM implements JapeConstants {
   private static final boolean DEBUG = false;
 
   /**
-    * This constructor creates a finite state machine starting from a
-    * single phase transducer. The FSM built by this constructor is supposed
-    * to be a part of a larger FSM which is sent using the owner parameter.
-    * All the new states created during the build process belong to the
-    * owner FSM.
-    * @param owner the larger FSM that will contain this FSM as a sub-set.
-    * @param spt the single phase transducer to be used for building this FSM.
-    */
-  public FSM(FSM owner, SinglePhaseTransducer spt){
-    initialState = new State(owner);
-    this.owner = owner;
-    Iterator rulesEnum = spt.getRules().iterator();
-    Rule currentRule;
-
-    while(rulesEnum.hasNext()){
-      currentRule = (Rule) rulesEnum.next();
-      FSM ruleFSM = new FSM( owner, currentRule);
-      initialState.addTransition(new Transition(null,
-                                                ruleFSM.getInitialState()));
-    }
-  }
-
-  /**
     * Builds a standalone FSM starting from a single phase transducer.
     * @param spt the single phase transducer to be used for building this FSM.
     */
   public FSM(SinglePhaseTransducer spt){
-    owner = this;
-    initialState = new State(owner);
+    initialState = new State();
     Iterator rulesEnum = spt.getRules().iterator();
     Rule currentRule;
 
     while(rulesEnum.hasNext()){
       currentRule = (Rule) rulesEnum.next();
-      FSM ruleFSM = new FSM( this, currentRule);
-      initialState.addTransition(new Transition(null,
-                                                ruleFSM.getInitialState()));
+      FSM ruleFSM = new FSM(currentRule);
+      initialState.addLambdaTransition(ruleFSM.getInitialState());
     }
+    minimise();
   }
 
   /**
@@ -77,10 +53,8 @@ public class FSM implements JapeConstants {
     * built by this constructor.
     * @param rule the rule to be used for the building process.
     */
-  public FSM(FSM owner, Rule rule) {
-
-    this.owner = owner;
-    initialState = new State(owner);
+  public FSM(Rule rule) {
+    initialState = new State();
     LeftHandSide lhs = rule.getLHS();
     PatternElement[][] constraints =
                        lhs.getConstraintGroup().getPatternElementDisjunction();
@@ -92,13 +66,13 @@ public class FSM implements JapeConstants {
 
     //The current and the next state for the current ROW.
     State currentRowState, nextRowState;
-    State finalState = new State(owner);
+    State finalState = new State();
     PatternElement currentPattern;
 
     for(int i = 0; i < constraints.length; i++){
       // for each row we have to create a sequence of states that will accept
       // the sequence of annotations described by the restrictions on that row.
-      // The final state of such a sequence will always be a finale state which
+      // The final state of such a sequence will always be a final state which
       // will have associated the right hand side of the rule used for this
       // constructor.
 
@@ -111,24 +85,25 @@ public class FSM implements JapeConstants {
         // currentRowState.
         // The case of kleene operators has to be considered!
         currentPattern = constraints[i][j];
-        State insulator = new State(owner);
-        currentRowState.addTransition(new Transition(null,insulator));
+        State insulator = new State();
+        currentRowState.addLambdaTransition(insulator);
         currentRowState = insulator;
         if(currentPattern instanceof BasicPatternElement) {
           //the easy case
-          nextRowState = new State(owner);
-          currentRowState.addTransition(
-            new Transition((BasicPatternElement)currentPattern, nextRowState));
+          nextRowState = new State();
+
+          currentRowState.addQuasiTransition(
+                                        (BasicPatternElement)currentPattern,
+                                        nextRowState, null);
           currentRowState = nextRowState;
         } else if(currentPattern instanceof ComplexPatternElement) {
 
           // the current pattern is a complex pattern element
           // ..it will probaly be converted into a sequence of states itself.
           currentRowState =  convertComplexPE(
-                              owner,
                               currentRowState,
                               (ComplexPatternElement)currentPattern,
-                              new LinkedList());
+                              null);
         } else {
           // we got an unknown kind of pattern
           throw new RuntimeException("Strange looking pattern:"+currentPattern);
@@ -138,11 +113,11 @@ public class FSM implements JapeConstants {
 
       //link the end of the current row to the final state using
       //an empty transition.
-      currentRowState.addTransition(new Transition(null,finalState));
-      finalState.setAction(rule.getRHS());
-      finalState.setFileIndex(rule.getPosition());
-      finalState.setPriority(rule.getPriority());
+      currentRowState.addLambdaTransition(finalState);
     } // for i
+    finalState.setAction(rule.getRHS());
+    finalState.setFileIndex(rule.getPosition());
+    finalState.setPriority(rule.getPriority());
   }
 
   /**
@@ -160,18 +135,21 @@ public class FSM implements JapeConstants {
     * @param state the state to start from
     * @param cpe the pattern to be recognized
     * @param label the bindings name for all the annotation accepted along
-    * the way this is actually a listy of Strings. It is necessary to use
+    * the way this is actually a list of Strings. It is necessary to use
     * a list becuase of the reccursive definition of ComplexPatternElement.
     * @return the final state reached after accepting a sequence of annotations
     * as described in the pattern
     */
-  private State convertComplexPE(FSM owner, State startState,
-                                ComplexPatternElement cpe, LinkedList labels){
-    //create a copy
-    LinkedList newBindings = (LinkedList)labels.clone();
-    String localLabel = cpe.getBindingName ();
-
-    if(localLabel != null)newBindings.add(localLabel);
+  private State convertComplexPE(State startState,
+                                ComplexPatternElement cpe, List labels){
+    /* The labels for this Complex Pattern Element.
+    they will contain all the labels from above and the local label*/
+    List localLabels = null;
+    if(cpe.getBindingName() != null || labels != null){
+      localLabels = new ArrayList();
+      if(labels != null) localLabels.addAll(labels);
+      if(cpe.getBindingName() != null)localLabels.add(cpe.getBindingName());
+    }
 
     PatternElement[][] constraints =
                        cpe.getConstraintGroup().getPatternElementDisjunction();
@@ -183,7 +161,7 @@ public class FSM implements JapeConstants {
     //                [PE]:[PE]...[PE] ]
 
     //The current and the next state for the current ROW.
-    State currentRowState, nextRowState, endState = new State(owner);
+    State currentRowState, nextRowState, endState = new State();
     PatternElement currentPattern;
 
     for(int i = 0; i < constraints.length; i++) {
@@ -201,27 +179,27 @@ public class FSM implements JapeConstants {
         //For each basic pattern element add a new state and link it to the
         //currentRowState.
         //The case of kleene operators has to be considered!
-        State insulator = new State(owner);
-        currentRowState.addTransition(new Transition(null,insulator));
+        State insulator = new State();
+        currentRowState.addLambdaTransition(insulator);
         currentRowState = insulator;
         currentPattern = constraints[i][j];
         if(currentPattern instanceof BasicPatternElement) {
 
           //the easy case
-          nextRowState = new State(owner);
-          currentRowState.addTransition(
-            new Transition((BasicPatternElement)currentPattern,
-                            nextRowState,newBindings));
+          nextRowState = new State();
+          currentRowState.addQuasiTransition(
+                                        (BasicPatternElement)currentPattern,
+                                        nextRowState,
+                                        localLabels);
           currentRowState = nextRowState;
         } else if(currentPattern instanceof ComplexPatternElement) {
 
           // the current pattern is a complex pattern element
           // ..it will probaly be converted into a sequence of states itself.
           currentRowState =  convertComplexPE(
-                              owner,
                               currentRowState,
                               (ComplexPatternElement)currentPattern,
-                              newBindings);
+                              localLabels);
         } else {
 
           //we got an unknown kind of pattern
@@ -231,7 +209,7 @@ public class FSM implements JapeConstants {
       } // for j
         // link the end of the current row to the general end state using
         // an empty transition.
-        currentRowState.addTransition(new Transition(null,endState));
+        currentRowState.addLambdaTransition(endState);
     } // for i
 
     // let's take care of the kleene operator
@@ -242,22 +220,22 @@ public class FSM implements JapeConstants {
       }
       case KLEENE_QUERY:{
         //allow to skip everything via a null transition
-        startState.addTransition(new Transition(null,endState));
+        startState.addLambdaTransition(endState);
         break;
       }
       case KLEENE_PLUS:{
 
         // allow to return to startState
-        endState.addTransition(new Transition(null,startState));
+        endState.addLambdaTransition(startState);
         break;
       }
       case KLEENE_STAR:{
 
         // allow to skip everything via a null transition
-        startState.addTransition(new Transition(null,endState));
+        startState.addLambdaTransition(endState);
 
         // allow to return to startState
-        endState.addTransition(new Transition(null,startState));
+        endState.addLambdaTransition(startState);
         break;
       }
       default:{
@@ -267,123 +245,213 @@ public class FSM implements JapeConstants {
     return endState;
   } // convertComplexPE
 
-  /**
-    * Add a new state to the set of states belonging to this FSM.
-    * @param state the new state to be added
-    */
-  protected void addState(State state) {
-    allStates.add(state);
-  } // addState
+//  /**
+//    * Add a new state to the set of states belonging to this FSM.
+//    * @param state the new state to be added
+//    */
+//  protected void addState(State state) {
+//    allStates.add(state);
+//  } // addState
+
+//  /**
+//    * Converts this FSM from a non-deterministic to a deterministic one by
+//    * eliminating all the unrestricted transitions.
+//    */
+//  public void eliminateVoidTransitions() {
+//
+//    Map newStates = new HashMap();
+//    Set dStates = new HashSet();
+//
+//    LinkedList unmarkedDStates = new LinkedList();
+//    Set currentDState = new HashSet();
+//
+//    currentDState.add(initialState);
+//    currentDState = lambdaClosure(currentDState);
+//    dStates.add(currentDState);
+//    unmarkedDStates.add(currentDState);
+//
+//    // create a new state that will take the place the set of states
+//    // in currentDState
+//    initialState = new State();
+//    newStates.put(currentDState, initialState);
+//
+//    // find out if the new state is a final one
+//    Iterator innerStatesIter = currentDState.iterator();
+//    RightHandSide action = null;
+//
+//    while(innerStatesIter.hasNext()){
+//      State currentInnerState = (State)innerStatesIter.next();
+//      if(currentInnerState.isFinal()){
+//        if(action != null){
+//          Err.prln("JAPE: Ambiguous rules found while minimising the FSM:\n" +
+//                   action.toString() + " vs " +
+//                   currentInnerState.getAction().toString());
+//        }
+//        action = (RightHandSide)currentInnerState.getAction();
+//        initialState.setAction(action);
+//        initialState.setFileIndex(currentInnerState.getFileIndex());
+//        initialState.setPriority(currentInnerState.getPriority());
+//        break;
+//      }
+//    }
+//
+//    while(!unmarkedDStates.isEmpty()) {
+//      currentDState = (AbstractSet)unmarkedDStates.removeFirst();
+//      Iterator insideStatesIter = currentDState.iterator();
+//
+//      while(insideStatesIter.hasNext()) {
+//        State innerState = (State)insideStatesIter.next();
+//        Iterator transIter = innerState.getTransitions().iterator();
+//
+//        while(transIter.hasNext()) {
+//          Transition currentTrans = (Transition)transIter.next();
+//
+//          if(currentTrans.getConstraints() !=null) {
+//            State target = currentTrans.getTarget();
+//            Set newDState = new HashSet();
+//            newDState.add(target);
+//            newDState = lambdaClosure(newDState);
+//
+//            if(!dStates.contains(newDState)) {
+//              dStates.add(newDState);
+//              unmarkedDStates.add(newDState);
+//              State newState = new State();
+//              newStates.put(newDState, newState);
+//
+//              //find out if the new state is a final one
+//              innerStatesIter = newDState.iterator();
+//              while(innerStatesIter.hasNext()) {
+//                State currentInnerState = (State)innerStatesIter.next();
+//
+//                if(currentInnerState.isFinal()) {
+//                  newState.setAction(
+//                          (RightHandSide)currentInnerState.getAction());
+//                  newState.setFileIndex(currentInnerState.getFileIndex());
+//                  newState.setPriority(currentInnerState.getPriority());
+//                  break;
+//                }
+//              }
+//            }// if(!dStates.contains(newDState))
+//
+//            State currentState = (State)newStates.get(currentDState);
+//            State newState = (State)newStates.get(newDState);
+//            currentState.addTransition(new Transition(
+//                                        currentTrans.getConstraints(),
+//                                        newState,
+//                                        currentTrans.getBindings()));
+//          }// if(currentTrans.getConstraints() !=null)
+//
+//        }// while(transIter.hasNext())
+//
+//      }// while(insideStatesIter.hasNext())
+//
+//    }// while(!unmarkedDstates.isEmpty())
+//
+//    /*
+//    //find final states
+//    Iterator allDStatesIter = dStates.iterator();
+//    while(allDStatesIter.hasNext()){
+//      currentDState = (AbstractSet) allDStatesIter.next();
+//      Iterator innerStatesIter = currentDState.iterator();
+//      while(innerStatesIter.hasNext()){
+//        State currentInnerState = (State) innerStatesIter.next();
+//        if(currentInnerState.isFinal()){
+//          State newState = (State)newStates.get(currentDState);
+//
+//          newState.setAction(currentInnerState.getAction());
+//          break;
+//        }
+//      }
+//
+//    }
+//    */
+////    allStates = newStates.values();
+//  }//eliminateVoidTransitions
 
   /**
     * Converts this FSM from a non-deterministic to a deterministic one by
     * eliminating all the unrestricted transitions.
     */
-  public void eliminateVoidTransitions() {
+  private void minimise() {
+    //initialise data structures
+    quasiStatesByState = new HashMap();
+    detStateByQuasiState = new HashMap();
+    unmarkedQuasiStates = new ArrayList();
 
-    dStates.clear(); //kalina: replaced from new HashSet()
-    LinkedList unmarkedDStates = new LinkedList();
-    AbstractSet currentDState = new HashSet();
-    //kalina: prefer clear coz faster than init()
-    newStates.clear();
+    //create the quasi-state for the initial state
+    getQuasiState(initialState);
 
-    currentDState.add(initialState);
-    currentDState = lambdaClosure(currentDState);
-    dStates.add(currentDState);
-    unmarkedDStates.add(currentDState);
+    //start the algorithm
+    while(!unmarkedQuasiStates.isEmpty()){
+      //get an unprocessed quasi-state
+      Set currentQuasiState = (Set)unmarkedQuasiStates.remove(0);
+      //get the deterministic state for the current quasi-state
+      State currentDetState = (State)detStateByQuasiState.
+                              get(currentQuasiState);
 
-    // create a new state that will take the place the set of states
-    // in currentDState
-    initialState = new State(owner);
-    newStates.put(currentDState, initialState);
-
-    // find out if the new state is a final one
-    Iterator innerStatesIter = currentDState.iterator();
-    RightHandSide action;
-
-    while(innerStatesIter.hasNext()){
-      State currentInnerState = (State)innerStatesIter.next();
-      if(currentInnerState.isFinal()){
-        action = (RightHandSide)currentInnerState.getAction();
-        initialState.setAction(action);
-        initialState.setFileIndex(currentInnerState.getFileIndex());
-        initialState.setPriority(currentInnerState.getPriority());
-        break;
-      }
-    }
-
-    while(!unmarkedDStates.isEmpty()) {
-      currentDState = (AbstractSet)unmarkedDStates.removeFirst();
-      Iterator insideStatesIter = currentDState.iterator();
-
-      while(insideStatesIter.hasNext()) {
-        State innerState = (State)insideStatesIter.next();
-        Iterator transIter = innerState.getTransitions().iterator();
-
-        while(transIter.hasNext()) {
-          Transition currentTrans = (Transition)transIter.next();
-
-          if(currentTrans.getConstraints() !=null) {
-            State target = currentTrans.getTarget();
-            AbstractSet newDState = new HashSet();
-            newDState.add(target);
-            newDState = lambdaClosure(newDState);
-
-            if(!dStates.contains(newDState)) {
-              dStates.add(newDState);
-              unmarkedDStates.add(newDState);
-              State newState = new State(owner);
-              newStates.put(newDState, newState);
-
-              //find out if the new state is a final one
-              innerStatesIter = newDState.iterator();
-              while(innerStatesIter.hasNext()) {
-                State currentInnerState = (State)innerStatesIter.next();
-
-                if(currentInnerState.isFinal()) {
-                  newState.setAction(
-                          (RightHandSide)currentInnerState.getAction());
-                  newState.setFileIndex(currentInnerState.getFileIndex());
-                  newState.setPriority(currentInnerState.getPriority());
-                  break;
-                }
-              }
-            }// if(!dStates.contains(newDState))
-
-            State currentState = (State)newStates.get(currentDState);
-            State newState = (State)newStates.get(newDState);
-            currentState.addTransition(new Transition(
-                                        currentTrans.getConstraints(),
-                                        newState,
-                                        currentTrans.getBindings()));
-          }// if(currentTrans.getConstraints() !=null)
-
-        }// while(transIter.hasNext())
-
-      }// while(insideStatesIter.hasNext())
-
-    }// while(!unmarkedDstates.isEmpty())
-
-    /*
-    //find final states
-    Iterator allDStatesIter = dStates.iterator();
-    while(allDStatesIter.hasNext()){
-      currentDState = (AbstractSet) allDStatesIter.next();
-      Iterator innerStatesIter = currentDState.iterator();
+      //process the quasi-state
+      Iterator innerStatesIter = currentQuasiState.iterator();
       while(innerStatesIter.hasNext()){
-        State currentInnerState = (State) innerStatesIter.next();
+        State currentInnerState = (State)innerStatesIter.next();
+        //check for finality
         if(currentInnerState.isFinal()){
-          State newState = (State)newStates.get(currentDState);
-
-          newState.setAction(currentInnerState.getAction());
-          break;
+          currentDetState.setAction(currentInnerState.getAction());
+          currentDetState.setFileIndex(currentInnerState.getFileIndex());
+          currentDetState.setPriority(currentInnerState.getPriority());
         }
-      }
 
+        //add the transitions for the new deterministic state
+        Set quasiTransitions = currentInnerState.getQuasiTransitions();
+        if(quasiTransitions != null){
+          Iterator patternsIter = quasiTransitions.iterator();
+          while(patternsIter.hasNext()){
+            Object[] patternData = (Object[])patternsIter.next();
+            currentDetState.addTransition(
+                (BasicPatternElement)patternData[0],
+                (State)detStateByQuasiState.
+                       get(getQuasiState((State)patternData[1])),
+                (List)patternData[2]);
+          }
+        }
+      }//while(innerStatesIter.hasNext())
+
+    }//while(!unmarkedQuasiStates.isEmpty())
+    initialState = (State)detStateByQuasiState.get(
+                          quasiStatesByState.get(initialState));
+
+
+  }//minimise
+
+
+  /**
+   * Returns the quasi-state containig the provided nondeterministic state.
+   * If it doesn't exist yet it will be created and then returned.
+   */
+  private Set getQuasiState(State state){
+    Set quasiState = (Set)quasiStatesByState.get(state);
+    if(quasiState == null){
+      //create the new quasi-state
+      quasiState = new HashSet(){
+        public int hashCode(){
+Out.prln("HashCode called");
+          return hashcode;
+        }
+        int hashcode = (int) (Math.random() * Integer.MAX_VALUE);
+      };
+      quasiState.add(state);
+      quasiState = lambdaClosure(quasiState);
+//Out.prln("new quasistate of size: " + quasiState.size());
+      Iterator innerStatesIter = quasiState.iterator();
+      while(innerStatesIter.hasNext()){
+        quasiStatesByState.put(innerStatesIter.next(), quasiState);
+      }
+      //create the new deterministic state for the quasi-state
+      State newState = new State();
+      detStateByQuasiState.put(quasiState, newState);
+      unmarkedQuasiStates.add(quasiState);
     }
-    */
-    allStates = newStates.values();
-  }//eliminateVoidTransitions
+    return quasiState;
+  }//private Set getSetForState(State state)
 
   /*
     * Computes the lambda-closure (aka epsilon closure) of the given set of
@@ -392,86 +460,33 @@ public class FSM implements JapeConstants {
     * @return a set containing all the states accessible from this state via
     * transitions that bear no restrictions.
     */
-  private AbstractSet lambdaClosure(AbstractSet s) {
-    // the stack/queue used by the algorithm
-    LinkedList list = new LinkedList(s);
+  private Set lambdaClosure(Set s) {
+    // the stack used by the algorithm
+    List stack = new LinkedList(s);
 
     // the set to be returned
-    AbstractSet lambdaClosure = new HashSet(s);
+    Set lambdaClosure = new HashSet(s);
     State top;
-    Iterator transIter;
-    Transition currentTransition;
     State currentState;
-    while(!list.isEmpty()){
-      top = (State)list.removeFirst();
-      transIter = top.getTransitions().iterator();
-
-      while(transIter.hasNext()){
-        currentTransition = (Transition)transIter.next();
-
-        if(currentTransition.getConstraints() == null){
-          currentState = currentTransition.getTarget();
-          if(!lambdaClosure.contains(currentState)){
-            lambdaClosure.add(currentState);
-            list.addFirst(currentState);
-          }// if(!lambdaClosure.contains(currentState))
-
-        }// if(currentTransition.getConstraints() == null)
-
+    while(!stack.isEmpty()){
+      top = (State)stack.remove(0);
+      Set lambdaSet = top.getLambdaSet();
+      if(lambdaSet != null){
+//Out.prln("Lamnbda set of size: " + lambdaSet.size());
+        Iterator statesIter = lambdaSet.iterator();
+        while(statesIter.hasNext()){
+          State state = (State)statesIter.next();
+          if(!lambdaClosure.contains(state)){
+            lambdaClosure.add(state);
+            stack.add(state);
+          }
+        }
       }
     }
+//Out.prln("Lambda closure of size: " + lambdaClosure.size());
     return lambdaClosure;
   } // lambdaClosure
 
-  /**
-    * Returns a GML (Graph Modelling Language) representation of the transition
-    * graph of this FSM.
-    */
-  public String getGML() {
-
-    String res = "graph[ \ndirected 1\n";
-///    String nodes = "", edges = "";
-    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
-                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
-
-    Iterator stateIter = allStates.iterator();
-    while (stateIter.hasNext()){
-      State currentState = (State)stateIter.next();
-      int stateIndex = currentState.getIndex();
-/*      nodes += "node[ id " + stateIndex +
-               " label \"" + stateIndex;
-*/
-        nodes.append("node[ id ");
-        nodes.append(stateIndex);
-        nodes.append(" label \"");
-        nodes.append(stateIndex);
-
-             if(currentState.isFinal()){
-/*              nodes += ",F";
-              nodes += "\\n" + currentState.getAction().shortDesc();
-*/
-              nodes.append(",F\\n" + currentState.getAction().shortDesc());
-             }
-///             nodes +=  "\"  ]\n";
-             nodes.append("\"  ]\n");
-///      edges += currentState.getEdgesGML();
-      edges.append(currentState.getEdgesGML());
-    }
-    res += nodes.toString() + edges.toString() + "]\n";
-    return res;
-  } // getGML
-
-  /**
-    * Returns a textual description of this FSM.
-    */
-  public String toString(){
-    String res = "Starting from:" + initialState.getIndex() + "\n";
-    Iterator stateIter = allStates.iterator();
-    while (stateIter.hasNext()){
-      res += "\n\n" + stateIter.next();
-    }
-    return res;
-  } // toString
 
   /**
     * The initial state of this FSM.
@@ -479,18 +494,22 @@ public class FSM implements JapeConstants {
   private State initialState;
 
   /**
-    * The set of states for this FSM
-    */
-  private transient Collection allStates =  new HashSet();
-
-  //kalina: added this member here to minimise HashMap allocation
-  private transient Map newStates = new HashMap();
-  private transient Set dStates = new HashSet();
+   * Used by the minimisation algorithm.
+   * Maps from a (nondeterministic) state to the set-state containing it
+   */
+  private Map quasiStatesByState;
 
   /**
-    * The top level FSM that contains this FSM, null if this FSM is a top
-    * level one.
-    */
-  private FSM owner = null;
+   * Maps from a quasi-state to the actual state created for it
+   */
+  Map detStateByQuasiState;
+
+
+  /**
+   * Used by the minimisation algorithm.
+   * A list of deterministic quasi-states (sets of nondeterministic states)
+   * that haven't yet been processed
+   */
+  private List unmarkedQuasiStates;
 
 } // FSM

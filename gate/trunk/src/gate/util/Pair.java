@@ -34,8 +34,9 @@ public class Pair implements Serializable {
   public Pair(Pair p0) {first = p0.first; second = p0.second; }
 
   // Methods
-  public int hashCode() { return first.hashCode(); }
-  public String toString() { return first.toString()+second.toString();}
+  public int hashCode() { return first.hashCode() ^ second.hashCode(); }
+  public String toString() { return "<" + first.toString() +
+                                    ", " + second.toString() + ">" ;}
   public boolean equals(Object p0) {
     if (!p0.getClass().equals(this.getClass()))
       return false;
