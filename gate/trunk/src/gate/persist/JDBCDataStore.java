@@ -195,7 +195,13 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /** Close the data store. */
   public void close() throws PersistenceException {
 
+    //1. close security factory
+    ac.close();
+
+    //2. close the JDBC connection
     try {
+      //rollback uncommited transactions
+      this.jdbcConn.rollback();
       this.jdbcConn.close();
     }
     catch (SQLException sqle) {
