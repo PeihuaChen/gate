@@ -146,6 +146,20 @@
            includes="gate/**,com/**"
 					 classpathref="build.class.path"/>
   </target>
+
+	<!-- This target compiles all the classes including debug information -->  
+  <target name="compile_debug"
+          depends="guk"
+          description="compile the source " >
+    <!-- Compile the java code from ${srcDir} into ${buildDir} -->
+    <javac srcdir="${srcDir}" 
+		       destdir="${outputDir}"
+           source="1.4"
+           debug="true"
+           includes="gate/**,com/**"
+					 classpathref="build.class.path"/>
+  </target>
+
 	
   <!-- Make gate.jar archive -->
 	<target name="jar" depends="compile,resources">
