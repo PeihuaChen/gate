@@ -29,7 +29,8 @@ public class TestGate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTest(TestDocument.suite());
+    suite.addTest(TestDocument.suite());  
+    suite.addTest(gate.annotation.TestAnnotation.suite());
     return suite;
   } // suite
 
