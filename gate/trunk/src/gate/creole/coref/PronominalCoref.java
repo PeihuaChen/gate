@@ -848,7 +848,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     long diff1 = offsetPrn.longValue() - offset1.longValue();
     long diff2 = offsetPrn.longValue() - offset2.longValue();
-    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+//    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+    //reject candidates that overlap with the pronoun
+    if (diff1 == 0) {
+      return ant2;
+    }
+    else if (diff2 == 0) {
+      return ant1;
+    }
 
     //get the one CLOSEST AND PRECEDING the pronoun
     if (diff1 > 0 && diff2 > 0) {
@@ -895,7 +902,15 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     Long offsetPrn = pronoun.getStartNode().getOffset();
     long diff1 = offsetPrn.longValue() - offset1.longValue();
     long diff2 = offsetPrn.longValue() - offset2.longValue();
-    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+//    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+    //reject candidates that overlap with the pronoun
+    if (diff1 == 0) {
+      return ant2;
+    }
+    else if (diff2 == 0) {
+      return ant1;
+    }
+
 
     //get the one CLOSEST AND PRECEDING the pronoun
     if (diff1 > 0 && diff2 > 0) {
