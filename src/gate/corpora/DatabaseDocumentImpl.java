@@ -151,13 +151,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
     try {
       String sql = " select v1.enc_name, " +
-                   "        v1.dc_character_content_id, " +
-                   "        v1.dc_binary_content_id, " +
+                   "        v1.dc_character_content, " +
+                   "        v1.dc_binary_content, " +
                    "        v1.dc_content_type " +
-                   " from  "+Gate.DB_OWNER+".v_doc_content v1, " +
-                   "       "+Gate.DB_OWNER+".t_document t2, " +
-                   " where  t2.doc_content_id = v1.dc_id " +
-                   "        and t2.doc_lr_id = ? ";
+                   " from  "+Gate.DB_OWNER+".v_content v1 " +
+                   " where  v1.lr_id = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,lrID.longValue());
