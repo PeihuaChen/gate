@@ -22,6 +22,8 @@ import junit.framework.*;
 
 import gate.*;
 import gate.util.*;
+import gate.creole.*;
+import gate.creole.nerc.*;
 
 
 /**
@@ -215,6 +217,181 @@ public class CookBook extends TestCase
     assert(fm.size() == 1);
 
   } // testUsingFeatures
+
+  /** String to print when wrong command-line args */
+  private static String usage =
+    "usage: CookBook [-dir directory-name | file(s)]";
+
+  /**
+   * Main function: an example of embedding GATE-based
+   * batch processing. The method:
+   * <UL>
+   * <LI>
+   * initialises the GATE library, and creates PRs for
+   * tokenisation, sentence splitting and part of speech tagging
+   * <LI>
+   * takes a directory name as argument (-dir option) or just a list
+   * of files
+   * <LI>
+   * creates a directory called "out" and an index.html file there
+   * <LI>
+   * for each .html file in that directory:
+   * <BR> create a GATE document from the file
+   * <BR> run the PRs on the document
+   * <BR> dump some output for the file to "out/gate__[file name].txt",
+   * and add a line to the index
+   * </UL>
+   */
+  public static void main(String[] args) throws Exception {
+    // say "hi"
+    Out.prln("CookBook.main");
+    Out.prln("processing command line arguments");
+
+    // check we have a directory name or list of files
+    List inputFiles = null;
+    if(args.length < 1) throw new GateException(usage);
+
+    // set up a list of all the files to process
+    if(args[0].equals("-dir")) { // list all the files in the dir
+      if(args.length < 2) throw new GateException(usage);
+      File dir = new File(args[1]);
+      File[] filesArray = dir.listFiles();
+      if(filesArray == null)
+        throw new GateException(
+          dir.getPath() + " is not a directory; " + usage
+        );
+      inputFiles = Arrays.asList(filesArray);
+
+    } else { // all args should be file names
+      inputFiles = new ArrayList();
+      for(int i = 0; i < args.length; i++)
+        inputFiles.add(new File(args[i]));
+    }
+
+    // did we get some file names?
+    if(inputFiles.isEmpty()) {
+      throw new GateException("No files to process!");
+    }
+
+    // initialise GATE
+    Out.prln("initialising GATE");
+    Gate.init();
+
+    // create some processing resources
+    // NOTE: for now we're using NERC, a composite NE recogniser
+    Out.prln("creating PRs");
+    // DefaultTokeniser tok = (DefaultTokeniser)
+    //   Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
+    // SentenceSplitter split = (SentenceSplitter)
+    //   Factory.createResource("gate.creole.splitter.SentenceSplitter");
+    // POSTagger tag = (POSTagger)
+    //   Factory.createResource("gate.creole.POSTagger");
+    Nerc nerc =
+      (Nerc) Factory.createResource("gate.creole.nerc.Nerc");
+
+    // make the "out" directory that will contain the results.
+    String outDirName =
+      ((File) inputFiles.get(0)).getParent() + Strings.getFileSep() + "out";
+    if(! new File(outDirName).mkdir()){
+      throw new GateException("Could not create the output directory");
+    }
+
+    // construct a name for the output index file; open; dump header
+    String nl = Strings.getNl(); // shorthand for platform's newline
+    String fsep =
+      Strings.getFileSep(); // shorthand for platform's file separator
+    String indexName =
+      ( (File) inputFiles.get(0) ).getParent() + fsep + "index.html";
+    FileWriter indexWriter = new FileWriter(new File(indexName));
+    indexWriter.write("<HTML><HEAD><TITLE>Documents list</TITLE></HEAD>");
+    indexWriter.write(nl + "<BODY>" + nl + "<UL>" + nl);
+
+    // main loop:
+    // for each document
+    //   create a gate doc
+    //   set as the document for hte PRs
+    //   run the PRs
+    //   dump output from the doc to out/gate__.....txt
+    //   delete the doc
+
+    // loop on files list
+    Iterator filesIter = inputFiles.iterator();
+    Out.prln("looping on input files list");
+    while(filesIter.hasNext()) {
+      File inFile = (File) filesIter.next(); // the current file
+      Out.prln("processing file " + inFile.getPath());
+      FeatureMap params = Factory.newFeatureMap(); // params list for new doc
+
+      // set the source URL parameter to a "file:..." URL string
+      params.put("sourceUrl", inFile.toURL().toExternalForm());
+
+      // use the platform's default encoding rather than GATE's
+      params.put("encoding", "");
+
+      // create the document
+      Document doc = (Document) Factory.createResource(
+        "gate.corpora.DocumentImpl", params
+      );
+
+      // set the document param on the PRs
+      // tok.setDocument(doc);
+      // split.setDocument(doc);
+      // tag.setDocument(doc);
+      nerc.setDocument(doc);
+
+      // run each PR
+      // tok.execute();
+      // split.execute();
+      // tag.execute();
+      nerc.execute();
+
+      // dump out results
+
+      // construct a name for the output file and open a stream
+      StringBuffer outFileName = new StringBuffer(inFile.getParent());
+      outFileName.append(fsep);
+      outFileName.append("out");
+      outFileName.append(fsep);
+      outFileName.append("gate__");
+      outFileName.append(inFile.getName());
+      outFileName.append(".txt");
+      File outFile = new File(outFileName.toString());
+      FileWriter outFileWriter = new FileWriter(outFile);
+      Out.prln("dumping " + outFile.getPath());
+
+      // iterate round the token annotations writing to the out file
+      // NOTE: to dump all to XML: outFileWriter.write(doc.toXml(tokens));
+      AnnotationSet tokens = doc.getAnnotations("nercAS").get("Token");
+      Iterator iter = tokens.iterator();
+      while(iter.hasNext()) {
+        Annotation token = (Annotation) iter.next();
+        FeatureMap tokFeats = token.getFeatures();
+        String tokStr = (String) tokFeats.get("string");
+        String tokPos = (String) tokFeats.get("category");
+        outFileWriter.write(tokStr + "\t" + tokPos + nl);
+      }
+      outFileWriter.write(doc.getFeatures().get("entitySet").toString());
+
+      // close the out file stream; add an index line
+      outFileWriter.close();
+      indexWriter.write(
+        "<LI><A href=\"" + inFile.getName() + "\">" + inFile.getName() +
+        "</a>" + " -> " + "<a href=\"" + "out" + fsep + outFile.getName() +
+        "\">" + "out" + fsep + outFile.getName() + "</a></LI>\n"
+      );
+
+      // make the doc a candidate for garbage collection
+      Out.prln("deleting gate doc");
+
+      Factory.deleteResource(doc);
+    } // input files loop
+
+    // finish the index file
+    indexWriter.write(nl + "</UL>" + nl + "</BODY></HTML>" + nl);
+    indexWriter.close();
+
+    Out.prln("The End (roll credits)");
+  } // main
 
   /** Fixture set up: initialise members before each test method */
   public void setUp() throws GateException, IOException {
