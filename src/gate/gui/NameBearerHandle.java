@@ -207,13 +207,13 @@ public class NameBearerHandle implements Handle,
     action.putValue(action.SHORT_DESCRIPTION,
       "Save trained HMM model into PR URL file");
     // Add Save trained HMM model action
-    popupItems.add(action);
+    popupItems.add(new XJMenuItem(action, sListenerProxy));
 
     action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
     action.putValue(action.SHORT_DESCRIPTION,
       "Save trained HMM model into new file");
     // Add Save As... trained HMM model action
-    popupItems.add(action);
+    popupItems.add(new XJMenuItem(action, sListenerProxy));
   } // fillHMMActions(gate.gui.ProtegeWrapper protege)
 
 
@@ -373,9 +373,6 @@ public class NameBearerHandle implements Handle,
     if(target instanceof ProcessingResource){
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-      if(target instanceof gate.ml.DataCollector){
-        staticPopupItems.add(new DumpArffAction());
-      }
       if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
         fillHMMActions(staticPopupItems);
       } // if
