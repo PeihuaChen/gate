@@ -77,7 +77,7 @@ public class TestPersist extends TestCase
     if(! cannotSync)
       assert("doc adopted but in other datastore already", false);
     doc.setDataStore(null);
-    doc.getFeatures().put("gate.NAME", "Alicia Tonbridge, a Document");
+    doc.setName("Alicia Tonbridge, a Document");
 
     // save the document
     doc = (Document) sds.adopt(doc);

@@ -298,7 +298,7 @@ extends AbstractFeatureBearer implements DataStore {
     String lrPersistenceId = null;
     FeatureMap lrFeatures = lr.getFeatures();
     if(lrFeatures != null) {
-      lrName = (String) lrFeatures.get("gate.NAME");
+      lrName = lr.getName();
       lrPersistenceId = (String) lrFeatures.get("DataStoreInstanceId");
     }
     if(lrName == null)

@@ -46,7 +46,7 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
 
   protected void initGuiComponents(){
     treeRoot = new DefaultMutableTreeNode(
-                 datastore.getFeatures().get("gate.NAME"),true);
+                 datastore.getName(), true);
     treeModel = new DefaultTreeModel(treeRoot, true);
     tree = new JTree(treeModel);
     tree.setExpandsSelectedPaths(true);
@@ -165,7 +165,7 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
         params.put("DataStore", datastore);
         params.put("DataStoreInstanceId", entry.id);
         FeatureMap features = Factory.newFeatureMap();
-        features.put("gate.NAME", entry.name);
+        Gate.setName(features, entry.name);
         Resource res = Factory.createResource(entry.type, params, features);
         datastore.getLr(entry.type, entry.id);
         //project.frame.resourcesTreeModel.treeChanged();

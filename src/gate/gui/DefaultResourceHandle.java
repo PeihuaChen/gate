@@ -53,7 +53,7 @@ public class DefaultResourceHandle implements ResourceHandle {
     }
 
     popup = null;
-    title = (String)resource.getFeatures().get("gate.NAME");
+    title = (String)resource.getName();
     buildViews();
   }//public DefaultResourceHandle(FeatureBearer res)
 
@@ -299,7 +299,7 @@ public class DefaultResourceHandle implements ResourceHandle {
           DataStore oneDS = (DataStore)dsIter.next();
           String name;
           if(oneDS.getFeatures() != null &&
-             (name = (String)oneDS.getFeatures().get("gate.NAME")) != null){
+             (name = (String)oneDS.getName()) != null){
           } else {
             name  = oneDS.getStorageUrl().getFile();
           }
@@ -354,7 +354,7 @@ public class DefaultResourceHandle implements ResourceHandle {
           try{
             long startTime = System.currentTimeMillis();
             fireStatusChanged("Reinitialising " +
-                               resource.getFeatures().get("gate.NAME"));
+                               resource.getName());
             Map listeners = new HashMap();
             StatusListener sListener = new StatusListener(){
                                         public void statusChanged(String text){
@@ -390,7 +390,7 @@ public class DefaultResourceHandle implements ResourceHandle {
               e.printStackTrace(Err.getPrintWriter());
             }
             long endTime = System.currentTimeMillis();
-            fireStatusChanged(resource.getFeatures().get("gate.NAME") +
+            fireStatusChanged(resource.getName() +
                               " reinitialised in " +
                               NumberFormat.getInstance().format(
                               (double)(endTime - startTime) / 1000) + " seconds");

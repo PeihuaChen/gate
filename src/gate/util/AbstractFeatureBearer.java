@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 15/Oct/2000
  *
  *  $Id$
@@ -20,13 +20,30 @@ import gate.*;
 /** A convenience implemetation of FeatureBearer.
   * @see FeatureBearer
   */
-abstract public class AbstractFeatureBearer
+abstract public class AbstractFeatureBearer implements FeatureBearer
 {
   /** Get the feature set */
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
+
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    FeatureMap fm = getFeatures();
+    if(fm == null){
+      fm = Factory.newFeatureMap();
+      setFeatures(fm);
+    }
+    Gate.setName(fm, name);
+  }
+
+  /** Returns the name of this resource*/
+  public String getName(){
+    FeatureMap fm = getFeatures();
+    if(fm == null) return null;
+    else return Gate.getName(fm);
+  }
 
   /** The feature set */
   protected FeatureMap features;

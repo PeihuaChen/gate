@@ -24,7 +24,7 @@ import gate.util.*;
   * code.
   */
 abstract public class AbstractProcessingResource
-extends AbstractFeatureBearer implements ProcessingResource
+extends AbstractResource implements ProcessingResource
 {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {

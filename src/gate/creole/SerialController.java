@@ -74,6 +74,7 @@ extends ArrayList implements Controller, List
 
   } // run()
 
+
   /** Trigger any exception that was caught when <CODE>run()</CODE> was
     * invoked. If there is an exception stored it is cleared by this call.
     */
@@ -84,6 +85,24 @@ extends ArrayList implements Controller, List
       throw e;
     }
   } // check()
+
+
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    FeatureMap fm = getFeatures();
+    if(fm == null){
+      fm = Factory.newFeatureMap();
+      setFeatures(fm);
+    }
+    Gate.setName(fm, name);
+  }
+
+  /** Returns the name of this resource*/
+  public String getName(){
+    FeatureMap fm = getFeatures();
+    if(fm == null) return null;
+    else return Gate.getName(fm);
+  }
 
   public void setRuntimeParameters(FeatureMap parameters){
   }

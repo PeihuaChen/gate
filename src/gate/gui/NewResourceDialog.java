@@ -226,7 +226,7 @@ public class NewResourceDialog extends JDialog {
       try {
         long startTime = System.currentTimeMillis();
         FeatureMap features = Factory.newFeatureMap();
-        features.put("gate.NAME", nameField.getText());
+        Gate.setName(features, nameField.getText());
         res = Factory.createResource(rData.getClassName(), params,
                                      features, listeners);
         long endTime = System.currentTimeMillis();
@@ -585,29 +585,4 @@ public class NewResourceDialog extends JDialog {
     Object[] values;
   }// class ParameterDisjunction
 
-  class ResourceLoader implements Runnable {
-    public void run(){
-      //create the new resource
-      FeatureMap params = Factory.newFeatureMap();
-      params.put("gate.event.StatusListener", getParent());
-      params.put("gate.event.ProgressListener", getParent());
-      for(int i=0; i< tableModel.getRowCount(); i++){
-        ParameterDisjunction pDisj = (ParameterDisjunction)
-                                     tableModel.getValueAt(i,0);
-        if(pDisj.getValue() != null){
-          params.put(pDisj.getName(), pDisj.getValue());
-        }
-      }
-      try {
-        resource = Factory.createResource(resourceData.getClassName(), params);
-        resource.getFeatures().put("gate.NAME", nameField.getText());
-      } catch(ResourceInstantiationException rie) {
-        JOptionPane.showMessageDialog(getOwner(),
-                                      "Resource could not be created!\n" +
-                                      rie.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-        resource = null;
-      }
-    }//run()
-  }//class ResourceLoader implements Runnable
 }//class NewResourceDialog
