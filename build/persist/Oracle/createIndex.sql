@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Tue Oct 16 17:12:49 2001
+ *  auto generated: Tue Oct 23 18:41:50 2001
  *
  *  $Id$
  *
@@ -61,6 +61,11 @@ CREATE INDEX XT_LANG_RESOURCE_03 ON T_LANG_RESOURCE
 CREATE UNIQUE INDEX XT_LR_TYPE_01 ON T_LR_TYPE
 (
        LRTP_TYPE                      
+);
+
+CREATE UNIQUE INDEX XT_PARAMETER_01 ON T_PARAMETER
+(
+       PAR_KEY                        
 );
 
 CREATE UNIQUE INDEX XT_USER_01 ON T_USER

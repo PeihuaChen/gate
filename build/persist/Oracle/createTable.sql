@@ -10,12 +10,24 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Mon Oct 15 17:32:04 2001
+ *  auto generated: Tue Oct 23 18:37:23 2001
  *
  *  $Id$
  *
  */
 
+
+
+DROP TABLE T_PARAMETER CASCADE CONSTRAINTS;
+
+CREATE TABLE T_PARAMETER (
+       PAR_ID               NUMBER NOT NULL,
+       PAR_KEY              VARCHAR2(16) NOT NULL,
+       PAR_VALUE_STRING     VARCHAR2(128) NULL,
+       PAR_VALUE_DATE       DATE NULL,
+       PAR_VALUE_NUMBER     NUMBER NULL,
+       PRIMARY KEY (PAR_ID)
+);
 
 
 DROP TABLE T_GROUP CASCADE CONSTRAINTS;
