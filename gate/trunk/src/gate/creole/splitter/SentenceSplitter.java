@@ -145,6 +145,19 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
       outputAS.add(outputAS.firstNode(), outputAS.lastNode(),
                    "Sentence", Factory.newFeatureMap());;
     }
+    //add a sentence covering all the tokens after the last sentence
+    Long endSentences = sentences.lastNode().getOffset();
+    AnnotationSet remainingTokens = inputAS.get("Token", endSentences,
+                                                inputAS.lastNode().getOffset());
+    if(remainingTokens != null && !remainingTokens.isEmpty()){
+      try{
+        outputAS.add(remainingTokens.firstNode().getOffset(),
+                     remainingTokens.lastNode().getOffset(),
+                     "Sentence", Factory.newFeatureMap());
+      }catch(InvalidOffsetException ioe){
+        throw new ExecutionException(ioe);
+      }
+    }
     fireProcessFinished();
   }//execute()
 
