@@ -381,16 +381,20 @@ public class AnnotationEditor extends AbstractVisualResource{
               popup.add(menu);
 
               //Add to a named AnnotationSet
-              Iterator asIter = document.getNamedAnnotationSets().values().iterator();
-              while(asIter.hasNext()){
-                AnnotationSet as = (AnnotationSet)asIter.next();
-                menu = new JMenu("Add to " + as.getName());
-                schemasIter = annotationSchemas.iterator();
-                while(schemasIter.hasNext()){
-                  AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
-                  menu.add(new NewAnnotationPopupItem(start, end, schema, as));
+              Map namedASs = document.getNamedAnnotationSets();
+              if(namedASs != null && !namedASs.isEmpty()){
+                Iterator asIter = namedASs.values().iterator();
+                while(asIter.hasNext()){
+                  AnnotationSet as = (AnnotationSet)asIter.next();
+                  menu = new JMenu("Add to " + as.getName());
+                  schemasIter = annotationSchemas.iterator();
+                  while(schemasIter.hasNext()){
+                    AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+                    menu.add(new NewAnnotationPopupItem(start, end, schema, as));
+                  }
+                  popup.add(menu);
                 }
-                popup.add(menu);
+
               }
 
               //Add to a new AnnotationSet
@@ -1533,6 +1537,11 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
             try{
               targetAS.add(new Long(start), new Long(end),
                            schema.getAnnotationName(), features);
+              SwingUtilities.invokeLater(new Runnable(){
+                public void run(){
+                  annotationsTableModel.fireTableDataChanged();
+                }
+              });
             }catch(InvalidOffsetException ioe){
               JOptionPane.showMessageDialog(textPane,
                                             "Invalid input!\n" + ioe.toString(),
