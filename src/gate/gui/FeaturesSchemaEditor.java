@@ -50,7 +50,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     if(features != null) features.removeFeatureMapListener(this);
     this.targetFeatures = features;
     populate();
-    features.addFeatureMapListener(this);
+    if(features != null) features.addFeatureMapListener(this);
   }
   
   
@@ -234,6 +234,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       if(targetFeatures == null){
         targetFeatures = Factory.newFeatureMap();
         target.setFeatures(targetFeatures);
+        setTargetFeatures(targetFeatures);
       }
       switch(columnIndex){
         case VALUE_COL:
