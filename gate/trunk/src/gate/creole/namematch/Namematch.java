@@ -46,9 +46,6 @@ public class Namematch extends AbstractProcessingResource
   /** the type of annotation*/
   protected String annotationType;
 
-  /** internal or external list cdg*/
-//  protected Boolean intCdgList;
-
   /** internal or external list */
   protected Boolean extLists;
 
@@ -91,6 +88,7 @@ public class Namematch extends AbstractProcessingResource
     *  exception.
     */
   public void run() {
+
     //check the input
     if(document == null) {
       executionException = new ExecutionException(
@@ -99,13 +97,15 @@ public class Namematch extends AbstractProcessingResource
       return;
     }
 
+    // creates the lists from external files and the cdg list is created
+    // both the external list and lookup
     try {
       createLists();
       if (!extLists.booleanValue())
         buildTables(document);
     } catch (IOException ioe) {ioe.printStackTrace();}
 
-
+    // get the annotations from document
     AnnotationSet nameAllAnnots;
     if ((annotationSetName == null)|| (annotationSetName == "")){
       nameAllAnnots = document.getAnnotations();
@@ -119,8 +119,12 @@ public class Namematch extends AbstractProcessingResource
         return;
       }
     } else {Out.prln("No annotations");return;}
-    //
+
+    // the "unknown" annotations
     AnnotationSet nameAnnotsUnknown;
+    nameAnnotsUnknown = nameAllAnnots.get("unknown",
+                            Factory.newFeatureMap());
+
     // go through all the annotation types
     Iterator iterAnnotationTypes = annotationTypes.iterator();
     while (iterAnnotationTypes.hasNext()) {
@@ -128,9 +132,6 @@ public class Namematch extends AbstractProcessingResource
 
       nameAnnots = nameAllAnnots.get(annotationType,
                                   Factory.newFeatureMap());
-      nameAnnotsUnknown = nameAllAnnots.get("unknown",
-                                  Factory.newFeatureMap());
-
       // return if no such annotations exist
       if (nameAnnots != null) {
         if (nameAnnots.isEmpty()) {
@@ -138,6 +139,18 @@ public class Namematch extends AbstractProcessingResource
         }
         else
         {
+          // the "unknown" annotations
+          if (nameAnnotsUnknown!=null){
+            nameAnnotsUnknown = nameAnnotsUnknown.get("unknown",
+                                  Factory.newFeatureMap());
+            // add the "unknown" annotations to the current set of annotation
+            Iterator iter = nameAnnotsUnknown.iterator();
+            while(iter.hasNext()) {
+              Annotation an = (Annotation)iter.next();
+              nameAnnots.add(an);
+            }
+          }// if
+
           // PROBLEM:
           // due to the fact that the strings to be compared
           // may contain tabs or newlines, those should also be matched
@@ -157,7 +170,7 @@ public class Namematch extends AbstractProcessingResource
             try {
               String annotString =
                 document.getContent().getContent(
-                offsetStartAnnot,offsetEndAnnot).toString();
+                  offsetStartAnnot,offsetEndAnnot).toString();
               // now do the reg. exp. substitutions
               annotString = regularExpressions(annotString," ", "\\s+");
 
@@ -168,6 +181,7 @@ public class Namematch extends AbstractProcessingResource
               executionException = new ExecutionException
                                      ("Invalid offset of the annotation");
             }
+
           } // for
 
           // now go through the annotations
@@ -198,7 +212,7 @@ public class Namematch extends AbstractProcessingResource
               if (matched_annots.containsKey(annot1_id.toString())) {
                 matchedAnnot1 =
                   (AnnotationMatches) matched_annots.get(annot1_id.toString());
-                if (matchedAnnot1.containsMatched(annot2_id.toString())) continue;
+              if (matchedAnnot1.containsMatched(annot2_id.toString())) continue;
               }
 
               // find which annotation string of the two is longer
@@ -216,6 +230,7 @@ public class Namematch extends AbstractProcessingResource
 
               // apply name matching rules
               if (apply_rules_namematch(shortName,longName)) {
+
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
 
@@ -246,13 +261,57 @@ public class Namematch extends AbstractProcessingResource
                 matched_annots.put(annot1_id.toString(),matchedAnnot1);
                 matched_annots.put(annot2_id.toString(),matchedAnnot2);
 
+                // classify the "unknown" annotation if such exists
+                if (nameAnnotsUnknown!=null) {
+                  if ((nameAnnotsUnknown.contains(annot1))
+                      && (!nameAnnotsUnknown.contains(annot2))){
+                    Integer id = annot1.getId();
+                    Long start = annot1.getStartNode().getOffset();
+                    Long end = annot1.getEndNode().getOffset();
+                    FeatureMap fm = annot1.getFeatures();
+                    nameAnnotsUnknown.remove(annot1);
+                    try {
+                      nameAnnotsUnknown.add(id,start,end,annotationType,fm);
+                    } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
+                  } else if ((nameAnnotsUnknown.contains(annot2))
+                      && (!nameAnnotsUnknown.contains(annot1))){
+                    Integer id = annot2.getId();
+                    Long start = annot2.getStartNode().getOffset();
+                    Long end = annot2.getEndNode().getOffset();
+                    FeatureMap fm = annot2.getFeatures();
+                    nameAnnotsUnknown.remove(annot2);
+                    try {
+                      nameAnnotsUnknown.add(id,start,end,annotationType,fm);
+                    } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
+                  } // else if
+                }//if
               } // if (apply_rules_namematch
             } //for j
             previousAnnots.add(annot1);
           }// for i
 
-          // append the "matches" attribute to existing annotations
+          // added the "unknown" annotation if it matches with an annotation
+          // of which the type has the current type
+          if (nameAnnotsUnknown!=null) {
+            //remove the unknown annotation
+            Iterator it = nameAnnotsUnknown.iterator();
+            while (it.hasNext()) {
+              Annotation ann = (Annotation)it.next();
+              nameAnnots.remove(ann);
+            }
 
+            // add the new annotation
+            AnnotationSet as = nameAnnotsUnknown.get(annotationType);
+            if ( as != null) {
+              Iterator iter = as.iterator();
+              while (iter.hasNext()) {
+                Annotation annot = (Annotation)iter.next();
+                nameAnnots.add(annot);
+              };
+            }// if
+          }// if
+
+          // append the "matches" attribute to existing annotations
           for (Enumeration enum =
                             matched_annots.keys(); enum.hasMoreElements() ;) {
             String annot_id = (String) enum.nextElement();
@@ -262,9 +321,11 @@ public class Namematch extends AbstractProcessingResource
             // remove attribute "matches" if such exists:
             // i.e has the namematcher run on the same doc b4?
             Annotation annot = nameAnnots.get(new Integer(annot_id));
-            FeatureMap attr = annot.getFeatures();
-            attr.remove("matches");
-            attr.put("matches", matchesVector);
+            if (annot!=null) {
+              FeatureMap attr = annot.getFeatures();
+              attr.remove("matches");
+              attr.put("matches", matchesVector);
+            }
           } // for Enumeration
         }// else
       }//if
@@ -394,8 +455,8 @@ public class Namematch extends AbstractProcessingResource
                     matchRule12(shortName, longName))
                 )// rules for person annotations
            ) // if
-         return true;
-    } // if (!matchRule0
+        return true;
+      } // if (!matchRule0
     return false;
   }//apply_rules
 
