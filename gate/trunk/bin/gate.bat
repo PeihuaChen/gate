@@ -25,7 +25,6 @@ REM set TOOLSJAR to where we hope tools.jar is are located
 REM ##############################################
 
 set TOOLSJAR=%LOCAT%\tools14.jar
-if not exist %TOOLSJAR% set TOOLSJAR=%LOCAT%\..\lib\tools14.jar
 
 echo TOOLSJAR=%TOOLSJAR%
 

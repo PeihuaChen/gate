@@ -15,7 +15,6 @@ fi
 
 # set TOOLSJAR to where we hope tools.jar is are located
 TOOLSJAR=$LOCAT/tools14.jar
-[ ! -f $TOOLSJAR ] && TOOLSJAR=$LOCAT/../lib/tools14.jar
 
 # set SITEGATEXML to where we thing gate.xml is (or "" if not around)
 SITEGATEXML=""
