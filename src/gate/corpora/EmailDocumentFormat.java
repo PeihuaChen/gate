@@ -62,6 +62,9 @@ public class EmailDocumentFormat extends TextualDocumentFormat
       throw new DocumentFormatException(
                "GATE document is null or no content found. Nothing to parse!");
     }// End if
+    
+    setNewLineProperty(doc);
+    
     // create an EmailDocumentHandler
     EmailDocumentHandler emailDocHandler = null;
     emailDocHandler = new  gate.email.EmailDocumentHandler(
