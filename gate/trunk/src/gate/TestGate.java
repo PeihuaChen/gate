@@ -211,9 +211,9 @@ public class TestGate {
       if(! allTests){
         suite.addTest(TestPersist.suite());
       } else {
+        suite.addTest(TestPersist.suite());
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
-        suite.addTest(TestPersist.suite());
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());

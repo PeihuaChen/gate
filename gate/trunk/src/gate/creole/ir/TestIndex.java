@@ -34,7 +34,10 @@ public class TestIndex extends TestCase{
 
   public TestIndex(String name) throws GateException {
     super(name);
+  }
 
+  /** Fixture set up */
+  public void setUp() throws Exception {
     try {
       File storageDir = File.createTempFile("TestIndex__", "__StorageDir");
 
@@ -68,18 +71,13 @@ public class TestIndex extends TestCase{
       e.printStackTrace();
       throw new GateException(e.getMessage());
     }
-
-  }
-
-  /** Fixture set up */
-  public void setUp() throws Exception {
-
   } // setUp
 
   /** Put things back as they should be after running tests
     * (reinitialise the CREOLE register).
     */
   public void tearDown() throws Exception {
+    sds.delete();
   } // tearDown
 
   /** Test suite routine for the test runner */
