@@ -1,3 +1,11 @@
+/*
+ *	Tools.java
+ *
+ *	Valentin Tablan, Jan/2000
+ *
+ *	$Id$
+ */
+
 package gate.util;
 
 public class Tools {
