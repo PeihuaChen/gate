@@ -63,6 +63,9 @@ public class CorpusBenchmarkTool {
       String listsURL = this.configs.getProperty("gazetteerListsURL");
       if (listsURL != null && !listsURL.equals(""))
         params.put("listsURL", listsURL);
+      String caseSensitive = this.configs.getProperty("gazetteerCaseSensitive");
+      if (caseSensitive != null && !caseSensitive.equals(""))
+        params.put("caseSensitive", new Boolean(caseSensitive));
       params.put("annotationSetName", "temp");
       gazetteer = (DefaultGazetteer) Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer", params);
