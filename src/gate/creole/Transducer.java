@@ -71,7 +71,11 @@ public class Transducer extends AbstractLanguageAnalyser {
       try{
         fireProgressChanged(0);
         batch = new Batch(grammarURL, encoding, new InternalStatusListener());
-        batch.setEnableDebugging(enableDebugging.booleanValue());
+        if(enableDebugging != null) {
+          batch.setEnableDebugging(enableDebugging.booleanValue());
+        } else {
+          batch.setEnableDebugging(false);
+        }
         fireProcessFinished();
       }catch(Exception e){
         throw new ResourceInstantiationException(e);
