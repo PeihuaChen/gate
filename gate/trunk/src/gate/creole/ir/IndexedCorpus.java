@@ -16,7 +16,7 @@ package gate.creole.ir;
 
 import gate.Corpus;
 
-public interface IndexedCorpus {
+public interface IndexedCorpus extends Corpus{
 
   /** Sets the definition to this corpus.
    * @param definition of index for this corpus
