@@ -600,8 +600,9 @@ create or replace package body persist is
   end;
 
   /*******************************************************************************************/
-  procedure set_lr_name(p_lr_id     IN number,
-                        p_lr_name   IN varchar2)
+  procedure update_lr  (p_lr_id     IN number,
+                        p_lr_name   IN varchar2,
+                        p_lr_parent_id IN number)
   is
     cnt number;
   begin
@@ -614,8 +615,11 @@ create or replace package body persist is
   
     --2. update it
     update t_lang_resource
-    set    lr_name = p_lr_name
+    set    lr_name = p_lr_name,
+           lr_parent_id = p_lr_parent_id
     where  lr_id = p_lr_id;
+    
+    
 
   exception
     when NO_DATA_FOUND then
