@@ -28,47 +28,61 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
   /**
    * The capacity of the map
    */
-  int m_capacity=3;
+  int capacity = 3;
 
   /**
    * The current number of elements of the map
    */
-  int m_size=0;
+  int count = 0;
 
   /**
    * Array keeping the keys of the entries in the map. It is "synchrnized"
-   * with the m_values array - the Nth position in both arrays correspond
+   * with the values array - the Nth position in both arrays correspond
    * to one and the same entry
    */
-  Object m_keys[];
+  Object theKeys[];
 
   /**
    * Array keeping the values of the entries in the map. It is "synchrnized"
-   * with the m_keys array - the Nth position in both arrays correspond
+   * with the keys array - the Nth position in both arrays correspond
    * to one and the same entry
    */
-  Object m_values[];
+  Object theValues[];
+
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = -6747241616127229116L;
+
+  /** the Object instance that will represent the NULL keys in the map */
+  transient static Object nullKey = new Object();
+
+  /** the static 'all keys' collection */
+  transient public static HashMap theKeysHere = new HashMap();
+
+  /** additional static members initialization */
+  static {
+    theKeysHere.put(nullKey, nullKey);
+  } // static code
 
   /**
    * Constructor
    */
   public SimpleMapImpl() {
-    m_keys = new Object[m_capacity];
-    m_values = new Object[m_capacity];
+    theKeys = new Object[capacity];
+    theValues = new Object[capacity];
   } // SimpleMapImpl()
 
   /**
    * return the number of elements in the map
    */
   public int size() {
-    return m_size;
+    return count;
   } // size()
 
   /**
    * return true if there are no elements in the map
    */
   public boolean isEmpty() {
-    return (m_size == 0);
+    return (count == 0);
   } // isEmpty()
 
   /**
@@ -87,8 +101,8 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
   {
     HashSet s = new HashSet(size());
     Object k;
-    for (int i=0; i<m_size; i++) {
-      k = m_keys[i];
+    for (int i = 0; i < count; i++) {
+      k = theKeys[i];
       if (k == nullKey)
            s.add(null);
         else
@@ -102,11 +116,11 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
    */
   public void clear()
   {
-    for (int i=0; i<m_size; i++) {
-      m_keys[i] = null;
-      m_values[i] = null;
+    for (int i = 0; i < count; i++) {
+      theKeys[i] = null;
+      theValues[i] = null;
     } // for
-    m_size =0;
+    count = 0;
   } // clear
 
   /**
@@ -129,7 +143,7 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
    */
   public Object get(Object key) {
     int pos = getPostionByKey(key);
-    return (pos == -1) ? null : m_values[pos];
+    return (pos == -1) ? null : theValues[pos];
   } // get
 
   /**
@@ -146,11 +160,11 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     // if the key is already in the 'all keys' map - try to find it in that instance
     // comparing by reference
     if (gKey != null) {
-      for (int i=0; i<m_size; i++) {
-        if (gKey == m_keys[i]) {
+      for (int i = 0; i < count; i++) {
+        if (gKey == theKeys[i]) {
           // we found the reference - return the value
-          Object oldVal = m_values[i];
-          m_values[i] = value;
+          Object oldVal = theValues[i];
+          theValues[i] = value;
           return oldVal;
         }
       } // for
@@ -160,13 +174,13 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
       gKey = key;
     }
     // enlarge the containers if necessary
-    if (m_size == m_capacity)
+    if (count == capacity)
       increaseCapacity();
 
     // put the key and value to the map
-    m_keys[m_size] = gKey;
-    m_values[m_size] = value;
-    m_size++;
+    theKeys[count] = gKey;
+    theValues[count] = value;
+    count++;
     return null;
   } // put
 
@@ -179,16 +193,16 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
         return null;
 
     // save the value to return it at the end
-    Object oldVal = m_values[pos];
-    m_size--;
+    Object oldVal = theValues[pos];
+    count--;
     // move the last element key and value removing the element
-    if (m_size != 0) {
-        m_keys[pos] = m_keys[m_size];
-        m_values[pos] = m_values[m_size];
+    if (count != 0) {
+        theKeys[pos] = theKeys[count];
+        theValues[pos] = theValues[count];
     }
     // clear the last position
-    m_keys[m_size] = null;
-    m_values[m_size] = null;
+    theKeys[count] = null;
+    theValues[count] = null;
 
     // return the value
     return oldVal;
@@ -207,9 +221,9 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     if (t instanceof SimpleMapImpl) {
       SimpleMapImpl sfm = (SimpleMapImpl)t;
       Object key;
-      for (int i=0; i<sfm.m_size; i++) {
-        key = sfm.m_keys[i];
-        put(key, sfm.m_values[i]);
+      for (int i = 0; i < sfm.count; i++) {
+        key = sfm.theKeys[i];
+        put(key, sfm.theValues[i]);
       } //for
     } else { // if (t instanceof SimpleMapImpl)
       Iterator entries = t.entrySet().iterator();
@@ -221,7 +235,6 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     } // if(t instanceof SimpleMapImpl)
   } // putAll
 
-transient Object g_akey = null;
   /**
    * return positive value as index of the key in the map.
    * Negative value means that the key is not present in the map
@@ -234,8 +247,8 @@ transient Object g_akey = null;
     if (key == null)
       return -1;
 
-    for (int i=0; i<m_size; i++) {
-      if (key == m_keys[i])
+    for (int i = 0; i < count; i++) {
+      if (key == theKeys[i])
         return i;
     } // for
     return -1;
@@ -246,8 +259,8 @@ transient Object g_akey = null;
    * This method is used in subsume check to speed it up.
    */
   protected int getSubsumeKey(Object key) {
-    for (int i=0; i<m_size; i++) {
-      if (key == m_keys[i])
+    for (int i = 0; i < count; i++) {
+      if (key == theKeys[i])
         return i;
     } // for
     return -1;
@@ -258,8 +271,8 @@ transient Object g_akey = null;
    */
   private int getPostionByValue(Object value) {
     Object av;
-    for (int i=0; i<m_size; i++) {
-      av = m_values[i];
+    for (int i = 0; i < count; i++) {
+      av = theValues[i];
       if (value == null) {
         if (av == null)
           return i;
@@ -274,16 +287,16 @@ transient Object g_akey = null;
 
   // Modification Operations
   private void increaseCapacity() {
-    int m_oldCapacity = m_capacity;
-    m_capacity *= 2;
-    Object m_oldKeys[] = m_keys;
-    m_keys = new Object[m_capacity];
+    int oldCapacity = capacity;
+    capacity *= 2;
+    Object oldKeys[] = theKeys;
+    theKeys = new Object[capacity];
 
-    Object m_oldValues[] = m_values;
-    m_values = new Object[m_capacity];
+    Object oldValues[] = theValues;
+    theValues = new Object[capacity];
 
-    System.arraycopy(m_oldKeys, 0, m_keys, 0, m_oldCapacity);
-    System.arraycopy(m_oldValues, 0, m_values, 0, m_oldCapacity);
+    System.arraycopy(oldKeys, 0, theKeys, 0, oldCapacity);
+    System.arraycopy(oldValues, 0, theValues, 0, oldCapacity);
   } // increaseCapacity
 
   /**
@@ -319,20 +332,20 @@ transient Object g_akey = null;
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof Map.Entry))
-            return false;
-        Map.Entry e = (Map.Entry)o;
+      if (!(o instanceof Map.Entry))
+        return false;
+      Map.Entry e = (Map.Entry)o;
 
-        return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
-            (value==null ? e.getValue()==null : value.equals(e.getValue()));
+      return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
+        (value==null ? e.getValue()==null : value.equals(e.getValue()));
     }
 
     public int hashCode() {
-        return hash ^ (key==null ? 0 : key.hashCode());
+      return hash ^ (key==null ? 0 : key.hashCode());
     }
 
     public String toString() {
-        return key+"="+value;
+      return key+"="+value;
     }
   } // Entry
 
@@ -340,9 +353,9 @@ transient Object g_akey = null;
   public Set entrySet() {
     HashSet s = new HashSet(size());
     Object v, k;
-    for (int i=0; i<m_size; i++) {
-      k = m_keys[i];
-      s.add(new Entry(k.hashCode(), ((k==nullKey)?null:k), m_values[i]));
+    for (int i = 0; i < count; i++) {
+      k = theKeys[i];
+      s.add(new Entry(k.hashCode(), ((k==nullKey)?null:k), theValues[i]));
     } //for
     return s;
   } // entrySet
@@ -354,19 +367,19 @@ transient Object g_akey = null;
     }
 
     Map m = (Map)o;
-    if (m.size() != m_size) {
+    if (m.size() != count) {
       return false;
     }
 
     Object v, k;
-    for (int i=0; i<m_size; i++) {
-      k = m_keys[i];
+    for (int i = 0; i < count; i++) {
+      k = theKeys[i];
       v = m.get(k);
       if (v==null) {
-        if (m_values[i]!=null)
+        if (theValues[i]!=null)
           return false;
       }
-      else if (!v.equals(m_values[i])){
+      else if (!v.equals(theValues[i])){
         return false;
       }
     } // for
@@ -396,12 +409,12 @@ transient Object g_akey = null;
       throw(new InternalError(e.toString()));
     }
 
-    newMap.m_size = m_size;
-    newMap.m_keys = new Object[m_capacity];
-    System.arraycopy(m_keys, 0, newMap.m_keys, 0, m_capacity);
+    newMap.count = count;
+    newMap.theKeys = new Object[capacity];
+    System.arraycopy(theKeys, 0, newMap.theKeys, 0, capacity);
 
-    newMap.m_values = new Object[m_capacity];
-    System.arraycopy(m_values, 0, newMap.m_values, 0, m_capacity);
+    newMap.theValues = new Object[capacity];
+    System.arraycopy(theValues, 0, newMap.theValues, 0, capacity);
 
     return newMap;
   } // clone
@@ -435,27 +448,13 @@ transient Object g_akey = null;
       theKeysHere = new HashMap();
       theKeysHere.put(nullKey, nullKey);
     }
-    for (int i=0; i<m_keys.length; i++) {
+    for (int i = 0; i < theKeys.length; i++) {
       // if the key is in the 'all keys' map
-      Object o = theKeysHere.get(m_keys[i]);
+      Object o = theKeysHere.get(theKeys[i]);
       if (o != null) // yes - so reuse the reference
-        m_keys[i] = o;
+        theKeys[i] = o;
       else // no - put it in the 'all keys' map
-        theKeysHere.put(m_keys[i], m_keys[i]);
+        theKeysHere.put(theKeys[i], theKeys[i]);
     }//for
-
   }//readObject
-
-
- /** Freeze the serialization UID. */
-  static final long serialVersionUID = -6747241616127229116L;
-
- /** the Object instance that will represent the NULL keys in the map */
-  transient static Object nullKey = new Object();
-  transient public static HashMap theKeysHere = new HashMap();
-  static {
-    theKeysHere.put(nullKey, nullKey);
-  } // static code
-
-  /** the static keys colleaction */
 } //SimpleMapImpl
