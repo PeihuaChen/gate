@@ -154,11 +154,10 @@ public class TestGate {
       // Test bench
       ////////////////////////////////////////////////
       // Just copy the test suite you want to activate
-//      suite.addTest(TestHtml.suite());
+      // suite.addTest(TestXSchema.suite());
 
       // Test suite
 //*
-      // Temporary desactivated by Cristian (work in progress....)
       suite.addTest(TestAnnotationDiff.suite());
       suite.addTest(TestConfig.suite());
       suite.addTest(TestBumpyStack.suite());

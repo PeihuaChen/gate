@@ -133,7 +133,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup( Document doc,
-                             String  originalContentFeatureType)
+                             String  originalContentFeature)
                                                 throws DocumentFormatException{
 
      FeatureMap fm = doc.getFeatures ();
@@ -141,7 +141,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
 
-     fm.put(originalContentFeatureType, doc.getContent().toString());
+     fm.put(originalContentFeature, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }// unpackMarkup

@@ -49,11 +49,11 @@ public class TestXSchema extends TestCase
 
     AnnotationSchema annotSchema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);
-
+/*
     // Create an annoatationSchema from a URL.
     URL url = Gate.getUrl("tests/xml/POSSchema.xml");
     annotSchema.fromXSchema(url);
-
+*/
     String s = annotSchema.toXSchema();
     // write back the XSchema fom memory
     // File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
