@@ -128,7 +128,7 @@ public class MainFrame extends JFrame
    * Access to this data is avaialable through the {@link #getIcon(String)}
    * method.
    */
-  static Map iconByName;
+  static Map iconByName = new HashMap();
 
   /**
    * A Map which holds listeners that are singletons (e.g. the status listener
@@ -137,7 +137,7 @@ public class MainFrame extends JFrame
    * The keys used are the class names of the listener interface and the values
    * are the actual listeners (e.g "gate.event.StatusListener" -> this).
    */
-  private static java.util.Map listeners;
+  private static java.util.Map listeners = new HashMap();
 
   static public Icon getIcon(String filename){
     Icon result = (Icon)iconByName.get(filename);
@@ -196,6 +196,10 @@ public class MainFrame extends JFrame
 
   /**Construct the frame*/
   public MainFrame() {
+    if(fileChooser == null){
+      fileChooser = new JFileChooser();
+      fileChooser.setMultiSelectionEnabled(false);
+    }
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
     initGuiComponents();
@@ -1161,42 +1165,6 @@ public class MainFrame extends JFrame
     }
   }
 
-  static {
-    if(fileChooser == null){
-      fileChooser = new JFileChooser();
-      fileChooser.setMultiSelectionEnabled(false);
-    }
-    iconByName = new HashMap();
-
-    listeners = new HashMap();
-  }
-
-/*
-  void remove(CustomResourceHandle handle){
-    DefaultMutableTreeNode parent = null;
-    if(handle instanceof ApplicationHandle){
-      parent = appRoot;
-    }else if(handle instanceof LRHandle){
-      parent = lrRoot;
-    }else if(handle instanceof PRHandle){
-      parent = prRoot;
-    }
-    DefaultMutableTreeNode node = null;
-    if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
-    while(node != null && node.getUserObject() != handle){
-      node = (DefaultMutableTreeNode)node.getNextSibling();
-    }
-    if(node != null){
-      node.removeFromParent();
-      projectTreeModel.nodeStructureChanged(parent);
-    }
-    JComponent view = handle.getLargeView();
-    if(view != null) mainTabbedPane.remove(view);
-    view = handle.getSmallView();
-    if(view == lowerScroll.getViewport().getView())
-      lowerScroll.getViewport().removeAll();
-  }
-*/
 
   /**
    * Overridden so we can exit when window is closed
@@ -1688,8 +1656,8 @@ public class MainFrame extends JFrame
 
   class LoadResourceFromFileAction extends AbstractAction {
     public LoadResourceFromFileAction(){
-      super("Restore resource from file");
-      putValue(SHORT_DESCRIPTION,"Restores a previously saved resource");
+      super("Restore application from file");
+      putValue(SHORT_DESCRIPTION,"Restores a previously saved application");
     }
 
     public void actionPerformed(ActionEvent e) {

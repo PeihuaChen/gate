@@ -157,11 +157,7 @@ public class Main {
       public void run(){
         //this needs to run before any GUI component is constructed.
         //the initial gate splash is exempted from this rule.
-//        applyUserPreferences();
-
-try{
-  UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-}catch(Exception e){}
+        applyUserPreferences();
 
         //all the defaults tables have been updated; build the GUI
         frame = new MainFrame();
@@ -195,7 +191,6 @@ try{
    * Reads the user config data and applies the required settings.
    */
   protected static void applyUserPreferences(){
-    if(true) return;
     //hardcode for now
     Gate.getUserConfig().put(GateConstants.SAVE_OPTIONS_ON_EXIT,
                              new Boolean(true));
