@@ -142,8 +142,6 @@ features);
 annotations.removeAll(org);
 }
 
-:org.Organization= {rule = "OrgContext5"}
-
 Rule:JoinOrg
 Priority: 50
 // Smith joined Energis
@@ -183,7 +181,7 @@ Priority: 20
   ({Token.string == "s"})?
  )?
  SPACE
- {Person}
+ {Person.rule1 == PersonTitle}
 )
 --> 
  {
@@ -211,9 +209,6 @@ Priority: 10
 (SPACE)
 {Token.category == CC}
 (SPACE)
-({Token.category == DT}
- SPACE
-)?
 {Organization}
 )
 -->
@@ -235,9 +230,6 @@ Priority: 10
  (SPACE)
  {Token.category == CC}
  (SPACE)
- ({Token.category == DT}
-  SPACE
- )?
 )
 
 (
@@ -253,9 +245,45 @@ features);
 annotations.removeAll(org);
 }
 
+Rule: OrgJobtitle
+Priority: 30
+(
+ {Unknown.kind == PN}
+):org
+( 
+ SPACE
+ {Lookup.majorType == jobtitle}
+)
+-->
+  {
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgJobTitle");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 
+Rule:LocOrg
+Priority: 20
+// guess that Unknown preceded by Loc is an Org
 
+(
+ {Location}
+ SPACE
+ {Unknown.kind == PN}
+):org
+-->
+{
+//removes Unknown annotation, adds a new Org annotation
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule", "LocOrg");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 
 
