@@ -121,7 +121,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     instantiationStack.push(resource);
   } // addInstantiation
 
-  /** This method makes a certain resource persistant by adding it into a
+  /** This method makes a certain resource persistent by adding it into a
     * persistantInstantiationList. It is used especially with AUTOINSTANCE tag
     * in creole xml.
     */
