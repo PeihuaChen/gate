@@ -1787,6 +1787,9 @@ public class AnnotationEditor extends AbstractVisualResource {
                     stylesTreeModel.removeNodeFromParent(node);
                   }
                 }
+                //remove the data for this type
+                Map setMap = (Map)typeDataMap.get(setName);
+                setMap.remove(tData.getType());
               }//if(tData.getAnnotations().isEmpty())
             }//if(asEvt.getType() == asEvt.ANNOTATION_REMOVED)
           } else {
