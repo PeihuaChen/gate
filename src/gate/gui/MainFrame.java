@@ -1431,7 +1431,8 @@ public class MainFrame extends JFrame
 */
 
   /** This class represent an action which loads ANNIE with default params*/
-  class LoadANNIEWithDefaultsAction extends AbstractAction {
+  class LoadANNIEWithDefaultsAction extends AbstractAction
+                                    implements ANNIEConstants{
     public LoadANNIEWithDefaultsAction() {
       super("With defaults");
     }// NewAnnotDiffAction
@@ -1447,12 +1448,10 @@ public class MainFrame extends JFrame
             // Create a serial analyser
             SerialAnalyserController sac = (SerialAnalyserController)
                 Factory.createResource("gate.creole.SerialAnalyserController");
-            // Load each PR as defined in gate.creole.AnnieConstants.PR_NAMES
-            for(int i=0; i<gate.creole.AnnieConstants.PR_NAMES.length; i++){
+            // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
+            for(int i = 0; i < PR_NAMES.length; i++){
             ProcessingResource pr = (ProcessingResource)
-                Factory.createResource( gate.creole.AnnieConstants.PR_NAMES[i],
-                                        params,
-                                        listeners);
+                Factory.createResource( PR_NAMES[i], params, listeners);
               // Add the PR to the sac
               sac.add(pr);
             }// End for
@@ -1469,68 +1468,33 @@ public class MainFrame extends JFrame
   }//class LoadANNIEWithDefaultsAction
 
   /** This class represent an action which loads ANNIE without default param*/
-  class LoadANNIEWithoutDefaultsAction extends AbstractAction {
+  class LoadANNIEWithoutDefaultsAction extends AbstractAction
+                                       implements ANNIEConstants {
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
     }// NewAnnotDiffAction
-
     public void actionPerformed(ActionEvent e) {
-      // Loads ANNIE without defaults
-      Runnable runnable = new Runnable(){
-        public void run(){
-          Map listeners = new HashMap();
-          listeners.put("gate.event.ProgressListener", MainFrame.this);
-          listeners.put("gate.event.StatusListener", MainFrame.this);
-          CreoleRegister reg = Gate.getCreoleRegister();
-          FeatureMap params = null;
-          gate.gui.NewResourceDialog resourceDialog = null;
-          try{
-            // Create a serial analyser
-            SerialAnalyserController sac = (SerialAnalyserController)
-                Factory.createResource("gate.creole.SerialAnalyserController");
-            // Load each PR as defined in gate.creole.AnnieConstants.PR_NAMES
-            for(int i=0; i<gate.creole.AnnieConstants.PR_NAMES.length; i++){
-              ResourceData resData = (ResourceData)reg.get(
-                                        gate.creole.AnnieConstants.PR_NAMES[i]);
-              // If resData is null it simply let the user know and tries to
-              // load other resources
-              if (resData != null){
-                resourceDialog = new NewResourceDialog(
-                    MainFrame.this, "Resource parameters", true );
-
-                // If show returns true, it means that the user presses Ok
-                if (resourceDialog.show(resData,"Parameters for the new "
-                      + resData.getName())){
-                  params = resourceDialog.getSelectedParameters();
-                  // If for some strange reason the selected user params are
-                  // null it will try to load the resource with the default
-                  // params and the user will be notified.
-                  if (params == null){
-                    params = Factory.newFeatureMap();
-                    Out.prln("The selected params were null and the system"+
-                    " loaded the resource with its default params !");
-                  }// End if
-                  ProcessingResource pr = (ProcessingResource)
-                                                        Factory.createResource(
-                                         gate.creole.AnnieConstants.PR_NAMES[i],
-                                         params,
-                                         listeners);
-                  // Add the PR to the sac
-                  sac.add(pr);
-                }// End if
-              }else{
-                Err.prln(gate.creole.AnnieConstants.PR_NAMES[i] +
-                                              " not found in Creole register");
-              }// End if
-            }// End for
-          }catch(gate.creole.ResourceInstantiationException ex){
-            ex.printStackTrace(Err.getPrintWriter());
-          }// End try
-        }// run()
-      };// End Runnable
-      Thread thread = new Thread(runnable, "");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
+      //Load ANNIE without defaults
+      CreoleRegister reg = Gate.getCreoleRegister();
+      // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
+      for(int i = 0; i < PR_NAMES.length; i++){
+        ResourceData resData = (ResourceData)reg.get(PR_NAMES[i]);
+        if (resData != null){
+          NewResourceDialog resourceDialog = new NewResourceDialog(
+              MainFrame.this, "Resource parameters", true );
+          resourceDialog.setTitle(
+                            "Parameters for the new " + resData.getName());
+          resourceDialog.show(resData);
+        }else{
+          Err.prln(PR_NAMES[i] + " not found in Creole register");
+        }// End if
+      }// End for
+      try{
+        // Create an application at the end.
+        Factory.createResource("gate.creole.SerialAnalyserController");
+      }catch(gate.creole.ResourceInstantiationException ex){
+        ex.printStackTrace(Err.getPrintWriter());
+      }// End try
     }// actionPerformed();
   }//class LoadANNIEWithoutDefaultsAction
 
