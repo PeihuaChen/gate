@@ -26,7 +26,9 @@ Priority: 100
  {Organization}|
  {Address}|
  {Money} |
- {Percent}
+ {Percent}|
+ {Token.string == "Dear"}|
+ {JobTitle}
 ):known
 -->
 {}
@@ -40,6 +42,7 @@ Priority: 50
 :unknown
 -->
  :unknown.Unknown = {kind = "PN", rule = Unknown}
+
 
 
 
