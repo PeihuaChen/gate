@@ -12,7 +12,7 @@ import java.util.*;
 /** Slightly modified implementation of java.util.TreeMap in order to return the
   * closest neighbours in the case of a failed search.
   */
-public class RBTreeMap extends AbstractMap
+public class RBTreeMap extends TreeMap
 	             implements SortedMap, Cloneable, java.io.Serializable
 {
     /**
@@ -851,7 +851,7 @@ public class RBTreeMap extends AbstractMap
 		Object key = entry.getKey();
                 if (!inRange(key))
                     return false;
-                Entry node = getEntry(key);
+                RBTreeMap.Entry node = getEntry(key);
                 return node != null &&
                        valEquals(node.getValue(), entry.getValue());
 	    }
@@ -863,7 +863,7 @@ public class RBTreeMap extends AbstractMap
 		Object key = entry.getKey();
                 if (!inRange(key))
                     return false;
-                Entry node = getEntry(key);
+                RBTreeMap.Entry node = getEntry(key);
                 if (node!=null && valEquals(node.getValue(),entry.getValue())){
 		    deleteEntry(node);
 		    return true;
@@ -988,7 +988,7 @@ public class RBTreeMap extends AbstractMap
      * user (see Map.Entry).
      */
 
-    static class Entry implements Map.Entry {
+  static class Entry implements Map.Entry {
 	Object key;
 	Object value;
 	Entry left = null;
@@ -998,9 +998,9 @@ public class RBTreeMap extends AbstractMap
 
 	/**
 	 * Make a new cell with given key, value, and parent, and with <tt>null</tt>
-	 * child links, and BLACK color. 
+	 * child links, and BLACK color.
 	 */
-	Entry(Object key, Object value, Entry parent) { 
+	Entry(Object key, Object value, Entry parent) {
 	    this.key = key;
 	    this.value = value;
 	    this.parent = parent;
@@ -1011,8 +1011,8 @@ public class RBTreeMap extends AbstractMap
          *
 	 * @return the key.
 	 */
-	public Object getKey() { 
-	    return key; 
+	public Object getKey() {
+	    return key;
 	}
 
 	/**
