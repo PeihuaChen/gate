@@ -193,6 +193,12 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     try {
       IndexWord jwIndexWord = this.wnDictionary.lookupIndexWord(WNHelper.int2POS(pos), lemma);
 
+      //do we have a word with this POS?
+      if (null == jwIndexWord) {
+        //return dummy
+        return new ArrayList();
+      }
+
       IndexWord[] jwIndexWordArr = new IndexWord[1];
       jwIndexWordArr[0] = jwIndexWord;
 
