@@ -338,30 +338,6 @@ public class NewResourceDialog extends JDialog {
     }// public void setValueAt
   }///class FeaturesTableModel extends DefaultTableModel
 
-  class BooleanRenderer extends DefaultTableCellRenderer {
-    public Component getTableCellRendererComponent(JTable table,
-                                                   Object value,
-                                                   boolean isSelected,
-                                                   boolean hasFocus,
-                                                   int row,
-                                                   int column){
-      Component comp = super.getTableCellRendererComponent(table,
-                                                           "",
-                                                           isSelected, hasFocus,
-                                                           row, column);
-      if (comp instanceof JLabel){
-        JLabel label = (JLabel)comp;
-        if(((Boolean)value).booleanValue()){
-          label.setIcon(MainFrame.getIcon("tick.gif"));
-        } else {
-          label.setIcon(null);
-        }
-      }
-      return comp;
-    }//public Component getTableCellRendererComponent
-  }//class BooleanRenderer extends DefaultTableCellRenderer
-
-
   class ParameterDisjunctionRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
@@ -370,10 +346,22 @@ public class NewResourceDialog extends JDialog {
                                                    int row,
                                                    int column) {
       ParameterDisjunction pDisj = (ParameterDisjunction)value;
+      String text = pDisj.getName();
+      if(pDisj.size() > 1) text += " [more...]";
+      //prepare the renderer
       Component comp = super.getTableCellRendererComponent(table,
-                                                           pDisj.getName(),
+                                                           text,
                                                            isSelected, hasFocus,
                                                            row, column);
+      String type = pDisj.getType();
+      String iconName = "param.gif";
+      if(type.startsWith("gate.")){
+        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
+        if(rData != null) iconName = rData.getIcon();
+      }
+      setIcon(MainFrame.getIcon(iconName));
+      return this;
+/*
       if(comp instanceof JLabel){
         try{
           JLabel label = (JLabel)comp;
@@ -387,6 +375,7 @@ public class NewResourceDialog extends JDialog {
         }catch(Exception e){}
       }
       return comp;
+*/
     }// public Component getTableCellRendererComponent
   }//class ParameterDisjunctionRenderer
 

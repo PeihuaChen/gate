@@ -49,7 +49,12 @@ public class Splash extends JWindow {
    * Constructor from content.
    */
   public Splash(JComponent content) {
-    this(null, content);
+    super();
+    getContentPane().setLayout(new BorderLayout());
+    content.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+    getContentPane().add(content, BorderLayout.CENTER);
+    validate();
+    pack();
   }// public Splash(JComponent content)
 
   /**

@@ -103,6 +103,7 @@ public class ApplicationViewer extends AbstractVisualResource
     mainTreeTable.setIntercellSpacing(new Dimension(5,0));
     mainTreeTable.setDefaultRenderer(Object.class, new ParameterValueRenderer());
     mainTreeTable.setDefaultEditor(Object.class, new ParameterValueEditor());
+    mainTreeTable.setDefaultRenderer(Boolean.class, new BooleanRenderer());
 
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable.getTree());
     ToolTipManager.sharedInstance().registerComponent(mainTreeTable);
@@ -404,14 +405,15 @@ public class ApplicationViewer extends AbstractVisualResource
     }
 
     public int getColumnCount(){
-      return 3;
+      return 4;
     }//getColumnCount
 
     public String getColumnName(int column){
       switch(column){
         case 0: return "Name";
         case 1: return "Type";
-        case 2: return "Parameter Value";
+        case 2: return "Required";
+        case 3: return "Parameter Value";
         default: return "?";
       }
     }//public String getColumnName(int column)
@@ -419,20 +421,30 @@ public class ApplicationViewer extends AbstractVisualResource
     public Class getColumnClass(int column){
       switch(column){
         case 1: return String.class;
-        case 2: return Object.class;
+        case 2: return Boolean.class;
+        case 3: return Object.class;
         default: return Object.class;
       }
     }//public Class getColumnClass(int column)
 
     public Object getValueAt(Object node, int column){
       if(node == root){
-        return null;
+          switch(column){
+            case 0: return null;
+            case 1: return null;
+            case 2: return new Boolean(false);
+            case 3: return null;
+          }
       }else{
         node = ((DefaultMutableTreeNode)node).getUserObject();
         if (node instanceof ProcessingResource){
           ProcessingResource pr = (ProcessingResource)node;
-          if(column == 1) return getResourceName(pr);
-          else return null;
+          switch(column){
+            case 0: return null;
+            case 1: return getResourceName(pr);
+            case 2: return new Boolean(false);
+            case 3: return null;
+          }
         }else if (node instanceof ParameterDisjunction){
           ParameterDisjunction pd = (ParameterDisjunction)node;
           switch(column){
@@ -445,7 +457,9 @@ public class ApplicationViewer extends AbstractVisualResource
                 if(rData != null) paramType = rData.getName();
               }
               return paramType;
-            }case 2: return pd.getValue();
+            }
+            case 2: return pd.getRequired();
+            case 3: return pd.getValue();
             default: return null;
           }
         }
@@ -455,7 +469,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
     public boolean isCellEditable(Object node, int column){
       node = ((DefaultMutableTreeNode)node).getUserObject();
-      if(column == 2) return node instanceof ParameterDisjunction;
+      if(column == 3) return node instanceof ParameterDisjunction;
       if(column == 0){
         return node instanceof ParameterDisjunction &&
                ((ParameterDisjunction)node).size() > 1 ;
@@ -471,7 +485,7 @@ public class ApplicationViewer extends AbstractVisualResource
             ((ParameterDisjunction)node).
               setSelectedIndex(((Integer)aValue).intValue());
           }
-        }case 2:{
+        }case 3:{
           if(node instanceof ParameterDisjunction){
             ((ParameterDisjunction)node).setValue(aValue);
           }
@@ -544,7 +558,10 @@ public class ApplicationViewer extends AbstractVisualResource
         if(pd.getType().startsWith("gate.")){
           ResourceData rData = (ResourceData)
                                Gate.getCreoleRegister().get(pd.getType());
-          if(rData != null) tipText = rData.getComment();
+          if(rData != null){
+            tipText = rData.getComment();
+            iconName = rData.getIcon();
+          }
         }
       }
       //prepare the renderer
@@ -908,7 +925,6 @@ public class ApplicationViewer extends AbstractVisualResource
 
     int selectedIndex;
     List options;
-    boolean required;
     String typeName;
     String name;
     String[] names;
