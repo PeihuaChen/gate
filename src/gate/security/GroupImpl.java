@@ -90,7 +90,11 @@ public class GroupImpl
   /** --- */
   public List getUsers() {
 
-    return users;
+    /** NOTE that we're returning a copy of the actuall collection of users
+     *  so that someone would not accidentaly modify it */
+
+    Vector copy = new Vector(users.subList(0,users.size()-1));
+    return copy;
   }
 
 
@@ -304,6 +308,7 @@ public class GroupImpl
    *  */
   public boolean equals(Object obj)
   {
+System.out.println(">>>> " +obj);
     Assert.assert(obj instanceof Group);
 
     Group group2 = (Group)obj;
