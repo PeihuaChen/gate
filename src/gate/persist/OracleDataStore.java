@@ -2014,7 +2014,14 @@ public class OracleDataStore extends JDBCDataStore {
       _syncFeatures(doc);
     }
 
-    //5. [optional] sync Annotations
+    //5. [optional] delete from DB named sets that were removed from the document
+    Collection removedSets = ((EventAwareDocument)dbDoc).getRemovedAnnotationSets();
+    Collection addedSets = ((EventAwareDocument)dbDoc).getAddedAnnotationSets();
+    if (false == removedSets.isEmpty() || false == addedSets.isEmpty()) {
+      _syncAnnotationSets(doc,removedSets,addedSets);
+    }
+
+    //6. [optional] sync Annotations
     _syncAnnotations(doc);
   }
 
@@ -2320,6 +2327,57 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(pstmt);
       DBHelper.cleanup(cstmt);
     }
+  }
+
+  private void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertNotNull(doc.getLRPersistenceId());
+    Assert.assertEquals(((DatabaseDataStore)doc.getDataStore()).getDatabaseID(),
+                      this.getDatabaseID());
+    Assert.assertNotNull(removedSets);
+    Assert.assertNotNull(addedSets);
+
+    Long lrID = (Long)doc.getLRPersistenceId();
+
+    //1. delete from DB removed a-sets
+    CallableStatement cstmt = null;
+
+    try {
+      cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+
+                                                ".persist.delete_annotation_set(?,?) }");
+
+      Iterator it = removedSets.iterator();
+      while (it.hasNext()) {
+        String setName = (String)it.next();
+
+        cstmt.setLong(1,lrID.longValue());
+        cstmt.setString(2,setName);
+        cstmt.execute();
+      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't remove annotation set from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+    }
+
+    //1. create in DB new a-sets
+    Iterator it = addedSets.iterator();
+/*    while (it.hasNext()) {
+      String setName = (String)it.next();
+      AnnotationSet aset = (AnnotationSet)doc.getNamedAnnotationSets().get(setName);
+
+      Assert.assertNotNull(aset);
+      Assert.assertTrue(aset instanceof DatabaseAnnotationSetImpl);
+
+      createAnnotationSet(lrID,aset);
+    }
+*/
   }
 
 
