@@ -36,7 +36,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
                                                 CreoleListener {
 
   /** --- */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /** jdbc url for the database */
   private   String      dbURL;
@@ -402,6 +402,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     finally {
       //problems?
       if (transFailed) {
+System.out.println("trans failed ...rollback");
         rollbackTrans();
 /*        try {
           this.jdbcConn.rollback();
@@ -435,13 +436,6 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     return result;
   }
 
-  /**
-   * Get a resource from the persistent store.
-   * <B>Don't use this method - use Factory.createResource with
-   * DataStore and DataStoreInstanceId parameters set instead.</B>
-   */
-  public abstract LanguageResource getLr(String lrClassName, Object lrPersistenceId)
-  throws PersistenceException,SecurityException;
 
   /** Get a list of the types of LR that are present in the data store. */
   public List getLrTypes() throws PersistenceException {
@@ -1463,6 +1457,352 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
   /** helper for sync() - never call directly */
   protected abstract void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException;
+
+  /**
+   * Get a resource from the persistent store.
+   * <B>Don't use this method - use Factory.createResource with
+   * DataStore and DataStoreInstanceId parameters set instead.</B>
+   */
+  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
+  throws PersistenceException,SecurityException {
+
+    LanguageResource result = null;
+
+    //0. preconditions
+    Assert.assertNotNull(lrPersistenceId);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canReadLR(lrPersistenceId)) {
+      throw new SecurityException("insufficient privileges");
+    }
+
+    //3. get resource from DB
+    if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
+      result = readDocument(lrPersistenceId);
+      Assert.assertTrue(result instanceof DatabaseDocumentImpl);
+    }
+    else if (lrClassName.equals(DBHelper.CORPUS_CLASS)) {
+      result = readCorpus(lrPersistenceId);
+      Assert.assertTrue(result instanceof DatabaseCorpusImpl);
+    }
+    else {
+      throw new IllegalArgumentException("resource class should be either Document or Corpus");
+    }
+
+    //4. postconditions
+    Assert.assertNotNull(result.getDataStore());
+    Assert.assertTrue(result.getDataStore() instanceof DatabaseDataStore);
+    Assert.assertNotNull(result.getLRPersistenceId());
+
+    //5. register the read doc as listener for sync events
+    addDatastoreListener((DatastoreListener)result);
+
+    //6. add the resource to the list of dependent resources - i.e. the ones that the
+    //data store should take care upon closing [and call sync()]
+    this.dependentResources.add(result);
+
+    //7. done
+    return result;
+  }
+
+  /** helper method for getLR - reads LR of type Document */
+  private DatabaseDocumentImpl readDocument(Object lrPersistenceId)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrPersistenceId);
+
+    if (false == lrPersistenceId instanceof Long) {
+      throw new IllegalArgumentException();
+    }
+
+    // 1. dummy document to be initialized
+    DatabaseDocumentImpl result = new DatabaseDocumentImpl(this.jdbcConn);
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    //3. read from DB
+    try {
+      String sql = " select lr_name, " +
+                   "        lrtp_type, " +
+                   "        lr_id, " +
+                   "        lr_parent_id, " +
+                   "        doc_id, " +
+                   "        doc_url, " +
+                   "        doc_start, " +
+                   "        doc_end, " +
+                   "        doc_is_markup_aware " +
+                   " from  "+this.dbSchema+"v_document " +
+                   " where  lr_id = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lrPersistenceId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        //ooops mo data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+
+      //4. fill data
+
+      //4.0 name
+      String lrName = rs.getString("lr_name");
+      Assert.assertNotNull(lrName);
+      result.setName(lrName);
+
+      //4.1 parent
+      Long parentID = null;
+      long parent_id = rs.getLong("lr_parent_id");
+      if (false == rs.wasNull()) {
+        parentID = new Long(parent_id);
+
+        //read parent resource
+        LanguageResource parentLR = this.getLr(DBHelper.DOCUMENT_CLASS,parentID);
+        Assert.assertNotNull(parentLR);
+        Assert.assertTrue(parentLR instanceof DatabaseDocumentImpl);
+
+        result.setParent(parentLR);
+      }
+
+
+      //4.2. markup aware
+      if (this.dbType == DBHelper.ORACLE_DB) {
+        long markup = rs.getLong("doc_is_markup_aware");
+        Assert.assertTrue(markup == DBHelper.FALSE || markup == DBHelper.TRUE);
+        if (markup == DBHelper.FALSE) {
+          result.setMarkupAware(Boolean.FALSE);
+        }
+        else {
+          result.setMarkupAware(Boolean.TRUE);
+
+        }
+      }
+      else if (this.dbType == DBHelper.POSTGRES_DB) {
+        boolean markup = rs.getBoolean("doc_is_markup_aware");
+        result.setMarkupAware(new Boolean(markup));
+      }
+      else {
+        throw new IllegalArgumentException();
+      }
+
+
+      //4.3 datastore
+      result.setDataStore(this);
+
+      //4.4. persist ID
+      Long persistID = new Long(rs.getLong("lr_id"));
+      result.setLRPersistenceId(persistID);
+
+      //4.5  source url
+      String url = rs.getString("doc_url");
+      result.setSourceUrl(new URL(url));
+
+      //4.6. start offset
+      Long start = null;
+      long longVal = rs.getLong("doc_start");
+      //null?
+      //if NULL is stored in the DB, Oracle returns 0 which is not what we want
+      if (false == rs.wasNull()) {
+        start = new Long(longVal);
+      }
+      result.setSourceUrlStartOffset(start);
+//      initData.put("DOC_SOURCE_URL_START",start);
+
+      //4.7. end offset
+      Long end = null;
+      longVal = rs.getLong("doc_end");
+      //null?
+      //if NULL is stored in the DB, Oracle returns 0 which is not what we want
+      if (false == rs.wasNull()) {
+        end = new Long(longVal);
+      }
+      result.setSourceUrlEndOffset(end);
+//      initData.put("DOC_SOURCE_URL_END",end);
+
+      //4.8 features
+      FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_DOCUMENT);
+      result.setFeatures(features);
+      //initData.put("DOC_FEATURES",features);
+
+      //4.9 set the nextAnnotationID correctly
+      long doc_id = rs.getLong("doc_id");
+
+      //cleanup
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+      sql = " select  max(ann_local_id),'ann_id'" +
+            " from "+this.dbSchema+"t_annotation " +
+            " where ann_doc_id = ?" +
+            " union " +
+            " select max(node_local_id),'node_id' " +
+            " from "+this.dbSchema+"t_node " +
+            " where node_doc_id = ?";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,doc_id);
+      pstmt.setLong(2,doc_id);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      int maxAnnID = 0 , maxNodeID = 0;
+      //ann id
+      if (false == rs.next()) {
+        //ooops no data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+      if (rs.getString(2).equals("ann_id"))
+        maxAnnID = rs.getInt(1);
+      else
+        maxNodeID = rs.getInt(1);
+
+      if (false == rs.next()) {
+        //ooops no data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+      if (rs.getString(2).equals("node_id"))
+        maxNodeID = rs.getInt(1);
+      else
+        maxAnnID = rs.getInt(1);
+
+      result.setNextNodeId(maxNodeID+1);
+//      initData.put("DOC_NEXT_NODE_ID",new Integer(maxNodeID+1));
+      result.setNextAnnotationId(maxAnnID+1);
+//      initData.put("DOC_NEXT_ANN_ID",new Integer(maxAnnID+1));
+
+
+//      params.put("initData__$$__", initData);
+//      try {
+        //here we create the persistent LR via Factory, so it's registered
+        //in GATE
+//        result = (DatabaseDocumentImpl)Factory.createResource("gate.corpora.DatabaseDocumentImpl", params);
+//      }
+//      catch (gate.creole.ResourceInstantiationException ex) {
+//        throw new GateRuntimeException(ex.getMessage());
+//      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(Exception e) {
+      throw new PersistenceException(e);
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+    return result;
+  }
+
+
+  /**
+   *  helper method for getLR - reads LR of type Corpus
+   */
+  private DatabaseCorpusImpl readCorpus(Object lrPersistenceId)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrPersistenceId);
+
+    if (false == lrPersistenceId instanceof Long) {
+      throw new IllegalArgumentException();
+    }
+
+    //3. read from DB
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    DatabaseCorpusImpl result = null;
+
+    try {
+      String sql = " select lr_name " +
+                   " from  "+this.dbSchema+"t_lang_resource " +
+                   " where  lr_id = ? ";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lrPersistenceId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        //ooops mo data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+
+      //4. fill data
+
+      //4.1 name
+      String lrName = rs.getString("lr_name");
+      Assert.assertNotNull(lrName);
+
+      //4.8 features
+      FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_CORPUS);
+
+      //4.9 cleanup
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+      sql = " select lr_id ," +
+            "         lr_name " +
+            " from "+this.dbSchema+"t_document        doc, " +
+            "      "+this.dbSchema+"t_lang_resource   lr, " +
+            "      "+this.dbSchema+"t_corpus_document corpdoc, " +
+            "      "+this.dbSchema+"t_corpus          corp " +
+            " where lr.lr_id = doc.doc_lr_id " +
+            "       and doc.doc_id = corpdoc.cd_doc_id " +
+            "       and corpdoc.cd_corp_id = corp.corp_id " +
+            "       and corp_lr_id = ? ";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lrPersistenceId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      Vector documentData = new Vector();
+      while (rs.next()) {
+        Long docLRID = new Long(rs.getLong("lr_id"));
+        String docName = rs.getString("lr_name");
+        documentData.add(new DocumentData(docName, docLRID));
+      }
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+      result = new DatabaseCorpusImpl(lrName,
+                                      this,
+                                      (Long)lrPersistenceId,
+                                      features,
+                                      documentData);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(Exception e) {
+      throw new PersistenceException(e);
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+    return result;
+  }
+
+  /**
+   *  reads the features of an entity
+   *  entities are of type LR or Annotation
+   */
+  protected abstract FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException;
 
 }
