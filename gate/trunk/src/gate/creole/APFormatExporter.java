@@ -71,7 +71,9 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       exportFilePathStr = new String(document.getSourceUrl().getFile() +
                                                                   ".apf.xml");
     else
-      exportFilePathStr = exportFilePath.getPath()+ "/"+docId + ".apf.xml";
+      exportFilePathStr = exportFilePath.getPath()+ "/"
+          + gate.util.Files.getLastPathComponent(
+              document.getSourceUrl().getFile()) + ".apf.xml";
 
     if (DEBUG)
       Out.prln("Export file path = "+ exportFilePathStr);
