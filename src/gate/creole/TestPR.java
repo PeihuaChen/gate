@@ -35,64 +35,15 @@ public class TestPR extends TestCase
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  protected DefaultTokeniser tokeniser = null;
-  protected DefaultGazetteer gaz = null;
-  protected SentenceSplitter splitter = null;
-  protected POSTagger tagger = null;
-  protected ANNIETransducer transducer = null;
-  protected OrthoMatcher orthomatcher = null;
-
-  protected Document doc1 = null;
-  protected Document doc2 = null;
-  protected Document doc3 = null;
+  protected static Document doc1;
+  protected static Document doc2;
+  protected static Document doc3;
 
   /** Construction */
   public TestPR(String name) { super(name); }
 
   /** Fixture set up */
   public void setUp() throws Exception {
-
-    //create a default tokeniser
-    FeatureMap params = null;
-
-    if (tokeniser == null) {
-      params = Factory.newFeatureMap();
-      tokeniser = (DefaultTokeniser) Factory.createResource(
-                      "gate.creole.tokeniser.DefaultTokeniser", params);
-    }
-
-    //create a default gazetteer
-    if (gaz == null) {
-      params = Factory.newFeatureMap();
-      gaz = (DefaultGazetteer) Factory.createResource(
-                            "gate.creole.gazetteer.DefaultGazetteer", params);
-    }
-
-    //create a splitter
-    if (splitter == null) {
-      params = Factory.newFeatureMap();
-      splitter = (SentenceSplitter) Factory.createResource(
-                            "gate.creole.splitter.SentenceSplitter", params);
-    }
-
-    //create a tagger
-    if (tagger == null) {
-      params = Factory.newFeatureMap();
-      tagger = (POSTagger) Factory.createResource(
-                            "gate.creole.POSTagger", params);
-    }
-    //create a grammar
-    if (transducer == null) {
-      params = Factory.newFeatureMap();
-      transducer = (ANNIETransducer) Factory.createResource(
-                            "gate.creole.ANNIETransducer", params);
-    }
-    //create a orthomatcher
-    if (orthomatcher == null) {
-      params = Factory.newFeatureMap();
-      orthomatcher = (OrthoMatcher) Factory.createResource(
-                            "gate.creole.orthomatcher.OrthoMatcher", params);
-    }
     //get 3 documents
     if (doc1 == null)
       doc1 = Factory.newDocument(
@@ -120,6 +71,10 @@ public class TestPR extends TestCase
   } // tearDown
 
   public void testTokenizer() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
+                    "gate.creole.tokeniser.DefaultTokeniser", params);
+
 
     //run the tokeniser for doc1
     tokeniser.setDocument(doc1);
@@ -144,9 +99,14 @@ public class TestPR extends TestCase
       " Token annotations, instead of the expected 2812.",
       doc3.getAnnotations().size()== 2812);
 
+    Factory.deleteResource(tokeniser);
   }// testTokenizer
 
   public void testGazetteer() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+    DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
+                          "gate.creole.gazetteer.DefaultGazetteer", params);
+
     //run gazetteer for doc1
     gaz.setDocument(doc1);
     gaz.execute();
@@ -170,9 +130,14 @@ public class TestPR extends TestCase
       doc3.getAnnotations().get("Lookup").size() +
       " Lookup annotations, instead of the expected 112.",
       doc3.getAnnotations().get("Lookup").size()== 112);
+    Factory.deleteResource(gaz);
   }//testGazetteer
 
   public void testSplitter() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+    SentenceSplitter splitter = (SentenceSplitter) Factory.createResource(
+                          "gate.creole.splitter.SentenceSplitter", params);
+
     //run splitter for doc1
     splitter.setDocument(doc1);
     splitter.execute();
@@ -211,9 +176,15 @@ public class TestPR extends TestCase
       doc3.getAnnotations().get("Split").size() +
       " Split annotations, instead of the expected 109.",
       doc3.getAnnotations().get("Split").size()== 109);
+    Factory.deleteResource(splitter);
   }//testSplitter
 
   public void testTagger() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+    POSTagger tagger = (POSTagger) Factory.createResource(
+                          "gate.creole.POSTagger", params);
+
+
     //run the tagger for doc1
     tagger.setDocument(doc1);
     tagger.execute();
@@ -244,9 +215,15 @@ public class TestPR extends TestCase
     assert("Found in in-outlook-09-aug-2001.html "+ annots.size() +
       " Token annotations with category feature, instead of the expected 1376.",
       annots.size() == 1376);
+    Factory.deleteResource(tagger);
   }//testTagger()
 
   public void testTransducer() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+    ANNIETransducer transducer = (ANNIETransducer) Factory.createResource(
+                          "gate.creole.ANNIETransducer", params);
+
+
     //run the transducer for doc1
     transducer.setDocument(doc1);
     transducer.execute();
@@ -318,9 +295,17 @@ public class TestPR extends TestCase
       doc3.getAnnotations().get("Money").size() +
       " Money annotations, instead of the expected 4",
       doc3.getAnnotations().get("Money").size()== 4);
+
+    Factory.deleteResource(transducer);
   }//testTransducer
 
   public void testOrthomatcher() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+
+    OrthoMatcher orthomatcher = (OrthoMatcher) Factory.createResource(
+                          "gate.creole.orthomatcher.OrthoMatcher", params);
+
+
     // run the orthomatcher for doc1
     orthomatcher.setDocument(doc1);
     orthomatcher.execute();
@@ -350,6 +335,7 @@ public class TestPR extends TestCase
     assert("Found in in-outlook-09-aug-2001.html "+ annots.size() +
       " annotations with matches feature, instead of the expected 22.",
       annots.size() == 22);
+    Factory.deleteResource(orthomatcher);
   }//testOrthomatcher
 
   /** A test for comparing the annotation sets*/
@@ -437,7 +423,7 @@ public class TestPR extends TestCase
       testPR.setUp();
       testPR.testTokenizer();
       testPR.testGazetteer();
-      testPR.testSplitter();
+//      testPR.testSplitter();
       testPR.testTagger();
       testPR.testTransducer();
       testPR.testOrthomatcher();
