@@ -170,8 +170,12 @@ public class ShellSlacFrame extends MainFrame {
   /** Here default ANNIE is created. Could be changed. */
   private void createDefaultApplication() {
     // Loads ANNIE with defaults
-    AbstractAction action = new LoadANNIEWithDefaultsAction();
-    action.actionPerformed(new ActionEvent(this, 1, "Load ANNIE"));
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run(){
+        AbstractAction action = new LoadANNIEWithDefaultsAction();
+        action.actionPerformed(new ActionEvent(this, 1, "Load ANNIE"));
+      }
+    });
   } // createDefaultApplication
 
   /** Create corpus for application */
