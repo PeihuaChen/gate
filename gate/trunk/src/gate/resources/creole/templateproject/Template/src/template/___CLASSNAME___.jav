@@ -15,9 +15,9 @@
  *  $Id$
  */
 
-package template;
+package ___PACKAGE___;
 
-import ___PACKAGE___.*;
+import gate.*;
 
 /** This class creates the resource Template*/
 public class ___CLASSNAME___ {
