@@ -49,12 +49,12 @@ extends AbstractProcessingResource implements Controller
     while(iter.hasNext()) {
       ProcessingResource pr = (ProcessingResource) iter.next();
 
-      //reg.parameterise(pr, parameterListIdMap.get(pr));
+//reg.parameterise(pr, parameterListIdMap.get(pr));
       pr.run();
       try {
         pr.check();
       } catch(ExecutionException e) {
-        runtimeException = e;
+        executionException = e;
         return;
       }
     } // for each PR in the resourceList

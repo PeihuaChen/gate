@@ -36,7 +36,7 @@ extends AbstractFeatureBearer implements ProcessingResource
    *  exception.
    */
   public void run() {
-    runtimeException = new ExecutionException(
+    executionException = new ExecutionException(
       "Resource " + getClass() + " hasn't overriden the run() method"
     );
     return;
@@ -46,14 +46,14 @@ extends AbstractFeatureBearer implements ProcessingResource
     * invoked. If there is an exception stored it is cleared by this call.
     */
   public void check() throws ExecutionException {
-    if(runtimeException != null) {
-      ExecutionException e = runtimeException;
-      runtimeException = null;
+    if(executionException != null) {
+      ExecutionException e = executionException;
+      executionException = null;
       throw e;
     }
   } // check()
 
   /** Any exception caught during run() invocations are stored here. */
-  protected ExecutionException runtimeException = null;
+  protected ExecutionException executionException  = null;
 
 } // class AbstractProcessingResource
