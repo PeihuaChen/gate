@@ -24,6 +24,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.tree.*;
+import java.text.*;
 import java.awt.Component;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -35,7 +36,8 @@ import java.io.IOException;
 import java.net.URL;
 import gate.event.*;
 
-public class ApplicationViewer extends AbstractVisualResource implements CreoleListener {
+public class ApplicationViewer extends AbstractVisualResource
+                               implements CreoleListener {
 
   public ApplicationViewer() {
   }
@@ -703,7 +705,10 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
                                 mainTreeTable.getEditingRow(),
                                 mainTreeTable.getEditingColumn())));
           }
-
+          long startTime = System.currentTimeMillis();
+          fireStatusChanged("Running " +
+                            controller.getFeatures().get("gate.NAME"));
+          fireProgressChanged(0);
           MainFrame.getInstance().showWaitDialog();
           Iterator prsIter = controller.iterator();
           while(prsIter.hasNext()){
@@ -751,7 +756,30 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
               return;
             }
           }
-          controller.run();
+          //run the thing
+          prsIter = controller.iterator();
+          int i = 0;
+          while(prsIter.hasNext()){
+            ProcessingResource pr = (ProcessingResource)prsIter.next();
+            fireStatusChanged("Running " + pr.getFeatures().get("gate.NAME"));
+            pr.run();
+            try {
+              pr.check();
+            } catch(ExecutionException ee) {
+              JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                            "Execution error:\n " +
+                                            ee.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+            }
+            i++;
+            fireProgressChanged(i / controller.size());
+          }
+          long endTime = System.currentTimeMillis();
+          fireProcessFinished();
+          fireStatusChanged(controller.getFeatures().get("gate.NAME") +
+                            " run in " +
+                            NumberFormat.getInstance().format(
+                            (double)(endTime - startTime) / 1000) + " seconds");
           MainFrame.getInstance().hideWaitDialog();
         }
       };
@@ -1024,6 +1052,8 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
    */
   Map addActionForPR;
   Map removeActionForPR;
+  private transient Vector statusListeners;
+  private transient Vector progressListeners;
   public void resourceLoaded(CreoleEvent e) {
     if(e.getResource() instanceof ProcessingResource){
       updateActions();
@@ -1047,6 +1077,61 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
   public void datastoreCreated(CreoleEvent e) {
   }
   public void datastoreClosed(CreoleEvent e) {
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
   }
 
 /*

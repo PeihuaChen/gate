@@ -190,14 +190,13 @@ public class MainFrame extends JFrame
     this.getContentPane().setLayout(new BorderLayout());
     this.setSize(new Dimension(800, 600));
     this.setTitle(Main.name + " " + Main.version);
-/*
     try{
       this.setIconImage(Toolkit.getDefaultToolkit().getImage(
             new URL("gate:/img/gateIcon.gif")));
     }catch(MalformedURLException mue){
       mue.printStackTrace(Err.getPrintWriter());
     }
-*/
+
     resourcesTree = new JTree(resourcesTreeModel);
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
     resourcesTree.setRowHeight(0);
@@ -244,15 +243,18 @@ public class MainFrame extends JFrame
     southBox = Box.createHorizontalBox();
     statusBar = new JLabel();
     progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
-    progressBar.setStringPainted(true);
-    Dimension dim = new Dimension(300, progressBar.getPreferredSize().height);
+    progressBar.setBorderPainted(false);
     progressBar.setStringPainted(false);
+    progressBar.setOrientation(JProgressBar.HORIZONTAL);
+    Dimension dim = new Dimension(300, progressBar.getPreferredSize().height);
     progressBar.setMaximumSize(dim);
     progressBar.setMinimumSize(dim);
     progressBar.setPreferredSize(dim);
+    Box tempBox = Box.createHorizontalBox();
     southBox.add(statusBar);
     southBox.add(Box.createHorizontalGlue());
     southBox.add(progressBar);
+
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
 
     //MENUS
@@ -533,7 +535,7 @@ public class MainFrame extends JFrame
   }
 
   public void progressChanged(int i) {
-    progressBar.setStringPainted(true);
+    //progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
     if(oldValue != i){
       SwingUtilities.invokeLater(new ProgressBarUpdater(i));
@@ -545,7 +547,7 @@ public class MainFrame extends JFrame
    *
    */
   public void processFinished() {
-    progressBar.setStringPainted(false);
+    //progressBar.setStringPainted(false);
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
   }
 
@@ -1261,9 +1263,9 @@ public class MainFrame extends JFrame
         //not one of the default root nodes
         value = ((DefaultMutableTreeNode)value).getUserObject();
         if(value instanceof ResourceHandle) {
-            setIcon(((ResourceHandle)value).getIcon());
-            setText(((ResourceHandle)value).getTitle());
-            setToolTipText(((ResourceHandle)value).getTooltipText());
+          setIcon(((ResourceHandle)value).getIcon());
+          setText(((ResourceHandle)value).getTitle());
+          setToolTipText(((ResourceHandle)value).getTooltipText());
         }
       }
       return this;
@@ -1427,7 +1429,6 @@ public class MainFrame extends JFrame
     }
     public void run(){
       progressBar.setValue(value);
-//      progressBar.paintImmediately(progressBar.getBounds());
     }
 
     int value;
