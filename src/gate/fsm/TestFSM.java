@@ -36,7 +36,7 @@ public class TestFSM extends TestCase {
   /** Construction */
   public TestFSM(String name) { super(name); }
 
-  public void setUp() throws JapeException, IOException {
+  public void setUp() throws JapeException, IOException, GateException {
 //    String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
 //    String japeFileName = "jape/TestABC.jape";
 /*    String japeFileName = "jape/combined/brian-soc-loc1.jape";

@@ -261,7 +261,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
 
   }
 
-  public void run(){
+  public void run() {
     startCorpusLoad = 0;
     startCorpusTokenization = 0;
     startLookupLoad = 0;
@@ -360,7 +360,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
 
 
     //do the jape stuff
-    Gate.init();
+    try { Gate.init(); } catch(Exception e) { System.err.println(e); }
     progressBar.setValue(0);
     startJapeFileOpen = System.currentTimeMillis();
     logTextArea.append("gazeteer lookup time: " +

@@ -20,4 +20,8 @@ public class GateException extends Exception {
   public GateException(String s) {
     super(s);
   }
+
+  public GateException(Exception e) {
+    super(e.toString());
+  }
 } // GateException
