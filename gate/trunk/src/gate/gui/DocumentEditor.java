@@ -90,6 +90,7 @@ public class DocumentEditor extends AbstractVisualResource{
   private boolean tableVisible;
   private boolean textVisible;
   private boolean filtersVisible;
+  private boolean editable;
 
   public DocumentEditor() {
     initLocalData();
@@ -327,6 +328,8 @@ public class DocumentEditor extends AbstractVisualResource{
             popup.show(textPane, e.getPoint().x, e.getPoint().y);
           }else{
             //there is selected text -> create a new annotation
+            startNewAnnotation(textPane.getSelectionStart(),
+                               textPane.getSelectionEnd());
           }
         }
       }
@@ -622,6 +625,10 @@ System.out.println("Annotation added!");
     }
   }
 
+  protected void startNewAnnotation(int start, int end){
+    //if(
+  }
+
   public TypeData getTypeData(String setName, String type){
     Map setMap = (Map)typeDataMap.get(setName);
     if(setMap != null) return (TypeData)setMap.get(type);
@@ -800,6 +807,12 @@ System.out.println("Annotation added!");
               annotationsTable.getCellRect(position, 0, true));
       }
     }
+  }
+  public void setEditable(boolean newEditable) {
+    editable = newEditable;
+  }
+  public boolean isEditable() {
+    return editable;
   }
   //inner classes
   /**
@@ -1079,6 +1092,7 @@ System.out.println("Annotation added!");
         style = textPane.addStyle(set, textPane.getStyle("default"));
       }else{
         style = textPane.addStyle(set + "." + type, textPane.getStyle(set));
+        StyleConstants.setForeground(style, colGenerator.getNextColor());
         //add an intermediary style that will be used for the actual display
         textPane.addStyle("_" + set + "." + type, style);
         //add the style that will be used for the actual display
