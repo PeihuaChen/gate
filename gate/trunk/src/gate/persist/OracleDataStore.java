@@ -81,8 +81,9 @@ public class OracleDataStore extends JDBCDataStore {
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call gate.has_access(?,?,?,?)} ");
-      //numbers generated from Oracle sequences are BIGINT
+      stmt = this.jdbcConn.prepareCall("{ call security.has_access(?,?,?,?)} ");
+//      stmt.setLong(1,);
+
       stmt.registerOutParameter(4,java.sql.Types.INTEGER);
       stmt.execute();
       int result = stmt.getInt(4);
