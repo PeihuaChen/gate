@@ -2754,6 +2754,13 @@ Out.prln("NULL size");
                      new SetRemovedOperation(e.getAnnotationSetName()));
     }//public void annotationSetRemoved(gate.event.DocumentEvent e)
 
+    /**Called when the content of the document has changed through an edit 
+     * operation.
+     */
+    public void contentEdited(DocumentEvent e){
+      //ignore
+    }
+
     public void annotationAdded(AnnotationSetEvent e) {
       AnnotationSet set = (AnnotationSet)e.getSource();
       String setName = set.getName();
