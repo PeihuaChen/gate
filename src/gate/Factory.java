@@ -170,7 +170,8 @@ public abstract class Factory {
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln(resClass.getName() + " is an LR");
 
-      DataStore dataStore = (DataStore) parameterValues.get("DataStore");
+      DataStore dataStore = (DataStore)
+                          parameterValues.get(DataStore.DATASTORE_FEATURE_NAME);
       if(dataStore != null) {
         if(dataStore instanceof SerialDataStore) {
           // SDS doesn't need a wrapper class; just check for serialisability
@@ -191,7 +192,7 @@ public abstract class Factory {
         }
 
         // get the datastore instance id and retrieve the resource
-        String instanceId = (String) parameterValues.get("DataStoreInstanceId");
+        Object instanceId = parameterValues.get(DataStore.LR_ID_FEATURE_NAME);
         if(instanceId == null)
           throw new
             ResourceInstantiationException("No instance id for " + resClass);
