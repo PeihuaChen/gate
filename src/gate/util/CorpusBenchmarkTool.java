@@ -137,7 +137,6 @@ public class CorpusBenchmarkTool {
       return;
     //first set the current directory to be the given one
     currDir = dir;
-    Out.prln("Processing directory: " + currDir + "<P>");
 
     File processedDir = null;
     File cleanDir = null;
@@ -146,6 +145,7 @@ public class CorpusBenchmarkTool {
 
     ArrayList subDirs = new ArrayList();
     File[] dirArray = currDir.listFiles();
+    if(dirArray == null) return;
     for (int i = 0; i < dirArray.length; i++) {
       if (dirArray[i].isFile() || dirArray[i].getName().equals(CVS_DIR_NAME))
         continue;
@@ -160,6 +160,9 @@ public class CorpusBenchmarkTool {
       else
         subDirs.add(dirArray[i]);
     }
+
+    if(cleanDir == null) return;
+    Out.prln("Processing directory: " + currDir + "<P>");
 
     if (this.isGenerateMode)
       generateCorpus(cleanDir, processedDir);
@@ -250,13 +253,13 @@ public class CorpusBenchmarkTool {
     Out.prln("<BR>Overall word count: " + corpusWordCount);
 
     if(hasProcessed) {
-      Out.prln("<BR>Old Processed: ");
-      Out.prln("Overall average precision: "
+      Out.prln("<P>Old Processed: ");
+      Out.prln("<BR>Overall average precision: "
                + corpusTool.getPrecisionAverageProc());
-      Out.prln("Overall average recall: "
+      Out.prln("<BR>Overall average recall: "
                + corpusTool.getRecallAverageProc());
     }
-    Out.prln("Finished! <P>");
+    Out.prln("<BR>Finished! <P>");
     Out.prln("</BODY>");
     Out.prln("</HTML>");
 
