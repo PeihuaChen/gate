@@ -43,9 +43,12 @@ SUBS=$*
 # where to find Java
 if [ $SYS = cygwin ]
 then
-  JAVABASE=//w/jdk/jdk1.2
-  JAVABASE1='w:\jdk\jdk1.2'
-  JAVABASE2='w:\\jdk\\jdk1.2'
+  JAVABASE=//v/apps/jdk/jdk1.3
+  JAVABASE1='v:\apps\jdk\jdk1.3'
+  JAVABASE2='v:\\apps\\jdk\\jdk1.3'
+#  JAVABASE=//w/jdk/jdk1.2
+#  JAVABASE1='w:\jdk\jdk1.2'
+#  JAVABASE2='w:\\jdk\\jdk1.2'
 #  JAVABASE=//w/apps/jdk1.2.2
 #  JAVABASE1='w:\apps\jdk1.2.2'
 elif [ $SYS=unix ] 
