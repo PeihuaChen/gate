@@ -13,18 +13,17 @@
  */
 package gate.util;
 
-import java.util.Comparator;
 import gate.*;
+import java.util.Comparator;
 
 /**
- * Compares annotations by start offset
+ * Compares {@link NameBearer}s by name (string comparation)
  */
-public class OffsetComparator implements Comparator {
+public class NameComparator implements Comparator {
 
   public int compare(Object o1, Object o2){
-    Annotation a1 = (Annotation)o1;
-    Annotation a2 = (Annotation)o2;
-    return a1.getStartNode().getOffset().compareTo(
-            a2.getStartNode().getOffset());
+    NameBearer nb1 = (NameBearer)o1;
+    NameBearer nb2 = (NameBearer)o2;
+    return nb1.getName().compareTo(nb2.getName());
   }
 }
