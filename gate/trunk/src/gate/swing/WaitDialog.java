@@ -39,8 +39,10 @@ public class WaitDialog extends JWindow implements Runnable {
   /**    */
   public WaitDialog(Frame frame, String title) {
     super(frame);
-    this.icon = new ImageIcon(ClassLoader.getSystemResource(
-                "gate/resources/img/working.gif"));
+    //this.icon = new ImageIcon(ClassLoader.getSystemResource(
+    //            "gate/resources/img/working.gif"));
+    // use the cached version from MainFrame
+    this.icon = gate.gui.MainFrame.getIcon("working.gif");
     this.frame = frame;
     try  {
       jbInit();
