@@ -122,6 +122,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void registerHooks(){
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
+    textPane.addCaretListener(textCaretListener);
   }
 
   /**
@@ -133,12 +134,14 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void unregisterHooks(){
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
+    textPane.removeCaretListener(textCaretListener);
   }
   
   
   protected void initListeners(){
     document.addDocumentListener(this);
     textMouseListener = new TextMouseListener();
+    textCaretListener = new TextCaretListener();
     mainTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener(){
         public void valueChanged(ListSelectionEvent e){
@@ -250,7 +253,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     return null;
   }
   
-  public TypeHandler getTypeHandler(String set, String type){
+  protected TypeHandler getTypeHandler(String set, String type){
     SetHandler sHandler = getSetHandler(set);
     TypeHandler tHandler = null;
     Iterator typeIter = sHandler.typeHandlers.iterator();
@@ -259,6 +262,20 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(aHandler.name.equals(type)) tHandler = aHandler;
     }
     return tHandler;
+  }
+  
+  public void setTypeSelected(final String setName, 
+                              final String typeName, 
+                              final boolean selected){
+    
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        TypeHandler tHandler = getTypeHandler(setName, typeName);
+        tHandler.setSelected(selected);
+        int row = tableRows.indexOf(tHandler);
+        tableModel.fireTableRowsUpdated(row, row);
+      }
+    });
   }
   
   protected class SetsTableModel extends AbstractTableModel{
@@ -536,7 +553,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**
    * Stores the data related to an annotation set
    */
-  public class SetHandler{
+  protected class SetHandler{
     SetHandler(AnnotationSet set){
       this.set = set;
       typeHandlers = new ArrayList();
@@ -577,8 +594,11 @@ public class AnnotationSetsView extends AbstractDocumentView
       int setRow = tableRows.indexOf(this);
       if(typeHandlers.size() == 1) 
         tableModel.fireTableRowsUpdated(setRow, setRow);
-      if(expanded) tableModel.fireTableRowsInserted(setRow + pos + 1,
+      if(expanded){
+        tableRows.add(setRow + pos + 1, tHandler);
+        tableModel.fireTableRowsInserted(setRow + pos + 1,
               setRow + pos + 1);
+      }
       return tHandler;
     }
     
@@ -637,7 +657,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     private boolean expanded = false;
   }
   
-  public class TypeHandler{
+  protected class TypeHandler{
     TypeHandler (SetHandler setHandler, String name){
       this.setHandler = setHandler;
       this.name = name;
@@ -668,6 +688,9 @@ public class AnnotationSetsView extends AbstractDocumentView
       	}
       	hghltTagsForAnn.clear();
       }
+      //update the table display
+      int row = tableRows.indexOf(this);
+      tableModel.fireTableRowsUpdated(row, row);
     }
     
     public boolean isSelected(){
@@ -775,6 +798,31 @@ public class AnnotationSetsView extends AbstractDocumentView
     
   }//protected class TextMouseListener implements MouseInputListener
   
+  
+  protected class TextCaretListener implements CaretListener{
+    public TextCaretListener(){
+      caretListenerTimer = new javax.swing.Timer(TIMER_DELAY,
+      		new NewAnnotationAction());
+      caretListenerTimer.setRepeats(false);
+    }
+    
+    public void caretUpdate(CaretEvent e){
+      caretListenerTimer.stop();
+      int dot = e.getDot();
+      int mark = e.getMark();
+      if(dot == mark) return;
+      caretListenerTimer.restart();
+    }
+    
+    javax.swing.Timer caretListenerTimer;
+    private static final int TIMER_DELAY = 500;
+  }
+  
+  protected class NewAnnotationAction extends AbstractAction{
+    public void actionPerformed(ActionEvent evt){
+      JOptionPane.showMessageDialog(textPane, "New Annotation?");
+    }
+  }
   /**
    * Used to select an annotation for editing.
    *
@@ -926,6 +974,8 @@ public class AnnotationSetsView extends AbstractDocumentView
    * The listener for mouse and mouse motion events in the text view.
    */
   protected TextMouseListener textMouseListener;
+  
+  protected TextCaretListener textCaretListener; 
   
   
   protected ColorGenerator colourGenerator;

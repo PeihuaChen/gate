@@ -22,7 +22,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter;
 
 import gate.*;
 import gate.creole.AnnotationSchema;
@@ -164,6 +163,23 @@ public class AnnotationEditor{
     btn.setMargin(insets0);
     pane.add(btn, constraints);
 
+    btn = new JButton(new DismissAction());
+    btn.setContentAreaFilled(false);
+    constraints.insets = new Insets(0, 2, 2, 2);
+    constraints.gridheight = 2;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    btn.setMargin(insets0);
+    btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    constraints.gridy = 0;
+    pane.add(btn, constraints);
+    
+    btn = new JButton(new ApplyAction());
+    btn.setContentAreaFilled(false);
+    btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    btn.setMargin(insets0);
+    constraints.gridy = 1;
+//    pane.add(btn, constraints);
+    
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     topWindow.getContentPane().add(pane);
   }
@@ -180,39 +196,65 @@ public class AnnotationEditor{
     bottomWindow.getContentPane().add(pane);    
   }
 
+  protected void initListeners(){
+    topWindow.addMouseListener(new MouseAdapter(){
+      public void mouseEntered(MouseEvent evt){
+        hideTimer.stop();
+      }
+    });
+    
+    bottomWindow.addMouseListener(new MouseAdapter(){
+      public void mouseEntered(MouseEvent evt){
+        hideTimer.stop();
+      }
+    });
+    
+    typeCombo.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        String newType = typeCombo.getSelectedItem().toString();
+        if(ann != null && ann.getType().equals(newType)) return;
+        if(ann == null){
+          //annotation creation
+        }else{
+          //annotation editing
+          Integer oldId = ann.getId();
+          Annotation oldAnn = ann;
+          set.remove(ann);
+          try{
+	          set.add(oldId, oldAnn.getStartNode().getOffset(), 
+	                  oldAnn.getEndNode().getOffset(), 
+	                  newType, oldAnn.getFeatures());
+	          setAnnotation(set.get(oldId), set);
+	          
+	          setsView.setTypeSelected(set.getName(), newType, true);
+          }catch(InvalidOffsetException ioe){
+            throw new GateRuntimeException(ioe);
+          }
+        }
+      }
+    });
+    
+  }
+  
   protected void initGUI(){
-    //initialise static windows if not already done
-    if(! inited){
-      solAction = new StartOffsetLeftAction();
-      sorAction = new StartOffsetRightAction();
-      eolAction = new EndOffsetLeftAction();
-      eorAction = new EndOffsetRightAction();
-      delAction = new DeleteAnnotationAction();
-      
-      initData();
-      initTopWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
-      initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
-      
-      hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
-        public void actionPerformed(ActionEvent evt){
-          hide();
-        }
-      });
-      hideTimer.setRepeats(false);
-      
-      topWindow.addMouseListener(new MouseAdapter(){
-        public void mouseEntered(MouseEvent evt){
-          hideTimer.stop();
-        }
-      });
-      bottomWindow.addMouseListener(new MouseAdapter(){
-        public void mouseEntered(MouseEvent evt){
-          hideTimer.stop();
-        }
-      });
-      
-      inited = true;
-    }
+    solAction = new StartOffsetLeftAction();
+    sorAction = new StartOffsetRightAction();
+    eolAction = new EndOffsetLeftAction();
+    eorAction = new EndOffsetRightAction();
+    delAction = new DeleteAnnotationAction();
+    
+    initData();
+    initTopWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+    initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+    initListeners();
+    
+    hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        hide();
+      }
+    });
+    hideTimer.setRepeats(false);
+    
   }
   
   public void setAnnotation(Annotation ann, AnnotationSet set){
@@ -226,13 +268,6 @@ public class AnnotationEditor{
    Collections.sort(typeList);
    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
    typeCombo.setSelectedItem(annType);
-   //notify the actions
-   solAction.setAnnotation(ann, set);
-   sorAction.setAnnotation(ann, set);
-   eolAction.setAnnotation(ann, set);
-   eorAction.setAnnotation(ann, set);
-   delAction.setAnnotation(ann, set);
-   
   }
   
   
@@ -303,20 +338,12 @@ public class AnnotationEditor{
       putValue(SHORT_DESCRIPTION, name);
       
     }
-    public void actionPerformed(ActionEvent evt){
-    }
-    
-    public void setAnnotation(Annotation ann, AnnotationSet set){
-      this.ann = ann;
-      this.set = set;
-    }
-    protected Annotation ann;
-    protected AnnotationSet set;
   }
 
   protected class StartOffsetLeftAction extends AnnotationAction{
     public StartOffsetLeftAction(){
-      super("Extend", MainFrame.getIcon("extend-left.gif"));
+      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
+              MainFrame.getIcon("extend-left.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -338,7 +365,7 @@ public class AnnotationEditor{
         set.remove(oldAnn);
 	      set.add(oldID, newStartOffset, ann.getEndNode().getOffset(),
 	              ann.getType(), ann.getFeatures());
-	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+	      setAnnotation(set.get(oldID), set);
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -347,7 +374,9 @@ public class AnnotationEditor{
   
   protected class StartOffsetRightAction extends AnnotationAction{
     public StartOffsetRightAction(){
-      super("Srink", MainFrame.getIcon("extend-right.gif"));
+      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
+            "CTRL-SHIFT = 10 characters</small></html>", 
+            MainFrame.getIcon("extend-right.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -371,7 +400,7 @@ public class AnnotationEditor{
         set.remove(oldAnn);
 	      set.add(oldID, newStartOffset, ann.getEndNode().getOffset(),
 	              ann.getType(), ann.getFeatures());
-	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+	      setAnnotation(set.get(oldID), set);
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -380,7 +409,9 @@ public class AnnotationEditor{
 
   protected class EndOffsetLeftAction extends AnnotationAction{
     public EndOffsetLeftAction(){
-      super("Srink", MainFrame.getIcon("extend-left.gif"));
+      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
+            "CTRL-SHIFT = 10 characters</small></html>",
+            MainFrame.getIcon("extend-left.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -404,7 +435,7 @@ public class AnnotationEditor{
         set.remove(oldAnn);
 	      set.add(oldID, ann.getStartNode().getOffset(), newEndOffset,
 	              ann.getType(), ann.getFeatures());
-	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+	      setAnnotation(set.get(oldID), set);
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -413,7 +444,9 @@ public class AnnotationEditor{
   
   protected class EndOffsetRightAction extends AnnotationAction{
     public EndOffsetRightAction(){
-      super("Extend", MainFrame.getIcon("extend-right.gif"));
+      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
+            "CTRL-SHIFT = 10 characters</small></html>", 
+            MainFrame.getIcon("extend-right.gif"));
     }
     
     public void actionPerformed(ActionEvent evt){
@@ -437,7 +470,7 @@ public class AnnotationEditor{
         set.remove(oldAnn);
 	      set.add(oldID, ann.getStartNode().getOffset(), newEndOffset,
 	              ann.getType(), ann.getFeatures());
-	      AnnotationEditor.this.setAnnotation(set.get(oldID), set);
+	      setAnnotation(set.get(oldID), set);
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -452,6 +485,29 @@ public class AnnotationEditor{
     
     public void actionPerformed(ActionEvent evt){
       set.remove(ann);
+      hide();
+    }
+  }
+  
+  protected class DismissAction extends AbstractAction{
+    public DismissAction(){
+      super("Dismiss");
+//      putValue(SHORT_DESCRIPTION, "Dismiss");
+      
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      hide();
+    }
+  }
+  
+  protected class ApplyAction extends AbstractAction{
+    public ApplyAction(){
+      super("Apply");
+//      putValue(SHORT_DESCRIPTION, "Apply");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
       hide();
     }
   }
@@ -471,9 +527,7 @@ public class AnnotationEditor{
   protected static final int HIDE_DELAY = 1500;
   protected static final int SHIFT_INCREMENT = 5;
   protected static final int CTRL_SHIFT_INCREMENT = 10;
-  
-  protected boolean inited = false;
-  
+    
   protected Object highlight;
   
   /**
