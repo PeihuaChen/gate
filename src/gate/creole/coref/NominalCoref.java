@@ -190,17 +190,31 @@ public class NominalCoref extends AbstractCoreferencer
 
         if (nominal.getType().equals(PERSON_CATEGORY)) {
             // Add each Person entity to the beginning of the people list
+            // but don't add pronouns
+            Object[] personTokens = getSortedTokens(nominal);
+
+	    if (personTokens.length == 1) {
+		Annotation personToken = (Annotation) personTokens[0];
+		
+		String personCategory = (String) 
+		    personToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
+		if (personCategory.equals("PP") ||
+		    personCategory.equals("PRP") ||
+		    personCategory.equals("PRP$") ||
+		    personCategory.equals("PRPR$")) {
+		    Out.println("ignoring personal pronoun");
+		    continue;
+		}
+	    }
+
             previousPeople.add(0, nominal);
 	    Out.println("added person");
         }
         else if (nominal.getType().equals(JOBTITLE_CATEGORY)) {
             
             // Look into the tokens to get some info about POS.
-            Object[] jobTitleTokens =
-                this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
-                                         nominal.getStartNode().getOffset(),
-                                         nominal.getEndNode().getOffset()).toArray();
-            java.util.Arrays.sort(jobTitleTokens, new OffsetComparator());
+            Object[] jobTitleTokens = getSortedTokens(nominal);
+
             Annotation lastToken = (Annotation)
                 jobTitleTokens[jobTitleTokens.length - 1];
 
@@ -274,9 +288,6 @@ public class NominalCoref extends AbstractCoreferencer
             
             Annotation previousPerson =
                 (Annotation) previousPeople.get(personIndex);
-
-            // Don't associate it if the previous person is a pronoun
-            
 
             // Don't associate if the two nominals are note the same gender
             String personGender = (String) 
@@ -413,11 +424,7 @@ public class NominalCoref extends AbstractCoreferencer
   }
 	
   private String stringValue(Annotation ann) {
-    Object[] tokens =
-      this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
-	       		          ann.getStartNode().getOffset(),
-				  ann.getEndNode().getOffset()).toArray();
-    java.util.Arrays.sort(tokens, new OffsetComparator());
+    Object[] tokens = getSortedTokens(ann);
 	
     StringBuffer output = new StringBuffer();
     for (int i=0;i<tokens.length;i++) {
@@ -430,6 +437,16 @@ public class NominalCoref extends AbstractCoreferencer
     return output.toString();
   }
 
+    private Object[] getSortedTokens(Annotation a) {
+	Object[] annotationTokens =
+	    this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
+					a.getStartNode().getOffset(),
+					a.getEndNode().getOffset()).toArray();
+	java.util.Arrays.sort(annotationTokens, new OffsetComparator());
+
+	return annotationTokens;
+    }
+	
   /** --- */
   public HashMap getResolvedAnaphora() {
     return this.anaphor2antecedent;
