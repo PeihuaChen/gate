@@ -83,7 +83,7 @@ depend:
 # the JUnit GUI test runner)
 test: japefiles
 	$(RUN) -Xint -Djava.compiler=nojit -Xmx150m \
-	  -classpath `$(CYGPATH) gate.jar:$(TOOLSJAR)` \
+	  -classpath `$(CYGPATHP) gate.jar:$(TOOLSJAR)` \
 	  -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` \
 	  -Dgate.config="$$GATE_CONFIG" \
 	  junit.textui.TestRunner gate.TestGate
