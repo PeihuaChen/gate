@@ -856,24 +856,27 @@ public class Namematch extends AbstractProcessingResource
            String s2) {
 
     if (s1.startsWith("The ")) s1 = s1.substring(4);
-
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
 
     String token = null;
     StringBuffer acronym_s1 = new StringBuffer("");
+    StringBuffer acronymDot_s1 = new StringBuffer("");
 
     while (tokens1.hasMoreTokens()) {
       token = tokens1.nextToken();
       acronym_s1.append(token.substring(0,1));
     }
 
-    //now check if last token is cdg
     s1 = acronym_s1.toString();
 
-    if (cdg.containsKey(token)) s1 = s1.substring(0,s1.length()-1);
+    //now check if last token is cdg
+    //if (cdg.containsKey(token)) s1 = s1.substring(0,s1.length()-1);
     s2 = regularExpressions(s2,""," ");
+    s2 = regularExpressions(s2,"","\\.");
+
     return matchRule1(s1,s2,false);
+
   }//matchRule6
 
   /**
