@@ -311,7 +311,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       //3. read annotations
 
       try {
-        String sql = " select ann_id, " +
+        String sql = " select ann_local_id, " +
                      "        at_name, " +
                      "        start_offset, " +
                      "        end_offset " +
@@ -402,7 +402,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
     //2. read the features from DB
     try {
-      String sql = " select annotation_id, " +
+      String sql = " select ann_local_id, " +
                    "        ft_key, " +
                    "        ft_value_type, " +
                    "        ft_number_value, " +
@@ -411,7 +411,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
                    "        ft_binary_value " +
                    " from  "+Gate.DB_OWNER+".v_annotation_features " +
                    " where  set_id = ? " +
-                   " order by annotation_id,ft_key ";
+                   " order by ann_local_id,ft_key ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
