@@ -33,8 +33,6 @@ public class Gate
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  private static FeatureMap params =  null;
-
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
     // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"
@@ -111,7 +109,7 @@ public class Gate
 
     /** Brings into the system, the default AnnotationSchemas. */
   public static void initDefaultAnnotationSchemas(){
-    params = Factory.newFeatureMap();
+    FeatureMap params = Factory.newFeatureMap();
     // add Percent Schema
     try{
       params.put("xmlFileUrl",Gate.class.getResource(
