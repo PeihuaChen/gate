@@ -50,10 +50,9 @@
   <property category="runtime.6" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
   <property category="runtime.6" name="jsprunner.docbase" value="." />
   <property category="runtime.6" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
-  <property category="runtime.7" name="ConfigurationName" value="gate.Main -h" />
+  <property category="runtime.7" name="ConfigurationName" value="gate.Main" />
   <property category="runtime.7" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.7" name="application.class" value="gate.Main" />
-  <property category="runtime.7" name="application.parameters" value="-h" />
   <property category="runtime.7" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
   <property category="runtime.7" name="jsprunner.docbase" value="." />
   <property category="runtime.7" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
