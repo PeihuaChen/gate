@@ -361,7 +361,8 @@ public class Main {
       if (ver==null) {
         throw new IOException();
       }
-      BufferedReader reader = new BufferedReader(new InputStreamReader(ver));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(ver,
+          "UTF-8"));
       Main.version = reader.readLine();
     } catch(IOException ioe) {
       Main.version = "2.0";
@@ -373,7 +374,8 @@ public class Main {
       if (build==null) {
         throw new IOException();
       }
-      BufferedReader reader = new BufferedReader(new InputStreamReader(build));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(build,
+          "UTF-8"));
       Main.build = reader.readLine();
     } catch(IOException ioe) {
       Main.build = "0000";
