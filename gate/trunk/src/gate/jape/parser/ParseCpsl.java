@@ -156,7 +156,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       throw new ParseException();
     }
     jj_consume_token(0);
-    m.finish(); // swap the various JGL types for Java arrays
+//move this out of here so the input file gets closed properly
+//    m.finish(); // swap the various JGL types for Java arrays
     {if (true) return m;}
     throw new Error("Missing return statement in function");
   }
@@ -1038,12 +1039,6 @@ existingAttrName + "\");" + nl +
     return retval;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   final private boolean jj_3R_20() {
     if (jj_scan_token(string)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -1155,6 +1150,12 @@ existingAttrName + "\");" + nl +
     if (jj_3R_24()) jj_scanpos = xsp;
     else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_scan_token(ident)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
