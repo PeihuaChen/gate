@@ -141,11 +141,11 @@ public class TestGate {
     Gate.init();
 
     TestSuite suite = new TestSuite();
-    /*
+
+    suite.addTest(TestEmail.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
     suite.addTest(TestSgml.suite());
-    suite.addTest(TestEmail.suite());*/
     suite.addTest(TestXSchema.suite());
     suite.addTest(TestCreole.suite());
     suite.addTest(CookBook.suite());

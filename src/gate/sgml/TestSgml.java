@@ -41,16 +41,6 @@ public class TestSgml extends TestCase
   public void setUp() {
   } // setUp
 
-
-  public static void main(String args[]) {
-    TestSgml app = new TestSgml("TestSgml");
-    try {
-      app.testSgmlLoading ();
-    }catch (Exception e){
-      e.printStackTrace (Err.getPrintWriter());
-    }
-  } // main
-
   public void testSgmlLoading() throws Exception {
     assert(true);
 
