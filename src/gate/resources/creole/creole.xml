@@ -284,8 +284,9 @@
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="annotationTypes" RUNTIME="true" DEFAULT="Person;Location;Date">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="outputFileUrl" RUNTIME="true" COMMENT="The url of the output file" SUFFIXES="xml;xsd">java.net.URL</PARAMETER>
     </RESOURCE>
-    
+  </CREOLE>  
   <!-- creole.xml for Controllers -->
   <CREOLE>
     <RESOURCE>
