@@ -36,7 +36,7 @@ import java.util.*;
 import java.net.*;
 
 
-public class DocumentEditor extends AbstractVisualResource{
+public class AnnotationEditor extends AbstractVisualResource{
   //properties
   private transient PropertyChangeSupport propertyChangeListeners =
                                           new PropertyChangeSupport(this);
@@ -92,7 +92,7 @@ public class DocumentEditor extends AbstractVisualResource{
   private boolean filtersVisible;
   private boolean editable;
 
-  public DocumentEditor() {
+  public AnnotationEditor() {
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -132,7 +132,7 @@ public class DocumentEditor extends AbstractVisualResource{
       //check for exceptions
       tokeniser.check();
 
-      DocumentEditor editor = new DocumentEditor();
+      AnnotationEditor editor = new AnnotationEditor();
       frame.getContentPane().add(editor);
       frame.pack();
       frame.setVisible(true);
@@ -1092,7 +1092,7 @@ System.out.println("Annotation added!");
         style = textPane.addStyle(set, textPane.getStyle("default"));
       }else{
         style = textPane.addStyle(set + "." + type, textPane.getStyle(set));
-        StyleConstants.setForeground(style, colGenerator.getNextColor());
+        StyleConstants.setForeground(style, colGenerator.getNextColor());http://online.amerada.co.uk
         //add an intermediary style that will be used for the actual display
         textPane.addStyle("_" + set + "." + type, style);
         //add the style that will be used for the actual display
