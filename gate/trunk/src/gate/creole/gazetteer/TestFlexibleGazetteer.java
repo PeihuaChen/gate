@@ -18,8 +18,10 @@ package gate.creole.gazetteer;
 import junit.framework.*;
 import gate.*;
 import gate.corpora.*;
+import java.io.File;
 import java.net.*;
 import gate.gui.MainFrame;
+import gate.util.GateRuntimeException;
 
 public class TestFlexibleGazetteer extends TestCase {
 
@@ -31,6 +33,16 @@ public class TestFlexibleGazetteer extends TestCase {
 
   /** Fixture set up - does nothing */
   public void setUp() throws Exception {
+    //make sure the right plugin is loaded
+    File pluginsHome = new File(System.getProperty(
+            GateConstants.GATE_HOME_SYSPROP_KEY), 
+            "plugins");
+    try{
+      Gate.getCreoleRegister().registerDirectories(
+              new File(pluginsHome, "Tools").toURL());
+    }catch(Exception e){
+      throw new GateRuntimeException(e);
+    }
   }
 
   /** Fixture tear down - does nothing */
