@@ -35,8 +35,10 @@ public class FeatureSchema {
   /** The class name of the feature value*/
   String featureValueClassName = null;
 
-  /** The default feature value */
-  String featureDefaultValue = null;
+  /** The value of the feature. This must be read only when "use" is default
+    * or fixed.
+    */
+  String featureValue = null;
 
   /** The use of that feature can be one of:
     *  prohibited | optional | required | default | fixed : optional
@@ -52,13 +54,13 @@ public class FeatureSchema {
    */
   public FeatureSchema( String aFeatureName,
                         String aFeatureValueClassName,
-                        String aFeatureDefaultValue,
+                        String aFeatureValue,
                         String aFeatureUse,
                         Set    aFeaturePermissibleValuesSet ){
 
     featureName                 = aFeatureName;
     featureValueClassName       = aFeatureValueClassName;
-    featureDefaultValue         = aFeatureDefaultValue;
+    featureValue                = aFeatureValue;
     featureUse                  = aFeatureUse;
     featurePermissibleValuesSet = aFeaturePermissibleValuesSet;
   }
@@ -144,48 +146,59 @@ public class FeatureSchema {
     return schemaString.toString();
   } // end toXSchema
 
-  /** This method is used to see if the feature has a default value
-    * @return true if the feature has a default value
-    * @return false if the feature doesn't have a default value
+  /** This method returns the value of the feature.
+    * If featureUse is something else than "default" or "fixed" it will return
+    * the empty string "".
     */
-  public boolean isDefaultValue(){
-    return "".equals(featureDefaultValue);
-  } // hasDefaultValue
+  public String getFeatureValue(){
+    if (isDefault() || isFixed())
+      return featureValue;
+    else
+      return "";
+  } // getFeatureValue
+
+  /** This method sets the value of the feature.
+    * @param aFeatureValue a String representing the value of a feature.
+    */
+  public void setFeatureValue(String aFeatureValue){
+    featureValue = aFeatureValue;
+  } // setFeatureValue
 
   /**
     * This method is used to check if the feature is required.
     * @return true if the feature is required. Otherwhise returns false
     */
   public boolean isRequired(){
-    return "required".equals("featureUse");
+    return "required".equals(featureUse);
   } // isRequired
 
   /** This method is used to check if the feature is default.
+    * Default is used if the feature was omitted.
     * @return true if the feature is default. Otherwhise returns false
     */
   public boolean isDefault(){
-    return "default".equals("featureUse");
+    return "default".equals(featureUse);
   } // isDefault
 
-  /** This method is used to check if the feature is fixed.
+  /** This method is used to check if the feature, is fixed.
     * @return true if the feature is fixed. Otherwhise returns false
     */
   public boolean isFixed(){
-    return "fixed".equals("featureUse");
+    return "fixed".equals(featureUse);
   } // isFixed
 
   /** This method is used to check if the feature is optional.
     * @return true if the optional is fixed. Otherwhise returns false
     */
   public boolean isOptional(){
-    return "optional".equals("featureUse");
+    return "optional".equals(featureUse);
   } // isOptional
 
   /** This method is used to check if the feature is prohibited.
     * @return true if the prohibited is fixed. Otherwhise returns false
     */
   public boolean isProhibited(){
-    return "prohibited".equals("featureUse");
+    return "prohibited".equals(featureUse);
   } // isProhibited
 
 } // FeatureSchema

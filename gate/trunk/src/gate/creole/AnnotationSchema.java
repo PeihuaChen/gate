@@ -273,7 +273,7 @@ public class AnnotationSchema extends AbstractLanguageResource
     String featureName = null;
     String featureType = null;
     String featureUse  = null;
-    String featureDefaultValue = null;
+    String featureValue = null;
     Set    featurePermissibleValuesSet = null;
 
     // Get the value of the name attribute. If this attribute doesn't exists
@@ -295,9 +295,9 @@ public class AnnotationSchema extends AbstractLanguageResource
       featureUse = "optional";
 
     // Get the value of value attribute
-    featureDefaultValue = anAttributeElement.getAttributeValue("value");
-    if (featureDefaultValue == null)
-      featureDefaultValue = "";
+    featureValue = anAttributeElement.getAttributeValue("value");
+    if (featureValue == null)
+      featureValue = "";
 
     // Let's check if it has a simpleType element inside
     org.jdom.Element simpleTypeElement  =
@@ -340,8 +340,8 @@ public class AnnotationSchema extends AbstractLanguageResource
       }// end if( restrictionElement != null)
     }// end if (simpleTypeElement != null)
 
-    // If it doesn't have a simpleTypeElement inside and featureType is null,
-    // then we set a default type to string
+    // If it doesn't have a simpleTypeElement inside and featureType is null or
+    // it wasn't recognised, then we set the default type to string.
     if (simpleTypeElement == null && featureType == null )
       featureType =  (String) xSchema2JavaMap.get("string");
 
@@ -349,7 +349,7 @@ public class AnnotationSchema extends AbstractLanguageResource
     FeatureSchema featureSchema = new FeatureSchema(
                                                    featureName,
                                                    featureType,
-                                                   featureDefaultValue,
+                                                   featureValue,
                                                    featureUse,
                                                    featurePermissibleValuesSet);
     featureSchemaSet.add(featureSchema);
