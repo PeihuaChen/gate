@@ -2241,7 +2241,7 @@ if(!highlights.isEmpty()){
                                       height + insets.top + insets.bottom);
         comp.setPreferredSize(dim);
       }catch(BadLocationException ble){
-        ble.printStackTrace();
+        //this will work the next time around so it's safe to ignore it now
       }
     }
     Border selectedBorder;

@@ -146,7 +146,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
     }
 
     // get the annotations from document
-    if ((annotationSetName == null)|| (annotationSetName == ""))
+    if ((annotationSetName == null)|| (annotationSetName.equals("")))
       nameAllAnnots = document.getAnnotations();
     else
       nameAllAnnots = document.getAnnotations(annotationSetName);

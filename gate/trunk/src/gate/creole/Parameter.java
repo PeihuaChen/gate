@@ -157,14 +157,14 @@ public class Parameter implements Serializable
           throw new ParameterException("Unsupported parameter type " + typeName);
         }
       }
-
-    // resource types
     } else {
+      // non java types
       if(resData == null)
         resData = (ResourceData) Gate.getCreoleRegister().get(typeName);
-      if(resData == null)
-        throw new ParameterException("No resource data for " + typeName);
-
+      if(resData == null){
+        //unknown type
+        return null;
+      }
       WeakBumpyStack instantiations = resData.getInstantiations();
       if(! instantiations.isEmpty())
         value = instantiations.peek();
@@ -242,17 +242,25 @@ public class Parameter implements Serializable
   {
     // get java builtin classes via class; else look in the register
     try {
-      if(typeName.startsWith("java."))
-          paramClass = Class.forName(typeName);
-      else {
-        ResourceData resData =
-          (ResourceData) Gate.getCreoleRegister().get(typeName);
-        if(resData == null)
-          throw new ParameterException(
-            "No resource data for " + typeName + " in Parameter/getParamClz"
-          );
+      ResourceData resData = (ResourceData)
+                             Gate.getCreoleRegister().get(typeName);
+      if(resData == null){
+        paramClass = Gate.getClassLoader().loadClass(typeName);
+      }else{
         paramClass = resData.getResourceClass();
       }
+
+//      if(typeName.startsWith("java."))
+//          paramClass = Class.forName(typeName);
+//      else {
+//        ResourceData resData =
+//          (ResourceData) Gate.getCreoleRegister().get(typeName);
+//        if(resData == null)
+//          throw new ParameterException(
+//            "No resource data for " + typeName + " in Parameter/getParamClz"
+//          );
+//        paramClass = resData.getResourceClass();
+//      }
     } catch(ClassNotFoundException e) {
       throw new ParameterException(
         "Couldn't find class " + typeName + ": " + Strings.getNl() + e

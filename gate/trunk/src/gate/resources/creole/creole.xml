@@ -6,6 +6,22 @@
   <CREOLE>
     <!-- Documents -->
     <RESOURCE>
+      <NAME>GATE Document Interface</NAME>
+      <CLASS>gate.Document</CLASS>
+      <INTERFACE>gate.Document</INTERFACE>
+      <ICON>lr.gif</ICON>
+      <PRIVATE/>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>GATE Corpus Interface</NAME>
+      <CLASS>gate.Corpus</CLASS>
+      <INTERFACE>gate.Corpus</INTERFACE>
+      <ICON>lr.gif</ICON>
+      <PRIVATE/>
+    </RESOURCE>
+
+    <RESOURCE>
       <NAME>GATE document</NAME>
       <CLASS>gate.corpora.DocumentImpl</CLASS>
       <INTERFACE>gate.Document</INTERFACE>
@@ -46,6 +62,7 @@
       <ICON>lr.gif</ICON>
       <PRIVATE/>
     </RESOURCE>
+
     <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
@@ -123,7 +140,7 @@
       <CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>
       <COMMENT>A customisable tokeniser.</COMMENT>
       <PRIVATE/>
-      <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="rulesURL" DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules" COMMENT="The URL for the rules file" SUFFIXES="rules">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8" COMMENT="The encoding used for reading the definitions" NAME="encoding">java.lang.String</PARAMETER>
@@ -135,7 +152,7 @@
       <NAME>ANNIE English Tokeniser</NAME>
       <CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
       <COMMENT>A customisable tokeniser.</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" COMMENT="The document to be tokenised" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="tokeniserRulesURL" DEFAULT="gate:/creole/tokeniser/DefaultTokeniser.rules" COMMENT="The URL for the rules file" SUFFIXES="rules" >java.net.URL</PARAMETER>
       <PARAMETER NAME="transducerGrammarURL" DEFAULT="gate:/creole/tokeniser/postprocess.jape" COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">java.net.URL</PARAMETER>
@@ -148,7 +165,7 @@
       <NAME>ANNIE Gazetteer</NAME>
       <CLASS>gate.creole.gazetteer.DefaultGazetteer</CLASS>
       <COMMENT>A list lookup component.</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="listsURL" DEFAULT="gate:/creole/gazeteer/default/lists.def" COMMENT="The URL to the file with list of lists" SUFFIXES="def">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8" NAME="encoding" COMMENT="The encoding used for reading the definitions">java.lang.String</PARAMETER>
@@ -161,7 +178,7 @@
       <NAME>Jape Transducer</NAME>
       <CLASS>gate.creole.Transducer</CLASS>
       <COMMENT>A module for executing Jape grammars</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" COMMENT="The annotation set to be used as input for the transducer" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" COMMENT="The annotation set to be used as output for the transducer" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file" SUFFIXES="jape">java.net.URL</PARAMETER>
@@ -172,7 +189,7 @@
     <RESOURCE>
       <NAME>ANNIE NE Transducer</NAME>
       <CLASS>gate.creole.ANNIETransducer</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" COMMENT="The annotation set to be used as input for the transducer" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" COMMENT="The annotation set to be used as output for the transducer" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file" DEFAULT="gate:/creole/transducer/NE/main.jape" SUFFIXES="jape">java.net.URL</PARAMETER>
@@ -183,7 +200,7 @@
     <RESOURCE>
       <NAME>ANNIE VP Chunker</NAME>
       <CLASS>gate.creole.VPChunker</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" COMMENT="The annotation set to be used as input for the transducer" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" COMMENT="The annotation set to be used as output for the transducer" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file" DEFAULT="gate:/creole/chunker/VP/VerbGroups.jape" SUFFIXES="jape">java.net.URL</PARAMETER>
@@ -196,7 +213,7 @@
       <NAME>ANNIE NERC</NAME>
       <COMMENT>ANNIE Named-Entity Recognition Component</COMMENT>
       <CLASS>gate.creole.nerc.Nerc</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="tempAnnotationSetName" COMMENT="The name used for the temporary annotation set" DEFAULT="nercAS" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER DEFAULT="UTF-8" COMMENT="The encoding used for reading the definition files" NAME="encoding">java.lang.String</PARAMETER>
       <PARAMETER NAME="tokeniserRulesURL" COMMENT="The URL for the tokeniser rules file" OPTIONAL="true" SUFFIXES="rules">java.net.URL</PARAMETER>
@@ -214,7 +231,7 @@
       <NAME>ANNIE Sentence Splitter</NAME>
       <COMMENT>ANNIE sentence splitter</COMMENT>
       <CLASS>gate.creole.splitter.SentenceSplitter</CLASS>
-      <PARAMETER COMMENT="The document to be processed" NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER COMMENT="The document to be processed" NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" COMMENT="The name used for the temporary annotation set" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" COMMENT="The name used for the temporary annotation set" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="encoding" COMMENT="The encoding used for reading the definition files" DEFAULT="UTF-8">java.lang.String</PARAMETER>
@@ -226,7 +243,7 @@
       <NAME>Hepple POS Tagger</NAME>
       <COMMENT>Mark Hepple's POS tagger</COMMENT>
       <CLASS>gate.creole.POSTagger</CLASS>
-      <PARAMETER NAME="document" COMMENT="The document to be processed" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" COMMENT="The document to be processed" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" COMMENT="The name of the annotation set used for input" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" COMMENT="The name of the annotation set used for output" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="lexiconURL" DEFAULT="gate:/creole/heptag/lexicon" COMMENT="The URL for the lexicon file" OPTIONAL="true">java.net.URL</PARAMETER>
@@ -236,7 +253,7 @@
     <RESOURCE>
       <NAME>ANNIE OrthoMatch</NAME>
       <CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="caseSensitive" DEFAULT="false" OPTIONAL="true">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="annotationTypes" DEFAULT="Organization;Person;Location;Date" RUNTIME="true" OPTIONAL="true">java.util.ArrayList</PARAMETER>
@@ -248,7 +265,7 @@
     <RESOURCE>
       <NAME>Annotation Set Transfer</NAME>
       <CLASS>gate.creole.annotransfer.AnnotationSetTransfer</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" COMMENT="The name of the annotation set used for input" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" COMMENT="The name of the annotation set used for output" DEFAULT="Filtered" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="tagASName" DEFAULT="Original markups" COMMENT="The name of the annotation set where the BODY tag is" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
@@ -258,7 +275,7 @@
     <RESOURCE>
       <NAME>Document Reset PR</NAME>
       <CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
     </RESOURCE>
   </CREOLE>
   <!-- creole.xml for Controllers -->
