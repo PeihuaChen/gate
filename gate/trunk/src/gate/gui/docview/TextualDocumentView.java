@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.text.*;
 import javax.swing.text.Highlighter;
 
+
 import gate.Annotation;
 import gate.Document;
 import gate.util.GateRuntimeException;
