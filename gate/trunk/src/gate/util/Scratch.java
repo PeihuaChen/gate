@@ -71,6 +71,7 @@ public class Scratch
   } catch (Exception e){
     e.printStackTrace (System.err);
   }
+  DocumentBuilder domParser = null;
   try{
     // Get a parser factory.
     DocumentBuilderFactory domBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -80,7 +81,7 @@ public class Scratch
     // a non namesapace aware one
     domBuilderFactory.setNamespaceAware(false);
     // create it
-    DocumentBuilder domParser = domBuilderFactory.newDocumentBuilder();
+    domParser = domBuilderFactory.newDocumentBuilder();
     // we have the DOM parser and we will use it to parse the xmlFile and
     // construct the DOM model
 
@@ -98,7 +99,7 @@ public class Scratch
 
   // now we have the dom and we have to query it in order to access our data
   // to get help on working with DOM : http://java.sun.com/xml/docs/api/index.html
-
+  /*
   NodeList nodeList = dom.getElementsByTagName("resource");
   for (int i = 0; i < nodeList.getLength(); i++){
     org.w3c.dom.Node node = nodeList.item(i);
@@ -120,7 +121,28 @@ public class Scratch
       if (elemNode.getNodeType() == org.w3c.dom.Node.TEXT_NODE )
         System.out.println("TEXT: " + elemNode.getNodeValue() );
     }
+
     System.out.println("---------------------------------------------------");
+    */
+  org.w3c.dom.Document newDom = domParser.newDocument();
+  Element root = newDom.createElement(dom.getDocumentElement().getTagName());
+  DocumentFragment df = newDom.createDocumentFragment();
+
+  NodeList nodeList = dom.getDocumentElement().getChildNodes();
+  for (int i = 0; i < nodeList.getLength(); i++){
+    org.w3c.dom.Node node = nodeList.item(i);
+
+    //ShowAllDetails(node);
+    //System.out.println("-----------------------------------------------------");
+    df.appendChild(node);
+
+  }
+
+  NodeList nodeList1 = newDom.getDocumentElement().getChildNodes();
+  for (int i = 0; i < nodeList1.getLength(); i++){
+    org.w3c.dom.Node node = nodeList.item(i);
+    ShowAllDetails(node);
+    System.out.println("-----------------------------------------------------");
   }
 
   /*
@@ -144,6 +166,26 @@ public class Scratch
    System.out.println(map.get(new ExtendedMimeType("text","xml")));
   */
   } // main
+
+  public static void ShowAllDetails(org.w3c.dom.Node node){
+    if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE){
+      System.out.println("ELEMENT: " + node.getNodeName());
+          // take its attributes
+      System.out.print("ATTRIBUTES: ");
+      NamedNodeMap namedNodeMap = node.getAttributes();
+      for (int attIdx = 0 ; attIdx < namedNodeMap.getLength(); attIdx ++){
+        org.w3c.dom.Node attNode = namedNodeMap.item(attIdx);
+        System.out.print(attNode.getNodeName() + "=\"" + attNode.getNodeValue() + "\"");
+      }
+      System.out.println();
+      NodeList elemNodeList = node.getChildNodes();
+      for (int j = 0; j < elemNodeList.getLength(); j++)
+        ShowAllDetails(elemNodeList.item(j));
+    }
+    if (node.getNodeType() == org.w3c.dom.Node.TEXT_NODE )
+        System.out.println("TEXT: " + node.getNodeValue() );
+  }
+
 
   //public int i;
 

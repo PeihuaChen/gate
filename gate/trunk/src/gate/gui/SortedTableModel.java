@@ -19,6 +19,7 @@ public abstract class SortedTableModel extends AbstractTableModel{
     protected SortedTableComparator m_comparator;
     protected int                   m_sortCol;
     protected boolean               m_sortAsc;
+    protected int                   m_rowCount;
 
     public SortedTableModel(){
       // sort the first column ascending
@@ -32,6 +33,7 @@ public abstract class SortedTableModel extends AbstractTableModel{
       m_data.addAll(data);
       m_comparator = comparator;
       sortDefault();
+      m_rowCount = m_data.size();
     }
 
     private void sortDefault(){
@@ -41,7 +43,7 @@ public abstract class SortedTableModel extends AbstractTableModel{
     }
 
     public int getRowCount(){
-      return  m_data.size();
+      return m_rowCount;
     }
 
     protected String addSortOrderString(int sortCol){
@@ -51,9 +53,9 @@ public abstract class SortedTableModel extends AbstractTableModel{
 
     class ColumnListener extends MouseAdapter {
       // members area
-      protected JTable m_table;
+      protected SortedTable m_table;
 
-      public ColumnListener(JTable jTable){
+      public ColumnListener(SortedTable jTable){
         m_table = jTable;
       }
 
@@ -86,6 +88,19 @@ public abstract class SortedTableModel extends AbstractTableModel{
         m_table.repaint();
       }
     }
+    
+    public Object[] getMaxValues(){
+      int colNumber = getColumnCount();
+      Object[] maxValues = new Object[colNumber];
+
+      for (int i = 0; i < colNumber; i++)
+        maxValues[i] = getMaxValue(i);
+
+      return maxValues;
+    }
+
+    abstract public Object getMaxValue(int i);
+
 }
 
 
