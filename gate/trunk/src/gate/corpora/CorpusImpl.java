@@ -24,7 +24,7 @@ import gate.persist.*;
 import java.io.*;
 import java.net.*;
 import gate.event.*;
-import gate.creole.AbstractLanguageResource;
+import gate.creole.*;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
@@ -46,45 +46,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     setName(name);
   } // Construction
 
-  /** The data store this LR lives in. */
-//  protected transient DataStore dataStore;
-  /** The persistence ID of this LR. Only set, when dataStore is.*/
-//  transient protected Object lrPersistentId = null;
 
   /** Initialise this resource, and return it. */
   public Resource init() {
     return this;
   } // init()
-
-
-  /** Get the data store the document lives in. */
-//  public DataStore getDataStore() {
-//    return dataStore;
-//  }
-
-
-  /** Set the data store that this LR lives in. */
-//  public void setDataStore(DataStore dataStore) throws PersistenceException {
-//    this.dataStore = dataStore;
-//  } // setDataStore(DS)
-
-
-
-  /** Returns the persistence id of this LR, if it has been stored in
-   *  a datastore. Null otherwise.
-   */
-//  public Object getLRPersistenceId(){
-//   return lrPersistentId;
-//  }
-
-  /** Sets the persistence id of this LR. To be used only in the
-   *  Factory and DataStore code.
-   */
-//  public void setLRPersistenceId(Object lrID){
-//    this.lrPersistentId = lrID;
-//  }
-
-
 
   /** Save: synchonise the in-memory image of the corpus with the persistent
     * image.
@@ -210,6 +176,13 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     return new VerboseIterator(corpusSet.iterator());
   }
 
+  /** Clears all documents in that corpus. Does not clear everything else though
+   *  like features, name, etc.
+   */
+  public void clear() {
+    corpusSet.clear();
+  }
+
   /**
    * Overridden so it can check the input and notify the listeners of the
    * addition.
@@ -322,7 +295,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     }
     Iterator iterator;
     Object lastNext;
-  }
+  }///class VerboseIterator
+
   protected void fireDocumentAdded(CorpusEvent e) {
     if (/*!Main.batchMode &&*/ corpusListeners != null) {
       Vector listeners = corpusListeners;
@@ -340,5 +314,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
         ((CorpusListener) listeners.elementAt(i)).documentRemoved(e);
       }
     }
-  }///class VerboseIterator
+  }
+
 } // class CorpusImpl
