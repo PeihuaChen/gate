@@ -208,6 +208,12 @@ public class Batch implements JapeConstants {
       parser.addStatusListener(listener);
       transducer = parser.MultiPhaseTransducer();
       parser.removeStatusListener(listener);
+      //the call to finish needs to be handled from here now as it
+      //was removed from the .jj file
+      transducer.addStatusListener(listener);
+      transducer.finish();
+      transducer.removeStatusListener(listener);
+
     } catch (gate.jape.parser.ParseException e) {
       throw new
         JapeException("Batch: error parsing transducer: " + e.getMessage());
