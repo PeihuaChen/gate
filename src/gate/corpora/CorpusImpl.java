@@ -164,6 +164,7 @@ public class CorpusImpl extends AbstractLanguageResource
     supportList.clear();
   }
 
+
   //List methods
   //java docs will be automatically copied from the List interface.
 
@@ -284,7 +285,76 @@ public class CorpusImpl extends AbstractLanguageResource
     return this;
   } // init()
 
-  public void populate(URL directory, FileFilter filter){
+
+  /**
+   * Fills the provided corpus with documents created on the fly from selected
+   * files in a directory. Uses a link {@FileFilter} to select which files will
+   * be used and which will be ignored.
+   * A simple file filter based on extensions is provided in the Gate
+   * distribution ({@link gate.util.ExtensionFileFilter}).
+   * @param corpus the corpus to be populated
+   * @param directory the directory from which the files will be picked. This
+   * parameter is an URL for uniformity. It needs to be a URL of type file
+   * otherwise an InvalidArgumentException will be thrown.
+   * @param filter the file filter used to select files from the target
+   * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   * @param recurseDirectories should the directory be parsed recursively?. If
+   * <tt>true</tt> all the files from the provided directory and all its
+   * children directories (on as many levels as necessary) will be picked if
+   * accepted by the filter otherwise the children directories will be ignored.
+   */
+  public static void populate(Corpus corpus, URL directory,
+                              FileFilter filter, boolean recurseDirectories)
+                     throws IOException, ResourceInstantiationException{
+    //check input
+    if(!directory.getProtocol().equalsIgnoreCase("file"))
+      throw new IllegalArgumentException(
+        "The URL provided is not of type \"file:\"!");
+
+    File dir = new File(directory.getPath());
+    if(!dir.exists())
+      throw new FileNotFoundException(dir.toString());
+
+    if(!dir.isDirectory())
+      throw new IllegalArgumentException(
+        dir.getAbsolutePath() + " is not a directory!");
+
+    //populate the corpus
+    File[] files = dir.listFiles(filter);
+    if(files != null){
+      for(int i = 0; i < files.length; i++){
+        File aFile = files[i];
+        if(aFile.isDirectory()){
+          //recurse dir if required
+          if(recurseDirectories){
+            populate(corpus, aFile.toURL(), filter, recurseDirectories);
+          }
+        }else{
+          //create the doc
+          corpus.add(Factory.newDocument(aFile.toURL()));
+        }
+      }
+    }
+  }//public static void populate
+
+  /**
+   * Fills this corpus with documents created from files in a directory.
+   * @param filter the file filter used to select files from the target
+   * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   * @param directory the directory from which the files will be picked. This
+   * parameter is an URL for uniformity. It needs to be a URL of type file
+   * otherwise an InvalidArgumentException will be thrown.
+   * An implementation for this method is provided as a static method at
+   * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * @param recurseDirectories should the directory be parsed recursively?. If
+   * <tt>true</tt> all the files from the provided directory and all its
+   * children directories (on as many levels as necessary) will be picked if
+   * accepted by the filter otherwise the children directories will be ignored.
+   */
+  public void populate(URL directory, FileFilter filter,
+                       boolean recurseDirectories)
+              throws IOException, ResourceInstantiationException{
+    populate(this, directory, filter, recurseDirectories);
   }
 
   public synchronized void removeCorpusListener(CorpusListener l) {

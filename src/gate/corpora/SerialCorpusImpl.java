@@ -200,6 +200,27 @@ public class SerialCorpusImpl extends
     }
   }
 
+  /**
+   * Fills this corpus with documents created from files in a directory.
+   * @param filter the file filter used to select files from the target
+   * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   * @param directory the directory from which the files will be picked. This
+   * parameter is an URL for uniformity. It needs to be a URL of type file
+   * otherwise an InvalidArgumentException will be thrown.
+   * An implementation for this method is provided as a static method at
+   * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * @param recurseDirectories should the directory be parsed recursively?. If
+   * <tt>true</tt> all the files from the provided directory and all its
+   * children directories (on as many levels as necessary) will be picked if
+   * accepted by the filter otherwise the children directories will be ignored.
+   */
+  public void populate(URL directory, FileFilter filter,
+                       boolean recurseDirectories)
+              throws IOException, ResourceInstantiationException{
+    CorpusImpl.populate(this, directory, filter, recurseDirectories);
+  }
+
+
   public synchronized void removeCorpusListener(CorpusListener l) {
     if (corpusListeners != null && corpusListeners.contains(l)) {
       Vector v = (Vector) corpusListeners.clone();
