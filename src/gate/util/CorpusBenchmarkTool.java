@@ -41,23 +41,33 @@ public class CorpusBenchmarkTool {
   public void initPRs() {
     try {
       //create a default tokeniser
+      Out.prln("Loading tokeniser");
       FeatureMap params = Factory.newFeatureMap();
       tokeniser = (DefaultTokeniser) Factory.createResource(
                       "gate.creole.tokeniser.DefaultTokeniser", params);
 
       //create a default gazetteer
+      Out.prln("Loading gazetteer");
       gazetteer = (DefaultGazetteer) Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer", params);
+
       //create a splitter
+      Out.prln("Loading sentence splitter");
       splitter = (SentenceSplitter) Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter", params);
+
       //create a tagger
+      Out.prln("Loading POS tagger");
       tagger = (POSTagger) Factory.createResource(
                       "gate.creole.POSTagger", params);
+
       //create a grammar
+      Out.prln("Loading grammars for transducer");
       transducer = (ANNIETransducer) Factory.createResource(
                       "gate.creole.ANNIETransducer", params);
+
       //create an orthomatcher
+      Out.prln("Loading orthomatcher");
       orthomatcher = (OrthoMatcher) Factory.createResource(
                       "gate.creole.orthomatcher.OrthoMatcher", params);
     } catch (ResourceInstantiationException ex) {
@@ -117,9 +127,7 @@ public class CorpusBenchmarkTool {
     Gate.init();
 
     CorpusBenchmarkTool corpusTool = new CorpusBenchmarkTool();
-    corpusTool.initPRs();
 
-    // check we have a directory name or list of files
     List inputFiles = null;
     if(args.length < 1) throw new GateException(usage);
     int i = 0;
@@ -127,11 +135,25 @@ public class CorpusBenchmarkTool {
       Out.prln("Generating the corpus...");
       corpusTool.setGenerateMode(true);
       i++;
+    } else if (args[0].equals("-marked")) {
+      Out.prln("Evaluating only against human-annotated texts...");
+      corpusTool.setMarkedOnly(true);
+      i++;
     }
     String dirName = args[i];
     File dir = new File(dirName);
     if (!dir.isDirectory())
       throw new GateException(usage);
+
+    corpusTool.initPRs();
+
+    annotTypes = new ArrayList();
+    annotTypes.add("Organization");
+    annotTypes.add("Person");
+    annotTypes.add("Date");
+    annotTypes.add("Location");
+    annotTypes.add("Address");
+    annotTypes.add("Money");
 
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();
@@ -148,6 +170,14 @@ public class CorpusBenchmarkTool {
 
   public boolean getGenerateMode() {
     return isGenerateMode;
+  }//getGenerateMode
+
+  public void setMarkedOnly(boolean mode) {
+    isMarkedOnly = mode;
+  }//setGenerateMode
+
+  public boolean getMarkedOnly() {
+    return isMarkedOnly;
   }//getGenerateMode
 
   public boolean isGenerateMode() {
@@ -258,6 +288,7 @@ public class CorpusBenchmarkTool {
         if (! cleanDocFile.exists()) {
           Out.prln("Warning: Cannot find original document " +
                    doc.getName() + " in " + fileDir);
+          isMarkedOnly = true;
         } else {
           FeatureMap params = Factory.newFeatureMap();
           params.put("sourceUrl", cleanDocFile.toURL());
@@ -286,10 +317,9 @@ public class CorpusBenchmarkTool {
           params.put("encoding", "");
 
           // create the document
-          //CHANGE TO markedDoc
-          cleanDoc = (Document) Factory.createResource(
+          markedDoc = (Document) Factory.createResource(
                                    "gate.corpora.DocumentImpl", params);
-          cleanDoc.setName(doc.getName());
+          markedDoc.setName(doc.getName());
         }
 
         evaluateDocuments(doc, cleanDoc, markedDoc);
@@ -337,55 +367,99 @@ public class CorpusBenchmarkTool {
     if (cleanDoc == null && markedDoc == null)
       return;
 
-    if (cleanDoc != null) {
+    //we've got no types to compare
+    if (annotTypes == null || annotTypes.isEmpty())
+      return;
+
+    if (cleanDoc != null && !isMarkedOnly) {
 
       processDocument(cleanDoc);
 
-      AnnotationDiff annotDiff=measureDocs(persDoc, cleanDoc, "Organization");
+      for (int jj= 0; jj< annotTypes.size(); jj++) {
+        String annotType = (String) annotTypes.get(jj);
 
-      if (annotDiff.getFMeasureAverage() != 1.0) {
+        AnnotationDiff annotDiff=measureDocs(persDoc, cleanDoc, annotType);
+        //we don't have this annotation type in this document
+        if (annotDiff == null)
+          continue;
 
-        AnnotationDiff annotDiff1 = measureDocs(markedDoc, persDoc, "Organization");
-        AnnotationDiff annotDiff2 = measureDocs(markedDoc, cleanDoc, "Organization");
+        if (annotDiff.getFMeasureAverage() != 1.0) {
+          Out.prln("\t\t Annotation type: " + annotType);
 
-        //check the precision first
-        if (annotDiff.getPrecisionAverage() != 1.0) {
-          Out.prln("\t\t Precision different from that of stored grammar for: " +
-                  cleanDoc.getName() + " is " + annotDiff.getPrecisionAverage());
-          if (annotDiff1 != null &&
-              annotDiff2!= null &&
-              annotDiff1.getPrecisionAverage()<annotDiff2.getPrecisionAverage()
-             )
-            Out.prln("\t\t\t Precision increase on human-marked from " +
-                     annotDiff1.getPrecisionAverage() + " to " +
-                     annotDiff2.getPrecisionAverage());
-          else if (annotDiff1 != null && annotDiff2 != null)
-            Out.prln("\t\t\t Precision decrease on human-marked from " +
-                     annotDiff1.getPrecisionAverage() + " to " +
-                     annotDiff2.getPrecisionAverage());
-        }//if precision
+          AnnotationDiff annotDiff1 =
+            measureDocs(markedDoc, persDoc, annotType);
+          AnnotationDiff annotDiff2 =
+            measureDocs(markedDoc, cleanDoc, annotType);
 
-        //check the recall now
-        if (annotDiff.getRecallAverage() != 1.0) {
-          Out.prln("\t\t Recall different from that of stored grammar for: " +
-                  cleanDoc.getName() + " is " + annotDiff.getRecallAverage());
-          if (annotDiff1 != null &&
-              annotDiff2!= null &&
-              annotDiff1.getRecallAverage()<annotDiff2.getRecallAverage()
-             )
-            Out.prln("\t\t\t Recall increase on human-marked from " +
-                     annotDiff1.getRecallAverage() + " to " +
-                     annotDiff2.getRecallAverage());
-          else if (annotDiff1 != null && annotDiff2 != null)
-            Out.prln("\t\t\t Recall decrease on human-marked from " +
-                     annotDiff1.getRecallAverage() + " to " +
-                     annotDiff2.getRecallAverage());
+          //check the precision first
+          if (annotDiff.getPrecisionAverage() != 1.0) {
+            Out.prln("\t\t\t Precision different from that of stored grammar for: " +
+                    cleanDoc.getName() + " is " + annotDiff.getPrecisionAverage());
+            if (annotDiff1 != null &&
+                annotDiff2!= null &&
+                annotDiff1.getPrecisionAverage()<annotDiff2.getPrecisionAverage()
+               )
+              Out.prln("\t\t\t\t Precision increase on human-marked from " +
+                       annotDiff1.getPrecisionAverage() + " to " +
+                       annotDiff2.getPrecisionAverage());
+            else if (annotDiff1 != null && annotDiff2 != null)
+              Out.prln("\t\t\t\t Precision decrease on human-marked from " +
+                       annotDiff1.getPrecisionAverage() + " to " +
+                       annotDiff2.getPrecisionAverage());
+          }//if precision
 
-        }//if recall
+          //check the recall now
+          if (annotDiff.getRecallAverage() != 1.0) {
+            Out.prln("\t\t\t Recall different from that of stored grammar for: " +
+                    cleanDoc.getName() + " is " + annotDiff.getRecallAverage());
+            if (annotDiff1 != null &&
+                annotDiff2!= null &&
+                annotDiff1.getRecallAverage()<annotDiff2.getRecallAverage()
+               )
+              Out.prln("\t\t\t\t Recall increase on human-marked from " +
+                       annotDiff1.getRecallAverage() + " to " +
+                       annotDiff2.getRecallAverage());
+            else if (annotDiff1 != null && annotDiff2 != null)
+              Out.prln("\t\t\t\t Recall decrease on human-marked from " +
+                       annotDiff1.getRecallAverage() + " to " +
+                       annotDiff2.getRecallAverage());
 
-      }//if the f-measure is not 1.0
+          }//if recall
 
-    }//if clean doc can be processed
+        }//if the f-measure is not 1.0
+      }//for loop through annotation types
+
+    } else if (markedDoc != null) {
+
+      for (int jj= 0; jj< annotTypes.size(); jj++) {
+        String annotType = (String) annotTypes.get(jj);
+
+        AnnotationDiff annotDiff=measureDocs(markedDoc, persDoc, annotType);
+        //we don't have this annotation type in this document
+        if (annotDiff == null)
+          continue;
+
+        if (annotDiff.getFMeasureAverage() != 1.0) {
+          Out.prln("\t\t Annotation type: " + annotType);
+
+          //check the precision first
+          if (annotDiff.getPrecisionAverage() != 1.0) {
+            Out.prln("\t\t\t Precision different from that of human annotations for: " +
+                    cleanDoc.getName() + " is " + annotDiff.getPrecisionAverage());
+          }//if precision
+
+          //check the recall now
+          if (annotDiff.getRecallAverage() != 1.0) {
+            Out.prln("\t\t\t Recall different from that of human annotations for: " +
+                    cleanDoc.getName() + " is " + annotDiff.getRecallAverage());
+          }//if recall
+
+        }//if the f-measure is not 1.0
+      }//for loop through annotation types
+
+    }//if
+
+
 
   }
 
@@ -394,6 +468,9 @@ public class CorpusBenchmarkTool {
       throws ResourceInstantiationException {
 
     if (keyDoc == null || respDoc == null)
+      return null;
+
+    if (keyDoc.getAnnotations().get(annotType) == null)
       return null;
 
     // create the annotation schema needed for AnnotationDiff
@@ -423,6 +500,7 @@ public class CorpusBenchmarkTool {
    */
   private File startDir;
   private File currDir;
+  private static List annotTypes;
 
   private DefaultTokeniser tokeniser;
   private DefaultGazetteer gazetteer;
@@ -436,6 +514,12 @@ public class CorpusBenchmarkTool {
    * run in evaluate mode
    */
   private boolean isGenerateMode = false;
+
+  /**
+   * If true, the corpus tool will evaluate only against the human-marked
+   * documents
+   */
+  private boolean isMarkedOnly = false;
 
   /** String to print when wrong command-line args */
   private static String usage =
