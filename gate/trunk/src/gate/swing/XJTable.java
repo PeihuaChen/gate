@@ -35,7 +35,9 @@ import javax.swing.table.TableModel;
  * <ul>
  * <li>sorting the table using the values from a column as keys</li>
  * <li>updating the widths of the columns so they accommodate the contents to
- * their preferred sizes.
+ * their preferred sizes.</li>
+ * <li>sizing the rows according to the preferred sizes of the renderers</li>
+ * <li>ability to hide columns</li>
  * </ul>
  * It uses a custom made model that stands between the table model set by the
  * user and the gui component. This middle model is responsible for sorting the
@@ -49,14 +51,6 @@ public class XJTable extends JTable{
   
   public XJTable(TableModel model){
     super(model);
-  }
-
-  /**
-   * Overrides some of the defaults as defined in JTable
-   */
-  protected void initializeLocalVars() {
-    super.initializeLocalVars();
-    setAutoResizeMode(AUTO_RESIZE_OFF);
   }
   
   public void setModel(TableModel dataModel) {
