@@ -9,13 +9,9 @@ import java.awt.event.*;
 import java.net.*;
 import java.io.*;
 
-
-import pcffont.*;
-
-
+import guk.pcffont.*;
 
 public class BasicUnicodeButtonUI extends BasicButtonUI {
-
 
   protected void paintText(Graphics g, JComponent c, Rectangle textRect, String text) {
     AbstractButton b = (AbstractButton) c;
@@ -55,38 +51,10 @@ public class BasicUnicodeButtonUI extends BasicButtonUI {
   }//protected void paintText()
 
 
-
-
-  private static String fontBase = "file:///z:/ue/jmutt/fonts/";
-
-  private static String imBase =  "file:///z:/ue/jmutt/im/";
   private static PCFUnicodeFontSet ufont;
 
-  static {
-    URL fonturl = null;
-    //
-    // Set up the character info package.
-    //
-    try {
-        UCData.ucdata_load(new URL(fontBase),
-                           UCData.UCDATA_CTYPE|UCData.UCDATA_RECOMP);
-    } catch (MalformedURLException malfu) {}
-
-    //
-    // Load the font.
-    //
-    try {
-        fonturl = new URL(fontBase + "basic.fst");
-    } catch (MalformedURLException mue) {
-        System.err.println("Unable to load: "+fontBase+"basic.fst");
-        System.exit(1);
-    }
-
-    try {
-        ufont = new PCFUnicodeFontSet(fonturl.openStream(), fontBase);
-    } catch (IOException ie) {
-        System.err.println("Unable to load the font: " + fonturl);
-//        System.exit(1);
-    }
+  static{
+    ufont = guk.Tools.getFontSet();
   }
+
 }
