@@ -16,7 +16,7 @@
 
 Phase:	Name
 Input: Token Lookup Title FirstPerson
-Options: control = appelt debug = true
+Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
 
@@ -83,12 +83,7 @@ Macro: PREFIX
  )
 )
 
-Macro: DET
-(
- ({Token.string == "A"} | {Token.string == "a"} |
-  {Token.string == "The"} |{Token.string == "the"}|
-  {Token.string == "One"} |{Token.string == "one"})
-)
+
 
 
 ///////////////////////////////////////////////////////////
@@ -125,14 +120,13 @@ annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
-
-Rule:	GazPersonFirst
-Priority: 20
+Rule:	TheGazPersonFirst
+Priority: 200
 (
  {Token.category == DT}|
  {Token.category == PRP}|
  {Token.category == RB}
-)?
+)
 (
  {FirstPerson}
 )
@@ -152,6 +146,33 @@ annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 //annotations.removeAll(person);
 }
+
+
+Rule:	GazPersonFirst
+Priority: 20
+(
+ {FirstPerson}
+)
+:person 
+( 
+ {Token.orth == upperInitial, Token.length == "1"}
+)?
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("gender"));
+features.put("kind", "personName");
+features.put("rule", "GazPersonFirst");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+//annotations.removeAll(person);
+}
+
+
+
+
 
 Rule: PersonFirstContext
 Priority: 30
@@ -578,11 +599,40 @@ Macro: CHURCH
 )
 
 /////////////////////////////////////////////////////////////
-Rule:	GazOrganization
-Priority: 145
+Rule:	TheGazOrganization
+Priority: 245
 (
  {Token.category == DT}
-)?
+)
+(
+{Lookup.majorType == organization}
+)
+:orgName -->  
+ {
+ gate.FeatureMap features = Factory.newFeatureMap();
+// create an annotation set consisting of all the annotations for org 
+gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
+// create an annotation set consisting of the annotation matching Lookup
+gate.AnnotationSet org = (gate.AnnotationSet)orgSet.get("Lookup");
+// if the annotation type Lookup doesn't exist, do nothing
+if (org != null && org.size()>0)
+{
+// if it does exist, take the first element in the set
+  gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+//propagate minorType feature (and value) from org
+  features.put("orgType", orgAnn.getFeatures().get("minorType"));
+}
+// create some new features
+  features.put("rule", "GazOrganization");
+// create a TempOrg annotation and add the features we've created
+annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+features);
+}
+
+
+Rule:	GazOrganization
+Priority: 145
+
 (
 {Lookup.majorType == organization}
 )
@@ -621,14 +671,37 @@ Priority: 50
   :orgName.TempOrganization = {kind = "orgName", rule=LocOrganization}
 
 
-Rule:	OrgXandY
-Priority: 20
+Rule:	INOrgXandY
+Priority: 200
 
 // Bradford & Bingley
 // Bradford & Bingley Ltd
 (
  {Token.category == IN}
-)?
+)
+
+(
+ ({Token.category == NNP}
+  )+
+
+ {Token.string == "&"}
+
+ (
+  {Token.orth == upperInitial}
+ )+
+
+ (CDG)?
+
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandY"}
+
+Rule:	OrgXandY
+Priority: 20
+
+// Bradford & Bingley
+// Bradford & Bingley Ltd
+
 
 (
  ({Token.category == NNP}
@@ -682,7 +755,7 @@ Priority: 25
 :orgName -->
   :orgName.TempOrganization = {kind = "department", rule = "OrgDept"}
 
-Rule:	OrgXKey
+Rule:	TheOrgXKey
 Priority: 500
 
 // The Aaaa Ltd.
@@ -698,11 +771,26 @@ Priority: 500
  {Lookup.majorType == org_key}
  ({Lookup.majorType == org_ending})?
 )
-:foo
+:org
 -->
-{}
+:org.TempOrganization = {kind = "unknown", rule = "TheOrgXKey"}
 
+Rule:	OrgXKey
+Priority: 125
 
+// Aaaa Ltd.
+(
+  (UPPER)
+  (UPPER)?
+  (UPPER)?
+  (UPPER)?
+  (UPPER)?
+ {Lookup.majorType == org_key}
+ ({Lookup.majorType == org_ending})?
+)
+:org
+-->
+:org.TempOrganization = {kind = "unknown", rule = "TheOrgXKey"}
 
 
 Rule: NotOrgXEnding
@@ -743,7 +831,6 @@ Priority: 120
 
 // Coca Cola Co.
 
-
 (
   (UPPER)
   (UPPER)?
@@ -751,6 +838,27 @@ Priority: 120
 )
 :orgName -->
   :orgName.TempOrganization = {kind = "unknown", rule = "OrgXEnding"}
+
+Rule:	TheOrgXandYKey
+Priority: 220
+
+(
+ {Token.category == DT}
+)
+(
+ (UPPER)
+ (UPPER)?
+  (({Token.string == "and"} | 
+    {Token.string == "&"})
+   (UPPER)?
+   (UPPER)?
+   (UPPER)?
+  )
+ {Lookup.majorType == org_key}
+ ({Lookup.majorType == org_ending})?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandYKey"}
 
 
 
@@ -761,9 +869,7 @@ Priority: 120
 // Xxx Services Ltd. 
 // AA and BB Services Ltd.
 // but NOT A XXX Services Ltd.
-(
- {Token.category == DT}
-)?
+
 (
  (UPPER)
  (UPPER)?
@@ -821,17 +927,12 @@ Priority: 1000
   :orgName.Temp = {kind = "notorgName", rule = "NotOrgXBase"}
 
 
-Rule:	OrgXBase
-Priority: 130
-
-// same as OrgXKey but uses base instead of key
-// includes govern_key e.g. academy
-// Barclays Bank
-// Royal Academy of Art
+Rule:	TheOrgXBase
+Priority: 230
 
 (
  ({Token.category == DT}
- )?
+ )
 )
 (
  (
@@ -853,12 +954,62 @@ Priority: 130
 :orgName -->
   :orgName.TempOrganization = {kind = "unknown", rule = "OrgXBase"}
 
+
+Rule:	OrgXBase
+Priority: 130
+
+// same as OrgXKey but uses base instead of key
+// includes govern_key e.g. academy
+// Barclays Bank
+// Royal Academy of Art
+
+(
+ (
+  (UPPER)|
+  {Lookup.majorType == organization}
+ )
+ (UPPER)?
+ (UPPER)?
+ ({Lookup.majorType == org_base}|
+  {Lookup.majorType == govern_key}
+ )
+ (
+  {Token.string == "of"}
+  (UPPER)
+  (UPPER)?
+  (UPPER)?
+ )?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXBase"}
+
+Rule:	TheBaseofOrg
+Priority: 230
+
+(
+ {Token.category == DT}
+)
+(
+ ({Lookup.majorType == org_base}|
+  {Lookup.majorType == govern_key}
+ )
+ 
+ {Token.string == "of"}
+ ( 
+  {Token.category == DT}
+ )?
+ (UPPER)
+ (UPPER)?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "unknown", rule = "BaseofOrg"}
+
+
+
+
 Rule:	BaseofOrg
 Priority: 130
 
-(
- (DET)?
-)
 (
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}
@@ -913,7 +1064,7 @@ Priority: 130
 // overrides PersonFull
 
 (
- (FIRSTNAME )
+ (FIRSTNAME)
  ({Lookup.majorType == org_key}|
   {Lookup.majorType == org_base})
  ({Lookup.majorType == org_ending})?
@@ -1118,4 +1269,10 @@ Priority: 50
 :org
 -->
  :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
+
+
+
+
+
+
 
