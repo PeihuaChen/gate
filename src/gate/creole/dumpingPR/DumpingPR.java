@@ -31,6 +31,8 @@ import java.io.*;
 public class DumpingPR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
+  private static final boolean DEBUG = false;
+
   /**
    * A list of annotation types, which are to be dumped into the output file
    */
@@ -128,7 +130,25 @@ public class DumpingPR extends AbstractLanguageAnalyser
   } // execute()
 
   protected void write2File(AnnotationSet exportSet) {
-    File outputFile = new File(outputFileUrl.getFile());
+    File outputFile;
+    String source = (String) document.getFeatures().get("gate.SourceURL");
+    try {
+      URL sourceURL = new URL(source);
+      StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
+      tempBuff.insert(sourceURL.getFile().lastIndexOf("."), "_gate_output");
+//      tempBuff.insert(0, sourceURL.getPath());
+      String outputPath = tempBuff.toString();
+      if (DEBUG)
+        Out.prln(outputPath);
+      outputFile = new File(outputPath);
+    } catch (java.net.MalformedURLException ex) {
+      if (outputFileUrl != null)
+        outputFile = new File(outputFileUrl.getFile());
+      else
+        throw new GateRuntimeException("Cannot export GATE annotations because"
+                     + "document does not have a valid source URL.");
+    }
+
     try {
       // Prepare to write into the xmlFile using UTF-8 encoding
       OutputStreamWriter writer = new OutputStreamWriter(
