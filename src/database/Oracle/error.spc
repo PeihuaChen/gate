@@ -71,6 +71,9 @@ create or replace package error is
 
   x_invalid_annotation_type EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_invalid_annotation_type, -20114);
+
+  x_invalid_feature_type EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_feature_type, -20115);
                            
 end error;
 /
