@@ -179,6 +179,7 @@ public class TestXml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
     );
+
     assert( "Bad document Format was produced. XmlDocumentFormat was expected",
             docFormat instanceof gate.corpora.XmlDocumentFormat
           );
@@ -187,9 +188,8 @@ public class TestXml extends TestCase
     docFormat.setMarkupElementsMap(markupElementsMap);
     docFormat.setElement2StringMap(anElement2StringMap);
 
-    docFormat.unpackMarkup (doc,"DocumentContent");
+    docFormat.unpackMarkup (doc);
     AnnotationSet annotSet = doc.getAnnotations();
-
 
   } // testUnpackMarkup()
 

@@ -214,6 +214,9 @@ public class GateFormatXmlDocumentHandler extends HandlerBase
        // Put them into the map
        documentFeatures.put(attName,attValue);
       }// End For
+
+      // Set the document features
+      doc.setFeatures(documentFeatures);
     }// End if
   }// processGateDocumentElement
 

@@ -152,7 +152,7 @@ public class TestGate {
     try {
       // Test bench
       // Just copy the test suite you want to activate
-//      suite.addTest(TestHtml.suite());
+//      suite.addTest(TestXml.suite());
 
       // Test suite
 //*
