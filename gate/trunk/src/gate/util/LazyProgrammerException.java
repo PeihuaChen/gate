@@ -34,7 +34,7 @@ public class LazyProgrammerException extends RuntimeException {
   /** In a fit of complete laziness we didn't even document this
     * class properly.
     */
-  String defaultMessage = 
+  static String defaultMessage = 
     " It was Valentin's fault. I never touched it.";
 
 } // LazyProgrammerException
