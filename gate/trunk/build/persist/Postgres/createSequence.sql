@@ -22,4 +22,58 @@ CREATE SEQUENCE "SEQ_FT_ID"
        minvalue 1
        cache 20;
 
+CREATE SEQUENCE "SEQ_FK_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
 
+CREATE SEQUENCE "SEQ_USR_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
+
+CREATE SEQUENCE "SEQ_GRP_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
+
+CREATE SEQUENCE "SEQ_UGRP_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
+
+CREATE SEQUENCE "SEQ_ENC_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
+
+CREATE SEQUENCE "SEQ_DC_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
+
+CREATE SEQUENCE "SEQ_LRTP_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
+
+CREATE SEQUENCE "SEQ_LR_ID"
+       start 1
+       increment 1
+       maxvalue 2147483647
+       minvalue 1
+       cache 20 ;
