@@ -3,19 +3,33 @@
 <!--JBuilder XML Project-->
 <project>
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime" name="ConfigurationCount" value="1" />
+  <property category="runtime" name="ConfigurationCount" value="3" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint" />
   <property category="runtime.0" name="jsprunner.docbase" value="." />
   <property category="runtime.0" name="jsprunner.jspfile" value="W%|/JBuilder4/bin" />
-  <property category="runtime.1" name="ConfigurationName" value="debug (-t)" />
+  <property category="runtime.1" name="ConfigurationName" value="Text mode (-t)" />
   <property category="runtime.1" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.1" name="application.class" value="gate.TestGate" />
   <property category="runtime.1" name="application.parameters" value="-t" />
-  <property category="runtime.1" name="application.vmparameters" value="-Djava.compiler=NONE -classpath &quot;z:\gate2\build\gate.jar&quot;" />
+  <property category="runtime.1" name="application.vmparameters" value="-Djava.compiler=NONE" />
   <property category="runtime.1" name="jsprunner.docbase" value="." />
   <property category="runtime.1" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.2" name="ConfigurationName" value="Text mode, no net connection (-t -n)" />
+  <property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.2" name="application.class" value="gate.TestGate" />
+  <property category="runtime.2" name="application.parameters" value="-t -n" />
+  <property category="runtime.2" name="application.vmparameters" value="-Djava.compiler=NONE" />
+  <property category="runtime.2" name="jsprunner.docbase" value="." />
+  <property category="runtime.2" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.3" name="ConfigurationName" value="No net connection (-n)" />
+  <property category="runtime.3" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.3" name="application.class" value="gate.TestGate" />
+  <property category="runtime.3" name="application.parameters" value="-n" />
+  <property category="runtime.3" name="application.vmparameters" value="-Djava.compiler=NONE" />
+  <property category="runtime.3" name="jsprunner.docbase" value="." />
+  <property category="runtime.3" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
   <property category="sys" name="AuthorLabel" value="@author" />
   <property category="sys" name="BackupPath" value="bak" />
   <property category="sys" name="BeansInstantiate" value="false" />
