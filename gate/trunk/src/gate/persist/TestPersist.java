@@ -82,8 +82,7 @@ public class TestPersist extends TestCase
     // save the document
     doc = (Document) sds.adopt(doc);
     sds.sync(doc);
-    String lrPersistenceId =
-      (String) doc.getFeatures().get(DataStore.LR_ID_FEATURE_NAME);
+    Object lrPersistenceId = doc.getLRPersistenceId();
 
     // test the getLrTypes method
     List lrTypes = sds.getLrTypes();
@@ -146,8 +145,7 @@ public class TestPersist extends TestCase
 
     // remember the persistence ID for reading back
     // (in the normal case these ids are obtained by DataStore.getLrIds(type))
-    String lrPersistenceId =
-      (String) doc.getFeatures().get(DataStore.LR_ID_FEATURE_NAME);
+    Object lrPersistenceId = doc.getLRPersistenceId();
 
     // read the document back
     FeatureMap features = Factory.newFeatureMap();
@@ -273,8 +271,7 @@ public class TestPersist extends TestCase
 
     // remember the persistence ID for reading back
     // (in the normal case these ids are obtained by DataStore.getLrIds(type))
-    String lrPersistenceId =
-      (String) doc.getFeatures().get(DataStore.LR_ID_FEATURE_NAME);
+    Object lrPersistenceId = doc.getLRPersistenceId();
 
     // delete document back
     sds.delete("gate.corpora.DocumentImpl", lrPersistenceId);
