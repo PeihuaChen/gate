@@ -110,7 +110,7 @@
   <!-- creole.xml for namematch -->
     <RESOURCE>
       <NAME>Arabic OrthoMatcher</NAME>
-      <JAR>chinese.jar</JAR>
+      <JAR>arabic.jar</JAR>
       <CLASS>arabic.ArabicOrthoMatcher</CLASS>
       <COMMENT>Chinese Orthomatcher</COMMENT>
       <PARAMETER DEFAULT="application/orthomatcher/listsNM.def"
