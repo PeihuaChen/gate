@@ -24,7 +24,18 @@ public class OffsetComparator implements Comparator {
   public int compare(Object o1, Object o2){
     Annotation a1 = (Annotation)o1;
     Annotation a2 = (Annotation)o2;
-    return a1.getStartNode().getOffset().compareTo(
-            a2.getStartNode().getOffset());
+    int result;
+
+    // compare start offsets
+    result = a1.getStartNode().getOffset().compareTo(
+        a2.getStartNode().getOffset());
+
+    // if start offsets are equal compare end offsets
+    if(result == 0) {
+      result = a1.getEndNode().getOffset().compareTo(
+          a2.getEndNode().getOffset());
+    } // if
+
+    return result;
   }
 }
