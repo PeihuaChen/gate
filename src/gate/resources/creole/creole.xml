@@ -479,6 +479,8 @@
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationTypes" RUNTIME="true"
       OPTIONAL="true">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="setsToKeep" RUNTIME="true"
+      OPTIONAL="true">java.util.ArrayList</PARAMETER>
     </RESOURCE>
 
     <RESOURCE>
