@@ -35,6 +35,13 @@ test:
 #	  junit.ui.TestRunner gate.TestGate
 #	  junit.ui.LoadingTestRunner gate.TestGate
 
+testjape:
+	./jdk.sh java -Djava.compiler=none $(CP) \
+	  junit.textui.TestRunner gate.jape.TestJape
+	
+
+jarupdate:
+	cd ../classes && ../build/jdk.sh jar uvf ../build/gate.jar gate
 jar:
 	rm -f gate.jar
 	cd ../classes && ../build/jdk.sh jar cvf ../build/gate.jar gate
@@ -60,6 +67,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.21  2000/02/25 15:16:11  hamish
+# couple of convenience targets
+#
 # Revision 1.20  2000/02/23 16:59:01  hamish
 # added db pkg
 #
