@@ -61,23 +61,14 @@ public class Main {
       MainFrame frame = new MainFrame();
       long startTime = System.currentTimeMillis();
       Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
-      //Splash splash = new Splash(new JLabel("sdzgsdrgs"));
       splash.show();
 
       Gate.init();
-      //find out the version number
-      String version = "Gate ";
-      try{
-        BufferedReader reader = new BufferedReader(
-                                  new InputStreamReader(
-                                  Files.getGateResourceAsStream("version.txt")));
-        version += reader.readLine();
-      }catch(IOException ioe){}
 
       if(DEBUG) Out.prln("constructing GUI");
       // run the GUI
 
-      frame.setTitle(version);
+      frame.setTitle(name + " " + version);
       //Validate frames that have preset sizes
       frame.validate();
       //Center the window
@@ -104,10 +95,29 @@ public class Main {
       splash.hide();
     }
 
-    // shut down with normal exit status
-    //System.exit(STATUS_NORMAL);
-
   } // main
+
+  static{
+      //find out the version number
+      try{
+        BufferedReader reader = new BufferedReader(
+                                  new InputStreamReader(
+                                  Files.getGateResourceAsStream("version.txt")));
+        Main.version = reader.readLine();
+      }catch(IOException ioe){
+        Main.version = "2.0";
+      }
+
+      //find out the build number
+      try{
+        BufferedReader reader = new BufferedReader(
+                                  new InputStreamReader(
+                                  Files.getGateResourceAsStream("build.txt")));
+        Main.build = reader.readLine();
+      }catch(IOException ioe){
+        Main.build = "0000";
+      }
+  }
 
 
 /**
@@ -222,6 +232,9 @@ public class Main {
   /** Verbose? */
   private static boolean verbose = false;
 
+  public static String name = "Gate";
+  public static String version;
+  public static String build;
 
   /** Process arguments and set up member fields appropriately.
     * Will shut down the process (via System.exit) if there are
