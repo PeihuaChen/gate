@@ -263,9 +263,16 @@ public abstract class Factory {
       res.setFeatures(fm);
     }
 
+    // make the meta-data available in case the resource wants to
+    // query it during initialisation
+    currentResourceData = resData;
+
     // initialise the resource
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
     res = res.init();
+
+    // remove the current metadata
+    currentResourceData = null;
 
     // remove the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
@@ -291,6 +298,7 @@ public abstract class Factory {
     creoleProxy.fireResourceLoaded(
       new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
     );
+
     return res;
   } // create(resourceClassName, parameterValues, features, listeners)
 
@@ -640,6 +648,18 @@ public abstract class Factory {
   static {
     creoleProxy = new CreoleProxy();
   } // static initialiser
+
+  /** The current metadata during resource initialisation */
+  protected static ResourceData currentResourceData;
+
+  /**
+   * Get the resource metadata that is currently being initialised.
+   * (When a resource is not under intialisation - i.e. in process of
+   * performing its {@link Resource#init()} method - this will be null.
+   */
+  public static ResourceData getCurrentResourceData() {
+    return currentResourceData;
+  } // getCurrentResourceData()
 
 } // abstract Factory
 
