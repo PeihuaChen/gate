@@ -65,6 +65,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation[] pleonasticIt;
   private HashMap personGender;
 
+  private HashMap anaphor2antecedent;
+
 
   private static final FeatureMap PRP_RESTRICTION;
 
@@ -77,6 +79,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   public PronominalCoref() {
 
     this.personGender = new HashMap();
+    this.anaphor2antecedent = new HashMap();
     this.qtTransducer = new gate.creole.Transducer();
     this.pleonTransducer = new gate.creole.Transducer();
   }
@@ -232,21 +235,16 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //11. find antecedent (if any) for pronoun
       Annotation antc = findAntecedent(currPronoun,prnSentIndex);
 
-      //12.add to COREF annotation set
-      corefSet = this.document.getAnnotations("COREF");
-      Long antOffset = new Long(0);
-
-      if (null!= antc) {
-        antOffset = antc.getStartNode().getOffset();
-      }
-
-      //13. create coref annotation
-      FeatureMap features = new SimpleFeatureMapImpl();
-      features.put("antecedent",antOffset);
-      corefSet.add(currPronoun.getStartNode(),currPronoun.getEndNode(),"COREF",features);
+      //12. add to the ana2ant hashtable
+      this.anaphor2antecedent.put(currPronoun,antc);
     }
 
     //done
+  }
+
+
+  public HashMap getResolvedAnaphora() {
+    return this.anaphor2antecedent;
   }
 
   private Annotation findAntecedent(Annotation currPronoun,int prnSentIndex) {
@@ -606,6 +604,7 @@ System.out.println("PLEONASM...");
 
     //0.5 cleanup
     this.personGender.clear();
+    this.anaphor2antecedent.clear();
 
     //1.get all annotation in the default set
     this.defaultAnnotations = this.document.getAnnotations();
