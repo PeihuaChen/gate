@@ -26,6 +26,7 @@ import gate.*;
 import gate.util.*;
 import gate.event.*;
 import gate.security.*;
+import gate.security.SecurityException;
 
 
 public abstract class JDBCDataStore extends AbstractFeatureBearer
@@ -230,7 +231,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
   public abstract LanguageResource getLr(String lrClassName, Object lrPersistenceId)
-  throws PersistenceException;
+  throws PersistenceException,SecurityException;
 
   /** Get a list of the types of LR that are present in the data store. */
   public abstract List getLrTypes() throws PersistenceException;

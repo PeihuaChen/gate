@@ -971,7 +971,7 @@ public class OracleDataStore extends JDBCDataStore {
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
-  throws PersistenceException {
+  throws PersistenceException,SecurityException {
 
     if (lrClassName.equals(DBHelper.DOCUMENT_CLASS)) {
       Document docResult = null;
@@ -1153,31 +1153,12 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Object lrID, Session session)
-    throws PersistenceException, SecurityException{
-
-    return canAccessLR((Long) lrID,READ_ACCESS);
-  }
-
-  /**
-   * Checks if the user (identified by the sessionID)
-   *  has read access to the LR
-   */
   public boolean canReadLR(Object lrID)
     throws PersistenceException, SecurityException{
 
     return canAccessLR((Long) lrID,READ_ACCESS);
   }
 
-  /**
-   * Checks if the user (identified by the sessionID)
-   * has write access to the LR
-   */
-  public boolean canWriteLR(Object lrID, Session session)
-    throws PersistenceException, SecurityException{
-
-    return canAccessLR((Long) lrID,WRITE_ACCESS);
-  }
 
   /**
    * Checks if the user (identified by the sessionID)
@@ -2614,6 +2595,23 @@ public class OracleDataStore extends JDBCDataStore {
         _sync(dbDoc,false);
       }
     }
+  }
+
+  /**
+   * Try to acquire exlusive lock on a resource from the persistent store.
+   * Always call unlockLR() when the lock is no longer needed
+   */
+  public boolean lockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  public void unlockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    throw new MethodNotImplementedException();
   }
 
 }
