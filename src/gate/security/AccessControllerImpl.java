@@ -45,9 +45,6 @@ public class AccessControllerImpl
   private Connection  jdbcConn;
   private URL         jdbcURL;
 
-//private Vector      users;
-//  private Vector      groups;
-
   private HashMap     usersByID;
   private HashMap     usersByName;
 
@@ -362,6 +359,29 @@ public class AccessControllerImpl
                       0);
 
     fireObjectDeletedEvent(e);
+
+    //6. this one is tricky: invalidate all sessions
+    //that are for user logged in as members of this group
+    Set sessionMappings = this.sessions.entrySet();
+    Iterator itSessions = sessionMappings.iterator();
+
+    //6.1 to avoid ConcurrentModificationException store the sessions
+    //found in a temp vector
+    Vector sessionsToDelete = new Vector();
+    while (itSessions.hasNext()) {
+      Map.Entry mapEntry = (Map.Entry)itSessions.next();
+      SessionImpl  ses = (SessionImpl)mapEntry.getValue();
+      if (ses.getGroup().equals(grp)) {
+        //logout(ses); --> this will cause ConcurrentModificationException
+        sessionsToDelete.add(ses);
+      }
+    }
+    //6.2 now delete sessions
+    for (int i=0; i< sessionsToDelete.size(); i++) {
+      Session ses = (Session)sessionsToDelete.elementAt(i);
+      logout(ses);
+    }
+
   }
 
   /** --- */
@@ -469,9 +489,6 @@ public class AccessControllerImpl
     this.usersByID.remove(usr.getID());
     this.usersByName.remove(usr.getName());
 
-    //5. delete the user's session
-    logout(s);
-
     //6. notify all other listeners
     //this one is tricky - sent OBJECT_DELETED event to all who care
     //but note that the SOURCE is not us but the object being deleted
@@ -481,6 +498,28 @@ public class AccessControllerImpl
                       0);
 
     fireObjectDeletedEvent(e);
+
+    //7. this one is tricky: invalidate all sessions for the user
+    Set sessionMappings = this.sessions.entrySet();
+    Iterator itSessions = sessionMappings.iterator();
+
+    //7.1 to avoid ConcurrentModificationException store the sessions
+    //found in a temp vector
+    Vector sessionsToDelete = new Vector();
+    while (itSessions.hasNext()) {
+      Map.Entry mapEntry = (Map.Entry)itSessions.next();
+      SessionImpl  ses = (SessionImpl)mapEntry.getValue();
+      if (ses.getUser().equals(usr)) {
+        //logout(ses); --> this will cause ConcurrentModificationException
+        sessionsToDelete.add(ses);
+      }
+    }
+    //7.2 now delete sessions
+    for (int i=0; i< sessionsToDelete.size(); i++) {
+      Session ses = (Session)sessionsToDelete.elementAt(i);
+      logout(ses);
+    }
+
   }
 
 
@@ -558,7 +597,7 @@ public class AccessControllerImpl
                                     DEFAULT_SESSION_TIMEOUT_MIN,
                                     isPrivilegedUser);
 
-    //4. add session to sessions collection
+    //4. add session to session collections
     this.sessions.put(s.getID(),s);
 
     //5. set the session timeouts and keep alives
@@ -575,15 +614,17 @@ public class AccessControllerImpl
     Assert.assertNotNull(s);
     Long SID = s.getID();
 
+    //1.sessions
     Session removedSession = (Session)this.sessions.remove(SID);
     Assert.assertNotNull(removedSession);
 
+    //2. keep alives
     Object lastUsed = this.sessionLastUsed.remove(SID);
     Assert.assertNotNull(lastUsed);
 
+    //3. timeouts
     Object timeout = this.sessionTimeouts.remove(SID);
     Assert.assertNotNull(timeout);
-
   }
 
   /** --- */
@@ -611,7 +652,18 @@ public class AccessControllerImpl
     long lastUsedMin = (currTimeMS-lastUsedMS)/(1000*60);
 
     if (lastUsedMin > sessTimeoutMin) {
-      //session expired
+      //oops, session expired
+      //invalidate it and fail
+      try {
+        logout(s);
+      }
+      catch(SecurityException se) {
+        //well, this can happen only if logout() was called together
+        //with isValidSesion() but the possibility it too low to care
+        //and synchronize access
+        ;
+      }
+
       return false;
     }
 
