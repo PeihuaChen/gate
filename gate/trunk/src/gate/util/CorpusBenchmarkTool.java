@@ -60,6 +60,12 @@ public class CorpusBenchmarkTool {
 
   public void execute() {
     execute(startDir);
+    if (application != null) {
+      Iterator iter = new ArrayList(application.getPRs()).iterator();
+      while (iter.hasNext())
+        Factory.deleteResource((Resource) iter.next());
+      Factory.deleteResource(application);
+    }
   }
 
   public void init() {
@@ -76,14 +82,18 @@ public class CorpusBenchmarkTool {
           Out.prln("New threshold is: " + this.threshold + "<P>\n");
         }
         String setName = this.configs.getProperty("annotSetName");
-        if (setName != null && !setName.equals(""))
+        if (setName != null && !setName.equals("")) {
+          Out.prln("Annotation set in marked docs is: " + setName + " <P>\n");
           this.annotSetName = setName;
+        }
         setName = this.configs.getProperty("outputSetName");
-        if (setName != null && !setName.equals(""))
+        if (setName != null && !setName.equals("")) {
+          Out.prln("Annotation set in processed docs is: " + setName + " <P>\n");
           this.outputSetName = setName;
+        }
         String types = this.configs.getProperty("annotTypes");
         if (types != null && !types.equals("")) {
-          Out.prln("Using annotation types from properties file. <P>\n");
+          Out.prln("Using annotation types from the properties file. <P>\n");
           StringTokenizer strTok = new StringTokenizer(types, ";");
           annotTypes = new ArrayList();
           while (strTok.hasMoreTokens())
@@ -184,6 +194,9 @@ public class CorpusBenchmarkTool {
       } else if (args[i].equals("-marked_stored")) {
         Out.prln("Evaluating stored documents against human-annotated...<P>");
         corpusTool.setMarkedStored(true);
+      } else if (args[i].equals("-marked_ds")) {
+        Out.prln("Looking for marked docs in a datastore...<P>");
+        corpusTool.setMarkedDS(true);
       } else if (args[i].equals("-verbose")) {
         Out.prln("Running in verbose mode. Will generate annotation " +
           "information when precision/recall are lower than " +
@@ -257,6 +270,14 @@ public class CorpusBenchmarkTool {
 
   public boolean getMarkedClean() {
     return isMarkedClean;
+  }//
+
+  public void setMarkedDS(boolean mode) {
+    isMarkedDS = mode;
+  }//
+
+  public boolean getMarkedDS() {
+    return isMarkedDS;
   }//
 
   public void setApplicationFile(File newAppFile) {
@@ -442,23 +463,53 @@ public class CorpusBenchmarkTool {
 
         //try finding the marked document
         StringBuffer docName = new StringBuffer(persDoc.getName());
-        docName.replace(
-          persDoc.getName().lastIndexOf("."),
-          docName.length(),
-          ".xml");
-        File markedDocFile = new File(markedDir, docName.toString());
-        if (! processMarked || ! markedDocFile.exists()) {
-          Out.prln("Warning: Cannot find human-annotated document " +
-                   markedDocFile + " in " + markedDir);
-        } else {
-          FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+        if (! isMarkedDS) {
+          docName.replace(
+            persDoc.getName().lastIndexOf("."),
+            docName.length(),
+            ".xml");
+          File markedDocFile = new File(markedDir, docName.toString());
+          if (! processMarked || ! markedDocFile.exists()) {
+            Out.prln("Warning: Cannot find human-annotated document " +
+                     markedDocFile + " in " + markedDir);
+          } else {
+            FeatureMap params = Factory.newFeatureMap();
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
-          // create the document
-          markedDoc = (Document) Factory.createResource(
-                                   "gate.corpora.DocumentImpl", params);
-          markedDoc.setName(persDoc.getName());
+            // create the document
+            markedDoc = (Document) Factory.createResource(
+                                     "gate.corpora.DocumentImpl", params);
+            markedDoc.setName(persDoc.getName());
+          }
+        } else {
+          //open marked from a DS
+          //open the data store
+          DataStore sds1 = Factory.openDataStore
+                          ("gate.persist.SerialDataStore",
+                           markedDir.toURL().toExternalForm());
+
+          List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
+          boolean found = false;
+          int k = 0;
+          //search for the marked doc with the same name
+          while (k < lrIDs1.size() && !found) {
+            String docID1 = (String) lrIDs1.get(k);
+
+            //read the stored document
+            FeatureMap features1 = Factory.newFeatureMap();
+            features1.put(DataStore.DATASTORE_FEATURE_NAME, sds1);
+            features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
+            Document tempDoc = (Document) Factory.createResource(
+                                        "gate.corpora.DocumentImpl",
+                                        features1);
+            //check whether this is our doc
+            if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
+                 endsWith(persDoc.getName())) {
+              found = true;
+              markedDoc = tempDoc;
+            } else k++;
+          }
         }
 
         evaluateDocuments(persDoc, cleanDoc, markedDoc);
@@ -507,25 +558,62 @@ public class CorpusBenchmarkTool {
 
         Out.prln("<H2>" + persDoc.getName() + "</H2>");
 
-        //try finding the marked document
-        StringBuffer docName = new StringBuffer(persDoc.getName());
-        docName.replace(
-          persDoc.getName().lastIndexOf("."),
-          docName.length(),
-          ".xml");
-        File markedDocFile = new File(markedDir, docName.toString());
-        if (! markedDocFile.exists()) {
-          Out.prln("Warning: Cannot find human-annotated document " +
-                   markedDocFile + " in " + markedDir);
-        } else {
-          FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
-          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+        if (! this.isMarkedDS) { //try finding the marked document as file
+          StringBuffer docName = new StringBuffer(persDoc.getName());
+          docName.replace(
+            persDoc.getName().lastIndexOf("."),
+            docName.length(),
+            ".xml");
+          File markedDocFile = new File(markedDir, docName.toString());
+          if (! markedDocFile.exists()) {
+            Out.prln("Warning: Cannot find human-annotated document " +
+                     markedDocFile + " in " + markedDir);
+          } else {
+            FeatureMap params = Factory.newFeatureMap();
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
+            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
 
-          // create the document
-          markedDoc = (Document) Factory.createResource(
-                                   "gate.corpora.DocumentImpl", params);
-          markedDoc.setName(persDoc.getName());
+            // create the document
+            markedDoc = (Document) Factory.createResource(
+                                     "gate.corpora.DocumentImpl", params);
+            markedDoc.setName(persDoc.getName());
+          }//find marked as file
+        } else {
+          try {
+            //open marked from a DS
+            //open the data store
+            DataStore sds1 = Factory.openDataStore
+                            ("gate.persist.SerialDataStore",
+                             markedDir.toURL().toExternalForm());
+
+            List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
+            boolean found = false;
+            int k = 0;
+            //search for the marked doc with the same name
+            while (k < lrIDs1.size() && !found) {
+              String docID1 = (String) lrIDs1.get(k);
+
+              //read the stored document
+              FeatureMap features1 = Factory.newFeatureMap();
+              features1.put(DataStore.DATASTORE_FEATURE_NAME, sds1);
+              features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
+              Document tempDoc = (Document) Factory.createResource(
+                                          "gate.corpora.DocumentImpl",
+                                          features1);
+              //check whether this is our doc
+              if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
+                   endsWith(persDoc.getName())) {
+                found = true;
+                markedDoc = tempDoc;
+              } else k++;
+            }
+          } catch (java.net.MalformedURLException ex) {
+            Out.prln("Error finding marked directory " + markedDir.getAbsolutePath());
+          } catch (gate.persist.PersistenceException ex1) {
+            Out.prln("Error opening marked as a datastore (-marked_ds specified)");
+          } catch (gate.creole.ResourceInstantiationException ex2) {
+            Out.prln("Error opening marked as a datastore (-marked_ds specified)");
+          }
         }
 
         evaluateDocuments(persDoc, cleanDoc, markedDoc);
@@ -583,39 +671,77 @@ public class CorpusBenchmarkTool {
       Out.prln("<TD>" + cleanDocs[i].getName() + "</TD>");
 
       //try finding the marked document
-      StringBuffer docName = new StringBuffer(cleanDoc.getName());
-      docName.replace(
-        cleanDoc.getName().lastIndexOf("."),
-        docName.length(),
-        ".xml");
-      File markedDocFile = new File(markedDir, docName.toString());
-      if (! markedDocFile.exists()) {
-        Out.prln("Warning: Cannot find human-annotated document " +
-                 markedDocFile + " in " + markedDir);
-        continue;
+      if (! isMarkedDS) {
+        StringBuffer docName = new StringBuffer(cleanDoc.getName());
+        docName.replace(
+          cleanDoc.getName().lastIndexOf("."),
+          docName.length(),
+          ".xml");
+        File markedDocFile = new File(markedDir, docName.toString());
+        if (! markedDocFile.exists()) {
+          Out.prln("Warning: Cannot find human-annotated document " +
+                   markedDocFile + " in " + markedDir);
+          continue;
+        } else {
+          params = Factory.newFeatureMap();
+          try {
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
+          } catch (java.net.MalformedURLException ex) {
+            Out.prln("Cannot create document from file: " +
+              markedDocFile.getAbsolutePath());
+            continue;
+          }
+          params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
+
+          // create the document
+          try {
+            markedDoc = (Document) Factory.createResource(
+                                   "gate.corpora.DocumentImpl", params,
+                                   null, cleanDoc.getName());
+          } catch (gate.creole.ResourceInstantiationException ex) {
+            Out.prln("Cannot create document from file: " +
+              markedDocFile.getAbsolutePath());
+            continue;
+          }
+
+        }//if markedDoc exists
       } else {
-        params = Factory.newFeatureMap();
         try {
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, markedDocFile.toURL());
+          //open marked from a DS
+          //open the data store
+          DataStore sds1 = Factory.openDataStore
+                          ("gate.persist.SerialDataStore",
+                           markedDir.toURL().toExternalForm());
+
+          List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
+          boolean found = false;
+          int k = 0;
+          //search for the marked doc with the same name
+          while (k < lrIDs1.size() && !found) {
+            String docID1 = (String) lrIDs1.get(k);
+
+            //read the stored document
+            FeatureMap features1 = Factory.newFeatureMap();
+            features1.put(DataStore.DATASTORE_FEATURE_NAME, sds1);
+            features1.put(DataStore.LR_ID_FEATURE_NAME, docID1);
+            Document tempDoc = (Document) Factory.createResource(
+                                        "gate.corpora.DocumentImpl",
+                                        features1);
+            //check whether this is our doc
+            if ( ((String)tempDoc.getFeatures().get("gate.SourceURL")).
+                 endsWith(cleanDoc.getName())) {
+              found = true;
+              markedDoc = tempDoc;
+            } else k++;
+          }
         } catch (java.net.MalformedURLException ex) {
-          Out.prln("Cannot create document from file: " +
-            markedDocFile.getAbsolutePath());
-          continue;
+          Out.prln("Error finding marked directory " + markedDir.getAbsolutePath());
+        } catch (gate.persist.PersistenceException ex1) {
+          Out.prln("Error opening marked as a datastore (-marked_ds specified)");
+        } catch (gate.creole.ResourceInstantiationException ex2) {
+          Out.prln("Error opening marked as a datastore (-marked_ds specified)");
         }
-        params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "");
-
-        // create the document
-        try {
-          markedDoc = (Document) Factory.createResource(
-                                 "gate.corpora.DocumentImpl", params,
-                                 null, cleanDoc.getName());
-        } catch (gate.creole.ResourceInstantiationException ex) {
-          Out.prln("Cannot create document from file: " +
-            markedDocFile.getAbsolutePath());
-          continue;
-        }
-
-      }//if markedDoc exists
+      } //if using a DS for marked
 
       try {
         evaluateDocuments(persDoc, cleanDoc, markedDoc);
@@ -813,6 +939,7 @@ ex.printStackTrace();
   protected void updateStatistics(AnnotationDiff annotDiff, String annotType){
       precisionSum += annotDiff.getPrecisionAverage();
       recallSum += annotDiff.getRecallAverage();
+      fMeasureSum += annotDiff.getFMeasureAverage();
       Double oldPrecision = (Double) precisionByType.get(annotType);
       if (oldPrecision == null)
         precisionByType.put(annotType,
@@ -828,20 +955,33 @@ ex.printStackTrace();
         prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
 
 
-      Double oldRecall = (Double) recallByType.get(annotType);
+      Double oldFMeasure = (Double) fMeasureByType.get(annotType);
+      if (oldFMeasure == null)
+        fMeasureByType.put(annotType,
+                         new Double(annotDiff.getFMeasureAverage()));
+      else
+        fMeasureByType.put(annotType,
+                         new Double(oldFMeasure.doubleValue() +
+                                    annotDiff.getFMeasureAverage()));
+      Integer fCount = (Integer) fMeasureCountByType.get(annotType);
+      if (fCount == null)
+        fMeasureCountByType.put(annotType, new Integer(1));
+      else
+        fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
+
+              Double oldRecall = (Double) recallByType.get(annotType);
       if (oldRecall == null)
         recallByType.put(annotType,
-                         new Double(annotDiff.getRecallAverage()));
+                            new Double(annotDiff.getRecallAverage()));
       else
         recallByType.put(annotType,
-                         new Double(oldRecall.doubleValue() +
-                                    annotDiff.getRecallAverage()));
+                            new Double(oldRecall.doubleValue() +
+                                       annotDiff.getRecallAverage()));
       Integer recCount = (Integer) recCountByType.get(annotType);
       if (recCount == null)
         recCountByType.put(annotType, new Integer(1));
       else
         recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
-
   }
 
   protected void printStatistics() {
@@ -876,6 +1016,23 @@ ex.printStackTrace();
 
     Out.prln("Overall recall: " + getRecallAverage()
              + "<P>");
+
+    Out.prln("<H3> F-Measure </H3>");
+    if (fMeasureByType != null && !fMeasureByType.isEmpty()) {
+      Iterator iter = fMeasureByType.keySet().iterator();
+      while (iter.hasNext()) {
+        String annotType = (String) iter.next();
+        Out.prln(annotType + ": "
+          + ((Double)fMeasureByType.get(annotType)).doubleValue()
+              /
+              ((Integer)fMeasureCountByType.get(annotType)).intValue()
+          + "<P>");
+      }//while
+    }
+
+    Out.prln("Overall average fMeasure: " + fMeasureSum/docNumber
+             + "<P>");
+
   }
 
   protected AnnotationDiff measureDocs(
@@ -968,10 +1125,13 @@ ex.printStackTrace();
   //the corpus at the end
   private double precisionSum = 0;
   private double recallSum = 0;
+  private double fMeasureSum = 0;
   private HashMap precisionByType = new HashMap();
   private HashMap prCountByType = new HashMap();
   private HashMap recallByType = new HashMap();
   private HashMap recCountByType = new HashMap();
+  private HashMap fMeasureByType = new HashMap();
+  private HashMap fMeasureCountByType = new HashMap();
   private int docNumber = 0;
 
   /**
@@ -987,6 +1147,8 @@ ex.printStackTrace();
    */
   private boolean isMarkedStored = false;
   private boolean isMarkedClean = false;
+  //whether marked are in a DS, not xml
+  private boolean isMarkedDS = false;
 
   private String annotSetName = "Key";
   private String outputSetName = null;
