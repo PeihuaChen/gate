@@ -86,8 +86,9 @@ public class HtmlDocumentHandler extends ParserCallback{
       obj = (CustomObject) stack.pop();
       // we add it to the colector
       colector.add(obj);
-    }else{
-      // the stack is empty and that means that the document was parsed completly
+    }
+    // if t is the </HTML> tag then we reached the end of theHTMLdocument
+    if (t == HTML.Tag.HTML){
       // replace the old content with the new one
       doc.setContent (new DocumentContentImpl(tmpDocContent));
       // get an annotation set from this document
@@ -107,7 +108,7 @@ public class HtmlDocumentHandler extends ParserCallback{
           }
         }catch (InvalidOffsetException e){
             e.printStackTrace (System.err);
-        }    
+        }
       }//while
       // notify the listener about the total amount of elements that has been processed
       fireStatusChangedEvent("Total elements : " + elements);
@@ -190,7 +191,7 @@ public class HtmlDocumentHandler extends ParserCallback{
     parse.
   */
   public void flush() throws BadLocationException{
-    //System.out.println("Flush called!!!!!!!!!!!");
+    System.out.println("Flush called!!!!!!!!!!!");
   }
   /**
     This method is called when the HTML parser encounts a comment

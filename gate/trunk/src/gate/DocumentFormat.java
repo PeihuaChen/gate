@@ -122,27 +122,32 @@ public abstract class DocumentFormat implements Resource,StatusReporter
   );
 
   /**
-    * Returns a MymeType having as input a fileSufix
+     Returns a MymeType having as input a fileSufix
+     If the file sufix is not recognised then a null will be returned
     */
   static private MimeType  getMimeType(String fileSufix){
     String mimeTypeString = null;
     MimeType mimeType = null;
+    // if a valid fileSuffix was introduced then search for it inside the MAP
     if (fileSufix != null){
+      // get a mimeType string associated with this fileSuffix
+      // Eg: for html get "text/html", for xml get "text/xml"
       mimeTypeString = (String) suffixes2mimeStringMap.get(fileSufix.toLowerCase());
+      // if one mimeType string was found then produce a mime Type with mimeTye
+      // string
       if (mimeTypeString != null){
         try{
           mimeType = new MimeType(mimeTypeString);
         }catch (MimeTypeFormatException e){
           e.printStackTrace(System.err);
         }
-      }
-    }
-    // default type
+      }//if
+    }//if
     return mimeType;
-  }
+  }//getMimeType
 
     /**
-    * Returns a MymeType having as input a url
+     Returns a MymeType having as input a url
     */
   static private MimeType  getMimeType(URL url){
     String mimeTypeString = null;
@@ -151,51 +156,76 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     MimeType mimeType = null;
     String fileSufix = null;
 
+    // ask the web server for the content type
+    // we expect to get contentType something like this:
+    // "text/html; charset=iso-8859-1"
+    // charset is optional
     try{
       contentType = url.openConnection().getContentType();
     } catch (IOException e){
       e.printStackTrace(System.err);
     }
-    StringTokenizer st = new StringTokenizer(contentType, ";");
-    mimeTypeString = st.nextToken().toLowerCase();
-    // return the corresponding mime type
+    // if a content Type was returned by the server, try to get the mime Type
+    // string
+    // if contentType is something like this:"text/html; charset=iso-8859-1"
+    // try to get content Type string (text/html)
+    if (contentType != null){
+      StringTokenizer st = new StringTokenizer(contentType, ";");
+      // we supose that the first token is the mime type string...
+      // if this doesn't happen then we are wrong
+      mimeTypeString     = st.nextToken().toLowerCase();
+    }
+    // return the corresponding mime type from the assocated MAP
     mimeType = (MimeType) mimeString2mimeTypeMap.get(mimeTypeString);
+    // if mimeType is null then we failed to recognise the mime type with the
+    // web server...
+    // Let's try a file suffix detection
     if (mimeType == null){
-      // get the file sufix
+      // get the file sufix from the URL
+      // see method definition for more details
       fileSufix = getFileSufix(url);
-      // guess the mime type on the on file sufix
+      // get the mime type based on the on file sufix
       mimeType = getMimeType(fileSufix);
-      // if still null then perform magic numbers guess
+      // if still null then we failed to recognise the mime type with  the file
+      // suffix... maybe a file sufix wasn't present or wasn't recognised by the
+      // gate application
+      // Let's perform a magic numbers guess.. (our last hope)
       if (mimeType == null){
          // mimeType = guessTypeUsingMagicNumbers(is);
+
       }
       // if still null then surrender
     }
-    // try to guess the the mime type from the filesuffix
     return mimeType;
-  }
+  }//getMimeType
 
-    /**
-    * return the fileSuffix or null if the url doesn't have a file suffix
-    *
-    */
+  /**
+    Return the fileSuffix or null if the url doesn't have a file suffix
+    If the url is null then the file suffix will be null also
+  */
   private static String getFileSufix(URL url){
     String fileName = null;
     String fileSuffix = null;
 
+    // GIGO test  (garbage in garbage out)
     if (url != null){
+       // get the file name from the URL
       fileName = url.getFile();
+      // tokenize this file name with "." as separator...
+      // the last token will be the file suffix
       StringTokenizer st = new StringTokenizer(fileName,".");
       // fileSuffix is the last token
       while (st.hasMoreTokens())
         fileSuffix = st.nextToken();
+      // here fileSuffix is the last token
     }
     return fileSuffix;
-  }
+  }//getFileSufix
 
-  /** Find a DocumentFormat implementation that deals with a particular
-    * MIME type, given that type.
-    */
+  /**
+    Find a DocumentFormat implementation that deals with a particular
+    MIME type, given that type.
+  */
   static public DocumentFormat getDocumentFormat(MimeType mimeType) {
     DocumentFormat docFormat = null;
     MimeType mime = null;
@@ -207,14 +237,6 @@ public abstract class DocumentFormat implements Resource,StatusReporter
         try{
           classHandler = mime.getParameterValue("ClassHandler");
           docFormat = (DocumentFormat) Class.forName(classHandler).newInstance();
-          /*
-          if (mimeType.toString ().equalsIgnoreCase ("text/xml"))
-            docFormat = (gate.corpora.XmlDocumentFormat) Class.forName(
-                      "gate.corpora.XmlDocumentFormat").newInstance();
-          if (mimeType.toString ().equalsIgnoreCase ("text/html"))
-            docFormat = (gate.corpora.HtmlDocumentFormat) Class.forName(
-                      "gate.corpora.HtmlDocumentFormat").newInstance();
-               */
         }catch (ClassNotFoundException e){
           e.printStackTrace(System.err);
         }catch (IllegalAccessException e){
@@ -227,10 +249,11 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     return docFormat;
   } // getDocumentFormat(MimeType)
 
-  /** Find a DocumentFormat implementation that deals with a particular
-    * MIME type, given the file suffix (e.g. ".txt") that the document came
-    * from.
-    */
+  /**
+    Find a DocumentFormat implementation that deals with a particular
+    MIME type, given the file suffix (e.g. ".txt") that the document came
+    from.
+  */
   static public DocumentFormat getDocumentFormat(String fileSuffix) {
     return getDocumentFormat (getMimeType (fileSuffix));
   } // getDocumentFormat(String)
