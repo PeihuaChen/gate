@@ -328,6 +328,41 @@ public class AnnotationEditor{
     }
   }
   
+  /**
+   * Changes the span of an existing annotation by creating a new annotation 
+   * with the same ID, type and features but with the new start and end offsets.
+   * @param set the annotation set 
+   * @param oldAnnotation the annotation to be moved
+   * @param newStartOffset the new start offset
+   * @param newEndOffset the new end offset
+   */
+  protected void moveAnnotation(AnnotationSet set, Annotation oldAnnotation, 
+          Long newStartOffset, Long newEndOffset) throws InvalidOffsetException{
+    //Moving is done by deleting the old annotation and creating a new one.
+    //If this was the last one of one type it would mess up the gui which 
+    //"forgets" about this type and then it recreates it (with a different 
+    //colour and not visible
+    //We need to store the metadata about this type so we can recreate it if 
+    //needed
+    AnnotationSetsView.TypeHandler oldHandler = setsView.getTypeHandler(
+            set.getName(), oldAnnotation.getType());
+    
+    Integer oldID = oldAnnotation.getId();
+    set.remove(oldAnnotation);
+    set.add(oldID, newStartOffset, newEndOffset,
+            oldAnnotation.getType(), oldAnnotation.getFeatures());
+    setAnnotation(set.get(oldID), set);
+    AnnotationSetsView.TypeHandler newHandler = setsView.getTypeHandler(
+            set.getName(), oldAnnotation.getType());
+    
+    if(newHandler != oldHandler){
+      //hide all highlights (if any) so we can show them in the right colour
+      newHandler.setSelected(false);
+      newHandler.colour = oldHandler.colour;
+      newHandler.setSelected(oldHandler.isSelected());
+    }
+  }
+  
   public void hide(){
 //    topWindow.setVisible(false);
     bottomWindow.setVisible(false);
@@ -352,8 +387,6 @@ public class AnnotationEditor{
     
     public void actionPerformed(ActionEvent evt){
       Annotation oldAnn = ann;
-      Integer oldID = ann.getId();
-      Long newStartOffset = ann.getStartNode().getOffset();
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -362,14 +395,11 @@ public class AnnotationEditor{
           increment = CTRL_SHIFT_INCREMENT;
         }
       }
-      long newValue = newStartOffset.longValue() - increment;
+      long newValue = ann.getStartNode().getOffset().longValue() - increment;
       if(newValue < 0) newValue = 0;
-      newStartOffset = new Long(newValue);
       try{
-        set.remove(oldAnn);
-	      set.add(oldID, newStartOffset, ann.getEndNode().getOffset(),
-	              ann.getType(), ann.getFeatures());
-	      setAnnotation(set.get(oldID), set);
+        moveAnnotation(set, ann, new Long(newValue), 
+                ann.getEndNode().getOffset());
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -384,10 +414,7 @@ public class AnnotationEditor{
     }
     
     public void actionPerformed(ActionEvent evt){
-      Annotation oldAnn = ann;
-      Integer oldID = ann.getId();
       long endOffset = ann.getEndNode().getOffset().longValue(); 
-      Long newStartOffset = ann.getStartNode().getOffset();
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -397,14 +424,11 @@ public class AnnotationEditor{
         }
       }
       
-      long newValue = newStartOffset.longValue()  + increment;
+      long newValue = ann.getStartNode().getOffset().longValue()  + increment;
       if(newValue > endOffset) newValue = endOffset;
-      newStartOffset = new Long(newValue);
       try{
-        set.remove(oldAnn);
-	      set.add(oldID, newStartOffset, ann.getEndNode().getOffset(),
-	              ann.getType(), ann.getFeatures());
-	      setAnnotation(set.get(oldID), set);
+        moveAnnotation(set, ann, new Long(newValue), 
+                ann.getEndNode().getOffset());
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -419,10 +443,7 @@ public class AnnotationEditor{
     }
     
     public void actionPerformed(ActionEvent evt){
-      Annotation oldAnn = ann;
-      Integer oldID = ann.getId();
       long startOffset = ann.getStartNode().getOffset().longValue(); 
-      Long newEndOffset = ann.getEndNode().getOffset();
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -432,14 +453,11 @@ public class AnnotationEditor{
         }
       }
       
-      long newValue = newEndOffset.longValue()  - increment;
+      long newValue = ann.getEndNode().getOffset().longValue()  - increment;
       if(newValue < startOffset) newValue = startOffset;
-      newEndOffset = new Long(newValue);
       try{
-        set.remove(oldAnn);
-	      set.add(oldID, ann.getStartNode().getOffset(), newEndOffset,
-	              ann.getType(), ann.getFeatures());
-	      setAnnotation(set.get(oldID), set);
+        moveAnnotation(set, ann, ann.getStartNode().getOffset(), 
+                new Long(newValue));
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
@@ -454,11 +472,9 @@ public class AnnotationEditor{
     }
     
     public void actionPerformed(ActionEvent evt){
-      Annotation oldAnn = ann;
-      Integer oldID = ann.getId();
       long maxOffset = textView.getDocument().
       		getContent().size().longValue() -1; 
-      Long newEndOffset = ann.getEndNode().getOffset();
+//      Long newEndOffset = ann.getEndNode().getOffset();
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -467,14 +483,11 @@ public class AnnotationEditor{
           increment = CTRL_SHIFT_INCREMENT;
         }
       }
-      long newValue = newEndOffset.longValue() + increment;
+      long newValue = ann.getEndNode().getOffset().longValue() + increment;
       if(newValue > maxOffset) newValue = maxOffset;
-      newEndOffset = new Long(newValue);
       try{
-        set.remove(oldAnn);
-	      set.add(oldID, ann.getStartNode().getOffset(), newEndOffset,
-	              ann.getType(), ann.getFeatures());
-	      setAnnotation(set.get(oldID), set);
+        moveAnnotation(set, ann, ann.getStartNode().getOffset(),
+                new Long(newValue));
       }catch(InvalidOffsetException ioe){
         throw new GateRuntimeException(ioe);
       }
