@@ -111,20 +111,23 @@ public class POSTagger extends AbstractLanguageAnalyser {
                                        tokensIter.next() : null);
           }
           //run the POS tagger
-          List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
-          //add the results
-          //make sure no malfunction accured
-          if(taggerResults.size() != tokensInCurrentSentence.size())
-            throw new GateRuntimeException(
-                "POS Tagger malfunction: the output size (" +
-                taggerResults.size() +
-                ") is different from the input size (" +
-                tokensInCurrentSentence.size() + ")!");
-          Iterator resIter = taggerResults.iterator();
-          Iterator tokIter = tokensInCurrentSentence.iterator();
-          while(resIter.hasNext()){
-            ((Annotation)tokIter.next()).getFeatures().
-              put(TOKEN_CATEGORY_FEATURE_NAME ,((String[])resIter.next())[1]);
+          List taggerList = tagger.runTagger(sentencesForTagger);
+          if(taggerList != null && taggerList.size() > 0){
+            List taggerResults = (List) taggerList.get(0); 
+            //add the results
+            //make sure no malfunction occurred
+            if(taggerResults.size() != tokensInCurrentSentence.size())
+              throw new GateRuntimeException(
+                  "POS Tagger malfunction: the output size (" +
+                  taggerResults.size() +
+                  ") is different from the input size (" +
+                  tokensInCurrentSentence.size() + ")!");
+            Iterator resIter = taggerResults.iterator();
+            Iterator tokIter = tokensInCurrentSentence.iterator();
+            while(resIter.hasNext()){
+              ((Annotation)tokIter.next()).getFeatures().
+                put(TOKEN_CATEGORY_FEATURE_NAME ,((String[])resIter.next())[1]);
+            }
           }
           fireProgressChanged(sentIndex++ * 100 / sentCnt);
         }//while(sentencesIter.hasNext())
