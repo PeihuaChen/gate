@@ -9,7 +9,7 @@ $id$
   <property name="mail.from.address" value="v.tablan@sheffield.ac.uk"/>
   
   <property name="mail.to.name" value="GATE developers"/>
-  <property name="mail.to.address" value="v.tablan@sheffield.ac.uk"/>
+  <property name="mail.to.address" value="gate@dcs.shef.ac.uk"/>
 
   <!-- import the main build file so we can reuse some targets -->
   <import file="../build.xml"/>
