@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Thu Oct 25 17:07:34 2001
+ *  auto generated: Wed Nov 07 20:42:12 2001
  *
  *  $Id$
  *
@@ -29,9 +29,29 @@ CREATE UNIQUE INDEX XT_ANNOTATION_01 ON T_ANNOTATION
        ANN_LOCAL_ID                   
 );
 
+CREATE INDEX XT_ANNOTATION_02 ON T_ANNOTATION
+(
+       ANN_STARTNODE_ID               
+);
+
+CREATE INDEX XT_ANNOTATION_03 ON T_ANNOTATION
+(
+       ANN_ENDNODE_ID                 
+);
+
 CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON T_ANNOTATION_TYPE
 (
        AT_NAME                        
+);
+
+CREATE UNIQUE INDEX XT_AS_ANNOTATION_02 ON T_AS_ANNOTATION
+(
+       ASANN_ANN_ID                   
+);
+
+CREATE INDEX XT_AS_ANNOTATION_01 ON T_AS_ANNOTATION
+(
+       ASANN_AS_ID                    
 );
 
 CREATE UNIQUE INDEX XT_DOC_ENCODING_01 ON T_DOC_ENCODING
