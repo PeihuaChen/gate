@@ -16,8 +16,7 @@
 package gate.creole.ontology;
 
 import java.util.*;
-
-import com.ontotext.gate.exception.*;
+import com.ontotext.gate.exception.NoSuchClosureTypeException;
 
 /** interface representing a single ontology class */
 public interface OClass {
@@ -51,9 +50,9 @@ public interface OClass {
 
   public void removeSuperClass(OClass superClass) ;
 
-  public Set getSubClasses(byte closure);
+  public Set getSubClasses(byte closure) throws NoSuchClosureTypeException;
 
-  public Set getSuperClasses(byte closure) ;
+  public Set getSuperClasses(byte closure)throws NoSuchClosureTypeException ;
 
   void inferSubClassesTransitiveClosure();
 
