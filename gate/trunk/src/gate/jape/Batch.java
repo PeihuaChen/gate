@@ -253,19 +253,19 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
       // transducer.transduce(doc);
-      transduce(doc, doc.getAnnotations());
+      transduce(doc, doc.getAnnotations(), doc.getAnnotations());
     }
   } // transduce(coll)
 
   /** Process a single document. */
   public void transduce(Document doc) throws JapeException {
-    transducer.transduce(doc, doc.getAnnotations());
+    transducer.transduce(doc, doc.getAnnotations(), doc.getAnnotations());
   } // transduce(doc)
 
   /** Process a single document. */
-  public void transduce(Document doc, AnnotationSet annotations)
-                                                          throws JapeException {
-    transducer.transduce(doc, annotations);
+  public void transduce(Document doc, AnnotationSet inputAS,
+                        AnnotationSet outputAS) throws JapeException {
+    transducer.transduce(doc, inputAS, outputAS);
   } // transduce(doc)
 
   /** Process a single text. */
@@ -501,6 +501,9 @@ implements JapeConstants, java.io.Serializable, ProcessProgressReporter,
 } // class Batch
 
 // $Log$
+// Revision 1.18  2001/01/21 20:51:31  valyt
+// Added the DocumentEditor class and the necessary changes to the gate API
+//
 // Revision 1.17  2000/11/10 18:53:57  hamish
 // implemented exception policy for PRs, PRs.check, and
 // added AbstractProcessingResource

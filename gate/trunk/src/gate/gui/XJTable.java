@@ -33,6 +33,13 @@ public class XJTable extends JTable {
     else return super.getModel();
   }
 
+  public int getTableRow(int modelRow){
+    for(int i = 0; i < sorter.indexes.length; i ++){
+      if(sorter.indexes[i] == modelRow) return i;
+    }
+    return -1;
+  }
+
   public void tableChanged(TableModelEvent e){
     super.tableChanged(e);
     adjustSizes(false);
@@ -325,7 +332,6 @@ public class XJTable extends JTable {
     }
 
     public void tableChanged(TableModelEvent e) {
-      //System.out.println("Sorter: tableChanged " + model.getRowCount());
       reallocateIndexes();
       sort(sorter);
       super.tableChanged(e);
@@ -333,7 +339,8 @@ public class XJTable extends JTable {
 
     public void checkModel() {
       if (indexes.length != model.getRowCount()) {
-        System.err.println("Sorter not informed of a change in model.");
+        tableChanged(null);
+        //System.err.println("Sorter not informed of a change in model.");
       }
     }
 

@@ -20,6 +20,9 @@ public class TextAttributesChooser extends JDialog {
   JCheckBox superscriptChk;
   JCheckBox strikethroughChk;
 
+  JCheckBox useForegroundChk;
+  JCheckBox useBackgroundChk;
+
   JColorChooser fgChooser;
   JColorChooser bgChooser;
   JTextPane sampleText;
@@ -121,6 +124,24 @@ public class TextAttributesChooser extends JDialog {
     box.setBorder(BorderFactory.createTitledBorder("Effects"));
 
     fontBox.add(box);
+
+    //Use colors checkboxes
+    box = new JPanel();
+    box.setLayout(new BoxLayout(box, BoxLayout.X_AXIS));
+    useForegroundChk = new JCheckBox("Use foreground colour");
+    useForegroundChk.setSelected(false);
+    box.add(useForegroundChk);
+
+    useBackgroundChk = new JCheckBox("Use background colour");
+    useBackgroundChk.setSelected(false);
+    box.add(useBackgroundChk);
+
+    box.add(Box.createHorizontalGlue());
+    box.setBorder(BorderFactory.createTitledBorder("Use Colours"));
+
+    fontBox.add(box);
+
+
     fontBox.add(Box.createVerticalGlue());
     firstLevel.add("Font", fontBox);
     //Colors stuff
@@ -233,6 +254,18 @@ public class TextAttributesChooser extends JDialog {
     fgChooser.getSelectionModel().addChangeListener(new ChangeListener(){
       public void stateChanged(ChangeEvent e){
         StyleConstants.setForeground(currentStyle, fgChooser.getColor());
+        useForegroundChk.setSelected(true);
+        updateSample();
+      }
+    });
+
+    useForegroundChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if(useForegroundChk.isSelected()){
+          StyleConstants.setForeground(currentStyle, fgChooser.getColor());
+        }else{
+          currentStyle.removeAttribute(StyleConstants.Foreground);
+        }
         updateSample();
       }
     });
@@ -240,6 +273,18 @@ public class TextAttributesChooser extends JDialog {
     bgChooser.getSelectionModel().addChangeListener(new ChangeListener(){
       public void stateChanged(ChangeEvent e){
         StyleConstants.setBackground(currentStyle, bgChooser.getColor());
+        useBackgroundChk.setSelected(true);
+        updateSample();
+      }
+    });
+
+    useBackgroundChk.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if(useBackgroundChk.isSelected()){
+          StyleConstants.setBackground(currentStyle, bgChooser.getColor());
+        }else{
+          currentStyle.removeAttribute(StyleConstants.Background);
+        }
         updateSample();
       }
     });
@@ -266,7 +311,7 @@ public class TextAttributesChooser extends JDialog {
 
   }
 
-  public MutableAttributeSet show(MutableAttributeSet style){
+  public AttributeSet show(AttributeSet style){
     currentStyle = new SimpleAttributeSet(style);
     //currentStyle.addAttributes(style);
     updateData();
@@ -283,11 +328,18 @@ public class TextAttributesChooser extends JDialog {
     boldChk.setSelected(StyleConstants.isBold(currentStyle));
     italicChk.setSelected(StyleConstants.isItalic(currentStyle));
     italicChk.setSelected(StyleConstants.isItalic(currentStyle));
+    underlineChk.setSelected(StyleConstants.isUnderline(currentStyle));
     subscriptChk.setSelected(StyleConstants.isSubscript(currentStyle));
     superscriptChk.setSelected(StyleConstants.isSuperscript(currentStyle));
     strikethroughChk.setSelected(StyleConstants.isStrikeThrough(currentStyle));
-    fgChooser.setColor(StyleConstants.getForeground(currentStyle));
-    bgChooser.setColor(StyleConstants.getBackground(currentStyle));
+    if(currentStyle.isDefined(StyleConstants.Foreground)){
+      fgChooser.setColor(StyleConstants.getForeground(currentStyle));
+      useForegroundChk.setSelected(true);
+    }else useForegroundChk.setSelected(false);
+    if(currentStyle.isDefined(StyleConstants.Background)){
+      bgChooser.setColor(StyleConstants.getBackground(currentStyle));
+      useBackgroundChk.setSelected(true);
+    }else useBackgroundChk.setSelected(false);
   }
 
   protected void updateSample(){

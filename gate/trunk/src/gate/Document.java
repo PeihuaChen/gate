@@ -19,6 +19,7 @@ import java.util.*;
 import java.net.*;
 
 import gate.util.*;
+import gate.event.*;
 
 
 /** Represents the commonalities between all sorts of documents.
@@ -108,4 +109,11 @@ public interface Document extends LanguageResource, Comparable {
   public void edit(Long start, Long end, DocumentContent replacement)
     throws InvalidOffsetException;
 
+  public void addDocumentListener(DocumentListener l);
+  public void removeDocumentListener(DocumentListener l);
+
+  public void addGateListener(GateListener l);
+  public void removeGateListener(GateListener l);
+
 } // interface Document
+

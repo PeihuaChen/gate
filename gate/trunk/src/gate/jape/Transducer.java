@@ -41,8 +41,9 @@ public abstract class Transducer implements java.io.Serializable,
   public String getName() { return name; }
 
   /** Transduce a document.  */
-  public abstract void transduce(Document doc, AnnotationSet annotations)
-                                                          throws JapeException;
+  public abstract void transduce(Document doc, AnnotationSet inputAS,
+                                 AnnotationSet outputAS)
+                                 throws JapeException;
 
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
@@ -119,6 +120,9 @@ public abstract class Transducer implements java.io.Serializable,
 
 
 // $Log$
+// Revision 1.9  2001/01/21 20:51:32  valyt
+// Added the DocumentEditor class and the necessary changes to the gate API
+//
 // Revision 1.8  2000/11/08 16:35:04  hamish
 // formatting
 //
