@@ -384,7 +384,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       }else{
         Class typeClass = null;
         try{
-          typeClass = Class.forName(type);
+          typeClass = Gate.getClassLoader().loadClass(type);
         }catch(ClassNotFoundException cnfe){
         }
         //non Gate type -> we'll use the text field
@@ -617,8 +617,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         //non Gate type
         Class typeClass = null;
         try{
-          typeClass = Class.forName(type);
+          typeClass = Gate.getClassLoader().loadClass(type);
         }catch(ClassNotFoundException cnfe){
+          try{
+            //if that failed let's try with the system classloader
+            typeClass = Class.forName(type);
+          }catch(ClassNotFoundException cnfex){
+          }
         }
 
         textField.setText((value == null) ? "" : value.toString());

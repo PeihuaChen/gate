@@ -431,7 +431,7 @@ public class CreoleRegisterImpl extends HashMap
     List res = new ArrayList();
     Class targetClass;
     try{
-      targetClass = Class.forName(type);
+      targetClass = Gate.getClassLoader().loadClass(type);
     }catch(ClassNotFoundException cnfe){
       throw new GateException("Invalid type " + type);
     }
@@ -439,7 +439,7 @@ public class CreoleRegisterImpl extends HashMap
       String aType = (String)typesIter.next();
       Class aClass;
       try{
-        aClass = Class.forName(aType);
+        aClass = Gate.getClassLoader().loadClass(aType);
         if(targetClass.isAssignableFrom(aClass)){
           //filter out hidden instances
           Iterator newInstancesIter = ((ResourceData)get(aType)).
