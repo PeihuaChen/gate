@@ -1,106 +1,163 @@
 @echo off
-REM ##############################################
+REM ######################################################################
 REM Gate run script by Valentin Tablan 01 Jun 2001
+REM This script uses some paths that it finds using some informed guesses.
+REM If you have problems starting gate please check the values below.
+REM
+REM
+REM GATE_HOME should point to the top level directory of your Gate
+REM installation.
+REM
+REM JAVA_HOME should point to the top level installation of the java VM you
+REM want to use for gate.
+REM
+REM GATE_CONFIG points to the gate.xml file containing the gate
+REM configuration options that are specific to your site (e.g. URL for the
+REM Oracle database). This configuration file is not required so don't
+REM worry if you don't have it.
+REM
+REM	TOOLSJAR should point to the tools.jar file to be used by gate. If the
+REM VM specified by JAVA_HOME contains a tools.jar file in the /lib
+REM directory it will be used otherwise the file pointed by TOOLSJAR will
+REM used.
+REM IMPORTANT: the tools.jar needs to have the same version as the java VM
+REM used. The /bin directory of the gate installation contains the
+REM tools.jar files for java2 versions 1.3 and 1.4.
+REM
+REM
+REM   ALL THE VALUES DESCRIBED ABOVESHOULD BE VALID PATHS
+REM   DO NOT INCLUDE ANY QUOTE SIGNS EVEN IF YOU PATH CONTAINS SPACES
+REM   TAKE CARE NOT TO INCLUDE ANY TRAILING SPACES AT THE END OF THE LINES
+REM
+REM
+REM ######################################################################
 REM $Id$
-REM ##############################################
+REM ######################################################################
 
-REM ##############################################
+
+
+
+REM ######################################################################
 REM set NLS_LANG for Oracle
-REM ##############################################
 set NLS_LANG=AMERICAN_AMERICA.UTF8
+REM ######################################################################
 
-REM ##############################################
-REM set LOCAT to where we hope gate.jar etc. are located
-REM ##############################################
+REM ######################################################################
+REM !!!!!    You shouldn't need to change anything below this line   !!!!!
+REM ######################################################################
 
-if not x%GATE_HOME% == x goto gotGateHome
 
-set LOCAT=%~d0%~p0
+
+
+REM ######################################################################
+REM Attempt to find GATE_HOME if not already set. This procedure will fail
+REM on Windows 95/98 so this value should be already set.
+REM Hopefully the installer did that.
+REM ######################################################################
+
+
+if not "x%GATE_HOME%" == "x" goto doneGateHome
+
+set GATE_HOME=%~d0%~p0\..
 goto doneGateHome
 
-:gotGateHome
-set LOCAT=%GATE_HOME%\bin
-
 :doneGateHome
-echo LOCAT: %LOCAT%
+echo GATE_HOME: %GATE_HOME%
 
 
-REM ##############################################
+REM ######################################################################
 REM set TOOLSJAR to where we hope tools.jar is are located
-REM ##############################################
+REM ######################################################################
 
-set TOOLSJAR=%LOCAT%\tools14.jar
+if not "x%TOOLSJAR%" == "x" goto doneTOOLSJAR
 
+if exist "%JAVA_HOME%\lib\tools.jar" goto jdkInstalled
+if exist "%GATE_HOME%\jre1.4" goto localJRE
+
+set TOOLSJAR=%GATE_HOME%\bin\tools14.jar
+goto doneTOOLSJAR
+
+
+:jdkInstalled
+set TOOLSJAR=%JAVA_HOME%\lib\tools.jar
+goto doneTOOLSJAR
+
+:localJRE
+set TOOLSJAR=%GATE_HOME%\bin\tools14.jar
+goto doneTOOLSJAR
+
+:doneTOOLSJAR
 echo TOOLSJAR=%TOOLSJAR%
 
 
-REM ##############################################
-REM set SITEGATEXML to where we thing gate.xml is (or "" if not around)
-REM ##############################################
+REM ######################################################################
+REM set GATE_CONFIG to where we thing gate.xml is (or "" if not around)
+REM ######################################################################
 
-set SITEGATEXML=
-if not x%GATE_CONFIG% == x goto gotGateConfig
+if not "x%GATE_CONFIG%" == "x" goto doneGateConfig
 
-if exist %LOCAT%\gate.xml set SITEGATEXML=%LOCAT%\gate.xml
+if exist "%GATE_HOME%\bin\gate.xml" set GATE_CONFIG=%GATE_HOME%\bin\gate.xml
 goto doneGateConfig
-
-:gotGateConfig
-set SITEGATEXML=%GATE_CONFIG%
 
 :doneGateConfig
 
-if not exist %SITEGATEXML% set SITEGATEXML=
-
-echo SITEGATEXML: %SITEGATEXML%
+echo GATE_CONFIG: %GATE_CONFIG%
 
 
-REM ##############################################
-REM set GATEJAR and GUK to gate.jar and ext locations
-REM ##############################################
+REM ######################################################################
+REM set GATEJAR
+REM ######################################################################
 
-set GATEJAR=%LOCAT%\gate.jar
-set GUK=%LOCAT%\ext
-if not exist %GATEJAR% set GATEJAR=%LOCAT%\..\build\gate.jar
-if not exist %GUK%\guk.jar set GUK=%LOCAT%\..\lib\ext
+set GATEJAR=%GATE_HOME%\bin\gate.jar
+if not exist "%GATEJAR%" set GATEJAR=%GATE_HOME%\build\gate.jar
 
 echo GATEJAR: %GATEJAR%
-echo GUK: %GUK%
 
 
-REM ##############################################
+REM ######################################################################
+REM set EXTDIR
+REM ######################################################################
+
+set EXTDIR=%GATE_HOME%\bin\ext
+if not exist "%EXTDIR%\guk.jar" set EXTDIR=%GATE_HOME%\lib\ext
+
+echo EXTDIR: %EXTDIR%
+
+
+REM ######################################################################
 REM set JAVA
-REM ##############################################
+REM ######################################################################
 
-set JAVA=%LOCAT%\..\jre1.4\bin\javaw.exe
-if not exist %JAVA% set JAVA=%JAVA_HOME%\bin\javaw.exe
-if not exist %JAVA% set JAVA=javaw.exe
+set JAVA=%JAVA_HOME%\bin\javaw.exe
+if not exist "%JAVA%" set JAVA=%GATE_HOME%\jre1.4\bin\javaw.exe
+if not exist "%JAVA%" set JAVA=javaw.exe
 
 echo JAVA: %JAVA%
 
 
-REM ##############################################
+REM ######################################################################
 REM set CLASSPATH
-REM ##############################################
+REM ######################################################################
 
-set "CLASSPATH=%GATEJAR%;%TOOLSJAR%;%CLASSPATH%"
+set OLDCP=%CLASSPATH%
+set CLASSPATH="%GATEJAR%";"%TOOLSJAR%";"%OLDCP%"
 
 echo CLASSPATH: %CLASSPATH%
 
-
-REM ##############################################
+REM ######################################################################
 REM if we have a site gate.xml set a var including the -i
-REM ##############################################
+REM ######################################################################
 
-if not x%SITEGATEXML% == x set FLAGS=-i %SITEGATEXML%
+if not "x%GATE_CONFIG%" == "x" set FLAGS=-i %GATE_CONFIG%
 
 echo FLAGS: %FLAGS%
 
 
-REM ##############################################
+REM ######################################################################
 REM run the beast
-REM ##############################################
+REM ######################################################################
 
-set RUN=%JAVA% -Xmx200m -Djava.ext.dirs=%GUK% -classpath "%CLASSPATH%" gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
+set RUN="%JAVA%" -Xmx200m -Djava.ext.dirs="%EXTDIR%" -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 echo RUN: %RUN%
-start %RUN%
+start "Gate" %RUN%
