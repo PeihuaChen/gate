@@ -80,6 +80,7 @@ public class DefaultTokeniser implements ProcessingResource,
           //add the gap
           if(charIdx > tokenStart){
             fm = Transients.newFeatureMap();
+            fm.put("String", content.substring(tokenStart, charIdx));
             fm.put("kind", "gap");
             annotationSet.add(new Long(tokenStart), new Long(charIdx),
                               "SpaceToken", fm);
@@ -97,6 +98,7 @@ public class DefaultTokeniser implements ProcessingResource,
           //add the break
           if(charIdx > tokenStart){
             fm = Transients.newFeatureMap();
+            fm.put("String", content.substring(tokenStart, charIdx));
             fm.put("kind", "break");
             annotationSet.add(new Long(tokenStart), new Long(charIdx),
                               "SpaceToken", fm);
@@ -155,6 +157,7 @@ public class DefaultTokeniser implements ProcessingResource,
             }else //does not contain letters or digits
               fm.put("kind", "other");
           }
+          fm.put("String", content.substring(tokenStart, charIdx));          
           annotationSet.add(new Long(tokenStart), new Long(charIdx),
                             "Token", fm);
           tokenStart = charIdx;

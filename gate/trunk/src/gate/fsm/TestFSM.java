@@ -38,12 +38,19 @@ public class TestFSM extends TestCase {
 
   public void setUp() throws JapeException, IOException {
 //    String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
-    String japeFileName = "jape/TestABC.jape";
+//    String japeFileName = "jape/TestABC.jape";
+/*    String japeFileName = "jape/combined/brian-soc-loc1.jape";
     InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
 
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
     batch = new Batch(japeFileStream);
+*/
+    Gate.init();
+    String resPath = "jape/combined/";
+    String resName = "brian-soc-loc1.jape";
+    batch = new Batch(resPath, resName);
+
     transducer = (MultiPhaseTransducer)batch.getTransducer();
     transducer.finish();
   } // setUp

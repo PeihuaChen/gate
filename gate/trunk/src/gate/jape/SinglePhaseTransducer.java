@@ -116,7 +116,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     while(startNode != lastNode){
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
-      currentFSM = FSMInstance.getNewInstance(
+//      currentFSM = FSMInstance.getNewInstance(
+      currentFSM = new FSMInstance(
                   fsm,
                   fsm.getInitialState(),//fresh start
                   startNode,//the matching starts form the current startNode
@@ -228,7 +229,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           }
         }//while(transIter.hasNext())
        //return currentFSM to the rightful owner :)
-       FSMInstance.returnInstance(currentFSM);
+//       FSMInstance.returnInstance(currentFSM);
        }//while(!activeFSMInstances.isEmpty())
 
        //FIRE THE RULE
@@ -271,11 +272,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
       }else throw new RuntimeException("Unknown rule application style!");
       //release all the accepting instances as they have done their job
-      Iterator acceptors = acceptingFSMInstances.iterator();
-      while(acceptors.hasNext())
-        FSMInstance.returnInstance((FSMInstance)acceptors.next());
+//      Iterator acceptors = acceptingFSMInstances.iterator();
+//      while(acceptors.hasNext())
+//        FSMInstance.returnInstance((FSMInstance)acceptors.next());
+      acceptingFSMInstances.clear();
     }//while(startNode != lastNode)
-    FSMInstance.clearInstances();
+//    FSMInstance.clearInstances();
   } // transduce
 
 
@@ -508,6 +510,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.10  2000/06/26 14:45:50  valyt
+// Fixed the haunting bug in Jape: it works OK now
+// Reversed Jape to using the Java object management instead of our custom made object pooling:
+// aparently it works faster if the VM deletes and creates new objects than when we try to re-use them. I imagine it is a 1.3 issue: the hotspot improves object creation/deletion times.
+//
 // Revision 1.9  2000/06/22 13:50:28  valyt
 // Changed TestJdk to accommodate linux
 //

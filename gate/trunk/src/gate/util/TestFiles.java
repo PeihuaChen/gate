@@ -101,7 +101,7 @@ public class TestFiles extends TestCase
 
     //open first jar file in a temporal file
     try{
-      System.out.println(Files.getResourceAsStream(jarFilePathFirst));
+//      System.out.println(Files.getResourceAsStream(jarFilePathFirst));
       f1 = Files.writeTempFile(Files.getResourceAsStream(jarFilePathFirst));
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);

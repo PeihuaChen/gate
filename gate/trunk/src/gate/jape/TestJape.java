@@ -158,9 +158,10 @@ public class TestJape extends TestCase
                      "ms\n");
     try{
       System.out.print("Opening Jape grammar... ");
-//      Batch batch = new Batch("jape/combined/", "main.jape");
+      Batch batch = new Batch("jape/combined/", "main.jape");
+//      Batch batch = new Batch("jape/combined/", "brian-soc-loc1.jape");
 //      Batch batch = new Batch("z:/gate2/src/gate/resources/jape/combined/main.jape");
-      Batch batch = new Batch("jape/", "Country.jape");
+//      Batch batch = new Batch("jape/", "Country.jape");
       startCorpusTransduce = (new Date()).getTime();
       System.out.print(": " + (startCorpusTransduce - startJapeFileOpen) +
                        "ms\n");
@@ -208,9 +209,10 @@ public class TestJape extends TestCase
     try{
       TestJape testJape = new TestJape("Test Jape");
       testJape.setUp();
-      testJape._testCombined();
-//      if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
- //     else testJape.DoTestBigGrammar(args[0]);
+//      testJape.DoTestBigGrammar("AveShort");
+//      testJape._testCombined();
+      if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
+     else testJape.DoTestBigGrammar(args[0]);
     }catch(Exception e){
       e.printStackTrace(System.err);
     }

@@ -120,6 +120,19 @@ public class FSMInstance implements Comparable, Cloneable{
     *themselves
     *@return an Object value that is actually a FSMInstance object
     */
+public Object clone() {
+  //do a classic clone except for bindings which need to be cloned themselves
+    try{
+      FSMInstance clone = (FSMInstance)super.clone();
+      clone.bindings = (HashMap)bindings.clone();
+      return clone;
+    }catch (CloneNotSupportedException cnse){
+      cnse.printStackTrace(System.err);
+      return null;
+    }
+  }
+
+/*
   public Object clone() {
   //do a classic clone except for bindings which need to be cloned themselves
 //System.out.println("Clone!");
@@ -128,10 +141,10 @@ public class FSMInstance implements Comparable, Cloneable{
                                                    this.startNode,
                                                    this.AGPosition,
                                                    null);
-    ((FSMInstance)clone).bindings = (HashMap)bindings.clone();
+    clone.bindings = (HashMap)(bindings.clone());
     return (FSMInstance)clone;
   }
-
+*/
   /** Implementation of the compareTo method required by the Comparable
     *interface. The comparison is based on the size of the matched region and
     *the index in the definition file of the rule associated to this FSM
