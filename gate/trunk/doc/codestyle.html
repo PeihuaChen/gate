@@ -1,17 +1,29 @@
 <HTML>
 <HEAD>
+  <TITLE>GATE code style</TITLE>
   <STYLE type="text/css">
   PRE {font-family: "fixed";}
   </STYLE>  
-  <TITLE>GATE code style</TITLE>
+  <LINK rel="stylesheet" type="text/css" href="gate.css"></LINK>
 </HEAD>
-<BODY TEXT="#000000" BGCOLOR="#FFFFFF">
+<BODY>
 
-<!----------------------------------------------------------------------->
-<H1>
-<IMG SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356></H1>
+<!-- body ************************************************************ -->
+<BODY>
 
+<!-- header gif ****************************************************** -->
+<P ALIGN="center">
+<IMG SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356></IMG>
+</P>
 
+<!-- top banner ****************************************************** -->
+<DIV CLASS="banner">
+  <P>
+  GATE Code Style
+  </P>
+</DIV>
+
+<!-- ***************************************************************** -->
 <P>
 ``A computer language is not just a way of getting a computer to perform
 operations but rather that it is a novel formal medium for expressing ideas
@@ -23,6 +35,13 @@ H. Abelson, G. Sussman and J. Sussman, 1985.
 
 <!--------------------------------------------------------------------->
 <A NAME=contents></A><H2>Contents</H2>
+
+<P>
+This page describes the Java and HTML coding styles for GATE (and the
+structure of the source and Web server trees). <B>Note</B> that this style
+applies to the GATE codebase; you don't need to use this style for external
+resources if you don't want to (but it would probably be a good idea if you
+did).
 
 <UL>
 <LI>
@@ -40,7 +59,7 @@ servers</A>
 <H2>Java code style</H2>
 
 <P>
-Every bit of Java code you write should look like the following example.
+Every bit of Java code in GATE should look like the following example.
 (Note that "like" does NOT mean "sort of kind of fairly similar".)
 
 <P>
