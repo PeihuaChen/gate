@@ -27,14 +27,6 @@ public class Gate
     "http://gate.ac.uk/creole/creole.xml"
   };
 
-  public static void main(String args[]){
-    Gate gate = new Gate();
-    try{
-      gate.init();
-    }catch (Exception e){
-      e.printStackTrace(System.err);
-    }
-  }
   /** Initialisation - must be called by all clients before using
     * any other parts of the library.
     */
