@@ -245,7 +245,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if (atts != null){
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
-       String attName  = atts.getLocalName(i);
+       String attName  = atts.getQName(i);
        String attValue = atts.getValue(i);
        if ("Name".equals(attName))
           currentAnnotationSet = doc.getAnnotations(attValue);
@@ -259,7 +259,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       currentAnnot = new AnnotationObject();
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
-       String attName  = atts.getLocalName(i);
+       String attName  = atts.getQName(i);
        String attValue = atts.getValue(i);
 
        if ("Type".equals(attName))
@@ -315,7 +315,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if (atts != null){
       for (int i = 0; i < atts.getLength(); i++) {
         // Extract name and value
-        String attName  = atts.getLocalName(i);
+        String attName  = atts.getQName(i);
         String attValue = atts.getValue(i);
         if ("id".equals(attName)){
           try{
