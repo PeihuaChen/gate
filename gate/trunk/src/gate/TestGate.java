@@ -150,7 +150,7 @@ public class TestGate {
     TestSuite suite = new TestSuite();
 
     try {
-      // suite.addTest(TestAnnotationDiff.suite());
+      suite.addTest(TestAnnotationDiff.suite());
       suite.addTest(TestConfig.suite());                //*
       suite.addTest(TestBumpyStack.suite());
       suite.addTest(TestAnnotation.suite());
