@@ -110,9 +110,9 @@ public class TestXml extends TestCase
       Date endTime = new Date();
       // get the size of the doc
       long  time1 = endTime.getTime () - startTime.getTime ();
-      File f = Files.writeTempFile(doc.getSourceURL().openStream());
-      long docSize = f.length();
-      f.delete();
+      //File f = Files.writeTempFile(doc.getSourceURL().openStream());
+      int docSize = doc.getContent().size().intValue();
+      //f.delete();
       System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
         docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
         time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +

@@ -12,13 +12,15 @@ package gate.corpora;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import org.w3c.www.mime.*;
+
 import gate.util.*;
 import gate.*;
+import gate.gui.*;
 
 // xml tools
 import javax.xml.parsers.*;
 import org.xml.sax.*;
+import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -31,7 +33,6 @@ import org.xml.sax.*;
   */
 public class XmlDocumentFormat extends TextualDocumentFormat
 {
-
   /** Default construction */
   public XmlDocumentFormat() { super(); }
 
@@ -64,18 +65,26 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 		  saxParserFactory.setNamespaceAware(false);
 
       // create it
-		  SAXParser parser = saxParserFactory.newSAXParser();
+		  SAXParser xmlParser = saxParserFactory.newSAXParser();
 
       // use it
       if (null != doc){
-        // parse and construct the gate annotations
-        //String s = doc.getContent().toString();
-        //StringReader sr = new StringReader(s);
-        //InputSource is = new InputSource (sr);
-        //doc.getSourceURL ().toString ()
-        parser.parse(doc.getSourceURL ().toString (),
-                new gate.xml.CustomDocumentHandler(doc, this.markupElementsMap)
-        );
+        // create a new Xml document handler
+        gate.xml.XmlDocumentHandler xmlDocHandler =  new
+                    gate.xml.XmlDocumentHandler(doc, this.markupElementsMap);
+        // register a progress listener with it 
+        xmlDocHandler.addProcessProgressListener(new ProgressListener(){
+          public void progressChanged(int i){
+            // this is implemented in DocumentFormat.java and inherited here
+            fireProgressChangedEvent(i);
+          }
+          public void processFinished(){
+            // this is implemented in DocumentFormat.java and inherited here
+            fireProcessFinishedEvent();
+          }
+        });
+        // parse the document handler
+        xmlParser.parse(doc.getSourceURL().toString(), xmlDocHandler );
       }
 
 	  } catch (Exception ex) {

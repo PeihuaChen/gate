@@ -11,16 +11,18 @@ package gate.corpora;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import org.w3c.www.mime.*;
-import gate.util.*;
-import gate.*;
-import gate.html.*;
-
 // html tools
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 import javax.swing.text.html.HTMLEditorKit.*;
 import javax.swing.text.*;
+
+import gate.util.*;
+import gate.*;
+import gate.html.*;
+import gate.gui.*;
+
+import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -64,9 +66,24 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
       System.out.println (e);
       e.printStackTrace (System.err);
     }
+    // create a new Htmldocument handler
+    HtmlDocumentHandler htmlDocHandler = new
+                               HtmlDocumentHandler(doc, this.markupElementsMap);
+    // register a progress listener with it
+    htmlDocHandler.addProcessProgressListener(new ProgressListener(){
+       public void progressChanged(int i){
+        // this is implemented in DocumentFormat.java and inherited here
+        fireProgressChangedEvent(i);
+       }
+       public void processFinished(){
+        // this is implemented in DocumentFormat.java and inherited here
+        fireProcessFinishedEvent();
+       }
+    });
 
     try{
-      parser.parse(reader,new HtmlCustomDocumentHandler(doc, this.markupElementsMap),true);
+      // parse the HTML document
+      parser.parse(reader, htmlDocHandler, true);
     } catch (Exception e){
      System.out.println (e);
       e.printStackTrace (System.err);

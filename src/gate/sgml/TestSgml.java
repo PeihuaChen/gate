@@ -63,31 +63,39 @@ public class TestSgml extends TestCase
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
             new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/HDS")
+           //new URL ("file:///d:/tmp/Hds.SGML")
     );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
-
+    
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
         new MimeType("text","sgml")
     );
 
-    // set's the map
-    docFormat.setMarkupElementsMap(markupElementsMap);
-
-    // timing the operation
-    Date startTime = new Date();
-      docFormat.unpackMarkup (doc,"DocumentContent");
-    Date endTime = new Date();
-    long  time1 = endTime.getTime () - startTime.getTime ();
-    File f = Files.writeTempFile(doc.getSourceURL().openStream());
-    long docSize = f.length();
-    f.delete();
     /*
-    System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
-      "." + (docSize/time1*1000)%1024 + " K/second");
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
+      doc.getSourceURL()
+    );
     */
+    //*
+    if (docFormat != null){
+      // set's the map
+      docFormat.setMarkupElementsMap(markupElementsMap);
+      // timing the operation
+      Date startTime = new Date();
+        docFormat.unpackMarkup (doc,"DocumentContent");
+      Date endTime = new Date();
+      // get the size of the doc
+      long  time1 = endTime.getTime () - startTime.getTime ();
+      int docSize = doc.getContent().size().intValue();
+      System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
+        docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
+        time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
+        "." + (docSize/time1*1000)%1024 + " K/second");
+    }
+    else
+      System.out.println("Couldn't figure out the type for this document");
+    //*/
     // graphic visualisation
 
     if (docFormat != null){
