@@ -225,37 +225,82 @@ create or replace package body persist is
   
   /*******************************************************************************************/
   procedure create_annotation(p_doc_id           IN number,
+                              p_ann_local_id         IN number,  
                               p_as_id            IN number,
-                              p_ann_start_offset IN number,  
-                              p_ann_end_offset   IN number,                                
+                              p_node_start_lid   IN number,                                
+                              p_node_start_offset IN number,  
+                              p_node_end_lid      IN number,                                                              
+                              p_node_end_offset   IN number,  
                               p_ann_type         IN varchar2,
-                              p_ann_id           OUT number)
+                              p_ann_global_id    OUT number)
   is
-     l_start_node_id number;
-     l_end_node_id   number;     
+     l_start_node_gid number;
+     l_end_node_gid   number;     
      l_ann_type_id   number;
      cnt             number;
   begin
      
-     -- 1. store nodes in DB
-     insert into t_node(node_id,
-                        node_doc_id,
-                        node_offset)
-     values (seq_node.nextval,
-             p_doc_id,
-             p_ann_start_offset)
-     returning node_id into l_start_node_id;
+     -- 1. store nodes in DB only if they're new
+     -- (nodes are shared between annotations so the chances 
+     -- a node is used by more than one annotation is high)
      
-     insert into t_node(node_id,
-                        node_doc_id,
-                        node_offset)
-     values (seq_node.nextval,
-             p_doc_id,
-             p_ann_end_offset)
-     returning node_id into l_end_node_id;
+     -- 1.1. start node
+     select count(node_global_id)
+     into   cnt     
+     from   t_node
+     where  node_doc_id = p_doc_id
+            and node_local_id = p_node_start_lid;
+     
+     if (0 = cnt) then
+        -- add to DB
+        insert into t_node(node_global_id,
+                           node_doc_id,
+                           node_local_id,
+                           node_offset)
+        values (seq_node.nextval,
+                p_doc_id,
+                p_node_start_lid,
+                p_node_start_offset)
+        returning node_global_id into l_start_node_gid;        
+     else
+        -- select the global ID
+        select node_global_id
+        into   l_start_node_gid
+        from   t_node
+        where  node_doc_id = p_doc_id
+               and node_local_id = p_node_start_lid;        
+     end if;
+     
+     -- 1.2. end node     
+
+     select count(node_global_id)
+     into   cnt     
+     from   t_node
+     where  node_doc_id = p_doc_id
+            and node_local_id = p_node_end_lid;
+     
+     if (0 = cnt) then
+        -- add to DB
+        insert into t_node(node_global_id,
+                           node_doc_id,
+                           node_local_id,
+                           node_offset)
+        values (seq_node.nextval,
+                p_doc_id,
+                p_node_end_lid,
+                p_node_end_offset)
+        returning node_global_id into l_end_node_gid;        
+     else
+        -- select the global ID
+        select node_global_id
+        into   l_end_node_gid
+        from   t_node
+        where  node_doc_id = p_doc_id
+               and node_local_id = p_node_end_lid;        
+     end if;
      
      
-     -- 2. store annotation in DN
+     -- 2. store annotation in DB
      
      -- 2.1 get the anotation type ID
      select count(at_id)
@@ -285,22 +330,26 @@ create or replace package body persist is
      end if;
      
      -- 2.3 insert annotation
-     insert into t_annotation(ann_id,
+     insert into t_annotation(ann_global_id,
+                              ann_doc_id,
+                              ann_local_id,
                               ann_at_id,
                               ann_startnode_id,
                               ann_endnode_id)
      values (seq_annotation.nextval,
+             p_doc_id,
+             p_ann_local_id,
              l_ann_type_id,
-             l_start_node_id,
-             l_end_node_id)
-     returning ann_id into p_ann_id;
+             l_start_node_gid,
+             l_end_node_gid)
+     returning ann_global_id into p_ann_global_id;
      
      -- 3. create a annotation-to-aset mapping
      insert into t_as_annotation(asann_id,
                                  asann_ann_id,
                                  asann_as_id)
      values (seq_as_annotation.nextval,
-             p_ann_id,
+             p_ann_global_id,
              p_as_id);
      
           
