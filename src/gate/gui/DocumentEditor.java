@@ -1250,6 +1250,7 @@ public class DocumentEditor extends AbstractVisualResource
 
         boolean corefDisplayed = isCoreferenceVisible() &&
                                  isCorefOptionAvailable();
+        if(corefDisplayed) updateCorefTree();
         if(isTypesTreeVisible() && corefDisplayed){
           rightSplit.setTopComponent(stylesTreeScroll);
           rightSplit.setBottomComponent(corefScroll);
