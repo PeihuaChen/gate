@@ -163,7 +163,7 @@ scratch:
 
 # make the javadoc documentation
 docs: ../doc/userguide.html build.txt version.txt
-	VERSION=`cat version.txt`-build`cat build.txt`; \
+	VERSION=`cat version.txt`-`cat build.txt`; \
 	DATE=`date +%b-%d-%Y`; \
 	sed -e "s,__VERSION__,$$VERSION," -e "s,__DATE__,$$DATE," \
 	  ../doc/src/version.html >../doc/version.html
@@ -203,9 +203,18 @@ clean:
 	rm -rf ../classes/guk `find ../classes/* -print |grep -v CVS` \
 	  `find .. -name '*.~*' -print`
 
+# create binary distributions
+bindistrib:
+	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-$${B}-BINARY; \
+	mkdir $$N; cp -R ../bin/* $$N; rm -rf `find $$N -name CVS -print`; \
+	cd $$N; cp ../gate.jar ../../lib/ext/guk.jar .; mv guk.jar ext; \
+	cd ..; tar czvf $$N.tgz $$N
+	
+
 # create distributions
+# don't think this is working...
 distrib:
-	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-build$${B}; \
+	V=`cat version.txt`; B=`cat build.txt`; N=gate-$${V}-$${B}; \
 	cd ../.. && cp -R gate $${N} && \
 	rm -rf `find $${N} -name internal -print` && \
 	BINFILES="$${N}/build/gate.sh $${N}/build/gate.bat $${N}/build/gate.jar $${N}/lib/ext/guk.jar `find $${N} -name '*.html' -print |grep -v $${N}'\/src\/'` $${N}/doc/gateHeader.gif"; \
