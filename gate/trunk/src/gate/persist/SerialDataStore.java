@@ -175,7 +175,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Delete a resource from the data store.
     */
-  public void delete(String lrClassName, String dataStoreInstanceId)
+  public void delete(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
     // find the subdirectory for resources of this type
@@ -188,7 +188,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
 
     // create a File to representing the resource storage file
-    File resourceFile = new File(resourceTypeDirectory, dataStoreInstanceId);
+    File resourceFile = new File(resourceTypeDirectory, (String)lrPersistenceId);
     if(! resourceFile.exists() || ! resourceFile.isFile())
       throw new PersistenceException("Can't find file " + resourceFile);
 
@@ -204,7 +204,7 @@ extends AbstractFeatureBearer implements DataStore {
     //let the world know about it
     fireResourceDeleted(
       new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_DELETED, null, dataStoreInstanceId
+        this, DatastoreEvent.RESOURCE_DELETED, null, (String) lrPersistenceId
       )
     );
   } // delete(lr)
@@ -345,7 +345,7 @@ extends AbstractFeatureBearer implements DataStore {
     * DataStore and DataStoreInstanceId parameters set instead.</B>
     * (Sometimes I wish Java had "friend" declarations...)
     */
-  public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
     // find the subdirectory for resources of this type
@@ -358,7 +358,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
 
     // create a File to representing the resource storage file
-    File resourceFile = new File(resourceTypeDirectory, dataStoreInstanceId);
+    File resourceFile = new File(resourceTypeDirectory, (String)lrPersistenceId);
     if(! resourceFile.exists() || ! resourceFile.isFile())
       throw new PersistenceException("Can't find file " + resourceFile);
 
@@ -430,12 +430,12 @@ extends AbstractFeatureBearer implements DataStore {
   } // getLrNames(lrType)
 
   /** Get the name of an LR from its ID. */
-  public String getLrName(String lrId) {
-    int secondSeparator = lrId.lastIndexOf("___");
-    lrId = lrId.substring(0, secondSeparator);
-    int firstSeparator = lrId.lastIndexOf("___");
+  public String getLrName(Object lrId) {
+    int secondSeparator = ((String) lrId).lastIndexOf("___");
+    lrId = ((String) lrId).substring(0, secondSeparator);
+    int firstSeparator = ((String) lrId).lastIndexOf("___");
 
-    return lrId.substring(0, firstSeparator);
+    return ((String) lrId).substring(0, firstSeparator);
   } // getLrName
 
   /** Set method for the autosaving behaviour of the data store.
@@ -549,7 +549,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Long lrID, Session s)
+  public boolean canReadLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
     throw new MethodNotImplementedException();
@@ -558,7 +558,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Long lrID, Session s)
+  public boolean canWriteLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
     throw new MethodNotImplementedException();
