@@ -136,7 +136,6 @@ implements AnnotationSet
 
   /** Remove from the ID index. */
   boolean removeFromIdIndex(Annotation a) {
-
     if(annotsById.remove(a.getId()) == null)
       return false;
 
@@ -193,6 +192,11 @@ implements AnnotationSet
   /** Get all annotations */
   public AnnotationSet get() {
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    Iterator iter = annotsById.values().iterator();
+    while (iter.hasNext()) {
+      Out.prln(iter.next().toString());
+    }
+
     resultSet.addAll(annotsById.values());
     if(resultSet.isEmpty())
       return null;
@@ -711,24 +715,26 @@ implements AnnotationSet
   } // toString()
   */
 
-  /** Two AnnotationSet are equal if their name, document and annotations
-    *  are the same
+  /** Two AnnotationSet are equal if their name, the documents of which belong
+    *  to the AnnotationSets and annotations from the sets are the same
     */
   public boolean equals(Object other) {
-    AnnotationSet annotSet;
 
-    if (!(other instanceof AnnotationSetImpl)) return false;
-    else annotSet = (AnnotationSet) other;
+    if (!super.equals(other)) return false;
 
-    if ((doc == null)^ (annotSet.getDocument() == null)) return false;
-    if ((doc != null)&& (!doc.equals(annotSet.getDocument()))) return false;
+    if (other instanceof AnnotationSetImpl) {
+      AnnotationSet annotSet = (AnnotationSet) other;
 
-    if ((name == null)^ (annotSet.getName() == null)) return false;
-    if ((name!=null)&& (!name.equals(annotSet.getName()))) return false;
+      // verify the documents which belong to
+      if ((doc == null)^ (annotSet.getDocument() == null)) return false;
+      if ((doc != null)&& (!doc.equals(annotSet.getDocument()))) return false;
 
-    if (this.size() != annotSet.size()) return false;
-
-    if (!this.containsAll(annotSet)) return false;
+      // verify the name of the AnnotationSets
+      if ((name == null)^ (annotSet.getName() == null)) return false;
+      if ((name!=null)&& (!name.equals(annotSet.getName()))) return false;
+    } else {
+      if (!(other instanceof Set)) return false;
+    }
 
     return true;
   } // equals
