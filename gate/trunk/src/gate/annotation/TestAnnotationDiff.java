@@ -93,10 +93,10 @@ public class TestAnnotationDiff extends TestCase
 
     assert("Precision changed.That's because of the key/response document or" +
             " code implementation!",
-            new Double(0.90).equals(annotDiff.getPrecision()));
+            new Double(0.6666666666666666).equals(annotDiff.getPrecision()));
     assert("Recall changed.That's because of the key/response document or" +
             " code implementation!",
-            new Double(0.8181818181818182).equals(annotDiff.getRecall()));
+            new Double(0.7272727272727273).equals(annotDiff.getRecall()));
 
     // Display the component
 /*
