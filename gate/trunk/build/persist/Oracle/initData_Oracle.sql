@@ -19,8 +19,29 @@
      insert into t_lr_type(lrtp_id,lrtp_type)
      values(1,'gate.corpora.DocumentImpl');
      
+     --
      insert into t_lr_type(lrtp_id,lrtp_type)
      values(2,'gate.corpora.CorpusImpl');
 
-
+     
+     --create the ADMIN user and group
+     insert into t_user(usr_id,
+                        usr_login,
+                        usr_pass)
+     values (0,
+             'ADMIN',
+             'sesame');
+             
+     --
+     insert into t_group(grp_id,
+                         grp_name)
+     values (0,
+             'ADMINS');
+             
+     --
+     insert into t_user_group(ugrp_id,
+                              ugrp_user_id,
+                              ugrp_group_id)
+     values (0,0,0);
+     
      --commit;                                        
