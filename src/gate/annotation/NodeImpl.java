@@ -1,0 +1,45 @@
+/*	NodeImpl.java
+ *	Valentin Tablan, 24.01.2000
+ *	$Id$
+ */
+
+package  gate.annotation;
+
+import java.util.*;
+import gate.*;
+import gate.util.*;
+
+/** Provides an implementation for the interface gate.Node.
+  */
+public class NodeImpl implements Node
+{
+  /** Construction from id. Creates an unrooted node. */
+  public NodeImpl (Integer id) {
+    this.id = id;
+    offset = null;
+  } // Node()
+
+  /** Construction from id and offset.
+    * @param id the Id of the new node
+    * @param offset the (temporal) offset of the Node; Should be <b>null</b>
+    * for non-anchored nodes.
+    */
+  public NodeImpl (Integer id, Long offset) {
+      this.id = id;
+      this.offset = offset;
+  } // Node(id, offset)
+
+  /** Returns the Id of the Node. */
+  public Integer getId () {
+    return  id;
+  }
+
+  /** Offset (will be null when the node is not anchored) */
+  public Long getOffset () {
+    return  offset;
+  }
+
+  private Integer id;
+  private Long offset;
+}
+

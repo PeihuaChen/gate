@@ -23,7 +23,7 @@ public class RBTreeMap extends AbstractMap
      */
     private Comparator comparator = null;
 
-    private transient Entry root = null;
+     private transient Entry root = null;
 
     /**
      * The number of entries in the tree

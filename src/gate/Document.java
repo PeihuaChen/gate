@@ -24,10 +24,13 @@ public interface Document extends FeatureBearer
   public AnnotationGraph getAnnotationGraph(Long id);
 
   /** The length of the underlying document, e.g. the number of bytes for
-    * textual documents*/
+    * textual documents
+    */
   public double getLength();
 
-  /**Creates a new empty annotation graph associated with this document and returns it.*/
+  /** Creates a new empty annotation graph associated with this document
+    * and returns it.
+    */
   public AnnotationGraph newAnnotationGraph(Long id);
 
   public Long getId();

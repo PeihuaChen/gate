@@ -15,7 +15,7 @@ import gate.util.*;
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.
   */
-public interface Annotation extends FeatureBearer {
+public interface Annotation extends FeatureBearer, IdBearer {
 
   /** The type of the annotation (corresponds to TIPSTER "name"). */
   public String getType();
@@ -25,8 +25,5 @@ public interface Annotation extends FeatureBearer {
 
   /** The end node. */
   public Node getEndNode();
-
-  /** The id of this annotation. */
-  public Long getId();
 
 } // interface Annotation

@@ -23,23 +23,26 @@ public class TestAnnotation extends TestCase
 //  /** Base of the test server URL */
 //  protected String testServer;
 //
-//  /** Name of test document 1 */
-////  protected String testDocument1;
-//
-//  /** Fixture set up */
-//  public void setUp() {
-//  } // setUp
+  /** Name of test document 1 */
+  protected Document testDocument1;
+
+  /** Fixture set up */
+  public void setUp() {
+  } // setUp
 
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() {
-    AnnotationSet as = new AnnotationSetImpl();
+    AnnotationSet as = new AnnotationSetImpl(testDocument1);
     assertEquals(as.size(), 0);
 
-    //as.add(0, 10, "Token", new SimpleFeatureMapImpl());
-    
+    as.add(new Long(0), new Long(10), "Token", new SimpleFeatureMapImpl());
+
     Iterator iter = as.iterator();
     while(iter.hasNext()) {
       Annotation a = (Annotation) iter.next();
+      assertEquals(a.getId().longValue(), 0);
+      assertEquals(a.getType(), "Token");
+      assertEquals(a.getFeatures().size(), 0);
     }
 
   } // testAnnotationSet
