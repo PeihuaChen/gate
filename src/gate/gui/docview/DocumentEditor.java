@@ -53,13 +53,30 @@ public class DocumentEditor extends AbstractVisualResource
       //lazily build the GUI only when needed
       public void componentShown(ComponentEvent e) {
         if(!viewsInited) initViews();
-//System.out.println("Docedit shown");        
       }
     });
 
     return this;
   }
   
+  public void cleanup(){
+    Iterator viewsIter;
+    if(centralViews != null){ 
+      viewsIter= centralViews.iterator();
+      while(viewsIter.hasNext()) ((Resource)viewsIter.next()).cleanup();
+      centralViews.clear();
+    }
+    if(horizontalViews != null){
+      viewsIter = horizontalViews.iterator();
+      while(viewsIter.hasNext()) ((Resource)viewsIter.next()).cleanup();
+      horizontalViews.clear();
+    }
+    if(verticalViews != null){
+      viewsIter = verticalViews.iterator();
+      while(viewsIter.hasNext()) ((Resource)viewsIter.next()).cleanup();
+      verticalViews.clear();
+    }
+  }
   
   protected void initViews(){
     viewsInited = true;
