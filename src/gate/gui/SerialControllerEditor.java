@@ -120,7 +120,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     scroller.getViewport().setView(loadedPRsTable);
     scroller.setBorder(BorderFactory.
                        createTitledBorder(BorderFactory.createEtchedBorder(),
-                                          "Loaded Processing resources"));
+                                          " Loaded Processing resources "));
 
     topBox.add(scroller);
     topBox.add(Box.createHorizontalGlue());
@@ -158,7 +158,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     scroller.getViewport().setView(memberPRsTable);
     scroller.setBorder(BorderFactory.
                        createTitledBorder(BorderFactory.createEtchedBorder(),
-                                          "Selected Processing resources"));
+                                          " Selected Processing resources "));
 
 
     topBox.add(scroller);
@@ -179,9 +179,9 @@ public class SerialControllerEditor extends AbstractVisualResource
     add(topBox);
 
     if(conditionalMode){
-      JPanel middleBox = new JPanel();
-      middleBox.setLayout(new BoxLayout(middleBox, BoxLayout.X_AXIS));
-      middleBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      strategyPanel = new JPanel();
+      strategyPanel.setLayout(new BoxLayout(strategyPanel, BoxLayout.X_AXIS));
+      strategyPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
       runBtnGrp = new ButtonGroup();
       yes_RunRBtn = new JRadioButton("Yes", true);
       yes_RunRBtn.setHorizontalTextPosition(AbstractButton.LEFT);
@@ -204,29 +204,30 @@ public class SerialControllerEditor extends AbstractVisualResource
                                          featureValueTextField.getPreferredSize().
                                          height));
 
-      middleBox.add(new JLabel(MainFrame.getIcon("greenBall.gif")));
-      middleBox.add(yes_RunRBtn);
-      middleBox.add(Box.createHorizontalStrut(5));
+      strategyPanel.add(new JLabel(MainFrame.getIcon("greenBall.gif")));
+      strategyPanel.add(yes_RunRBtn);
+      strategyPanel.add(Box.createHorizontalStrut(5));
 
-      middleBox.add(new JLabel(MainFrame.getIcon("redBall.gif")));
-      middleBox.add(no_RunRBtn);
-      middleBox.add(Box.createHorizontalStrut(5));
+      strategyPanel.add(new JLabel(MainFrame.getIcon("redBall.gif")));
+      strategyPanel.add(no_RunRBtn);
+      strategyPanel.add(Box.createHorizontalStrut(5));
 
-      middleBox.add(new JLabel(MainFrame.getIcon("yellowBall.gif")));
-      middleBox.add(conditional_RunRBtn);
-      middleBox.add(Box.createHorizontalStrut(5));
+      strategyPanel.add(new JLabel(MainFrame.getIcon("yellowBall.gif")));
+      strategyPanel.add(conditional_RunRBtn);
+      strategyPanel.add(Box.createHorizontalStrut(5));
 
-      middleBox.add(featureNameTextField);
-      middleBox.add(Box.createHorizontalStrut(5));
-      middleBox.add(new JLabel("is"));
-      middleBox.add(Box.createHorizontalStrut(5));
-      middleBox.add(featureValueTextField);
-      middleBox.add(Box.createHorizontalStrut(5));
-      middleBox.setBorder(BorderFactory.
-                          createTitledBorder(BorderFactory.createEtchedBorder(),
-                                            "Run ?"));
+      strategyPanel.add(featureNameTextField);
+      strategyPanel.add(Box.createHorizontalStrut(5));
+      strategyPanel.add(new JLabel("is"));
+      strategyPanel.add(Box.createHorizontalStrut(5));
+      strategyPanel.add(featureValueTextField);
+      strategyPanel.add(Box.createHorizontalStrut(5));
+      strategyBorder = BorderFactory.createTitledBorder(
+          BorderFactory.createEtchedBorder(),
+          " No processing resource selected... ");
+      strategyPanel.setBorder(strategyBorder);
 
-      add(middleBox);
+      add(strategyPanel);
     }//if conditional mode
     if(analyserMode){
       //we need to add the corpus combo
@@ -273,7 +274,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     parametersPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
     parametersBorder = BorderFactory.createTitledBorder(
                                       BorderFactory.createEtchedBorder(),
-                                      "No selected processing resource");
+                                      " No selected processing resource ");
     parametersPanel.setBorder(parametersBorder);
     parametersEditor = new ResourceParametersEditor();
     parametersEditor.init(null, null);
@@ -658,6 +659,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     showParamsEditor(pr);
     selectedPR = pr;
     if(conditionalMode){
+      strategyBorder.setTitle(" Run \"" + pr.getName() + "\"? ");
       //update the state of the run strategy buttons
       selectedPRRunStrategy = (RunningStrategy)
                                  ((List)((ConditionalController)controller).
@@ -731,8 +733,8 @@ public class SerialControllerEditor extends AbstractVisualResource
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                                          get(pr.getClass().getName());
 
-      parametersBorder.setTitle("Parameters for the \"" + pr.getName() +
-                                "\" " + rData.getName());
+      parametersBorder.setTitle(" Parameters for the \"" + pr.getName() +
+                                "\" " + rData.getName() + " ");
 
       //this is a list of lists
       List parameters = rData.getParameterList().getRuntimeParameters();
@@ -1283,6 +1285,13 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   /** A border for the {@link parametersPanel} */
   TitledBorder parametersBorder;
+
+
+  /** A JPanel containing the running strategy options*/
+  JPanel strategyPanel;
+
+  /** A border for the running strategy options box */
+  TitledBorder strategyBorder;
 
   /**
    * Button for run always.
