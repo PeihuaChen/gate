@@ -4,6 +4,25 @@
     <description>
         GATE see http://gate.ac.uk
     </description>
+  <!-- ******************************************************************* 
+       ****************  USER OPTIONS ************************************ 
+       *******************************************************************
+       
+       Make changes to this section of the build file to customise your 
+       GATE start-up and build script -->    
+  
+  <!-- TOOLS.JAR -->
+  <!-- GATE will normally try to guess which tools.jar library to use based on
+       your Java installation.
+       If you want to set this manually uncomment the line below & edit it -->
+  <!-- <property name="tools.jar.location" value="w:/jdk/jdk1.5.0/lib/tools.jar"/> -->
+  <!-- RUNTIME MEMORY -->
+  <property name="run.memory" value="200M"/>
+  
+  <!-- ******************************************************************* 
+       ****************  USER OPTIONS END HERE! ************************** 
+       ******************************************************************* -->
+       
   <!-- set global properties for this build -->
   
   <!-- Directories -->
@@ -50,7 +69,33 @@
   
   
   <!-- tools.jar path -->
-  <path id="tools.jar.path" location="bin/tools14.jar"/>
+  
+  <!-- GATE will attemt to guess which tools.jar file to use. -->
+  <!-- First try the two variants of $JAVA_HOME/lib/tools.jar -->
+  <condition property="tools.jar.location"
+            value="${java.home}/../lib/tools.jar">
+    <and>
+      <not>
+        <isset property="tools.jar.location"/>
+      </not>
+      <available file="${java.home}/../lib/tools.jar"
+                 type="file"/>
+    </and>
+  </condition>
+  <condition property="tools.jar.location"
+            value="${java.home}/lib/tools.jar">
+    <and>
+      <not>
+        <isset property="tools.jar.location"/>
+      </not>
+      <available file="${java.home}/lib/tools.jar"
+                 type="file"/>
+    </and>             
+  </condition>  
+  <!-- If that failed, then use the canned version inside GATE_HOME -->          
+  <property name="tools.jar.location" value="bin/tools14.jar"/>
+  <!-- Now store the value as a path -->
+  <path id="tools.jar.path" location="${tools.jar.location}"/>
   
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
@@ -69,6 +114,7 @@
     <format property="TODAY_UK" pattern="d-MMMM-yyyy" locale="en"/>
     <format property="TSTAMP_UK" pattern="hh:mm" locale="en"/>
   </tstamp>
+  
   
   <!-- Prints out some information messages -->
   <echo level="info">
@@ -184,12 +230,24 @@
   
   <!-- Run the beast -->
   <target name="run">
+    <property name="toolsjar.debug" refid="tools.jar.path"/>
+    <property name="class.path.debug" refid="run.class.path"/>
+    <echo>
+      Starting GATE ${gate.version}, build ${gate.build}
+      Using JVM at ${java.home}
+      Maximum memory ${run.memory}
+      Using tools.jar at ${toolsjar.debug}
+      CLASSPATH=${class.path.debug}
+    </echo>
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
           spawn="false"
-          maxmemory="200m">
-       <jvmarg value="-Djava.ext.dirs=${extDir}"/>   
+          dir="." 
+          logError="true"
+          maxmemory="${run.memory}">
+       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
+       <jvmarg value="-Dsun.java2d.opengl=true"/>
      </java>
   </target>
   
