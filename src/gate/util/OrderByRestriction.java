@@ -1,4 +1,17 @@
+/*
+ *  OrderByRestriction.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Rosen Marinov, 10/Dec/2001
+ */
 package gate.util;
+
 
 public class OrderByRestriction implements java.io.Serializable{
 
@@ -9,18 +22,26 @@ public class OrderByRestriction implements java.io.Serializable{
   private String key;
   private int operator_;
 
-  /** --- */
+  /** Constructor.
+   *
+   * @param key string value of feature key
+   * @param operator_ type of operator for ordering: ascending or descending
+   */
   public OrderByRestriction(String key,  int operator_){
     this.key = key;
     this.operator_ = operator_;
   }
 
-  /** --- */
+  /**
+   * @return String key of the feature
+   */
   public String getKey(){
     return key;
   }
 
-  /** --- */
+  /**
+   * @return int type of operator for ordering: ascending or descending
+   */
   public int getOperator(){
     return operator_;
   }
