@@ -179,7 +179,7 @@ public class Main {
         System.exit(1);
       }
     }
-    registerCreoleUrls();
+    
 
     //create the main frame, show it and hide the splash
     SwingUtilities.invokeLater(new Runnable(){
@@ -272,6 +272,7 @@ public class Main {
         } // if - when no SLUG GUI load session
       }
     });
+    registerCreoleUrls();
   } // runGui()
 
   /** Run the db admin interface. */
