@@ -147,7 +147,9 @@ public class Files {
     resourceFile = File.createTempFile ("gateResource", ".tmp");
     resourceFileOutputStream = new FileOutputStream(resourceFile);
     resourceFile.deleteOnExit ();
-    //resourceReader = new BufferedReader(new InputStreamReader(contentStream));
+
+    if (contentStream == null)
+      return resourceFile;
 
     int bytesRead = 0;
     final int readSize = 1024;
