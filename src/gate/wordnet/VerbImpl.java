@@ -37,7 +37,7 @@ public class VerbImpl extends WordSenseImpl
 
     super(_word,_synset,_senseNumber,_orderInSynset,_isSemcor, _wnDict);
 
-    Assert.assertNull(_jwVerb);
+    Assert.assertNotNull(_jwVerb);
 
     String[] jwFrames = _jwVerb.getVerbFrames();
     this.verbFrames = new ArrayList(jwFrames.length);
