@@ -1229,6 +1229,26 @@ public class DocumentEditor extends AbstractVisualResource
       }
     });
 
+    paintHighlights(annotations, style);
+
+    //restore the state
+    textPane.select(selStart, selEnd);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        //show the text
+        textScroll.getViewport().setView(textPane);
+        try {
+          textScroll.getViewport().setViewPosition(
+              textPane.modelToView(position).getLocation());
+          textScroll.paintImmediately(textScroll.getBounds());
+        }
+        catch (BadLocationException ble) {
+        }
+      }
+    });
+  }//protected void showHighlights()
+
+  protected void paintHighlights(Set annotations, AttributeSet style){
     //highlight the annotations
     int size = annotations.size();
     int i = 0;
@@ -1247,29 +1267,69 @@ public class DocumentEditor extends AbstractVisualResource
 
       textPane.select(start, end);
       textPane.setCharacterAttributes(style, true);
-      value = i * 100 / size;
-      if(value - lastValue >= 5){
-        progressBar.setValue(value);
-        progressBar.paintImmediately(progressBar.getBounds());
-        lastValue = value;
+      if(progressBar.isVisible()){
+        value = i * 100 / size;
+        if (value - lastValue >= 5) {
+          progressBar.setValue(value);
+          progressBar.paintImmediately(progressBar.getBounds());
+          lastValue = value;
+        }
+        i++;
       }
-      i++;
     }
-    //restore the state
-    textPane.select(selStart, selEnd);
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        //show the text
-        textScroll.getViewport().setView(textPane);
-        try{
-          textScroll.getViewport().setViewPosition(
-                                  textPane.modelToView(position).getLocation());
-          textScroll.paintImmediately(textScroll.getBounds());
-        }catch(BadLocationException ble){
+  }
+
+  /**
+   * Called whenever a part of the textual display needs to be repainted
+   * because, for instance, of an edit operation.
+   * @param start the start offset for the area to be repainted
+   * @param end the end offset for the area to be repainted.
+   */
+  protected void repairHighlights(int start, int end) {
+    //we need to fix the character ranges for all types visible or not
+    //clear everything
+    int selStart = textPane.getSelectionStart();
+    int selEnd = textPane.getSelectionEnd();
+    //clear the styles in the affected area
+    textPane.select(start, end);
+    textPane.setCharacterAttributes(textPane.getStyle("default"), true);
+
+    //repaint the highlights for the annotations going through the affected area
+    Iterator setsIter = typeDataMap.keySet().iterator();
+    while(setsIter.hasNext()){
+      Map typesMap = (Map)typeDataMap.get(setsIter.next());
+      Iterator typesIter = typesMap.keySet().iterator();
+      while(typesIter.hasNext()){
+        TypeData tData = (TypeData) typesMap.get(typesIter.next());
+        if (tData.getVisible()) {
+          String setName = tData.getSet();
+          AnnotationSet annSet = setName.equals("Default") ?
+                                 document.getAnnotations() :
+                                 document.getAnnotations(setName);
+          annSet = annSet.get(tData.getType());
+          if(annSet != null){
+            AnnotationSet annotationsToRepaint = annSet.get(new Long(start),
+                new Long(end));
+//          Set annotationsToRepaint = new HashSet();
+//          Iterator annIter = tData.getAnnotations().iterator();
+//          while (annIter.hasNext()) {
+//            Annotation anAnnotation = (Annotation) annIter.next();
+//            long annStart = anAnnotation.getStartNode().getOffset().longValue();
+//            long annEnd = anAnnotation.getEndNode().getOffset().longValue();
+//            if ( (annStart < start && annEnd >= start) ||
+//                (start <= annStart && annStart <= end)
+//                )
+//              annotationsToRepaint.add(anAnnotation);
+//          }
+            paintHighlights(annotationsToRepaint, tData.getActualStyle());
+          }
         }
       }
-    });
-  }//protected void showHighlights()
+    }
+    //restore selection
+    textPane.select(selStart, selEnd);
+//    textPane.requestFocus();
+  }
 
   /**
    * Updates the GUI when the user has selected an annotation e.g. by using the
@@ -2484,11 +2544,14 @@ Out.prln("NULL size");
       } else {
         style = textPane.addStyle(set + "." + type, textPane.getStyle(set));
         StyleConstants.setBackground(style,
-                                        colGenerator.getNextColor().brighter());
-        //add an intermediary style that will be used for the actual display
-        textPane.addStyle("_" + set + "." + type, style);
+                                     colGenerator.getNextColor().brighter());
+        //add an intermediary style that will be used attribute inheritance tricks
+        middleStyle = visible ?
+                      textPane.addStyle("_" + set + "." + type, style) :
+                      textPane.addStyle("_" + set + "." + type,
+                                        textPane.getStyle("default"));
         //add the style that will be used for the actual display
-        textPane.addStyle("_" + set + "." + type + "_",
+        actualStyle = textPane.addStyle("_" + set + "." + type + "_",
                           textPane.getStyle("_" + set + "." + type));
         setMap.put(type, this);
       }
@@ -2528,10 +2591,9 @@ Out.prln("NULL size");
             }
 
             //update the text display
-            Style actualStyle = textPane.getStyle("_" + set + "." + type);
-            actualStyle.setResolveParent(style);
-            showHighlights(annotations, textPane.getStyle("_" + set + "."
-                                                          + type + "_"));
+//            Style tempStyle = textPane.getStyle("_" + set + "." + type);
+            middleStyle.setResolveParent(style);
+            showHighlights(annotations, actualStyle);
           } else {
             //hide the corresponding range
             //update the annotations table
@@ -2560,8 +2622,8 @@ Out.prln("NULL size");
               }
             });
             //update the text display
-            Style actualStyle = textPane.getStyle("_" + set + "." + type);
-            actualStyle.setResolveParent(textPane.getStyle("default"));
+//            Style middleStyle = textPane.getStyle("_" + set + "." + type);
+            middleStyle.setResolveParent(textPane.getStyle("default"));
           }//if(visible)
         }//public void run()
       };//Runnable runnable = new Runnable()
@@ -2573,6 +2635,8 @@ Out.prln("NULL size");
     }//public void setVisible(boolean isVisible)
 
     public AttributeSet getAttributes() { return style;}
+
+    private AttributeSet getActualStyle() { return style;}
 
     public void setAttributes(AttributeSet newAttributes) {
       style.removeAttributes(style.copyAttributes());
@@ -2601,7 +2665,20 @@ Out.prln("NULL size");
     private String set;
     private String type;
     private boolean visible;
+    /**
+     * The style used for annotations of this type
+     */
     private Style style;
+
+    /**
+     * Used internally for attribute inheritance tricks.
+     */
+    private Style middleStyle;
+
+    /**
+     * The style actually used to affect the text.
+     */
+    private Style actualStyle;
     private Set annotations = null;
     private Range range = null;
 
@@ -2767,10 +2844,11 @@ Out.prln("NULL size");
             aRange.end--;
           }//while(rangesIter.hasNext())
           tableChanged = true;
-
-          //update the text -> hide the highlight
-          SwingUtilities.invokeLater(new HighlightsRemover(ann));
         }//if(tData.getVisible())
+        //update the text -> hide the highlight
+        //required even if not visible
+        SwingUtilities.invokeLater(new HighlightsRemover(ann));
+
         //if this was the last annotation of this type remove the type node
         if((tData.annotations.size() == 1 &&
            tData.annotations.iterator().next() == ann) ||
@@ -2992,12 +3070,17 @@ Out.prln("NULL size");
    *  accordingly
    */
   class SwingDocumentListener implements javax.swing.event.DocumentListener{
-    public void insertUpdate(javax.swing.event.DocumentEvent e) {
+    public void insertUpdate(final javax.swing.event.DocumentEvent e) {
       try{
         document.edit(new Long(e.getOffset()), new Long(e.getOffset()),
                       new DocumentContentImpl(
                         e.getDocument().getText(e.getOffset(), e.getLength())));
-        annotationsTable.repaint();
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            annotationsTable.repaint();
+            repairHighlights(e.getOffset(), e.getOffset() + e.getLength());
+          }
+        });
       }catch(BadLocationException ble){
         ble.printStackTrace(Err.getPrintWriter());
       }catch(InvalidOffsetException ioe){
@@ -3011,6 +3094,7 @@ Out.prln("NULL size");
                       new Long(e.getOffset() + e.getLength()),
                       new DocumentContentImpl(""));
         annotationsTable.repaint();
+//        repairHighlights(e.getOffset(), e.getOffset() + e.getLength());
       }catch(InvalidOffsetException ioe){
         ioe.printStackTrace(Err.getPrintWriter());
       }
