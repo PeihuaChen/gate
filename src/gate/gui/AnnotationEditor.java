@@ -585,7 +585,7 @@ public class AnnotationEditor extends AbstractVisualResource {
     typeDataMap = new HashMap();
 
     eventHandler = new DelayedListener();
-    new Thread(eventHandler).start();
+    new Thread(Thread.currentThread().getThreadGroup(), eventHandler).start();
 
   }//protected void initLocalData()
 
@@ -902,7 +902,8 @@ public class AnnotationEditor extends AbstractVisualResource {
         });
       }
     };
-    Thread thread = new Thread(runnable);
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                               runnable);
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
   }
@@ -1499,13 +1500,15 @@ public class AnnotationEditor extends AbstractVisualResource {
                 Thread.sleep(100);
               } catch(InterruptedException ie){}
             }
-            guiUpdateThread = new Thread(guiUpdater);
+            guiUpdateThread = new Thread(Thread.currentThread().getThreadGroup(),
+                                         guiUpdater);
             guiUpdateThread.setPriority(Thread.MIN_PRIORITY);
             guiUpdateThread.start();
           }//synchronized(Thread.class)
         }//runnable.run()
       };//Runnable runnable = new Runnable()
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }//public void setVisible(boolean isVisible)
@@ -1878,7 +1881,8 @@ System.out.println("No more annotations of type " + type +"!");
              selectAnnotation(set, annotation);
             }
           };
-          Thread thread = new Thread(runnable);
+          Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                     runnable);
           thread.start();
         }
       });

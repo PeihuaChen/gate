@@ -222,7 +222,8 @@ class AnnotDiffDialog extends JFrame {
   }
 
   private void doDiff(){
-    Thread thread = new Thread(new DiffRunner());
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                               new DiffRunner());
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
   }//doDiff();

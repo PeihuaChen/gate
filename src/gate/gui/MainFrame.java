@@ -1033,7 +1033,8 @@ while(listIter.hasNext()){
           }
         }//public void run()
       };
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
       thread.setPriority(thread.MIN_PRIORITY);
       thread.start();
     }
@@ -1097,7 +1098,8 @@ while(listIter.hasNext()){
           }
         }//public void run()
       };
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
       thread.setPriority(thread.MIN_PRIORITY);
       thread.start();
     }

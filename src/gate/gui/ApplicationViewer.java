@@ -763,7 +763,8 @@ public class ApplicationViewer extends AbstractVisualResource
 //          MainFrame.getInstance().hideWaitDialog();
         }
       };
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }//public void actionPerformed(ActionEvent e)
