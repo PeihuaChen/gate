@@ -28,7 +28,7 @@ create sequence  seq_feature_key
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 5;
 
 drop sequence   seq_user ;
 create sequence  seq_user
@@ -36,7 +36,7 @@ create sequence  seq_user
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
 
 drop sequence    seq_group ;
 create sequence  seq_group
@@ -44,7 +44,7 @@ create sequence  seq_group
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
 
 drop sequence    seq_user_group ;
 create sequence  seq_user_group
@@ -52,7 +52,7 @@ create sequence  seq_user_group
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
 
 drop sequence    seq_doc_encoding ;
 create sequence  seq_doc_encoding
@@ -60,7 +60,7 @@ create sequence  seq_doc_encoding
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
 
 drop sequence    seq_doc_content ;
 create sequence  seq_doc_content
@@ -68,7 +68,7 @@ create sequence  seq_doc_content
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 5;
 
 drop sequence    seq_lr_type ;
 create sequence  seq_lr_type
@@ -76,7 +76,7 @@ create sequence  seq_lr_type
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
 
 drop sequence    seq_lang_resource ;
 create sequence  seq_lang_resource
@@ -84,7 +84,7 @@ create sequence  seq_lang_resource
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 5;
 
 drop sequence    seq_document ;
 create sequence  seq_document
@@ -92,7 +92,7 @@ create sequence  seq_document
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 5;
 
 drop sequence    seq_node ;
 create sequence  seq_node
@@ -108,7 +108,7 @@ create sequence  seq_annotation_type
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
 
 drop sequence  seq_annotation ;
 create sequence  seq_annotation
@@ -140,7 +140,7 @@ create sequence  seq_corpus
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 5;
 
 
 drop sequence  seq_corpus_document ;
@@ -149,7 +149,7 @@ create sequence  seq_corpus_document
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 5;
 
 drop sequence  seq_parameter ;
   create sequence  seq_parameter
@@ -157,4 +157,4 @@ drop sequence  seq_parameter ;
        increment 1
        maxvalue 2147483647
        minvalue 1
-       cache 20 ;
+       cache 1;
