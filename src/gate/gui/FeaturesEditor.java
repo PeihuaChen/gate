@@ -108,13 +108,19 @@ public class FeaturesEditor extends AbstractVisualResource{
   }
 
   public void setFeatureBearer(FeatureBearer newResource) {
-    resource = newResource;
-    features = resource.getFeatures();
+    if(newResource == null){
+      resource = null;
+      features = null;
+System.out.println("NULL!");
+    }else{
+      resource = newResource;
+      features = resource.getFeatures();
+    }
     tableModel.fireTableDataChanged();
   }// public void setFeatureBearer(FeatureBearer newResource)
 
   public void setTarget(Object target) {
-    if(target instanceof FeatureBearer){
+    if(target == null || target instanceof FeatureBearer){
       setFeatureBearer((FeatureBearer)target);
     }else{
       throw new IllegalArgumentException(
@@ -147,7 +153,7 @@ public class FeaturesEditor extends AbstractVisualResource{
     }
 
     public int getRowCount(){
-      return features.size();
+      return features == null ? 0 : features.size();
     }
 
     public String getColumnName(int columnIndex){
@@ -168,6 +174,7 @@ public class FeaturesEditor extends AbstractVisualResource{
 
     public boolean isCellEditable(int rowIndex,
                               int columnIndex){
+      if(features == null) return false;
       return rowIndex == features.size()
              ||
              ((!((String)table.getModel().getValueAt(rowIndex, 0)).
@@ -177,6 +184,7 @@ public class FeaturesEditor extends AbstractVisualResource{
 
     public Object getValueAt(int rowIndex,
                          int columnIndex){
+      if(features == null) return null;
       List keys = new ArrayList(features.keySet());
       Collections.sort(keys);
       Object key = keys.get(rowIndex);
