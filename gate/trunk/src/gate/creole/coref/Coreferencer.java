@@ -89,6 +89,16 @@ public class Coreferencer extends AbstractLanguageAnalyser
     return this.pronominalModule.getAnnotationSetName();
   }
 
+  /** --- */
+  public void setResolveIt(Boolean newValue) {
+    this.pronominalModule.setResolveIt(newValue);
+  }
+
+  /** --- */
+  public Boolean getResolveIt() {
+    return this.pronominalModule.getResolveIt();
+  }
+
   /**
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
