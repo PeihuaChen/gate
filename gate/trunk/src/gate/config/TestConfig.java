@@ -88,7 +88,7 @@ public class TestConfig extends TestCase
     // we should have a GATECONFIG entry on Gate
     String fullSizeKeyName = "FULLSIZE";
     String fullSizeValueName = "yes";
-    Map gateConfig = Gate.getGateConfig();
+    Map gateConfig = Gate.getUserConfig();
     assertNotNull("no gate config map", gateConfig);
     String fullSizeValue = (String) gateConfig.get(fullSizeKeyName);
     assertNotNull("no full size value", fullSizeValue);
@@ -121,7 +121,7 @@ public class TestConfig extends TestCase
   public void testConfigUpdating() throws Exception {
     // clear the gate config so we don't write values from the
     // system initialisation into the test file
-    Map configMap = Gate.getGateConfig();
+    Map configMap = Gate.getUserConfig();
     configMap.clear();
 
     // if user config file exists, save it and remember the name
@@ -138,7 +138,7 @@ public class TestConfig extends TestCase
     assertTrue("user config file still there", ! userConfigFile.exists());
 
     // call Gate.writeConfig - check it creates an empty config file
-    Gate.writeGateConfig();
+    Gate.writeUserConfig();
     String writtenConfig = Files.getString(new File(configName));
     String empty = Gate.getEmptyConfigFile();
     assertEquals("written config doesn't match", writtenConfig, empty);
@@ -149,7 +149,7 @@ public class TestConfig extends TestCase
 
     // call Gate.writeConfig, delete the config data from Gate's map,
     // read the config file and check that the new data is present
-    Gate.writeGateConfig();
+    Gate.writeUserConfig();
     configMap.clear();
     readConfig(userConfigFile.toURL());
 

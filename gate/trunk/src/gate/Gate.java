@@ -496,16 +496,16 @@ jar/classpath so it's the same as registerBuiltins
   } // genSym
 
   /** GATE development environment configuration data (stored in gate.xml). */
-  private static Map gateConfig = new HashMap();
+  private static Map userConfig = new HashMap();
 
   /** Name of the XML element for GATE development environment config data. */
-  private static String gateConfigElement = "GATECONFIG";
+  private static String userConfigElement = "GATECONFIG";
 
   /**
    * Gate the name of the XML element for GATE development environment
    * config data.
    */
-  public static String getGateConfigElement() { return gateConfigElement; }
+  public static String getUserConfigElement() { return userConfigElement; }
 
   /** Shorthand for local newline */
   private static String nl = Strings.getNl();
@@ -517,7 +517,7 @@ jar/classpath so it's the same as registerBuiltins
     "<GATE>" + nl +
     "" + nl +
     "<!-- NOTE: the next line may be overwritten by the GUI!!! -->" + nl +
-    "<" + gateConfigElement + "/>" + nl +
+    "<" + userConfigElement + "/>" + nl +
     "" + nl +
     "</GATE>" + nl;
 
@@ -531,13 +531,13 @@ jar/classpath so it's the same as registerBuiltins
    * Get the GATE development environment configuration data
    * (initialised from <TT>gate.xml</TT>).
    */
-  public static Map getGateConfig() { return gateConfig; }
+  public static Map getUserConfig() { return userConfig; }
 
   /**
    * Update the GATE development environment configuration data in the
    * user's <TT>gate.xml</TT> file (create one if it doesn't exist).
    */
-  public static void writeGateConfig() throws GateException {
+  public static void writeUserConfig() throws GateException {
     // the user's config file
     String configFileName = getUserConfigFile();
     File configFile = new File(configFileName);
@@ -553,7 +553,7 @@ jar/classpath so it's the same as registerBuiltins
 
       // update the config element of the file
       Files.updateXmlElement(
-        new File(configFileName), gateConfigElement, gateConfig
+        new File(configFileName), userConfigElement, userConfig
       );
 
     } catch(IOException e) {
@@ -561,7 +561,7 @@ jar/classpath so it's the same as registerBuiltins
         "problem writing user " + gateDotXml + ": " + nl + e.toString()
       );
     }
-  } // writeGateConfig
+  } // writeUserConfig
 
   /**
    * Get the name of the user's <TT>gate.xml</TT> config file (this
