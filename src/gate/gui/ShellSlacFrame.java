@@ -91,6 +91,10 @@ public class ShellSlacFrame extends MainFrame {
       System.getProperty(GateConstants.APPLICATION_JAVA_PROPERTY_NAME);
     if(applicationURL != null) {
       createDefaultApplication(applicationURL);
+    } 
+    else {
+      // create default ANNIE
+      createDefaultApplication();
     } // if
     
     dataStore = null;
@@ -111,7 +115,8 @@ public class ShellSlacFrame extends MainFrame {
     ResourceData rDataDocument = getDocumentResourceData();
     if(rDataDocument != null) {
       action = new NewResourceAction(rDataDocument);
-      action.putValue(action.NAME, "Create Document");
+      action.putValue(action.NAME, "New Document");
+      action.putValue(action.SHORT_DESCRIPTION,"Create a new document");
     
       fileMenu.add(new XJMenuItem(action, this));
 
@@ -126,6 +131,8 @@ public class ShellSlacFrame extends MainFrame {
     fileMenu.add(new XJMenuItem(action, this));
     action = new LoadAllDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
+
+/*
     fileMenu.addSeparator();
     
     action = new RunApplicationAction();
@@ -142,20 +149,31 @@ public class ShellSlacFrame extends MainFrame {
     action = new RestoreDefaultApplicationAction();
     fileMenu.add(new XJMenuItem(action, this));
 
-/* Test code is executed here
     action = new TestStoreAction();
     fileMenu.add(new XJMenuItem(action, this));
 */
+
     fileMenu.addSeparator();
-    fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
+    action = new ExitGateAction();
+    action.putValue(action.NAME, "Exit");
+    fileMenu.add(new XJMenuItem(action, this));
     retMenuBar.add(fileMenu);
 
     JMenu toolsMenu = new JMenu("Tools");
+
+    action = new RunApplicationAction();
+    if(application == null) {
+      action.setEnabled(false);
+    } // if
+    runAction = action;
+    toolsMenu.add(new XJMenuItem(action, this));
+    toolsMenu.addSeparator();
+    
     createToolsMenuItems(toolsMenu);
     retMenuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
-    helpMenu.add(new HelpAboutAction());
+    helpMenu.add(new HelpAboutSlugAction());
     retMenuBar.add(helpMenu);
 
     return retMenuBar;
@@ -351,10 +369,11 @@ public class ShellSlacFrame extends MainFrame {
 //------------------------------------------------------------------------------
 //  Inner classes section
   
+  /** Run the current application SLAC */
   class RunApplicationAction extends AbstractAction {
     public RunApplicationAction() {
-      super("Run application");
-      putValue(SHORT_DESCRIPTION, "Run current application");
+      super("Process Documents", getIcon("menu_controller.gif"));
+      putValue(SHORT_DESCRIPTION, "Run the application to process documents");
     } // RunApplicationAction()
 
     public void actionPerformed(ActionEvent e) {
@@ -544,5 +563,18 @@ public class ShellSlacFrame extends MainFrame {
       } // if
     } // actionPerformed(ActionEvent e)
   } // class TestStoreAction extends AbstractAction
+
+  class HelpAboutSlugAction extends AbstractAction {
+    public HelpAboutSlugAction() {
+      super("About");
+    } // HelpAboutSlugAction()
+
+    public void actionPerformed(ActionEvent e) {
+      JOptionPane.showMessageDialog(ShellSlacFrame.this, 
+          "Slug application",
+          "Slug application about", 
+          JOptionPane.INFORMATION_MESSAGE);
+    } // actionPerformed(ActionEvent e)
+  } // class HelpAboutSlugAction extends AbstractAction
 
 } // class ShellSlacFrame
