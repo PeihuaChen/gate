@@ -244,6 +244,7 @@ implements AnnotationSet
   /** Get the node with the largest offset */
   public Node lastNode() {
     indexByStartOffset();
+    indexByEndOffset();
     return (Node) nodesByOffset.get(nodesByOffset.lastKey());
   } // lastNode
 

@@ -30,7 +30,8 @@ public class TestFSM extends TestCase {
   public TestFSM(String name) { super(name); }
 
   public void setUp() throws JapeException {
-    String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
+//    String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
+    String japeFileName = "/gate/jape/TestABC.jape";
     InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);

@@ -16,6 +16,7 @@ import gate.*;
 import gate.util.*;
 import gate.annotation.*;
 
+
 /** Tests for the Corpus classes
   */
 public class TestJape extends TestCase
@@ -28,16 +29,40 @@ public class TestJape extends TestCase
     //System.out.println("TestJape.setUp()");
   } // setUp
 
+
+
   /** Batch run */
   public void testBatch() throws JapeException, IOException {
     Corpus c = Transients.newCorpus("TestJape corpus");
     c.add(
       Transients.newDocument("http://derwent.dcs.shef.ac.uk/tests/doc0.html")
     );
-    
+    //add some annotations on the first (only) document in corpus c
+    Document doc = (Document)c.first();
+    AnnotationSet defaultAS = doc.getAnnotations();
+    try{
+      FeatureMap feat = Transients.newFeatureMap();
+      defaultAS.add(new Long( 0), new Long( 2), "A",feat);
+      defaultAS.add(new Long( 2), new Long( 4), "A",feat);
+//      defaultAS.add(new Long( 4), new Long( 6), "A",feat);
+//      defaultAS.add(new Long( 6), new Long( 8), "A",feat);
+      defaultAS.add(new Long( 8), new Long(10), "B",feat);
+//      defaultAS.add(new Long(10), new Long(12), "B",feat);
+//      defaultAS.add(new Long(12), new Long(14), "B",feat);
+//      defaultAS.add(new Long(14), new Long(16), "B",feat);
+//      defaultAS.add(new Long(16), new Long(18), "B",feat);
+      defaultAS.add(new Long(18), new Long(20), "C",feat);
+//      defaultAS.add(new Long(20), new Long(22), "C",feat);
+//      defaultAS.add(new Long(22), new Long(24), "C",feat);
+//      defaultAS.add(new Long(24), new Long(26), "C",feat);
+    }catch(gate.util.InvalidOffsetException ioe){
+      ioe.printStackTrace(System.err);
+    }
+
     // run the parser test
     Batch batch = null;
-    String japeFileName = "/gate/jape/Test11.jape";
+//    String japeFileName = "/gate/jape/Test11.jape";
+    String japeFileName = "/gate/jape/TestABC.jape";
     InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
@@ -48,10 +73,11 @@ public class TestJape extends TestCase
     // );
 
     // test the transducers
-//    batch.transduce(c);
-
+    batch.transduce(c);
     // check the results
-
+    doc = (Document)c.first();
+    defaultAS = doc.getAnnotations();
+    System.out.println(defaultAS);
   } // testBatch()
 
   /** Test suite routine for the test runner */
@@ -59,6 +85,16 @@ public class TestJape extends TestCase
     return new TestSuite(TestJape.class);
   } // suite
 
+  //main method for running this test as a standalone test
+  public static void main(String[] args) {
+    try{
+      TestJape testJape = new TestJape("Test Jape");
+      testJape.setUp();
+      testJape.testBatch();
+    }catch(Exception e){
+      e.printStackTrace(System.err);
+    }
+  }
 } // class TestJape
 
 
