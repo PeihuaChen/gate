@@ -26,12 +26,6 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
       //create all the componets
       FeatureMap params;
       FeatureMap features;
-      Map listeners = new HashMap();
-      listeners.put("gate.event.StatusListener", new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
 
       //tokeniser
       fireStatusChanged("Creating a tokeniser");
@@ -44,7 +38,7 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
       Gate.setHiddenAttribute(features, true);
       tokeniser = (SimpleTokeniser)Factory.createResource(
                     "gate.creole.tokeniser.SimpleTokeniser",
-                    params, features, listeners, null);
+                    params, features);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
 
       fireProgressChanged(50);
@@ -58,11 +52,8 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features.clear();
       Gate.setHiddenAttribute(features, true);
-      listeners.put("gate.event.ProgressListener",
-                    new IntervalProgressListener(51, 100));
       transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
-                                                      params, features,
-                                                      listeners, null);
+                                                      params, features);
       fireProgressChanged(100);
       fireProcessFinished();
       transducer.setName("Transducer " + System.currentTimeMillis());

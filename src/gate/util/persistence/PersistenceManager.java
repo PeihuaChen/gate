@@ -17,6 +17,7 @@ import gate.*;
 import gate.util.*;
 import gate.creole.*;
 import gate.event.*;
+import gate.gui.MainFrame;
 import gate.persist.PersistenceException;
 
 import java.util.*;
@@ -186,8 +187,8 @@ public class PersistenceManager {
       throw new PersistenceException(e);
     }
     if(target instanceof NameBearer){
-      StatusListener sListener = (StatusListener)
-                                 listeners.get("gate.event.StatusListener");
+      StatusListener sListener = (StatusListener)MainFrame.getListeners().
+                                 get("gate.event.StatusListener");
       if(sListener != null){
         sListener.statusChanged("Storing " + ((NameBearer)target).getName());
       }
@@ -341,10 +342,11 @@ public class PersistenceManager {
 
   public static void saveObjectToFile(Object obj, File file)
                      throws PersistenceException, IOException {
-    ProgressListener pListener = (ProgressListener)
-                                 listeners.get("gate.event.ProgressListener");
+    ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
+                                 .get("gate.event.ProgressListener");
     StatusListener sListener = (gate.event.StatusListener)
-                                listeners.get("gate.event.StatusListener");
+                               MainFrame.getListeners().
+                               get("gate.event.StatusListener");
     long startTime = System.currentTimeMillis();
     if(pListener != null) pListener.progressChanged(0);
     ObjectOutputStream oos = null;
@@ -373,10 +375,11 @@ public class PersistenceManager {
   public static Object loadObjectFromFile(File file)
                      throws PersistenceException, IOException,
                             ResourceInstantiationException {
-    ProgressListener pListener = (ProgressListener)
-                                 listeners.get("gate.event.ProgressListener");
+    ProgressListener pListener = (ProgressListener)MainFrame.getListeners().
+                                 get("gate.event.ProgressListener");
     StatusListener sListener = (gate.event.StatusListener)
-                                listeners.get("gate.event.StatusListener");
+                                MainFrame.getListeners()
+                                .get("gate.event.StatusListener");
     if(pListener != null) pListener.progressChanged(0);
     long startTime = System.currentTimeMillis();
     ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
@@ -426,18 +429,6 @@ public class PersistenceManager {
   }
 
 
-  public static void addListener(String listenerType, Object listener){
-    if(listeners == null) listeners = new HashMap();
-    listeners.put(listenerType, listener);
-  }
-
-  /**
-   * All package memebers use these listeners
-   */
-  static Map getListeners(){
-    return listeners;
-  }
-
   /**
    * A dictionary mapping from java type (Class) to the type (Class) that can
    * be used to store persistent data for the input type.
@@ -462,8 +453,6 @@ public class PersistenceManager {
   private static Map existingTransientValues;
 
   private static ClassComparator classComparator = new ClassComparator();
-
-  private static Map listeners = null;
 
   static{
     persistentReplacementTypes = new HashMap();

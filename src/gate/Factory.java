@@ -90,12 +90,10 @@ public abstract class Factory {
     * @return an instantiated resource.
     */
   public static Resource createResource(
-    String resourceClassName, FeatureMap parameterValues,
-    Map listeners
+    String resourceClassName, FeatureMap parameterValues
   ) throws ResourceInstantiationException
   {
-    return createResource(resourceClassName, parameterValues, null,
-                          listeners, null);
+    return createResource(resourceClassName, parameterValues, null, null);
   } // createResource(resClassName, paramVals, listeners)
 
   /** Create an instance of a resource, and return it.
@@ -116,7 +114,7 @@ public abstract class Factory {
     ) throws ResourceInstantiationException
    {
       return createResource(resourceClassName, parameterValues,
-                            features, null, null);
+                            features, null);
    }
 
   /** Create an instance of a resource, and return it.
@@ -140,7 +138,7 @@ public abstract class Factory {
     */
   public static Resource createResource(
     String resourceClassName, FeatureMap parameterValues,
-    FeatureMap features, Map listeners, String resourceName
+    FeatureMap features, String resourceName
   ) throws ResourceInstantiationException
    {
     // get the resource metadata
@@ -280,7 +278,7 @@ public abstract class Factory {
     }
 
 
-
+    Map listeners = new HashMap(gate.gui.MainFrame.getListeners());
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
       try {
@@ -332,24 +330,6 @@ public abstract class Factory {
 
     return res;
   } // create(resourceClassName, parameterValues, features, listeners)
-
-  /** Create an instance of a resource, and return it.
-    * Callers of this method are responsible for
-    * querying the resource's parameter lists, putting together a set that
-    * is complete apart from runtime parameters, and passing a feature map
-    * containing these parameter settings.
-    *
-    * @param resourceClassName the name of the class implementing the resource.
-    * @param parameterValues the feature map containing intialisation time
-    *   parameterValues for the resource.
-    * @return an instantiated resource.
-    */
-  public static Resource createResource(
-    String resourceClassName, FeatureMap parameterValues
-  ) throws ResourceInstantiationException
-  {
-    return createResource(resourceClassName, parameterValues, null);
-  } // createResource(resClassName, paramVals)
 
   /** Delete an instance of a resource. This involves removing it from
     * the stack of instantiations maintained by this resource type's

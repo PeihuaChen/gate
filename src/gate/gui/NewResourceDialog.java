@@ -42,15 +42,9 @@ public class NewResourceDialog extends JDialog {
     initLocalData();
     initGuiComponents();
     initListeners();
-
   }// public NewResourceDialog(Frame frame, String title, boolean modal)
 
   protected void initLocalData(){
-    listeners = new HashMap();
-    if(getParent() instanceof gate.event.ProgressListener)
-      listeners.put("gate.event.ProgressListener", getParent());
-    if(getParent() instanceof gate.event.StatusListener)
-      listeners.put("gate.event.StatusListener", getParent());
   }// protected void initLocalData()
 
   protected void initGuiComponents(){
@@ -104,14 +98,7 @@ public class NewResourceDialog extends JDialog {
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = false;
-//        String name = nameField.getText();
-//        if(name == null || name.length() == 0){
-//          JOptionPane.showMessageDialog(getOwner(),
-//                                        "Please give a name for the new resource!\n",
-//                                        "Gate", JOptionPane.ERROR_MESSAGE);
-//        }else{
         hide();
-//        }
       }//public void actionPerformed(ActionEvent e)
     });
 
@@ -131,13 +118,12 @@ public class NewResourceDialog extends JDialog {
   Resource resource;
 
   boolean userCanceled;
-  Map listeners;
 
   /** This method is intended to be used in conjunction with
-    * getSelectedParameters(). The method will not instanciate the resource
+    * getSelectedParameters(). The method will not instantiate the resource
     * like the
     * other show() method but it is intended to colect the params required to
-    * instanciate a resource. Returns true if the user pressed Ok and false
+    * instantiate a resource. Returns true if the user pressed Ok and false
     * if the used pressed Cancel;
     */
   public synchronized boolean show(ResourceData rData, String aTitle) {
@@ -192,14 +178,16 @@ public class NewResourceDialog extends JDialog {
           FeatureMap params = parametersEditor.getParameterValues();
 
           Resource res;
-          gate.event.StatusListener sListener = (gate.event.StatusListener)
-                                      listeners.get("gate.event.StatusListener");
+          gate.event.StatusListener sListener =
+            (gate.event.StatusListener)MainFrame.getListeners().
+                                       get("gate.event.StatusListener");
           if(sListener != null) sListener.statusChanged("Loading " +
                                                         nameField.getText() +
                                                         "...");
 
-          gate.event.ProgressListener pListener = (gate.event.ProgressListener)
-                                      listeners.get("gate.event.ProgressListener");
+          gate.event.ProgressListener pListener =
+            (gate.event.ProgressListener)MainFrame.getListeners().
+                                         get("gate.event.ProgressListener");
           if(pListener != null){
             pListener.progressChanged(0);
           }
@@ -210,8 +198,7 @@ public class NewResourceDialog extends JDialog {
             String name = nameField.getText();
             if(name == null || name.length() == 0) name = null;
             res = Factory.createResource(resourceData.getClassName(), params,
-                                         features, listeners,
-                                         name);
+                                         features, name);
             long endTime = System.currentTimeMillis();
             if(sListener != null) sListener.statusChanged(
                 nameField.getText() + " loaded in " +

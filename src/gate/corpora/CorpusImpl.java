@@ -336,7 +336,7 @@ public class CorpusImpl extends AbstractLanguageResource
           params.put("sourceUrl", aFile.toURL());
 
           corpus.add(Factory.createResource(DocumentImpl.class.getName(),
-                                            params, null, null, docName));
+                                            params, null, docName));
         }
       }
     }

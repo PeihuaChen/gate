@@ -37,13 +37,6 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     //create all the componets
     FeatureMap params;
     FeatureMap features;
-    Map listeners = new HashMap();
-
-    listeners.put("gate.event.StatusListener", new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    });
 
     //gazetteer
     fireStatusChanged("Creating the gazetteer");
@@ -54,12 +47,10 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-    listeners.put("gate.event.ProgressListener",
-                  new IntervalProgressListener(0, 10));
 
     gazetteer = (DefaultGazetteer)Factory.createResource(
                     "gate.creole.gazetteer.DefaultGazetteer",
-                    params, features, listeners, null);
+                    params, features);
     gazetteer.setName("Gazetteer " + System.currentTimeMillis());
     fireProgressChanged(10);
 
@@ -72,12 +63,9 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-    listeners.put("gate.event.ProgressListener",
-                  new IntervalProgressListener(11, 100));
-
     transducer = (Transducer)Factory.createResource(
                     "gate.creole.Transducer",
-                    params, features, listeners, null);
+                    params, features);
     transducer.setName("Transducer " + System.currentTimeMillis());
 
     fireProgressChanged(100);
