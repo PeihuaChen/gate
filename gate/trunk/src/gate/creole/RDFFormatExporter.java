@@ -166,6 +166,7 @@ System.out.println("export path:" +exportFilePathStr);
 System.out.println("a2o called...");
     DAMLModel ontologyModel, instanceModel;
     HashMap ontologies = new HashMap();
+    HashMap instanceMatches = new HashMap();
 
 
       ontologyModel = new DAMLModelImpl();
@@ -273,8 +274,26 @@ System.out.println("exporting ["+ann+"]");
                                 .toString();
           Assert.assertNotNull(instanceName);
 
-          DAMLClass annInstance = instanceModel.createDAMLClass(instanceName);
-          annInstance.prop_type().add(damlClass);
+          //create instance of proper type
+          DAMLInstance annInstance = instanceModel.createDAMLInstance(damlClass,instanceName);
+
+          //check orhtographic matches
+          List matches = (List)ann.getFeatures().get("matches");
+          if (null != matches) {
+            //try to get equiv instance
+            if (instanceMatches.containsKey(matches)) {
+System.out.println("equiv found");
+              DAMLInstance equivInstance = (DAMLInstance)instanceMatches.get(matches);
+//              annInstance.prop_sameIndividualAs().add((DAMLCommon)equivInstance);
+            }
+            else {
+System.out.println("first in chain");
+              //first entry of the coref chain
+              instanceMatches.put(matches,annInstance);
+            }
+          }
+
+
         }//while
       }//while
 
