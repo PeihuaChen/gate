@@ -8,7 +8,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Marin Dimitrov, 18/Sep/2001
+ *  Marin Dimitrov, 16/Oct/2001
  *
  *  $Id$
  *
@@ -17,5 +17,18 @@
 
 create or replace view V_LR as
   select *
-    from t_lang_resource
+  from   t_lang_resource a,
+         t_lr_type       b
+  where  a.lr_type_id = b.lrtp_id;
+    
+    
+create or replace view V_DOCUMENT as
+  select *
+  from   t_document a;
+    
+    
+create or replace view V_FEATURE as
+  select *
+  from   t_feature;
+    
    
