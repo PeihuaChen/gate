@@ -146,9 +146,24 @@ public class OptionsDialog extends JDialog {
       getBoolean(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT).
       booleanValue());
 
+    addSpaceOnMarkupUnpackChk = new JCheckBox(
+      "Add space on markup unpack if needed",
+      true);
+
+    if ( (Gate.getUserConfig().
+       get(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) != null)
+      &&
+      !Gate.getUserConfig().
+        getBoolean(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME).
+          booleanValue()
+      )
+      addSpaceOnMarkupUnpackChk.setSelected(false);
+
     JPanel vBox = new JPanel();
     vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
     vBox.add(includeFeaturesOnPreserveFormatChk);
+    vBox.add(Box.createVerticalStrut(10));
+    vBox.add(addSpaceOnMarkupUnpackChk);
     vBox.add(Box.createVerticalStrut(10));
     vBox.setBorder(BorderFactory.createTitledBorder(
         BorderFactory.createEtchedBorder() , " Advanced features "));
@@ -359,6 +374,9 @@ public class OptionsDialog extends JDialog {
       userConfig.put(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT,
                      new Boolean(includeFeaturesOnPreserveFormatChk.
                                  isSelected()));
+      userConfig.put(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+                     new Boolean(addSpaceOnMarkupUnpackChk.
+                                 isSelected()));
       hide();
     }// void actionPerformed(ActionEvent evt)
   }
@@ -478,6 +496,11 @@ public class OptionsDialog extends JDialog {
    * The "Include Annotation Features in Save Preserving Format" checkbox
    */
   JCheckBox includeFeaturesOnPreserveFormatChk;
+
+  /**
+   * The "Add extra space markup unpack if needed" checkbox
+   */
+  JCheckBox addSpaceOnMarkupUnpackChk;
 
   /**
    * The name of the look and feel class
