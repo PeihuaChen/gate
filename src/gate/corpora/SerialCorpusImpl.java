@@ -261,6 +261,10 @@ public class SerialCorpusImpl extends
   }
   public void resourceLoaded(CreoleEvent e) {
   }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){}
+
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     if (res instanceof Document) {

@@ -190,6 +190,11 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
     */
    public List getVREnabledAnnotationTypes();
 
+   /**
+    * Renames an existing resource.
+    */
+   public void setResourceName(Resource res, String newName);
+
   /**
    * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
    * The register will fire events every time a resource is added to or removed

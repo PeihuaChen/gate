@@ -201,6 +201,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
   public void resourceUnloaded(CreoleEvent e) {
     repaint();
   }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+    repaint();
+  }
   public void datastoreOpened(CreoleEvent e) {
   }
   public void datastoreCreated(CreoleEvent e) {
