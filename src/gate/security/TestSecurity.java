@@ -36,8 +36,8 @@ public class TestSecurity extends TestCase
 
   /** JDBC URL */
   private static final String JDBC_URL =
-            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB"
+//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
+"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
   private boolean exceptionThrown = false;
 
@@ -108,7 +108,15 @@ public class TestSecurity extends TestCase
     Assert.assert(true == ac.isValidSession(adminSession));
 
     //3. create a new user and group
-    User myUser = ac.createUser("myUser", "myPassword",adminSession);
+    User myUser;
+    try {
+      myUser = ac.createUser("myUser", "myPassword",adminSession);
+    } catch (gate.security.SecurityException ex) {
+      //user kalina hasn't got enough priviliges, so login as admin
+      adminSession = ac.login("ADMIN", "sesame", ac.findGroup("ADMINS").getID());
+      myUser = ac.createUser("myUser", "myPassword",adminSession);
+    }
+
     //is the user aded to the security factory?
     Assert.assertNotNull(ac.findUser("myUser"));
     //is the user in the security factory equal() to what we put there?
