@@ -16,6 +16,8 @@
 package gate;
 
 import java.util.*;
+import java.net.*;
+import java.io.*;
 import junit.framework.*;
 import gnu.getopt.*;
 
@@ -65,6 +67,12 @@ public class TestGate {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** Status flag for normal exit. */
+  private static final int STATUS_NORMAL = 0;
+
+  /** Status flag for error exit. */
+  private static final int STATUS_ERROR = 1;
+
   private static final String
                 defOracleDriver = "jdbc:oracle:thin:@derwent:1521:dbgate";
   private static final String
@@ -90,6 +98,10 @@ public class TestGate {
     * (useful for
     * debugging, as there's less confusion to do with threads and
     * class loaders).
+    * <LI>
+    * <B>-i file</B> additional initialisation file (probably called
+    *   <TT>gate.xml</TT>). Used for site-wide initialisation by the
+    *   start-up scripts.
     * </UL>
     */
   public static void main(String[] args) throws Exception {
@@ -97,7 +109,7 @@ public class TestGate {
     boolean autoloadingMode = false;
 
     // process command-line options
-    Getopt g = new Getopt("GATE test suite", args, "tnNas");
+    Getopt g = new Getopt("GATE test suite", args, "tnNasi:");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -117,6 +129,24 @@ public class TestGate {
         case 's':
           oracleDriver = saiOracleDriver;
           psqlDriver = saiPSQLDriver;
+          break;
+        // -i gate.xml site-wide init file
+        case 'i':
+          String optionString = g.getOptarg();
+          URL u = null;
+          File f = new File(optionString);
+          try {
+            u = f.toURL();
+          } catch(MalformedURLException e) {
+            Err.prln("Bad initialisation file: " + optionString);
+            Err.prln(e);
+            System.exit(STATUS_ERROR);
+          }
+          Gate.setSiteConfigFile(f);
+          Out.prln(
+            "Initialisation file " + optionString +
+            " recorded for initialisation"
+          );
           break;
         case '?':
           // leave the warning to getopt
@@ -178,7 +208,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestPR.suite());
+        suite.addTest(TestConfig.suite());
       } else {
         suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestControllers.suite());

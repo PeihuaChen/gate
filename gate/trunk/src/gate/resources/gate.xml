@@ -6,6 +6,9 @@
      time - i.e. will appear in every GATE invocation -->
 
 <GATE>
+
+<GATECONFIG Save_options_on_exit="true" Save_session_on_exit="true"/>
+
 <SYSTEM NAME="Brings into GATE the default annotation schemas">
   <CONTROLLER>none</CONTROLLER>
   <LR xmlFileUrl="gate:/creole/schema/AddressSchema.xml">gate.creole.AnnotationSchema</LR>
@@ -19,12 +22,5 @@
   <LR xmlFileUrl="gate:/creole/schema/PersonSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/SyntaxTreeNodeSchema.xml">gate.creole.AnnotationSchema</LR>
 </SYSTEM>
-<DBCONFIG  
-  url="jdbc:oracle:thin:GATEUSER/gate@rainow.dcs.shef.ac.uk:1521:gate101"
-  url1="jdbc:oracle:oci8:GATEUSER/gate@maindb.dcs.shef.ac.uk"
-  url-test="jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:gatedb2"  
-  />
-<!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@gatedb.dcs.shef.ac.uk"/-->
-<!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2"/-->
-<GATECONFIG Save_options_on_exit="true" Save_session_on_exit="true"/>
+
 </GATE>

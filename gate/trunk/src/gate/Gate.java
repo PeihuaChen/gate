@@ -153,7 +153,21 @@ jar/classpath so it's the same as registerBuiltins
     dataStoreRegister = new DataStoreRegister();
   } // initDataStoreRegister()
 
-  /** Reads config data (<TT>gate.xml</TT> files). */
+  /**
+   * Reads config data (<TT>gate.xml</TT> files). There are three
+   * sorts of these files:
+   * <UL>
+   * <LI>
+   * The builtin file from GATE's resources - this is read first.
+   * <LI>
+   * A site-wide init file given as a command-line argument - this is
+   * read second.
+   * <LI>
+   * The user's file from their home directory - this is read last.
+   * </UL>
+   * Settings from files read after some settings have already been
+   * made will simply overwrite the previous settings.
+   */
   public static void initConfigData() throws GateException {
     ConfigDataProcessor configProcessor = new ConfigDataProcessor();
 
@@ -161,7 +175,7 @@ jar/classpath so it's the same as registerBuiltins
     URL configUrl =
       Gate.getClassLoader().getResource("gate/resources/" + GATE_DOT_XML);
 
-    // open a stream to the builtin config data file
+    // open a stream to the builtin config data file and parse it
     InputStream configStream = null;
     try {
       configStream = Files.getGateResourceAsStream(GATE_DOT_XML);
@@ -171,6 +185,20 @@ jar/classpath so it's the same as registerBuiltins
       );
     }
     configProcessor.parseConfigFile(configStream, configUrl);
+
+    // parse any command-line initialisation file
+    File siteConfigFile = Gate.getSiteConfigFile();
+    if(siteConfigFile != null) {
+      try {
+        configUrl = siteConfigFile.toURL();
+        configStream = new FileInputStream(Gate.getSiteConfigFile());
+      } catch(IOException e) {
+        throw new GateException(
+          "Couldn't open site config data file: " + configUrl + " " + e
+        );
+      }
+      configProcessor.parseConfigFile(configStream, configUrl);
+    }
 
     // parse the user's config file (if it exists)
     String userConfigName = getUserConfigFileName();
@@ -535,6 +563,19 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static String getUserConfigElement() { return userConfigElement; }
 
+  /**
+   * Get the site config file (generally set during command-line processing).
+   */
+  public static File getSiteConfigFile() { return siteConfigFile; }
+
+  /** Set the site config file (e.g. during command-line processing). */
+  public static void setSiteConfigFile(File siteConfigFile) {
+    Gate.siteConfigFile = siteConfigFile;
+  } // setSiteConfigFile
+
+  /** Site config file */
+  private static File siteConfigFile;
+
   /** Shorthand for local newline */
   private static String nl = Strings.getNl();
 
@@ -639,5 +680,4 @@ jar/classpath so it's the same as registerBuiltins
   public static boolean runningOnUnix() {
     return Strings.getFileSep().equals("/");
   } // runningOnUnix
-
 } // class Gate
