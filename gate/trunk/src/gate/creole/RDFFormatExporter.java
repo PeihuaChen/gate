@@ -56,6 +56,8 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
 
   private URL ontologyLocation = null;
 
+  private String annotationSetName = null;
+
   public RDFFormatExporter() {
   }
 
@@ -113,10 +115,22 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
     return ontologyLocation;
   }// getDtdFileName()
 
+  /** Java bean style accessor for annotationSetName */
+  public String getAnnotationSetName() {
+    return annotationSetName;
+  } //getAnnotationSetName
+
+
+  /** Java bean style mutator for annotaionSetName */
+  public void setAnnotationSetName(String annotationSetName) {
+    this.annotationSetName = annotationSetName;
+  }
+
   /** Initialise this resource, and returns it. */
   public gate.Resource init() throws ResourceInstantiationException {
     return this;
   } // init()
+
 
   /** Run the resource and does the entire export process*/
   public void execute() throws ExecutionException{
@@ -126,13 +140,11 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
       throw new ExecutionException("No document found to export in APF format!");
     }
 
+    /* Commented by Niraj to include support for annotationSetName where all the
+     * annotations should be exported incase exportedTypes is null
     if (exportedTypes == null) {
       throw new ExecutionException("No export types found.");
-    }
-
-    if (exportedTypes == null) {
-      throw new ExecutionException("No export types found.");
-    }
+    }*/
 
 //    StringBuffer rdfDoc = new StringBuffer(10*(document.getContent().size().intValue()));
 
@@ -205,7 +217,19 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
         }
       }
 
-      Iterator itTypes = this.exportedTypes.iterator();
+      //* Addition by Niraj to include AnnotationSet Support */
+      AnnotationSet inputAs = (annotationSetName == null ||
+                               annotationSetName.length() == 0) ?
+                               document.getAnnotations() :
+                               document.getAnnotations(annotationSetName);
+
+      // see if exportedTypes is null
+      Iterator itTypes = (exportedTypes == null || exportedTypes.size() == 0) ?
+                       inputAs.getAllTypes().iterator() : exportedTypes.iterator();
+
+      //Iterator itTypes = this.exportedTypes.iterator();
+      // End of addition
+
       while (itTypes.hasNext()) {
 
         String type = (String)itTypes.next();
