@@ -293,14 +293,24 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
     }
 
     /**
-     * Notifies the chache that it should advance its internal structures one
+     * Notifies the cache that it should advance its internal structures one
      * step forward.
      */
     public void shift(){
-      backwardCache.remove(backwardCache.size() - 1);
-      backwardCache.add(0, currentAttributes);
-      currentAttributes = (Map) forwardCache.remove(0);
-      forwardCache.add(null);
+      if(backwardCache.isEmpty()){
+        //no backward caching, all attributes have position "0" or more
+        //nothing to do
+      }else{
+        backwardCache.remove(backwardCache.size() - 1);
+        backwardCache.add(0, currentAttributes);
+      }
+      if(forwardCache.isEmpty()){
+        //no forward caching, all attributes have position "0" or less
+        if(currentAttributes != null) currentAttributes.clear();
+      }else{
+        currentAttributes = (Map) forwardCache.remove(0);
+        forwardCache.add(null);
+      }
     }
 
     /**
