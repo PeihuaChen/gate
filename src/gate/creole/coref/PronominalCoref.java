@@ -40,11 +40,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   //JAPE grammars
   private static final String QT_GRAMMAR_URL = Gate.class.
-      getResource(Files.getResourcePath() +  
-              "/gate/creole/coref/quoted_text.jape").toString();
+      getResource(Files.getResourcePath() +
+              "/creole/coref/quoted_text.jape").toString();
   private static final String PLEON_GRAMMAR_URL = Gate.class.getResource(
-          Files.getResourcePath() +  
-          "/gate/creole/coref/pleonasm.jape").toString();
+          Files.getResourcePath() +
+          "/creole/coref/pleonasm.jape").toString();
 
   //annotation types
   private static final String QUOTED_TEXT_TYPE = "QuotedText";
