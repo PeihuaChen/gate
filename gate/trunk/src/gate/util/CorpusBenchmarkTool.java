@@ -1138,7 +1138,8 @@ ex.printStackTrace();
     Out.prln("</TABLE>");
 
     try {
-      errFileWriter.close();
+      if(errFileWriter != null)
+        errFileWriter.close();
     }
     catch (Exception ex) {
       Out.prln("Exception on close of error file " + errFileWriter + ": "
