@@ -161,27 +161,28 @@ public class RBTreeMap extends AbstractMap
         return (n.left  != null && valueSearchNonNull(n.left, value)) ||
                (n.right != null && valueSearchNonNull(n.right, value));
     }
-/**
-*Returns a pair of values: (glb,lub).
-* If the given key is found in the map then glb=lub=the value associated with
-* the given key.
-* If the key is not in the map:
-*glb=the value associated with the greatest key in the map that is lower
-*than the given key; or null if the given key is smaller than any key in the map.
-*lub=the value associated with the smaller key in the map that is greater
-*than the given key; or null the given key is greater than any key in the map.
-*   If the map is empty it returns (null,null).
-*/
-  public Object[] getClosestMatch(Object key){
-    if (root==null)return new Object[]{null,null};
-    Entry lub=getCeilEntry(key);
-    if(lub==null){//greatest key in set is still smaller then parameter "key"
-      return new Object[]{lastEntry().value,null};
-    };
-    int cmp=compare(key,lub.key);
-    if (cmp==0){return new Object[]{lub.value,lub.value};}
-    else return new Object[]{getPrecedingEntry(lub.key),lub.value};
-  }
+
+    /**
+      *Returns a pair of values: (glb,lub).
+      * If the given key is found in the map then glb=lub=the value associated with
+      * the given key.
+      * If the key is not in the map:
+      *glb=the value associated with the greatest key in the map that is lower
+      *than the given key; or null if the given key is smaller than any key in the map.
+      *lub=the value associated with the smaller key in the map that is greater
+      *than the given key; or null the given key is greater than any key in the map.
+      *   If the map is empty it returns (null,null).
+      */
+    public Object[] getClosestMatch(Object key){
+      if (root==null)return new Object[]{null,null};
+      Entry lub=getCeilEntry(key);
+      if(lub==null){//greatest key in set is still smaller then parameter "key"
+        return new Object[]{lastEntry().value,null};
+      };
+      int cmp=compare(key,lub.key);
+      if (cmp==0){return new Object[]{lub.value,lub.value};}
+      else return new Object[]{getPrecedingEntry(lub.key),lub.value};
+    }
 
     /**
      * Returns the value to which this map maps the specified key.  Returns
