@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Valentin Tablan, 24.01.2000
  *
  *  $Id$
@@ -20,13 +20,16 @@ import gate.*;
 import gate.util.*;
 
 /** Provides an implementation for the interface gate.Node.
- * 
+ *
  */
 public class NodeImpl implements Node, Comparable
 {
   /** Debug flag
    */
   private static final boolean DEBUG = false;
+
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = -8240414984367916298L;
 
   /** Construction from id. Creates an unrooted node.
    */
@@ -36,9 +39,9 @@ public class NodeImpl implements Node, Comparable
   } // Node()
 
   /** Construction from id and offset.
-   * 
+   *
    * @param id the Id of the new node
-   * @param offset the (temporal) offset of the Node; Should be <b>null</b> 
+   * @param offset the (temporal) offset of the Node; Should be <b>null</b>
    *     for non-anchored nodes.
    */
   public NodeImpl (Integer id, Long offset) {
@@ -71,14 +74,14 @@ public class NodeImpl implements Node, Comparable
    */
   void setOffset(Long offset) { this.offset = offset; }
 
-  /** 
+  /**
    * The id of this node (used for persistency)
-   * 
+   *
    */
   Integer id;
-  /** 
+  /**
    * The offset of this node
-   * 
+   *
    */
   Long offset;
 }

@@ -27,6 +27,8 @@ import gate.persist.*;
 abstract public class AbstractLanguageResource
 extends AbstractResource implements LanguageResource
 {
+  static final long serialVersionUID = 3320133313194786685L;
+
   /** Get the data store that this LR lives in. Null for transient LRs. */
   public DataStore getDataStore() { return dataStore; }
 
