@@ -1198,6 +1198,8 @@ public class OracleDataStore extends JDBCDataStore {
                    "        lrtp_type, " +
                    "        lr_id, " +
                    "        doc_url, " +
+                   "        doc_start, " +
+                   "        doc_end, " +
                    "        doc_is_markup_aware " +
                    " from  "+Gate.DB_OWNER+".v_document " +
                    " where  lr_id = ? ";
@@ -1237,7 +1239,15 @@ public class OracleDataStore extends JDBCDataStore {
       String url = rs.getString("doc_url");
       result.setSourceUrl(new URL(url));
 
-      //4.6 features
+      //4.6. start offset
+      Long start = new Long(rs.getLong("doc_start"));
+      result.setSourceUrlStartOffset(start);
+
+      //4.7. end offset
+      Long end = new Long(rs.getLong("doc_end"));
+      result.setSourceUrlEndOffset(end);
+
+      //4.8 features
       FeatureMap features = readFeatures((Long)lrPersistenceId,this.FEATURE_OWNER_DOCUMENT);
       result.setFeatures(features);
     }
