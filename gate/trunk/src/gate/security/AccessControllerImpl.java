@@ -484,7 +484,7 @@ public class AccessControllerImpl
       stmt.setLong(3,prefGroupID.longValue());
       stmt.registerOutParameter(4,java.sql.Types.NUMERIC);
       stmt.execute();
-      isPrivilegedUser = stmt.getBoolean(4);
+      isPrivilegedUser = (stmt.getInt(4) == DBHelper.FALSE ? false : true );
     }
     catch(SQLException sqle) {
       switch(sqle.getErrorCode())
