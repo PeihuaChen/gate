@@ -31,7 +31,7 @@ import gate.event.*;
 /** NERC stands for Named-Entity Recognition Component. This class wraps
   * various of GATE's builtin CREOLE components to form an NE recogniser.
   */
-public class Nerc extends AbstractProcessingResource {
+public class Nerc extends AbstractLanguageAnalyser {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     try{
@@ -336,14 +336,6 @@ public class Nerc extends AbstractProcessingResource {
   public String getEncoding() {
     return encoding;
   }
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }
-
-  public gate.Document getDocument() {
-    return document;
-  }
-
 
   /** The tokeniser used by this NERC */
   protected DefaultTokeniser tokeniser;
@@ -366,7 +358,6 @@ public class Nerc extends AbstractProcessingResource {
   protected java.net.URL gazetteerListsURL;
   protected java.net.URL japeGrammarURL;
   protected String encoding;
-  protected gate.Document document;
   protected String tempAnnotationSetName = "nercAS";
   private Boolean caseSensitiveGazetteer;
   private java.net.URL splitterGazetteerURL;

@@ -93,7 +93,7 @@ import gate.util.*;
  * //.
  *
  */
-public class SimpleTokeniser extends AbstractProcessingResource{
+public class SimpleTokeniser extends AbstractLanguageAnalyser{
   /** Debug flag
    */
   private static final boolean DEBUG = false;
@@ -725,14 +725,6 @@ public class SimpleTokeniser extends AbstractProcessingResource{
     return rulesURL;
   }
   /**    */
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }
-  /**    */
-  public gate.Document getDocument() {
-    return document;
-  }
-  /**    */
   public void setAnnotationSetName(String newAnnotationSetName) {
     annotationSetName = newAnnotationSetName;
   }
@@ -813,9 +805,6 @@ public class SimpleTokeniser extends AbstractProcessingResource{
   static protected String defaultResourceName =
                             "creole/tokeniser/DefaultTokeniser.rules";
 
-  /** the document to be tokenised
-   */
-  protected gate.Document document;
   private String rulesResourceName;
   private java.net.URL rulesURL;
   private String encoding;

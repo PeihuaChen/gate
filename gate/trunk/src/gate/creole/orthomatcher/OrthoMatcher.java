@@ -26,7 +26,7 @@ import java.io.*;
 import java.net.*;
 import gnu.regexp.*;
 
-public class OrthoMatcher extends AbstractProcessingResource
+public class OrthoMatcher extends AbstractLanguageAnalyser
                        implements ProcessingResource{
 
   protected static final String CDGLISTNAME = "cdg";
@@ -44,9 +44,6 @@ public class OrthoMatcher extends AbstractProcessingResource
   protected static final String STRING_FEATURE = "string";
   protected static final String THE_VALUE = "The";
 
-
-  /** the document for namematch */
-  protected gate.Document document;
 
   /**the name of the annotation set*/
   protected String annotationSetName;
@@ -870,10 +867,6 @@ public class OrthoMatcher extends AbstractProcessingResource
     return false;
   }//apply_rules
 
-  /** set the document */
-  public void setDocument(gate.Document newDocument) {
-    document = newDocument;
-  }//setDocument
 
   /** set the extLists flag */
   public void setExtLists(Boolean newExtLists) {
@@ -902,14 +895,6 @@ public class OrthoMatcher extends AbstractProcessingResource
   public void setPersonType(String newPersonType) {
     personType = newPersonType;
   }//setPersonType
-
-  /**
-   * Gets the document currently set as target for this namematch.
-   * @return a {@link gate.Document}
-   */
-  public gate.Document getDocument() {
-    return document;
-  }//getDocument
 
   /**get the name of the annotation set*/
   public String getAnnotationSetName() {

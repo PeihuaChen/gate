@@ -20,39 +20,13 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 
-/** A parent implementation of language analysers with some default
- *  code.
+/**
+ * A parent implementation of language analysers with some default code.
  */
 abstract public class AbstractLanguageAnalyser
-extends AbstractProcessingResource
+                      extends AbstractProcessingResource
+                      implements LanguageAnalyser
 {
-  /** Initialise this resource, and return it.*/
-  public Resource init() throws ResourceInstantiationException {
-    return this;
-  } // init()
-
-  /** Run the resource. It doesn't make sense not to override
-   *  this in subclasses so the default implementation signals an
-   *  exception.
-   */
-  public void run() {
-    executionException = new ExecutionException(
-      "Resource " + getClass() + " hasn't overriden the run() method"
-    );
-    return;
-  } // run()
-
-  /** Trigger any exception that was caught when <CODE>run()</CODE> was
-   *  invoked. If there is an exception stored it is cleared by this call.
-   */
-  public void check() throws ExecutionException {
-    if(executionException != null) {
-      ExecutionException e = executionException;
-      executionException = null;
-      throw e;
-    }
-  } // check()
-
   /** Set the document property for this analyser. */
   public void setDocument(Document document) {
     this.document = document;
@@ -78,8 +52,5 @@ extends AbstractProcessingResource
 
   /** The corpus property for this analyser. */
   protected Corpus corpus;
-
-  /** Any exception caught during run() invocations are stored here. */
-  protected ExecutionException executionException  = null;
 
 } // class AbstractLanguageAnalyser

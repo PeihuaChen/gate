@@ -23,11 +23,8 @@ import gate.util.*;
 /**
  * This class is the implementation of the resource ACEPROCESSOR.
  */
-public class AnnotationSetTransfer extends AbstractProcessingResource
+public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   implements ProcessingResource {
-
-  /**  The document we're working with. */
-  protected gate.Document         document;
 
   protected String                tagASName = "Original markups";
   protected String                outputASName = "Filtered";
@@ -93,19 +90,6 @@ public class AnnotationSetTransfer extends AbstractProcessingResource
 
 
   } // run()
-
-
-  /** Get the document we're running on. */
-  public Document getDocument()
-  {
-    return document;
-  }
-
-  /** Set the document to run on. */
-  public void setDocument(Document newDocument)
-  {
-    this.document = newDocument;
-  }
 
   public void setTagASName(String newTagASName) {
     tagASName = newTagASName;
