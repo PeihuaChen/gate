@@ -168,8 +168,9 @@ public class CreoleXmlHandler extends HandlerBase {
         }
 
       // if there are any parameters awaiting addition to the list, add them
+      // (note that they're not disjunctive or the "/OR" would have got them)
       if(! currentParamDisjunction.isEmpty()) {
-        currentParamList.add(currentParamDisjunction);
+        currentParamList.addAll(currentParamDisjunction);
         currentParamDisjunction = new ArrayList();
       }
 
