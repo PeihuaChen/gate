@@ -35,7 +35,7 @@ import com.objectspace.jgl.*;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
-import gate.gui.*;
+import gate.event.*;
 
 
 /**
@@ -997,6 +997,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.13  2001/03/08 14:33:28  valyt
+// Rebuilt jape conform to the new event model
+//
 // Revision 1.12  2001/02/08 13:46:07  valyt
 // Added full Unicode support for the gazetteer and Jape
 // converted the gazetteer files to UTF-8
