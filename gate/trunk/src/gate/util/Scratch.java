@@ -68,6 +68,7 @@ public void thing(Document doc, LeftHandSide lhs)
 throws InvalidOffsetException {
 
     AnnotationSet wholeAnnots = lhs.getBoundAnnots("whole");
+
     if(wholeAnnots != null && wholeAnnots.size() != 0) {
       // RHS assignment block
 
@@ -88,9 +89,23 @@ throws InvalidOffsetException {
       } // block for existing annots
 
       doc.getAnnotations().add(
-        wholeAnnots.firstNode().getOffset(),
+        wholeAnnots.firstNode().getOffset(),     // shouldn't need getOffset
         wholeAnnots.lastNode().getOffset(),
         "Name", features
+      );
+
+      // end of RHS assignment block
+    }
+    
+    if(wholeAnnots != null && wholeAnnots.size() != 0) {
+      // RHS assignment block
+
+      FeatureMap features = Transients.newFeatureMap();
+
+      features.put("kind", "KiloAmount");
+
+      doc.getAnnotations().add(
+        wholeAnnots.firstNode(), wholeAnnots.lastNode(), "Name", features
       );
 
       // end of RHS assignment block
