@@ -161,9 +161,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     docCleanup();
     Map matchesMap = (Map)document.getFeatures().
                      get(DOCUMENT_COREF_FEATURE_NAME);
-//    if(matchesMap != null && matchesMap.containsKey(nameAllAnnots.getName())){
-//      docCleanup();
-//    }
 
     // creates the cdg list from the document
     //no need to create otherwise, coz already done in init()
@@ -649,8 +646,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     Object matchesValue = document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
     if (matchesValue != null && (matchesValue instanceof Map))
       ((Map)matchesValue).remove(nameAllAnnots.getName());
-    else if (matchesValue != null)
-      document.getFeatures().remove(DOCUMENT_COREF_FEATURE_NAME);
+    else if (matchesValue != null) {
+      document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, new HashMap());
+    }
 
     //get all annotations that have a matches feature
     HashSet fNames = new HashSet();

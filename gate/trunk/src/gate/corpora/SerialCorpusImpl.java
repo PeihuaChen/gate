@@ -308,6 +308,13 @@ public class SerialCorpusImpl extends
       return;
 
     if (DEBUG) Out.prln("Resource deleted called for: " + docID);
+    //first check if it is this corpus that's been deleted, it must be
+    //unloaded immediately
+    if (docID.equals(this.getLRPersistenceId())) {
+      Factory.deleteResource(this);
+      return;
+    }//if
+
     boolean isDirty=false;
     //the problem here is that I only have the doc persistent ID
     //and nothing else, so I need to determine the index of the doc first

@@ -129,7 +129,7 @@ import gate.event.*;
   * </PRE>
   */
 public class DocumentImpl
-extends AbstractLanguageResource implements Document, CreoleListener {
+extends AbstractLanguageResource implements Document, CreoleListener, DatastoreListener {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -194,6 +194,8 @@ extends AbstractLanguageResource implements Document, CreoleListener {
     if (DEBUG) Out.prln("Document cleanup called");
     if (this.lrPersistentId != null)
       Gate.getCreoleRegister().removeCreoleListener(this);
+    if(this.getDataStore() != null)
+      this.getDataStore().removeDatastoreListener(this);
   } // cleanup()
 
 
@@ -1530,6 +1532,22 @@ extends AbstractLanguageResource implements Document, CreoleListener {
     //make persistent documents listen to the creole register
     //for events about their DS
     Gate.getCreoleRegister().addCreoleListener(this);
+  }
+  public void resourceAdopted(DatastoreEvent evt) {
+  }
+  public void resourceDeleted(DatastoreEvent evt) {
+    if(! evt.getSource().equals(this.getDataStore()))
+      return;
+    //if an open document is deleted from a DS, then
+    //it must close itself immediately, as is no longer valid
+    if(evt.getResourceID().equals(this.getLRPersistenceId()))
+      Factory.deleteResource(this);
+  }
+  public void resourceWritten(DatastoreEvent evt) {
+  }
+  public void setDataStore(DataStore dataStore) throws gate.persist.PersistenceException {
+    super.setDataStore( dataStore);
+    dataStore.addDatastoreListener(this);
   }
 
 } // class DocumentImpl
