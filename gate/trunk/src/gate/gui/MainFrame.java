@@ -953,7 +953,7 @@ public class MainFrame extends JFrame
   public void datastoreOpened(CreoleEvent e){
     DataStore ds = e.getDatastore();
 
-    ds.setName(ds.getStorageUrl().getFile());
+    ds.setName(ds.getStorageUrl());
 
     NameBearerHandle handle = new NameBearerHandle(ds, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);

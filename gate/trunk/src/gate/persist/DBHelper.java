@@ -80,11 +80,11 @@ public class DBHelper {
   }
 
   /** --- */
-  public static Connection connect(URL connectURL)
+  public static Connection connect(String connectURL)
     throws SQLException,ClassNotFoundException{
 
     loadDrivers();
-    Connection conn = DriverManager.getConnection(connectURL.toString());
+    Connection conn = DriverManager.getConnection(connectURL);
 
     return conn;
   }

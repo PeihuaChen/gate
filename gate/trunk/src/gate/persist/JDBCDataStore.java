@@ -36,7 +36,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** --- */
   protected Connection  jdbcConn;
-  private   URL         dbURL;
+  private   String         dbURL;
   private   String      driverName;
 
   protected   AccessController ac;
@@ -162,9 +162,9 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** Set the URL for the underlying storage mechanism. */
-  public void setStorageUrl(URL storageUrl) throws PersistenceException {
+  public void setStorageUrl(String storageUrl) throws PersistenceException {
 
-    if (!storageUrl.toString().startsWith("jdbc:")) {
+    if (!storageUrl.startsWith("jdbc:")) {
       throw new PersistenceException("Incorrect JDBC url (should start with \"jdbc:\")");
     }
     else {
@@ -174,8 +174,10 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** Get the URL for the underlying storage mechanism. */
-  public URL getStorageUrl() {
-    throw new MethodNotImplementedException();
+  public String getStorageUrl() {
+
+    return this.dbURL;
+
   }
 
   /**

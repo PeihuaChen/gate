@@ -25,6 +25,7 @@ import junit.framework.*;
 import gate.*;
 import gate.util.*;
 import gate.corpora.*;
+import gate.security.*;
 
 /** Persistence test class
   */
@@ -52,7 +53,7 @@ public class TestPersist extends TestCase
     storageDir.delete(); // get rid of the temp file
     storageDir.mkdir(); // create an empty dir of same name
 
-    SerialDataStore sds = new SerialDataStore(storageDir.toURL());
+    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
     sds.create();
     sds.open();
 
@@ -72,7 +73,7 @@ public class TestPersist extends TestCase
     if(! cannotSync) assert("doc synced ok before adoption", false);
 
     // check that we can't adopt a resource that's stored somewhere else
-    doc.setDataStore(new SerialDataStore(new File("z:\\").toURL()));
+    doc.setDataStore(new SerialDataStore(new File("z:\\").toURL().toString()));
     try { sds.adopt(doc); } catch(PersistenceException e) { cannotSync=true; }
     if(! cannotSync)
       assert("doc adopted but in other datastore already", false);
@@ -114,6 +115,70 @@ public class TestPersist extends TestCase
     // delete the datastore
     sds.delete();
   } // testSaveRestore()
+
+/*
+  public void testSecurityTables() throws Exception {
+    AccessController ac = new AccessControllerImpl();
+    ac.open("jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB");
+
+    User myUser = ac.findUser("kalina");
+    Assert.assertNotNull(myUser);
+    Assert.assertEquals(myUser.getName(), "kalina");
+
+    List myGroups = myUser.getGroups();
+    Assert.assertNotNull(myGroups);
+    for (int i = 0; i< myGroups.size(); i++) {
+      Group myGroup = ac.findGroup((Long) myGroups.get(i));
+      if (i == 0)
+        Assert.assertEquals(myGroup.getName(), "English Language Group");
+      else if (i == 1)
+        Assert.assertEquals(myGroup.getName(), "Suahili Group");
+      else
+        Assert.fail("Found more groups for user kalina than should have been!");
+    }//for
+
+    Session mySession = ac.login("kalina", "sesame",
+                              ac.findGroup("English Language Group").getID());
+    Assert.assertNotNull(mySession);
+//    Assert.assert(ac.isValidSession(mySession));
+
+  } // testSecurityTables
+
+  public void testUserGroupManipulation() throws Exception {
+    AccessController ac = new AccessControllerImpl();
+    ac.open("jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB");
+
+    User myUser = ac.createUser("myUser", "myPassword");
+    Group myGroup = ac.createGroup("myGroup");
+    Session mySession = ac.login("myUser", "myPassword", myGroup.getID());
+
+    myGroup.addUser(myUser, mySession);
+    myGroup.setName("my new group", mySession);
+    Assert.assertEquals(myGroup.getName(), "my new group");
+
+    List myUsers = myGroup.getUsers();
+    Assert.assertNotNull(myUsers);
+    for (int i = 0; i< myUsers.size(); i++) {
+      User myUser1 = ac.findUser((Long) myUsers.get(i));
+      if (i == 0)
+        Assert.assertEquals(myUser1.getName(), "myUser");
+      else
+        Assert.fail("Found more groups for user "
+                            + myUser1 + "than should have been!");
+      Out.prln("are equals? " + myUser1.equals(myUser));
+    }//for
+
+    ac.logout(mySession);
+    myGroup.setName("my new group again", mySession);
+
+    mySession = ac.login("myUser", "myPassword",
+                              ac.findGroup("my new group").getID());
+    ac.deleteGroup(myGroup, mySession);
+
+    Out.prln(myGroup.getName());
+  } // testUserGroupManipulation
+*/
+
 
   /** Simple test */
   public void testSimple() throws Exception {
@@ -171,7 +236,7 @@ public class TestPersist extends TestCase
     storageDir.delete();
 
     // create and open a serial data store
-    SerialDataStore sds = new SerialDataStore(storageDir.toURL());
+    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
     sds.create();
     sds.open();
 
@@ -253,7 +318,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     SerialDataStore sds = new SerialDataStore();
-    sds.setStorageUrl(storageDir.toURL());
+    sds.setStorageUrl(storageDir.toURL().toString());
     sds.create();
     sds.open();
 
@@ -375,6 +440,14 @@ public class TestPersist extends TestCase
       test.setUp();
       test.testSimple();
       test.tearDown();
+
+//      test.setUp();
+//      test.testSecurityTables();
+//      test.tearDown();
+
+//      test.setUp();
+//      test.testUserGroupManipulation();
+//      test.tearDown();
 
     }catch(Exception e){
       e.printStackTrace();

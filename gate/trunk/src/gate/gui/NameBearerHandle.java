@@ -379,10 +379,16 @@ public class NameBearerHandle implements Handle,
         while(dsIter.hasNext()){
           DataStore oneDS = (DataStore)dsIter.next();
           String name;
-          if(oneDS.getFeatures() != null &&
-             (name = (String)oneDS.getName()) != null){
+          if((name = (String)oneDS.getName()) != null){
           } else {
-            name  = oneDS.getStorageUrl().getFile();
+            name  = oneDS.getStorageUrl();
+            try {
+              URL tempURL = new URL(name);
+              name = tempURL.getFile();
+            } catch (java.net.MalformedURLException ex) {
+              throw new GateRuntimeException(
+                        );
+            }
           }
           dsByName.put(name, oneDS);
         }

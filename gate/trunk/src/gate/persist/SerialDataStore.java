@@ -41,7 +41,7 @@ extends AbstractFeatureBearer implements DataStore {
    * the serialised classes. <B>NOTE:</B> should not be called except by
    * GATE code.
    */
-  public SerialDataStore(URL storageDirUrl) throws PersistenceException {
+  public SerialDataStore(String storageDirUrl) throws PersistenceException {
     setStorageUrl(storageDirUrl);
   } // construction from URL
 
@@ -63,7 +63,15 @@ extends AbstractFeatureBearer implements DataStore {
   public File getStorageDir() { return storageDir; }
 
   /** Set the URL for the underlying storage mechanism. */
-  public void setStorageUrl(URL storageUrl) throws PersistenceException {
+  public void setStorageUrl(String urlString) throws PersistenceException {
+    URL storageUrl = null;
+    try {
+     storageUrl  = new URL(urlString);
+    } catch (java.net.MalformedURLException ex) {
+      throw new PersistenceException(
+        "The URL passed is not correct: " + urlString
+      );
+    }
     if(! storageUrl.getProtocol().equalsIgnoreCase("file"))
       throw new PersistenceException(
         "A serial data store needs a file URL, not " + storageUrl
@@ -72,7 +80,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // setStorageUrl
 
   /** Get the URL for the underlying storage mechanism. */
-  public URL getStorageUrl() {
+  public String getStorageUrl() {
     if(storageDir == null) return null;
 
     URL u = null;
@@ -81,7 +89,7 @@ extends AbstractFeatureBearer implements DataStore {
       // be a valid file and therefore convertable to URL
     }
 
-    return u;
+    return u.toString();
   } // getStorageUrl()
 
   /** Create a new data store. This tries to create a directory in
