@@ -34,15 +34,26 @@ public class Transducer extends AbstractProcessingResource {
    * constructor from the super class. The actual object initialisation is done
    * via the {@link #init} method.
    */
-  public Transducer() { }
+  public Transducer() {
+//    if (! Main.batchMode){
+      //fire events if not in batch mode
+      sListener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
 
-  /*
-  private void writeObject(ObjectOutputStream oos) throws IOException {
-    Out.prln("writing transducer");
-    oos.defaultWriteObject();
-    Out.prln("finished writing transducer");
-  } // writeObject
-  */
+      pListener = new ProgressListener(){
+        public void progressChanged(int value){
+          fireProgressChanged(value);
+        }
+
+        public void processFinished(){
+          fireProcessFinished();
+        }
+      };
+//    }
+  }
 
   /**
    * This method is the one responsible for initialising the transducer. It
@@ -51,16 +62,23 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-//    if (! Main.batchMode) //fire events if not in batch mode
-      sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
+    if(batch != null){
+      //if we're actually reinitialising we need to remove the listeners
+      if( sListener != null){
+        batch.removeStatusListener(sListener);
+      }
+      if( pListener != null){
+        batch.removeProgressListener(pListener);
+      }
+    }
 
     if(grammarURL != null && encoding != null){
       try{
-        batch = new Batch(grammarURL, encoding, sListener);
+        if(sListener != null){
+          batch = new Batch(grammarURL, encoding, sListener);
+        }else{
+          batch = new Batch(grammarURL, encoding);
+        }
       }catch(JapeException je){
         throw new ResourceInstantiationException(je);
       }
@@ -70,17 +88,7 @@ public class Transducer extends AbstractProcessingResource {
         encoding + ") are needed to create a JapeTransducer!"
       );
 
-//    if (! Main.batchMode) //fire events if not in batch mode
-      batch.addProgressListener(new ProgressListener(){
-        public void progressChanged(int value){
-          fireProgressChanged(value);
-        }
-
-        public void processFinished(){
-          fireProcessFinished();
-        }
-      });
-
+    if (pListener != null) batch.addProgressListener(pListener);
     return this;
   }
 
@@ -89,7 +97,7 @@ public class Transducer extends AbstractProcessingResource {
    * This method is responsible for doing all the processing of the input
    * document.
    */
-  public void run(){
+  public void execute() throws ExecutionException{
     try{
       if(document == null) throw new ParameterException("No document provided!");
       if(inputASName != null && inputASName.equals("")) inputASName = null;
@@ -102,7 +110,7 @@ public class Transducer extends AbstractProcessingResource {
                         document.getAnnotations() :
                         document.getAnnotations(outputASName));
     }catch(Exception e){
-      executionException = new ExecutionException(e);
+      throw new ExecutionException(e);
     }
   }
 
@@ -237,7 +245,8 @@ public class Transducer extends AbstractProcessingResource {
    */
   private String outputASName;
 
-  private transient StatusListener sListener;
+  private StatusListener sListener;
+  private ProgressListener pListener;
   private transient Vector statusListeners;
   private transient Vector progressListeners;
 
