@@ -22,7 +22,7 @@ import java.lang.reflect.*;
 
 import gate.*;
 import gate.creole.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.util.*;
 import gate.fsm.TestFSM;
 
@@ -95,9 +95,7 @@ import gate.fsm.TestFSM;
  *
  */
 public class DefaultTokeniser extends AbstractProcessingResource
-implements Runnable, ProcessingResource, ProcessProgressReporter,
-           StatusReporter
-{
+implements Runnable, ProcessingResource{
   /** Debug flag
    */
   private static final boolean DEBUG = false;

@@ -23,7 +23,7 @@ import java.net.*;
 
 import gate.util.*;
 import gate.creole.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.*;
 
 /** This component is responsible for doing lists lookup. The implementaion is
