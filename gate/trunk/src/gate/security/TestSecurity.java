@@ -90,6 +90,15 @@ public class TestSecurity extends TestCase
     AccessController ac = new AccessControllerImpl();
     ac.open(JDBC_URL);
 
+    //1.1 list groups and users
+    List groups = ac.listGroups();
+    Assert.assertNotNull(groups);
+    Out.prln("+++ found ["+groups.size()+"] groups...");
+
+    List users = ac.listUsers();
+    Assert.assertNotNull(users);
+    Out.prln("+++ found ["+users.size()+"] users...");
+
     //2. log into the securoty factory
     Session adminSession = ac.login("kalina", "sesame",
                               ac.findGroup("English Language Group").getID());
