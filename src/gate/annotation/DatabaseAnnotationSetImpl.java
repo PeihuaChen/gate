@@ -70,7 +70,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //add self as listener for sync events from the document's datastore
 //00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
-
+    ((VerboseHashMap)annotsById).setOwner(this);
   } // construction from document
 
   /** Construction from Document and name. */
@@ -86,7 +86,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //add self as listener for sync events from the document's datastore
 //00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
-
+    ((VerboseHashMap)annotsById).setOwner(this);
   } // construction from document and name
 
 
@@ -129,6 +129,8 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //add self as listener for sync events from the document's datastore
 //00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
+
+    ((VerboseHashMap)annotsById).setOwner(this);
   } // construction from collection
 
 
@@ -351,6 +353,21 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     }
 
     return result;
+  }
+
+
+  /**
+   *
+   * @param e
+   */
+  protected void fireAnnotationRemoved(AnnotationSetEvent e) {
+    if (annotationSetListeners != null) {
+      Vector listeners = annotationSetListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((AnnotationSetListener) listeners.elementAt(i)).annotationRemoved(e);
+      }
+    }
   }
 
   /** Remove an element from this set. */

@@ -159,14 +159,37 @@ implements AnnotationSet
     public Object remove(Object key){
       Object res = super.remove(key);
       if(res != null) {
-        fireAnnotationRemoved(new AnnotationSetEvent(
-                                    AnnotationSetImpl.this,
-                                    AnnotationSetEvent.ANNOTATION_REMOVED,
-                                    getDocument(), (Annotation)res));
+        if(owner == null){
+          fireAnnotationRemoved(new AnnotationSetEvent(
+                                              AnnotationSetImpl.this,
+                                              AnnotationSetEvent.ANNOTATION_REMOVED,
+                                              getDocument(), (Annotation)res));
+        }else{
+          owner.fireAnnotationRemoved(new AnnotationSetEvent(
+              AnnotationSetImpl.this,
+              AnnotationSetEvent.ANNOTATION_REMOVED,
+          getDocument(), (Annotation) res));
+        }
       }
       return res;
     }//public Object remove(Object key)
     static final long serialVersionUID = -4832487354063073511L;
+
+    /**
+     * The annotation set this maps is part of.
+     * This is an ugly hack in order to fix a bug: database annotation sets
+     * didn't fire annotation removed events.
+     */
+    private transient AnnotationSetImpl owner;
+    /**
+     * Sets the annotation set this maps is part of.
+     * This is an ugly hack in order to fix a bug: database annotation sets
+     * didn't fire annotation removed events.
+     */
+    public void setOwner(AnnotationSetImpl newOwner){
+      this.owner = newOwner;
+    }
+
   }//protected class VerboseHashMap extends HashMap
 
   /** Get an iterator for this set */
@@ -1005,7 +1028,7 @@ implements AnnotationSet
     * annotations that end at that node
     */
   Map annotsByEndNode;
-  transient Vector annotationSetListeners;
+  protected transient Vector annotationSetListeners;
   private transient Vector gateListeners;
   /**
    *
