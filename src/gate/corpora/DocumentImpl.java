@@ -159,11 +159,6 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-    //make sure we have an encoding
-    if(encoding == null || encoding.length() == 0)
-      encoding = System.getProperty("file.encoding");
-    if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
-
     // set up the source URL and create the content
     if(sourceUrl == null) {
       if(stringContent == null) {
@@ -177,7 +172,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     } else {
       try {
         content = new DocumentContentImpl(
-          sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset);
+          sourceUrl, getEncoding(), sourceUrlStartOffset, sourceUrlEndOffset);
         getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
       } catch(IOException e) {
         e.printStackTrace();
@@ -551,7 +546,15 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   public void setContent(DocumentContent content) { this.content = content; }
 
   /** Get the encoding of the document content source */
-  public String getEncoding() { return encoding; }
+  public String getEncoding() {
+    //we need to make sure we ALWAYS have an encoding
+    if(encoding == null || encoding.trim().length() == 0){
+      //no encoding definded: use the platform default
+      encoding = java.nio.charset.Charset.forName(
+          System.getProperty("file.encoding")).name();
+    }
+    return encoding;
+  }
 
   /** Set the encoding of the document content source */
   public void setEncoding(String encoding) { this.encoding = encoding; }
@@ -711,8 +714,10 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     boolean wasXML = mimeType != null && mimeType.equalsIgnoreCase("text/xml");
 
     if(wasXML){
-      String defaultEncoding = System.getProperty("file.encoding");
-      xmlDoc.append("<?xml version=\"1.0 ?>" + Strings.getNl());
+      xmlDoc.append("<?xml version=\"1.0\" encoding=\"");
+      xmlDoc.append(getEncoding());
+      xmlDoc.append("\" ?>");
+      xmlDoc.append(Strings.getNl());
     }// ENd if
     // Identify and extract the root annotation from the dumpingSet.
     theRootAnnotation = identifyTheRootAnnotation(dumpingSet);
@@ -1470,9 +1475,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   /** Returns a GateXml document that is a custom XML format for wich there is
     * a reader inside GATE called gate.xml.GateFormatXmlHandler.
     * What it does is to serialize a GATE document in an XML format.
-    * @return a string representing a Gate Xml document. If saved in a file,this
-    * string must be written using the UTF-8 encoding because the first line
-    * in the generated xml document is <?xml version="1.0" encoding="UTF-8" ?>
+    * @return a string representing a Gate Xml document.
     */
   public String toXml(){
     // Initialize the xmlContent with 3 time the size of the current document.
@@ -1481,7 +1484,11 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     StringBuffer xmlContent = new StringBuffer(
          DOC_SIZE_MULTIPLICATION_FACTOR*(getContent().size().intValue()));
     // Add xml header
-    xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+    xmlContent.append("<?xml version=\"1.0\" encoding=\"");
+    xmlContent.append(getEncoding());
+    xmlContent.append("\" ?>");
+    xmlContent.append(Strings.getNl());
+
     // Add the root element
     xmlContent.append("<GateDocument>\n");
     xmlContent.append("<!-- The document's features-->\n\n");

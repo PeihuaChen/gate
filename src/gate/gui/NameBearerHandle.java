@@ -574,10 +574,7 @@ public class NameBearerHandle implements Handle,
               ////////////////////////////////
               // Save-as-XML always uses UTF-8
               ////////////////////////////////
-              String encoding = /*((gate.TextualDocument)target).getEncoding();
-              if(encoding == null || encoding.length() == 0)
-                encoding = System.getProperty("file.encoding");
-              if(encoding == null || encoding.length() == 0) encoding =*/ "UTF-8";
+              String encoding = ((gate.TextualDocument)target).getEncoding();
 
               OutputStreamWriter writer = new OutputStreamWriter(
                                             new FileOutputStream(selectedFile),
@@ -663,9 +660,6 @@ public class NameBearerHandle implements Handle,
             try{
               // Prepare to write into the xmlFile using the original encoding
               String encoding = ((gate.TextualDocument)target).getEncoding();
-              if(encoding == null || encoding.length() == 0)
-                encoding = System.getProperty("file.encoding");
-              if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
 
               OutputStreamWriter writer = new OutputStreamWriter(
                                             new FileOutputStream(selectedFile),
@@ -855,10 +849,6 @@ public class NameBearerHandle implements Handle,
 
                   // Prepare to write into the xmlFile using the original encoding
                   String encoding = ((gate.TextualDocument)currentDoc).getEncoding();
-                  if(encoding == null || encoding.length() == 0)
-                    encoding = System.getProperty("file.encoding");
-                  if(encoding == null || encoding.length() == 0)
-                    encoding = "UTF-8";
 
                   OutputStreamWriter writer = new OutputStreamWriter(
                                                 new FileOutputStream(docFile),
