@@ -102,10 +102,10 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public String getIcon() { return icon; }
 
   /** The stack of instantiations */
-  protected BumpyStack instantiationStack = new BumpyStack();
+  protected WeakBumpyStack instantiationStack = new WeakBumpyStack();
 
   /** Get the list of instantiations of resources */
-  public BumpyStack getInstantiations() {
+  public WeakBumpyStack getInstantiations() {
     return instantiationStack;
   } // getInstantiations
 

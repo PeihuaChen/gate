@@ -162,7 +162,7 @@ public class Parameter implements Serializable
       if(resData == null)
         throw new ParameterException("No resource data for " + typeName);
 
-      Stack instantiations = resData.getInstantiations();
+      WeakBumpyStack instantiations = resData.getInstantiations();
       if(! instantiations.isEmpty())
         value = instantiations.peek();
     }
