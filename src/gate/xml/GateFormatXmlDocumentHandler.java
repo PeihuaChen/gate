@@ -27,6 +27,8 @@ import org.xml.sax.*;
 
 
 /**
+  * Implements the behaviour of the XML reader. This is the reader for
+  * Gate Xml documents saved with DocumentImplementation.toXml() method.
   */
 public class GateFormatXmlDocumentHandler extends HandlerBase
                                            implements StatusReporter{

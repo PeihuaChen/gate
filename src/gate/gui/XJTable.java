@@ -438,7 +438,7 @@ public class XJTable extends JTable {
                             table, value, isSelected, hasFocus, row, column);
       if(res instanceof JLabel){
         if(convertColumnIndexToModel(column) == sortedColumn){
-          ((JLabel)res).setIcon(ascending?downIcon:upIcon);
+          ((JLabel)res).setIcon(ascending?upIcon:downIcon);
         }else{
           ((JLabel)res).setIcon(null);
         }
