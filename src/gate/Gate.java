@@ -1031,7 +1031,7 @@ jar/classpath so it's the same as registerBuiltins
     protected boolean valid;
     
     /**
-     * The list of {@link ResourceInfo} objects.
+     * The list of {@link Gate.ResourceInfo} objects.
      */
     protected List resourceInfoList;
   }
