@@ -44,7 +44,7 @@ test:
 #	  junit.ui.LoadingTestRunner gate.TestGate
 
 # build gate.jar. recursively includes all the .jar and .zip from lib too
-jar: tcl
+jar: tcl japefiles
 	rm -f gate.jar
 	cd ../classes && ../build/jdk.sh jar cvf ../build/gate.jar gate
 	./addjars.sh gate.jar ../lib/*.jar ../lib/*.zip
@@ -97,16 +97,18 @@ list:
 # rebuild the JAPE file parser.
 # uses JavaCC 0.8pre1 from ../lib for the java,
 # and 0.7 from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1
-jape: ../src/gate/jape/parser/ParseCpsl.java \
+jape: japefiles ../src/gate/jape/parser/ParseCpsl.java \
   ../src/gate/jape/parser/ParseCpsl.html \
   ../src/gate/jape/parser/ParseCpslPlain.html
 ../src/gate/jape/parser/ParseCpsl.java: ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
 	../../../../build/jdk.sh java -cp ../../../../lib/JavaCC.zip \
 	  COM.sun.labs.javacc.Main ParseCpsl.jj
-# if we want to put .japes into the jar file, uncomment the below
-#	cd ../src && for f in `find . -name '*.jape' -print`; \
-#	do cp $$f ../classes/$$f; done
+
+# put .japes into the classes, and hence the jar file
+japefiles:
+	cd ../src && for f in `find . -name '*.jape' -print`; \
+	do cp $$f ../classes/$$f; done
 
 ../src/gate/jape/parser/ParseCpsl.html: ../src/gate/jape/parser/ParseCpsl.jj \
   ../src/gate/jape/parser/ParseCpslPlain.html
@@ -114,6 +116,7 @@ jape: ../src/gate/jape/parser/ParseCpsl.java \
 	mv ParseCpsl.html ParseCpslPlain.html || :; \
 	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
 	  COM.sun.labs.jjdoc.JJDocMain -ONE_TABLE=false ParseCpsl.jj
+
 ../src/gate/jape/parser/ParseCpslPlain.html: \
   ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
