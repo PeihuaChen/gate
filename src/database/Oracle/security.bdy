@@ -432,6 +432,32 @@ create or replace package body security is
      return (cnt = 0);
           
   end;                                                                                                        
+
+
+  /*******************************************************************************************/
+  function is_valid_security_data(p_perm_mode  IN  number,
+                                  p_group_id   IN  number,
+                                  p_user_id    IN  number)
+     return boolean
+  is
+  begin
+    if (p_perm_mode in (security.PERM_WR_GW,security.PERM_GR_GW,security.PERM_GR_OW)) then
+     -- group write/read access, owner_group_id should ne NOT NULL
+     if (p_group_id is null) then
+        return false;
+     end if;
+  end if;
+  
+  if (p_perm_mode in (security.PERM_GR_OW,security.PERM_OR_OW)) then     
+     -- owner_user_id is mandatory
+     if (p_user_id is null) then
+        return false;
+     end if;      
+  end if;
+          
+  return true;          
+  
+  end;                                                                                                        
   
 /*begin
   -- Initialization
