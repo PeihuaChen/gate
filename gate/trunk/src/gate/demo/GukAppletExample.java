@@ -572,7 +572,7 @@ public class GukAppletExample extends JApplet implements MUTTManagerObject {
           doc.getAnnotations().add( new Long(0), new Long(doc.getContent().toString().length()),
                                   "utterance", attrs);
 
-        }catch(IOException ioe){
+        }catch(gate.creole.ResourceInstantiationException ioe){
 
           ioe.printStackTrace();
 

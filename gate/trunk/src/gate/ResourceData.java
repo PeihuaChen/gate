@@ -24,6 +24,13 @@ import gate.util.*;
 
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
+  * Metadata elements which are used by the CREOLE registration and loading
+  * mechanisms are properties of ResourceData implementations and have their
+  * own get/set methods. Other metadata elements are made features of the
+  * ResourceData. So, for example, if you add an element "FunkyElementThaing"
+  * to the metadata of a resource, this will be made a feature of that
+  * resource's ResourceData.
+  * @see CreoleRegister
   */
 public interface ResourceData extends FeatureBearer {
   /** String representation */
@@ -69,6 +76,12 @@ public interface ResourceData extends FeatureBearer {
 
   /** Set method for the resource jar file URL */
   public void setJarFileUrl(URL jarFileUrl);
+
+  /** Get method for the resource comment */
+  public String getComment();
+
+  /** Set method for the resource comment */
+  public void setComment(String comment);
 
   /** Get method for the resource jar file URL */
   public URL getJarFileUrl();

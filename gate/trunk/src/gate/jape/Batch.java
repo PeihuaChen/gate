@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 10/08/98
  *
  *  $Id$
@@ -33,6 +33,7 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.*;
 import gate.gui.*;
+import gate.creole.*;
 
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.
@@ -157,7 +158,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
       throw new
         JapeException("Batch: couldn't read JAPE stream: " + e.getMessage());
     }
-  } // parseJape(InputStream) 
+  } // parseJape(InputStream)
 
   /** Parse a jape file from a resource and store the transducer. */
   private void parseJape(String resPath, String resName) throws JapeException {
@@ -265,8 +266,11 @@ public class Batch implements JapeConstants, java.io.Serializable,
   /** Process a single text. */
   public Document transduce(String text) throws JapeException {
     Document doc = null;
-    try { doc = Factory.newDocument(text);
-    } catch (IOException e) { throw new JapeException(e.toString()); }
+    try {
+      doc = Factory.newDocument(text);
+    } catch (ResourceInstantiationException e) {
+      throw new JapeException(e.toString());
+    }
     transducer.transduce(doc, doc.getAnnotations());
     return doc;
   } // transduce(text)
@@ -282,21 +286,24 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
   /** Process a set of files. */
   public Corpus transduce(String[] textFileNames) throws JapeException {
-    Corpus coll = Factory.newCorpus("JAPE batch corpus");
-    Document doc = null;
-    for(int i = 0; i < textFileNames.length; i++) {
-      try {
-        doc = Factory.newDocument(textFileNames[i]);
-        doc.setFeatures(Factory.newFeatureMap());
-        /*coll.createDocument(
-          textFileNames[i],
-          null, // the text - should get read from disk
-          new AnnotationSetImpl(doc),
-          Factory.newFeatureMap(),
-          Document.COPIED
-        );*/
-      } catch(IOException e) { throw new JapeException(e.toString()); }
-      transducer.transduce(doc, doc.getAnnotations());
+    Corpus coll = null;
+    try {
+      coll = Factory.newCorpus("JAPE batch corpus");
+      Document doc = null;
+      for(int i = 0; i < textFileNames.length; i++) {
+          doc = Factory.newDocument(textFileNames[i]);
+          doc.setFeatures(Factory.newFeatureMap());
+          /*coll.createDocument(
+            textFileNames[i],
+            null, // the text - should get read from disk
+            new AnnotationSetImpl(doc),
+            Factory.newFeatureMap(),
+            Document.COPIED
+          );*/
+        transducer.transduce(doc, doc.getAnnotations());
+      }
+    } catch(ResourceInstantiationException e) {
+      throw new JapeException(e.toString());
     }
     return coll;
   } // transduce(textFileNames)
@@ -370,7 +377,11 @@ public class Batch implements JapeConstants, java.io.Serializable,
       // open the collection or bomb
       coll = null;
       batch.message("opening the collection");
-      coll = Factory.newCorpus(persCollName);
+      try {
+        coll = Factory.newCorpus(persCollName);
+      } catch(ResourceInstantiationException e) {
+        batch.usage("oops (x): " + e);
+      }
 
       // transduce
       batch.message("calling transducer");
@@ -457,6 +468,26 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.13  2000/10/23 21:50:41  hamish
+// cleaned up exception handling in gate.creole and added
+// ResourceInstantiationException;
+//
+// changed Factory.newDocument(URL u) to use the new instantiation
+// facilities;
+//
+// added COMMENT to resource metadata / ResourceData;
+//
+// changed Document and DocumentImpl to follow beans style, and moved
+// constructor logic to init(); changed all the Factory newDocument methods to
+// use the new resource creation stuff;
+//
+// added builtin document and corpus metadata to creole/creole.xml (copied from
+// gate.ac.uk/tests/creole.xml);
+//
+// changed Corpus to the new style too;
+//
+// removed CreoleRegister.init()
+//
 // Revision 1.12  2000/10/18 13:26:47  hamish
 // Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
 //     parameter list fed to createResource.

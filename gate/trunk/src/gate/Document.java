@@ -30,18 +30,42 @@ public interface Document extends LanguageResource, Comparable
   /** Documents are identified by URLs */
   public URL getSourceUrl();
 
+  /** Set method for the document's URL */
+  public void setSourceUrl(URL sourceUrl);
+
+  /** Get method for the document's URL name (i.e. the string that
+    * describes the URL).
+    */
+  public String getSourceUrlName();
+
+  /** Set method for the document's URL name (i.e. the string that
+    * describes the URL).
+    */
+  public void setSourceUrlName(String sourceUrlName);
+
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document.
     */
   public Long[] getSourceUrlOffsets();
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method gets the
+    * start offset.
+    */
+  public Long getSourceUrlStartOffset();
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method gets the
+    * end offset.
+    */
+  public Long getSourceUrlEndOffset();
 
   /** The content of the document: wraps e.g. String for text; MPEG for
     * video; etc.
     */
   public DocumentContent getContent();
 
-  /** Mutator method
-    */
+  /** Set method for the document content */
   public void setContent(DocumentContent newContent);
 
   /** Get the default set of annotations. The set is created if it

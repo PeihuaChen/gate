@@ -30,7 +30,7 @@ extends AbstractFeatureBearer implements Resource
 {
   /** Initialise this resource, and return it. */
   public Resource init() {
-    return Gate.getCreoleRegister().init(this);
+    return this;
   } // init()
 
 } // class AbstractResource

@@ -24,6 +24,7 @@ import java.io.*;
 import gate.*;
 import gate.annotation.*;
 import gate.util.*;
+import gate.creole.*;
 
 /** Represents the commonalities between all sorts of documents.
   *
@@ -137,64 +138,101 @@ public class DocumentImpl implements Document
     content = new DocumentContentImpl();
   } // default construction
 
-  /** Construction from URL; content read over the net. */
-  public DocumentImpl(URL u) throws IOException { this(u, null, null, null); }
-
-  /** Construction from URL; content read over the net. */
-  public DocumentImpl(URL u, String encoding) throws IOException {
-    this(u, encoding, null, null);
-  }
-
-  /** Construction from URL and offsets. Both offsets must be
-    * non-null, or they are both ignored. Content is read over the
-    * net between the offsets.
-    */
-  public DocumentImpl(URL u, String encoding, Long start, Long end)
-         throws IOException {
-    // store the offsets if they're non-null
-    if(start != null && end != null) {
-      sourceUrlOffsets = new Long[2];
-      sourceUrlOffsets[0] = start;
-      sourceUrlOffsets[1] = end;
-    }
-
-    // store the URL
-    sourceUrl = u;
-
-    // get content out of the URL
-    content = new DocumentContentImpl(u, encoding, start, end);
-  } // DocumentImpl(u,start,end)
-
-  /** Construction from String */
-  public DocumentImpl(String str) throws IOException {
-    content = new DocumentContentImpl(str);
-    sourceUrl = new URL("http://no_host/From_String");
-  } // DocumentImpl(string)
-
   /** Initialise this resource, and return it. */
-  public Resource init() {
-    return Gate.getCreoleRegister().init(this);
+  public Resource init() throws ResourceInstantiationException {
+
+    // set up the source URL and create the content
+    if(sourceUrl == null && sourceUrlName != null)
+      try {
+        sourceUrl = new URL(sourceUrlName);
+        content = new DocumentContentImpl(
+          sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset
+        );
+      } catch(IOException e) {
+        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
+      }
+
+    // record the source URL name in case we only got the URL itself
+    if(sourceUrlName == null && sourceUrl != null)
+      sourceUrlName = sourceUrl.toExternalForm();
+
+    return this;
   } // init()
 
   /** Documents are identified by URLs */
   public URL getSourceUrl() { return sourceUrl; }
 
+  /** Set method for the document's URL */
+  public void setSourceUrl(URL sourceUrl) {
+    this.sourceUrl = sourceUrl;
+  } // setSourceUrl
+
+  /** Get method for the document's URL name (i.e. the string that
+    * describes the URL).
+    */
+  public String getSourceUrlName() { return sourceUrlName; }
+
+  /** Set method for the document's URL name (i.e. the string that
+    * describes the URL).
+    */
+  public void setSourceUrlName(String sourceUrlName) {
+    this.sourceUrlName = sourceUrlName;
+  } // setSourceUrlName
+
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document.
     */
-  public Long[] getSourceUrlOffsets() { return sourceUrlOffsets; }
+  public Long[] getSourceUrlOffsets() {
+    Long[] sourceUrlOffsets = new Long[2];
+    sourceUrlOffsets[0] = sourceUrlStartOffset;
+    sourceUrlOffsets[1] = sourceUrlEndOffset;
+    return sourceUrlOffsets;
+  } // getSourceUrlOffsets
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method gets the
+    * start offset.
+    */
+  public Long getSourceUrlStartOffset() { return sourceUrlStartOffset; }
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method sets the
+    * start offset.
+    */
+  public void setSourceUrlStartOffset(Long sourceUrlStartOffset) {
+    this.sourceUrlStartOffset = sourceUrlStartOffset;
+  } // setSourceUrlStartOffset
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method gets the
+    * end offset.
+    */
+  public Long getSourceUrlEndOffset() { return sourceUrlEndOffset; }
+
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document. This method sets the
+    * end offset.
+    */
+  public void setSourceUrlEndOffset(Long sourceUrlEndOffset) {
+    this.sourceUrlEndOffset = sourceUrlEndOffset;
+  } // setSourceUrlStartOffset
 
   /** Get the data store the document lives in. */
   public DataStore getDataStore() {
     return null;
-  }
+  } // getDataStore
 
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() { return content; }
 
-  /** mutator method*/
-  // added by Cristian URSU on 7/June/2000
-  public void setContent(DocumentContent newContent){content = newContent;}
+  /** Set method for the document content */
+  public void setContent(DocumentContent content) { this.content = content; }
+
+  /** Get the encoding of the document content source */
+  public String getEncoding() { return encoding; }
+
+  /** Set the encoding of the document content source */
+  public void setEncoding(String encoding) { encoding = encoding; }
 
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
@@ -221,14 +259,14 @@ public class DocumentImpl implements Document
   } // getAnnotations(name)
 
   /**
-  * Returns a map with the named annotation sets
-  */
-  /*This was needed by the constructor on DocumentWrapper that
-  *takes a DocumentImpl.
-  */
+    * Returns a map with the named annotation sets
+    */
+  // This was needed by the constructor on DocumentWrapper that
+  // takes a DocumentImpl.
   public Map getNamedAnnotationSets(){
     return namedAnnotSets;
-  }
+  } // getNamedAnnotationSets
+
   /** Get the features associated with this document. */
   public FeatureMap getFeatures() { return features; }
 
@@ -294,13 +332,13 @@ public class DocumentImpl implements Document
   /** Utility method to produce a string for comparison in ordering.
     * String is based on the source URL and offsets.
     */
-  String getOrderingString() {
+  protected String getOrderingString() {
     if(sourceUrl == null) return toString();
 
     StringBuffer orderingString = new StringBuffer(sourceUrl.toString());
-    if(sourceUrlOffsets != null) {
-      orderingString.append(sourceUrlOffsets[0].toString());
-      orderingString.append(sourceUrlOffsets[1].toString());
+    if(sourceUrlStartOffset != null && sourceUrlEndOffset != null) {
+      orderingString.append(sourceUrlStartOffset.toString());
+      orderingString.append(sourceUrlEndOffset.toString());
     }
     return orderingString.toString();
   } // getOrderingString()
@@ -313,17 +351,32 @@ public class DocumentImpl implements Document
 
   /** The id of the next new node */
   protected int nextNodeId = 0;
-
   /** The source URL */
-  protected URL sourceUrl = null;
+  protected URL sourceUrl;
+
+  /** The document's URL name. */
+  protected String sourceUrlName;
 
   /** The content of the document */
   protected DocumentContent content;
 
+  /** The encoding of the source of the document content */
+  protected String encoding;
+
   /** The range that the content comes from at the source URL
     * (or null if none).
     */
-  protected Long[] sourceUrlOffsets = null;
+  //protected Long[] sourceUrlOffsets;
+
+  /** The start of the range that the content comes from at the source URL
+    * (or null if none).
+    */
+  protected Long sourceUrlStartOffset;
+
+  /** The end of the range that the content comes from at the source URL
+    * (or null if none).
+    */
+  protected Long sourceUrlEndOffset;
 
   /** The default annotation set */
   protected AnnotationSet defaultAnnots;

@@ -26,18 +26,14 @@ import java.lang.reflect.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.annotation.*;
+import gate.creole.*;
 
 /** Provides static methods for the creation of Resources.
-  * <B>NOTE:</B> these methods should be abstract (or, even better, this
-  * should be an interface). The method implementations given here make
-  * no sense. Unfortunately, Java has no way to implement abstract
-  * static methods; interface methods can't be static; static class methods
-  * can't be abstract.
   */
 public abstract class Factory
 {
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /** The CREOLE register */
   private static CreoleRegister reg = Gate.getCreoleRegister();
@@ -45,18 +41,28 @@ public abstract class Factory
   /** Create an instance of a resource, and return it. */
   public static Resource createResource(
     String resourceClassName, FeatureMap parameters
-  ) throws GateException,
-ClassNotFoundException
+  ) throws ResourceInstantiationException
    {
     // get the resource metadata and default implementation class
     ResourceData resData = (ResourceData) reg.get(resourceClassName);
-    Class resClass = resData.getResourceClass();
+    Class resClass = null;
+    if(resData == null)
+      throw new ResourceInstantiationException(
+        "Couldn't get resource data for " + resourceClassName
+      );
+    try {
+      resClass = resData.getResourceClass();
+    } catch(ClassNotFoundException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get resource class from the resource data" + e
+      );
+    }
 
 // we need instances of LR, PR and VR in order to test whether
 // the resource class is an instance of one of these. eventually
 // these should be anonymous inner classes, statically initialised,
 // and based on AbstractLR, AbstractPR...
-LanguageResource dummyLr = new gate.corpora.CorpusImpl(null);
+LanguageResource dummyLr = new gate.corpora.CorpusImpl();
 Object dummyPr = new Object();
 Object dummyVr = new Object();
 
@@ -64,7 +70,10 @@ Object dummyVr = new Object();
     if(resClass.isInstance(dummyLr)) {
 //if the DS param is set, find an appropriate data store wrapper and:
 //resClass = dataStoreWrapperClass
-//if none available then throw UnknownWrapperException
+//if none available then
+//throw new ResourceInstantiationException(
+//  "Unknown wrapper class " + dataStoreWrapperClass
+//);      OR maybe UnknownDataStoreException
 
     // type-specific stuff for PRs
     } else if(resClass.isInstance(dummyPr)) {
@@ -78,18 +87,20 @@ Object dummyVr = new Object();
     try {
       res = (Resource) resClass.newInstance();
     } catch(IllegalAccessException e) {
-      throw new GateException("Couldn't create resource instance: " + e);
+      throw new ResourceInstantiationException(
+        "Couldn't create resource instance, access denied: " + e
+      );
     } catch(InstantiationException e) {
-      throw new GateException("Couldn't create resource instance: " + e);
+      throw new ResourceInstantiationException(
+        "Couldn't create resource instance due to newInstance() failure: " + e
+      );
     }
 
     // set the parameters of the resource
     try {
       setResourceParameters(res, parameters);
     } catch(Exception e) {
-      // throw new ResourceInitialisationException(e);
-throw new GateException(e);
-//////////////////////
+      throw new ResourceInstantiationException("Parameterisation failure" + e);
     }
 
     // initialise the resource
@@ -110,6 +121,11 @@ throw new GateException(e);
   {
     // the number of parameters that we manage to set on the bean
     int numParametersSet = 0;
+    if(DEBUG) {
+      Out.prln("setResourceParameters, params = ");
+      Iterator iter = parameters.entrySet().iterator();
+      while(iter.hasNext()) Out.prln("  " + iter.next());
+    }
 
     // get the beaninfo for the resource bean, excluding data about Object
     BeanInfo resBeanInfo =
@@ -131,10 +147,12 @@ throw new GateException(e);
         // call the set method with the parameter value
         Object[] args = new Object[1];
         args[0] = paramValue;
-        if(DEBUG)
-          Out.prln(
-            "setting res param " + prop.getDisplayName() + " = " + paramValue
-          );
+        if(DEBUG) {
+          Out.pr("setting res param, property = ");
+          TestCreole.printProperty(prop);
+          Out.prln("to paramValue = " + paramValue);
+        }
+
         setMethod.invoke(resource, args);
         numParametersSet++;
 
@@ -148,26 +166,56 @@ throw new GateException(e);
 
   } // setResourceParameters
 
-  /** Create a new Corpus. */
-  public static Corpus newCorpus(String name) {
-    return new CorpusImpl(name);
+  /** Create a new transient Corpus. */
+  public static Corpus newCorpus(String name)
+  throws ResourceInstantiationException
+  {
+    FeatureMap parameters = newFeatureMap();
+    parameters.put("name", name);
+    parameters.put("features", Factory.newFeatureMap());
+    return (Corpus) createResource("gate.Corpus", parameters);
   } // newCorpus
 
-  /** Create a new Document from a URL. */
-  public static Document newDocument(URL u) throws IOException {
-    return new DocumentImpl(u);
+  /** Create a new transient Document from a URL. */
+  public static Document newDocument(URL sourceUrl)
+  throws ResourceInstantiationException
+  {
+    FeatureMap parameters = newFeatureMap();
+    parameters.put("sourceUrlName", sourceUrl.toExternalForm());
+    return (Document) createResource("gate.Document", parameters);
   } // newDocument(URL)
 
-  /** Create a new Document from a URL. */
-  public static Document newDocument(URL u,
-                                     String encoding) throws IOException {
-    return new DocumentImpl(u, encoding);
+  /** Create a new transient Document from a URL and an encoding. */
+  public static Document newDocument(URL sourceUrl, String encoding)
+  throws ResourceInstantiationException
+  {
+    FeatureMap parameters = newFeatureMap();
+    parameters.put("sourceUrlName", sourceUrl.toExternalForm());
+    parameters.put("encoding", encoding);
+    return (Document) createResource("gate.Document", parameters);
   } // newDocument(URL)
 
+  /** Create a new transient textual Document from a string. */
+  public static Document newDocument(String content)
+  throws ResourceInstantiationException
+  {
+    Document doc = (Document) createResource("gate.Document", newFeatureMap());
 
-  /** Create a new Document from a String. */
-  public static Document newDocument(String s) throws IOException {
-    return new DocumentImpl(s);
+    // laziness: should fit this into createResource by adding a new
+    // document parameter, but haven't time right now...
+    doc.setContent(new DocumentContentImpl(content));
+
+    // various classes are in the habit of assuming that a document
+    // inevitably has a source URL...  so give it a dummy one
+    try {
+      doc.setSourceUrl(new URL("http://localhost/"));
+    } catch(MalformedURLException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't create dummy URL in newDocument(String): " + e
+      );
+    }
+
+    return doc;
   } // newDocument(String)
 
   /** Create a new FeatureMap. */

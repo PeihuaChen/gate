@@ -62,6 +62,15 @@ public class TestCreole extends TestCase
     }
   } // setUp
 
+  /** Put things back as they should be after running tests
+    * (reinitialise the CREOLE register).
+    */
+  public void tearDown() throws Exception {
+    reg.clear();
+    Gate.init();
+    Gate.initCreoleRegister();
+  } // tearDown
+
   /** Test resource discovery */
   public void testDiscovery() throws Exception {
 
@@ -159,6 +168,31 @@ public class TestCreole extends TestCase
     reg.clear();
   } // testInterfaceIndex()
 
+  /** Test comments on resources */
+  public void testComments() throws Exception {
+
+    ResourceData docRd = (ResourceData) reg.get("gate.Document");
+    assertNotNull("testComments: couldn't find document res data", docRd);
+    String comment = docRd.getComment();
+    assert(
+      "testComments: incorrect or missing COMMENT on document",
+      comment != null && comment.equals("GATE document")
+    );
+  } // testComments()
+
+  /** Test arbitrary metadata elements on resources */
+  public void testArbitraryMetadata() throws Exception {
+
+    ResourceData docRd = (ResourceData) reg.get("gate.Document");
+    assertNotNull("testArbitraryMetadata: couldn't find doc res data", docRd);
+    FeatureMap features = docRd.getFeatures();
+    String comment = (String) features.get("FUNKY-METADATA-THAING");
+    assert(
+      "testArbitraryMetadata: incorrect FUNKY-METADATA-THAING on document",
+      comment != null && comment.equals("hubba hubba")
+    );
+  } // testArbitraryMetadata()
+
   /** Test resource introspection */
   public void testIntrospection() throws Exception {
     // get the gate.Document resource and its class
@@ -189,15 +223,7 @@ public class TestCreole extends TestCase
       )
         setFeaturesMethod = setMethodDescr;
 
-      if(DEBUG) {
-        Out.pr("prop dispname= " + propDescrs[i].getDisplayName() + "; ");
-        Out.pr("prop type name= " + propClass.getName() + "; ");
-        if(getMethodDescr != null)
-          Out.pr("get meth name= " + getMethodDescr.getName() + "; ");
-        if(setMethodDescr != null)
-          Out.pr("set meth name= " + setMethodDescr.getName() + "; ");
-        Out.prln();
-      }
+      if(DEBUG) printProperty(propDescrs[i]);
     }
 
     // try setting the features property
@@ -219,8 +245,28 @@ public class TestCreole extends TestCase
   public void testFactory() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
+    params.put(
+      "sourceUrlName",
+      Gate.getUrl("tests/doc0.html").toExternalForm()
+    );
     Resource res = Factory.createResource("gate.Document", params);
   } // testFactory
+
+  /** Utility method to print out the values of a property descriptor
+    * @see java.beans.PropertyDescriptor
+    */
+  public static void printProperty(PropertyDescriptor prop) {
+    Class propClass = prop.getPropertyType();
+    Method getMethodDescr = prop.getReadMethod();
+    Method setMethodDescr = prop.getWriteMethod();
+    Out.pr("prop dispname= " + prop.getDisplayName() + "; ");
+    Out.pr("prop type name= " + propClass.getName() + "; ");
+    if(getMethodDescr != null)
+      Out.pr("get meth name= " + getMethodDescr.getName() + "; ");
+    if(setMethodDescr != null)
+      Out.pr("set meth name= " + setMethodDescr.getName() + "; ");
+    Out.prln();
+  } // printProperty
 
   /** Example of what bean info classes do.
     * If this was a public class in gate.corpora it would be used
