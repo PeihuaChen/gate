@@ -51,6 +51,7 @@ public class ProfilePRs {
   private static double totalDocLength = 0;
   private static int docs = 0;
   private static Profiler prof = new Profiler();
+  private static double maxDocLength = 0;
 
   /** Main function */
   public static void main(String[] args) throws Exception {
@@ -151,6 +152,9 @@ public class ProfilePRs {
       );
       totalDocLength += doc.getContent().size().longValue();
 
+      if (maxDocLength < doc.getContent().size().longValue())
+        maxDocLength = doc.getContent().size().longValue();
+
       // set the document param on the PRs
       tokeniser.setDocument(doc);
       prof.checkPoint("Processing file " + inFile.getPath() +
@@ -192,6 +196,9 @@ public class ProfilePRs {
 
     totalDocLength = (double) totalDocLength/1024;
     Out.prln("\nTotal KBytes processed: " + (long)totalDocLength);
+    Out.prln("\nMax document size in bytes: " + (long)maxDocLength +
+      " (" + (long) maxDocLength/1024 + " Kb)");
+
 
     prof.printCategAvg("Processing", docs, totalDocLength, "kb");
     prof.printCategAvg("Tokenizer", docs, totalDocLength, "kb");
