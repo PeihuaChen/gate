@@ -136,7 +136,8 @@ public class ShellSlacFrame extends MainFrame {
     action = new ExportDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
     
-    
+    action = new ExportAllDocumentAction();
+    fileMenu.add(new XJMenuItem(action, this));
 /*
     action = new StoreAllDocumentAction();
     action.setEnabled(false);
@@ -258,7 +259,7 @@ public class ShellSlacFrame extends MainFrame {
     SwingUtilities.invokeLater(run);
   } // createDefaultApplication
 
-    
+  /** Load application from file */  
   public class ApplicationLoadRun implements Runnable {
     private String appURL;
     public ApplicationLoadRun(String url) {
@@ -281,6 +282,7 @@ public class ShellSlacFrame extends MainFrame {
     } // run
   } // class ApplicationLoadRun implements Runnable 
 
+  /** Create default ANNIE */
   public class ANNIERunnable implements Runnable {
     MainFrame parentFrame;
     ANNIERunnable(MainFrame parent) {
@@ -344,6 +346,7 @@ public class ShellSlacFrame extends MainFrame {
     } // if
   }// resourceLoaded();
   
+  /** Find in resource tree and show the document */
   protected void showDocument(Document doc) {
     // should find NameBearerHandle for document and call 
     Handle handle = null;
@@ -399,6 +402,7 @@ public class ShellSlacFrame extends MainFrame {
     } // catch
   } // datastoreOpened(CreoleEvent e)
 
+  /** Return handle to selected tab resource */
   private Handle getSelectedResource() {
     JComponent largeView = (JComponent)
                                 mainTabbedPane.getSelectedComponent();
@@ -418,6 +422,55 @@ public class ShellSlacFrame extends MainFrame {
       
     return result;
   } // getSelectedResource()
+  
+  /** Export All store of documents from SLUG corpus */
+  private void saveDocuments(File targetDir) {
+    if(corpus == null || corpus.size() == 0) return;
+
+    Document doc;
+    String target = targetDir.getPath();
+    URL fileURL;
+    String fileName = null;
+    int index;
+    
+    MainFrame.lockGUI("Export all documents...");
+
+    target = target+File.separatorChar;
+    for(int i=0; i<corpus.size(); ++i) {
+      doc = (Document) corpus.get(i);
+      fileURL = doc.getSourceUrl();
+      if(fileURL != null) 
+        fileName = fileURL.toString();
+        index = fileName.lastIndexOf('/');
+        if(index != -1) {
+          fileName = fileName.substring(index+1, fileName.length());
+        }
+      else
+        fileName = "content_txt";
+
+      // create full file name
+      fileName = target + fileName+".xml";
+      try{
+    
+        // Prepare to write into the xmlFile using UTF-8 encoding
+        OutputStreamWriter writer = new OutputStreamWriter(
+                        new FileOutputStream(new File(fileName)),"UTF-8");
+
+        // Write (test the toXml() method)
+        // This Action is added only when a gate.Document is created.
+        // So, is for sure that the resource is a gate.Document
+        writer.write(doc.toXml());
+        writer.flush();
+        writer.close();
+      } catch (Exception ex){
+        ex.printStackTrace(Out.getPrintWriter());
+      } finally{
+        MainFrame.unlockGUI();
+      } // finally
+    } // for
+    
+    MainFrame.unlockGUI();
+  } // saveDocuments(File targetDir)
   
 //------------------------------------------------------------------------------
 //  Inner classes section
@@ -644,6 +697,7 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class TestStoreAction extends AbstractAction
 
+  /** Export current document action */
   class ExportDocumentAction extends AbstractAction {
     public ExportDocumentAction() {
       super("Export");
@@ -660,7 +714,44 @@ public class ShellSlacFrame extends MainFrame {
       }// End if
     } // actionPerformed(ActionEvent e)
   } // class ExportDocumentAction extends AbstractAction
-  
+
+  /** Export All menu action */
+  class ExportAllDocumentAction extends AbstractAction {
+    public ExportAllDocumentAction() {
+      super("Export All");
+      putValue(SHORT_DESCRIPTION, "Save all documents in XML format");
+    } // ExportAllDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+      fileChooser.setDialogTitle("Select Export directory");
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+      int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
+      if(res == fileChooser.APPROVE_OPTION) {
+        File directory = fileChooser.getSelectedFile();
+        if(directory != null && directory.isDirectory()) {
+          Runnable run = new ExportAllRunnable(directory);
+          Thread thread = new Thread(run, "");
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        } // if
+      } // if
+    } // actionPerformed(ActionEvent e)
+  } // class ExportAllDocumentAction extends AbstractAction
+
+  /** Object to run ExportAll in a new Thread */  
+  private class ExportAllRunnable implements Runnable {
+    File directory;
+    ExportAllRunnable(File targetDirectory) {
+      directory = targetDirectory;
+    } // ExportAllRunnable(File targetDirectory)
+    
+    public void run() {
+      saveDocuments(directory);
+    } // run()
+  } // ExportAllRunnable
+
+  /** Dummy Help About dialog */
   class HelpAboutSlugAction extends AbstractAction {
     public HelpAboutSlugAction() {
       super("About");
