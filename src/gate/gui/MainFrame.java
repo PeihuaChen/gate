@@ -421,12 +421,12 @@ public class MainFrame extends JFrame
 "<HTML>" +
 "<B>Hamish Cunningham, Valentin Tablan, Kalina Bontcheva, Diana Maynard,</B>" +
 "<BR>Niraj Aswani, Mike Dowman, Marin Dimitrov, Bobby Popov, Yaoyong Li, Akshay Java," +
-"<BR>Wim Peters, Mark Greenwood, Angus Roberts, Andrey Shafirin, Horacio Saggion," +
+"<BR>Wim Peters, Ian Roberts, Mark Greenwood, Angus Roberts, Andrey Shafirin," +
 //"<BR>XXX," +
 //"<BR>XXX," +
-"<BR>Cristian Ursu, Atanas Kiryakov, Angel Kirilov, Damyan Ognyanoff, Dimitar Manov," +
-"<BR>Milena Yankova, Oana Hamza, Robert Gaizauskas, Mark Hepple, Mark Leisher," +
-"<BR>Fang Huang, Kevin Humphreys, Yorick Wilks." +
+"<BR>Horacio Saggion, Cristian Ursu, Atanas Kiryakov, Angel Kirilov, Damyan Ognyanoff," +
+"<BR>Dimitar Manov, Milena Yankova, Oana Hamza, Robert Gaizauskas, Mark Hepple," +
+"<BR>Mark Leisher, Fang Huang, Kevin Humphreys, Yorick Wilks." +
 "<P><B>JVM version</B>: " + System.getProperty("java.version") +
 " from " + System.getProperty("java.vendor")
     );
