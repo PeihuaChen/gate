@@ -665,7 +665,7 @@ public class CorpusBenchmarkTool {
             persDoc.getName().length(),
             ".err");
           Out.prln("<H2>" +
-                   "<a href=err/" + errName.toString() + ">"
+                   "<a href=\"err/" + errName.toString() + "\">"
                    + persDoc.getName() + "</a>" + "</H2>");
         } else
           Out.prln("<H2>" + persDoc.getName() + "</H2>");
@@ -787,7 +787,7 @@ public class CorpusBenchmarkTool {
           cleanDocs[i].getName().length(),
           ".err");
         Out.prln("<H2>" +
-                 "<a href=err/" + errName.toString() + ">"
+                 "<a href=\"err/" + errName.toString() + "\">"
                  + cleanDocs[i].getName() + "</a>" + "</H2>");
       } else
         Out.prln("<H2>" + cleanDocs[i].getName() + "</H2>");
