@@ -106,18 +106,18 @@ public class WaitDialog extends JWindow implements Runnable {
     JPanel centerPanel = new JPanel();
     centerBox = Box.createVerticalBox();
     centerPanel.setLayout(borderLayout1);
-    centerPanel.setBorder(new LineBorder(Color.darkGray, 2));
+    //centerPanel.setBorder(new LineBorder(Color.darkGray, 2));
     centerPanel.setBackground(Color.white);
     centerBox.setBackground(Color.white);
     picture = new JLabel(icon);
-
+    picture.setOpaque(false);
     centerPanel.add(centerBox, BorderLayout.CENTER);
     centerPanel.add(picture, BorderLayout.WEST);
     centerPanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);
     centerPanel.add(Box.createVerticalStrut(5), BorderLayout.SOUTH);
     centerPanel.add(Box.createHorizontalStrut(8), BorderLayout.EAST);
     getContentPane().add(centerPanel, BorderLayout.CENTER);
-
+    centerPanel.setOpaque(false);
   }
 
   /**
