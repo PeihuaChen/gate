@@ -168,25 +168,105 @@ public class AnnotationImpl
     return true;
   }// equals
 */
-  /** This method compares two FeatureMaps
-   * Returns true if their content is
-   */
-  private boolean compareFeatureMaps(FeatureMap oneFm, FeatureMap anotherFm){
-    // If the two sets don't have the same size return false
-    if (oneFm.size() != anotherFm.size())
+
+  /** This verifies if <b>this</b> annotation is compatible with another one.
+    * Compatible means that they hit the same possition and the FeatureMap of
+    * <b>this</b> is incuded into aAnnot FeatureMap.
+    * @param aAnnot a gate Annotation.
+    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * <code>false</code> otherwise.
+    */
+  public boolean isCompatible(Annotation aAnnot){
+    if (aAnnot == null) return false;
+
+    if (coextensive(aAnnot)){
+      if (aAnnot.getFeatures() == null) return true;
+      if (aAnnot.getFeatures().subsumes(this.getFeatures()))
+        return true;
+    }// End if
+    return false;
+  }//isCompatible
+
+  /** This method verifies if two annotation and are partially compatible.
+    * Partially compatible means that they overlap and the FeatureMap of
+    * <b>this</b> is incuded into FeatureMap of aAnnot.
+    * @param aAnnot a gate Annotation.
+    * @return <code>true</code> if <b>this</b> is partially compatible with
+    * aAnnot and <code>false</code> otherwise.
+    */
+  public boolean isPartiallyCompatible(Annotation aAnnot){
+    if (aAnnot == null) return false;
+
+    if (overlaps(aAnnot)){
+      if (aAnnot.getFeatures() == null) return true;
+      if (aAnnot.getFeatures().subsumes(this.getFeatures()))
+        return true;
+    }// End if
+    return false;
+  }//isPartiallyCompatible
+
+  /**
+    *  Two Annotation are coestensive if their offsets are the
+    *  same.
+    *  @param anAnnot A Gate annotation.
+    *  @return <code>true</code> if two annotation hit the same possition and
+    *  <code>false</code> otherwise
+    */
+  public boolean coextensive(Annotation anAnnot){
+    // If their start offset is not the same then return false
+    if((anAnnot.getStartNode() == null) ^ (this.getStartNode() == null))
       return false;
-    // If they have the same size compare their elements
-    Set oneFmKeySet = oneFm.keySet();
-    Iterator oneFmKeySetIterator = oneFmKeySet.iterator();
-    while (oneFmKeySetIterator.hasNext()){
-      Object oneFmKey = oneFmKeySetIterator.next();
-      if (!anotherFm.containsKey(oneFmKey))
+
+    if(anAnnot.getStartNode() != null){
+      if((anAnnot.getStartNode().getOffset() == null) ^
+         (this.getStartNode().getOffset() == null))
         return false;
-      if (!anotherFm.containsValue(oneFm.get(oneFmKey)))
+      if(anAnnot.getStartNode().getOffset() != null &&
+        (!anAnnot.getStartNode().getOffset().equals(
+                            this.getStartNode().getOffset())))
         return false;
-    }// end while
+    }// End if
+
+    // If their end offset is not the same then return false
+    if((anAnnot.getEndNode() == null) ^ (this.getEndNode() == null))
+      return false;
+
+    if(anAnnot.getEndNode() != null){
+      if((anAnnot.getEndNode().getOffset() == null) ^
+         (this.getEndNode().getOffset() == null))
+        return false;
+      if(anAnnot.getEndNode().getOffset() != null &&
+        (!anAnnot.getEndNode().getOffset().equals(
+              this.getEndNode().getOffset())))
+        return false;
+    }// End if
+
+    // If we are here, then the annotations hit the same position.
     return true;
-  }// compareFeatureMaps
+  }//coextensive
+
+  /** This method tells if <b>this</b> overlaps aAnnot.
+    * @param aAnnot a gate Annotation.
+    * @return <code>true</code> if they overlap and <code>false</code> false if
+    * they don't.
+    */
+  public boolean overlaps(Annotation aAnnot){
+    if (aAnnot == null) return false;
+    if (aAnnot.getStartNode() == null ||
+        aAnnot.getEndNode() == null ||
+        aAnnot.getStartNode().getOffset() == null ||
+        aAnnot.getEndNode().getOffset() == null) return false;
+
+    if ( aAnnot.getEndNode().getOffset().longValue() <=
+         this.getStartNode().getOffset().longValue())
+      return false;
+
+    if ( aAnnot.getStartNode().getOffset().longValue() >=
+         this.getEndNode().getOffset().longValue())
+      return false;
+
+    return true;
+  }//overlaps
 
   /**
    * The id of this annotation (for persitency resons)
