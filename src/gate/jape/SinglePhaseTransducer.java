@@ -90,11 +90,28 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
   /**
-  * Transduce a document using the default annotation set and the current
+  * Transduce a document using the annotation set provided and the current
   * rule application style.
   */
-  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotationSet) throws JapeException {
     fireProgressChangedEvent(0);
+
+    //the input annotations will be read from this set
+    AnnotationSet annotations = null;
+
+    //select only the annotations of types specified in the input list
+    if(input.isEmpty()) annotations = annotationSet;
+    else{
+      Iterator typesIter = input.iterator();
+      AnnotationSet ofOneType = null;
+      while(typesIter.hasNext())
+        ofOneType = annotationSet.get((String)typesIter.next());
+        if(ofOneType != null){
+          if(annotations == null) annotations = ofOneType;
+          else annotations.addAll(ofOneType);
+        }
+    }
+    if(annotations == null) annotations = new AnnotationSetImpl(doc);
 
     //INITIALISATION Should we move this someplace else?
     //build the finite state machine transition graph
@@ -133,7 +150,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   startNode,//current position in AG is the start position
                   new java.util.HashMap()//no bindings yet!
                   );
-      //at this point ActiveFSMInstances should be always empty!
+      //at this point ActiveFSMInstances should always be empty!
       activeFSMInstances.addLast(currentFSM);
         while(!activeFSMInstances.isEmpty()){
         //while there are some "alive" FSM instances
@@ -195,8 +212,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
             newAttributes = (FeatureMap)constraintsByType.get(annType);
             offset = currentFSM.getAGPosition().getOffset();
             matchedHere = annotations.get(annType,
-                                                   newAttributes,
-                                                   offset);
+                                          newAttributes,
+                                          offset);
             if(matchedHere == null || matchedHere.isEmpty()) success = false;
             else{
               //we have some matched annotations of the current type
@@ -338,11 +355,36 @@ extends Transducer implements JapeConstants, java.io.Serializable
   public PrioritisedRuleList getRules(){
     return rules;
   }
+
+  /**
+  *Adds a new type of input annotations used by this transducer.
+  *If the list of input types is empty this transducer will parse all the
+  *annotations in the document otherwise the types not found in the input list
+  *will be completely ignored! To be used with caution!
+  */
+  public void addInput(String ident){
+    input.add(ident);
+  }
+
+  /**
+  *Defines the types of input annotations that this transducer reads. If this
+  *set is empty the transducer will read all the annotations otherwise it will
+  *only "see" the annotations of types found in this list ignoring all other
+  *types of annotations.
+  */
+  java.util.Set input = new java.util.HashSet();
+  
 } // class SinglePhaseTransducer
 
 
 
 // $Log$
+// Revision 1.15  2000/09/10 18:30:26  valyt
+// Added support for:
+// 	rules priority
+// 	input specification
+// in Jape
+//
 // Revision 1.14  2000/07/19 20:37:37  valyt
 // Changed the Files.getResourceAsStream() method in order to break the tests :)
 //

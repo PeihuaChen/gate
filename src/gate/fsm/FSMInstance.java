@@ -50,6 +50,7 @@ public class FSMInstance implements Comparable, Cloneable{
     length = AGPosition.getOffset().longValue() -
              startNode.getOffset().longValue();
     fileIndex = FSMPosition.getFileIndex();
+    priority = FSMPosition.getPriority();
   }
 
   /** Returns the FSM transition graph that backs this FSM instance
@@ -162,6 +163,10 @@ public Object clone() {
       FSMInstance other = (FSMInstance)obj;
       if(length < other.getLength()) return -1;
       else if(length > other.getLength()) return 1;
+      //equal length
+      else if(priority < other.priority) return -1;
+      else if(priority > other.priority) return 1;
+      //equal priority
       else if(fileIndex <= other.fileIndex) return 1;
       else return -1;
     }else throw new ClassCastException(
@@ -203,6 +208,12 @@ public Object clone() {
   * state was generated.
   */
   private int fileIndex;
+
+  /**
+  * The priority in the definition file of the rule from which the AGPosition
+  * state was generated.
+  */
+  private int priority;
 
   /** Static method that provides new FSM instances. This method handles some
     * basic object pooling in order to reuse the FSMInstance objects.
