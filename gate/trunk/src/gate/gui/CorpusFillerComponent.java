@@ -95,6 +95,7 @@ public class CorpusFillerComponent extends JPanel {
     constraints.fill = constraints.HORIZONTAL;
     constraints.insets = new Insets(0, 0, 0, 10);
     add(extensionsTextField = new JTextField(40), constraints);
+    extensionsTextField.setEditable(false);
     extensionsTextField.setText(extensions.toString());
 
     constraints = new GridBagConstraints();
