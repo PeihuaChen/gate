@@ -187,11 +187,6 @@ public class TestBumpyStack extends TestCase
           "\nJapes expected: " + japeCnt + ", got: " + newJapeCnt +
           "\nSerCtls expected: " + serctlCnt + ", got: " + newSerctlCnt;
 
-if(corpusCnt != newCorpusCnt){
-  System.out.println(((Resource)((ResourceData)Gate.getCreoleRegister().
-                  get("gate.corpora.CorpusImpl")).
-                  getInstantiations().get(0)).getName());
-}
     assertTrue(message, docCnt + 4 > newDocCnt &&
                     corpusCnt + 3 > newCorpusCnt &&
                     tokCnt + 3 > newTokCnt &&
