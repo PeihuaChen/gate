@@ -78,6 +78,16 @@ public class AnnotationListView extends AbstractDocumentView
     constraints.anchor = GridBagConstraints.WEST;
     statusLabel = new JLabel();
     mainPanel.add(statusLabel, constraints);
+    
+    //get a pointer to the text view used to display
+    //the selected annotations 
+    Iterator centralViewsIter = owner.getCentralViews().iterator();
+    while(textView == null && centralViewsIter.hasNext()){
+      DocumentView aView = (DocumentView)centralViewsIter.next();
+      if(aView instanceof TextualDocumentView)  
+        textView = (TextualDocumentView)aView;
+    }
+    
     initListeners();
   }
   
@@ -110,6 +120,15 @@ public class AnnotationListView extends AbstractDocumentView
                   " Annotations (" +
                   Integer.toString(table.getSelectedRowCount()) +
                   "selected)");
+          //blink the selected annotations
+          textView.removeAllBlinkingHighlights();
+          int[] rows = table.getSelectedRows();
+          for(int i = 0; i < rows.length; i++){
+            Object tag = tagList.get(rows[i]);
+            AnnotationHandler aHandler = (AnnotationHandler)
+              annotationHandlerByTag.get(tag);
+            textView.addBlinkingHighlight(aHandler.ann);
+          }
         }
     });
     
@@ -322,6 +341,7 @@ public class AnnotationListView extends AbstractDocumentView
   protected List tagList;
   protected JPanel mainPanel;
   protected JLabel statusLabel;
+  protected TextualDocumentView textView;
   
   private static final int TYPE_COL = 0;
   private static final int SET_COL = 1;
