@@ -5,6 +5,7 @@
    <!-- creole.xml for SearchPR -->
     <RESOURCE>
       <JAR>crawl.jar</JAR>
+      <JAR>lib/websphinx.jar</JAR>
       <NAME>CrawlerPR</NAME>
       <CLASS>crawl.CrawlPR</CLASS>
       <COMMENT>provides interface to the webspinx API</COMMENT>
