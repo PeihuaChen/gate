@@ -3,15 +3,27 @@
 <!-- creole.xml directory file for GATE builtins -->
 <CREOLE-DIRECTORY> 
   <CREOLE>
-    <!-- Ontology -->
+    <!-- Taxonomy -->
     <RESOURCE>
-      <NAME>Ontology</NAME>
+      <NAME>Taxonomy</NAME>
       <CLASS>com.ontotext.gate.ontology.DAMLOntology</CLASS>
-      <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
-      <COMMENT>Ontology</COMMENT>
+      <INTERFACE>gate.creole.ontology.Taxonomy</INTERFACE>
+      <COMMENT>Taxonomy</COMMENT>
       <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
       <ICON>controller.gif</ICON>
     </RESOURCE>
+
+  <!-- Ontology -->
+
+  <RESOURCE>
+    <NAME>Ontology</NAME>
+    <CLASS>com.ontotext.gate.ontology.DAMLKnowledgeBaseImpl</CLASS>
+    <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
+    <COMMENT>Ontology</COMMENT>
+    <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml"
+       COMMENT="The URL of the Knowledge Base">java.net.URL</PARAMETER>
+    <ICON>lrs.gif</ICON>
+  </RESOURCE>
 
     <!-- Protege project name -->
     <RESOURCE>
@@ -54,7 +66,7 @@
       <CLASS>com.ontotext.gate.vr.OntologyEditorImpl</CLASS>
       <GUI TYPE="large">
         <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
+        <RESOURCE_DISPLAYED>gate.creole.ontology.Taxonomy</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
 
