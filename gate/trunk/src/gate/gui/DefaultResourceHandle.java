@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.event.*;
 import java.text.NumberFormat;
 import java.io.*;
+import javax.swing.filechooser.FileFilter;
 
 import gate.*;
 import gate.util.*;
@@ -222,15 +223,31 @@ public class DefaultResourceHandle implements ResourceHandle {
       JFileChooser fileChooser = MainFrame.getFileChooser();
       File selectedFile = null;
 
-      ExtensionFileFilter filter = new ExtensionFileFilter();
-      filter.addExtension("xml");
-      filter.addExtension("gml");
-
+      List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
+      Iterator filtersIter = filters.iterator();
+      FileFilter filter = null;
+      if(filtersIter.hasNext()){
+        filter = (FileFilter)filtersIter.next();
+        while(filtersIter.hasNext() &&
+              filter.getDescription().indexOf("XML") == -1){
+          filter = (FileFilter)filtersIter.next();
+        }
+      }
+      if(filter == null || filter.getDescription().indexOf("XML") == -1){
+        //no suitable filter found, create a new one
+        ExtensionFileFilter xmlFilter = new ExtensionFileFilter();
+        xmlFilter.setDescription("XML files");
+        xmlFilter.addExtension("xml");
+        xmlFilter.addExtension("gml");
+        fileChooser.addChoosableFileFilter(xmlFilter);
+        filter = xmlFilter;
+      }
+      fileChooser.setFileFilter(filter);
 
       fileChooser.setMultiSelectionEnabled(false);
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       fileChooser.setDialogTitle("Select document to save ...");
       fileChooser.setSelectedFiles(null);
-      fileChooser.setFileFilter(filter);
 
       int res = (getLargeView() != null) ?
                               fileChooser.showDialog(getLargeView(), "Save"):

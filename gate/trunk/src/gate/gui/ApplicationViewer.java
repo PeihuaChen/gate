@@ -1254,6 +1254,7 @@ public class ApplicationViewer extends AbstractVisualResource
         }//while(pdIter.hasNext())
       }//if(pdLIst != null)
     }//while(parListsIter.hasNext())
+    mainTreeTable.repaint();
   }//public void resourceUnloaded(CreoleEvent e)
 
   public void datastoreOpened(CreoleEvent e) {
