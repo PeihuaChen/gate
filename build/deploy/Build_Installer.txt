@@ -19,3 +19,16 @@ make sure *.bat are in DOS format
 
 build installers using gate\build\deploy\gate2.iap
 
+
+TEST THE INSTALLERS ON WINDOWS AND LINUX (at least)
+
+- for Windows - make sure u're installing it in a directory *with* spaces
+- for Linux - make sure u're *not* installing as root
+
+make the following 4 tests:
+
+1. win/web install
+2. win - executable install
+3. linux/web install
+4. linux/shell script install
+
