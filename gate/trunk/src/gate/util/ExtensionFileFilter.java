@@ -44,16 +44,11 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
   public boolean accept(File f){
     String name = f.getName();
     if(f.isDirectory()) return true;
-    boolean res = false;
 
-    if(name.indexOf('.') != -1){
-      String extension = name.substring(name.lastIndexOf('.')+1,name.length());
-      Iterator extIter = acceptedExtensions.iterator();
-      while(extIter.hasNext()){
-        if(((String)extIter.next()).equalsIgnoreCase(extension)) res=true;
-      }
-    };
-    return res;
+    for(int i = 0; i < acceptedExtensions.size(); i++){
+      if(name.endsWith((String)acceptedExtensions.get(i))) return true;
+    }
+    return false;
   }
 
   /**
@@ -86,7 +81,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
    * The set of accepted extensions
    *
    */
-  private Set acceptedExtensions = new HashSet();
+  private List acceptedExtensions = new ArrayList();
 
   /**
    * The desciption of the accepted files.
