@@ -14,7 +14,6 @@ import gate.creole.*;
 import gate.corpora.*;
 import java.net.*;
 import java.io.*;
-import java.util.*;
 
 /**
  * This class tests if Repositinioning Information works.
