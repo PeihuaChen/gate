@@ -30,7 +30,7 @@ import gate.util.MethodNotImplementedException;
 public class AccessControllerImpl
   implements AccessController, ObjectModificationListener {
 
-  public static final int DEFAULT_SESSION_TIMEOUT_MIN = 60;
+  public static final int DEFAULT_SESSION_TIMEOUT_MIN = 4*60;
 
   public static final int LOGIN_OK = 1;
   public static final int LOGIN_FAILED = 2;
