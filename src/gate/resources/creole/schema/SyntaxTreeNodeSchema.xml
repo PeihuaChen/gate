@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <schema xmlns="http://www.w3.org/2000/10/XMLSchema">
 	<!-- XSchema deffinition for syntaxTreeNode-->
-	<element name="syntaxTreeNode">
+	<element name="SyntaxTreeNode">
 		<complexType>
-			<attribute name="time" type="integer" use="required"/>
-			<attribute name="text"  type="string"  use ="required"/>
-			<attribute name="cat" use="default" value="N">
+			<attribute name="text"  type="string"  use ="optional"/>
+			<attribute name="cat" use="required">
 				<simpleType>
 					<restriction base="string">
 						<enumeration value="N"/>
@@ -19,9 +18,7 @@
 					</restriction>
 				</simpleType>
 			</attribute>
-			<attribute name="leftChild"   type="IDREF" use="optional"/>
-			<attribute name="rightChild" type="IDREF" use="optional"/>
-			<attribute name="id" type="ID" use="optional"/>
+			<attribute name="consists" type="list" use="optional"/>
 		</complexType>
 	</element>
 </schema>
