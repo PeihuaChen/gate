@@ -977,10 +977,7 @@ public class DocumentEditor extends AbstractVisualResource
    * Sets the document to be displayed
    */
   public void setTarget(Object target){
-    if(target == null){
-      document = null;
-      return;
-    }else if(!(target instanceof gate.Document)){
+    if(!(target instanceof gate.Document)){
       throw new IllegalArgumentException(
         "The document editor can only display Gate documents!\n" +
         "The provided resource is not a document but a: " +
@@ -1000,6 +997,12 @@ public class DocumentEditor extends AbstractVisualResource
     myHandle = handle;
   }
 
+  public void cleanup(){
+    document = null;
+    stylesTreeRoot.removeAllChildren();
+    data.clear();
+    ranges.clear();
+  }
 
 
   /**
