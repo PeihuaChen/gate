@@ -60,10 +60,10 @@ public class TestXSchema extends TestCase
     String s = annotSchema.toXSchema();
 
     // write back the XSchema fom memory
-    File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
+    // File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
     // load it again.
-    annotSchema.fromXSchema(file.toURL());
-
+    //annotSchema.fromXSchema(file.toURL());
+    annotSchema.fromXSchema(new ByteArrayInputStream(s.getBytes()));
   } // testFromAndToXSchema()
 
   /** Test suite routine for the test runner */
