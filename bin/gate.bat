@@ -9,7 +9,7 @@ REM ##############################################
 REM let's find JAVA
 REM ##############################################
 
-set RUNJAVA="java"
+set RUNJAVA=java
 if not "%JAVA_HOME%" == "" set RUNJAVA="%JAVA_HOME%\bin\java"
 echo Using java in %RUNJAVA%
 
@@ -39,9 +39,9 @@ REM ##############################################
 REM we have gate.jar; let's find guk.jar
 SET GUK_HOME=%~d0%~p0ext
 if exist "%GUK_HOME%\guk*.jar" goto allGo
+
 %~d0
 cd %~p0
-
 SET GUK_HOME=..\lib\ext\
 if exist "%GUK_HOME%\guk*.jar" goto allGo
 
@@ -55,6 +55,6 @@ REM Run the thing
 REM ##############################################
 :allGo
 echo using guk.jar in "%GUK_HOME%guk.jar"
-%RUNJAVA% -Xmx200m -cp "%GATE_HOME%gate.jar" -Djava.ext.dirs="%GUK_HOME%" gate.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
+%RUNJAVA% -Xmx200m -Djava.ext.dirs=%GUK_HOME% -cp "%GATE_HOME%gate.jar"  gate.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :finish
