@@ -711,8 +711,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           return new Boolean(label.getText());
         }else{
           //get the value from the text field
-          return ((textField.getText().equals("")) ? null :
-                                                     textField.getText());
+          return textField.getText();
+//          return ((textField.getText().equals("")) ? null :
+//                                                     textField.getText());
         }
       }
     }//public Object getCellEditorValue()
