@@ -1,7 +1,7 @@
 /*
- *  DDL script for Oracle 8.x
+ *  DDL script for Oracle 8.x and Oracle 9.x
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2002, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -9,13 +9,38 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Marin Dimitrov, 19/Sep/2001
- * 
- *  auto generated: Thu Oct 25 17:02:59 2001
+ *
+ *  auto generated: Wed Jan 23 16:12:35 2002
  *
  *  $Id$
  *
  */
 
+
+
+DROP TABLE T_PARAMETER CASCADE CONSTRAINTS;
+
+CREATE TABLE T_PARAMETER (
+       PAR_ID               NUMBER NOT NULL,
+       PAR_KEY              VARCHAR2(16) NOT NULL,
+       PAR_VALUE_STRING     VARCHAR2(128) NULL,
+       PAR_VALUE_DATE       DATE NULL,
+       PAR_VALUE_NUMBER     NUMBER NULL,
+       PRIMARY KEY (PAR_ID)
+)
+     	 CACHE
+;
+
+
+DROP TABLE T_GROUP CASCADE CONSTRAINTS;
+
+CREATE TABLE T_GROUP (
+       GRP_ID               NUMBER NOT NULL,
+       GRP_NAME             VARCHAR2(128) NULL,
+       PRIMARY KEY (GRP_ID)
+)
+     	 CACHE
+;
 
 
 DROP TABLE T_USER CASCADE CONSTRAINTS;
@@ -25,69 +50,9 @@ CREATE TABLE T_USER (
        USR_LOGIN            VARCHAR2(16) NOT NULL,
        USR_PASS             VARCHAR2(16) NOT NULL,
        PRIMARY KEY (USR_ID)
-);
-
-
-DROP TABLE T_GROUP CASCADE CONSTRAINTS;
-
-CREATE TABLE T_GROUP (
-       GRP_ID               NUMBER NOT NULL,
-       GRP_NAME             VARCHAR2(128) NULL,
-       PRIMARY KEY (GRP_ID)
-);
-
-
-DROP TABLE T_USER_GROUP CASCADE CONSTRAINTS;
-
-CREATE TABLE T_USER_GROUP (
-       UGRP_ID              NUMBER NOT NULL,
-       UGRP_USER_ID         NUMBER NULL,
-       UGRP_GROUP_ID        NUMBER NULL,
-       PRIMARY KEY (UGRP_ID), 
-       FOREIGN KEY (UGRP_USER_ID)
-                             REFERENCES T_USER, 
-       FOREIGN KEY (UGRP_GROUP_ID)
-                             REFERENCES T_GROUP
-);
-
-
-DROP TABLE T_DOC_ENCODING CASCADE CONSTRAINTS;
-
-CREATE TABLE T_DOC_ENCODING (
-       ENC_ID               NUMBER NOT NULL,
-       ENC_NAME             VARCHAR2(16) NOT NULL,
-       PRIMARY KEY (ENC_ID)
-);
-
-
-DROP TABLE T_DOC_CONTENT CASCADE CONSTRAINTS;
-
-CREATE TABLE T_DOC_CONTENT (
-       DC_ID                NUMBER NOT NULL,
-       DC_ENCODING_ID       NUMBER NULL,
-       DC_CHARACTER_CONTENT CLOB NULL,
-       DC_BINARY_CONTENT    BLOB NULL,
-       DC_CONTENT_TYPE      NUMBER NOT NULL,
-       PRIMARY KEY (DC_ID), 
-       FOREIGN KEY (DC_ENCODING_ID)
-                             REFERENCES T_DOC_ENCODING
-);
-
-
-DROP TABLE T_FEATURE CASCADE CONSTRAINTS;
-
-CREATE TABLE T_FEATURE (
-       FT_ID                NUMBER NOT NULL,
-       FT_ENTITY_ID         NUMBER NOT NULL,
-       FT_ENTITY_TYPE       NUMBER NOT NULL,
-       FT_KEY               VARCHAR2(128) NOT NULL,
-       FT_NUMBER_VALUE      NUMBER NULL,
-       FT_BINARY_VALUE      BLOB NULL,
-       FT_CHARACTER_VALUE   VARCHAR2(4000) NULL,
-       FT_LONG_CHARACTER_VALUE CLOB NULL,
-       FT_VALUE_TYPE        NUMBER NOT NULL,
-       PRIMARY KEY (FT_ID)
-);
+)
+     	 CACHE
+;
 
 
 DROP TABLE T_LR_TYPE CASCADE CONSTRAINTS;
@@ -96,7 +61,12 @@ CREATE TABLE T_LR_TYPE (
        LRTP_ID              NUMBER NOT NULL,
        LRTP_TYPE            VARCHAR2(128) NOT NULL,
        PRIMARY KEY (LRTP_ID)
-);
+)
+     	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 CACHE
+;
 
 
 DROP TABLE T_LANG_RESOURCE CASCADE CONSTRAINTS;
@@ -110,16 +80,48 @@ CREATE TABLE T_LANG_RESOURCE (
        LR_NAME              VARCHAR2(128) NOT NULL,
        LR_ACCESS_MODE       NUMBER NOT NULL,
        LR_PARENT_ID         NUMBER NULL,
-       PRIMARY KEY (LR_ID), 
+       PRIMARY KEY (LR_ID),
        FOREIGN KEY (LR_OWNER_USER_ID)
-                             REFERENCES T_USER, 
+                             REFERENCES T_USER,
        FOREIGN KEY (LR_LOCKING_USER_ID)
-                             REFERENCES T_USER, 
+                             REFERENCES T_USER,
        FOREIGN KEY (LR_OWNER_GROUP_ID)
-                             REFERENCES T_GROUP, 
+                             REFERENCES T_GROUP,
        FOREIGN KEY (LR_PARENT_ID)
                              REFERENCES T_LANG_RESOURCE
-);
+)
+     	 CACHE
+;
+
+
+DROP TABLE T_DOC_ENCODING CASCADE CONSTRAINTS;
+
+CREATE TABLE T_DOC_ENCODING (
+       ENC_ID               NUMBER NOT NULL,
+       ENC_NAME             VARCHAR2(16) NOT NULL,
+       PRIMARY KEY (ENC_ID)
+)
+     	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 CACHE
+;
+
+
+DROP TABLE T_DOC_CONTENT CASCADE CONSTRAINTS;
+
+CREATE TABLE T_DOC_CONTENT (
+       DC_ID                NUMBER NOT NULL,
+       DC_ENCODING_ID       NUMBER NULL,
+       DC_CHARACTER_CONTENT CLOB NULL,
+       DC_BINARY_CONTENT    BLOB NULL,
+       DC_CONTENT_TYPE      NUMBER NOT NULL,
+       PRIMARY KEY (DC_ID),
+       FOREIGN KEY (DC_ENCODING_ID)
+                             REFERENCES T_DOC_ENCODING
+)
+     	 CACHE
+;
 
 
 DROP TABLE T_DOCUMENT CASCADE CONSTRAINTS;
@@ -132,12 +134,44 @@ CREATE TABLE T_DOCUMENT (
        DOC_START            NUMBER NULL,
        DOC_END              NUMBER NULL,
        DOC_IS_MARKUP_AWARE  NUMBER(1) NOT NULL,
-       PRIMARY KEY (DOC_ID), 
+       PRIMARY KEY (DOC_ID),
        FOREIGN KEY (DOC_CONTENT_ID)
-                             REFERENCES T_DOC_CONTENT, 
+                             REFERENCES T_DOC_CONTENT,
        FOREIGN KEY (DOC_LR_ID)
                              REFERENCES T_LANG_RESOURCE
-);
+)
+     	 CACHE
+;
+
+
+DROP TABLE T_CORPUS CASCADE CONSTRAINTS;
+
+CREATE TABLE T_CORPUS (
+       CORP_ID              NUMBER NOT NULL,
+       CORP_LR_ID           NUMBER NOT NULL,
+       PRIMARY KEY (CORP_ID),
+       FOREIGN KEY (CORP_LR_ID)
+                             REFERENCES T_LANG_RESOURCE
+)
+     	 CACHE
+;
+
+
+DROP TABLE T_CORPUS_DOCUMENT CASCADE CONSTRAINTS;
+
+CREATE TABLE T_CORPUS_DOCUMENT (
+       CD_ID                NUMBER NOT NULL,
+       CD_CORP_ID           NUMBER NOT NULL,
+       CD_DOC_ID            NUMBER NOT NULL,
+       PRIMARY KEY (CD_ID),
+       FOREIGN KEY (CD_CORP_ID)
+                             REFERENCES T_CORPUS,
+       FOREIGN KEY (CD_DOC_ID)
+                             REFERENCES T_DOCUMENT
+)
+    	 TABLESPACE GATE01TS
+ 	 CACHE
+;
 
 
 DROP TABLE T_NODE CASCADE CONSTRAINTS;
@@ -147,10 +181,12 @@ CREATE TABLE T_NODE (
        NODE_DOC_ID          NUMBER NOT NULL,
        NODE_LOCAL_ID        NUMBER NOT NULL,
        NODE_OFFSET          NUMBER NOT NULL,
-       PRIMARY KEY (NODE_GLOBAL_ID), 
+       PRIMARY KEY (NODE_GLOBAL_ID),
        FOREIGN KEY (NODE_DOC_ID)
                              REFERENCES T_DOCUMENT
-);
+)
+     	 CACHE
+;
 
 
 DROP TABLE T_ANNOTATION_TYPE CASCADE CONSTRAINTS;
@@ -159,7 +195,12 @@ CREATE TABLE T_ANNOTATION_TYPE (
        AT_ID                NUMBER NOT NULL,
        AT_NAME              VARCHAR2(128) NULL,
        PRIMARY KEY (AT_ID)
-);
+)
+     	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 CACHE
+;
 
 
 DROP TABLE T_ANNOTATION CASCADE CONSTRAINTS;
@@ -169,18 +210,20 @@ CREATE TABLE T_ANNOTATION (
        ANN_DOC_ID           NUMBER NULL,
        ANN_LOCAL_ID         NUMBER NOT NULL,
        ANN_AT_ID            NUMBER NOT NULL,
-       ANN_ENDNODE_ID       NUMBER NOT NULL,
        ANN_STARTNODE_ID     NUMBER NOT NULL,
-       PRIMARY KEY (ANN_GLOBAL_ID), 
+       ANN_ENDNODE_ID       NUMBER NOT NULL,
+       PRIMARY KEY (ANN_GLOBAL_ID),
        FOREIGN KEY (ANN_DOC_ID)
-                             REFERENCES T_DOCUMENT, 
+                             REFERENCES T_DOCUMENT,
        FOREIGN KEY (ANN_STARTNODE_ID)
-                             REFERENCES T_NODE, 
+                             REFERENCES T_NODE,
        FOREIGN KEY (ANN_ENDNODE_ID)
-                             REFERENCES T_NODE, 
+                             REFERENCES T_NODE,
        FOREIGN KEY (ANN_AT_ID)
                              REFERENCES T_ANNOTATION_TYPE
-);
+)
+     	 CACHE
+;
 
 
 DROP TABLE T_ANNOT_SET CASCADE CONSTRAINTS;
@@ -189,10 +232,12 @@ CREATE TABLE T_ANNOT_SET (
        AS_ID                NUMBER NOT NULL,
        AS_DOC_ID            NUMBER NOT NULL,
        AS_NAME              VARCHAR2(128) NULL,
-       PRIMARY KEY (AS_ID), 
+       PRIMARY KEY (AS_ID),
        FOREIGN KEY (AS_DOC_ID)
                              REFERENCES T_DOCUMENT
-);
+)
+     	 CACHE
+;
 
 
 DROP TABLE T_AS_ANNOTATION CASCADE CONSTRAINTS;
@@ -201,49 +246,67 @@ CREATE TABLE T_AS_ANNOTATION (
        ASANN_ID             NUMBER NOT NULL,
        ASANN_ANN_ID         NUMBER NOT NULL,
        ASANN_AS_ID          NUMBER NOT NULL,
-       PRIMARY KEY (ASANN_ID), 
+       PRIMARY KEY (ASANN_ID),
        FOREIGN KEY (ASANN_ANN_ID)
-                             REFERENCES T_ANNOTATION, 
+                             REFERENCES T_ANNOTATION,
        FOREIGN KEY (ASANN_AS_ID)
                              REFERENCES T_ANNOT_SET
-);
+)
+     	 CACHE
+;
 
 
-DROP TABLE T_CORPUS CASCADE CONSTRAINTS;
+DROP TABLE T_FEATURE_KEY CASCADE CONSTRAINTS;
 
-CREATE TABLE T_CORPUS (
-       CORP_ID              NUMBER NOT NULL,
-       CORP_LR_ID           NUMBER NOT NULL,
-       PRIMARY KEY (CORP_ID), 
-       FOREIGN KEY (CORP_LR_ID)
-                             REFERENCES T_LANG_RESOURCE
-);
-
-
-DROP TABLE T_CORPUS_DOCUMENT CASCADE CONSTRAINTS;
-
-CREATE TABLE T_CORPUS_DOCUMENT (
-       CD_ID                NUMBER NOT NULL,
-       CD_CORP_ID           NUMBER NOT NULL,
-       CD_DOC_ID            NUMBER NOT NULL,
-       PRIMARY KEY (CD_ID), 
-       FOREIGN KEY (CD_CORP_ID)
-                             REFERENCES T_CORPUS, 
-       FOREIGN KEY (CD_DOC_ID)
-                             REFERENCES T_DOCUMENT
-);
+CREATE TABLE T_FEATURE_KEY (
+       FK_ID                NUMBER NOT NULL,
+       FK_STRING            VARCHAR2(128) NOT NULL,
+       PRIMARY KEY (FK_ID)
+)
+    	 TABLESPACE GATE01TS
+ 	 STORAGE  (
+		 BUFFER_POOL KEEP
+ 	)
+	 CACHE
+;
 
 
-DROP TABLE T_PARAMETER CASCADE CONSTRAINTS;
+DROP TABLE T_FEATURE CASCADE CONSTRAINTS;
 
-CREATE TABLE T_PARAMETER (
-       PAR_ID               NUMBER NOT NULL,
-       PAR_KEY              VARCHAR2(16) NOT NULL,
-       PAR_VALUE_STRING     VARCHAR2(128) NULL,
-       PAR_VALUE_DATE       DATE NULL,
-       PAR_VALUE_NUMBER     NUMBER NULL,
-       PRIMARY KEY (PAR_ID)
-);
+CREATE TABLE T_FEATURE (
+       FT_ID                NUMBER NOT NULL,
+       FT_ENTITY_ID         NUMBER NOT NULL,
+       FT_ENTITY_TYPE       NUMBER NOT NULL,
+       FT_KEY_ID            NUMBER NOT NULL,
+       FT_NUMBER_VALUE      NUMBER NULL,
+       FT_BINARY_VALUE      BLOB NULL,
+       FT_CHARACTER_VALUE   VARCHAR2(4000) NULL,
+       FT_LONG_CHARACTER_VALUE CLOB NULL,
+       FT_VALUE_TYPE        NUMBER NOT NULL,
+       PRIMARY KEY (FT_ID),
+       FOREIGN KEY (FT_KEY_ID)
+                             REFERENCES T_FEATURE_KEY
+)
+     	 CACHE
+;
+
+
+DROP TABLE T_USER_GROUP CASCADE CONSTRAINTS;
+
+CREATE TABLE T_USER_GROUP (
+       UGRP_ID              NUMBER NOT NULL,
+       UGRP_USER_ID         NUMBER NULL,
+       UGRP_GROUP_ID        NUMBER NULL,
+       PRIMARY KEY (UGRP_ID),
+       FOREIGN KEY (UGRP_USER_ID)
+                             REFERENCES T_USER,
+       FOREIGN KEY (UGRP_GROUP_ID)
+                             REFERENCES T_GROUP
+)
+    	 TABLESPACE GATE01TS
+ 	 CACHE
+;
+
 
 
 
