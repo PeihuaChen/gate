@@ -18,6 +18,8 @@ import gate.Resource;
 /**
  * An ontology aware JAPE transducer. Adds the {@link #ontology} member to the
  * {@link Transducer} class.
+ * @deprecated Ontology related functionality is now implemented in the 
+ * standard JAPE Transducer {@link gate.creole.Transducer}.
  */
 public class OntologyAwareTransducer extends Transducer {
 
