@@ -70,7 +70,7 @@ create or replace package body persist is
      delete 
      from   t_feature
      where  ft_entity_id = p_lr_id
-            and ft_entity_type = persist.FEATURE_OWNER_ANNOTATION;
+            and ft_entity_type = persist.FEATURE_OWNER_DOCUMENT;
 
      -- 2. delete annotations
 
