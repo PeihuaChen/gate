@@ -123,6 +123,7 @@ public class AnnotationListView extends AbstractDocumentView
     table.getSelectionModel().
       addListSelectionListener(new ListSelectionListener(){
         public void valueChanged(ListSelectionEvent e){
+          if(!isActive())return;
           statusLabel.setText(
                   Integer.toString(tableModel.getRowCount()) +
                   " Annotations (" +
@@ -130,14 +131,7 @@ public class AnnotationListView extends AbstractDocumentView
                   "selected)");
           //blink the selected annotations
           textView.removeAllBlinkingHighlights();
-          int[] rows = table.getSelectedRows();
-          for(int i = 0; i < rows.length; i++){
-            Object tag = tagList.get(table.rowViewToModel(rows[i]));
-            AnnotationHandler aHandler = (AnnotationHandler)
-              annotationHandlerByTag.get(tag);
-            textView.addBlinkingHighlight(aHandler.ann);
-            textView.scrollAnnotationToVisible(aHandler.ann);
-          }
+          showHighlights();
         }
     });
 
@@ -225,14 +219,17 @@ public class AnnotationListView extends AbstractDocumentView
    * @see gate.gui.docview.AbstractDocumentView#registerHooks()
    */
   protected void registerHooks() {
-    //this view is a slave only view so it has no hooks to register
+    //this is called on activation
+    showHighlights();
   }
 
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#unregisterHooks()
    */
   protected void unregisterHooks() {
-    //this view is a slave only view so it has no hooks to register
+    //this is called on de-activation
+    //remove highlights
+    textView.removeAllBlinkingHighlights();
   }
 
   /* (non-Javadoc)
@@ -245,6 +242,16 @@ public class AnnotationListView extends AbstractDocumentView
     tableModel.fireTableDataChanged();
   }
 
+  protected void showHighlights(){
+    int[] rows = table.getSelectedRows();
+    for(int i = 0; i < rows.length; i++){
+      Object tag = tagList.get(table.rowViewToModel(rows[i]));
+      AnnotationHandler aHandler = (AnnotationHandler)
+        annotationHandlerByTag.get(tag);
+      textView.addBlinkingHighlight(aHandler.ann);
+      textView.scrollAnnotationToVisible(aHandler.ann);
+    }    
+  }
 
   public void addAnnotation(Object tag, Annotation ann, AnnotationSet set){
     AnnotationHandler aHandler = new AnnotationHandler(set, ann);
@@ -333,6 +340,8 @@ public class AnnotationListView extends AbstractDocumentView
 
   public void annotationUpdated(AnnotationEvent e){
     //update all occurrences of this annotation
+    //save selection
+    int[] selection = table.getSelectedRows();
     Annotation ann = (Annotation)e.getSource();
     for(int i = 0; i < tagList.size(); i++){
       Object tag = tagList.get(i);
@@ -340,8 +349,30 @@ public class AnnotationListView extends AbstractDocumentView
         if(tableModel != null)tableModel.fireTableRowsUpdated(i, i);
       }
     }
+    //restore selection
+    table.clearSelection();
+    if(selection != null){
+      for(int i = 0; i < selection.length; i++){
+        table.getSelectionModel().addSelectionInterval(selection[i], 
+                selection[i]);
+      }
+    }
   }
 
+  /**
+   * Selects the annotation for the given tag.
+   * @param tag the tag of the annotation to be selected.
+   */
+  public void selectAnnotationForTag(Object tag){
+    int modelPosition = tagList.indexOf(tag);
+    if(modelPosition != -1){
+      int tablePosition = table.rowModelToView(modelPosition);
+      table.getSelectionModel().setSelectionInterval(tablePosition, 
+              tablePosition);
+      table.scrollRectToVisible(table.getCellRect(tablePosition, 0, false));
+    }
+  }
+  
   class AnnotationTableModel extends AbstractTableModel{
     public int getRowCount(){
       return tagList.size();
