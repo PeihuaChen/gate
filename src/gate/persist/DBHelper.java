@@ -26,6 +26,28 @@ public class DBHelper {
   private static final String jdbcPostgresDriverName = "postgresql.Driver";
   private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
 
+
+  //ACHTUNG!
+  //DO NOT EDIT THESE CONSTANTS WITHOUT
+  //SYNCHRONIZING WITH ERROR.SPC PL/SQL PACKAGE
+  //note that while Oracle returns negative error numbers
+  //the SQLException::getErrorCode() returns positive ones
+  //
+  public static final int X_ORACLE_START = 20100;
+  public static final int X_ORACLE_DUPLICATE_GROUP_NAME =      X_ORACLE_START + 1 ;
+  public static final int X_ORACLE_DUPLICATE_USER_NAME =       X_ORACLE_START + 2 ;
+  public static final int X_ORACLE_INVALID_USER_NAME =         X_ORACLE_START + 3 ;
+  public static final int X_ORACLE_INVALID_USER_PASS =         X_ORACLE_START + 4 ;
+  public static final int X_ORACLE_INVALID_USER_GROUP =        X_ORACLE_START + 5 ;
+  public static final int X_ORACLE_INVALID_LR =                X_ORACLE_START + 6 ;
+  public static final int X_ORACLE_INVALID_ACCESS_MODE =       X_ORACLE_START + 7 ;
+  public static final int X_ORACLE_INVALID_ARGUMENT =          X_ORACLE_START + 8 ;
+  public static final int X_ORACLE_NOT_IMPLEMENTED =           X_ORACLE_START + 9 ;
+  public static final int X_ORACLE_GROUP_OWNS_RESOURCES =      X_ORACLE_START + 10 ;
+  public static final int X_ORACLE_USER_OWNS_RESOURCES =       X_ORACLE_START + 11 ;
+  public static final int X_ORACLE_INCOMPLETE_DATA  =          X_ORACLE_START + 12 ;
+
+
   private static final boolean DEBUG = true;
 
   private static boolean  driversLoaded;
