@@ -487,12 +487,12 @@
       <COMMENT>Document cleaner</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationTypes" RUNTIME="true"
-      		OPTIONAL="true"
-      		ITEM_CLASS_NAME="java.lang.String">
+          OPTIONAL="true"
+          ITEM_CLASS_NAME="java.lang.String">
       java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="setsToKeep" RUNTIME="true"
-      		OPTIONAL="true"
-      		ITEM_CLASS_NAME="java.lang.String">
+          OPTIONAL="true"
+          ITEM_CLASS_NAME="java.lang.String">
         java.util.ArrayList</PARAMETER>
     </RESOURCE>
 
@@ -546,6 +546,27 @@
       <PARAMETER NAME="fieldNames" RUNTIME="true"  DEFAULT="*"   COMMENT="The fields returned from result documents">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="searcherClassName" RUNTIME="true"  DEFAULT="gate.creole.ir.lucene.LuceneSearch"  COMMENT="The search implementation">java.lang.String</PARAMETER>
       <ICON>binoculars.gif</ICON>
+    </RESOURCE>
+
+    <!-- creole.xml for MLTrainer -->
+    <RESOURCE>
+      <NAME>Machine Learning PR</NAME>
+      <COMMENT>Trains a machine learning algorithm from a corpus</COMMENT>
+      <CLASS>gate.creole.ml.MachineLearningPR</CLASS>
+      <PARAMETER NAME="document"
+        COMMENT="The document to be processed"
+        RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name of the annotation set used for input"
+        RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="configFileURL"
+        COMMENT="The URL for the configuration file"
+        SUFFIXES="xml">java.net.URL</PARAMETER>
+      <PARAMETER NAME="training"
+        COMMENT="Set to true for training mode"
+        RUNTIME="true"
+        DEFAULT="true">java.lang.Boolean</PARAMETER>
+
     </RESOURCE>
 
   </CREOLE>
