@@ -385,6 +385,7 @@ public class NameBearerHandle implements Handle,
             selectedFile = fileChooser.getSelectedFile();
             File currentDir = fileChooser.getCurrentDirectory();
             if(selectedFile == null) return;
+            long start = System.currentTimeMillis();
             NameBearerHandle.this.statusChanged("Saving as XML to " +
              selectedFile.toString() + "...");
             try{
@@ -404,8 +405,10 @@ public class NameBearerHandle implements Handle,
             }finally{
               MainFrame.unlockGUI();
             }
+            long time = System.currentTimeMillis() - start;
             NameBearerHandle.this.statusChanged("Finished saving as xml into "+
-             " the file : "+ selectedFile.toString());
+             " the file: " + selectedFile.toString() +
+             " in " + ((double)time) / 1000 + " s");
           }// End if
         }// End run()
       };// End Runnable
