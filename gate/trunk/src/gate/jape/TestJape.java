@@ -26,7 +26,7 @@ import gate.*;
 import gate.util.*;
 import gate.annotation.*;
 import gate.creole.tokeniser.*;
-import gate.creole.gazeteer.*;
+import gate.creole.gazetteer.*;
 import gate.creole.*;
 
 
@@ -186,11 +186,11 @@ public class TestJape extends TestCase
                      "ms\n");
 
     //Do gazeteer lookup
-    gate.creole.gazeteer.DefaultGazeteer gazeteer = null;
+    gate.creole.gazetteer.DefaultGazetteer gazeteer = null;
     startGazeteerLoad = startLookup = System.currentTimeMillis();
     Out.print("Loading gazeteer lists...");
     try{
-      gazeteer =new gate.creole.gazeteer.DefaultGazeteer(
+      gazeteer =new gate.creole.gazetteer.DefaultGazetteer(
                     "creole/gazeteer/aventinus3","lists.def");
 
       startLookup = System.currentTimeMillis();
@@ -207,7 +207,7 @@ public class TestJape extends TestCase
     }catch(IOException ioe){
       Err.println("Cannot read the gazeteer lists!" +
                          "\nAre the Gate resources in place?");
-    }catch(GazeteerException ge){
+    }catch(GazetteerException ge){
       ge.printStackTrace(Err.getPrintWriter());
     }
 
