@@ -21,6 +21,7 @@ import java.net.*;
 import java.beans.*;
 import java.lang.reflect.*;
 import junit.framework.*;
+import junit.framework.Test;
 import java.sql.*;
 
 import oracle.sql.*;
@@ -209,13 +210,15 @@ public class TestPersist extends TestCase
     Document doc3 =
       (Document) sds.getLr("gate.corpora.DocumentImpl", lrPersistenceId);
 
-    //clear the parameters value from features as they will be different
-
-    assertTrue(doc3.equals(doc2));
-    assertTrue(persDoc.equals(doc2));
-
-    // delete the datastore
-    sds.delete();
+    try{
+      boolean value = TestEqual.documentsEqual(doc3, doc2);
+      assertTrue(TestEqual.message, value);
+      value = TestEqual.documentsEqual(persDoc, doc2);
+      assertTrue(TestEqual.message, value);
+    }finally{
+      // delete the datastore
+      sds.delete();
+    }
   } // testSaveRestore()
 
   /** Simple test */
@@ -259,7 +262,7 @@ public class TestPersist extends TestCase
 
     //parameters should be different
     // check that the version we read back matches the original
-    assertTrue(persDoc.equals(doc2));
+    assertTrue(TestEqual.documentsEqual(persDoc, doc2));
 
     // delete the datastore
     sds.delete();
@@ -333,9 +336,11 @@ public class TestPersist extends TestCase
     if (DEBUG)
       Out.prln("Annotations in doc: " + diskDoc.getAnnotations());
     assertTrue("doc annotations from disk not equal to memory version",
-          doc.getAnnotations().equals(diskDoc.getAnnotations()));
+          TestEqual.annotationSetsEqual(doc.getAnnotations(),
+                                        diskDoc.getAnnotations()));
+
     assertTrue("doc from disk not equal to memory version",
-          doc.equals(diskDoc));
+          TestEqual.documentsEqual(doc, diskDoc));
 
     Iterator corpusIter = diskCorp.iterator();
     while(corpusIter.hasNext()){
@@ -1014,7 +1019,7 @@ public class TestPersist extends TestCase
 
     doc2Set = doc2.getAnnotations("TEST SET");
     Assert.assertTrue(dbDocSet.size() == doc2Set.size());
-    Assert.assertEquals(doc2Set,dbDocSet);
+    Assert.assertTrue(TestEqual.annotationSetsEqual(doc2Set, dbDocSet));
     Assert.assertTrue(doc2Set.contains(dbDocAnnNew));
 
     Factory.deleteResource(doc2);
@@ -1047,10 +1052,15 @@ public class TestPersist extends TestCase
 
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
     Assert.assertTrue(doc2.getNamedAnnotationSets().containsKey(dummySetName));
+    AnnotationSet copy1 = (AnnotationSet)
+                          dbDoc.getNamedAnnotationSets().get(dummySetName);
+    AnnotationSet copy2 = (AnnotationSet)
+                          doc2.getNamedAnnotationSets().get(dummySetName);
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsValue(aset));
-    Assert.assertTrue(doc2.getNamedAnnotationSets().containsValue(aset));
+    Assert.assertTrue(TestEqual.annotationSetsEqual(copy1, copy2));
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().size() == doc2.getNamedAnnotationSets().size());
-    Assert.assertEquals(doc2.getNamedAnnotationSets(),dbDoc.getNamedAnnotationSets());
+//maps aren't equal since removing the equals impementations
+//    Assert.assertEquals(doc2.getNamedAnnotationSets(),dbDoc.getNamedAnnotationSets());
 
     Factory.deleteResource(doc2);
     doc2 = null;

@@ -1333,11 +1333,4 @@ public class DatabaseDocumentImpl extends DocumentImpl
     return result;
   }
 
-
-
-  public boolean equals(Object other) {
-
-    return this == other;
-  }
-
 }
