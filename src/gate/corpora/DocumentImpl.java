@@ -199,7 +199,7 @@ extends AbstractLanguageResource implements Document {
         }
         namedAnnotSets.clear();
     }
-    namedAnnotSets = null;
+//    namedAnnotSets = null;
   } // cleanup()
 
 
