@@ -76,11 +76,11 @@ public class TestCreole extends TestCase
 
     if (Gate.isGateHomeReachable())
       reg.addDirectory(
-        new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/creole.xml")
+        new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/")
       );
     else if (Gate.isGateAcUkReachable())
       reg.addDirectory(
-        new URL("http://www.gate.ac.uk/tests/creole.xml")
+        new URL("http://www.gate.ac.uk/tests/")
       );
     else
       throw new GateException("Derwent and www.gate.ac.uk are not reachable");
@@ -92,8 +92,9 @@ public class TestCreole extends TestCase
     ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
     assert(pr1rd != null & pr2rd != null);
 
-    //CreoleLoader loader = Gate.getCreoleLoader();
-    //ProcessingResource pr1 = (ProcessingResource) loader.load(pr1rd);
+    Class pr1class = pr1rd.getResourceClass();
+    assertNotNull(pr1class);
+    ProcessingResource pr1 = (ProcessingResource) (pr1class.newInstance());
 
     reg.clear();
   } // testLoading()
