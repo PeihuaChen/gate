@@ -60,6 +60,12 @@ implements AnnotationSet
     this.doc = (DocumentImpl) doc;
   } // construction from document
 
+  /** Construction from Document and name. */
+  public AnnotationSetImpl(Document doc, String name) {
+    this(doc);
+    this.name = name;
+  } // construction from document and name
+
   /** Construction from Collection (which must be an AnnotationSet) */
   public AnnotationSetImpl(Collection c) throws ClassCastException {
     this(((AnnotationSet) c).getDocument());
@@ -387,10 +393,52 @@ implements AnnotationSet
 
   } // addToEndOffsetIndex(a)
 
-  /** Propagate changes to the document content. */
-  void edit(Long start, Long end, DocumentContent replacement)
-  throws InvalidOffsetException {
-    throw new LazyProgrammerException();
+  /** Propagate changes to the document content. Has, unfortunately,
+    * to be public, to allow DocumentImpls to get at it. Oh for a
+    * "friend" declaration. Doesn't thow InvalidOffsetException as
+    * DocumentImpl is the only client, and that checks the offsets
+    * before calling this method.
+    */
+  public void edit(Long start, Long end, DocumentContent replacement) {
+
+    long s = start.longValue(), e = end.longValue();
+    long rlen = // length of the replacement value
+      ( (replacement == null) ? 0 : replacement.size().longValue() );
+
+    indexByStartOffset();
+    indexByEndOffset();
+
+    Iterator replacedAreaNodesIter =
+      nodesByOffset.subMap(start, end).values().iterator();
+    while(replacedAreaNodesIter.hasNext()) {
+      Node n = (Node) replacedAreaNodesIter.next();
+
+      // remove from nodes map
+      nodesByOffset.remove(n);
+
+      // remove annots that start at this node
+      AnnotationSet invalidatedAnnots =
+        (AnnotationSet) annotsByStartNode.get(n.getId());
+      if(invalidatedAnnots != null)
+        removeAll(invalidatedAnnots);
+
+      // remove annots that end at this node
+      invalidatedAnnots =
+        (AnnotationSet) annotsByEndNode.get(n.getId());
+      if(invalidatedAnnots != null)
+        removeAll(invalidatedAnnots);
+    } // loop over replaced area nodes 
+
+    // update the offsets of the other nodes
+    Iterator nodesAfterReplacementIter =
+      nodesByOffset.tailMap(end).values().iterator();
+    while(nodesAfterReplacementIter.hasNext()) {
+      NodeImpl n = (NodeImpl) nodesAfterReplacementIter.next();
+      long oldOffset = n.getOffset().longValue();
+
+      n.setOffset(new Long( oldOffset - ( (e-s) - rlen ) ));
+    } // loop over nodes after replacement area
+
   } // edit(start,end,replacement)
 
   /** Get the name of this set. */
