@@ -116,70 +116,6 @@ public class TestPersist extends TestCase
     sds.delete();
   } // testSaveRestore()
 
-/*
-  public void testSecurityTables() throws Exception {
-    AccessController ac = new AccessControllerImpl();
-    ac.open("jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB");
-
-    User myUser = ac.findUser("kalina");
-    Assert.assertNotNull(myUser);
-    Assert.assertEquals(myUser.getName(), "kalina");
-
-    List myGroups = myUser.getGroups();
-    Assert.assertNotNull(myGroups);
-    for (int i = 0; i< myGroups.size(); i++) {
-      Group myGroup = ac.findGroup((Long) myGroups.get(i));
-      if (i == 0)
-        Assert.assertEquals(myGroup.getName(), "English Language Group");
-      else if (i == 1)
-        Assert.assertEquals(myGroup.getName(), "Suahili Group");
-      else
-        Assert.fail("Found more groups for user kalina than should have been!");
-    }//for
-
-    Session mySession = ac.login("kalina", "sesame",
-                              ac.findGroup("English Language Group").getID());
-    Assert.assertNotNull(mySession);
-//    Assert.assert(ac.isValidSession(mySession));
-
-  } // testSecurityTables
-
-  public void testUserGroupManipulation() throws Exception {
-    AccessController ac = new AccessControllerImpl();
-    ac.open("jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB");
-
-    User myUser = ac.createUser("myUser", "myPassword");
-    Group myGroup = ac.createGroup("myGroup");
-    Session mySession = ac.login("myUser", "myPassword", myGroup.getID());
-
-    myGroup.addUser(myUser, mySession);
-    myGroup.setName("my new group", mySession);
-    Assert.assertEquals(myGroup.getName(), "my new group");
-
-    List myUsers = myGroup.getUsers();
-    Assert.assertNotNull(myUsers);
-    for (int i = 0; i< myUsers.size(); i++) {
-      User myUser1 = ac.findUser((Long) myUsers.get(i));
-      if (i == 0)
-        Assert.assertEquals(myUser1.getName(), "myUser");
-      else
-        Assert.fail("Found more groups for user "
-                            + myUser1 + "than should have been!");
-      Out.prln("are equals? " + myUser1.equals(myUser));
-    }//for
-
-    ac.logout(mySession);
-    myGroup.setName("my new group again", mySession);
-
-    mySession = ac.login("myUser", "myPassword",
-                              ac.findGroup("my new group").getID());
-    ac.deleteGroup(myGroup, mySession);
-
-    Out.prln(myGroup.getName());
-  } // testUserGroupManipulation
-*/
-
-
   /** Simple test */
   public void testSimple() throws Exception {
     // create a temporary directory; because File.createTempFile actually
@@ -440,14 +376,6 @@ public class TestPersist extends TestCase
       test.setUp();
       test.testSimple();
       test.tearDown();
-
-//      test.setUp();
-//      test.testSecurityTables();
-//      test.tearDown();
-
-//      test.setUp();
-//      test.testUserGroupManipulation();
-//      test.tearDown();
 
     }catch(Exception e){
       e.printStackTrace();
