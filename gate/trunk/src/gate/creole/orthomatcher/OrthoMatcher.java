@@ -160,10 +160,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
     //check if we've been run on this document before
     //and clean the doc if needed
+    docCleanup();
     Map matchesMap = (Map)document.getFeatures().get(DOC_MATCHES_FEATURE);
-    if(matchesMap != null && matchesMap.containsKey(nameAllAnnots.getName())){
-      docCleanup();
-    }
+//    if(matchesMap != null && matchesMap.containsKey(nameAllAnnots.getName())){
+//      docCleanup();
+//    }
 
     // creates the cdg list from the document
     //no need to create otherwise, coz already done in init()
@@ -182,9 +183,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     if (! matchesDocFeature.isEmpty()) {
       if(matchesMap == null){
         matchesMap = new HashMap();
-        document.getFeatures().put(DOC_MATCHES_FEATURE, matchesMap);
       }
       matchesMap.put(nameAllAnnots.getName(), matchesDocFeature);
+      //we need to put it even if it was already present in order to triger
+      //the update events
+      document.getFeatures().put(DOC_MATCHES_FEATURE, matchesMap);
 
       //cannot do clear() as this has already been put on the document
       //so I need a new one for the next run of matcher
@@ -639,7 +642,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
   protected void docCleanup() {
     Map matchesMap = (Map)document.getFeatures().get(DOC_MATCHES_FEATURE);
-    matchesMap.remove(nameAllAnnots.getName());
+    if(matchesMap != null) matchesMap.remove(nameAllAnnots.getName());
 
     //get all annotations that have a matches feature
     HashSet fNames = new HashSet();

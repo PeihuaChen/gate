@@ -118,7 +118,7 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
    *  can keep track of what's updated
    */
   public Object put(Object key, Object value) {
-    Object res = super.put( key,  value);
+    Object res = super.put(key,  value);
     //tell the world if they're listening
     fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
     return res;
