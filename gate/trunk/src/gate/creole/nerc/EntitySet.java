@@ -18,11 +18,12 @@ package gate.creole.nerc;
 import gate.*;
 
 import java.util.*;
+import java.io.Serializable;
 
 /** Representing a set of entities found in a single text file.
   * Each member a the set is an EntityDescriptor
   */
-public class EntitySet extends AbstractSet implements Set {
+public class EntitySet extends AbstractSet implements Set, Serializable {
 
   /** Constructs an entity set from a Gate annotation set*/
   public EntitySet(String fileName, Document document,

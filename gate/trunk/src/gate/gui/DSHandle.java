@@ -173,10 +173,12 @@ public class DSHandle extends DefaultResourceHandle implements DatastoreListener
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
+        pe.printStackTrace(Err.getPrintWriter());
       } catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + rie.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
+        rie.printStackTrace(Err.getPrintWriter());
       }
     }// public void actionPerformed(ActionEvent e)
     DSEntry entry;
