@@ -203,7 +203,8 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   } // createCreoleDirectoryFile
 
   /** Overide HashMap's put method to maintain a list of all the
-    * types of LR in the register.
+    * types of LR in the register, and a list of tool types. The key is
+    * the resource type, the value its data.
     */
   public Object put(Object key, Object value) {
     ResourceData rd = (ResourceData) value;
@@ -230,10 +231,14 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       vrTypes.add(rd.getClassName());
     }
 
+    // maintain tool types list
+    if(rd.isTool())
+      toolTypes.add(rd.getClassName());
+
     return super.put(key, value);
   } // put(key, value)
 
-  /** Overide HashMap's delete method to update the list of types of LR
+  /** Overide HashMap's delete method to update the lists of types
     * in the register.
     */
   public Object remove(Object key) {
@@ -244,6 +249,14 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     }
     if(LanguageResource.class.isAssignableFrom(rd.getClass()))
       lrTypes.remove(rd.getClassName());
+    else if(ProcessingResource.class.isAssignableFrom(rd.getClass()))
+      prTypes.remove(rd.getClassName());
+    else if(VisualResource.class.isAssignableFrom(rd.getClass()))
+      vrTypes.remove(rd.getClassName());
+
+    // maintain tool types list
+    if(rd.isTool())
+      toolTypes.remove(rd.getClassName());
 
     return super.remove(key);
   } // remove(Object)
@@ -255,6 +268,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     lrTypes.clear();
     prTypes.clear();
     vrTypes.clear();
+    toolTypes.clear();
     directories.clear();
     super.clear();
   } // clear()
@@ -267,6 +281,9 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 
   /** Get the list of types of VR in the register. */
   public Set getVrTypes() { return vrTypes; }
+
+  /** Get the list of types of TOOL respurces in the register. */
+  public Set getToolTypes() { return toolTypes; }
 
   /** Get a list of all instantiations of LR in the register. */
   public List getLrInstances() {
@@ -345,5 +362,8 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 
   /** A list of the types of VR in the register. */
   protected Set vrTypes = new HashSet();
+
+  /** A list of the types of TOOL in the register. */
+  protected Set toolTypes = new HashSet();
 
 } // class CreoleRegisterImpl

@@ -201,6 +201,20 @@ public class TestCreole extends TestCase
     reg.clear();
   } // testMetadata()
 
+  /** Test TOOLS and PRIVATE attributes */
+  public void testToolsAndPrivate() throws Exception {
+    ResourceData pr3rd = (ResourceData) reg.get("testpkg.PrintOutTokens");
+    assert("couldn't get PR3", pr3rd != null);
+    assert("PR3 not a tool", pr3rd.isTool());
+    if(DEBUG) Out.prln(pr3rd.getFeatures());
+
+    String docFormatName = "gate.corpora.XmlDocumentFormat";
+    ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
+    assert("Xml doc format not PRIVATE", xmlDocFormatRD.isPrivate());
+    if(DEBUG) Out.prln(xmlDocFormatRD.getFeatures());
+
+  } // testToolsAndPrivate()
+
   /** Test resource loading */
   public void testLoading() throws Exception {
 

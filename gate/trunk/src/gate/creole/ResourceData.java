@@ -212,6 +212,28 @@ public class ResourceData extends AbstractFeatureBearer {
   /** Is the resource autoloading? */
   public boolean isAutoLoading() { return autoLoading; }
 
+  /** Private flag */
+  protected boolean priv = false;
+
+  /** Set method for resource private flag */
+  public void setPrivate(boolean priv) {
+    this.priv = priv;
+  } // setPrivate
+
+  /** Is the resource private? */
+  public boolean isPrivate() { return priv; }
+
+  /** Tool flag */
+  protected boolean tool = false;
+
+  /** Set method for resource tool flag */
+  public void setTool(boolean tool) {
+    this.tool = tool;
+  } // setTool
+
+  /** Is the resource a tool? */
+  public boolean isTool() { return tool; }
+
   /** Is this a valid resource data configuration? If not, leave an
     * error message that can be returned by <TT>getValidityMessage()</TT>.
     */
