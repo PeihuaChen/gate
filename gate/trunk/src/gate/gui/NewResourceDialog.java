@@ -118,12 +118,17 @@ public class NewResourceDialog extends JDialog {
                       table.getSize().height + 1);
       }
     });
+
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
-          table.editingStopped(new ChangeEvent(
-                                table.getCellEditor(table.getEditingRow(),
-                                                    table.getEditingColumn())));
+        try{
+          if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
+            table.editingStopped(new ChangeEvent(
+                                  table.getCellEditor(table.getEditingRow(),
+                                                      table.getEditingColumn())));
+          }
+        }catch(Exception ex){
+          return;
         }
         userCanceled = false;
         String name = nameField.getText();
@@ -536,12 +541,13 @@ public class NewResourceDialog extends JDialog {
                                 calculateValueFromString(stringValue);
       }catch(Exception e){
         values[selectedIndex] = oldValue;
-        JOptionPane.showMessageDialog(getContentPane(),
+        JOptionPane.showMessageDialog(getOwner(),
                                       "Invalid value!\n" +
                                       "Is it the right type?",
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
     }
+
     public Object getValue(){
       return values[selectedIndex];
     }

@@ -220,8 +220,9 @@ public class XJTable extends JTable {
           }
           int portWidth = scrollPane.getSize().width -
                           scrollPane.getInsets().left -
-                          scrollPane.getInsets().right -
-                          scrollPane.getVerticalScrollBar().getWidth();
+                          scrollPane.getInsets().right;
+          if(scrollPane.getVerticalScrollBar().isVisible())
+            portWidth -= scrollPane.getVerticalScrollBar().getWidth();
           if(totalWidth < portWidth){
             int width = tCol.getMinWidth() + portWidth - totalWidth;
             tCol.setPreferredWidth(width);

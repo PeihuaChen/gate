@@ -39,6 +39,10 @@ public class DSHandle extends DefaultResourceHandle {
   protected void initLocalData(){
   }
 
+  public DataStore getDataStore(){
+    return datastore;
+  }
+
   protected void initGuiComponents(){
     treeRoot = new DefaultMutableTreeNode(datastore.getFeatures().get("gate.NAME"),
                                           true);
