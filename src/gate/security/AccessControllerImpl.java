@@ -33,11 +33,14 @@ public class AccessControllerImpl implements AccessController {
   public static final int LOGIN_FAILED = 2;
 
   /* these should be the same as in the security PL/SQL package definition */
-  private static final int DB_DUPLICATE_GROUP_NAME = -20101;
-  private static final int DB_DUPLICATE_USER_NAME = -20102;
-  private static final int DB_INVALID_USER_NAME = -20103;
-  private static final int DB_INVALID_USER_PASS = -20104;
 
+  // user defined error numbers in Oracle are in -21000 ... -21999
+  private static final int DB_ERROR_START = -20100;
+  private static final int DB_DUPLICATE_GROUP_NAME = DB_ERROR_START -1;
+  private static final int DB_DUPLICATE_USER_NAME = DB_ERROR_START -2;
+  private static final int DB_INVALID_USER_NAME = DB_ERROR_START -3;
+  private static final int DB_INVALID_USER_PASS = DB_ERROR_START -4;
+  private static final int DB_INVALID_USER_GROUP = DB_ERROR_START -5;
 
 
   private HashMap     sessions;
@@ -385,6 +388,8 @@ public class AccessControllerImpl implements AccessController {
           throw new SecurityException("Login failed: incorrect user");
         case DB_INVALID_USER_PASS :
           throw new SecurityException("Login failed: incorrect password");
+        case DB_INVALID_USER_GROUP :
+          throw new SecurityException("Login failed: incorrect group");
         default:
           throw new PersistenceException("can't login user, DB error is: ["+
                                           sqle.getMessage()+"]");
