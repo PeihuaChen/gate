@@ -816,7 +816,7 @@ public class OracleDataStore extends JDBCDataStore {
 
     try {
       stmt = this.jdbcConn.prepareCall(
-          "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
+              "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
       //do we have doc encoding?
@@ -956,53 +956,48 @@ public class OracleDataStore extends JDBCDataStore {
 
     //DB stuff
     CallableStatement stmt = null;
-      try {
-        stmt = this.jdbcConn.prepareCall(
-            "{ call "+Gate.DB_OWNER+".persist.create_annotation_set(?,?,?) }");
-        stmt.setLong(1,lrID.longValue());
+    try {
+      stmt = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".persist.create_annotation_set(?,?,?) }");
+      stmt.setLong(1,lrID.longValue());
 
-        if (null == asetName) {
-          stmt.setNull(2,java.sql.Types.VARCHAR);
-        }
-        else {
-          stmt.setString(2,asetName);
-        }
-        stmt.registerOutParameter(3,java.sql.Types.BIGINT);
-        stmt.execute();
+      if (null == asetName) {
+        stmt.setNull(2,java.sql.Types.VARCHAR);
+      }
+      else {
+        stmt.setString(2,asetName);
+      }
+      stmt.registerOutParameter(3,java.sql.Types.BIGINT);
+      stmt.execute();
 
-        asetID = new Long(stmt.getLong(3));
-      }
-      catch(SQLException sqle) {
-        throw new PersistenceException("can't create a-set [step 1] in DB: ["+ sqle.getMessage()+"]");
-      }
-      finally {
-        DBHelper.cleanup(stmt);
-      }
+      asetID = new Long(stmt.getLong(3));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create a-set [step 1] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
 
 
     //2. insert annotations/nodes for DEFAULT a-set
     //for now use a stupid cycle
     //TODO: pass all the data with one DB call (?)
-    Iterator itAnnotations = aset.iterator();
-    while (itAnnotations.hasNext()) {
-      Annotation ann = (Annotation)itAnnotations.next();
-      Node start = (Node)ann.getStartNode();
-      Node end = (Node)ann.getEndNode();
-      String type = ann.getType();
-/*System.out.println("creating annotation, lrid=["+lrID+"],"+
-                    "ann_local_id=["+ann.getId()+"]," +
-                    "aset_id=["+asetID+"]," +
-                    "start_id=["+start.getId()+"]," +
-                    "start_off=["+start.getOffset()+"]," +
-                    "end_id=["+end.getId()+"]," +
-                    "end_off=["+end.getOffset()+"]," +
-                    "type=["+type+"]...");
-*/
-      //DB stuff
-      Long annGlobalID = null;
-      try {
-        stmt = this.jdbcConn.prepareCall(
-            "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?,?,?,?) }");
+
+    try {
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?,?,?,?) }");
+
+      Iterator itAnnotations = aset.iterator();
+
+      while (itAnnotations.hasNext()) {
+        Annotation ann = (Annotation)itAnnotations.next();
+        Node start = (Node)ann.getStartNode();
+        Node end = (Node)ann.getEndNode();
+        String type = ann.getType();
+
+        //DB stuff
+        Long annGlobalID = null;
         stmt.setLong(1,lrID.longValue());
         stmt.setLong(2,ann.getId().longValue());
         stmt.setLong(3,asetID.longValue());
@@ -1016,28 +1011,29 @@ public class OracleDataStore extends JDBCDataStore {
         stmt.execute();
 
         annGlobalID = new Long(stmt.getLong(9));
-      }
-      catch(SQLException sqle) {
-        switch(sqle.getErrorCode()) {
-          case DBHelper.X_ORACLE_INVALID_ANNOTATION_TYPE:
-            throw new PersistenceException(
-                "can't create annotation in DB, [invalid annotation type]");
-          default:
-            throw new PersistenceException(
+
+        //2.1. set annotation features
+        FeatureMap features = ann.getFeatures();
+        Assert.assertNotNull(features);
+        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+      } //while
+    }//try
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_INVALID_ANNOTATION_TYPE:
+          throw new PersistenceException(
+                              "can't create annotation in DB, [invalid annotation type]");
+        default:
+          throw new PersistenceException(
                 "can't create annotation in DB: ["+ sqle.getMessage()+"]");
-      }
-
-      }
-      finally {
-        DBHelper.cleanup(stmt);
-      }
-
-      //2.1. set annotation features
-      FeatureMap features = ann.getFeatures();
-      Assert.assertNotNull(features);
-      createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+      }//switch
+    }//catch
+    finally {
+      DBHelper.cleanup(stmt);
     }
-  }
+  }//func
 
 
 
@@ -1052,20 +1048,19 @@ public class OracleDataStore extends JDBCDataStore {
     Long corpusID = null;
     //DB stuff
     CallableStatement stmt = null;
-      try {
-        stmt = this.jdbcConn.prepareCall(
-            "{ call "+Gate.DB_OWNER+".persist.create_corpus(?,?) }");
-        stmt.setLong(1,lrID.longValue());
-        stmt.registerOutParameter(2,java.sql.Types.BIGINT);
-        stmt.execute();
-        corpusID = new Long(stmt.getLong(2));
-      }
-      catch(SQLException sqle) {
-        throw new PersistenceException("can't create corpus [step 2] in DB: ["+ sqle.getMessage()+"]");
-      }
-      finally {
-        DBHelper.cleanup(stmt);
-      }
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.create_corpus(?,?) }");
+      stmt.setLong(1,lrID.longValue());
+      stmt.registerOutParameter(2,java.sql.Types.BIGINT);
+      stmt.execute();
+      corpusID = new Long(stmt.getLong(2));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create corpus [step 2] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
 
     //3. for each document in the corpus call createDocument()
     Iterator itDocuments = corp.iterator();
@@ -1280,7 +1275,6 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(stmt);
     }
-
   }
 
 
@@ -1308,7 +1302,9 @@ public class OracleDataStore extends JDBCDataStore {
     catch(SQLException sqle) {
       throw new PersistenceException("can't get a timestamp from DB: ["+ sqle.getMessage()+"]");
     }
-
+    finally {
+      DBHelper.cleanup(stmt);
+    }
   }
 
 
@@ -1942,6 +1938,7 @@ public class OracleDataStore extends JDBCDataStore {
       //4.8 features
       FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_CORPUS);
 
+      //4.9 cleanup
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
 
@@ -1976,8 +1973,7 @@ public class OracleDataStore extends JDBCDataStore {
         FeatureMap params = Factory.newFeatureMap();
         params.put(DataStore.DATASTORE_FEATURE_NAME, this);
         params.put(DataStore.LR_ID_FEATURE_NAME, currLRID);
-        Document dbDoc = (Document)
-                    Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+        Document dbDoc = (Document)Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
 
         dbDocs.add(dbDoc);
@@ -2608,6 +2604,7 @@ public class OracleDataStore extends JDBCDataStore {
                                       sqle.getMessage()+"]");
     }
     finally {
+      DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
     }
   }
@@ -3348,32 +3345,38 @@ public class OracleDataStore extends JDBCDataStore {
    *  of a particular type
    */
   public List findLrs(List constraints, String lrType) throws PersistenceException {
-      Vector lrs = new Vector();
-      PreparedStatement stmt = null;
-      ResultSet rs = null;
 
-      try {
-        String sql = getSQLQuery(constraints,lrType);
-        stmt = this.jdbcConn.prepareStatement(sql);
-        stmt.execute();
-        rs = stmt.getResultSet();
+    Vector lrs = new Vector();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-        while (rs.next()) {
-          long lr_ID = rs.getLong(1);
-          LanguageResource lr = getLr(lrType,new Long(lr_ID));
-          lrs.addElement(lr);
-        }
-        return lrs;
-      }
-      catch(SQLException sqle) {
-        throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
-      }
-      catch (SecurityException e){
-        e.printStackTrace();
-      }
+    try {
+      String sql = getSQLQuery(constraints,lrType);
+      stmt = this.jdbcConn.prepareStatement(sql);
+      stmt.execute();
+      rs = stmt.getResultSet();
 
+      while (rs.next()) {
+        long lr_ID = rs.getLong(1);
+        LanguageResource lr = getLr(lrType,new Long(lr_ID));
+        lrs.addElement(lr);
+      }
       return lrs;
     }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
+    }
+    catch (SecurityException e){
+      e.printStackTrace();
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
+
+    return lrs;
+  }
+
 
   private String getSQLQuery(List filter, String lrType){
     String query="";
