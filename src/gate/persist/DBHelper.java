@@ -85,7 +85,8 @@ public class DBHelper {
   /** used to store annotation's features */
   protected static final int FEATURE_OWNER_ANNOTATION  = 3;
 
-
+  /** feature value is int  */
+  public static final int VALUE_TYPE_NULL              = 100;
   /** feature value is int  */
   public static final int VALUE_TYPE_INTEGER           = 101;
   /** feature value is long */

@@ -40,6 +40,7 @@ public class TestPersist extends TestCase
 
 
 
+
   /** Debug flag */
   private static final boolean DEBUG = false;
   private static Long uc01_lrID = null;
@@ -463,6 +464,7 @@ public class TestPersist extends TestCase
 
     doc.getFeatures().put("hi there", new Integer(23232));
     doc.getFeatures().put("LONG STRING", this.VERY_LONG_STRING);
+    doc.getFeatures().put("NULL feature",null);
     //create a complex feature - array of strings
     Vector complexFeature = new Vector();
     complexFeature.add("string 1");
@@ -515,6 +517,7 @@ public class TestPersist extends TestCase
     corp.getFeatures().put("my INT feature ", new Integer("1234"));
     corp.getFeatures().put("my LONG feature ", new Long("123456789"));
     corp.getFeatures().put("my LONG STRING feature", this.VERY_LONG_STRING);
+    corp.getFeatures().put("my NULL feature", null);
     return corp;
   }
 

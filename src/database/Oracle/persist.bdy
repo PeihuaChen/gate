@@ -15,7 +15,7 @@ create or replace package body persist is
  *  $Id$
  *
  */
-
+ 
    
  
  
@@ -484,7 +484,8 @@ create or replace package body persist is
   is
   begin
      
-     return (p_type in (persist.VALUE_TYPE_INTEGER,
+     return (p_type in (persist.VALUE_TYPE_NULL,
+                       persist.VALUE_TYPE_INTEGER,
                        persist.VALUE_TYPE_LONG,
                        persist.VALUE_TYPE_BOOLEAN,
                        persist.VALUE_TYPE_STRING,
