@@ -48,14 +48,91 @@ create or replace package body persist is
   end;                                                                                                        
 
   /*******************************************************************************************/
-  procedure delete_lr(p_lr_id     IN number,
-                      p_lr_type   IN varchar2)
+  procedure delete_document(p_lr_id     IN number)
   is
-  
-  begin
-     raise error.x_not_implemented;
+     l_doc_id number;
+     l_content_id number;
+     
+  begin       
+     --0. get doc_id
+     select doc_id 
+     into   l_doc_id
+     from   t_document
+     where  doc_lr_id = p_lr_id;
+     
+     -- get content id
+     select doc_content_id
+     into   l_content_id
+     from   t_document
+     where  doc_id = l_doc_id;
+     
+     -- 1. delete features
+     delete 
+     from   t_feature
+     where  ft_entity_id = p_lr_id
+            and ft_entity_type = persist.FEATURE_OWNER_ANNOTATION;
+
+     -- 2. delete annotations
+
+     -- 2.1. delete annotations' features
+     delete 
+     from   t_feature
+     where  ft_entity_type = persist.FEATURE_OWNER_ANNOTATION
+            and ft_entity_id in (select ann_global_id
+                                 from   t_annotation
+                                 where  ann_doc_id = l_doc_id
+                                );
+
+     --2.2. annotation to aset mappings
+     delete 
+     from   t_as_annotation
+     where  asann_ann_id in (select ann_global_id
+                             from   t_annotation
+                             where  ann_doc_id = l_doc_id
+                             );                                                                    
+     --2.3 annotations
+     delete
+     from   t_annotation
+     where  ann_doc_id = l_doc_id;
+                      
+     -- 3. delete annotation sets
+     delete
+     from   t_annot_set
+     where  as_doc_id = l_doc_id;
+     
+     -- 4. delete nodes
+     delete 
+     from   t_node
+     where  node_doc_id = l_doc_id;
+          
+     -- 5. delete document
+     delete
+     from   t_document
+     where  doc_id = l_doc_id;
+     
+     -- 6. delete document content
+     delete 
+     from   t_doc_content
+     where  dc_id = l_content_id;
+     
+     -- 8. delete LR
+     delete 
+     from   t_lang_resource
+     where  lr_id = p_lr_id;     
+     
+     exception
+        when NO_DATA_FOUND then
+           raise error.x_invalid_lr;
+     
   end;                                                                                                        
 
+  /*******************************************************************************************/
+  procedure delete_corpus(p_lr_id     IN number)
+  is
+     l_doc_id number;
+  begin       
+     raise error.x_not_implemented;
+  end;                                                                                                        
 
   /*******************************************************************************************/
   procedure create_lr(p_usr_id           IN number,
