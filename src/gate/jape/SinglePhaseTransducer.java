@@ -443,6 +443,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   );
       // at this point ActiveFSMInstances should always be empty!
       activeFSMInstances.addLast(currentFSM);
+      whileloop2:
       while(!activeFSMInstances.isEmpty()){
         // while there are some "alive" FSM instances
         // take the first active FSM instance
@@ -451,6 +452,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
         if(currentFSM.getFSMPosition().isFinal()){
           // if the current FSM is in a final state
           acceptingFSMInstances.add(currentFSM.clone());
+          //if we're only looking for the shortest stop here
+          if(ruleApplicationStyle == APPELT_SHORTEST_STYLE) break whileloop2;
         }
         //all the annotations that start from the current node.
         AnnotationSet paths = annotations.get(
@@ -560,8 +563,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
       } else if(ruleApplicationStyle == APPELT_STYLE) {
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
-        // just execute the longest (last) rule or the shortest one according
-        //to the options564
+        // just execute the longest (last) rule
 
         FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.last();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
@@ -572,16 +574,15 @@ extends Transducer implements JapeConstants, java.io.Serializable
       } else if(ruleApplicationStyle == APPELT_SHORTEST_STYLE) {
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
-        // just execute the longest (last) rule or the shortest one according
-        //to the options564
+        // just execute the shortest (first) rule
 
         FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.first();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
-System.out.print(startNode.getOffset());
+//System.out.print(startNode.getOffset());
         startNode = currentAcceptor.getAGPosition();
-System.out.println("->" + startNode.getOffset());
+//System.out.println("->" + startNode.getOffset());
       } else throw new RuntimeException("Unknown rule application style!");
       //release all the accepting instances as they have done their job
       /*
@@ -598,7 +599,8 @@ System.out.println("->" + startNode.getOffset());
         oldStartNodeOff = startNodeOff;
       }
 
-
+      //we start all over again so we need to clear to old unused instances
+      activeFSMInstances.clear();
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();
     fireProcessFinished();
