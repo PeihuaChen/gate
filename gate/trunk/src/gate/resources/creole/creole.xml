@@ -417,6 +417,8 @@
       <PARAMETER NAME="annotationTypes"
   DEFAULT="Organization;Person;Location;Date" RUNTIME="true"
   OPTIONAL="true">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="processUnknown" DEFAULT="true"
+  OPTIONAL="true">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="organizationType" DEFAULT="Organization"
   OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="personType" DEFAULT="Person"
