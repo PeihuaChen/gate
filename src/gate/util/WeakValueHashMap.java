@@ -140,7 +140,7 @@ public class WeakValueHashMap extends AbstractMap{
     }
 
     Set supportEntrySet;
-  }
+  }//protected class EntrySet extends AbstractSet {
 
 
   /**
@@ -178,85 +178,6 @@ public class WeakValueHashMap extends AbstractMap{
     WeakValue wv = new WeakValue(key, value, refQueue);
     WeakValue oldWv = (WeakValue)supportMap.put(key, wv);
     return oldWv == null ? null : oldWv.get();
-  }
-
-
-  /**
-   * Returns <tt>true</tt> if this map maps one or more keys to this value.
-   * More formally, returns <tt>true</tt> if and only if this map contains
-   * at least one mapping to a value <tt>v</tt> such that <tt>(value==null ?
-   * v==null : value.equals(v))</tt>.  This operation will require
-   * time linear in the map size.<p>
-   *
-   * @param value value whose presence in this map is to be tested.
-   *
-   * @return <tt>true</tt> if this map maps one or more keys to this value.
-   */
-  public boolean containsValue(Object value) {
-    processQueue();
-    Iterator i = entrySet().iterator();
-    WeakValue wValue;
-    if (value==null) {
-      while (i.hasNext()) {
-        Entry e = (Entry) i.next();
-        wValue = (WeakValue)e.getValue();
-        if(wValue.get() == null) return true;
-      }
-    } else {
-      while (i.hasNext()) {
-        Entry e = (Entry) i.next();
-        wValue = (WeakValue)e.getValue();
-        if(value.equals(wValue.get())) return true;
-      }
-    }
-    return false;
-  }
-
-
-
-  /**
-   * Compares the specified object with this map for equality.  Returns
-   * <tt>true</tt> if the given object is also a map and the two maps
-   * represent the same mappings.  More formally, two maps <tt>t1</tt> and
-   * <tt>t2</tt> represent the same mappings if
-   * <tt>t1.keySet().equals(t2.keySet())</tt> and for every key <tt>k</tt>
-   * in <tt>t1.keySet()</tt>, <tt> (t1.get(k)==null ? t2.get(k)==null :
-   * t1.get(k).equals(t2.get(k))) </tt>.  This ensures that the
-   * <tt>equals</tt> method works properly across different implementations
-   * of the map interface.<p>
-   *
-   * This implementation first checks if the specified object is this map;
-   * if so it returns <tt>true</tt>.  Then, it checks if the specified
-   * object is a map whose size is identical to the size of this set; if
-   * not, it it returns <tt>false</tt>.  If so, it iterates over this map's
-   * <tt>entrySet</tt> collection, and checks that the specified map
-   * contains each mapping that this map contains.  If the specified map
-   * fails to contain such a mapping, <tt>false</tt> is returned.  If the
-   * iteration completes, <tt>true</tt> is returned.
-   *
-   * @param o object to be compared for equality with this map.
-   * @return <tt>true</tt> if the specified object is equal to this map.
-   */
-  public boolean equals(Object o) {
-    processQueue();
-    if (o == this) return true;
-
-    if (!(o instanceof Map)) return false;
-    Map t = (Map) o;
-    if (t.size() != size()) return false;
-
-    Iterator i = entrySet().iterator();
-    while (i.hasNext()) {
-      Entry e = (Entry) i.next();
-      Object key = e.getKey();
-      Object value = ((WeakValue)e.getValue()).get();
-      if (value == null) {
-        if (!(t.get(key)==null && t.containsKey(key))) return false;
-      } else {
-        if (!value.equals(t.get(key))) return false;
-      }
-    }
-    return true;
   }
 
 
