@@ -40,6 +40,12 @@ implements ProcessingResource
   /** The features associated with this resource. */
   protected FeatureMap features;
 
+  /** A prarmeter */
+  public void setThing(String t) { }
+
+  /** Another prarmeter */
+  public void setThing2(String t) { }
+
   /** Run the thing. */
   public void run() {
     features = Factory.newFeatureMap();
