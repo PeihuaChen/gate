@@ -185,7 +185,7 @@ internaldocs:
 # convert the source to HTML using the java2html utility
 java2html:
 	rm -rf ../doc/internal/java2html/[a-zA]*
-	$(RUN) -classpath `$(CYGPATH) lib/j2h.jar` j2h \
+	$(RUN) -Dfile.encoding=UTF-8 -classpath `$(CYGPATH) lib/j2h.jar` j2h \
 	  -d `$(CYGPATH) ../doc/java2html` -js `$(CYGPATH) ../src` \
 	  -jd `$(CYGPATH) ../doc/javadoc` -m 4 -t 2 -n "GATE source"
 
