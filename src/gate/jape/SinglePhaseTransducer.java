@@ -100,19 +100,23 @@ extends Transducer implements JapeConstants, java.io.Serializable
     AnnotationSet annotations = null;
 
     //select only the annotations of types specified in the input list
+//System.out.println("Input:" + input);
     if(input.isEmpty()) annotations = annotationSet;
     else{
       Iterator typesIter = input.iterator();
       AnnotationSet ofOneType = null;
-      while(typesIter.hasNext())
+      while(typesIter.hasNext()){
         ofOneType = annotationSet.get((String)typesIter.next());
         if(ofOneType != null){
+//System.out.println("Adding " + ofOneType.getAllTypes());
           if(annotations == null) annotations = ofOneType;
           else annotations.addAll(ofOneType);
         }
+      }
     }
     if(annotations == null) annotations = new AnnotationSetImpl(doc);
 
+//System.out.println("Actual input:" + annotations.getAllTypes());
     //INITIALISATION Should we move this someplace else?
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
@@ -379,6 +383,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.16  2000/09/12 13:40:52  valyt
+// Fixed a bug in Jape (the input specification didn't work properly)
+//
 // Revision 1.15  2000/09/10 18:30:26  valyt
 // Added support for:
 // 	rules priority
