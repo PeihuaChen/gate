@@ -975,7 +975,7 @@ System.out.println("Annotation added!");
      */
 
     public Dimension getPreferredSize() {
-    	Dimension retDimension = super.getPreferredSize();
+      Dimension retDimension = super.getPreferredSize();
       Insets borderInsets = selectedBorder.getBorderInsets(this);
       if(retDimension != null){
           retDimension = new Dimension(retDimension.width + 3 +
@@ -1363,16 +1363,16 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
     }
 
     public Color getBackground() {
-    	AttributeSet attr = getAttributes();
-	    if (attr != null) {
+      AttributeSet attr = getAttributes();
+      if (attr != null) {
         javax.swing.text.Document d = super.getDocument();
-	      if (d instanceof StyledDocument){
+        if (d instanceof StyledDocument){
           StyledDocument doc = (StyledDocument) d;
           return doc.getBackground(attr);
-	      }else{
+        }else{
           return null;
-	      }
-	    }
+        }
+      }
       return null;
     }
   }
@@ -1422,7 +1422,7 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
   public class CustomStyledEditorKit extends StyledEditorKit{
     private final ViewFactory defaultFactory = new CustomStyledViewFactory();
     public ViewFactory getViewFactory() {
-    	return defaultFactory;
+      return defaultFactory;
     }
 
     /**
@@ -1437,7 +1437,6 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
 
       char[] buff = new char[65536];
       int charsRead = 0;
-
       while ((charsRead = in.read(buff, 0, buff.length)) != -1) {
             doc.insertString(pos, new String(buff, 0, charsRead), null);
             pos += charsRead;
@@ -1447,23 +1446,23 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
 
   public class CustomStyledViewFactory implements ViewFactory{
     public View create(Element elem) {
-	    String kind = elem.getName();
-	    if (kind != null) {
-	    	if (kind.equals(AbstractDocument.ContentElementName)) {
+      String kind = elem.getName();
+      if (kind != null) {
+        if (kind.equals(AbstractDocument.ContentElementName)) {
           return new CustomLabelView(elem);
-		    }else if (kind.equals(AbstractDocument.ParagraphElementName)) {
-		      return new ParagraphView(elem);
-		    }else if (kind.equals(AbstractDocument.SectionElementName)) {
-		      return new BoxView(elem, View.Y_AXIS);
-		    }else if (kind.equals(StyleConstants.ComponentElementName)) {
-		      return new ComponentView(elem);
-		    }else if (kind.equals(StyleConstants.IconElementName)) {
-		      return new IconView(elem);
-		    }
-	    }
-	    // default to text display
+        }else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+          return new ParagraphView(elem);
+        }else if (kind.equals(AbstractDocument.SectionElementName)) {
+          return new BoxView(elem, View.Y_AXIS);
+        }else if (kind.equals(StyleConstants.ComponentElementName)) {
+          return new ComponentView(elem);
+        }else if (kind.equals(StyleConstants.IconElementName)) {
+          return new IconView(elem);
+        }
+      }
+      // default to text display
       return new CustomLabelView(elem);
-	  }
+    }
   }
 
   }//class AnnotationEditor
