@@ -102,7 +102,8 @@ public class Editor extends JFrame {
    */
   private void jbInit() throws Exception {
     Locale locale = new Locale("en", "GB");
-    Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
+    //Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
+    Locale[] availableLocales = Locale.getAvailableLocales();
     JMenuItem item;
     if(availableLocales != null && availableLocales.length > 1) {
       jMenuIM = new JMenu("Input methods");
