@@ -85,6 +85,11 @@ public class DumpingPR extends AbstractLanguageAnalyser
   protected boolean includeFeatures = false;
 
   /**
+   * Whether or not to include the annotation features during export
+   */
+  protected boolean useStandOffXML = false;
+
+  /**
    * What suffix to use for the dump files. .gate by default, but can be
    * changed via the set method.
    */
@@ -140,11 +145,16 @@ public class DumpingPR extends AbstractLanguageAnalyser
       return;
     }
 
+    //if we're saving into standOffXML, then the rest of the settings do
+    //not matter because that toXML method saves everything
+    if (this.useStandOffXML) {
+      write2File();
+      return;
+    }
+
     //first transfer the annotation types from a list to a set
     //don't I just hate this!
-    Set types2Export = new HashSet();
-    for(int i=0; i<annotationTypes.size(); i++)
-      types2Export.add(annotationTypes.get(i));
+    Set types2Export = new HashSet(annotationTypes);
 
     //then get the annotations for export
     AnnotationSet annots2Export = allAnnots.get(types2Export);
@@ -211,6 +221,49 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
 
   }//write2File
+
+  protected void write2File() {
+    File outputFile;
+
+      URL sourceURL = document.getSourceUrl();
+      StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
+      //now append the special suffix if we want to use it
+      if (useSuffixForDumpFiles)
+        tempBuff.append(this.suffixForDumpFiles);
+      String outputPath = tempBuff.toString();
+      if (DEBUG)
+        Out.prln(outputPath);
+      outputFile = new File(outputPath);
+
+    try {
+      // Prepare to write into the xmlFile using the doc's encoding if there
+      OutputStreamWriter writer;
+      if (document instanceof DocumentImpl) {
+        String encoding = ((DocumentImpl) document).getEncoding();
+        if (encoding == null || "".equals(encoding))
+          writer = new OutputStreamWriter(new FileOutputStream(outputFile));
+        else
+          writer = new OutputStreamWriter(
+                            new FileOutputStream(outputFile), encoding);
+      } else
+          writer = new OutputStreamWriter(
+                            new FileOutputStream(outputFile));
+
+      // Write (test the toXml() method)
+      // This Action is added only when a gate.Document is created.
+      // So, is for sure that the resource is a gate.Document
+      writer.write(document.toXml());
+      writer.flush();
+      writer.close();
+    } catch (IOException ex) {
+      throw new GateRuntimeException("Dumping PR: Error writing document "
+                                     + document.getName() + ": "
+                                     + ex.getMessage());
+    }
+
+
+  }//write2File
+
 
   protected AnnotationSet renameAnnotations(AnnotationSet annots2Export,
                                    HashMap renameMap){
@@ -279,6 +332,15 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   public Boolean getIncludeFeatures() {
     return new Boolean(includeFeatures);
+  }
+
+  public void setUseStandOffXML(Boolean newValue) {
+    if (newValue != null)
+      useStandOffXML = newValue.booleanValue();
+  }
+
+  public Boolean getUseStandOffXML() {
+    return new Boolean(useStandOffXML);
   }
 
   public String getSuffixForDumpFiles() {
