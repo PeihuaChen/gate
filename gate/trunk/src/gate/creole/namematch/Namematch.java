@@ -229,24 +229,24 @@ public class Namematch extends AbstractProcessingResource
               // first check that annot2 is NOT already in the list of
               // matched annotations for annot1 - do not proceed with
               // annot2 if so
-              if (matched_annots.containsKey(annot1_id.toString())) {
+              if (matched_annots.containsKey(annot1_id)) {
                 matchedAnnot1 =
-                  (AnnotationMatches) matched_annots.get(annot1_id.toString());
+                  (AnnotationMatches) matched_annots.get(annot1_id);
               if (matchedAnnot1.containsMatched(annot2_id)) continue;
+              }
+
+              // determine the title from annotation string
+              if (annotationType.equals(personType)) {
+                annotString1 =
+                  containTitle(nameAllAnnots, annotString1,annot1);
+                annotString2 =
+                  containTitle(nameAllAnnots, annotString2,annot2);
               }
 
               // find which annotation string of the two is longer
               //  this is useful for some of the matching rules
               String longName = null;
               String shortName = null;
-
-              // determine the title from annotation string
-              if (annotationType.equals(personType)) {
-                annotString1 = containTitle(nameAllAnnots, annotString1,annot1);
-                annotString2 = containTitle(nameAllAnnots, annotString2,annot2);
-//                Out.prln("Annot1 without title" + annotString1);
-//                Out.prln("Annot2 without title" + annotString2);
-              }
 
               if (annotString1.length()>=annotString2.length()) {
                 longName = annotString1;
@@ -257,15 +257,14 @@ public class Namematch extends AbstractProcessingResource
               }
 
               // apply name matching rules
-              if (apply_rules_namematch(shortName,longName)) {
-
+              if (apply_rules_namematch(shortName,longName,annot1,annot2)) {
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot1 = new AnnotationMatches();
 
-                if (matched_annots.containsKey(annot2_id.toString())){
+                if (matched_annots.containsKey(annot2_id)){
                   matchedAnnot2 =
-                   (AnnotationMatches) matched_annots.get(annot2_id.toString());
+                   (AnnotationMatches) matched_annots.get(annot2_id);
                 }
                 // first add the annotation ids matched by annot2 to those
                 // matched by annot1
@@ -275,16 +274,17 @@ public class Namematch extends AbstractProcessingResource
                     if (!matchedAnnot1.containsMatched(matchedByAnnot2Id)) {
                       matchedAnnot1.addMatchedAnnotId(matchedByAnnot2Id);
                     }
-                      // then add annot1 to all those annotations
-                      // that have been matched with annot2 so far
-                      matchedByAnnot2 = (AnnotationMatches)
-                                         matched_annots.get(matchedByAnnot2Id);
+                    // then add annot1 to all those annotations
+                    // that have been matched with annot2 so far
+                    matchedByAnnot2 = (AnnotationMatches)
+                                       matched_annots.get(matchedByAnnot2Id);
 
-                      if ((matchedByAnnot2 !=null)&&
-                        (!matchedByAnnot2.containsMatched
-                          (annot1_id))) {
-                        matchedByAnnot2.addMatchedAnnotId(annot1_id);
-                      }
+                    if ((matchedByAnnot2 !=null)&&
+                      (!matchedByAnnot2.containsMatched
+                        (annot1_id))) {
+
+                      matchedByAnnot2.addMatchedAnnotId(annot1_id);
+                    }
                     } // for
                   }
                   // add annotation2 to the ids of annotation1
@@ -297,6 +297,7 @@ public class Namematch extends AbstractProcessingResource
                                       matchedAnnot1.matchedAnnotAt(l));
 
                     }
+
                     matchedByAnnot1 = (AnnotationMatches)
                                        matched_annots.get(matchedByAnnot1Id);
 
@@ -322,8 +323,9 @@ public class Namematch extends AbstractProcessingResource
                   if (!matchedAnnot2.containsMatched(annot2_id))
                     matchedAnnot2.addMatchedAnnotId(annot2_id);
 
-                  matched_annots.put(annot1_id.toString(),matchedAnnot1);
-                  matched_annots.put(annot2_id.toString(),matchedAnnot2);
+                  matched_annots.put(annot1_id,matchedAnnot1);
+                  matched_annots.put(annot2_id,matchedAnnot2);
+
                 }
 
                 // classify the "unknown" annotation if such exists
@@ -397,7 +399,7 @@ public class Namematch extends AbstractProcessingResource
           // append the "matches" attribute to existing annotations
           for (Enumeration enum =
                             matched_annots.keys(); enum.hasMoreElements() ;) {
-            String annot_id = (String) enum.nextElement();
+            Integer annot_id = (Integer) enum.nextElement();
             AnnotationMatches matchedAnnot =
               (AnnotationMatches) matched_annots.get(annot_id);
 
@@ -405,7 +407,7 @@ public class Namematch extends AbstractProcessingResource
             List matchesList = matchedAnnot.getMatched();
             // remove attribute "matches" if such exists:
             // i.e has the namematcher run on the same doc b4?
-            Annotation annot = nameAnnots.get(new Integer(annot_id));
+            Annotation annot = nameAnnots.get(annot_id);
             if (annot!=null) {
               FeatureMap attr = annot.getFeatures();
               attr.remove("matches");
@@ -435,6 +437,9 @@ public class Namematch extends AbstractProcessingResource
   /** return a person name without title */
   public String containTitle (AnnotationSet annotSet,String annotString,
                               Annotation annot){
+    // list with the title and the string annotation
+    List titleStringAnnot = new ArrayList();
+
     // get the offsets
     Long startAnnot = annot.getStartNode().getOffset();
     Long endAnnot = annot.getEndNode().getOffset();
@@ -462,9 +467,11 @@ public class Namematch extends AbstractProcessingResource
                   offsetStartAnnot,offsetEndAnnot).toString();
 
               // eliminate the title from annotation string and return the result
-              if (annotTitle.length()<annotString.length())
-                return annotString.substring(
-                                    annotTitle.length()+1,annotString.length());
+              if (annotTitle.length()<annotString.length()){
+                return annotString.substring(annotTitle.length()+1,
+                                                          annotString.length());
+
+              }
             } catch (InvalidOffsetException ioe) {
               executionException = new ExecutionException
                                  ("Invalid offset of the annotation");
@@ -624,9 +631,28 @@ public class Namematch extends AbstractProcessingResource
 
 
   /** apply_rules_namematch: apply rules similarly to lasie1.5's namematch */
-  private boolean apply_rules_namematch(String shortName, String longName) {
+  private boolean apply_rules_namematch(String shortName, String longName,
+                                        Annotation annot1,Annotation annot2) {
+/*    boolean genderPerson = false;
+    if (annotationType.equals(personType))
+    {
+
+      if (((annot1.getFeatures().get("gender")!=null)&&
+           (annot1.getFeatures().get("gender").equals(
+                                 annot2.getFeatures().get("gender"))))
+          ||
+          ((annot1.getFeatures().get("gender")!=null)&&
+           (annot2.getFeatures().get("gender")== null)
+          )
+          ||
+          (annot1.getFeatures().get("gender")== null)
+         )
+      {genderPerson = true;}//Out.prln(genderPerson);}
+    }
+    else genderPerson = true;
+*/
     // first apply rule for spurius matches i.e. rule0
-    if (!matchRule0(longName, shortName)) {
+    if ((!matchRule0(longName, shortName))) {
       if (
            (// rules for all annotations
               matchRule1(longName, shortName, false)
