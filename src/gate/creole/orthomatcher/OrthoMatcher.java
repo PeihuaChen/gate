@@ -452,6 +452,16 @@ public class OrthoMatcher extends AbstractProcessingResource
       // find which annotation string of the two is longer
       //  this is useful for some of the matching rules
       String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
+      if (prevAnnotString == null)
+        try {
+          prevAnnotString = document.getContent().getContent(
+            prevAnnot.getStartNode().getOffset(),
+            prevAnnot.getEndNode().getOffset()
+            ).toString();
+        } catch (InvalidOffsetException ioe) {
+          return false;
+        }//try
+
 
       String longName = prevAnnotString;
       String shortName = annotString;
