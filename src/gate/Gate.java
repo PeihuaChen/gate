@@ -293,24 +293,13 @@ public class Gate implements GateConstants
         try{
           URL pluginURL = dirs[i].toURL();
           addKnownPlugin(pluginURL);
-//          if(!knownPlugins.contains(pluginURL)) 
-//            knownPlugins.add(pluginURL);
         }catch(MalformedURLException mue){
           //this shoulod never happen
           throw new GateRuntimeException(mue);
         }
       }
     }
-    //we now have a full list of known plugins
-    //get the information about the plugins
-//this data is now lazily populated as required.    
-//    Iterator pluginIter = knownPlugins.iterator();
-//    while(pluginIter.hasNext()){
-//      URL aPluginURL = (URL)pluginIter.next();
-//      DirectoryInfo dInfo = new DirectoryInfo(aPluginURL);
-//      pluginData.put(aPluginURL, dInfo);
-//    }
-    
+
     //process the autoload plugins
     String pluginPath = getUserConfig().getString(AUTOLOAD_PLUGIN_PATH_KEY);
     //can be overridden by system property
@@ -328,7 +317,8 @@ public class Gate implements GateConstants
     }
     
     //load all loadable plugins
-    StringTokenizer strTok = new StringTokenizer(pluginPath, ";", false);
+    StringTokenizer strTok = new StringTokenizer(pluginPath, 
+            Strings.getPathSep(), false);
     while(strTok.hasMoreTokens()){
       String aDir = strTok.nextToken();
       try{
@@ -1008,6 +998,10 @@ jar/classpath so it's the same as registerBuiltins
     return knownPlugins;
   }
   
+  /**
+   * Adds the plugin to the list of known plugins.
+   * @param pluginURL the URL for the new plugin.
+   */
   public static void addKnownPlugin(URL pluginURL){
     pluginURL = normaliseCreoleUrl(pluginURL);
     if(knownPlugins.contains(pluginURL)) return;
@@ -1045,6 +1039,11 @@ jar/classpath so it's the same as registerBuiltins
     return autoloadPlugins;
   }
   
+  /**
+   * Adds a new directory to the list of plugins that are loaded automatically
+   * at start-up.
+   * @param pluginUrl the URL for the new plugin.
+   */
   public static void addAutoloadPlugin(URL pluginUrl){
     pluginUrl = normaliseCreoleUrl(pluginUrl);
     if(autoloadPlugins.contains(pluginUrl))return;

@@ -44,6 +44,10 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+    File file = new File("Z:/gate/bin");
+    System.out.println("Canonical path: " + file.getCanonicalPath());
+    System.out.println("URL: " + file.toURL());
+    
     URL url = new URL("jar:file:/Z:/gate/bin/gate.jar!/gate/Gate.class");
     System.out.println(url);
     System.out.println("Path: " + url.getPath());
