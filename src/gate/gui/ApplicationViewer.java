@@ -653,6 +653,7 @@ public class ApplicationViewer extends AbstractVisualResource
       ResourceData rData = (ResourceData)
                           Gate.getCreoleRegister().get(pr.getClass().getName());
       List params = rData.getParameterList().getRuntimeParameters();
+//System.out.println("parameters: " + params);
       Iterator paramsIter = params.iterator();
       List parameterDisjunctions = new ArrayList();
       while(paramsIter.hasNext()){
@@ -848,6 +849,7 @@ public class ApplicationViewer extends AbstractVisualResource
 
     public Object getValue(){
       if(values[selectedIndex] != null) {
+System.out.println("Using user set value " + values[selectedIndex]);
         return values[selectedIndex];
       } else {
         //no value set; use the most currently used one of the given type
@@ -855,7 +857,10 @@ public class ApplicationViewer extends AbstractVisualResource
           Stack instances = ((ResourceData)
                               Gate.getCreoleRegister().get(getType())).
                                   getInstantiations();
-          if(instances != null && !instances.isEmpty()) return instances.peek();
+          if(instances != null && !instances.isEmpty()){
+System.out.println("Using MRU value " + instances.peek());
+            return instances.peek();
+          }
           else return null;
         } else {
           return null;

@@ -244,7 +244,6 @@ public class TestCreole extends TestCase
     assert(param.optional);
     assert(! param.runtime);
     assert(param.comment == null);
-    assert(param.defaultValue == null);
     assert(param.name.equals("thing"));
 
     reg.clear();

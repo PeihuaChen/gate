@@ -375,13 +375,13 @@ public class DefaultResourceHandle implements ResourceHandle {
             FeatureMap features = Factory.newFeatureMap();
             features.put("gate.HIDDEN", "true");
             features.put("gate.NAME", resource.getFeatures().get("gate.NAME"));
-            Resource oldRes = (Resource)resource;
+            Factory.deleteResource((Resource)resource);
             resource = Factory.createResource(resource.getClass().getName(),
                                               (FeatureMap)resource.getFeatures().
                                                           get("gate.PARAMETERS"),
                                               features, listeners);
             resource.getFeatures().remove("gate.HIDDEN");
-            Factory.deleteResource(oldRes);
+
 
             largeView.removeAll();
             addAllViews();
