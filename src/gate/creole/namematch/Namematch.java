@@ -81,6 +81,7 @@ public class Namematch extends AbstractProcessingResource
     annotationTypes.add("Organization");
     annotationTypes.add("Person");
     annotationTypes.add("Location");
+    annotationTypes.add("Date");
     try {
       createLists();
     } catch (IOException ioe) {ioe.printStackTrace();}
@@ -228,6 +229,12 @@ public class Namematch extends AbstractProcessingResource
               String longName = null;
               String shortName = null;
 
+              // determine the title from annotation string
+              if (annotationType.equals("Person")) {
+                annotString1 = containTitle(nameAllAnnots, annotString1, annot1);
+                annotString2 = containTitle(nameAllAnnots, annotString2, annot2);
+              }
+
               if (annotString1.length()>=annotString2.length()) {
                 longName = annotString1;
                 shortName = annotString2;
@@ -236,11 +243,11 @@ public class Namematch extends AbstractProcessingResource
                 shortName = annotString1;
               }
 
+
               // apply name matching rules
               if (apply_rules_namematch(shortName,longName)) {
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
-
                 if (matched_annots.containsKey(annot2_id.toString())){
                   matchedAnnot2 =
                    (AnnotationMatches) matched_annots.get(annot2_id.toString());
@@ -356,6 +363,44 @@ public class Namematch extends AbstractProcessingResource
     return;
 
   } // run()
+
+  /***/
+  public String containTitle (AnnotationSet annotSet, String annotString,
+                              Annotation annot){
+    // get the offsets
+    Long startAnnot = annot.getStartNode().getOffset();
+    Long endAnnot = annot.getEndNode().getOffset();
+
+    AnnotationSet as =
+      annotSet.get(startAnnot,endAnnot).get("Lookup");
+
+    if ((as !=null )) {
+      Iterator iter = as.iterator();
+      while (iter.hasNext()) {
+        Annotation currentAnnot = (Annotation)(iter.next());
+        FeatureMap fm = currentAnnot.getFeatures();
+        if (fm.containsKey("majorType")&&
+          (fm.get("majorType").equals("title"))){
+
+            Long offsetStartAnnot = currentAnnot.getStartNode().getOffset();
+            Long offsetEndAnnot = currentAnnot.getEndNode().getOffset();
+            try {
+              String annotTitle =
+                document.getContent().getContent(
+                  offsetStartAnnot,offsetEndAnnot).toString();
+              if (annotTitle.length()<annotString.length())
+                return annotString.substring(
+                                    annotTitle.length()+1,annotString.length());
+            } catch (InvalidOffsetException ioe) {
+              executionException = new ExecutionException
+                                 ("Invalid offset of the annotation");
+            }
+        }//if
+      }// while
+    }//if
+    return annotString;
+
+  }
 
   /** all the matches from the current document are placed in a list */
   public void determineMatchesDocument() {
@@ -740,6 +785,54 @@ public class Namematch extends AbstractProcessingResource
       return matchRule1(tokens1.nextToken(),s2,true);
 
     return false;
+
+/*    String stringToTokenize1 = s1;
+    StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
+    String token = tokens1.nextToken();
+
+    if (tokens1.countTokens()>1) {
+      // in case the first token is a title
+      AnnotationSet namedAnnots;
+      if ((annotationSetName == null)||(annotationSetName == ""))
+        namedAnnots = document.getAnnotations();
+      else namedAnnots = document.getAnnotations(annotationSetName);
+
+      // get the "Lookup" annotations
+      namedAnnots = namedAnnots.get("Lookup");
+
+      Out.prln("Annotations "+namedAnnots);
+      if (namedAnnots != null) {
+      Iterator iter = namedAnnots.iterator();
+      while (iter.hasNext()) {
+        Annotation annot = (Annotation)iter.next();
+        if (annot != null) {
+          FeatureMap fm = annot.getFeatures();
+          Out.prln("fm "+fm);
+          if (fm.containsKey("majorType")&&(fm.get("majorType").equals("title"))){
+            Long offsetStartAnnot = annot.getStartNode().getOffset();
+            Long offsetEndAnnot = annot.getEndNode().getOffset();
+            try {
+              String annotString =
+                document.getContent().getContent(
+                  offsetStartAnnot,offsetEndAnnot).toString();
+
+              Out.prln("anoot "+ annotString);
+              if (token.equals(annotString)) {
+                token = tokens1.nextToken();
+                Out.prln("token " +token);
+              }
+
+            } catch (InvalidOffsetException ioe) {
+              executionException = new ExecutionException
+                                     ("Invalid offset of the annotation");
+            }
+          } //if
+        } // if (annot!=null)
+      }//while
+      return matchRule1(token,s2,true);
+      }
+    }//if
+    return false;*/
   }//matchRule5
 
   /**
@@ -755,6 +848,7 @@ public class Namematch extends AbstractProcessingResource
 
     String stringToTokenize1 = s1;
     StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
+
     String token = null;
     StringBuffer acronym_s1 = new StringBuffer("");
 
@@ -767,7 +861,7 @@ public class Namematch extends AbstractProcessingResource
     s1 = acronym_s1.toString();
 
     if (cdg.containsKey(token)) s1 = s1.substring(0,s1.length()-1);
-
+    s2 = regularExpressions(s2,""," ");
     return matchRule1(s1,s2,false);
   }//matchRule6
 
