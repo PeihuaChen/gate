@@ -85,8 +85,8 @@ public interface DataStore extends FeatureBearer, NameBearer {
   public boolean isAutoSaving();
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr)
-  throws PersistenceException;
+  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
+  throws PersistenceException, gate.security.SecurityException;
 
   /**
    * Get a resource from the persistent store.
@@ -143,6 +143,14 @@ public interface DataStore extends FeatureBearer, NameBearer {
    * has write access to the LR
    */
   public boolean canWriteLR(Object lrID, Session s)
+    throws PersistenceException, gate.security.SecurityException;
+
+  /** get security information for LR . */
+  public SecurityInfo getSecurityInfo(LanguageResource lr)
+    throws PersistenceException;
+
+  /** set security information for LR . */
+  public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
     throws PersistenceException, gate.security.SecurityException;
 
 } // interface DataStore

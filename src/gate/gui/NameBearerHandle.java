@@ -413,7 +413,8 @@ public class NameBearerHandle implements Handle,
           if(ds == ownDS){
             ds.sync((LanguageResource)target);
           }else{
-            ds.adopt((LanguageResource)target);
+            //TODO: change the null for SecurityInfo
+            ds.adopt((LanguageResource)target,null);
             ds.sync((LanguageResource)target);
           }
         }
@@ -421,6 +422,11 @@ public class NameBearerHandle implements Handle,
         JOptionPane.showMessageDialog(getLargeView(),
                                       "Save failed!\n " +
                                       pe.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+      }catch(gate.security.SecurityException se) {
+        JOptionPane.showMessageDialog(getLargeView(),
+                                      "Save failed!\n " +
+                                      se.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
     }

@@ -49,15 +49,6 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   // related SQL packages/scripts [for Oracle - security.spc]
   // i.e. if u don't have a serious reason do *not* change anything
 
-  /** world read/ group write */
-  public static final int ACCESS_WR_GW = 1;
-  /** group read/ group write */
-  public static final int ACCESS_GR_GW = 2;
-  /** group read/ owner write */
-  public static final int ACCESS_GR_OW = 3;
-  /** owner read/ owner write */
-  public static final int ACCESS_OR_OW = 4;
-
   /** used to store corpus' features */
   protected static final int FEATURE_OWNER_CORPUS  = 1;
   /** used to store document's features */
@@ -257,8 +248,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** Adopt a resource for persistence. */
-  public abstract LanguageResource adopt(LanguageResource lr)
-    throws PersistenceException;
+  public abstract LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
+    throws PersistenceException,gate.security.SecurityException;
 
   /**
    * Get a resource from the persistent store.

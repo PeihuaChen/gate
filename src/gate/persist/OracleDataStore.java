@@ -215,8 +215,8 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr)
-  throws PersistenceException {
+  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
+  throws PersistenceException,gate.security.SecurityException {
 
     //1. is the LR one of Document or Corpus?
     if (false == lr instanceof Document &&
@@ -1063,6 +1063,20 @@ public class OracleDataStore extends JDBCDataStore {
         Object value = entry.getValue();
         createFeature(entityID,entityType,key,value);
       }
+  }
+
+  /** get security information for LR . */
+  public SecurityInfo getSecurityInfo(LanguageResource lr)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** set security information for LR . */
+  public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
+    throws PersistenceException, gate.security.SecurityException {
+
+    throw new MethodNotImplementedException();
   }
 
 }
