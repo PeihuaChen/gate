@@ -86,7 +86,7 @@ public class Javac implements GateConstants{
     args.add(classesDir.getAbsolutePath());
     args.addAll(sourceFiles);
     //call the compiler
-    Main.compile((String[])args.toArray(new String[args.size()]));
+    int res = Main.compile((String[])args.toArray(new String[args.size()]));
 
     //load the newly compiled classes
     //load all classes from the classes directory
@@ -99,6 +99,8 @@ public class Javac implements GateConstants{
 
     //delete the work directory
     Files.rmdir(workDir);
+
+    if(res != 0) throw new GateException("Compiler error!");
   }
 
   /**
