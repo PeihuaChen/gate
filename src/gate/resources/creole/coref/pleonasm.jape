@@ -206,7 +206,20 @@ Priority: 99
 
         gate.FeatureMap features = Factory.newFeatureMap();
         features.put("firedBy","ruleA");
-        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+        
+    //try to get doc feature    
+    Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
+
+    if (null == cnt) {
+        cnt = new Integer(1);
+    }
+    else {
+        cnt = new Integer(cnt.intValue() + 1);
+    }
+    
+    doc.getFeatures().put("PLEONASM",cnt);
+        
 }
 
 
@@ -235,7 +248,20 @@ Priority: 77
 
         gate.FeatureMap features = Factory.newFeatureMap();
         features.put("firedBy","ruleC");
-        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+        
+    //try to get doc feature    
+    Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
+
+    if (null == cnt) {
+        cnt = new Integer(1);
+    }
+    else {
+        cnt = new Integer(cnt.intValue() + 1);
+    }
+    
+    doc.getFeatures().put("PLEONASM",cnt);
+        
 }
 
 
@@ -259,7 +285,20 @@ Priority: 66
 
         gate.FeatureMap features = Factory.newFeatureMap();
         features.put("firedBy","ruleD");
-        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+        
+    //try to get doc feature    
+    Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
+
+    if (null == cnt) {
+        cnt = new Integer(1);
+    }
+    else {
+        cnt = new Integer(cnt.intValue() + 1);
+    }
+    
+    doc.getFeatures().put("PLEONASM",cnt);
+        
 }
 
 
@@ -285,5 +324,18 @@ Priority: 55
 
         gate.FeatureMap features = Factory.newFeatureMap();
         features.put("firedBy","ruleD");
-        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "pleonastic It", features);
+        annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+
+    //try to get doc feature    
+    Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
+
+    if (null == cnt) {
+        cnt = new Integer(1);
+    }
+    else {
+        cnt = new Integer(cnt.intValue() + 1);
+    }
+    
+    doc.getFeatures().put("PLEONASM",cnt);
+        
 }
