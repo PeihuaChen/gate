@@ -142,7 +142,8 @@ public class TextualDocumentFormat extends DocumentFormat
             // the end of a para is recorded here.
             readBR = false;
             endOffsetPara = index;
-            state = 3;}
+            state = 3;
+          }// End if
         }break;
         // It can be also a final state
         // From state 3 there are only 2 possible ways: (state 2 or state1)

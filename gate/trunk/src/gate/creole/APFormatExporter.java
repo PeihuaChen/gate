@@ -28,7 +28,7 @@ import java.io.*;
   */
 public class APFormatExporter extends AbstractLanguageAnalyser{
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   /** Constructor does nothing. This PR is bean like initialized*/
   public APFormatExporter() {}
 
@@ -39,7 +39,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       throw new ExecutionException("No document found to export in APF format!");
     if (exportedTypes == null)
       throw new ExecutionException("No export types found.");
-
+    xmlDoc = new StringBuffer();
     initDocId();
     if (docId == null)
       throw new ExecutionException("Couldn't detect the document's ID");
@@ -51,7 +51,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       exportFilePathStr = new String(document.getSourceUrl().getFile() +
                                                                   ".apf.xml");
     else
-      exportFilePathStr = exportFilePath.getFile();
+      exportFilePathStr = exportFilePath.getPath()+ "/"+docId + ".apf.xml";
 
     if (DEBUG)
       Out.prln("Export file path = "+ exportFilePathStr);
@@ -78,8 +78,6 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
 
   /** Initialise this resource, and returns it. */
   public Resource init() throws ResourceInstantiationException {
-    //document.getSourceUrl().getProtocol()
-    xmlDoc = new StringBuffer();
     return this;
   } // init()
 
@@ -166,13 +164,20 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
     // If no types founded then simply return
     if (exportedTypes == null || exportedTypes.isEmpty()) return;
 
-    FeatureMap entitiesMap = null;
+    Map entitiesMap = null;
     if ( document.getFeatures() == null ||
          document.getFeatures().get(OrthoMatcher.DOC_MATCHES_FEATURE)== null)
-      entitiesMap = Factory.newFeatureMap();
+      entitiesMap = new HashMap();
     else
-      entitiesMap = (FeatureMap)document.getFeatures().
+      entitiesMap = (Map)document.getFeatures().
                                         get(OrthoMatcher.DOC_MATCHES_FEATURE);
+    Map namedAnnotSetMap = null;
+    if (document.getNamedAnnotationSets() == null)
+      namedAnnotSetMap = new HashMap();
+    else
+      namedAnnotSetMap = new HashMap(document.getNamedAnnotationSets());
+    // Add the default annoattion set
+    namedAnnotSetMap.put(null,document.getAnnotations());
     // The entities map is a map from annotation sets names to list of lists
     // Each list element is composed from annotations refering the same entity
     // All the entities that are in the exportedTypes need to be serialized.
@@ -182,22 +187,19 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       // Serialize all entities of type
       // The keys in the entiitesMap are annotation sets names. The null key
       // designates the default annotation.
-      //document.getNamedAnnotationSets();
-      Set entitiesMapKeySet = entitiesMap.keySet();
-      Iterator entitiesKeysIter = entitiesMapKeySet.iterator();
-      while (entitiesKeysIter.hasNext()){
-        Object annotSetName = entitiesKeysIter.next();
+      Set annotationSetNames = namedAnnotSetMap.keySet();
+      Iterator annotationSetNamesIter = annotationSetNames.iterator();
+      while (annotationSetNamesIter.hasNext()){
+        Object annotSetName = annotationSetNamesIter.next();
         // This list contains entities found in the annotSetName
         List entitiesList = (List) entitiesMap.get(annotSetName);
+        if (entitiesList == null) entitiesList = new ArrayList();
         // This annotation set will contain all annotations of "entityType"
-        Set annotSet = null;
-        if (annotSetName == null)
-          // Get all annotations of type entityType from the default annot set
-          annotSet = document.getAnnotations().get(entityType);
-        else
-          // Get all annotations of type entityType from the annotSetName
-          annotSet = document.getAnnotations((String)annotSetName).get(entityType);
-        if (annotSet == null) annotSet = new HashSet();
+        AnnotationSet annotSet = null;
+        Set serializationAnnotSet = null;
+        annotSet = (AnnotationSet)namedAnnotSetMap.get(annotSetName);
+        if (annotSet == null || annotSet.get(entityType) == null) continue;
+        serializationAnnotSet = new HashSet(annotSet.get(entityType));
         // All annotations from annotSet will be serialized as entities unless
         // some of them are present in the entities map
         // Now we are searching for the entityType in the entitiesMap and
@@ -212,20 +214,27 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
           // its type and compare it with entityType
           String theEntityType = new String("");
           if (entity != null && !entity.isEmpty()){
-            Annotation a = (Annotation)entity.get(0);
-            if (a!= null) theEntityType = a.getType();
+            Integer annotId = (Integer)entity.get(0);
+            Annotation a = (Annotation)annotSet.get(annotId);
+            if (a != null) theEntityType = a.getType();
           }// End if
           // The the types are equal then serialize the entities
           if (theEntityType.equals(entityType)){
-            serializeAnEntity(entity);
+            List ent = new ArrayList();
+            Iterator entityIter = entity.iterator();
+            while(entityIter.hasNext()){
+              Integer id = (Integer)entityIter.next();
+              ent.add(annotSet.get(id));
+            }// End while
+            serializeAnEntity(ent);
             // Remove all annotation from entity that apear in annotSet
-            annotSet.removeAll(entity);
+            serializationAnnotSet.removeAll(ent);
           }// End if
         }// End while(entitiesListIter.hasNext())
         // Serialize the remaining entities in annotSet
-        Iterator annotSetIter = annotSet.iterator();
-        while(annotSetIter.hasNext()){
-          Annotation annotEntity = (Annotation) annotSetIter.next();
+        Iterator serializationAnnotSetIter = serializationAnnotSet.iterator();
+        while(serializationAnnotSetIter.hasNext()){
+          Annotation annotEntity = (Annotation) serializationAnnotSetIter.next();
           List ent = new ArrayList();
           ent.add(annotEntity);
           serializeAnEntity(ent);
@@ -258,7 +267,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       Annotation ann = (Annotation)anEntityIter.next();
       serializeAnEntityAttributes(ann);
     }// End while(anEntityIter.hasNext())
-    xmlDoc.append("  </entity>");
+    xmlDoc.append("  </entity>\n");
   }// End serializeAnEntity();
 
   /** This method serializes an entity mention from an Annotation*/
@@ -273,15 +282,15 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
     xmlDoc.append("        <extent>\n");
     xmlDoc.append("          <charseq>\n");
     try{
-      xmlDoc.append("          <!-- string = " +
+      xmlDoc.append("          <!-- string = \"" +
             document.getContent().getContent(ann.getStartNode().getOffset(),
-                                      ann.getEndNode().getOffset())+" -->\n");
+                                      ann.getEndNode().getOffset())+"\" -->\n");
     }catch (InvalidOffsetException ioe){
       Err.prln("APFormatExporter:Warning: Couldn't access text between"+
       " offsets:" + ann.getStartNode().getOffset() + " and "+
       ann.getEndNode().getOffset());
     }// End try
-    xmlDoc.append("<start>"+ann.getStartNode().getOffset()+
+    xmlDoc.append("          <start>"+ann.getStartNode().getOffset()+
         "</start><end>"+ann.getEndNode().getOffset()+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </extent>\n");
@@ -289,15 +298,15 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
     xmlDoc.append("        <head>\n");
     xmlDoc.append("          <charseq>\n");
     try{
-      xmlDoc.append("          <!-- string = " +
+      xmlDoc.append("          <!-- string = \"" +
             document.getContent().getContent(ann.getStartNode().getOffset(),
-                                      ann.getEndNode().getOffset())+" -->\n");
+                                      ann.getEndNode().getOffset())+"\" -->\n");
     }catch (InvalidOffsetException ioe){
       Err.prln("APFormatExporter:Warning: Couldn't access text between"+
       " offsets:" + ann.getStartNode().getOffset() + " and "+
       ann.getEndNode().getOffset());
     }// End try
-    xmlDoc.append("<start>"+ann.getStartNode().getOffset()+
+    xmlDoc.append("          <start>"+ann.getStartNode().getOffset()+
         "</start><end>"+ann.getEndNode().getOffset()+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </head>\n");
@@ -312,15 +321,15 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
     xmlDoc.append("        <name>\n");
     xmlDoc.append("          <charseq>\n");
     try{
-      xmlDoc.append("          <!-- string = " +
+      xmlDoc.append("          <!-- string = \"" +
             document.getContent().getContent(ann.getStartNode().getOffset(),
-                                      ann.getEndNode().getOffset())+" -->\n");
+                                      ann.getEndNode().getOffset())+"\" -->\n");
     }catch (InvalidOffsetException ioe){
       Err.prln("APFormatExporter:Warning: Couldn't access text between"+
       " offsets:" + ann.getStartNode().getOffset() + " and "+
       ann.getEndNode().getOffset());
     }// End try
-    xmlDoc.append("<start>"+ann.getStartNode().getOffset()+
+    xmlDoc.append("          <start>"+ann.getStartNode().getOffset()+
         "</start><end>"+ann.getEndNode().getOffset()+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </name>\n");
