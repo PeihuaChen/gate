@@ -63,11 +63,11 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 */
 
-  public void delete(String lrClassName, Object lrId) throws gate.security.SecurityException, gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
+/*  public void delete(String lrClassName, Object lrId) throws gate.security.SecurityException, gate.persist.PersistenceException {
+
     throw new MethodNotImplementedException();
   }
-
+*/
 
   public List findLrIds(List constraints) throws gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
@@ -1201,6 +1201,24 @@ public class PostgresDataStore extends JDBCDataStore {
     }
 
     return fm;
+  }
+
+  /**
+   *  helper method for delete()
+   *  never call it directly beause proper events will not be fired
+   */
+  protected void deleteDocument(Long lrId)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   *  helper method for delete()
+   *  never call it directly beause proper events will not be fired
+   */
+  protected void deleteCorpus(Long lrId)
+    throws PersistenceException {
+    throw new MethodNotImplementedException();
   }
 
 
