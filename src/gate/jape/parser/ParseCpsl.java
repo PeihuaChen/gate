@@ -784,9 +784,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   String existingAttrName = null;
 
   blockBuffer.append("// RHS assignment block" + nl);
-  //blockBuffer.append("      JdmSpanSequence spans = null;" + nl);
-  blockBuffer.append("      FeatureMap attrs = null;" + nl);
-  blockBuffer.append("      Annotation annot = null;" + nl);
+  blockBuffer.append(
+    "      FeatureMap features = Transients.newFeatureMap();" + nl
+  );
     switch (jj_nt.kind) {
     case colon:
       jj_consume_token(colon);
@@ -794,7 +794,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       break;
     case colonplus:
       jj_consume_token(colonplus);
-                                                   simpleSpan = false;
+      simpleSpan = false;
+      {if (true) throw new
+        ParseException(":+ not a legal operator (no multi-span annots)");}
       break;
     default:
       jj_la1[26] = jj_gen;
@@ -808,30 +810,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     jj_consume_token(period);
     nameTok = jj_consume_token(ident);
     newAnnotType = nameTok.image;
-
-    blockBuffer.append("      spans = new JdmSpanSequence();" + nl);
-    blockBuffer.append("      attrs = new JdmAttributeSequence();" + nl);
     blockBuffer.append(
-      "      annot = new JdmAnnotation(\"" + newAnnotType +
-      "\", spans, attrs);" + nl
+      "      String newAnnotType = \"" + newAnnotType + "\";" + nl
     );
-
-    if(simpleSpan)
-      blockBuffer.append(
-        "      spans.append(new JdmSpan(" +
-        annotSetName + ".getLeftmostStart(), " +
-        annotSetName + ".getRightmostEnd()));" + nl
-      );
-    else
-      blockBuffer.append(
-        "      for(int i=0; i<" + annotSetName + ".length(); i++) {" + nl +
-        "        JdmSpanSequence compositeSpans = " + annotSetName +
-        ".nth(i).getSpans();" + nl +
-        "        for(int j=0; j<compositeSpans.length(); j++)" + nl +
-        "          spans.append(" + nl + "          new JdmSpan(" +
-        "compositeSpans.nth(j).getStart(), " +
-        "compositeSpans.nth(j).getEnd()));" + nl + "      }" + nl
-      );
 
     // start of the attribute stuff
     blockBuffer.append("      Object val = null;" + nl);
@@ -897,12 +878,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             break;
         } // switch
 
-        blockBuffer.append(
-          "      try{attrs.append(new JdmAttribute(\"" +
-          newAttrName + "\", val));}" + nl +
-          // ignore the exception: val type must be ok, came from parser
-          "      catch(JdmException e) { }" + nl
-        );
+        blockBuffer.append("      features.put(\"" + newAttrName + "\", val);");
+        blockBuffer.append(nl);
         break;
       case colon:
         jj_consume_token(colon);
@@ -917,7 +894,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
-            "        JdmAnnotationSet " + existingAnnotSetName +
+            "        AnnotationSet " + existingAnnotSetName +
             " = lhs.getBoundAnnots(\"" + nameTok.image + "\"); " + nl
           );
         jj_consume_token(period);
@@ -926,21 +903,19 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         jj_consume_token(period);
         nameTok = jj_consume_token(ident);
                                    existingAttrName = nameTok.image;
-          blockBuffer.append("        " +
-            "JdmAnnotationSet existingAnnots = " + nl +
-            "        " + existingAnnotSetName +
-            ".selectAnnotations(\"" + existingAnnotType + "\", new " +
-            "JdmAttributeSequence());" + nl +
-            "        for(int i=0; i<" + existingAnnotSetName +
-            ".length(); i++) {" + nl +
-            "          JdmAttribute a = " + existingAnnotSetName +
-            ".nth(i).getAttribute(\"" + existingAttrName + "\");" + nl +
-            "          if(a != null)" +  nl +
-            "            try{attrs.append(new JdmAttribute(a));}" + nl +
-            // ignore the exception: val type must be ok, came from an attr
-            "            catch(JdmException e) { }" + nl +
-            "        } // for" + nl +
-            "      } // block for existing annots" + nl
+          blockBuffer.append(
+"        AnnotationSet existingAnnots = " + nl +
+"        " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
+"        Iterator iter = existingAnnots.iterator();" + nl +
+"        while(iter.hasNext()) {" + nl +
+"          Annotation existingA = (Annotation) iter.next();" + nl +
+"          Object existingFeatureValue = existingA.getFeatures().get(\"" +
+existingAttrName + "\");" + nl +
+"          if(existingFeatureValue != null) {" + nl +
+"            features.put(\"" + existingAttrName + "\", existingFeatureValue);" + nl +
+"            break;" + nl +
+"          }" + nl + "        } // while" + nl +
+"      } // block for existing annots" + nl
           );
         break;
       default:
@@ -958,7 +933,11 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       }
     }
     jj_consume_token(rightBrace);
-    blockBuffer.append("      doc.addAnnotation(annot);");
+    blockBuffer.append("      doc.getAnnotations().add(" + nl);
+    blockBuffer.append("        " + annotSetName + ".firstNode(), ");
+    blockBuffer.append(annotSetName + ".lastNode(), " + nl);
+    blockBuffer.append("        \"" + newAnnotType + "\", features" + nl);
+    blockBuffer.append("      );" + nl);
     blockBuffer.append("      // end of RHS assignment block");
     block[1] = blockBuffer.toString();
     {if (true) return block;}
