@@ -66,6 +66,14 @@ public class ShellSlacFrame extends MainFrame {
   /** Shell GUI corpus */
   private Corpus corpus = null;
   
+  /** Shell GUI documents DataStore */
+  private DataStore dataStore = null;
+  
+  /** Keep this action for enable/disable the menu item */
+  private Action saveAction = null;
+  /** Keep this action for enable/disable the menu item */
+  private Action runAction = null;
+  
   /** New frame */
   public ShellSlacFrame() {
     super(true);
@@ -78,12 +86,18 @@ public class ShellSlacFrame extends MainFrame {
 
   protected void initShellSlacLocalData(){
     createCorpus();
-    createDefaultApplication();
+//    createDefaultApplication();
+    String applicationURL = 
+      System.getProperty(GateConstants.APPLICATION_JAVA_PROPERTY_NAME);
+    if(applicationURL != null) {
+      createDefaultApplication(applicationURL);
+    } // if
+    
+    dataStore = null;
   } // initLocalData
 
   protected void initShellSlacGuiComponents() {
     super.setJMenuBar(createMenuBar());
-    super.setTitle("Shell SLAC " + Main.name + " " + Main.version);
   } // initShellSlacGuiComponents()
 
   /** Create the new Shell SLAC menu */
@@ -104,11 +118,21 @@ public class ShellSlacFrame extends MainFrame {
       fileMenu.add(new XJMenuItem(new CloseSelectedDocumentAction(), this));
     } // if
     
-    fileMenu.add(new XJMenuItem("Store all Documents", "", this));
-    fileMenu.add(new XJMenuItem("Load stored Documents", "", this));
+    action = new StoreAllDocumentAction();
+    action.setEnabled(false);
+    saveAction = action;
+    fileMenu.add(new XJMenuItem(action, this));
+    action = new StoreAllDocumentAsAction();
+    fileMenu.add(new XJMenuItem(action, this));
+    action = new LoadAllDocumentAction();
+    fileMenu.add(new XJMenuItem(action, this));
     fileMenu.addSeparator();
     
     action = new RunApplicationAction();
+    if(application == null) {
+      action.setEnabled(false);
+    } // if
+    runAction = action;
     fileMenu.add(new XJMenuItem(action, this));
     
     action = new LoadResourceFromFileAction();
@@ -183,6 +207,35 @@ public class ShellSlacFrame extends MainFrame {
 //    });
   } // createDefaultApplication
 
+  /** Load serialized application from file. */
+  private void createDefaultApplication(String url) {
+    ApplicationLoadRun run = new ApplicationLoadRun(url);
+    SwingUtilities.invokeLater(run);
+  } // createDefaultApplication
+
+    
+  public class ApplicationLoadRun implements Runnable {
+    private String appURL;
+    public ApplicationLoadRun(String url) {
+      appURL = url;
+    }
+    
+    public void run(){
+      File file = new File(appURL);  
+      
+      if( file.exists() ) 
+        try {
+          gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
+        } catch (PersistenceException pex) {
+          pex.printStackTrace();
+        } catch (ResourceInstantiationException riex) {
+          riex.printStackTrace();
+        } catch (IOException ioex) {
+          ioex.printStackTrace();
+        } // catch
+    } // run
+  } // class ApplicationLoadRun implements Runnable 
+
   public class ANNIERunnable implements Runnable {
     MainFrame parentFrame;
     ANNIERunnable(MainFrame parent) {
@@ -217,6 +270,7 @@ public class ShellSlacFrame extends MainFrame {
         Factory.deleteResource(application);
       } // if
       application = (SerialAnalyserController) res;
+      runAction.setEnabled(true);
       if(corpus != null) 
         application.setCorpus(corpus);
     } // if
@@ -257,6 +311,34 @@ public class ShellSlacFrame extends MainFrame {
       select(handle);
     } // if
   } // showDocument(Document doc)
+
+  /** Called when a {@link gate.DataStore} has been created.
+   *  Save corpus on datastore creation and remove this datastore. */
+  public void datastoreCreated(CreoleEvent e){
+    super.datastoreCreated(e);
+    if(corpus == null) return; 
+
+    DataStore ds = e.getDatastore();
+    try {
+      // put documents in datastore
+      saveAction.setEnabled(false);
+      ds.adopt(corpus, null);
+      ds.sync(corpus);
+      if(dataStore != null) {
+        // close old datastore if any
+        dataStore.close();
+      } // if
+      dataStore = ds;
+      saveAction.setEnabled(true);
+    } catch (PersistenceException pex) {
+      pex.printStackTrace();
+    } catch (gate.security.SecurityException sex) {
+      sex.printStackTrace();
+    } // catch
+  } // datastoreCreated(CreoleEvent e)
+
+//------------------------------------------------------------------------------
+//  Inner classes section
   
   class RunApplicationAction extends AbstractAction {
     public RunApplicationAction() {
@@ -324,5 +406,46 @@ public class ShellSlacFrame extends MainFrame {
       }// End if
     } // actionPerformed(ActionEvent e)
   } // class CloseSelectedDocumentAction extends AbstractAction
+
+  class StoreAllDocumentAsAction extends AbstractAction {
+    public StoreAllDocumentAsAction() {
+      super("Store all Documents As...");
+      putValue(SHORT_DESCRIPTION,
+        "Store all opened in the application documents in new directory");
+    } // StoreAllDocumentAsAction()
+
+    public void actionPerformed(ActionEvent e) {
+      createSerialDataStore();
+    } // actionPerformed(ActionEvent e)
+  } // class StoreAllDocumentAction extends AbstractAction
+
+  class StoreAllDocumentAction extends AbstractAction {
+    public StoreAllDocumentAction() {
+      super("Store all Documents");
+      putValue(SHORT_DESCRIPTION,"Store all opened in the application documents");
+    } // StoreAllDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+      if(dataStore != null) {
+        try {
+          dataStore.sync(corpus);
+        } catch (PersistenceException pex) {
+          pex.printStackTrace();
+        } catch (gate.security.SecurityException sex) {
+          sex.printStackTrace();
+        } // catch
+      } // if
+    } // actionPerformed(ActionEvent e)
+  } // class StoreAllDocumentAction extends AbstractAction
+
+  class LoadAllDocumentAction extends AbstractAction {
+    public LoadAllDocumentAction() {
+      super("Load all Documents");
+      putValue(SHORT_DESCRIPTION,"Load documents from storage");
+    } // StoreAllDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+    } // actionPerformed(ActionEvent e)
+  } // class LoadAllDocumentAction extends AbstractAction
   
 } // class ShellSlacFrame
