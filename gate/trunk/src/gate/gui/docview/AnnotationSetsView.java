@@ -123,6 +123,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
     textPane.addCaretListener(textCaretListener);
+    textPane.addAncestorListener(textAncestorListener);
   }
 
   /**
@@ -135,6 +136,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
     textPane.removeCaretListener(textCaretListener);
+    textPane.removeAncestorListener(textAncestorListener);
   }
   
   
@@ -142,6 +144,25 @@ public class AnnotationSetsView extends AbstractDocumentView
     document.addDocumentListener(this);
     textMouseListener = new TextMouseListener();
     textCaretListener = new TextCaretListener();
+    textAncestorListener = new AncestorListener(){
+      public void ancestorAdded(AncestorEvent event){
+        if(wasShowing) annotationEditor.show(false);
+        wasShowing = false;
+      }
+      
+      public void ancestorRemoved(AncestorEvent event){
+        if(annotationEditor.isShowing()){
+          wasShowing = true;
+          annotationEditor.hide();
+        }
+      }
+      
+      public void ancestorMoved(AncestorEvent event){
+        
+      }
+      private boolean wasShowing = false; 
+    };
+    
     mainTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener(){
         public void valueChanged(ListSelectionEvent e){
@@ -953,7 +974,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     public void actionPerformed(ActionEvent evt){
       annotationEditor.setAnnotation(aHandler.ann, aHandler.set);
-      annotationEditor.show();
+      annotationEditor.show(true);
     }
     
     AnnotationHandler aHandler;
@@ -976,6 +997,8 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected TextMouseListener textMouseListener;
   
   protected TextCaretListener textCaretListener; 
+  
+  protected AncestorListener textAncestorListener; 
   
   
   protected ColorGenerator colourGenerator;
