@@ -1,0 +1,97 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 19/11/2002
+ *
+ *  $Id$
+ *
+ */
+package gate.creole.ml;
+
+import java.util.*;
+import java.io.*;
+import java.net.URL;
+
+import org.jdom.*;
+import org.jdom.input.*;
+
+import gate.util.*;
+
+/**
+ * Stores data describing a dataset.
+ */
+
+public class DatasetDefintion implements Serializable{
+
+  public DatasetDefintion(Element domElement) throws GateException{
+    if(!domElement.getName().equals("DATASET")) throw new GateException(
+    "Dataset defintion element is \"" + domElement.getName() +
+    "\" instead of \"DATASET\"!");
+
+    //find instance the type
+    Element anElement = domElement.getChild("INSTANCE-TYPE");
+    if(anElement != null) instanceType = anElement.getTextTrim();
+    else throw new GateException(
+      "Required element \"INSTANCE-TYPE\" not present!");
+
+    //find the attributes
+    int attrIndex = 0;
+    attributes = new ArrayList();
+    Iterator childrenIter = domElement.getChildren("ATTRIBUTE").iterator();
+    while(childrenIter.hasNext()){
+      Element child = (Element)childrenIter.next();
+      Attribute attribute = new Attribute(child);
+      if(attribute.isClass()){
+        if(classAttribute != null) throw new GateException(
+          "Attribute \""+ attribute.getName() +
+          "\" marked as class attribute but the class is already known to be\""+
+          classAttribute.getName() + "\"!");
+        classAttribute = attribute;
+        classIndex = attrIndex;
+      }
+      attributes.add(attribute);
+      attrIndex ++;
+    }
+
+    if(classAttribute == null) throw new GateException(
+      "No class attribute defined!");
+  }
+
+
+  public String toString(){
+    StringBuffer res = new StringBuffer();
+    res.append("Instance type: " + instanceType + "\n");
+    Iterator attrIter = attributes.iterator();
+    while(attrIter.hasNext()){
+      res.append("Attribute:" + attrIter.next().toString() + "\n");
+    }
+    return res.toString();
+  }
+
+
+  public java.util.List getAttributes() {
+    return attributes;
+  }
+
+  public Attribute getClassAttribute(){
+    return classAttribute;
+  }
+  public String getInstanceType() {
+    return instanceType;
+  }
+
+  public int getClassIndex() {
+    return classIndex;
+  }
+
+  protected java.util.List attributes;
+  protected Attribute classAttribute = null;
+  protected String instanceType;
+
+  protected int classIndex;
+}
