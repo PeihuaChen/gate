@@ -129,7 +129,7 @@ public class CookBook extends TestCase
     // to deal with URL and net-related exceptions:
     URL u = null;
     try {
-      u = new URL("http://derwent.dcs.shef.ac.uk:8000/tests/doc0.html");
+      u = new URL("http://derwent.dcs.shef.ac.uk/tests/doc0.html");
       doc1 = Transients.newDocument(u);
       doc2 = Transients.newDocument(u);
     } catch(IOException e) {
@@ -186,7 +186,7 @@ public class CookBook extends TestCase
 
     URL u = null;
     try {
-      u = new URL("http://derwent.dcs.shef.ac.uk:8000/tests/doc0.html");
+      u = new URL("http://derwent.dcs.shef.ac.uk/tests/doc0.html");
       doc1 = Transients.newDocument(u);
       doc2 = Transients.newDocument(u);
     } catch(IOException e) { fail(e.toString()); }
