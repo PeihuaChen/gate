@@ -37,22 +37,22 @@ public class ConfigDataProcessor
   /** The parser for the CREOLE directory files */
   protected SAXParser parser = null;
 
+
   /** Default constructor. Sets up config files parser. */
   public ConfigDataProcessor() throws GateException {
 
     // construct a SAX parser for parsing the config files
     try {
       // Get a parser factory.
-      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
       // Set up the factory to create the appropriate type of parser:
       // non validating one
-      saxParserFactory.setValidating(false);
       // non namespace aware one
-      saxParserFactory.setNamespaceAware(true);
-
       // create the parser
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+      saxParserFactory.setValidating(false);
+      saxParserFactory.setNamespaceAware(true);
       parser = saxParserFactory.newSAXParser();
+
 
     } catch (SAXException e) {
       if(DEBUG) Out.println(e);

@@ -27,7 +27,7 @@ import gate.event.*;
 import gate.creole.*;
 
 // xml tools
-import javax.xml.parsers.*;
+//import customxerces.javax.xml.parsers.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 //import org.w3c.www.mime.*;
@@ -117,21 +117,33 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
       //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
       // Get a parser factory.
-      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-      // Set up the factory to create the appropriate type of parser
+      // Get a parser factory.
+      // Set up the factory to create the appropriate type of parser:
       // non validating one
+      // non namespace aware one
+      // create the parser
+      javax.xml.parsers.SAXParserFactory saxParserFactory = javax.xml.parsers.SAXParserFactory.newInstance();
       saxParserFactory.setValidating(false);
-      // non namesapace aware one
       saxParserFactory.setNamespaceAware(true);
-      // create it
-      SAXParser xmlParser = saxParserFactory.newSAXParser();
+      javax.xml.parsers.SAXParser xmlParser = saxParserFactory.newSAXParser();
+
+
+      // for customxerces
+      customxerces.javax.xml.parsers.SAXParserFactory cxSaxParserFactory = customxerces.javax.xml.parsers.SAXParserFactory.newInstance();
+      cxSaxParserFactory.setValidating(false);
+      cxSaxParserFactory.setNamespaceAware(true);
+      customxerces.javax.xml.parsers.SAXParser cxXmlParser = cxSaxParserFactory.newSAXParser();
       if (isGateXmlDocument){
         // Construct the appropiate xml handler for the job.
         gateXmlHandler = new GateFormatXmlDocumentHandler(doc);
         // Register a status listener
         gateXmlHandler.addStatusListener(statusListener);
         // Parse the Gate Document
-        xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+        if(doc.getCollectRepositioningInfo().booleanValue() && doc.getPreserveOriginalContent().booleanValue()) {
+          cxXmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+        } else {
+          xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+        }
         gateXmlHandler.removeStatusListener(statusListener);
       }else{
         // Create a new Xml document handler
@@ -151,30 +163,54 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 Angel */
       // try to choose concret parser (Xerces)
 // Angel - start
-      org.apache.xerces.parsers.SAXParser newxmlParser =
-          new org.apache.xerces.parsers.SAXParser();
-      // Set up the factory to create the appropriate type of parser
-      // non validating one
-      // http://xml.org/sax/features/validation set to false
-      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
-      // namesapace aware one
-      // http://xml.org/sax/features/namespaces set to true
-      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-      newxmlParser.setContentHandler(xmlDocHandler);
-      newxmlParser.setErrorHandler(xmlDocHandler);
-      newxmlParser.setDTDHandler(xmlDocHandler);
-      newxmlParser.setEntityResolver(xmlDocHandler);
-      newxmlParser.setReaderFactory(new StreamingCharFactory());
-      newxmlParser.parse(doc.getSourceUrl().toString());
+      if(doc.getCollectRepositioningInfo().booleanValue() && doc.getPreserveOriginalContent().booleanValue()) {
+        customxerces.org.apache.xerces.parsers.SAXParser newxmlParser =
+            new customxerces.org.apache.xerces.parsers.SAXParser();
+
+        // Set up the factory to create the appropriate type of parser
+        // non validating one
+        // http://xml.org/sax/features/validation set to false
+        newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+        // namesapace aware one
+        // http://xml.org/sax/features/namespaces set to true
+        newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+        newxmlParser.setContentHandler(xmlDocHandler);
+        newxmlParser.setErrorHandler(xmlDocHandler);
+        newxmlParser.setDTDHandler(xmlDocHandler);
+        newxmlParser.setEntityResolver(xmlDocHandler);
+        newxmlParser.setReaderFactory(new StreamingCharFactory());
+        newxmlParser.parse(doc.getSourceUrl().toString());
+      } else {
+        org.apache.xerces.parsers.SAXParser newxmlParser =
+            new org.apache.xerces.parsers.SAXParser();
+
+        // Set up the factory to create the appropriate type of parser
+        // non validating one
+        // http://xml.org/sax/features/validation set to false
+        newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+        // namesapace aware one
+        // http://xml.org/sax/features/namespaces set to true
+        newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+        newxmlParser.setContentHandler(xmlDocHandler);
+        newxmlParser.setErrorHandler(xmlDocHandler);
+        newxmlParser.setDTDHandler(xmlDocHandler);
+        newxmlParser.setEntityResolver(xmlDocHandler);
+        //newxmlParser.setReaderFactory(new StreamingCharFactory());
+        newxmlParser.parse(doc.getSourceUrl().toString());
+      }
 // Angel - end
         ((DocumentImpl) doc).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
         xmlDocHandler.removeStatusListener(statusListener);
       }// End if
-    } catch (ParserConfigurationException e){
+    } catch (javax.xml.parsers.ParserConfigurationException e){
         throw
         new DocumentFormatException("XML parser configuration exception ", e);
-    } catch (SAXException e){
+    } catch (customxerces.javax.xml.parsers.ParserConfigurationException e) {
+       throw
+        new DocumentFormatException("XML parser configuration exception ",
+                                    e);
+    } catch (SAXException e) {
       doc.getFeatures().put("parsingError", new Boolean(true));
 
       Boolean bThrow = (Boolean)
@@ -231,14 +267,22 @@ Angel */
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
       //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
       // Get a parser factory.
-      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-      // Set up the factory to create the appropriate type of parser
+      // Get a parser factory.
+      // Set up the factory to create the appropriate type of parser:
       // non validating one
+      // non namespace aware one
+      // create the parser
+      javax.xml.parsers.SAXParserFactory saxParserFactory = javax.xml.parsers.SAXParserFactory.newInstance();
       saxParserFactory.setValidating(false);
-      // non namesapace aware one
       saxParserFactory.setNamespaceAware(true);
-      // create it
-      SAXParser xmlParser = saxParserFactory.newSAXParser();
+      javax.xml.parsers.SAXParser xmlParser = saxParserFactory.newSAXParser();
+
+
+      // for customxerces
+      customxerces.javax.xml.parsers.SAXParserFactory cxSaxParserFactory = customxerces.javax.xml.parsers.SAXParserFactory.newInstance();
+      cxSaxParserFactory.setValidating(false);
+      cxSaxParserFactory.setNamespaceAware(true);
+      customxerces.javax.xml.parsers.SAXParser cxXmlParser = cxSaxParserFactory.newSAXParser();
 
       // create a new Xml document handler
       xmlDocHandler =  new XmlDocumentHandler(aDocument,
@@ -257,26 +301,49 @@ Angel */
 
 // Angel - start
       // try to choose concret parser
-      org.apache.xerces.parsers.SAXParser newxmlParser =
-          new org.apache.xerces.parsers.SAXParser();
-      // Set up the factory to create the appropriate type of parser
-      // non validating one
-      // http://xml.org/sax/features/validation set to false
-      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
-      // namesapace aware one
-      // http://xml.org/sax/features/namespaces set to true
-      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-      newxmlParser.setContentHandler(xmlDocHandler);
-      newxmlParser.setErrorHandler(xmlDocHandler);
-      newxmlParser.setDTDHandler(xmlDocHandler);
-      newxmlParser.setEntityResolver(xmlDocHandler);
-      newxmlParser.setReaderFactory(new StreamingCharFactory());
-      newxmlParser.parse(is);
+      if(aDocument.getCollectRepositioningInfo().booleanValue() && aDocument.getPreserveOriginalContent().booleanValue()) {
+        customxerces.org.apache.xerces.parsers.SAXParser newxmlParser =
+            new customxerces.org.apache.xerces.parsers.SAXParser();
+
+        // Set up the factory to create the appropriate type of parser
+        // non validating one
+        // http://xml.org/sax/features/validation set to false
+        newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+        // namesapace aware one
+        // http://xml.org/sax/features/namespaces set to true
+        newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+        newxmlParser.setContentHandler(xmlDocHandler);
+        newxmlParser.setErrorHandler(xmlDocHandler);
+        newxmlParser.setDTDHandler(xmlDocHandler);
+        newxmlParser.setEntityResolver(xmlDocHandler);
+        newxmlParser.setReaderFactory(new StreamingCharFactory());
+        newxmlParser.parse(aDocument.getSourceUrl().toString());
+      } else {
+        org.apache.xerces.parsers.SAXParser newxmlParser =
+            new org.apache.xerces.parsers.SAXParser();
+
+        // Set up the factory to create the appropriate type of parser
+        // non validating one
+        // http://xml.org/sax/features/validation set to false
+        newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+        // namesapace aware one
+        // http://xml.org/sax/features/namespaces set to true
+        newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+        newxmlParser.setContentHandler(xmlDocHandler);
+        newxmlParser.setErrorHandler(xmlDocHandler);
+        newxmlParser.setDTDHandler(xmlDocHandler);
+        newxmlParser.setEntityResolver(xmlDocHandler);
+        //newxmlParser.setReaderFactory(new StreamingCharFactory());
+        newxmlParser.parse(aDocument.getSourceUrl().toString());
+      }
 // Angel - end
 
       ((DocumentImpl) aDocument).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
-    } catch (ParserConfigurationException e){
+    } catch (javax.xml.parsers.ParserConfigurationException e){
+        throw new DocumentFormatException(
+                        "XML parser configuration exception ", e);
+    } catch (customxerces.javax.xml.parsers.ParserConfigurationException e){
         throw new DocumentFormatException(
                         "XML parser configuration exception ", e);
     } catch (SAXException e){

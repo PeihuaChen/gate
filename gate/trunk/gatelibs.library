@@ -27,6 +27,7 @@
     <path>[lib/pg73jdbc3.jar]</path>
     <path>[lib/ext/guk.jar]</path>
     <path>[lib/ext/nl.mpi.lookup.jar]</path>
+    <path>[lib/customxerces.jar]</path>
   </class>
-  <lastmodsaved>1063719629750</lastmodsaved>
+  <lastmodsaved>1075140906981</lastmodsaved>
 </library>
