@@ -36,7 +36,7 @@ public class DataStoreRegister extends HashSet {
 // and resource jars
     names.put(
       "gate.persist.SerialDataStore",
-      "A simple file-based storage mechanism that uses Java serialisation"
+      "SerialDataStore: file-based storage using Java serialisation"
     );
 
     return names;
