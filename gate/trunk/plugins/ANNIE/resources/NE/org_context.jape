@@ -5,17 +5,6 @@ Phase:	Org_Context
 Options: control = appelt
 
 
-//Macro:PNUNKNOWN
-//(
-// ({Token.orth == upperInitial} |
-//  {Token.orth == allCaps})
-// (SPACE 
-//  ({Token.orth == upperInitial} |
-//   {Token.orth == allCaps})
-// )*
-//)
-
-
 
 Rule:OrgContext1
 Priority: 1
@@ -37,7 +26,14 @@ Priority: 1
 )
 :org
 -->
- :org.Organization = {rule = "OrgContext1"}
+{
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgContext1");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 Rule: OrgContext2
 Priority: 5
@@ -56,7 +52,14 @@ Priority: 5
  {Token.string == "Laboratories"})
 )
 -->
- :org.Organization= {rule = "OrgContext2"}
+{
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgContext2");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 Rule:OrgContext3
 Priority: 5
@@ -70,7 +73,14 @@ Priority: 5
  {Token.string == "shares"}
 )
 -->
- :org.Organization= {rule = "OrgContext3"}
+{
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgContext3");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 Rule:OrgContext4
 Priority: 10
@@ -86,7 +96,15 @@ Priority: 10
  {Unknown.kind == PN}
 ):org
 -->
- :org.Organization= {rule = "OrgContext4"}
+{
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgContext4");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
+
 
 Rule: OrgContext5
 Priority: 10
@@ -103,7 +121,16 @@ Priority: 10
  {Unknown.kind == PN}
 ):org
 -->
- :org.Organization= {rule = "OrgContext5"}
+ {
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgContext5");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
+
+:org.Organization= {rule = "OrgContext5"}
 
 Rule:JoinOrg
 Priority: 50
@@ -122,7 +149,14 @@ Priority: 50
 )
 :org
 -->
- :org.Organization= {rule = "joinOrg"}
+ {
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "JoinOrg");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 
 Rule:OrgPerson
@@ -140,22 +174,42 @@ Priority: 20
  {Person}
 )
 --> 
- :org.Organization= {rule = "OrgJobPerson"}
+ {
+//get the matched annotation(s)
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 
-Rule: OrgConjOrg1
+//create the new annotation
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgPerson");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+
+//delete the old annotation(s)
+annotations.removeAll(org);
+}
+
+
+Rule: OrgConjOrg1 
 Priority: 10
 
 (
- {Unknown.kind == PN}
+{Unknown.kind == PN}
 ):org
 (
- (SPACE)
- {POS.category == CC}
- (SPACE)
- {Organization}
+(SPACE)
+{POS.category == CC}
+(SPACE)
+{Organization}
 )
 -->
- :org.Organization= {rule = "OrgConjOrg1"}
+{
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgConjOrg1");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
 
 
 Rule: OrgConjOrg2
@@ -172,5 +226,21 @@ Priority: 10
  {Unknown.kind == PN}
 ):org
 -->
- :org.Organization= {rule = "OrgConjOrg2"}
+ {
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "OrgConjOrg2");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
+
+
+
+
+
+
+
+
+
 
