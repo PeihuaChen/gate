@@ -372,7 +372,7 @@ public class AnnotationEditor extends AbstractVisualResource {
         //find the annotation set
         String setName = (String)annotationsTable.getModel().
                                                     getValueAt(row, 1);
-        AnnotationSet set = setName.equals("<Default>")?
+        AnnotationSet set = setName.equals("Default")?
                             document.getAnnotations() :
                             document.getAnnotations(setName);
 
@@ -399,6 +399,17 @@ public class AnnotationEditor extends AbstractVisualResource {
           //right click
           //add delete option
           JPopupMenu popup = new JPopupMenu();
+          popup.add(new AbstractAction(){
+            {
+              putValue(NAME, "Select all");
+            }
+            public void actionPerformed(ActionEvent evt){
+              annotationsTable.selectAll();
+            }
+          });
+
+          popup.addSeparator();
+
           class DeleteAnnotationAction extends AbstractAction{
             public DeleteAnnotationAction(){
               super("Delete selected");
@@ -415,7 +426,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                 //find the annotation set
                 String setName = (String)annotationsTable.getModel().
                                                             getValueAt(row, 1);
-                AnnotationSet set = setName.equals("<Default>")?
+                AnnotationSet set = setName.equals("Default")?
                                     document.getAnnotations() :
                                     document.getAnnotations(setName);
                 set.remove(ann);
@@ -424,6 +435,7 @@ public class AnnotationEditor extends AbstractVisualResource {
           }//class DeleteAnnotationAction extends AbstractAction
 
           popup.add(new DeleteAnnotationAction());
+          popup.addSeparator();
           popup.add(editAnnAct);
           popup.show(annotationsTable, e.getX(), e.getY());
         }
@@ -469,12 +481,12 @@ public class AnnotationEditor extends AbstractVisualResource {
                                             new Long(position)
                                         ).iterator();
             if(annIter.hasNext()){
-              JMenu menu = new JMenu("<Default>");
+              JMenu menu = new JMenu("Default");
               popup.add(menu);
               while(annIter.hasNext()){
                 Annotation ann = (Annotation)annIter.next();
                 JMenuItem item = new SelectAnnotationPopupItem(ann,
-                                                                  "<Default>");
+                                                                  "Default");
                 menu.add(item);
               }
             }
@@ -507,7 +519,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                !getAnnotationSchemas().isEmpty()){
               JPopupMenu popup = new JPopupMenu();
               //Add to the default AnnotationSet
-              JMenu menu = new JMenu("Add to <Default>");
+              JMenu menu = new JMenu("Add to Default");
 
               menu.add(new NewCustomAnnotationPopupItem(
                                                  start,
@@ -916,7 +928,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                                   int progressEnd){
     as.addGateListener(eventHandler);
     String setName = as.getName();
-    if(setName == null) setName = "<Default>";
+    if(setName == null) setName = "Default";
     TypeData setData = new TypeData(setName, null, false);
     setData.setAnnotations(as);
     DefaultMutableTreeNode setNode = new DefaultMutableTreeNode(setData, true);
@@ -1516,8 +1528,8 @@ public class AnnotationEditor extends AbstractVisualResource {
 
   /**
    * Describes a range in the {@link data} structure. A range is a bunch of
-   * annotations belonging to the same annotation set that are contiguous in
-   * the {@link #data} structure.
+   * annotations of the same type belonging to the same annotation set that
+   * are contiguous in the {@link #data} structure.
    */
   class Range implements Comparable {
     public Range(String setName, String type, int start, int end) {
@@ -1591,7 +1603,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             AnnotationSetEvent asEvt = (AnnotationSetEvent)currentEvent;
             AnnotationSet set = (AnnotationSet)asEvt.getSource();
             String setName = set.getName();
-            if(setName == null) setName = "<Default>";
+            if(setName == null) setName = "Default";
             Annotation ann = asEvt.getAnnotation();
             String type = ann.getType();
             TypeData tData = getTypeData(setName, type);
@@ -1741,6 +1753,10 @@ public class AnnotationEditor extends AbstractVisualResource {
     protected long lastEvent = 0;
   }//class DelayedListener
 
+  /**
+   * This class handles the blinking for the selected annotations in the
+   * text display. On creation
+   */
   class SelectionBlinker implements Runnable{
     public void run(){
       while(true){
