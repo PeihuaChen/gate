@@ -1056,4 +1056,15 @@ public class DatabaseDocumentImpl extends DocumentImpl
     super.removeAnnotationSet(name);
   }
 
+  /**
+   * Returns true of an LR has been modified since the last sync.
+   * Always returns false for transient LRs.
+   */
+  public boolean isModified() {
+    return this.isResourceChanged(EventAwareLanguageResource.DOC_CONTENT) ||
+            this.isResourceChanged(EventAwareLanguageResource.RES_FEATURES) ||
+              this.isResourceChanged(EventAwareLanguageResource.RES_NAME) ||
+                this.isResourceChanged(EventAwareLanguageResource.DOC_MAIN);
+  }
+
 }

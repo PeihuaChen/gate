@@ -230,8 +230,18 @@ public class DatabaseCorpusImpl extends CorpusImpl
       default:
         throw new IllegalArgumentException();
     }
-
   }
+
+  /**
+   * Returns true of an LR has been modified since the last sync.
+   * Always returns false for transient LRs.
+   */
+  public boolean isModified() {
+    return this.isResourceChanged(EventAwareLanguageResource.RES_FEATURES) ||
+            this.isResourceChanged(EventAwareLanguageResource.RES_NAME);
+  }
+
+
 
   /** Sets the name of this resource*/
   public void setName(String name){
