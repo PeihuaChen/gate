@@ -38,7 +38,9 @@ public class TestPersist extends TestCase
 
 
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
+  private Long uc01_lrID = null;
+  private LanguageResource uc01_LR = null;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
@@ -461,6 +463,13 @@ public class TestPersist extends TestCase
     //5. try adding doc to data store
     LanguageResource lr = ds.adopt(doc,si);
 
+    Assert.assert(lr instanceof DatabaseDocumentImpl);
+    Assert.assertNotNull(lr.getDataStore());
+    Assert.assert(lr.getDataStore() instanceof DatabaseDataStore);
+
+    this.uc01_lrID = (Long)lr.getLRPersistenceId();
+    this.uc01_LR = lr;
+
     //6.close
     ac.close();
     ds.close();
@@ -521,6 +530,38 @@ public class TestPersist extends TestCase
   public void testDB_UseCase03() throws Exception {
 
     //read a document
+    //use the one created in UC01
+//this.uc01_lrID = new Long(1041);
+//System.out.println("docid = " +this.uc01_lrID);
+    LanguageResource lr = null;
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+
+    String name = lr.getName();
+    Assert.assertNotNull(name);
+    Assert.assert(name.equals(this.uc01_LR.getName()));
+
+    FeatureMap fm = lr.getFeatures();
+    FeatureMap fmOrig = this.uc01_LR.getFeatures();
+
+    Assert.assertNotNull(fm);
+    Assert.assertNotNull(fmOrig);
+
+    Iterator keys = fm.keySet().iterator();
+
+    while (keys.hasNext()) {
+      String currKey = (String)keys.next();
+//System.out.println("KEY =" +currKey);
+//System.out.println("VAL =" +fm.get(currKey));
+      Assert.assert(fmOrig.containsKey(currKey));
+      Assert.assertEquals(fm.get(currKey),fmOrig.get(currKey));
+    }
 
     if(DEBUG) {
       Err.prln("Use case 03 passed...");
