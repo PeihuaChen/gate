@@ -237,7 +237,8 @@ public class SerialCorpusImpl extends
       return transientCorpus.toArray();
 
     //there is a problem here, because some docs might not be instantiated
-    return documents.values().toArray();
+    throw new MethodNotImplementedException(
+                "toArray() is not implemented for SerialCorpusImpl");
   }
 
   public Object[] toArray(Object[] a){
@@ -245,7 +246,8 @@ public class SerialCorpusImpl extends
       return transientCorpus.toArray(a);
 
     //there is a problem here, because some docs might not be instantiated
-    return documents.values().toArray(a);
+    throw new MethodNotImplementedException(
+                "toArray(Object[] a) is not implemented for SerialCorpusImpl");
   }
 
   public boolean add(Object o){

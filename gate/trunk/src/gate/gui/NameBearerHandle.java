@@ -433,8 +433,8 @@ public class NameBearerHandle implements Handle,
             ds.sync((LanguageResource)target);
           }else{
             //TODO: change the null for SecurityInfo
-            ds.adopt((LanguageResource)target,null);
-            ds.sync((LanguageResource)target);
+            LanguageResource lr = ds.adopt((LanguageResource)target,null);
+            ds.sync(lr);
           }
         }
       } catch(PersistenceException pe) {
