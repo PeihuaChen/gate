@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This script was automatically generated using Zero G's InstallAnywhere 6.1 Standard, Build 2325
      STATUS: Fully Functional LICENSED Edition
-     DATE:   Tue Jan 11 17:25:51 GMT 2005 -->
+     DATE:   Fri Jan 14 14:38:10 GMT 2005 -->
 <InstallAnywhere_Deployment_Project increments="2025">
 	<!-- ** DO NOT EDIT ** Essential authorization and configuration data ** DO NOT EDIT ** -->
 	<essentialScriptInfo>
@@ -10,7 +10,7 @@
 		<scriptID>12,42,11,90,89,56,50,48,54,77,57,83,84,86,78,77</scriptID>
 		<buildID>3,13,71,87,105,110,100,111,119,115,32,88,80,44,32,53,46,49,44,32,120,56,54,59,32,74,97,118,97,32,49,46,51,46,49,95,48,56,44,32,83,117,110,32,77,105,99,114,111,115,121,115,116,101,109,115,32,73,110,99,46,44,32,104,116,116,112,58,47,47,106,97,118,97,46,115,117,110,46,99,111,109,47,59,32,101,110,44,32,71,66,59,32,67,112,49,50,53,50</buildID>
 		<!-- The authorizationID may change between project saves and builds.  This does not effect the integrity of the project, nor do changes in this value represent changes in the actual InstallAnywhere project. -->
-		<authorizationID>1,0,0,0,99,-54,80,48,80,112,116,103,88,98,113,97,113,81,67,49,74,65,70,70,85,71,64,69,66,69,48,79,87,5,2,2,11,47,114,1,1,0,0</authorizationID>
+		<authorizationID>1,0,0,0,115,-86,-32,-48,80,112,116,103,88,98,113,97,113,81,67,49,74,65,70,70,85,71,64,69,66,69,48,79,87,5,2,4,11,40,113,1,1,0,0</authorizationID>
 	</essentialScriptInfo>
 	<installationObjects uniqueObjects="105">
 		<object class="com.zerog.ia.installer.Installer" objectID="429f2d65aae3">
@@ -166,7 +166,7 @@ it will search for ones in this list]]></string>
 								</object>
 							</method>
 							<method name="addElement">
-								<object class="com.zerog.ia.installer.util.LAXPropertyData" objectID="761234cbbdb3">
+								<object class="com.zerog.ia.installer.util.LAXPropertyData" objectID="85203a07bdb2">
 									<property name="propertyValue">
 										<string><![CDATA[org.apache.tools.ant.launch.Launcher]]></string>
 									</property>
@@ -846,7 +846,7 @@ Press "Done" to quit the installer.]]></string>
 					</method>
 					<method name="put">
 						<string><![CDATA[com.zerog.ia.project.build.last.date]]></string>
-						<string><![CDATA[11 January 2005 16:56:28 o'clock GMT]]></string>
+						<string><![CDATA[14 January 2005 14:30:49 o'clock GMT]]></string>
 					</method>
 					<method name="put">
 						<string><![CDATA[com.zerog.ia.build.platform.windows.vm]]></string>
@@ -918,7 +918,7 @@ Press "Done" to quit the installer.]]></string>
 					</method>
 					<method name="put">
 						<string><![CDATA[com.zerog.ia.project.save.last.date]]></string>
-						<string><![CDATA[11 January 2005 17:25:51 o'clock GMT]]></string>
+						<string><![CDATA[14 January 2005 14:38:10 o'clock GMT]]></string>
 					</method>
 					<method name="put">
 						<string><![CDATA[com.zerog.ia.build.options.optimization.platform.cdrom]]></string>
@@ -1072,13 +1072,13 @@ Press "Done" to quit the installer.]]></string>
 			<property name="installerInfoData">
 				<object class="com.zerog.ia.installer.util.InstallerInfoData" objectID="429f2d74aae5">
 					<property name="installerTitle">
-						<string><![CDATA[GATE 3.0 RC2]]></string>
+						<string><![CDATA[GATE 3.0]]></string>
 					</property>
 					<property name="installerName">
-						<string><![CDATA[gate3rc2]]></string>
+						<string><![CDATA[gate3]]></string>
 					</property>
 					<property name="productName">
-						<string><![CDATA[GATE 3.0 RC2]]></string>
+						<string><![CDATA[GATE 3.0]]></string>
 					</property>
 					<property name="productID">
 						<object class="com.zerog.registry.UUID">
@@ -1847,7 +1847,7 @@ and any path to a file to read from that file]]></string>
 												<boolean>false</boolean>
 											</property>
 											<property name="totalSize">
-												<long>215675</long>
+												<long>215671</long>
 											</property>
 											<property name="unixPermissions">
 												<string><![CDATA[775]]></string>
@@ -1955,7 +1955,7 @@ and any path to a file to read from that file]]></string>
 												<boolean>false</boolean>
 											</property>
 											<property name="totalSize">
-												<long>34955939</long>
+												<long>36248495</long>
 											</property>
 											<property name="unixPermissions">
 												<string><![CDATA[775]]></string>
@@ -2037,7 +2037,7 @@ and any path to a file to read from that file]]></string>
 												<boolean>false</boolean>
 											</property>
 											<property name="totalSize">
-												<long>3220208</long>
+												<long>3219308</long>
 											</property>
 											<property name="unixPermissions">
 												<string><![CDATA[775]]></string>
@@ -2143,7 +2143,7 @@ and any path to a file to read from that file]]></string>
 														<boolean>false</boolean>
 													</property>
 													<property name="totalSize">
-														<long>107400361</long>
+														<long>107419215</long>
 													</property>
 													<property name="unixPermissions">
 														<string><![CDATA[775]]></string>
@@ -2365,8 +2365,8 @@ and any path to a file to read from that file]]></string>
 										<object refID="763033658af5"/>
 									</property>
 									<installChildren>
-										<object refID="761b69b78aed"/>
 										<object refID="763033658af5"/>
+										<object refID="761b69b78aed"/>
 										<object refID="761d65868aef"/>
 										<object refID="761b58bf8aeb"/>
 										<object class="com.zerog.ia.installer.actions.CreateShortcut" objectID="763113948af8">
@@ -2488,7 +2488,7 @@ and any path to a file to read from that file]]></string>
 												<string><![CDATA[tao.pdf]]></string>
 											</property>
 											<property name="fileSize">
-												<long>3722634</long>
+												<long>3779256</long>
 											</property>
 											<property name="macBinary">
 												<boolean>false</boolean>
