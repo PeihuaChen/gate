@@ -1,3 +1,18 @@
+/*  ApplicationViewer.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 25/01/2001
+ *
+ *  $Id$
+ *
+ */
+
 package gate.gui;
 
 import gate.creole.*;
@@ -124,7 +139,8 @@ public class ApplicationViewer extends AbstractVisualResource {
     modulesTable = new XJTable(modulesTableModel);
     modulesTable.setSortable(true);
     modulesTable.setSortedColumn(0);
-    modulesTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    modulesTable.setSelectionMode(
+                                ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     scroller = new JScrollPane(modulesTable);
     scroller.setBorder(BorderFactory.createTitledBorder("Available components"));
 
@@ -161,7 +177,7 @@ public class ApplicationViewer extends AbstractVisualResource {
           List actions = new ArrayList();
           for(int i = 0; i < rows.length; i++){
             Action act =(Action)
-                        addActionForPR.get(modulesTable.getValueAt(rows[i], -1));
+                       addActionForPR.get(modulesTable.getValueAt(rows[i], -1));
             if(act != null) actions.add(act);
           }
           Iterator actIter = actions.iterator();
@@ -180,14 +196,15 @@ public class ApplicationViewer extends AbstractVisualResource {
               ApplicationViewer.this,
               "Please select some components to be removed from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
-        }else{
+        } else {
           List actions = new ArrayList();
           for(int i = 0; i < rows.length; i++){
-            Object node = mainTreeTable.getTree().getPathForRow(rows[i]).getLastPathComponent();
+            Object node = mainTreeTable.getTree().getPathForRow(
+                                                rows[i]).getLastPathComponent();
             if(node instanceof ProcessingResource && controller.contains(node)){
               Action act = (Action)removeActionForPR.get(node);
               if(act != null) actions.add(act);
-            }else{
+            } else {
               JOptionPane.showMessageDialog(
                   ApplicationViewer.this,
                   "Only processing resources can be removed!\n" +
@@ -264,7 +281,8 @@ public class ApplicationViewer extends AbstractVisualResource {
               "Gate", JOptionPane.ERROR_MESSAGE);
         }else{
           for(int i = rows.length -1; i >= 0; i--){
-            Object node = mainTreeTable.getTree().getPathForRow(rows[i]).getLastPathComponent();
+            Object node = mainTreeTable.getTree().getPathForRow(
+                                                rows[i]).getLastPathComponent();
             if(node instanceof ProcessingResource && controller.contains(node)){
               int index = controller.indexOf(node);
               //move the module down
@@ -498,7 +516,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 */
           }
         }
-      }else if (value instanceof ParameterDisjunction){
+      } else if (value instanceof ParameterDisjunction) {
         Icon icon = new ImageIcon(getClass().
                                   getResource("/gate/resources/img/param.gif"));
         setOpenIcon(icon);
@@ -525,7 +543,8 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   class ModulesTableModel extends AbstractTableModel{
     public int getRowCount(){
-      return Gate.getCreoleRegister().getPrInstances().size() - controller.size() -1;
+      return
+        Gate.getCreoleRegister().getPrInstances().size() - controller.size() -1;
     }
 
     public int getColumnCount(){
@@ -583,7 +602,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     public void actionPerformed(ActionEvent e){
       controller.add(pr);
       ResourceData rData = (ResourceData)
-                           Gate.getCreoleRegister().get(pr.getClass().getName());
+                          Gate.getCreoleRegister().get(pr.getClass().getName());
       List params = rData.getParameterList().getRuntimeParameters();
       Iterator paramsIter = params.iterator();
       List parameterDisjunctions = new ArrayList();
@@ -634,7 +653,8 @@ public class ApplicationViewer extends AbstractVisualResource {
             List someParams = (List)paramsForPR.get(pr);
             Iterator paramsIter = someParams.iterator();
             while(paramsIter.hasNext()){
-              ParameterDisjunction pDisj = (ParameterDisjunction)paramsIter.next();
+              ParameterDisjunction pDisj =
+                                        (ParameterDisjunction)paramsIter.next();
               if(pDisj.getValue() != null){
                 params.put(pDisj.getName(), pDisj.getValue());
               }
@@ -645,29 +665,29 @@ public class ApplicationViewer extends AbstractVisualResource {
             }catch(java.beans.IntrospectionException ie){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") + ":\n" +
-                                            ie.toString(),
+                                            pr.getFeatures().get("gate.NAME") +
+                                            ":\n" + ie.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }catch(java.lang.reflect.InvocationTargetException ite){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") + ":\n" +
-                                            ite.toString(),
+                                            pr.getFeatures().get("gate.NAME") +
+                                            ":\n" + ite.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }catch(IllegalAccessException iae){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") + ":\n" +
-                                            iae.toString(),
+                                            pr.getFeatures().get("gate.NAME") +
+                                            ":\n" + iae.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }catch(GateException ge){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("gate.NAME") + ":\n" +
-                                            ge.toString(),
+                                            pr.getFeatures().get("gate.NAME") +
+                                            ":\n" + ge.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }
@@ -703,24 +723,24 @@ public class ApplicationViewer extends AbstractVisualResource {
       currentParameter = (Parameter)options.get(selectedIndex);
       typeName = currentParameter.getTypeName();
       if(values[selectedIndex] == null){
-        try{
+        try {
           values[selectedIndex] = currentParameter.getDefaultValue();
-        }catch(Exception e){
+        } catch(Exception e) {
           values[selectedIndex] = "";
         }
       }
 //      tableModel.fireTableDataChanged();
     }
 
-    public int size(){
+    public int size() {
       return options.size();
     }
 
-    public Boolean getRequired(){
+    public Boolean getRequired() {
       return new Boolean(!currentParameter.isOptional());
     }
 
-    public String getName(){
+    public String getName() {
       return currentParameter.getName();
     }
 
@@ -760,14 +780,15 @@ public class ApplicationViewer extends AbstractVisualResource {
     public Object getValue(){
       if(values[selectedIndex] != null) {
         return values[selectedIndex];
-      }else{
+      } else {
         //no value set; use the most currently used one of the given type
         if(getType().startsWith("gate.")){
-          Stack instances = ((ResourceData)Gate.getCreoleRegister().get(getType())).
-                 getInstantiations();
+          Stack instances = ((ResourceData)
+                              Gate.getCreoleRegister().get(getType())).
+                                  getInstantiations();
           if(instances != null && !instances.isEmpty()) return instances.peek();
           else return null;
-        }else{
+        } else {
           return null;
         }
       }
@@ -807,7 +828,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     JComboBox combo;
   }
 
-  class ParameterValueRenderer extends DefaultTableCellRenderer{
+  class ParameterValueRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table,
                                                Object value,
                                                boolean isSelected,
@@ -815,7 +836,8 @@ public class ApplicationViewer extends AbstractVisualResource {
                                                int row,
                                                int column){
       if(value instanceof FeatureBearer){
-        String name = (String)((FeatureBearer)value).getFeatures().get("gate.NAME");
+        String name = (String)
+                        ((FeatureBearer)value).getFeatures().get("gate.NAME");
         if(name != null){
           return super.getTableCellRendererComponent(table, name, isSelected,
                                                      hasFocus, row, column);
@@ -839,10 +861,10 @@ public class ApplicationViewer extends AbstractVisualResource {
           JFileChooser fileChooser = MainFrame.getInstance().fileChooser;
           int res = fileChooser.showOpenDialog(ApplicationViewer.this);
           if(res == fileChooser.APPROVE_OPTION){
-            try{
+            try {
               textField.setText(fileChooser.getSelectedFile().
                                 toURL().toExternalForm());
-            }catch(IOException ioe){}
+            } catch(IOException ioe){}
           }
         }
       });
@@ -860,7 +882,8 @@ public class ApplicationViewer extends AbstractVisualResource {
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
       if(rData != null){
         //Gate type
-        combo.setModel(new DefaultComboBoxModel(rData.getInstantiations().toArray()));
+        combo.setModel(new DefaultComboBoxModel(
+                                          rData.getInstantiations().toArray()));
         combo.setSelectedItem(value);
         combo.setRenderer(new ComboRenderer());
         comboUsed = true;
@@ -886,7 +909,8 @@ public class ApplicationViewer extends AbstractVisualResource {
                                                     boolean isSelected,
                                                     boolean cellHasFocus){
         if(value instanceof FeatureBearer){
-          String name = (String)((FeatureBearer)value).getFeatures().get("gate.NAME");
+          String name = (String)(
+                          (FeatureBearer)value).getFeatures().get("gate.NAME");
           if(name != null){
             return super.getListCellRendererComponent(list, name, index,
                                                       isSelected, cellHasFocus);
