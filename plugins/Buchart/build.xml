@@ -11,13 +11,10 @@
       ################################################################### -->
        
 <!-- Update this to point at your main GATE jar file -->
-<fileset id="gate-jar" file="z:/gate/bin/gate.jar"/>
-
-<!-- Update this to point to a compatiable tools.jar file -->
-<fileset id="tools-jar" file="z:/gate/bin/tools14.jar"/>
+<fileset id="gate-jar" file="../../bin/gate.jar"/>
 
 <!-- Update this to point at your installation of GATE -->
-<property name="gate_home" location="z:/gate"/>
+<property name="gate_home" location="../.."/>
 
 <!-- If you are wanting to use your own installation of SWI prolog then
      change this so that it points to the jpl.jar file in that distribution -->
@@ -39,7 +36,6 @@
 	<path id="use-path">
 		<fileset refid="jpl-jar"/>
 		<fileset refid="gate-jar"/>
-		<fileset refid="tools-jar"/>
 		<fileset id="gate-libs" dir="${gate_home}/lib">
 			<include name="*.jar"/>
 			<include name="*.zip"/>
@@ -52,7 +48,6 @@
 	<path id="use-path">
 		<fileset refid="jpl-jar"/>
 		<fileset refid="gate-jar"/>
-		<fileset refid="tools-jar"/>
 	</path>
 </target>
 
@@ -83,7 +78,7 @@
 
 
 <target name="buchart.jar" depends="plcafe.translate,plcafe.compile,buchart.compile">
-	<jar file="BuChart.jar" basedir="${classes}" update="true"/>
+	<jar file="BuChart.jar" basedir="${classes}"/>
 </target>
 
 <target name="plcafe.translate">
@@ -123,7 +118,6 @@
 		<classpath>
 			<fileset file="BuChart.jar"/>
 			<fileset dir="${lib}">
-				<include name="**/*.jar"/>
 			</fileset>
 		</classpath>
 		<jvmarg value="-Xmx512m"/>
