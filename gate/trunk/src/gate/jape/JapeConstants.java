@@ -53,6 +53,9 @@ public interface JapeConstants extends Serializable
   public int APPELT_STYLE = 2;
   /** Appelt-shortest-style rule application */
   public int FIRST_STYLE = 3;
+  /** The phase finishes on the first match */
+  public int ONCE_STYLE = 3;
+
 
   /** The default priority of a rule. */
   public int DEFAULT_PRIORITY = -1;
@@ -67,7 +70,11 @@ public interface JapeConstants extends Serializable
 
 
 // $Log$
+// Revision 1.8  2002/04/22 11:45:57  valyt
+// ONCE mode added to Jape
+//
 // Revision 1.7  2001/05/17 16:02:41  valyt
+//
 // Jape grammars now can match using the "first" style
 //
 // Tokeniser only matches one character per (Space)Tokens in case of whitespace or control characters
