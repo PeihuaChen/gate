@@ -456,15 +456,14 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
       textField = new JTextField();
 
+      fileChooser = MainFrame.getFileChooser();
       button = new JButton(new ImageIcon(getClass().getResource(
                                "/gate/resources/img/loadFile.gif")));
       button.setToolTipText("Set from file...");
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          JFileChooser fileChooser = MainFrame.getFileChooser();
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           fileChooser.setDialogTitle("Select a file");
-          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
           int res = fileChooser.showOpenDialog(ResourceParametersEditor.this);
           if(res == fileChooser.APPROVE_OPTION){
             try {
@@ -497,7 +496,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           label.setText(value.toString());
         }
       });
-
     }//ParameterValueEditor()
 
     public Component getTableCellEditorComponent(JTable table,
@@ -506,7 +504,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                                  int row,
                                                  int column){
 
-      type = ((ParameterDisjunction)table.getValueAt(row, 0)).getType();
+      ParameterDisjunction pDisj = (ParameterDisjunction)
+                                   table.getValueAt(row, 0);
+      type = pDisj.getType();
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
 
       if(rData != null){
@@ -521,6 +521,23 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         comboUsed = false;
         textField.setText((value == null) ? "" : value.toString());
         if(type.equals("java.net.URL")){
+          //clean up all filters
+          fileChooser.resetChoosableFileFilters();
+          fileChooser.setAcceptAllFileFilterUsed(true);
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          Parameter param = pDisj.getParameter();
+          Set sufixes = param.getSuffixes();
+          if(sufixes != null){
+            ExtensionFileFilter fileFilter = new ExtensionFileFilter();
+            Iterator sufIter = sufixes.iterator();
+            while(sufIter.hasNext()){
+              fileFilter.addExtension((String)sufIter.next());
+            }
+            fileFilter.setDescription("Known file types " + sufixes.toString());
+            fileChooser.addChoosableFileFilter(fileFilter);
+            fileChooser.setFileFilter(fileFilter);
+          }
+
           textField.setEditable(true);
           textButtonBox.removeAll();
           textButtonBox.add(textField);
@@ -570,6 +587,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
      * Generic editor for all types that are not treated special
      */
     JTextField textField;
+
+    /**
+     * A pointer to the filechooser from MainFrame;
+     */
+    JFileChooser fileChooser;
 
     boolean comboUsed;
     JButton button;
