@@ -219,7 +219,31 @@ public class OracleDataStore extends JDBCDataStore {
 
   /** Get a list of the types of LR that are present in the data store. */
   public List getLrTypes() throws PersistenceException {
-    throw new MethodNotImplementedException();
+
+    Vector lrTypes = new Vector();
+    Statement stmt = null;
+    ResultSet rs = null;
+
+    try {
+      stmt = this.jdbcConn.createStatement();
+      rs = stmt.executeQuery(" SELECT lrtp_type " +
+                             " FROM   t_lr_type LRTYPE ");
+
+      while (rs.next()) {
+        //access by index is faster
+        String lrType = rs.getString(1);
+        lrTypes.add(lrType);
+      }
+
+      return lrTypes;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get LR types from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
   }
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
