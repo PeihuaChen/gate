@@ -119,7 +119,7 @@ public class TextualDocumentFormat extends DocumentFormat
         readBR = true;
         // If \n is followed by a \r then advance the index in order to read a
         // BR entity
-        if ((index+1 < endOffset) && (content.charAt(index+1) == '\r'))
+        while ((index+1 < endOffset) && (content.charAt(index+1) == '\r'))
           index ++;
       }// End if
       switch(state){
