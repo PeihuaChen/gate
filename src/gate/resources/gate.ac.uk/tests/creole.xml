@@ -121,15 +121,6 @@
 			</GUI>
 		</RESOURCE>
 		<RESOURCE>
-			<NAME>Serial Controller Editor</NAME>
-			<CLASS>gate.gui.ApplicationEditor</CLASS>
-			<!-- type values can be "large" or "small"-->
-			<GUI TYPE="large">
-				<MAIN_VIEWER/>
-				<RESOURCE_DISPLAYED>gate.creole.SerialController</RESOURCE_DISPLAYED>
-			</GUI>
-		</RESOURCE>
-		<RESOURCE>
 			<NAME>Serial Datastore Viewer</NAME>
 			<CLASS>gate.gui.SerialDatastoreViewer</CLASS>
 			<!-- type values can be "large" or "small"-->

@@ -836,6 +836,7 @@ public class DocumentEditor extends AbstractVisualResource
     //printing
 //    toolbar.add(Box.createHorizontalStrut(20));
 //    toolbar.add(new PrintAction());
+//    toolbar.add(new SearchAction());
 
 
 
@@ -3273,6 +3274,40 @@ Out.prln("NULL size");
     JComponent source;
   }//protected class DeleteSelectedAnnotationsAction
 
+  protected class SearchAction extends AbstractAction {
+    public SearchAction(){
+      super("Search");
+      putValue(SHORT_DESCRIPTION, "Search within the text");
+      putValue(SMALL_ICON, MainFrame.getIcon("search.gif"));
+    }
+
+    public void actionPerformed(ActionEvent evt){
+    }
+  }
+
+  protected class SearchDialog extends JDialog{
+    SearchDialog(Frame owner){
+      super(owner, "Find", false);
+      initLocalData();
+      initGuiComponents();
+      initListeners();
+    }
+
+    protected void initLocalData(){
+    }
+
+    protected void initGuiComponents(){
+    }
+
+    protected void initListeners(){
+    }
+
+    JTextField textField;
+    JCheckBox ignoreCaseChk;
+    JCheckBox wholeWordsChk;
+
+  }
+
   /**
    * The action that is fired when the user wants to edit an annotation.
    * This will show a {@link gate.gui.AnnotationEditDialog} to allow the user
@@ -3360,26 +3395,41 @@ Out.prln("NULL size");
 
     /** This method takes care of how the dumping is done*/
     public void actionPerformed(ActionEvent e){
-      PrinterJob printerJob = PrinterJob.getPrinterJob();
+      Runnable runnable = new Runnable(){
+        public void run(){
+          PrinterJob printerJob = PrinterJob.getPrinterJob();
 
-      if (printerJob.printDialog()) {
-        try{
-          PageFormat pageFormat = printerJob.pageDialog(printerJob.defaultPage());
-          Printable printable = new Printable(){
-            public int print(Graphics graphics, PageFormat pageFormat,
-                             int pageIndex)throws PrinterException{
-              if(pageIndex == 0){
-                textScroll.getViewport().printAll(graphics);
-                return Printable.PAGE_EXISTS;
-              }else return Printable.NO_SUCH_PAGE;
+          if (printerJob.printDialog()) {
+            try{
+              PageFormat pageFormat = printerJob.pageDialog(printerJob.defaultPage());
+              Printable printable = new Printable(){
+                public int print(Graphics graphics, PageFormat pageFormat,
+                                 int pageIndex)throws PrinterException{
+                  if(pageIndex == 0){
+                    JTextPane printPane = new JTextPane(textPane.getStyledDocument());
+                    JScrollPane scroller = new JScrollPane(printPane);
+                    scroller.setSize((int)pageFormat.getImageableHeight(),
+                                     (int)pageFormat.getImageableHeight());
+                    scroller.validate();
+
+                    textPane.printAll(graphics);
+                    return Printable.PAGE_EXISTS;
+                  }else return Printable.NO_SUCH_PAGE;
+                }
+              };
+              printerJob.setPrintable(printable , pageFormat);
+              printerJob.print();
+            }catch(Exception ex) {
+              ex.printStackTrace();
             }
-          };
-          printerJob.setPrintable(printable , pageFormat);
-          printerJob.print();
-        }catch(Exception ex) {
-          ex.printStackTrace();
+          }
         }
-      }
+      };
+
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable, "Print thread");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 

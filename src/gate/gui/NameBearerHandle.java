@@ -304,28 +304,30 @@ public class NameBearerHandle implements Handle,
                                         "Error!\n" + pe.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         }
-        statusListeners.clear();
-        progressListeners.clear();
-        //delete the viewers
-        if(largeView instanceof VisualResource){
-          Factory.deleteResource((VisualResource)largeView);
-        }else if(largeView instanceof JTabbedPane){
-          Component[] comps = ((JTabbedPane)largeView).getComponents();
-          for(int i = 0; i < comps.length; i++){
-            if(comps[i] instanceof VisualResource)
-              Factory.deleteResource((VisualResource)comps[i]);
-          }
-        }
-        if(smallView instanceof VisualResource){
-          Factory.deleteResource((VisualResource)smallView);
-        }else if(smallView instanceof JTabbedPane){
-          Component[] comps = ((JTabbedPane)smallView).getComponents();
-          for(int i = 0; i < comps.length; i++){
-            if(comps[i] instanceof VisualResource)
-              Factory.deleteResource((VisualResource)comps[i]);
-          }
+      }
+
+      statusListeners.clear();
+      progressListeners.clear();
+      //delete the viewers
+      if(largeView instanceof VisualResource){
+        Factory.deleteResource((VisualResource)largeView);
+      }else if(largeView instanceof JTabbedPane){
+        Component[] comps = ((JTabbedPane)largeView).getComponents();
+        for(int i = 0; i < comps.length; i++){
+          if(comps[i] instanceof VisualResource)
+            Factory.deleteResource((VisualResource)comps[i]);
         }
       }
+      if(smallView instanceof VisualResource){
+        Factory.deleteResource((VisualResource)smallView);
+      }else if(smallView instanceof JTabbedPane){
+        Component[] comps = ((JTabbedPane)smallView).getComponents();
+        for(int i = 0; i < comps.length; i++){
+          if(comps[i] instanceof VisualResource)
+            Factory.deleteResource((VisualResource)comps[i]);
+        }
+      }
+
     }//public void actionPerformed(ActionEvent e)
   }//class CloseAction
 
