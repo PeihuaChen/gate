@@ -32,8 +32,8 @@ import gate.security.*;
 public class TestPersist extends TestCase
 {
   private static final String JDBC_URL =
-//           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
-           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
+           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
+//           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -409,7 +409,6 @@ public class TestPersist extends TestCase
     SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
 
     //5. try adding doc to data store
-    ds.setAutoSaving(true);
     ds.adopt(doc,si);
 
     Out.prln("Use case 01 passed...");
