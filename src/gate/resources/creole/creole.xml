@@ -624,7 +624,7 @@
       <!-- type values can be "large" or "small"-->
       <GUI TYPE="large">
         <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.ProcessingResource</RESOURCE_DISPLAYED>
+        <RESOURCE_DISPLAYED>gate.Resource</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
 
