@@ -266,7 +266,7 @@ public abstract class DocumentFormat implements Resource,StatusReporter
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
-  protected void fireStatusChangedEvent(String text){
+  public void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);

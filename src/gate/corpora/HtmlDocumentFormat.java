@@ -73,7 +73,7 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     htmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
-            fireStatusChangedEvent(text);
+            fireStatusChangedEvent(text); 
           }
     });
 
