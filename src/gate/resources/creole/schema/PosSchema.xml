@@ -19,6 +19,24 @@
 					</restriction>
 				</simpleType>
 			</attribute>
+			<attribute name="gender"   use="required">
+				<simpleType>
+					<restriction base="string">
+						<enumeration value="M"/>
+						<enumeration value="F"/>
+						<enumeration value="N"/>
+					</restriction>
+				</simpleType>
+			</attribute>
+			<attribute name="number"   use="required">
+				<simpleType>
+					<restriction base="string">
+						<enumeration value="Sg"/>
+						<enumeration value="Pl"/>
+					</restriction>
+				</simpleType>
+			</attribute>
+			
 		</complexType>
 	</element>
 </schema>
