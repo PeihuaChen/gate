@@ -37,16 +37,4 @@ public interface ProcessingResource extends Resource, Executable
    * resource will change too after calling reInit().
    */
   public void reInit() throws ResourceInstantiationException;
-
-  /**
-   * Checks whether this PR has been interrupted since the lsat time its
-   * {@link execute()} method was called.
-   */
-  public boolean isInterrupted();
-
-  /**
-   * Notifies this PR that it should stop its execution as soon as possible.
-   */
-  public void interrupt();
-
 } // interface ProcessingResource
