@@ -11,8 +11,9 @@ package gate.util;
 import java.util.*;
 import java.io.*;
 import junit.framework.*;
+import java.net.*;
 
-/** Tests for the Jdk class
+/** Tests for the Jdk class and for GateClassLoader.
   */
 public class TestJdk extends TestCase
 {
@@ -135,6 +136,45 @@ if(true) return;
 
 
   /** Test reloading of classes. */
+  public void testReloading() throws Exception {
+
+/*
+    // find the X class from the TestJdk JAR
+    GateClassLoader loader = Gate.getClassLoader();
+    loader.addURL(
+      new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/gate2/lib/TestJdk.jar")
+    );
+    Class theXClass = loader.reloadClass("gate.util.X");
+    assert("null xClass in reload test", theXClass != null);
+
+    // try and instantiate one
+    Object theXObject = jdk.instantiateClass(theXClass);
+    assert("couldn't instantiate the X class", theXObject != null);
+    assert(
+      "X instantiated wrongly, name = " + theXObject.getClass().getName(),
+      theXObject.getClass().getName().equals("gate.util.X")
+    );
+*/
+
+    GateClassLoader loader = Gate.getClassLoader();
+    loader.addURL(new URL("http://www.dcs.shef.ac.uk/~hamish/TestJdk.jar"));
+
+    Class dummyClass1 = loader.loadClass("gate.util.Dummy");
+    assert("dummy1 is null", dummyClass1 != null);
+    Object dummyObject1 = dummyClass1.newInstance();
+    assert("dummy1 object is null", dummyObject1 != null);
+
+    Class dummyClass2 = loader.reloadClass("gate.util.Dummy");
+    assert("dummy2 is null", dummyClass2 != null);
+    Object dummyObject2 = dummyClass2.newInstance();
+    assert("dummy2 object is null", dummyObject2 != null);
+
+    Class dummyClass3 = loader.reloadClass("gate.util.Dummy");
+    assert("dummy3 is null", dummyClass2 != null);
+    Object dummyObject3 = dummyClass3.newInstance();
+    assert("dummy3 object is null", dummyObject3 != null);
+  
+  } // testReloading
 
 
   /** Test suite routine for the test runner */
