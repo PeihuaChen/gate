@@ -170,14 +170,29 @@ public class ShellSlacFrame extends MainFrame {
   /** Here default ANNIE is created. Could be changed. */
   private void createDefaultApplication() {
     // Loads ANNIE with defaults
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run(){
-        AbstractAction action = new LoadANNIEWithDefaultsAction();
-        action.actionPerformed(new ActionEvent(this, 1, "Load ANNIE"));
-      }
-    });
+
+//    SwingUtilities.invokeLater(new Runnable() {
+//      public void run(){
+        Runnable loadAction = new ANNIERunnable(ShellSlacFrame.this);
+        Thread thread = new Thread(loadAction, "");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+//      }
+//    });
   } // createDefaultApplication
 
+  public class ANNIERunnable implements Runnable {
+    MainFrame parentFrame;
+    ANNIERunnable(MainFrame parent) {
+      parentFrame = parent;
+    }
+    
+    public void run(){
+      AbstractAction action = new LoadANNIEWithDefaultsAction();
+      action.actionPerformed(new ActionEvent(parentFrame, 1, "Load ANNIE"));
+    }
+  } // ANNIERunnable
+  
   /** Create corpus for application */
   private void createCorpus() {
     try {
@@ -257,7 +272,6 @@ public class ShellSlacFrame extends MainFrame {
     public void actionPerformed(ActionEvent e) {
       if (application != null) {
         try {
-          application.setCorpus(corpus);
           application.execute();
         } catch (ExecutionException ex) {
           ex.printStackTrace();
