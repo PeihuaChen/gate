@@ -177,7 +177,7 @@ public class AnnotationDiff extends AbstractVisualResource
   /** Used to store the no. of annotations from response,identified as belonging
     * to one of the previous types.
     */
-  private int typeCounter[] = new int[MAX_TYPES];
+  private long typeCounter[] = new long[MAX_TYPES];
 
   /** Constructs a AnnotationDif*/
   public AnnotationDiff(){
@@ -425,6 +425,26 @@ public class AnnotationDiff extends AbstractVisualResource
   public double getRecallAverage(){
     return recallAverage;
   } // getRecallAverage
+
+  ///////////////////////////////////////////////////
+  // Missing, spurious, etc methods
+  ///////////////////////////////////////////////////
+
+  public long getCorrectCount() {
+    return typeCounter[CORRECT_TYPE];
+  }
+
+  public long getPartiallyCorrectCount() {
+    return typeCounter[PARTIALLY_CORRECT_TYPE];
+  }
+
+  public long getSpuriousCount() {
+    return typeCounter[SPURIOUS_TYPE];
+  }
+
+  public long getMissingCount() {
+    return typeCounter[MISSING_TYPE];
+  }
 
   ///////////////////////////////////////////////////
   // FALSE POSITIVE methods
@@ -926,11 +946,11 @@ public class AnnotationDiff extends AbstractVisualResource
 
     // CALCULATE ALL (NLP) MEASURES like:
     // Precistion, Recall, FalsePositive and F-Measure
-    int possible =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
+    long possible =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
                     typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
                     typeCounter[MISSING_TYPE]; // this comes from Key
 
-    int actual =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
+    long actual =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
                   typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
                   typeCounter[SPURIOUS_TYPE]; // this comes from Resp
 
