@@ -26,8 +26,8 @@ CREATE OR REPLACE FUNCTION security_delete_user(int4) RETURNS boolean AS '
        /* check for documents
        -- if the user owns documents then fail
        */
-       if (can_delete_group(p_usr_id) = false) then
-          raise ''%'', x_user_owns_resources;
+       if (security_can_delete_group(p_usr_id) = false) then
+          raise exception ''%'', x_user_owns_resources;
        end if;
 
        /* delete user from t_user_group */

@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION security_set_user_name(int4,varchar) RETURNS boolean 
 
    DECLARE
       /* in parameters */
-      p_usr_id alias for $1;
+      p_user_id alias for $1;
       p_new_name alias for $2;
 
    BEGIN

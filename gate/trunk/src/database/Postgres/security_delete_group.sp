@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION security_delete_group(int4) RETURNS boolean AS '
       /* check for documents
        -- if the group ownes documents then fail
       */
-      if (can_delete_group(p_grp_id) = false) then
+      if (security_can_delete_group(p_grp_id) = false) then
           raise exception ''%'', x_group_owns_resources;
       end if;
   
