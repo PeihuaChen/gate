@@ -59,7 +59,7 @@ public class TestSplitterTagger extends TestCase{
     //runtime stuff
     splitter.setDocument(doc);
     splitter.setOutputASName("testAS");
-    splitter.setTempAnnotationSetName("testAS");
+    splitter.setInputASName("testAS");
     splitter.run();
     //check for exceptions
     splitter.check();
