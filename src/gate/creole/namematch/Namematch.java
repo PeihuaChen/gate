@@ -47,10 +47,10 @@ public class Namematch extends AbstractProcessingResource
   protected String annotationType;
 
   /** internal or external list cdg*/
-  protected Boolean intCdgList;
+//  protected Boolean intCdgList;
 
   /** internal or external list */
-  protected Boolean intExtLists;
+  protected Boolean extLists;
 
   /** the annotation set for the document */
   protected AnnotationSet nameAnnots ;
@@ -79,8 +79,7 @@ public class Namematch extends AbstractProcessingResource
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     cbuffer = new char[BUFF_SIZE];
-    intExtLists = new Boolean(true);
-    intCdgList = new Boolean(true);
+    extLists = new Boolean(false);
     annotationTypes.add("Organization");
     annotationTypes.add("Person");
     annotationTypes.add("Location");
@@ -100,13 +99,12 @@ public class Namematch extends AbstractProcessingResource
       return;
     }
 
-    if (intExtLists.equals("true"))
-      buildTables(document, intCdgList);
-    else {
-      try {
+    try {
       createLists();
-      } catch (IOException ioe) {ioe.printStackTrace();}
-    }
+      if (!extLists.booleanValue())
+        buildTables(document);
+    } catch (IOException ioe) {ioe.printStackTrace();}
+
 
     AnnotationSet nameAllAnnots;
     if ((annotationSetName == null)|| (annotationSetName == "")){
@@ -121,7 +119,8 @@ public class Namematch extends AbstractProcessingResource
         return;
       }
     } else {Out.prln("No annotations");return;}
-
+    //
+    AnnotationSet nameAnnotsUnknown;
     // go through all the annotation types
     Iterator iterAnnotationTypes = annotationTypes.iterator();
     while (iterAnnotationTypes.hasNext()) {
@@ -129,6 +128,9 @@ public class Namematch extends AbstractProcessingResource
 
       nameAnnots = nameAllAnnots.get(annotationType,
                                   Factory.newFeatureMap());
+      nameAnnotsUnknown = nameAllAnnots.get("unknown",
+                                  Factory.newFeatureMap());
+
       // return if no such annotations exist
       if (nameAnnots != null) {
         if (nameAnnots.isEmpty()) {
@@ -279,7 +281,7 @@ public class Namematch extends AbstractProcessingResource
     }
   } // check()
 
-  /** if (intExtLists == false) then reads the names of files in order
+  /** if ( == false) then reads the names of files in order
     *  to create the lookup tables
     */
   public void createLists() throws IOException {
@@ -314,9 +316,10 @@ public class Namematch extends AbstractProcessingResource
 
     String lineRead = null;
     while ((lineRead = bufferedReader.readLine()) != null){
-
-      if (nameList.compareTo("cdg")==0){
-        cdg.put(lineRead,"cdg");
+      if (extLists.booleanValue()){
+        if (nameList.compareTo("cdg")==0){
+          cdg.put(lineRead,"cdg");
+        }// if
       }// if
       else {
         int index = lineRead.indexOf("£");
@@ -402,16 +405,16 @@ public class Namematch extends AbstractProcessingResource
   }//setDocument
 
   /** set the annotations */
-  public void setIntExtLists(Boolean newInt_Ext_Lists) {
-    intExtLists = newInt_Ext_Lists;
-  }//setIntExtLists
+  public void setExtLists(Boolean newExtLists) {
+    extLists = newExtLists;
+  }//setextLists
 
-  /** set the annotation set */
+  /** set the annotation set name*/
   public void setAnnotationSetName(String newAnnotationSetName) {
     annotationSetName = newAnnotationSetName;
   }//setAnnotationSetName
 
-  /** set the type of the annotation*/
+  /** set the types of the annotations*/
   public void setAnnotationTypes(Set newType) {
     annotationTypes = newType;
   }//setAnnotationTypes
@@ -424,10 +427,6 @@ public class Namematch extends AbstractProcessingResource
     personType = newPersonType;
   }//setPersonType
 
-  /** set intCdgList */
-  public void setIntCdgList(Boolean newIntCdgList) {
-    intCdgList = newIntCdgList;
-  }//setIntCdgList
   /**
    * Gets the document currently set as target for this namematch.
    * @return a {@link gate.Document}
@@ -446,7 +445,6 @@ public class Namematch extends AbstractProcessingResource
     return annotationTypes;
   }//getAnnotationTypes
 
-  /** */
   public String getOrganizationType() {
     return organizationType;
   }
@@ -455,13 +453,10 @@ public class Namematch extends AbstractProcessingResource
     return personType;
   }
 
-  public Boolean getIntExtList() {
-    return intExtLists;
+  public Boolean getExtList() {
+    return extLists;
   }
 
-  public Boolean getIntCdgList() {
-    return intCdgList;
-  }
 
   public Vector getMatchesDocument() {
     return matchesDocument;
@@ -948,214 +943,52 @@ public class Namematch extends AbstractProcessingResource
     * (used by the namematch rules)
     */
 
-  private void buildTables(Document doc, Boolean intCdgList) {
-
-    // aliases table: corresponding aliases have the same value
-    alias = new HashMap(17);
-    alias.put("National Aeronautics and Space Administration","1");
-    alias.put("NASA","1");
-    alias.put("New York Stock Exchange","2");
-    alias.put("Big Board","2");
-    alias.put("Aluminum Co.","3");
-    alias.put("Aluminum Co","3");
-    alias.put("Alcoa","3");
-    alias.put("New York Times Inc.","4");
-    alias.put("Times","4");
-    alias.put("New York Times","4");
-    alias.put("Coca-Cola Co.","5");
-    alias.put("Coca-Cola Co","5");
-    alias.put("Coca-Cola","5");
-    alias.put("Coke","5");
-    alias.put("IBM","6");
-    alias.put("Big Blue","6");
-    alias.put("New York","7");
-    alias.put("Big Apple","7");
-
-    // spurius matches
-    spur_match= new HashMap(2);
-    spur_match.put("Eastern Airways","1");
-    spur_match.put("Eastern Air","1");
+  private void buildTables(Document doc) {
 
     // company designators
     cdg = new HashMap();
-    if (intCdgList.equals("False")) {// i.e. get cdg from Lookup annotations
+
+    if (!extLists.booleanValue()) {// i.e. get cdg from Lookup annotations
+       AnnotationSet nameAnnots;
       // get all Lookup annotations
-      AnnotationSet nameAnnots =
-      doc.getAnnotations().get("Lookup", Factory.newFeatureMap());
+      if (annotationSetName != null) {
+        if (annotationSetName.equals("")) {
+          nameAnnots = doc.getAnnotations().get("Lookup");
+        }
+        else {
+          nameAnnots =
+            doc.getAnnotations(annotationSetName).get("Lookup");
+        }
+      } else {
+        nameAnnots = doc.getAnnotations().get("Lookup");
+      }
 
       if (nameAnnots!=null)
-      if (!nameAnnots.isEmpty()) {
-        for (int i=0;i<nameAnnots.size();i++) {
-
-          Annotation annot = nameAnnots.get(new Integer(i));
-          String CdgValue = annot.getFeatures().get("listName").toString();
-          if (CdgValue.equals("Cdg")) {
-            // get the actual string
-            Long offsetStartAnnot = annot.getStartNode().getOffset();
-            Long offsetEndAnnot = annot.getEndNode().getOffset();
-            try {
-              String annotString =
-                            doc.getContent().getContent(
-                              offsetStartAnnot,offsetEndAnnot
-                            ).toString();
-              cdg.put(annotString,"cdg");
-            } catch (InvalidOffsetException ioe) {
-             ioe.printStackTrace(Err.getPrintWriter());
-            }
-          } // if (CdgValue.equals("Cdg"))
-        }// for
+        if (!nameAnnots.isEmpty()) {
+          Iterator iter = nameAnnots.iterator();
+          while (iter.hasNext()) {
+            Annotation annot = (Annotation)iter.next();
+            String CdgValue = (String)annot.getFeatures().get("majorType");
+            if (CdgValue != null) {
+              if (CdgValue.equals("cdg")) {
+              // get the actual string
+              Long offsetStartAnnot = annot.getStartNode().getOffset();
+              Long offsetEndAnnot = annot.getEndNode().getOffset();
+              try {
+                String annotString =
+                              doc.getContent().getContent(
+                                offsetStartAnnot,offsetEndAnnot
+                              ).toString();
+                cdg.put(annotString,"cdg");
+              } catch (InvalidOffsetException ioe) {
+                ioe.printStackTrace(Err.getPrintWriter());
+              }
+            } // if (CdgValue.equals("Cdg"))
+            }//if
+        }// while
       } // if (!nameAnnots.isEmpty())
 
     } //if (!intCdgList)
-    else {
-      cdg.put("Co","cdg");
-      cdg.put("PTE LTD","cdg");
-      cdg.put("AMBA","cdg");
-      cdg.put("Ltd.","cdg");
-      cdg.put("NA.","cdg");
-      cdg.put("Co.","cdg");
-      cdg.put("CDERL","cdg");
-      cdg.put("L. P.","cdg");
-      cdg.put("SARL","cdg");
-      cdg.put("PLC.","cdg");
-      cdg.put("Pty ltd","cdg");
-      cdg.put("S. p. A.","cdg");
-      cdg.put("Oy","cdg");
-      cdg.put("GMBH & COKG","cdg");
-      cdg.put("GMBH","cdg");
-      cdg.put("Bv","cdg");
-      cdg.put("Pte ltd","cdg");
-      cdg.put("L. L. C.","cdg");
-      cdg.put("G. M. B. H.","cdg");
-      cdg.put("NV.","cdg");
-      cdg.put("AG &AMP; COKG","cdg");
-      cdg.put("LTD.","cdg");
-      cdg.put("S. P. A.","cdg");
-      cdg.put("KK.","cdg");
-      cdg.put("AG & COKG","cdg");
-      cdg.put("GMBH.","cdg");
-      cdg.put("Cos","cdg");
-      cdg.put("PT","cdg");
-      cdg.put("Lp","cdg");
-      cdg.put("corp","cdg");
-      cdg.put("AB","cdg");
-      cdg.put("GMBH &AMP; COKG","cdg");
-      cdg.put("Associates","cdg");
-      cdg.put("BDH","cdg");
-      cdg.put("MIJ","cdg");
-      cdg.put("SV","cdg");
-      cdg.put("G. m. b. H. &AMP; CO , KG","cdg");
-      cdg.put("NV","cdg");
-      cdg.put("Ag","cdg");
-      cdg.put("Group","cdg");
-      cdg.put("CO","cdg");
-      cdg.put("Brothers","cdg");
-      cdg.put("Sons Co","cdg");
-      cdg.put("Ay","cdg");
-      cdg.put("eGmbh","cdg");
-      cdg.put("CPORA","cdg");
-      cdg.put("plc","cdg");
-      cdg.put("PERSERO","cdg");
-      cdg.put("C.V.","cdg");
-      cdg.put("Spa","cdg");
-      cdg.put("Corp","cdg");
-      cdg.put("gGmbH","cdg");
-      cdg.put("LDA","cdg");
-      cdg.put("BV","cdg");
-      cdg.put("SAC","cdg");
-      cdg.put("Corp.","cdg");
-      cdg.put("SPA","cdg");
-      cdg.put("Ltd","cdg");
-      cdg.put("Sons","cdg");
-      cdg.put("LLC","cdg");
-      cdg.put("PTY LTD","cdg");
-      cdg.put("S. A. R. L.","cdg");
-      cdg.put("N. V.","cdg");
-      cdg.put("Corporation","cdg");
-      cdg.put("AG & Co KG","cdg");
-      cdg.put("HMIG","cdg");
-      cdg.put("LTD","cdg");
-      cdg.put("B. V.","cdg");
-      cdg.put("INC.","cdg");
-      cdg.put("KK","cdg");
-      cdg.put("Inc","cdg");
-      cdg.put("Na","cdg");
-      cdg.put("LP","cdg");
-      cdg.put("Incorporated","cdg");
-      cdg.put("INC","cdg");
-      cdg.put("GmbH.","cdg");
-      cdg.put("AG","cdg");
-      cdg.put("ASSOCIATES","cdg");
-      cdg.put("Gmbh","cdg");
-      cdg.put("Bhd","cdg");
-      cdg.put("PERUM","cdg");
-      cdg.put("CV","cdg");
-      cdg.put("Kk","cdg");
-      cdg.put("AY","cdg");
-      cdg.put("C. por A.","cdg");
-      cdg.put("BHD","cdg");
-      cdg.put("Company","cdg");
-      cdg.put("S. A.","cdg");
-      cdg.put("AENP","cdg");
-      cdg.put("Limited","cdg");
-      cdg.put("plc.","cdg");
-      cdg.put("COS","cdg");
-      cdg.put("HVER","cdg");
-      cdg.put("AG &AMP; Co KG","cdg");
-      cdg.put("CORP.","cdg");
-      cdg.put("G. m. b. H.","cdg");
-      cdg.put("BDH.","cdg");
-      cdg.put("Bros.","cdg");
-      cdg.put("Group.","cdg");
-      cdg.put("Plc","cdg");
-      cdg.put("G. m. b. H. & CO , KG","cdg");
-      cdg.put("Cos.","cdg");
-      cdg.put("SA","cdg");
-      cdg.put("PLC","cdg");
-      cdg.put("NA","cdg");
-      cdg.put("N. A.","cdg");
-      cdg.put("PERJAN","cdg");
-      cdg.put("Inc.","cdg");
-      cdg.put("PP","cdg");
-      cdg.put("CORP","cdg");
-      cdg.put("C. de R. L.","cdg");
-      cdg.put("L.P.","cdg");
-      cdg.put("Plc.","cdg");
-      cdg.put("EGMBH","cdg");
-      cdg.put("PN","cdg");
-      cdg.put("OYAB","cdg");
-      cdg.put("Limitada","cdg");
-      cdg.put("SPA.","cdg");
-      cdg.put("OY","cdg");
-      cdg.put("Ab","cdg");
-      cdg.put("AG.","cdg");
-      cdg.put("GmbH","cdg");
-      cdg.put("AB.","cdg");
-      cdg.put("S. A. C.","cdg");
-      cdg.put("Nv","cdg");
-      cdg.put("SA.","cdg");
-      cdg.put("Sa","cdg");
-    }// else
-
-    // definite article - but never used in the program so far!
-    def_art=new HashMap(2);
-    def_art.put("The","def");
-    def_art.put("the","def");
-
-    // connectors
-    connector=new HashMap(7);
-    connector.put("of","con");
-    connector.put("for","con");
-    connector.put("de","con");
-    connector.put("di","con");
-    connector.put("von","con");
-    connector.put("van","con");
-    connector.put("&","con");
-
-    // prepositions
-    prepos = new HashMap(2);
-    prepos.put("of","prepos");
-    prepos.put("for","prepos");
   }//buildTables
 
   /** substitute all multiple spaces, tabes and newlines
