@@ -156,6 +156,19 @@ public class TestCreole extends TestCase
           feats.get("TYPE").equals("gate.gui.SomeViewer")
       );
     }
+
+    List smallViews = rd.getAllSmallViews();
+    assert("wrong number of small views", smallViews.size() == 1);
+    iter = smallViews.iterator();
+    while(iter.hasNext()) {
+      FeatureMap feats = (FeatureMap) iter.next();
+
+      assert(
+        "wrong type on TPR2 small view",
+        feats != null && feats.size() > 0 &&
+          feats.get("TYPE").equals("gate.gui.SomeSmallViewer")
+      );
+    }
   } // testViews()
 
   /** Utility method to check that a list of resources are all
