@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <library>
   <!--JBuilder Library Definition File-->
   <fullname>gatelibs</fullname>
@@ -24,6 +25,8 @@
     <path>[lib/jdbc7.2dev-1.2.jar]</path>
     <path>[lib/jena.jar]</path>
     <path>[lib/protege.jar]</path>
+    <path>[lib/lucene-1.2-rc4.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
+
