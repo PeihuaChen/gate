@@ -87,6 +87,14 @@ Macro: PERSONENDING
  {Lookup.majorType == person_ending}
 )
 
+Macro: PREFIX
+(
+ ({Lookup.majorType == surname, Lookup.minorType == prefix}
+  SPACE)|
+ (({Token.string == "O"}|{Token.string == "D"})
+  {Token.string == "'"}
+ )
+)
 
 Macro: DET
 (
@@ -269,6 +277,7 @@ Priority: 15
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
   (SPACE)? 
  )?
+ (PREFIX)*
  (UPPER)
  (SPACE PERSONENDING)?
 )
@@ -361,6 +370,7 @@ Priority: 20
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
   (SPACE)? 
  )
+ (PREFIX)*
  (UPPER)
  (SPACE PERSONENDING)?
 )
@@ -427,6 +437,7 @@ Priority: 50
  (SPACE)
 )
 (
+ (PREFIX)*
  (UPPER)
 ):unknown
 (
@@ -446,6 +457,7 @@ Priority: 10
 )?
 (
  ((FIRSTNAME | FIRSTNAMEAMBIG) (SPACE) )+
+ (PREFIX)*
  (UPPER)
  (SPACE PERSONENDING)?
 )
@@ -508,6 +520,23 @@ if (firstPerson != null && firstPerson.size()>0)
 annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
+Rule: PersonFullStop
+Priority: 50
+// G.Wilson Fri
+
+(
+ ((FIRSTNAME | FIRSTNAMEAMBIG) (SPACE)? )
+ (PREFIX)* 
+ (UPPER)
+):person
+(
+ (SPACE)
+ {Lookup.majorType == date}
+)
+-->
+ :person.TempPerson = {kind = "personName", rule = "PersonFullStop"}
+
 
 Rule:  PersonSaint
 Priority: 50
