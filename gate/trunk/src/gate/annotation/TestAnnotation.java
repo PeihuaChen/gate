@@ -940,6 +940,59 @@ public class TestAnnotation extends TestCase
 
   }// testIsPartiallyCompatibleAndCompatible
 
+
+  public void testFeatureSubsumeMethods(){
+
+    FeatureMap fm1 = Factory.newFeatureMap();
+    fm1.put("k1","v1");
+    fm1.put("k2","v2");
+
+    FeatureMap fm2 = Factory.newFeatureMap();
+    fm2.put("k1","v1");
+
+    Set featKeysSet1 = new HashSet();
+    featKeysSet1.add("k1");
+    featKeysSet1.add("k2");
+    featKeysSet1.add("k3");
+    featKeysSet1.add("k4");
+
+    assertTrue(fm1 + " should subsume " + fm2 + " using the key set" +
+                               featKeysSet1,fm1.subsumes(fm2, featKeysSet1));
+    assertTrue(fm1 + " should subsume " + fm2 +
+                            " taking all feat into consideration",
+                            fm1.subsumes(fm2, null));
+
+    FeatureMap fm3 = Factory.newFeatureMap();
+    fm3.put("k1","v1");
+    fm3.put("k2","v2");
+    fm3.put("k3",new Integer(3));
+
+    Set featKeysSet2 = new HashSet();
+    featKeysSet2.add("k1");
+
+    assertTrue(fm1 + " should subsume " + fm3 + " using the key set" +
+                          featKeysSet2,fm1.subsumes(fm3, featKeysSet2));
+    assertTrue(fm1 + " should NOT subsume " + fm3 +
+                                " taking all feats into consideration",
+                                !fm1.subsumes(fm3,null));
+
+    FeatureMap fm4 = Factory.newFeatureMap();
+    fm4.put("k1",new Integer(2));
+    fm4.put("k2","v2");
+    fm4.put("k3","v3");
+
+    Set featKeysSet3 = new HashSet();
+    featKeysSet3.add("k2");
+
+    assertTrue(fm3 + " should subsume " + fm4 + " using the key set" +
+                              featKeysSet3, fm4.subsumes(fm3,featKeysSet3));
+    assertTrue(fm4 + " should NOT subsume " + fm3 +
+                                " taking all feats into consideration",
+                                !fm4.subsumes(fm3,null));
+
+
+  }// testFeatureSubsumeMethods();
+
   public static void main(String[] args){
 
     try{
