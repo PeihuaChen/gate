@@ -38,10 +38,10 @@ public class GroupImpl implements Group{
   private Connection conn;
 
   /** --- */
-  private AccessControler ac;
+  private AccessController ac;
 
 
-  public GroupImpl(Long id, String name, List users,AccessControler ac,Connection conn) {
+  public GroupImpl(Long id, String name, List users,AccessController ac,Connection conn) {
 
     this.id = id;
     this.name = name;

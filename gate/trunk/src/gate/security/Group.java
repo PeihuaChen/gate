@@ -31,23 +31,23 @@ public interface Group {
   public List getUsers();
 
   /** --- */
-  public void setName(String newName, Long sessionID)
+  public void setName(String newName, Session s)
     throws PersistenceException,SecurityException;
 
   /** --- */
-  public void addUser(Long userID, Long sessionID)
+  public void addUser(Long userID, Session s)
     throws PersistenceException,SecurityException;
 
   /** --- */
-  public void addUser(User usr, Long sessionID)
+  public void addUser(User usr, Session s)
     throws PersistenceException,SecurityException;
 
   /** --- */
-  public void removeUser(Long userID, Long sessionID)
+  public void removeUser(Long userID, Session s)
     throws PersistenceException,SecurityException;
 
   /** --- */
-  public void removeUser(User usr, Long sessionID)
+  public void removeUser(User usr, Session s)
     throws PersistenceException,SecurityException;
 
 }
