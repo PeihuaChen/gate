@@ -56,12 +56,13 @@ public class BootStrap {
   /** a buffer in order to read an array of char */
   private char cbuffer[] = null;
 
-  /** the current file created by the system */
-  File newFile = null;
-
   /** determine the methods from the class that implements the resource*/
-  ArrayList listMethodsResource = null;
-  Set allPackages;
+  protected ArrayList listMethodsResource = null;
+
+  /** the packages used by the class which creates the resources */
+  protected Set allPackages = null;
+
+  protected Map fields = null;
 
   public BootStrap() {
 
@@ -74,6 +75,8 @@ public class BootStrap {
     cbuffer = new char[BUFF_SIZE];
 
     allPackages = new HashSet();
+
+    fields = new HashMap();
   }
 
   /** replace with replacement in the text using regEx as a regular expression
@@ -108,17 +111,28 @@ public class BootStrap {
 
     // determine the position of the last "."
     int index = text.lastIndexOf(".");
+    int ind = text.lastIndexOf(";");
+    String type = new String();
+    String namePackage = new String();
 
     if (index != -1){
       // determine the package and add to the list of packages
-      String namePackage = (text.substring(0,index))+".*";
-      if (!allPackages.contains(namePackage))
+      if (ind != -1) {
+        type = text.substring(index+1,text.length()-1)+"[]";
+        namePackage = (text.substring(2,index))+".*";
+      }
+      else {
+        namePackage = (text.substring(0,index))+".*";
+        type = text.substring(index+1,text.length());
+      }
+      // add the name of the package
+      if ((!allPackages.contains(namePackage))&&
+                              (namePackage.compareTo("java.lang.*")!=0))
         allPackages.add(namePackage);
 
-      text = text.substring(index+1,text.length());
-    }
+    } else {type = text;}
 
-    return text;
+    return type;
   }
 
   /** returns all the interfaces that it implements and the class that
@@ -160,12 +174,13 @@ public class BootStrap {
 
         // determine the packages
         if (lastDot != -1) {
-          String packageName =  name.substring(0,lastDot);
+          String namePackage =  name.substring(0,lastDot);
           currentClass = Class.forName(name);
           name = name.substring(lastDot+1,name.length());
           // add the name of package in the list
-          if (!allPackages.contains(packageName))
-            allPackages.add(packageName +".*");
+          if ((!allPackages.contains(namePackage))&&
+                            (namePackage.compareTo("java.lang.*")!=0))
+            allPackages.add(namePackage +".*");
         } else {
           currentClass = Class.forName("gate."+name);
           if (!allPackages.contains("gate.*"))
@@ -219,9 +234,10 @@ public class BootStrap {
     */
   public void shapeMethod (ArrayList listMethodExtend,Map listInterfacesMethod){
     // determine all the methods from the interfaces which are not among the
-    // methods from the class that extends the resource
+    // methods of the class that extends the resource
     Set keys = listInterfacesMethod.keySet();
     Iterator iteratorKeys = keys.iterator();
+    int j = 0;
     while (iteratorKeys.hasNext()) {
       String nameMethod = (String)(iteratorKeys.next());
       if (listMethodExtend.contains(nameMethod) == false) {
@@ -246,7 +262,7 @@ public class BootStrap {
         else
           for (int i=0;i<valTypes.length;i++) {
             declaration = declaration + findDot(valTypes[i].getName()) +
-                            " variable"+ i;
+                            " parameter"+ i;
 
             if (i==valTypes.length-1)
               declaration = declaration + ")";
@@ -256,27 +272,41 @@ public class BootStrap {
           } // for
 
         // exceptions
+
         if (valException.length == 0) {
-          if (typeReturn.compareTo("void") !=0 )
-           declaration = declaration + "{ " + "return "+
-                            typeReturn.toLowerCase()+ "; }" + "\n" + "\n"+
-                            "protected "+ typeReturn + " " +
-                            typeReturn.toLowerCase() +";";
-          else
-           declaration = declaration+" {}" ;
+          if (typeReturn.compareTo("void") !=0 ){
+            if (typeReturn.indexOf("[]") == -1)
+              declaration = declaration + "{ " + "return "+
+                            typeReturn.toLowerCase()+ j + "; }";
+            else
+              declaration = declaration + "{ " + "return "+
+                            typeReturn.toLowerCase().substring(
+                            0,typeReturn.length()-2)+ j + "[]; }";
+
+            fields.put(new Integer(j),typeReturn);
+            j =j+1;
+          }
+          else {declaration = declaration+" {}" ;}
         } // if
         else {
-          declaration = declaration + " throws ";
+          declaration = declaration + "\n"+ "                throws ";
           for (int i=0;i<valException.length;i++) {
 
             declaration = declaration + findDot(valException[i].getName());
 
             if (i == valException.length-1) {
-              if (typeReturn.compareTo("void") !=0 )
-                declaration = declaration + "{ " + "return "+
-                          typeReturn.toLowerCase()+ "; }" + "\n"+"\n" +
-                          "protected " + typeReturn +" " +
-                          typeReturn.toLowerCase() +";";
+              if (typeReturn.compareTo("void") !=0 ){
+                if (typeReturn.indexOf("[]") == -1)
+                  declaration = declaration + "{ " + "return "+
+                          typeReturn.toLowerCase()+ j+"; }";
+                else
+                  declaration = declaration + "{ " + "return "+
+                            typeReturn.toLowerCase().substring(
+                            0,typeReturn.length()-2)+ j + "[]; }";
+
+                fields.put(new Integer(j),typeReturn);
+                j=j+1;
+              }
               else
                 declaration = declaration+" {}" ;
             } else
@@ -322,12 +352,22 @@ public class BootStrap {
                                             finalIndex+2,newContent.length());
       String nextLetter = newContent.substring(finalIndex,finalIndex+2);
 
-      newContent = newContent.substring(0,finalIndex)+ interfaces+nextLetter
-                    +"\n";
+      newContent = newContent.substring(0,finalIndex)+
+                                                interfaces+nextLetter+"\n";
+
       Iterator iterator = listMethodsResource.iterator();
       while (iterator.hasNext()) {
         String method = (String)iterator.next();
-        newContent = newContent + "\n" + method+ "\n";
+        newContent = newContent + "\n" + method+"\n";
+      }
+      Iterator iter = fields.keySet().iterator();
+      int i=0;
+      while (iter.hasNext()) {
+        Integer index = (Integer)iter.next();
+        String type = (String)fields.get(index);
+        newContent = newContent + "\n" + "protected " + type +" " +
+                          type.toLowerCase() + index.toString() +";";
+        i+=1;
       }
       newContent = newContent + finalContent;
     }
@@ -356,7 +396,8 @@ public class BootStrap {
 
     return names;
   }
-  // determine all the packages
+
+  /** determine all the packages */
   public String namesPackages (Set listPackages) {
     Iterator iterator = listPackages.iterator();
     String packages = new String();
@@ -388,127 +429,118 @@ public class BootStrap {
     // that it extends
     String interfacesAndClass = getInterfacesAndClass (typeResource,
                                                   listInterfaces);
+
+    // all the packages from the class which creates the resource
     String packages = namesPackages(allPackages);
 
+    // the current file created by the system
+    File newFile = null;
 
-      // take the content of the file with the structure of the template project
-      InputStream inputStream = Files.getGateResourceAsStream(oldResource +"/"+
-                                "file-list.properties");
+    // take the content of the file with the structure of the template project
+    InputStream inputStream = Files.getGateResourceAsStream(oldResource +"/"+
+                              "file-list.properties");
 
-      Properties properties = new Properties();
+    Properties properties = new Properties();
 
-      properties.load(inputStream);
+    // put all the files and directories
+    properties.load(inputStream);
 
-      Enumeration keyProperties = properties.propertyNames();
+    // close the input stream
+    inputStream.close();
 
-      // goes through all the files from the template project
-      while (keyProperties.hasMoreElements()) {
+    Enumeration keyProperties = properties.propertyNames();
 
-        String valKey = (String)keyProperties.nextElement();
+    // goes through all the files from the template project
+    while (keyProperties.hasMoreElements()) {
 
-        String valueKey = properties.getProperty(valKey);
+      String valKey = (String)keyProperties.nextElement();
 
-        int indexEnd = valueKey.indexOf(",");
-        String newValueKey = valueKey;
+      String valueKey = properties.getProperty(valKey);
 
-        while ((indexEnd != -1)||(newValueKey.compareTo("")!=0)) {
-          String nameFile = "";
+      int indexEnd = valueKey.indexOf(",");
+      String newValueKey = valueKey;
 
-          if (indexEnd != -1) {
-            nameFile = newValueKey.substring(0,indexEnd);
-          } else {
-            nameFile = newValueKey;
-            newValueKey = "";
-          }
+      while ((indexEnd != -1)||(newValueKey.compareTo("")!=0)) {
+        String nameFile = "";
 
-          // the new path of the current file from template project
-          String newPathFile = changeKeyValue(pathNewProject+"/"+nameFile);
+        if (indexEnd != -1) {
+          nameFile = newValueKey.substring(0,indexEnd);
+        } else {
+          nameFile = newValueKey;
+          newValueKey = "";
+        }
 
-          if (valKey.compareTo("dir") == 0) {
-            // the current directory is created
-            newFile = new File(newPathFile);
-            newFile.mkdir();
+        // the new path of the current file from template project
+        String newPathFile = changeKeyValue(pathNewProject+"/"+nameFile);
+
+        if (valKey.compareTo("dir") == 0) {
+          // the current directory is created
+          newFile = new File(newPathFile);
+          newFile.mkdir();
+
+        } // if
+        else {
+          // the extension of the current file
+          String extension = newPathFile.substring(newPathFile.length()-4,
+                                                      newPathFile.length());
+
+          InputStream currentInputStream =
+              Files.getGateResourceAsStream(oldResource+"/"+nameFile);
+          if (extension.compareTo(".jav") == 0)
+            newFile = new File(newPathFile+"a");
+          else newFile = new File(newPathFile);
+
+          if (extension.compareTo(".jar")!=0) {
+
+            // the content of the current file is copied on the disk
+
+            // the current file for writing characters
+
+            FileWriter fileWriter = new FileWriter(newFile);
+
+            InputStreamReader inputStreamReader = new InputStreamReader (
+                                                    currentInputStream);
+
+            int  charRead = 0;
+            String text = null;
+
+            while(
+            (charRead = inputStreamReader.read(cbuffer,0,BUFF_SIZE)) != -1){
+
+              text = new String (cbuffer,0,charRead);
+
+              String expr1 = "public class " + names.get("___CLASSNAME___");
+              String expr2 = "import ___PACKAGE___.*;";
+              String newText;
+
+              if (packages.length() == 0){
+                newText = regularExpressions(text,"",expr2);
+              }
+              else {
+                newText = regularExpressions(text,packages,expr2);
+              }
+
+              newText = addContent(newText,expr1,interfacesAndClass);
+              fileWriter.write(newText ,0,newText.length());
+
+            } // while
+
+            inputStreamReader.close();
+
+            // close the input stream
+            currentInputStream.close();
+
+            // close the file for writing
+            fileWriter.close();
 
           } // if
-          else {
-            // the extension of the current file
-            String extension = newPathFile.substring(newPathFile.length()-4,
-                                                        newPathFile.length());
+        } // else
+        if (indexEnd != -1)
+         newValueKey = newValueKey.substring(indexEnd+1,newValueKey.length());
 
-            InputStream currentInputStream =
-                Files.getGateResourceAsStream(oldResource+"/"+nameFile);
-            if (extension.compareTo(".jav") == 0)
-              newFile = new File(newPathFile+"a");
-            else newFile = new File(newPathFile);
-
-            if (extension.compareTo(".jar")!=0) {
-
-              // the content of the current file is copied on the disk
-
-              // the current file for writing characters
-
-              FileWriter fileWriter = new FileWriter(newFile);
-
-              InputStreamReader inputStreamReader = new InputStreamReader (
-                                                      currentInputStream);
-
-              int  charRead = 0;
-              String text = null;
-
-
-              while(
-              (charRead = inputStreamReader.read(cbuffer,0,BUFF_SIZE)) != -1){
-
-                text = new String (cbuffer,0,charRead);
-
-                String expr1 = "public class " + names.get("___CLASSNAME___");
-                String expr2 = "import ___PACKAGE___.*;";
-                String newText;
-
-                if (packages.length() == 0){
-                  newText = regularExpressions(text,"",expr2);
-                }
-                else {
-                  newText = regularExpressions(text,packages,expr2);
-                }
-
-                newText = addContent(newText,expr1,interfacesAndClass);
-                fileWriter.write(newText ,0,newText.length());
-
-              } // while
-
-              inputStreamReader.close();
-
-              // close the input stream
-              currentInputStream.close();
-
-              // close the file for writing
-              fileWriter.close();
-
-            } // if
-            else { // the current file is a jar
-
-              // the current file for writing bytes
-              FileOutputStream fileOutputStream = null;
-              fileOutputStream = new FileOutputStream (newFile);
-              int  bytesRead = 0;
-              while(
-                (bytesRead = currentInputStream.read(buffer,0,BUFF_SIZE)) != -1)
-
-                fileOutputStream.write(buffer ,0,bytesRead);
-
-                currentInputStream.close();
-
-                fileOutputStream.close();
-            } // else
-
-          } // else
-          if (indexEnd != -1)
-           newValueKey = newValueKey.substring(indexEnd+1,newValueKey.length());
-
-          indexEnd = newValueKey.indexOf(",");
-        } // while
-      }// while
+        indexEnd = newValueKey.indexOf(",");
+      } // while
+    }// while
 
   } // modify
 
