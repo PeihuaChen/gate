@@ -577,7 +577,7 @@ public class DocumentEditor extends AbstractVisualResource
             // compute correction for new line breaks in long lines
             start += longLinesCorrection(start);
             end += longLinesCorrection(end);
-                      
+
             //bring the annotation in view
             try{
               Rectangle startRect = textPane.modelToView(start);
@@ -1015,12 +1015,12 @@ public class DocumentEditor extends AbstractVisualResource
     propertyChangeListeners.addPropertyChangeListener(propertyName, l);
   }
 
-  
+
   /** Return the current selected document */
   public gate.Document getDocument() {
     return document;
   } // Document getDocument()
-  
+
   /**
    * Sets the document to be displayed
    */
@@ -1088,10 +1088,10 @@ public class DocumentEditor extends AbstractVisualResource
     int unbreakedLineSize = 0;
     char ch;
     int contentSize = content.length();
-    
+
     for(int i=0; i<contentSize; ++i) {
       ch = content.charAt(i);
-      
+
       switch(ch) {
         case '\n' :
             unbreakedLineSize = 0;
@@ -1117,7 +1117,7 @@ public class DocumentEditor extends AbstractVisualResource
               // break without space
               spacePos = i;
             } // if
-            
+
             breakPositions.add(new Integer(spacePos+1));
             unbreakedLineSize = i - spacePos;
             spacePos = -1;
@@ -1127,12 +1127,12 @@ public class DocumentEditor extends AbstractVisualResource
           } // if
       } // switch
     } // for
-    
+
     return breakPositions;
   } // getBreakPositions(String content)
 
   /** Max unbreaked line size */
-  private final int MAX_LINE_SIZE = 2048;  
+  private final int MAX_LINE_SIZE = 2048;
 
   /**
    * Cut very long lines to pieces not grater than MAX_LINE_SIZE
@@ -1153,24 +1153,24 @@ public class DocumentEditor extends AbstractVisualResource
       intValue = currentBreak.intValue();
       buff.insert(intValue, '\n');
     } // for
-        
-    if(breaks.size() > 0) { 
+
+    if(breaks.size() > 0) {
       return breaks;
     }
     else {
       return null;
     }
   } // correctLongLines(StringBuffer buff)
-  
+
   /** Compute correction for additional new line in very long lines of text */
   private int longLinesCorrection(int position) {
     int result = 0;
-    
+
     if(longLinesCorrectionPositions != null) {
       boolean underPosition = true;
       Integer current;
       Iterator it = longLinesCorrectionPositions.iterator();
-      
+
       while(underPosition && it.hasNext()) {
         current = (Integer) it.next();
         if(position > (current.intValue()+result)) {
@@ -1183,13 +1183,13 @@ public class DocumentEditor extends AbstractVisualResource
         } // if
       } // while
     } // if
-    
+
     return result;
   } // int longLinesCorrection(int position)
 
   /** Keep cut places in very long lines inside document */
   private Vector longLinesCorrectionPositions;
-  
+
   /**
    * Updates this component when the underlying document is changed. This method
    * is only triggered when the document is changed to a new one and not when
@@ -1198,13 +1198,6 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void this_documentChanged(){
     initLocalData();
-    annotationsTableModel.fireTableDataChanged();
-    document.getFeatures().addFeatureMapListener(new FeatureMapListener(){
-      public void featureMapUpdated(){
-          updateCorefTree();
-      }
-    });
-    updateCorefTree();
 
     Enumeration enum = stylesTreeRoot.children();
     while(enum.hasMoreElements()){
@@ -1221,7 +1214,7 @@ public class DocumentEditor extends AbstractVisualResource
     if(longLinesCorrectionPositions != null) {
       documentContent = buffContent.toString();
     } // if
-    
+
     textPane.setText(documentContent);
     //listen for events from the document content editor
     textPane.getDocument().addDocumentListener(new SwingDocumentListener());
@@ -1233,6 +1226,15 @@ public class DocumentEditor extends AbstractVisualResource
 
     //register the for this new document's events
     document.addDocumentListener(eventHandler);
+
+    annotationsTableModel.fireTableDataChanged();
+    document.getFeatures().addFeatureMapListener(new FeatureMapListener(){
+      public void featureMapUpdated(){
+        updateCorefTree();
+      }
+    });
+    updateCorefTree();
+
 
     //add all the other annotation sets
     Map namedASs = document.getNamedAnnotationSets();
@@ -1294,17 +1296,17 @@ public class DocumentEditor extends AbstractVisualResource
     int i = 0;
     int lastValue = 0;
     int value;
-    
+
     int start, end;
     Iterator annIter = annotations.iterator();
     while(annIter.hasNext()){
       Annotation ann = (Annotation)annIter.next();
       start = ann.getStartNode().getOffset().intValue();
-      end = ann.getEndNode().getOffset().intValue(); 
+      end = ann.getEndNode().getOffset().intValue();
       // compute correction for new line breaks in long lines
       start += longLinesCorrection(start);
       end += longLinesCorrection(end);
-      
+
       textPane.select(start, end);
       textPane.setCharacterAttributes(style, true);
       value = i * 100 / size;
@@ -1558,14 +1560,14 @@ public class DocumentEditor extends AbstractVisualResource
       }//while(corefDataIter.hasNext())
       //we're done with this set: add all the nodes to the set node
       //set visible to false for all nodes that will not be kept
-      for(Enumeration entityNodes = setNode.children();
-          entityNodes.hasMoreElements();){
-        Object anOldNode = entityNodes.nextElement();
-        if(!newEntityNodes.contains(anOldNode)){
-          ((CorefData)((DefaultMutableTreeNode)anOldNode).
-          getUserObject()).setVisible(false);
-        }
-      }
+//      for(Enumeration entityNodes = setNode.children();
+//          entityNodes.hasMoreElements();){
+//        Object anOldNode = entityNodes.nextElement();
+//        if(!newEntityNodes.contains(anOldNode)){
+//          ((CorefData)((DefaultMutableTreeNode)anOldNode).
+//          getUserObject()).setVisible(false);
+//        }
+//      }
 
       setNode.removeAllChildren();
       for(Iterator nodesIter = newEntityNodes.iterator();
@@ -1583,14 +1585,22 @@ public class DocumentEditor extends AbstractVisualResource
     }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
+        highlighter.removeAllHighlights();
         corefTreeModel.nodeStructureChanged(corefTreeRoot);
         //expand the root
         corefTree.expandPath(new TreePath(new Object[]{corefTreeRoot}));
         //expand all of root's children
         Enumeration children = corefTreeRoot.children();
         while(children.hasMoreElements()){
-          corefTree.expandPath(new TreePath(corefTreeModel.getPathToRoot(
-                               (DefaultMutableTreeNode)children.nextElement())));
+          DefaultMutableTreeNode aNode =
+            (DefaultMutableTreeNode)children.nextElement();
+          corefTree.expandPath(
+            new TreePath(corefTreeModel.getPathToRoot(aNode)));
+          if(aNode.getUserObject() instanceof CorefData){
+            CorefData cData = (CorefData)aNode.getUserObject();
+            //trigger highlights repaint
+            cData.setVisible(cData.getVisible());
+          }
         }
       }
     });
