@@ -38,45 +38,24 @@ public class AnnotationSchema extends AbstractLanguageResource
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-/*
-  public static void main(String[] args){
-    URL url = null;
-    try{
-      url = new URL("file:///d:/cursu/XSchema/POSSchema.xml");
-      //url = new URL("file:///d:/cursu/XSchema/SentenceSchema.xml");
-      //url = new URL("file:///d:/cursu/XSchema/TokenSchema.xml");
-      //url = new URL("file:///d:/cursu/XSchema/UtteranceSchema.xml");
-      //url = new URL("file:///d:/cursu/XSchema/SyntaxTreeNodeSchema.xml");
-      //url = new URL("file:///d:/cursu/XSchema/AllXSchema.xml");
-    } catch (Exception e){
-      e.printStackTrace(Err.getPrintWriter());
-    }
-    AnnotationSchema annotation = new AnnotationSchema("");
-    annotation.fromXSchema(url);
-    Out.pr(annotation.toXSchema());
-  }
- */
+  /** A map between XSchema types and Java Types */
+  private static Map xSchema2JavaMap;
 
-  /** A map between XSchema types and Java Types
-    */
-  private static Map xSchema2JavaMap = new HashMap();
+  /** A map between JAva types and XSchema */
+  private static Map java2xSchemaMap;
 
-  /** A map between JAva types and XSchema
-    */
-  private static Map java2xSchemaMap = new HashMap();
-
-//// comments?
-  private static DocumentBuilder xmlParser = null;
-
-//// comments?
-  static{
-    setUp();
-  }
+  /** Parser for the XSchema source files */
+  private static DocumentBuilder xmlParser;
 
   /** This sets up two Maps between XSchema types and their coresponding
     * Java types
     */
-  private static void setUp(){
+  private static void setUpStaticData()
+  throws ResourceInstantiationException
+  {
+    xSchema2JavaMap = new HashMap();
+    java2xSchemaMap = new HashMap();
+
     xSchema2JavaMap.put("string",   String.class.getName());
     xSchema2JavaMap.put("integer",  Integer.class.getName());
     xSchema2JavaMap.put("int",      Integer.class.getName() );
@@ -107,50 +86,43 @@ public class AnnotationSchema extends AbstractLanguageResource
 
       // Create the DOM parser
       xmlParser = domBuilderFactory.newDocumentBuilder();
-      // Parse the document and create the DOM structure
-    } catch (ParserConfigurationException e){
-        e.printStackTrace(Err.getPrintWriter());
+
+    } catch(ParserConfigurationException e) {
+      throw new ResourceInstantiationException(
+        "couldn't create annotation schema parser: " + e
+      );
     }
-  } // setUp
+  } // setUpStaticData
 
   /** The name of the annotation */
-  String annotationName = null;
+  protected String annotationName = null;
 
-  /** Schemas for the attributes */
-  Set featureSchemaSet = null;
-
-  /** Constructs an annotation schema. Name and
-    * feature schema set on null
-    */
-  public AnnotationSchema(){
-    this(null,null);
-  } // AnnotationSchema
-
-  /** Constructs an annotation schema given it's name.
-    * Feature schema that it might contain is set on null
-    */
-  public AnnotationSchema(String anAnnotationName){
-    this(anAnnotationName,null);
-  } // AnnotationSchema
-
-  /** Constructs an AnnotationSchema object given it's name and a set of
-    * FeatureSchema
-    */
-  public AnnotationSchema(String anAnnotationName,Set aFeatureSchemaSet){
-    annotationName   = anAnnotationName;
-    featureSchemaSet = aFeatureSchemaSet;
-  } // AnnotationSchema
-
-  /** Returns the value of annotationName field
-    */
+  /** Returns the value of annotation name */
   public String getAnnotationName(){
     return annotationName;
   } // getAnnotationName
 
-  /** Returns the set of FeatureSchema*/
-  public Set getFeatureSchemas(){
+  /** Sets the annotation name */
+  public void setAnnotationName(String annotationName) {
+    this.annotationName = annotationName;
+  } // setAnnotationName
+
+  /** Schemas for the attributes */
+  protected Set featureSchemaSet = null;
+
+  /** Constructs an annotation schema. */
+  public AnnotationSchema(){
+  } // AnnotationSchema
+
+  /** Returns the feature schema set */
+  public Set getFeatureSchemaSet(){
     return featureSchemaSet;
   } // getAttributeSchemas
+
+  /** Sets the feature schema set */
+  public void setFeatureSchemaSet(Set featureSchemaSet) {
+    this.featureSchemaSet = featureSchemaSet;
+  } // setFeatureSchemaSet
 
   /** Returns a FeatureSchema object from featureSchemaSet, given a
     * feature name.
@@ -166,10 +138,35 @@ public class AnnotationSchema extends AbstractLanguageResource
     return null;
   } // getFeatureSchema
 
+  /** Initialise this resource, and return it. If the schema XML source file
+    * URL has been set, it will construct itself from that file.
+    */
+  public Resource init() throws ResourceInstantiationException {
+    // set up the static data if it's not there already
+    if(xSchema2JavaMap == null || java2xSchemaMap == null || xmlParser == null)
+      setUpStaticData();
+
+    // parse the XML file if we have its URL
+    if(xmlFileUrl != null)
+      fromXSchema(xmlFileUrl);
+
+    return this;
+  } // init()
+
+  /** The xml file URL of the resource */
+  protected URL xmlFileUrl;
+
+  /** Set method for the resource xml file URL */
+  public void setXmlFileUrl(URL xmlFileUrl) { this.xmlFileUrl = xmlFileUrl; }
+
+  /** Get method for the resource xml file URL */
+  public URL getXmlFileUrl() { return xmlFileUrl; }
+
   /** Creates an AnnotationSchema object from an XSchema file
     * @param anXSchemaURL the URL where to find the XSchema file
     */
-  public void fromXSchema(URL anXSchemaURL){
+  public void fromXSchema(URL anXSchemaURL)
+  throws ResourceInstantiationException {
     try {
       // Parse the document and create the DOM structure
       org.w3c.dom.Document dom =
@@ -180,16 +177,22 @@ public class AnnotationSchema extends AbstractLanguageResource
       // Use JDOM
       workWithJDom(jDom);
     } catch (SAXException e){
-      e.printStackTrace(Err.getPrintWriter());
+      throw new ResourceInstantiationException(
+        "couldn't parse annotation schema file: " + e
+      );
     } catch (IOException e) {
-      e.printStackTrace(Err.getPrintWriter());
+      throw new ResourceInstantiationException(
+        "couldn't open annotation schema file: " + e
+      );
     }
   } // fromXSchema
 
   /** Creates an AnnotationSchema object from an XSchema file
     * @param anXSchemaInputStream the Input Stream containing the XSchema file
     */
-  public void fromXSchema(InputStream anXSchemaInputStream){
+  public void fromXSchema(InputStream anXSchemaInputStream)
+  throws ResourceInstantiationException
+  {
     try {
       // Parse the document and create the DOM structure
       org.w3c.dom.Document dom =
@@ -200,9 +203,13 @@ public class AnnotationSchema extends AbstractLanguageResource
       // Use JDOM
       workWithJDom(jDom);
     } catch (SAXException e){
-      e.printStackTrace(Err.getPrintWriter());
+      throw new ResourceInstantiationException(
+        "couldn't parse annotation schema stream: " + e
+      );
     } catch (IOException e) {
-      e.printStackTrace(Err.getPrintWriter());
+      throw new ResourceInstantiationException(
+        "couldn't open annotation schema stream: " + e
+      );
     }
   } // end fromXSchema
 

@@ -29,7 +29,7 @@ abstract public class AbstractResource
 extends AbstractFeatureBearer implements Resource
 {
   /** Initialise this resource, and return it. */
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException {
     return this;
   } // init()
 

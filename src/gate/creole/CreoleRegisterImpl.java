@@ -70,6 +70,9 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     }
   } // default constructor
 
+  /** Removes all resources and forgets all directories. */
+  public void clear() { directories.clear(); super.clear(); }
+
   /** Add a CREOLE directory URL to the register and to the GATE classloader.
     * The directory is <B>not</B> registered.
     */
@@ -170,8 +173,10 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     try {
       parseDirectory(
         Files.getGateResourceAsStream("creole/creole.xml"),
-        Gate.getUrl("creole/")
+        Gate.getClassLoader().getResource("gate/resources/creole/")
+// Gate.getUrl("creole/")
       );
+// Out.prln(Gate.getClassLoader().getResource("gate/resources/creole/"));
     } catch(IOException e) {
       if(DEBUG) System.out.println(e);
       throw(new GateException(e));

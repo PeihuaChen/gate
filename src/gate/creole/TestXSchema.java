@@ -31,7 +31,7 @@ import gate.util.*;
 public class TestXSchema extends TestCase
 {
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /** Construction */
   public TestXSchema(String name) { super(name); }
@@ -43,7 +43,14 @@ public class TestXSchema extends TestCase
   /** A test */
   public void testFromAndToXSchema() throws Exception {
 
-    AnnotationSchema annotSchema = new AnnotationSchema();
+    ResourceData resData = (ResourceData)
+      Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
+
+    FeatureMap parameters = Factory.newFeatureMap();
+    parameters.put("xmlFileUrl", resData.getXmlFileUrl());
+
+    AnnotationSchema annotSchema = (AnnotationSchema)
+      Factory.createResource("gate.creole.AnnotationSchema", parameters);
 
     // Create an annoatationSchema from a URL.
     URL url = Gate.getUrl("tests/xml/POSSchema.xml");
@@ -61,30 +68,20 @@ public class TestXSchema extends TestCase
   /** Test creation of annotation schemas via gate.Factory */
   public void testFactoryCreation() throws Exception {
 
+    ResourceData resData = (ResourceData)
+      Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
+
     FeatureMap parameters = Factory.newFeatureMap();
+    parameters.put("xmlFileUrl", resData.getXmlFileUrl());
+
     AnnotationSchema schema = (AnnotationSchema)
       Factory.createResource("gate.creole.AnnotationSchema", parameters);
 
-    if(DEBUG) Out.prln("schema features: " + schema.getFeatures());
-///////////////////
-/*
+    if(DEBUG) {
+      Out.prln("schema RD: " + resData);
+      Out.prln("schema: " + schema);
+    }
 
-deal with the XML element properly; it should be processed relative
-  to ResourceData.jarFileUrl minus the jarFile bit....
-
-COULD do: make resource features have creoleDirectoryUrl;
-"XML" element will be there too, and will be relative path from the URL;
-then get init to construct URL to the XML source and read it.
-BUT, doesn't this break the bean-style initialisation convention?
-What is special about jarFile[Url] and xmlSourceUrl....? (Built
-relative to dir URL)
-
-make ASchema beans-style with proper init
-then get it parsing the XML....
-....and tested here
-
-*/
-//////////////////
   } // testFactoryCreation()
 
   /** Test suite routine for the test runner */

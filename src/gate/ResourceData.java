@@ -77,14 +77,26 @@ public interface ResourceData extends FeatureBearer {
   /** Set method for the resource jar file URL */
   public void setJarFileUrl(URL jarFileUrl);
 
+  /** Get method for the resource jar file URL */
+  public URL getJarFileUrl();
+
+  /** Set method for the resource xml file name */
+  public void setXmlFileName(String xmlFileName);
+
+  /** Get method for the resource xml file name */
+  public String getXmlFileName();
+
+  /** Set method for the resource xml file URL */
+  public void setXmlFileUrl(URL xmlFileUrl);
+
+  /** Get method for the resource xml file URL */
+  public URL getXmlFileUrl();
+
   /** Get method for the resource comment */
   public String getComment();
 
   /** Set method for the resource comment */
   public void setComment(String comment);
-
-  /** Get method for the resource jar file URL */
-  public URL getJarFileUrl();
 
   /** Add a parameter list */
   public void addParameterList(List parameterList);
