@@ -50,6 +50,13 @@ public class Batch implements JapeConstants, java.io.Serializable,
     initTransducer();
   } // full init constructor
 
+  public Batch(String japeFileName, StatusListener sListener) throws JapeException {
+    this.japeFileName = japeFileName;
+    this.addStatusListener(sListener);
+    initTransducer();
+  } // full init constructor
+
+
   /** Create a fully initialised instance from an InputStream connected
     * to the JAPE file.
     */
@@ -94,6 +101,11 @@ public class Batch implements JapeConstants, java.io.Serializable,
       throw new JapeException(
         "unknown file type (not .jape, .ser or .jar):" + japeFileName
       );
+    if(transducer != null) transducer.addStatusListener(new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChangedEvent(text);
+      }
+    });
   } // getTransducer
 
   /** Parse a jape file and store the transducer. */
@@ -101,7 +113,14 @@ public class Batch implements JapeConstants, java.io.Serializable,
     try {
       gate.jape.parser.ParseCpsl parser =
         new gate.jape.parser.ParseCpsl(japeFileName);
+      StatusListener listener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChangedEvent(text);
+        }
+      };
+      parser.addStatusListener(listener);
       transducer = parser.MultiPhaseTransducer();
+      transducer.removeStatusListener(listener);
     } catch (gate.jape.parser.ParseException e) {
       throw new
         JapeException("Batch: error parsing transducer: " + e.getMessage());
@@ -387,11 +406,17 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
   //StatusReporter Implementation
   public void addStatusListener(StatusListener listener){
-    transducer.addStatusListener(listener);
+    myStatusListeners.add(listener);
   }
   public void removeStatusListener(StatusListener listener){
-    transducer.removeStatusListener(listener);
+    myStatusListeners.remove(listener);
   }
+  protected void fireStatusChangedEvent(String text){
+    Iterator listenersIter = myStatusListeners.iterator();
+    while(listenersIter.hasNext())
+      ((StatusListener)listenersIter.next()).statusChanged(text);
+  }
+
   //ProcessProgressReporter implementation
   public void addProcessProgressListener(ProgressListener listener){
     transducer.addProcessProgressListener(listener);
@@ -413,6 +438,9 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.8  2000/07/12 17:55:39  valyt
+// *** empty log message ***
+//
 // Revision 1.7  2000/07/04 14:37:39  valyt
 // Added some support for Jape-ing in a different annotations et than the default one;
 // Changed the L&F for the JapeGUI to the System default

@@ -6,6 +6,7 @@ import com.objectspace.jgl.*;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
+import gate.gui.*;
 
 public class ParseCpslTokenManager implements ParseCpslConstants
 {

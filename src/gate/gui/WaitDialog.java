@@ -19,39 +19,39 @@ public class WaitDialog extends JWindow implements Runnable{
     }
   }
 
-  public void showDialog(String[] texts, boolean modal){
+  public synchronized void showDialog(String[] texts, boolean modal){
     centerBox.removeAll();
     for(int i =0; i < texts.length; i++){
       centerBox.add(new JLabel(texts[i]));
     }
     centerBox.validate();
     pack();
-    stop = false;
-    Thread thread = new Thread(this);
-    thread.setPriority(Thread.MAX_PRIORITY);
-    thread.start();
     Point loc = frame.getLocation();
     loc.move(frame.getSize().width - getSize().width / 2 ,
              frame.getSize().height - getSize().height /2 );
     setLocation(loc);
+    stop = false;
+    Thread thread = new Thread(this);
+    thread.setPriority(Thread.MAX_PRIORITY);
+    thread.start();
     show();
   }
 
-  public void showDialog(Component[] components, boolean modal){
+  public synchronized void showDialog(Component[] components, boolean modal){
     centerBox.removeAll();
     for(int i =0; i < components.length; i++){
       centerBox.add(components[i]);
     }
     centerBox.validate();
     pack();
-    stop = false;
-    Thread thread = new Thread(this);
-    thread.setPriority(Thread.MAX_PRIORITY);
-    thread.start();
     Point loc = frame.getLocation();
     loc.move(frame.getSize().width - getSize().width / 2 ,
              frame.getSize().height - getSize().height /2 );
     setLocation(loc);
+    stop = false;
+    Thread thread = new Thread(this);
+    thread.setPriority(Thread.MAX_PRIORITY);
+    thread.start();
     show();
   }
 
