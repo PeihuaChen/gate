@@ -987,6 +987,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //normalize index
       int startSentenceIndex = quoteStartPos >= 0 ? quoteStartPos
                                                   : -quoteStartPos -1 -1; // blame Sun, not me
+      //still not good?
+      if (startSentenceIndex < 0) {
+        startSentenceIndex = 0;
+      }
 
       //1.2. get the persons and restrict to these that precede the quote (i.e. not contained
       //in the quote)
@@ -1012,6 +1016,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //normalize it
       int endSentenceIndex = quoteEndPos >= 0 ? quoteEndPos
                                               : -quoteEndPos -1 -1; // blame Sun, not me
+      //still not good?
+      if (endSentenceIndex < 0) {
+        endSentenceIndex = 0;
+      }
+
       this.antecedentsAfter = generateAntecedentCandidates(endSentenceIndex,
                                                             this.quoteIndex,
                                                             ANTEC_AFTER);
