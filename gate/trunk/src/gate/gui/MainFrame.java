@@ -286,6 +286,7 @@ public class MainFrame extends JFrame
     Out.prln("Gate 2 started at: " + new Date().toString());
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
+
     logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
 
 
