@@ -26,6 +26,7 @@ public class TableMap extends AbstractTableModel
     public void setModel(TableModel model) {
         this.model = model;
         model.addTableModelListener(this);
+        tableChanged(null);
     }
 
     // By default, implement TableModel by forwarding all messages

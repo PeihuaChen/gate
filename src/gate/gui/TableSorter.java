@@ -21,21 +21,29 @@ import java.util.*;
 
 import javax.swing.table.TableModel;
 import javax.swing.event.TableModelEvent;
-
-// Imports for picking up mouse events from the JTable.
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.InputEvent;
+import java.io.IOException;
+import java.awt.Component;
+import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
+import javax.swing.JButton;
+
+import gate.util.Files;
 
 public class TableSorter extends TableMap {
     int             indexes[];
     Vector          sortingColumns = new Vector();
     boolean         ascending = true;
     int compares;
+    int sortedColumn = -1;
+    JButton sortedHeader = null;
+    Icon upIcon;
+    Icon downIcon;
 
     public TableSorter() {
         indexes = new int[0]; // for consistency
@@ -275,11 +283,6 @@ public class TableSorter extends TableMap {
     }
 
     public void sortByColumn(int column) {
-        sortByColumn(column, true);
-    }
-
-    public void sortByColumn(int column, boolean ascending) {
-        this.ascending = ascending;
         sortingColumns.removeAllElements();
         sortingColumns.addElement(new Integer(column));
         sort(this);
@@ -289,24 +292,42 @@ public class TableSorter extends TableMap {
     // There is no-where else to put this.
     // Add a mouse listener to the Table to trigger a table sort
     // when a column heading is clicked in the JTable.
-    public void addMouseListenerToHeaderInTable(JTable table) {
-        final TableSorter sorter = this;
-        final JTable tableView = table;
-        tableView.setColumnSelectionAllowed(false);
-        MouseAdapter listMouseListener = new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                TableColumnModel columnModel = tableView.getColumnModel();
-                int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-                int column = tableView.convertColumnIndexToModel(viewColumn);
-                if (e.getClickCount() == 1 && column != -1) {
-                    //System.out.println("Sorting ...");
-                    int shiftPressed = e.getModifiers()&InputEvent.SHIFT_MASK;
-                    boolean ascending = (shiftPressed == 0);
-                    sorter.sortByColumn(column, ascending);
+    public void registerJTable(JTable table) {
+      final TableSorter sorter = this;
+      final JTable tableView = table;
+      upIcon = new ImageIcon(getClass().getResource(Files.getResourcePath() +
+                                                    "/img/up.gif"));
+      downIcon = new ImageIcon(getClass().getResource(Files.getResourcePath() +
+                                                      "/img/down.gif"));
+      tableView.setColumnSelectionAllowed(false);
+      MouseAdapter listMouseListener = new MouseAdapter() {
+          public void mouseClicked(MouseEvent e) {
+              TableColumnModel columnModel = tableView.getColumnModel();
+              int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+              int column = tableView.convertColumnIndexToModel(viewColumn);
+              if (e.getClickCount() == 1 && column != -1) {
+                if(column != sortedColumn) ascending = true;
+                else ascending = !ascending;
+                if(sortedHeader != null) sortedHeader.setIcon(null);
+                Component header = tableView.getTableHeader().getComponentAt(
+                            tableView.getTableHeader().getHeaderRect(column).x +3,
+                            tableView.getTableHeader().getHeaderRect(column).y +3);
+                if(header instanceof JButton){
+                  sortedHeader = (JButton) header;
                 }
-            }
-        };
-        JTableHeader th = tableView.getTableHeader();
-        th.addMouseListener(listMouseListener);
+                sorter.sortByColumn(column);
+                sortedColumn = column;
+                if(sortedHeader!= null){
+                  if(ascending){
+                    sortedHeader.setIcon(upIcon);
+                  }else{
+                    sortedHeader.setIcon(downIcon);
+                  }
+                }
+              }
+          }
+      };
+      JTableHeader th = tableView.getTableHeader();
+      th.addMouseListener(listMouseListener);
     }
 }
