@@ -10,7 +10,6 @@
     <path>[lib/javacompiler.jar]</path>
     <path>[lib/jigsaw.jar]</path>
     <path>[lib/junit.jar]</path>
-    <path>[lib/orajdbc2.zip]</path>
     <path>[lib/oro.jar]</path>
     <path>[lib/postgres6.5-jdbc1.2.jar]</path>
     <path>[lib/jdom.jar]</path>
@@ -21,6 +20,7 @@
     <path>[lib/graph_drawing.jar]</path>
     <path>[lib/sapdbc.jar]</path>
     <path>[lib/xerces.jar]</path>
+    <path>[lib/orajdbc9i.zip]</path>
   </class>
   <required>gatelibs</required>
 </library>
