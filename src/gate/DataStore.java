@@ -22,6 +22,7 @@ import gate.util.*;
 import gate.persist.*;
 import gate.event.*;
 import gate.security.*;
+import gate.security.SecurityException;
 
 /** Models all sorts of data storage.
   */
@@ -65,13 +66,14 @@ public interface DataStore extends FeatureBearer, NameBearer {
    * @param lrClassName class name of the type of resource
    */
   public void delete(String lrClassName, Object lrId)
-  throws PersistenceException;
+  throws PersistenceException,SecurityException;
 
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  public void sync(LanguageResource lr) throws PersistenceException;
+  public void sync(LanguageResource lr)
+  throws PersistenceException,SecurityException;
 
   /**
    * Set method for the autosaving behaviour of the data store.
@@ -94,7 +96,7 @@ public interface DataStore extends FeatureBearer, NameBearer {
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
   LanguageResource getLr(String lrClassName, Object lrId)
-  throws PersistenceException;
+  throws PersistenceException,SecurityException;
 
   /** Get a list of the types of LR that are present in the data store. */
   public List getLrTypes() throws PersistenceException;
@@ -160,5 +162,18 @@ public interface DataStore extends FeatureBearer, NameBearer {
   /** identify user using this datastore */
   public Session getSession(Session s)
     throws gate.security.SecurityException;
+
+  /**
+   * Try to acquire exlusive lock on a resource from the persistent store.
+   * Always call unlockLR() when the lock is no longer needed
+   */
+  public boolean lockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException;
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  public void unlockLr(LanguageResource lr)
+  throws PersistenceException,SecurityException;
 
 } // interface DataStore
