@@ -204,7 +204,7 @@ public class AccessControllerImpl
       //numbers generated from Oracle sequences are BIGINT
       stmt.registerOutParameter(2,java.sql.Types.BIGINT);
       stmt.execute();
-      new_id = new Long(stmt.getLong(1));
+      new_id = new Long(stmt.getLong(2));
     }
     catch(SQLException sqle) {
       throw new PersistenceException(
