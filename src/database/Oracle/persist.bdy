@@ -814,18 +814,18 @@ create or replace package body persist is
            and aset.as_doc_id = doc.doc_id
            and doc.doc_lr_id = p_lr_id;
     
+    --2. delete mappings
+    delete 
+    from   t_as_annotation
+    where  asann_as_id = l_as_id;
+    
     --1. delete annotations
     delete
     from   t_annotation   ann
     where  exists (select members.asann_id
                    from   t_as_annotation members
                    where  members.asann_ann_id = ann.ann_global_id
-                          and members.asann_as_id = l_as_id);
-                          
-    --2. delete mappings
-    delete 
-    from   t_as_annotation
-    where  asann_as_id = l_as_id;
+                          and members.asann_as_id = l_as_id);                          
     
     --3. delete set itself
     delete
