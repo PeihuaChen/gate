@@ -214,6 +214,7 @@ Macro: MODALADJ
     {Token.category=="JJ" , Token.string=="fair"} |
     {Token.category=="JJ" , Token.string=="unfair"} |
     {Token.category=="JJ" , Token.string=="common"} |
+    {Token.category=="JJ" , Token.string=="uncommon"} |
     {Token.category=="JJ" , Token.string=="rare"} |
     {Token.category=="JJ" , Token.string=="wrong"} |
     {Token.category=="JJ" , Token.string=="safe"} |
@@ -382,7 +383,7 @@ Priority: 77
    (NOT)?
    (ADVERB-01)?
    (COGV-ED)
-   {Token.category=="IN" , Token.string=="that"}
+   ({Token.category=="IN" , Token.string=="that"})?
 ) :pleonasm
 -->
 {
