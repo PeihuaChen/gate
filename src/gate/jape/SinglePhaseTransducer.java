@@ -433,7 +433,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
         }
 
       } else if(ruleApplicationStyle == APPELT_STYLE ||
-                ruleApplicationStyle == FIRST_STYLE) {
+                ruleApplicationStyle == FIRST_STYLE ||
+                ruleApplicationStyle == ONCE_STYLE) {
 
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
@@ -469,6 +470,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, currentAcceptor.getBindings(),
                              inputAS, outputAS);
+
+        //if in ONCE mode stop after first match
+        if(ruleApplicationStyle == ONCE_STYLE) return;
+
         //advance in AG
         lastAGPosition = currentAcceptor.getAGPosition().getOffset().longValue();
       }

@@ -356,6 +356,8 @@ SinglePhaseTransducer SinglePhaseTransducer() :
             t.setRuleApplicationStyle(FIRST_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("brill"))
             t.setRuleApplicationStyle(BRILL_STYLE);
+          else if(optionValueTok.image.equalsIgnoreCase("once"))
+            t.setRuleApplicationStyle(ONCE_STYLE);
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
@@ -1028,7 +1030,11 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.26  2002/04/22 11:45:58  valyt
+// ONCE mode added to Jape
+//
 // Revision 1.25  2002/02/26 13:27:13  valyt
+//
 // Error messages from the compiler
 //
 // Revision 1.24  2001/11/01 15:49:10  valyt
