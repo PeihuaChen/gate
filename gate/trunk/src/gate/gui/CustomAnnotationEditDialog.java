@@ -39,7 +39,6 @@ public class CustomAnnotationEditDialog extends JDialog {
   private final static int CANCEL = 2;
 
   // internal data
-
   private Annotation annot = null;
   private MyCustomFeatureBearer data = null;
 
@@ -63,10 +62,12 @@ public class CustomAnnotationEditDialog extends JDialog {
     super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
     this.setTitle("Custom Annotation Editor");
-
     data = new MyCustomFeatureBearer(null);
   }//CustomAnnotationEditDialog
 
+  /** Constructs a CustomAnnotationEditDialog.The parent frame is null and the
+    * dialog is modal.
+    */
   public CustomAnnotationEditDialog(){
     this(null, true);
   }// End CustomAnnotationEditDialog
@@ -175,13 +176,14 @@ public class CustomAnnotationEditDialog extends JDialog {
 
   }//initListeners()
 
-  /** Returns annot type edited with this viewer*/
+  /** Returns annot type edited with this tool*/
   public String getAnnotType(){ return data.getAnnotType();}
 
-  /** Returns annot type edited with this viewer*/
+  /** Returns the features edited with this tool*/
   public FeatureMap getFeatures(){ return data.getFeatures();}
 
-  /** This method is called when the user press the OK button*/
+  /** This method is called when the user press the OK button
+    */
   private void doOk(){
     buttonPressed = OK;
     if (!"".equals(annotTypeTextField.getText())){
@@ -201,7 +203,10 @@ public class CustomAnnotationEditDialog extends JDialog {
     this.hide();
   }//doCancel();
 
-  /** This method displays the AnnotationEditDialog in creating mode*/
+  /**  This method displays the AnnotationEditDialog in creating mode
+    *  If a user wnats to create a new annotation then show() must be called with
+    *  null as a param.
+    */
   public int show(Annotation anAnnot){
     annot = anAnnot;
 
@@ -219,12 +224,7 @@ public class CustomAnnotationEditDialog extends JDialog {
     }// End if
   }// show()
 
-  /** This method displays the AnnotationEditDialog in edit mode*/
-/*  public int show(){
-    return show(null);
-  }// show()
-*/
-
+/*
   public static void main(String[] args){
 
     try {
@@ -235,21 +235,25 @@ public class CustomAnnotationEditDialog extends JDialog {
       //aed.show(annotSchema);
       caed.show(null);
 
-  /*
-      // Create an annoatationSchema from a URL.
-      URL url =
-      annotSchema.fromXSchema(url);
-  */
     } catch (Exception e){
       e.printStackTrace(System.err);
     }
   }// main
+*/
+  // INNER CLASS
 
+  /** This class implements a feature bearer. It is used as internal data.
+    * The FeatureEditor will use an object belonging to this class.
+    */
   class MyCustomFeatureBearer implements FeatureBearer{
 
+    // Members
     private FeatureMap features = null;
     private String annotType = null;
 
+    /** Constructs a custom feature bearer. If annot is null then it creates
+     *  empty annotType and fetures.
+     */
     public MyCustomFeatureBearer(Annotation anAnnot){
       if (anAnnot != null){
         features = anAnnot.getFeatures();
@@ -260,8 +264,7 @@ public class CustomAnnotationEditDialog extends JDialog {
       }// End if
     }//MyCustomFeatureBearer
 
-    public MyCustomFeatureBearer(){}
-
+    // Mutators and accesors
     public void setFeatures(FeatureMap aFeatureMap){
       features = aFeatureMap;
     }// setFeatures();
@@ -276,6 +279,7 @@ public class CustomAnnotationEditDialog extends JDialog {
 
     public String getAnnotType(){
       return annotType;
-    }//getAlignmentY()
-  }// End MyCustomFeatureBearer
-}//CustomAnnotationEditDialog
+    }//getAnnotType()
+
+  }// End class MyCustomFeatureBearer
+}//End class CustomAnnotationEditDialog
