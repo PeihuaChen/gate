@@ -91,8 +91,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       Long start = bodyAnn.getStartNode().getOffset();
       Long end = bodyAnn.getEndNode().getOffset();
 
+      //get all annotations we want transferred
       AnnotationSet annots2Copy = inputAS.getContained(start, end);
+      //copy them to the new set and delete them from the old one
       outputAS.addAll(annots2Copy);
+      inputAS.removeAll(annots2Copy);
     }
 
 
