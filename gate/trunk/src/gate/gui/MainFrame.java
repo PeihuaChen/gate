@@ -327,8 +327,7 @@ public class MainFrame extends JFrame
                               new ResourcesTreeCellRenderer();
     resourcesTree.setCellRenderer(treeCellRenderer);
     resourcesTree.setCellEditor(new ResourcesTreeCellEditor(resourcesTree,
-                                                          treeCellRenderer,
-                                                          null));
+                                                          treeCellRenderer));
 
     resourcesTree.setRowHeight(0);
     //expand all nodes
@@ -2502,13 +2501,13 @@ public class MainFrame extends JFrame
   }
 
   protected class ResourcesTreeCellEditor extends DefaultTreeCellEditor {
-    ResourcesTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer,
-                           TreeCellEditor editor ){
-      super(tree, renderer, editor);
+    ResourcesTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer){
+      super(tree, renderer);
     }
 
-        /**
-     * Starts the editing timer.
+    /**
+     * This is the original implementation from the super class with some
+     * changes (i.e. shorter timer: 500 ms instead of 1200)
      */
     protected void startEditingTimer() {
       if(timer == null) {
@@ -2520,49 +2519,23 @@ public class MainFrame extends JFrame
 
     /**
      * This is the original implementation from the super class with some
-     * changes (e.g. proper discovery of icon)
+     * changes (i.e. correct discovery of icon)
      */
     public Component getTreeCellEditorComponent(JTree tree, Object value,
                                                 boolean isSelected,
                                                 boolean expanded,
                                                 boolean leaf, int row) {
-      setTree(tree);
-      lastRow = row;
-      //this sets the icon to thew default value
-      determineOffset(tree, value, isSelected, expanded, leaf, row);
+      Component retValue = super.getTreeCellEditorComponent(tree, value,
+                                                            isSelected,
+                                                            expanded,
+                                                            leaf, row);
       //lets find the actual icon
       if(renderer != null) {
         renderer.getTreeCellRendererComponent(tree, value, isSelected, expanded,
                                               leaf, row, false);
         editingIcon = renderer.getIcon();
       }
-
-      editingComponent = realEditor.getTreeCellEditorComponent(tree, value,
-                          isSelected, expanded,leaf, row);
-
-      TreePath        newPath = tree.getPathForRow(row);
-
-      canEdit = (lastPath != null && newPath != null && lastPath.equals(newPath));
-
-      Font font = getFont();
-
-      if(font == null) {
-        if(renderer != null) font = renderer.getFont();
-        if(font == null)font = tree.getFont();
-      }
-      editingContainer.setFont(font);
-      return editingContainer;
-    }
-
-    public boolean isCellEditable(EventObject event) {
-      Object userObject = ((DefaultMutableTreeNode)resourcesTree.
-                           getPathForRow(lastRow).getLastPathComponent()).
-                           getUserObject();
-      if(userObject instanceof Handle){
-        if(((Handle)userObject).getTarget() instanceof Resource)
-          return super.isCellEditable(event);
-      }
-      return false;
+      return retValue;
     }
   }//protected class ResourcesTreeCellEditor extends DefaultTreeCellEditor {
 
