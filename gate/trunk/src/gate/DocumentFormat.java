@@ -88,7 +88,6 @@ extends AbstractLanguageResource implements LanguageResource{
   public DocumentFormat() {}
 
   /** listeners for status report */
-  protected List myStatusListeners = new LinkedList();
   private transient Vector statusListeners;
 
   /** Unpack the markup in the document. This converts markup from the

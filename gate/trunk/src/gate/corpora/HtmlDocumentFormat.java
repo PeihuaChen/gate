@@ -75,43 +75,25 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     reader = new InputStreamReader(
              new ByteArrayInputStream(doc.getContent().toString().getBytes()));
 
-/*
-    if (doc.getSourceUrl() == null)
-        // If doc's source URL is null then the document content will be parsed
-        // If we are here, it's for sure that document content is not null
-        reader = new InputStreamReader(
-             new ByteArrayInputStream(doc.getContent().toString().getBytes()));
-    else {
-      try{
-        conn = doc.getSourceUrl().openConnection();
-        reader =  new InputStreamReader(conn.getInputStream());
-      } catch (IOException e){
-        if (doc.getContent() == null)
-            throw new DocumentFormatException(
-                  "GATE document doesn't have content or a valid URL." +
-                  " Nothing to parse!");
-        else
-          reader = new InputStreamReader(
-              new ByteArrayInputStream(doc.getContent().toString().getBytes()));
-
-      }// End try
-    }// End if
-*/
     // create a new Htmldocument handler
     HtmlDocumentHandler htmlDocHandler = new
                            HtmlDocumentHandler(doc, this.markupElementsMap);
-    // register a status listener with it
-    htmlDocHandler.addStatusListener(new StatusListener(){
+    // Create a Status Listener
+    StatusListener statusListener = new StatusListener(){
           public void statusChanged(String text){
-            // this is implemented in DocumentFormat.java and inherited here
             fireStatusChanged(text);
           }
-    });
+    };
+    // Register the listener with htmlDocHandler
+    htmlDocHandler.addStatusListener(statusListener);
     try{
       // parse the HTML document
       parser.parse(reader, htmlDocHandler, true);
     } catch (IOException e){
       throw new DocumentFormatException(e);
+    }finally{
+      if (htmlDocHandler != null)
+        htmlDocHandler.removeStatusListener(statusListener);
     }// End try
   }//unpackMarkup(doc)
 
