@@ -10,6 +10,8 @@
 package gate.jape;
 
 import java.util.Enumeration;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.Iterator;
 import com.objectspace.jgl.*;
 
@@ -17,6 +19,7 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.*;
 import gate.fsm.*;
+import gate.gui.*;
 
 /**
   * Represents a complete CPSL grammar, with a phase name, options and 
@@ -91,6 +94,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
   * rule application style.
   */
   public void transduce(Document doc) throws JapeException {
+    fireProgressChangedEvent(0);
+
     //INITIALISATION Should we move this someplace else?
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
@@ -111,7 +116,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     gate.Node startNode = doc.getAnnotations().firstNode();
     //The last node: where the parsing will stop
     gate.Node lastNode = doc.getAnnotations().lastNode();
-
+    int oldStartNodeOff = 0;
+    int lastNodeOff = lastNode.getOffset().intValue();
+    int startNodeOff;
     //the big while for the actual parsing
     while(startNode != lastNode){
       //while there are more annotations to parse
@@ -262,9 +269,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //  System.out.println("XXXXXXXXXXXXXXXXXXXX");
       }else if(ruleApplicationStyle == APPELT_STYLE){
         //AcceptingFSMInstances is an ordered structure:
-        //just execute the first rule.
+        //just execute the longest (last) rule.
         FSMInstance currentAcceptor =
-                                    (FSMInstance)acceptingFSMInstances.first();
+                                    (FSMInstance)acceptingFSMInstances.last();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc,currentAcceptor.getBindings());
         //advance in AG
@@ -276,193 +283,18 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //      while(acceptors.hasNext())
 //        FSMInstance.returnInstance((FSMInstance)acceptors.next());
       acceptingFSMInstances.clear();
+      startNodeOff = startNode.getOffset().intValue();
+      if(startNodeOff - oldStartNodeOff > 1024){
+        fireProgressChangedEvent(100 * startNodeOff / lastNodeOff);
+        oldStartNodeOff = startNodeOff;
+      }
     }//while(startNode != lastNode)
 //    FSMInstance.clearInstances();
+    fireProcessFinishedEvent();
   } // transduce
 
 
 //###############end modified versions
-
-  /** Transduce a document. Defers to other methods dependent on
-    * the current rule application style.
-    */
-  public void transduce_(Document doc) throws JapeException {
-
-    if(ruleApplicationStyle == BRILL_STYLE)
-      transduceBrillStyle(doc);
-    else if(ruleApplicationStyle == APPELT_STYLE)
-      transduceAppeltStyle(doc);
-
-  } // transduce
-
-  /** Transduce a document. Rule application is Brill style (i.e. we
-    * try to find all possible applications of all rules).
-    */
-  protected void transduceBrillStyle(Document doc) throws JapeException {
-    int finalPosition = doc.getContent().size().intValue();
-
-    Enumeration rulesIterator = rules.elements();
-    while(rulesIterator.hasMoreElements()) {
-      int position = 0;
-      MutableInteger newPosition = new MutableInteger();
-      newPosition.value = 0;
-      Rule rule = (Rule) rulesIterator.nextElement();
-
-      while(position <= finalPosition) {
-
-	      if(rule.matches(doc, position, newPosition)) {
-	        rule.transduce(doc);
-        }
-	      position = newPosition.value;
-
-      } // while position not final
-
-    } // while there are more rules
-
-  } // transduceBrillStyle
-
-  /** Transduce a document. Rule application is Appelt style (i.e. we
-    * apply only a single rule in any position, based on length/priority).
-    */
-  protected void transduceAppeltStyle(Document doc) throws JapeException {
-
-    PrioritisedRuleList candidates = new PrioritisedRuleList();// matched rules
-    int pos = 0; // position in the document byte stream
-    int end = doc.getContent().size().intValue(); // the end of the byte stream
-
-    while(pos < end) {
-      int smallestPending = Integer.MAX_VALUE; // next pending rule left offset
-
-      // Set each rule to its next match and collect candidates for this pos.
-      // Rules will be in one of five states during this loop:
-      // 1. the last match failed, and there are no more annotations
-      //    of required types in the document, so the rule is finished
-      // 2. the rule is pending, but at a position that has been jumped
-      //    over by another rule firing. reset and shift to state 3.
-      // 3. not pending, not finished. this is the initial state; get
-      //    the next match (shift to state 1, 4 or 5)
-      // 4. pending at the current position: this is a candidate for firing
-      // 5. pending at some future point (the smallest of these is recorded
-      //    so we can advance position to there)
-      // After this loop we have zero or more candidates for firing and
-      // zero or more pending. The fired rule is reset by the firing process;
-      // pending rules that are no longer valid after a firing are in state 2.
-      // and get reset in this loop. So rule state is consistent for the
-      // duration of this document; all rules get reset at the end of the
-      // document.
-      for(ForwardIterator i = rules.start(); ! i.atEnd(); i.advance()) {
-        Rule rule = (Rule) i.get();
-        //System.out.println("trying rule " + rule.getName());
-
-        // 1. rule has no more matches in this document: ignore
-        if(rule.finished())
-          continue;
-
-        int pendingAt = rule.pending(); // rule pending status or offset
-
-        // 2. it was pending but got jumped by other rule firing: shift to 3.
-        if(pendingAt != -1 && pendingAt < pos) {
-          rule.reset(); // implies any candidate will be reset before next try,
-          pendingAt = -1; // as best gets to transduce and others end up here
-        }
-
-        // 3. it isn't pending: get the next match (shift to state 1, 4 or 5)
-        if(pendingAt == -1)
-          pendingAt = rule.getNextMatch(doc, pos, end);
-
-        // 4. it's a valid match at this position, so add to candidates
-        if(pendingAt == pos)
-          candidates.add(rule, rule.getEndPosition()-rule.getStartPosition());
-
-        // 5. pending in the future; record pending point if it's the smallest
-        else if(pendingAt != -1)
-          smallestPending = Math.min(smallestPending, pendingAt);
-      } // for each rule
-
-      // fire the best rule
-      if(candidates.size() > 0) {
-        Rule bestRule = (Rule) candidates.at(0); // first candidate is best
-        candidates = new PrioritisedRuleList();  // forget the other candidates
-        pos = bestRule.getEndPosition(); // advance to end of this rule
-        bestRule.transduce(doc); // do the transduction (resets rule)
-        //System.out.println("applied rule " + bestRule.getName());
-      }
-
-      // no match, and none pending so give up
-      else if(smallestPending == Integer.MAX_VALUE)
-        break;
-
-      // no rules matched here but some are pending: advance to the leftmost
-      else
-        pos = Math.max(smallestPending, pos + 1);
-
-    }   // while pos < end
-
-    // reset all rules; some may be finished, some pending
-    for(ForwardIterator i = rules.start(); ! i.atEnd(); i.advance())
-      ((Rule) i.get()).reset();
-
-
-
-  /************* BUGGY: ***********
-    int position = 0;
-    int finalPosition = doc.getByteSequence().length();
-    PrioritisedRuleList candidateRules = new PrioritisedRuleList();
-
-    while(position <= finalPosition) {
-      int leftmostFailurePosition = Integer.MAX_VALUE;
-
-      Enumeration rulesIterator = rules.elements();
-      while(rulesIterator.hasMoreElements()) {
-        Rule rule = (Rule) rulesIterator.nextElement();
-        MutableInteger newPosition = new MutableInteger();
-        newPosition.value = 0;
-        if(rule.matches(doc, position, newPosition)) {
-          //Debug.pr(
-          //  this, "matched rule: " + Debug.getNl() + rule.toString("  ")
-          //);
-          candidateRules.add(
-            rule, newPosition.value - rule.getStartPosition()
-          );
-
-        }
-        else {
-          //Debug.pr("rule " + rule.getName() + " failed, newPos = " +
-          //         newPosition.value + Debug.getNl());
-          if(leftmostFailurePosition > newPosition.value)
-            leftmostFailurePosition = newPosition.value;
-        }
-      } // while there are more rules
-
-      if(candidateRules.size() > 0) {
-        DListIterator i = candidateRules.begin();
-        Rule bestRule = (Rule) i.get();
-        //Debug.pr(
-        //  this, "bestRule: " + bestRule.getName() + Debug.getNl()
-        //);
-        position = bestRule.getEndPosition();
-        //Debug.pr("position = " + position);
-        bestRule.transduce(doc);
-
-        // reset the rules that weren't applied
-        for(i.advance(); ! i.atEnd(); i.advance()) {
-          //Debug.pr(
-          //  this,
-          //  "reseting rule: " + ((Rule) i.get()).getName() + Debug.getNl()
-          //);
-          ((Rule) i.get()).reset();
-        }
-      } else { // no rules matched
-        position = leftmostFailurePosition;
-        //Debug.pr(this,
-        //         "no rules matched, position = " + position + Debug.getNl());
-      }
-
-      // clear the candidates list
-      candidateRules.clear();
-    } // while position <= final
-******************/
-  } // transduceAppeltStyle
 
   /** Clean up (delete action class files, for e.g.). */
   public void cleanUp() {
@@ -504,12 +336,15 @@ extends Transducer implements JapeConstants, java.io.Serializable
   public PrioritisedRuleList getRules(){
     return rules;
   }
-
 } // class SinglePhaseTransducer
 
 
 
 // $Log$
+// Revision 1.11  2000/07/03 21:00:59  valyt
+// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
+// (it looks great :) )
+//
 // Revision 1.10  2000/06/26 14:45:50  valyt
 // Fixed the haunting bug in Jape: it works OK now
 // Reversed Jape to using the Java object management instead of our custom made object pooling:

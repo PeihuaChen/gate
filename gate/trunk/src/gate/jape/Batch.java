@@ -17,14 +17,17 @@ import java.util.*;
 import java.util.jar.*;
 import java.io.*;
 import com.objectspace.jgl.*;
+
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
+import gate.gui.*;
 
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.
   */
-public class Batch implements JapeConstants, java.io.Serializable {
+public class Batch implements JapeConstants, java.io.Serializable,
+                              ProcessProgressReporter, StatusReporter{
   /** The name of the transducer file, a .jape or .ser. */
   private String japeFileName;
 
@@ -211,7 +214,8 @@ public class Batch implements JapeConstants, java.io.Serializable {
     Iterator iter = coll.iterator();
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
-      transducer.transduce(doc);
+//      transducer.transduce(doc);
+      transduce(doc);
     }
   } // transduce(coll)
 
@@ -381,15 +385,38 @@ public class Batch implements JapeConstants, java.io.Serializable {
     if(verbose) System.out.println("Batch: " + mess);
   } // message
 
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    transducer.addStatusListener(listener);
+  }
+  public void removeStatusListener(StatusListener listener){
+    transducer.removeStatusListener(listener);
+  }
+  //ProcessProgressReporter implementation
+  public void addProcessProgressListener(ProgressListener listener){
+    transducer.addProcessProgressListener(listener);
+  }
+  public void removeProcessProgressListener(ProgressListener listener){
+    transducer.removeProcessProgressListener(listener);
+  }
+  //ProcessProgressReporter implementation ends here
+
   /** Are we initialising from a resource? */
   private boolean fromResource = false;
 
   /** Path to the resources tree */
   private String resPath = null;
 
+  private List myProgressListeners = new LinkedList();
+  private List myStatusListeners = new LinkedList();
+
 } // class Batch
 
 // $Log$
+// Revision 1.6  2000/07/03 21:00:59  valyt
+// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
+// (it looks great :) )
+//
 // Revision 1.5  2000/06/09 16:54:33  hamish
 // support for grammars coming from resources
 //

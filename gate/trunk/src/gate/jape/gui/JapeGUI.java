@@ -22,7 +22,9 @@ import gate.creole.tokeniser.*;
 
 
 /** A small toy inteface for Jape testing and tweaking */
-public class JapeGUI extends JFrame {
+public class JapeGUI extends JFrame implements ProgressListener,
+                                               StatusListener,
+                                               Runnable {
 
   public JapeGUI() {
     try  {
@@ -65,13 +67,13 @@ public class JapeGUI extends JFrame {
     northBox = Box.createHorizontalBox();
     this.getContentPane().setLayout(borderLayout1);
     statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-    statusBar.setMaximumSize(new Dimension(400, 17));
+    statusBar.setMaximumSize(new Dimension(30000, 17));
     statusBar.setMinimumSize(new Dimension(200, 17));
-    statusBar.setPreferredSize(new Dimension(200, 17));
+    statusBar.setPreferredSize(new Dimension(30000, 17));
     statusBar.setToolTipText("Status bar");
-    progressBar.setMaximumSize(new Dimension(400, 16));
-    progressBar.setMinimumSize(new Dimension(200, 16));
-    progressBar.setPreferredSize(new Dimension(200, 16));
+    progressBar.setMaximumSize(new Dimension(300, 16));
+    progressBar.setMinimumSize(new Dimension(300, 16));
+    progressBar.setPreferredSize(new Dimension(300, 16));
     collectionAddBtn.setText("Add Document(s)");
     collectionAddBtn.addActionListener(new java.awt.event.ActionListener() {
 
@@ -241,115 +243,115 @@ public class JapeGUI extends JFrame {
       grammarFile = filer.getSelectedFile();
       grammarLbl.setText(grammarFile.getName());
     }
+
   }
 
+  public void run(){
+    startCorpusLoad = 0;
+    startCorpusTokenization = 0;
+    startJapeFileOpen = 0;
+    startCorpusTransduce = 0;
+    endProcess = 0;
+    if(corpus.isEmpty() || grammarFile == null|| tokeniserRulesFile == null){
+      statusBar.setText("Missing corpus, grammar or tokeniser rules!");
+      return;
+    }
+    logTextArea.append("Started at: " + (new Date()) + "\n");
+    startCorpusLoad = System.currentTimeMillis();
+
+    if(corpusIsDirty){
+      statusBar.setText("Reloading the corpus...");
+      corpus.clear();
+      int progress = 0;
+      int fileCnt = corpusFiles.size();
+      Iterator filesIter = corpusFiles.iterator();
+      try{
+        while(filesIter.hasNext()){
+              progressBar.setValue(progress++/fileCnt);
+              corpus.add(Transients.newDocument(
+                                    ((File)filesIter.next()).toURL()));
+              progressBar.setValue(progress/fileCnt);
+            }
+      }catch(java.net.MalformedURLException mue){
+        progressBar.setValue(0);
+        statusBar.setText(mue.toString());
+        mue.printStackTrace(System.err);
+      }catch(IOException ioe){
+        progressBar.setValue(0);
+        statusBar.setText(ioe.toString());
+        ioe.printStackTrace(System.err);
+      }
+      progressBar.setValue(0);
+    }
+    //tokenize all documents
+    startCorpusTokenization = System.currentTimeMillis();
+    logTextArea.append("corpus loading time: " +
+                       (startCorpusTokenization - startCorpusLoad) +
+                       "ms\n");
+
+    int docCnt = corpus.size();
+    statusBar.setText("Tokenizing all the documents...");
+    try{
+      tokeniser =new DefaultTokeniser(tokeniserRulesFile.getAbsolutePath());
+    }catch(IOException ioe){
+      System.err.println("Cannot read the tokeniser rules!" +
+                         "\nAre the Gate resources in place?");
+    }catch(TokeniserException te){
+      te.printStackTrace(System.err);
+    }
+    tokeniser.addProcessProgressListener(this);
+    tokeniser.addStatusListener(this);
+
+    Iterator docIter = corpus.iterator();
+    while(docIter.hasNext()){
+      currentDoc = (Document)docIter.next();
+      tokeniser.tokenise(currentDoc, false);
+    }
+    //do the jape stuff
+    Gate.init();
+    progressBar.setValue(0);
+    startJapeFileOpen = System.currentTimeMillis();
+    logTextArea.append("corpus tokenization time: " +
+                       (startJapeFileOpen - startCorpusTokenization) +
+                       "ms\n");
+    try{
+      statusBar.setText("Opening Jape grammar...");
+      InputStream japeFileStream = new FileInputStream(grammarFile);
+      if(japeFileStream == null)
+        throw new JapeException("couldn't open " + grammarFile.getName());
+      Batch batch = new Batch(grammarFile.getAbsolutePath());
+      startCorpusTransduce = System.currentTimeMillis();
+      logTextArea.append("JAPE structures build time: " +
+                         (startCorpusTransduce - startJapeFileOpen) +
+                         "ms\n");
+      batch.addProcessProgressListener(this);
+      batch.addStatusListener(this);
+      batch.transduce(corpus);
+      endProcess = System.currentTimeMillis();
+      logTextArea.append("transducing time: " +
+                         (endProcess - startCorpusTransduce) + "ms\n");
+    }catch(FileNotFoundException fnfe){
+      fnfe.printStackTrace(System.err);
+    }catch(JapeException je){
+      je.printStackTrace(System.err);
+    }
+    statusBar.setText("");
+    //select the first document
+    docIter = corpus.iterator();
+    if(docIter.hasNext()){
+      currentDoc = (Document)docIter.next();
+      corpusList.setSelectedIndex(0);
+    }
+    logTextArea.append("Processing ended at: " + (new Date()) + "\n" +
+                       "===============================================\n");
+    //repaint what needs to be repainted
+    updateAll();
+    corpusIsDirty = true;
+  }
   void runBtn_actionPerformed(ActionEvent e) {
     //We need to run all the actions in a different thread so the interface
     //doesn't freeze
-    Thread thread = new Thread(new Runnable(){
-      public void run(){
-        startCorpusLoad = 0;
-        startCorpusTokenization = 0;
-        startJapeFileOpen = 0;
-        startCorpusTransduce = 0;
-        endProcess = 0;
-        if(corpus.isEmpty() || grammarFile == null|| tokeniserRulesFile == null){
-          statusBar.setText("Missing corpus, grammar or tokeniser rules!");
-          return;
-        }
-        logTextArea.append("Started at: " + (new Date()) + "\n");
-        startCorpusLoad = (new Date()).getTime();
-
-        if(corpusIsDirty){
-          statusBar.setText("Reloading the corpus...");
-          corpus.clear();
-          int progress = 0;
-          int fileCnt = corpusFiles.size();
-          Iterator filesIter = corpusFiles.iterator();
-          try{
-            while(filesIter.hasNext()){
-                  progressBar.setValue(progress++/fileCnt);
-                  corpus.add(Transients.newDocument(
-                                        ((File)filesIter.next()).toURL()));
-                  progressBar.setValue(progress/fileCnt);
-                }
-          }catch(java.net.MalformedURLException mue){
-            progressBar.setValue(0);
-            statusBar.setText(mue.toString());
-            mue.printStackTrace(System.err);
-          }catch(IOException ioe){
-            progressBar.setValue(0);
-            statusBar.setText(ioe.toString());
-            ioe.printStackTrace(System.err);
-          }
-          progressBar.setValue(0);
-        }
-        //tokenize all documents
-        startCorpusTokenization = (new Date()).getTime();
-        logTextArea.append("corpus loading time: " +
-                           (startCorpusTokenization - startCorpusLoad) +
-                           "ms\n");
-
-        statusBar.setText("Tokenizing all the documents...");
-        gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
-        try{
-          tokeniser =new DefaultTokeniser(tokeniserRulesFile.getAbsolutePath());
-        }catch(IOException ioe){
-          System.err.println("Cannot read the tokeniser rules!" +
-                             "\nAre the Gate resources in place?");
-        }catch(TokeniserException te){
-          te.printStackTrace(System.err);
-        }
-        int progress = 0;
-        int docCnt = corpus.size();
-        Iterator docIter = corpus.iterator();
-        while(docIter.hasNext()){
-          progressBar.setValue(progress++/docCnt);
-          currentDoc = (Document)docIter.next();
-          tokeniser.tokenise(currentDoc, false);
-          progressBar.setValue(progress/docCnt);
-        }
-        //do the jape stuff
-        Gate.init();
-        progressBar.setValue(0);
-        startJapeFileOpen = (new Date()).getTime();
-        logTextArea.append("corpus tokenization time: " +
-                           (startJapeFileOpen - startCorpusTokenization) +
-                           "ms\n");
-        try{
-          statusBar.setText("Opening Jape grammar...");
-          InputStream japeFileStream = new FileInputStream(grammarFile);
-          if(japeFileStream == null)
-            throw new JapeException("couldn't open " + grammarFile.getName());
-          Batch batch = new Batch(grammarFile.getAbsolutePath());
-          statusBar.setText("Transducing the corpus...");
-          startCorpusTransduce = (new Date()).getTime();
-          logTextArea.append("JAPE structures build time: " +
-                             (startCorpusTransduce - startJapeFileOpen) +
-                             "ms\n");
-          batch.transduce(corpus);
-          endProcess = (new Date()).getTime();
-          logTextArea.append("transducing time: " +
-                             (endProcess - startCorpusTransduce) + "ms\n");
-        }catch(FileNotFoundException fnfe){
-          fnfe.printStackTrace(System.err);
-        }catch(JapeException je){
-          je.printStackTrace(System.err);
-        }
-        statusBar.setText("");
-        //select the first document
-        docIter = corpus.iterator();
-        if(docIter.hasNext()){
-          currentDoc = (Document)docIter.next();
-          corpusList.setSelectedIndex(0);
-        }
-        logTextArea.append("Processing ended at: " + (new Date()) + "\n" +
-                           "===============================================\n");
-        //repaint what needs to be repainted
-        updateAll();
-        corpusIsDirty = true;
-      }
-    });
+    Thread thread = new Thread(this);
     thread.start();
   }
 
@@ -643,6 +645,8 @@ public class JapeGUI extends JFrame {
   Set corpusFiles = new HashSet();
   File grammarFile;
   File tokeniserRulesFile = null;
+  DefaultTokeniser tokeniser =null;
+
 
   private boolean invokedStandalone = false;
   Document currentDoc;
@@ -680,9 +684,37 @@ public class JapeGUI extends JFrame {
     }
   }
 
+  //ProgressListener implementation
+  public void progressChanged(int i){
+    if(lastProgress != i){
+//System.out.println(i);
+      progressBar.setValue(i);
+      if(System.currentTimeMillis() - lastProgressUpdate > 300){
+        progressBar.paintImmediately(progressBar.getVisibleRect());
+        lastProgressUpdate = System.currentTimeMillis();
+      }
+      lastProgress = i;
+    }
+  }
 
+  public void processFinished(){
+    progressBar.setValue(0);
+  }
 
+  //StatusListener implementation
+  public void statusChanged(String text){
+    statusBar.setText(text);
+//    if(System.currentTimeMillis() - lastStatusUpdate > 300){
+      statusBar.paintImmediately(statusBar.getVisibleRect());
+//      lastStatusUpdate = System.currentTimeMillis();
+//    }
+  }
+  long lastStatusUpdate = 0;
+  long lastProgressUpdate = 0;
+  int lastProgress = 0;
 }
+
+
 
 class WindowListener extends java.awt.event.WindowAdapter {
   JapeGUI adaptee;

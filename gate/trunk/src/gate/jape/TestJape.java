@@ -140,7 +140,8 @@ public class TestJape extends TestCase
     gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
     try{
       tokeniser =new gate.creole.tokeniser.DefaultTokeniser(
-        Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+        Files.getResourceAsStream("creole/tokeniser/DiTokeniser.rules"));
+//        Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
     }catch(IOException ioe){
       System.err.println("Cannot read the tokeniser rules!" +
                          "\nAre the Gate resources in place?");
@@ -219,8 +220,6 @@ public class TestJape extends TestCase
     try{
       TestJape testJape = new TestJape("Test Jape");
       testJape.setUp();
-//      testJape.DoTestBigGrammar("AveShort");
-//      testJape._testCombined();
       if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
      else testJape.DoTestBigGrammar(args[0]);
     }catch(Exception e){

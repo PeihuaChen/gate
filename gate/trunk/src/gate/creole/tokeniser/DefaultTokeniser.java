@@ -12,6 +12,7 @@ import java.util.*;
 import java.io.*;
 
 import gate.*;
+import gate.gui.*;
 import gate.util.*;
 import gate.fsm.TestFSM;
 import EDU.auburn.VGJ.graph.ParseError;
@@ -82,7 +83,11 @@ import EDU.auburn.VGJ.graph.ParseError;
   * //.
  */
 public class DefaultTokeniser implements Runnable, ProcessingResource,
-                                         ProcessProgressReporter{
+                                         ProcessProgressReporter,
+                                         StatusReporter{
+  protected DefaultTokeniser(){
+  }
+
   /**Constructs a DefaultTokeniser from the file with the name specified by
     *ruleFile
     *@throws FileNotFoundException if the file cannot be found.
@@ -483,6 +488,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     *used instead.
     */
   public void run(){
+    fireStatusChangedEvent("Tokenising " + doc.getSourceURL().getFile() + "...");
     String content = doc.getContent().toString();
     int length = content.length();
     char currentChar;
@@ -495,6 +501,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     DFSMState nextState;
     String tokenString;
     int charIdx = 0;
+    int oldCharIdx = 0;
     FeatureMap newTokenFm;
     while(charIdx < length){
       currentChar = content.charAt(charIdx);
@@ -550,6 +557,10 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         graphPosition = dInitialState;
         tokenStart = charIdx;
       }
+      if(charIdx - oldCharIdx > 256){
+        fireProgressChangedEvent((100 * charIdx )/ length );
+        oldCharIdx = charIdx;
+      }
     }//while(charIdx < length)
 
     if(null != lastMatchingState){
@@ -568,28 +579,41 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         //This REALLY shouldn't happen!
         ioe.printStackTrace(System.err);
       }
-      charIdx = lastMatch + 1;
     }
+    fireProcessFinishedEvent();
+    fireStatusChangedEvent("Tokenisation complete!");
+  }
 
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
+  }
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
+  }
+  protected void fireStatusChangedEvent(String text){
+    Iterator listenersIter = myStatusListeners.iterator();
+    while(listenersIter.hasNext())
+      ((StatusListener)listenersIter.next()).statusChanged(text);
   }
 
   //ProcessProgressReporter implementation
   public void addProcessProgressListener(ProgressListener listener){
-    myListeners.add(listener);
+    myProgressListeners.add(listener);
   }
 
   public void removeProcessProgressListener(ProgressListener listener){
-    myListeners.remove(listener);
+    myProgressListeners.remove(listener);
   }
 
   protected void fireProgressChangedEvent(int i){
-    Iterator listenersIter = myListeners.iterator();
+    Iterator listenersIter = myProgressListeners.iterator();
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).progressChanged(i);
   }
 
   protected void fireProcessFinishedEvent(){
-    Iterator listenersIter = myListeners.iterator();
+    Iterator listenersIter = myProgressListeners.iterator();
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
   }
@@ -609,7 +633,8 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
   }
 
   private FeatureMap features  = null;
-  private List myListeners = new LinkedList();
+  private List myProgressListeners = new LinkedList();
+  private List myStatusListeners = new LinkedList();
   private Document doc;
   private AnnotationSet annotationSet;
 

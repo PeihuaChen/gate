@@ -1,4 +1,4 @@
-/* 
+/*
 	Transducer.java - transducer class
 
 	Hamish Cunningham, 24/07/98
@@ -12,6 +12,7 @@ package gate.jape;
 import java.util.*;
 import com.objectspace.jgl.*;
 import gate.annotation.*;
+import gate.gui.*;
 import gate.util.*;
 import gate.*;
 
@@ -19,7 +20,9 @@ import gate.*;
 /**
   * Represents a single or multiphase transducer.
   */
-public abstract class Transducer implements java.io.Serializable
+public abstract class Transducer implements java.io.Serializable,
+                                            ProcessProgressReporter,
+                                            StatusReporter
 {
   /** Name of this transducer. */
   protected String name;
@@ -41,11 +44,52 @@ public abstract class Transducer implements java.io.Serializable
   /** Create a string representation of the object with padding. */
   public abstract String toString(String pad);
 
-} // interface Transducer
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
+  }
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
+  }
+  protected void fireStatusChangedEvent(String text){
+    Iterator listenersIter = myStatusListeners.iterator();
+    while(listenersIter.hasNext())
+      ((StatusListener)listenersIter.next()).statusChanged(text);
+  }
+
+  //ProcessProgressReporter implementation
+  public void addProcessProgressListener(ProgressListener listener){
+    myProgressListeners.add(listener);
+  }
+
+  public void removeProcessProgressListener(ProgressListener listener){
+    myProgressListeners.remove(listener);
+  }
+
+  protected void fireProgressChangedEvent(int i){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).progressChanged(i);
+  }
+
+  protected void fireProcessFinishedEvent(){
+    Iterator listenersIter = myProgressListeners.iterator();
+    while(listenersIter.hasNext())
+      ((ProgressListener)listenersIter.next()).processFinished();
+  }
+  private List myProgressListeners = new LinkedList();
+  private List myStatusListeners = new LinkedList();
+  //ProcessProgressReporter implementation ends here
+
+} // class Transducer
 
 
 
 // $Log$
+// Revision 1.2  2000/07/03 21:00:59  valyt
+// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
+// (it looks great :) )
+//
 // Revision 1.1  2000/02/23 13:46:13  hamish
 // added
 //

@@ -1,4 +1,4 @@
-/* 
+/*
 	MultiPhaseTransducer.java - transducer class
 
 	Hamish Cunningham, 24/07/98
@@ -12,6 +12,7 @@ package gate.jape;
 import java.util.*;
 import com.objectspace.jgl.*;
 import gate.annotation.*;
+import gate.gui.*;
 import gate.util.*;
 import gate.*;
 
@@ -82,11 +83,35 @@ implements JapeConstants, java.io.Serializable
 
   /** Transduce the document by running each phase in turn. */
   public void transduce(Document doc) throws JapeException {
+    ProgressListener pListener = new ProgressListener(){
+      public void processFinished(){
+        donePhases ++;
+        if(donePhases == phasesCnt) fireProcessFinishedEvent();
+      }
+      public void progressChanged(int i){
+        int value = (donePhases * 100 + i)/phasesCnt;
+        fireProgressChangedEvent(value);
+      }
+      int phasesCnt = phases.size();
+      int donePhases = 0;
+    };
+    StatusListener sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChangedEvent(text);
+      }
+    };
 
     for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance()) {
       Transducer t = (Transducer) i.get();
       try {
+        fireStatusChangedEvent("Transducing " + doc.getSourceURL().getFile() +
+                               " (Phase: " + t.getName() + ")...");
+        t.addProcessProgressListener(pListener);
+        t.addStatusListener(sListener);
         t.transduce(doc);
+        t.removeProcessProgressListener(pListener);
+        t.removeStatusListener(sListener);
+        fireStatusChangedEvent("");
       } catch(JapeException e) {
         String errorMessage = new String(
           "Error transducing document " + doc.getSourceURL() +
@@ -136,6 +161,10 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.3  2000/07/03 21:00:59  valyt
+// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
+// (it looks great :) )
+//
 // Revision 1.2  2000/04/14 18:02:46  valyt
 // Added some gate.fsm classes
 // added some accessor function in old jape classes
