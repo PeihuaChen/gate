@@ -953,6 +953,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
   public Collection getLoadedAnnotationSets() {
 
     //never return the data member - return a clone
+    Assert.assertNotNull(this.namedAnnotSets);
     Vector result = new Vector(this.namedAnnotSets.values());
     if (null != this.defaultAnnots) {
       result.add(this.defaultAnnots);
