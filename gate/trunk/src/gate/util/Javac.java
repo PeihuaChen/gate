@@ -15,7 +15,7 @@ package gate.util;
 
 
 import com.sun.tools.javac.v8.util.*;
-//import com.sun.tools.javac.v8.comp.*;
+import com.sun.tools.javac.v8.comp.*;
 import com.sun.tools.javac.v8.code.*;
 import com.sun.tools.javac.v8.*;
 
