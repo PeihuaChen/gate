@@ -4,7 +4,6 @@ REM Gate run script by Valentin Tablan 01 Jun 2001
 REM $Id$
 REM ##############################################
 
-
 REM ##############################################
 REM set LOCAT to where we hope gate.jar etc. are located
 REM ##############################################
@@ -19,6 +18,16 @@ set LOCAT=%GATE_HOME%\bin
 
 :doneGateHome
 echo LOCAT: %LOCAT%
+
+
+REM ##############################################
+REM set TOOLSJAR to where we hope tools.jar is are located
+REM ##############################################
+
+set TOOLSJAR=%LOCAT%\tools14.jar
+if not exist %TOOLSJAR% set TOOLSJAR=%LOCAT%\..\lib\tools14.jar
+
+echo TOOLSJAR=%TOOLSJAR%
 
 
 REM ##############################################
@@ -58,7 +67,8 @@ REM ##############################################
 REM set JAVA
 REM ##############################################
 
-set JAVA=%JAVA_HOME%\bin\javaw.exe
+set JAVA=%LOCAT%\..\jre1.4\bin\javaw.exe
+if not exist %JAVA% set JAVA=%JAVA_HOME%\bin\javaw.exe
 if not exist %JAVA% set JAVA=javaw.exe
 
 echo JAVA: %JAVA%
@@ -68,7 +78,7 @@ REM ##############################################
 REM set CLASSPATH
 REM ##############################################
 
-set "CLASSPATH=%GATEJAR%;%CLASSPATH%"
+set "CLASSPATH=%GATEJAR%;%TOOLSJAR%;%CLASSPATH%"
 
 echo CLASSPATH: %CLASSPATH%
 
