@@ -71,7 +71,6 @@ public class NameBearerHandle implements Handle,
       tooltipText = ((DataStore)target).getComment();
     }
 
-    popup = null;
     title = (String)target.getName();
     this.icon = MainFrame.getIcon(iconName);
 
@@ -121,11 +120,7 @@ public class NameBearerHandle implements Handle,
   }
 
   public JPopupMenu getPopup() {
-    return popup;
-  }
-
-  public void setPopup(JPopupMenu popup) {
-    this.popup = popup;
+    return buildPopup();
   }
 
   public String getTooltipText() {
@@ -194,9 +189,9 @@ public class NameBearerHandle implements Handle,
   } // fillHMMActions(gate.gui.ProtegeWrapper protege)
 
 
-  protected void buildViews() {
+  protected JPopupMenu buildPopup(){
     //build the popup
-    popup = new JPopupMenu();
+    JPopupMenu popup = new JPopupMenu();
     XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
     closeItem.setAccelerator(KeyStroke.getKeyStroke(
                                 KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
@@ -249,6 +244,25 @@ public class NameBearerHandle implements Handle,
       popup.addSeparator();
       popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
     }
+
+    //add the custom actions from the resource if any are provided
+    if(target instanceof ActionsPublisher){
+      Iterator actionsIter = ((ActionsPublisher)target).getActions().iterator();
+      while(actionsIter.hasNext()){
+        Action anAction = (Action)actionsIter.next();
+        if(anAction == null) popup.addSeparator();
+        else{
+          if(window instanceof StatusListener)
+            popup.add(new XJMenuItem(anAction, (StatusListener)window));
+          else popup.add(anAction);
+        }
+      }
+    }
+    return popup;
+  }
+
+
+  protected void buildViews() {
 
     fireStatusChanged("Building views...");
 
@@ -336,7 +350,6 @@ public class NameBearerHandle implements Handle,
     }
   }//public synchronized void addProgressListener(ProgressListener l)
 
-  JPopupMenu popup;
   String title;
   String tooltipText;
   NameBearer target;
@@ -1434,7 +1447,6 @@ public class NameBearerHandle implements Handle,
     }
 
     Gate.getCreoleRegister().removeCreoleListener(this);
-    popup = null;
     target = null;
   }
 
