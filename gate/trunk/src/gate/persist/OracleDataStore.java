@@ -219,6 +219,8 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
+    LanguageResource result = null;
+
     //-1. preconditions
     Assert.assertNotNull(lr);
     Assert.assertNotNull(secInfo);
@@ -261,13 +263,21 @@ public class OracleDataStore extends JDBCDataStore {
                                       " database (persistance ID is =["+(Long)persistID+"] )");
     }
 
+    //3. perform changes
+    //autocommit should be disabled because of LOBs
+    this.beginTrans();
+
     if (lr instanceof Document) {
-      return createDocument((Document)lr,secInfo);
+      result =  createDocument((Document)lr,secInfo);
     }
     else {
-      return createCorpus((Corpus)lr,secInfo);
+      result =  createCorpus((Corpus)lr,secInfo);
     }
 
+    //4. commit
+    this.commitTrans();
+
+    return result;
   }
 
 
@@ -332,21 +342,19 @@ public class OracleDataStore extends JDBCDataStore {
     ResultSet rs = null;
     CallableStatement cstmt = null;
     try {
-Out.prln("PASS 1");
       String sql =  "select dc_content_type, " +
                     "       dc_character_content, " +
                     "       dc_binary_content " +
                     "from "+gate.Gate.DB_OWNER+".t_doc_content " +
-                    "where  dc_id = ? ";
-//Out.prln(sql);
+                    "where  dc_id = ? " +
+                    "for update ";
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,docContentID.longValue());
-      pstmt.executeQuery(sql);
-Out.prln("PASS 1.2");
-      rs = pstmt.getResultSet();
-Out.prln("PASS 1.3");
+      rs = pstmt.executeQuery();
+
+      //rs = pstmt.getResultSet();
+
       rs.next();
-Out.prln("PASS 2");
       //important: read the objects in the order they appear in
       //the ResultSet, otherwise data may be lost
       long contentType = rs.getLong("DC_CONTENT_TYPE");
@@ -368,7 +376,6 @@ Out.prln("PASS 2");
       cstmt.setLong(1,docContentID.longValue());
       cstmt.setLong(2,newContentType);
       cstmt.execute();
-Out.prln("PASS 3");
     }
     catch(IOException ioe) {
       throw new PersistenceException("can't update document content in DB : ["+
@@ -474,7 +481,7 @@ Out.prln("PASS 3");
     //do we have content at all?
 //Out.prln("SIZE=["+docContent.size()+"]");
     if (docContent.size().longValue() > 0) {
-////      updateDocumentContent(docContentID,docContent);
+      updateDocumentContent(docContentID,docContent);
     }
 
     //6. insert annotations, etc
@@ -677,10 +684,11 @@ Out.prln("PASS 3");
                       " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
                       "        "+Gate.DB_OWNER+".t_lr_type LRTYPE " +
                       " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                      "        AND LRTYPE.lrtp_type = ?"
+                      "        AND LRTYPE.lrtp_type = ? "
                       );
       stmt.setString(1,lrType);
-      rs = stmt.executeQuery();
+      stmt.execute();
+      rs = stmt.getResultSet();
 
       while (rs.next()) {
         //access by index is faster
@@ -714,10 +722,11 @@ Out.prln("PASS 3");
                 " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
                 "        t_lr_type LRTYPE " +
                 " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                "        AND LRTYPE.lrtp_type = ?"
+                "        AND LRTYPE.lrtp_type = ? "
                 );
       stmt.setString(1,lrType);
-      rs = stmt.executeQuery();
+      stmt.execute();
+      rs = stmt.getResultSet();
 
       while (rs.next()) {
         //access by index is faster
@@ -998,19 +1007,15 @@ Out.prln("PASS 3");
     try {
       String sql = " select ft_long_character_value, " +
                    "        ft_binary_value " +
-                   " from   t_feature " +
-                   " where  ft_id = ?";
-Out.prln(sql);
+                   " from  "+Gate.DB_OWNER+".t_feature " +
+                   " where  ft_id = ? ";
 
       stmtA = this.jdbcConn.prepareStatement(sql);
       stmtA.setLong(1,featID.longValue());
-Out.prln("PASS 1");
       stmtA.execute();
-Out.prln("PASS 2");
       rsA = stmtA.getResultSet();
-Out.prln("PASS 3");
+
       rsA.next();
-Out.prln("PASS 4");
       //NOTE: if the result set contains LOBs always read them
       // in the order they appear in the SQL query
       // otherwise data will be lost
@@ -1027,7 +1032,6 @@ Out.prln("PASS 4");
         String s = (String)value;
         writeCLOB(s,clobValue);
       }
-Out.prln("PASS 5");
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't create feature [step 2] in DB: ["+ sqle.getMessage()+"]");
@@ -1101,7 +1105,9 @@ Out.prln("PASS 5");
 
           //does this string fit into a varchar2 or into clob?
           String s = (String)currValue;
+Out.prln("feature is string, len=["+s.length()+"], content=["+s+"]");
           if (false == this.fitsInVarchar2(s)) {
+Out.prln("oops, too long...");
             // Houston, we have a problem
             // put the string into a clob
             _updateFeatureLOB(featID,value,valueType);
@@ -1120,7 +1126,7 @@ Out.prln("PASS 5");
 
   private boolean fitsInVarchar2(String s) {
 
-    return s.getBytes().length > this.ORACLE_VARCHAR_LIMIT_BYTES;
+    return s.getBytes().length < this.ORACLE_VARCHAR_LIMIT_BYTES;
   }
 
   /** --- */
