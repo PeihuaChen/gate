@@ -33,9 +33,11 @@ import java.text.NumberFormat;
 import java.util.*;
 
 public class SerialControllerEditor extends AbstractVisualResource
-                               implements CreoleListener{
+                               implements CreoleListener,
+                                          ActionsPublisher{
 
   public SerialControllerEditor() {
+
   }
 
   public void setTarget(Object target){
@@ -56,25 +58,18 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   public void setHandle(Handle handle) {
     this.handle = handle;
-    //add the items to the popup
-    JPopupMenu popup = handle.getPopup();
-    popup.addSeparator();
-    popup.add(runAction);
-    popup.addSeparator();
-    popup.add(addMenu);
-    popup.add(removeMenu);
 
-    popup.addPopupMenuListener(new PopupMenuListener() {
-      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-        buildInternalMenus();
-        addMenu.setEnabled(addMenu.getItemCount() > 0);
-        removeMenu.setEnabled(removeMenu.getItemCount() > 0);
-      }
-      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-      }
-      public void popupMenuCanceled(PopupMenuEvent e) {
-      }
-    });
+//    popup.addPopupMenuListener(new PopupMenuListener() {
+//      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+//        buildInternalMenus();
+//        addMenu.setEnabled(addMenu.getItemCount() > 0);
+//        removeMenu.setEnabled(removeMenu.getItemCount() > 0);
+//      }
+//      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+//      }
+//      public void popupMenuCanceled(PopupMenuEvent e) {
+//      }
+//    });
 
     //register the listeners
     if(handle instanceof StatusListener)
@@ -89,7 +84,11 @@ public class SerialControllerEditor extends AbstractVisualResource
   }//init
 
   protected void initLocalData() {
+    actionList = new ArrayList();
     runAction = new RunAction();
+    //add the items to the popup
+    actionList.add(null);
+    actionList.add(runAction);
   }//initLocalData
 
   protected void initGuiComponents() {
@@ -608,6 +607,11 @@ public class SerialControllerEditor extends AbstractVisualResource
       });
     }//if conditional
   }//protected void initListeners()
+
+
+  public List getActions(){
+    return actionList;
+  }
 
   /**
    * Cleans the internal data and prepares this object to be collected
@@ -1240,12 +1244,18 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
   }//InternalStatusListener
 
+
+
   /** The controller this editor edits */
   SerialController controller;
 
   /** The {@link Handle} that created this view */
   Handle handle;
 
+  /**
+   * The list of actions provided by this editor
+   */
+  List actionList;
   /**
    * Contains all the PRs loaded in the sytem that are not already part of the
    * serial controller

@@ -1258,18 +1258,18 @@ public class MainFrame extends JFrame
     handle.addProgressListener(MainFrame.this);
     handle.addStatusListener(MainFrame.this);
 
-    JPopupMenu popup = handle.getPopup();
-    popup.addSeparator();
-    // Create a CloseViewAction and a menu item based on it
-    CloseViewAction cva = new CloseViewAction(handle);
-    XJMenuItem menuItem = new XJMenuItem(cva, this);
-    // Add an accelerator ATL+F4 for this action
-    menuItem.setAccelerator(KeyStroke.getKeyStroke(
-                                      KeyEvent.VK_H, ActionEvent.CTRL_MASK));
-    popup.add(menuItem);
-    // Put the action command in the component's action map
-    if (handle.getLargeView() != null)
-      handle.getLargeView().getActionMap().put("Hide current view",cva);
+//    JPopupMenu popup = handle.getPopup();
+//    popup.addSeparator();
+//    // Create a CloseViewAction and a menu item based on it
+//    CloseViewAction cva = new CloseViewAction(handle);
+//    XJMenuItem menuItem = new XJMenuItem(cva, this);
+//    // Add an accelerator ATL+F4 for this action
+//    menuItem.setAccelerator(KeyStroke.getKeyStroke(
+//                                      KeyEvent.VK_H, ActionEvent.CTRL_MASK));
+//    popup.add(menuItem);
+//    // Put the action command in the component's action map
+//    if (handle.getLargeView() != null)
+//      handle.getLargeView().getActionMap().put("Hide current view",cva);
   }// datastoreOpened();
 
   /**Called when a {@link gate.DataStore} has been created*/
