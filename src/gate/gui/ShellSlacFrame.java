@@ -378,34 +378,10 @@ public class ShellSlacFrame extends MainFrame {
 
     public void actionPerformed(ActionEvent e) {
       if (application != null) {
-        try {
-          application.setCorpus(corpus);
-          application.execute();
-        } catch (ExecutionException ex) {
-          ex.printStackTrace();
-          throw new GateRuntimeException("Error in execution of application.");
-        } // catch
+        SerialControllerEditor editor = new SerialControllerEditor();
+        editor.setTarget(application);
+        editor.runAction.actionPerformed(null);
       } // if
-/*
-      if (application != null && applicationsRoot.getChildCount() > 0) {
-        DefaultMutableTreeNode node = 
-          (DefaultMutableTreeNode) applicationsRoot.getChildAt(0);
-        Object userObject = node.getUserObject();
-        if(userObject instanceof NameBearerHandle) {
-          NameBearerHandle handle = (NameBearerHandle) userObject;
-  Out.println("Handle: "+handle);
-  Out.println("Popup: "+handle.getPopup());
-          Action act = handle.getPopup().getActionMap().get("Run");
-          if (act != null) {
-  Out.println("Action is not null");
-            act.actionPerformed(null);
-          } // if
-          else {
-  Out.println("Actions: "+handle.getPopup().getActionMap().keys());
-          }
-        } // if
-      }// End if
-*/
     } // actionPerformed(ActionEvent e)
   } // class RunApplicationAction extends AbstractAction
 
