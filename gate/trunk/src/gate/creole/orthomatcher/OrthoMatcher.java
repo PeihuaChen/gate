@@ -65,6 +65,19 @@ public class OrthoMatcher extends AbstractProcessingResource
   /** internal or external list */
   protected boolean extLists = true;
 
+  protected boolean matchingUnknowns = true;
+
+  /** This is an internal variable to indicate whether
+   *  we matched using a rule that requires that
+   *  the newly matched annotation matches all the others
+   *  This is needed, because organizations can share
+   *  first/last tokens like News and be different
+   *
+   * I have not implemented this yet, but might need to
+   * Let's see how it tests
+   */
+  private   boolean allMatchingNeeded = false;
+
   //** Orthomatching is not case-sensitive by default*/
   protected boolean caseSensitive = false;
 
@@ -161,7 +174,8 @@ public class OrthoMatcher extends AbstractProcessingResource
     matchNameAnnotations();
 
     //then match the unknown ones to all name ones
-    matchUnknown();
+    if (matchingUnknowns)
+      matchUnknown();
 
     // set the matches of the document
 //    determineMatchesDocument();
@@ -173,6 +187,7 @@ public class OrthoMatcher extends AbstractProcessingResource
       matchesDocFeature = new ArrayList();
     }
 
+//    Out.prln("Processed strings" + processedAnnots.values());
     //clean-up the internal data structures for next run
     nameAllAnnots = null;
     processedAnnots.clear();
@@ -206,6 +221,7 @@ public class OrthoMatcher extends AbstractProcessingResource
             ).toString();
           // now do the reg. exp. substitutions
           annotString = regularExpressions(annotString," ", "\\s+");
+
         } catch (InvalidOffsetException ioe) {
             executionException = new ExecutionException
                                    ("Invalid offset of the annotation");
@@ -221,11 +237,19 @@ public class OrthoMatcher extends AbstractProcessingResource
                           nameAnnot.getEndNode().getOffset()
                         ));
         Collections.sort(tokens, new gate.util.OffsetComparator());
+        //check if these actually do not end after the name
+        //needed coz new tokeniser conflates
+        //strings with dashes. So British Gas-style is two tokens
+        //instead of three. So cannot match properly British Gas
+//        tokens = checkTokens(tokens);
         tokensMap.put(nameAnnot.getId(), tokens);
+
+//        Out.prln("Matching annot " + nameAnnot + ": string " + annotString);
 
         //first check whether we have not matched such a string already
         //if so, just consider it matched, don't bother calling the rules
         if (processedAnnots.containsValue(annotString)) {
+//          Out.prln("Contained string found " + annotString);
           updateMatches(nameAnnot, annotString);
           processedAnnots.put(nameAnnot.getId(), annotString);
           continue;
@@ -243,6 +267,7 @@ public class OrthoMatcher extends AbstractProcessingResource
         //otherwise try matching with previous annotations
         matchWithPrevious(nameAnnot, annotString);
 
+//        Out.prln("Putting in previous " + nameAnnot + ": string " + annotString);
         //finally add the current annotations to the processed map
         processedAnnots.put(nameAnnot.getId(), annotString);
       }//while through name annotations
@@ -387,7 +412,8 @@ public class OrthoMatcher extends AbstractProcessingResource
          //also put an attribute to indicate that
           nameAnnot.getFeatures().put("NMRule", unknownType);
         }//if unknown
-      }
+        break; //no need to match further
+      }//if annotations matched
 
     }//while through previous annotations
 
@@ -430,12 +456,21 @@ public class OrthoMatcher extends AbstractProcessingResource
     //last but not be the same
     if (apply_rules_namematch(prevAnnot.getType(), shortName,longName)) {
       List toMatchList = new ArrayList(matchesList);
+//      if (newAnnot.getType().equals(unknownType))
+//        Out.prln("Matching new " + annotString + " with annots " + toMatchList);
       toMatchList.remove(prevAnnot.getId());
       return matchOtherAnnots(toMatchList, newAnnot, annotString);
     }
     return false;
   }
 
+  /** This method checkes whether the new annotation matches
+   *  all annotations given in the toMatchList (it contains ids)
+   *  The idea is that the new annotation needs to match all those,
+   *  because assuming transitivity does not always work, when
+   *  two different entities share a common token: e.g., BT Cellnet
+   *  and BT and British Telecom.
+  */
   protected boolean matchOtherAnnots( List toMatchList, Annotation newAnnot,
                                       String annotString) {
 
@@ -481,6 +516,8 @@ public class OrthoMatcher extends AbstractProcessingResource
       tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
 
       matchedAll = apply_rules_namematch(prevAnnot.getType(), shortName,longName);
+//      if (newAnnot.getType().equals(unknownType))
+//        Out.prln("Loop: " + shortName + " and " + longName + ": result: " + matchedAll);
 
       i++;
     }//while
@@ -662,12 +699,17 @@ public class OrthoMatcher extends AbstractProcessingResource
       tokens.remove(tokens.size()-1);
 
     StringBuffer newString = new StringBuffer(50);
-    for (int i = 0; i < tokens.size(); i++)
+    for (int i = 0; i < tokens.size(); i++){
       newString.append((String) ((Annotation) tokens.get(i)
           ).getFeatures().get(STRING_FEATURE) );
+      if (i != tokens.size()-1)
+        newString.append(" ");
+    }
 
-    return newString.toString();
+    if (caseSensitive)
+      return newString.toString();
 
+    return newString.toString().toLowerCase();
   }
 
 
@@ -986,7 +1028,6 @@ public class OrthoMatcher extends AbstractProcessingResource
            String s2) {
 
     boolean allTokensMatch = true;
-//    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
 
     Iterator tokensLongAnnotIter = tokensLongAnnot.iterator();
     Iterator tokensShortAnnotIter = tokensShortAnnot.iterator();
@@ -994,12 +1035,14 @@ public class OrthoMatcher extends AbstractProcessingResource
       Annotation token = (Annotation) tokensLongAnnotIter.next();
       if (((String)token.getFeatures().get(KIND_FEATURE)).equals("punctuation"))
         continue;
+//      Out.prln("Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
       if (! token.getFeatures().get(STRING_FEATURE).equals(
              ((Annotation) tokensShortAnnotIter.next()).getFeatures().get(STRING_FEATURE))) {
         allTokensMatch = false;
         break;
       } // if (!tokensLongAnnot.nextToken()
     } // while
+//    Out.prln("result is: " + allTokensMatch);
     return allTokensMatch;
   }//matchRule4
 
@@ -1049,6 +1092,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     if (tokensLongAnnot.size() != s2.length())
       return false;
 
+//    Out.prln("Acronym: Matching " + s1 + "and " + s2);
     StringBuffer acronym_s1 = new StringBuffer("");
     StringBuffer acronymDot_s1 = new StringBuffer("");
 
@@ -1059,6 +1103,9 @@ public class OrthoMatcher extends AbstractProcessingResource
       acronymDot_s1.append(toAppend);
       acronymDot_s1.append(".");
     }
+
+//    Out.prln("Acronym: To Match " + acronym_s1 + "and " + s2);
+//    Out.prln("Result: " + matchRule1(acronym_s1.toString(),s2,caseSensitive));
 
     if (matchRule1(acronym_s1.toString(),s2,caseSensitive) ||
         matchRule1(acronymDot_s1.toString(),s2,caseSensitive) )
