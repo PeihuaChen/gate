@@ -239,8 +239,10 @@ public class CorpusBenchmarkTool {
         InputStream inputStream = new FileInputStream(propFile);
         corpusTool.configs.load(inputStream);
         String thresholdString = corpusTool.configs.getProperty("threshold");
-        if (thresholdString != null && !thresholdString.equals(""))
+        if (thresholdString != null && !thresholdString.equals("")) {
           corpusTool.threshold = (new Double(thresholdString)).doubleValue();
+          Out.prln("new threshold is: " + corpusTool.threshold);
+        }
         String setName = corpusTool.configs.getProperty("annotSetName");
         if (setName != null && !setName.equals(""))
           corpusTool.annotSetName = setName;
@@ -735,7 +737,7 @@ public class CorpusBenchmarkTool {
     for (int jj= 0; jj< annotTypes.size(); jj++) {
       String annotType = (String) annotTypes.get(jj);
 
-      AnnotationDiff annotDiff=measureDocs(persDoc, cleanDoc, annotType);
+      AnnotationDiff annotDiff=measureDocs(markedDoc, cleanDoc, annotType);
       //we don't have this annotation type in this document
       if (annotDiff == null)
         continue;
@@ -750,48 +752,54 @@ public class CorpusBenchmarkTool {
 
       AnnotationDiff annotDiff1 =
         measureDocs(markedDoc, persDoc, annotType);
-      AnnotationDiff annotDiff2 =
-        measureDocs(markedDoc, cleanDoc, annotType);
 
-      Out.prln("<TD>" + annotDiff.getPrecisionAverage()
-              + "</TD>");
+      Out.prln("<TD>" + annotDiff.getPrecisionAverage());
       //check the precision first
-      if (annotDiff.getPrecisionAverage() != 1.0) {
-        if (annotDiff1 != null &&
-            annotDiff2!= null &&
-            annotDiff1.getPrecisionAverage()<annotDiff2.getPrecisionAverage()
-           )
-          Out.prln("<P> Precision increase on human-marked from " +
-                   annotDiff1.getPrecisionAverage() + " to " +
-                   annotDiff2.getPrecisionAverage() + "</P>");
-        else if (annotDiff1 != null
-                 && annotDiff2 != null
-                 && annotDiff1.getPrecisionAverage()
-                     > annotDiff2.getPrecisionAverage())
-          Out.prln("<P> Precision decrease on human-marked from " +
-                   annotDiff1.getPrecisionAverage() + " to " +
-                   annotDiff2.getPrecisionAverage() + "</P>");
-      }//if precision
+      if (annotDiff1 != null &&
+          annotDiff!= null &&
+          annotDiff1.getPrecisionAverage()<annotDiff.getPrecisionAverage()
+         )
+        Out.prln("<P> Precision increase on human-marked from " +
+                 annotDiff1.getPrecisionAverage() + " to " +
+                 annotDiff.getPrecisionAverage() + "</P>");
+      else if (annotDiff1 != null
+               && annotDiff != null
+               && annotDiff1.getPrecisionAverage()
+                   > annotDiff.getPrecisionAverage())
+        Out.prln("<P> Precision decrease on human-marked from " +
+                 annotDiff1.getPrecisionAverage() + " to " +
+                 annotDiff.getPrecisionAverage() + "</P>");
+      Out.prln("</TD>");
 
-      Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
+      Out.prln("<TD>" + annotDiff.getRecallAverage());
       //check the recall now
-      if (annotDiff.getRecallAverage() != 1.0) {
-        if (annotDiff1 != null &&
-            annotDiff2!= null &&
-            annotDiff1.getRecallAverage()<annotDiff2.getRecallAverage()
-           )
-          Out.prln("<P> Recall increase on human-marked from " +
-                   annotDiff1.getRecallAverage() + " to " +
-                   annotDiff2.getRecallAverage() + "</P>");
-        else if (annotDiff1 != null
-                 && annotDiff2 != null
-                 && annotDiff1.getRecallAverage()
-                     > annotDiff2.getRecallAverage())
-          Out.prln("<P> Recall decrease on human-marked from " +
-                   annotDiff1.getRecallAverage() + " to " +
-                   annotDiff2.getRecallAverage() + "</P>");
+      if (annotDiff1 != null &&
+          annotDiff!= null &&
+          annotDiff1.getRecallAverage()<annotDiff.getRecallAverage()
+         )
+        Out.prln("<P> Recall increase on human-marked from " +
+                 annotDiff1.getRecallAverage() + " to " +
+                 annotDiff.getRecallAverage() + "</P>");
+      else if (annotDiff1 != null
+               && annotDiff != null
+               && annotDiff1.getRecallAverage()
+                   > annotDiff.getRecallAverage())
+        Out.prln("<P> Recall decrease on human-marked from " +
+                 annotDiff1.getRecallAverage() + " to " +
+                 annotDiff.getRecallAverage() + "</P>");
 
-      }//if recall
+      Out.prln("</TD>");
+
+      //check the recall now
+      if ( isVerboseMode
+           &&
+           ((annotDiff.getRecallAverage() < threshold
+             ||
+             annotDiff.getRecallAverage() < threshold)
+           )
+         )
+        printAnnotations(annotDiff, markedDoc, cleanDoc);
+
 
       Out.prln("</TR>");
     }//for loop through annotation types
