@@ -17,8 +17,10 @@ package gate.annotation;
 
 import java.util.*;
 import java.awt.*;
+import java.text.NumberFormat;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.table.*;
 
 import gate.util.*;
 import gate.*;
@@ -53,10 +55,16 @@ public class AnnotationDiff implements VisualResource{
   /** The Recall value (see NLP Information Extraction)*/
   private Double recall = null;
 
+  /** A number formater for displaying precision and recall*/
+  protected static NumberFormat formatter = NumberFormat.getInstance();
+
   /** As Required by Resource Interface*/
   private FeatureMap featureMap = null;
 
   /** The viewer component */
+  private JPanel diffPanel = new JPanel();
+
+  /** The components that will stay into diffPanel*/
   private SortedTable diffTable = new SortedTable();
 
   /** Sets the key Document containing the annotation set taken as refference*/
@@ -122,23 +130,55 @@ public class AnnotationDiff implements VisualResource{
     AnnotationSet keyAnnotSet = null;
     AnnotationSet responseAnnotSet = null;
     Set diffSet  = null;
-
     // Get the key AnnotationSet from the keyDocument
     keyAnnotSet = keyDocument.getAnnotations().get(
                               annotationSchema.getAnnotationName());
     // Get the response AnnotationSet from the resonseDocument
     responseAnnotSet = responseDocument.getAnnotations().get(
                                         annotationSchema.getAnnotationName());
-    // Calculate the diff Set. This set will be used later at graphic
+    // Calculate the diff Set. This set will be used later with graphic
     // visualisation.
     diffSet = doDiff(keyAnnotSet, responseAnnotSet);
-
     if (diffSet != null){
       //Show it
+      // Configuring the formatter object. It will be used later to format
+      // precision and recall
+      formatter.setMaximumIntegerDigits(1);
+      formatter.setMinimumFractionDigits(4);
+      formatter.setMinimumFractionDigits(4);
+
+      // Create an Annotation diff table model
       AnnotationDiffTableModel diffModel = new AnnotationDiffTableModel();
+      // Set data for this table model
       diffModel.setData(diffSet);
-      diffTable.setTableModel(diffModel);
-    }// End If
+      // Set the model for our table
+      diffTable.setModel(diffModel);
+      // Set the cell renderer.
+      diffTable.setDefaultRenderer(java.lang.String.class,
+                                  new AnnotationDiffCellRenderer(diffModel));
+      // Setting the box layout for diffpanel
+      BoxLayout boxLayout = new BoxLayout(diffPanel,BoxLayout.Y_AXIS);
+      diffPanel.setLayout(boxLayout);
+      // Put the table into a JScrollPanel
+      JScrollPane tableScroll = new JScrollPane(diffTable);
+      // Add the tableScroll to the diffPanel
+      diffPanel.add(tableScroll);
+
+      //Lay out the JLabels from left to right.
+      JPanel jLabelPane = new JPanel();
+      jLabelPane.setLayout(new BoxLayout(jLabelPane, BoxLayout.X_AXIS));
+      // Keep the components together
+      jLabelPane.add(Box.createHorizontalGlue());
+      JLabel precisionLabel = new JLabel("Precision: " +
+                                      formatter.format(precision));
+      jLabelPane.add(precisionLabel);
+      // This places a space between the two JLabel components
+      jLabelPane.add(Box.createRigidArea(new Dimension(20, 0)));
+      JLabel recallLabel = new JLabel("Recall: " + formatter.format(recall));
+      jLabelPane.add(recallLabel);
+
+      diffPanel.add(jLabelPane);
+    }// End if(diffSet != null)
     if (DEBUG)
       printStructure(diffSet);
 
@@ -315,40 +355,97 @@ public class AnnotationDiff implements VisualResource{
     return true;
   }// areEqual
 
-class DiffSetElement{
+  /**
+    * This class is used for internal purposes. It represents a data row
+    */
+  protected class DiffSetElement{
 
-  private Annotation leftAnnotation = null;
+    private Annotation leftAnnotation = null;
 
-  private Annotation rightAnnotation = null;
+    private Annotation rightAnnotation = null;
 
-  public DiffSetElement(){
-  }// DiffSetElement
+    public DiffSetElement(){
+    }// DiffSetElement
 
-  /** Constructor for DiffSetlement*/
-  public DiffSetElement( Annotation aLeftAnnotation,
-                         Annotation aRightAnnotation){
-    leftAnnotation = aLeftAnnotation;
-    rightAnnotation = aRightAnnotation;
-  }// DiffSetElement
+    /** Constructor for DiffSetlement*/
+    public DiffSetElement( Annotation aLeftAnnotation,
+                           Annotation aRightAnnotation){
+      leftAnnotation = aLeftAnnotation;
+      rightAnnotation = aRightAnnotation;
+    }// DiffSetElement
 
-  /** Sets the left annotation*/
-  public void setLeftAnnotation(Annotation aLeftAnnotation){
-    leftAnnotation = aLeftAnnotation;
-  }// setLeftAnnot
+    /** Sets the left annotation*/
+    public void setLeftAnnotation(Annotation aLeftAnnotation){
+      leftAnnotation = aLeftAnnotation;
+    }// setLeftAnnot
 
-  /** Gets the left annotation*/
-  public Annotation getLeftAnnotation(){
-    return leftAnnotation;
-  }// getLeftAnnotation
+    /** Gets the left annotation*/
+    public Annotation getLeftAnnotation(){
+      return leftAnnotation;
+    }// getLeftAnnotation
 
-  /** Sets the right annotation*/
-  public void setRightAnnotation(Annotation aRightAnnotation){
-    rightAnnotation = aRightAnnotation;
-  }// setRightAnnot
+    /** Sets the right annotation*/
+    public void setRightAnnotation(Annotation aRightAnnotation){
+      rightAnnotation = aRightAnnotation;
+    }// setRightAnnot
 
-  /** Gets the right annotation*/
-  public Annotation getRightAnnotation(){
-    return rightAnnotation;
-  }// getRightAnnotation
-}// classs DiffSetElement
+    /** Gets the right annotation*/
+    public Annotation getRightAnnotation(){
+      return rightAnnotation;
+    }// getRightAnnotation
+  }// classs DiffSetElement
+
+  /**
+    * This class defines a Cell renderere for the AnnotationDiff table
+    */
+  public class AnnotationDiffCellRenderer extends DefaultTableCellRenderer{
+    /** The model used to analyse data and get decision on how to render it.*/
+    AnnotationDiffTableModel diffModel = null;
+
+    /** Constructs a randerer with a table model*/
+    public AnnotationDiffCellRenderer(AnnotationDiffTableModel aDiffModel){
+      diffModel = aDiffModel;
+    }//AnnotationDiffCellRenderer
+
+    /** This method is called by JTable*/
+    public Component getTableCellRendererComponent( JTable table,
+                                                    Object value,
+                                                    boolean isSelected,
+                                                    boolean hasFocus,
+                                                    int row,
+                                                    int column){
+
+      Component defaultComp = super.getTableCellRendererComponent(table,
+                                                                  value,
+                                                                  isSelected,
+                                                                  hasFocus,
+                                                                  row,
+                                                                  column);
+      // Nothing special to render if the model is null.
+      if (diffModel == null)
+        return defaultComp;
+
+      if (!(diffModel.getRawObject(row) instanceof DiffSetElement))
+        return defaultComp;
+
+      // The column number four will be randered using a blank component
+      if (column == 4)
+        return new JPanel();
+
+      DiffSetElement diffElement = (DiffSetElement) diffModel.getRawObject(row);
+      if (diffElement != null){
+        if (diffElement.getLeftAnnotation() == null ||
+            diffElement.getRightAnnotation()== null ){
+          // Background red and foreground white
+          defaultComp.setBackground(new Color(255,0,0));
+          defaultComp.setForeground(new Color(255,255,255));
+        }else{
+          // Background green and foreground black
+          defaultComp.setBackground(new Color(0,255,0));
+          defaultComp.setForeground(new Color(0,0,0));
+        }// end if
+      }// end if
+      return defaultComp;
+    }//getTableCellRendererComponent
+  }// class AnnotationDiffCellRenderer
 } // class AnnotationDiff

@@ -65,7 +65,7 @@ public class TestAnnotationDiff extends TestCase
     gate.Document keyDocument =
        gate.Factory.newDocument(
           //Gate.getUrl("tests/annotDiff/KeyDocument.xml")
-          new URL("file:///Z:/gate2/src/gate/resources/gate.ac.uk/tests/annotDiff/keyDocument.xml")
+new URL("file:///Z:/gate2/src/gate/resources/gate.ac.uk/tests/annotDiff/keyDocument.xml")
        );
     gate.DocumentFormat keyDocFormat = gate.DocumentFormat.getDocumentFormat(
       keyDocument, keyDocument.getSourceUrl()
@@ -75,7 +75,7 @@ public class TestAnnotationDiff extends TestCase
     gate.Document responseDocument =
         gate.Factory.newDocument(
             //Gate.getUrl("tests/annotDiff/ResponseDocument.xml")
-            new URL("file:///Z:/gate2/src/gate/resources/gate.ac.uk/tests/annotDiff/responseDocument.xml")
+new URL("file:///Z:/gate2/src/gate/resources/gate.ac.uk/tests/annotDiff/responseDocument.xml")
             );
     gate.DocumentFormat responseDocFormat =
         gate.DocumentFormat.getDocumentFormat(
@@ -94,10 +94,8 @@ public class TestAnnotationDiff extends TestCase
       Factory.createResource("gate.annotation.AnnotationDiff",parameters);
 
     JFrame jFrame = new JFrame("AnnotationDiff GUI");
-    JScrollPane tableScroll = new JScrollPane();
-    tableScroll.getViewport().add(annotDiff.getGUI(),null);
-    jFrame.getContentPane().add(tableScroll, BorderLayout.CENTER);
-    jFrame.setSize(500,300);
+    jFrame.getContentPane().add(annotDiff.getGUI(), BorderLayout.CENTER);
+    jFrame.pack();
     jFrame.setVisible(true);
   } // testDiff()
 
