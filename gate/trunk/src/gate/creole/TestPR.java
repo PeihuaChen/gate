@@ -328,8 +328,8 @@ public class TestPR extends TestCase
                   doc1.getAnnotations().get(null,fType);
 
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+ annots.size() +
-      " annotations with matches feature, instead of the expected 29.",
-      annots.size() == 29);
+      " annotations with matches feature, instead of the expected 30.",
+      annots.size() == 30);
 
     //run the orthomatcher for doc2
     orthomatcher.setDocument(doc2);
