@@ -33,6 +33,9 @@ public class TestSecurity extends TestCase
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
+  private static final int ADMIN_GROUP_ID = 0;
+  private static final int ADMIN_USER_ID = 0;
+
 
   /** JDBC URL */
   private static final String JDBC_URL =
@@ -100,8 +103,7 @@ public class TestSecurity extends TestCase
     Out.prln("+++ found ["+users.size()+"] users...");
 
     //2. log into the securoty factory
-    Session adminSession = ac.login("admin", "sesame",
-                              ac.findGroup("English Language Group").getID());
+    Session adminSession = ac.login("ADMIN", "sesame",new Long(ADMIN_GROUP_ID));
     //check session
     Assert.assertNotNull(adminSession);
     //is session valid?
