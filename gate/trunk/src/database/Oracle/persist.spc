@@ -18,6 +18,14 @@ create or replace package persist is
 
   ENCODING_UTF constant varchar2(16) := 'UTF8';
   
+  VALUE_TYPE_INTEGER    constant number := 101;
+  VALUE_TYPE_LONG       constant number := 102;
+  VALUE_TYPE_BOOLEAN    constant number := 103;
+  VALUE_TYPE_STRING     constant number := 104;
+  VALUE_TYPE_BINARY     constant number := 105;
+  VALUE_TYPE_FLOAT      constant number := 106;
+
+  
   procedure get_timestamp(p_timestamp  OUT number);
 
   
@@ -62,8 +70,22 @@ create or replace package persist is
                               p_ann_id           OUT number);
 
 
-  procedure delete_lr(p_lr_id     IN number,
-                      p_corp_id   OUT number);
-    
+  procedure create_corpus(p_lr_id     IN number,
+                          p_corp_id   OUT number);
+                      
+
+  procedure create_feature(p_entity_id           IN number,
+                           p_entity_type         IN number,
+                           p_key                 IN varchar2,  
+                           p_value_number        IN number,                                
+                           p_value_varchar       IN varchar2,
+                           p_value_type          IN number,
+                           p_feat_id             OUT number);
+                      
+  
+  function is_valid_feature_type(p_type          IN number)
+     return boolean;
+     
+
 end persist;
 /

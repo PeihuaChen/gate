@@ -285,6 +285,61 @@ create or replace package body persist is
      returning corp_id into p_corp_id;
      
   end;
+
+  
+  /*******************************************************************************************/
+  function is_valid_feature_type(p_type          IN number)
+     return boolean
+  is
+  begin
+     
+     return (p_type in (persist.VALUE_TYPE_INTEGER,
+                       persist.VALUE_TYPE_LONG,
+                       persist.VALUE_TYPE_BOOLEAN,
+                       persist.VALUE_TYPE_STRING,
+                       persist.VALUE_TYPE_BINARY,
+                       persist.VALUE_TYPE_FLOAT));
+     
+  end;
+  
+  /*******************************************************************************************/
+  procedure create_feature(p_entity_id           IN number,
+                           p_entity_type         IN number,
+                           p_key                 IN varchar2,  
+                           p_value_number        IN number,                                
+                           p_value_varchar       IN varchar2,
+                           p_value_type          IN number,
+                           p_feat_id             OUT number)                      
+  is
+  begin
+  
+  
+     if (false = is_valid_feature_type(p_value_type)) then
+        raise error.x_invalid_feature_type;
+     end if;  
+  
+     
+     insert into t_feature(ft_id,
+                           ft_entity_id,
+                           ft_entity_type,
+                           ft_key,
+                           ft_number_value,
+                           ft_binary_value,
+                           ft_character_value,
+                           ft_long_character_value,
+                           ft_value_type)
+     values(seq_feature.nextval,
+            p_entity_id,
+            p_entity_type,
+            p_key,
+            p_value_number,
+            empty_blob(),
+            p_value_varchar,
+            empty_clob(),
+            p_value_type)
+     returning ft_id into p_feat_id;
+     
+  end;
   
 /*begin
   -- Initialization
