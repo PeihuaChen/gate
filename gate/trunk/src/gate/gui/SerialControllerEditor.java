@@ -104,6 +104,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     loadedPRsTableModel = new LoadedPRsTableModel();
     loadedPRsTable = new XJTable();
+    loadedPRsTable.setSortable(false);
     loadedPRsTable.setModel(loadedPRsTableModel);
 
     loadedPRsTable.setDefaultRenderer(ProcessingResource.class,
@@ -141,8 +142,9 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(Box.createHorizontalGlue());
 
     memberPRsTableModel = new MemberPRsTableModel();
-    memberPRsTable = new XJTable(memberPRsTableModel);
+    memberPRsTable = new XJTable();
     memberPRsTable.setSortable(false);
+    memberPRsTable.setModel(memberPRsTableModel);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
     memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
