@@ -36,8 +36,8 @@ public class TestSecurity extends TestCase
 
   /** JDBC URL */
   private static final String JDBC_URL =
-//            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
+//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
   private boolean exceptionThrown = false;
 
@@ -100,7 +100,7 @@ public class TestSecurity extends TestCase
     Out.prln("+++ found ["+users.size()+"] users...");
 
     //2. log into the securoty factory
-    Session adminSession = ac.login("kalina", "sesame",
+    Session adminSession = ac.login("admin", "sesame",
                               ac.findGroup("English Language Group").getID());
     //check session
     Assert.assertNotNull(adminSession);
