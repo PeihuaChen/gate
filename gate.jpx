@@ -284,6 +284,7 @@
   <property category="sys" name="JbxEventListener5" value="gate.event.CreoleListener"/>
   <property category="sys" name="JbxEventListener6" value="gate.gui.StatusListener"/>
   <property category="sys" name="JbxEventListener7" value="gate.gui.ProgressListener"/>
+  <property category="sys" name="JvmVersion" value="1.4"/>
   <property category="sys" name="LastTag" value="0"/>
   <property category="sys" name="Libraries" value="gatelibs"/>
   <property category="sys" name="MakeStable" value="0"/>
