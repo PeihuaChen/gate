@@ -1,0 +1,91 @@
+package crawl;
+
+import websphinx.*;
+
+import gate.creole.*;
+import gate.util.*;
+import gate.corpora.*;
+import gate.*;
+
+import java.net.*;
+
+
+public class SphinxWrapper extends Crawler{
+    private Corpus corpus = null;
+    private int maxPages = -1;
+    private static int count = 0;
+
+    public void visit(Page p) {
+	System.out.println("["+p.getDepth()+"] "+p.toURL());
+	String docName = p.toURL() + "_" + Gate.genSym();
+	FeatureMap params = Factory.newFeatureMap();
+	params.put(Document.DOCUMENT_URL_PARAMETER_NAME, p.toURL());
+	try {
+            Document doc = (Document) Factory.createResource(
+							     DocumentImpl.class.getName(), params, null, docName
+							     );
+            corpus.add(doc);
+	    
+	}
+	catch (ResourceInstantiationException e) {
+            String nl = Strings.getNl();
+            Err.prln(
+		     "WARNING: could not intantiate document" + nl +
+		     "  Document name was: " + docName + nl +
+		     "  Exception was: " + e + nl + nl
+		     );
+	}
+	count++;
+    }
+    
+    public boolean shouldVisit(Link l) {
+	if ((maxPages != -1)&&(count > maxPages)) {
+	    return false;
+	} else {
+	    return super.shouldVisit(l);
+	}
+	  
+    }
+    
+    public void setDepth(int depth) {
+	super.setMaxDepth(depth);
+    }
+
+    public void setMaxPages(int max) {
+	this.maxPages = max;
+    }
+    
+    public int getMaxPages() {
+	return maxPages;
+    }
+   
+
+    public void setStart(String root) {
+	//super.setDepthFirst(false);
+	//super.setDomain(Crawler.SUBTREE);
+	try {
+	    URL url = new URL(root);
+	    Link link = new Link(url);
+	    super.setRoot(link);
+	}catch (MalformedURLException me) {
+	    System.err.println("Malformed url "+root);
+	    me.printStackTrace();
+	}
+    }
+
+     public void setStart(URL root) {
+	 Link link = new Link(root);
+	 super.setRoot(link);
+     }
+    
+    public void setCorpus(Corpus corpus) {
+	this.corpus = corpus;
+    }
+
+    public void start() {
+	super.run();
+	this.count = 0;
+	this.maxPages = -1;
+    }
+   
+  }
