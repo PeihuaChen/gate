@@ -754,7 +754,14 @@ extends AbstractLanguageResource implements Document {
   public void setStringContent(String newStringContent) {
     stringContent = newStringContent;
   }
-
+/*
+  // Methods used to debug serialization problems
+  private void writeObject(ObjectOutputStream out) throws IOException{
+  }// writeObject
+  private void readObject(ObjectInputStream in) throws IOException,
+                                                     ClassNotFoundException{
+  }// readObject
+*/
    /** Freeze the serialization UID. */
   static final long serialVersionUID = -8456893608311510260L;
 } // class DocumentImpl

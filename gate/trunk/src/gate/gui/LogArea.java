@@ -26,10 +26,11 @@ import java.io.*;
 import gate.util.*;
 
 /**
-  * This class is used to log all messages from gate. When an object of this
-  * class is created, it redirects the output of gate.util.Out & gate.util.Err.
-  * The output from Err is written with Red ans the one from Out is written
-  * with Black.
+  * This class is used to log all messages from GATE. When an object of this
+  * class is created, it redirects the output of @see gate.util.Out &
+  * @see gate.util.Err.
+  * The output from Err is written with <font color="red">red</font> and the
+  * one from Out is written in <b>black</b>.
   */
 public class LogArea extends JTextPane {
 
@@ -48,7 +49,9 @@ public class LogArea extends JTextPane {
   /** This fields defines the clear all  behaviour*/
   protected ClearAllAction clearAllAction = null;
 
-  /** Constructs a LogArea object and captures the output from Err and Out*/
+  /** Constructs a LogArea object and captures the output from Err and Out. The
+    * output from System.out & System.err is not captured.
+    */
   public LogArea(){
     thisLogArea = this;
     this.setEditable(false);
@@ -92,11 +95,9 @@ public class LogArea extends JTextPane {
 
   /** Inner class that defines the behaviour of SelectAll action.*/
   protected class SelectAllAction extends AbstractAction{
-
     public SelectAllAction(){
       super("Select all");
     }// SelectAll
-
     public void actionPerformed(ActionEvent e){
       thisLogArea.selectAll();
     }// actionPerformed();
@@ -107,7 +108,6 @@ public class LogArea extends JTextPane {
     public CopyAction(){
       super("Copy");
     }// CopyAction
-
     public void actionPerformed(ActionEvent e){
       thisLogArea.copy();
     }// actionPerformed();
@@ -118,7 +118,6 @@ public class LogArea extends JTextPane {
     public ClearAllAction(){
       super("Clear all");
     }// ClearAllAction
-
     public void actionPerformed(ActionEvent e){
       try{
         thisLogArea.getDocument().remove(0,thisLogArea.getDocument().getLength());
@@ -128,8 +127,8 @@ public class LogArea extends JTextPane {
     }// actionPerformed();
   }// End class ClearAllAction
 
-  /** Inner class that defines the behaviour of a OutputStream that writes to
-   *  the LogArea
+  /** Inner class that defines the behaviour of an OutputStream that writes to
+   *  the LogArea.
    */
   class LogAreaOutputStream extends OutputStream{
     /** This field dictates the style on how to write */

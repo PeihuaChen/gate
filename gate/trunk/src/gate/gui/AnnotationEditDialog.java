@@ -30,8 +30,8 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.creole.*;
 
-/** This class visually adds/edits features from an annotation
-  * Features are taken from an AnnotationSchema
+/** This class visually adds/edits features from a GATE annotation.
+  * Features are taken from an AnnotationSchema object.
   */
 public class AnnotationEditDialog extends JDialog {
 
@@ -136,19 +136,15 @@ public class AnnotationEditDialog extends JDialog {
         // Those features must be preserved.
         responseMap.put(key,featureMap.get(key));
     }// end while
-
     tableModel = new FeaturesTableModel(tableData);
-
   }// initLocalData();
 
   /** This method creates the GUI components and paces them into the layout*/
   protected void buildGuiComponents(){
     this.getContentPane().setLayout(new BoxLayout( this.getContentPane(),
                                                    BoxLayout.Y_AXIS));
-
     //create the main box
     Box componentsBox = Box.createHorizontalBox();
-
     componentsBox.add(Box.createHorizontalStrut(5));
     // add the feature table
     featuresTable = new JTable();
@@ -187,9 +183,6 @@ public class AnnotationEditDialog extends JDialog {
     featureSchemaList = new JList();
     featureSchemaList.setSelectionMode(
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-//    featureSchemaList.setBorder(BorderFactory.createTitledBorder(
-//                    BorderFactory.createEtchedBorder()));
-
     featuresListScroll = new JScrollPane(featureSchemaList);
 
     box = Box.createVerticalBox();
@@ -200,11 +193,9 @@ public class AnnotationEditDialog extends JDialog {
     box.add(Box.createVerticalStrut(5));
 
     componentsBox.add(box);
-
     componentsBox.add(Box.createHorizontalStrut(5));
 
     // Add the Ok and Cancel buttons
-
     this.getContentPane().add(componentsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
 
@@ -218,48 +209,44 @@ public class AnnotationEditDialog extends JDialog {
 
     this.getContentPane().add(cancelOkBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
-
     setSize(500,350);
   }//buildGuiComponents();
 
   /** Init GUI components with values taken from local data*/
   protected void initGuiComponents(){
-
     featuresTable.setModel(tableModel);
     featureSchemaList.setModel(listModel);
-
   }//initGuiComponents()
 
   /** Init all the listeners*/
   protected void initListeners(){
-
     okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         featuresEditor.stopCellEditing();
         doOk();
-      }
-    });
+      }// actionPerformed();
+    });// addActionListener();
 
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         requestFocus();
         doCancel();
-      }
-    });
+      }//actionPerformed();
+    });// addActionListener();
 
-    // ->
+    // -> button
     removeFeatButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doRemoveFeatures();
-      }
-    });
+      }//actionPerformed();
+    });// addActionListener();
 
-    // <-
+    // <- button
     addFeatButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doAddFeatures();
-      }
-    });
+      }// actionPerformed();
+    });// addActionListener();
   }//initListeners()
 
   /** This method remove a feature from the table and adds it to the list*/
@@ -364,6 +351,7 @@ public class AnnotationEditDialog extends JDialog {
   }// show()
 
   // Inner classes
+
   // TABLE MODEL
   protected class FeaturesTableModel extends AbstractTableModel{
 
@@ -542,8 +530,8 @@ public class AnnotationEditDialog extends JDialog {
 
   }///class FeaturesTableModel extends DefaultTableModel
 
+  /** Internal class used in the inner FeaturesTableModel class*/
   class RowData {
-
     private Object value = null;
     private FeatureSchema featSchema = null;
 
@@ -572,46 +560,49 @@ public class AnnotationEditDialog extends JDialog {
   }// RowData
 
   // The EDITOR RENDERER
-
+  /** This inner class deals with the feature type being eddited. What it does
+    * is to decide what GUI component to use (JComboBox, JTextField or JLabel)
+    */
   class FeaturesEditor extends AbstractCellEditor  implements TableCellEditor{
-
-     JComboBox cb = null;
-     JTextField tf = null;
-
+    // Fields
+    JComboBox cb = null;
+    JTextField tf = null;
+    /** Constructor*/
     public FeaturesEditor(){}
+    /** The method overridden in order to implement behaviour*/
+    public Component getTableCellEditorComponent( JTable table,
+                                                  Object value,
+                                                  boolean isSelected,
+                                                  int row,
+                                                  int column){
+       RowData rd = (RowData) tableModel.data.get(row);
+       if (rd.getFeatureSchema().isEnumeration()){
+          cb = new JComboBox(rd.getFeatureSchema().
+                                            getPermissibleValues().toArray());
+          cb.setSelectedItem(value);
+          tf = null;
+          return cb;
+       }// End if
+       if ( rd.getFeatureSchema().isDefault() ||
+            rd.getFeatureSchema().isOptional() ||
+            rd.getFeatureSchema().isRequired() ){
 
-    public Component getTableCellEditorComponent(JTable table,
-                                             Object value,
-                                             boolean isSelected,
-                                             int row,
-                                             int column){
-     RowData rd = (RowData) tableModel.data.get(row);
-     if (rd.getFeatureSchema().isEnumeration()){
-        cb = new JComboBox(rd.getFeatureSchema().getPermissibleValues().toArray());
-        cb.setSelectedItem(value);
-        tf = null;
-        return cb;
-     }
-
-     if ( rd.getFeatureSchema().isDefault() ||
-          rd.getFeatureSchema().isOptional() ||
-          rd.getFeatureSchema().isRequired() ){
-
-          tf = new JTextField(value.toString());
-          cb = null;
-          return tf;
-     }
-     return new JLabel(value.toString());
+            tf = new JTextField(value.toString());
+            cb = null;
+            return tf;
+       }// End iff
+       return new JLabel(value.toString());
     }//getTableCellEditorComponent
-
+    /** @return the object representing the value stored @ that cell*/
     public Object getCellEditorValue(){
       if (cb != null ) return cb.getSelectedItem();
       if (tf != null ) return tf.getText();
       return new String("");
     }//getCellEditorValue
+  }//FeaturesEditor inner class
 
-  }//FeaturesEditor
 /*
+  // Method used for testing in development
   public static void main(String[] args){
 
     try {
@@ -638,4 +629,4 @@ public class AnnotationEditDialog extends JDialog {
     }
   }// main
 */
-}//AnnotationEditDialog
+}//AnnotationEditDialog class

@@ -6,14 +6,12 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Cristian URSU 7/03/2001
+ *  Cristian URSU, 7/03/2001
  *
  *  $Id$
  *
  */
 package gate.gui;
-
-// Nedd to fix the  BUG with repaining !!!!!!!
 
 import gate.*;
 import gate.annotation.*;
@@ -26,16 +24,23 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
-
+/** This class wraps the @see gate.annotation.AnnotationDiff one. It adds the
+  * the GUI functionality needed to set up params for AnnotationDiff and also
+  * adds the AnnotationDiff as a tool in GATE.
+  */
 class AnnotDiffDialog extends JFrame {
-  // Local data
+  // Local data needed in initLocalData() method
+
+  /** A map from documentName 2 GATE document It is used to display names in
+    * combo boxes
+    */
   Map  documentsMap = null;
   Map  typesMap = null;
   Vector  falsePozTypes = null;
   MainFrame mainFrame = null;
   AnnotDiffDialog thisAnnotDiffDialog = null;
-  int configWidth = 700;
-  // GUI components
+
+  // GUI components used in initGuiComponents()
   JComboBox keyDocComboBox = null;
   JComboBox responseDocComboBox = null;
   JComboBox typesComboBox = null;
@@ -49,6 +54,10 @@ class AnnotDiffDialog extends JFrame {
   JButton evalButton = null;
   AnnotationDiff annotDiff = null;
 
+  /** Constructs an annotDiffDialog object having as parent aMainFrame
+    * @param aMainFrame the parent frame for this AnnotDiffDialog. If can be
+    * <b>null</b>, meaning no parent.
+    */
   public AnnotDiffDialog(MainFrame aMainFrame){
     mainFrame = aMainFrame;
     thisAnnotDiffDialog = this;
@@ -57,7 +66,7 @@ class AnnotDiffDialog extends JFrame {
     initListeners();
   }//AnnotDiffDialog
 
-  /** This method is called when addind or removing a document*/
+  /** This method is called when adding or removing a document*/
   public void updateData(){
     documentsMap = null;
     typesMap = null;
@@ -73,17 +82,18 @@ class AnnotDiffDialog extends JFrame {
     });
   }//updateData()
 
-  /**Initialises the data (the loaded resources)*/
+  /** Initialises the data needed to set up @see gate.annotation.AnnotationDiff
+    * GUI components will be build using this data.
+    */
   public void initLocalData(){
     annotDiff = new AnnotationDiff();
-    //Get all available documents and construct the documentsMap
-    // DocName, Document pairs
+    // Get all available documents and construct the documentsMap
+    // (docName, gate.Document) pairs
     documentsMap = new HashMap();
 
     CreoleRegister registry =  Gate.getCreoleRegister();
     ResourceData resourceData =
                         (ResourceData)registry.get("gate.corpora.DocumentImpl");
-
     if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
       java.util.List instantiations = resourceData.getInstantiations();
       Iterator iter = instantiations.iterator();
@@ -106,7 +116,8 @@ class AnnotDiffDialog extends JFrame {
   }// initLocalData
 
   /**
-    * This method initializes the GUI components
+    * This method initializes the GUI components. Data is loaded from localData
+    * fields.
     */
   public void initGuiComponents(){
 
@@ -174,8 +185,6 @@ class AnnotDiffDialog extends JFrame {
     evalButton.setFont(evalButton.getFont().deriveFont(Font.BOLD));
 
     // Put all those components at their place
-//    JPanel northBox = new JPanel();
-//    northBox.setLayout(new FlowLayout(BoxLayout.X_AXIS));
     Box northBox = new Box(BoxLayout.X_AXIS);
 
     Box currentBox = new Box(BoxLayout.Y_AXIS);
@@ -205,22 +214,21 @@ class AnnotDiffDialog extends JFrame {
     northBox.add(currentBox);
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
-
     northBox.add(evalButton);
-
 
     this.getContentPane().add(northBox,BorderLayout.NORTH);
     this.getContentPane().add(annotDiff,BorderLayout.CENTER);
-    configWidth = northBox.getPreferredSize().width + 10;
-
     pack();
-    //this.setSize(configWidth,400);
   }//initGuiComponents
 
+  /** This method is called when the user want to close the tool. See
+    * initListeners() method for more details
+    */
   void this_windowClosing(WindowEvent e){
     this.setVisible(false);
-  }
+  }//this_windowClosing();
 
+  /** This method starts AnnotationDiff tool in a separate thread.*/
   private void doDiff(){
     Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
                                new DiffRunner());
@@ -228,36 +236,34 @@ class AnnotDiffDialog extends JFrame {
     thread.start();
   }//doDiff();
 
-  /**
-    * This one initializes the listeners fot the GUI components
-    */
+  /**This one initializes the listeners fot the GUI components */
   public void initListeners(){
 
     this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     this.addWindowListener(new java.awt.event.WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         this_windowClosing(e);
-      }
-    });
+      }// windowClosing();
+    });// addWindowListener();
 
     evalButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
          thisAnnotDiffDialog.doDiff();
-      }
-    });
+      }// actionPerformed();
+    });//addActionListener();
 
     keyDocComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         initAnnotTypes();
-      }
-    });
+      }// actionPerformed();
+    });//addActionListener();
 
     responseDocComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         initAnnotTypes();
-      }
-    });
-  }//initListeners
+      }// actionPerformed();
+    });//addActionListener();
+  }//initListeners();
 
   /** Reads the selected keyDocument + the selected responseDocument, does the
     * intersection of the two annot sets and fill the two combo boxes called
@@ -286,7 +292,7 @@ class AnnotDiffDialog extends JFrame {
       cbm = new DefaultComboBoxModel(falsePozTypes);
       falsePozTypeComboBox.setModel(cbm);
       return;
-    }// if
+    }//End if
 
     // Do intersection for annotation types...
     Set keySet = new HashSet(keyDocument.getAnnotations().getAllTypes());
@@ -316,7 +322,6 @@ class AnnotDiffDialog extends JFrame {
     falsePozTypes.add("No annot.");
     cbm = new DefaultComboBoxModel(falsePozTypes);
     falsePozTypeComboBox.setModel(cbm);
-
   }//initAnnotTypes();
 
   /** It returns the selected KEY gate.Document*/
@@ -342,23 +347,27 @@ class AnnotDiffDialog extends JFrame {
     return (String) falsePozTypeComboBox.getSelectedItem();
   }//getSelectedFalsePozAnnot
 
+  /**  Inner class that adds a tool tip to the combo boxes with key and response
+    *  documents. The tool tip represents the full path of the documents.
+    */
   class MyCellRenderer extends JLabel implements ListCellRenderer {
 
      Color background = null;
      Color foreground = null;
-
-     public MyCellRenderer(Color aBackground, Color aForeground) {
+     /** Constructs a renderer*/
+     public MyCellRenderer(Color aBackground, Color aForeground){
          setOpaque(true);
          background = aBackground;
          foreground = aForeground;
-     }
+     }// MyCellRenderer();
+
+     /** This method is overridden in order to implement the needed behaviour*/
      public Component getListCellRendererComponent(
-         JList list,
-         Object value,
-         int index,
-         boolean isSelected,
-         boolean cellHasFocus)
-     {
+                                                   JList list,
+                                                   Object value,
+                                                   int index,
+                                                   boolean isSelected,
+                                                   boolean cellHasFocus){
          // should be done only once...
          ToolTipManager.sharedInstance().registerComponent(list);
          setText(value.toString());
@@ -367,15 +376,14 @@ class AnnotDiffDialog extends JFrame {
          if (isSelected)
              list.setToolTipText(value.toString());
          return this;
-     }
+     }// getListCellRendererComponent()
   }//MyCellRenderer
 
-  /**Class used to run an annot. diff in a new thread*/
+  /**Inner class used to run an annot. diff in a new thread*/
   class DiffRunner implements Runnable{
-
-    public DiffRunner(){
-    }// DiffRuner
-
+    /** Constructor */
+    public DiffRunner(){}// DiffRuner
+    /** This method is overridden in order to implement the needed behaviour*/
     public void run(){
       annotDiff.setKeyDocument(thisAnnotDiffDialog.getSelectedKeyDocument());
       annotDiff.setResponseDocument(thisAnnotDiffDialog.getSelectedResponseDocument());
@@ -391,15 +399,14 @@ class AnnotDiffDialog extends JFrame {
                      e.getMessage() + "\n Annotation diff stopped !",
                      "Annotation Diff initialization error !",
                      JOptionPane.ERROR_MESSAGE);
-      } finally {
+      }finally {
         SwingUtilities.invokeLater(new Runnable(){
           public void run(){
             doLayout();
             pack();
-          }
-        });
-      }
+          }// run
+        });//invokeLater
+      }// End try
     }// run();
   }//DiffRunner
-
 }//AnnotDiffDialog
