@@ -16,7 +16,6 @@ govern_key.lst:govern_key
 government.lst:organization:government
 hour.lst:time:hour
 ident_prekey.lst:ident_key:pre
-loc_relig.lst:location:relig
 loc_key.lst:loc_key:post
 loc_prekey.lst:loc_key:pre
 ministry.lst:organization:government
@@ -35,7 +34,6 @@ person_female_cap.lst:person_first:female
 person_full.lst:person_full
 person_male.lst:person_first:male
 person_male_cap.lst:person_first:male
-person_relig.lst:person_full:relig
 province.lst:location:province
 region.lst:location:region
 region_uk.lst:location:region
