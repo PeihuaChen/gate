@@ -34,8 +34,6 @@ import java.util.*;
 public class SentenceSplitter extends Nerc{
 
   public Resource init()throws ResourceInstantiationException {
-    //init super object
-    super.init();
     //create all the componets
     FeatureMap params;
     FeatureMap features;
