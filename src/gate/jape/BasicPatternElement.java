@@ -319,6 +319,10 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     }
     return res;
   }
+
+  public Constraint[] getConstraints(){
+    return constraints2;
+  }
 } // class BasicPatternElement
 
 

@@ -303,7 +303,7 @@ public class FSM implements JapeConstants{
             currentState.addTransition(new Transition(
                                         currentTrans.getConstraints(),
                                         newState,
-                                        currentTrans.getLabels()));
+                                        currentTrans.getBindings()));
           }//if(currentTrans.getConstraints() !=null)
         }//while(transIter.hasNext())
       }//while(insideStatesIter.hasNext())

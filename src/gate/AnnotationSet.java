@@ -69,6 +69,12 @@ public interface AnnotationSet extends Set
   /** Get the node with the largest offset */
   public Node lastNode();
 
+  /**
+  * Get the first node that is relevant for this annotation set and which has
+  * the offset larger than the one of the node provided.
+  */
+  public Node nextNode(Node node);
+
   /** Get the name of this set. */
   public String getName();
 
