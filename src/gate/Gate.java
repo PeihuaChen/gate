@@ -216,8 +216,8 @@ public class Gate implements GateConstants
         URL aPluginURL = new URL(aDir);
         if(!autoloadPlugins.contains(aPluginURL)){
           autoloadPlugins.add(aPluginURL);
-          getCreoleRegister().registerDirectories(aPluginURL);
         }
+        getCreoleRegister().registerDirectories(aPluginURL);
       }catch(MalformedURLException mue){
         System.err.println("Cannot load " + aDir + " CREOLE repository.");
         mue.printStackTrace();
