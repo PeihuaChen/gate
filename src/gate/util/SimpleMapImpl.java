@@ -74,7 +74,10 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     for (int i=0; i<m_capacity; i++) {
       k = m_keys[i];
       if (k !=null) {
-        s.add(k);
+        if (k.equals(nullKey))
+            s.add(null);
+        else
+            s.add(k);
       }
     } //for
     return s;
@@ -120,6 +123,8 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
       if (m_keys[i] != null)
           continue;
 
+      if (key == null)
+        key = nullKey;
       m_keys[i] = key;
       m_values[i] = value;
       m_size++;
@@ -169,7 +174,6 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
       Map.Entry e;
       while (entries.hasNext()) {
         e = (Map.Entry)entries.next();
-        if (e.getKey() == null) continue;
         put(e.getKey(), e.getValue());
       } // while
     } // if
@@ -179,7 +183,8 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
   private int getPostionByKey(Object key) {
     Object ak;
     if (key == null) {
-      return -1;
+//      return -1;
+        key = nullKey;
     }
 
     for (int i=0; i<m_capacity; i++) {
@@ -196,7 +201,7 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
   private int getPostionByValue(Object value) {
     Object av;
     for (int i=0; i<m_capacity; i++) {
-      if (m_keys == null)
+      if (m_keys[i] == null)
         continue;
       av = m_values[i];
       if (value == null) {
@@ -284,7 +289,7 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
       k = m_keys[i];
       if (k == null)
         continue;
-      s.add(new Entry(k.hashCode(), k, m_values[i]));
+      s.add(new Entry(k.hashCode(), ((k==nullKey)?null:k), m_values[i]));
     } //for
     return s;
   } // entrySet
@@ -381,4 +386,7 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -6747241616127229116L;
+
+ /** the Object instance that will represent the NULL keys in the map */
+  static Object nullKey = new Object();
 } //SimpleMapImpl
