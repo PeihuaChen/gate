@@ -151,14 +151,15 @@ extends AbstractLanguageResource implements Document {
     entitiesMap.put(new Character((char)169),"&#169;");
 
     // set up the source URL and create the content
-    if(sourceUrl == null){
-      if(stringContent == null){
+    if(sourceUrl == null) {
+      if(stringContent == null) {
         throw new ResourceInstantiationException(
-          "The sourceURL and document's content were null.");
-      }// End if
+          "The sourceURL and document's content were null."
+        );
+      }
       content = new DocumentContentImpl(stringContent);
       getFeatures().put("gate.SourceURL", "created from String");
-    }else{
+    } else {
       try {
         content = new DocumentContentImpl(
           sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset
@@ -169,11 +170,6 @@ extends AbstractLanguageResource implements Document {
       }
     }
 
-/*
-    // record the source URL name in case we only got the URL itself
-    if(sourceUrlName == null && sourceUrl != null)
-      sourceUrlName = sourceUrl.toExternalForm();
-*/
     // set up a DocumentFormat if markup unpacking required
     if(getMarkupAware().booleanValue()) {
       DocumentFormat docFormat =
@@ -200,6 +196,7 @@ extends AbstractLanguageResource implements Document {
     return this;
   } // init()
 
+  /** Clear all the data members of the object. */
   public void cleanup() {
     if (defaultAnnots != null) defaultAnnots.clear();
     defaultAnnots = null;
@@ -212,9 +209,9 @@ extends AbstractLanguageResource implements Document {
             annots.clear();
         }
         namedAnnotSets.clear();
-    }//if
+    }
     namedAnnotSets = null;
-  }
+  } // cleanup()
 
   /** Documents are identified by URLs */
   public URL getSourceUrl() { return sourceUrl; }
@@ -223,14 +220,6 @@ extends AbstractLanguageResource implements Document {
   public void setSourceUrl(URL sourceUrl) {
     this.sourceUrl = sourceUrl;
   } // setSourceUrl
-
-  /** Get method for the document's URL name (i.e. the string that
-    * describes the URL).
-    */
-
-  /** Set method for the document's URL name (i.e. the string that
-    * describes the URL).
-    */// setSourceUrlName
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document.
@@ -308,15 +297,13 @@ extends AbstractLanguageResource implements Document {
       namedSet = new AnnotationSetImpl(this, name);
       namedAnnotSets.put(name, namedSet);
 
-      DocumentEvent evt = new DocumentEvent(this,
-                                            DocumentEvent.ANNOTATION_SET_ADDED,
-                                            name);
+      DocumentEvent evt = new DocumentEvent(
+        this, DocumentEvent.ANNOTATION_SET_ADDED, name
+      );
       fireAnnotationSetAdded(evt);
     }
     return namedSet;
   } // getAnnotations(name)
-
-  /** Is the document markup-aware? */
 
   /** Make the document markup-aware. This will trigger the creation
    *  of a DocumentFormat object at Document initialisation time; the
@@ -1112,7 +1099,7 @@ extends AbstractLanguageResource implements Document {
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
-  /** Sets the nextAnnotationId*/
+  /** Sets the nextAnnotationId */
   public void setNextAnnotationId(int aNextAnnotationId){
     nextAnnotationId = aNextAnnotationId;
   }// setNextAnnotationId();
@@ -1144,20 +1131,6 @@ extends AbstractLanguageResource implements Document {
     }
 
     return orderingString.toString();
-  }
-  public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
-      v.removeElement(l);
-      statusListeners = v;
-    }
-  }
-  public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      statusListeners = v;
-    }
   } // getOrderingString()
 
   /** The id of the next new annotation */
@@ -1235,20 +1208,38 @@ extends AbstractLanguageResource implements Document {
 
   /** Named sets of annotations */
   protected Map namedAnnotSets;
-  private transient Vector statusListeners;
-  private transient Vector documentListeners;
-  private transient Vector gateListeners;
+
+  /**
+   * A property of the document that will be set when the user
+   * wants to create the document from a string, as opposed to from
+   * a URL.
+   */
   private String stringContent;
+
+  /**
+   * The stringContent of a document is
+   * a property of the document that will be set when the user
+   * wants to create the document from a string, as opposed to from
+   * a URL.
+   * <B>Use the <TT>getContent</TT> method instead to get the actual document
+   * content.</B>
+   */
+  public String getStringContent() { return stringContent; }
+
+  /**
+   * The stringContent of a document is
+   * a property of the document that will be set when the user
+   * wants to create the document from a string, as opposed to from
+   * a URL.
+   * <B>Use the <TT>setContent</TT> method instead to update the actual
+   * document content.</B>
+   */
+  public void setStringContent(String stringContent) {
+    this.stringContent = stringContent;
+  } // set StringContent
+
+  /** Is the document markup-aware? */
   protected Boolean markupAware = new Boolean(false);
-  protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
-      }
-    }
-  }
 
   /** Check: test 2 objects for equality */
   protected boolean check(Object a, Object b) {
@@ -1299,9 +1290,6 @@ extends AbstractLanguageResource implements Document {
     memberCode =
       (sourceUrlStartOffset == null) ? 0 : sourceUrlStartOffset.hashCode();
     code += memberCode;
-//    memberCode = (sourceUrlName == null) ? 0 : sourceUrlName.hashCode();
-//    code += memberCode;
-
     memberCode =
       (sourceUrlEndOffset == null) ? 0 : sourceUrlEndOffset.hashCode();
     code += memberCode;
@@ -1322,60 +1310,12 @@ extends AbstractLanguageResource implements Document {
     s.append("  nextNodeId:" + nextNodeId + n);
     s.append("  sourceUrl:" + sourceUrl + n);
     s.append("  sourceUrlStartOffset:" + sourceUrlStartOffset + n);
-//    s.append("  sourceUrlName:" + sourceUrlName + n);
     s.append("  sourceUrlEndOffset:" + sourceUrlEndOffset + n);
     s.append(n);
 
     return s.toString();
   } // toString
 
-  public synchronized void removeDocumentListener(DocumentListener l) {
-    if (documentListeners != null && documentListeners.contains(l)) {
-      Vector v = (Vector) documentListeners.clone();
-      v.removeElement(l);
-      documentListeners = v;
-    }
-  }
-  public synchronized void addDocumentListener(DocumentListener l) {
-    Vector v = documentListeners == null ? new Vector(2) : (Vector) documentListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      documentListeners = v;
-    }
-  }
-  protected void fireAnnotationSetAdded(DocumentEvent e) {
-    if (documentListeners != null) {
-      Vector listeners = documentListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((DocumentListener) listeners.elementAt(i)).annotationSetAdded(e);
-      }
-    }
-  }
-  protected void fireAnnotationSetRemoved(DocumentEvent e) {
-    if (documentListeners != null) {
-      Vector listeners = documentListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((DocumentListener) listeners.elementAt(i)).annotationSetRemoved(e);
-      }
-    }
-  }
-
-  public void setStringContent(String newStringContent) {
-    stringContent = newStringContent;
-  }
-  public String getStringContent() {
-    return stringContent;
-  }
-/*
-  // Methods used to debug serialization problems
-  private void writeObject(ObjectOutputStream out) throws IOException{
-  }// writeObject
-  private void readObject(ObjectInputStream in) throws IOException,
-                                                     ClassNotFoundException{
-  }// readObject
-*/
    /** Freeze the serialization UID. */
   static final long serialVersionUID = -8456893608311510260L;
 
@@ -1441,5 +1381,67 @@ extends AbstractLanguageResource implements Document {
         }// End if
         return 0;
       }//compare()
-  }/// End inner class AnnotationComparator
+  } // End inner class AnnotationComparator
+
+
+  private transient Vector statusListeners;
+  private transient Vector documentListeners;
+  private transient Vector gateListeners;
+
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+  public synchronized void removeDocumentListener(DocumentListener l) {
+    if (documentListeners != null && documentListeners.contains(l)) {
+      Vector v = (Vector) documentListeners.clone();
+      v.removeElement(l);
+      documentListeners = v;
+    }
+  }
+  public synchronized void addDocumentListener(DocumentListener l) {
+    Vector v = documentListeners == null ? new Vector(2) : (Vector) documentListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      documentListeners = v;
+    }
+  }
+  protected void fireAnnotationSetAdded(DocumentEvent e) {
+    if (documentListeners != null) {
+      Vector listeners = documentListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DocumentListener) listeners.elementAt(i)).annotationSetAdded(e);
+      }
+    }
+  }
+  protected void fireAnnotationSetRemoved(DocumentEvent e) {
+    if (documentListeners != null) {
+      Vector listeners = documentListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DocumentListener) listeners.elementAt(i)).annotationSetRemoved(e);
+      }
+    }
+  }
+
 } // class DocumentImpl

@@ -64,6 +64,7 @@ public class TestGate {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
+
   private static final String
                 defOracleDriver = "jdbc:oracle:thin:@derwent:1521:dbgate";
   private static final String
