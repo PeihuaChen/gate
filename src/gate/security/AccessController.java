@@ -101,5 +101,7 @@ public interface AccessController {
   public List listGroups()
     throws PersistenceException;
 
+  /** -- */
+  public boolean isValidSecurityInfo(SecurityInfo si);
 
 }
