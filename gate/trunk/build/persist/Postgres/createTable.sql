@@ -89,9 +89,10 @@ CREATE TABLE  t_feature  (
     ft_entity_id       int4 NOT NULL ,
     ft_entity_type     int2 NOT NULL ,
     ft_key_id          int4 NOT NULL ,
-    ft_number_value    int4,
+    ft_int_value       int4,
+    ft_float_value     float4,
     ft_binary_value    bytea,
-    ft_character_value  text,
+    ft_character_value text,
     ft_value_type      int2 NOT NULL ,
    FOREIGN KEY ( ft_key_id )
       REFERENCES  t_feature_key ( fk_id )
