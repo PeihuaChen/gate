@@ -19,7 +19,7 @@ import java.util.*;
 import gate.*;
 import gate.creole.ontology.*;
 import gate.gui.ProtegeWrapper;
-import com.ontotext.gate.ontology.OntologyImpl;
+import com.ontotext.gate.ontology.*;
 // Protege import
 import edu.stanford.smi.protege.model.*;
 import edu.stanford.smi.protege.event.*;
@@ -92,12 +92,13 @@ public class ProtegeProjectName extends AbstractLanguageResource
     Cls cls;
     OClass oCls;
 
-    ontotextOntology = new OntologyImpl();
+    ontotextOntology = new DAMLOntology();
     ontotextOntology.setURL(ontotextOntologyUrl);
 
     while(it.hasNext()) {
       cls = (Cls) it.next();
       oCls = ontotextOntology.createClass(cls.getName(), "Protege class");
+      oCls.setURI("");
       ontotextOntology.addClass(oCls);
       createSubClasses(cls, oCls);
     }
@@ -140,7 +141,9 @@ public class ProtegeProjectName extends AbstractLanguageResource
   public void setURL(URL aUrl) {
     ontotextOntologyUrl = aUrl;
     if(ontotextOntology != null) {
-      ontotextOntology.setURL(aUrl);
+      ontotextOntology.setURL(aUrl); 
+      fillOntotextOntology();
+      visualResource.refreshOntoeditor(ontotextOntology);
     } // if
   }
   public void setSourceURI(String theURI) {
@@ -156,10 +159,16 @@ public class ProtegeProjectName extends AbstractLanguageResource
     return ontotextOntology.getVersion();
   }
   public void load() throws ResourceInstantiationException {
-    ontotextOntology.load();
+    if(ontotextOntology != null) {
+      ontotextOntology.setURL(ontotextOntologyUrl); 
+      ontotextOntology.load();
+    } // if
   }
   public void store() throws ResourceInstantiationException {
-    ontotextOntology.store();
+    if(ontotextOntology != null) {
+      ontotextOntology.setURL(ontotextOntologyUrl); 
+      ontotextOntology.store();
+    } // if
   }
   public String getId() {
     return ontotextOntology.getId();
