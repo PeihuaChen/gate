@@ -105,7 +105,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     List currentAnnotationSchemaList = null;
     try{
       currentAnnotationSchemaList =
-              creoleReg.getAllPublicInstances("gate.creole.AnnotationSchema");
+              creoleReg.getAllInstances("gate.creole.AnnotationSchema");
     } catch (GateException e){
       // This exception shouldn't happen. If it happens then something went
       // terribly wrong.

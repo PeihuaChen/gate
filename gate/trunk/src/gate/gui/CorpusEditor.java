@@ -187,7 +187,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
       try{
         //get all the documents loaded in the system
         java.util.List loadedDocuments = Gate.getCreoleRegister().
-                               getAllPublicInstances("gate.Document");
+                               getAllInstances("gate.Document");
         if(loadedDocuments == null || loadedDocuments.isEmpty()){
           JOptionPane.showMessageDialog(
               CorpusEditor.this,
