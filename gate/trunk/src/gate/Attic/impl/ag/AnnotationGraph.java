@@ -11,17 +11,10 @@ extends TreeSet implements gate.AnnotationGraph
 
   public AnnotationGraph() {
   }
-
   /** find a node by ID */
   public Node getNode(String id){
     return null;
   }//getNode(String id)
-
-  /** The ordered set of anchors present in the nodes of the AG. */
-  // unnecessary?
-  public SortedSet getAnchors(){
-    return null;
-  }//getAnchors()
 
   /** Greatest lower bound on an annotation: the greatest anchor in the AG
     * such that there is a node with this anchor which structurally precedes
