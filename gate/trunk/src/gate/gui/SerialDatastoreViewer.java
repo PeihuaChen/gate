@@ -217,6 +217,7 @@ public class SerialDatastoreViewer extends JTree
       Runnable runnable = new Runnable(){
         public void run(){
           try{
+            MainFrame.lockGUI("Loading " + entry.name);
             long start = System.currentTimeMillis();
             fireStatusChanged("Loading " + entry.name);
             fireProgressChanged(0);
@@ -240,6 +241,8 @@ public class SerialDatastoreViewer extends JTree
             rie.printStackTrace(Err.getPrintWriter());
             fireProgressChanged(0);
             fireProcessFinished();
+          }finally{
+            MainFrame.unlockGUI();
           }
         }
       };//runnable

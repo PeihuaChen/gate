@@ -509,7 +509,7 @@ jar/classpath so it's the same as registerBuiltins
 
   /**
    * Sets the {@link Executable} currently under execution.
-   * At a givem time there can be only one executable set. After the executable
+   * At a given time there can be only one executable set. After the executable
    * has finished its execution this value should be set back to null.
    * An attempt to set the executable while this value is not null will result
    * in the method call waiting until the old executable is set to null.
@@ -535,6 +535,7 @@ jar/classpath so it's the same as registerBuiltins
   public synchronized static gate.Executable getExecutable() {
     return currentExecutable;
   } // getExecutable
+
 
   /**
    * Returns a new unique string
