@@ -85,7 +85,7 @@ public class OracleDataStore extends JDBCDataStore {
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call persist.get_lr_name(?,?) }");
+      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.get_lr_name(?,?) }");
       stmt.setLong(1,ID.longValue());
       stmt.registerOutParameter(2,java.sql.Types.VARCHAR);
       stmt.execute();
@@ -166,7 +166,8 @@ public class OracleDataStore extends JDBCDataStore {
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call persist.delete_lr(?,?) }");
+      stmt = this.jdbcConn.prepareCall(
+                      "{ call "+Gate.DB_OWNER+".persist.delete_lr(?,?) }");
       stmt.setLong(1,ID.longValue());
       stmt.setString(2,lrClassName);
       stmt.execute();
@@ -248,7 +249,8 @@ public class OracleDataStore extends JDBCDataStore {
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call persist.create_lr(?,?,?,?,?,?,?) }");
+      stmt = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".persist.create_lr(?,?,?,?,?,?,?) }");
       stmt.setLong(1,s.getUser().getID().longValue());
       stmt.setLong(2,s.getGroup().getID().longValue());
       stmt.setString(3,lrType);
@@ -310,7 +312,8 @@ public class OracleDataStore extends JDBCDataStore {
     Long docContentID = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call persist.create_document(?,?,?,?,?,?,?,?) }");
+      stmt = this.jdbcConn.prepareCall(
+          "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
       stmt.setLong(3,docStartOffset.longValue());
@@ -384,7 +387,7 @@ public class OracleDataStore extends JDBCDataStore {
     try {
       stmt = this.jdbcConn.createStatement();
       rs = stmt.executeQuery(" SELECT lrtp_type " +
-                             " FROM   t_lr_type LRTYPE ");
+                             " FROM   "+Gate.DB_OWNER+".t_lr_type LRTYPE ");
 
       while (rs.next()) {
         //access by index is faster
@@ -412,12 +415,13 @@ public class OracleDataStore extends JDBCDataStore {
     ResultSet rs = null;
 
     try {
-      stmt = this.jdbcConn.prepareStatement(" SELECT lr_id " +
-                                            " FROM   t_lang_resource LR, " +
-                                            "        t_lr_type LRTYPE " +
-                                            " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                                            "        AND LRTYPE.lrtp_type = ?"
-                                            );
+      stmt = this.jdbcConn.prepareStatement(
+                      " SELECT lr_id " +
+                      " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
+                      "        "+Gate.DB_OWNER+".t_lr_type LRTYPE " +
+                      " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
+                      "        AND LRTYPE.lrtp_type = ?"
+                      );
       stmt.setString(1,lrType);
       rs = stmt.executeQuery();
 
@@ -448,12 +452,13 @@ public class OracleDataStore extends JDBCDataStore {
     ResultSet rs = null;
 
     try {
-      stmt = this.jdbcConn.prepareStatement(" SELECT lr_name " +
-                                            " FROM   t_lang_resource LR, " +
-                                            "        t_lr_type LRTYPE " +
-                                            " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                                            "        AND LRTYPE.lrtp_type = ?"
-                                            );
+      stmt = this.jdbcConn.prepareStatement(
+                " SELECT lr_name " +
+                " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
+                "        t_lr_type LRTYPE " +
+                " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
+                "        AND LRTYPE.lrtp_type = ?"
+                );
       stmt.setString(1,lrType);
       rs = stmt.executeQuery();
 
@@ -487,7 +492,8 @@ public class OracleDataStore extends JDBCDataStore {
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call gate.get_timestamp(?)} ");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".persist.get_timestamp(?)} ");
       //numbers generated from Oracle sequences are BIGINT
       stmt.registerOutParameter(1,java.sql.Types.BIGINT);
       stmt.execute();
@@ -540,7 +546,8 @@ public class OracleDataStore extends JDBCDataStore {
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.has_access_to_lr(?,?,?,?,?)} ");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.has_access_to_lr(?,?,?,?,?)} ");
       stmt.setLong(1,lrID.longValue());
       stmt.setLong(2,s.getUser().getID().longValue());
       stmt.setLong(3,s.getGroup().getID().longValue());
