@@ -514,113 +514,130 @@ public class NameBearerHandle implements Handle,
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
-          //we need a directory
-          JFileChooser filer = MainFrame.getFileChooser();
-          filer.setDialogTitle(
-              "Select the directory that will contain the corpus");
-          filer.setFileSelectionMode(filer.DIRECTORIES_ONLY);
+          try{
+            //we need a directory
+            JFileChooser filer = MainFrame.getFileChooser();
+            filer.setDialogTitle(
+                "Select the directory that will contain the corpus");
+            filer.setFileSelectionMode(filer.DIRECTORIES_ONLY);
+            filer.setFileFilter(filer.getAcceptAllFileFilter());
 
-          if (filer.showDialog(getLargeView() != null ?
-                                   getLargeView() :
-                                   getSmallView(),
-                                   "Select") == filer.APPROVE_OPTION){
+            if (filer.showDialog(getLargeView() != null ?
+                                     getLargeView() :
+                                     getSmallView(),
+                                     "Select") == filer.APPROVE_OPTION){
 
-            File dir = filer.getSelectedFile();
-            //create the top directory if needed
-            if(!dir.exists()){
-              if(!dir.mkdirs()){
-                JOptionPane.showMessageDialog(
-                  largeView != null ?largeView : smallView,
-                  "Could not create top directory!",
-                  "Gate", JOptionPane.ERROR_MESSAGE);
-                return;
-              }
-            }
-            //iterate through all the docs and save each of them as xml
-            Corpus corpus = (Corpus)target;
-            Iterator docIter = corpus.iterator();
-            boolean overwriteAll = false;
-            int docCnt = corpus.size();
-            int currentDocIndex = 0;
-            while(docIter.hasNext()){
-              Document currentDoc = (Document)docIter.next();
-              URL sourceURL = currentDoc.getSourceUrl();
-              String fileName = null;
-              if(sourceURL != null){
-                fileName = sourceURL.getFile();
-                fileName = Files.getLastPathComponent(fileName);
-              }
-              if(fileName == null || fileName.length() == 0){
-                fileName = currentDoc.getName();
-              }
-              if(!fileName.toLowerCase().endsWith(".xml")) fileName += ".xml";
-              File docFile = null;
-              boolean nameOK = false;
-              do{
-                docFile = new File(dir, fileName);
-                if(docFile.exists() && !overwriteAll){
-                  //ask the user if we can ovewrite the file
-                  Object[] options = new Object[] {"Yes", "All",
-                                                   "No", "Cancel"};
-                  int answer = JOptionPane.showOptionDialog(
-                    largeView != null ? largeView : smallView,
-                    "File " + docFile.getName() + " already exists!\n" +
-                    "Overwrite?" ,
-                    "Gate", JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.WARNING_MESSAGE, null, options, options[2]);
-                  switch(answer){
-                    case 0: {
-                      nameOK = true;
-                      break;
-                    }
-                    case 1: {
-                      nameOK = true;
-                      overwriteAll = true;
-                      break;
-                    }
-                    case 2: {
-                      //user said NO, allow them to provide an alternative name;
-                      fileName = (String)JOptionPane.showInputDialog(
-                          largeView != null ? largeView : smallView,
-                          "Please provide an alternative file name",
-                          "Gate", JOptionPane.QUESTION_MESSAGE,
-                          null, null, fileName);
-                      if(fileName == null) return;
-                      break;
-                    }
-                    case 3: {
-                      //user gave up; return
-                      return;
-                    }
-                  }
-
-                }else{
-                  nameOK = true;
+              File dir = filer.getSelectedFile();
+              //create the top directory if needed
+              if(!dir.exists()){
+                if(!dir.mkdirs()){
+                  JOptionPane.showMessageDialog(
+                    largeView != null ?largeView : smallView,
+                    "Could not create top directory!",
+                    "Gate", JOptionPane.ERROR_MESSAGE);
+                  return;
                 }
-              }while(!nameOK);
-              //save the file
-              try{
-                OutputStreamWriter writer = new OutputStreamWriter(
-                              new FileOutputStream(docFile),"UTF-8");
-                writer.write(currentDoc.toXml());
-                writer.flush();
-                writer.close();
-              }catch(IOException ioe){
-                JOptionPane.showMessageDialog(
-                  largeView != null ? largeView : smallView,
-                  "Could not create write file:" +
-                  ioe.toString(),
-                  "Gate", JOptionPane.ERROR_MESSAGE);
-                ioe.printStackTrace(Err.getPrintWriter());
-                return;
               }
 
-              fireStatusChanged(currentDoc.getName() + " saved");
-              fireProgressChanged(100 * currentDocIndex++ / docCnt);
-            }//while(docIter.hasNext())
-            fireStatusChanged("Corpus saved");
-            fireProcessFinished();
-          }//select directory
+              MainFrame.lockGUI("Saving...");
+
+              //iterate through all the docs and save each of them as xml
+              Corpus corpus = (Corpus)target;
+              Iterator docIter = corpus.iterator();
+              boolean overwriteAll = false;
+              int docCnt = corpus.size();
+              int currentDocIndex = 0;
+              while(docIter.hasNext()){
+                Document currentDoc = (Document)docIter.next();
+                URL sourceURL = currentDoc.getSourceUrl();
+                String fileName = null;
+                if(sourceURL != null){
+                  fileName = sourceURL.getFile();
+                  fileName = Files.getLastPathComponent(fileName);
+                }
+                if(fileName == null || fileName.length() == 0){
+                  fileName = currentDoc.getName();
+                }
+                if(!fileName.toLowerCase().endsWith(".xml")) fileName += ".xml";
+                File docFile = null;
+                boolean nameOK = false;
+                do{
+                  docFile = new File(dir, fileName);
+                  if(docFile.exists() && !overwriteAll){
+                    //ask the user if we can ovewrite the file
+                    Object[] options = new Object[] {"Yes", "All",
+                                                     "No", "Cancel"};
+                    MainFrame.unlockGUI();
+                    int answer = JOptionPane.showOptionDialog(
+                      largeView != null ? largeView : smallView,
+                      "File " + docFile.getName() + " already exists!\n" +
+                      "Overwrite?" ,
+                      "Gate", JOptionPane.DEFAULT_OPTION,
+                      JOptionPane.WARNING_MESSAGE, null, options, options[2]);
+                    MainFrame.lockGUI("Saving...");
+                    switch(answer){
+                      case 0: {
+                        nameOK = true;
+                        break;
+                      }
+                      case 1: {
+                        nameOK = true;
+                        overwriteAll = true;
+                        break;
+                      }
+                      case 2: {
+                        //user said NO, allow them to provide an alternative name;
+                        MainFrame.unlockGUI();
+                        fileName = (String)JOptionPane.showInputDialog(
+                            largeView != null ? largeView : smallView,
+                            "Please provide an alternative file name",
+                            "Gate", JOptionPane.QUESTION_MESSAGE,
+                            null, null, fileName);
+                        if(fileName == null){
+                          fireProcessFinished();
+                          return;
+                        }
+                        MainFrame.lockGUI("Saving");
+                        break;
+                      }
+                      case 3: {
+                        //user gave up; return
+                        fireProcessFinished();
+                        return;
+                      }
+                    }
+
+                  }else{
+                    nameOK = true;
+                  }
+                }while(!nameOK);
+                //save the file
+                try{
+                  OutputStreamWriter writer = new OutputStreamWriter(
+                                new FileOutputStream(docFile),"UTF-8");
+                  writer.write(currentDoc.toXml());
+                  writer.flush();
+                  writer.close();
+                }catch(IOException ioe){
+                  MainFrame.unlockGUI();
+                  JOptionPane.showMessageDialog(
+                    largeView != null ? largeView : smallView,
+                    "Could not create write file:" +
+                    ioe.toString(),
+                    "Gate", JOptionPane.ERROR_MESSAGE);
+                  ioe.printStackTrace(Err.getPrintWriter());
+                  return;
+                }
+
+                fireStatusChanged(currentDoc.getName() + " saved");
+                fireProgressChanged(100 * currentDocIndex++ / docCnt);
+              }//while(docIter.hasNext())
+              fireStatusChanged("Corpus saved");
+              fireProcessFinished();
+            }//select directory
+          }finally{
+            MainFrame.unlockGUI();
+          }
         }//public void run(){
       };//Runnable runnable = new Runnable()
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
@@ -672,45 +689,50 @@ public class NameBearerHandle implements Handle,
       putValue(SHORT_DESCRIPTION, "Save back to the datastore");
     }
     public void actionPerformed(ActionEvent e){
-      DataStore ds = ((LanguageResource)target).getDataStore();
-      if(ds != null){
-        try {
-          MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
-          StatusListener sListener = (StatusListener)
-                                     gate.gui.MainFrame.getListeners().
-                                     get("gate.event.StatusListener");
-          if(sListener != null) sListener.statusChanged(
-            "Saving: " + ((LanguageResource)target).getName());
-          double timeBefore = System.currentTimeMillis();
-          ((LanguageResource)
-                    target).getDataStore().sync((LanguageResource)target);
-          double timeAfter = System.currentTimeMillis();
-          if(sListener != null) sListener.statusChanged(
-            ((LanguageResource)target).getName() + " saved in " +
-            NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
-            + " seconds");
-        } catch(PersistenceException pe) {
-          MainFrame.unlockGUI();
-          JOptionPane.showMessageDialog(getLargeView(),
-                                        "Save failed!\n " +
-                                        pe.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-        } catch(SecurityException se) {
-          MainFrame.unlockGUI();
-          JOptionPane.showMessageDialog(getLargeView(),
-                                        "Save failed!\n " +
-                                        se.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
-        }finally{
-          MainFrame.unlockGUI();
-        }
-      } else {
-        JOptionPane.showMessageDialog(getLargeView(),
-                        "This resource has not been loaded from a datastore.\n"+
-                         "Please use the \"Save to\" option!\n",
-                         "Gate", JOptionPane.ERROR_MESSAGE);
+      Runnable runnable = new Runnable(){
+        public void run(){
+          DataStore ds = ((LanguageResource)target).getDataStore();
+          if(ds != null){
+            try {
+              MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
+              StatusListener sListener = (StatusListener)
+                                         gate.gui.MainFrame.getListeners().
+                                         get("gate.event.StatusListener");
+              if(sListener != null) sListener.statusChanged(
+                "Saving: " + ((LanguageResource)target).getName());
+              double timeBefore = System.currentTimeMillis();
+              ((LanguageResource)
+                        target).getDataStore().sync((LanguageResource)target);
+              double timeAfter = System.currentTimeMillis();
+              if(sListener != null) sListener.statusChanged(
+                ((LanguageResource)target).getName() + " saved in " +
+                NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
+                + " seconds");
+            } catch(PersistenceException pe) {
+              MainFrame.unlockGUI();
+              JOptionPane.showMessageDialog(getLargeView(),
+                                            "Save failed!\n " +
+                                            pe.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+            } catch(SecurityException se) {
+              MainFrame.unlockGUI();
+              JOptionPane.showMessageDialog(getLargeView(),
+                                            "Save failed!\n " +
+                                            se.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+            }finally{
+              MainFrame.unlockGUI();
+            }
+          } else {
+            JOptionPane.showMessageDialog(getLargeView(),
+                            "This resource has not been loaded from a datastore.\n"+
+                             "Please use the \"Save to\" option!\n",
+                             "Gate", JOptionPane.ERROR_MESSAGE);
 
-      }
+          }
+        }
+      };
+      new Thread(runnable).start();
     }//public void actionPerformed(ActionEvent e)
   }//class SaveAction
 
