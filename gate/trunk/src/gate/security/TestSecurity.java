@@ -108,7 +108,7 @@ public class TestSecurity extends TestCase
     Assert.assert(true == ac.isValidSession(adminSession));
 
     //3. create a new user and group
-    User myUser = ac.createUser("myUser", "myPassword");
+    User myUser = ac.createUser("myUser", "myPassword",adminSession);
     //is the user aded to the security factory?
     Assert.assertNotNull(ac.findUser("myUser"));
     //is the user in the security factory equal() to what we put there?
@@ -118,7 +118,7 @@ public class TestSecurity extends TestCase
 
 
 
-    Group myGroup = ac.createGroup("myGroup");
+    Group myGroup = ac.createGroup("myGroup",adminSession);
     //is the group aded to the security factory?
     Assert.assertNotNull(ac.findGroup("myGroup"));
     //is the group in the security factory equal() to what we put there?
