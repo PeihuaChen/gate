@@ -10,41 +10,28 @@
 package gate.util;
 
 import java.util.*;
-import java.awt.datatransfer.*;
-
 import gate.*;
-import gate.jape.*;
-import org.w3c.www.mime.*;
-/*
-import java.io.IOException;
-import java.net.URL;
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import org.w3c.tidy.Tidy;
-*/
+import gate.creole.*;
 
-import java.io.*;
+import org.xml.sax.*;
+import javax.xml.parsers.*;
 
-import javax.swing.text.rtf.*;
-import javax.swing.text.*;
 
-/**
-  * A scratch pad for experimenting.
+/** A scratch pad for experimenting.
   */
 public class Scratch
 {
 
-
   public static void main(String args[]) {
-    //Scratch app = new Scratch();
-    //app.loadMessages("d:/mail_corpora/miguel.mail");
+    doIt();
   } // main
 
-  public void loadMessages(String mailFolder){
-  }
+  public static void doIt() {
+    System.out.println("done");
+  } // doIt
 
 } // class Scratch
+
+
 
 

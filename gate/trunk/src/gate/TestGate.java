@@ -13,6 +13,7 @@ import junit.framework.*;
 
 import gate.annotation.*;
 import gate.corpora.*;
+import gate.creole.*;
 import gate.util.*;
 import gate.db.*;
 import gate.jape.*;
@@ -31,7 +32,7 @@ import gate.sgml.*;
 public class TestGate
 {
   /** Main routine. */
-  public static void main(String[] args) throws ClassNotFoundException {
+  public static void main(String[] args) throws Exception {
     Gate.init();
 
     String a[] = new String[1];
@@ -56,6 +57,7 @@ public class TestGate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
+    suite.addTest(TestCreole.suite()); //*
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
@@ -70,7 +72,7 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());
+    suite.addTest(TestDB.suite());      //*/
 
     return suite;
   } // suite

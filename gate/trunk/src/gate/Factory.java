@@ -31,7 +31,7 @@ public abstract class Factory
   }
 
   /** Create a new Corpus. */
-  public static Corpus newCorpus(String name) { 
+  public static Corpus newCorpus(String name) {
     throw new RuntimeException();
   }
 

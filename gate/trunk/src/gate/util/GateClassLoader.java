@@ -65,6 +65,15 @@ public class GateClassLoader extends URLClassLoader {
     * and not the system class loader. If this is not the case, this
     * method will simply return the previously loaded class (because of
     * the delegation chaining model of class loaders in JDK1.2 and above).
+    * <P>
+    * The method works by avoiding the normal chaining behaviour of
+    * class loaders by creating a star-shaped group of parallel loaders.
+    * Each of these chains of the system class loader, but as long as
+    * the class that we wish to reload wan't loaded by the system loader,
+    * it will not be present in a new loader of this type.
+    * <P>
+    * An implication is that reloaded classes must always be instantiated
+    * via the class returned from this method.
     */
   public Class reloadClass(String name) throws ClassNotFoundException {
     Class theClass = null;

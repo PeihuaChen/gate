@@ -117,7 +117,7 @@ public class TestJape extends TestCase
 //    System.out.println(defaultAS);
   } // testBatch()
 
-  public void DoTestBigGrammar(String textName){
+  public void DoTestBigGrammar(String textName) throws GateException {
     long startCorpusLoad = 0, startCorpusTokenization = 0,
          startGazeteerLoad = 0, startLookup = 0,
          startJapeFileOpen = 0, startCorpusTransduce = 0,

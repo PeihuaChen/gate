@@ -143,28 +143,9 @@ if(true) return;
   /** Test reloading of classes. */
   public void testReloading() throws Exception {
 
-/*
-    // find the X class from the TestJdk JAR
-    GateClassLoader loader = Gate.getClassLoader();
-    loader.addURL(
-      new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/gate2/lib/TestJdk.jar")
-    );
-    Class theXClass = loader.reloadClass("gate.util.X");
-    assert("null xClass in reload test", theXClass != null);
-
-    // try and instantiate one
-    Object theXObject = jdk.instantiateClass(theXClass);
-    assert("couldn't instantiate the X class", theXObject != null);
-    assert(
-      "X instantiated wrongly, name = " + theXObject.getClass().getName(),
-      theXObject.getClass().getName().equals("gate.util.X")
-    );
-*/
-
     GateClassLoader loader = Gate.getClassLoader();
     loader.addURL(new URL("http://derwent.dcs.shef.ac.uk/tests/TestJdk.jar"));
     //loader.addURL(new URL("file:/build/TestJdk.jar"));
-
 
     Class dummyClass1 = loader.loadClass("testpkg.Dummy");
     assert("dummy1 is null", dummyClass1 != null);
