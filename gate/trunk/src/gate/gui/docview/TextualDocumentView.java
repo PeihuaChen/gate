@@ -80,6 +80,9 @@ public class TextualDocumentView extends AbstractDocumentView {
 
   }
 
+  protected void unregisterHooks(){}
+  protected void registerHooks(){}
+  
   protected void initListeners(){
   }
   
