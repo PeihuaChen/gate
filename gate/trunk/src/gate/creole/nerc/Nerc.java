@@ -123,7 +123,6 @@ public class Nerc extends SerialController {
    */
   protected void runSystem() throws ExecutionException{
     FeatureMap params;
-System.out.println("AS name:" + tempAnnotationSetName + ":");
     if(tempAnnotationSetName.equals("")) tempAnnotationSetName = null;
     try{
       fireProgressChanged(0);
