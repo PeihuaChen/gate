@@ -44,32 +44,20 @@ An open mind and a sense of humour.
 </UL>
 
 <P>
-<B>To install</B>,
-unpack the distribution; you will have the files
-<UL>
-<LI>
-gate/build/gate.jar: the main system and subsidiary libraries
-<LI>
-gate/build/guk.jar: support for Unicode editing
-<LI>
-gate/build/gate.sh: a UNIX shell script to start the GATE GUI
-<LI>
-gate/build/gate.bat: a DOS shell script to start the GATE GUI
-<LI>
-gate/doc/...: system documentation
-<UL>
-If you took a distribution that includes the source there will be a whole
-load of other stuff too.
+After unpacking the distribution (using tar/gunzip, or winzip, or whatever)
+you can run the GATE development environment from the build directory using
+gate.sh (on UNIX or in a Cygwin environment) or gate.bat (from a DOS shell).
+In each case the setting of JAVA_HOME will be used if set; otherwise it is
+assumed that java is in PATH.
 
 <P>
 <B>To user GATE as a library</B>, put gate.jar
 on your classpath, and (for Unicode support) guk.jar in
 the JDK extensions directory. (See your Java system documentation if this
 doesn't mean anything to you.)
-Now edit gate.sh or gate.bat to point to your java command and use the script
-to run the GUI. You can also use it as a library from your Java code.
-See the <A HREF=userguide.html>user guide</A> for more details of both
-options.
+
+<P>
+See the <A HREF=userguide.html>user guide</A> for more details of using GATE.
 
 
 <!--------------------------------------------------------------------->
