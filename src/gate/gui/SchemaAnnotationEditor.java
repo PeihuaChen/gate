@@ -268,19 +268,23 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
 
   /** This method creates the GUI components and paces them into the layout*/
   protected void buildGuiComponents(){
-    this.setLayout(new BoxLayout( this,BoxLayout.Y_AXIS));
+    this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
     // Create the annotationSchema JComboBox box
     Box annotSchBox = Box.createVerticalBox();
     annotSchBox.add(Box.createVerticalStrut(5));
     annotSchemaComboBox = new JComboBox(name2annotSchemaMap.keySet().toArray());
+    annotSchemaComboBox.setEditable(false);
+    annotSchemaComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     annotSchemaComboBox.setSelectedItem(currentAnnotSchema.getAnnotationName());
-    annotSchBox.add(new JLabel("Select annotation schema"));
+    JLabel annotSchemaLabel = new JLabel("Select annotation type");
+    annotSchemaLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    annotSchBox.add(annotSchemaLabel);
     annotSchBox.add(annotSchemaComboBox);
 
-    //create the main box
+    //Create the main box
     Box componentsBox = Box.createHorizontalBox();
-    componentsBox.add(Box.createHorizontalStrut(5));
-    // add the feature table
+
+    // Create the feature table
     featuresTable = new JTable();
     featuresTable.setSelectionMode(
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -291,11 +295,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     featuresTableScroll = new JScrollPane(featuresTable);
 
     Box box = Box.createVerticalBox();
-    box.add(Box.createVerticalStrut(5));
-    box.add(new JLabel("Current features"));
+//    box.add(Box.createVerticalStrut(5));
+    JLabel currentFeat = new JLabel("Current features");
+    currentFeat.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(currentFeat);
     box.add(Box.createVerticalStrut(10));
     box.add(featuresTableScroll);
-    box.add(Box.createVerticalStrut(5));
+    featuresTableScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
+//    box.add(Box.createVerticalStrut(5));
 
     componentsBox.add(box);
     componentsBox.add(Box.createHorizontalStrut(10));
@@ -324,18 +331,23 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     featuresListScroll = new JScrollPane(featureSchemaList);
 
     box = Box.createVerticalBox();
-    box.add(Box.createVerticalStrut(5));
-    box.add(new JLabel("Possible features"));
+//    box.add(Box.createVerticalStrut(5));
+    JLabel possibFeaturesLabel = new JLabel("Possible features");
+    possibFeaturesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    box.add(possibFeaturesLabel);
     box.add(Box.createVerticalStrut(10));
+    featuresListScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
     box.add(featuresListScroll);
-    box.add(Box.createVerticalStrut(5));
+//    box.add(Box.createVerticalStrut(5));
 
     componentsBox.add(box);
     componentsBox.add(Box.createHorizontalStrut(5));
 
-    this.add(annotSchBox);
-    this.add(Box.createVerticalStrut(5));
-    this.add(componentsBox);
+    box = Box.createVerticalBox();
+    box.add(annotSchBox);
+    box.add(componentsBox);
+    this.add(box);
+    this.initGuiComponents();
   }//buildGuiComponents();
 
   /** Init GUI components with values taken from local data*/
