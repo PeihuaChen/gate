@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.*;
 import java.util.*;
 import gate.util.*;
+import gate.gui.OkCancelDialog;
 
 public class NLGLexiconVR extends AbstractVisualResource {
   public NLGLexiconVR() {
@@ -34,6 +35,7 @@ public class NLGLexiconVR extends AbstractVisualResource {
   protected void initLocalData(){
     this.addSenseAction = new AddSenseAction();
     this.lookupLemmaAction = new LookupLemmaAction();
+    this.addWordAction = new AddWordAction();
   }
 
   protected void initGuiComponents(){
@@ -44,24 +46,33 @@ public class NLGLexiconVR extends AbstractVisualResource {
     mainBox = Box.createHorizontalBox();
     leftBox = Box.createVerticalBox();
     rightBox = Box.createVerticalBox();
-    definitionTextField.setPreferredSize(new Dimension(69, 24));
-    definitionTextField.setToolTipText("");
-    definitionTextField.setText("");
+    buttonBox = Box.createHorizontalBox();
+    definitionTextArea.setPreferredSize(new Dimension(69, 50));
+    definitionTextArea.setToolTipText("");
+    definitionTextArea.setText("");
+    definitionTextArea.setWrapStyleWord(true);
     definitionTextLabel.setText("Definition");
     lemmaTextLabel.setText("Lemma");
-    leftBox.setBackground(SystemColor.control);
-    leftBox.setEnabled(true);
     this.setLayout(gridLayout1);
     this.setAlignmentX((float) 0.5);
     this.setDebugGraphicsOptions(0);
     lemmaTextField.setText("");
+    lemmaTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                    lemmaTextField.getPreferredSize().height));
     SynsetTextLabel.setText("Synset Entries");
     synsetEntriesList.setSelectedIndex(-1);
     synsetEntriesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     POSTextLabel.setText("Part of Speech");
+
+    posString.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                    posString.getPreferredSize().height));
+
     sensesTextLabel.setText("Senses");
     addSenseButton = new JButton(addSenseAction);
-    addSenseButton.setText("Add");
+    addSenseButton.setText("Add Sense");
+
+    addWordButton = new JButton(addWordAction);
+    addWordButton.setText("Add Word");
 
     lookupButton = new JButton(lookupLemmaAction);
     lookupButton.setText("Lookup");
@@ -70,13 +81,17 @@ public class NLGLexiconVR extends AbstractVisualResource {
     mainBox.add(leftBox, null);
     leftBox.add(lemmaTextLabel, null);
     leftBox.add(lemmaTextField, null);
-    leftBox.add(lookupButton);
+
+    buttonBox.add(lookupButton);
+    buttonBox.add(addWordButton);
+
+    leftBox.add(buttonBox);
     mainBox.add(rightBox, null);
     rightBox.add(SynsetTextLabel, null);
     rightBox.add(synsetScrollPane, null);
     synsetScrollPane.getViewport().add(synsetEntriesList, null);
     rightBox.add(definitionTextLabel, null);
-    rightBox.add(definitionTextField, null);
+    rightBox.add(definitionTextArea, null);
     rightBox.add(POSTextLabel, null);
     rightBox.add(posString, null);
     leftBox.add(sensesTextLabel, null);
@@ -85,20 +100,11 @@ public class NLGLexiconVR extends AbstractVisualResource {
     leftBox.add(addSenseButton, null);
 
     leftBox.add(Box.createVerticalGlue());
-    leftBox.add(Box.createHorizontalGlue());
+    rightBox.add(Box.createVerticalGlue());
     mainBox.add(Box.createVerticalGlue());
   }
 
   protected void initListeners(){
-
-    this.lemmaTextField.addFocusListener(new FocusAdapter() {
-      public void focusGained(FocusEvent e) {
-
-      }
-
-      public void focusLost(FocusEvent e) {
-      }
-    });
 
   }
 
@@ -147,14 +153,13 @@ public class NLGLexiconVR extends AbstractVisualResource {
 
     sensesListModel.clear();
     synsetListModel.clear();
-    definitionTextField.setText("");
+    definitionTextArea.setText("");
     posString.setText("");
     if (senses == null || senses.isEmpty()) {
     } else {
       for (int i= 0; i < senses.size(); i++) {
         LexKBWordSense sense = (LexKBWordSense) senses.get(i);
-        NLGLexiconVR.this.sensesListModel.addElement(lemma + "_" +
-            sense.getPOS() + "_" + sense.getSenseNumber());
+        NLGLexiconVR.this.sensesListModel.addElement(sense.toString());
         if (senses.size() == 1)
           updateRightGUI(sense);
       }//for loop through senses
@@ -164,13 +169,12 @@ public class NLGLexiconVR extends AbstractVisualResource {
   protected void updateRightGUI(LexKBWordSense sense) {
     if (lexKB == null) return;
     LexKBSynset synset = sense.getSynset();
-    this.definitionTextField.setText(synset.getDefinition());
+    this.definitionTextArea.setText(synset.getDefinition());
     this.posString.setText(synset.getPOS().toString());
     this.posString.setEnabled(false);
     for (int i = 0; i < synset.getWordSenses().size(); i++) {
       LexKBWordSense senseI = synset.getWordSense(i);
-      synsetListModel.addElement(senseI.getWord().getLemma() + "_"
-                                 + senseI.getPOS() + "_" + senseI.getSenseNumber());
+      synsetListModel.addElement(senseI.toString());
     }
 
   }//updateRightGUI
@@ -189,18 +193,27 @@ public class NLGLexiconVR extends AbstractVisualResource {
         return;
 
       String lemma = NLGLexiconVR.this.lemmaTextField.getText();
-      //need to check that we need to add a word and not just add a sense to a word
-      //that's depending on whether or not the senses list is empty
-      MutableWord newWord =
-        NLGLexiconVR.this.lexKB.addWord(lemma);
+      java.util.List wordSenses = (java.util.List) lexKB.lookupWord(lemma);
+      if (wordSenses == null || wordSenses.isEmpty())
+        throw new GateRuntimeException("Please add this word to the lexicon first.");
 
-      //to be replaced by the synset management dialogue!!!
-      MutableLexKBSynset newSynset = NLGLexiconVR.this.lexKB.addSynset();
-      newSynset.setDefinition("test");
-      newSynset.setPOS("Noun");
+      Word theWord = ((LexKBWordSense) wordSenses.get(0)).getWord();
+      if (! (theWord instanceof MutableWord))
+        throw new GateRuntimeException("Cannot modify read-only lexicon!");
+
+      MutableWord myWord = (MutableWord) theWord;
+
+      ChooseSynsetPanel chooseSynsetPanel = new ChooseSynsetPanel(lexKB);
+      OkCancelDialog.showDialog(NLGLexiconVR.this, chooseSynsetPanel,
+                                "Choose/Add synset for new word sense of: "
+                                + theWord.getLemma());
+
+      LexKBSynset newSynset = chooseSynsetPanel.getSelectedSynset();
+      if (! (newSynset instanceof MutableLexKBSynset))
+        throw new GateRuntimeException("Cannot modify read-only lexicon!");
 
       //now add the new sense for this word given the synset
-      newWord.addSense(newSynset);
+      myWord.addSense((MutableLexKBSynset) newSynset);
 
       NLGLexiconVR.this.updateLeftGUI(lemma);
     }//actionPerformed
@@ -209,6 +222,43 @@ public class NLGLexiconVR extends AbstractVisualResource {
   /**
    * Adds an element to the list from the editing component located at the top
    * of this dialog.
+   */
+  protected class AddWordAction extends AbstractAction{
+    AddWordAction(){
+      super("AddWord");
+      putValue(SHORT_DESCRIPTION, "Add a word to the lexicon");
+    }
+    public void actionPerformed(ActionEvent e){
+      if (NLGLexiconVR.this.lexKB == null)
+        return;
+
+      String lemma = NLGLexiconVR.this.lemmaTextField.getText();
+      MutableWord newWord =
+        NLGLexiconVR.this.lexKB.addWord(lemma);
+
+    ChooseSynsetPanel chooseSynsetPanel = new ChooseSynsetPanel(lexKB);
+    boolean okPressed =
+        OkCancelDialog.showDialog(NLGLexiconVR.this, chooseSynsetPanel,
+                              "Choose/Add synset for new word sense of: "
+                              + newWord.getLemma());
+    if (! okPressed)
+      return;
+
+    LexKBSynset newSynset = chooseSynsetPanel.getSelectedSynset();
+    if (newSynset == null)
+      return;
+    if (! (newSynset instanceof MutableLexKBSynset))
+      throw new GateRuntimeException("Cannot modify read-only lexicon!");
+
+      //now add the new sense for this word given the synset
+      newWord.addSense((MutableLexKBSynset)newSynset);
+
+      NLGLexiconVR.this.updateLeftGUI(lemma);
+    }//actionPerformed
+  }
+
+  /**
+   * Lookup the lemma in the lexicon
    */
   protected class LookupLemmaAction extends AbstractAction{
     LookupLemmaAction(){
@@ -226,16 +276,17 @@ public class NLGLexiconVR extends AbstractVisualResource {
   protected Box mainBox;
   protected Box leftBox;
   protected Box rightBox;
+  protected Box buttonBox;
   protected JLabel lemmaTextLabel = new JLabel();
-  protected JTextField lemmaTextField = new JTextField();
+  protected JTextField lemmaTextField = new JTextField(30);
   protected JLabel SynsetTextLabel = new JLabel();
   protected JScrollPane synsetScrollPane = new JScrollPane();
   protected JLabel definitionTextLabel = new JLabel();
-  protected JTextField definitionTextField = new JTextField();
+  protected JTextArea definitionTextArea = new JTextArea();
   protected JList synsetEntriesList = new JList();
   protected DefaultListModel synsetListModel;
   protected JLabel POSTextLabel = new JLabel();
-  protected JTextField posString = new JTextField();
+  protected JTextField posString = new JTextField(30);
   protected JLabel sensesTextLabel = new JLabel();
   protected JScrollPane sensesScrollPane = new JScrollPane();
   protected JList sensesList;
@@ -251,6 +302,12 @@ public class NLGLexiconVR extends AbstractVisualResource {
      * An action that looks up a lemma in the lexicon
      */
     protected Action lookupLemmaAction;
+
+    protected JButton addWordButton;
+    /**
+      * An action that adds a new word to the lexicon
+      */
+     protected Action addWordAction;
 
 }
 
