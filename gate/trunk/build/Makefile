@@ -44,10 +44,13 @@ test: japefiles
 #	  junit.ui.LoadingTestRunner gate.TestGate
 
 # build gate.jar. recursively includes all the .jar and .zip from lib too
-jar: tcl japefiles
+jar: tcl japefiles resources
 	rm -f gate.jar
 	cd ../classes && ../build/jdk.sh jar cvf ../build/gate.jar gate
 	./addjars.sh gate.jar ../lib/*.jar ../lib/*.zip
+resources:
+	cd ../src/gate && cp -R resources ../../classes/gate
+	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
 
 # refresh the jar with all the class files
 jarupdate:
@@ -120,7 +123,7 @@ jape: japefiles ../src/gate/jape/parser/ParseCpsl.java \
 
 # put .japes into the classes, and hence the jar file
 japefiles:
-	cd ../src && for f in `find . -name '*.jape' -print`; \
+	cd ../src && for f in `find . -name '*.jape' -print |grep -v resources`; \
 	do cp $$f ../classes/$$f; done
 
 ../src/gate/jape/parser/ParseCpsl.html: ../src/gate/jape/parser/ParseCpsl.jj \
