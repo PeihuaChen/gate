@@ -115,6 +115,9 @@ System.out.println("starting ANNIE modules...");
     throws Exception{
 System.out.println("starting use case 01...");
     Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9801.35.sgm");
+//    Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9806.93.sgm");
+//    Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9802.108.sgm");
+
     runANNIE(doc);
 
     Coreferencer corefMain = (Coreferencer)Factory.createResource("gate.creole.coref.Coreferencer");

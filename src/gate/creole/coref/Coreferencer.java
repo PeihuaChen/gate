@@ -21,10 +21,10 @@ import gate.*;
 import gate.creole.*;
 
 
-public class Coreferencer extends AbstractProcessingResource
+public class Coreferencer extends AbstractLanguageAnalyser
                           implements ProcessingResource{
 
-  private Document  doc;
+//  private Document  doc;
   private PronominalCoref pronominalModule;
 
   public Coreferencer() {
@@ -33,9 +33,7 @@ public class Coreferencer extends AbstractProcessingResource
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-
     Resource result = super.init();
-
     //load all submodules
     this.pronominalModule = (PronominalCoref)Factory.createResource("gate.creole.coref.PronominalCoref");
 
@@ -57,17 +55,17 @@ public class Coreferencer extends AbstractProcessingResource
 
 
   /** Get the document we're running on. */
-  public Document getDocument() {
+/*  public Document getDocument() {
     return this.doc;
   }
-
+*/
 
   /** Set the document to run on. */
   public void setDocument(Document newDocument) {
     Assert.assertNotNull(newDocument);
-    this.doc = newDocument;
+    this.pronominalModule.setDocument(newDocument);
 
-    this.pronominalModule.setDocument(this.doc);
+    super.setDocument(newDocument);
   }
 
 
@@ -76,7 +74,6 @@ public class Coreferencer extends AbstractProcessingResource
    * are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException{
-
     this.pronominalModule.execute();
   }
 
