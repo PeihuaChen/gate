@@ -34,6 +34,8 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   private Connection  jdbcConn;
   private HashSet     annotationsRead;
 
+  private boolean     contentChanged;
+  private boolean     featuresChanged;
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -57,6 +59,9 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
     this.isContentRead = false;
     this.jdbcConn = conn;
+
+    this.contentChanged = false;
+    this.featuresChanged = false;
   }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
@@ -545,6 +550,32 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
       }
     }
+  }
+
+
+  /** Set method for the document content */
+  public void setContent(DocumentContent content) {
+
+    super.setContent(content);
+
+    this.contentChanged = true;
+  }
+
+
+  public boolean isContentChanged() {
+    return this.contentChanged;
+  }
+
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features) {
+    super.setFeatures(features);
+
+    this.featuresChanged = true;
+  }
+
+
+  public boolean isFeatureChanged() {
+    return this.featuresChanged;
   }
 
 }
