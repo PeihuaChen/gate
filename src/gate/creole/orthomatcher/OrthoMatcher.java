@@ -355,7 +355,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       while (unknownIter.hasNext()) {
         Integer unknId = (Integer) unknownIter.next();
         Annotation unknown = nameAllAnnots.get(unknId);
-        nameAllAnnots.add(
+        Integer newID = nameAllAnnots.add(
           unknown.getStartNode(),
           unknown.getEndNode(),
           (String) annots2Remove.get(unknId),
@@ -363,6 +363,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         );
         nameAllAnnots.remove(unknown);
 
+        //change the id in the matches list
+        List mList = (List)unknown.getFeatures().get(MATCHES_FEATURE);
+        mList.remove(unknId);
+        mList.add(newID);
       }//while
     }//if
   }
