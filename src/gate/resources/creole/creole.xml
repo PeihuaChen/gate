@@ -705,6 +705,17 @@
         <RESOURCE_DISPLAYED>gate.Resource</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+    
+    <RESOURCE>
+      <NAME>Document Editor</NAME>
+      <CLASS>gate.gui.docview.DocumentEditor</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    
 
     <RESOURCE>
       <NAME>Annotations Editor</NAME>
@@ -795,6 +806,18 @@
         <MAIN_VIEWER/>
       </GUI>
     </RESOURCE>
+    
+    
+    <RESOURCE>
+      <NAME>Text</NAME>
+      <CLASS>gate.gui.docview.TextualDocumentView</CLASS>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Annotation Sets</NAME>
+      <CLASS>gate.gui.docview.AnnotationSetsView</CLASS>
+    </RESOURCE>    
+    
 
   </CREOLE>
 </CREOLE-DIRECTORY>
