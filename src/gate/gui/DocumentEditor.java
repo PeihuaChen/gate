@@ -216,7 +216,7 @@ public class DocumentEditor extends AbstractVisualResource{
   private boolean annotationsTableVisible = false;
   private boolean coreferenceVisible = false;
   private boolean textVisible = true;
-  private boolean typesTreeVisible = true;
+  private boolean typesTreeVisible = false;
 
   /**
    * Default constructor. Creats all the components and initialises all the
