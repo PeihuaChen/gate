@@ -42,10 +42,13 @@ public class SerialAnalyserController extends SerialController {
       "The corpus supplied for execution was null!");
     //iterate through the documents in the corpus
     for(int i = 0; i < corpus.size(); i++){
+      if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the " + getName() +
+        " application has been abruptly interrupted!");
+
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
       Document doc = (Document)corpus.get(i);
       //run the system over this document
-
       //set the doc and corpus
       for(int j = 0; j < prList.size(); j++){
         ((LanguageAnalyser)prList.get(j)).setDocument(doc);

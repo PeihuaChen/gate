@@ -19,6 +19,8 @@ import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.Font;
 import java.awt.Window;
+import java.awt.Dialog;
+import java.awt.Frame;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.Dimension;
@@ -27,6 +29,8 @@ import java.awt.Point;
 import java.awt.event.*;
 import java.awt.font.TextAttribute;
 import java.awt.GraphicsEnvironment;
+
+import java.text.*;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -82,8 +86,8 @@ public class MainFrame extends JFrame
   JMenu newPrMenu;
   JMenu newAppMenu;
   JMenu loadANNIEMenu = null;
-  JButton stopBtn;
-  Action stopAction;
+  JButton stopBtnx;
+  Action stopActionx;
 
   JTree resourcesTree;
   JScrollPane resourcesTreeScroll;
@@ -139,6 +143,8 @@ public class MainFrame extends JFrame
    */
   private static java.util.Map listeners = new HashMap();
   private static java.util.Collection guiRoots = new ArrayList();
+
+  private static JDialog guiLock = null;
 
   static public Icon getIcon(String filename){
     Icon result = (Icon)iconByName.get(filename);
@@ -371,18 +377,16 @@ public class MainFrame extends JFrame
     Box tempVBox = Box.createVerticalBox();
     tempVBox.add(sbBox);
     tempVBox.add(progressBar);
-    stopAction = new StopAction();
-    stopAction.setEnabled(false);
-    stopBtn = new JButton(stopAction);
+//    stopBtn = new JButton(stopAction);
 //    stopBtn.setBorder(  BorderFactory.createLineBorder(Color.black, 1));BorderFactory.createEtchedBorder()
-    stopBtn.setBorder(BorderFactory.createCompoundBorder(
-                                    BorderFactory.createEmptyBorder(2,3,2,3),
-                                    BorderFactory.createLineBorder(Color.black,
-                                                                   1)));
-    stopBtn.setForeground(Color.red);
+//    stopBtn.setBorder(BorderFactory.createCompoundBorder(
+//                                    BorderFactory.createEmptyBorder(2,3,2,3),
+//                                    BorderFactory.createLineBorder(Color.black,
+//                                                                   1)));
+//    stopBtn.setForeground(Color.red);
 
-    southBox.add(Box.createRigidArea(
-                     new Dimension(5, stopBtn.getPreferredSize().height)));
+//    southBox.add(Box.createRigidArea(
+//                     new Dimension(5, stopBtn.getPreferredSize().height)));
     southBox.add(tempVBox);
     southBox.add(Box.createHorizontalStrut(5));
 
@@ -1034,15 +1038,15 @@ public class MainFrame extends JFrame
   public void progressChanged(int i) {
     //progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
-    if((!stopAction.isEnabled()) &&
-       (Gate.getExecutable() != null)){
-      stopAction.setEnabled(true);
-      SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
-          southBox.add(stopBtn, 0);
-        }
-      });
-    }
+//    if((!stopAction.isEnabled()) &&
+//       (Gate.getExecutable() != null)){
+//      stopAction.setEnabled(true);
+//      SwingUtilities.invokeLater(new Runnable(){
+//        public void run(){
+//          southBox.add(stopBtn, 0);
+//        }
+//      });
+//    }
     if(!animator.isActive()) animator.activate();
     if(oldValue != i){
       SwingUtilities.invokeLater(new ProgressBarUpdater(i));
@@ -1055,14 +1059,14 @@ public class MainFrame extends JFrame
    */
   public void processFinished() {
     //progressBar.setStringPainted(false);
-    if(stopAction.isEnabled()){
-      stopAction.setEnabled(false);
-      SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
-          southBox.remove(stopBtn);
-        }
-      });
-    }
+//    if(stopAction.isEnabled()){
+//      stopAction.setEnabled(false);
+//      SwingUtilities.invokeLater(new Runnable(){
+//        public void run(){
+//          southBox.remove(stopBtn);
+//        }
+//      });
+//    }
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
     animator.deactivate();
   }
@@ -1109,12 +1113,6 @@ public class MainFrame extends JFrame
 
   }// resourceLoaded();
 
-  public void aaa(int foo){
-  }
-
-  public void bbb(){
-      aaa(10);
-  }
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
@@ -1238,124 +1236,65 @@ public class MainFrame extends JFrame
   public static java.util.Map getListeners() {
     return listeners;
   }
+
   public static java.util.Collection getGuiRoots() {
     return guiRoots;
   }
 
-/*
-  protected void addProject(ProjectData pData) {
-    openProjects.add(pData);
-    projectComboModel.addElement(pData);
-    projectComboModel.setSelectedItem(pData);
-  }
-*/
   /**
-   * Makes the necessary GUI adjustements when a new project becomes current.
+   * This method will lock all input to the gui by means of a modal dialog.
+   * If Gate is not currently running in GUI mode this call will be ignored.
+   * A call to this method while the GUI is locked will cause the GUI to be
+   * unlocked and then locked again with the new message.
+   * If a message is provided it will show in the dialog.
+   * @param message the message to be displayed while the GUI is locked
    */
-/*
-  protected void setCurrentProject(ProjectData project){
-    if(currentProject == project) return;
-    currentProject = project;
+  public synchronized static void lockGUI(final String message){
+    //check whether GUI is up
+    if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
 
-    if(!openProjects.contains(project)) openProjects.add(project);
-
-    CustomResourceHandle handle =
-                  new CustomResourceHandle(project.toString(), currentProject);
-    handle.setIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/project.gif")));
-    projectTreeRoot.setUserObject(handle);
-
-    projectTreeRoot.removeAllChildren();
-    mainTabbedPane.removeAll();
-    SwingUtilities.invokeLater(new Runnable(){
+    unlockGUI();
+    //this call needs to return so we'll show the dialog from a different thread
+    new Thread(new Runnable(){
       public void run(){
-        mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
+        Object[] options = new Object[]{new JButton(new StopAction())};
+        JOptionPane pane = new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
+                                           JOptionPane.DEFAULT_OPTION,
+                                           null, options, null);
+
+        //build the dialog
+        JDialog dialog;
+        String title = "Please wait...";
+        Window window = SwingUtilities.getWindowAncestor(
+          (Component)((ArrayList)getGuiRoots()).get(0));
+        if(window == null) window = JOptionPane.getRootFrame();
+        if (window instanceof Frame) {
+            dialog = new JDialog((Frame)window, title, true);
+        } else {
+            dialog = new JDialog((Dialog)window, title, true);
+        }
+        dialog.getContentPane().setLayout(new BorderLayout());
+        dialog.getContentPane().add(pane, BorderLayout.CENTER);
+
+        dialog.setResizable(false);
+        dialog.pack();
+        dialog.setLocationRelativeTo((Component)
+                                     ((ArrayList)getGuiRoots()).get(0));
+        guiLock = dialog;
+        guiLock.show();
       }
-    });
+    }).start();
+  }
 
+  public synchronized static void unlockGUI(){
+//    try{
+//      throw new Exception("foo");
+//    }catch(Exception e){
+//      e.printStackTrace();
+//    }
+    if(guiLock != null) guiLock.hide();
+  }
 
-    handle = new CustomResourceHandle("Applications", currentProject);
-    handle.setIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/applications.gif")));
-    appRoot = new DefaultMutableTreeNode(handle, true);
-    JPopupMenu popup = new JPopupMenu();
-    popup.add(newApplicationAction);
-    handle.setPopup(popup);
-    projectTreeRoot.add(appRoot);
-    Iterator resIter = currentProject.getApplicationsList().iterator();
-    while(resIter.hasNext()){
-      handle = (CustomResourceHandle)resIter.next();
-      appRoot.add(new DefaultMutableTreeNode(handle));
-      if(handle.isShown() && handle.getLargeView() != null){
-        mainTabbedPane.addTab(handle.getTitle(), handle.getLargeView());
-      }
-    }
-
-
-    handle = new CustomResourceHandle("Language Resources", currentProject);
-    handle.setIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/lrs.gif")));
-    lrRoot = new DefaultMutableTreeNode(handle, true);
-    popup = new JPopupMenu();
-    popup.add(newLRAction);
-    handle.setPopup(popup);
-    projectTreeRoot.add(lrRoot);
-    resIter = currentProject.getLRList().iterator();
-    while(resIter.hasNext()){
-      handle = (CustomResourceHandle)resIter.next();
-      lrRoot.add(new DefaultMutableTreeNode(handle));
-      if(handle.isShown() && handle.getLargeView() != null){
-        mainTabbedPane.addTab(handle.getTitle(), handle.getLargeView());
-      }
-    }
-
-    handle = new CustomResourceHandle("Processing Resources", currentProject);
-    handle.setIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/prs.gif")));
-    prRoot = new DefaultMutableTreeNode(handle, true);
-    popup = new JPopupMenu();
-    popup.add(newPRAction);
-    handle.setPopup(popup);
-    projectTreeRoot.add(prRoot);
-    resIter = currentProject.getPRList().iterator();
-    while(resIter.hasNext()){
-      handle = (CustomResourceHandle)resIter.next();
-      prRoot.add(new DefaultMutableTreeNode(handle));
-      if(handle.isShown() && handle.getLargeView() != null){
-        mainTabbedPane.addTab(handle.getTitle(), handle.getLargeView());
-      }
-    }
-
-    handle = new CustomResourceHandle("Data Stores", currentProject);
-    handle.setIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/dss.gif")));
-    popup = new JPopupMenu();
-    popup.add(newDSAction);
-    popup.add(openDSAction);
-    handle.setPopup(popup);
-    dsRoot = new DefaultMutableTreeNode(handle, true);
-    projectTreeRoot.add(dsRoot);
-    DataStoreRegister dsr = Gate.getDataStoreRegister();
-    Iterator dsIter = dsr.iterator();
-    while(dsIter.hasNext()){
-      DataStore ds = (DataStore)dsIter.next();
-      //make sure he have a name
-      ds.setName("Unnamed datasource");
-      handle = new DSHandle(ds, currentProject);
-      dsRoot.add(new DefaultMutableTreeNode(handle));
-    }
-
-    projectTreeModel.nodeStructureChanged(projectTreeRoot);
-
-    DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                                  projectTreeRoot.getFirstChild();
-    while(node != null){
-      projectTree.expandPath(
-                  new TreePath(projectTreeModel.getPathToRoot(node)));
-      node = node.getNextSibling();
-    }
-  }//protected void setCurrentProject(ProjectData project)
-*/
 
 /*
   synchronized void showWaitDialog() {
@@ -1611,8 +1550,11 @@ public class MainFrame extends JFrame
       // Loads ANNIE with defaults
       Runnable runnable = new Runnable(){
         public void run(){
+          long startTime = System.currentTimeMillis();
           FeatureMap params = Factory.newFeatureMap();
           try{
+            //lock the gui
+            lockGUI("ANNIE is being loaded...");
             // Create a serial analyser
             SerialAnalyserController sac = (SerialAnalyserController)
                 Factory.createResource("gate.creole.SerialAnalyserController",
@@ -1626,10 +1568,16 @@ public class MainFrame extends JFrame
               // Add the PR to the sac
               sac.add(pr);
             }// End for
-            statusChanged("ANNIE loaded!");
+
+            long endTime = System.currentTimeMillis();
+            statusChanged("ANNIE loaded in " +
+                NumberFormat.getInstance().format(
+                (double)(endTime - startTime) / 1000) + " seconds");
           }catch(gate.creole.ResourceInstantiationException ex){
             ex.printStackTrace(Err.getPrintWriter());
-          }// End try
+          }finally{
+            unlockGUI();
+          }
         }// run()
       };// End Runnable
       Thread thread = new Thread(runnable, "");
@@ -1837,10 +1785,14 @@ public class MainFrame extends JFrame
   }
 
 
-  class StopAction extends AbstractAction {
+  static class StopAction extends AbstractAction {
     public StopAction(){
       super(" Stop! ");
       putValue(SHORT_DESCRIPTION,"Stops the current action");
+    }
+
+    public boolean isEnabled(){
+      return Gate.getExecutable() != null;
     }
 
     public void actionPerformed(ActionEvent e) {

@@ -838,7 +838,6 @@ public class SerialControllerEditor extends AbstractVisualResource
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
         public void run(){
-
           //stop editing the parameters
           try{
             parametersEditor.setParameters();
@@ -898,6 +897,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
           Gate.setExecutable(controller);
 
+          MainFrame.lockGUI("Running " + controller.getName() + "...");
           //execute the thing
           long startTime = System.currentTimeMillis();
           fireStatusChanged("Running " +
@@ -925,6 +925,7 @@ public class SerialControllerEditor extends AbstractVisualResource
                                           "Gate", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace(Err.getPrintWriter());
           }finally{
+            MainFrame.unlockGUI();
             Gate.setExecutable(null);
           }//catch
 
