@@ -485,7 +485,7 @@ implements AnnotationSet
   DocumentImpl doc;
 
   /** Maps annotation ids (Integers) to Annotations */
-  HashMap annotsById;
+  protected HashMap annotsById;
 
   /** Maps annotation types (Strings) to AnnotationSets */
   HashMap annotsByType = null;
