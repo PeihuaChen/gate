@@ -196,7 +196,9 @@ public class AccessControllerImpl implements AccessController {
     throws PersistenceException,SecurityException {
 
     Group grp = (Group)this.groupsByID.get(id);
-    Assert.assertNotNull(grp);
+    if (null == grp) {
+      throw new SecurityException("incorrect group id supplied ( id = ["+id+"])");
+    }
 
     //delegate
     deleteGroup(grp,s);
@@ -242,21 +244,86 @@ public class AccessControllerImpl implements AccessController {
   public User createUser(String name, String passwd)
     throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    Assert.assertNotNull(name);
+
+    //1. create user in DB
+    CallableStatement stmt = null;
+    Long new_id;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.create_user(?,?,?)} ");
+      stmt.setString(1,name);
+      stmt.setString(2,passwd);
+      //numbers generated from Oracle sequences are BIGINT
+      stmt.registerOutParameter(3,java.sql.Types.BIGINT);
+      stmt.execute();
+      new_id = new Long(stmt.getLong(3));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create a user in DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //2. create UserImpl for the new user and put in collections
+    // groups list is empty
+    UserImpl usr = new UserImpl(new_id,name,new Vector(),this,this.jdbcConn);
+
+    this.usersByID.put(new_id,usr);
+    this.usersByName.put(new_id,usr);
+
+    return usr;
   }
 
   /** --- */
-  public User deleteUser(User usr, Session s)
+  public void deleteUser(User usr, Session s)
     throws PersistenceException,SecurityException {
 
+    //1. check session
+    if (false == isValidSession(s)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. is user to be deleted the same from the session?
+    User sessionUsr = s.getUser();
+    //equals() is custom, so "==" is ok
+    if (sessionUsr != usr) {
+      throw new SecurityException("session user is not the user to be deleted");
+    }
+
+    //3. delete in DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.delete_user(?) } ");
+      stmt.setLong(1,usr.getID().longValue());
+      stmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete user from DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //4. delete from collections
+    this.usersByID.remove(usr.getID());
+    this.usersByName.remove(usr.getName());
+
+    //5. delete the user's session
+    logout(s);
+
+    //6. notify all other listeners
     throw new MethodNotImplementedException();
+
   }
 
   /** --- */
-  public User deleteUser(Long id, Session s)
+  public void deleteUser(Long id, Session s)
     throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    User usr = (User)usersByID.get(id);
+    if (null == usr) {
+      throw new SecurityException("incorrect user id supplied ( id = ["+id+"])");
+    }
+
+    //delegate
+    deleteUser(usr,s);
   }
 
   /** --- */
