@@ -74,7 +74,6 @@
       <ICON>lrs.gif</ICON>
       <PRIVATE/>
     </RESOURCE>
-
     <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
@@ -705,7 +704,7 @@
         <RESOURCE_DISPLAYED>gate.Resource</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
+
     <RESOURCE>
       <NAME>Document Editor</NAME>
       <CLASS>gate.gui.docview.DocumentEditor</CLASS>
@@ -715,7 +714,7 @@
         <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-    
+
 
     <RESOURCE>
       <NAME>Annotations Editor</NAME>
@@ -736,6 +735,19 @@
         <RESOURCE_DISPLAYED>gate.Corpus</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
+	  <!-- New VR by Niraj -->
+    <RESOURCE>
+      <NAME>Jape Viewer</NAME>
+      <CLASS>gate.gui.jape.JapeViewer</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.Transducer</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
+
     <RESOURCE>
       <NAME>Serial Application editor</NAME>
       <CLASS>gate.gui.SerialControllerEditor</CLASS>
@@ -806,8 +818,8 @@
         <MAIN_VIEWER/>
       </GUI>
     </RESOURCE>
-    
-    
+
+
     <RESOURCE>
       <NAME>Text</NAME>
       <CLASS>gate.gui.docview.TextualDocumentView</CLASS>
@@ -816,8 +828,8 @@
     <RESOURCE>
       <NAME>Annotation Sets</NAME>
       <CLASS>gate.gui.docview.AnnotationSetsView</CLASS>
-    </RESOURCE>    
-    
+    </RESOURCE>
+
 
   </CREOLE>
 </CREOLE-DIRECTORY>
