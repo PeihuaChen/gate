@@ -220,7 +220,7 @@ public class AccessControllerImpl
     User usr = (User)this.usersByName.get(name);
 
     if (null == usr) {
-      throw new SecurityException("No such user");
+      throw new SecurityException("No such user (" + name + ")");
     }
 
     return usr;

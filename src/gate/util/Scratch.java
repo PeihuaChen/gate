@@ -41,6 +41,15 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+    File tempFile = File.createTempFile("gaga", "");
+    tempFile.delete();
+    tempFile.mkdir();
+    tempFile.deleteOnExit();
+    File tempFile2 = File.createTempFile("fil", ".tmp", tempFile);
+    tempFile2.deleteOnExit();
+System.out.println(tempFile.getCanonicalPath());
+    Thread.sleep(100000);
+
 //    Map charsets = java.nio.charset.Charset.availableCharsets();
 //    Iterator namesIter = charsets.keySet().iterator();
 //    while(namesIter.hasNext()){

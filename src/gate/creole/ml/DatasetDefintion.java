@@ -62,6 +62,13 @@ public class DatasetDefintion implements Serializable{
       "No class attribute defined!");
   }
 
+  public DatasetDefintion(){
+    attributes = new ArrayList();
+    classAttribute = null;
+    classIndex = -1;
+    instanceType = null;
+  }
+
 
   public String toString(){
     StringBuffer res = new StringBuffer();
@@ -87,6 +94,15 @@ public class DatasetDefintion implements Serializable{
 
   public int getClassIndex() {
     return classIndex;
+  }
+  public void setClassAttribute(Attribute classAttribute) {
+    this.classAttribute = classAttribute;
+  }
+  public void setClassIndex(int classIndex) {
+    this.classIndex = classIndex;
+  }
+  public void setInstanceType(String instanceType) {
+    this.instanceType = instanceType;
   }
 
   protected java.util.List attributes;

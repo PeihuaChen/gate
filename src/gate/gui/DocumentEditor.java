@@ -447,7 +447,7 @@ public class DocumentEditor extends AbstractVisualResource
         } else if(SwingUtilities.isRightMouseButton(e)) {
           //right click
           //add select all option
-          JPopupMenu popup = new JPopupMenu();
+          JPopupMenu popup = new XJPopupMenu();
           popup.add(new AbstractAction(){
             {
               putValue(NAME, "Select all");
@@ -550,14 +550,14 @@ public class DocumentEditor extends AbstractVisualResource
           int position = textPane.viewToModel(e.getPoint());
           if(textPane.getSelectionStart() ==  textPane.getSelectionEnd()){
             //no selection -> select an annotation
-            JPopupMenu popup = new JPopupMenu("Select:");
+            JPopupMenu popup = new XJPopupMenu("Select:");
             //find annotations at this position
             Iterator annIter = document.getAnnotations().
                                         get(new Long(position),
                                             new Long(position)
                                         ).iterator();
             if(annIter.hasNext()){
-              JMenu menu = new JMenu("Default");
+              JMenu menu = new XJMenu("Default");
               popup.add(menu);
               while(annIter.hasNext()){
                 Annotation ann = (Annotation)annIter.next();
@@ -574,7 +574,7 @@ public class DocumentEditor extends AbstractVisualResource
                 annIter = set.get(new Long(position), new Long(position)).
                               iterator();
                 if(annIter.hasNext()){
-                  JMenu menu = new JMenu(set.getName());
+                  JMenu menu = new XJMenu(set.getName());
                   popup.add(menu);
                   while(annIter.hasNext()){
                     Annotation ann = (Annotation)annIter.next();
@@ -589,9 +589,9 @@ public class DocumentEditor extends AbstractVisualResource
             if(!editable) return;
             Long startOffset = new Long(textPane.getSelectionStart());
             Long endOffset = new Long(textPane.getSelectionEnd());
-            JPopupMenu popup = new JPopupMenu();
+            JPopupMenu popup = new XJPopupMenu();
             //add new annotation in the Default AS
-            JMenu menu = new JMenu("Add annotation to \"Default\"");
+            JMenu menu = new XJMenu("Add annotation to \"Default\"");
             menu.add(new XJMenuItem(
                          new NewAnnotationAction(document.getAnnotations(),
                                                  startOffset, endOffset),
@@ -621,7 +621,7 @@ public class DocumentEditor extends AbstractVisualResource
                                              (String)annSetsIter.next());
 
 
-                menu = new JMenu("Add annotation to \"" + set.getName() + "\"");
+                menu = new XJMenu("Add annotation to \"" + set.getName() + "\"");
                 menu.add(new XJMenuItem(
                              new NewAnnotationAction(set, startOffset, endOffset),
                              myHandle));
@@ -641,7 +641,7 @@ public class DocumentEditor extends AbstractVisualResource
             }
 
             //add to a new annotation set
-            menu = new JMenu("Add annotation to a new set");
+            menu = new XJMenu("Add annotation to a new set");
             menu.add(new XJMenuItem(
                          new NewAnnotationAction(null, startOffset, endOffset),
                          myHandle));

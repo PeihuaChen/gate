@@ -275,6 +275,4 @@ public class MenuLayout implements LayoutManager {
       }
     }
   }
-
-
 }

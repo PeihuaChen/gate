@@ -135,6 +135,7 @@ public class Editor extends JFrame {
     JMenuItem item;
     if(!installedLocales.isEmpty()) {
       jMenuIM = new JMenu("Input methods");
+      jMenuIM.getPopupMenu().setLayout(new MenuLayout());
       ButtonGroup bg = new ButtonGroup();
       Iterator localIter = installedLocales.iterator();
       while(localIter.hasNext()){

@@ -308,7 +308,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * Loads the state of this engine from previously saved data.
    * @param is
    */
-  protected void load(InputStream is) throws IOException{
+  public void load(InputStream is) throws IOException{
     if(sListener != null) sListener.statusChanged("Loading model...");
     ObjectInputStream ois = new ObjectInputStream(is);
     try{
@@ -328,7 +328,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * Saves the state of the engine for reuse at a later time.
    * @param os
    */
-  protected void save(OutputStream os) throws IOException{
+  public void save(OutputStream os) throws IOException{
     if(sListener != null) sListener.statusChanged("Saving model...");
     ObjectOutputStream oos = new ObjectOutputStream(os);
     oos.writeObject(classifier);
@@ -355,6 +355,9 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    */
   public void setOwnerPR(ProcessingResource pr){
     this.owner = pr;
+  }
+  public DatasetDefintion getDatasetDefinition() {
+    return datasetDefinition;
   }
 
 

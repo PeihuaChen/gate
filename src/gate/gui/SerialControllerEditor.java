@@ -293,8 +293,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     add(horBox);
     add(Box.createVerticalStrut(10));
 
-    addMenu = new JMenu("Add");
-    removeMenu = new JMenu("Remove");
+    addMenu = new XJMenu("Add");
+    removeMenu = new XJMenu("Remove");
   }// initGuiComponents()
 
   protected void initListeners() {
@@ -434,7 +434,7 @@ public class SerialControllerEditor extends AbstractVisualResource
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
           new AddPRAction(pr).actionPerformed(null);
         }else if(SwingUtilities.isRightMouseButton(e)){
-            JPopupMenu popup = new JPopupMenu();
+            JPopupMenu popup = new XJPopupMenu();
             popup.add(new AddPRAction(pr){
               {
                 putValue(NAME, "Add \"" + this.pr.getName() +
@@ -469,7 +469,7 @@ public class SerialControllerEditor extends AbstractVisualResource
                                     memberPRsTableModel.getValueAt(row, 1);
             selectPR(row);
           }else if(SwingUtilities.isRightMouseButton(e)){
-            JPopupMenu popup = new JPopupMenu();
+            JPopupMenu popup = new XJPopupMenu();
             popup.add(new AbstractAction("Edit parameters"){
               public void actionPerformed(ActionEvent e){
                 ProcessingResource pr = (ProcessingResource)

@@ -62,6 +62,7 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
+    new Main().annotatorArgsMap = null;
     // check we have a useable JDK
     if(
       System.getProperty("java.version").compareTo(Gate.getMinJdkVersion())
@@ -138,7 +139,7 @@ public class Main {
         splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
         splashBox.setBackground(Color.white);
 
-        String splashName = 
+        String splashName =
           System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
         if(splashName == null) {
           splashName = "gateSplash.gif";
@@ -163,7 +164,7 @@ public class Main {
         splash.show();
       }
     });
-    
+
     // initialise the library and load user CREOLE directories
     try{
       Gate.init();
@@ -207,9 +208,9 @@ public class Main {
         else {
           frame.setTitle(name + " " + version + " build " + build);
         } // if - SLUG
-        
+
         // Set title from Java properties
-        String title = 
+        String title =
           System.getProperty(GateConstants.TITLE_JAVA_PROPERTY_NAME);
         if(title != null) {
           frame.setTitle(title);
@@ -218,7 +219,7 @@ public class Main {
 
         // Set icon from Java properties
         // iconName could be absolute or "gate:/img/....gif"
-        String iconName = 
+        String iconName =
           System.getProperty(GateConstants.APP_ICON_JAVA_PROPERTY_NAME);
         if(iconName != null) {
           try {

@@ -125,7 +125,7 @@ public class NameBearerHandle implements Handle,
   }
 
   public JPopupMenu getPopup() {
-    JPopupMenu popup = new JPopupMenu();
+    JPopupMenu popup = new XJPopupMenu();
     //first add the static items
     Iterator itemIter = staticPopupItems.iterator();
     while(itemIter.hasNext()){
