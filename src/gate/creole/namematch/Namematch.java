@@ -180,7 +180,7 @@ public class Namematch extends AbstractProcessingResource
               annotString = regularExpressions(annotString," ", "\\s+");
 
               // put string in the map
-              annotStringMap.put(annot,annotString);
+              annotStringMap.put(annot.getId(),annotString);
 
             } catch (InvalidOffsetException ioe) {
               executionException = new ExecutionException
@@ -200,9 +200,7 @@ public class Namematch extends AbstractProcessingResource
           while (iteratorNameAnnots.hasNext()) {
             Annotation annot1 = (Annotation)iteratorNameAnnots.next();
 
-            // get string from map and NOT from spans
-            String annotString1 = (String) annotStringMap.get(annot1);
-
+            // get the id annotattion
             Integer annot1_id = annot1.getId();
 
             AnnotationMatches matchedAnnot1 = new AnnotationMatches();
@@ -212,9 +210,14 @@ public class Namematch extends AbstractProcessingResource
             while (i.hasNext()) {
               Annotation annot2 = (Annotation)i.next();
 
-              String annotString2 = (String) annotStringMap.get(annot2);
+              String annotString2 = (String) annotStringMap.get(annot2.getId());
 
+              // get the id annotattion
               Integer annot2_id = annot2.getId();
+
+              // get string from map and NOT from spans
+              String annotString1 = (String) annotStringMap.get(annot1.getId());
+
               // first check that annot2 is NOT already in the list of
               // matched annotations for annot1 - do not proceed with
               // annot2 if so
@@ -231,8 +234,8 @@ public class Namematch extends AbstractProcessingResource
 
               // determine the title from annotation string
               if (annotationType.equals("Person")) {
-                annotString1 = containTitle(nameAllAnnots, annotString1, annot1);
-                annotString2 = containTitle(nameAllAnnots, annotString2, annot2);
+                annotString1 = containTitle(nameAllAnnots, annotString1,annot1);
+                annotString2 = containTitle(nameAllAnnots, annotString2,annot2);
               }
 
               if (annotString1.length()>=annotString2.length()) {
@@ -364,13 +367,14 @@ public class Namematch extends AbstractProcessingResource
 
   } // run()
 
-  /***/
-  public String containTitle (AnnotationSet annotSet, String annotString,
+  /** return a person name without title */
+  public String containTitle (AnnotationSet annotSet,String annotString,
                               Annotation annot){
     // get the offsets
     Long startAnnot = annot.getStartNode().getOffset();
     Long endAnnot = annot.getEndNode().getOffset();
 
+    // determine "Lookup" annotation set
     AnnotationSet as =
       annotSet.get(startAnnot,endAnnot).get("Lookup");
 
@@ -378,6 +382,8 @@ public class Namematch extends AbstractProcessingResource
       Iterator iter = as.iterator();
       while (iter.hasNext()) {
         Annotation currentAnnot = (Annotation)(iter.next());
+
+        // determine the features of the current annotation
         FeatureMap fm = currentAnnot.getFeatures();
         if (fm.containsKey("majorType")&&
           (fm.get("majorType").equals("title"))){
@@ -385,9 +391,12 @@ public class Namematch extends AbstractProcessingResource
             Long offsetStartAnnot = currentAnnot.getStartNode().getOffset();
             Long offsetEndAnnot = currentAnnot.getEndNode().getOffset();
             try {
+              // the title from the current annotation
               String annotTitle =
                 document.getContent().getContent(
                   offsetStartAnnot,offsetEndAnnot).toString();
+
+              // eliminate the title from annotation string and return the result
               if (annotTitle.length()<annotString.length())
                 return annotString.substring(
                                     annotTitle.length()+1,annotString.length());
@@ -786,53 +795,6 @@ public class Namematch extends AbstractProcessingResource
 
     return false;
 
-/*    String stringToTokenize1 = s1;
-    StringTokenizer tokens1 = new StringTokenizer(stringToTokenize1," ");
-    String token = tokens1.nextToken();
-
-    if (tokens1.countTokens()>1) {
-      // in case the first token is a title
-      AnnotationSet namedAnnots;
-      if ((annotationSetName == null)||(annotationSetName == ""))
-        namedAnnots = document.getAnnotations();
-      else namedAnnots = document.getAnnotations(annotationSetName);
-
-      // get the "Lookup" annotations
-      namedAnnots = namedAnnots.get("Lookup");
-
-      Out.prln("Annotations "+namedAnnots);
-      if (namedAnnots != null) {
-      Iterator iter = namedAnnots.iterator();
-      while (iter.hasNext()) {
-        Annotation annot = (Annotation)iter.next();
-        if (annot != null) {
-          FeatureMap fm = annot.getFeatures();
-          Out.prln("fm "+fm);
-          if (fm.containsKey("majorType")&&(fm.get("majorType").equals("title"))){
-            Long offsetStartAnnot = annot.getStartNode().getOffset();
-            Long offsetEndAnnot = annot.getEndNode().getOffset();
-            try {
-              String annotString =
-                document.getContent().getContent(
-                  offsetStartAnnot,offsetEndAnnot).toString();
-
-              Out.prln("anoot "+ annotString);
-              if (token.equals(annotString)) {
-                token = tokens1.nextToken();
-                Out.prln("token " +token);
-              }
-
-            } catch (InvalidOffsetException ioe) {
-              executionException = new ExecutionException
-                                     ("Invalid offset of the annotation");
-            }
-          } //if
-        } // if (annot!=null)
-      }//while
-      return matchRule1(token,s2,true);
-      }
-    }//if
-    return false;*/
   }//matchRule5
 
   /**
