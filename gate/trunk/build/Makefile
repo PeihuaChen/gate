@@ -57,7 +57,7 @@ jarupdate:
 # build the Tcl script library:
 # get gate.util.Jacl to update itself; rebuild it; copy all the Tcl files
 tcl:
-	./jdk.sh java -cp gate.jar gate.util.Jacl
+	./jdk.sh java $(CP) gate.util.Jacl
 	make ../classes/gate/util/Jacl.class
 	cd ../src && for f in `find . -name '*.tcl' -print`; \
 	do cp $$f ../classes/$$f; done
