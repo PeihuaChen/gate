@@ -68,7 +68,7 @@ REM ##############################################
 REM set CLASSPATH
 REM ##############################################
 
-set CLASSPATH=%GATEJAR%;%CLASSPATH%
+set "CLASSPATH=%GATEJAR%;%CLASSPATH%"
 
 echo CLASSPATH: %CLASSPATH%
 
@@ -86,7 +86,7 @@ REM ##############################################
 REM run the beast
 REM ##############################################
 
-set RUN=%JAVA% -Xmx200m -Djava.ext.dirs=%GUK% -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
+set RUN=%JAVA% -Xmx200m -Djava.ext.dirs=%GUK% -classpath "%CLASSPATH%" gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 echo RUN: %RUN%
 %RUN%
