@@ -89,7 +89,7 @@ public class GroupImpl implements Group{
       //release stmt???
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't change group name in DB: ["+ sqle.getMessage()+"]");
     }
   }
 
