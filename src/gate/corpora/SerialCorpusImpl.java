@@ -299,7 +299,7 @@ public class SerialCorpusImpl extends
     DocumentData docData = new DocumentData(doc.getName(),
                                             doc.getLRPersistenceId());
     boolean result = docDataList.add(docData);
-    documents.put(new Integer(docDataList.size()), doc);
+    documents.put(new Integer(docDataList.size()-1), doc);
     return result;
   }
 
@@ -517,6 +517,10 @@ public class SerialCorpusImpl extends
         return null;
       Object res = super.get(key);
       int index = ((Integer) key).intValue();
+      if (index >= docDataList.size())
+        return null;
+
+      if (DEBUG) Out.prln("index " + index + "result: " + res);
 
       //if the document is null, then I must get it from the DS
       if (res == null) {
