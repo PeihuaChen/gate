@@ -41,6 +41,8 @@ public abstract class Factory
   /** The DataStore register */
   private static DataStoreRegister dsReg = Gate.getDataStoreRegister();
 
+  private static CreoleProxy creoleProxy;
+
   /** Create an instance of a resource using default parameter values.
     * @see #createResource(String,FeatureMap)
     */
@@ -86,6 +88,51 @@ public abstract class Factory
   public static Resource createResource(
     String resourceClassName, FeatureMap parameterValues,
     Map listeners
+  ) throws ResourceInstantiationException
+   {
+      return createResource(resourceClassName, parameterValues, null,
+                            listeners);
+   }
+
+  /** Create an instance of a resource, and return it.
+    * Callers of this method are responsible for
+    * querying the resource's parameter lists, putting together a set that
+    * is complete apart from runtime parameters, and passing a feature map
+    * containing these parameter settings.
+    *
+    * @param resourceClassName the name of the class implementing the resource.
+    * @param parameterValues the feature map containing
+    *   parameterValues for the resource.
+    * @param features the features for the new resource
+    * @return an instantiated resource.
+    */
+  public static Resource createResource(
+    String resourceClassName, FeatureMap parameterValues,
+    FeatureMap features
+    ) throws ResourceInstantiationException
+   {
+      return createResource(resourceClassName, parameterValues, features, null);
+   }
+
+  /** Create an instance of a resource, and return it.
+    * Callers of this method are responsible for
+    * querying the resource's parameter lists, putting together a set that
+    * is complete apart from runtime parameters, and passing a feature map
+    * containing these parameter settings.
+    *
+    * @param resourceClassName the name of the class implementing the resource.
+    * @param parameterValues the feature map containing
+    *   parameterValues for the resource.
+    * @param listeners The listeners to be registered with the resource during
+    * its initialisation. A {@link java.util.Map} that maps freom fully
+    * qualified class name (as a string) to listener (of the type declared by
+    * the key).
+    * @param features the features for the new resource
+    * @return an instantiated resource.
+    */
+  public static Resource createResource(
+    String resourceClassName, FeatureMap parameterValues,
+    FeatureMap features, Map listeners
   ) throws ResourceInstantiationException
    {
     // get the resource metadata
@@ -155,8 +202,9 @@ public abstract class Factory
           throw new ResourceInstantiationException("Bad read from DB: " + e);
         }
         resData.addInstantiation(res);
+        if(features != null) res.getFeatures().putAll(features);
         //fire the event
-        ((CreoleRegisterImpl)reg).fireResourceLoaded(
+        creoleProxy.fireResourceLoaded(
                                    new CreoleEvent(res,
                                                    CreoleEvent.RESOURCE_LOADED)
                                   );
@@ -181,7 +229,13 @@ public abstract class Factory
     // set the parameterValues of the resource and add the listeners
     try {
       if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
-      setResourceParameters(res, parameterValues);
+      FeatureMap parameters = newFeatureMap();
+      if(DEBUG) Out.prln("Reading the default parameters for  " +
+                         res.toString());
+      parameters.putAll(resData.getParameterList().getInitimeDefaults());
+      //overwrite the defaults with the user provided values
+      parameters.putAll(parameterValues);
+      setResourceParameters(res, parameters);
     } catch(Exception e) {
       if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
       throw new ResourceInstantiationException("Parameterisation failure" + e);
@@ -226,8 +280,10 @@ public abstract class Factory
 
     // record the instantiation on the resource data's stack
     resData.addInstantiation(res);
+    //add the features sepcified by the user
+    if(features != null) res.getFeatures().putAll(features);
     //fire the event
-    ((CreoleRegisterImpl)reg).fireResourceLoaded(
+    creoleProxy.fireResourceLoaded(
                                new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
                               );
     return res;
@@ -264,7 +320,7 @@ public abstract class Factory
       (ResourceData) reg.get(resource.getClass().getName());
     List instances = rd.getInstantiations();
     instances.remove(resource);
-    ((CreoleRegisterImpl)reg).fireResourceUnloaded(
+    creoleProxy.fireResourceUnloaded(
             new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
     );
   } // deleteResource
@@ -502,7 +558,8 @@ public abstract class Factory
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
-    dsReg.add(ds);
+    if(dsReg.add(ds)) creoleProxy.fireDatastoreOpened(
+                        new CreoleEvent(ds, CreoleEvent.DATASTORE_OPENED));
     return ds;
   } // openDataStore()
 
@@ -516,7 +573,8 @@ public abstract class Factory
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
     ds.open();
-    dsReg.add(ds);
+    if(dsReg.add(ds)) creoleProxy.fireDatastoreCreated(
+                          new CreoleEvent(ds, CreoleEvent.DATASTORE_CREATED));
     return ds;
   } // createDataStore()
 
@@ -537,5 +595,83 @@ public abstract class Factory
     godfreyTheDataStore.setStorageUrl(storageUrl);
 
     return godfreyTheDataStore;
-  } // instantiateDS(URL)
+  }// instantiateDS(URL)
+
+  public static synchronized void addCreoleListener(CreoleListener l){
+    creoleProxy.addCreoleListener(l);
+  }
+  static{
+    creoleProxy = new CreoleProxy();
+  }
+
 } // abstract Factory
+
+class CreoleProxy {
+
+  public synchronized void removeCreoleListener(CreoleListener l) {
+    if (creoleListeners != null && creoleListeners.contains(l)) {
+      Vector v = (Vector) creoleListeners.clone();
+      v.removeElement(l);
+      creoleListeners = v;
+    }
+  }
+
+  public synchronized void addCreoleListener(CreoleListener l) {
+    Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      creoleListeners = v;
+    }
+  }
+
+  private transient Vector creoleListeners;
+  protected void fireResourceLoaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
+      }
+    }
+  }
+
+  protected void fireResourceUnloaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
+      }
+    }
+  }
+
+  protected void fireDatastoreOpened(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
+      }
+    }
+  }
+
+  protected void fireDatastoreCreated(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
+      }
+    }
+  }
+
+  protected void fireDatastoreClosed(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
+      }
+    }
+  }
+}//class CreoleProxy

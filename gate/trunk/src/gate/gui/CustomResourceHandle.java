@@ -22,13 +22,14 @@ import gate.*;
  * Class used to store the information about an open resource.
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
+ * @deprecated as of 27/03/2001. Replaced by {@link DefaultResourceHandle}
  */
-class CustomResourceHandle implements IResourceHandle {
+class CustomResourceHandle implements ResourceHandle {
   public CustomResourceHandle() {}
 
   public CustomResourceHandle(Resource resource, ProjectData project) {
     this.resource = resource;
-    this.title = (String)resource.getFeatures().get("NAME");
+    this.title = (String)resource.getFeatures().get("gate.NAME");
     this.project = project;
     buildViews();
     myself = this;
@@ -105,7 +106,7 @@ class CustomResourceHandle implements IResourceHandle {
   protected void buildViews() {
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
     FeaturesEditor fEdt = new FeaturesEditor();
-    fEdt.setResource(resource);
+    fEdt.setFeatureBearer(resource);
     view.add("Features", fEdt);
     largeView = view;
     smallView = null;

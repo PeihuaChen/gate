@@ -15,9 +15,12 @@
 package gate.gui;
 
 import gate.*;
+import gate.util.*;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Color;
 import javax.swing.table.*;
 
 import java.util.*;
@@ -40,6 +43,8 @@ public class FeaturesEditor extends AbstractVisualResource {
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     tableModel = new FeaturesTableModel();
     table = new XJTable(tableModel);
+    table.setDefaultRenderer(String.class, new FeaturesTableRenderer());
+    table.setDefaultRenderer(Object.class, new FeaturesTableRenderer());
     JScrollPane scroll = new JScrollPane(table);
     this.add(scroll, BorderLayout.CENTER);
   }
@@ -47,25 +52,26 @@ public class FeaturesEditor extends AbstractVisualResource {
   protected void initListeners(){
   }
 
-  public void setResource(gate.Resource newResource) {
+  public void setFeatureBearer(FeatureBearer newResource) {
     resource = newResource;
     features = resource.getFeatures();
     tableModel.fireTableDataChanged();
   }
 
-  public gate.Resource getResource() {
+  public FeatureBearer getFeatureBearer() {
     return resource;
   }
 
   XJTable table;
   FeaturesTableModel tableModel;
-  private gate.Resource resource;
+  private FeatureBearer resource;
   FeatureMap features;
 
   class FeaturesTableModel extends AbstractTableModel{
     public int getColumnCount(){
       return 2;
     }
+
     public int getRowCount(){
       return features.size() + 1;
     }
@@ -88,7 +94,10 @@ public class FeaturesEditor extends AbstractVisualResource {
 
     public boolean isCellEditable(int rowIndex,
                               int columnIndex){
-      return columnIndex == 1 || rowIndex == features.size();
+      return rowIndex == features.size()
+             ||
+             ((!((String)getValueAt(rowIndex, 0)).startsWith("gate."))
+             );
     }
 
     public Object getValueAt(int rowIndex,
@@ -141,18 +150,42 @@ public class FeaturesEditor extends AbstractVisualResource {
           newValue = null;
         }
       }else{
-        //the column here is 2
-        if(aValue.equals("")){
-          //remove feature
-          features.remove(getValueAt(rowIndex, 0));
+        if(columnIndex == 0){
+          //the name of the feature changed
+          String oldName = (String)getValueAt(rowIndex, 0);
+          Object oldValue = features.remove(oldName);
+          features.put(aValue, oldValue);
         }else{
-          //change feature
-          features.put(getValueAt(rowIndex, 0), aValue);
+          //the value of a feature changed
+          if(aValue.equals("")){
+            //remove feature
+            features.remove(getValueAt(rowIndex, 0));
+          }else{
+            //change feature
+            features.put(getValueAt(rowIndex, 0), aValue);
+          }
         }
       }
+      fireTableDataChanged();
     }
 
     String newKey;
     Object newValue;
   }///class FeaturesTableModel extends DefaultTableModel
+
+  class FeaturesTableRenderer extends DefaultTableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table,
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row,
+                                                   int column){
+
+      super.getTableCellRendererComponent(table, value, false, hasFocus,
+                                          row, column);
+      setEnabled(table.isCellEditable(row, column));
+      return this;
+    }
+
+  }
 }

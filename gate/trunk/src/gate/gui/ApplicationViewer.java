@@ -462,7 +462,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       String tipText = null;
       if (value instanceof ProcessingResource){
         ProcessingResource pr = (ProcessingResource)value;
-        text = (String)pr.getFeatures().get("NAME");
+        text = (String)pr.getFeatures().get("gate.NAME");
         tipText = ((ResourceData)
                    Gate.getCreoleRegister().get(pr.getClass().getName())
                    ).getComment();
@@ -473,7 +473,7 @@ public class ApplicationViewer extends AbstractVisualResource {
         while(!done && prIter.hasNext()){
           if(pr == prIter.next()){
             MainFrame frame = MainFrame.getInstance();
-            PRHandle prHandle = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("NAME"));
+            PRHandle prHandle = null;// = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("gate.NAME"));
             done = true;
             if(prHandle != null){
               Icon icon = prHandle.getIcon();
@@ -547,7 +547,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       if(index == rowIndex && pr != null){
         switch(columnIndex){
           case -1: return pr;
-          case 0: return pr.getFeatures().get("NAME");
+          case 0: return pr.getFeatures().get("gate.NAME");
           case 1: return getResourceName(pr);
         }
       }
@@ -561,7 +561,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   class AddPRAction extends AbstractAction{
     AddPRAction(ProcessingResource aPR){
-      super((String)aPR.getFeatures().get("NAME"));
+      super((String)aPR.getFeatures().get("gate.NAME"));
       this.pr = aPR;
     }
 
@@ -589,7 +589,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   class RemovePRAction extends AbstractAction{
     RemovePRAction(ProcessingResource pr){
-      super((String)pr.getFeatures().get("NAME"));
+      super((String)pr.getFeatures().get("gate.NAME"));
       this.pr = pr;
     }
 
@@ -627,33 +627,33 @@ public class ApplicationViewer extends AbstractVisualResource {
               }
             }
             try{
-    //System.out.println("PR:" + pr.getFeatures().get("NAME") + "\n" + params);
+    //System.out.println("PR:" + pr.getFeatures().get("gate.NAME") + "\n" + params);
               Factory.setResourceParameters(pr, params);
             }catch(java.beans.IntrospectionException ie){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            pr.getFeatures().get("gate.NAME") + ":\n" +
                                             ie.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }catch(java.lang.reflect.InvocationTargetException ite){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            pr.getFeatures().get("gate.NAME") + ":\n" +
                                             ite.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }catch(IllegalAccessException iae){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            pr.getFeatures().get("gate.NAME") + ":\n" +
                                             iae.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
             }catch(GateException ge){
               JOptionPane.showMessageDialog(ApplicationViewer.this,
                                             "Could not set parameters for " +
-                                            pr.getFeatures().get("NAME") + ":\n" +
+                                            pr.getFeatures().get("gate.NAME") + ":\n" +
                                             ge.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
               return;
@@ -804,7 +804,7 @@ public class ApplicationViewer extends AbstractVisualResource {
                                                int row,
                                                int column){
       if(value instanceof FeatureBearer){
-        String name = (String)((FeatureBearer)value).getFeatures().get("NAME");
+        String name = (String)((FeatureBearer)value).getFeatures().get("gate.NAME");
         if(name != null){
           return super.getTableCellRendererComponent(table, name, isSelected,
                                                      hasFocus, row, column);
@@ -875,7 +875,7 @@ public class ApplicationViewer extends AbstractVisualResource {
                                                     boolean isSelected,
                                                     boolean cellHasFocus){
         if(value instanceof FeatureBearer){
-          String name = (String)((FeatureBearer)value).getFeatures().get("NAME");
+          String name = (String)((FeatureBearer)value).getFeatures().get("gate.NAME");
           if(name != null){
             return super.getListCellRendererComponent(list, name, index,
                                                       isSelected, cellHasFocus);
@@ -997,7 +997,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       String name = null;
       if(value != null){
         ProcessingResource res = (ProcessingResource) value;
-        name = (String)res.getFeatures().get("NAME");
+        name = (String)res.getFeatures().get("gate.NAME");
         if(name == null){
           name = "No name: " + res.getClass().toString();
         }
@@ -1029,7 +1029,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       while(prsIter.hasNext()){
         PRHandle handle = (PRHandle)prsIter.next();
         ProcessingResource pr = (ProcessingResource)handle.resource;
-        String prName = (String)handle.resource.getFeatures().get("NAME");
+        String prName = (String)handle.resource.getFeatures().get("gate.NAME");
         if(prName == null){
           prName = "No name: " + pr.getClass().toString();
         }
@@ -1042,7 +1042,7 @@ public class ApplicationViewer extends AbstractVisualResource {
         //select the current value
         try{
           String currentName = (String)((ProcessingResource)value).
-                               getFeatures().get("NAME");
+                               getFeatures().get("gate.NAME");
           if(prsByName.containsKey(currentName)){
             combo.setSelectedItem(currentName);
           }

@@ -387,7 +387,7 @@ public class AnnotationEditDialog extends JDialog {
       Resource res;
       try{
         res = Factory.createResource(rData.getClassName(), params);
-        res.getFeatures().put("NAME", nameField.getText());
+        res.getFeatures().put("gate.NAME", nameField.getText());
       }catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getOwner(),
                                       "Resource could not be created!\n" +

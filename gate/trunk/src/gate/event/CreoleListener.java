@@ -23,4 +23,14 @@ public interface CreoleListener extends java.util.EventListener{
 
   /**Called when a {@link gate.Resource} has been removed from the system*/
   public void resourceUnloaded(CreoleEvent e);
+
+  /**Called when a {@link gate.Datastore} has been opened*/
+  public void datastoreOpened(CreoleEvent e);
+
+  /**Called when a {@link gate.Datastore} has been created*/
+  public void datastoreCreated(CreoleEvent e);
+
+  /**Called when a {@link gate.Datastore} has been closed*/
+  public void datastoreClosed(CreoleEvent e);
+
 }

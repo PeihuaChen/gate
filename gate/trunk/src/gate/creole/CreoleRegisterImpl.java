@@ -38,7 +38,7 @@ import gate.event.*;
   * the class name of the resource.
   * @see gate.CreoleRegister
   */
-public class CreoleRegisterImpl extends HashMap implements CreoleRegister
+public class CreoleRegisterImpl extends HashMap implements CreoleRegister, CreoleListener
 {
   /** Debug flag */
   protected static final boolean DEBUG = false;
@@ -399,12 +399,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       if(rData != null && !rData.isPrivate()) publics.add(oneType);
     }
     return publics;
-  } // getPublicTypes
-
-  /**
-   * Removes a {@link gate.event.CreoleListener} previously registered with this
-   * CreoleRegister. {@see #addCreoleListener()}
-   */
+  }
   public synchronized void removeCreoleListener(CreoleListener l) {
     if (creoleListeners != null && creoleListeners.contains(l)) {
       Vector v = (Vector) creoleListeners.clone();
@@ -412,51 +407,34 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       creoleListeners = v;
     }
   }
+  public synchronized void addCreoleListener(CreoleListener l) {
+    Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      creoleListeners = v;
+    }
+  } // getPublicTypes
+
+  /**
+   * Removes a {@link gate.event.CreoleListener} previously registered with this
+   * CreoleRegister. {@see #addCreoleListener()}
+   */
 
   /**
    * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
    * The register will fire events every time a resource is added to or removed
    * from the system.
-   */
-  public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v =
-      creoleListeners == null
-      ? new Vector(2)
-      : (Vector) creoleListeners.clone();
-
-    if (! v.contains(l)) {
-      v.addElement(l);
-      creoleListeners = v;
-    }
-  } // addCreoleListener
+   */// addCreoleListener
 
   /**
    * Notifies all listeners that a new {@link gate.Resource} has been loaded
    * into the system
-   */
-  public void fireResourceLoaded(CreoleEvent e) {
-    if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
-      }
-    }
-  } // fireResourceLoaded
+   */// fireResourceLoaded
 
   /**
    * Notifies all listeners that a {@link gate.Resource} has been unloaded
    * from the system
-   */
-  public void fireResourceUnloaded(CreoleEvent e) {
-    if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
-      }
-    }
-  } // fireResourceUnloaded
+   */// fireResourceUnloaded
 
   /** A list of the types of LR in the register. */
   protected Set lrTypes = new HashSet();
@@ -470,6 +448,73 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   /** A list of the types of TOOL in the register. */
   protected Set toolTypes = new HashSet();
 
-  /**The lists of listeners registered with this CreoleRegister*/
   private transient Vector creoleListeners;
+  protected void fireResourceLoaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
+      }
+    }
+  }
+  protected void fireResourceUnloaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
+      }
+    }
+  }
+  protected void fireDatastoreOpened(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
+      }
+    }
+  }
+  protected void fireDatastoreCreated(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
+      }
+    }
+  }
+
+  protected void fireDatastoreClosed(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
+      }
+    }
+  }
+
+  public void resourceLoaded(CreoleEvent e) {
+    fireResourceLoaded(e);
+  }
+
+  public void resourceUnloaded(CreoleEvent e) {
+    fireResourceUnloaded(e);
+  }
+
+  public void datastoreOpened(CreoleEvent e) {
+    fireDatastoreOpened(e);
+  }
+
+  public void datastoreCreated(CreoleEvent e) {
+    fireDatastoreCreated(e);
+  }
+
+  public void datastoreClosed(CreoleEvent e) {
+    fireDatastoreClosed(e);
+  }
+
+  /**The lists of listeners registered with this CreoleRegister*/
 } // class CreoleRegisterImpl
