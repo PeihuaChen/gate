@@ -178,7 +178,7 @@ implements AnnotationSet
 
   public AnnotationSetImpl(Collection c) throws ClassCastException {
 
-    this(((AnnotationSet) c).getDocument());
+    this(((AnnotationSet) c).getDocument(), ((AnnotationSet) c).getName());
 
 
 
@@ -533,8 +533,6 @@ implements AnnotationSet
   public AnnotationSet get() {
 
     AnnotationSetImpl resultSet = new AnnotationSetImpl(doc);
-
-    Iterator iter = annotsById.values().iterator();
 
     resultSet.addAllKeepIDs(annotsById.values());
 
