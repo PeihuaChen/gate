@@ -186,6 +186,8 @@ public class TestPR extends TestCase
       doc3.getAnnotations().get("Sentence").size() +
       " Sentence annotations, instead of the expected 65.",
       doc3.getAnnotations().get("Sentence").size()== 65);
+    if (DEBUG)
+      Out.prln(doc3.getAnnotations().get("Sentence"));
 
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get("Split").size() +
