@@ -29,7 +29,7 @@ import gate.event.*;
 import gate.security.*;
 import gate.security.SecurityException;
 import gate.corpora.*;
-
+import gate.annotation.*;
 
 public abstract class JDBCDataStore extends AbstractFeatureBearer
                                     implements DatabaseDataStore,
@@ -1400,8 +1400,69 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected abstract void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
     throws PersistenceException;
 
+
   /** helper for sync() - never call directly */
-  protected abstract void _syncAnnotations(Document doc)
+  protected void _syncAnnotations(Document doc)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertNotNull(doc.getLRPersistenceId());
+    Assert.assertEquals(((DatabaseDataStore)doc.getDataStore()).getDatabaseID(),
+                      this.getDatabaseID());
+
+
+    EventAwareDocument ead = (EventAwareDocument)doc;
+    //1. get the sets read from the DB for this document
+    //chnaged annotations can occur only in such sets
+    Collection loadedSets = ead.getLoadedAnnotationSets();
+
+    Iterator it = loadedSets.iterator();
+    while (it.hasNext()) {
+      AnnotationSet as = (AnnotationSet)it.next();
+      //check that this set is neither NEW nor DELETED
+      //they should be already synced
+      if (ead.getAddedAnnotationSets().contains(as.getName()) ||
+          ead.getRemovedAnnotationSets().contains(as.getName())) {
+        //oops, ignore it
+        continue;
+      }
+
+      EventAwareAnnotationSet eas = (EventAwareAnnotationSet)as;
+      Assert.assertNotNull(as);
+
+      Collection anns = null;
+      anns = eas.getAddedAnnotations();
+      Assert.assertNotNull(anns);
+      if (anns.size()>0) {
+        _syncAddedAnnotations(doc,as,anns);
+      }
+
+      anns = eas.getRemovedAnnotations();
+      Assert.assertNotNull(anns);
+      if (anns.size()>0) {
+        _syncRemovedAnnotations(doc,as,anns);
+      }
+
+      anns = eas.getChangedAnnotations();
+      Assert.assertNotNull(anns);
+      if (anns.size()>0) {
+        _syncChangedAnnotations(doc,as,anns);
+      }
+    }
+  }
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+    throws PersistenceException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException;
+
+  /** helper for sync() - never call directly */
+  protected abstract void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException;
 
 }
