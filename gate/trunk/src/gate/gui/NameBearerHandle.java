@@ -799,6 +799,8 @@ public class NameBearerHandle implements Handle,
           }// End if
           DataStore ownDS = ((LanguageResource)target).getDataStore();
           if(ds == ownDS){
+            MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
+
             StatusListener sListener = (StatusListener)
                                        gate.gui.MainFrame.getListeners().
                                        get("gate.event.StatusListener");
@@ -831,6 +833,8 @@ public class NameBearerHandle implements Handle,
             StatusListener sListener = (StatusListener)
                                        gate.gui.MainFrame.getListeners().
                                        get("gate.event.StatusListener");
+            MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
+
             if(sListener != null) sListener.statusChanged(
               "Saving: " + ((LanguageResource)target).getName());
             double timeBefore = System.currentTimeMillis();
@@ -862,6 +866,8 @@ public class NameBearerHandle implements Handle,
                                       "Save failed!\n " +
                                       se.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
+      }finally{
+        MainFrame.unlockGUI();
       }
     }
   }//class SaveToAction extends AbstractAction
