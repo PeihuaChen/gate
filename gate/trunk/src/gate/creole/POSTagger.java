@@ -52,7 +52,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
         "No URL provided for the rules!");
     }
     try{
-      tagger = new hepple.postag.POSTagger(lexiconURL,rulesURL);
+      tagger = new hepple.postag.POSTagger(lexiconURL,rulesURL, encoding);
     }catch(Exception e){
       throw new ResourceInstantiationException(e);
     }
@@ -113,7 +113,6 @@ public class POSTagger extends AbstractLanguageAnalyser {
             currentToken = (Annotation)(tokensIter.hasNext() ?
                                        tokensIter.next() : null);
           }
-          tagger.setEncoding(this.encoding);
           //run the POS tagger
           List taggerList = tagger.runTagger(sentencesForTagger);
           if(taggerList != null && taggerList.size() > 0){
