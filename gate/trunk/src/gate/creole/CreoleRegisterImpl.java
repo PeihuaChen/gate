@@ -28,7 +28,7 @@ import gate.event.*;
 
 
 /** This class implements the CREOLE register interface. DO NOT
-  * construct objects of this class unless your name is gate.util.Gate
+  * construct objects of this class unless your name is gate.Gate
   * (in which case please go back to the source code repository and stop
   * looking at other class's code).
   * <P>

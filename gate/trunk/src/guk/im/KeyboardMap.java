@@ -890,8 +890,8 @@ public class KeyboardMap implements Runnable{
   /**
    * Updates the keyboard map for a new Locale or a new state of the current locale handler.
    * Currently the state changes are ignored.
-   * This method delegates its job to the thread which wil call {@link #update()}
-   *
+   * This method delegates its job to the thread which will do the actual
+   * update.
    * @param newHandler
    * @param newState
    */
@@ -1111,9 +1111,8 @@ public class KeyboardMap implements Runnable{
     /**
      * Constructs a new KeyGUI.
      *
-     * @param key the String key used in the
-     * {@link guk.im.KeyboardMap#GUIforString}
-     * map
+     * @param key the String key used in the map that holds the GUIs used for
+     * keys
      * @param englishLow the English char on the key
      * @param englishUp the English char on the key when used with the Shift
      *     key.

@@ -84,7 +84,7 @@ public class JTreeTable extends XJTable {
 
 
   /**
-   * Overrides the setSortable() method from {@link XJtable} so the table is NOT
+   * Overrides the setSortable() method from {@link XJTable} so the table is NOT
    * sortable. In a tree-table component the ordering for the rows is given by
    * the structure of the tree and they cannot be reordered.
    */
@@ -113,7 +113,7 @@ public class JTreeTable extends XJTable {
 
   /**
    * The renderer used to display the table cells containing tree nodes.
-   * Will use the {@link tree} to paint the nodes.
+   * Will use an inernal JTree object to paint the nodes.
    */
   public class TreeTableCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table,

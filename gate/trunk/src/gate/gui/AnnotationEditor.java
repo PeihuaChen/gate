@@ -123,7 +123,7 @@ public class AnnotationEditor extends AbstractVisualResource {
   /**
    * This highlighter is actually used as a data structure. It is used to keep
    * the data for the selected annotations; the actual highlighting will be
-   * done by the {@link #highligter} as using two different highlighters on the
+   * done by the {@link #highlighter} as using two different highlighters on the
    * same text component is looking for trouble.
    */
   Highlighter selectionHighlighter;

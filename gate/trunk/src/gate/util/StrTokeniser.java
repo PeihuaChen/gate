@@ -8,7 +8,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Deriver from Sun code by Valy, sometime or other.
+ *  Derived from Sun code by Valy, sometime or other.
  *
  *  Copyright (c) 1995, 1996 Sun Microsystems, Inc. All Rights Reserved.
  *
