@@ -202,8 +202,21 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     */
   public Object put(Object key, Object value) {
     ResourceData rd = (ResourceData) value;
-    if(LanguageResource.class.isAssignableFrom(rd.getClass()))
+
+    // get the resource implementation class
+    Class resClass = null;
+    try {
+      resClass = rd.getResourceClass();
+    } catch(ClassNotFoundException e) {
+      throw new GateRuntimeException(
+        "Couldn't get resource class from the resource data:" + e
+      );
+    }
+
+    // if it's an LR add its class name to the list
+    if(LanguageResource.class.isAssignableFrom(resClass)) {
       lrTypes.add(rd.getClassName());
+    }
 
     return super.put(key, value);
   } // put(key, value)
