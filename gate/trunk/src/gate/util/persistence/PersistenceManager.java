@@ -408,23 +408,28 @@ public class PersistenceManager {
       }
       //now we can read the saved object
       res = ois.readObject();
+      ois.close();
+
+      //insure a fresh start
+      existingTransientValues.clear();
+      res = getTransientRepresentation(res);
+      existingTransientValues.clear();
+      long endTime = System.currentTimeMillis();
+              if(sListener != null) sListener.statusChanged(
+                  "Loading completed in " +
+                  NumberFormat.getInstance().format(
+                  (double)(endTime - startTime) / 1000) + " seconds");
+              if(pListener != null) pListener.processFinished();
+      return res;
+    }catch(ResourceInstantiationException rie){
+      if(sListener != null) sListener.statusChanged("Loading failed!");
+      if(pListener != null) pListener.processFinished();
+      throw rie;
     }catch(Exception ex){
       if(sListener != null) sListener.statusChanged("Loading failed!");
       if(pListener != null) pListener.processFinished();
       throw new PersistenceException(ex);
     }
-    ois.close();
-    //insure a fresh start
-    existingTransientValues.clear();
-    res = getTransientRepresentation(res);
-    existingTransientValues.clear();
-    long endTime = System.currentTimeMillis();
-            if(sListener != null) sListener.statusChanged(
-                "Loading completed in " +
-                NumberFormat.getInstance().format(
-                (double)(endTime - startTime) / 1000) + " seconds");
-            if(pListener != null) pListener.processFinished();
-    return res;
   }
 
 
