@@ -59,7 +59,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
         fireStatusChangedEvent(text);
       }
     });
-    // call method that creates annotations on the gate document
+    // call the method that creates annotations on the gate document
     emailDocHandler.annotateMessages();
   }//unpackMarkup
 

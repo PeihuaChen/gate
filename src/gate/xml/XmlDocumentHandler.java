@@ -326,7 +326,7 @@ public class XmlDocumentHandler extends HandlerBase
   private gate.Document doc = null;
 
   // an annotation set used for creating annotation reffering the doc
-  private gate.AnnotationSet basicAS;
+  private gate.AnnotationSet basicAS = null;
 
   // listeners for status report
   protected List myStatusListeners = new LinkedList();

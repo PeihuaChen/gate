@@ -68,7 +68,13 @@ public class TestEmail extends TestCase
 
 
     gate.Document doc = gate.Transients.newDocument(
-                new URL("http://www.dcs.shef.ac.uk/~cursu/email/test.eml")
+              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test1.eml")
+              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test2.eml")
+              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test3.eml")
+              //new URL("http://www.dcs.shef.ac.uk/~cursu/email/test4.eml")
+              new URL("http://www.dcs.shef.ac.uk/~cursu/email/test5.eml")
+              // new URL("http://www.dcs.shef.ac.uk/~cursu/email/test.eml")
+              //  new URL("http://www.dcs.shef.ac.uk/~cursu/email/miguel.mail.eml")
     );
 
 
