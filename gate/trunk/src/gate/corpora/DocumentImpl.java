@@ -257,7 +257,7 @@ public class DocumentImpl implements Document
     */
   String getOrderingString() {
     if(sourceURL == null) return toString();
-    
+
     StringBuffer orderingString = new StringBuffer(sourceURL.toString());
     if(sourceURLOffsets != null) {
       orderingString.append(sourceURLOffsets[0].toString());
@@ -265,6 +265,36 @@ public class DocumentImpl implements Document
     }
     return orderingString.toString();
   } // getOrderingString()
+
+
+//Persistence stuff
+  public boolean isPersistent(){
+  //This class does not define persistent objects.
+    return false;
+  }
+
+  public boolean isPersistenceCapable(){
+    //There isn't yet a persistent implementation for corpora so return false
+    return false;
+  }
+
+  public boolean canLiveIn(DataStore ds){
+    return false;
+  }
+
+  public String getErrorMessage(){
+    return null;
+  }
+
+  public void setupDS(DataStore ds){
+    //Do nothing!
+  }
+
+  public LRDBWrapper getDBWrapper(DataStore ds){
+    return null;
+  }
+//END persistence stuff
+
 
   /** The features associated with this document. */
   protected FeatureMap features;

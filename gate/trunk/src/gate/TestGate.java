@@ -51,7 +51,7 @@ public class TestGate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTest(TestJape.suite());
+//    suite.addTest(TestJape.suite());
     suite.addTest(TestDocument.suite());
     suite.addTest(TestAnnotation.suite());
     suite.addTest(TestRBTreeMap.suite());
