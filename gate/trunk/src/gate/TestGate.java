@@ -162,7 +162,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests)
-        suite.addTest(TestSplitterTagger.suite());
+        suite.addTest(TestCreole.suite());
       else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());

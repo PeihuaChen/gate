@@ -451,6 +451,11 @@ extends AbstractLanguageResource implements Document {
 
   /** This method saves all the annotations from aDumpAnnotSet and combines
     * them with the document content.
+    * @param aDumpAnnotationSet is a GATE annotation set prepared to be used
+    * on the raw text from document content. If aDumpAnnotSet is <b>null<b>
+    * then an empty string will be returned.
+    * @return The XMl document obtained from raw text + the information from
+    * the dump annotation set.
     */
   private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet){
     String content = null;

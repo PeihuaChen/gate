@@ -124,51 +124,46 @@ public class TestCreole extends TestCase
 
   /** Test view registration */
   public void testViews() throws Exception {
-    ResourceData rd = (ResourceData) reg.get("testpkg.TestPR2");
+    List smallViews1 =
+                  reg.getSmallVRsForResource("gate.persist.SerialDataStore");
+    String className1 = new String("");
+    if (smallViews1!= null && smallViews1.size()>0)
+      className1 = (String)smallViews1.get(0);
     assert(
-      "no icon on TPR2",
-      rd.getIcon() != null && rd.getIcon().equals("anIconForTPR2")
+      "Found "+className1+
+      " as small viewer for gate.persist.SerialDataStore, "+
+      "instead  of gate.gui.SerialDatastoreViewer",
+      smallViews1.size() == 1 &&
+      "gate.gui.SerialDatastoreViewer".equals(className1)
     );
 
-    List v = rd.getViews();
-    if(v == null || v.size() == 0)
-      fail("wrong number of views");
+    List largeViews1 =
+                  reg.getLargeVRsForResource("gate.Corpus");
+    assert(
+      "Found "+largeViews1.size()+" wich are " +largeViews1 +
+      " as large viewers for gate.Corpus, "+
+     "instead  of 2 which are [gate.gui.CorpusEditor, gate.gui.FeaturesEditor]",
+      largeViews1.size() == 2
+    );
 
-    Iterator iter = v.iterator();
-    while(iter.hasNext()) {
-      FeatureMap feats = (FeatureMap) iter.next();
+    List largeViews2 =
+                  reg.getLargeVRsForResource("gate.Document");
+    assert(
+      "Found "+largeViews2.size()+" wich are " +largeViews2 +
+      " as large viewers for gate.Document, "+
+     "instead  of 2 which are [gate.gui.DocumentEditor, gate.gui.FeaturesEditor]",
+      largeViews2.size() == 2
+    );
 
-      assert(
-        "wrong type on TPR2 view",
-        feats != null && feats.size() > 0 &&
-          feats.get("TYPE").equals("gate.gui.SomeViewer")
-      );
-    }
-
-    List allViews = rd.getAllViews();
-    iter = allViews.iterator();
-    while(iter.hasNext()) {
-      FeatureMap feats = (FeatureMap) iter.next();
-
-      assert(
-        "wrong type on TPR2 view",
-        feats != null && feats.size() > 0 &&
-          feats.get("TYPE").equals("gate.gui.SomeViewer")
-      );
-    }
-
-    List smallViews = rd.getAllSmallViews();
-    assert("wrong number of small views", smallViews.size() == 1);
-    iter = smallViews.iterator();
-    while(iter.hasNext()) {
-      FeatureMap feats = (FeatureMap) iter.next();
-
-      assert(
-        "wrong type on TPR2 small view",
-        feats != null && feats.size() > 0 &&
-          feats.get("TYPE").equals("gate.gui.SomeSmallViewer")
-      );
-    }
+    List annotViews1 =
+                  reg.getAnnotationVRs();
+    assert(
+      "Found "+annotViews1.size()+" wich are " +annotViews1 +
+      " as annotation viewers for all types annotations, "+
+     "instead  of 2 which are [gate.gui.SchemaAnnotationEditor,"+
+     " gate.gui.UnrestrictedAnnotationEditor]",
+      annotViews1.size() == 2
+    );
   } // testViews()
 
   /** Utility method to check that a list of resources are all
@@ -292,7 +287,7 @@ public class TestCreole extends TestCase
     // get some res data from the register
     assert(
       "wrong number of resources in the register: " + reg.size(),
-      reg.size() == 8
+      reg.size() == 15
     );
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
@@ -359,8 +354,8 @@ public class TestCreole extends TestCase
     Set prs = reg.getPrTypes();
     Set lrs = reg.getLrTypes();
 
-    assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 0);
-    assert("wrong number prs in reg: " + prs.size(), prs.size() == 5);
+    assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 7);
+    assert("wrong number prs in reg: " + prs.size(), prs.size() == 4);
     assert("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
   } // testTypeLists()
 

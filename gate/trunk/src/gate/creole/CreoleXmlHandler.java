@@ -61,9 +61,6 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** The source URL of the directory file being parsed. */
   private URL sourceUrl;
 
-  /** The features (attributes) of VIEW elements */
-  private FeatureMap viewFeatures = Factory.newFeatureMap();
-
   /** This object indicates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
@@ -145,13 +142,6 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentParam.name = currentAttributes.getValue("NAME");
       currentParam.runtime =
         Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
-    }else if(elementName.toUpperCase().equals("VIEW")){
-      for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
-        viewFeatures.put(
-          currentAttributes.getQName(i).toUpperCase(),
-          currentAttributes.getValue(i)
-        );
-      }// End for
     }else if(elementName.toUpperCase().equals("GUI")){
       String typeValue = currentAttributes.getValue("TYPE");
       if (typeValue != null){
@@ -320,18 +310,6 @@ public class CreoleXmlHandler extends DefaultHandler {
         Out.prln("added param: " + currentParam);
       currentParam = new Parameter();
     // End PARAMETER processing
-    //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("VIEW")) {
-      checkStack("endElement", "VIEW");
-      String viewType = (String) contentStack.pop();
-      viewFeatures.put("TYPE", viewType);
-      resourceData.addView(viewFeatures);
-      if(DEBUG)
-        Out.prln("added view: " + viewFeatures);
-
-      // clear the holding map for the next view
-      viewFeatures = Factory.newFeatureMap();
-    // End VIEW processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("AUTOLOAD")) {
       resourceData.setAutoLoading(true);
