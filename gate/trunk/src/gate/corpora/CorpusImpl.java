@@ -29,13 +29,14 @@ import gate.creole.*;
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
   */
-public class CorpusImpl extends AbstractLanguageResource implements Corpus {
+public class CorpusImpl extends AbstractLanguageResource implements Corpus, CreoleListener {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
   public CorpusImpl(){
     supportList = Collections.synchronizedList(new VerboseList());
+    Gate.getCreoleRegister().addCreoleListener(this);
   }
 
 
@@ -328,5 +329,18 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
   }
   public java.util.List getDocumentsList() {
     return documentsList;
+  }
+  public void resourceLoaded(CreoleEvent e) {
+  }
+  public void resourceUnloaded(CreoleEvent e) {
+    Resource res = e.getResource();
+    //remove all occurences
+    if(res instanceof Document) while(contains(res)) remove(res);
+  }
+  public void datastoreOpened(CreoleEvent e) {
+  }
+  public void datastoreCreated(CreoleEvent e) {
+  }
+  public void datastoreClosed(CreoleEvent e) {
   }
 } // class CorpusImpl
