@@ -141,18 +141,16 @@ extends AbstractLanguageResource implements Document {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
 
+    entitiesMap = new HashMap();
+    entitiesMap.put(new Character('<'),"&lt;");
+    entitiesMap.put(new Character('>'),"&gt;");
+    entitiesMap.put(new Character('&'),"&amp;");
+    entitiesMap.put(new Character('\''),"&apos;");
+    entitiesMap.put(new Character('"'),"&quot;");
+    entitiesMap.put(new Character((char)160),"&#160;");
+    entitiesMap.put(new Character((char)169),"&#169;");
+
     // set up the source URL and create the content
-/*
-    if(sourceUrl == null && sourceUrlName != null)
-      try {
-        sourceUrl = new URL(sourceUrlName);
-        content = new DocumentContentImpl(
-          sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset
-        );
-      } catch(IOException e) {
-        throw new ResourceInstantiationException("DocumentImpl.init: " + e);
-      }
-*/
     if(sourceUrl == null){
       if(stringContent == null)
       {
@@ -381,7 +379,6 @@ extends AbstractLanguageResource implements Document {
     // GATE document.
     FeatureMap docFeatures = this.getFeatures();
     String mimeTypeStr = null;
-    boolean useCData = true;
     boolean addRootEndTag = false;
     if (  docFeatures != null &&
           null != (mimeTypeStr=(String)docFeatures.get("MimeType")) &&
@@ -392,23 +389,19 @@ extends AbstractLanguageResource implements Document {
            )
        ){
           /* don't add the root tag */
-          if ("text/html".equalsIgnoreCase(mimeTypeStr))
-            useCData = false;
     }else{
       // Add the root start element
       xmlDoc.append("<GatePreserveFormat>");
       addRootEndTag = true;
     }// End if
 
-//    xmlDoc.append("[CDATA[");
-    xmlDoc.append(saveAnnotationSetAsXml(dumpingSet, useCData));
-//    xmlDoc.append("]]>");
+    xmlDoc.append(saveAnnotationSetAsXml(dumpingSet));
 
     if (addRootEndTag){
       // Add the root end element
       xmlDoc.append("</GatePreserveFormat>");
     }// End if
-
+    this.removeAnnotationSet("Dumping annotation set");
     fireStatusChanged("Done.");
     return xmlDoc.toString();
   }//End toXml()
@@ -459,8 +452,7 @@ extends AbstractLanguageResource implements Document {
   /** This method saves all the annotations from aDumpAnnotSet and combines
     * them with the document content.
     */
-  private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet,
-                                                            boolean useCData){
+  private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet){
     String content = null;
     if (this.getContent()== null)
       content = new String("");
@@ -469,6 +461,11 @@ extends AbstractLanguageResource implements Document {
     StringBuffer docContStrBuff = new StringBuffer(content);
     if (aDumpAnnotSet == null)   return docContStrBuff.toString();
 
+    TreeMap offsets2CharsMap = new TreeMap();
+    if (content.length()!= 0){
+      // Fill the offsets2CharsMap with all the indices where special chars appear
+      buildEntityMapFromString(content,offsets2CharsMap);
+    }//End if
     // The saving alghorithm is as follows:
     ///////////////////////////////////////////
     // Construct a set of annot with all IDs in asc order.
@@ -487,28 +484,17 @@ extends AbstractLanguageResource implements Document {
     // ofsets is sorted in ascending order.
     // Iterate this set in descending order and remove an offset at each
     // iteration
-    boolean isFirstOffset = false;
-    boolean isLastOffset = false;
     int dim = offsets.size();
     while (!offsets.isEmpty()){
       Long offset = (Long)offsets.last();
       // Remove the offset from the set
       offsets.remove(offset);
-      if (dim == offsets.size() + 1) isFirstOffset = true;
-      else isFirstOffset = false;
-      if (offsets.isEmpty()) isLastOffset = true;
-      else isLastOffset = false;
-      // Use the offset
+      // Now, use it
       // Return a list with annotations that needs to be serialized in that
       // offset.
       List annotations = getAnnotationsForOffset(aDumpAnnotSet,offset);
       StringBuffer tmpBuff = null;
-      if (useCData && !isLastOffset)
-          // End CDATA section
-          tmpBuff = new StringBuffer("]]>");
-      else
-        tmpBuff = new StringBuffer("");
-
+      tmpBuff = new StringBuffer("");
       Stack stack = new Stack();
       Iterator it = annotations.iterator();
       while(it.hasNext()){
@@ -564,15 +550,24 @@ extends AbstractLanguageResource implements Document {
         }// End while
       }// End if
 
-      if ( useCData && !isFirstOffset){
-        //Start CDATA section
-        tmpBuff.append("<![CDATA[");
-      }else{
-        // If is the first offset don't add CDATA section.
-        // Just change its state from first offset to not first offset.
-        isFirstOffset = false;
+      // Before inserting tmpBuff into docContStrBuff we need to check
+      // if there are chars to be replaced and if there are, they would be
+      // replaced.
+      if (!offsets2CharsMap.isEmpty()){
+        Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+        while( !offsets2CharsMap.isEmpty() &&
+                       offsChar.intValue() >= offset.intValue()){
+          // Replace the char at offsChar with its corresponding entity form
+          // the entitiesMap.
+          docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
+          (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+          // Discard the offsChar after it was used.
+          offsets2CharsMap.remove(offsChar);
+          // Investigate next offsChar
+          if (!offsets2CharsMap.isEmpty())
+            offsChar = (Integer) offsets2CharsMap.lastKey();
+        }// End while
       }// End if
-
       // Insert tmpBuff to the location where it belongs in docContStrBuff
       docContStrBuff.insert(offset.intValue(),tmpBuff.toString());
     }// End while
@@ -639,16 +634,42 @@ extends AbstractLanguageResource implements Document {
   private String writeStartTag(Annotation annot){
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
-    strBuff.append("<"+annot.getType()+
+    strBuff.append("<"+annot.getType()+" gateId=\"" +annot.getId()+"\""+
                     writeFeatures(annot.getFeatures())+" >");
     return strBuff.toString();
   }// writeStartTag()
+
+  /** This method takes aScanString and searches for those chars from
+    * entitiesMap that appear in the string. A tree map(offset2Char) is filled
+    * using as key the offsets where those Chars appear and the Char.
+    * If one of the params is null the method simply returns.
+    */
+  private void buildEntityMapFromString(String aScanString, TreeMap aMapToFill){
+    if (aScanString == null || aMapToFill == null) return;
+    if (entitiesMap == null || entitiesMap.isEmpty()){
+      Err.prln("WARNING: Entities map was not initialised !");
+      return;
+    }// End if
+    // Fill the Map with the offsets of the special chars
+    Iterator entitiesMapIterator = entitiesMap.keySet().iterator();
+    while(entitiesMapIterator.hasNext()){
+      Character c = (Character) entitiesMapIterator.next();
+      int fromIndex = 0;
+      while (-1 != fromIndex){
+        fromIndex = aScanString.indexOf(c.charValue(),fromIndex);
+        if (-1 != fromIndex){
+          aMapToFill.put(new Integer(fromIndex),c);
+          fromIndex ++;
+        }// End if
+      }// End while
+    }// End while
+  }//buildEntityMapFromString();
 
   /** Returns a string representing an empty tag based on the input annot*/
   private String writeEmptyTag(Annotation annot){
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
-    strBuff.append("<"+annot.getType()+
+    strBuff.append("<"+annot.getType()+" gateId=\"" +annot.getId()+"\""+
                     writeFeatures(annot.getFeatures())+" />");
     return strBuff.toString();
   }// writeEmptyTag()
@@ -674,16 +695,41 @@ extends AbstractLanguageResource implements Document {
     while (it.hasNext()){
       Object key = it.next();
       Object value = feat.get(key);
-      if((String.class.isAssignableFrom(key.getClass()) ||
-          Number.class.isAssignableFrom(key.getClass()))
-          &&
-          (String.class.isAssignableFrom(value.getClass()) ||
-           Number.class.isAssignableFrom(value.getClass()))
+      // Eliminate a feature inserted at reading time and which help to
+      // take some decissions at saving time
+      if ("isEmptyAndSpan".equals(key.toString()))
+        continue;
+      if( !(String.class.isAssignableFrom(key.getClass()) ||
+            Number.class.isAssignableFrom(key.getClass()))){
 
-        ) strBuff.append(" " + key + "=\"" + value + "\"");
-      else
-        Out.println("Warning: Some features were lost"+
-                    " (they didn't came from String or Number)");
+          Out.prln("Warning:Found a feature NAME("+key+") that doesn't came"+
+                           " from String or Number.(feature discarded)");
+          continue;
+      }// End if
+      if ( !(String.class.isAssignableFrom(value.getClass()) ||
+             Number.class.isAssignableFrom(value.getClass()) ||
+             java.util.Collection.class.isAssignableFrom(value.getClass()))){
+
+          Out.prln("Warning:Found a feature VALUE("+value+") that doesn't came"+
+                     " from String, Number or Collection.(feature discarded)");
+          continue;
+      }// End if
+      strBuff.append(" " + key + "=\"");
+      if (java.util.Collection.class.isAssignableFrom(value.getClass())){
+        Iterator valueIter = ((Collection)value).iterator();
+        while(valueIter.hasNext()){
+          Object item = valueIter.next();
+          if (!(String.class.isAssignableFrom(item.getClass()) ||
+                Number.class.isAssignableFrom(item.getClass())))
+                continue;
+          strBuff.append(item +";");
+        }// End while
+        if (strBuff.charAt(strBuff.length()-1) == ';')
+          strBuff.deleteCharAt(strBuff.length()-1);
+      }else{
+        strBuff.append(value);
+      }// End if
+      strBuff.append("\"");
     }// End while
     return strBuff.toString();
   }// writeFeatures()
@@ -991,6 +1037,10 @@ extends AbstractLanguageResource implements Document {
     */
   private final int DESC = -3;
 
+  /** A map initialized in init() containing entities that needs to be
+    * replaced in strings
+    */
+  private Map entitiesMap = null;
   /** The range that the content comes from at the source URL
     * (or null if none).
     */
