@@ -17,15 +17,25 @@ package gate.gui;
 import javax.swing.*;
 import java.awt.event.*;
 
+import gate.*;
+import gate.creole.*;
+
 class ApplicationHandle extends ResourceHandle {
 
-  public ApplicationHandle(String applicationName, ProjectData project) {
-    super(applicationName, project);
+  public ApplicationHandle(SerialController controller, ProjectData project) {
+    super(controller, project);
     setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/application.gif")));
     popup = new JPopupMenu();
     popup.add(new DesignApplicationAction());
     popup.add(new RunApplicationAction());
+
+    largeView = super.getLargeView();
+    if(largeView instanceof JTabbedPane){
+      JComponent comp = new ApplicationViewer((SerialController)resource);
+      largeView.add(comp, "Design");
+      ((JTabbedPane)largeView).setSelectedComponent(comp);
+    }
   }
 
 

@@ -19,6 +19,7 @@ import java.util.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.*;
+import javax.swing.*;
 
 import gnu.getopt.*;
 
@@ -48,15 +49,6 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
-    Gate.init();
-    //find out the version number
-    String version = "Gate ";
-    try{
-      BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(
-                                Files.getGateResourceAsStream("version.txt")));
-      version += reader.readLine();
-    }catch(IOException ioe){}
     // process command-line options
     processArgs(args);
 
@@ -66,9 +58,25 @@ public class Main {
       batchProcess();
     }
     else {
+      MainFrame frame = new MainFrame();
+      long startTime = System.currentTimeMillis();
+      Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
+      //Splash splash = new Splash(new JLabel("sdzgsdrgs"));
+      splash.show();
+
+      Gate.init();
+      //find out the version number
+      String version = "Gate ";
+      try{
+        BufferedReader reader = new BufferedReader(
+                                  new InputStreamReader(
+                                  Files.getGateResourceAsStream("version.txt")));
+        version += reader.readLine();
+      }catch(IOException ioe){}
+
       if(DEBUG) Out.prln("constructing GUI");
       // run the GUI
-      MainFrame frame = new MainFrame();
+
       frame.setTitle(version);
       //Validate frames that have preset sizes
       frame.validate();
@@ -84,6 +92,16 @@ public class Main {
       frame.setLocation((screenSize.width - frameSize.width) / 2,
                         (screenSize.height - frameSize.height) / 2);
       frame.setVisible(true);
+
+      //wait for 1 sec
+      long timeNow = System.currentTimeMillis();
+      while(timeNow - startTime < 3000){
+        try{
+          Thread.sleep(150);
+          timeNow = System.currentTimeMillis();
+        }catch(InterruptedException ie){}
+      }
+      splash.hide();
     }
 
     // shut down with normal exit status

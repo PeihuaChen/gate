@@ -61,6 +61,7 @@ public class AnnotationEditor extends AbstractVisualResource{
   DefaultTreeModel stylesTreeModel;
 
   TextAttributesChooser styleChooser;
+  AnnotationEditDialog annotationEditDialog;
 
   Box progressBox;
   JProgressBar progressBar;
@@ -140,6 +141,17 @@ public class AnnotationEditor extends AbstractVisualResource{
       frame.pack();
       frame.setVisible(true);
       editor.setDocument(doc);
+
+      //get the annotation schemas
+      params =  Factory.newFeatureMap();
+      params.put("xmlFileUrl", new java.net.URL("file:///Z:/gate2/src/gate/resources/creole/schema/PosSchema.xml"));
+
+      AnnotationSchema annotSchema = (AnnotationSchema)
+         Factory.createResource("gate.creole.AnnotationSchema", params);
+      Set annotationSchemas = new HashSet();
+      annotationSchemas.add(annotSchema);
+      editor.setAnnotationSchemas(annotationSchemas);
+
     }catch(Exception e){
       e.printStackTrace(System.err);
     }
@@ -280,7 +292,29 @@ public class AnnotationEditor extends AbstractVisualResource{
         }
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
           //double left click -> edit the annotation
-          System.out.println("Edit");
+          Annotation ann = (Annotation)annotationsTable.getModel().
+                                                        getValueAt(row, -1);
+          //find an appropiate schema
+          if(annotationSchemas != null && !annotationSchemas.isEmpty()){
+            Iterator schemasIter = annotationSchemas.iterator();
+            boolean done = false;
+            while(!done && schemasIter.hasNext()){
+              AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+              if(schema.getAnnotationName().equalsIgnoreCase(ann.getType())){
+                FeatureMap features = ann.getFeatures();
+                annotationEditDialog.setLocationRelativeTo(annotationsTable);
+                FeatureMap newFeatures = annotationEditDialog.show(features,
+                                                                   schema);
+                if(newFeatures != null){
+                  features.clear();
+                  features.putAll(newFeatures);
+                  ((AbstractTableModel)annotationsTable.getModel()).
+                                        fireTableRowsUpdated(row, row);
+                }
+                done = true;
+              }
+            }
+          }
         }else if(SwingUtilities.isRightMouseButton(e)){
           //right click
         }
@@ -291,8 +325,7 @@ public class AnnotationEditor extends AbstractVisualResource{
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)){
           int position = textPane.viewToModel(e.getPoint());
-          String selectedText = textPane.getSelectedText();
-          if(selectedText == null){
+          if(textPane.getSelectionStart() ==  textPane.getSelectionEnd()){
             //no selection -> select an annotation
             JPopupMenu popup = new JPopupMenu("Select:");
             //find annotations at this position
@@ -305,7 +338,7 @@ public class AnnotationEditor extends AbstractVisualResource{
               popup.add(menu);
               while(annIter.hasNext()){
                 Annotation ann = (Annotation)annIter.next();
-                JMenuItem item = new AnnotationPopupItem(ann, "<Default>");
+                JMenuItem item = new SelectAnnotationPopupItem(ann, "<Default>");
                 menu.add(item);
               }
             }
@@ -322,7 +355,7 @@ public class AnnotationEditor extends AbstractVisualResource{
                   popup.add(menu);
                   while(annIter.hasNext()){
                     Annotation ann = (Annotation)annIter.next();
-                    JMenuItem item = new AnnotationPopupItem(ann, set.getName());
+                    JMenuItem item = new SelectAnnotationPopupItem(ann, set.getName());
                     menu.add(item);
                   }
                 }
@@ -331,8 +364,47 @@ public class AnnotationEditor extends AbstractVisualResource{
             popup.show(textPane, e.getPoint().x, e.getPoint().y);
           }else{
             //there is selected text -> create a new annotation
-            startNewAnnotation(textPane.getSelectionStart(),
-                               textPane.getSelectionEnd());
+            int start = textPane.getSelectionStart();
+            int end = textPane.getSelectionEnd();
+            if(annotationSchemas != null &&
+               !annotationSchemas.isEmpty()){
+              JPopupMenu popup = new JPopupMenu();
+              //Add to the default AnnotationSet
+              JMenu menu = new JMenu("Add to <Default>");
+
+              Iterator schemasIter = annotationSchemas.iterator();
+              while(schemasIter.hasNext()){
+                AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+                menu.add(new NewAnnotationPopupItem(start, end, schema,
+                         document.getAnnotations()));
+              }
+              popup.add(menu);
+
+              //Add to a named AnnotationSet
+              Iterator asIter = document.getNamedAnnotationSets().values().iterator();
+              while(asIter.hasNext()){
+                AnnotationSet as = (AnnotationSet)asIter.next();
+                menu = new JMenu("Add to " + as.getName());
+                schemasIter = annotationSchemas.iterator();
+                while(schemasIter.hasNext()){
+                  AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+                  menu.add(new NewAnnotationPopupItem(start, end, schema, as));
+                }
+                popup.add(menu);
+              }
+
+              //Add to a new AnnotationSet
+              menu = new JMenu("Add to new annotation set");
+              schemasIter = annotationSchemas.iterator();
+              while(schemasIter.hasNext()){
+                AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+                menu.add(new NewAnnotationPopupItem(start, end, schema, null));
+              }
+              popup.add(menu);
+
+              //show the popup
+              popup.show(textPane, e.getPoint().x, e.getPoint().y);
+            }
           }
         }
       }
@@ -371,7 +443,8 @@ public class AnnotationEditor extends AbstractVisualResource{
 
     //LEFT SPLIT
     textPane = new JTextPane();
-    textPane.setEditable(false);
+//    textPane.setEditable(false);
+    textPane.setEnabled(true);
     textPane.setEditorKit(new CustomStyledEditorKit());
     Style defaultStyle = textPane.getStyle("default");
     StyleConstants.setBackground(defaultStyle, Color.white);
@@ -458,6 +531,7 @@ public class AnnotationEditor extends AbstractVisualResource{
     //Extra Stuff
     styleChooser = new TextAttributesChooser();
     styleChooser.setModal(true);
+    annotationEditDialog = new AnnotationEditDialog();
 
     progressBox = new Box(BoxLayout.X_AXIS);
     progressBox.add(Box.createHorizontalStrut(5));
@@ -629,11 +703,13 @@ System.out.println("Annotation added!");
                                                                    false);
       setNode.add(typeNode);
     }
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        stylesTreeModel.reload();
+      }
+    });
   }
 
-  protected void startNewAnnotation(int start, int end){
-    //if(
-  }
 
   public TypeData getTypeData(String setName, String type){
     Map setMap = (Map)typeDataMap.get(setName);
@@ -867,6 +943,9 @@ System.out.println("Annotation added!");
       synchronized(data){
         ann = (Annotation)data.get(row);
         switch(column){
+          case -1:{//The actual annotation
+            return ann;
+          }
           case 0:{//Type
             return ann.getType();
           }
@@ -1381,8 +1460,8 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
     }
   }
 
-  protected class AnnotationPopupItem extends JMenuItem{
-    public AnnotationPopupItem(Annotation ann, String setName){
+  protected class SelectAnnotationPopupItem extends JMenuItem{
+    public SelectAnnotationPopupItem(Annotation ann, String setName){
       super(ann.getType());
       setToolTipText("<html><b>Features:</b><br>" +
                      ann.getFeatures().toString() + "</html>");
@@ -1423,6 +1502,54 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
     String set;
     Annotation annotation;
   }
+
+  protected class NewAnnotationPopupItem extends JMenuItem{
+    public NewAnnotationPopupItem(int aStart, int anEnd,
+                                  AnnotationSchema aSchema,
+                                  AnnotationSet aTargetAS){
+      super(aSchema.getAnnotationName());
+      this.start = aStart;
+      this.end = anEnd;
+      this.schema = aSchema;
+      this.targetAS = aTargetAS;
+
+      this.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          String newASName = "foo";
+          if(targetAS == null){
+            Object answer = JOptionPane.showInputDialog(
+                              textPane,
+                              "Please provide a name for the new annotation set:",
+                              "Gate",
+                              JOptionPane.QUESTION_MESSAGE);
+            if(answer == null) return;
+            newASName = (String)answer;
+          }
+          FeatureMap features = annotationEditDialog.show(schema);
+          if(features != null){
+            if(targetAS == null){
+              targetAS = document.getAnnotations(newASName);
+            }
+            try{
+              targetAS.add(new Long(start), new Long(end),
+                           schema.getAnnotationName(), features);
+            }catch(InvalidOffsetException ioe){
+              JOptionPane.showMessageDialog(textPane,
+                                            "Invalid input!\n" + ioe.toString(),
+                                            "Gate", JOptionPane.ERROR_MESSAGE);
+            }
+          }
+        }
+      });
+    }
+
+    int start;
+    int end;
+    AnnotationSchema schema;
+    AnnotationSet targetAS;
+  }
+
+
   public class CustomStyledEditorKit extends StyledEditorKit{
     private final ViewFactory defaultFactory = new CustomStyledViewFactory();
     public ViewFactory getViewFactory() {

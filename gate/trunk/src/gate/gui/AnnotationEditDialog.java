@@ -67,7 +67,7 @@ public class AnnotationEditDialog extends JDialog {
     * @param anAnnotationSchema object from which this dialog configures
     * @param aModal (wheter or not this dialog is modal)
     */
-  public AnnotationEditDialog( Frame aFrame,boolean aModal) {
+  public AnnotationEditDialog( Frame aFrame, boolean aModal) {
 
     super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
@@ -75,6 +75,10 @@ public class AnnotationEditDialog extends JDialog {
     buildGuiComponents();
     initListeners();
   }//AnnotationEditDialog
+
+  public AnnotationEditDialog() {
+    this(null, true);
+  }
 
   /** Init local data*/
   protected void initLocalData(){
