@@ -73,7 +73,6 @@ public class MainFrame extends JFrame
   //new version
   JPopupMenu appsPopup;
   JPopupMenu lrsPopup;
-  //add
   JPopupMenu prsPopup;
   JPopupMenu dssPopup;
 
