@@ -116,6 +116,20 @@ public class CorpusBenchmarkTool {
           annotTypes.add("GPE");
           annotTypes.add("Facility");
         }
+        String features = this.configs.getProperty("annotFeatures");
+        HashSet result = new HashSet();
+        if (features != null && !features.equals("")) {
+          Out.pr("Using annotation features from the properties file. \n");
+          java.util.StringTokenizer tok =
+              new java.util.StringTokenizer(features, ";");
+          String current;
+          while(tok.hasMoreTokens()) {
+            current = tok.nextToken();
+            result.add(current);
+          } // while
+        }
+        diffFeaturesSet = result;
+        Out.prln("Features: "+diffFeaturesSet+" <P>\n");
 
       } catch (IOException ex) {
         //just ignore the file and go on with the defaults
@@ -183,9 +197,10 @@ public class CorpusBenchmarkTool {
   public static void main(String[] args) throws GateException {
     Out.prln("<HTML>");
     Out.prln("<HEAD>");
-    Out.prln("<TITLE> Corpus benchmark tool: ran with args " +
-            args.toString() + " on " +
-            new Date() + "</TITLE> </HEAD>");
+    Out.prln("<TITLE> Corpus benchmark tool: ran with args ");
+    for(int argC=0; argC < args.length; ++argC)
+      Out.pr(args[argC]+" ");
+    Out.pr(" on " + new Date() + "</TITLE> </HEAD>");
     Out.prln("<BODY>");
     Out.prln("Please wait while GATE tools are initialised. <P>");
     // initialise GATE
@@ -250,7 +265,11 @@ public class CorpusBenchmarkTool {
 
     Out.prln("<BR>Overall average precision: " + corpusTool.getPrecisionAverage());
     Out.prln("<BR>Overall average recall: " + corpusTool.getRecallAverage());
-    Out.prln("<BR>Overall word count: " + corpusWordCount);
+    if(corpusWordCount == 0)
+      Out.prln("<BR>No Token annotations to count words in the corpus.");
+    else
+      Out.prln("<BR>Overall word count: " + corpusWordCount);
+
 
     if(hasProcessed) {
       Out.prln("<P>Old Processed: ");
@@ -290,6 +309,14 @@ public class CorpusBenchmarkTool {
   public boolean getMoreInfo() {
     return isMoreInfoMode;
   } // getMoreInfo
+
+  public void setDiffFeaturesList(Set features) {
+    diffFeaturesSet = features;
+  } // setDiffFeaturesList
+
+  public Set getDiffFeaturesList() {
+    return diffFeaturesSet;
+  } // getDiffFeaturesList
 
   public void setMarkedStored(boolean mode) {
     isMarkedStored = mode;
@@ -894,7 +921,10 @@ ex.printStackTrace();
 
 
       int wordCount = countWords(cleanDoc);
-      Out.prln("<BR>Word count: " + wordCount);
+      if(wordCount == 0)
+        Out.prln("<BR>No Token annotations to count words in the document.");
+      else
+        Out.prln("<BR>Word count: " + wordCount);
       corpusWordCount += wordCount;
 
       if(!isMarkedClean)
@@ -1597,7 +1627,8 @@ ex.printStackTrace();
     annotDiff.setResponseDocument(respDoc);
     annotDiff.setKeyAnnotationSetName(annotSetName);
     annotDiff.setResponseAnnotationSetName(outputSetName);
-    annotDiff.setKeyFeatureNamesSet(new HashSet());
+    // set feature names set for annotation diff
+    annotDiff.setKeyFeatureNamesSet(diffFeaturesSet);
     annotDiff.setTextMode(new Boolean(true));
     annotDiff.init();
 
@@ -1760,6 +1791,11 @@ ex.printStackTrace();
    */
   private boolean isMoreInfoMode = false;
 
+  /**
+   * The list of features used in the AnnotationDiff separated by comma
+   * Example: "class;inst"
+   */
+  private Set diffFeaturesSet;
 
   /**
    * If true, the corpus tool will evaluate stored against the human-marked
