@@ -26,24 +26,15 @@ import gate.util.IdBearer;
   * the situation where each annotation has to point to its parent graph in
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.
+  * 
+  * It inherits from SimpleAnnotation in order to allow users to add events
+  * and more methods for comparing annotations
   *
   * The event code is needed so a persistent annotation set can listen to
   * its annotations and update correctly the database
   */
 public interface Annotation
-extends FeatureBearer, IdBearer, Comparable, Serializable {
-
-  /** The type of the annotation (corresponds to TIPSTER "name"). */
-  public String getType();
-
-  /** The start node. */
-  public Node getStartNode();
-
-  /** The end node. */
-  public Node getEndNode();
-
-  /** Ordering */
-  public int compareTo(Object o) throws ClassCastException;
+extends SimpleAnnotation, Serializable {
 
   /** This verifies if <b>this</b> annotation is compatible with another one.
     * Compatible means that they hit the same possition and the FeatureMap of
