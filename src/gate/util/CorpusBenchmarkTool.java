@@ -43,18 +43,35 @@ public class CorpusBenchmarkTool {
       //create a default tokeniser
       Out.prln("Loading tokeniser <P>");
       FeatureMap params = Factory.newFeatureMap();
+      String rulesURL = this.configs.getProperty("tokeniserRulesURL");
+      if (rulesURL != null && !rulesURL.equals(""))
+        params.put("tokeniserRulesURL", rulesURL);
+      String grammarsURL = this.configs.getProperty("tokeniserGrammarURL");
+      if (grammarsURL != null && !grammarsURL.equals(""))
+        params.put("transducerGrammarURL", grammarsURL);
       params.put("annotationSetName", annotSetName);
       tokeniser = (DefaultTokeniser) Factory.createResource(
                       "gate.creole.tokeniser.DefaultTokeniser", params);
 
       //create a default gazetteer
       Out.prln("Loading gazetteer <P>");
+      params.clear();
+      String listsURL = this.configs.getProperty("gazetteerListsURL");
+      if (listsURL != null && !listsURL.equals(""))
+        params.put("listsURL", listsURL);
+      params.put("annotationSetName", annotSetName);
       gazetteer = (DefaultGazetteer) Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer", params);
 
       //create a splitter
       Out.prln("Loading sentence splitter <P>");
       params.clear();
+      listsURL = this.configs.getProperty("splitterGazetteerURL");
+      if (listsURL != null && !listsURL.equals(""))
+        params.put("gazetteerListsURL", listsURL);
+      grammarsURL = this.configs.getProperty("splitterGrammarURL");
+      if (grammarsURL != null && !grammarsURL.equals(""))
+        params.put("transducerURL", grammarsURL);
       params.put("inputASName", annotSetName);
       params.put("outputASName", annotSetName);
       splitter = (SentenceSplitter) Factory.createResource(
@@ -62,11 +79,26 @@ public class CorpusBenchmarkTool {
 
       //create a tagger
       Out.prln("Loading POS tagger <P>");
+      params.clear();
+      String lexiconURL = this.configs.getProperty("taggerLexiconURL");
+      if (lexiconURL != null && !lexiconURL.equals(""))
+        params.put("lexiconURL", lexiconURL);
+      rulesURL = this.configs.getProperty("taggerRulesURL");
+      if (rulesURL != null && !rulesURL.equals(""))
+        params.put("rulesURL", rulesURL);
+      params.put("inputASName", annotSetName);
+      params.put("outputASName", annotSetName);
       tagger = (POSTagger) Factory.createResource(
                       "gate.creole.POSTagger", params);
 
       //create a grammar
       Out.prln("Loading grammars for transducer <P>");
+      params.clear();
+      String grammarURL = this.configs.getProperty("grammarURL");
+      if (grammarURL != null && !grammarURL.equals(""))
+        params.put("grammarURL", grammarURL);
+      params.put("inputASName", annotSetName);
+      params.put("outputASName", annotSetName);
       transducer = (ANNIETransducer) Factory.createResource(
                       "gate.creole.ANNIETransducer", params);
 
@@ -182,6 +214,21 @@ public class CorpusBenchmarkTool {
     File dir = new File(dirName);
     if (!dir.isDirectory())
       throw new GateException(usage);
+
+    File propFile = new File("corpus_tool.properties");
+    Out.prln(propFile.getAbsolutePath());
+    if (propFile.exists()) {
+      try {
+        InputStream inputStream = new FileInputStream(propFile);
+        corpusTool.configs.load(inputStream);
+      } catch (IOException ex) {
+        //just ignore the file and go on with the defaults
+        corpusTool.configs = new Properties();
+      }
+      corpusTool.threshold = (new Double(
+                  corpusTool.configs.getProperty("threshold"))).doubleValue();
+    } else
+      corpusTool.configs = new Properties();
 
     corpusTool.init();
 
@@ -955,6 +1002,7 @@ public class CorpusBenchmarkTool {
   private String annotSetName = "Key";
 
   private double threshold = 0.5;
+  private Properties configs = new Properties();
 
   /** String to print when wrong command-line args */
   private static String usage =
