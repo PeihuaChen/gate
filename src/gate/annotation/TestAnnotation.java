@@ -282,7 +282,12 @@ public class TestAnnotation extends TestCase
 
     assertEquals(null, basicAS.get(new Integer(0)));
     basicAS.remove(basicAS.get(new Integer(8)));
+    assertEquals(9, basicAS.size());
 
+    basicAS.removeAll(basicAS);
+    assertEquals(null, basicAS.get());
+    assertEquals(null, basicAS.get("T1")); 
+    assertEquals(null, basicAS.get(new Integer(0)));
   } // testRemove()
 
   /** Test iterator remove */
@@ -293,10 +298,9 @@ public class TestAnnotation extends TestCase
     assertEquals(5, asBuf.size());
 
     // remove annotation with id 0; this is returned last by the
-    // iterator, hence the integer control in the loop
+    // iterator
     Iterator iter = basicAS.iterator();
-    int i = 0;
-    while(iter.hasNext() && i < 11)
+    while(iter.hasNext())
       iter.next();
     iter.remove();
 
@@ -353,7 +357,7 @@ public class TestAnnotation extends TestCase
 
     SortedSet sortedAnnots = new TreeSet(basicAS);
     annotArray = (Annotation[]) sortedAnnots.toArray(new Annotation[0]);
-    for(int i = 0, j = 10; i<11; i++, j--)
+    for(int i = 0; i<11; i++)
       assert( annotArray[i].getId().equals(new Integer(i)) );
 
     Annotation a1 = basicAS.get(new Integer(3));
