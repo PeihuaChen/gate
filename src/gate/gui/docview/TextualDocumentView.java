@@ -65,20 +65,32 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
 
   /**
-   * Ads several highlights in one go. This method does not assume that it was 
-   * called from the UI thread.
-   * @param annotations
-   * @param set
-   * @param colour
-   * @return
+   * Ads several highlights in one go. 
+   * This method should <b>not</b> be called from within the UI thread.
+   * @param annotations the collection of annotations for which highlights 
+   * are to be added.
+   * @param set the annotation set all the annotations belong to.
+   * @param colour the colour for the highlights.
+   * @return the list of tags for the added highlights. The order of the 
+   * elements corresponds to the order defined by the iterator of the 
+   * collection of annotations provided. 
    */
   public List addHighlights(Collection annotations, 
           AnnotationSet set, Color colour){
+    //hide the text pane to speed up rendering.
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
+        textView.setVisible(false);
         scroller.getViewport().setView(new JLabel("Updating"));
       }
     });
+    //wait for the textual view to be hidden
+    while(textView.isVisible()) 
+      try{
+        Thread.sleep(30);
+      }catch(InterruptedException ie){
+        //ignore
+      }
     
     Highlighter highlighter = textView.getHighlighter();
     
@@ -101,18 +113,32 @@ public class TextualDocumentView extends AbstractDocumentView {
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         scroller.getViewport().setView(textView);
+        textView.setVisible(true);
       }
     });
     return tagsList;
   }
   
-  
+  /**
+   * Removes several highlights in one go. 
+   * This method should <b>not</b> be called from within the UI thread.
+   * @param tags the tags for the highlights to be removed
+   */
   public void removeHighlights(Collection tags){
+    //hide the text pane to speed up rendering.
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
+        textView.setVisible(false);
         scroller.getViewport().setView(new JLabel("Updating"));
       }
     });
+    //wait for the textual view to be hidden.
+    while(textView.isVisible()) 
+      try{
+        Thread.sleep(30);
+      }catch(InterruptedException ie){
+        //ignore
+      }
     
     Highlighter highlighter = textView.getHighlighter();
     
@@ -124,6 +150,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         scroller.getViewport().setView(textView);
+        textView.setVisible(true);
       }
     });
   }
@@ -136,7 +163,6 @@ public class TextualDocumentView extends AbstractDocumentView {
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
-System.out.println("init GUI");    
     textView = new JEditorPane();
     textView.setContentType("text/plain");
     textView.setEditorKit(new StyledEditorKit());

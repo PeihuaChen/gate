@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.*;
 import javax.swing.JScrollPane;
@@ -137,10 +138,35 @@ public class AnnotationSetsView extends AbstractDocumentView
   public Component getGUI(){
     return mainPanel;
   }
-  protected void guiShown(){
-    tableModel.fireTableRowsUpdated(0, tableModel.getRowCount() -1);
-  }
 
+  protected Color getColor(String annotationType){
+    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+    int rgba = prefRoot.getInt(annotationType, -1);
+    Color colour;
+    if(rgba == -1){
+      //initialise and save
+      float components[] = colourGenerator.getNextColor().getComponents(null);
+      colour = new Color(components[0],
+                         components[1],
+                         components[2],
+                         0.5f);
+      int rgb = colour.getRGB();
+      int alpha = colour.getAlpha();
+      rgba = rgb | (alpha << 24);
+      prefRoot.putInt(annotationType, rgba);
+    }else{
+      colour = new Color(rgba, true);
+    }
+    return colour;
+  }
+  
+  protected void saveColor(String annotationType, Color colour){
+    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+    int rgb = colour.getRGB();
+    int alpha = colour.getAlpha();
+    int rgba = rgb | (alpha << 24);
+    prefRoot.putInt(annotationType, rgba);
+  }
   
   /**
    * This method will be called whenever the view becomes active. Implementers 
@@ -177,6 +203,57 @@ public class AnnotationSetsView extends AbstractDocumentView
 //        tableModel.fireTableRowsUpdated(0, 0);
       }
     });
+    
+    mainTable.addMouseListener(new MouseAdapter(){
+      public void mouseClicked(MouseEvent evt){
+        int row =  mainTable.rowAtPoint(evt.getPoint());
+        int column = mainTable.columnAtPoint(evt.getPoint());
+        if(row >= 0 && column == NAME_COL){
+          Object handler = tableRows.get(row);
+          if(handler instanceof TypeHandler){
+            TypeHandler tHandler = (TypeHandler)handler;
+            if(evt.getClickCount() >= 2){
+              //double click
+              tHandler.changeColourAction.actionPerformed(null);
+            }
+          }
+        }
+      }
+      public void mousePressed(MouseEvent evt){
+        int row =  mainTable.rowAtPoint(evt.getPoint());
+        int column = mainTable.columnAtPoint(evt.getPoint());
+        if(row >= 0 && column == NAME_COL){
+          Object handler = tableRows.get(row);
+          if(handler instanceof TypeHandler){
+            TypeHandler tHandler = (TypeHandler)handler;
+            if(evt.isPopupTrigger()){
+              //show popup
+              JPopupMenu popup = new JPopupMenu();
+              popup.add(tHandler.changeColourAction);
+              popup.show(mainTable, evt.getX(), evt.getY());
+            }
+          }
+        }
+      }
+      
+      public void mouseReleased(MouseEvent evt){
+        int row =  mainTable.rowAtPoint(evt.getPoint());
+        int column = mainTable.columnAtPoint(evt.getPoint());
+        if(row >= 0 && column == NAME_COL){
+          Object handler = tableRows.get(row);
+          if(handler instanceof TypeHandler){
+            TypeHandler tHandler = (TypeHandler)handler;
+            if(evt.isPopupTrigger()){
+              //show popup
+              JPopupMenu popup = new JPopupMenu();
+              popup.add(tHandler.changeColourAction);
+              popup.show(mainTable, evt.getX(), evt.getY());
+            }
+          }
+        }
+      }
+    });
+    
     textMouseListener = new TextMouseListener();
     textCaretListener = new TextCaretListener();
     textAncestorListener = new AncestorListener(){
@@ -731,12 +808,42 @@ public class AnnotationSetsView extends AbstractDocumentView
     TypeHandler (SetHandler setHandler, String name){
       this.setHandler = setHandler;
       this.name = name;
-      float components[] = colourGenerator.getNextColor().getComponents(null);
-      colour = new Color(components[0],
-                         components[1],
-                         components[2],
-                         0.5f);
+      colour = getColor(name);
       hghltTagsForAnn = new HashMap();
+      changeColourAction = new ChangeColourAction();
+    }
+    
+    public void setColour(Color colour){
+      if(this.colour.equals(colour)) return;
+      this.colour = colour;
+      saveColor(name, colour);
+      if(isSelected()){
+        //redraw the highlights
+        Runnable runnable = new Runnable(){
+          public void run(){
+            //hide highlights
+            textView.removeHighlights(hghltTagsForAnn.values());
+            hghltTagsForAnn.clear();
+            //show highlights
+            List annots = new ArrayList(setHandler.set.get(name));
+            List tags = textView.addHighlights(annots, setHandler.set, 
+                    TypeHandler.this.colour);
+            for(int i = 0; i < annots.size(); i++){
+              hghltTagsForAnn.put(annots.get(i), tags.get(i));
+            }
+          }
+        };
+        Thread thread = new Thread(runnable);
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+      }
+      //update the table display
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          int row = tableRows.indexOf(this);
+          if(row >= 0) tableModel.fireTableRowsUpdated(row, row);
+        }
+      });
     }
     
     public void setSelected(boolean selected){
@@ -812,6 +919,24 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
     }
     
+    protected class ChangeColourAction extends AbstractAction{
+      public ChangeColourAction(){
+        super("Change colour");
+      }
+      
+      public void actionPerformed(ActionEvent evt){
+        Color col = JColorChooser.showDialog(mainTable, 
+                "Select colour for \"" + name + "\"",
+                colour);
+        if(col != null){
+          Color colAlpha = new Color(col.getRed(), col.getGreen(),
+                  col.getBlue(), 128);
+          setColour(colAlpha);
+        }
+      }
+    }
+    
+    ChangeColourAction changeColourAction;
     boolean selected;
     Map hghltTagsForAnn;
     String name;
@@ -1097,8 +1222,11 @@ public class AnnotationSetsView extends AbstractDocumentView
         if(handler instanceof TypeHandler){
           TypeHandler tHandler = (TypeHandler)handler;
           AnnotationSet set = tHandler.setHandler.set;
-          List toDelete = new ArrayList(set.get(tHandler.name));
-          set.removeAll(toDelete);
+          AnnotationSet toDeleteAS = set.get(tHandler.name);
+          if(toDeleteAS != null){
+            List toDelete = new ArrayList(toDeleteAS);
+            set.removeAll(toDelete);
+          }
         }else if(handler instanceof SetHandler){
           SetHandler sHandler = (SetHandler)handler;
           if(sHandler.set == document.getAnnotations()){

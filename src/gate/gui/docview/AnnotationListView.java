@@ -87,13 +87,12 @@ public class AnnotationListView extends AbstractDocumentView
     return mainPanel;
   }
   protected void initListeners(){
-    table.addComponentListener(new ComponentAdapter(){
-      public void componentResized(ComponentEvent e){
-        //trigger a resize for the columns
-        table.adjustSizes();
-//        tableModel.fireTableDataChanged();
-      }
-    });
+//    table.addComponentListener(new ComponentAdapter(){
+//      public void componentShown(ComponentEvent e){
+//        //trigger a resize for the columns
+//        table.adjustSizes();
+//      }
+//    });
 
     tableModel.addTableModelListener(new TableModelListener(){
       public void tableChanged(TableModelEvent e){
