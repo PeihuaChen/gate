@@ -634,6 +634,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   public void cleanup(){
     Gate.getCreoleRegister().removeCreoleListener(this);
+    controller.removeControllerListener(this);
     controller = null;
     progressListeners.clear();
     statusListeners.clear();
