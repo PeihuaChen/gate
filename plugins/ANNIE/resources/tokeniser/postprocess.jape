@@ -3,14 +3,14 @@
 
 
 Phase:postprocess
-Input: Token
-Options: control = first
+Input: Token SpaceToken
+Options: control = appelt
 
 //adjusts the tokeniser output
 
 Rule: simpleJoin
  (
-  //'30s, ..., 'Cause, 'em, 'N, 'S, 's, 'T, 'd, , 'll, 'm, 're, 's, 'til, 've  
+  //'30s, ..., 'Cause, 'em, 'N, 'S, 's, 'T, 'd, , 'll, 'm, 're, 's, 'til, 've
   (
    {Token.string=="'"}
    ({Token.string=="30s"}|{Token.string=="40s"}|{Token.string=="50s"}|{Token.string=="60s"}
@@ -32,7 +32,7 @@ Rule: simpleJoin
   |
   //ma'am
   (({Token.string=="ma"}|{Token.string=="Ma"}){Token.string=="'"} {Token.string=="am"})
-  
+
  ):left
 -->
 {
@@ -46,7 +46,7 @@ Rule: simpleJoin
   Iterator tokIter = tokens.iterator();
   while(tokIter.hasNext())
     text += (String)((Annotation)tokIter.next()).getFeatures().get("string");
-  
+
   gate.FeatureMap features = Factory.newFeatureMap();
   features.put("kind", "word");
   features.put("string", text);
@@ -74,7 +74,7 @@ Rule: VBneg
     Long ofs2 = ((gate.AnnotationSet)bindings.get("two")).lastNode().getOffset();
     try{
       gate.FeatureMap features;
-      if(!ofs0.equals(ofs1)){	
+      if(!ofs0.equals(ofs1)){
         features = Factory.newFeatureMap();
         features.put("kind", "word");
         String text = firstTokenText.substring(0, firstTokenText.length() - 1);
@@ -83,7 +83,7 @@ Rule: VBneg
         features.put("orth", firstToken.getFeatures().get("orth"));
         annotations.add(ofs0, ofs1, "Token", features);
       }
-      
+
       features = Factory.newFeatureMap();
       features.put("kind", "word");
       features.put("string", "n't");
@@ -94,4 +94,33 @@ Rule: VBneg
       e.printStackTrace();
     }
   }//if first token ends with "n"
+}
+
+// CR+LF | CR |LF+CR -> One single SpaceToken
+Rule: NewLine
+ (
+  ({SpaceToken.string=="\n"}) |
+  ({SpaceToken.string=="\r"}) |
+  ({SpaceToken.string=="\n"}{SpaceToken.string=="\r"}) |
+  ({SpaceToken.string=="\r"}{SpaceToken.string=="\n"})
+  ):left
+-->
+{
+  gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+  annotations.removeAll(toRemove);
+  //get the tokens
+  java.util.ArrayList tokens = new java.util.ArrayList(toRemove);
+  //define a comparator for annotations by start offset
+  Collections.sort(tokens, new gate.util.OffsetComparator());
+  String text = "";
+  Iterator tokIter = tokens.iterator();
+  while(tokIter.hasNext())
+    text += (String)((Annotation)tokIter.next()).getFeatures().get("string");
+
+  gate.FeatureMap features = Factory.newFeatureMap();
+  features.put("kind", "control");
+  features.put("string", text);
+  features.put("length", Integer.toString(text.length()));
+  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "SpaceToken", features);
+  System.out.println("New spacetoken: " + text.length());
 }
