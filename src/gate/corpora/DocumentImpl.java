@@ -295,6 +295,78 @@ public class DocumentImpl implements Document, StatusReporter
    */
   public boolean isMarkupAware() { return markupAware; }
 
+  /** Returns a GateXml document
+    * @return a string representing a Gate Xml document
+    */
+  public String toXml(){
+    StringBuffer xmlContent = new StringBuffer("");
+    // Add xml header
+    xmlContent.append("<?xml version=\"1.0\"?>\n");
+
+    // Add the root element
+    xmlContent.append("<GateDocument" +
+        featuresToXml(this.getFeatures()) + ">\n");
+    // Add plain text element
+    xmlContent.append("<PlainText>");
+    xmlContent.append(this.getContent().toString());
+    xmlContent.append("</PlainText>\n");
+    // Save the AnnotationSet element
+    xmlContent.append(annotationSetToXml(this.getAnnotations()));
+    // Add the end of GateDocument
+    xmlContent.append("</GateDocument>");
+    // return the XmlGateDocument
+    return xmlContent.toString();
+  }// toXml
+
+  /** This method saves a FeatureMap as XML attributes.
+    * @ param aFeatureMap the feature map that has to be saved as XML.
+    * @ return a String like this: feat1="val1" feat2="val2" ...
+    */
+  private String featuresToXml(FeatureMap aFeatureMap){
+    StringBuffer str = new StringBuffer("");
+
+    if (aFeatureMap == null) return str.toString();
+
+    Set keySet = aFeatureMap.keySet();
+    Iterator keyIterator = keySet.iterator();
+    while(keyIterator.hasNext()){
+      Object key = keyIterator.next();
+      Object value = aFeatureMap.get(key);
+      str.append(" " + key + "=\"" + value + "\"");
+    }// end While
+
+    return str.toString();
+  }//featuresToXml
+
+  /** This method saves an AnnotationSet as XML.
+    * @param anAnnotationSet The annotation set that has to be saved as XML.
+    * @return a String like this: <AnnotationSet> <Annotation>....
+    * </AnnotationSet>
+    */
+  private String annotationSetToXml(AnnotationSet anAnnotationSet){
+    StringBuffer str = new StringBuffer("");
+
+    str.append("<AnnotationSet>\n");
+    if (anAnnotationSet == null){
+      str.append("</AnnotationSet>\n");
+      return str.toString();
+    }// End if
+
+    // Iterate through AnnotationSet and save each Annotation as XML
+    Iterator iterator = anAnnotationSet.iterator();
+    while (iterator.hasNext()){
+      Annotation annot = (Annotation) iterator.next();
+      str.append("<Annotation " + "Type=\"" + annot.getType() + "\" Start=\"" +
+      annot.getStartNode().getOffset() + "\" End=\"" +
+      annot.getEndNode().getOffset() + "\">\n");
+      str.append("<Features" + featuresToXml(annot.getFeatures()) + "/>\n");
+      str.append("</Annotation>\n");
+    }// End while
+
+    str.append("</AnnotationSet>\n");
+    return str.toString();
+  }// annotationSetToXml
+
   /** Returns a map with the named annotation sets
     */
   // This was needed by the constructor on DocumentWrapper that
