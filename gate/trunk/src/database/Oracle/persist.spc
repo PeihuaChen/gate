@@ -68,11 +68,14 @@ create or replace package persist is
 
 
   procedure create_annotation(p_doc_id           IN number,
+                              p_ann_local_id     IN number,    
                               p_as_id            IN number,
-                              p_ann_start_offset IN number,  
-                              p_ann_end_offset   IN number,                                
+                              p_node_start_lid   IN number,                                
+                              p_node_start_offset IN number,  
+                              p_node_end_lid      IN number,                                                              
+                              p_node_end_offset   IN number,                                
                               p_ann_type         IN varchar2,
-                              p_ann_id           OUT number);
+                              p_ann_global_id    OUT number);
 
 
   procedure create_corpus(p_lr_id     IN number,
