@@ -103,7 +103,16 @@ public abstract class DocumentFormat implements Resource,StatusReporter
 
     suffixes2mimeStringMap.put("sgm",mime.getType() + "/" + mime.getSubtype());
     suffixes2mimeStringMap.put("sgml",mime.getType() + "/" + mime.getSubtype());
-  }
+
+    // register RTF mime type
+    mime = new MimeType("text","rtf");
+    mime.addParameter ("ClassHandler","gate.corpora.RtfDocumentFormat");
+    // register the class with this map type
+    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+
+    suffixes2mimeStringMap.put("rtf",mime.getType() + "/" + mime.getSubtype());
+
+  }//register
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
