@@ -1758,11 +1758,27 @@ gate.corpora.DocumentImpl
     <TD>Marin</TD>
     <TD>-</TD>
     <TD>20 May 2003 Gate 2.1 build 1250</TD>
-    <TD>Documents part of database corpuse were not properly unloaded. Instead of nullifying the repsective position in the 
+    <TD>Documents part of database corpus were not properly unloaded. Instead of nullifying the repsective position in the 
     list with corpus documents, the list element was actually removed so effectively the document was removed from the in-memory
     coprus strucures. As a result the corpus will report that it contains less documents than the correct count and any PR that tries
     to process the corpus (and loads, processes and unloads documents one by one) will effectively process only half of the focuments (before
     the in-memory list was emptied)
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00092</TD>
+    <TD>Persistence - Database</TD>
+    <TD>Marin</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>20 May 2003 Gate 2.1 build 1250</TD>
+    <TD>Documents with no content were successfully stored in the database but it was impossible to read them back (In the Postgres case documents
+    were assigned incorrect content type)
     </TD>
     <TD>-</TD>
     <TD>-</TD>
