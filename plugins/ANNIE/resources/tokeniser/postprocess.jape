@@ -73,13 +73,16 @@ Rule: VBneg
     Long ofs1 = new Long(firstToken.getEndNode().getOffset().longValue() - 1);
     Long ofs2 = ((gate.AnnotationSet)bindings.get("two")).lastNode().getOffset();
     try{
-      gate.FeatureMap features = Factory.newFeatureMap();
-      features.put("kind", "word");
-      String text = firstTokenText.substring(0, firstTokenText.length() - 1);
-      features.put("string", text);
-      features.put("length", Integer.toString(text.length()));
-      features.put("orth", firstToken.getFeatures().get("orth"));
-      annotations.add(ofs0, ofs1, "Token", features);
+      gate.FeatureMap features;
+      if(!ofs1.equals(ofs2)){	
+        features = Factory.newFeatureMap();
+        features.put("kind", "word");
+        String text = firstTokenText.substring(0, firstTokenText.length() - 1);
+        features.put("string", text);
+        features.put("length", Integer.toString(text.length()));
+        features.put("orth", firstToken.getFeatures().get("orth"));
+        annotations.add(ofs0, ofs1, "Token", features);
+      }
       
       features = Factory.newFeatureMap();
       features.put("kind", "word");
