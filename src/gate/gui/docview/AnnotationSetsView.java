@@ -12,6 +12,7 @@ import java.awt.Component;
 import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -32,13 +33,16 @@ import javax.swing.text.BadLocationException;
 import gate.*;
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.event.*;
 import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
+import gate.gui.*;
 import gate.gui.MainFrame;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
+import gate.util.*;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 
@@ -57,8 +61,13 @@ public class AnnotationSetsView extends AbstractDocumentView
     setHandlers = new ArrayList();
     tableRows = new ArrayList();
     colourGenerator = new ColorGenerator();
+    actions = new ArrayList();
+    actions.add(new SavePreserveFormatAction());
   }
   
+  public List getActions() {
+    return actions;
+  }  
 
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
@@ -1098,6 +1107,83 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }
   
+  protected class SavePreserveFormatAction extends AbstractAction{
+    public SavePreserveFormatAction(){
+      super("Save preserving document format");
+    }
+    
+    public void actionPerformed(ActionEvent evt){
+      Runnable runableAction = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          File selectedFile = null;
+
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setDialogTitle("Select document to save ...");
+          fileChooser.setSelectedFiles(null);
+
+          int res = fileChooser.showDialog(owner, "Save");
+          if(res == JFileChooser.APPROVE_OPTION){
+            selectedFile = fileChooser.getSelectedFile();
+            fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+            if(selectedFile == null) return;
+            StatusListener sListener = (StatusListener)MainFrame.getListeners().
+              get("gate.event.StatusListener");
+            if (sListener != null) 
+              sListener.statusChanged("Please wait while dumping annotations"+
+              "in the original format to " + selectedFile.toString() + " ...");
+            // This method construct a set with all annotations that need to be
+            // dupmped as Xml. If the set is null then only the original markups
+            // are dumped.
+            Set annotationsToDump = new HashSet();
+            Iterator setIter = setHandlers.iterator();
+            while(setIter.hasNext()){
+              SetHandler sHandler = (SetHandler)setIter.next();
+              Iterator typeIter = sHandler.typeHandlers.iterator();
+              while(typeIter.hasNext()){
+                TypeHandler tHandler = (TypeHandler)typeIter.next();
+                if(tHandler.isSelected()){
+                  annotationsToDump.addAll(sHandler.set.get(tHandler.name));
+                }
+              }
+            }
+            
+            try{
+              // Prepare to write into the xmlFile using the original encoding
+              String encoding = ((TextualDocument)document).getEncoding();
+
+              OutputStreamWriter writer = new OutputStreamWriter(
+                                            new FileOutputStream(selectedFile),
+                                            encoding);
+
+              //determine if the features need to be saved first
+              Boolean featuresSaved =
+                  Gate.getUserConfig().getBoolean(
+                    GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
+              boolean saveFeatures = true;
+              if (featuresSaved != null)
+                saveFeatures = featuresSaved.booleanValue();
+              // Write with the toXml() method
+              writer.write(
+                document.toXml(annotationsToDump, saveFeatures));
+              writer.flush();
+              writer.close();
+            } catch (Exception ex){
+              ex.printStackTrace(Out.getPrintWriter());
+            }// End try
+            if (sListener != null)
+              sListener.statusChanged("Finished dumping into the "+
+              "file : " + selectedFile.toString());
+          }// End if
+        }// End run()
+      };// End Runnable
+      Thread thread = new Thread(runableAction, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+  
   /**
    * Used to select an annotation for editing.
    *
@@ -1290,6 +1376,8 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected MouseStoppedMovingAction mouseStoppedMovingAction;
   
   protected String lastAnnotationType = "_New_";
+  
+  protected List actions;
   
   protected ColorGenerator colourGenerator;
   private static final int NAME_COL = 1;
