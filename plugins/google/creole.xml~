@@ -11,7 +11,8 @@
       <PARAMETER NAME="query" RUNTIME="true" COMMENT="The Search Query">java.ang.String</PARAMETER>
 <PARAMETER NAME="key" RUNTIME="false" COMMENT="The registration key for Google API">java.lang.String</PARAMETER>
      <PARAMETER NAME="limit" RUNTIME="true" DEFAULT="10" COMMENT="The number of results returned">java.lang.Integer</PARAMETER> 
-      <ICON>binoculars.gif</ICON>
+      <PARAMETER NAME="source" RUNTIME="true" DEFAULT="corpus" COMMENT="The list of root urls." optional="True">gate.Corpus</PARAMETER>
+     <ICON>binoculars.gif</ICON>
     </RESOURCE>
    </CREOLE>
 </CREOLE-DIRECTORY>
