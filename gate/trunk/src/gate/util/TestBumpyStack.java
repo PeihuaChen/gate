@@ -41,7 +41,7 @@ public class TestBumpyStack extends TestCase
 
   /** Test the bumpiness of the thing. */
   public void testBumpiness() throws Exception {
-    BumpyStack bumper = new BumpyStack();
+    WeakBumpyStack bumper = new WeakBumpyStack();
 
     String s1 = new String("s1");
     String s2 = new String("s2");
