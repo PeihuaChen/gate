@@ -1,0 +1,117 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 08/10/2001
+ *
+ *  $Id$
+ *
+ */
+
+package gate.creole;
+
+import gate.*;
+
+
+import java.util.*;
+
+/**
+ * This class implements a SerialController that only contains
+ * {@link gate.LanguageAnalyser}s.
+ * It has a {@link gate.Corpus} and its execute method runs all the analysers in
+ * turn over each of the documents in the corpus.
+ */
+public class SerialAnalyserController extends SerialController {
+
+  public gate.Corpus getCorpus() {
+    return corpus;
+  }
+
+  public void setCorpus(gate.Corpus corpus) {
+    this.corpus = corpus;
+  }
+
+  /** Run the Processing Resources in sequence. */
+  public void execute() throws ExecutionException{
+    if(corpus == null) throw new ExecutionException(
+      "(SerialAnalyserController) \"" + getName() + "\":\n" +
+      "The corpus supplied for execution was null!");
+    //iterate through the documents in the corpus
+    Iterator docsIter = corpus.iterator();
+    while(docsIter.hasNext()){
+      Document doc = (Document)docsIter.next();
+      //run the system over this document
+
+      //set the doc and corpus
+      for(int i = 0; i < prList.size(); i++){
+        ((LanguageAnalyser)prList.get(i)).setDocument(doc);
+        ((LanguageAnalyser)prList.get(i)).setCorpus(corpus);
+      }
+
+      super.execute();
+
+    }
+  }
+
+  /**
+   * Sets the current document to the memeber PRs
+   */
+  protected void setDocToPrs(Document doc){
+    Iterator prIter = getPRs().iterator();
+    while(prIter.hasNext()){
+      ((LanguageAnalyser)prIter.next()).setDocument(doc);
+    }
+  }
+
+
+  /**
+   * Checks whether all the contained PRs have all the required runtime
+   * parameters set. Ignores the corpus and document parameters as these will
+   * be set at run time.
+   *
+   * @return a {@link List} of {@link ProcessingResource}s that have required
+   * parameters with null values if they exist <tt>null</tt> otherwise.
+   * @throw {@link ResourceInstantiationException} if problems occur while
+   * inspecting the parameters for one of the resources. These will normally be
+   * introspection problems and are usually caused by the lack of a parameter
+   * or of the read accessor for a parameter.
+   */
+  public List getOffendingPocessingResources()
+         throws ResourceInstantiationException{
+    //take all the contained PRs
+    ArrayList badPRs = new ArrayList(getPRs());
+    //remove the ones that no parameters problems
+    Iterator prIter = getPRs().iterator();
+    while(prIter.hasNext()){
+      ProcessingResource pr = (ProcessingResource)prIter.next();
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                              get(pr.getClass().getName());
+      //this is a list of lists
+      List parameters = rData.getParameterList().getRuntimeParameters();
+      //remove corpus and document
+      Iterator pDisjIter = parameters.iterator();
+      while(pDisjIter.hasNext()){
+        List aDisjunction = (List)pDisjIter.next();
+        Iterator internalParIter = aDisjunction.iterator();
+        while(internalParIter.hasNext()){
+          Parameter parameter = (Parameter)internalParIter.next();
+          if(parameter.getName().equals("corpus") ||
+             parameter.getName().equals("document")) internalParIter.remove();
+        }
+        if(aDisjunction.isEmpty()) pDisjIter.remove();
+      }
+
+      if(AbstractResource.checkParameterValues(pr, parameters)){
+        badPRs.remove(pr);
+      }
+    }
+    return badPRs.isEmpty() ? null : badPRs;
+  }
+
+
+  private gate.Corpus corpus;
+}
