@@ -379,7 +379,7 @@ public class DefaultResourceHandle implements ResourceHandle {
             Resource oldRes = (Resource)resource;
             resource = Factory.createResource(resource.getClass().getName(),
                                               (FeatureMap)resource.getFeatures().
-                                                          get("gate.PARAMETERS"),
+                                                          get("gate.PARAMETERS(transient)"),
                                               features, listeners);
             resource.getFeatures().remove("gate.HIDDEN");
             Factory.deleteResource(oldRes);
