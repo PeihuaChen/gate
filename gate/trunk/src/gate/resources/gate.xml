@@ -19,7 +19,7 @@
   <LR xmlFileUrl="gate:/creole/schema/PersonSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/SyntaxTreeNodeSchema.xml">gate.creole.AnnotationSchema</LR>
 </SYSTEM>
-<DBCONFIG url="jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2"/>
+<DBCONFIG url="jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:gatedb2"/>
 <!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@gatedb.dcs.shef.ac.uk"/-->
 <!--DBCONFIG url="jdbc:oracle:oci8:GATEUSER/gate2@/grindleford.dcs.shef.ac.uk:1521:GateDB2"/-->
 </GATE>
