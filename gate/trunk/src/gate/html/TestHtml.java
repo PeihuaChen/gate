@@ -93,7 +93,10 @@ public class TestHtml extends TestCase
           public void processFinished(){
           }
       });
+
       */
+      docFormat.unpackMarkup (doc,"DocumentContent");
+      /*
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");
@@ -104,6 +107,7 @@ public class TestHtml extends TestCase
         docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
         time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
         "." + (docSize/time1*1000)%1024 + " K/second");
+      */
     }
     //*/
 
