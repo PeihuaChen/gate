@@ -56,6 +56,15 @@ create or replace package error is
 
   x_not_implemented EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_not_implemented, -20109);
+
+  x_group_owns_resources EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_group_owns_resources, -20110);
+
+  x_user_owns_resources EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_user_owns_resources, -20111);
+
+  x_incomplete_data EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_incomplete_data, -20112);
                            
 end error;
 /
