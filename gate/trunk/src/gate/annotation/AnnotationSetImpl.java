@@ -423,7 +423,10 @@ implements AnnotationSet
 
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
-    if(nodesByOffset == null) indexByStartOffset();
+    if(nodesByOffset == null) {
+      indexByStartOffset();
+      indexByEndOffset();
+    }
 
     // find existing nodes
     Node startNode  = (Node) nodesByOffset.getNextOf(start);
@@ -453,7 +456,10 @@ implements AnnotationSet
 
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
-    if(nodesByOffset == null) indexByStartOffset();
+    if(nodesByOffset == null){
+      indexByStartOffset();
+      indexByEndOffset();
+    }
 
     // find existing nodes
     Node startNode  = (Node) nodesByOffset.getNextOf(start);
@@ -585,7 +591,10 @@ implements AnnotationSet
     if(nodesByOffset != null) nodesByOffset.put(end, endNode);
 
     // if there's no appropriate index give up
-    if(annotsByEndNode == null) return;
+    if(annotsByEndNode == null){
+//System.out.println("No index boule! \n" + a);
+      return;
+    }
 
     // get the annotations that start at the same node, or create new set
     AnnotationSet thisNodeAnnots =
@@ -593,7 +602,7 @@ implements AnnotationSet
 
     if(thisNodeAnnots == null) {
       thisNodeAnnots = new AnnotationSetImpl(doc);
-      annotsByEndNode.put(startNode.getId(), thisNodeAnnots);
+      annotsByEndNode.put(endNode.getId(), thisNodeAnnots);
     }
     // add to the annots listed for a's start node
     thisNodeAnnots.add(a);
