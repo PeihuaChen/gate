@@ -28,14 +28,14 @@ public class DatastoreEvent extends GateEvent {
    * @param resourceID the ID corresponding to the resource in this datastore
    */
   public DatastoreEvent(DataStore source, int type, Resource res,
-                        String resourceID) {
+                        Object resourceID) {
     super(source, type);
     this.resource = res;
     this.resourceID = resourceID;
   }
 
   protected Resource resource;
-  protected String resourceID;
+  protected Object resourceID;
 
   /**
    * The type of events fired when a resource has been adopted
@@ -53,7 +53,7 @@ public class DatastoreEvent extends GateEvent {
   public static final int RESOURCE_WRITTEN = 303;
 
   /** Gets the ID of the resource involved in this event */
-  public String getResourceID() {
+  public Object getResourceID() {
     return resourceID;
   }
 

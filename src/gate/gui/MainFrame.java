@@ -1817,6 +1817,7 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
                 ds = Factory.openDataStore(className, storageURL);
 
                 //2. login the user
+                //NEEDS FIXING WITH THE LOGIN DIALOG
                 ac = new AccessControllerImpl();
                 Assert.assertNotNull(ac);
                 ac.open(storageURL);
@@ -1831,6 +1832,10 @@ javax.swing.plaf.basic.BasicFileChooserUI uiii;
                 Assert.assertNotNull(usrSession);
                 Assert.assertTrue(ac.isValidSession(usrSession));
 
+                FeatureMap securityData = Factory.newFeatureMap();
+                securityData.put("user", usr);
+                securityData.put("group", grp);
+                reg.addSecurityData(ds, securityData);
               } catch(PersistenceException pe) {
                 JOptionPane.showMessageDialog(
                     MainFrame.this, "Datastore open error!\n " +

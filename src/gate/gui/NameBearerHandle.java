@@ -30,6 +30,7 @@ import gate.swing.*;
 import gate.creole.*;
 import gate.persist.*;
 import gate.event.*;
+import gate.security.*;
 
 /**
  * Class used to store the GUI information about an open entity (resource,
@@ -441,7 +442,7 @@ public class NameBearerHandle implements Handle,
   class SaveToAction extends AbstractAction {
     public SaveToAction(){
       super("Save to...");
-      putValue(SHORT_DESCRIPTION, "Save this resource to a new datastore");
+      putValue(SHORT_DESCRIPTION, "Save this resource to a datastore");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -491,7 +492,14 @@ public class NameBearerHandle implements Handle,
             ds.sync((LanguageResource)target);
           }else{
             //TODO: change the null for SecurityInfo
-            LanguageResource lr = ds.adopt((LanguageResource)target,null);
+            FeatureMap securityData = (FeatureMap)
+                         Gate.getDataStoreRegister().getSecurityData(ds);
+            SecurityInfo si = null;
+            if (securityData != null)
+              si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,
+                                    (User) securityData.get("user"),
+                                    (Group) securityData.get("group"));
+            LanguageResource lr = ds.adopt((LanguageResource)target,si);
             ds.sync(lr);
           }
         }
