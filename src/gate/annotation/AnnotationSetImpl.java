@@ -178,6 +178,8 @@ implements AnnotationSet
 
     // find the next node at or after offset; get the annots starting there
     Node nextNode = (Node) nodesByOffset.getNextOf(offset);
+    if(nextNode == null) // no nodes beyond this offset
+      return null;
     AnnotationSet nextAnnots =
       (AnnotationSet) annotsByStartNode.get(nextNode.getId());
 
@@ -324,7 +326,7 @@ implements AnnotationSet
     StringBuffer buf = new StringBuffer();
     Iterator iter = annotsByType.iterator();
     while(iter.hasNext()) {
-      HashMap thisType = iter.next()entrySet();
+      HashMap thisType = iter.next().entrySet();
       sortedAnnots.clear();
       sortedAnnots.addAll(thisType.);
       buf.append("[type: " +
