@@ -500,6 +500,19 @@
       <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">java.lang.String</PARAMETER>
     </RESOURCE>
 
+    <!-- creole.xml for SearchPR -->
+    <RESOURCE>
+      <NAME>SearchPR</NAME>
+      <CLASS>gate.creole.ir.SearchPR</CLASS>
+      <COMMENT>provides IR functionality</COMMENT>
+      <PARAMETER NAME="corpus" RUNTIME="true"      COMMENT="The indexed  corpus to be searched">gate.creole.ir.IndexedCorpus</PARAMETER>
+      <PARAMETER NAME="query"   RUNTIME="true"     COMMENT="The search query">java.lang.String</PARAMETER>
+      <PARAMETER NAME="limit"       RUNTIME="true"  DEFAULT="20"               COMMENT="The number of results returned">java.lang.Integer</PARAMETER>
+      <PARAMETER NAME="fieldNames" RUNTIME="true"  DEFAULT="*"   COMMENT="The fields returned from result documents">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="searcherClassName" RUNTIME="true"  DEFAULT="gate.creole.ir.lucene.LuceneSearch"  COMMENT="The search implementation">java.lang.String</PARAMETER>
+      <ICON>binoculars.gif</ICON>
+    </RESOURCE>
+
   </CREOLE>
 
 
