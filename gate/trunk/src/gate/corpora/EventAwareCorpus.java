@@ -26,4 +26,6 @@ public interface EventAwareCorpus extends EventAwareLanguageResource {
 
   public List getRemovedDocuments();
 
+  public List getAddedDocuments();
+
 }
