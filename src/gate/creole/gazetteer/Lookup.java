@@ -22,7 +22,7 @@ package gate.creole.gazetteer;
  * intended to represesnt a comma separated list).
  *
  */
-class Lookup implements java.io.Serializable {
+public class Lookup implements java.io.Serializable {
 
   /** Debug flag
    */
@@ -46,17 +46,17 @@ class Lookup implements java.io.Serializable {
    * Tha major type for this lookup, e.g. "Organisation"
    *
    */
-  String majorType;
+  public String majorType;
   /**
    * The minor type for this lookup, e.g. "Company"
    *
    */
-  String minorType;
+  public String minorType;
   /**
    * The languages for this lookup, e.g. "English, French"
    *
    */
-  String languages;
+  public String languages;
 
   /**
    * Returns a string representation of this lookup in the format
