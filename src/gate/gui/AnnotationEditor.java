@@ -447,7 +447,12 @@ public class AnnotationEditor extends AbstractVisualResource {
                         ).intValue();
               //bring the annotation in view
               try{
-                textPane.scrollRectToVisible(textPane.modelToView(start));
+                Rectangle startRect = textPane.modelToView(start);
+                Rectangle endRect = textPane.modelToView(end);
+                SwingUtilities.computeUnion(endRect.x, endRect.y,
+                                            endRect.width, endRect.height,
+                                            startRect);
+                textPane.scrollRectToVisible(startRect);
                 annotationsTable.requestFocus();
               }catch(BadLocationException ble){
                 throw new GateRuntimeException(ble.toString());
