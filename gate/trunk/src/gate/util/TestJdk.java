@@ -164,7 +164,6 @@ public class TestJdk extends TestCase
     GateClassLoader loader = Gate.getClassLoader();
     loader.addURL(Gate.getUrl("tests/TestJdk.jar"));
 
-    //loader.addURL(new URL("file:/build/TestJdk.jar"));
     Class dummyClass1 = loader.loadClass("testpkg.Dummy");
     assertTrue("dummy1 is null", dummyClass1 != null);
     Object dummyObject1 = dummyClass1.newInstance();
@@ -174,11 +173,13 @@ public class TestJdk extends TestCase
     assertTrue("dummy2 is null", dummyClass2 != null);
     Object dummyObject2 = dummyClass2.newInstance();
     assertTrue("dummy2 object is null", dummyObject2 != null);
+    assertTrue("dummy1 and dummy2 are the same", dummyClass1 != dummyClass2);
 
     Class dummyClass3 = loader.reloadClass("testpkg.Dummy");
     assertTrue("dummy3 is null", dummyClass2 != null);
     Object dummyObject3 = dummyClass3.newInstance();
     assertTrue("dummy3 object is null", dummyObject3 != null);
+    assertTrue("dummy2 and dummy3 are the same", dummyClass2 != dummyClass3);
 
   } // testReloading
 
