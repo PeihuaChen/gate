@@ -1,3 +1,17 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 24/01/2001
+ *
+ *  $Id$
+ *
+ */
+
 package gate.gui;
 
 import java.awt.*;
@@ -39,7 +53,8 @@ public class MainFrame_AboutBox extends JDialog implements ActionListener {
   }
   /**Component initialization*/
   private void jbInit() throws Exception  {
-    //imageLabel.setIcon(new ImageIcon(MainFrame_AboutBox.class.getResource("[Your Image]")));
+    // imageLabel.setIcon(new ImageIcon(
+    // MainFrame_AboutBox.class.getResource("[Your Image]")));
     this.setTitle("About");
     setResizable(false);
     panel1.setLayout(borderLayout1);

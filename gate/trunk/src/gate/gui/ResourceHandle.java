@@ -14,30 +14,20 @@
 
 package gate.gui;
 
-/**
- * Title:        Gate2
- * Description:
- * Copyright:    Copyright (c) 2000
- * Company:      University Of Sheffield
- * @author Hamish, Kalina, Valy, Cristi
- * @version 1.0
- */
 import javax.swing.*;
 import java.util.*;
 
 import gate.*;
-
-
 
 /**
  * Class used to store the information about an open resource.
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
  */
-class ResourceHandle{
-  public ResourceHandle(){}
+class ResourceHandle {
+  public ResourceHandle() {}
 
-  public ResourceHandle(Resource resource, ProjectData project){
+  public ResourceHandle(Resource resource, ProjectData project) {
     this.resource = resource;
     this.title = (String)resource.getFeatures().get("NAME");
     this.project = project;
@@ -45,7 +35,7 @@ class ResourceHandle{
     myself = this;
   }
 
-  public ResourceHandle(String title, ProjectData project){
+  public ResourceHandle(String title, ProjectData project) {
     this.resource = null;
     this.title = title;
     this.project = project;
@@ -54,11 +44,11 @@ class ResourceHandle{
     myself = this;
   }
 
-  public Icon getSmallIcon(){
+  public Icon getSmallIcon() {
     return smallIcon;
   }
 
-  public void setSmallIcon(Icon icon){
+  public void setSmallIcon(Icon icon) {
     this.smallIcon = icon;
   }
 
@@ -66,7 +56,7 @@ class ResourceHandle{
     return title;
   }
 
-  public void setTitle(String newTitle){
+  public void setTitle(String newTitle) {
     this.title = newTitle;
   }
 
@@ -74,7 +64,7 @@ class ResourceHandle{
    * Returns a GUI component to be used as a small viewer/editor, e.g. below
    * the main tree in the Gate GUI for the selected resource
    */
-  public JComponent getSmallView(){
+  public JComponent getSmallView() {
     return smallView;
   }
 
@@ -82,38 +72,38 @@ class ResourceHandle{
    * Returns the large view for this resource. This view will go into the main
    * display area.
    */
-  public JComponent getLargeView(){
+  public JComponent getLargeView() {
     return largeView;
   }
 
-  public JPopupMenu getPopup(){
+  public JPopupMenu getPopup() {
     return popup;
   }
 
-  public void setPopup(JPopupMenu popup){
+  public void setPopup(JPopupMenu popup) {
     this.popup = popup;
   }
 
-  public void setShown(boolean visible){
+  public void setShown(boolean visible) {
     shown = visible;
   }
 
-  public boolean isShown(){
+  public boolean isShown() {
     return shown;
   }
 
-  public String getTooltipText(){
+  public String getTooltipText() {
     return tooltipText;
   }
 
-  public void setTooltipText(String text){
+  public void setTooltipText(String text) {
     this.tooltipText = text;
   }
 
-  public Resource getResource(){
+  public Resource getResource() {
     return resource;
   }
-  protected void buildViews(){
+  protected void buildViews() {
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
     FeaturesEditor fEdt = new FeaturesEditor();
     fEdt.setResource(resource);

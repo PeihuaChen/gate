@@ -43,7 +43,7 @@ import java.io.*;
  * the document but in order for the editor to work it needs to be provided
  * with a set of annotation schemas.
  */
-public class AnnotationEditor extends AbstractVisualResource{
+public class AnnotationEditor extends AbstractVisualResource {
   //properties
   private transient PropertyChangeSupport propertyChangeListeners =
                                           new PropertyChangeSupport(this);
@@ -182,7 +182,7 @@ public class AnnotationEditor extends AbstractVisualResource{
     initListeners();
   }
 
-  /**Test code*/
+  /** Test code*/
   public static void main(String[] args) {
     try{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -204,9 +204,12 @@ public class AnnotationEditor extends AbstractVisualResource{
                  //"file:///d:/tmp/help-doc.html");
                  //"file:///d:/tmp/F7V.xml");
                  "http://redmires.dcs.shef.ac.uk/admin/index.html");
-                 //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/swing/Action.html");
-                 //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt/AWTEventMulticaster.html");
-      gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
+                 //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/
+                 //                                       swing/Action.html");
+                 //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt
+                 ///AWTEventMulticaster.html");
+      gate.Document doc = (gate.Document)Factory.createResource(
+                                          "gate.corpora.DocumentImpl", params);
       //create a default tokeniser
      params.clear();
      params.put("rulesResourceName", "creole/tokeniser/DefaultTokeniser.rules");
@@ -244,29 +247,29 @@ public class AnnotationEditor extends AbstractVisualResource{
    * Initialises all the listeners that this component has to register with
    * other classes.
    */
-  protected void initListeners(){
+  protected void initListeners() {
     //listen for our own properties change events
-    this.addPropertyChangeListener("document", new PropertyChangeListener(){
+    this.addPropertyChangeListener("document", new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt){
         this_documentChanged();
       }
     });
     this.addPropertyChangeListener("visibleAnnotationSets",
-                                   new PropertyChangeListener(){
+                                   new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt){
       }
     });
     this.addPropertyChangeListener("annotationSchemas",
-                                   new PropertyChangeListener(){
+                                   new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt){
       }
     });
     //listen for component events
-    this.addComponentListener(new ComponentAdapter(){
+    this.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
       }
 
-      public void componentShown(ComponentEvent e){
+      public void componentShown(ComponentEvent e) {
         //expand all the nodes in the tree
         if(stylesTreeRoot.getChildCount() > 0){
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -310,7 +313,8 @@ public class AnnotationEditor extends AbstractVisualResource{
               stylesTreeModel.nodeChanged(node);
             }else if(clickedComp instanceof JLabel && e.getClickCount() == 2){
               styleChooser.setLocationRelativeTo(stylesTree);
-              nData.setAttributes(styleChooser.show(nData.getAttributes().copyAttributes()));
+              nData.setAttributes(
+                    styleChooser.show(nData.getAttributes().copyAttributes()));
               stylesTreeModel.nodeChanged(node);
             }
           }
@@ -336,11 +340,14 @@ public class AnnotationEditor extends AbstractVisualResource{
         if(SwingUtilities.isLeftMouseButton(e)){
           if(e.getClickCount() == 1){
             //single left click ->highlight the annotation
-            int start = ((Long)annotationsTable.getModel().getValueAt(row, 2)).intValue();
-            int end = ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
+            int start =
+              ((Long)annotationsTable.getModel().getValueAt(row, 2)).intValue();
+            int end =
+              ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
             try{
               highlighter.removeAllHighlights();
-              highlighter.addHighlight(start, end, DefaultHighlighter.DefaultPainter);
+              highlighter.addHighlight(start, end,
+                                          DefaultHighlighter.DefaultPainter);
               textPane.scrollRectToVisible(textPane.modelToView(start));
               annotationsTable.requestFocus();
             }catch(BadLocationException ble){
@@ -350,7 +357,7 @@ public class AnnotationEditor extends AbstractVisualResource{
             //double left click -> edit the annotation
             editAnnAct.actionPerformed(null);
           }
-        }else if(SwingUtilities.isRightMouseButton(e)){
+        } else if(SwingUtilities.isRightMouseButton(e)) {
           //right click
           //add delete option
           JPopupMenu popup = new JPopupMenu();
@@ -397,7 +404,8 @@ public class AnnotationEditor extends AbstractVisualResource{
               popup.add(menu);
               while(annIter.hasNext()){
                 Annotation ann = (Annotation)annIter.next();
-                JMenuItem item = new SelectAnnotationPopupItem(ann, "<Default>");
+                JMenuItem item = new SelectAnnotationPopupItem(ann,
+                                                                  "<Default>");
                 menu.add(item);
               }
             }
@@ -414,14 +422,15 @@ public class AnnotationEditor extends AbstractVisualResource{
                   popup.add(menu);
                   while(annIter.hasNext()){
                     Annotation ann = (Annotation)annIter.next();
-                    JMenuItem item = new SelectAnnotationPopupItem(ann, set.getName());
+                    JMenuItem item = new SelectAnnotationPopupItem(ann,
+                                                                set.getName());
                     menu.add(item);
                   }
                 }
               }
             }
             popup.show(textPane, e.getPoint().x, e.getPoint().y);
-          }else{
+          } else {
             //there is selected text -> create a new annotation
             int start = textPane.getSelectionStart();
             int end = textPane.getSelectionEnd();
@@ -448,7 +457,8 @@ public class AnnotationEditor extends AbstractVisualResource{
                   menu = new JMenu("Add to " + as.getName());
                   schemasIter = getAnnotationSchemas().iterator();
                   while(schemasIter.hasNext()){
-                    AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+                    AnnotationSchema schema =
+                                          (AnnotationSchema)schemasIter.next();
                     menu.add(new NewAnnotationPopupItem(start, end, schema, as));
                   }
                   popup.add(menu);
@@ -546,7 +556,8 @@ public class AnnotationEditor extends AbstractVisualResource{
     stylesTree.setToggleClickCount(0);
     stylesTreeScroll = new JScrollPane(stylesTree);
     stylesTreeScroll.setAlignmentY(Component.TOP_ALIGNMENT);
-    stylesTreeScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    stylesTreeScroll.setHorizontalScrollBarPolicy(
+                                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     this.add(stylesTreeScroll);
 
     /*
@@ -585,11 +596,12 @@ public class AnnotationEditor extends AbstractVisualResource{
     typesTable.setShowGrid(false);
     typesTable.setDefaultRenderer(TypeData.class, new TypeDataRenderer());
     typesTable.setDefaultRenderer(Boolean.class,
-                                            new PlainRenderer(typesTable.getDefaultRenderer(Boolean.class)));
+            new PlainRenderer(typesTable.getDefaultRenderer(Boolean.class)));
     typesTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
     typesScroll = new JScrollPane(typesTable);
-    typesScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    typesScroll.setHorizontalScrollBarPolicy(
+                                        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     typesScroll.setBorder(BorderFactory.createTitledBorder("Types"));
     filtersPane.add(typesScroll);
     filtersPane.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -640,7 +652,8 @@ public class AnnotationEditor extends AbstractVisualResource{
     return result;
   }
 
-  public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
+  public synchronized void removePropertyChangeListener(
+                                                    PropertyChangeListener l) {
     super.removePropertyChangeListener(l);
     propertyChangeListeners.removePropertyChangeListener(l);
   }
@@ -711,7 +724,8 @@ public class AnnotationEditor extends AbstractVisualResource{
   public void setTextVisible(boolean newTextVisible) {
     boolean  oldTextVisible = textVisible;
     textVisible = newTextVisible;
-    propertyChangeListeners.firePropertyChange("textVisible", new Boolean(oldTextVisible), new Boolean(newTextVisible));
+    propertyChangeListeners.firePropertyChange("textVisible",
+                    new Boolean(oldTextVisible), new Boolean(newTextVisible));
   }
 
   /**
@@ -728,7 +742,8 @@ public class AnnotationEditor extends AbstractVisualResource{
   public void setFiltersVisible(boolean newFiltersVisible) {
     boolean  oldFiltersVisible = filtersVisible;
     filtersVisible = newFiltersVisible;
-    propertyChangeListeners.firePropertyChange("filtersVisible", new Boolean(oldFiltersVisible), new Boolean(newFiltersVisible));
+    propertyChangeListeners.firePropertyChange("filtersVisible",
+              new Boolean(oldFiltersVisible), new Boolean(newFiltersVisible));
   }
 
   /**
@@ -857,15 +872,15 @@ public class AnnotationEditor extends AbstractVisualResource{
   /**
    * Repaints the per-annotation-type highlighting in the text display.
    */
-  protected void showHighlights(AnnotationSet annotations, AttributeSet style){
+  protected void showHighlights(AnnotationSet annotations, AttributeSet style) {
     //store the state of the text display
     int selStart = textPane.getSelectionStart();
     int selEnd = textPane.getSelectionEnd();
     final int position = textPane.viewToModel(
                             textScroll.getViewport().getViewPosition());
     //hide the text
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
         progressBar.setValue(0);
         //progressBar.setMaximumSize(new Dimension(textScroll.getWidth(),20));
         textScroll.getViewport().setView(progressBox);
@@ -900,7 +915,7 @@ public class AnnotationEditor extends AbstractVisualResource{
         textScroll.getViewport().setView(textPane);
         try{
           textScroll.getViewport().setViewPosition(
-                                   textPane.modelToView(position).getLocation());
+                                  textPane.modelToView(position).getLocation());
           textScroll.paintImmediately(textScroll.getBounds());
         }catch(BadLocationException ble){
         }
@@ -912,7 +927,7 @@ public class AnnotationEditor extends AbstractVisualResource{
    * Updates the GUI when the user has selected an annotation e.g. by using the
    * right click popup.
    */
-  protected void selectAnnotation(String set, Annotation ann){
+  protected void selectAnnotation(String set, Annotation ann) {
     TypeData tData = getTypeData(set, ann.getType());
     if(!tData.getVisible()){
       tData.setVisible(true);
@@ -921,10 +936,10 @@ public class AnnotationEditor extends AbstractVisualResource{
         Thread.sleep(100);
       }catch(InterruptedException ie){}
       synchronized(Thread.class){
-        while(guiUpdateThread != null && guiUpdateThread.isAlive()){
+        while(guiUpdateThread != null && guiUpdateThread.isAlive()) {
           try{
             Thread.sleep(100);
-          }catch(InterruptedException ie){}
+          } catch(InterruptedException ie) {}
         }
         //refresh the display for the type (the checkbox has to be shown selected)
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -1082,33 +1097,36 @@ public class AnnotationEditor extends AbstractVisualResource{
                                               int row,
                                               boolean hasFocus){
       if(value instanceof DefaultMutableTreeNode){
-        TypeData nData = (TypeData)((DefaultMutableTreeNode)value).getUserObject();
-        if(nData != null){
+        TypeData nData = (TypeData)
+                              ((DefaultMutableTreeNode)value).getUserObject();
+        if(nData != null) {
           textComponent.selectAll();
           textComponent.replaceSelection(nData.getTitle());
           textComponent.selectAll();
           textComponent.setCharacterAttributes(nData.getAttributes(), true);
           //needs to be sized in order for modelToView() to work properly
           textComponent.setSize(textComponent.getPreferredSize());
-          try{
-            Rectangle rect = textComponent.modelToView(nData.getTitle().length());
+          try {
+            Rectangle rect =
+                          textComponent.modelToView(nData.getTitle().length());
             int width  = rect.x + rect.width -
                          textComponent.modelToView(0).x + 2;
             int height = textComponent.modelToView(0).height + 2;
-            BufferedImage image = (BufferedImage)tree.createImage(width, height);
-            if(image != null){
+            BufferedImage image =
+                                (BufferedImage)tree.createImage(width, height);
+            if(image != null) {
               Graphics graphics = image.getGraphics();
               if(graphics != null) {
                 textComponent.printAll(graphics);
               }
               icon.setImage(image);
             }
-          }catch(BadLocationException ble){
+          } catch(BadLocationException ble) {
             ble.printStackTrace(System.err);
           }
 
           removeAll();
-          if(nData.getType() != null){
+          if(nData.getType() != null) {
             visibleChk.setSelected(nData.getVisible());
             add(visibleChk);
           }
@@ -1116,7 +1134,7 @@ public class AnnotationEditor extends AbstractVisualResource{
           if(selected) setBorder(selectedBorder);
           else setBorder(null);
         }
-      }else{
+      } else {
         label.setIcon(null);
         label.setText(value.toString());
         removeAll();
@@ -1133,7 +1151,7 @@ public class AnnotationEditor extends AbstractVisualResource{
     public Dimension getPreferredSize() {
       Dimension retDimension = super.getPreferredSize();
       Insets borderInsets = selectedBorder.getBorderInsets(this);
-      if(retDimension != null){
+      if(retDimension != null) {
           retDimension = new Dimension(retDimension.width + 3 +
                                        borderInsets.left +
                                        borderInsets.right,
@@ -1170,63 +1188,72 @@ public class AnnotationEditor extends AbstractVisualResource{
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {}
+    protected void firePropertyChange(String propertyName, Object oldValue,
+                                                            Object newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, byte oldValue, byte newValue) {}
+    public void firePropertyChange(String propertyName, byte oldValue,
+                                                              byte newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, char oldValue, char newValue) {}
+    public void firePropertyChange(String propertyName, char oldValue,
+                                                              char newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, short oldValue, short newValue) {}
+    public void firePropertyChange(String propertyName, short oldValue,
+                                                            short newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, int oldValue, int newValue) {}
+    public void firePropertyChange(String propertyName, int oldValue,
+                                                              int newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, long oldValue, long newValue) {}
+    public void firePropertyChange(String propertyName, long oldValue,
+                                                              long newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, float oldValue, float newValue) {}
+    public void firePropertyChange(String propertyName, float oldValue,
+                                                              float newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, double oldValue, double newValue) {}
+    public void firePropertyChange(String propertyName, double oldValue,
+                                                            double newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {}
+    public void firePropertyChange(String propertyName, boolean oldValue,
+                                                            boolean newValue) {}
 
     Border selectedBorder;
     ImageIcon icon;
@@ -1250,7 +1277,7 @@ public class AnnotationEditor extends AbstractVisualResource{
    * For eficiency reasons there are some intermediary styles between a parent
    * and a child style that used for changing the display in one operation.
    */
-  public class TypeData{
+  public class TypeData {
 
     public TypeData(String set, String type, boolean visible){
       this.set = set;
@@ -1261,12 +1288,13 @@ public class AnnotationEditor extends AbstractVisualResource{
         setMap = new HashMap();
         typeDataMap.put(set, setMap);
       }
-      if(type == null){
+      if(type == null) {
         //this node represents a Set
         style = textPane.addStyle(set, textPane.getStyle("default"));
-      }else{
+      } else {
         style = textPane.addStyle(set + "." + type, textPane.getStyle(set));
-        StyleConstants.setBackground(style, colGenerator.getNextColor().brighter());
+        StyleConstants.setBackground(style,
+                                        colGenerator.getNextColor().brighter());
         //add an intermediary style that will be used for the actual display
         textPane.addStyle("_" + set + "." + type, style);
         //add the style that will be used for the actual display
@@ -1276,35 +1304,35 @@ public class AnnotationEditor extends AbstractVisualResource{
       }
     }
 
-    public String getSet(){ return set;}
-    public void setSet(String set){this.set = set;}
+    public String getSet() { return set;}
+    public void setSet(String set) {this.set = set;}
 
-    public String getType(){return type;}
+    public String getType() {return type;}
 
-    public String getTitle(){return (type == null) ? set : type;}
-    public boolean getVisible(){return visible;}
+    public String getTitle() {return (type == null) ? set : type;}
+    public boolean getVisible() {return visible;}
 
-    public void setVisible(boolean isVisible){
+    public void setVisible(boolean isVisible) {
       if(this.visible == isVisible) return;
       this.visible = isVisible;
       //this is most likely called from the SWING thread so we want to get
       //out of here as quickly as possible. We'll start a new thread that will
       //do all that needs doing
-      Runnable runnable = new Runnable(){
-        public void run(){
+      Runnable runnable = new Runnable() {
+        public void run() {
           //define the runnable for the guiUpdateThread
-          Runnable guiUpdater = new Runnable(){
-            public void run(){
-              if(visible){
+          Runnable guiUpdater = new Runnable() {
+            public void run() {
+              if(visible) {
                   //make the corresponding range visible
                   //update the annotations table
-                  synchronized(data){
+                  synchronized(data) {
                     range = new Range(set, type, data.size(),
                                       data.size() + annotations.size());
                     ranges.add(range);
                     data.addAll(annotations);
-                    SwingUtilities.invokeLater(new Runnable(){
-                      public void run(){
+                    SwingUtilities.invokeLater(new Runnable() {
+                      public void run() {
                         annotationsTableModel.fireTableDataChanged();
                       }
                     });
@@ -1315,13 +1343,13 @@ public class AnnotationEditor extends AbstractVisualResource{
                   actualStyle.setResolveParent(style);
                   showHighlights(annotations, textPane.getStyle("_" + set + "."
                                                                 + type + "_"));
-                }else{
+                } else {
                   //hide the corresponding range
                   //update the annotations table
-                  synchronized(data){
+                  synchronized(data) {
                     Collections.sort(ranges);
                     Iterator rangesIter = ranges.iterator();
-                    while(rangesIter.hasNext()){
+                    while(rangesIter.hasNext()) {
                       //find my range
                       Range aRange = (Range)rangesIter.next();
                       if(aRange == range){
@@ -1330,7 +1358,7 @@ public class AnnotationEditor extends AbstractVisualResource{
                         //remove the elements from Data
                         data.subList(range.start, range.end).clear();
                         //shift back all the remaining ranges
-                        while(rangesIter.hasNext()){
+                        while(rangesIter.hasNext()) {
                           aRange = (Range)rangesIter.next();
                           aRange.start -= size;
                           aRange.end -= size;
@@ -1338,8 +1366,8 @@ public class AnnotationEditor extends AbstractVisualResource{
                       }
                     }
                     range = null;
-                    SwingUtilities.invokeLater(new Runnable(){
-                      public void run(){
+                    SwingUtilities.invokeLater(new Runnable() {
+                      public void run() {
                         annotationsTableModel.fireTableDataChanged();
                       }
                     });
@@ -1354,11 +1382,11 @@ public class AnnotationEditor extends AbstractVisualResource{
 
           //wait for the guiUpdateThread to finish if it's doing anything
           //and then start it with the new runnable
-          synchronized(Thread.class){
+          synchronized(Thread.class) {
             while(guiUpdateThread != null && guiUpdateThread.isAlive()){
-              try{
+              try {
                 Thread.sleep(100);
-              }catch(InterruptedException ie){}
+              } catch(InterruptedException ie){}
             }
             guiUpdateThread = new Thread(guiUpdater);
             guiUpdateThread.setPriority(Thread.MIN_PRIORITY);
@@ -1371,23 +1399,23 @@ public class AnnotationEditor extends AbstractVisualResource{
       thread.start();
     }//public void setVisible(boolean isVisible)
 
-    public AttributeSet getAttributes(){ return style;}
+    public AttributeSet getAttributes() { return style;}
 
-    public void setAttributes(AttributeSet newAttributes){
+    public void setAttributes(AttributeSet newAttributes) {
       style.removeAttributes(style.copyAttributes());
       style.addAttributes(newAttributes);
     }
 
 
-    public void setAnnotations(AnnotationSet as){
+    public void setAnnotations(AnnotationSet as) {
       this.annotations = as;
     }
 
-    public AnnotationSet getAnnotations(){
+    public AnnotationSet getAnnotations() {
       return annotations;
     }
 
-    public String toString(){return getTitle();}
+    public String toString() {return getTitle();}
 
     private String set;
     private String type;
@@ -1403,19 +1431,19 @@ public class AnnotationEditor extends AbstractVisualResource{
    * annotations belonging to the same annotation set that are contiguous in
    * the {@link #data} structure.
    */
-  class Range implements Comparable{
-    public Range(String setName, String type, int start, int end){
+  class Range implements Comparable {
+    public Range(String setName, String type, int start, int end) {
       this.setName = setName;
       this.type = type;
       this.start = start;
       this.end = end;
     }
 
-    public String toString(){
+    public String toString() {
       return setName +  ", " + type + " (" + start + ", " + end + ")";
     }
 
-    public int compareTo(Object other){
+    public int compareTo(Object other) {
       if(other instanceof Range) return start - ((Range)other).start;
       else throw new ClassCastException("Can't compare a " +
                                          other.getClass() + " to a " +
@@ -1440,35 +1468,37 @@ public class AnnotationEditor extends AbstractVisualResource{
    * thread wakes it will process <strong>all</strong> the pending events and
    * then will go back to sleep.
    */
-  class DelayedListener implements GateListener, Runnable{
-    public DelayedListener(){
+  class DelayedListener implements GateListener, Runnable {
+    public DelayedListener() {
       eventQueue = Collections.synchronizedList(new ArrayList());
     }
 
-    public void processGateEvent(GateEvent e){
-      synchronized(eventQueue){
+    public void processGateEvent(GateEvent e) {
+      synchronized(eventQueue) {
         eventQueue.add(e);
         lastEvent = System.currentTimeMillis();
       }
     }
 
-    public void run(){
+    public void run() {
       boolean tableChanged = false;
       while(!stop){
-        synchronized(eventQueue){
+        synchronized(eventQueue) {
           if((System.currentTimeMillis() - lastEvent) > sleepInterval){
             GateEvent currentEvent;
-            while(! eventQueue.isEmpty()){
+            while(! eventQueue.isEmpty()) {
               currentEvent = (GateEvent)eventQueue.remove(0);
               //process the current event
-              if(currentEvent instanceof gate.event.DocumentEvent){
+              if(currentEvent instanceof gate.event.DocumentEvent) {
                 //document event
                 gate.event.DocumentEvent docEvt =
                   (gate.event.DocumentEvent)currentEvent;
-                if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED){
-throw new UnsupportedOperationException("DocumentEditor -> Annotation set removed");
+                if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED) {
+                  throw new UnsupportedOperationException(
+                    "DocumentEditor -> Annotation set removed");
                 }else if(docEvt.getType() == docEvt.ANNOTATION_SET_ADDED){
-                  addAnnotationSet(document.getAnnotations(docEvt.getAnnotationSetName()),0,0);
+                  addAnnotationSet(document.getAnnotations(
+                                          docEvt.getAnnotationSetName()),0,0);
                 }
               }else if(currentEvent instanceof AnnotationSetEvent){
                 //annotation set event
@@ -1488,7 +1518,8 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                       data.add(tData.range.end, ann);
                       tData.range.end++;
                       Iterator rangesIter = ranges.
-                                            subList(ranges.indexOf(tData.range) + 1,
+                                            subList(
+                                                ranges.indexOf(tData.range) + 1,
                                                     ranges.size()).
                                             iterator();
                       while(rangesIter.hasNext()){
@@ -1505,7 +1536,7 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                                   textPane.getStyle("_" + setName + "." +
                                                     type + "_"), true);
                     }
-                  }else{
+                  } else {
                     //new type
                     Map setMap = (Map)typeDataMap.get(setName);
                     if(setMap == null){
@@ -1521,12 +1552,12 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                       ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
                     while(node != null &&
-                          !((TypeData)node.getUserObject()).getSet().equals(setName))
+                      !((TypeData)node.getUserObject()).getSet().equals(setName))
                       node = node.getNextSibling();
                     //we have to add typeNode to node
                     //find the right place
                     int i = 0;
-                    while(i < node.getChildCount() &&
+                    while (i < node.getChildCount() &&
                           ((TypeData)
                             ((DefaultMutableTreeNode)node.getChildAt(i)).
                             getUserObject()
@@ -1534,7 +1565,7 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                     node.insert(typeNode, i);
                     stylesTreeModel.nodeStructureChanged(node);
                   }
-                }else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
+                } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
                   tData .annotations.remove(ann);
                   if(tData.getVisible()){
                     //update the annotations table
@@ -1543,8 +1574,8 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                     tData.range.end--;
                     //shift all the remaining ranges
                     Iterator rangesIter = ranges.
-                                          subList(ranges.indexOf(tData.range) + 1,
-                                                  ranges.size()).
+                                        subList(ranges.indexOf(tData.range) + 1,
+                                        ranges.size()).
                                           iterator();
                     while(rangesIter.hasNext()){
                       Range aRange = (Range) rangesIter.next();
@@ -1560,12 +1591,12 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                               textPane.getStyle("default"), true);
                   }//if(tData.getVisible())
                 }
-              }else{
+              } else {
                 //unknown event type
               }
             }//while(! eventQueue.isEmpty())
-            if(tableChanged){
-              SwingUtilities.invokeLater(new Runnable(){
+            if(tableChanged) {
+              SwingUtilities.invokeLater(new Runnable() {
                 public void run(){
                   if(annotationsTableModel != null){
                     annotationsTableModel.fireTableDataChanged();
@@ -1576,9 +1607,9 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
             }
           }
         }//synchronized(eventQueue)
-        try{
+        try {
           Thread.sleep(sleepInterval);
-        }catch(InterruptedException ie){
+        } catch(InterruptedException ie) {
         }
       }
     }
@@ -1597,8 +1628,8 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
    * the text component whent it is defined in a style from which the current
    * style inherits.
    */
-  public class CustomLabelView extends javax.swing.text.LabelView{
-    public CustomLabelView(Element elem){
+  public class CustomLabelView extends javax.swing.text.LabelView {
+    public CustomLabelView(Element elem) {
       super(elem);
     }
 
@@ -1622,8 +1653,8 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
    * Apart from the normal {@link javax.swing.JMenuItem} behaviour, this menu
    * item also highlits the annotation which it would select if pressed.
    */
-  protected class SelectAnnotationPopupItem extends JMenuItem{
-    public SelectAnnotationPopupItem(Annotation ann, String setName){
+  protected class SelectAnnotationPopupItem extends JMenuItem {
+    public SelectAnnotationPopupItem(Annotation ann, String setName) {
       super(ann.getType());
       setToolTipText("<html><b>Features:</b><br>" +
                      ann.getFeatures().toString() + "</html>");
@@ -1633,9 +1664,10 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
       set = setName;
       this.addMouseListener(new MouseAdapter() {
         public void mouseEntered(MouseEvent e) {
-          try{
+          try {
             highlighter.removeAllHighlights();
-            highlighter.addHighlight(start, end, DefaultHighlighter.DefaultPainter);
+            highlighter.addHighlight(start, end,
+                                            DefaultHighlighter.DefaultPainter);
           }catch(BadLocationException ble){
             throw new GateRuntimeException(ble.toString());
           }
@@ -1670,7 +1702,7 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
    * This will show a {@link gate.gui.AnnotationEditDialog} to allow the user
    * to do the editing.
    */
-  protected class EditAnnotationAction extends AbstractAction{
+  protected class EditAnnotationAction extends AbstractAction {
     public EditAnnotationAction(Annotation ann){
       super("Edit");
       this.ann = ann;
@@ -1709,10 +1741,10 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
    * The menu items used for creating a new annotation from the right click
    * popup menu.
    */
-  protected class NewAnnotationPopupItem extends JMenuItem{
+  protected class NewAnnotationPopupItem extends JMenuItem {
     public NewAnnotationPopupItem(int aStart, int anEnd,
                                   AnnotationSchema aSchema,
-                                  AnnotationSet aTargetAS){
+                                  AnnotationSet aTargetAS) {
       super(aSchema.getAnnotationName());
       this.start = aStart;
       this.end = anEnd;
@@ -1724,10 +1756,10 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
           String newASName = "foo";
           if(targetAS == null){
             Object answer = JOptionPane.showInputDialog(
-                              textPane,
-                              "Please provide a name for the new annotation set:",
-                              "Gate",
-                              JOptionPane.QUESTION_MESSAGE);
+                            textPane,
+                            "Please provide a name for the new annotation set:",
+                            "Gate",
+                            JOptionPane.QUESTION_MESSAGE);
             if(answer == null) return;
             newASName = (String)answer;
           }

@@ -114,7 +114,8 @@ public class LRHandle extends CustomResourceHandle {
       DataStore ds = ((LanguageResource)resource).getDataStore();
       if(ds != null){
         try{
-          ((LanguageResource)resource).getDataStore().sync((LanguageResource)resource);
+          ((LanguageResource)
+                    resource).getDataStore().sync((LanguageResource)resource);
         }catch(PersistenceException pe){
           JOptionPane.showMessageDialog(project.frame,
                                         "Save failed!\n " +
@@ -123,9 +124,9 @@ public class LRHandle extends CustomResourceHandle {
         }
       }else{
         JOptionPane.showMessageDialog(project.frame,
-                                      "This resource has not been loaded from a datastore.\n"+
-                                      "Please use the \"Save to\" option!\n",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                        "This resource has not been loaded from a datastore.\n"+
+                         "Please use the \"Save to\" option!\n",
+                         "Gate", JOptionPane.ERROR_MESSAGE);
 
       }
     }

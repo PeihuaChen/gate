@@ -20,7 +20,8 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 /**
- * A small window used to show messages to the user during processing. This component is intended as a nicer alternative
+ * A small window used to show messages to the user during processing.
+ * This component is intended as a nicer alternative
  * to a status bar/progress bar.
  * The window has its own thread for updating the animated pictures displayed.
  *
