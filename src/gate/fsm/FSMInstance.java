@@ -95,7 +95,11 @@ public class FSMInstance implements Comparable, Cloneable{
     *time.
     *@param node a position in the AnnotationGraph
     */
-  public void setAGPosition(Node node){ AGPosition = node;}
+  public void setAGPosition(Node node){
+    AGPosition = node;
+    length = AGPosition.getOffset().longValue() -
+             startNode.getOffset().longValue();
+  }
 
   /** Gets the map representing the bindings that took place during the matching
     *process this FSM instance performed.

@@ -1,6 +1,7 @@
 package gate.util;
 
 import gate.*;
+import gate.gui.*;
 
 import java.util.*;
 import java.text.BreakIterator;

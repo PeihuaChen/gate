@@ -12,6 +12,7 @@ package gate.jape;
 import java.util.*;
 import com.objectspace.jgl.*;
 import gate.annotation.*;
+import gate.gui.*;
 import gate.util.*;
 import gate.*;
 
@@ -179,7 +180,7 @@ implements JapeConstants, java.io.Serializable
     return buf.toString();
   } // toString
 
-//needed by FSM  
+//needed by FSM
   public LeftHandSide getLHS(){
     return lhs;
   }
@@ -187,10 +188,22 @@ implements JapeConstants, java.io.Serializable
     return rhs;
   }
 
+  //StatusReporter VOID Implementation
+  public void addStatusListener(StatusListener listener){}
+  public void removeStatusListener(StatusListener listener){}
+  //ProcessProgressReporter VOID implementation
+  public void addProcessProgressListener(ProgressListener listener){}
+  public void removeProcessProgressListener(ProgressListener listener){}
+  //ProcessProgressReporter implementation ends here
+
 } // class Rule
 
 
 // $Log$
+// Revision 1.4  2000/07/03 21:00:59  valyt
+// Added StatusBar and ProgressBar support for tokenisation & Jape transduction
+// (it looks great :) )
+//
 // Revision 1.3  2000/05/05 12:51:12  valyt
 // Got rid of deprecation warnings
 //
