@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+<!-- COPY BACK TO GATE RESOURCES ************ -->
+
+
+<!-- creole.xml directory file for testpkg resources -->
+<!-- $Id$ -->
+<CREOLE-DIRECTORY>
+
+  <!-- creole.xml resource metadata file for test resources -->
+  <CREOLE>
+
+    <!-- Don't change this one - TestCreole assumes certain values here -->
+    <RESOURCE>
+      <NAME>Sheffield Test PR 1</NAME>
+      <JAR>TestResources.jar</JAR>
+      <CLASS>testpkg.TestPR1</CLASS>
+
+      <PARAMETER-LIST>
+	<PARAMETER RUNTIME="trUe" NAME="HOOPY DOOPY">param0</PARAMETER>
+      </PARAMETER-LIST>
+
+      <PARAMETER-LIST>
+	<PARAMETER DEFAULT="a default"
+	  OPTIONAL="false" NAME="someparam">param1</PARAMETER>
+	<PARAMETER DEFAULT="" COMMENT="a param comment"
+	  OPTIONAL="true" NAME="some other param">param2</PARAMETER>
+      </PARAMETER-LIST>
+
+      <SOME-ARBITRARY-RESOURCE-FEATURE/>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Sheffield Test PR 2</NAME>
+      <JAR>TestResources.jar</JAR>
+      <CLASS>testpkg.TestPR2</CLASS>
+      <AUTOLOAD/>
+    </RESOURCE>
+
+  </CREOLE> 
+
+</CREOLE-DIRECTORY>
+
+
