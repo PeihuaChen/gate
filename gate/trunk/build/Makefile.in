@@ -164,7 +164,8 @@ java2html:
 # delete all the class files etc. (doesn't delete gate.jar)
 clean:
 	rm -f classes.jar TestJdk.jar TestResources.jar
-	rm -rf `find ../classes/* -print |grep -v CVS` \
+	rm -rf '../classes/dependency cache' ../classes/gate
+	rm -rf ../classes/guk `find ../classes/* -print |grep -v CVS` \
 	  `find .. -name '*.~*' -print`
 
 # make a pretty list of the gate source, missing class files etc.
