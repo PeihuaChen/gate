@@ -139,5 +139,10 @@ japefiles:
 	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
 	  COM.sun.labs.jjdoc.JJDocMain  ParseCpsl.jj
 
+# make the testpkg.Dummy jar used by TestJdk to test class reloading
+TestJdk.jar: testpkg/Dummy.java
+	$(COMPILE) testpkg/Dummy.java
+	cd ../classes && ../build/jdk.sh jar cvf TestJdk.jar testpkg; \
+	mv TestJdk.jar ../build; rm -r testpkg
 
 ############################################################################
