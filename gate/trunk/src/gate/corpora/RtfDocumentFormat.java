@@ -48,9 +48,14 @@ public class RtfDocumentFormat extends TextualDocumentFormat
   public RtfDocumentFormat() { super(); }
 
   /** Unpack the markup in the document. This converts markup from the
-    * native format (e.g. XML, RTF) into annotations in GATE format.
+    * native format (e.g.RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
+    * It always tryes to parse te doc's content. It doesn't matter if the
+    * sourceUrl is null or not.
+    *
+    * @param Document doc The gate document you want to parse.
+    *
     */
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException {
 
@@ -92,8 +97,19 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
-    * It also uses the originalContentfeaturetype to preserve the original
-    * content of the Gate document.
+    * It uses the same behaviour as
+    * <code>unpackMarkup(Document doc);</code> but the document's old content is
+    * preserved into a feature attached to the doc.
+    * <p><b>WARNING :</b> If you are using this method, you should know
+    * that when it comes to dump the document as a GATE XML
+    * one(to assure persistence), it will result in bad document format.
+    * In this case you should use the Java persistency implemented
+    * in @see gate.persist package.</p>
+    *
+    * @param gate.Document doc The gate document you want to parse and create
+    * annotations
+    * @param String originalContentFeatureType The name of a feature that will
+    * preserve the old content of the document.
     */
    public void unpackMarkup(gate.Document doc,
                             String        originalContentFeatureType)

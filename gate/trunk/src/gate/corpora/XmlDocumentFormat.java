@@ -49,9 +49,19 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   public XmlDocumentFormat() { super(); }
 
   /** Unpack the markup in the document. This converts markup from the
-    * native format (e.g. XML, RTF) into annotations in GATE format.
+    * native format (e.g. XML) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
-    * what annotation type names to use.
+    * what annotation type names to use. If the document was created from a
+    * String, then is recomandable to set the doc's sourceUrl to <b>null</b>.
+    * So, if the document has a valid URL, then the parser will try to
+    * parse the XML document pointed by the URL.If the URL is not valid, or
+    * is null, then the doc's content will be parsed. If the doc's content is
+    * not a valid XML then the parser might crash.
+    *
+    * @param Document doc The gate document you want to parse. If
+    * <code>doc.getSourceUrl()</code> returns <b>null</b> then the content of
+    * doc will be parsed. Using a URL is recomended because the parser will
+    * report errors corectlly if the XML document is not well formed.
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
 /*
@@ -150,8 +160,19 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
-    * It also uses the originalContentfeaturetype to preserve the original
-    * content of the Gate document.
+    * It uses the same behaviour as
+    * <code>unpackMarkup(Document doc);</code> but the document's old content is
+    * preserved into a feature attached to the doc.
+    * <p><b>WARNING :</b> If you are using this method, you should know
+    * that when it comes to dump the document as a GATE XML
+    * one(to assure persistence), it will result in bad document format.
+    * In this case you should use the Java persistency implemented
+    * in @see gate.persist package.</p>
+    *
+    * @param gate.Document doc The gate document you want to parse and create
+    * annotations
+    * @param String originalContentFeatureType The name of a feature that will
+    * preserve the old content of the document.
     */
    public void unpackMarkup( Document doc,
                              String  originalContentFeature)

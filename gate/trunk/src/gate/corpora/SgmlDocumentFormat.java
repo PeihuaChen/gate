@@ -49,9 +49,15 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
   public SgmlDocumentFormat() { super(); }
 
   /** Unpack the markup in the document. This converts markup from the
-    * native format (e.g. XML, RTF) into annotations in GATE format.
+    * native format (e.g. SGML) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
+    * The doc's content is first converted to a wel formed XML.
+    * If this succeddes then the document is saved into a temp file and parsed
+    * as an XML document.
+    *
+    * @param Document doc The gate document you want to parse.
+    *
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
     if ( (doc == null) ||
@@ -125,8 +131,19 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
-    * It also uses the originalContentfeaturetype to preserve the original
-    * content of the Gate document.
+    * It uses the same behaviour as
+    * <code>unpackMarkup(Document doc);</code> but the document's old content is
+    * preserved into a feature attached to the doc.
+    * <p><b>WARNING :</b> If you are using this method, you should know
+    * that when it comes to dump the document as a GATE XML
+    * one(to assure persistence), it will result in bad document format.
+    * In this case you should use the Java persistency implemented
+    * in @see gate.persist package.</p>
+    *
+    * @param gate.Document doc The gate document you want to parse and create
+    * annotations
+    * @param String originalContentFeatureType The name of a feature that will
+    * preserve the old content of the document.
     */
    public void unpackMarkup(Document doc,
                                     String  originalContentFeatureType)

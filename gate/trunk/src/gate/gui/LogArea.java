@@ -16,9 +16,11 @@
 
 package gate.gui;
 
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.*;
+
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 
 import gate.util.*;
@@ -31,14 +33,29 @@ import gate.util.*;
   */
 public class LogArea extends JTextPane {
 
+  /** Field needed in inner classes*/
+  protected LogArea thisLogArea = null;
+
+  /** The popup menu with various actions*/
+  protected JPopupMenu popup = null;
+
+  /** This fields defines the Select all behaviour*/
+  protected SelectAllAction selectAllAction = null;
+
+  /** This fields defines the copy  behaviour*/
+  protected CopyAction copyAction = null;
+
   /** Constructs a LogArea object and captures the output from Err and Out*/
   public LogArea(){
+    thisLogArea = this;
+    this.setEditable(false);
+
     LogAreaOutputStream err = new LogAreaOutputStream(true);
     LogAreaOutputStream out = new LogAreaOutputStream(false);
 
-    // Corrupting Err
+    // Redirect Err
     Err.setPrintWriter(new PrintWriter(err,true));
-    // Corrupting Out
+    // Redirect Out
     Out.setPrintWriter(new PrintWriter(out,true));
     // Corrupting System.out
     // For the moment this option is inactive.Comment out to activate it.
@@ -46,7 +63,50 @@ public class LogArea extends JTextPane {
     // Corrupting System.err
     // For the moment this option is inactive.Comment out to activate it.
     //System.setErr(new PrintStream(err,true));
+
+    popup = new JPopupMenu();
+    selectAllAction = new SelectAllAction();
+    copyAction = new CopyAction();
+
+    popup.add(selectAllAction);
+    popup.add(copyAction);
+
+    initListeners();
   }// LogArea
+
+  /** Init all listeners for this object*/
+  public void initListeners(){
+    this.addMouseListener(new MouseAdapter(){
+      public void mouseClicked(MouseEvent e){
+        if(SwingUtilities.isRightMouseButton(e)){
+          popup.show(thisLogArea, e.getPoint().x, e.getPoint().y);
+        }//End if
+      }// end mouseClicked()
+    });// End addMouseListener();
+  }// initListeners();
+
+  /** Inner class that defines the behaviour of SelectAll action.*/
+  protected class SelectAllAction extends AbstractAction{
+
+    public SelectAllAction(){
+      super("Select all");
+    }// SelectAll
+
+    public void actionPerformed(ActionEvent e){
+      thisLogArea.selectAll();
+    }// actionPerformed();
+  }// End class SelectAllAction
+
+  /** Inner class that defines the behaviour of copy action.*/
+  protected class CopyAction extends AbstractAction{
+    public CopyAction(){
+      super("Copy");
+    }// CopyAction
+
+    public void actionPerformed(ActionEvent e){
+      thisLogArea.copy();
+    }// actionPerformed();
+  }// End class CopyAction
 
   /** Inner class that defines the behaviour of a OutputStream that writes to
    *  the LogArea
@@ -80,13 +140,10 @@ public class LogArea extends JTextPane {
       charCode &= 0x000000FF;
       // Convert the byte to a char before put it into the log area
       char c = (char)charCode;
-      // Simulate an Append with insertString. We need the last possition in
-      // document.
-      int startPosition = styledDoc.getLength();
-      // Append it to the log area
+      // Insert it in the log Area
       try{
           synchronized(styledDoc){
-            styledDoc.insertString(startPosition,String.valueOf(c),style);
+            styledDoc.insertString(0,String.valueOf(c),style);
           }// End synchronize
       } catch(BadLocationException e){
         e.printStackTrace(Err.getPrintWriter());
@@ -97,11 +154,10 @@ public class LogArea extends JTextPane {
      *  using the style specified in constructor.
      */
     public synchronized void write(byte[] data, int offset, int length){
-      int startPosition = styledDoc.getLength();
-      // Append the string to the log area
+      // Insert the string to the log area
       try{
           synchronized(styledDoc){
-            styledDoc.insertString( startPosition,
+            styledDoc.insertString( 0,
                                     new String(data,offset,length),
                                     style);
           } // End synchronize

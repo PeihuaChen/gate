@@ -287,14 +287,41 @@ public class MainFrame extends JFrame
     JPanel splashBox = new JPanel();
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
     splashBox.setBackground(Color.white);
+/*
     JLabel gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
         "/gate/resources/img/gateSplash.gif")));
-    gifLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-    splashBox.add(gifLbl);
+    Box box = new Box(BoxLayout.X_AXIS);
+    box.add(Box.createHorizontalGlue());
+    box.add(gifLbl);
+    box.add(Box.createHorizontalGlue());
+    splashBox.add(box);
+*/
+    JLabel gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
+        "/gate/resources/img/gateHeader.gif")));
+    Box box = new Box(BoxLayout.X_AXIS);
+    box.add(gifLbl);
+    box.add(Box.createHorizontalGlue());
+    splashBox.add(box);
+    splashBox.add(Box.createVerticalStrut(10));
 
-    JLabel verLbl = new JLabel("<HTML>Version <B>" + Main.version + "</B>" +
-                                ", build <B>" + Main.build + "</B></HTML>");
-    splashBox.add(verLbl);
+    JLabel verLbl = new JLabel("<HTML><FONT color=\"blue\">Version <B>"
+        + Main.version + "</B></FONT>" +
+       ", <FONT color=\"red\">build <B>" + Main.build + "</B></FONT></HTML>");
+    box = new Box(BoxLayout.X_AXIS);
+    box.add(Box.createHorizontalGlue());
+    box.add(verLbl);
+
+    splashBox.add(box);
+    splashBox.add(Box.createVerticalStrut(10));
+
+    verLbl = new JLabel("<HTML><B>GATE team:</B><BR>" +
+    "Hamish Cunningham, Kalina Bontcheva, Valentin Tablan, Cristian Ursu,<BR>"+
+    "Oana Hamza, Diana Maynard, Yorick Wilks, Robert Gaizauskas.");
+    box = new Box(BoxLayout.X_AXIS);
+    box.add(verLbl);
+    box.add(Box.createHorizontalGlue());
+
+    splashBox.add(box);
 
     JButton okBtn = new JButton("OK");
     okBtn.addActionListener(new ActionListener() {
@@ -302,10 +329,14 @@ public class MainFrame extends JFrame
         splash.hide();
       }
     });
-    okBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
     okBtn.setBackground(Color.white);
+    box = new Box(BoxLayout.X_AXIS);
+    box.add(Box.createHorizontalGlue());
+    box.add(okBtn);
+    box.add(Box.createHorizontalGlue());
+
     splashBox.add(Box.createVerticalStrut(10));
-    splashBox.add(okBtn);
+    splashBox.add(box);
     splashBox.add(Box.createVerticalStrut(10));
     splash = new Splash(this, splashBox);
   }
