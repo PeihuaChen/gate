@@ -36,7 +36,7 @@ import gate.*;
 import gate.util.*;
 import gate.corpora.TestDocument;
 
-public class TestGazetteer extends TestCase{
+public class TestGazetteer extends TestCase {
 
   public TestGazetteer(String name) {
     super(name);
@@ -76,9 +76,9 @@ public class TestGazetteer extends TestCase{
       testGaz.setUp();
       testGaz.testDefaultGazetteer();
       testGaz.tearDown();
-    }catch(Exception e){
+    } catch(Exception e) {
       e.printStackTrace();
     }
-  }
+  } // main
 
-}
+} // TestGazetteer

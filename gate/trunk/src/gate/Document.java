@@ -25,8 +25,8 @@ import gate.util.*;
 
 /** Represents the commonalities between all sorts of documents.
   */
-public interface Document extends LanguageResource, Comparable
-{
+public interface Document extends LanguageResource, Comparable {
+
   /** Documents are identified by URLs */
   public URL getSourceUrl();
 

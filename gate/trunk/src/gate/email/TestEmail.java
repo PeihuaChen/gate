@@ -29,8 +29,8 @@ import junit.framework.*;
 import org.w3c.www.mime.*;
 
 
-/** Test class for Email facilities
-  *
+/**
+  * Test class for Email facilities
   */
 public class TestEmail extends TestCase
 {
@@ -47,14 +47,13 @@ public class TestEmail extends TestCase
 
   public static void main(String args[]){
     TestEmail app = new TestEmail("TestEmail");
-    try{
+    try {
       app.testUnpackMarkup();
       app.testEmail();
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace (Err.getPrintWriter());
     }
   }
-
 
   /** A test */
   public void testUnpackMarkup() throws Exception{
@@ -94,29 +93,29 @@ public class TestEmail extends TestCase
           public void processFinished(){
           }
       });
-   */
-      //docFormat.unpackMarkup (doc,"DocumentContent");
-      docFormat.unpackMarkup(doc);
-      /*
-      // timing the operation
-      Date startTime = new Date();
-        docFormat.unpackMarkup (doc,"DocumentContent");
-      Date endTime = new Date();
-      // get the size of the doc
-      long  time1 = endTime.getTime () - startTime.getTime ();
-      //File f = Files.writeTempFile(doc.getSourceURL().openStream());
-      int docSize = doc.getContent().size().intValue();
-      //f.delete();
-      Out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-        docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-       time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024+
-        "." + (docSize/time1*1000)%1024 + " K/second");
-      */
+    */
+    //docFormat.unpackMarkup (doc,"DocumentContent");
+    docFormat.unpackMarkup(doc);
+    /*
+    // timing the operation
+    Date startTime = new Date();
+      docFormat.unpackMarkup (doc,"DocumentContent");
+    Date endTime = new Date();
+    // get the size of the doc
+    long  time1 = endTime.getTime () - startTime.getTime ();
+    //File f = Files.writeTempFile(doc.getSourceURL().openStream());
+    int docSize = doc.getContent().size().intValue();
+    //f.delete();
+    Out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
+      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
+     time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024+
+      "." + (docSize/time1*1000)%1024 + " K/second");
+    */
    //*/
   } // testUnpackMarkup()
 
   /**
-    final test
+    * final test
     */
   public void testEmail(){
     EmailDocumentHandler emailDocumentHandler = new EmailDocumentHandler();
@@ -128,4 +127,4 @@ public class TestEmail extends TestCase
     return new TestSuite(TestEmail.class);
   } // suite
 
-}//class TestEmail
+} // class TestEmail

@@ -27,4 +27,4 @@ public interface ProgressListener {
 
   public void processFinished();
 
-}
+} // ProgressListener

@@ -215,7 +215,8 @@ extends PatternElement implements JapeConstants, java.io.Serializable
         if(rightmostEnd == -1) { // first time through
           rightmostEnd = matchEnd;
         }
-        else if(match.firstNode().getOffset().intValue() >= rightmostEnd) { // reject
+        else if(match.firstNode().getOffset().intValue() >= rightmostEnd) {
+          // reject
           lastFailurePoint = matchEnd;
           match = null;
         }
@@ -234,7 +235,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
           continue;
         }
         else {
-          //Debug.pr(
+          // Debug.pr(
           //  this, "BPE.matches: negating successful constraint, match = " +
           //  match.toString() + Debug.getNl()
           //);
@@ -263,6 +264,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
         //);
         return false;
       } else {
+
         //Debug.pr(this,"BPE.matches: match= "+match.toString()+Debug.getNl());
         matchedAnnots.addAll(match);
         addedAnnots.addAll(match);
@@ -315,9 +317,9 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // toString
 
   /**
-  * Returns a short description.
-  */
-  public String shortDesc(){
+    * Returns a short description.
+    */
+  public String shortDesc() {
     String res = "";
     if(constraints1 != null) {
       for(int len = constraints1.size(), i = 0; i < len; i++)

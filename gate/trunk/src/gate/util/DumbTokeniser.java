@@ -30,18 +30,18 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  public DumbTokeniser(){
+  public DumbTokeniser() {
   }
 
   public static void main(String[] args) {
-//    DefaultTokenizer defaultTokenizer = new DefaultTokenizer();
+    // DefaultTokenizer defaultTokenizer = new DefaultTokenizer();
   }
 
-  public FeatureMap getFeatures(){
+  public FeatureMap getFeatures() {
     return features;
   }
 
-  public void setFeatures(FeatureMap features){
+  public void setFeatures(FeatureMap features) {
     this.features = features;
   }
 
@@ -52,23 +52,23 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
     * checks.
     */
   public void tokenise(Document doc, AnnotationSet annotationSet,
-                       boolean runInNewThread){
+                       boolean runInNewThread) {
     this.doc =  doc;
     this.annotationSet = annotationSet;
     if(runInNewThread){
       Thread thread = new Thread(this);
       thread.start();
-    }else run();
+    } else run();
   }
 
   /** Tokenises the given document writting all the generated annotations in
     * the default annotation set.
     */
-  public void tokenise(Document doc, boolean runInNewThread){
+  public void tokenise(Document doc, boolean runInNewThread) {
     tokenise(doc, doc.getAnnotations(), runInNewThread);
   }
 
-  public void run(){
+  public void run() {
     String content = doc.getContent().toString();
     FeatureMap fm;
     boolean containsDigits = false, containsLetters = false,
@@ -80,21 +80,23 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
     int charIdx = 0;
     int length = content.length();
     int tokenStart;
-    //each step of this "do..while" cycle should parse one or more tokens
-    try{
-      do{
-        tokenStart = charIdx;
-        //parse the whitespace
-        while(charIdx < length &&
-              Character.isWhitespace(content.charAt(charIdx))){
-          //parse the gap
-          //all characters that are space are considered gap
-          while(charIdx < length &&
-                Character.isSpaceChar(content.charAt(charIdx))){
 
+    // each step of this "do..while" cycle should parse one or more tokens
+    try {
+      do {
+        tokenStart = charIdx;
+        // parse the whitespace
+        while(charIdx < length &&
+              Character.isWhitespace(content.charAt(charIdx))) {
+
+          // parse the gap
+          // all characters that are space are considered gap
+          while(charIdx < length &&
+                Character.isSpaceChar(content.charAt(charIdx))) {
             charIdx++;
-          }//parse gap
-          //add the gap
+          }// parse gap
+
+          // add the gap
           if(charIdx > tokenStart){
             fm = Factory.newFeatureMap();
             fm.put("String", content.substring(tokenStart, charIdx));
@@ -104,15 +106,16 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
             tokenStart = charIdx;
           }
 
-          //parse the break
-          //all the character that are whitespace but not space are breaks
+          // parse the break
+          // all the character that are whitespace but not space are breaks
           while(charIdx < length &&
                 Character.isWhitespace(content.charAt(charIdx)) &&
                 !Character.isSpaceChar(content.charAt(charIdx))){
 
             charIdx++;
-          }//parse break
-          //add the break
+          }// parse break
+
+          // add the break
           if(charIdx > tokenStart){
             fm = Factory.newFeatureMap();
             fm.put("String", content.substring(tokenStart, charIdx));
@@ -121,11 +124,11 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
                               "SpaceToken", fm);
             tokenStart = charIdx;
           }
-        }//parse whitespace
+        }// parse whitespace
 
-        //parse the text
+        // parse the text
         while(charIdx < length &&
-              !Character.isWhitespace(content.charAt(charIdx))){
+              !Character.isWhitespace(content.charAt(charIdx))) {
           currentChar = content.charAt(charIdx);
 
           if(Character.isDigit(currentChar)) containsDigits = true;
@@ -143,22 +146,25 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
           else if(currentChar == ',') containsComma = true;
           else containsUnknownChar = true;
           charIdx++;
-        }//parse the text
-        //add the token
-        if(charIdx > tokenStart){
+        }// parse the text
+
+        // add the token
+        if(charIdx > tokenStart) {
           fm = Factory.newFeatureMap();
           if(containsDigits){
             if(containsLetters)
               if(containsDash)
-                if(containsUnknownChar) fm.put("kind", "containsDigitsAndLettersAndDashesAndOther");
+                if(containsUnknownChar) fm.put("kind",
+                                  "containsDigitsAndLettersAndDashesAndOther");
                 else fm.put("kind", "containsDigitsAndLettersAndDashes");
               else fm.put("kind", "containsDigitsAndLetters");
             else if(containsDash) fm.put("kind", "containsDigitsAndDash");
             else if(containsSlash) fm.put("kind", "containsDigitsAndSlash");
             else if(containsComma) fm.put("kind", "containsDigitsAndComma");
             else if(containsPeriod) fm.put("kind", "containsDigitsAndPeriod");
-            else if(containsUnknownChar) fm.put("kind", "containsDigitsAndOther");
-          }else{//does not contain digits
+            else if(containsUnknownChar) fm.put("kind",
+                                                      "containsDigitsAndOther");
+          } else {//does not contain digits
             if(containsLetters){
               if(containsDash) fm.put("kind","containsLettersAndDashes");
               else if(!containsSlash && !containsComma &&
@@ -170,8 +176,8 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
                   else fm.put("orth","allCaps");
                 else fm.put("orth", "lowerCase");
 
-              }else fm.put("kind", "other");
-            }else //does not contain letters or digits
+              } else fm.put("kind", "other");
+            } else //does not contain letters or digits
               fm.put("kind", "other");
           }
           fm.put("String", content.substring(tokenStart, charIdx));
@@ -189,34 +195,34 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
           upperInitial = false;
           containsUnknownChar = false;
         }
-      }while(charIdx < length);
-    }catch(InvalidOffsetException ioe){
+      } while(charIdx < length);
+    } catch(InvalidOffsetException ioe) {
       ioe.printStackTrace(Err.getPrintWriter());
     }
 
 
-//    try{
-//      for (int charIdx = 0; charIdx < content.length(); charIdx++){
-//        currentChar = content.charAt(charIdx);
+    //    try{
+    //      for (int charIdx = 0; charIdx < content.length(); charIdx++){
+    //        currentChar = content.charAt(charIdx);
 
-//      }
-//    }catch(InvalidOffsetException ioe){
-//      ioe.printStackTrace(Err.getPrintWriter());
-//    }
+    //      }
+    //    }catch(InvalidOffsetException ioe){
+    //      ioe.printStackTrace(Err.getPrintWriter());
+    //    }
   }
 
-  public void run_(){
+  public void run_() {
     String content = doc.getContent().toString();
     BreakIterator bi = BreakIterator.getWordInstance();
     bi.setText(content);
     int start = bi.first();
     FeatureMap fm;
-    try{
+    try {
       for (int end = bi.next();
            end != BreakIterator.DONE;
            start = end, end = bi.next())
       {
-        if(!Character.isWhitespace(content.charAt(start))){
+        if(!Character.isWhitespace(content.charAt(start))) {
           fm = Factory.newFeatureMap();
           fm.put("string", content.substring(start, end));
           annotationSet.add(new Long(start),
@@ -224,21 +230,21 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
                             "Token", fm);
         }
       }
-    }catch(InvalidOffsetException ioe){
+    } catch(InvalidOffsetException ioe) {
       ioe.printStackTrace(Err.getPrintWriter());
     }
   }
 
   //ProcessProgressReporter implementation
-  public void addProcessProgressListener(ProgressListener listener){
+  public void addProcessProgressListener(ProgressListener listener) {
     myListeners.add(listener);
   }
 
-  public void removeProcessProgressListener(ProgressListener listener){
+  public void removeProcessProgressListener(ProgressListener listener) {
     myListeners.remove(listener);
   }
 
-  protected void fireProgressChangedEvent(int i){
+  protected void fireProgressChangedEvent(int i) {
     Iterator listenersIter = myListeners.iterator();
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).progressChanged(i);
@@ -251,7 +257,11 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
   }
 
   private FeatureMap features  = null;
+
   private List myListeners = new LinkedList();
+
   private Document doc;
+
   private AnnotationSet annotationSet;
-}
+
+} // class DumbTokeniser

@@ -54,7 +54,7 @@ public class XmlDocumentHandler extends HandlerBase
   public XmlDocumentHandler(gate.Document aDocument, Map  aMarkupElementsMap,
                             Map anElement2StringMap){
     this(aDocument,aMarkupElementsMap,anElement2StringMap,null);
-  }//XmlDocumentHandler
+  } // XmlDocumentHandler
 
   /**
     * Constructs a XmlDocumentHandler object.
@@ -72,17 +72,22 @@ public class XmlDocumentHandler extends HandlerBase
                             gate.AnnotationSet  anAnnotationSet){
     // init stack
     stack = new java.util.Stack();
+
     // this string contains the plain text (the text without markup)
     tmpDocContent = new StringBuffer("");
+
     // colector is used later to transform all custom objects into annotation
     // objects
     colector = new LinkedList();
+
     // the Gate document
     doc = aDocument;
+
     // this map contains the elements name that we want to create
     // if it's null all the elements from the XML documents will be transformed
     // into Gate annotation objects
     markupElementsMap = aMarkupElementsMap;
+
     // this map contains the string that we want to insert iside the document
     // content, when a certain element is found
     // if the map is null then no string is added
@@ -107,18 +112,23 @@ public class XmlDocumentHandler extends HandlerBase
     * this new gate document.
     */
   public void endDocument() throws org.xml.sax.SAXException {
+
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent.toString()));
+
     // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
+
     // If basicAs is null then get the default AnnotationSet,
     // based on the gate document.
     if (basicAS == null)
       basicAS = doc.getAnnotations();
+
     // create all the annotations (on this new document) from the collector
     Iterator anIterator = colector.iterator();
     while (anIterator.hasNext()){
       CustomObject obj = (CustomObject) anIterator.next();
+
       // create a new annotation and add it to the annotation set
       try{
         // the annotation type will be conforming with markupElementsMap
@@ -149,18 +159,23 @@ public class XmlDocumentHandler extends HandlerBase
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0)
         fireStatusChangedEvent("Processed elements : " + elements);
+
     // construct a SimpleFeatureMapImpl from the list of attributes
     FeatureMap fm = new SimpleFeatureMapImpl();
+
     //get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
      String attName  = atts.getName(i);
      String attValue = atts.getValue(i);
      fm.put(attName,attValue);
     }
+
     // create the START index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
+
     // initialy the Start index is equal with End index
     CustomObject obj = new CustomObject(elemName,fm, startIndex, startIndex);
+
     // put this object into the stack
     stack.push(obj);
   }
@@ -173,18 +188,22 @@ public class XmlDocumentHandler extends HandlerBase
   public void endElement(String elemName) throws SAXException{
     // obj is for internal use
     CustomObject obj = null;
+
     // if the stack is not empty, we extract the custom object and delete it
     if (!stack.isEmpty ()){
       obj = (CustomObject) stack.pop();
     }
+
     // put the object into colector
     // later, when the document ends we will use colector to create all the
     // annotations
     colector.add(obj);
+
     // if element is found on Element2String map, then add the string to the
     // end of the document content
     if (element2StringMap != null){
       String stringFromMap = null;
+
       // test to see if element is inside the map
       // if it is then get the string value and add it to the document content
       stringFromMap = (String) element2StringMap.get(elemName);
@@ -208,10 +227,13 @@ public class XmlDocumentHandler extends HandlerBase
 
     CustomObject obj = null;
     // iterate through stack to modify the End index of the existing elements
+
     java.util.Iterator anIterator = stack.iterator();
     while (anIterator.hasNext ()){
+
       // get the object and move to the next one
       obj = (CustomObject) anIterator.next ();
+
       // if obj is not null then sets its end index
       if (null != obj){
         // sets its End index
@@ -272,7 +294,7 @@ public class XmlDocumentHandler extends HandlerBase
     * It works only if the XmlDocumentHandler implements a
     * com.sun.parser.LexicalEventListener
     */
-  public void comment(String text) throws SAXException{
+  public void comment(String text) throws SAXException {
     // create a FeatureMap and then add the comment to the annotation set.
     /*
     gate.util.SimpleFeatureMapImpl fm = new gate.util.SimpleFeatureMapImpl();
@@ -289,7 +311,7 @@ public class XmlDocumentHandler extends HandlerBase
     * It works only if the XmlDocumentHandler implements a
     * com.sun.parser.LexicalEventListener
     */
-  public void startCDATA()throws SAXException{
+  public void startCDATA()throws SAXException {
   }
 
   /**
@@ -298,7 +320,7 @@ public class XmlDocumentHandler extends HandlerBase
     * It works only if the XmlDocumentHandler implements a
     * com.sun.parser.LexicalEventListener
     */
-  public void endCDATA() throws SAXException{
+  public void endCDATA() throws SAXException {
   }
 
   /**
@@ -306,7 +328,7 @@ public class XmlDocumentHandler extends HandlerBase
     * It works only if the XmlDocumentHandler implements a
     * com.sun.parser.LexicalEventListener
     */
-  public void startParsedEntity(String name) throws SAXException{
+  public void startParsedEntity(String name) throws SAXException {
   }
 
   /**
@@ -390,11 +412,11 @@ public class XmlDocumentHandler extends HandlerBase
 } //XmlDocumentHandler
 
 
-/*
- * The objects belonging to this class are used inside the stack.
- * This class is for internal needs
- */
-class  CustomObject{
+/**
+  * The objects belonging to this class are used inside the stack.
+  * This class is for internal needs
+  */
+class  CustomObject {
 
   // constructor
   public CustomObject(String anElemName, FeatureMap aFm,
@@ -409,36 +431,44 @@ class  CustomObject{
   public String getElemName(){
     return elemName;
   }
+
   public FeatureMap getFM(){
     return fm;
   }
+
   public Long getStart(){
     return start;
   }
+
   public Long getEnd(){
     return end;
   }
-
 
   // mutator
   public void setElemName(String anElemName){
     elemName = anElemName;
   }
+
   public void setFM(FeatureMap aFm){
     fm = aFm;
   }
+
   public void setStart(Long aStart){
     start = aStart;
   }
+
   public void setEnd(Long anEnd){
     end = anEnd;
   }
 
   // data fields
   private String elemName = null;
+
   private FeatureMap fm = null;
+
   private Long start = null;
+
   private Long end  = null;
 
-}// CustomObject
+} // CustomObject
 

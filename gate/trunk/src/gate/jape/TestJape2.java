@@ -97,8 +97,8 @@ public class TestJape2 {
     // run the parser test
     message("parsing the .jape file (or deserialising the .ser file)");
     Batch batch = null;
-    try { batch = new Batch(japeName); }
-    catch(JapeException e) {
+    try { batch = new Batch(japeName);
+    } catch(JapeException e) {
       usage("can't create transducer " + e.getMessage());
     }
     /*Transducer transducer = parseJape(japeName);
@@ -133,7 +133,6 @@ public class TestJape2 {
       collDir.getAbsolutePath()
     );
 
-
     // add all the documents
     for(ArrayIterator i = fileNames.begin(); ! i.atEnd(); i.advance()) {
       String fname = (String) i.get();
@@ -151,7 +150,7 @@ public class TestJape2 {
         e.printStackTrace();
       }
 
-/*
+      /*
       // Tokenise the document
       Tokeniser tokeniser = new Tokeniser(doc, Tokeniser.HMM);
       try { tokeniser.hmmTokenSequence(); }
@@ -166,7 +165,7 @@ public class TestJape2 {
       // Gazetteer the document
       gate.creole.Annotator gazetteer = new GazetteerAnnotator();
       gazetteer.annotate(doc, null);
-*/
+      */
     } // for each doc name
 
     // return the annotated collection
@@ -179,7 +178,8 @@ public class TestJape2 {
     * Must be run from the gate2 directory.
     * Parse the .jape file.
     */
-/*  static public Transducer parseJape(String japeName) {
+    /*
+    static public Transducer parseJape(String japeName) {
     Transducer transducer = null;
 
     if(japeName.endsWith(".ser")) { // it's compiled already
@@ -231,7 +231,7 @@ public class TestJape2 {
       e.printStackTrace();
     }
   } // runTransducer
-*/
+  */
 
   /** You got something wrong, dumbo. */
   public static void usage(String errorMessage) {
@@ -255,6 +255,9 @@ public class TestJape2 {
 
 
 // $Log$
+// Revision 1.6  2000/10/26 10:45:31  oana
+// Modified in the code style
+//
 // Revision 1.5  2000/10/23 21:50:42  hamish
 // cleaned up exception handling in gate.creole and added
 // ResourceInstantiationException;

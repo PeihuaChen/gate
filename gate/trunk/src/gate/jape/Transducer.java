@@ -43,7 +43,8 @@ public abstract class Transducer implements java.io.Serializable,
   public String getName() { return name; }
 
   /** Transduce a document.  */
-  public abstract void transduce(Document doc, AnnotationSet annotations) throws JapeException;
+  public abstract void transduce(Document doc, AnnotationSet annotations)
+                                                          throws JapeException;
 
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
@@ -60,9 +61,11 @@ public abstract class Transducer implements java.io.Serializable,
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
   }
+
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
+
   protected void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
@@ -90,19 +93,26 @@ public abstract class Transducer implements java.io.Serializable,
       ((ProgressListener)listenersIter.next()).processFinished();
   }
 
-  public void setFileName(String fileName){ this.fileName = fileName; }
-  public void setDirName(String dirName){ this.dirName = dirName;}
-  public void setFromResource(boolean fromResource){
+  public void setFileName(String fileName) { this.fileName = fileName; }
+
+  public void setDirName(String dirName) { this.dirName = dirName;}
+
+  public void setFromResource(boolean fromResource) {
     this.fromResource = fromResource;
   }
 
-  public String getFileName(){ return fileName;}
-  public String getDirName(){return dirName;}
-  public boolean getFromResource(){return fromResource;}
+  public String getFileName() { return fileName;}
+
+  public String getDirName() { return dirName; }
+
+  public boolean getFromResource() { return fromResource;}
 
   private List myProgressListeners = new LinkedList();
+
   private List myStatusListeners = new LinkedList();
+
   private String fileName, dirName;
+
   private boolean fromResource;
   //ProcessProgressReporter implementation ends here
 
@@ -111,6 +121,9 @@ public abstract class Transducer implements java.io.Serializable,
 
 
 // $Log$
+// Revision 1.7  2000/10/26 10:45:31  oana
+// Modified in the code style
+//
 // Revision 1.6  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //

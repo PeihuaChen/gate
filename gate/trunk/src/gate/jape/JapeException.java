@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Hamish Cunningham, 23/02/2000
  *
  *  $Id$
@@ -33,4 +33,5 @@ public class JapeException extends GateException {
   public JapeException() {
     super();
   }
-} 
+
+} // class JapeException

@@ -24,17 +24,17 @@ import gate.util.*;
 import java.io.Serializable;
 
 /**
-THIS CLASS SHOULDN'T BE HERE. Please let's all ignore it, and maybe
-it will go away.
-<P>
-* Implements the TIPSTER and GDM API for attributes.
-* Test code in <code>testAttributes</code> class. <P>
-* The JdmAttribute class would accept all java serialisable classes, all
-* jdm classes and also all user-defined classes provided they implement
-* the Serializable interface. This restriction is necessary  since Jdm
-* uses Java serialisation to ensure object persistency. However, making
-* classes serialisable is usually quite straightforward. <P>
-* @author Kalina Bontcheva
+  * THIS CLASS SHOULDN'T BE HERE. Please let's all ignore it, and maybe
+  * it will go away.
+  * <P>
+  * Implements the TIPSTER and GDM API for attributes.
+  * Test code in <code>testAttributes</code> class. <P>
+  * The JdmAttribute class would accept all java serialisable classes, all
+  * jdm classes and also all user-defined classes provided they implement
+  * the Serializable interface. This restriction is necessary  since Jdm
+  * uses Java serialisation to ensure object persistency. However, making
+  * classes serialisable is usually quite straightforward. <P>
+  * @author Kalina Bontcheva
 */
 public class JdmAttribute implements Serializable {
 
@@ -79,11 +79,9 @@ public class JdmAttribute implements Serializable {
     return a.getName().equals(name) && a.getValue().equals(value);
   }
 
-
-
   public String toString() {
          return "JdmAttr: name=" + name + "; value=" + value.toString();
 
   }
 
-}
+} // class JdmAttribute

@@ -17,7 +17,7 @@
 
 package gate.creole.tokeniser;
 
-/**Fired when an invalid tokeniser rule is found
+/** Fired when an invalid tokeniser rule is found
   */
 public class InvalidRuleException extends TokeniserException {
   /** Debug flag */
@@ -27,4 +27,4 @@ public class InvalidRuleException extends TokeniserException {
     super(s);
   }
 
-}
+} // class InvalidRuleException

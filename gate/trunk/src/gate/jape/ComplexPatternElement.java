@@ -132,7 +132,7 @@ implements JapeConstants, java.io.Serializable
     }
     else if(kleeneOp == KLEENE_QUERY) {
       if(firstTry) matchHistory.push(new Integer(matchArity));
-      /*Debug.pr(this, "CPE.matches: true, QUERY rule");*/
+      /* Debug.pr(this, "CPE.matches: true, QUERY rule"); */
       return true;
     }
     else if(kleeneOp == KLEENE_PLUS) {
@@ -185,24 +185,26 @@ implements JapeConstants, java.io.Serializable
     }
 
     buf.append(
-      "); constraintGroup(" + newline + 
+      "); constraintGroup(" + newline +
       constraintGroup.toString(Strings.addPadding(pad, INDENT_PADDING)) +
       newline + pad + ") CPE." + newline
     );
 
     return buf.toString();
   } // toString
-//needed by FSM
+  //needed by FSM
 
   public int getKleeneOp(){ return kleeneOp; };
+
   public ConstraintGroup getConstraintGroup(){ return constraintGroup; };
-
-
 
 } // class ComplexPatternElement
 
 
 // $Log$
+// Revision 1.5  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.4  2000/10/16 16:44:33  oana
 // Changed the comment of DEBUG variable
 //
@@ -228,7 +230,8 @@ implements JapeConstants, java.io.Serializable
 // A bug fixed, wasn't restoring the document length
 //
 // Revision 1.12  1998/11/05 13:36:29  kalina
-// moved to use array of JdmAttributes for selectNextAnnotation instead of a sequence
+// moved to use array of JdmAttributes for selectNextAnnotation instead
+// of a sequence
 //
 // Revision 1.11  1998/11/01 21:21:35  hamish
 // use Java arrays in transduction where possible

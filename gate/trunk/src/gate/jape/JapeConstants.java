@@ -31,16 +31,21 @@ public interface JapeConstants
 
   /** no Kleene operator */
   public int NO_KLEENE_OP		=  0;
+
   /** Kleene star (*) */
   public int KLEENE_STAR		=  1;
+
   /** Kleene plus (+) */
   public int KLEENE_PLUS		=  2;
+
   /** Kleene query (?) */
   public int KLEENE_QUERY		=  3;
 
   /** No binding on this element */
   public int NO_BINDING			=  1;
+
   public int MULTI_SPAN_BINDING		=  2;
+
   public int SINGLE_SPAN_BINDING	=  3;
 
   /** Brill-style rule application */
@@ -61,6 +66,9 @@ public interface JapeConstants
 
 
 // $Log$
+// Revision 1.3  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.2  2000/10/10 15:36:35  oana
 // Changed System.out in Out and System.err in Err;
 // Added the DEBUG variable seted on false;

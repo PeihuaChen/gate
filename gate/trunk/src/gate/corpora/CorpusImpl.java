@@ -28,8 +28,8 @@ import java.net.*;
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
   */
-public class CorpusImpl extends TreeSet implements Corpus
-{
+public class CorpusImpl extends TreeSet implements Corpus {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

@@ -26,47 +26,47 @@ import gate.util.*;
 import gate.*;
 
 /**
-  Not so fast...
-  This class is not a realy Sgml2Xml convertor.
-  It takes an SGML document and tries to prepare it for an XML parser
-  For a true conversion we need an Java SGML parser...
-  If you know one let me know....
-
-  What does it do:
-  <ul>
-    <li>If it finds something like this : &lt;element attribute = value&gt;
-        it will produce: &lt;element attribute = "value"&gt;
-    <li>If it finds something like this : &lt;element something
-        attribute2=value&gt;it will produce : &lt;element
-        defaultAttribute="something" attribute2="value"&gt;
-    <li>If it finds : &lt;element att1='value1 value2' att2="value2
-        value3"&gt; it will produce: &lt;element att1="value1 value2"
-        att2="value2 value3"&gt;
-    <li>If it finds : &lt;element1&gt; &lt;elem&gt;text &lt;/element1&gt;
-        will produce: &lt;element1&gt; &lt;elem&gt;text&lt;elem&gt;
-        &lt;/element1&gt;
-    <li>If it find : &lt;element1&gt; &lt;elem&gt;[white spaces]
-        &lt;/element1&gt;,
-        it will produce:&lt;element1&gt; &lt;elem/&gt;[white spaces]&lt;
-        /element1&gt;
-  </ul>
-  What doesn't:
-  <ul>
-    <li>Doesn't expand the entities. So the entities from the SGML document must
-        be resolved by the XML parser
-    <li>Doesn't replace internal entities with their corresponding value
-  </ul>
-
-*/
+  * Not so fast...
+  * This class is not a realy Sgml2Xml convertor.
+  * It takes an SGML document and tries to prepare it for an XML parser
+  * For a true conversion we need an Java SGML parser...
+  * If you know one let me know....
+  *
+  * What does it do:
+  * <ul>
+  *  <li>If it finds something like this : &lt;element attribute = value&gt;
+  *      it will produce: &lt;element attribute = "value"&gt;
+  *  <li>If it finds something like this : &lt;element something
+  *      attribute2=value&gt;it will produce : &lt;element
+  *      defaultAttribute="something" attribute2="value"&gt;
+  *  <li>If it finds : &lt;element att1='value1 value2' att2="value2
+  *      value3"&gt; it will produce: &lt;element att1="value1 value2"
+  *      att2="value2 value3"&gt;
+  *  <li>If it finds : &lt;element1&gt; &lt;elem&gt;text &lt;/element1&gt;
+  *      will produce: &lt;element1&gt; &lt;elem&gt;text&lt;elem&gt;
+  *      &lt;/element1&gt;
+  *  <li>If it find : &lt;element1&gt; &lt;elem&gt;[white spaces]
+  *      &lt;/element1&gt;,
+  *      it will produce:&lt;element1&gt; &lt;elem/&gt;[white spaces]&lt;
+  *      /element1&gt;
+  * </ul>
+  * What doesn't:
+  * <ul>
+  *  <li>Doesn't expand the entities. So the entities from the SGML document
+  *      must be resolved by the XML parser
+  *  <li>Doesn't replace internal entities with their corresponding value
+  * </ul>
+  */
 
 public class Sgml2Xml{
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
   /**
     * The constructor initialises some member fields
     * @param SgmlDoc the content of the Sgml document that will be modified
-  */
+    */
   public Sgml2Xml(String SgmlDoc){
     // create a new modifier
     m_modifier = new StringBuffer(SgmlDoc);
@@ -75,15 +75,18 @@ public class Sgml2Xml{
     dubiousElements = new ArrayList();
     stack = new Stack();
   }
+
   /**
     * The other constructor
     * @param doc The Gate document that will be transformed to XML
-  */
+    */
   public Sgml2Xml(Document doc){
     // set as a member
     m_doc = doc;
+
     // create a new modifier
     m_modifier = new StringBuffer(m_doc.getContent().toString());
+
     // create a new dobiousElements list
     // se the explanatin at the end of the class
     dubiousElements = new ArrayList();
@@ -91,24 +94,25 @@ public class Sgml2Xml{
 
   }
 
-/*
+  /*
   public static void main(String[] args){
     Sgml2Xml convertor =
-new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
-<w VBZ>is\n<trunc> <w UNC>th </trunc>");
+      new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
+      <w VBZ>is\n<trunc> <w UNC>th </trunc>");
     try{
       Out.println(convertor.convert());
     } catch (Exception e){
       e.printStackTrace(Err.getPrintWriter());
     }
   }
-*/
-  /**
-    It analises the char that was red in state 1
-    If it finds '<' it then goes to state 2
-    Otherwise it stays in state 1 and keeps track about the text that is not
-    white spaces.
   */
+
+  /**
+    * It analises the char that was red in state 1
+    * If it finds '<' it then goes to state 2
+    * Otherwise it stays in state 1 and keeps track about the text that is not
+    * white spaces.
+    */
   private void doState1(char currChar){
     if ('<' == currChar){
       // change to state 2
@@ -165,41 +169,50 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
     */
   private void doState3(char currChar){
     if ( '>' == currChar ){
+
       // save the pos where the element's name ends
       elemNameEnd = m_cursor - 1;
+
       // this is also the pos where to insert '/' for empty elements.
       // In this case we have this situation <w> sau < w>
       closePos = m_cursor - 1;
+
       // get the name of the element
       elemName = m_modifier.substring(elemNameStart,elemNameEnd);
+
       // we put the element into stack
       // we think in this point that the element is empty...
       performFinalAction(elemName, closePos);
+
       // go to state 1
       m_currState = 1;
     }
     if (isWhiteSpace(currChar)){
       // go to state 4
       m_currState = 4;
+
       // save the pos where the element's name ends
       elemNameEnd = m_cursor - 1;
+
       // get the name of the element
       elemName = m_modifier.substring(elemNameStart,elemNameEnd);
     }
   }// doState3
 
   /**
-    We read the name of the element and we prepare for '>' or attributes
-    '>' -> state 1
-    any char !- white space -> state 5
-  */
+    * We read the name of the element and we prepare for '>' or attributes
+    * '>' -> state 1
+    * any char !- white space -> state 5
+    */
   private void doState4(char currChar){
     if ( '>' == currChar ){
       // this is also the pos where to insert '/' for empty elements in this case
       closePos = m_cursor -1 ;
+
       // we put the element into stack
       // we think in this point that the element is empty...
       performFinalAction(elemName, closePos);
+
       // go to state 1
       m_currState = 1;
     }
@@ -207,18 +220,20 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
       // we just read the first char from the attrib name or attrib value..
       // go to state 5
       m_currState = 5;
+
       // remember the position where starts the attrib or the value of an attrib
       attrStart = m_cursor - 1;
     }
-  }// doState4
+  } // doState4
 
   /**
-    '=' -> state 6
-    '>' -> state 4 (we didn't read an attribute but a value of the defaultAtt )
-    WS (white spaces) we don't know yet if we read an attribute or the value of
-    the defaultAttr -> state 10
-    This state modifies the content onf m_modifier ... it adds text
-  */
+    * '=' -> state 6
+    * '>' -> state 4 (we didn't read an attribute but a value of the
+    * defaultAtt )
+    * WS (white spaces) we don't know yet if we read an attribute or the value
+    * of the defaultAttr -> state 10
+    * This state modifies the content onf m_modifier ... it adds text
+    */
   private void doState5(char currChar){
     if ( '=' == currChar )
           m_currState = 6;
@@ -229,39 +244,46 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
       attrEnd = m_cursor - 1 ;
       m_modifier.insert(attrEnd,'"');
       m_modifier.insert(attrStart,"defaultAttr=\"");
+
       // go to state 4
       m_currState = 4;
+
       // parse again the entire sequence from state 4 before reading any char
       m_cursor = attrStart;
     }
     if (isWhiteSpace(currChar)){
       // go to state 10
       m_currState = 10;
+
       // record the position where ends this attribute
       attrEnd = m_cursor - 1;
     }
-  }// doState5
+  } // doState5
 
   /**
-    IF we read ' or " then we have to get prepared to read everything until the
-    next ' or "
-    If we read a char then -> state 8;
-    Stay here while we read WS
-  */
+    * IF we read ' or " then we have to get prepared to read everything until
+    * the next ' or "
+    * If we read a char then -> state 8;
+    * Stay here while we read WS
+    */
   private void doState6(char currChar){
     if ( ('\'' == currChar) || ('"' == currChar) ){
       endPair = currChar;
       if ('\'' == currChar){
+
         // we have to replace ' with "
         m_modifier = m_modifier.replace(m_cursor - 1, m_cursor,"\"");
       }
       m_currState = 7;
     }
     if ( ('\'' != currChar) && ('"' != currChar) && !isWhiteSpace(currChar)){
+
       // this means that curChar is any char
       m_currState = 8;
+
       // every value must be inside this pair""
       m_modifier.insert(m_cursor - 1, '"');
+
       // insert implies the modification of m_cursor
       // we increment m_cursor in order to say in the same position and to
       // anulate the efect of insert.
@@ -270,15 +292,16 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   }// doState6
 
   /**
-    If we find the pair ' or " go to state 9
-    Otherwhise read everything and stay in state 7
-    If in state 7 we read '>' then we add automaticaly a " at the end and go
-    to state 1
-  */
+    * If we find the pair ' or " go to state 9
+    * Otherwhise read everything and stay in state 7
+    * If in state 7 we read '>' then we add automaticaly a " at the end and go
+    * to state 1
+    */
   private void doState7(char currChar){
     //if ( ('\'' == currChar) || ('"' == currChar) ){
     if ( endPair == currChar ){
       if ('\'' == currChar){
+
         // we have to replace ' with "
         m_modifier = m_modifier.replace(m_cursor - 1, m_cursor,"\"");
       }
@@ -290,8 +313,10 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
     if ('>' == currChar){
       // go to state 1
       m_currState = 1;
+
       // insert the final " ata the end
       m_modifier.insert(m_cursor - 1, '"');
+
       // go to te current possition (because of insert)
       m_cursor ++;
 
@@ -301,19 +326,22 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   }// doState7
 
   /**
-    If '>' go to state 1
-    If WS go to state 9
-    Stays in state 8 and read the attribute's value
-  */
+    * If '>' go to state 1
+    * If WS go to state 9
+    * Stays in state 8 and read the attribute's value
+    */
   private void doState8(char currChar){
 
     if ('>' == currChar){
       // go to state 1
       m_currState = 1;
+
       // complete the end " ( <elem attr="value> )
       m_modifier.insert(m_cursor - 1, '"');
+
       // go to te current possition (because of insert)
       m_cursor ++;
+
       // we finished to read a beggining tag
       // see the method definition for more details
       performFinalAction(elemName, m_cursor - 1);
@@ -321,21 +349,24 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
     if (isWhiteSpace(currChar)){
       // go to state 9
       m_currState = 9;
+
       // add the ending " char
       m_modifier.insert(m_cursor - 1, '"');
+
       // increment the cursor in order to anulate the effect of insert
       m_cursor ++;
     }
-  }//doState8
+  } // doState8
   /**
-    Here we prepare to read another attrib, value pair (any char -> state 5)
-    If '>' we just read a beggining tag -> state 1
-    Stay here while read WS
-  */
+    * Here we prepare to read another attrib, value pair (any char -> state 5)
+    * If '>' we just read a beggining tag -> state 1
+    * Stay here while read WS
+    */
   private void doState9(char currChar){
     if ('>' == currChar){
       // go to state 1
       m_currState = 1;
+
       // add the object to the stack
       performFinalAction(elemName, m_cursor - 1);
     }
@@ -347,10 +378,10 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   }//doState9
 
   /**
-    If any C -> state 4
-    If '=' state 6
-    Stays here while reads WS
-  */
+    * If any C -> state 4
+    * If '=' state 6
+    * Stays here while reads WS
+    */
   private void doState10(char currChar){
     if ('=' == currChar)
              m_currState = 6;
@@ -359,6 +390,7 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
       // a default attribute
       m_modifier.insert(attrEnd,'"');
       m_modifier.insert(attrStart,"defaultAttr=\"");
+
       // go to state 4
       m_currState = 4;
 
@@ -367,21 +399,21 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   }// doState10
 
   /**
-   We are preparing to read the and definition of an element
-   Stays in this state while reading WS
-  */
+    * We are preparing to read the and definition of an element
+    * Stays in this state while reading WS
+    */
   private void doState11(char currChar){
     if (!isWhiteSpace(currChar)){
       m_currState = 12;
       elemNameStart = m_cursor - 1;
     }
-  }//doState11
+  } // doState11
 
   /**
-    Here we read the element's name ...this is an end tag
-    Stays here while reads a char
-  */
-  private void doState12(char currChar){
+    * Here we read the element's name ...this is an end tag
+    * Stays here while reads a char
+    */
+  private void doState12(char currChar) {
     if ('>' == currChar){
       elemNameEnd = m_cursor - 1;
       elemName = m_modifier.substring(elemNameStart,elemNameEnd);
@@ -395,23 +427,23 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   }//doState12
 
   /**
-    If '>' -> state 1
-    Stays here while reads WS
-  */
-  private void doState13(char currChar){
+    * If '>' -> state 1
+    * Stays here while reads WS
+    */
+  private void doState13(char currChar) {
     if ('>' == currChar){
       elemName = m_modifier.substring(elemNameStart,elemNameEnd);
       performActionWithEndElem(elemName);
       m_currState = 1;
     }
-  }//doState13
+  } // doState13
 
   /**
-    This method is responsable with document conversion
-  */
-  public String convert() throws Exception{
+    * This method is responsable with document conversion
+    */
+  public String convert() throws Exception {
 
-    while (thereAreCharsToBeProcessed()){
+    while (thereAreCharsToBeProcessed()) {
       // read() gets the next char and increment the m_cursor
       m_currChar = read();
       switch(m_currState){
@@ -433,7 +465,7 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
 
     // put all the elements from the stack into the dubiousElements list
     // we do that in order to colect all the dubious elements
-    while (!stack.isEmpty()){
+    while (!stack.isEmpty()) {
       CustomObject obj = (CustomObject) stack.pop();
       dubiousElements.add(obj);
     }
@@ -470,37 +502,39 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   }// convert()
 
   /**
-    This method tests to see if there are more char to be read
-    It will return false when there are no more chars to be read
-  */
-  private boolean thereAreCharsToBeProcessed(){
+    * This method tests to see if there are more char to be read
+    * It will return false when there are no more chars to be read
+    */
+  private boolean thereAreCharsToBeProcessed() {
     if (m_cursor < m_modifier.length()) return true;
     else return false;
   }//thereAreCharsToBeProcessed
 
   /**
-    This method reads a char and increments the m_cursor
-  */
+    * This method reads a char and increments the m_cursor
+    */
   private char read(){
     return m_modifier.charAt(m_cursor ++);
   }//read
 
   /**
-    This is the action when we finished to read the entire tag
-    The action means that we put the tag into stack and consider that is empty
-    as default
-  */
-  private void performFinalAction(String elemName, int pos){
+    * This is the action when we finished to read the entire tag
+    * The action means that we put the tag into stack and consider that is empty
+    * as default
+    */
+  private void performFinalAction(String elemName, int pos) {
     // create anew CustomObject
     CustomObject obj = new CustomObject();
+
     // set its properties
     obj.setElemName(elemName);
     obj.setClosePos(pos);
+
     // default we consider every element to be empty
     // in state 1 we modify that if the element is followed by text
     obj.setEmpty(true);
     stack.push(obj);
-  }//performFinalAction
+  } // performFinalAction
 
   /**
     * This is the action performed when an end tag is read.
@@ -511,41 +545,45 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
     * followed by text will close at the end of the text...
     * If a dubious element is followed by another element then is
     * automaticaly considered an empty element.
-
-    @param elemName is the the name of the end tag that was read
-  */
-  private void performActionWithEndElem(String elemName){
+    *
+    * @param elemName is the the name of the end tag that was read
+    */
+  private void performActionWithEndElem(String elemName) {
     CustomObject obj    = null;
     boolean      stop = false;
+
     // get all the elements that are dubious from the stack
     // the iteration will stop when an element is equal with elemName
     while (!stack.isEmpty() && !stop){
+
       // eliminate the object from the stack
       obj = (CustomObject) stack.pop();
+
       //if its elemName is equal with the param elemName we stop the itteration
       if (obj.getElemName().equalsIgnoreCase(elemName)) stop = true;
+
       // otherwhise add the element to the doubiousElements list
       else dubiousElements.add(obj);
     }
   }//performActionWithEndElem
 
   /**
-    This method is called after we read the entire SGML document
-    It resolves the dobious Elements this way:
-    <ul>
-    <li>
-    1. We don't have a DTD so we will consider that all dubious elements
-       followed by text will close at the end of the text...
-    <li>
-    2. If a dubious element is followed by another element then is automaticaly
-       considered an empty element.
-
-    An element is considered dubious when we don't know if it is  empty
-    or may be closed...
-
-    @param aCustomobject an object from the dubiousElements list
-  */
-  private void makeFinalModifications(CustomObject aCustomObject){
+    * This method is called after we read the entire SGML document
+    * It resolves the dobious Elements this way:
+    * <ul>
+    * <li>
+    * 1. We don't have a DTD so we will consider that all dubious elements
+    *    followed by text will close at the end of the text...
+    * <li>
+    * 2. If a dubious element is followed by another element then is
+        automaticaly considered an empty element.
+    *
+    * An element is considered dubious when we don't know if it is  empty
+    * or may be closed...
+    *
+    * @param aCustomobject an object from the dubiousElements list
+    */
+  private void makeFinalModifications(CustomObject aCustomObject) {
     String endElement = null;
     // if the element is empty then we add / before > like this:
     // <w> -> <w/>
@@ -559,30 +597,36 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
       // insert it where the closePos indicates
       m_modifier.insert(aCustomObject.getClosePos(), endElement);
     }
-  }//makeFinalModifications
+  } // makeFinalModifications
 
   /**
-    Tests if c is a white space char
-  */
-  private boolean isWhiteSpace(char c){
+    * Tests if c is a white space char
+    */
+  private boolean isWhiteSpace(char c) {
     return Character.isWhitespace(c);
   }
 
   // this is a gate Document... It's content will be transferred to
   // m_modifier
   private Document m_doc = null;
+
   // this is the modifier that will transform an SGML document into an
   // XML document
   private StringBuffer m_modifier = null;
+
   // we need the stack to be able to remember the order of the tags
   private Stack stack = null;
+
   // this is a list with all the tags that are not colsed...
   // some of them are empty tags and some of them are not...
   private List dubiousElements = null;
+
   // this is tre current position inside the modifier
   private int m_cursor = 0;
+
   // the current state of the SGML2XML automata
   private int m_currState = 1;
+
   // the char that was read from the m_modifier @ position m_cursor
   private char m_currChar = ' ';
 
@@ -600,8 +644,10 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
 
   // is the current tag name
   private String elemName = null;
+
   // indicates where in the m_modifier begins the current tag elemName
   private int elemNameStart = 0;
+
   // indicates where in the m_modifier ends the current tag elemName
   // we need that in order to be able to read the current tag name
   // this name it will be read from m_modifier using the substring() method
@@ -609,16 +655,20 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   // elemName = m_modifier.substring(elemNameStart,elemNameEnd)
   // Eg: <w attr1=val1> -> <[elemNameStart]w[elemNameEnd] [attr1=val1>
   private int elemNameEnd = 0;
+
   // this is the position there a start tag ends like this:
   // Eg: <w attr1=val1>  -> <w attr1=val1 [closePos]>
   private int closePos = 0;
+
   //this is the position where an attribute starts...
   // we need it when we have to add the defaultAttr (see state 5)
   private int attrStart = 0;
+
     //this is the position where an attribute ends...
   // we need it when we have to add the defaultAttr (see state 5) or to add "
   // Eg: <w attr1=val1> -> <w [attrStart]attr1[attrEnd]=val1>
   private int attrEnd = 0;
+
   // endPair field is used in states 6 and 7....
   // When we read something like this :
   // attr=' val1 val2 val3' endPair remembers what is the pair for the beginning
@@ -627,67 +677,75 @@ new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
   // behaviour...
   // We need this field when we have the following situation
   // attr1 = " val1 val2 ' val3" . We need to know what is the end pair for ".
-  // In this case we can't allow ' to be the endPair  
+  // In this case we can't allow ' to be the endPair
   private char endPair = ' ';
-}//class Sgml2Xml
 
-/*
- * The objects belonging to this class are used inside the stack
- */
-class  CustomObject{
+} // class Sgml2Xml
+
+/**
+  * The objects belonging to this class are used inside the stack
+  */
+class  CustomObject {
 
   // constructor
-  public CustomObject(){
+  public CustomObject() {
     elemName = null;
     closePos = 0;
     empty = false;
   }
 
   // accessor
-  public String getElemName(){
+  public String getElemName() {
     return elemName;
   }
-  public int getClosePos(){
+
+  public int getClosePos() {
     return closePos;
   }
-  public boolean isEmpty(){
+
+  public boolean isEmpty() {
     return empty;
   }
 
   // modifiers
-  void setElemName(String anElemName){
+  void setElemName(String anElemName) {
     elemName = anElemName;
   }
+
   void setClosePos(int aPos){
     closePos = aPos;
   }
-  void setEmpty(boolean anEmptyValue){
+
+  void setEmpty(boolean anEmptyValue) {
     empty = anEmptyValue;
   }
 
   // data fields
   private String elemName = null;
+
   private int closePos = 0;
+
   private boolean empty = false;
 
+} // CustomObject
 
-}// CustomObject
+class MyComparator implements Comparator {
 
-class MyComparator implements Comparator{
+  public MyComparator() {
+  }
 
-      public MyComparator(){
-      }
-      public int compare(Object o1, Object o2){
-        if ( !(o1 instanceof CustomObject) ||
-             !(o2 instanceof CustomObject)) return 0;
+  public int compare(Object o1, Object o2) {
+    if ( !(o1 instanceof CustomObject) ||
+         !(o2 instanceof CustomObject)) return 0;
 
-        CustomObject co1 = (CustomObject) o1;
-        CustomObject co2 = (CustomObject) o2;
-        int result = 0;
-        if (co1.getClosePos() <   co2.getClosePos())  result = -1;
-        if (co1.getClosePos() ==  co2.getClosePos())  result =  0;
-        if (co1.getClosePos() >   co2.getClosePos())  result =  1;
+    CustomObject co1 = (CustomObject) o1;
+    CustomObject co2 = (CustomObject) o2;
+    int result = 0;
+    if (co1.getClosePos() <   co2.getClosePos())  result = -1;
+    if (co1.getClosePos() ==  co2.getClosePos())  result =  0;
+    if (co1.getClosePos() >   co2.getClosePos())  result =  1;
 
-        return -result;
-      }//compare
-}//class MyComparator
+    return -result;
+  } // compare
+
+}// class MyComparator

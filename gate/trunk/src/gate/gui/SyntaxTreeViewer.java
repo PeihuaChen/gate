@@ -39,66 +39,72 @@ import gate.*;
 import guk.uekit.*;
 
 /**
-The SyntaxTreeViewer works by getting an annotation set of all annotations that
-need to be displayed (both text and tree nodes) as an AnnotationSet property
-called treeAnnotations. The types of annotations used by the viewer can be
-configured although it also has default values. <P>
-
-The textAnnotationType property specifies the type
-of annotation which is used to get the text from (e.g. token, utterance);
-default value - utterance. The treeNodeAnnotationType is the name of the
-annotations which encode the SyntaxTreeNodes; default - SyntaxTreeNode. The
-component assumes that the annotations of type treeNodeAnnotationType have
-features called: cat with a value String; consists which is a Vector either empty
-or with annotation ids of the node's children; and text which contains the text
-covered by this annotation. The component will work fine even without the last
-feature. Still when it creates annotations, these will have this feature added. <P>
-
-
-Newly added tree nodes to the tree are automatically added to the document
-as annotations (the document is obtained automatically from the annotation set
-passed to the viewer with setAnnotations).
-Deleted nodes are automatically deleted from the document
-annotations too. <P>
-
-In order to have appropriate behaviour always put this component inside a
-scroll pane or something similar that provides scrollers. Example code: <BREAK>
-<PRE>
-    JScrollPane scroller = new JScrollPane(syntaxTreeViewer1);
-    scroller.setPreferredSize(syntaxTreeViewer1.getPreferredSize());
-		frame.getContentPane().add(scroller, BorderLayout.CENTER);
-</PRE>
-
-To get an idea how to use the component, look at the main function which is also
-the test for this bean. <P>
-
-The trick of using the viewer is that it needs to be constructed first, then shown,
-and only after that set the annotations. This is due to painting and size issues.
-Example code: <BREAK>
-<PRE>
-    final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
-    //if we need GATE Unicode support
-    syntaxTreeViewer1.setUnicodeSupportEnabled(true);
-
-    frame.show(); //show the frame that contains the tree viewer
-    ...
-    //finally set the annotations on the tree viewer
-    syntaxTreeViewer1.setTreeAnnotations(annots);
-</PRE><P>
-
-When more than one annotations of type textAnnotationType (e.g., tokens) are
-passed to the viewer in setTreeAnnotations, these annotations are treated as
-separate leafs which together constitute the text to be annotated. For example,
-if the three tokens - this, is, silly - are passed to the viewer, it will take
-their offsets and corresponding texts and add them to the viewer as separate
-leafs separated by spaces - this is silly. This functionality however has not
-been tested extensively and I suspect it might not work properly. <P>
-
-The default way is to pass just one annotation of type textAnnotationType which
-corresponds to the entire sentence or utterance to be annotated with syntax tree
-information. Then the viewer automatically tokenises it and creates the leaves.
-This is well-tested and is the usual way.  <P>
-*/
+  * The SyntaxTreeViewer works by getting an annotation set of all annotations
+  * that need to be displayed (both text and tree nodes) as an AnnotationSet
+  * property called treeAnnotations. The types of annotations used by the viewer
+  * can be configured although it also has default values. <P>
+  *
+  * The textAnnotationType property specifies the type
+  * of annotation which is used to get the text from (e.g. token, utterance);
+  * default value - utterance. The treeNodeAnnotationType is the name of the
+  * annotations which encode the SyntaxTreeNodes; default - SyntaxTreeNode. The
+  * component assumes that the annotations of type treeNodeAnnotationType have
+  * features called: cat with a value String; consists which is a Vector either
+  * empty or with annotation ids of the node's children; and text which contains
+  * the text covered by this annotation. The component will work fine even
+  * without the last feature. Still when it creates annotations,
+  * these will have this feature added. <P>
+  *
+  *
+  * Newly added tree nodes to the tree are automatically added to the document
+  * as annotations (the document is obtained automatically from the annotation
+  * set passed to the viewer with setAnnotations).
+  * Deleted nodes are automatically deleted from the document
+  * annotations too. <P>
+  *
+  * In order to have appropriate behaviour always put this component inside a
+  * scroll pane or something similar that provides scrollers.
+  * Example code: <BREAK>
+  * <PRE>
+  *  JScrollPane scroller = new JScrollPane(syntaxTreeViewer1);
+  *  scroller.setPreferredSize(syntaxTreeViewer1.getPreferredSize());
+	*  frame.getContentPane().add(scroller, BorderLayout.CENTER);
+  * </PRE>
+  *
+  * To get an idea how to use the component, look at the main function which
+  * is also the test for this bean. <P>
+  *
+  * The trick of using the viewer is that it needs to be constructed first,
+  * then shown, and only after that set the annotations. This is due to painting
+  * and size issues.
+  * Example code: <BREAK>
+  * <PRE>
+  *  final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer
+  *                                               ("SyntaxTreeNode");
+  *  //if we need GATE Unicode support
+  *  syntaxTreeViewer1.setUnicodeSupportEnabled(true);
+  *
+  *  frame.show(); //show the frame that contains the tree viewer
+  * ...
+  *  //finally set the annotations on the tree viewer
+  * syntaxTreeViewer1.setTreeAnnotations(annots);
+  * </PRE><P>
+  *
+  * When more than one annotations of type textAnnotationType (e.g., tokens) are
+  * passed to the viewer in setTreeAnnotations, these annotations are treated as
+  * separate leafs which together constitute the text to be annotated.
+  * For example, if the three tokens - this, is, silly - are passed to the
+  * viewer, it will take their offsets and corresponding texts and add them
+  * to the viewer as separate leafs separated by spaces - this is silly.
+  * This functionality however has not been tested extensively and I suspect
+  * it might not work properly. <P>
+  *
+  * The default way is to pass just one annotation of type textAnnotationType
+  * which corresponds to the entire sentence or utterance to be annotated with
+  * syntax tree information. Then the viewer automatically tokenises it and
+  * creates the leaves.
+  * This is well-tested and is the usual way.  <P>
+  */
 
 public class SyntaxTreeViewer extends JPanel
     implements Scrollable, ActionListener, MouseListener{
@@ -106,54 +112,74 @@ public class SyntaxTreeViewer extends JPanel
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  //class members
-  private boolean laidOut = false;  //whether to use any layout or not
+  // class members
+  // whether to use any layout or not
+  private boolean laidOut = false;
 
-  private int horizButtonGap = 5; //display all buttons x pixels apart horizontally
-  private int vertButtonGap = 50; //display buttons at diff layers x pixels apart vertically
-  private int extraButtonWidth = 10; //extra width in pixels to be added to each button
-  private int maxUnitIncrement = 10; //number of pixels to be used as increment by scroller
+  // display all buttons x pixels apart horizontally
+  private int horizButtonGap = 5;
 
-  //GUI members
+  // display buttons at diff layers x pixels apart vertically
+  private int vertButtonGap = 50;
+
+  // extra width in pixels to be added to each button
+  private int extraButtonWidth = 10;
+
+  // number of pixels to be used as increment by scroller
+  private int maxUnitIncrement = 10;
+
+  // GUI members
   BorderLayout borderLayout1 = new BorderLayout();
   JPopupMenu popup = new JPopupMenu(); //the right-click popup
   Color buttonBackground;
   Color selectedNodeColor = Color.red.darker();
 
-  //the HashSet with the coordinates of the lines to draw
+  // the HashSet with the coordinates of the lines to draw
   HashSet lines = new HashSet();
 
-  //The utterance to be annotated as a sentence. It's not used if the tree is passed
-  //as annotations.
+  // The utterance to be annotated as a sentence. It's not used if the tree
+  // is passed
+  // as annotations.
   private Annotation utterance;
   private int utteranceOffset = 0;
-  //for internal use only. Set when the utterance is set.
+
+  // for internal use only. Set when the utterance is set.
   private String displayedString = "";
 
-  //The name of the annotation type which is used to locate the
-  //stereotype with the allowed categories
-  //also when reading and creating annotations
+  // The name of the annotation type which is used to locate the
+  // stereotype with the allowed categories
+  // also when reading and creating annotations
   private String treeNodeAnnotationType = "SyntaxTreeNode";
 
-  //The annotation name of the annotations used to extract the
-  //text that appears at the leaves of the tree. For now the viewer
-  //supports only one such annotation but might be an idea to extend it
-  //so that it gets its text off many token annotations, which do not
-  //need to be tokenised or off the syntax tree annotations themselves.
+  // The annotation name of the annotations used to extract the
+  // text that appears at the leaves of the tree. For now the viewer
+  // supports only one such annotation but might be an idea to extend it
+  // so that it gets its text off many token annotations, which do not
+  // need to be tokenised or off the syntax tree annotations themselves.
   private String textAnnotationType = "utterance";
 
-  private HashMap leaves = new HashMap();  //all leaf nodes
-  private HashMap nonTerminals = new HashMap(); //all non-terminal nodes
-  private HashMap buttons = new HashMap(); //all buttons corresponding to any node
-  private Vector selection = new Vector(); //all selected buttons
-	private AnnotationSet treeAnnotations; //all annotations tp be displayed
+  // all leaf nodes
+  private HashMap leaves = new HashMap();
+
+  // all non-terminal nodes
+  private HashMap nonTerminals = new HashMap();
+
+  // all buttons corresponding to any node
+  private HashMap buttons = new HashMap();
+
+  // all selected buttons
+  private Vector selection = new Vector();
+
+  // all annotations tp be displayed
+	private AnnotationSet treeAnnotations;
+
   private Document document = null;
-//the document to which the annotations belong
+  // the document to which the annotations belong
 
   private static BasicUnicodeButtonUI buttonUI = null;
   private boolean unicodeSupportEnabled = false;
 
-  private SyntaxTreeViewer() {   //override so we can't be constructed like that!
+  private SyntaxTreeViewer() { //override so we can't be constructed like that!
   }
 
   //CONSTRUCTORS
@@ -162,8 +188,10 @@ public class SyntaxTreeViewer extends JPanel
   }
 
   private SyntaxTreeViewer(String annotType, boolean unicodeSupport) {
+
   	treeNodeAnnotationType = annotType;
     unicodeSupportEnabled = unicodeSupport;
+
     if (unicodeSupportEnabled)
        buttonUI = new BasicUnicodeButtonUI();
     try  {
@@ -204,15 +232,17 @@ public class SyntaxTreeViewer extends JPanel
 
   public static void main(String[] args) throws Exception{
     Gate.init();
-//    final String text = "This is a sentence. That is another one.";
+    // final String text = "This is a sentence. That is another one.";
     final String text = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628 \u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
     final Document doc = Factory.newDocument(text);
 
-//  that works too but only use if you have the test file there.
-//    final Document doc = Factory.newDocument(new URL("file:///z:/temp/weird.txt"), "UTF-8");
+    // that works too but only use if you have the test file there.
+    // final Document doc = Factory.newDocument(
+    //                        new URL("file:///z:/temp/weird.txt"), "UTF-8");
 
 
-    final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
+    final SyntaxTreeViewer syntaxTreeViewer1 =
+      new SyntaxTreeViewer("SyntaxTreeNode");
     syntaxTreeViewer1.setUnicodeSupportEnabled(true);
     //need to set the document here!!!!
 
@@ -223,8 +253,9 @@ public class SyntaxTreeViewer extends JPanel
 		frame.setEnabled(true);
 		frame.setTitle("SyntaxTree Viewer");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//		frame.getContentPane().add(syntaxTreeViewer1, BorderLayout.CENTER);
-    //intercept the closing event to shut the application
+
+    // frame.getContentPane().add(syntaxTreeViewer1, BorderLayout.CENTER);
+    // intercept the closing event to shut the application
     frame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         AnnotationSet hs = doc.getAnnotations().get("SyntaxTreeNode");
@@ -245,7 +276,6 @@ public class SyntaxTreeViewer extends JPanel
     scroller.setPreferredSize(syntaxTreeViewer1.getPreferredSize());
 		frame.getContentPane().add(scroller, BorderLayout.CENTER);
 
-
     //DISPLAY FRAME
     frame.pack();
     frame.show();
@@ -253,7 +283,8 @@ public class SyntaxTreeViewer extends JPanel
     FeatureMap attrs = Factory.newFeatureMap();
     attrs.put("time", new Long(0));
     attrs.put("text", doc.getContent().toString());
-/*
+
+    /*
     FeatureMap attrs1 = Factory.newFeatureMap();
     attrs1.put("cat", "N");
     attrs1.put("text", "This");
@@ -263,11 +294,11 @@ public class SyntaxTreeViewer extends JPanel
     attrs2.put("cat", "V");
     attrs2.put("text", "is");
     attrs2.put("consists", new Vector());
- */
+    */
 
-    doc.getAnnotations().add( new Long(0), new Long(doc.getContent().toString().length()),
-                              "utterance", attrs);
-/*    Integer id1 = doc.getAnnotations().add(new Long(0), new Long(4),
+    doc.getAnnotations().add( new Long(0), new Long(
+                      doc.getContent().toString().length()),"utterance", attrs);
+    /* Integer id1 = doc.getAnnotations().add(new Long(0), new Long(4),
                               "SyntaxTreeNode", attrs1);
     Integer id2 = doc.getAnnotations().add(new Long(5), new Long(7),
                               "SyntaxTreeNode", attrs2);
@@ -279,8 +310,10 @@ public class SyntaxTreeViewer extends JPanel
     consists.add(id1);
     consists.add(id2);
     attrs3.put("consists", consists);
-    doc.getAnnotations().add(new Long(0), new Long(7), "SyntaxTreeNode", attrs3);
-*/
+    doc.getAnnotations().add(new Long(0), new Long(7),
+                                                  "SyntaxTreeNode", attrs3);
+    */
+
     HashSet set = new HashSet();
     set.add("utterance");
     set.add("SyntaxTreeNode");
@@ -311,11 +344,13 @@ public class SyntaxTreeViewer extends JPanel
         return getPreferredSize();
   }
 
-  public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+  public int getScrollableUnitIncrement(Rectangle visibleRect,
+                                              int orientation, int direction) {
     return maxUnitIncrement;
   }
 
-  public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+  public int getScrollableBlockIncrement(Rectangle visibleRect,
+                                              int orientation, int direction) {
     if (orientation == SwingConstants.HORIZONTAL)
         return visibleRect.width - maxUnitIncrement;
     else
@@ -330,14 +365,14 @@ public class SyntaxTreeViewer extends JPanel
     return false;
   }
 
-
-
   void this_propertyChange(PropertyChangeEvent e) {
+
     //we have a new utterance to display and annotate
     if (e.getPropertyName().equals("utterance")) {
       clearAll();
       utterances2Trees();
     }
+
     if (e.getPropertyName().equals("treeAnnotations")) {
     	clearAll();
       document = treeAnnotations.getDocument();
@@ -347,9 +382,9 @@ public class SyntaxTreeViewer extends JPanel
   } //this_propertyChange
 
   /**
-  * Clear all buttons and tree nodes created because component is being
-  * re-initialised. Not sure it works perfectly.
-  */
+    * Clear all buttons and tree nodes created because component is being
+    * re-initialised. Not sure it works perfectly.
+    */
   private void clearAll() {
   	lines.clear();
   	this.removeAll();
@@ -359,8 +394,9 @@ public class SyntaxTreeViewer extends JPanel
   }
 
   /**
-  * Converts the annotations into treeNodes and sets the displayedString correctly.
-  */
+    * Converts the annotations into treeNodes and sets the displayedString
+    * correctly.
+    */
   private void annotations2Trees() {
   	HashMap processed = new HashMap(); //for all processed annotations
 
@@ -368,33 +404,34 @@ public class SyntaxTreeViewer extends JPanel
     	treeAnnotations.get(textAnnotationType);
 
 		if (utterances.size() == 0) {
-      Out.println("No annotations of type " + textAnnotationType + " passed so can't display anything!");
+      Out.println("No annotations of type " + textAnnotationType +
+                                          " passed so can't display anything!");
       return;
     }
 
-    //if we have one annotation only then we try to tokenise it
-    //before showing it. The idea is that it must be the whole
-    //utterance or sentence.
+    // if we have one annotation only then we try to tokenise it
+    // before showing it. The idea is that it must be the whole
+    // utterance or sentence.
     if (utterances.size() == 1) {
 
-      //we have our utterance now
+      // we have our utterance now
       utterance = (Annotation) utterances.iterator().next();
 
-      //let's process that into leaves
+      // let's process that into leaves
       utterances2Trees();
     } else {
-    //we have many annotations of the major type. These must be tokens
-    //so they get converted into leafs straight away, one token into 1 leaf.
+      // we have many annotations of the major type. These must be tokens
+      // so they get converted into leafs straight away, one token into 1 leaf.
       tokens2Tree(utterances);
     }
 
-
-    //sort them from left to right first
+    // sort them from left to right first
     AnnotationSet nodeAnnotations = treeAnnotations.get(treeNodeAnnotationType);
     if (nodeAnnotations == null || nodeAnnotations.isEmpty())
       return;
 
-    //now sort the annotation set. Should work as annotation implements Comparable
+    // now sort the annotation set. Should work as
+    // annotation implements Comparable
     LinkedList nodeAnnots = new LinkedList(nodeAnnotations);
     Collections.sort(nodeAnnots);
 
@@ -407,6 +444,7 @@ public class SyntaxTreeViewer extends JPanel
     	Annotation annot = (Annotation) i.next();
 
       Vector children = (Vector) annot.getFeatures().get("consists");
+
       //check if it's a leaf
       if (children == null ||
       		children.isEmpty())
@@ -434,6 +472,7 @@ public class SyntaxTreeViewer extends JPanel
         processed.put(annot.getId(), parentButton);
 
       } //if
+
 		} //loop through children
 
     //loop through the rest of the nodes
@@ -448,8 +487,8 @@ public class SyntaxTreeViewer extends JPanel
 	  selection.clear();
 
     this.scrollRectToVisible(new
-    				Rectangle(0, (int) getHeight()- (int) getVisibleRect().getHeight(),
-            					(int) getVisibleRect().getWidth(), (int) getVisibleRect().getHeight()));
+      Rectangle(0, (int) getHeight()- (int) getVisibleRect().getHeight(),
+        (int) getVisibleRect().getWidth(), (int) getVisibleRect().getHeight()));
   } //annotations2Trees
 
   private JButton processChildrenAnnots(Annotation annot, HashMap processed) {
@@ -461,12 +500,15 @@ public class SyntaxTreeViewer extends JPanel
     	Integer childId = (Integer) i.next();
       Annotation child = treeAnnotations.get(childId);
       JButton childButton;
+
       if (processed.containsKey(child.getId()))
       	childButton = (JButton) processed.get(child.getId());
       else
       	childButton = processChildrenAnnots(child, processed);
+
       childrenButtons.add(childButton);
     }
+
     selection = (Vector) childrenButtons.clone();
     STreeNode parent = createParentNode(
     											(String) annot.getFeatures().get("cat"),
@@ -494,78 +536,99 @@ public class SyntaxTreeViewer extends JPanel
 
 
   /**
-  * Converts the given utterances into a set of leaf nodes for annotation
-  */
+    * Converts the given utterances into a set of leaf nodes for annotation
+    */
   private void utterances2Trees() {
 
   	if (! utterance.getType().equals(textAnnotationType)) {
-			Out.println("Can't display annotations other than the specified type:" + textAnnotationType);
+			Out.println("Can't display annotations other than the specified type:" +
+                                                            textAnnotationType);
       return;
     }
 
     displayedString = (String) utterance.getFeatures().get("text");
 
-    //set the utterance offset correctly. All substring calculations depend on that.
+    // set the utterance offset correctly.
+    // All substring calculations depend on that.
     utteranceOffset = utterance.getStartNode().getOffset().intValue();
     int currentOffset = utteranceOffset;
+
     StrTokeniser strTok =
         new StrTokeniser((String) utterance.getFeatures().get("text"),
                         " \r\n\t");
 
     Insets insets = this.getInsets();
-    int buttonX = insets.left;   //the starting X position for the buttons
-    int buttonY = this.getHeight() - 20 - insets.bottom; //the starting Y position
+    // the starting X position for the buttons
+    int buttonX = insets.left;
+
+    // the starting Y position
+    int buttonY = this.getHeight() - 20 - insets.bottom;
 
     while (strTok.hasMoreTokens()) {
       String word = strTok.nextToken();
 
-      //create the leaf node
-      STreeNode node = new STreeNode(currentOffset, currentOffset + word.length());
-      node.setAllowsChildren(false); //make it a leaf
-      node.setUserObject(word); //set the text
-      node.setLevel(0);
-      leaves.put(new Integer(node.getID()), node); //add to hash table of leaves
+      // create the leaf node
+      STreeNode node =
+        new STreeNode(currentOffset, currentOffset + word.length());
 
-      //create the corresponding button
+      // make it a leaf
+      node.setAllowsChildren(false);
+
+      // set the text
+      node.setUserObject(word);
+      node.setLevel(0);
+
+      // add to hash table of leaves
+      leaves.put(new Integer(node.getID()), node);
+
+      // create the corresponding button
       buttonX = createButton4Node(node, buttonX, buttonY);
 
       currentOffset += word.length()+1;  //// +1 to include the delimiter too
-
     }
 
     this.setSize(buttonX, buttonY + 20 + insets.bottom);
-//    this.resize(buttonX, buttonY + 20 + insets.bottom);
+    // this.resize(buttonX, buttonY + 20 + insets.bottom);
     this.setPreferredSize(this.getSize());
 
-  } //utterance2Trees
+  } // utterance2Trees
 
   /**
-  * Converts the given tokens into a set of leaf nodes
-  * this needs testing as I've never used it
-  */
+    * Converts the given tokens into a set of leaf nodes
+    * this needs testing as I've never used it
+    */
   private void tokens2Tree(AnnotationSet tokens) {
     Document doc = tokens.getDocument();
 
     Insets insets = this.getInsets();
-    int buttonX = insets.left;   //the starting X position for the buttons
-    int buttonY = this.getHeight() - 20 - insets.bottom; //the starting Y position
+    // the starting X position for the buttons
+    int buttonX = insets.left;
+
+    // the starting Y position
+    int buttonY = this.getHeight() - 20 - insets.bottom;
 
     Iterator i = tokens.iterator();
     while (i.hasNext()) {
       Annotation annot = (Annotation) i.next();
 
-      //create the leaf node
-      STreeNode node = new STreeNode(annot.getStartNode().getOffset().intValue(),
-                                     annot.getEndNode().getOffset().intValue());
-      node.setAllowsChildren(false); //make it a leaf
+      // create the leaf node
+      STreeNode node = new STreeNode(
+                                    annot.getStartNode().getOffset().intValue(),
+                                    annot.getEndNode().getOffset().intValue()
+                                    );
+      // make it a leaf
+      node.setAllowsChildren(false);
+
       node.setUserObject(doc.getContent().toString().substring(
-                                     annot.getStartNode().getOffset().intValue(),
-                                     annot.getEndNode().getOffset().intValue()));
+                                   annot.getStartNode().getOffset().intValue(),
+                                   annot.getEndNode().getOffset().intValue()));
                                      //set the text
       node.setLevel(0);
-      leaves.put(new Integer(node.getID()), node); //add to hash table of leaves
 
-      //create the corresponding button
+      // add to hash table of leaves
+      leaves.put(new Integer(node.getID()), node);
+
+      // create the corresponding button
       buttonX = createButton4Node(node, buttonX, buttonY);
 
     }
@@ -574,19 +637,20 @@ public class SyntaxTreeViewer extends JPanel
     this.setPreferredSize(this.getSize());
 
 
-  } //tokens2Tree
+  } // tokens2Tree
 
 
 
   /**
-   * Returns the X position where another button can start if necessary.
-      To be used to layout only the leaf buttons. All others must be created
-      central to their children using createCentralButton.
-  */
+    * Returns the X position where another button can start if necessary.
+    * To be used to layout only the leaf buttons. All others must be created
+    * central to their children using createCentralButton.
+    */
   private int createButton4Node(STreeNode node, int buttonX, int buttonY) {
 
     JButton button = new JButton((String) node.getUserObject());
     button.setBorderPainted(false);
+
     //change the button UI so it supports Unicode (only if we need to)
     if (unicodeSupportEnabled)
       button.setUI(buttonUI);
@@ -596,15 +660,19 @@ public class SyntaxTreeViewer extends JPanel
     int buttonWidth,
         buttonHeight;
 
-//    Out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
+    // Out.print
+    //  ("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
 
     buttonWidth = fm.stringWidth(button.getText())
                   + button.getMargin().left + button.getMargin().right
                   + extraButtonWidth;
-    buttonHeight = fm.getHeight() + button.getMargin().top + button.getMargin().bottom;
+    buttonHeight = fm.getHeight() + button.getMargin().top +
+                      button.getMargin().bottom;
     buttonY = buttonY - buttonHeight;
 
-//    Out.print("New Button width " + buttonWidth + "; New Button height " + buttonHeight);
+    // Out.print("New Button width " + buttonWidth + ";
+    //    New Button height " + buttonHeight);
+
     button.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
     button.addActionListener(this);
     button.addMouseListener(this);
@@ -630,15 +698,18 @@ public class SyntaxTreeViewer extends JPanel
         buttonX = 0,
         buttonY =0;
 
-//    Out.print("Button width " + b1.getWidth() + "; Button height " + b1.getHeight());
+    // Out.print("Button width " + b1.getWidth() + ";
+    //    Button height " + b1.getHeight());
 
     buttonWidth = fm.stringWidth(button.getText())
                   + button.getMargin().left + button.getMargin().right
                   + extraButtonWidth;
-    buttonHeight = fm.getHeight() + button.getMargin().top + button.getMargin().bottom;
+    buttonHeight = fm.getHeight() + button.getMargin().top +
+                      button.getMargin().bottom;
 
     int left = this.getWidth(), right =0 , top = this.getHeight();
-    //determine the left, right, top
+
+    // determine the left, right, top
     for (Iterator i = selection.iterator(); i.hasNext(); ) {
       JButton childButton = (JButton) i.next();
 
@@ -652,23 +723,25 @@ public class SyntaxTreeViewer extends JPanel
 
     buttonX = (left + right) /2 - buttonWidth/2;
     buttonY = top - vertButtonGap;
-//    Out.println("Button's Y is" + buttonY);
+    // Out.println("Button's Y is" + buttonY);
 
-//    Out.print("New Button width " + buttonWidth + "; New Button height " + buttonHeight);
+    // Out.print("New Button width " + buttonWidth + ";
+    //    New Button height " + buttonHeight);
     button.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
     button.addActionListener(this);
     button.addMouseListener(this);
-//    button.registerKeyboardAction(this,
-//    															"delete",
-//                                  KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
-//                                  WHEN_FOCUSED);
+    // button.registerKeyboardAction(this,
+    //													"delete",
+    //                           KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+    //                           WHEN_FOCUSED);
 
     button.setActionCommand("" + newNode.getID());
 
     this.add(button);
-    buttons.put(new Integer(newNode.getID()), button);   //add to hashmap of buttons
+    // add to hashmap of buttons
+    buttons.put(new Integer(newNode.getID()), button);
 
-    //check if we need to resize the panel
+    // check if we need to resize the panel
     if (buttonY < 0) {
     	this.setSize(this.getWidth(), this.getHeight() + 5* (- buttonY));
       this.setPreferredSize(this.getSize());
@@ -685,7 +758,7 @@ public class SyntaxTreeViewer extends JPanel
       										button.getY() + offset,
                           button.getWidth(),
                           button.getHeight());
-    } //for loop through buttons
+    } // for loop through buttons
 
     for (Iterator k = lines.iterator(); k.hasNext(); ) {
     	Coordinates coords = (Coordinates) k.next();
@@ -700,9 +773,9 @@ public class SyntaxTreeViewer extends JPanel
     if (e.getSource() instanceof JMenuItem) {
       JMenuItem menuItem = (JMenuItem) e.getSource();
 
-      //check if we're annotating a leaf
-      //the popup label is set to leaves when the popup has been
-      //constructed in showRightClickPopup
+      // check if we're annotating a leaf
+      // the popup label is set to leaves when the popup has been
+      // constructed in showRightClickPopup
       if (popup.getLabel().equals("leaves")) {
         Integer id = new Integer(e.getActionCommand());
 
@@ -712,41 +785,48 @@ public class SyntaxTreeViewer extends JPanel
 
         STreeNode leaf = (STreeNode) leaves.get(id);
 
-        //create parent with the same span as leaf
-        //using createParentNode here is not a good idea coz it works only
-        //for creating parents of non-terminal nodes, not leaves
+        // create parent with the same span as leaf
+        // using createParentNode here is not a good idea coz it works only
+        // for creating parents of non-terminal nodes, not leaves
         STreeNode parent = new STreeNode(leaf.getStart(), leaf.getEnd());
         parent.setLevel(leaf.getLevel()+1); //levels increase from bottom to top
         parent.add(leaf);
-        parent.setUserObject(menuItem.getText()); //set the text
-        //last create the annotation; should always come last!
+
+        // set the text
+        parent.setUserObject(menuItem.getText());
+
+        // last create the annotation; should always come last!
         parent.createAnnotation(  document,
                                   treeNodeAnnotationType,
         													displayedString,
                                   utteranceOffset);
         nonTerminals.put(new Integer(parent.getID()), parent);
 
-        //create new button positioned centrally above the leaf
+        // create new button positioned centrally above the leaf
         createCentralButton(parent);
 
-        //add the necessary lines for drawing
+        // add the necessary lines for drawing
         addLines(parent);
 
         selection.clear();
 
-        //repaint the picture!
+        // repaint the picture!
         this.repaint();
-      } //finished processing leaves
+      } // finished processing leaves
       else if (popup.getLabel().equals("non-terminal")) {
-        //the action command is set to the id under which the button can be found
+        // the action command is set to the id under which
+        // the button can be found
         Integer id = new Integer(e.getActionCommand());
 
         //locate button from buttons hashMap and add to selection
         JButton button = (JButton) buttons.get(id);
         selection.add(button);
 
-        STreeNode parent = createParentNode(menuItem.getText()); //create the new parent
-        nonTerminals.put(new Integer(parent.getID()), parent); //add to nonTerminals HashMap
+        //create the new parent
+        STreeNode parent = createParentNode(menuItem.getText());
+
+        //add to nonTerminals HashMap
+        nonTerminals.put(new Integer(parent.getID()), parent);
 
         //create new button positioned centrally above the leaf
         createCentralButton(parent);
@@ -775,24 +855,25 @@ public class SyntaxTreeViewer extends JPanel
 
 		//check if CTRL is pressed and if not, clear the selection
     if (! e.isControlDown() && SwingUtilities.isLeftMouseButton(e))
-//		if (! e.isControlDown() && e.getModifiers() == e.BUTTON1_MASK)
+    //if (! e.isControlDown() && e.getModifiers() == e.BUTTON1_MASK)
       clearSelection();
+
 		//and select the current node
     if (SwingUtilities.isLeftMouseButton(e))
-//		if (e.getModifiers() == e.BUTTON1_MASK)
+    //if (e.getModifiers() == e.BUTTON1_MASK)
 	   	selectNode(e);
 
 
     //only repspond to right-clicks here by displaying the popup
     if (SwingUtilities.isRightMouseButton(e)) {
-//    if (e.isPopupTrigger() || e.getModifiers() == e.BUTTON3_MASK) {
+      //if (e.isPopupTrigger() || e.getModifiers() == e.BUTTON3_MASK) {
     	//if button not in focus, grad the focus and select it!
     	if ( source.getBackground() != selectedNodeColor ) {
         source.grabFocus();
         source.doClick();
         selectNode(e);
       }
-//        Out.println(e.getComponent().getClass() + " right-clicked!");
+      //Out.println(e.getComponent().getClass() + " right-clicked!");
       showRightClickPopup(e);
     } //end of right-click processing
 
@@ -808,7 +889,7 @@ public class SyntaxTreeViewer extends JPanel
   }
 
   public void mouseExited(MouseEvent e) {
-  } //createButton4Node
+  } // createButton4Node
 
 
   private void showRightClickPopup(MouseEvent e) {
@@ -824,7 +905,7 @@ public class SyntaxTreeViewer extends JPanel
       //do nothing if it already has a parent
       if (leaf.getParent() != null) {
       	clearSelection();
-      	JOptionPane.showMessageDialog(this, "Node already annotated. To delete the existing annotation, select it and press <DEL>.",
+      	JOptionPane.showMessageDialog(this, "Node already annotated. To delete the existing annotation,select it and press <DEL>.",
         															"Syntax Tree Viewer message",
                                       JOptionPane.INFORMATION_MESSAGE);
       	return;
@@ -841,9 +922,10 @@ public class SyntaxTreeViewer extends JPanel
     	//check if it has been annotated already
       if ( ((STreeNode) nonTerminals.get(id)).getParent() != null) {
       	clearSelection();
-      	JOptionPane.showMessageDialog(this, "Node already annotated. To delete the existing annotation, select it and press <DEL>.",
-        															"Syntax Tree Viewer message",
-                                      JOptionPane.INFORMATION_MESSAGE);
+      	JOptionPane.showMessageDialog(this, "Node already annotated. To delete"+
+                          " the existing annotation, select it and press <DEL>.",
+                          "Syntax Tree Viewer message",
+                          JOptionPane.INFORMATION_MESSAGE);
       	return;  //and do nothing if so!
       }
 
@@ -877,7 +959,7 @@ public class SyntaxTreeViewer extends JPanel
       lines.add(coords);
     }
 
-  }//addLines
+  } // addLines
 
   private void clearSelection() {
     for (Enumeration enum = selection.elements(); enum.hasMoreElements(); ) {
@@ -907,9 +989,11 @@ public class SyntaxTreeViewer extends JPanel
     if (nodeStereotype == null)
       return;
 
-    AttributeStereotype categories = nodeStereotype.getAttributeStereotype("cat");
+    AttributeStereotype categories =
+      nodeStereotype.getAttributeStereotype("cat");
     //iterate through all categories
-    for (Iterator i = categories.getPermissibleValues().iterator(); i.hasNext(); ) {
+    for (Iterator i =
+                categories.getPermissibleValues().iterator(); i.hasNext(); ) {
 
       JMenuItem menuItem = new JMenuItem( (String) i.next() );
       menuItem.addActionListener(this);
@@ -917,7 +1001,7 @@ public class SyntaxTreeViewer extends JPanel
 
     }
 
-*/
+    */
     JMenuItem menuItem = new JMenuItem("S");
     menuItem.addActionListener(this);
     popup.add(menuItem);
@@ -962,22 +1046,22 @@ public class SyntaxTreeViewer extends JPanel
     menuItem.addActionListener(this);
     popup.add(menuItem);
 
-  }//fillCategoriesMenu
+  } // fillCategoriesMenu
 
   /**
-   * Sets the action commands of all menu items to the specified command
-  */
+    * Sets the action commands of all menu items to the specified command
+    */
   private void setMenuCommands(JPopupMenu menu, String command) {
     for (int i = 0; i < menu.getComponentCount() ; i++) {
       JMenuItem item = (JMenuItem) menu.getComponent(i);
       item.setActionCommand(command);
     }
 
-  } //setMenuCommands
+  } // setMenuCommands
 
   /**
-  * Create a parent node for all selected non-terminal nodes
-  */
+    * Create a parent node for all selected non-terminal nodes
+    */
   protected STreeNode createParentNode(String text) {
     STreeNode  parentNode = new STreeNode();
 
@@ -1013,8 +1097,8 @@ public class SyntaxTreeViewer extends JPanel
   }
 
   /**
-  * Create a parent node for all selected non-terminal nodes
-  */
+    * Create a parent node for all selected non-terminal nodes
+    */
   protected STreeNode createParentNode(String text, Annotation annot) {
     STreeNode  parentNode = new STreeNode(annot);
 
@@ -1039,7 +1123,7 @@ public class SyntaxTreeViewer extends JPanel
 
 
   void selectNode(MouseEvent e) {
-    //try finding the node that's annotated, i.e., the selected button
+    // try finding the node that's annotated, i.e., the selected button
     if (e.getSource() instanceof JButton) {
       JButton source = (JButton) e.getSource();
 
@@ -1049,7 +1133,7 @@ public class SyntaxTreeViewer extends JPanel
     }
   }
 
-  //remove that node from the syntax tree
+  // remove that node from the syntax tree
   void removeNode(JButton button) {
 
     Integer id = new Integer(button.getActionCommand());
@@ -1066,8 +1150,11 @@ public class SyntaxTreeViewer extends JPanel
     button.setVisible(false);
     this.remove(button);
 
-    recalculateLines();  //recalculate all lines
-    selection.clear(); //make sure we clear the selection
+    //recalculate all lines
+    recalculateLines();
+
+    //make sure we clear the selection
+    selection.clear();
     repaint();
   }
 
@@ -1081,6 +1168,7 @@ public class SyntaxTreeViewer extends JPanel
 
   private void removeNodesAbove(STreeNode node) {
     STreeNode parent = (STreeNode) node.getParent();
+
     while (parent != null) {
       Integer id = new Integer(parent.getID());
       parent.removeAnnotation(document);
@@ -1107,8 +1195,8 @@ public class SyntaxTreeViewer extends JPanel
   }
 
   /**
-  * recalculates all lines from that node to all its children
-  */
+    * recalculates all lines from that node to all its children
+    */
   private void recalculateLines(STreeNode node) {
     Integer id = new Integer(node.getID());
     JButton button = (JButton) buttons.get(id);
@@ -1135,7 +1223,8 @@ public class SyntaxTreeViewer extends JPanel
 	public void setTreeAnnotations(AnnotationSet newTreeAnnotations) {
 		AnnotationSet  oldTreeAnnotations = treeAnnotations;
 		treeAnnotations = newTreeAnnotations;
-		firePropertyChange("treeAnnotations", oldTreeAnnotations, newTreeAnnotations);
+		firePropertyChange("treeAnnotations", oldTreeAnnotations,
+                          newTreeAnnotations);
 	}
 
   public void setTreeNodeAnnotationType(String newTreeNodeAnnotationType) {
@@ -1199,9 +1288,12 @@ class FocusButton extends JButton {
 		}
   }
 
-} //FocusButton
+} // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.12  2000/10/26 10:45:26  oana
+// Modified in the code style
+//
 // Revision 1.11  2000/10/24 10:10:18  valyt
 // Fixed the deprecation warning in gate/gui/SyntaxTreeViewer.java
 //

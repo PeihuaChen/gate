@@ -48,7 +48,7 @@ public class AnnotationSchema extends AbstractLanguageResource
   private static DocumentBuilder xmlParser;
 
   /** This sets up two Maps between XSchema types and their coresponding
-    * Java types
+    * Java types + a DOM xml parser
     */
   private static void setUpStaticData()
   throws ResourceInstantiationException
@@ -259,12 +259,12 @@ public class AnnotationSchema extends AbstractLanguageResource
       Iterator complexTypeCildrenIterator = complexTypeCildrenList.iterator();
       if (complexTypeCildrenIterator.hasNext())
         featureSchemaSet = new HashSet();
-      while (complexTypeCildrenIterator.hasNext()){
+      while (complexTypeCildrenIterator.hasNext()) {
         org.jdom.Element childElement =
                     (org.jdom.Element) complexTypeCildrenIterator.next();
         createAndAddFeatureSchemaObject(childElement);
       }// end while
-    }//end if
+    }// end if
   } // createAnnoatationSchemaObject
 
   /** This method creates and adds a FeatureSchema object to the current
@@ -272,7 +272,7 @@ public class AnnotationSchema extends AbstractLanguageResource
     * @param anElement is an XSchema attribute element
     */
   public void createAndAddFeatureSchemaObject(org.jdom.Element
-                                                          anAttributeElement){
+                                                          anAttributeElement) {
     String featureName = null;
     String featureType = null;
     String featureUse  = null;
@@ -284,30 +284,36 @@ public class AnnotationSchema extends AbstractLanguageResource
     featureName = anAttributeElement.getAttributeValue("name");
     if (featureName == null)
       featureName = "UnknownFeature";
+
     // See if it has a type attribute associated
     featureType = anAttributeElement.getAttributeValue("type");
     if (featureType != null)
       // Set it to the corresponding Java type
       featureType = (String) xSchema2JavaMap.get(featureType);
+
     // Get the value of use attribute
     featureUse = anAttributeElement.getAttributeValue("use");
     if (featureUse == null)
       // Set it to the default value
       featureUse = "optional";
+
     // Get the value of value attribute
     featureDefaultValue = anAttributeElement.getAttributeValue("value");
     if (featureDefaultValue == null)
       featureDefaultValue = "";
+
     // Let's check if it has a simpleType element inside
     org.jdom.Element simpleTypeElement  =
                                   anAttributeElement.getChild("simpleType");
+
     // If it has (!= null) then check to see if it has a restrictionElement
-    if (simpleTypeElement != null){
+    if (simpleTypeElement != null) {
       org.jdom.Element restrictionElement =
                               simpleTypeElement.getChild("restriction");
-      if (restrictionElement != null){
+      if (restrictionElement != null) {
         // Get the type attribute for restriction element
         featureType = restrictionElement.getAttributeValue("base");
+
         // Check to see if that attribute was present. getAttributeValue will
         // return null if it wasn't present
         if (featureType == null)
@@ -316,15 +322,17 @@ public class AnnotationSchema extends AbstractLanguageResource
         else
           // Set it to the corresponding Java type
           featureType = (String) xSchema2JavaMap.get(featureType);
+
         // Check to see if there are any enumeration elements inside
         List enumerationElementChildrenList =
                                  restrictionElement.getChildren("enumeration");
         Iterator enumerationChildrenIterator =
                                 enumerationElementChildrenList.iterator();
+
         // Check if there is any enumeration element in the list
         if (enumerationChildrenIterator.hasNext())
             featurePermissibleValuesSet = new HashSet();
-        while (enumerationChildrenIterator.hasNext()){
+        while (enumerationChildrenIterator.hasNext()) {
           org.jdom.Element enumerationElement =
                         (org.jdom.Element) enumerationChildrenIterator.next();
           String permissibleValue =
@@ -357,6 +365,7 @@ public class AnnotationSchema extends AbstractLanguageResource
     schemaString.append("<?xml version=\"1.0\"?>\n" +
                    "<schema xmlns=\"http://www.w3.org/2000/10/XMLSchema\">\n"+
                    " <element name=\"" + annotationName + "\"");
+
     if (featureSchemaSet == null)
       schemaString.append("/>\n");
     else {
@@ -374,4 +383,5 @@ public class AnnotationSchema extends AbstractLanguageResource
   }// toXSchema
 
 } // AnnotationSchema
+
 

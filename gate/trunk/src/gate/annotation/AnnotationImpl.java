@@ -23,8 +23,8 @@ import gate.util.*;
 /** Provides an implementation for the interface gate.Annotation
   */
 public class AnnotationImpl
-implements Annotation, FeatureBearer, Comparable
-{
+  implements Annotation, FeatureBearer, Comparable {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

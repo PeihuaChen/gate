@@ -53,8 +53,9 @@ implements JapeConstants, java.io.Serializable, Cloneable
   public Constraint(String annotType, Array attrsArray) {
     this.annotType = annotType;
     attrs1 = new SimpleFeatureMapImpl();
-    for(ArrayIterator i = attrsArray.begin(); ! i.atEnd(); i.advance())
-      attrs1.put(((JdmAttribute) i.get()).getName(), ((JdmAttribute) i.get()).getValue());
+    for ( ArrayIterator i = attrsArray.begin(); ! i.atEnd(); i.advance())
+      attrs1.put(((JdmAttribute) i.get()).getName(),
+                                          ((JdmAttribute) i.get()).getValue());
   } // Construction from annot type and array of attributes
 
   /** The type of annnotation we're looking for. */
@@ -107,10 +108,11 @@ implements JapeConstants, java.io.Serializable, Cloneable
     newC.annotType = annotType;
     newC.attrs1 = (FeatureMap) ((SimpleFeatureMapImpl) attrs1).clone();
 
-//    Enumeration e = attrs1.getElements();
-//    while(e.hasMoreElements())
-//      newC.attrs1.addAll(new JdmAttribute((JdmAttribute) e.nextElement()));
-//		newC.negated = negated;
+    /* Enumeration e = attrs1.getElements();
+       while(e.hasMoreElements())
+         newC.attrs1.addAll(new JdmAttribute((JdmAttribute) e.nextElement()));
+       newC.negated = negated;
+    */
     return newC;
   } // clone
 
@@ -119,7 +121,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
     * after parsing.
     */
   public void finish() {
-/*
+    /*
     if(attrs1 == null || attrs1.size() == 0) {
       attrs2 = new JdmAttribute[0];
       attrs1 = null;
@@ -139,7 +141,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
       attrs2[i++] = new JdmAttribute(name, value);
     }
     attrs1 = null;
- */
+    */
   } // finish
 
   /** Create a string representation of the object. */
@@ -154,11 +156,13 @@ implements JapeConstants, java.io.Serializable, Cloneable
     );
 
     // constraints
-//    for(int i=0; i<attrs.length(); i++)
-//      buf.append(" " + attrs.nth(i));
-//		for (Enumeration e = attrs.getElements(); e.hasMoreElements(); )
-//    	buf.append(" " + ((JdmAttribute) e.nextElement() ).toString());
-//    buf.append(newline + pad + ") Constraint." + newline);
+    /*
+    for(int i=0; i<attrs.length(); i++)
+      buf.append(" " + attrs.nth(i));
+		for (Enumeration e = attrs.getElements(); e.hasMoreElements(); )
+    	buf.append(" " + ((JdmAttribute) e.nextElement() ).toString());
+    buf.append(newline + pad + ") Constraint." + newline);
+     */
     // constraints
     if(attrs1 == null) {
       for(int i=0; i<attrs2.length; i++)
@@ -173,7 +177,7 @@ implements JapeConstants, java.io.Serializable, Cloneable
     return buf.toString();
   } // toString
 
-  public String shortDesc(){
+  public String shortDesc() {
     String res = annotType + "(";
     if(attrs1 == null) {
       for(int i=0; i<attrs2.length; i++)
@@ -183,11 +187,15 @@ implements JapeConstants, java.io.Serializable, Cloneable
     }
     res += ")";
     return res;
-  }
+  } // shortDesc
+  
 } // class Constraint
 
 
 // $Log$
+// Revision 1.6  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.5  2000/10/16 16:44:33  oana
 // Changed the comment of DEBUG variable
 //

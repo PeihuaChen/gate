@@ -41,6 +41,7 @@ import org.w3c.www.mime.*;
   */
 public class RtfDocumentFormat extends TextualDocumentFormat
 {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -60,27 +61,31 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(gate.Document doc){
+  public void unpackMarkup(gate.Document doc) {
     // create a RTF editor kit
     RTFEditorKit aRtfEditorkit = new RTFEditorKit();
+
     // create a Styled Document
     // NOTE that RTF Kit works only with Systled Document interface
     StyledDocument styledDoc = new DefaultStyledDocument();
+
     // get an Input stream from the gate document
     InputStream in = new ByteArrayInputStream(
                                          doc.getContent().toString().getBytes()
                                          );
-    try{
+
+    try {
       aRtfEditorkit.read(in, styledDoc, 0);
       // replace the document content with the one without markups
       doc.setContent(new DocumentContentImpl(
                                       styledDoc.getText(0,styledDoc.getLength())
                                             )
                     );
-    } catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace(Err.getPrintWriter());
     }
-  }//unpackMarkup
+
+  } // unpackMarkup
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -90,13 +95,16 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup(gate.Document doc,
-                                    String  originalContentFeatureType){
+                                    String  originalContentFeatureType) {
 
      FeatureMap fm = doc.getFeatures ();
+
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
+
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }
+
 }// class RtfDocumentFormat

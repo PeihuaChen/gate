@@ -65,7 +65,8 @@ public class Batch implements JapeConstants, java.io.Serializable,
     initTransducer();
   } // full init constructor
 
-  public Batch(String japeFileName, StatusListener sListener) throws JapeException {
+  public Batch(String japeFileName, StatusListener sListener)
+                                                        throws JapeException {
     this.japeFileName = japeFileName;
     this.addStatusListener(sListener);
     initTransducer();
@@ -116,7 +117,8 @@ public class Batch implements JapeConstants, java.io.Serializable,
       throw new JapeException(
         "unknown file type (not .jape, .ser or .jar):" + japeFileName
       );
-    if(transducer != null) transducer.addStatusListener(new StatusListener(){
+
+    if(transducer != null) transducer.addStatusListener(new StatusListener() {
       public void statusChanged(String text){
         fireStatusChangedEvent(text);
       }
@@ -178,6 +180,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
   /** Deserialise from a .ser file. */
   private void deserialiseJape(File japeFile) throws JapeException {
+
     // set up a file input stream
     FileInputStream japeInputStream = null;
     try {
@@ -248,7 +251,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
     Iterator iter = coll.iterator();
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
-//      transducer.transduce(doc);
+      // transducer.transduce(doc);
       transduce(doc, doc.getAnnotations());
     }
   } // transduce(coll)
@@ -259,7 +262,8 @@ public class Batch implements JapeConstants, java.io.Serializable,
   } // transduce(doc)
 
   /** Process a single document. */
-  public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
+  public void transduce(Document doc, AnnotationSet annotations)
+                                                          throws JapeException {
     transducer.transduce(doc, annotations);
   } // transduce(doc)
 
@@ -374,6 +378,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
     Corpus coll = null;
     if(persCollName != null) { // we got a collection name, not a list of files
+
       // open the collection or bomb
       coll = null;
       batch.message("opening the collection");
@@ -406,7 +411,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
     // we won! we won! we can smash up all the computers now!
     batch.message("done");
-//    System.exit(0);
+    //System.exit(0);
 
   } // main
 
@@ -425,7 +430,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
     Err.println(errorMessage);
     Err.println(usageMessage);
-//    System.exit(1);
+    // System.exit(1);
 
   } // usage
 
@@ -435,12 +440,15 @@ public class Batch implements JapeConstants, java.io.Serializable,
   } // message
 
   //StatusReporter Implementation
+
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
   }
+
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
+
   protected void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
@@ -448,12 +456,15 @@ public class Batch implements JapeConstants, java.io.Serializable,
   }
 
   //ProcessProgressReporter implementation
+
   public void addProcessProgressListener(ProgressListener listener){
     transducer.addProcessProgressListener(listener);
   }
+
   public void removeProcessProgressListener(ProgressListener listener){
     transducer.removeProcessProgressListener(listener);
   }
+
   //ProcessProgressReporter implementation ends here
 
   /** Are we initialising from a resource? */
@@ -463,11 +474,15 @@ public class Batch implements JapeConstants, java.io.Serializable,
   private String resPath = null;
 
   private List myProgressListeners = new LinkedList();
+
   private List myStatusListeners = new LinkedList();
 
 } // class Batch
 
 // $Log$
+// Revision 1.14  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.13  2000/10/23 21:50:41  hamish
 // cleaned up exception handling in gate.creole and added
 // ResourceInstantiationException;
@@ -489,9 +504,12 @@ public class Batch implements JapeConstants, java.io.Serializable,
 // removed CreoleRegister.init()
 //
 // Revision 1.12  2000/10/18 13:26:47  hamish
-// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+// Factory.createResource now working, with a utility method that uses
+// reflection (via java.beans.Introspector) to set properties on a resource
+// from the
 //     parameter list fed to createResource.
-//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     resources may now have both an interface and a class; they are indexed
+//     by interface type; the class is used to instantiate them
 //     moved createResource from CR to Factory
 //     removed Transients; use Factory instead
 //
@@ -510,7 +528,8 @@ public class Batch implements JapeConstants, java.io.Serializable,
 // *** empty log message ***
 //
 // Revision 1.7  2000/07/04 14:37:39  valyt
-// Added some support for Jape-ing in a different annotations et than the default one;
+// Added some support for Jape-ing in a different annotations et than the
+// default one;
 // Changed the L&F for the JapeGUI to the System default
 //
 // Revision 1.6  2000/07/03 21:00:59  valyt

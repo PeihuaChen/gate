@@ -36,6 +36,7 @@ import org.w3c.www.mime.*;
   */
 public class TextualDocumentFormat extends DocumentFormat
 {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

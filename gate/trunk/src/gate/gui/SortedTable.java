@@ -22,7 +22,7 @@ import java.awt.*;
 
 import gate.util.*;
 
-public class SortedTable extends JTable{
+public class SortedTable extends JTable {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -32,20 +32,22 @@ public class SortedTable extends JTable{
 
   // constructors
   public SortedTable(){}
-  public void setTableModel(SortedTableModel model){
+
+  public void setTableModel(SortedTableModel model) {
     m_model = model;
     setModel(model);
     InitHeader();
     initColumnSizes(JTable.AUTO_RESIZE_OFF);
   }
-  private void InitHeader(){
+
+  private void InitHeader() {
     JTableHeader header = getTableHeader();
     header.setUpdateTableInRealTime(true);
     header.addMouseListener(m_model.new ColumnListener(this));
     header.setReorderingAllowed(true);
   }
 
-  private void initColumnSizes(int autoResize){
+  private void initColumnSizes(int autoResize) {
         TableColumn column = null;
         Component comp = null;
         int headerWidth = 0;
@@ -84,4 +86,4 @@ public class SortedTable extends JTable{
         }
   }
 
-}
+} // SortedTable

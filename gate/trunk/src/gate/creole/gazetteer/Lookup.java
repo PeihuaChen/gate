@@ -17,8 +17,8 @@
 
 package gate.creole.gazetteer;
 
-/**Used to describe a type of lookup annotations*/
-class Lookup{
+/** Used to describe a type of lookup annotations */
+class Lookup {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -28,6 +28,7 @@ class Lookup{
     minorType = minor;
     this.languages = languages;
   }
+
   String majorType;
   String minorType;
   String languages;
@@ -40,7 +41,8 @@ class Lookup{
   public boolean equals(Object obj){
     if(obj instanceof Lookup) return obj.toString().equals(toString());
     else return false;
-  }
+  } // equals
 
   public int hashCode(){ return toString().hashCode();}
-}
+
+} // Lookup

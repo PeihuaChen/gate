@@ -16,8 +16,9 @@
  */
 
 package gate.util;
-/**Used to signal an attempt to close all connections to a database while there
-  *are still connections in use by the clients of that database.
+
+/** Used to signal an attempt to close all connections to a database while there
+  * are still connections in use by the clients of that database.
   */
 public class OpenTransactionsException extends GateException {
 
@@ -31,5 +32,5 @@ public class OpenTransactionsException extends GateException {
     super(s);
   }
 
-}//OpenTransactionsException
+} // OpenTransactionsException
 

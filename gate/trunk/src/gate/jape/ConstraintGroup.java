@@ -142,8 +142,13 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     * after parsing.
     */
   public void finish() {
-    int i = 0; // index into patternElementDisjunction2
-    int j = 0; // index into the conjunctions (second dimension of pED2)
+
+    // index into patternElementDisjunction2
+    int i = 0;
+
+    // index into the conjunctions (second dimension of pED2)
+    int j = 0;
+
     patternElementDisjunction2 =
       new PatternElement[patternElementDisjunction1.size()][];
 
@@ -156,7 +161,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
       Array conjunction = (Array) disjuncIter.get();
       patternElementDisjunction2[i] = new PatternElement[conjunction.size()];
       j = 0;
-      
+
       // for each pattern element making up this conjunction
       for(
         ArrayIterator conjIter = conjunction.begin();
@@ -167,10 +172,10 @@ extends PatternElement implements JapeConstants, java.io.Serializable
         patternElementDisjunction2[i][j].finish();
       } // loop on conjunction
 
-    }   // loop on patternElementDisjunction1
+    } // loop on patternElementDisjunction1
 
     patternElementDisjunction1 = null;
-  }     // finish
+  } // finish
 
   /** Access to the annotations that have been matched by this group. */
   public AnnotationSet getMatchedAnnots() {
@@ -189,7 +194,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
           matchedAnnots.addAll(pat.getMatchedAnnots());
       } // for each element of the conjunction
 
-    }   // for each conjunction (element of the disjunction)
+    } // for each conjunction (element of the disjunction)
 
     return matchedAnnots;
   } // getMatchedAnnots
@@ -197,7 +202,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
   /** Clear all the annotations that have been matched by this group. */
   public void reset() {
-    //Debug.pr(this, "CG reset, matchHistory.size() = " + matchHistory.size());
+    // Debug.pr(this, "CG reset, matchHistory.size() = " + matchHistory.size());
     int pEDLen = patternElementDisjunction2.length;
 
     // for each (conjunction) member of the pattern element disjunction
@@ -214,7 +219,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
   /** Multilevel rollback of annot caches etc. */
   public void rollback(int arity) {
-    //Debug.pr(this, "CG rollback(" + arity + "), matchHistory.size() = " +
+    // Debug.pr(this, "CG rollback(" + arity + "), matchHistory.size() = " +
     //                   matchHistory.size());
     for(int i=0; i<arity; i++) {
       PatternElement[] conjunction = (PatternElement[]) matchHistory.pop();
@@ -330,10 +335,10 @@ extends PatternElement implements JapeConstants, java.io.Serializable
       } // for each conjunction (element of the disjunction)
 
     } else { // after finish
-      int pEDLen = patternElementDisjunction2.length; 
+      int pEDLen = patternElementDisjunction2.length;
       if(firstTime) firstTime = false;
       else buf.append(newline + pad + "|" + newline);
-      
+
       for(int i = 0; i < pEDLen; i++) {
         int conjLen = patternElementDisjunction2[i].length;
         // for each pattern element making up this conjunction
@@ -350,15 +355,18 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // toString
 
 
-//needed by FSM
+  //needed by FSM
   public PatternElement[][] getPatternElementDisjunction(){
     return patternElementDisjunction2;
   }
-  
+
 } // class ConstraintGroup
 
 
 // $Log$
+// Revision 1.5  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.4  2000/10/16 16:44:33  oana
 // Changed the comment of DEBUG variable
 //

@@ -62,24 +62,28 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(Document doc){
+  public void unpackMarkup(Document doc) {
 	  try {
 
       Sgml2Xml sgml2Xml = new Sgml2Xml(doc);
 
       fireStatusChangedEvent("Performing SGML to XML...");
+
       // convert the SGML document
       String xmlUri = sgml2Xml.convert();
+
       fireStatusChangedEvent("DONE !");
+
       //Out.println("Conversion done..." + xmlUri);
       //Out.println(sgml2Xml.convert());
 
 		  // Get a parser factory.
 		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-		  // Set up the factory to create the appropriate type of parser
 
+		  // Set up the factory to create the appropriate type of parser
       // non validating one
 		  saxParserFactory.setValidating(false);
+
       // non namesapace aware one
 		  saxParserFactory.setNamespaceAware(false);
 
@@ -88,10 +92,12 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
       // use it
       if (null != doc){
+
         // create a new Xml document handler
         XmlDocumentHandler xmlDocHandler = new
                             XmlDocumentHandler(doc, this.markupElementsMap,
                                                this.element2StringMap);
+
         // register a status listener with it
         xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -99,6 +105,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
             fireStatusChangedEvent(text);
           }
         });
+
         parser.parse(xmlUri, xmlDocHandler);
       }
 
@@ -109,7 +116,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
   }
 
-  private String sgml2Xml(Document doc){
+  private String sgml2Xml(Document doc) {
     String xmlUri = doc.getSourceUrl().toString ();
 
     return xmlUri;
@@ -123,13 +130,16 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup(Document doc,
-                                    String  originalContentFeatureType){
+                                    String  originalContentFeatureType) {
 
      FeatureMap fm = doc.getFeatures ();
+
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
+
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }
-}//class SgmlDocumentFormat
+
+} // class SgmlDocumentFormat

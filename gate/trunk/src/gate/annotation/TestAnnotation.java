@@ -136,43 +136,56 @@ public class TestAnnotation extends TestCase
     } catch (InvalidOffsetException e) {
       threwUp = true;
     }
+
     if(! threwUp) fail("Should have thrown InvalidOffsetException");
     threwUp = false;
+
     try {
       as.add(new Long(1), new Long(-1), "T", emptyFeatureMap);
     } catch (InvalidOffsetException e) {
       threwUp = true;
     }
+
     if(! threwUp) fail("Should have thrown InvalidOffsetException");
     threwUp = false;
+
     try {
       as.add(new Long(1), new Long(0), "T", emptyFeatureMap);
     } catch (InvalidOffsetException e) {
       threwUp = true;
     }
+
     if(! threwUp) fail("Should have thrown InvalidOffsetException");
     threwUp = false;
+
     try {
       as.add(null, new Long(1), "T", emptyFeatureMap);
     } catch (InvalidOffsetException e) {
       threwUp = true;
     }
+
     if(! threwUp) fail("Should have thrown InvalidOffsetException");
     threwUp = false;
+
     try {
       as.add(new Long(1), null, "T", emptyFeatureMap);
     } catch (InvalidOffsetException e) {
       threwUp = true;
     }
+
     if(! threwUp) fail("Should have thrown InvalidOffsetException");
     threwUp = false;
+
     try {
       as.add(new Long(999999), new Long(100000000), "T", emptyFeatureMap);
     } catch (InvalidOffsetException e) {
       threwUp = true;
     }
-// won't work until the doc size check is implemented
-//    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+
+    /*
+    // won't work until the doc size check is implemented
+    if(! threwUp) fail("Should have thrown InvalidOffsetException");
+    */
     threwUp = false;
 
   } // testExceptions()
@@ -190,7 +203,8 @@ public class TestAnnotation extends TestCase
     Node startNode;
     Node endNode;
 
-    as.get("T"); // to trigger type indexing
+    // to trigger type indexing
+    as.get("T");
     as.add(new Long(10), new Long(20), "T1", fm);    // 0
     as.add(new Long(10), new Long(20), "T2", fm);    // 1
     as.add(new Long(10), new Long(20), "T3", fm);    // 2
@@ -217,18 +231,29 @@ public class TestAnnotation extends TestCase
     // first construct a sorted set of annotations
     SortedSet sortedAnnots = new TreeSet(as);
 
-    int idCounter = 0; // for checking the annotation id
+    // for checking the annotation id
+    int idCounter = 0;
     Iterator iter = sortedAnnots.iterator();
     while(iter.hasNext()) {
       a = (Annotation) iter.next();
-      assertEquals(idCounter++, a.getId().intValue());      // check annot ids
+
+      // check annot ids
+      assertEquals(idCounter++, a.getId().intValue());
 
       startNode = a.getStartNode();
       endNode = a.getEndNode();
-      assertEquals(0,  startNode.getId().intValue());       // start node id
-      assertEquals(10, startNode.getOffset().longValue());  // start offset
-      assertEquals(1,  endNode.getId().intValue());         // end id
-      assertEquals(20, endNode.getOffset().longValue());    // end offset
+
+      // start node id
+      assertEquals(0,  startNode.getId().intValue());
+
+      // start offset
+      assertEquals(10, startNode.getOffset().longValue());
+
+      // end id
+      assertEquals(1,  endNode.getId().intValue());
+
+      // end offset
+      assertEquals(20, endNode.getOffset().longValue());
     }
 
   } // testTypeIndex()
@@ -246,7 +271,8 @@ public class TestAnnotation extends TestCase
     Node startNode;
     Node endNode;
 
-    as.get("T"); // to trigger type indexing
+    // to trigger type indexing
+    as.get("T");
     newId = as.add(new Long(10), new Long(20), "T1", fm);    // 0
     a = as.get(newId);
     startNode = a.getStartNode();
@@ -277,18 +303,28 @@ public class TestAnnotation extends TestCase
     // first construct a sorted set of annotations
     SortedSet sortedAnnots = new TreeSet(as);
 
-    int idCounter = 0; // for checking the annotation id
+    // for checking the annotation id
+    int idCounter = 0;
     Iterator iter = sortedAnnots.iterator();
     while(iter.hasNext()) {
       a = (Annotation) iter.next();
-      assertEquals(idCounter++, a.getId().intValue());      // check annot ids
+      // check annot ids
+      assertEquals(idCounter++, a.getId().intValue());
 
       startNode = a.getStartNode();
       endNode = a.getEndNode();
-      assertEquals(0,  startNode.getId().intValue());       // start node id
-      assertEquals(10, startNode.getOffset().longValue());  // start offset
-      assertEquals(1,  endNode.getId().intValue());         // end id
-      assertEquals(20, endNode.getOffset().longValue());    // end offset
+
+      // start node id
+      assertEquals(0,  startNode.getId().intValue());
+
+      // start offset
+      assertEquals(10, startNode.getOffset().longValue());
+
+      // end id
+      assertEquals(1,  endNode.getId().intValue());
+
+      // end offset
+      assertEquals(20, endNode.getOffset().longValue());
     }
 
   } // testAddWithNodes()
@@ -306,8 +342,8 @@ public class TestAnnotation extends TestCase
     FeatureMap constraints = new SimpleFeatureMapImpl();
     constraints.put("pos", "NN");
 
-//Out.println(basicAS);
-//Out.println(constraints);
+    //Out.println(basicAS);
+    //Out.println(constraints);
 
     asBuf = basicAS.get("T1", constraints);
     assertEquals(3, asBuf.size());
@@ -323,7 +359,7 @@ public class TestAnnotation extends TestCase
     assertEquals(1, asBuf.size());
 
     constraints.put("pos", "JJ");
-//Out.println(constraints);
+    //Out.println(constraints);
     asBuf = basicAS.get("T1", constraints, new Long(0));
     assertEquals(null, asBuf);
     asBuf = basicAS.get("T1", constraints, new Long(14));
@@ -357,16 +393,15 @@ public class TestAnnotation extends TestCase
 
     assertEquals(10, basicAS.size());
     assertEquals(10, ((AnnotationSetImpl) basicAS).annotsById.size());
+
     asBuf = basicAS.get("T1");
     assertEquals(6, asBuf.size());
 
     asBuf = basicAS.get(new Long(9));
     assertEquals(4, asBuf.size());
-
     assertEquals(null, basicAS.get(new Integer(0)));
     basicAS.remove(basicAS.get(new Integer(8)));
     assertEquals(9, basicAS.size());
-
     basicAS.removeAll(basicAS);
     assertEquals(null, basicAS.get());
     assertEquals(null, basicAS.get("T1"));
@@ -391,10 +426,8 @@ public class TestAnnotation extends TestCase
     assertEquals(10, ((AnnotationSetImpl) basicAS).annotsById.size());
     asBuf = basicAS.get("T1");
     assertEquals(6, asBuf.size());
-
     asBuf = basicAS.get(new Long(9));
     assertEquals(4, asBuf.size());
-
     assertEquals(null, basicAS.get(new Integer(0)));
     basicAS.remove(basicAS.get(new Integer(8)));
 
@@ -474,6 +507,7 @@ public class TestAnnotation extends TestCase
     Document doc = Factory.newDocument(
       new URL(TestDocument.getTestServerName() + "tests/doc0.html")
     );
+
     AnnotationSet as = new AnnotationSetImpl(doc);
     assertEquals(as.size(), 0);
 
@@ -551,34 +585,43 @@ public class TestAnnotation extends TestCase
     input.add("foo");
     input.add("foofoo");
     AnnotationSet annotations = null;
+
     if(input.isEmpty()) annotations = as;
     else{
       Iterator typesIter = input.iterator();
       AnnotationSet ofOneType = null;
+
       while(typesIter.hasNext()){
         ofOneType = as.get((String)typesIter.next());
+
         if(ofOneType != null){
-//System.out.println("Adding " + ofOneType.getAllTypes());
+          //System.out.println("Adding " + ofOneType.getAllTypes());
           if(annotations == null) annotations = ofOneType;
           else annotations.addAll(ofOneType);
         }
       }
     }
-//    if(annotations == null) annotations = new AnnotationSetImpl(doc);
-System.out.println("Actual input:" + annotations.getAllTypes() + "\n" + annotations);
+    /* if(annotations == null) annotations = new AnnotationSetImpl(doc); */
+    System.out.println(
+        "Actual input:" + annotations.getAllTypes() + "\n" + annotations
+    );
 
-    AnnotationSet res = annotations.get("foo", Factory.newFeatureMap(), new Long(10));
-System.out.println(res);
+    AnnotationSet res =
+      annotations.get("foo", Factory.newFeatureMap(), new Long(10));
+
+    System.out.println(res);
     assert(!res.isEmpty());
   }
 
   public static void main(String[] args){
 
     try{
+
       TestAnnotation testAnnot = new TestAnnotation("");
       testAnnot.setUp();
       testAnnot._testGap();
       testAnnot.tearDown();
+
     }catch(Throwable t){
       t.printStackTrace();
     }

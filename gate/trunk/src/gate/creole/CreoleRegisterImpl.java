@@ -61,6 +61,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 
       // create the parser
       parser = saxParserFactory.newSAXParser();
+
     } catch (SAXException e) {
       if(DEBUG) Out.println(e);
       throw(new GateException(e));
@@ -68,6 +69,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       if(DEBUG) Out.println(e);
       throw(new GateException(e));
     }
+
   } // default constructor
 
   /** Removes all resources and forgets all directories. */
@@ -107,6 +109,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     * URLs for resource JAR files are added to the GATE class loader.
     */
   public void registerDirectories(URL directoryUrl) throws GateException {
+
     // add the URL (may overwrite an existing one; who cares)
     directories.add(directoryUrl);
 
@@ -192,13 +195,13 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     */
   public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames)
   {
-////////////////////
-// dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
-// for each jar file pick out creole.xml
-// strip xml header
-// dump into dirfile
-// put </CREOLE-DIRECTORY> into dirfile
-throw new LazyProgrammerException();
+    ////////////////////
+    // dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
+    // for each jar file pick out creole.xml
+    // strip xml header
+    // dump into dirfile
+    // put </CREOLE-DIRECTORY> into dirfile
+    throw new LazyProgrammerException();
   } // createCreoleDirectoryFile
 
 } // class CreoleRegisterImpl

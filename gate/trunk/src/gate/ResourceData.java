@@ -33,6 +33,7 @@ import gate.util.*;
   * @see CreoleRegister
   */
 public interface ResourceData extends FeatureBearer {
+
   /** String representation */
   public String toString();
 

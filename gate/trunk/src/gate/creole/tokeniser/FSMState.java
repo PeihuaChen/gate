@@ -2,14 +2,14 @@
  * FSMState.java
  *
  * Copyright (c) 2000-2001, The University of Sheffield.
- * 
+ *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
  * Version 2, June1991.
- * 
+ *
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  * Valentin Tablan, 27/06/2000
  *
  * $Id$
@@ -20,112 +20,116 @@ package gate.creole.tokeniser;
 import java.util.*;
   /** A state of the finite state machine that is the kernel tokeniser
     */
-  class FSMState{
-    /** Debug flag */
-    private static final boolean DEBUG = false;
+class FSMState{
 
-    /**Creates a new FSMState belonging to a specified tokeniser
-      *@param owner the tokeniser that contains this new state
-      */
-    public FSMState(DefaultTokeniser owner){
-      myIndex = index++;
-      owner.fsmStates.add(this);
-    }
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
-    /**Returns the value of the transition function of this state for a given
-      *Unicode type.
-      *As this state can belong to a non-deterministic automaton, the result
-      *will be a set.
-      */
-    Set nextSet(UnicodeType type){
-      if(null == type) return transitionFunction[DefaultTokeniser.maxTypeId];
-      else return transitionFunction[type.type];
-    }
+  /** Creates a new FSMState belonging to a specified tokeniser
+    * @param owner the tokeniser that contains this new state
+    */
+  public FSMState(DefaultTokeniser owner) {
+    myIndex = index++;
+    owner.fsmStates.add(this);
+  }
 
-    /**Returns the value of the transition function of this state for a given
-      *Unicode type specified using the internal ids used by the tokeniser.
-      *As this state can belong to a non-deterministic automaton, the result
-      *will be a set.
-      */
-    Set nextSet(int type){
-      return transitionFunction[type];
-    }
+  /** Returns the value of the transition function of this state for a given
+    * Unicode type.
+    * As this state can belong to a non-deterministic automaton, the result
+    * will be a set.
+    */
+  Set nextSet(UnicodeType type) {
+    if(null == type) return transitionFunction[DefaultTokeniser.maxTypeId];
+    else return transitionFunction[type.type];
+  } // nextSet(UnicodeType type)
 
-    /**Adds a new transition to the transition function of this state
-      *@param type the restriction for the new transition; if <code>null</code>
-      * this transition will be unrestricted.
-      *@param state the vaule of the transition function for the given type
-      */
-    void put(UnicodeType type, FSMState state){
-      if(null == type) put(DefaultTokeniser.maxTypeId, state);
-      else put(type.type, state);
-    }
+  /** Returns the value of the transition function of this state for a given
+    * Unicode type specified using the internal ids used by the tokeniser.
+    * As this state can belong to a non-deterministic automaton, the result
+    * will be a set.
+    */
+  Set nextSet(int type) {
+    return transitionFunction[type];
+  } // nextSet(int type)
 
-    /**Adds a new transition to the transition function of this state
-      *@param index the internal index of the Unicode type representing the
-      *restriction for the new transition;
-      *@param state the vaule of the transition function for the given type
-      */
-    void put(int index, FSMState state){
-      if(null == transitionFunction[index])
-        transitionFunction[index] = new HashSet();
-      transitionFunction[index].add(state);
-    }
+  /** Adds a new transition to the transition function of this state
+    * @param type the restriction for the new transition; if <code>null</code>
+    * this transition will be unrestricted.
+    * @param state the vaule of the transition function for the given type
+    */
+  void put(UnicodeType type, FSMState state) {
+    if(null == type) put(DefaultTokeniser.maxTypeId, state);
+    else put(type.type, state);
+  } // put(UnicodeType type, FSMState state)
 
-    /**Sets the RHS string value*/
-    void setRhs(String rhs){this.rhs = rhs;}
+  /** Adds a new transition to the transition function of this state
+    * @param index the internal index of the Unicode type representing the
+    * restriction for the new transition;
+    * @param state the vaule of the transition function for the given type
+    */
+  void put(int index, FSMState state) {
+    if(null == transitionFunction[index])
+      transitionFunction[index] = new HashSet();
+    transitionFunction[index].add(state);
+  } // put(int index, FSMState state)
 
-    /**Gets the RHS string value*/
-    String getRhs(){return rhs;}
+  /** Sets the RHS string value */
+  void setRhs(String rhs) { this.rhs = rhs; }
 
-    /**Checks whether this state is a final one*/
-    boolean isFinal() {return (null != rhs);}
+  /** Gets the RHS string value */
+  String getRhs() { return rhs; }
 
-    /**Gets the unique id of this state*/
-    int getIndex(){return myIndex;}
+  /** Checks whether this state is a final one */
+  boolean isFinal() { return (null != rhs); }
 
-    /**Returns a GML representation of all the edges emerging from this state*/
-    String getEdgesGML(){
-      String res = "";
-      Set nextSet;
-      Iterator nextSetIter;
-      FSMState nextState;
-      for(int i = 0; i <= DefaultTokeniser.maxTypeId; i++){
-        nextSet = transitionFunction[i];
-        if(null != nextSet){
-          nextSetIter = nextSet.iterator();
-          while(nextSetIter.hasNext()){
-            nextState = (FSMState)nextSetIter.next();
-            res += "edge [ source " + myIndex +
-            " target " + nextState.getIndex() +
-            " label \"";
-            if(i == DefaultTokeniser.maxTypeId) res += "[]";
-            else res += DefaultTokeniser.typeMnemonics[i];
-            res += "\" ]\n";
-          }//while(nextSetIter.hasNext())
-        }
-      };
-      return res;
-    }
+  /** Gets the unique id of this state */
+  int getIndex() { return myIndex; }
 
-    /**The transition function of this state. It's an array mapping from int
-      *(the ids used internally by the tokeniser for the Unicode types) to sets
-      *of states.
-      */
-    Set[] transitionFunction = new Set[DefaultTokeniser.maxTypeId + 1];
+  /** Returns a GML representation of all the edges emerging
+    * from this state */
+  String getEdgesGML() {
+    String res = "";
+    Set nextSet;
+    Iterator nextSetIter;
+    FSMState nextState;
 
-    /**The RHS string value from which the annotation associated to final states
-      *is constructed.
-      */
-    String rhs;
+    for(int i = 0; i <= DefaultTokeniser.maxTypeId; i++){
+      nextSet = transitionFunction[i];
+      if(null != nextSet){
+        nextSetIter = nextSet.iterator();
+        while(nextSetIter.hasNext()){
+          nextState = (FSMState)nextSetIter.next();
+          res += "edge [ source " + myIndex +
+          " target " + nextState.getIndex() +
+          " label \"";
+          if(i == DefaultTokeniser.maxTypeId) res += "[]";
+          else res += DefaultTokeniser.typeMnemonics[i];
+          res += "\" ]\n";
+        }//while(nextSetIter.hasNext())
+      }
+    };
+    return res;
+  } // getIndex
 
-    /**the unique index of this state*/
-    int myIndex;
+  /** The transition function of this state. It's an array mapping from int
+    * (the ids used internally by the tokeniser for the Unicode types) to sets
+    * of states.
+    */
+  Set[] transitionFunction = new Set[DefaultTokeniser.maxTypeId + 1];
 
-    /**used for generating unique ids*/
-    static int index;
+  /** The RHS string value from which the annotation associated to
+    * final states is constructed.
+    */
+  String rhs;
 
-    static{
-      index = 0;
-    }
-  }//class FSMState
+  /**the unique index of this state*/
+  int myIndex;
+
+  /**used for generating unique ids*/
+  static int index;
+
+  static{
+    index = 0;
+  }
+
+} // class FSMState

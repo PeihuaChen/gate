@@ -24,23 +24,27 @@ import org.xml.sax.*;
 
 public abstract class LaxErrorHandler implements ErrorHandler {
 
-/** Debug flag */
-private static final boolean DEBUG = false;
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
-/**
- * LaxErrorHandler constructor comment.
- */
-public LaxErrorHandler() {super();}
-/**
- * error method comment.
- */
-public abstract void error(SAXParseException ex) throws SAXException;
-/**
- * fatalError method comment.
- */
-public abstract void fatalError(SAXParseException ex) throws SAXException ;
-/**
- * warning method comment.
- */
-public abstract void warning(SAXParseException ex) throws SAXException ;
-}
+  /**
+   * LaxErrorHandler constructor comment.
+   */
+  public LaxErrorHandler() {super();}
+
+  /**
+   * error method comment.
+   */
+  public abstract void error(SAXParseException ex) throws SAXException;
+
+  /**
+   * fatalError method comment.
+   */
+  public abstract void fatalError(SAXParseException ex) throws SAXException ;
+
+  /**
+   * warning method comment.
+   */
+  public abstract void warning(SAXParseException ex) throws SAXException ;
+
+} // class LaxErrorHandler

@@ -32,7 +32,6 @@ import gate.*;
 
 
 /** Test class for HTML facilities
-  *
   */
 public class TestHtml extends TestCase
 {
@@ -47,19 +46,20 @@ public class TestHtml extends TestCase
   } // setUp
 
 
-  public static void main(String args[]){
+  public static void main(String args[]) {
     TestHtml app = new TestHtml("TestHtml");
-    try{
+    try {
       app.testUnpackMarkup();
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace (Err.getPrintWriter());
     }
   }
 
 
   /** A test */
-  public void testUnpackMarkup() throws Exception{
+  public void testUnpackMarkup() throws Exception {
     assert(true);
+
     // create the markupElementsMap map
     Map markupElementsMap = null;
 
@@ -82,9 +82,10 @@ public class TestHtml extends TestCase
 
     // get the docFormat that deals with it.
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, doc.getSourceUrl()
-    );
+                                                        doc, doc.getSourceUrl()
+                                                        );
     assert(docFormat instanceof gate.corpora.HtmlDocumentFormat);
+
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
      /*

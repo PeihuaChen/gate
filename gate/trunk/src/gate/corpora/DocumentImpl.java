@@ -282,13 +282,16 @@ public class DocumentImpl implements Document
 
     if(content != null)
       ((DocumentContentImpl) content).edit(start, end, replacement);
+
     if(defaultAnnots != null)
       ((AnnotationSetImpl) defaultAnnots).edit(start, end, replacement);
+
     if(namedAnnotSets != null) {
       Iterator iter = namedAnnotSets.values().iterator();
       while(iter.hasNext())
         ((AnnotationSetImpl) iter.next()).edit(start, end, replacement);
     }
+
   } // edit(start,end,replacement)
 
   /** Check that an offset is valid, i.e. it is non-null, greater than
@@ -340,6 +343,7 @@ public class DocumentImpl implements Document
       orderingString.append(sourceUrlStartOffset.toString());
       orderingString.append(sourceUrlEndOffset.toString());
     }
+
     return orderingString.toString();
   } // getOrderingString()
 
@@ -383,4 +387,5 @@ public class DocumentImpl implements Document
 
   /** Named sets of annotations */
   protected Map namedAnnotSets;
+
 } // class DocumentImpl

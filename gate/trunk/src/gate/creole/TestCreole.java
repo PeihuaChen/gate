@@ -100,6 +100,7 @@ public class TestCreole extends TestCase
 
     // checks values of parameters of param0 in test pr 1
     assert(pr1rd.getClassName().equals("testpkg.TestPR1"));
+
     Iterator iter = pr1rd.getParameterListsSet().iterator();
     Iterator iter2 = null;
     Parameter param = null;
@@ -113,6 +114,7 @@ public class TestCreole extends TestCase
       if(param.valueString.equals("param0"))
         break;
     }
+
     assert("param0 was null", param != null);
     assert(param.valueString.equals("param0"));
     assert(! param.optional);
@@ -129,6 +131,7 @@ public class TestCreole extends TestCase
 
     // get some res data from the register
     assert("wrong number of resources in the register", reg.size() == 6);
+
     //ResourceData pr1rd = (ResourceData) reg.get("Sheffield Test PR 1");
     //ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
@@ -177,6 +180,7 @@ public class TestCreole extends TestCase
       "doc res data has wrong interface name",
       docRd.getInterfaceName().equals("gate.Document")
     );
+
     Class docClass = docRd.getResourceClass();
     assertNotNull("couldn't get doc class", docClass);
     LanguageResource docRes = (LanguageResource) docClass.newInstance();

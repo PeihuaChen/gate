@@ -37,6 +37,7 @@ public class TestJacl extends TestCase
 
   /** Jacl creation and use of GATE scripts */
   public void testCreation() throws TclException {
+
     // create and interpreter and load all the GATE scripts
     Jacl jacl = new Jacl();
     jacl.loadScripts();
@@ -67,7 +68,7 @@ public class TestJacl extends TestCase
     // find the list of script files in the GATE source tree
     // (the parameter to findScripts causes a dir change before the search)
     List scriptPaths = jacl.findScripts(jacl.goToGateSrcScript);
-    // Out.println("Scripts found: " + scriptPaths); 
+    // Out.println("Scripts found: " + scriptPaths);
 
     // refresh Jacl.java's list of GATE scripts
     // Out.println("Updating Jacl.java....");

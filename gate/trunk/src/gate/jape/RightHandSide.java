@@ -159,8 +159,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     if(blockNames.add(name) == null) // it wasn't already a member
       actionClassString.append(
-        "    AnnotationSet " + name + "Annots = (AnnotationSet)bindings.get(\"" +
-        name + "\"); " + nl
+        "    AnnotationSet " + name + "Annots = (AnnotationSet)bindings.get(\""
+        + name + "\"); " + nl
       );
 
     actionClassString.append(
@@ -182,12 +182,12 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     // call the gate class loader to load the resultant class
     // read in the bytes if the compiled file for later serialisation
     // create an instance of the class
-/*    writeActionClass();
+    /* writeActionClass();
     compileActionClass();
     loadActionClass();
     readActionClass();
     instantiateActionClass();
-*/
+    */
     //Out.println(actionClassString);
     try {
       actionClassBytes = new Jdk().compile(
@@ -440,6 +440,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.13  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.12  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //

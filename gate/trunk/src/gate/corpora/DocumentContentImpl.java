@@ -64,7 +64,6 @@ public class DocumentContentImpl implements DocumentContent
         buf.append((char) i);
       counter++;
     }
-
     content = new String(buf);
   } // Contruction from URL and offsets
 

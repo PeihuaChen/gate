@@ -23,7 +23,9 @@ package gate.gui;
   * resources that use theur own thread for processing purposes.
   */
 public interface ProcessProgressReporter {
+
   public void addProcessProgressListener(ProgressListener listener);
+  
   public void removeProcessProgressListener(ProgressListener listener);
 
-}
+} // ProcessProgressReporter

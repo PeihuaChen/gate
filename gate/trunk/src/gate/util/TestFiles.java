@@ -77,7 +77,8 @@ public class TestFiles extends TestCase
     BufferedReader bfr = new BufferedReader(new FileReader(f));
 
     String firstLn = bfr.readLine();
-    assert("first line from jape/combined/testloc.jape doesn't match", firstLine.equals(firstLn));
+    assert("first line from jape/combined/testloc.jape doesn't match",
+      firstLine.equals(firstLn));
 
     f.delete ();
   } // testWriteTempFile()
@@ -89,16 +90,17 @@ public class TestFiles extends TestCase
 
   public static void main(String args[]){
     TestFiles app = new TestFiles("TestFiles");
-    try{
-//      app.testJarFiles ();
+    try {
+      //app.testJarFiles ();
       app.testGetResources();
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace (Err.getPrintWriter());
     }
-  }
+  } // main
 
   /** Test JarFiles methods */
   public void testJarFiles() throws Exception {
+
     JarFiles jarFiles = new JarFiles();
     Set filesToMerge = new HashSet();
     String jarFilePathFirst = "jartest/ajartest.jar";
@@ -113,7 +115,7 @@ public class TestFiles extends TestCase
     FileInputStream fileStreamSecond = null;
 
     //open first jar file in a temporal file
-//   Out.println(Files.getResourceAsStream(jarFilePathFirst));
+    // Out.println(Files.getResourceAsStream(jarFilePathFirst));
     f1 = Files.writeTempFile(Files.getGateResourceAsStream(jarFilePathFirst));
 
     //open second jar file in a temporal file
@@ -132,6 +134,7 @@ public class TestFiles extends TestCase
     jarPathFinal = resourceFile.getAbsolutePath();
     filesToMerge.add(jarPathFirst);
     filesToMerge.add(jarPathSecond);
+
     //close the temporal files
     fileStreamFirst = new FileInputStream(f1);
 
@@ -143,7 +146,7 @@ public class TestFiles extends TestCase
 
     jarFiles.merge(filesToMerge,jarPathFinal);
 
-  }// testJarFiles
+  } // testJarFiles
 
   public void testFind(){
     String regex = "z:/gate2/doc/.*.html";
@@ -160,6 +163,6 @@ public class TestFiles extends TestCase
         //Out.println(verif);
       }
     }
-  }//testFind
+  } // testFind
 
 } // class TestFiles

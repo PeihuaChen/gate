@@ -20,6 +20,7 @@ package gate.corpora;
 import java.util.*;
 import java.io.*;
 import java.net.*;
+
 // html tools
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
@@ -71,16 +72,19 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     PrintWriter out = null;
 
     HTMLEditorKit.Parser parser = new ParserDelegator();
+
     try{
       conn = doc.getSourceUrl().openConnection ();
       reader =  new InputStreamReader(conn.getInputStream ());
-    } catch (Exception e){
+    } catch (Exception e) {
       Out.println (e);
       e.printStackTrace (Err.getPrintWriter());
     }
+
     // create a new Htmldocument handler
     HtmlDocumentHandler htmlDocHandler = new
                              HtmlDocumentHandler(doc, this.markupElementsMap);
+
     // register a status listener with it
     htmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
@@ -89,10 +93,10 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
           }
     });
 
-    try{
+    try {
       // parse the HTML document
       parser.parse(reader, htmlDocHandler, true);
-    } catch (Exception e){
+    } catch (Exception e) {
       Out.println (e);
       e.printStackTrace (Err.getPrintWriter());
     }
@@ -110,10 +114,13 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
                                     String  originalContentFeatureType){
 
      FeatureMap fm = doc.getFeatures ();
+
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
+
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }
-}// class HtmlDocumentFormat
+
+} // class HtmlDocumentFormat

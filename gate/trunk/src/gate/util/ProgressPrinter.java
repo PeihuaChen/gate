@@ -9,7 +9,7 @@
  *  
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Valentin Tablan, 21/07/2000
  *
  *  $Id$
@@ -22,46 +22,49 @@ import java.io.*;
 import gate.gui.*;
 
 
-  public class ProgressPrinter implements ProgressListener{
+public class ProgressPrinter implements ProgressListener {
 
-    /** Debug flag */
-    private static final boolean DEBUG = false;
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
-    public ProgressPrinter(PrintStream out, int numberOfSteps){
-      this.out = out;
-      this.numberOfSteps = numberOfSteps;
+  public ProgressPrinter(PrintStream out, int numberOfSteps) {
+    this.out = out;
+    this.numberOfSteps = numberOfSteps;
+  }
+
+  public ProgressPrinter(PrintStream out) {
+    this.out = out;
+  }
+
+  public void processFinished() {
+    for(int i = currentValue; i < numberOfSteps; i++) {
+      out.print("#");
     }
+    out.println("]");
+    currentValue = 0;
+    started = false;
+  }
 
-    public ProgressPrinter(PrintStream out){
-      this.out = out;
+  public void progressChanged(int newValue) {
+    if(!started){
+      out.print("[");
+      started = true;
     }
-
-    public void processFinished(){
-      for(int i = currentValue; i < numberOfSteps; i++){
+    newValue = newValue * numberOfSteps / 100;
+    if(newValue > currentValue){
+      for(int i = currentValue; i < newValue; i++) {
         out.print("#");
       }
-      out.println("]");
-      currentValue = 0;
-      started = false;
+      currentValue = newValue;
     }
-
-    public void progressChanged(int newValue){
-      if(!started){
-        out.print("[");
-        started = true;
-      }
-      newValue = newValue * numberOfSteps / 100;
-      if(newValue > currentValue){
-        for(int i = currentValue; i < newValue; i++){
-          out.print("#");
-        }
-        currentValue = newValue;
-      }
-    }
-
-
-    int currentValue = 0;
-    int numberOfSteps = 70;
-    PrintStream out;
-    boolean started = false;
   }
+
+  int currentValue = 0;
+
+  int numberOfSteps = 70;
+
+  PrintStream out;
+
+  boolean started = false;
+
+} // class ProgressPrinter

@@ -30,6 +30,7 @@ import gate.annotation.*;
   */
 public class TestDocument extends TestCase
 {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -44,6 +45,7 @@ public class TestDocument extends TestCase
 
   /** Fixture set up */
   public void setUp() {
+
     try{
       Gate.init();
       testServer = Gate.getUrl().toExternalForm();
@@ -78,10 +80,12 @@ public class TestDocument extends TestCase
     assert(doc1.compareTo(doc2) < 0);
     assert(doc1.compareTo(doc1) == 0);
     assert(doc1.compareTo(doc3) > 0);
+
   } // testCompareTo()
 
   /** A comprehensive test */
   public void testLotsOfThings() {
+
     // check that the test URL is available
     URL u = null;
     try{

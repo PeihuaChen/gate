@@ -27,7 +27,8 @@ public class ColorGenerator {
   public ColorGenerator() {
     for(int i = 0; i < 8; i++)availableSpacesList[i] = new LinkedList();
     ColorSpace usedCS = new ColorSpace(0,0,0,255);
-    availableSpacesList[0].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+    availableSpacesList[0].addLast(new ColorSpace(usedCS.baseR +
+                                               usedCS.radius/2,
                                                usedCS.baseG,
                                                usedCS.baseB,
                                                usedCS.radius/2));
@@ -35,7 +36,8 @@ public class ColorGenerator {
                                                usedCS.baseG + usedCS.radius/2,
                                                usedCS.baseB,
                                                usedCS.radius/2));
-    availableSpacesList[2].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+    availableSpacesList[2].addLast(new ColorSpace(usedCS.baseR +
+                                               usedCS.radius/2,
                                                usedCS.baseG + usedCS.radius/2,
                                                usedCS.baseB,
                                                usedCS.radius/2));
@@ -44,7 +46,8 @@ public class ColorGenerator {
                                                usedCS.baseG,
                                                usedCS.baseB + usedCS.radius/2,
                                                usedCS.radius/2));
-    availableSpacesList[4].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+    availableSpacesList[4].addLast(new ColorSpace(usedCS.baseR +
+                                               usedCS.radius/2,
                                                usedCS.baseG,
                                                usedCS.baseB + usedCS.radius/2,
                                                usedCS.radius/2));
@@ -52,14 +55,15 @@ public class ColorGenerator {
                                                usedCS.baseG + usedCS.radius/2,
                                                usedCS.baseB + usedCS.radius/2,
                                                usedCS.radius/2));
-/*
-    availableSpacesList[6].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+  /*
+    availableSpacesList[6].addLast(new ColorSpace(usedCS.baseR +
+                                               usedCS.radius/2,
                                                usedCS.baseG + usedCS.radius/2,
                                                usedCS.baseB + usedCS.radius/2,
                                                usedCS.radius/2));
 
   */
-//    Color foo = getNextColor();
+  //    Color foo = getNextColor();
   }
 
   public Color getNextColor(){
@@ -72,7 +76,8 @@ public class ColorGenerator {
                                                  usedCS.baseG,
                                                  usedCS.baseB,
                                                  usedCS.radius/2));
-      availableSpacesList[listToRead].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+      availableSpacesList[listToRead].addLast(new ColorSpace(
+                                                 usedCS.baseR + usedCS.radius/2,
                                                  usedCS.baseG,
                                                  usedCS.baseB,
                                                  usedCS.radius/2));
@@ -80,7 +85,8 @@ public class ColorGenerator {
                                                  usedCS.baseG + usedCS.radius/2,
                                                  usedCS.baseB,
                                                  usedCS.radius/2));
-      availableSpacesList[listToRead].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+      availableSpacesList[listToRead].addLast(new ColorSpace(
+                                                 usedCS.baseR + usedCS.radius/2,
                                                  usedCS.baseG + usedCS.radius/2,
                                                  usedCS.baseB,
                                                  usedCS.radius/2));
@@ -89,7 +95,8 @@ public class ColorGenerator {
                                                  usedCS.baseG,
                                                  usedCS.baseB + usedCS.radius/2,
                                                  usedCS.radius/2));
-      availableSpacesList[listToRead].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+      availableSpacesList[listToRead].addLast(new ColorSpace(
+                                                 usedCS.baseR + usedCS.radius/2,
                                                  usedCS.baseG,
                                                  usedCS.baseB + usedCS.radius/2,
                                                  usedCS.radius/2));
@@ -97,7 +104,8 @@ public class ColorGenerator {
                                                  usedCS.baseG + usedCS.radius/2,
                                                  usedCS.baseB + usedCS.radius/2,
                                                  usedCS.radius/2));
-      availableSpacesList[listToRead].addLast(new ColorSpace(usedCS.baseR + usedCS.radius/2,
+      availableSpacesList[listToRead].addLast(new ColorSpace(
+                                                 usedCS.baseR + usedCS.radius/2,
                                                  usedCS.baseG + usedCS.radius/2,
                                                  usedCS.baseB + usedCS.radius/2,
                                                  usedCS.radius/2));
@@ -125,6 +133,9 @@ public class ColorGenerator {
   }
 
   LinkedList[] availableSpacesList = new LinkedList[8];
+
   LinkedList usedSpacesList = new LinkedList();
+
   int listToRead = 0;
-}
+
+} // ColorGenerator

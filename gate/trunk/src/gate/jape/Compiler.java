@@ -138,11 +138,13 @@ public class Compiler {
     Err.println("JAPE compiler error: " + mess);
   } // emessage
 
-
 } // class Compiler
 
 
 // $Log$
+// Revision 1.4  2000/10/26 10:45:30  oana
+// Modified in the code style
+//
 // Revision 1.3  2000/10/16 16:44:33  oana
 // Changed the comment of DEBUG variable
 //

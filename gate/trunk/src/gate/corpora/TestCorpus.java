@@ -30,6 +30,7 @@ import gate.annotation.*;
   */
 public class TestCorpus extends TestCase
 {
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -43,6 +44,7 @@ public class TestCorpus extends TestCase
   /** Corpus creation */
   public void testCreation() throws Exception {
     Corpus c = Factory.newCorpus("test corpus");
+
     assert(c.isEmpty());
     assert(c.getName().equals("test corpus"));
 
@@ -56,6 +58,7 @@ public class TestCorpus extends TestCase
     c2.getFeatures().put("author", "valy");
     assert(c2.getFeatures().size() == 1);
     assert(c2.getFeatures().get("author").equals("valy"));
+
   } // testCreation()
 
   /** Add some documents */

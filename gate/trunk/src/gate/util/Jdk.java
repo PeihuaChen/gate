@@ -121,15 +121,15 @@ public class Jdk {
     while(iter.hasNext()) {
       byte[] classBytes = (byte[]) iter.next();
 
-      if(classBytes == null || classBytes.length == 0)
-	throw new GateException("no bytes returned from compiler");
+    if(classBytes == null || classBytes.length == 0)
+    	throw new GateException("no bytes returned from compiler");
 
       // possibly this test is wrong - what about sources that contain
       // multiple classes or have inner classes? at any rate we currently
       // have no way to return them
-      if(iter.hasNext())
-	throw 
-	  new GateException("only compiled one class but got multiple results");
+    if(iter.hasNext())
+    	throw
+	      new GateException("only compiled one class but got multiple results");
 
       return classBytes;
     } // while

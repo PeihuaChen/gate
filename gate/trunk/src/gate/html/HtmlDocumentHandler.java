@@ -49,7 +49,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param aMarkupElementsMap The map containing the elements that will
     * transform into annotations
     */
-  public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap){
+  public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap) {
     this(aDocument,aMarkupElementsMap,null);
   }
 
@@ -62,20 +62,25 @@ public class HtmlDocumentHandler extends ParserCallback {
     */
   public HtmlDocumentHandler(gate.Document       aDocument,
                              Map                 aMarkupElementsMap,
-                             gate.AnnotationSet  anAnnotationSet){
+                             gate.AnnotationSet  anAnnotationSet) {
     // init stack
     stack = new java.util.Stack();
+
     // this string contains the plain text (the text without markup)
     tmpDocContent = new StringBuffer("");
+
     // colector is used later to transform all custom objects into
     // annotation objects
     colector = new LinkedList();
+
     // the Gate document
     doc = aDocument;
+
     // this map contains the elements name that we want to create
     // if it's null all the elements from the XML documents will be transformed
     // into Gate annotation objects
     markupElementsMap = aMarkupElementsMap;
+
     // init an annotation set for this gate document
     basicAS = anAnnotationSet;
   }
@@ -83,13 +88,16 @@ public class HtmlDocumentHandler extends ParserCallback {
   /** This method is called when the HTML parser encounts the beginning
     * of a tag that means that the tag is paired by an end tag and it's
     * not an empty one.
-   */
-  public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
+    */
+  public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
+
     // fire the status listener if the elements processed exceded the rate
     if (0 == (++elements % ELEMENTS_RATE))
         fireStatusChangedEvent("Processed elements : " + elements);
+
     // construct a feature map from the attributes list
     FeatureMap fm = new SimpleFeatureMapImpl();
+
     // take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
       Enumeration enum = a.getAttributeNames();
@@ -97,11 +105,15 @@ public class HtmlDocumentHandler extends ParserCallback {
         Object attribute = enum.nextElement();
         fm.put(attribute.toString(),(a.getAttribute(attribute)).toString());
       }// while
+
     }// if
+
     // create the start index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
+
     // initialy the start index is equal with the End index
     CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
+
     // put it into the stack
     stack.push (obj);
   }//handleStartTag
@@ -109,36 +121,43 @@ public class HtmlDocumentHandler extends ParserCallback {
    /** This method is called when the HTML parser encounts the end of a tag
      * that means that the tag is paired by a beginning tag
      */
-  public void handleEndTag(HTML.Tag t, int pos){
+  public void handleEndTag(HTML.Tag t, int pos) {
     // obj is for internal use
     CustomObject obj = null;
+
     // if the stack is not empty then we get the object from the stack
     if (!stack.isEmpty()){
       obj = (CustomObject) stack.pop();
+
       // we add it to the colector
       colector.add(obj);
     }
+
     // if t is the </HTML> tag then we reached the end of theHTMLdocument
     if (t == HTML.Tag.HTML){
+
       // replace the old content with the new one
       doc.setContent (new DocumentContentImpl(tmpDocContent.toString()));
+
       // If basicAs is null then get the default annotation
       // set from this gate document
       if (basicAS == null)
         basicAS = doc.getAnnotations();
+
       // iterate through colector and construct annotations
       Iterator anIterator = colector.iterator();
       while (anIterator.hasNext()){
         obj = (CustomObject) anIterator.next();
+
         // construct an annotation from this obj
-        try{
-          if (markupElementsMap == null){
+        try {
+          if (markupElementsMap == null) {
              basicAS.add( obj.getStart(),
                           obj.getEnd(),
                           obj.getElemName(),
                           obj.getFM()
                          );
-          }else{
+          } else {
             String annotationType =
                    (String) markupElementsMap.get(obj.getElemName());
             if (annotationType != null)
@@ -148,45 +167,57 @@ public class HtmlDocumentHandler extends ParserCallback {
                             obj.getFM()
                            );
           }
-        }catch (InvalidOffsetException e){
-            e.printStackTrace (Err.getPrintWriter());
+        } catch (InvalidOffsetException e) {
+          e.printStackTrace (Err.getPrintWriter());
         }
       }//while
+
       // notify the listener about the total amount of elements that
       // has been processed
       fireStatusChangedEvent("Total elements : " + elements);
+
     }//else
+
   }//handleEndTag
 
   /** This method is called when the HTML parser encounts an empty tag
     */
-  public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
+  public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos) {
     // fire the status listener if the elements processed exceded the rate
     if ((++elements % ELEMENTS_RATE) == 0)
        fireStatusChangedEvent("Processed elements : " + elements);
+
     // if the HTML tag is BR then we add a new line character to the document
     if (HTML.Tag.BR == t)
       tmpDocContent.append("\n");
+
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
+
     // take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount ()){
+
        // Out.println("HAS  attributes = " + a.getAttributeCount ());
         Enumeration enum = a.getAttributeNames ();
         while (enum.hasMoreElements ()){
           Object attribute = enum.nextElement ();
           fm.put ( attribute.toString(),(a.getAttribute(attribute)).toString());
+
         }//while
+
     }//if
+
     // create the start index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
+
     // initialy the start index is equal with the End index
     CustomObject obj = new CustomObject(t.toString(),fm,startIndex,startIndex);
+
     // we add the object directly into the colector
     // we don't add it to the stack because this is an empty tag
     colector.add(obj);
-  }//handleSimpleTag
+  } // handleSimpleTag
 
   /** This method is called when the HTML parser encounts text (PCDATA)
     */
@@ -208,21 +239,22 @@ public class HtmlDocumentHandler extends ParserCallback {
     CustomObject obj = null;
     Long end = new Long(tmpDocContentSize + content.length());
 
-    //modify all the elements from the stack with the new calculated end index
+    // modify all the elements from the stack with the new calculated end index
     Iterator iterator = stack.iterator ();
     while (iterator.hasNext()){
       obj = (CustomObject) iterator.next();
       obj.setEnd(end);
     }
+
     // update the document content
     tmpDocContent.append(content);
   }
 
   /**
-    This method is called when the HTML parser encounts an error
-    it depends on the programmer if he wants to deal with that error
+    * This method is called when the HTML parser encounts an error
+    * it depends on the programmer if he wants to deal with that error
     */
-  public void handleError(String errorMsg, int pos){
+  public void handleError(String errorMsg, int pos) {
     //Out.println ("ERROR CALLED : " + errorMsg);
   }
 
@@ -230,25 +262,26 @@ public class HtmlDocumentHandler extends ParserCallback {
     * of its input streamin order to notify the parserCallback that there
     * is nothing more to parse.
     */
-  public void flush() throws BadLocationException{
+  public void flush() throws BadLocationException {
     Out.println("Flush called!!!!!!!!!!!");
   }
 
   /** This method is called when the HTML parser encounts a comment
     */
-  public void handleComment(char[] text, int pos){
+  public void handleComment(char[] text, int pos) {
   }
 
   //StatusReporter Implementation
 
-  public void addStatusListener(StatusListener listener){
+  public void addStatusListener(StatusListener listener) {
     myStatusListeners.add(listener);
   }
 
-  public void removeStatusListener(StatusListener listener){
+  public void removeStatusListener(StatusListener listener) {
     myStatusListeners.remove(listener);
   }
-  protected void fireStatusChangedEvent(String text){
+
+  protected void fireStatusChangedEvent(String text) {
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
@@ -291,18 +324,18 @@ public class HtmlDocumentHandler extends ParserCallback {
   // the transformation will take place inside onDocumentEnd() method
   private List colector = null;
 
-} //HtmlDocumentHandler
+} // HtmlDocumentHandler
 
 
-/*
-  The objects belonging to this class are used inside the stack.
-  This class is for internal needs
- */
-class  CustomObject{
+/**
+  * The objects belonging to this class are used inside the stack.
+  * This class is for internal needs
+  */
+class  CustomObject {
 
   // constructor
   public CustomObject(String anElemName, FeatureMap aFm,
-                         Long aStart, Long anEnd){
+                         Long aStart, Long anEnd) {
     elemName = anElemName;
     fm = aFm;
     start = aStart;
@@ -310,31 +343,36 @@ class  CustomObject{
   }
 
   // accesor
-  public String getElemName(){
+  public String getElemName() {
     return elemName;
   }
-  public FeatureMap getFM(){
+
+  public FeatureMap getFM() {
     return fm;
   }
-  public Long getStart(){
+
+  public Long getStart() {
     return start;
   }
-  public Long getEnd(){
+
+  public Long getEnd() {
     return end;
   }
 
-
   // mutator
-  public void setElemName(String anElemName){
+  public void setElemName(String anElemName) {
     elemName = anElemName;
   }
-  public void setFM(FeatureMap aFm){
+
+  public void setFM(FeatureMap aFm) {
     fm = aFm;
   }
-  public void setStart(Long aStart){
+
+  public void setStart(Long aStart) {
     start = aStart;
   }
-  public void setEnd(Long anEnd){
+
+  public void setEnd(Long anEnd) {
     end = anEnd;
   }
 
@@ -344,5 +382,5 @@ class  CustomObject{
   private Long start = null;
   private Long end  = null;
 
-}// CustomObject
+} // CustomObject
 

@@ -136,9 +136,9 @@ public class CreoleXmlHandler extends HandlerBase {
 
     if(elementName.toUpperCase().equals("RESOURCE")) {
       // add the new resource data object to the creole register
-//******************************
-// check that the resource has all mandatory elements, e.g. class name
-//******************************
+      //******************************
+      // check that the resource has all mandatory elements, e.g. class name
+      //******************************
       if(resourceData.getInterfaceName() != null) // index by intf if present
         register.put(resourceData.getInterfaceName(), resourceData);
       else // index by class name
@@ -156,6 +156,7 @@ public class CreoleXmlHandler extends HandlerBase {
         }
 
       if(DEBUG) Out.println("added: " + resourceData);
+
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
       resourceData.setName((String) elementStack.pop());
@@ -170,6 +171,7 @@ public class CreoleXmlHandler extends HandlerBase {
       if(sourceUrl != null) {
         String sourceUrlName = sourceUrl.toExternalForm();
         String separator = "/";
+
         if(sourceUrlName.endsWith(separator))
           separator = "";
         URL jarFileUrl = null;
@@ -247,11 +249,13 @@ public class CreoleXmlHandler extends HandlerBase {
     // but don't want to do anything with them, hence this loop:
     boolean isSpaces = true;
     char contentChars[] = content.toCharArray();
+
     for(int i=0, len=contentChars.length; i < len; i++)
       if(! Character.isWhitespace(contentChars[i])) {
         isSpaces = false;
         break;
       }
+
     if(isSpaces) return;
 
     elementStack.push(content);
