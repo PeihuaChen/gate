@@ -4,14 +4,12 @@
 <!ELEMENT S (W )*>
 <!ELEMENT W (#PCDATA)>
 <!ENTITY Sent "This is an internal entity.">
-<!ENTITY Sent1 SYSTEM "Sentence1.xml">
 ]>
 <TEST>
 <!-- A comment -->
 <S><W pos="NN" person="yes">Cristian URSU</W> <W>wrote</W> that program.</S>
 TADA.
 <S>&Sent;</S>
-&Sent1;
 This is<EMPTYELEMENT/> clear.
 <![CDATA[<S>Hello, world! >>> </S>]]>
 <W>&#xc10;</W>
