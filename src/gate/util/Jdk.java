@@ -91,19 +91,25 @@ public class Jdk {
     String argv[] = new String[3];
     argv[0] = "-nodisk";
     argv[1] = className;
-    argv[2] = javaSource;
+    argv[2] = javaCode;
     compiler.compile(argv);
     List compilerOutput = compiler.getCompilerOutput();
 
     Iterator iter = compilerOutput.iterator();
     while(iter.hasNext()) {
       byte[] classBytes = (byte[]) iter.next();
-      assert(
-	"no bytes returned from compiler",
-	classBytes != null && classBytes.length > 0
-      );
 
-      return classBytes
+      if(classBytes == null || classBytes.length == 0)
+	throw new GateException("no bytes returned from compiler");
+
+      // possibly this test is wrong - what about sources that contain
+      // multiple classes or have inner classes? at any rate we currently
+      // have no way to return them
+      if(iter.hasNext())
+	throw 
+	  new GateException("only compiled one class but got multiple results");
+
+      return classBytes;
     } // while
 
     throw new GateException("no compiler output");
