@@ -542,7 +542,7 @@ public class CorpusBenchmarkTool {
             persDoc.getName().length(),
             ".err");
           Out.prln("<H2>" +
-                   "<a href=err/" + errName.toString() + ">"
+                   "<a href=\"err/" + errName.toString() + "\">"
                    + persDoc.getName() + "</a>" + "</H2>");
         } else
           Out.prln("<H2>" + persDoc.getName() + "</H2>");
@@ -970,7 +970,7 @@ ex.printStackTrace();
     printTableHeader();
 
     // store annotation diff in .err file
-    FileWriter errFileWriter = null;
+    Writer errWriter = null;
     if (isMoreInfoMode && errDir != null) {
       StringBuffer docName = new StringBuffer(cleanDoc.getName());
       docName.replace(
@@ -978,13 +978,20 @@ ex.printStackTrace();
           docName.length(),
           ".err");
       File errFile = new File(errDir, docName.toString());
+      String encoding = ((gate.corpora.DocumentImpl)cleanDoc).getEncoding();
       try {
-        errFileWriter = new FileWriter(errFile, false);
+        if(encoding == null) {
+          errWriter = new OutputStreamWriter(
+              new FileOutputStream(errFile, false));
+        } else {
+          errWriter = new OutputStreamWriter(
+              new FileOutputStream(errFile, false), encoding);
+        }
       }
       catch (Exception ex) {
         Out.prln("Exception when creating the error file " + errFile + ": "
                  + ex.getMessage());
-        errFileWriter = null;
+        errWriter = null;
       }
     }
 
@@ -1166,16 +1173,16 @@ ex.printStackTrace();
       } // if(isMoreInfoMode && annotDiff1 != null)
 
       if (isMoreInfoMode && errDir != null)
-        storeAnnotations(annotType, annotDiffer, markedDoc, cleanDoc, errFileWriter);
+        storeAnnotations(annotType, annotDiffer, markedDoc, cleanDoc, errWriter);
     }//for loop through annotation types
     Out.prln("</TABLE>");
 
     try {
-      if(errFileWriter != null)
-        errFileWriter.close();
+      if(errWriter != null)
+        errWriter.close();
     }
     catch (Exception ex) {
-      Out.prln("Exception on close of error file " + errFileWriter + ": "
+      Out.prln("Exception on close of error file " + errWriter + ": "
                + ex.getMessage());
     }
   }//evaluateAllThree
@@ -1188,7 +1195,7 @@ ex.printStackTrace();
     printTableHeader();
 
     // store annotation diff in .err file
-    FileWriter errFileWriter = null;
+    Writer errWriter = null;
     if (isMoreInfoMode && errDir != null) {
       StringBuffer docName = new StringBuffer(keyDoc.getName());
       docName.replace(
@@ -1196,13 +1203,20 @@ ex.printStackTrace();
           docName.length(),
           ".err");
       File errFile = new File(errDir, docName.toString());
+      String encoding = ((gate.corpora.DocumentImpl)keyDoc).getEncoding();
       try {
-        errFileWriter = new FileWriter(errFile, false);
+        if(encoding == null) {
+          errWriter = new OutputStreamWriter(
+              new FileOutputStream(errFile, false));
+        } else {
+          errWriter = new OutputStreamWriter(
+              new FileOutputStream(errFile, false), encoding);
+        }
       }
       catch (Exception ex) {
         Out.prln("Exception when creating the error file " + errFile + ": "
                  + ex.getMessage());
-        errFileWriter = null;
+        errWriter = null;
       }
     }
 
@@ -1245,16 +1259,16 @@ ex.printStackTrace();
       Out.prln("</TR>");
 
       if (isMoreInfoMode && errDir != null)
-        storeAnnotations(annotType, annotDiff, keyDoc, respDoc, errFileWriter);
+        storeAnnotations(annotType, annotDiff, keyDoc, respDoc, errWriter);
     }//for loop through annotation types
     Out.prln("</TABLE>");
 
     try {
-      if(errFileWriter != null)
-        errFileWriter.close();
+      if(errWriter != null)
+        errWriter.close();
     }
     catch (Exception ex) {
-      Out.prln("Exception on close of error file " + errFileWriter + ": "
+      Out.prln("Exception on close of error file " + errWriter + ": "
                + ex.getMessage());
     }
   }//evaluateTwoDocs
@@ -1605,6 +1619,77 @@ ex.printStackTrace();
     }
   }//printStatsForType
 
+  private double precisionSumCalc = 0;
+  private double recallSumCalc = 0;
+  private double fMeasureSumCalc = 0;
+
+  public double getPrecisionAverageCalc() {
+    return precisionSumCalc;
+  }
+
+  public double getRecallAverageCalc() {
+    return recallSumCalc;
+  }
+
+  public double getFmeasureAverageCalc() {
+    return fMeasureSumCalc;
+  }
+
+  protected void calculateAvgTotal() {
+    long correct, partial, spurious, missing;
+    long correctSum, partialSum, spuriousSum, missingSum;
+
+    if (annotTypes == null) {
+      return;
+    }
+    correctSum = partialSum = spuriousSum = missingSum = 0;
+
+    String annotType;
+    for (int i = 0; i < annotTypes.size(); i++) {
+      annotType = (String) annotTypes.get(i);
+      correct = (correctByType.get(annotType) == null)? 0 :
+                        ((Long)correctByType.get(annotType)).longValue();
+      partial = (partialByType.get(annotType) == null)? 0 :
+                        ((Long)partialByType.get(annotType)).longValue();
+      spurious = (spurByType.get(annotType) == null)? 0 :
+                        ((Long)spurByType.get(annotType)).longValue();
+      missing = (missingByType.get(annotType) == null)? 0:
+                        ((Long)missingByType.get(annotType)).longValue();
+      correctSum += correct;
+      partialSum += partial;
+      spuriousSum += spurious;
+      missingSum += missing;
+    }//for
+
+    long actual = correctSum + partialSum + spuriousSum;
+    long possible = correctSum + partialSum + missingSum;
+
+    if(actual == 0) {
+      precisionSumCalc = 0;
+    }
+    else {
+      precisionSumCalc = (correctSum + 0.5 * partialSum) / actual;
+    }
+
+    if(possible == 0) {
+      recallSumCalc = 0;
+    }
+    else {
+      recallSumCalc = (correctSum + 0.5 * partialSum) / actual;
+    }
+
+    if(precisionSumCalc == 0 && recallSumCalc == 0) {
+      fMeasureSumCalc = 0;
+    }
+    else {
+      fMeasureSumCalc =
+        ((beta*beta + 1)*precisionSumCalc*recallSumCalc)
+        /
+        ((beta*beta*precisionSumCalc) + recallSumCalc);
+
+    }
+  } // calculateAvgTotal
+
   protected AnnotationDiffer measureDocs(
     Document keyDoc, Document respDoc, String annotType)
       throws ResourceInstantiationException {
@@ -1644,7 +1729,7 @@ ex.printStackTrace();
   } // measureDocs
 
   protected void storeAnnotations(String type, AnnotationDiffer annotDiffer,
-                  Document keyDoc, Document respDoc, FileWriter errFileWriter) {
+                  Document keyDoc, Document respDoc, Writer errFileWriter) {
     if(errFileWriter == null) return; // exit on "no file"
 
     try {
@@ -1673,7 +1758,7 @@ ex.printStackTrace();
   }// storeAnnotations
 
   protected void storeAnnotations(String type, Set set, Document doc,
-                                  FileWriter file) throws IOException{
+                                  Writer file) throws IOException{
 
     if (set == null || set.isEmpty())
       return;
