@@ -193,6 +193,12 @@ public class OrthoMatcher extends AbstractProcessingResource
     processedAnnots.clear();
     annots2Remove.clear();
     tokensMap.clear();
+    matchesDocFeature = null;
+    longAnnot = null;
+    shortAnnot = null;
+    tokensLongAnnot = null;
+    tokensShortAnnot = null;
+
   } // run()
 
   protected void matchNameAnnotations() {
@@ -236,6 +242,9 @@ public class OrthoMatcher extends AbstractProcessingResource
                           nameAnnot.getStartNode().getOffset(),
                           nameAnnot.getEndNode().getOffset()
                         ));
+        //if no tokens to match, do nothing
+        if (tokens.isEmpty())
+          continue;
         Collections.sort(tokens, new gate.util.OffsetComparator());
         //check if these actually do not end after the name
         //needed coz new tokeniser conflates
@@ -311,6 +320,8 @@ public class OrthoMatcher extends AbstractProcessingResource
                         unknown.getStartNode().getOffset(),
                         unknown.getEndNode().getOffset()
                       ));
+      if (tokens.isEmpty())
+        continue;
       Collections.sort(tokens, new gate.util.OffsetComparator());
       tokensMap.put(unknown.getId(), tokens);
 
