@@ -43,8 +43,6 @@ public class Scratch
     String A = a.toUpperCase();
     System.out.println("a: " + a);
     System.out.println("A: " + A);
-
-
 //    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 //    Map uidefaults  = (Map)javax.swing.UIManager.getDefaults();
 //    List keys = new ArrayList(uidefaults.keySet());
