@@ -92,6 +92,10 @@ public interface GateConstants {
   public static final String
     CORPUS_INDEX_STATISTICS_FEATURE_KEY = "Index_statistics_feature_key";
 
+  /** Document property to set throw of exception on parsing format error */
+  public static final String THROWEX_FORMAT_PROPERTY_NAME = 
+    "throwExceptionOnFormatError";
+
   /** The key for the WordNet config file*/
   public static final String WORDNET_CONFIG_FILE = "Wordnet_config_file";
 
