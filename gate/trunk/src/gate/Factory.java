@@ -356,6 +356,9 @@ public abstract class Factory {
     * @param resource the resource to be deleted.
     */
   public static void deleteResource(Resource resource) {
+    Out.prln("registry: " + reg);
+    Out.prln("resource " + resource);
+    Out.prln("resource class " + resource.getClass());
     ResourceData rd =
       (ResourceData) reg.get(resource.getClass().getName());
     rd.removeInstantiation(resource);

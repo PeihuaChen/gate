@@ -60,6 +60,12 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
     this.doc = (DocumentImpl) doc;
   } // construction from document and name
 
+  /** Construction from Document and name. */
+  public DatabaseAnnotationSetImpl(Document doc, Collection c) {
+    this(c);
+    this.doc = (DocumentImpl) doc;
+  } // construction from document and name
+
   /** Construction from Collection (which must be an AnnotationSet) */
   public DatabaseAnnotationSetImpl(Collection c) throws ClassCastException {
     super(c);

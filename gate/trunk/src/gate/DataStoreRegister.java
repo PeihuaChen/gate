@@ -39,10 +39,10 @@ public class DataStoreRegister extends HashSet {
       "gate.persist.SerialDataStore",
       "SerialDataStore: file-based storage using Java serialisation"
     );
-    names.put(
-      "gate.persist.JdbcDataStore",
-      "JdbcDataStore: generic RDBMS storage over JDBC"
-    );
+//    names.put(
+//      "gate.persist.JdbcDataStore",
+//      "JdbcDataStore: generic RDBMS storage over JDBC"
+//    );
     names.put(
       "gate.persist.OracleDataStore",
       "OracleDataStore: Oracle-specific RDBMS storage over JDBC"

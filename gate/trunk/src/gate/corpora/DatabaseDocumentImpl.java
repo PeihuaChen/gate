@@ -368,12 +368,73 @@ public class DatabaseDocumentImpl extends DocumentImpl {
           return;
         }
 
+        //2. read annotation Features
+        HashMap featuresByAnnotationID = _readFeatures(asetID);
+
+        //3. read annotations
+        AnnotationSetImpl transSet = new AnnotationSetImpl(this);
+
+        try {
+          String sql1 = " select ann_local_id, " +
+                       "        at_name, " +
+                       "        start_offset, " +
+                       "        end_offset " +
+                       " from  "+Gate.DB_OWNER+".v_annotation  " +
+                       " where  asann_as_id = ? ";
+
+        if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
+
+        pstmt = this.jdbcConn.prepareStatement(sql1);
+        pstmt.setLong(1,asetID.longValue());
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        while (rs.next()) {
+          //1. read data memebers
+          Integer annID = new Integer(rs.getInt(1));
+          String type = rs.getString(2);
+          Long startOffset = new Long(rs.getLong(3));
+          Long endOffset = new Long(rs.getLong(4));
+
+          if (DEBUG) Out.println("annID=["+annID+"]");
+          if (DEBUG) Out.println("start=["+startOffset+"]");
+          if (DEBUG) Out.println("end=["+endOffset+"]");
+
+          //2. get the features
+          FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
+          //fm may should NOT be null
+          if (null == fm) {
+            fm =  new SimpleFeatureMapImpl();
+          }
+
+          //3. add to annotation set
+          transSet.add(annID,startOffset,endOffset,type,fm);
+        }//while
+        }//read the annotations
+        catch(SQLException sqle) {
+          throw new SynchronisationException("can't read content from DB: ["
+                                            + sqle.getMessage()+"]");
+        }
+        catch(InvalidOffsetException oe) {
+          throw new SynchronisationException(oe);
+        }
+        finally {
+          try {
+            DBHelper.cleanup(rs);
+            DBHelper.cleanup(pstmt);
+          }
+          catch(PersistenceException pe) {
+            throw new SynchronisationException("JDBC error: ["
+                                              + pe.getMessage()+"]");
+          }
+        }//finally
+
         //1.5, create a-set
         if (null == name) {
-          as = new DatabaseAnnotationSetImpl(this);
+          as = new DatabaseAnnotationSetImpl(this, transSet);
         }
         else {
-          as = new DatabaseAnnotationSetImpl(this,name);
+          as = new DatabaseAnnotationSetImpl(this,name, transSet);
         }
       }
       catch(SQLException sqle) {
@@ -389,63 +450,6 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         }
       }
 
-      //read Features
-      HashMap featuresByAnnotationID = _readFeatures(asetID);
-
-      //3. read annotations
-
-      try {
-        String sql = " select ann_local_id, " +
-                     "        at_name, " +
-                     "        start_offset, " +
-                     "        end_offset " +
-                     " from  "+Gate.DB_OWNER+".v_annotation  " +
-                     " where  asann_as_id = ? ";
-
-      if (DEBUG) Out.println(">>>>> asetID=["+asetID+"]");
-
-      pstmt = this.jdbcConn.prepareStatement(sql);
-      pstmt.setLong(1,asetID.longValue());
-      pstmt.execute();
-      rs = pstmt.getResultSet();
-
-      while (rs.next()) {
-        //1. read data memebers
-        Integer annID = new Integer(rs.getInt(1));
-        String type = rs.getString(2);
-        Long startOffset = new Long(rs.getLong(3));
-        Long endOffset = new Long(rs.getLong(4));
-
-        if (DEBUG) Out.println("annID=["+annID+"]");
-        if (DEBUG) Out.println("start=["+startOffset+"]");
-        if (DEBUG) Out.println("end=["+endOffset+"]");
-
-        //2. get the features
-        FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
-        //fm may should NOT be null
-        if (null == fm) {
-          fm =  new SimpleFeatureMapImpl();
-        }
-
-        //3. add to annotation set
-        as.add(annID,startOffset,endOffset,type,fm);
-      }
-    }
-    catch(SQLException sqle) {
-      throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
-    }
-    catch(InvalidOffsetException oe) {
-      throw new SynchronisationException(oe);
-    }
-    finally {
-      try {
-        DBHelper.cleanup(rs);
-        DBHelper.cleanup(pstmt);
-      }
-      catch(PersistenceException pe) {
-        throw new SynchronisationException("JDBC error: ["+ pe.getMessage()+"]");
-      }
-    }
 
     //4. update internal data members
     if (name == null) {

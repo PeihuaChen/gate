@@ -33,6 +33,13 @@
       <ICON>lr.gif</ICON>
     </RESOURCE>
     <RESOURCE>
+      <NAME>GATE Oracle Document</NAME>
+      <CLASS>gate.corpora.DatabaseDocumentImpl</CLASS>
+      <INTERFACE>gate.Document</INTERFACE>
+      <ICON>lr.gif</ICON>
+      <PRIVATE/>
+    </RESOURCE>
+    <RESOURCE>
       <NAME>GATE Serial Corpus</NAME>
       <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
       <INTERFACE>gate.Corpus</INTERFACE>
@@ -316,6 +323,15 @@
       <GUI TYPE="small">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.persist.SerialDataStore</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    <RESOURCE>
+      <NAME>Oracle Datastore Viewer</NAME>
+      <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="small">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.persist.OracleDataStore</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
     <!-- VR def for gate Syntax Tree Editor/Viewer -->
