@@ -15,6 +15,8 @@
 
 package gate.creole.coref;
 
+import java.util.*;
+
 import junit.framework.*;
 
 import gate.*;
@@ -114,11 +116,19 @@ System.out.println("starting ANNIE modules...");
   public void useCase01()
     throws Exception{
 System.out.println("starting use case 01...");
-    Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9801.35.sgm");
+
+    DataStore sds = Factory.openDataStore("gate.persist.SerialDataStore", "file:/E:/gate2/serial/debug/");
+    sds.open();
+
+    List lrIds = sds.getLrIds("gate.corpora.DocumentImpl");
+    Object lrID = lrIds.get(0);
+
+    Document doc = (Document) sds.getLr("gate.corpora.DocumentImpl", lrID);
+//    Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9801.35.sgm");
 //    Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9806.93.sgm");
 //    Document doc = loadDocument("file:/E:/Gate2/data/gatecorpora/ace/aps/npaper/clean/9802.108.sgm");
 
-    runANNIE(doc);
+//--    runANNIE(doc);
 
     Coreferencer corefMain = (Coreferencer)Factory.createResource("gate.creole.coref.Coreferencer");
     corefMain.init();
