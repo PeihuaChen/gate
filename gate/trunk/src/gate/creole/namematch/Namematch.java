@@ -84,7 +84,7 @@ public class Namematch extends AbstractProcessingResource
     annotationTypes.add("Date");
     try {
       createLists();
-    } catch (IOException ioe) {throw new ResourceInstantiationException(ioe);}
+    } catch (IOException ioe) {ioe.printStackTrace();}
     return this;
   } // init()
 
@@ -122,10 +122,10 @@ public class Namematch extends AbstractProcessingResource
 
     if (nameAllAnnots != null) {
       if (nameAllAnnots.isEmpty()) {
-        Out.prln("NameMatcher message: No annotations found.");
+        Out.prln("No annotations");
         return;
       }
-    } else {Out.prln("NameMatcher message: No annotations found.");return;}
+    } else {Out.prln("No annotations");return;}
 
     // the "unknown" annotations
     AnnotationSet nameAnnotsUnknown;
@@ -138,6 +138,7 @@ public class Namematch extends AbstractProcessingResource
 
       nameAnnots = nameAllAnnots.get(annotationType,
                                   Factory.newFeatureMap());
+
       // return if no such annotations exist
       if (nameAnnots != null) {
         if (nameAnnots.isEmpty()) {
@@ -149,11 +150,7 @@ public class Namematch extends AbstractProcessingResource
             nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
                                   Factory.newFeatureMap());
             // add the "unknown" annotations to the current set of annotation
-            Iterator iter = nameAnnotsUnknown.iterator();
-            while(iter.hasNext()) {
-              Annotation an = (Annotation)iter.next();
-              nameAnnots.add(an);
-            }
+            nameAnnots.addAll(nameAnnotsUnknown);
           }// if
 
           // PROBLEM:
@@ -299,8 +296,9 @@ public class Namematch extends AbstractProcessingResource
                   }
 
                 // added the id annotation to the list of matches
-                if ((!nameAnnotsUnknown.contains(annot1))||
-                  (!nameAnnotsUnknown.contains(annot2))) {
+                if ((nameAnnotsUnknown == null)||
+                   (!nameAnnotsUnknown.contains(annot1))||
+                   (!nameAnnotsUnknown.contains(annot2))) {
                   if (!matchedAnnot1.containsMatched(annot1_id.toString()))
                     matchedAnnot1.addMatchedAnnotId(annot1_id.toString());
                   if (!matchedAnnot1.containsMatched(annot2_id.toString()))
@@ -343,6 +341,8 @@ public class Namematch extends AbstractProcessingResource
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } // else if
                 }//if
+
+
               } // if (apply_rules_namematch
             }//while
 
@@ -397,9 +397,9 @@ public class Namematch extends AbstractProcessingResource
 
     // update the annotation set
     // add the "unknown" annotations that are not matching
-    nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
-                      Factory.newFeatureMap());
     if (nameAnnotsUnknown!=null) {
+      nameAnnotsUnknown = nameAnnotsUnknown.get("Unknown",
+                      Factory.newFeatureMap());
       nameAllAnnots.addAll(nameAnnotsUnknown);
     }
 
@@ -540,7 +540,8 @@ public class Namematch extends AbstractProcessingResource
   public void createLists() throws IOException {
     InputStream inputStream = Files.getGateResourceAsStream(
                                               "creole/namematcher/listsNM.def");
-    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+    InputStreamReader inputStreamReader = new InputStreamReader (
+                                                    inputStream);
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
     String lineRead = null;
