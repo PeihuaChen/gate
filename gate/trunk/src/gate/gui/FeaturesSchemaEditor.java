@@ -94,9 +94,10 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     mainTable.setModel(featuresModel);
     mainTable.setTableHeader(null);
     mainTable.setSortable(false);
-    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    mainTable.setShowVerticalLines(false);    
     mainTable.setBackground(getBackground());
-//    setIntercellSpacing(new Dimension(2,2));
+    mainTable.setIntercellSpacing(new Dimension(2,2));
     featureEditorRenderer = new FeatureEditorRenderer();
     mainTable.getColumnModel().getColumn(ICON_COL).
         setCellRenderer(featureEditorRenderer);
@@ -150,7 +151,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     }
     featureList.add(emptyFeature);
     featuresModel.fireTableDataChanged();
-//    setSize(getPreferredScrollableViewportSize());
+//    mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
+    mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
   }
 
   FeatureMap targetFeatures;
@@ -240,6 +242,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           if(feature.name != null && feature.name.length() > 0){
             targetFeatures.put(feature.name, aValue);
             fireTableRowsUpdated(rowIndex, rowIndex);
+            mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
           }
           break;
         case NAME_COL:
