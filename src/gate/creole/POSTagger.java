@@ -80,9 +80,13 @@ public class POSTagger extends AbstractProcessingResource {
         Iterator sentIter = sentences.iterator();
         while(sentIter.hasNext()){
           Annotation sentenceAnn = (Annotation)sentIter.next();
-          List tokens = new ArrayList(
-                        inputAS.get(sentenceAnn.getStartNode().getOffset(),
-                        sentenceAnn.getEndNode().getOffset()).get("Token"));
+          AnnotationSet rangeSet = inputAS.get(
+                                    sentenceAnn.getStartNode().getOffset(),
+                                    sentenceAnn.getEndNode().getOffset());
+          if(rangeSet == null) continue;
+          AnnotationSet tokensSet = rangeSet.get("Token");
+          if(tokensSet == null) continue;
+          List tokens = new ArrayList(tokensSet);
           Collections.sort(tokens, offsetComparator);
           List sentence = new ArrayList();
           Iterator tokIter = tokens.iterator();
