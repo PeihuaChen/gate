@@ -270,9 +270,9 @@ public class CorpusSaver {
         LanguageResource lr = ds.adopt(doc, null);
         theCorpus.add(lr);
         theCorpus.unloadDocument((Document)lr);
-        Factory.deleteResource(lr);
+        Factory.deleteResource(doc);
         if (lr != doc)
-          Factory.deleteResource(doc);
+          Factory.deleteResource(lr);
       } catch (Exception ex) {
         throw new GateRuntimeException(ex.getClass() + " " + ex.getMessage());
       }
