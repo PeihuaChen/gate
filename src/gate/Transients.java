@@ -46,10 +46,4 @@ public class Transients
   public static FeatureMap newFeatureMap() {
     return new SimpleFeatureMapImpl();
   } // newFeatureMap
-  /**
-  * Creates a new empty standalone AnnotationSet
-  */
-  public static AnnotationSet newAnnotationSet(){
-    return new AnnotationSetImpl();
-  }
 } // class Transients
