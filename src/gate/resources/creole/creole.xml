@@ -220,25 +220,6 @@
       <PARAMETER NAME="encoding" DEFAULT="UTF-8" COMMENT="The encoding used for reading the grammar">java.lang.String</PARAMETER>
     </RESOURCE>
 
-
-    <!-- creole.xml for NERC (Named-Entity Recognition Component)-->
-    <RESOURCE>
-      <NAME>ANNIE NERC</NAME>
-      <COMMENT>ANNIE Named-Entity Recognition Component</COMMENT>
-      <CLASS>gate.creole.nerc.Nerc</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="tempAnnotationSetName" COMMENT="The name used for the temporary annotation set" DEFAULT="nercAS" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8" COMMENT="The encoding used for reading the definition files" NAME="encoding">java.lang.String</PARAMETER>
-      <PARAMETER NAME="tokeniserRulesURL" COMMENT="The URL for the tokeniser rules file" OPTIONAL="true" SUFFIXES="rules">java.net.URL</PARAMETER>
-      <PARAMETER NAME="tokeniserPostprocessor" COMMENT="The URL for the tokeniser postprocessor file" OPTIONAL="true" SUFFIXES="jape">java.net.URL</PARAMETER>
-      <PARAMETER NAME="gazetteerListsURL" COMMENT="The URL to the gazetteer definition" OPTIONAL="true" SUFFIXES="def">java.net.URL</PARAMETER>
-      <PARAMETER NAME="splitterGazetteerURL" COMMENT="The URL to the gazetteer used by the sentence splitter" OPTIONAL="true" SUFFIXES="jape">java.net.URL</PARAMETER>
-      <PARAMETER NAME="splitterGrammarURL" COMMENT="The URL to the transducer used by the sentence splitter" OPTIONAL="true" SUFFIXES="jape">java.net.URL</PARAMETER>
-      <PARAMETER NAME="taggerLexiconURL" COMMENT="The URL to the lexicon used by the POS tagger" OPTIONAL="true">java.net.URL</PARAMETER>
-      <PARAMETER NAME="taggerRulesURL" COMMENT="The URL to the rules file used by the POS tagger" OPTIONAL="true" >java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="true" NAME="caseSensitiveGazetteer" COMMENT="Should this gazetteer diferentiate on case">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="japeGrammarURL" COMMENT="The URL to the Jape grammar file" OPTIONAL="true" SUFFIXES="jape">java.net.URL</PARAMETER>
-    </RESOURCE>
     <!-- creole.xml for Sentence splitter-->
     <RESOURCE>
       <NAME>ANNIE Sentence Splitter</NAME>
