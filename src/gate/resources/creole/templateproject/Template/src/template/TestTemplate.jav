@@ -43,7 +43,7 @@ public class TestTemplate
       //Class c = null;
       //c = Class.forName("oracle.jdbc.driver.OracleDriver");
       //c = null;
-      junit.ui.LoadingTestRunner.main(a);
+      junit.swingui.TestRunner.main(a);
       // if there's a problem use this one:
       // junit.ui.TestRunner.main(a);
     }
@@ -54,7 +54,7 @@ public class TestTemplate
     */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-//    suite.addTest(Test___CLASSNAME___.suite());
+    suite.addTest(Test___CLASSNAME___.suite());
     return suite;
   } // suite
 
