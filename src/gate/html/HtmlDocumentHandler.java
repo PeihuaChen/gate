@@ -28,7 +28,7 @@ import gate.*;
 import gate.gui.*;
 
 
-/** Implements the behaviour of the HTML reader
+/** Implements the behaviour of the HTML reader.
   * Methods of an object of this class are called by the HTML parser when
   * events will appear.
   * The idea is to parse the HTML document and construct Gate annotations
@@ -88,7 +88,6 @@ public class HtmlDocumentHandler extends ParserCallback {
     * not an empty one.
     */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
-
     // Fire the status listener if the elements processed exceded the rate
     if (0 == (++elements % ELEMENTS_RATE))
         fireStatusChangedEvent("Processed elements : " + elements);
@@ -117,13 +116,13 @@ public class HtmlDocumentHandler extends ParserCallback {
     // Just analize the tag t and add some\n chars and spaces to the
     // tmpDocContent.The reason behind is that we need to have a readable form
     // for the final document.
-    customizeAppearanceOfDocument(t);
+    customizeAppearanceOfDocumentWithStartTag(t);
   }//handleStartTag
 
    /** This method is called when the HTML parser encounts the end of a tag
      * that means that the tag is paired by a beginning tag
      */
-  public void handleEndTag(HTML.Tag t, int pos) {
+  public void handleEndTag(HTML.Tag t, int pos){
     // obj is for internal use
     CustomObject obj = null;
 
@@ -134,6 +133,13 @@ public class HtmlDocumentHandler extends ParserCallback {
       // we add it to the colector
       colector.add(obj);
     }
+
+    // If element has text between, then customize its apearance
+    if ( obj != null &&
+         obj.getStart().longValue() != obj.getEnd().longValue()
+       )
+      // Customize the appearance of the document
+      customizeAppearanceOfDocumentWithEndTag(t);
 
     // if t is the </HTML> tag then we reached the end of theHTMLdocument
     if (t == HTML.Tag.HTML){
@@ -189,7 +195,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
   /** This method is called when the HTML parser encounts an empty tag
     */
-  public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos) {
+  public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // fire the status listener if the elements processed exceded the rate
     if ((++elements % ELEMENTS_RATE) == 0)
        fireStatusChangedEvent("Processed elements : " + elements);
@@ -197,7 +203,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     // Just analize the tag t and add some\n chars and spaces to the
     // tmpDocContent.The reason behind is that we need to have a readable form
     // for the final document.
-    customizeAppearanceOfDocument(t);
+    customizeAppearanceOfDocumentWithSimpleTag(t);
 
     // construct a feature map from the attributes list
     // these are empty elements
@@ -263,12 +269,50 @@ public class HtmlDocumentHandler extends ParserCallback {
     * for the final document. This method modifies the content of tmpDocContent.
     * @param t the Html tag encounted by the HTML parser
     */
-  protected void customizeAppearanceOfDocument(HTML.Tag t){
+  protected void customizeAppearanceOfDocumentWithSimpleTag(HTML.Tag t){
     // if the HTML tag is BR then we add a new line character to the document
     if (HTML.Tag.BR == t)
       tmpDocContent.append("\n");
+  }// customizeAppearanceOfDocumentWithSimpleTag
 
-  }// customizeAppearanceOfDocument
+  /** This method analizes the tag t and adds some \n chars and spaces to the
+    * tmpDocContent.The reason behind is that we need to have a readable form
+    * for the final document. This method modifies the content of tmpDocContent.
+    * @param t the Html tag encounted by the HTML parser
+    */
+  protected void customizeAppearanceOfDocumentWithStartTag(HTML.Tag t){
+
+    if (HTML.Tag.P == t){
+      int tmpDocContentSize = tmpDocContent.length();
+      if ( tmpDocContentSize >= 2 &&
+           '\n' != tmpDocContent.charAt(tmpDocContentSize - 2)
+         ) tmpDocContent.append("\n");
+    }// End if
+  }// customizeAppearanceOfDocumentWithStartTag
+
+  /** This method analizes the tag t and adds some \n chars and spaces to the
+    * tmpDocContent.The reason behind is that we need to have a readable form
+    * for the final document. This method modifies the content of tmpDocContent.
+    * @param t the Html tag encounted by the HTML parser
+    */
+  protected void customizeAppearanceOfDocumentWithEndTag(HTML.Tag t){
+    // if the HTML tag is BR then we add a new line character to the document
+    if ( (HTML.Tag.P == t) ||
+
+         (HTML.Tag.H1 == t) ||
+         (HTML.Tag.H2 == t) ||
+         (HTML.Tag.H3 == t) ||
+         (HTML.Tag.H4 == t) ||
+         (HTML.Tag.H5 == t) ||
+         (HTML.Tag.H6 == t) ||
+         (HTML.Tag.TR == t) ||
+         (HTML.Tag.CENTER == t) ||
+         (HTML.Tag.LI == t)
+       ) tmpDocContent.append("\n");
+
+    if (HTML.Tag.TITLE == t)
+      tmpDocContent.append("\n\n");
+  }// customizeAppearanceOfDocumentWithEndTag
 
   /**
     * This method is called when the HTML parser encounts an error
