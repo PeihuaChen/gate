@@ -68,11 +68,21 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     if(document == null)
       throw new GateRuntimeException("No document to process!");
 
+    /* Niraj */
+    Map matchesMap = null;
+    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
+                                                  DOCUMENT_COREF_FEATURE_NAME);
+    /* End */
+
     //first clear the default set, which cannot be removed
-    if (annotationTypes == null || annotationTypes.isEmpty())
+    if (annotationTypes == null || annotationTypes.isEmpty()) {
       document.getAnnotations().clear();
-    else
-      removeSubSet(document.getAnnotations());
+      /* Niraj */
+      removeFromDocumentCorefData((String) null, matchesMap);
+      /* End */
+    } else {
+      removeSubSet(document.getAnnotations(), /* Niraj */ matchesMap /* End */);
+    }
 
     //get the names of all sets
     Map namedSets = document.getNamedAnnotationSets();
@@ -93,21 +103,87 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
         // skip named sets from setsToKeep
         if(setsToKeep != null && setsToKeep.contains(setName)) continue;
 
-        if (annotationTypes == null || annotationTypes.isEmpty())
+        if (annotationTypes == null || annotationTypes.isEmpty()) {
           document.removeAnnotationSet(setName);
-        else
-          removeSubSet(document.getAnnotations(setName));
+          /* Niraj */
+          removeFromDocumentCorefData((String) setName, matchesMap);
+          /* End */
+        } else {
+          removeSubSet(document.getAnnotations(setName), /* Niraj */ matchesMap /* End */);
+        }
       }//if
     }
 
+    /* Niraj */
+    // and finally we add it to the document
+    document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME, matchesMap);
+    /* End */
+
   } // execute()
 
-  private void removeSubSet(AnnotationSet theSet) {
+  /* Niraj */
+  // method to undate the Document-Coref-data
+  private void removeFromDocumentCorefData(String currentSet, Map matchesMap) {
+    if(matchesMap == null)
+      return;
+
+    // if this is defaultAnnotationSet, we cannot remove this
+    if(currentSet == null) {
+      java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+      if (matches == null || matches.size() == 0) {
+        // do nothing
+        return;
+      }
+      else {
+        matchesMap.put(currentSet, new java.util.ArrayList());
+      }
+    } else {
+      // we remove this set from the Coref Data
+      matchesMap.remove(currentSet);
+    }
+  }
+
+  // method to update the Document-Coref-data
+  private void removeAnnotationsFromCorefData(AnnotationSet annotations, String setName, Map matchesMap) {
+    java.util.List matches = (java.util.List) matchesMap.get(setName);
+    if(matches == null)
+      return;
+
+    // each element in the matches is a group of annotation IDs
+    // so for each annotation we will have to traverse through all the lists and
+    // find out the annotation and remove it
+    ArrayList annots = new ArrayList(annotations);
+    for(int i=0;i<annots.size();i++) {
+      Annotation toRemove = (Annotation) annots.get(i);
+      Iterator idIters = matches.iterator();
+      ArrayList ids = new ArrayList();
+      while(idIters.hasNext()) {
+        ids = (ArrayList) idIters.next();
+        if(ids.remove(toRemove.getId())) {
+          // yes removed
+          break;
+        }
+      }
+      if(ids.size()==0) {
+        matches.remove(ids);
+      }
+    }
+    // and finally see if there is any group available
+    if(matches.size()==0) {
+      matchesMap.remove(setName);
+    }
+  }
+
+  /* End */
+
+  private void removeSubSet(AnnotationSet theSet, Map matchMap) {
     AnnotationSet toRemove = theSet.get(new HashSet(annotationTypes));
     if (toRemove == null || toRemove.isEmpty())
       return;
     theSet.removeAll(toRemove);
-
+    /* Niraj */
+    removeAnnotationsFromCorefData(toRemove, theSet.getName(), matchMap);
+    /* End */
   }//removeSubSet
 
   public void setMarkupASName(String newMarkupASName) {
