@@ -92,12 +92,14 @@ public class AccessControllerImpl
 
     Assert.assertNotNull(url);
 
-    //1. get connection to the database
     try {
+
+      //1. get connection to the database
       jdbcConn = DBHelper.connect(url);
 
       Assert.assertNotNull(jdbcConn);
 
+      //2. initialize group/user collections
       //init, i.e. read users and groups from DB
       init();
     }
@@ -107,10 +109,6 @@ public class AccessControllerImpl
     catch(ClassNotFoundException clse) {
       throw new PersistenceException("cannot locate JDBC driver ["+ clse.getMessage() +"]");
     }
-
-    //2. initialize group/user collections
-    throw new MethodNotImplementedException();
-
   }
 
   /** --- */
@@ -428,7 +426,7 @@ public class AccessControllerImpl
     this.sessionTimeouts.put(sessionID,new Long(DEFAULT_SESSION_TIMEOUT_MIN));
     touchSession(s); //this one changes the keepAlive time
 
-    throw new MethodNotImplementedException();
+    return s;
   }
 
   /** --- */
@@ -453,7 +451,7 @@ public class AccessControllerImpl
   public void setSessionTimeout(Session s, int timeoutMins)
     throws SecurityException {
 
-    throw new MethodNotImplementedException();
+    this.sessionTimeouts.put(s.getID(),new Long(timeoutMins));
   }
 
   /** --- */
