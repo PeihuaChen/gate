@@ -547,6 +547,7 @@ public class Editor extends JFrame {
 
 //    textPane.setEditorKit(new UnicodeStyledEditorKit(GUK.getFontSet()));
     textPane.setEditorKit(new StyledEditorKit());
+    textPane.setFont(new Font("Arial Unicode MS", Font.PLAIN, 14));
     this.setJMenuBar(jMenuBar1);
     contentPane.add(jToolBar, BorderLayout.NORTH);
     contentPane.add(new JScrollPane(textPane), BorderLayout.CENTER);
