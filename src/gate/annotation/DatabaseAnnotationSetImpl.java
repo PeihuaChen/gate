@@ -133,6 +133,31 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
               + "updated annots: " + updatedAnnotations;
   }
 
+
+  /** Two AnnotationSet are equal if their name, the documents of which belong
+    *  to the AnnotationSets and annotations from the sets are the same
+    */
+  public boolean equals(Object other) {
+
+    if (false == other instanceof DatabaseAnnotationSetImpl) {
+      return super.equals(other);
+    }
+
+    boolean result = true;
+
+    if (!super.equals((AnnotationSet)other)) {
+      return false;
+    }
+
+    DatabaseAnnotationSetImpl target = (DatabaseAnnotationSetImpl)other;
+
+    result = result && this.addedAnnotations.equals(target.addedAnnotations)
+                    && this.removedAnnotations.equals(target.removedAnnotations)
+                    && this.updatedAnnotations.equals(target.updatedAnnotations);
+
+    return result;
+  } // equals
+
   /**
    * All the events from the document or its annotation sets are handled by
    * this inner class.
@@ -286,5 +311,6 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
     return result;
   }
+
 
 }
