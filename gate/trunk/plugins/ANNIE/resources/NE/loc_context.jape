@@ -1,0 +1,71 @@
+/*
+*  loc_context.jape
+*
+* Copyright (c) 1998-2001, The University of Sheffield.
+*
+*  This file is part of GATE (see http://gate.ac.uk/), and is free
+*  software, licenced under the GNU Library General Public License,
+*  Version 2, June 1991 (in the distribution as file licence.html,
+*  and also available at http://gate.ac.uk/gate/licence.html).
+*
+*  Diana Maynard, 02 Aug 2001
+* 
+*  $Id$
+*/
+
+Phase:	Loc_Context
+Options: control = appelt
+
+
+
+
+Rule: LocConjLoc1 
+Priority: 10
+
+(
+{Unknown.kind == PN}
+):loc
+(
+(SPACE)
+{Token.category == CC}
+(SPACE)
+({Token.category == DT}
+ SPACE
+)?
+{Location}
+)
+-->
+{
+gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "LocConjLoc1");
+annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+features);
+annotations.removeAll(loc);
+}
+
+
+Rule: LocConjLoc2
+Priority: 10
+
+(
+ {Location}
+ (SPACE)
+ {Token.category == CC}
+ (SPACE)
+ ({Token.category == DT}
+  SPACE
+ )?
+)
+(
+ {Unknown.kind == PN}
+):loc
+-->
+ {
+gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "LocConjLoc2");
+annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+features);
+annotations.removeAll(loc);
+}
