@@ -3391,23 +3391,23 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
     /** Get a list of LRs that satisfy some set or restrictions */
-  public List findLrs(List constraints) throws PersistenceException {
-    return findLrs(constraints,null);
+  public List findLrIds(List constraints) throws PersistenceException {
+    return findLrIds(constraints,null);
   }
 
   /**
    *  Get a list of LRs that satisfy some set or restrictions and are
    *  of a particular type
    */
-  public List findLrs(List constraints, String lrType) throws PersistenceException {
-    return findLrs(constraints, lrType, null, -1);
+  public List findLrIds(List constraints, String lrType) throws PersistenceException {
+    return findLrIds(constraints, lrType, null, -1);
   }
 
   /**
    *  Get a list of LRs that satisfy some set or restrictions and are
    *  of a particular type
    */
-  public List findLrs(List constraints, String lrType,
+  public List findLrIds(List constraints, String lrType,
                       List orderByConstraints, int limitcount) throws PersistenceException {
       Vector lrsIDs = new Vector();
       CallableStatement stmt = null;
