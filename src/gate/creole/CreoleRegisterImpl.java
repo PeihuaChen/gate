@@ -95,28 +95,41 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       }
     }
 
+    try {
+      parseDirectory(directoryUrl.openStream());
+    } catch(IOException e) {
+      if(DEBUG) System.out.println(e);
+      throw(new GateException(e));
+    }
+  } // registerDirectories(URL)
+
+  /** Parse a directory file (represented as an open, adding
+    * resource data objects to the CREOLE register as they occur.
+    */
+  protected void parseDirectory(InputStream directoryStream)
+  throws GateException
+  {
     // construct a parser for the directory file and parse it.
     // this will create ResourceData entries in this
     SAXParser parser = null;
-	  try {
-		  // Get a parser factory.
-		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+    try {
+      // Get a parser factory.
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
-		  // Set up the factory to create the appropriate type of parser:
+      // Set up the factory to create the appropriate type of parser:
       // non validating one
-		  saxParserFactory.setValidating(false);
+      saxParserFactory.setValidating(false);
       // non namespace aware one
-		  saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(false);
 
       // create the parser
-		  parser = saxParserFactory.newSAXParser();
+      parser = saxParserFactory.newSAXParser();
 
       // use it
       HandlerBase handler = new CreoleXmlHandler(this);
-      parser.parse(directoryUrl.openStream(), handler);
+      parser.parse(directoryStream, handler);
 
 	  } catch (IOException e) {
-      if(DEBUG) Out.println(e);
       throw(new GateException(e));
 	  } catch (SAXException e) {
       if(DEBUG) Out.println(e);
@@ -124,9 +137,22 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
 	  } catch (ParserConfigurationException e) {
       if(DEBUG) Out.println(e);
       throw(new GateException(e));
-	  }
+    }
 
   } // registerDirectories
+
+  /** Register resources that are built in to the GATE distribution.
+    * These resources are described by the <TT>creole.xml</TT> file in
+    * <TT>resources/creole</TT>.
+    */
+  public void registerBuiltins() throws GateException {
+    try {
+      parseDirectory(Files.getGateResourceAsStream("creole/creole.xml"));
+    } catch(IOException e) {
+      if(DEBUG) System.out.println(e);
+      throw(new GateException(e));
+    }
+  } // registerBuiltins()
 
   /** This is a utility method for creating CREOLE directory files
     * (typically called <CODE>creole.xml</CODE>) from a list of Jar
