@@ -31,6 +31,7 @@ import gate.event.*;
 import gate.security.*;
 import gate.security.SecurityException; //hide the more general exception
 import gate.corpora.*;
+import gate.annotation.*;
 
 public class OracleDataStore extends JDBCDataStore {
 
@@ -399,7 +400,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected LanguageResource createDocument(Document doc,SecurityInfo secInfo)
+  protected Document createDocument(Document doc,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //delegate, set to Null
@@ -408,7 +409,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected LanguageResource createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+  protected Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //-1. preconditions
@@ -511,7 +512,25 @@ public class OracleDataStore extends JDBCDataStore {
     createFeatures(docID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //8. done
-    return doc;
+    Document dbDoc = new DatabaseDocumentImpl(this.jdbcConn);
+
+    dbDoc.setContent(doc.getContent());
+    dbDoc.setDataStore(this);
+    dbDoc.setFeatures(doc.getFeatures());
+    dbDoc.setLRPersistenceId(docID);
+    dbDoc.setMarkupAware(doc.getMarkupAware());
+    dbDoc.setName(doc.getName());
+    dbDoc.setSourceUrl(doc.getSourceUrl());
+    dbDoc.setSourceUrlEndOffset(doc.getSourceUrlEndOffset());
+    dbDoc.setSourceUrlStartOffset(dbDoc.getSourceUrlStartOffset());
+
+    //add all anotations
+    //1. default
+    AnnotationSet aset = new DatabaseAnnotationSetImpl(doc.getAnnotations());
+    //dbDoc.
+    //2. named
+
+    return dbDoc;
   }
 
 
@@ -602,7 +621,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected LanguageResource createCorpus(Corpus corp,SecurityInfo secInfo)
+  protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
@@ -632,7 +651,7 @@ public class OracleDataStore extends JDBCDataStore {
     while (itDocuments.hasNext()) {
       Document doc = (Document)itDocuments.next();
 
-      createDocument(doc,corpusID,secInfo);
+      Document dbDoc = createDocument(doc,corpusID,secInfo);
     }
 
     //4. create features
