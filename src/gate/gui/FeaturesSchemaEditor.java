@@ -47,7 +47,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   }
   
   public void setTargetFeatures(FeatureMap features){
-    features.removeFeatureMapListener(this);
+    if(features != null) features.removeFeatureMapListener(this);
     this.targetFeatures = features;
     populate();
     features.addFeatureMapListener(this);
