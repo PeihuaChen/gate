@@ -24,6 +24,9 @@ public interface GateConstants {
   /** The name of session state data files (<TT>gate.session</TT>). */
   public static final String GATE_DOT_SER = "gate.session";
 
+  /** The name of the site config property (<TT>gate.config</TT>). */
+  public static final String GATE_CONFIG_PROPERTY = "gate.config";
+
   /** The name of the annotation set storing original markups in a document */
   public static final String
     ORIGINAL_MARKUPS_ANNOT_SET_NAME = "Original markups";

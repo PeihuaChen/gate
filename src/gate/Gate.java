@@ -160,8 +160,8 @@ jar/classpath so it's the same as registerBuiltins
    * <LI>
    * The builtin file from GATE's resources - this is read first.
    * <LI>
-   * A site-wide init file given as a command-line argument - this is
-   * read second.
+   * A site-wide init file given as a command-line argument or as a
+   * <TT>gate.config</TT> property - this is read second.
    * <LI>
    * The user's file from their home directory - this is read last.
    * </UL>
@@ -564,9 +564,16 @@ jar/classpath so it's the same as registerBuiltins
   public static String getUserConfigElement() { return userConfigElement; }
 
   /**
-   * Get the site config file (generally set during command-line processing).
+   * Get the site config file (generally set during command-line processing
+   * or as a <TT>gate.config</TT> property).
+   * If the config is null, this method checks the <TT>gate.config</TT>
+   * property and uses it if non-null.
    */
-  public static File getSiteConfigFile() { return siteConfigFile; }
+  public static File getSiteConfigFile() {
+    if(siteConfigFile == null)
+      siteConfigFile = new File(System.getProperty(GATE_CONFIG_PROPERTY));
+    return siteConfigFile;
+  } // getSiteConfigFile
 
   /** Set the site config file (e.g. during command-line processing). */
   public static void setSiteConfigFile(File siteConfigFile) {
