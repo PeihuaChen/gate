@@ -11,6 +11,7 @@
   <LR xmlFileUrl="gate:/creole/schema/AddressSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/DateSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/IdentifierSchema.xml">gate.creole.AnnotationSchema</LR>
+<LR xmlFileUrl="gate:/creole/schema/GpeSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/LocationSchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/MoneySchema.xml">gate.creole.AnnotationSchema</LR>
   <LR xmlFileUrl="gate:/creole/schema/OrganizationSchema.xml">gate.creole.AnnotationSchema</LR>
