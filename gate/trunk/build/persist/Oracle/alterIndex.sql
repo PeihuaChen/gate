@@ -15,51 +15,51 @@
  */
 
 ALTER INDEX xpkt_annotation REBUILD 
-	TABLESPACE gate01is
+	TABLESPACE gateindex01
 	PCTFREE 0
 	REVERSE;
 
-ALTER INDEX xpkt_annotation_type REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_annotation_type REBUILD TABLESPACE gateindex01;
 
 ALTER INDEX xpkt_annot_set REBUILD 
-	TABLESPACE gate01is
+	TABLESPACE gateindex01
 	PCTFREE 0;
 
 ALTER INDEX xpkt_as_annotation REBUILD 
-	TABLESPACE gate01is
+	TABLESPACE gateindex01
 	PCTFREE 0;
 
-ALTER INDEX xpkt_corpus REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_corpus REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_corpus_document REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_corpus_document REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_document REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_document REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_doc_content REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_doc_content REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_doc_encoding REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_doc_encoding REBUILD TABLESPACE gateindex01;
 
 ALTER INDEX xpkt_feature REBUILD 
-	TABLESPACE gate01is
+	TABLESPACE gateindex01
 	PCTFREE 0;
 
-ALTER INDEX xpkt_feature_key REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_feature_key REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_group REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_group REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_lang_resource REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_lang_resource REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_lr_type REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_lr_type REBUILD TABLESPACE gateindex01;
 
 ALTER INDEX xpkt_node REBUILD 
-	TABLESPACE gate01is
+	TABLESPACE gateindex01
 	PCTFREE 0;
 
-ALTER INDEX xpkt_parameter REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_parameter REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_user REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_user REBUILD TABLESPACE gateindex01;
 
-ALTER INDEX xpkt_user_group REBUILD TABLESPACE gate01is;
+ALTER INDEX xpkt_user_group REBUILD TABLESPACE gateindex01;
 
 --alter index xpkt_annotation rebuild reverse;
 
