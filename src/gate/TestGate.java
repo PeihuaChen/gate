@@ -249,7 +249,6 @@ public class TestGate {
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJavac.suite());
         suite.addTest(TestReload.suite());
-//        suite.addTest(TestJdk.suite());
         suite.addTest(TestJape.suite());
         suite.addTest(TestTemplate.suite());
         /* The TCL tests rely on the application being started from the
