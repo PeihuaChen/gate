@@ -92,7 +92,9 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(buttonsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
     setSize(400, 300);
+
     getRootPane().setDefaultButton(okBtn);
+    getRootPane().setWindowDecorationStyle(JRootPane.QUESTION_DIALOG);
   }// protected void initGuiComponents()
 
 
@@ -103,7 +105,8 @@ public class NewResourceDialog extends JDialog {
         TableCellEditor cellEditor = parametersEditor.getCellEditor();
         if(cellEditor != null){
           cellEditor.stopCellEditing();
-        }
+Out.prln("Stop editing!");
+        }else Out.prln("No editor!");
         hide();
       }//public void actionPerformed(ActionEvent e)
     });
@@ -141,8 +144,7 @@ public class NewResourceDialog extends JDialog {
 
     validate();
     pack();
-    requestFocus();
-    nameField.requestFocus();
+    nameField.requestFocusInWindow();
     userCanceled = true;
     setModal(true);
     super.show();
