@@ -160,8 +160,9 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("3")||value.equals("5")||value.equals("0"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("3")||
+                value.toString().equals("5")||value.toString().equals("0"));
         } // for
       } // if
     } // while
@@ -181,8 +182,8 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("4")||value.equals("2"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("4")||value.toString().equals("2"));
         }// for
       } // if
     } // while
@@ -202,8 +203,9 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("0")||value.equals("5")||value.equals("3"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("0")||
+                value.toString().equals("5")||value.toString().equals("3"));
         } // for
       } // if
     } // while
@@ -223,8 +225,8 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("2")||value.equals("4"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("2")||value.toString().equals("4"));
         } // for
       } // if
     } // while
@@ -244,8 +246,9 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("0")||value.equals("3")||value.equals("5"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("0")||
+                value.toString().equals("3")||value.toString().equals("5"));
         } // for
       } // if
     } // while
@@ -265,8 +268,8 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("8")||value.equals("6"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("8")||value.toString().equals("6"));
         } // for
       }// if
     } // while
@@ -286,8 +289,8 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("9")||value.equals("7"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("9")||value.toString().equals("7"));
         } // for
       }// if
     } // while
@@ -307,8 +310,8 @@ public class TestNamematch extends TestCase
       if (type == "matches") {
         List list = (List)fm1.get(type);
         for (int j=0; j< list.size(); j++) {
-          String value = (String)list.get(j);
-          assert(value.equals("7")||value.equals("9"));
+          Integer value = (Integer)list.get(j);
+          assert(value.toString().equals("7")||value.toString().equals("9"));
         } // for
       }// if
     } // while*/
