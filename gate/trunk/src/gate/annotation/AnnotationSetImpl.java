@@ -135,7 +135,7 @@ implements AnnotationSet
   } // remove(o)
 
   /** Remove from the ID index. */
-  boolean removeFromIdIndex(Annotation a) {
+  protected boolean removeFromIdIndex(Annotation a) {
     if(annotsById.remove(a.getId()) == null)
       return false;
 
@@ -143,7 +143,7 @@ implements AnnotationSet
   } // removeFromIdIndex(a)
 
   /** Remove from the type index. */
-  void removeFromTypeIndex(Annotation a) {
+  protected void removeFromTypeIndex(Annotation a) {
     if(annotsByType != null) {
 
       AnnotationSet sameType = (AnnotationSet) annotsByType.get(a.getType());
@@ -156,7 +156,7 @@ implements AnnotationSet
   } // removeFromTypeIndex(a)
 
   /** Remove from the offset indices. */
-  void removeFromOffsetIndex(Annotation a) {
+  protected void removeFromOffsetIndex(Annotation a) {
     if(nodesByOffset != null) {
     // knowing when a node is no longer needed would require keeping a reference
     // count on annotations, or using a weak reference to the nodes in
@@ -478,7 +478,7 @@ implements AnnotationSet
   } // add(id, start, end, type, features)
 
   /** Construct the positional index. */
-  public void indexByType() {
+  protected void indexByType() {
 
     if(annotsByType != null) return;
 
@@ -492,7 +492,7 @@ implements AnnotationSet
   } // indexByType()
 
   /** Construct the positional indices for annotation start */
-  public void indexByStartOffset() {
+  protected void indexByStartOffset() {
 
     if(annotsByStartNode != null) return;
 
@@ -509,7 +509,7 @@ implements AnnotationSet
   } // indexByStartOffset()
 
   /** Construct the positional indices for annotation end */
-  public void indexByEndOffset() {
+  protected void indexByEndOffset() {
 
     if(annotsByEndNode != null) return;
 
