@@ -41,10 +41,13 @@ public class TestJdk extends TestCase
       toolsDir.startsWith("W:\\JBuilder") ||
       toolsDir.startsWith("w:\\JBuilder") ||
       toolsDir.startsWith("H:\\JBuilder") ||
+      toolsDir.startsWith("D:\\apps\\JBuilder4\\jdk1.3\\jre\\..\\bin") ||
+      toolsDir.startsWith("W:\\apps\\JBuilder4\\jdk1.3\\jre\\..\\bin") ||
+      //toolsDir.startsWith("") ||
       toolsDir.startsWith("h:\\JBuilder") ||
       toolsDir.startsWith("/usr/local/") ||
       toolsDir.startsWith("/usr/java") ||
-      toolsDir.startsWith("/usr/j2se/jre/../bin") || 
+      toolsDir.startsWith("/usr/j2se/jre/../bin") ||
       toolsDir.startsWith("/usr/j2se/jre/bin") ||
       toolsDir.startsWith("/opt/")
     );
