@@ -75,7 +75,7 @@ public class Nerc extends SerialController {
               "gate.creole.gazetteer.DefaultGazetteer");
       params.putAll(rData.getParameterList().getInitimeDefaults());
       if(gazetteerListsURL != null) params.put("listsURL",
-                                               tokeniserRulesURL);
+                                               gazetteerListsURL);
       params.put("encoding", encoding);
       if(DEBUG) Out.prln("Parameters for the gazetteer: \n" + params);
       features = Factory.newFeatureMap();
@@ -181,11 +181,11 @@ public class Nerc extends SerialController {
   public String getAnnotationSetName() {
     return annotationSetName;
   }
-  public void setDocument(gate.corpora.DocumentImpl newDocument) {
+  public void setDocument(gate.Document newDocument) {
     document = newDocument;
   }
 
-  public gate.corpora.DocumentImpl getDocument() {
+  public gate.Document getDocument() {
     return document;
   }
   public synchronized void removeProgressListener(ProgressListener l) {
@@ -221,7 +221,7 @@ public class Nerc extends SerialController {
   private java.net.URL japeGrammarURL;
   private String encoding;
   private String annotationSetName;
-  private gate.corpora.DocumentImpl document;
+  private gate.Document document;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
   protected void fireProgressChanged(int e) {
