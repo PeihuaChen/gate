@@ -299,6 +299,18 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
 
   /**
+   * Tests whether a character is internal to a word (i.e. if it's a letter or
+   * a combining mark (spacing or not)).
+   * @param ch the character to be tested
+   * @return a boolean value
+   */
+  public static boolean isWordInternal(char ch){
+    return Character.isLetter(ch) ||
+           Character.getType(ch) == Character.COMBINING_SPACING_MARK ||
+           Character.getType(ch) == Character.NON_SPACING_MARK;
+  }
+
+  /**
    * This method runs the gazetteer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
@@ -399,9 +411,9 @@ public class DefaultGazetteer extends AbstractGazetteer {
         //if we have a successful state then store it
         if(currentState.isFinal() &&
            (matchedRegionStart == 0 ||
-            !Character.isLetter(content.charAt(matchedRegionStart - 1))) &&
+            !isWordInternal(content.charAt(matchedRegionStart - 1))) &&
            (charIdx + 1 >= content.length()   ||
-            !Character.isLetter(content.charAt(charIdx + 1)))
+            !isWordInternal(content.charAt(charIdx + 1)))
           ){
           matchedRegionEnd = charIdx;
           lastMatchingState = currentState;
