@@ -29,8 +29,10 @@ import gate.util.*;
 
 public class DatabaseCorpusImpl extends CorpusImpl
                                 implements DatastoreListener,
-                                           EventAwareLanguageResource {
+                                           EventAwareCorpus {
 
+  /** Debug flag */
+  private static final boolean DEBUG = false;
 
   private boolean featuresChanged;
   private boolean nameChanged;
@@ -38,6 +40,8 @@ public class DatabaseCorpusImpl extends CorpusImpl
    * The listener for the events coming from the features.
    */
   protected EventsHandler eventHandler;
+  protected List documentData;
+  protected List removedDocuments;
 
   public DatabaseCorpusImpl() {
     super();
@@ -56,7 +60,15 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.dataStore = _ds;
     this.lrPersistentId = _persistenceID;
     this.features = _features;
-    this.supportList = _dbDocs;
+//    this.supportList = _dbDocs;
+    this.documentData =  _dbDocs;
+    this.supportList = new ArrayList(this.documentData.size());
+    this.removedDocuments = new ArrayList();
+
+    //init the document list
+    for (int i=0; i< this.documentData.size(); i++) {
+      this.supportList.add(null);
+    }
 
     this.featuresChanged = false;
     this.nameChanged = false;
@@ -90,6 +102,10 @@ public class DatabaseCorpusImpl extends CorpusImpl
       result = super.add(doc);
     }
 
+    //add to doc data too
+    DocumentData newDocData = new DocumentData(doc.getName(),null);
+    this.documentData.add(newDocData);
+
     if (result) {
       fireDocumentAdded(new CorpusEvent(this,
                                         doc,
@@ -118,6 +134,10 @@ public class DatabaseCorpusImpl extends CorpusImpl
     //assert docs are either transient or from the same datastore
     if (isValidForAdoption(doc)) {
       super.add(index,doc);
+
+      //add to doc data too
+      DocumentData newDocData = new DocumentData(doc.getName(),null);
+      this.documentData.add(index,newDocData);
 
       //if added then fire event
       if (this.supportList.size() > collInitialSize) {
@@ -207,8 +227,6 @@ public class DatabaseCorpusImpl extends CorpusImpl
         break;
       }
     }
-
-
   }
 
   public void resourceWritten(DatastoreEvent evt){
@@ -219,8 +237,10 @@ public class DatabaseCorpusImpl extends CorpusImpl
     if (evt.getResourceID().equals(this.getLRPersistenceId())) {
       //wow, the event is for me
       //clear all flags, the content is synced with the DB
-          this.featuresChanged =
-            this.nameChanged = false;
+      this.featuresChanged =
+        this.nameChanged = false;
+
+      this.removedDocuments.clear();
     }
   }
 
@@ -306,6 +326,16 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.features = (FeatureMap)initData.get("CORP_FEATURES");
     this.supportList = (List)initData.get("CORP_SUPPORT_LIST");
 
+    this.documentData = new ArrayList(this.supportList.size());
+    this.removedDocuments = new ArrayList();
+
+    //init the documentData list
+    for (int i=0; i< this.supportList.size(); i++) {
+      Document dbDoc = (Document)this.supportList.get(i);
+      DocumentData dd = new DocumentData(dbDoc.getName(),dbDoc.getLRPersistenceId());
+      this.documentData.add(dd);
+    }
+
     this.featuresChanged = false;
     this.nameChanged = false;
 
@@ -324,4 +354,249 @@ public class DatabaseCorpusImpl extends CorpusImpl
     return null;
   }
 
+  /**
+   * Gets the names of the documents in this corpus.
+   * @return a {@link List} of Strings representing the names of the documents
+   * in this corpus.
+   */
+  public List getDocumentNames(){
+
+    List docsNames = new ArrayList();
+
+    if(this.documentData == null)
+      return docsNames;
+
+    Iterator iter = this.documentData.iterator();
+    while (iter.hasNext()) {
+      DocumentData data = (DocumentData)iter.next();
+      docsNames.add(data.getDocumentName());
+    }
+
+    return docsNames;
+  }
+
+
+  /**
+   * Gets the name of a document in this corpus.
+   * @param index the index of the document
+   * @return a String value representing the name of the document at
+   * <tt>index</tt> in this corpus.<P>
+   */
+  public String getDocumentName(int index){
+
+    if (index >= this.documentData.size()) return "No such document";
+
+    return ((DocumentData)this.documentData.get(index)).getDocumentName();
+  }
+
+  /**
+   * returns a document in the coprus by index
+   * @param index the index of the document
+   * @return an Object value representing DatabaseDocumentImpl
+   */
+  public Object get(int index){
+
+    //0. preconditions
+    Assert.assertTrue(index >= 0);
+    Assert.assertTrue(index < this.documentData.size());
+    Assert.assertTrue(index < this.supportList.size());
+
+    if (index >= this.documentData.size())
+      return null;
+
+    Object res = this.supportList.get(index);
+
+    //if the document is null, then I must get it from the database
+    if (null == res) {
+      Long currLRID = (Long)((DocumentData)this.documentData.get(index)).getPersistentID();
+      FeatureMap params = Factory.newFeatureMap();
+      params.put(DataStore.DATASTORE_FEATURE_NAME, this.getDataStore());
+      params.put(DataStore.LR_ID_FEATURE_NAME, currLRID);
+
+      try {
+        Document dbDoc = (Document)Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
+        if (DEBUG) {
+          Out.prln("Loaded document :" + dbDoc.getName());
+        }
+
+        //change the result to the newly loaded doc
+        res = dbDoc;
+
+        //finally replace the doc with the instantiated version
+        Assert.assertNull(this.supportList.get(index));
+        this.supportList.set(index, dbDoc);
+      }
+      catch (ResourceInstantiationException ex) {
+        Err.prln("Error reading document inside a serialised corpus.");
+        throw new GateRuntimeException(ex.getMessage());
+      }
+    }
+
+    return res;
+  }
+
+  public Object remove(int index){
+
+    //1. get the persistent id and add it to the removed list
+    DocumentData docData = (DocumentData)this.documentData.get(index);
+    Long removedID = (Long)docData.getPersistentID();
+//    Assert.assertTrue(null != removedID);
+    //removedID may be NULL if the doc is still transient
+
+    //2. add to the list of removed documents
+    if (null != removedID) {
+      this.removedDocuments.add(removedID);
+    }
+
+    //3. delete
+    this.documentData.remove(index);
+    Document res = (Document)this.supportList.remove(index);
+
+    //4, fire events
+    fireDocumentRemoved(new CorpusEvent(DatabaseCorpusImpl.this,
+                                        res,
+                                        index,
+                                        CorpusEvent.DOCUMENT_REMOVED));
+    return res;
+
+  }
+
+
+  public boolean remove(Object obj){
+
+    //0. preconditions
+    Assert.assertNotNull(obj);
+    Assert.assertTrue(obj instanceof DatabaseDocumentImpl);
+
+    if (false == obj instanceof Document) {
+      return false;
+    }
+
+    Document doc = (Document) obj;
+
+    //see if we can find it first. If not, then judt return
+    int index = findDocument(doc);
+    if (index == -1) {
+      return false;
+    }
+
+    if(index < this.documentData.size()) {
+      //we found it, so remove it
+
+      //1. get the persistent id and add it to the removed list
+      DocumentData docData = (DocumentData)this.documentData.get(index);
+      Long removedID = (Long)docData.getPersistentID();
+      //Assert.assertTrue(null != removedID);
+      //removed ID may be null - doc is still transient
+
+      //2. add to the list of removed documents
+      if (null != removedID) {
+        this.removedDocuments.add(removedID);
+      }
+
+      //3. delete
+      this.documentData.remove(index);
+      Document oldDoc = (Document) this.supportList.remove(index);
+
+      fireDocumentRemoved(new CorpusEvent(DatabaseCorpusImpl.this,
+                                          oldDoc,
+                                          index,
+                                          CorpusEvent.DOCUMENT_REMOVED));
+    }
+
+    return true;
+  }
+
+
+  public int findDocument(Document doc) {
+
+    boolean found = false;
+    DocumentData docData = null;
+
+    //first try finding the document in memory
+    int index = this.supportList.indexOf(doc);
+
+    if (index > -1 && index < this.documentData.size()) {
+      return index;
+    }
+
+    //else try finding a document with the same name and persistent ID
+    Iterator iter = this.documentData.iterator();
+
+    for (index = 0;  iter.hasNext(); index++) {
+      docData = (DocumentData) iter.next();
+      if (docData.getDocumentName().equals(doc.getName()) &&
+          docData.getPersistentID().equals(doc.getLRPersistenceId())) {
+        found = true;
+        break;
+      }
+    }
+
+    if (found && index < this.documentData.size()) {
+      return index;
+    }
+    else {
+      return -1;
+    }
+  }//findDocument
+
+
+  public boolean contains(Object o){
+    //return true if:
+    // - the document data list contains a document with such a name
+    //   and persistent id
+
+    if(false == o instanceof Document)
+      return false;
+
+    int index = findDocument((Document) o);
+
+    if (index < 0) {
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+
+  public Iterator iterator(){
+    return new DatabaseCorpusIterator(this.documentData);
+  }
+
+  public List getLoadedDocuments() {
+    return new ArrayList(this.supportList);
+  }
+
+  public List getRemovedDocuments() {
+    return new ArrayList(this.removedDocuments);
+  }
+
+  private class DatabaseCorpusIterator implements Iterator {
+
+      private Iterator docDataIter;
+      private List docDataList;
+
+      public DatabaseCorpusIterator(List docDataList) {
+        this.docDataList = docDataList;
+        this.docDataIter = this.docDataList.iterator();
+      }
+
+      public boolean hasNext() {
+        return docDataIter.hasNext();
+      }
+
+      public Object next(){
+
+        //try finding a document with the same name and persistent ID
+        DocumentData docData = (DocumentData)docDataIter.next();
+        int index = this.docDataList.indexOf(docData);
+        return DatabaseCorpusImpl.this.get(index);
+      }
+
+      public void remove() {
+        throw new UnsupportedOperationException("DatabaseCorpusImpl does not " +
+                    "support remove in the iterators");
+      }
+  }
 }
