@@ -1,0 +1,41 @@
+<!-- $Id$ -->
+<project name="GATE" default="all" basedir=".">
+    <description>
+        GATE see http://gate.ac.uk
+    </description>
+  <!-- set global properties for this build -->
+  
+  <!-- Sources -->
+  <property name="src" location="src"/>
+  <!-- Files required by hte build process -->
+  <property name="build" location="build"/>
+  <!-- Output directory for the build process -->
+  <property name="output"  location="classes"/>
+  <!-- Use the new 1.3+ compiler -->
+  <property name="build.compiler"  value="modern"/>
+	<!-- The CLASSPATH -->
+  <path id="project.class.path">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+			<include name="**/*.zip"/>
+		</fileset>
+  </path>  
+  
+  <target name="resources">
+  </target>
+
+
+	<!-- This target compiles all the classes -->  
+  <target name="compile"
+  	  depends="resources"
+          description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" 
+		       destdir="${output}"
+					 classpathref="project.class.path"/>
+  </target>
+  
+	<target name="all" depends="compile">
+	</target>
+
+</project>
