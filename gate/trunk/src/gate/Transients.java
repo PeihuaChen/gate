@@ -31,10 +31,15 @@ public class Transients
     return new CorpusImpl(name);
   } // newCorpus
 
-  /** Create a new Document. */
+  /** Create a new Document from a URL. */
   public static Document newDocument(URL u) throws IOException {
     return new DocumentImpl(u);
-  } // newDocument  
+  } // newDocument(URL)
+
+  /** Create a new Document from a String. */
+  public static Document newDocument(String s) throws IOException {
+    return new DocumentImpl(s);
+  } // newDocument(String)
 
   /** Create a new FeatureMap. */
   public static FeatureMap newFeatureMap() {
