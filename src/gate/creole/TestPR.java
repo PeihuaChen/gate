@@ -386,6 +386,7 @@ public class TestPR extends TestCase
     String lrId = (String)ds.getLrIds
                                 ("gate.corpora.DocumentImpl").get(0);
 
+
     // get the document from data store
     FeatureMap features = Factory.newFeatureMap();
     features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
@@ -459,14 +460,17 @@ public class TestPR extends TestCase
       AnnotationDiff annotDiff = (AnnotationDiff)
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
 
-      if (annotDiff.getFMeasureAverage() != 1.0) {
-        Err.prln("missing annotations " +
-          annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
-        Err.prln("spurious annotations " +
-          annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
-        Err.prln("partially-correct annotations " +
-         annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
-      }
+      if (DEBUG){
+        if (annotDiff.getFMeasureAverage() != 1.0) {
+          assertTrue("missing annotations " +
+            annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE),false);
+          assertTrue("spurious annotations " +
+            annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE),false);
+          assertTrue("partially-correct annotations " +
+            annotDiff.getAnnotationsOfType(
+                            AnnotationDiff.PARTIALLY_CORRECT_TYPE),false);
+        }
+      }//if
 
       assertTrue(annotType+ " precision average in "+
         responseDocument.getSourceUrl().getFile()+
