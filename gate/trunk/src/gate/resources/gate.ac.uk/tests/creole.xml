@@ -32,6 +32,10 @@
       <CLASS>testpkg.TestPR2</CLASS>
       <AUTOLOAD/>
       <VIEW TITLE="turds float nicely" ANNOT="x">gate.gui.SomeViewer</VIEW>
+      <VIEW
+	SMALL="true"
+        TITLE="a small view"
+	ANNOT="x">gate.gui.SomeSmallViewer</VIEW>
       <ICON>anIconForTPR2</ICON>
     </RESOURCE>
 
