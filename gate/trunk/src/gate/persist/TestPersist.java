@@ -229,10 +229,10 @@ public class TestPersist extends TestCase
     Document diskDoc = (Document) lrsFromDisk.get(1);
     Document diskDoc2 = (Document) lrsFromDisk.get(2);
     Corpus diskCorp = (Corpus) lrsFromDisk.get(0);
-    assert(doc.equals(diskDoc));
-    assert(doc2.equals(diskDoc2));
-    assert(corp.equals(diskCorp));
-    assert(corp.getName().equals(diskCorp.getName()));
+    assert("doc from disk not equal to memory version", doc.equals(diskDoc));
+    assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
+    assert("corpus from disk not equal to mem version", corp.equals(diskCorp));
+    assert("corp name != mem name", corp.getName().equals(diskCorp.getName()));
 
     // delete the datastore
     sds.delete();
