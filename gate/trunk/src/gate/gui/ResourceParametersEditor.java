@@ -373,6 +373,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         }else if(typeClass != null &&
                  List.class.isAssignableFrom(typeClass)){
           //List value
+          setText(textForList((List)value));
           textButtonBox.removeAll();
           textButtonBox.add(this);
           this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
@@ -383,6 +384,24 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         }else return this;
       }
     }// public Component getTableCellRendererComponent
+
+    /**
+     * Gets a string representation for a list value
+     */
+    protected String textForList(List list){
+      if(list == null) return "[]";
+      StringBuffer res = new StringBuffer("[");
+      Iterator elemIter = list.iterator();
+      while(elemIter.hasNext()){
+        Object elem = elemIter.next();
+        res.append( ((elem instanceof NameBearer) ?
+                    ((NameBearer)elem).getName() :
+                    elem.toString()) + ", ");
+      }
+      res.delete(res.length() - 2, res.length() - 1);
+      res.append("]");
+      return res.toString();
+    }
 
     JButton fileButton;
     JButton listButton;
@@ -496,7 +515,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
       listButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           List returnedList = listEditor.showDialog();
-          if(returnedList != null) listValue = returnedList;
+          if(returnedList != null){
+            listValue = returnedList;
+            fireEditingStopped();
+          }else{
+            fireEditingCanceled();
+          }
         }
       });
 
@@ -593,6 +617,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                             param.getItemClassName());
 
           textField.setEditable(false);
+          textField.setText(textForList((List)value));
           textButtonBox.removeAll();
           textButtonBox.add(textField);
           textButtonBox.add(Box.createHorizontalStrut(5));
@@ -604,6 +629,24 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
         }
       }
     }//getTableCellEditorComponent
+
+    /**
+     * Gets a string representation for a list value
+     */
+    protected String textForList(List list){
+      if(list == null) return "[]";
+      StringBuffer res = new StringBuffer("[");
+      Iterator elemIter = list.iterator();
+      while(elemIter.hasNext()){
+        Object elem = elemIter.next();
+        res.append( ((elem instanceof NameBearer) ?
+                    ((NameBearer)elem).getName() :
+                    elem.toString()) + ", ");
+      }
+      res.delete(res.length() - 2, res.length() - 1);
+      res.append("]");
+      return res.toString();
+    }
 
     public Object getCellEditorValue(){
       if(comboUsed) return combo.getSelectedItem();
