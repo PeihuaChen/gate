@@ -31,5 +31,7 @@
 	<classpathentry kind="lib" path="lib/weka.jar"/>
 	<classpathentry kind="lib" path="lib/maxent.jar"/>
 	<classpathentry kind="lib" path="lib/troveForMaxent.jar"/>
+	<classpathentry kind="lib" path="Z:/gate/lib/xpp3-1.1.3.3_min.jar"/>
+	<classpathentry kind="lib" path="Z:/gate/lib/xstream-1.0.2.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
