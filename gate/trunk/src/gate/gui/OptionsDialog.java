@@ -451,6 +451,7 @@ public class OptionsDialog extends JDialog {
                                           "TabbedPane.font",
                                           "Table.font",
                                           "TableHeader.font",
+                                          "TextField.font",
                                           "TitledBorder.font",
                                           "ToggleButton.font",
                                           "ToolBar.font",
@@ -461,7 +462,6 @@ public class OptionsDialog extends JDialog {
   public static String[] textComponentsKeys =
                              new String[]{"EditorPane.font",
                                           "TextArea.font",
-                                          "TextField.font",
                                           "TextPane.font"};
 
   /**
