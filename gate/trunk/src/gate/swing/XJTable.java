@@ -129,7 +129,7 @@ public class XJTable extends JTable {
   }//init()
 
 
-  /**RFesizes all the cells so they accommodate the components at their
+  /**Resizes all the cells so they accommodate the components at their
    * preferred sizes.
    */
   protected void adjustSizes(boolean headerOnly){
@@ -167,6 +167,7 @@ public class XJTable extends JTable {
             cellWidth = dim.width;
             cellHeight = dim.height;
             width = Math.max(width, cellWidth);
+            //width = Math.max(width, tCol.getPreferredWidth());
             if((cellHeight + rowMargin) > getRowHeight(row)){
              setRowHeight(row, cellHeight + rowMargin);
             }
@@ -184,6 +185,7 @@ public class XJTable extends JTable {
         totalHeight += getRowHeight(row);
       dim = new Dimension(totalWidth, totalHeight);
       setPreferredScrollableViewportSize(dim);
+
       //extend the last column
       Container p = getParent();
       if (p instanceof JViewport) {
@@ -199,15 +201,15 @@ public class XJTable extends JTable {
           }
           int portWidth = scrollPane.getSize().width -
                           scrollPane.getInsets().left -
-                          scrollPane.getInsets().right - 4;
-          totalWidth = getPreferredSize().width;
+                          scrollPane.getInsets().right;
           if(totalWidth < portWidth){
             int width = tCol.getMinWidth() + portWidth - totalWidth;
             tCol.setPreferredWidth(width);
-            //tCol.setMinWidth(width);
+            tCol.setMinWidth(width);
           }
         }
       }
+
     }//if(! headerOnly)
   }
 

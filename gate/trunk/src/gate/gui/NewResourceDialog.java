@@ -22,6 +22,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.event.*;
+import javax.swing.border.*;
 
 import java.util.*;
 import java.net.URL;
@@ -76,6 +77,11 @@ public class NewResourceDialog extends JDialog {
                              new ParameterDisjunctionRenderer());
     table.setDefaultRenderer(Boolean.class,
                              new BooleanRenderer());
+    table.setDefaultRenderer(Object.class,
+                             new ObjectRenderer());
+    table.setDefaultRenderer(String.class,
+                             new DefaultTableCellRenderer());
+
     table.setDefaultEditor(ParameterDisjunction.class,
                            new ParameterDisjunctionEditor());
     table.setDefaultEditor(Object.class,
@@ -103,6 +109,14 @@ public class NewResourceDialog extends JDialog {
 
 
   protected void initListeners(){
+    addComponentListener(new ComponentAdapter() {
+      public void componentResized(ComponentEvent e) {
+        //fire a resize on table. It will automatically resize itself to the
+        //right size
+        table.setSize(table.getSize().width + 1,
+                      table.getSize().height + 1);
+      }
+    });
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
@@ -133,7 +147,7 @@ public class NewResourceDialog extends JDialog {
         hide();
       }
     });
-  }
+  }//protected void initListeners()
 
   ParametersTableModel tableModel;
   XJTable table;
@@ -347,7 +361,50 @@ public class NewResourceDialog extends JDialog {
       }
       return comp;
     }
-  }
+  }//class ParameterDisjunctionRenderer
+
+
+  class ObjectRenderer extends DefaultTableCellRenderer{
+    ObjectRenderer(){
+      button = new JButton(new ImageIcon(getClass().getResource(
+                               "/gate/resources/img/loadFile.gif")));
+      button.setToolTipText("Set from file...");
+      textButtonBox = new JPanel();
+      textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
+      textButtonBox.setOpaque(false);
+    }
+
+    public Component getTableCellRendererComponent(JTable table,
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row,
+                                                   int column){
+      //prepare the renderer
+      super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+                                          row, column);
+
+      if(table.isCellEditable(row, column))
+        setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+
+
+      String type = (String)table.getValueAt(row, 1);
+      if(type.equals("java.net.URL")){
+        textButtonBox.removeAll();
+        textButtonBox.add(this);
+        textButtonBox.add(Box.createHorizontalGlue());
+        textButtonBox.add(button);
+        return textButtonBox;
+      }else{
+        return this;
+      }
+
+//      return this;
+    }
+
+    JButton button;
+    JPanel textButtonBox;
+  }//class ObjectRenderer extends DefaultTableCellRenderer
 
   class ParameterDisjunctionEditor extends DefaultCellEditor{
     public ParameterDisjunctionEditor(){
@@ -374,6 +431,7 @@ public class NewResourceDialog extends JDialog {
   class CustomEditor extends DefaultCellEditor{
     CustomEditor(){
       super(new JTextField());
+      setClickCountToStart(1);
       textField = (JTextField)getComponent();
       button = new JButton(new ImageIcon(getClass().getResource(
                                "/gate/resources/img/loadFile.gif")));
