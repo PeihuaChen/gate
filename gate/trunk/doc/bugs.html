@@ -1679,6 +1679,26 @@ gate.corpora.DocumentImpl
 
   </TR>
 
+  <TR>
+    <TD>00087</TD>
+    <TD>core</TD>
+    <TD>Thomas Karopka</TD>
+    <TD>Angel</TD>
+    <TD>03 Dec 2002 Gate 2.1beta build 958</TD>
+    <TD>9 Jan 2003 Gate 2.1-beta1 build 1123</TD>
+    <TD>When the document is created from string it is not parsed even when it is in HTML or XML format. 
+             The document format could be detected from the document content. 
+             Some of detection methods are changed to cover this case.
+    </TD>
+    <TD>Create GATE document from string with HTML or XML content. 
+              See if the result is parsed and only text is extracted or content remains unchanged.
+              If the document is parsed also the Original markup should be created.
+    </TD>
+    <TD>&LT;HTML&GT; Test &LT;B&GT;parsing&LT;/B&GT; of this string.  &LT;/HTML&GT;</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 </TABLE>
 
 
