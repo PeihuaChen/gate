@@ -194,7 +194,10 @@ public class OracleDataStore extends JDBCDataStore {
 
     //3. try to lock document, so that we'll be sure no one is editing it
     //NOTE: use the private method
-    if (false== _lockLr((Long)lrId)) {
+    User lockingUser = this.getLockingUser((Long)lrId);
+    User currUser = this.session.getUser();
+
+    if (null != lockingUser && false == lockingUser.equals(currUser)) {
       //oops, someone is editing now
       throw new PersistenceException("LR locked by another user");
     }
@@ -2790,11 +2793,12 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
   private User getLockingUser(LanguageResource lr)
-  throws PersistenceException,SecurityException {
+    throws PersistenceException,SecurityException {
 
     //0. preconditions
     Assert.assertNotNull(lr);
@@ -2802,6 +2806,17 @@ public class OracleDataStore extends JDBCDataStore {
                       lr instanceof DatabaseCorpusImpl);
     Assert.assertNotNull(lr.getLRPersistenceId());
     Assert.assertEquals(lr.getDataStore(),this);
+
+    //delegate
+    return getLockingUser((Long)lr.getLRPersistenceId());
+  }
+
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  private User getLockingUser(Long lrID)
+  throws PersistenceException,SecurityException {
 
     //1. check session
     if (null == this.session) {
@@ -2813,7 +2828,6 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //3. read from DB
-    Long lrID = (Long)lr.getLRPersistenceId();
     PreparedStatement pstmt = null;
     Long userID = null;
     ResultSet rs = null;
