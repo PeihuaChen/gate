@@ -43,7 +43,7 @@ public class TestCreole extends TestCase
   /** Fixture set up */
   public void setUp() throws Exception {
     // Initialise the creole register
-    //Gate.init();
+    Gate.init();
     Gate.initCreoleRegister();
   } // setUp
 
@@ -57,8 +57,9 @@ public class TestCreole extends TestCase
         Out.println(iter.next());
     }
 
-    assert(((ResourceData) reg.get("Sheffield Unicode Tokeniser")).getName()
-           .equals("Sheffield Unicode Tokeniser"));
+    ResourceData rd = (ResourceData) reg.get("Sheffield Unicode Tokeniser");
+    assertNotNull("couldn't find unicode tok in register of resources", rd);
+    assert(rd.getName().equals("Sheffield Unicode Tokeniser"));
 
     String docFormatName = "Sheffield XML Document Format";
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
@@ -70,10 +71,12 @@ public class TestCreole extends TestCase
   /** Test resource loading */
   public void testLoading() throws Exception {
 
+    // clear the register and the creole directory set
     CreoleRegister reg = Gate.getCreoleRegister();
     reg.clear();
     reg.getDirectories().clear();
 
+/*
     if (Gate.isGateHomeReachable())
       reg.addDirectory(
         new URL("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/")
@@ -84,6 +87,10 @@ public class TestCreole extends TestCase
       );
     else
       throw new GateException("Derwent and www.gate.ac.uk are not reachable");
+*/
+    // find a URL for finding test files and add to the directory set
+    URL testUrl = Gate.getUrl("tests/");
+    reg.addDirectory(testUrl);
 
     reg.registerDirectories();
 

@@ -87,22 +87,7 @@ public class TestXml extends TestCase
     anElement2StringMap.put("s","\n");
 
 
-    // init detects if Derwent or www.gate.ac.uk are reachable
-    Gate.init();
-    // create a new gate document
-    if (Gate.isGateHomeReachable())
-        doc = gate.Transients.newDocument(
-         new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/xml/xces.xml")
-        );
-    else if (Gate.isGateAcUkReachable())
-             doc = gate.Transients.newDocument(
-                new URL ("http://www.gate.ac.uk/tests/xml/xces.xml")
-            );
-         else
-          throw new LazyProgrammerException(
-                                "Derwent and www.gate.ak.uk are not reachable"
-                                           );
-
+    doc = gate.Transients.newDocument(Gate.getUrl("tests/xml/xces.xml"));
     /*
     gate.Document doc = gate.Transients.newDocument(
               new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/Sentence.xml")

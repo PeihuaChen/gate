@@ -2,14 +2,14 @@
  *	CookBook.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 16/Feb/2000
  *
  *	$Id$
@@ -101,7 +101,7 @@ mechanism. Simple feature maps use Java's Map interface.
 See also the other test classes, although note that they also use methods
 that are not part of the public API (which is restricted to the <TT>gate</TT>
 package. Test classes:
-<A HREF=corpora/TestCorpus.html>TestCorpus</A>;  
+<A HREF=corpora/TestCorpus.html>TestCorpus</A>;
 <A HREF=corpora/TestDocument.html>TestDocument</A>;
 <A HREF=corpora/TestAnnotation.html>TestAnnotation</A>.
 
@@ -137,25 +137,13 @@ public class CookBook extends TestCase
   } // testCorpusConstruction
 
   /** Adding documents to a corpus */
-  public void testAddingDocuments() {
+  public void testAddingDocuments() throws GateException {
     corpus = Transients.newCorpus("My example corpus");
 
     // document constructors may take a URL; if so you have
     // to deal with URL and net-related exceptions:
     URL u = null;
-    try {
-      if (Gate.isGateHomeReachable())
-        u = new URL("http://derwent.dcs.shef.ac.uk/tests/doc0.html");
-      else if (Gate.isGateAcUkReachable())
-        u = new URL("http://gate.ac.uk/tests/doc0.html");
-      else
-        throw new LazyProgrammerException();
-
-      doc1 = Transients.newDocument(u);
-      doc2 = Transients.newDocument(u);
-    } catch(IOException e) {
-      fail(e.toString());   // fail the test, give up, go home, go to sleep
-    }
+    u = Gate.getUrl("tests/doc0.html");
 
     // some set methods
     Iterator iter = corpus.iterator();
@@ -183,7 +171,7 @@ public class CookBook extends TestCase
 
   /** Using the FeatureMap interface */
   public void testUsingFeatures() {
-    AnnotationSet as = doc1.getAnnotations(); 
+    AnnotationSet as = doc1.getAnnotations();
     Integer id; // the id of new annotations
 
     // putting features on documents
@@ -202,21 +190,11 @@ public class CookBook extends TestCase
 
 
   /** Fixture set up: initialise members before each test method */
-  public void setUp() {
+  public void setUp() throws GateException, IOException {
     corpus = Transients.newCorpus("My example corpus");
 
-    URL u = null;
-    try {
-      if (Gate.isGateHomeReachable())
-        u = new URL("http://derwent.dcs.shef.ac.uk/tests/doc0.html");
-      else if (Gate.isGateAcUkReachable())
-        u = new URL("http://gate.ac.uk/tests/doc0.html");
-      else
-        throw new LazyProgrammerException();
-
-      doc1 = Transients.newDocument(u);
-      doc2 = Transients.newDocument(u);
-    } catch(IOException e) { fail(e.toString()); }
+    doc1 = Transients.newDocument(Gate.getUrl("tests/doc0.html"));
+    doc2 = Transients.newDocument(Gate.getUrl("tests/doc0.html"));
   } // setUp
 
   /** Construction */
@@ -227,5 +205,5 @@ public class CookBook extends TestCase
     return new TestSuite(CookBook.class);
   } // suite
 
-  
+
 } // class CookBook
