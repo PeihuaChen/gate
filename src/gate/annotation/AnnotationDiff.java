@@ -35,7 +35,11 @@ import java.beans.*;
   * AnnotationSchema object. It also deals with graphic representation of the
   * result.
   */
-public class AnnotationDiff extends AbstractVisualResource{
+public class AnnotationDiff extends AbstractVisualResource
+  implements  Scrollable{
+
+  // number of pixels to be used as increment by scroller
+  protected int maxUnitIncrement = 10;
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -464,6 +468,31 @@ public class AnnotationDiff extends AbstractVisualResource{
   public AnnotationSchema getAnnotationSchema(){
     return annotationSchema;
   } // AnnotationSchema
+
+  public Dimension getPreferredScrollableViewportSize() {
+        return getPreferredSize();
+  }// public Dimension getPreferredScrollableViewportSize()
+
+  public int getScrollableUnitIncrement(Rectangle visibleRect,
+                                              int orientation, int direction) {
+    return maxUnitIncrement;
+  }// public int getScrollableUnitIncrement
+
+  public int getScrollableBlockIncrement(Rectangle visibleRect,
+                                              int orientation, int direction) {
+    if (orientation == SwingConstants.HORIZONTAL)
+        return visibleRect.width - maxUnitIncrement;
+    else
+        return visibleRect.height - maxUnitIncrement;
+  }// public int getScrollableBlockIncrement
+
+  public boolean getScrollableTracksViewportWidth() {
+    return false;
+  }// public boolean getScrollableTracksViewportWidth()
+
+  public boolean getScrollableTracksViewportHeight() {
+    return false;
+  }
 
   /**
     * This method does the diff, Precision,Recall,FalsePositive
