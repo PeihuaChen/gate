@@ -66,6 +66,34 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   protected static final int FEATURE_OWNER_ANNOTATION  = 3;
 
 
+  /** feature value is int  */
+  protected static final int VALUE_TYPE_INTEGER           = 101;
+  /** feature value is long */
+  protected static final int VALUE_TYPE_LONG              = 102;
+  /** feature value is boolean */
+  protected static final int VALUE_TYPE_BOOLEAN           = 103;
+  /** feature value is string less than 4000 bytes */
+  protected static final int VALUE_TYPE_STRING            = 104;
+  /** feature value is binary */
+  protected static final int VALUE_TYPE_BINARY            = 105;
+  /** feature value is float */
+  protected static final int VALUE_TYPE_FLOAT             = 106;
+  /** feature value is array of ints */
+  protected static final int VALUE_TYPE_INTEGER_ARR       = 107;
+  /** feature value is array of longs */
+  protected static final int VALUE_TYPE_LONG_ARR          = 108;
+  /** feature value is array of bools */
+  protected static final int VALUE_TYPE_BOOLEAN_ARR       = 109;
+  /** feature value is array of strings */
+  protected static final int VALUE_TYPE_STRING_ARR        = 110;
+  /** feature value is array of binary values */
+  protected static final int VALUE_TYPE_BINARY_ARR        = 111;
+  /** feature value is array of floats */
+  protected static final int VALUE_TYPE_FLOAT_ARR         = 112;
+  /** feature value is array of floats */
+  protected static final int VALUE_TYPE_EMPTY_ARR         = 113;
+
+
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
     throw new MethodNotImplementedException();
@@ -358,5 +386,47 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   protected abstract void writeCLOB(String src,java.sql.Clob dest)
     throws SQLException,IOException;
 
+
+  /** --- */
+  protected int findFeatureType(Object value) {
+
+    if (value instanceof Integer)
+      return this.VALUE_TYPE_INTEGER;
+    else if (value instanceof Long)
+      return this.VALUE_TYPE_LONG;
+    else if (value instanceof Boolean)
+      return this.VALUE_TYPE_BOOLEAN;
+    else if (value instanceof Double ||
+             value instanceof Float)
+      return this.VALUE_TYPE_FLOAT;
+    else if (value instanceof String)
+      return this.VALUE_TYPE_STRING;
+    else if (value instanceof List) {
+      //is the array empty?
+      List arr = (List)value;
+
+      if (arr.isEmpty()) {
+        return this.VALUE_TYPE_EMPTY_ARR;
+      }
+      else {
+        Object element = arr.get(0);
+
+        if (element  instanceof Integer)
+          return this.VALUE_TYPE_INTEGER_ARR;
+        else if (element  instanceof Long)
+          return this.VALUE_TYPE_LONG_ARR;
+        else if (element instanceof Boolean)
+          return this.VALUE_TYPE_BOOLEAN_ARR;
+        else if (element instanceof Double ||
+                 element instanceof Float)
+          return this.VALUE_TYPE_FLOAT_ARR;
+        else if (element instanceof String)
+          return this.VALUE_TYPE_STRING_ARR;
+      }
+    }
+
+    //this should never happen
+    throw new IllegalArgumentException();
+  }
 
 }

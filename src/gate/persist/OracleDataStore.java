@@ -39,6 +39,11 @@ public class OracleDataStore extends JDBCDataStore {
   private static final int READ_ACCESS = 0;
   private static final int WRITE_ACCESS = 1;
 
+  private static final int ORACLE_VARCHAR_LIMIT_BYTES = 4000;
+  private static final int UTF_BYTES_PER_CHAR_MAX = 3;
+  private static final int ORACLE_VARCHAR_MAX_SYMBOLS =
+                                  ORACLE_VARCHAR_LIMIT_BYTES/UTF_BYTES_PER_CHAR_MAX;
+
   private static final int INTERNAL_BUFFER_SIZE = 16*1024;
 
   public OracleDataStore() {
@@ -747,6 +752,9 @@ public class OracleDataStore extends JDBCDataStore {
     catch(SQLException sqle) {
       throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
     }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
   }
 
   /** --- */
@@ -817,12 +825,221 @@ public class OracleDataStore extends JDBCDataStore {
     writeCLOB(src.toString(),dest);
   }
 
+  protected Long _createFeature(Long entityID, int entityType,String key,Object value, int valueType)
+    throws PersistenceException {
+
+    //1. store in DB
+    Long featID = null;
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".persist.create_feature(?,?,?,?,?,?,?)} ");
+
+      //1.1 set known values + NULLs
+      stmt.setLong(1,entityID.longValue());
+      stmt.setLong(2,entityType);
+      stmt.setString(3,key);
+      stmt.setNull(4,java.sql.Types.NUMERIC);
+      stmt.setNull(5,java.sql.Types.VARCHAR);
+      stmt.setLong(6,valueType);
+      stmt.registerOutParameter(7,java.sql.Types.BIGINT);
+
+      //1.2 set proper data
+      switch(valueType) {
+
+        case VALUE_TYPE_BOOLEAN:
+
+          boolean b = ((Boolean)value).booleanValue();
+          stmt.setLong(4, b ? this.ORACLE_TRUE : this.ORACLE_FALSE);
+          break;
+
+        case VALUE_TYPE_INTEGER:
+
+          stmt.setLong(4,((Integer)value).intValue());
+          break;
+
+        case VALUE_TYPE_LONG:
+
+          stmt.setLong(4,((Long)value).longValue());
+          break;
+
+        case VALUE_TYPE_FLOAT:
+
+          Double d = (Double)value;
+          stmt.setDouble(4,d.doubleValue());
+
+        case VALUE_TYPE_BINARY:
+
+          //ignore
+          //will be handled later in processing
+
+        case VALUE_TYPE_STRING:
+
+          String s = (String)value;
+          //does it fin into a varchar2?
+          if (fitsInVarchar2(s)) {
+            stmt.setString(5,s);
+          }
+          //else : will be handled later in processing
+
+      }
+
+
+      stmt.execute();
+      featID = new Long(stmt.getLong(7));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create feature [step 1] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+    return featID;
+  }
+
+
+  protected void _updateFeatureLOB(Long featID,Object value, int valueType)
+    throws PersistenceException {
+
+    //NOTE: at this point value is never an array,
+    // although the type may claim so
+
+    //0. preconditions
+    Assert.assert(valueType == this.VALUE_TYPE_BINARY ||
+                  valueType == this.VALUE_TYPE_BINARY_ARR ||
+                  valueType == this.VALUE_TYPE_STRING ||
+                  valueType == this.VALUE_TYPE_STRING_ARR);
+
+
+    //1. get the row to be updated
+    PreparedStatement stmtA = null;
+    ResultSet rsA = null;
+    Clob clobValue = null;
+    Blob blobValue = null;
+
+    try {
+      String sql = " select ft_long_character_value, " +
+                   "        ft_binary_value " +
+                   " from   t_feature " +
+                   " where  ft_id = ?";
+      stmtA = this.jdbcConn.prepareStatement(sql);
+      stmtA.setLong(1,featID.longValue());
+      stmtA.execute();
+      rsA = stmtA.getResultSet();
+
+      rsA.next();
+      //NOTE: if the result set contains LOBs always read them
+      // in the order they appear in the SQL query
+      // otherwise data will be lost
+      clobValue = rsA.getClob(1);
+      blobValue = rsA.getBlob(2);
+
+      //blob or clob?
+      if (valueType == this.VALUE_TYPE_BINARY || valueType == this.VALUE_TYPE_BINARY_ARR) {
+        //blob
+        throw new MethodNotImplementedException();
+      }
+      else {
+        //clob
+        String s = (String)value;
+        writeCLOB(s,clobValue);
+      }
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create feature [step 2] in DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(IOException ioe) {
+      throw new PersistenceException("can't create feature [step 2] in DB: ["+ ioe.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rsA);
+      DBHelper.cleanup(stmtA);
+    }
+
+  }
 
   /** --- */
   protected void createFeature(Long entityID, int entityType,String key, Object value)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    //1. what kind of feature value is this?
+    int valueType = findFeatureType(value);
+
+    //2. how many elements do we store?
+    Vector elementsToStore = new Vector();
+
+    switch(valueType) {
+      case VALUE_TYPE_BINARY:
+      case VALUE_TYPE_BOOLEAN:
+      case VALUE_TYPE_FLOAT:
+      case VALUE_TYPE_INTEGER:
+      case VALUE_TYPE_LONG:
+      case VALUE_TYPE_STRING:
+        elementsToStore.add(value);
+        break;
+
+      default:
+        //arrays
+        List arr = (List)value;
+        Iterator itValues = arr.iterator();
+
+        while (itValues.hasNext()) {
+          elementsToStore.add(itValues.next());
+        }
+
+        //normalize , i.e. ignore arrays
+        if (valueType == this.VALUE_TYPE_BINARY_ARR)
+          valueType = this.VALUE_TYPE_BINARY;
+        else if (valueType == this.VALUE_TYPE_BOOLEAN_ARR)
+          valueType = this.VALUE_TYPE_BOOLEAN;
+        else if (valueType == this.VALUE_TYPE_FLOAT_ARR)
+          valueType = this.VALUE_TYPE_FLOAT;
+        else if (valueType == this.VALUE_TYPE_INTEGER_ARR)
+          valueType = this.VALUE_TYPE_INTEGER;
+        else if (valueType == this.VALUE_TYPE_LONG_ARR)
+          valueType = this.VALUE_TYPE_LONG;
+        else if (valueType == this.VALUE_TYPE_STRING_ARR)
+          valueType = this.VALUE_TYPE_STRING;
+    }
+
+
+
+    //3. for all elements:
+    for (int i=0; i< elementsToStore.size(); i++) {
+
+        Object currValue = elementsToStore.elementAt(i);
+
+        //3.1. create a dummy feature [LOB hack]
+        Long featID = _createFeature(entityID,entityType,key,value,valueType);
+
+        //3.2. update CLOBs if needed
+        if (valueType == VALUE_TYPE_STRING) {
+
+          //does this string fit into a varchar2 or into clob?
+          String s = (String)currValue;
+          if (false == this.fitsInVarchar2(s)) {
+            // Houston, we have a problem
+            // put the string into a clob
+            _updateFeatureLOB(featID,value,valueType);
+          }
+        }
+
+        //3.3. BLOBs
+        if (valueType == VALUE_TYPE_BINARY) {
+          throw new MethodNotImplementedException();
+        }
+    }
+
+
+  }
+
+
+  private boolean fitsInVarchar2(String s) {
+
+    return s.getBytes().length > this.ORACLE_VARCHAR_LIMIT_BYTES;
   }
 
   /** --- */
