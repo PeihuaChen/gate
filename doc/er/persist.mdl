@@ -293,6 +293,7 @@
 			parameters 	(list Parameters
 			    (object Parameter "savepointID"
 				type       	"Long"))
+			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
 			uid        	0)
@@ -300,6 +301,8 @@
 			quid       	"3BA636F900C8"
 			parameters 	(list Parameters
 			    (object Parameter "lrID"
+				type       	"Long")
+			    (object Parameter "sessionID"
 				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
@@ -309,7 +312,18 @@
 			quid       	"3BA637130397"
 			parameters 	(list Parameters
 			    (object Parameter "lrID"
+				type       	"Long")
+			    (object Parameter "sessionID"
 				type       	"Long"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "setDriver"
+			quid       	"3BA743810167"
+			parameters 	(list Parameters
+			    (object Parameter "driverName"
+				type       	"String"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -327,14 +341,6 @@
 		    (object Operation "OracleDataStore"
 			quid       	"3BA2009D02FE"
 			parameters 	(list Parameters
-			    (object Parameter "driver"
-				type       	"String")
-			    (object Parameter "url"
-				type       	"String")
-			    (object Parameter "user"
-				type       	"String")
-			    (object Parameter "password"
-				type       	"String")
 			    (object Parameter "mode"
 				type       	"integer"))
 			concurrency 	"Sequential"
@@ -365,22 +371,10 @@
 		    (object Operation "JDBCDataStore"
 			quid       	"3BA2078D02EE"
 			parameters 	(list Parameters
-			    (object Parameter "driver"
-				type       	"String")
-			    (object Parameter "url"
-				type       	"String")
-			    (object Parameter "user"
-				type       	"String")
-			    (object Parameter "password"
-				type       	"String")
-			    (object Parameter "schema"
-				type       	"String")
-			    (object Parameter "catalog"
-				type       	"String")
 			    (object Parameter "mode"
 				type       	"integer"))
 			concurrency 	"Sequential"
-			opExportControl 	"Public"
+			opExportControl 	"Protected"
 			uid        	0)
 		    (object Operation "cleanup"
 			quid       	"3BA207C50136"
@@ -411,6 +405,12 @@
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Protected"
+			uid        	0)
+		    (object Operation "loadDrivers"
+			quid       	"3BA757AB01E2"
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Private"
 			uid        	0))))
 	logical_presentations 	(list unit_reference_list
 	    (object ClassDiagram "Main"
@@ -420,7 +420,7 @@
 		max_height 	28350
 		max_width  	21600
 		origin_x   	0
-		origin_y   	1525
+		origin_y   	2044
 		items      	(list diagram_item_list
 		    (object ClassView "Class" "Logical View::DataStore" @1
 			ShowCompartmentStereotypes 	TRUE
@@ -513,22 +513,22 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(1968, 1680)
+			location   	(2080, 1376)
 			label      	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(1638, 1471)
+			    location   	(1587, 1142)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	660
+			    max_width  	986
 			    justify    	0
 			    label      	"DatabaseDataStore")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(1638, 1421)
+			    location   	(1587, 1092)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	660
+			    max_width  	986
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -538,14 +538,14 @@
 			quidu      	"3BA1EBEC0302"
 			compartment 	(object Compartment
 			    Parent_View 	@4
-			    location   	(1638, 1532)
+			    location   	(1587, 1203)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
-			    nlines     	8
-			    max_width  	656)
-			width      	678
-			height     	542
+			    nlines     	9
+			    max_width  	984)
+			width      	1004
+			height     	592
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::OracleDataStore" @5
@@ -556,10 +556,10 @@
 			location   	(992, 2688)
 			label      	(object ItemLabel
 			    Parent_View 	@5
-			    location   	(142, 2607)
+			    location   	(673, 2607)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	1700
+			    max_width  	638
 			    justify    	0
 			    label      	"OracleDataStore")
 			icon_style 	"Icon"
@@ -568,13 +568,13 @@
 			quidu      	"3BA1FA57029B"
 			compartment 	(object Compartment
 			    Parent_View 	@5
-			    location   	(142, 2668)
+			    location   	(673, 2668)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
 			    nlines     	2
-			    max_width  	1706)
-			width      	1718
+			    max_width  	634)
+			width      	656
 			height     	186
 			annotation 	8
 			autoResize 	TRUE)
@@ -637,10 +637,10 @@
 			location   	(1968, 2256)
 			label      	(object ItemLabel
 			    Parent_View 	@9
-			    location   	(820, 2075)
+			    location   	(1652, 2050)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	2296
+			    max_width  	632
 			    justify    	0
 			    label      	"JDBCDataStore")
 			icon_style 	"Icon"
@@ -649,14 +649,14 @@
 			quidu      	"3BA2074B027B"
 			compartment 	(object Compartment
 			    Parent_View 	@9
-			    location   	(820, 2136)
+			    location   	(1652, 2111)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	6
-			    max_width  	2303)
-			width      	2314
-			height     	386
+			    nlines     	7
+			    max_width  	628)
+			width      	650
+			height     	436
 			annotation 	8
 			autoResize 	TRUE)
 		    (object InheritView "" @10
@@ -695,10 +695,10 @@
 			location   	(1968, 2256)
 			label      	(object ItemLabel
 			    Parent_View 	@14
-			    location   	(820, 2075)
+			    location   	(1652, 2050)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	2296
+			    max_width  	632
 			    justify    	0
 			    label      	"JDBCDataStore")
 			icon_style 	"Icon"
@@ -707,14 +707,14 @@
 			quidu      	"3BA2074B027B"
 			compartment 	(object Compartment
 			    Parent_View 	@14
-			    location   	(820, 2136)
+			    location   	(1652, 2111)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	6
-			    max_width  	2303)
-			width      	2314
-			height     	386
+			    nlines     	7
+			    max_width  	628)
+			width      	650
+			height     	436
 			annotation 	8
 			autoResize 	TRUE)))))
     root_subsystem 	(object SubSystem "Component View"
