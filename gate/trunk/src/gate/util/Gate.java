@@ -87,6 +87,7 @@ public class Gate
     if(urlBase != null) return urlBase;
 
     try {
+
        // if we're assuming a net connection, try network servers
       if(isNetConnected()) {
         if(

@@ -442,10 +442,7 @@ public class TestAnnotation extends TestCase
       annots[i++] = a;
 
       assert(basicAS.contains(a));
-//System.out.println("Before:" + basicAS);
       iter.remove();
-//System.out.println("Annotation:" + a);
-//System.out.println("After:" + basicAS);
       assert(!basicAS.contains(a));
     } // while
 
@@ -672,14 +669,16 @@ public class TestAnnotation extends TestCase
       }
     }
     /* if(annotations == null) annotations = new AnnotationSetImpl(doc); */
-    System.out.println(
+    if (DEBUG)
+      Out.println(
         "Actual input:" + annotations.getAllTypes() + "\n" + annotations
-    );
+      );
 
     AnnotationSet res =
       annotations.get("foo", Factory.newFeatureMap(), new Long(10));
 
-    System.out.println(res);
+    if (DEBUG)
+      Out.println(res);
     assert(!res.isEmpty());
   }
 
@@ -690,7 +689,7 @@ public class TestAnnotation extends TestCase
       TestAnnotation testAnnot = new TestAnnotation("");
       testAnnot.setUp();
       testAnnot.testIterator();
-//      testAnnot._testGap();
+      testAnnot._testGap();
       testAnnot.tearDown();
 
     }catch(Throwable t){

@@ -123,6 +123,8 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
     MimeType mimeTypeFromMagicNumbers = null;
     String fileSufix = null;
 
+    if (url == null)
+      return null;
     // Ask the web server for the content type
     // We expect to get contentType something like this:
     // "text/html; charset=iso-8859-1"
