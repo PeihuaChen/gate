@@ -317,4 +317,15 @@ extends AbstractFeatureBearer implements DataStore {
   /** Random number generator */
   protected static Random randomiser = new Random();
 
+  /** String representation */
+  public String toString() {
+    String nl = Strings.getNl();
+    StringBuffer s = new StringBuffer("SerialDataStore: ");
+    s.append("autoSaving: " + autoSaving);
+    s.append("; storageDir: " + storageDir);
+    s.append(nl);
+
+    return s.toString();
+  } // toString()
+
 } // class SerialDataStore

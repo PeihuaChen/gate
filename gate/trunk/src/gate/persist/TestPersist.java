@@ -31,7 +31,7 @@ import gate.corpora.*;
 public class TestPersist extends TestCase
 {
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
@@ -304,8 +304,28 @@ public class TestPersist extends TestCase
     // DSR should have one member
     assert("DSR has wrong number elements", dsr.size() == 1);
 
-    // delete the datastore
+    // create and open another serial data store
+    storageDir = File.createTempFile("TestPersist__", "__StorageDir");
+    storageDir.delete();
+    DataStore sds2 = Factory.createDataStore(
+      "gate.persist.SerialDataStore", storageDir.toURL()
+    );
+
+    // DSR should have two members
+    assert("DSR has wrong number elements", dsr.size() == 2);
+
+    // peek at the DSR members
+    Iterator dsrIter = dsr.iterator();
+    while(dsrIter.hasNext()) {
+      DataStore ds = (DataStore) dsrIter.next();
+      assertNotNull("null ds in ds reg", ds);
+      if(DEBUG)
+        Out.prln(ds);
+    }
+
+    // delete the datastores
     sds.delete();
+    sds2.delete();
   } // testDSR()
 
 
