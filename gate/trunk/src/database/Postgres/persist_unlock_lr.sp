@@ -33,11 +33,11 @@ CREATE OR REPLACE FUNCTION persist_unlock_lr(int4,int4) RETURNS boolean AS '
      if not FOUND then
         raise exception ''%'',x_invalid_lr;
      end if;
-    
+
      /* is the reource locked by us? */
      if (l_locking_user_id = p_usr_id or
-         l_locking_user_id = C_ADMIN_USER_ID) then
-        
+         p_usr_id = C_ADMIN_USER_ID) then
+
         update t_lang_resource
         set    lr_locking_user_id = null
         where  lr_id = p_lr_id;
@@ -46,7 +46,6 @@ CREATE OR REPLACE FUNCTION persist_unlock_lr(int4,int4) RETURNS boolean AS '
 
      /* dummy */
      return true;
-
-   END;
+  END;
 '
 LANGUAGE 'plpgsql';
