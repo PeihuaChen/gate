@@ -37,28 +37,70 @@ import gate.creole.*;
 
 
 /**
-  * The types of annotations used by the viewer
-  * can be configured although it also has default values. <P>
+  * The SyntaxTreeViewer is capable of showing and editing utterances (fancy
+  * name for sentences) and the
+  * attached syntax trees. It works by taking an utterance and all Token
+  * annotations and constructs the text. Then it also gets all SyntaxTreeNode
+  * annotations and builds and shows the syntac tree for that utterance. The
+  * leaves of the tree are the tokens, which constitute the utterance.<P>
   *
-  * The textAnnotationType property specifies the type
-  * of annotation which is used to get the text from (e.g. token, utterance);
-  * default value - utterance. The treeNodeAnnotationType is the name of the
-  * annotations which encode the SyntaxTreeNodes; default - SyntaxTreeNode. The
-  * component assumes that the annotations of type treeNodeAnnotationType have
-  * features called: cat with a value String; consists which is a Vector either
-  * empty or with annotation ids of the node's children; and text which contains
+  * It is possible to configure the annotation types that are used by the
+  * viewer. The textAnnotationType property specifies the type
+  * of annotation which is used to denote the utterance (sentence).
+  * In GATE, the value of this property is not set directly, but is derived
+  * from the VR configuration information from creole.xml (explained below).
+  *
+  * The treeNodeAnnotationType is the name of the
+  * annotations which encode the SyntaxTreeNodes; default - SyntaxTreeNode.
+  * To change when part of GATE, modify the <PARAMETER> setting of the
+  * TreeViewer entry in creole.xml. Similarly, one can change which annotation
+  * is used for chunking the utterance. By default, it is Token, which is also
+  * specified in creole.xml as a parameter in the treeviewer entry.
+  *
+  * The component assumes that the annotations of type treeNodeAnnotationType have
+  * features called: cat with a value String; consists which is a List either
+  * empty or with annotation ids of the node's children; and optionally
+  * text which contains
   * the text covered by this annotation. The component will work fine even
   * without the last feature. Still when it creates annotations,
   * these will have this feature added. <P>
   *
   *
-  * Newly added tree nodes to the tree are automatically added to the document
-  * as annotations (the document is obtained automatically from the annotation
-  * set passed to the viewer with setAnnotations).
-  * Deleted nodes are automatically deleted from the document
-  * annotations too. <P>
+  * Newly added tree nodes to the tree are added to the document
+  * as annotations and deleted nodes are automatically deleted from the document
+  * only after OK is chosen in the dialog. Cancel does not make any changes
+  * permanent. <P>
   *
-  * In order to have appropriate behaviour always put this component inside a
+  * Configuring the viewer in GATE<P>
+  * The viewer is configured in creole.xml. The default entry is:
+  * <PRE>
+  *   <RESOURCE>
+  *     <NAME>Syntax tree viewer</NAME>
+  *     <CLASS>gate.gui.SyntaxTreeViewer</CLASS>
+  *     <!-- type values can be  "large" or "small"-->
+  *     <GUI>
+  *       <MAIN_VIEWER/>
+  *       <ANNOTATION_TYPE_DISPLAYED>Sentence</ANNOTATION_TYPE_DISPLAYED>
+  *       <PARAMETER NAME="treeNodeAnnotationType" DEFAULT="SyntaxTreeNode"
+  *                  RUNTIME="false" OPTIONAL="true">java.lang.String
+  *       </PARAMETER>
+  *       <PARAMETER NAME="tokenType" DEFAULT="Token" RUNTIME="false"
+  *                  OPTIONAL="true">java.lang.String
+  *       </PARAMETER>
+  *     </GUI>
+  *   </RESOURCE>
+  * </PRE>
+  *
+  * The categories that appear in the menu for manual annotation are determined
+  * from SyntaxTreeViewerSchema.xml. If you want to change the default set,
+  * you must edit this file and update your Gate jar accordingly (e.g., by
+  * recompilation. This does not affect the categories of SyntaxTreeNode
+  * annotations, which have been created automatically by some other process,
+  * e.g., a parser PR.
+  *
+  * <P>
+  * If used outside GATE,
+  * in order to have appropriate behaviour always put this component inside a
   * scroll pane or something similar that provides scrollers.
   * Example code: <BREAK>
   * <PRE>
@@ -67,21 +109,20 @@ import gate.creole.*;
   *  frame.getContentPane().add(scroller, BorderLayout.CENTER);
   * </PRE>
   *
-  * To get an idea how to use the component, look at the main function which
-  * is also the test for this bean. <P>
-  *
-  * The trick of using the viewer is that it needs to be constructed first,
-  * then shown, and only after that set the annotations. This is due to painting
-  * and size issues.
-  * Example code: <BREAK>
-  * <PRE>
-  * </PRE><P>
   *
   * The default way is to pass just one annotation of type textAnnotationType
   * which corresponds to the entire sentence or utterance to be annotated with
-  * syntax tree information. Then the viewer automatically tokenises it and
-  * creates the leaves.
-  * This is well-tested and is the usual way.  <P>
+  * syntax tree information. Then the viewer automatically tokenises it
+  * (by obtaining the relevant token annotations) and creates the leaves.<P>
+  *
+  * To create a new annotation, use setSpan, instead of setAnnotation.
+  *
+  * <P> In either
+  * case, you must call setTarget first, because that'll provide the viewer
+  * with the document's annotation set, from where it can obtain the token
+  * annotations.
+  * <P> If you intend to use the viewer outside GATE and do not understand
+  * the API, e-mail gate@dcs.shef.ac.uk.
   */
 
 public class SyntaxTreeViewer extends AbstractVisualResource
@@ -645,15 +686,15 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       ioe.printStackTrace();
     }
 
-    AnnotationSet allTokens = currentSet.get(tokenType);
+    AnnotationSet allTokens = currentSet.get(utteranceStartOffset,
+                                          utteranceEndOffset);
     if (allTokens == null || allTokens.isEmpty()) {
       Out.println("TreeViewer warning: No annotations of type " + tokenType +
                   "so cannot show or edit the text and the tree annotations.");
       return;
     }
 
-    AnnotationSet tokens = allTokens.get( utteranceStartOffset,
-                                          utteranceEndOffset);
+    AnnotationSet tokens = allTokens.get(tokenType);
 
     //if no tokens return
     //needs improving maybe, just show one solid utterance
@@ -670,16 +711,20 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // the starting Y position
     int buttonY = this.getHeight() - 20 - insets.bottom;
 
-    // sort them from left to right first
-    // Should work as
-    // annotation implements Comparable
-    LinkedList tokenAnnots = new LinkedList(tokens);
-    Collections.sort(tokenAnnots);
+    //We need to go through the nodes this way and get the f***ing tokens
+    //coz there is no way to sort them by startOffset. The compareTo method
+    //only uses the Ids, highly useful!
+    Node startNode = tokens.firstNode();
+    Node endNode = tokens.nextNode(startNode);
 
-    Iterator iter = tokenAnnots.iterator();
     //loop through the tokens
-    while (iter.hasNext()) {
-      Annotation tokenAnnot = (Annotation) iter.next();
+    while (startNode != null && endNode != null) {
+      AnnotationSet nextTokenSet = tokens.get(startNode.getOffset());
+
+      if (nextTokenSet == null || nextTokenSet.isEmpty())
+        break;
+
+      Annotation tokenAnnot = (Annotation) nextTokenSet.iterator().next();
       Long tokenBegin = tokenAnnot.getStartNode().getOffset();
       Long tokenEnd = tokenAnnot.getEndNode().getOffset();
 
@@ -708,9 +753,16 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       // create the corresponding button
       buttonX = createButton4Node(node, buttonX, buttonY);
 
+      //advance to the next node
+      startNode = tokenAnnot.getEndNode();
+      endNode = tokens.nextNode(startNode);
     } //while
 
+
 /*
+    //This old piece of code was used to tokenise, instead of relying on
+    // annotations. Can re-instate if someone shows me the need for it.
+
     long currentOffset = utteranceStartOffset.longValue();
 
     StrTokeniser strTok =
@@ -965,8 +1017,9 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
     JButton source = (JButton) e.getSource();
 
-    //check if CTRL is pressed and if not, clear the selection
-    if ((! e.isControlDown() || e.isShiftDown()) && SwingUtilities.isLeftMouseButton(e))
+    //check if CTRL or Shift is pressed and if not, clear the selection
+    if ((! (e.isControlDown() || e.isShiftDown()))
+         && SwingUtilities.isLeftMouseButton(e))
       clearSelection();
 
     //and select the current node
@@ -1381,6 +1434,13 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.19  2001/08/08 14:39:00  kalina
+// Made the dialog to size itself maximum as much as the screen, coz was
+// getting too big without that.
+//
+// Some documentation on Tree Viewer and some small changes to utterance2trees()
+// to make it order the tokens correctly by offset
+//
 // Revision 1.18  2001/08/07 19:03:05  kalina
 // Made the tree viewer use Token annotations to break the sentence for annotation
 //
