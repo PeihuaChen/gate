@@ -73,8 +73,6 @@ Rule:	MoneySymbolUnit
 // $20US
 
 
-//(SPACE | {Token.kind == punctuation}     
-//)
 (   
  ({Token.symbolkind == currency})
  (SPACE)?
@@ -84,8 +82,7 @@ Rule:	MoneySymbolUnit
  )?
 ) 
 :number 
-// (SPACE | {Token.kind == punctuation}
-// )
+
  -->
   :number.Money = {kind = "number", rule = "MoneySymbolUnit"}
 
