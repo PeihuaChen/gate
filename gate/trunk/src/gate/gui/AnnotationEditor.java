@@ -288,6 +288,7 @@ public class AnnotationEditor extends AbstractVisualResource {
           }
           //stylesTreeModel.reload();
         }
+        stylesTree.paintImmediately(stylesTree.getBounds());
         //set the slider location
         leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
       }
@@ -319,7 +320,21 @@ public class AnnotationEditor extends AbstractVisualResource {
             if(clickedComp instanceof JCheckBox){
               nData.setVisible(! nData.getVisible());
               stylesTreeModel.nodeChanged(node);
-            }else if(clickedComp instanceof JLabel && e.getClickCount() == 2){
+            }else if(clickedComp instanceof JTextPane &&
+                     e.getClickCount() == 2){
+              if(styleChooser == null){
+                Window parent = SwingUtilities.getWindowAncestor(
+                                  AnnotationEditor.this);
+                styleChooser = parent instanceof Frame ?
+                               new TextAttributesChooser((Frame)parent,
+                                                         "Please select your options",
+                                                         true) :
+                               new TextAttributesChooser((Dialog)parent,
+                                                         "Please select your options",
+                                                         true);
+
+              }
+
               styleChooser.setLocationRelativeTo(stylesTree);
               nData.setAttributes(
                     styleChooser.show(nData.getAttributes().copyAttributes()));
@@ -653,8 +668,6 @@ public class AnnotationEditor extends AbstractVisualResource {
     */
 
     //Extra Stuff
-    styleChooser = new TextAttributesChooser();
-    styleChooser.setModal(true);
     annotationEditDialog = new AnnotationEditDialog();
 
     progressBox = new Box(BoxLayout.X_AXIS);
@@ -669,10 +682,9 @@ public class AnnotationEditor extends AbstractVisualResource {
 //    ((DefaultHighlighter)selectionHighlighter).setDrawsLayeredHighlights(true);
     selectionHighlighter.install(textPane);
 
-    selectionHighlighterPainter = new DefaultHighlighter.
-                                      DefaultHighlightPainter(
-                                        Color.blue
-                                      );
+    selectionHighlighterPainter =
+      new DefaultHighlighter.DefaultHighlightPainter(
+            textPane.getSelectionColor());
 
     Thread thread  = new Thread(Thread.currentThread().getThreadGroup(),
                                 new SelectionBlinker());
@@ -1150,8 +1162,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       label = new JLabel(icon);
       textComponent = new JTextPane();
       selectedBorder = BorderFactory.createLineBorder(Color.blue);
-      FlowLayout layout = new FlowLayout(FlowLayout.LEFT, 1, 1);
-      setLayout(layout);
+      setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
       setOpaque(false);
     }
 
@@ -1162,6 +1173,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                                               boolean leaf,
                                               int row,
                                               boolean hasFocus){
+      removeAll();
       if(value instanceof DefaultMutableTreeNode){
         TypeData nData = (TypeData)
                               ((DefaultMutableTreeNode)value).getUserObject();
@@ -1170,42 +1182,21 @@ public class AnnotationEditor extends AbstractVisualResource {
           textComponent.replaceSelection(nData.getTitle());
           textComponent.selectAll();
           textComponent.setCharacterAttributes(nData.getAttributes(), true);
-          //needs to be sized in order for modelToView() to work properly
+          textComponent.setPreferredSize(null);
           textComponent.setSize(textComponent.getPreferredSize());
-          try {
-            Rectangle rect =
-                          textComponent.modelToView(nData.getTitle().length());
-            int width  = rect.x + rect.width -
-                         textComponent.modelToView(0).x + 2;
-            int height = textComponent.modelToView(0).height + 2;
-            BufferedImage image =
-                                (BufferedImage)tree.createImage(width, height);
-            if(image != null) {
-              Graphics graphics = image.getGraphics();
-              if(graphics != null) {
-                textComponent.printAll(graphics);
-              }
-              icon.setImage(image);
-            }
-          } catch(BadLocationException ble) {
-            ble.printStackTrace(Err.getPrintWriter());
-          }
 
-          removeAll();
           if(nData.getType() != null) {
             visibleChk.setSelected(nData.getVisible());
             add(visibleChk);
           }
-          add(label);
           if(selected) setBorder(selectedBorder);
           else setBorder(null);
         }
       } else {
-        label.setIcon(null);
-        label.setText(value.toString());
-        removeAll();
-        add(label);
+        textComponent.selectAll();
+        textComponent.replaceSelection(value.toString());
       }
+      add(textComponent);
       return this;
     }
 
@@ -1696,7 +1687,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             }
           });
           try{
-            Thread.sleep(300);
+            Thread.sleep(400);
           }catch(InterruptedException ie){
             ie.printStackTrace(Err.getPrintWriter());
           }
@@ -1708,7 +1699,7 @@ public class AnnotationEditor extends AbstractVisualResource {
         }//synchronized(selectionHighlighter)
 
         try{
-          Thread.sleep(700);
+          Thread.sleep(600);
         }catch(InterruptedException ie){
           ie.printStackTrace(Err.getPrintWriter());
         }

@@ -25,13 +25,14 @@ import gate.*;
 import gate.util.*;
 import gate.creole.*;
 import gate.persist.*;
+import gate.event.*;
 
 /**
  * Class used to store the information about an open resource.
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
  */
-class DefaultResourceHandle implements ResourceHandle{
+public class DefaultResourceHandle implements ResourceHandle{
 
   public DefaultResourceHandle(FeatureBearer res){
     this.resource = res;
@@ -121,6 +122,7 @@ class DefaultResourceHandle implements ResourceHandle{
 
   protected void buildViews(){
     //build the large views
+    fireStatusChanged("Building views...");
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
 
     /* Fancy discovery code goes here
@@ -132,8 +134,11 @@ class DefaultResourceHandle implements ResourceHandle{
     /* Not so fancy hardcoded views build */
     popup = new JPopupMenu();
     popup.add(new CloseAction());
+    popup.addSeparator();
+    popup.add(new ReloadAction());
     //Language Resources
     if(resource instanceof LanguageResource){
+      popup.addSeparator();
       popup.add(new SaveAction());
       popup.add(new SaveToAction());
       if(resource instanceof gate.corpora.DocumentImpl){
@@ -161,9 +166,24 @@ class DefaultResourceHandle implements ResourceHandle{
     view.add("Features", fEdt);
     largeView = view;
     smallView = null;
+    fireStatusChanged("Views built!");
   }
 
   public String toString(){ return title;}
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
 
   JPopupMenu popup;
   String title;
@@ -175,6 +195,8 @@ class DefaultResourceHandle implements ResourceHandle{
   JComponent largeView;
 
   File currentDir = null;
+  private transient Vector progressListeners;
+  private transient Vector statusListeners;
 
   class CloseAction extends AbstractAction{
     public CloseAction(){
@@ -195,7 +217,7 @@ class DefaultResourceHandle implements ResourceHandle{
 
     public void actionPerformed(ActionEvent e){
 
-      JFileChooser fileChooser = MainFrame.getInstance().fileChooser;
+      JFileChooser fileChooser = MainFrame.getFileChooser();
       File selectedFile = null;
 
       ExtensionFileFilter filter = new ExtensionFileFilter();
@@ -207,7 +229,10 @@ class DefaultResourceHandle implements ResourceHandle{
       fileChooser.setDialogTitle("Select document to save ...");
       fileChooser.setSelectedFiles(null);
       fileChooser.setFileFilter(filter);
-      int res = fileChooser.showDialog(MainFrame.getInstance(), "Save");
+
+      int res = (getLargeView() != null) ? fileChooser.showDialog(getLargeView(), "Save"):
+                  (getSmallView() != null) ? fileChooser.showDialog(getSmallView(), "Save") :
+                                             fileChooser.showDialog(null, "Save");
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFile = fileChooser.getSelectedFile();
         currentDir = fileChooser.getCurrentDirectory();
@@ -243,13 +268,13 @@ class DefaultResourceHandle implements ResourceHandle{
           ((LanguageResource)
                     resource).getDataStore().sync((LanguageResource)resource);
         }catch(PersistenceException pe){
-          JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
                                         pe.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         }
       }else{
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+        JOptionPane.showMessageDialog(getLargeView(),
                         "This resource has not been loaded from a datastore.\n"+
                          "Please use the \"Save to\" option!\n",
                          "Gate", JOptionPane.ERROR_MESSAGE);
@@ -280,14 +305,14 @@ class DefaultResourceHandle implements ResourceHandle{
         }
         List dsNames = new ArrayList(dsByName.keySet());
         if(dsNames.isEmpty()){
-          JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          JOptionPane.showMessageDialog(getLargeView(),
                                         "There are no open datastores!\n " +
                                         "Please open a datastore first!",
                                         "Gate", JOptionPane.ERROR_MESSAGE);
 
         }else{
           Object answer = JOptionPane.showInputDialog(
-                              MainFrame.getInstance(),
+                              getLargeView(),
                               "Select the datastore",
                               "Gate", JOptionPane.QUESTION_MESSAGE,
                               null, dsNames.toArray(),
@@ -302,11 +327,62 @@ class DefaultResourceHandle implements ResourceHandle{
           }
         }
       }catch(PersistenceException pe){
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+        JOptionPane.showMessageDialog(getLargeView(),
                                       "Save failed!\n " +
                                       pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
     }
+  }//class SaveToAction extends AbstractAction
+
+  class ReloadAction extends AbstractAction{
+    ReloadAction(){
+      super("Reload");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      //resource
+    }
   }
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }////class ReloadAction extends AbstractAction
 }

@@ -23,10 +23,13 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.creole.*;
+import gate.event.*;
 
 class ApplicationHandle extends DefaultResourceHandle {
 
-  public ApplicationHandle(SerialController controller) {
+  public ApplicationHandle(SerialController controller,
+                           StatusListener sListener,
+                           ProgressListener pListener) {
     super(controller);
     try{
       FeatureMap params = Factory.newFeatureMap();
@@ -34,6 +37,8 @@ class ApplicationHandle extends DefaultResourceHandle {
       appView = (ApplicationViewer)Factory.createResource(
                             "gate.gui.ApplicationViewer", params);
       appView.setHandle(this);
+      appView.addStatusListener(sListener);
+      appView.addProgressListener(pListener);
       JTabbedPane view = (JTabbedPane)super.getLargeView();
       view.add("Design", appView);
       view.setSelectedComponent(appView);

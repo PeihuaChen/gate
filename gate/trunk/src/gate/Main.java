@@ -91,7 +91,7 @@ public class Main {
 
   /** Run the user interface */
   private static void runGui() {
-    MainFrame frame = MainFrame.getInstance();
+    MainFrame frame = new MainFrame();
     long startTime = System.currentTimeMillis();
     Splash splash = new Splash(frame, "/gate/resources/img/gateSplash.gif");
     splash.show();

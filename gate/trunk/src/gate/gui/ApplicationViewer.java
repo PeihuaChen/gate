@@ -709,7 +709,7 @@ public class ApplicationViewer extends AbstractVisualResource
           fireStatusChanged("Running " +
                             controller.getFeatures().get("gate.NAME"));
           fireProgressChanged(0);
-          MainFrame.getInstance().showWaitDialog();
+//          MainFrame.getInstance().showWaitDialog();
           Iterator prsIter = controller.iterator();
           while(prsIter.hasNext()){
             ProcessingResource pr = (ProcessingResource)prsIter.next();
@@ -759,7 +759,7 @@ public class ApplicationViewer extends AbstractVisualResource
                             " run in " +
                             NumberFormat.getInstance().format(
                             (double)(endTime - startTime) / 1000) + " seconds");
-          MainFrame.getInstance().hideWaitDialog();
+//          MainFrame.getInstance().hideWaitDialog();
         }
       };
       Thread thread = new Thread(runnable);
@@ -927,7 +927,7 @@ public class ApplicationViewer extends AbstractVisualResource
       button.setToolTipText("Set from file...");
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          JFileChooser fileChooser = MainFrame.getInstance().fileChooser;
+          JFileChooser fileChooser = MainFrame.getFileChooser();
           int res = fileChooser.showOpenDialog(ApplicationViewer.this);
           if(res == fileChooser.APPROVE_OPTION){
             try {
@@ -1012,6 +1012,7 @@ public class ApplicationViewer extends AbstractVisualResource
   JTreeTable mainTreeTable;
   PRsAndParamsTTModel mainTTModel;
   JPopupMenu popup;
+
   JMenu addMenu;
   JMenu removeMenu;
   XJTable modulesTable;
