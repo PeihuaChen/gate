@@ -144,6 +144,20 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
   public List getPublicVrTypes();
 
   /**
+   * Returns a list of strings representing class names for large VRs valid
+   * for a given type of language/processing resource.
+   * The default VR will be the first in the returned list.
+   */
+  public List getLargeVRsForResource(String resourceClassName);
+
+  /**
+   * Returns a list of strings representing class names for small VRs valid
+   * for a given type of language/processing resource
+   * The default VR will be the first in the returned list.
+   */
+  public List getSmallVRsForResource(String resourceClassName);
+
+  /**
    * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
    * The register will fire events every time a resource is added to or removed
    * from the system and when a datastore is created, opened or closed.

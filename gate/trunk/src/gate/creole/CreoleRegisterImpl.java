@@ -405,6 +405,48 @@ public class CreoleRegisterImpl extends HashMap
     return Collections.unmodifiableList(getPublicTypes(getVrTypes()));
   }//getPublicVrTypes()
 
+
+  /**
+   * Returns a list of strings representing class names for large VRs valid
+   * for a given type of language/processing resource.
+   * The default VR will be the first in the returned list.
+   */
+  public List getLargeVRsForResource(String resourceClassName){
+    Map data = new HashMap();
+    data.put("gate.corpora.DocumentImpl",
+             new Object[]{"gate.gui.DocumentEditor",
+                          "gate.gui.FeaturesEditor"});
+
+    data.put("gate.Document",
+             new Object[]{"gate.gui.DocumentEditor",
+                          "gate.gui.FeaturesEditor"});
+
+    data.put("gate.Resource",
+             new Object[]{"gate.gui.FeaturesEditor"});
+
+
+    List result = new ArrayList();
+    Object[] VRnames = (Object[])data.get(resourceClassName);
+    if(VRnames != null) result.addAll(Arrays.asList(VRnames));
+    return result;
+  }
+
+  /**
+   * Returns a list of strings representing class names for small VRs valid
+   * for a given type of language/processing resource
+   * The default VR will be the first in the returned list.
+   */
+  public List getSmallVRsForResource(String resourceClassName){
+    Map data = new HashMap();
+
+    List result = new ArrayList();
+    Object[] VRnames = (Object[])data.get(resourceClassName);
+    if(VRnames != null) result.addAll(Arrays.asList(VRnames));
+    return result;
+  }
+
+
+
   /** Get a list of all non-private instantiations. */
   protected List getPublics(List instances) {
     Iterator iter = instances.iterator();
