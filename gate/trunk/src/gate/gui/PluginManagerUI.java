@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
@@ -66,9 +67,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     setTitle("Plugin Management Console");
     mainTableModel = new MainTableModel();
     mainTable = new XJTable();
-    mainTable.setSortable(false);
+//    mainTable.setSortable(false);
     mainTable.setModel(mainTableModel);
-    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     DeleteColumnCellRendererEditor rendererEditor = new DeleteColumnCellRendererEditor();
     mainTable.getColumnModel().getColumn(DELETE_COLUMN).
@@ -82,6 +83,23 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     resourcesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     //enable tooltips
     ToolTipManager.sharedInstance().registerComponent(resourcesList);
+    
+    JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+    JScrollPane scroller = new JScrollPane(mainTable);
+    scroller.setBorder(BorderFactory.createTitledBorder(
+            scroller.getBorder(), 
+            "Known CREOLE directories", 
+            TitledBorder.LEFT, TitledBorder.ABOVE_TOP));
+    mainSplit.setLeftComponent(scroller);
+    
+    scroller = new JScrollPane(resourcesList);
+    scroller.setBorder(BorderFactory.createTitledBorder(
+            scroller.getBorder(), 
+            "CREOLE resources in directory",
+            TitledBorder.LEFT, TitledBorder.ABOVE_TOP));
+    mainSplit.setRightComponent(scroller);
+    mainSplit.setDividerLocation(0.75);
+    
     getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.insets = new Insets(2, 2, 2, 2);
@@ -89,25 +107,18 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     constraints.anchor = GridBagConstraints.WEST;
     constraints.gridy = 0;
     constraints.weightx = 1;
-    getContentPane().add(new JLabel("Known CREOLE directories"), constraints);
-    getContentPane().add(new JLabel("CREOLE resources in directory"), constraints);
+    constraints.weighty = 1;
+    getContentPane().add(mainSplit, constraints);
     
     constraints.gridy = 1;
-    constraints.weighty = 1;
-    getContentPane().add(new JScrollPane(mainTable), constraints);
-    getContentPane().add(new JScrollPane(resourcesList), constraints);
-    
-    constraints.gridy = 2;
     constraints.weighty = 0;
-    constraints.gridwidth = 2;
     Box hBox = Box.createHorizontalBox();
     hBox.add(new JLabel("You can also "));
     hBox.add(new JButton(new AddCreoleRepositoryAction()));
     hBox.add(Box.createHorizontalGlue());
     getContentPane().add(hBox, constraints);
     
-    constraints.gridy = 3;
-    constraints.gridwidth = 2;
+    constraints.gridy = 2;
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.fill = GridBagConstraints.NONE;
     hBox = Box.createHorizontalBox();
@@ -229,22 +240,26 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     public Object getElementAt(int index){
       int row = mainTable.getSelectedRow();
       if(row == -1) return null;
+      row = mainTable.rowViewToModel(row);
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
               (URL)Gate.getKnownPlugins().get(row));
       return (Gate.ResourceInfo)dInfo.getResourceInfoList().get(index);
     }
     
     public int getSize(){
+      
       int row = mainTable.getSelectedRow();
       if(row == -1) return 0;
+      row = mainTable.rowViewToModel(row);
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
               (URL)Gate.getKnownPlugins().get(row));
       return dInfo.getResourceInfoList().size();
     }
     
     public void dataChanged(){
-      fireIntervalRemoved(this, 0, getSize());
-      fireContentsChanged(this, 0, getSize());
+//      fireIntervalRemoved(this, 0, getSize() - 1);
+//      fireIntervalAdded(this, 0, getSize() - 1);
+      fireContentsChanged(this, 0, getSize() - 1);
     }
   }
   
@@ -263,9 +278,13 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       editorDeleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           int row = mainTable.getEditingRow();
-          Gate.removeKnownDirectory((URL)Gate.getKnownPlugins().
-                  get(row));
+          row = mainTable.rowViewToModel(row);
+          URL toDelete = (URL)Gate.getKnownPlugins().get(row);
+          Gate.removeKnownDirectory(toDelete);
+          loadAlwaysByURL.remove(toDelete);
+          loadNowByURL.remove(toDelete);
           mainTableModel.fireTableDataChanged();
+          resourcesListModel.dataChanged();
         }
       });
     }
