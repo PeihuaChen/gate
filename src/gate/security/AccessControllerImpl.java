@@ -83,7 +83,7 @@ public class AccessControllerImpl implements AccessController {
 
   /** --- */
   public void open(URL url)
-    throws PersistenceException,SecurityException {
+    throws PersistenceException{
 
     Assert.assertNotNull(url);
 
@@ -91,7 +91,10 @@ public class AccessControllerImpl implements AccessController {
     try {
       jdbcConn = DBHelper.connect(url);
 
-      Assert.assertNull(jdbcConn);
+      Assert.assertNotNull(jdbcConn);
+
+      //init, i.e. read users and groups from DB
+      init();
     }
     catch(SQLException sqle) {
       throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");
@@ -494,12 +497,114 @@ public class AccessControllerImpl implements AccessController {
   }
 
 
-  private void init() {
+  private void init()
+    throws PersistenceException {
 
     //1. read all groups and users from DB
+    Statement stmt = null;
+    ResultSet rs = null;
+    String    sql;
+    Hashtable   groupNames = new Hashtable();
+    Hashtable   groupMembers= new Hashtable();
+    Hashtable   userNames= new Hashtable();
+    Hashtable   userGroups= new Hashtable();
+
+    try {
+      stmt = this.jdbcConn.createStatement();
+
+      //1.1 read groups
+      sql = " SELECT grp_id, " +
+            "        grp_name "+
+            " FROM   t_group";
+      rs = stmt.executeQuery(sql);
+
+
+
+      while (rs.next()) {
+        //access by index is faster
+        //first column index is 1
+        long grp_id = rs.getLong(1);
+        String grp_name = rs.getString(2);
+        groupNames.put(new Long(grp_id),grp_name);
+        groupMembers.put(new Long(grp_id),new Vector());
+      }
+      DBHelper.cleanup(rs);
+
+
+      //1.2 read users
+      sql = " SELECT usr_id, " +
+            "        usr_login "+
+            " FROM   t_user";
+      rs = stmt.executeQuery(sql);
+
+      while (rs.next()) {
+        //access by index is faster
+        //first column index is 1
+        long usr_id = rs.getLong(1);
+        String usr_name = rs.getString(2);
+        userNames.put(new Long(usr_id),usr_name);
+        userGroups.put(new Long(usr_id),new Vector());
+      }
+      DBHelper.cleanup(rs);
+
+
+      //1.3 read user/group relations
+      sql = " SELECT    UGRP_GROUP_ID, " +
+            "           UGRP_USER_ID "+
+            " FROM      t_user_group " +
+            " ORDER BY  UGRP_GROUP_ID asc";
+      rs = stmt.executeQuery(sql);
+
+      while (rs.next()) {
+        //access by index is faster
+        //first column index is 1
+        Long grp_id = new Long(rs.getLong(1));
+        Long usr_id = new Long(rs.getLong(2));
+
+        //append user to group members list
+        Vector currMembers = (Vector)groupMembers.get(grp_id);
+        currMembers.add(usr_id);
+
+        Vector currGroups = (Vector)userGroups.get(usr_id);
+        currGroups.add(grp_id);
+      }
+      DBHelper.cleanup(rs);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("DB error is: ["+
+                                          sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(stmt);
+    }
 
     //2. create USerImpl's and GroupImpl's and put them in collections
 
-    throw new MethodNotImplementedException();
+    //2.1 create Groups
+    Enumeration enGroups = groupNames.keys();
+    while (enGroups.hasMoreElements()) {
+      Long grpId = (Long)enGroups.nextElement();
+      Vector grpMembers = (Vector)groupMembers.get(grpId);
+      String grpName = (String)groupNames.get(grpId);
+
+      Group grp = new GroupImpl(grpId,grpName,grpMembers,this,this.jdbcConn);
+      //add to collection
+      this.groupsByID.put(grp.getID(),grp);
+      this.groupsByName.put(grp.getName(),grp);
+    }
+
+    //2.1 create Users
+    Enumeration enUsers = userNames.keys();
+    while (enUsers.hasMoreElements()) {
+      Long usrId = (Long)enUsers.nextElement();
+      Vector usrGroups = (Vector)userGroups.get(usrId);
+      String usrName = (String)userNames.get(usrId);
+
+      User usr = new UserImpl(usrId,usrName,usrGroups,this,this.jdbcConn);
+      //add to collection
+      this.usersByID.put(usr.getID(),usr);
+      this.usersByName.put(usr.getName(),usr);
+    }
   }
 }
