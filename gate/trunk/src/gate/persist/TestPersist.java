@@ -476,9 +476,10 @@ public class TestPersist extends TestCase
     Assert.assertNotNull(lr.getDataStore());
     Assert.assertTrue(lr.getDataStore() instanceof DatabaseDataStore);
 
-    this.uc01_lrID = (Long)lr.getLRPersistenceId();
+    uc01_lrID = (Long)lr.getLRPersistenceId();
+    if (DEBUG) Out.prln("lr id: " + this.uc01_lrID);
 //    this.uc01_LR = lr;
-    this.uc01_LR = doc;
+    uc01_LR = doc;
 //System.out.println("adopted doc:name=["+((Document)lr).getName()+"], lr_id=["+((Document)lr).getLRPersistenceId()+"]");
     //6.close
     ac.close();
@@ -552,16 +553,16 @@ public class TestPersist extends TestCase
     ds.open();
 
     //2. read LR
-    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
 
     //3. check name
     String name = lr.getName();
     Assert.assertNotNull(name);
-    Assert.assertEquals(name,this.uc01_LR.getName());
+    Assert.assertEquals(name,uc01_LR.getName());
 
     //4. check features
     FeatureMap fm = lr.getFeatures();
-    FeatureMap fmOrig = this.uc01_LR.getFeatures();
+    FeatureMap fmOrig = uc01_LR.getFeatures();
 
     Assert.assertNotNull(fm);
     Assert.assertNotNull(fmOrig);
@@ -648,29 +649,6 @@ public class TestPersist extends TestCase
 
   }
 
-  public void testDB_UseCase05() throws Exception {
-
-    //delete a document
-    LanguageResource lr = null;
-
-    //1. open data storage
-    DatabaseDataStore ds = new OracleDataStore();
-    Assert.assertNotNull(ds);
-    ds.setStorageUrl(this.JDBC_URL);
-    ds.open();
-
-    //2. read LR
-    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
-
-    //3. try to delete it
-    ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
-
-    if(DEBUG) {
-      Err.prln("Use case 05 passed...");
-    }
-
-  }
-
   public void testDB_UseCase04() throws Exception {
 
     //sync a document
@@ -682,9 +660,9 @@ public class TestPersist extends TestCase
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
 
-    if (DEBUG) Out.prln("ID " + this.uc01_lrID);
+    if (DEBUG) Out.prln("ID " + uc01_lrID);
     //2. read LR
-    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Document dbDoc = (Document)lr;
     Document doc2 = null;
 
@@ -693,7 +671,7 @@ public class TestPersist extends TestCase
     String newName = oldName + "__UPD";
     dbDoc.setName(newName);
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertEquals(newName,dbDoc.getName());
     Assert.assertEquals(newName,doc2.getName());
 
@@ -719,7 +697,7 @@ public class TestPersist extends TestCase
         fm.put(currKey,newVal);
     }
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertEquals(fm,dbDoc.getFeatures());
     Assert.assertEquals(fm,doc2.getFeatures());
 
@@ -729,7 +707,7 @@ public class TestPersist extends TestCase
     newURL = new URL(docURL.toString()+".UPDATED");
     dbDoc.setSourceUrl(newURL);
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertEquals(newURL,dbDoc.getSourceUrl());
     Assert.assertEquals(newURL,doc2.getSourceUrl());
 
@@ -740,7 +718,7 @@ public class TestPersist extends TestCase
     dbDoc.setSourceUrlEndOffset(newEnd);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertEquals(newStart,dbDoc.getSourceUrlStartOffset());
     Assert.assertEquals(newStart,doc2.getSourceUrlStartOffset());
     Assert.assertEquals(newEnd,dbDoc.getSourceUrlEndOffset());
@@ -753,7 +731,7 @@ public class TestPersist extends TestCase
     dbDoc.setMarkupAware(newMA);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertEquals(newMA,doc2.getMarkupAware());
     Assert.assertEquals(newMA,dbDoc.getMarkupAware());
 
@@ -764,7 +742,7 @@ public class TestPersist extends TestCase
     dbDoc.setContent(contNew);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertEquals(contNew,dbDoc.getContent());
     Assert.assertEquals(contNew,doc2.getContent());
 
@@ -824,6 +802,29 @@ public class TestPersist extends TestCase
     if(DEBUG) {
       Err.prln("Use case 04 passed...");
     }
+  }
+
+  public void testDB_UseCase05() throws Exception {
+
+    //delete a document
+    LanguageResource lr = null;
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. read LR
+    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+
+    //3. try to delete it
+    ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
+
+    if(DEBUG) {
+      Err.prln("Use case 05 passed...");
+    }
+
   }
 
   public static void main(String[] args){
