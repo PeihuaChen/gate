@@ -14,7 +14,7 @@ import gate.util.*;
 
 /** Models all sorts of data storage.
   */
-public interface DataStore extends FeatureBearer
+public interface DataStore extends Factory, FeatureBearer
 {
    
 } // interface DataStore
