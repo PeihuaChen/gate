@@ -370,6 +370,40 @@ implements AnnotationSet
 
   } // get(type, constraints, offset)
 
+  /**
+    * Select annotations by offset that
+    * start at a position between the start and end before the end offset
+    */
+  public AnnotationSet getContained(Long startOffset, Long endOffset) {
+    //the result will include all the annotations that either:
+    //start at a position between the start and end before the end offsets
+    if(annotsByStartNode == null) indexByStartOffset();
+    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    Iterator nodesIter;
+    Iterator annotsIter;
+    Node currentNode;
+    Annotation currentAnnot;
+    //find all the annots that start at or after the start offset but strictly
+    //before the end offset
+    nodesIter = nodesByOffset.subMap(startOffset, endOffset).values().iterator();
+    while(nodesIter.hasNext()){
+      currentNode = (Node)nodesIter.next();
+      Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
+      if (fromPoint == null) continue;
+      //loop through the annotations and find only those that
+      //also end before endOffset
+      Iterator annotIter = fromPoint.iterator();
+      while (annotIter.hasNext()) {
+        Annotation annot = (Annotation) annotIter.next();
+        if (annot.getEndNode().getOffset().compareTo(endOffset) <= 0)
+          resultSet.add(annot);
+      }
+    }
+    return resultSet;
+  }//get(startOfset, endOffset)
+
+
+
   /** Get the node with the smallest offset */
   public Node firstNode() {
     indexByStartOffset();
