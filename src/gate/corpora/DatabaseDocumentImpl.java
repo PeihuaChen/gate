@@ -658,6 +658,10 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
         switch(valueType.intValue()) {
 
+          case DBHelper.VALUE_TYPE_NULL:
+            currFeatureValue = null;
+            break;
+
           case DBHelper.VALUE_TYPE_BINARY:
             throw new MethodNotImplementedException();
 
@@ -684,7 +688,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
             break;
 
           default:
-            throw new SynchronisationException("Invalid feature type found in DB");
+            throw new SynchronisationException("Invalid feature type found in DB, value is ["+valueType+"]");
         }//switch
 
         //ok, we got the key/value pair now
