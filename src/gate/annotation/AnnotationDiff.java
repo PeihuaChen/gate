@@ -37,39 +37,6 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  public final int MAX_TYPES = 5;
-
-  public final int NULL_TYPE = -1;
-  public final int DEFAULT_TYPE = 0;
-  public final int CORRECT_TYPE = 1;
-  public final int PARTIALLY_CORRECT_TYPE = 2;
-  public final int SPURIOUS_TYPE = 3;
-  public final int MISSING_TYPE = 4;
-
-  private  final Color RED = new Color(255,173,181);
-  private  final Color GREEN = new Color(173,255,214);
-  private  final Color WHITE = new Color(255,255,255);
-  private  final Color BLUE = new Color(173,215,255);
-  private  final Color YELLOW = new Color(255,231,173);
-  private  final Color BLACK = new Color(0,0,0);
-
-  private Color colors[] = new Color[MAX_TYPES];
-
-  /** Used to represent the result of diff*/
-  Set diffSet = new HashSet();
-
-  /** These fields are used in doDiff() and detectKey(Response)Type()*/
-  Set keyPartiallySet = new HashSet();
-  Set responsePartiallySet = new HashSet();
-  java.util.List keyAnnotList = null;
-  java.util.List responseAnnotList = null;
-
-
-  /** Used to store the no. of annotations from response,identified as belonging
-    * to one of the previous types.
-    */
-  private int typeCounter[] = new int[MAX_TYPES];
-
   /** This document contains the key annotation set which is taken as reference
    *  in comparison*/
   private Document keyDocument = null;
@@ -98,6 +65,9 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   private double falsePositiveLenient = 0.0;
   private double falsePositiveAverage = 0.0;
 
+  /**  This string represents the type of annotations used to play the roll of
+    *  total number of words needed to calculate the False Positive.
+    */
   private String annotationTypeForFalsePositive = null;
 
   /** A number formater for displaying precision and recall*/
@@ -108,6 +78,41 @@ public class AnnotationDiff extends JPanel implements VisualResource{
 
   /** The components that will stay into diffPanel*/
   private XJTable diffTable = new XJTable();
+
+  /** Used to represent the result of diff. See DiffSetElement class.*/
+  private Set diffSet = new HashSet();
+
+  /** These fields are used in doDiff() and detectKey(Response)Type()*/
+  private Set keyPartiallySet = new HashSet();
+  private Set responsePartiallySet = new HashSet();
+
+  /** This lists are created from keyAnnotationSet and responseAnnotationSet*/
+  private java.util.List keyAnnotList = null;
+  private java.util.List responseAnnotList = null;
+
+  /** Fields used to describe the type of annotations */
+  public final int MAX_TYPES = 5;
+
+  public final int NULL_TYPE = -1;
+  public final int DEFAULT_TYPE = 0;
+  public final int CORRECT_TYPE = 1;
+  public final int PARTIALLY_CORRECT_TYPE = 2;
+  public final int SPURIOUS_TYPE = 3;
+  public final int MISSING_TYPE = 4;
+
+  private  final Color RED = new Color(255,173,181);
+  private  final Color GREEN = new Color(173,255,214);
+  private  final Color WHITE = new Color(255,255,255);
+  private  final Color BLUE = new Color(173,215,255);
+  private  final Color YELLOW = new Color(255,231,173);
+  private  final Color BLACK = new Color(0,0,0);
+
+  private Color colors[] = new Color[MAX_TYPES];
+
+  /** Used to store the no. of annotations from response,identified as belonging
+    * to one of the previous types.
+    */
+  private int typeCounter[] = new int[MAX_TYPES];
 
   /** Constructs a AnnotationDif*/
   public AnnotationDiff(){
@@ -189,7 +194,6 @@ public class AnnotationDiff extends JPanel implements VisualResource{
   public double getFalsePositiveAverage(){
     return falsePositiveAverage;
   }// getFalsePositive
-
 
   /**
     * Sets the response Document(containing the annotation Set being compared)
@@ -431,8 +435,6 @@ public class AnnotationDiff extends JPanel implements VisualResource{
     if (aKeyAnnotList == null || aResponseAnnotList == null)
       return;
 
-
-
     int actual = aResponseAnnotList.size();
     int possible = aKeyAnnotList.size();
 
@@ -554,7 +556,7 @@ public class AnnotationDiff extends JPanel implements VisualResource{
       recallAverage = (double) (recallStrict + recallLenient) / 2;
     }// End if
 
-    int no = 232;
+    int no = 0;
     if (annotationTypeForFalsePositive != null)
       no =
          responseDocument.getAnnotations(annotationTypeForFalsePositive).size();
