@@ -95,29 +95,86 @@ public class GroupImpl implements Group{
 
 
   /** --- */
-  public void addUser(Long userID, Session s) {
+  public void addUser(Long userID, Session s)
+    throws PersistenceException,SecurityException{
 
-    throw new MethodNotImplementedException();
+    User usr = this.ac.findUser(userID);
+    addUser(usr,s);
   }
 
   /** --- */
-  public void addUser(User usr, Session s) {
+  public void addUser(User usr, Session s)
+    throws PersistenceException,SecurityException{
 
-    throw new MethodNotImplementedException();
+    //1. check if the user is not already in group
+    if (this.users.contains(usr)) {
+      throw new SecurityException("User id=["+usr.getID()+"] is alredy member of group");
+    }
+
+    //2. check the session
+    if (this.ac.isValidSession(s) == false) {
+      throw new SecurityException("invalid session provided");
+    }
+
+    //3. update DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.conn.prepareCall("{ call security.add_user_to_group(?,?)} ");
+      stmt.setLong(0,this.id.longValue());
+      stmt.setLong(1,usr.getID().longValue());
+      stmt.execute();
+      //release stmt???
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't add user to group in DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //4. update usr collection
+    this.users.add(usr);
+
   }
 
 
   /** --- */
-  public void removeUser(Long userID, Session s) {
+  public void removeUser(Long userID, Session s)
+    throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    User usr = this.ac.findUser(userID);
+    removeUser(usr,s);
   }
 
 
   /** --- */
-  public void removeUser(User usr, Session s) {
+  public void removeUser(User usr, Session s)
+    throws PersistenceException,SecurityException{
 
-    throw new MethodNotImplementedException();
+    //1. check if the user member of group
+    if (this.users.contains(usr) == false) {
+      throw new SecurityException("User id=["+usr.getID()+"] is NOT a member of group");
+    }
+
+    //2. check the session
+    if (this.ac.isValidSession(s) == false) {
+      throw new SecurityException("invalid session provided");
+    }
+
+    //3. update DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.conn.prepareCall("{ call security.remove_user_from_group(?,?)} ");
+      stmt.setLong(0,this.id.longValue());
+      stmt.setLong(1,usr.getID().longValue());
+      stmt.execute();
+      //release stmt???
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't remove user from group in DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //4. update usr collection
+    this.users.remove(usr);
   }
 
 
