@@ -17,6 +17,6 @@ public class OpenTransactionsException extends GateException {
     super(s);
   }
 
-}//InvalidDatabaseException
+}//OpenTransactionsException
 
 

@@ -9,6 +9,9 @@ import java.util.*;
 
 /**Writes an object to an PipedOutputStream wich can be connected to a
   *PipedInputStream.
+  *Before writting the object it also writes it in a buffer and finds 
+  *out its size so it can be reported via getSize method.
+  *All read/writes occur in separate threads to avoid a deadlock. 
   */
 public class ObjectWriter extends Thread{
   public ObjectWriter(Object obj) {
@@ -57,10 +60,22 @@ public class ObjectWriter extends Thread{
     }
   }
 
+  /**
+   * Returns a PipedInputStream from which the object given as parameter for
+   *the constructor can be read.
+   *
+   * @return a PipedInputStream connected to PipedOutputStream which writes
+   *the object which this ObjectWriter was built for.
+   */
   public InputStream getInputStream(){
     return inputStream;
   }
 
+  /**
+   * Obtains the object size.
+   *
+   * @return the size of the object recieved as parameter for the constructor.
+   */
   public int getSize(){
     return size;
   }
@@ -106,6 +121,10 @@ public class ObjectWriter extends Thread{
     public InputStream getInputStream(){
       return _inputStream;
     }
+    /**
+     * Describe 'run' method here.
+     *
+     */
     public void run(){
       try{
         ObjectOutputStream _oos = new ObjectOutputStream(_outputStream);
