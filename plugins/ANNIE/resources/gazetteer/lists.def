@@ -36,7 +36,6 @@ person_full.lst:person_full
 person_male.lst:person_first:male
 person_male_cap.lst:person_first:male
 person_relig.lst:person_full:relig
-person_sci.lst:person_full:sci
 province.lst:location:province
 region.lst:location:region
 region_uk.lst:location:region
