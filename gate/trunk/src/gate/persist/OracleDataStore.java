@@ -310,8 +310,10 @@ public class OracleDataStore extends JDBCDataStore {
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  public void sync(LanguageResource lr) throws PersistenceException {
-    //open a new transaction
+  public void sync(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+
+    //4.delegate (open a new transaction)
     _sync(lr,true);
   }
 
@@ -319,10 +321,13 @@ public class OracleDataStore extends JDBCDataStore {
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  private void _sync(LanguageResource lr, boolean openNewTrans) throws PersistenceException {
+  private void _sync(LanguageResource lr, boolean openNewTrans)
+    throws PersistenceException,SecurityException {
 
-    //0. preconditions
+    //0.preconditions
     Assert.assertNotNull(lr);
+    Long lrID = (Long)lr.getLRPersistenceId();
+
     if (false == lr instanceof Document &&
         false == lr instanceof Corpus) {
       //only documents and corpuses could be serialized in DB
@@ -336,11 +341,30 @@ public class OracleDataStore extends JDBCDataStore {
         "This LR is not stored in this DataStore"
       );
 
-    //1. user session should be set
-/*    if (null == this.session) {
-      throw new SecurityException("user session not set");
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
     }
-*/
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. check permissions
+    if (false == canWriteLR(lrID)) {
+      throw new SecurityException("insufficient privileges");
+    }
+
+    //3. is the resource locked?
+    User lockingUser = getLockingUser(lr);
+    User currUser = this.session.getUser();
+
+    if (lockingUser != null && false == lockingUser.equals(currUser)) {
+      throw new PersistenceException("document is locked by another user and cannot be synced");
+    }
+
+
     boolean transFailed = false;
     try {
       //2. autocommit should be FALSE because of LOBs
@@ -2628,7 +2652,12 @@ public class OracleDataStore extends JDBCDataStore {
       else {
         //don't open a new transaction, the sync() called for corpus has already
         //opened one
-        _sync(dbDoc,false);
+        try {
+          _sync(dbDoc,false);
+        }
+        catch(SecurityException se) {
+          gate.util.Err.prln("document cannot be synced: ["+se.getMessage()+"]");
+        }
       }
     }
   }
@@ -2759,6 +2788,64 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       DBHelper.cleanup(cstmt);
     }
+  }
+
+  /**
+   * Releases the exlusive lock on a resource from the persistent store.
+   */
+  private User getLockingUser(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(lr.getDataStore(),this);
+
+    //1. check session
+    if (null == this.session) {
+      throw new SecurityException("session not set");
+    }
+
+    if (false == this.ac.isValidSession(this.session)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //3. read from DB
+    Long lrID = (Long)lr.getLRPersistenceId();
+    PreparedStatement pstmt = null;
+    Long userID = null;
+    ResultSet rs = null;
+
+    try {
+      String sql = "  select  nvl(lr_locking_user_id,0) as user_id" +
+                    " from "+Gate.DB_OWNER+".t_lang_resource " +
+                    " where   lr_id = ?";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("LR not found in DB");
+      }
+
+      long result = rs.getLong("user_id");
+
+      return result == 0  ? null
+                          : this.ac.findUser(new Long(result));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't get locking user from DB : ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+
   }
 
 }
