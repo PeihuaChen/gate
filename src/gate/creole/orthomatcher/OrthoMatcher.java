@@ -884,7 +884,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
                   matchRule14(longName, shortName)
                || //kalina: added this, so it matches names when contain more
                   //than one first and one last name
-                  matchRule13(longName, shortName)
+                  matchRule15(longName, shortName)
               )
           )// rules for person annotations
          ) //if
@@ -1489,6 +1489,46 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
   }//matchRule14
 
+  /**
+    * RULE #15: does one token from a Person name appear as the other token
+    * Note that this rule has NOT been used in LaSIE's 1.5
+    * namematcher; added for ACE by Di's request
+    * Applied to: organisation annotations only
+    */
+  public boolean matchRule15(String s1,
+            String s2) {
+
+
+    String token1 = null;
+    String token2 = null;
+
+    int matched_tokens = 0;
+
+    // if names < 2 words then rule is invalid
+
+//    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin")) {
+//      Out.prln("Rule 15:" );
+//      Out.prln("with tokens " + tokensShortAnnot);
+//    }
+
+    // now do the matching
+    for (int i=0; i < tokensShortAnnot.size() && matched_tokens == 0; i++) {
+
+      for (int j=0; j<tokensLongAnnot.size() && matched_tokens ==0; j++)
+//      Out.prln("i = " + i);
+        if ( ((Annotation) tokensLongAnnot.get(j)).getFeatures(
+                                                   ).get(STRING_FEATURE).equals(
+             ((Annotation) tokensShortAnnot.get(i)).getFeatures(
+                                                   ).get(STRING_FEATURE)) ) {
+          matched_tokens++;
+      }
+    } // for
+
+    if (matched_tokens > 0)
+      return true;
+
+    return false;
+  }//matchRule15
 
   /** Tables for namematch info
     * (used by the namematch rules)
