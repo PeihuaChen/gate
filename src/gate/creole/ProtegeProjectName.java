@@ -37,6 +37,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
 
   /** Ontotext Ontology object */
   private Ontology ontotextOntology = null;
+  private URL ontotextOntologyUrl = null;
   
   /** Keep visual resource to refresh Ontotext Editor if any */
   ProtegeWrapper visualResource = null;
@@ -92,15 +93,7 @@ public class ProtegeProjectName extends AbstractLanguageResource
     OClass oCls;
     
     ontotextOntology = new OntologyImpl();
-
-    URL shit = null;
-    try {
-      shit = new URL("gate:/creole/ontology/demo.daml");
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    } // catch
-    
-    ontotextOntology.setURL(shit);
+    ontotextOntology.setURL(ontotextOntologyUrl);
     
     while(it.hasNext()) {
       cls = (Cls) it.next();
@@ -134,10 +127,13 @@ public class ProtegeProjectName extends AbstractLanguageResource
   }
 
   public URL getURL() { 
-    return ontotextOntology.getURL(); 
+    return ontotextOntologyUrl; 
   }
   public void setURL(URL aUrl) { 
-    ontotextOntology.setURL(aUrl); 
+    ontotextOntologyUrl = aUrl;
+    if(ontotextOntology != null) {
+      ontotextOntology.setURL(aUrl); 
+    } // if
   }
   public void setSourceURI(String theURI) { 
     ontotextOntology.setSourceURI(theURI);
