@@ -21,6 +21,7 @@ import java.net.*;
 import gate.util.*;
 import gate.persist.*;
 import gate.event.*;
+import gate.security.SecurityException;
 
 /** Models all sorts of data storage.
   */
@@ -124,5 +125,20 @@ public interface DataStore extends FeatureBearer {
    * Returns the comment displayed by the GUI for this DataStore
    */
   public String getComment();
+
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   *  has read access to the LR
+   */
+  public boolean canReadLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException;
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has write access to the LR
+   */
+  public boolean canWriteLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException;
 
 } // interface DataStore
