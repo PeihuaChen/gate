@@ -207,7 +207,7 @@ DROP TABLE  t_annot_set ;
 
 CREATE TABLE  t_annot_set  (
     as_id              int4 DEFAULT nextval('seq_annot_set')  NOT NULL ,
-    as_name            varchar(128) NOT NULL ,
+    as_name            varchar(128),
     as_doc_id          int4 NOT NULL ,
    FOREIGN KEY ( as_doc_id )
       REFERENCES  t_document ( doc_id )
