@@ -150,7 +150,7 @@ public class MainFrame extends JFrame
    * are the actual listeners (e.g "gate.event.StatusListener" -> this).
    */
   private static java.util.Map listeners = new HashMap();
-  private static java.util.Collection guiRoots = new ArrayList();
+  protected static java.util.Collection guiRoots = new ArrayList();
 
   private static JDialog guiLock = null;
 
@@ -210,8 +210,12 @@ public class MainFrame extends JFrame
     }
   }//protected void select(ResourceHandle handle)
 
-  /**Construct the frame*/
   public MainFrame() {
+    this(false);
+  } // MainFrame
+  
+  /**Construct the frame*/
+  public MainFrame(boolean isShellSlacGIU) {
     guiRoots.add(this);
     if(fileChooser == null){
       fileChooser = new JFileChooser();
@@ -230,23 +234,31 @@ public class MainFrame extends JFrame
       dialog = null;
     }
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
-    initLocalData();
-    initGuiComponents();
-    initListeners();
-  }
+    initLocalData(isShellSlacGIU);
+    initGuiComponents(isShellSlacGIU);
+    initListeners(isShellSlacGIU);
+  } // MainFrame(boolean simple)
 
-  protected void initLocalData(){
+  protected void initLocalData(boolean isShellSlacGIU){
     resourcesTreeRoot = new DefaultMutableTreeNode("Gate", true);
     applicationsRoot = new DefaultMutableTreeNode("Applications", true);
-    languageResourcesRoot = new DefaultMutableTreeNode("Language Resources",
+    if(isShellSlacGIU) {
+      languageResourcesRoot = new DefaultMutableTreeNode("Documents",
                                                        true);
+    } else {
+      languageResourcesRoot = new DefaultMutableTreeNode("Language Resources",
+                                                       true);
+    } // if
     processingResourcesRoot = new DefaultMutableTreeNode("Processing Resources",
                                                          true);
     datastoresRoot = new DefaultMutableTreeNode("Data stores", true);
     resourcesTreeRoot.add(applicationsRoot);
     resourcesTreeRoot.add(languageResourcesRoot);
-    resourcesTreeRoot.add(processingResourcesRoot);
-    resourcesTreeRoot.add(datastoresRoot);
+    if(!isShellSlacGIU) {
+      resourcesTreeRoot.add(processingResourcesRoot);
+      resourcesTreeRoot.add(datastoresRoot);
+    } // if
+
     resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot, true);
 
     newDSAction = new NewDSAction();
@@ -266,7 +278,7 @@ public class MainFrame extends JFrame
 
   }
 
-  protected void initGuiComponents(){
+  protected void initGuiComponents(boolean isShellSlacGIU){
     this.getContentPane().setLayout(new BorderLayout());
 
     Integer width =Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH);
@@ -641,7 +653,7 @@ public class MainFrame extends JFrame
     guiRoots.add(dssPopup);
   }
 
-  protected void initListeners(){
+  protected void initListeners(boolean isShellSlacGIU){
     Gate.getCreoleRegister().addCreoleListener(this);
 
     resourcesTree.addMouseListener(new MouseAdapter() {
@@ -1810,11 +1822,14 @@ public class MainFrame extends JFrame
 
 
   class NewResourceAction extends AbstractAction {
+    /** Used for creation of resource menu item and creation dialog */
+    ResourceData rData;
+
     public NewResourceAction(ResourceData rData) {
       super(rData.getName());
       putValue(SHORT_DESCRIPTION,"Create a new " + rData.getName());
       this.rData = rData;
-    }
+    } // NewResourceAction(ResourceData rData)
 
     public void actionPerformed(ActionEvent evt) {
       Runnable runnable = new Runnable(){
@@ -1825,9 +1840,8 @@ public class MainFrame extends JFrame
         }
       };
       SwingUtilities.invokeLater(runnable);
-    }
-    ResourceData rData;
-  }
+    } // actionPerformed
+  } // class NewResourceAction extends AbstractAction
 
 
   static class StopAction extends AbstractAction {
