@@ -125,6 +125,10 @@ implements AnnotationSet
    */
   public class VerboseHashMap extends HashMap{
 
+    // NASO
+    VerboseHashMap() {
+      super(4);
+    } //contructor
 
     public Object remove(Object key){
       Object res = super.remove(key);
@@ -626,20 +630,15 @@ implements AnnotationSet
       indexByEndOffset();
     }
 
-    // find existing nodes if appropriate nodes don't already exist, create them
+    // find existing nodes
     Node startNode  = (Node) nodesByOffset.getNextOf(start);
+    Node endNode    = (Node) nodesByOffset.getNextOf(end);
+
+    // if appropriate nodes don't already exist, create them
     if(startNode == null || ! startNode.getOffset().equals(start))
       startNode = new NodeImpl(doc.getNextNodeId(), start);
-
-    Node endNode = null;
-    if(start.equals(end))
-      endNode = startNode;
-    else
-      endNode = (Node) nodesByOffset.getNextOf(end);
-
     if(endNode == null   || ! endNode.getOffset().equals(end))
       endNode = new NodeImpl(doc.getNextNodeId(), end);
-
 
     // construct an annotation
     Annotation a = new AnnotationImpl(id, startNode, endNode, type, features);
@@ -651,7 +650,10 @@ implements AnnotationSet
   protected void indexByType() {
 
     if(annotsByType != null) return;
-    annotsByType = new HashMap();
+
+//    annotsByType = new HashMap(); // NASO
+    annotsByType = new HashMap(4);
+
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
 
@@ -667,7 +669,8 @@ implements AnnotationSet
 
     if(nodesByOffset == null)
       nodesByOffset = new RBTreeMap();
-    annotsByStartNode = new HashMap();
+//    annotsByStartNode = new HashMap(); // NASO
+    annotsByStartNode = new HashMap(4);
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
@@ -684,7 +687,8 @@ implements AnnotationSet
 
     if(nodesByOffset == null)
       nodesByOffset = new RBTreeMap();
-    annotsByEndNode = new HashMap();
+//    annotsByEndNode = new HashMap(); // NASO
+    annotsByEndNode = new HashMap(4);
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
