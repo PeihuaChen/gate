@@ -48,7 +48,7 @@ public class MyPattern implements Comparable {
   }
 
   public boolean isSameCategory(String category) {
-    if(this.category.equals("*")) {
+    if(this.category.equals("*") || category.equals("*")) {
        return true;
     } else {
       if (this.category.equals("verb")) {
