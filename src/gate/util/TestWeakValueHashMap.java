@@ -44,6 +44,7 @@ public class TestWeakValueHashMap extends TestCase {
     //force gc
     System.gc();
 
+    //the last two values should have dissappeared
     assert("The weak hash map has not been cleaned:\n" +
            "expected size: 1; actual size: " + wvhm.size(), wvhm.size() == 1);
   }
@@ -81,6 +82,7 @@ public class TestWeakValueHashMap extends TestCase {
     //force gc
     System.gc();
 
+    //the last two values should have dissappeared
     assert("Value misteriously dissappeared", wvhm.containsValue(value1));
   }
 

@@ -20,6 +20,9 @@ import java.io.*;
 import junit.framework.*;
 import java.net.*;
 
+import gate.*;
+import gate.creole.*;
+
 /** BumpyStack test class.
   */
 public class TestBumpyStack extends TestCase
@@ -61,5 +64,93 @@ public class TestBumpyStack extends TestCase
     assert("s2 not front of stack", ((String) bumper.pop()).equals("s2"));
     assert("stack wrong length (II)" + bumper.size(), bumper.size() == 2);
   } // testBumpiness()
+
+  /**
+   * Tests whether the CreoleRegisterImpl keeps unreacheable resourecs alive
+   */
+  public void testSelfCleaning() throws Exception {
+    //force GC
+    System.gc();
+
+    //count instances
+    Collection instances = ((ResourceData)
+                           Gate.getCreoleRegister().
+                           get("gate.corpora.DocumentImpl")).
+                           getInstantiations();
+    int docCnt = instances == null ? 0: instances.size();
+
+    instances = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.corpora.CorpusImpl")).
+                  getInstantiations();
+    int corpusCnt = instances == null ? 0: instances.size();
+
+    instances = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.creole.tokeniser.DefaultTokeniser")).
+                  getInstantiations();
+    int tokCnt = instances == null ? 0: instances.size();
+
+    instances = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.creole.ANNIETransducer")).
+                  getInstantiations();
+    int japeCnt = instances == null ? 0: instances.size();
+
+    instances = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.creole.SerialController")).
+                  getInstantiations();
+    int serctlCnt = instances == null ? 0: instances.size();
+
+    //create some unreacheable resources
+    //LRs
+    Factory.newCorpus("corpus");
+    Factory.newDocument("content");
+    Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+
+    //PRs
+    Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
+    Factory.createResource("gate.creole.ANNIETransducer");
+
+    //Controllers
+    Factory.createResource("gate.creole.SerialController");
+
+    //force GC
+    System.gc();
+
+    //check instances count
+    int newDocCnt = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.corpora.DocumentImpl")).
+                  getInstantiations().size();
+
+    int newCorpusCnt = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.corpora.CorpusImpl")).
+                  getInstantiations().size();
+
+    int newTokCnt = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.creole.tokeniser.DefaultTokeniser")).
+                  getInstantiations().size();
+
+    int newJapeCnt = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.creole.ANNIETransducer")).
+                  getInstantiations().size();
+
+    int newSerctlCnt = ((ResourceData)
+                  Gate.getCreoleRegister().
+                  get("gate.creole.SerialController")).
+                  getInstantiations().size();
+
+    assertEquals("Documents not cleaned", docCnt, newDocCnt);
+    assertEquals("Corpora not cleaned", corpusCnt, newCorpusCnt);
+    assertEquals("Tokenisers not cleaned", tokCnt, newTokCnt);
+    assertEquals("Japes not cleaned", japeCnt, newJapeCnt);
+    assertEquals("Controllers not cleaned", serctlCnt, newSerctlCnt);
+  }
+
 
 } // class TestBumpyStack
