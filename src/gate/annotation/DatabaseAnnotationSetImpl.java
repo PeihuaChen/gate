@@ -70,7 +70,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //add self as listener for sync events from the document's datastore
 //00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
-    ((VerboseHashMap)annotsById).setOwner(this);
+//    ((VerboseHashMap)annotsById).setOwner(this);
   } // construction from document
 
   /** Construction from Document and name. */
@@ -86,7 +86,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //add self as listener for sync events from the document's datastore
 //00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
-    ((VerboseHashMap)annotsById).setOwner(this);
+//    ((VerboseHashMap)annotsById).setOwner(this);
   } // construction from document and name
 
 
@@ -130,7 +130,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 //00    doc.getDataStore().removeDatastoreListener(this);
     doc.getDataStore().addDatastoreListener(this);
 
-    ((VerboseHashMap)annotsById).setOwner(this);
+//    ((VerboseHashMap)annotsById).setOwner(this);
   } // construction from collection
 
 
