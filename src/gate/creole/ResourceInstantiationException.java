@@ -46,13 +46,24 @@ public class ResourceInstantiationException extends GateException {
   }
 
   public ResourceInstantiationException(Exception e) {
-    super(e.toString());
     this.exception = e;
   }
 
-
-  public Exception getException(){
-    return exception;
+  /**
+   * Overriden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(){
+    printStackTrace(System.err);
   }
+
+  /**
+   * Overriden so we can print the enclosed exception's stacktrace too.
+   */
+  public void printStackTrace(java.io.PrintStream s) {
+    super.printStackTrace(s);
+    s.print("  Caused by:");
+    if(exception != null) exception.printStackTrace(s);
+  }
+
 
 } // ResourceInstantiationException

@@ -226,7 +226,12 @@ public class MainFrame extends JFrame
 
   protected void initGuiComponents(){
     this.getContentPane().setLayout(new BorderLayout());
-    this.setSize(new Dimension(800, 600));
+
+    Integer width =Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH);
+    Integer height =Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_HEIGHT);
+    this.setSize(new Dimension(width == null ? 800 : width.intValue(),
+                               height == null ? 600 : height.intValue()));
+
     this.setTitle(Main.name + " " + Main.version);
     try{
       this.setIconImage(Toolkit.getDefaultToolkit().getImage(
@@ -454,14 +459,7 @@ public class MainFrame extends JFrame
     fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
     fileMenu.addSeparator();
 
-    fileMenu.add(new XJMenuItem(new AbstractAction("Exit"){
-      {
-        putValue(SHORT_DESCRIPTION, "Exits the application");
-      }
-      public void actionPerformed(ActionEvent evt){
-        System.exit(0);
-      }
-    }, this));
+    fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
     menuBar.add(fileMenu);
 
 
@@ -491,7 +489,8 @@ public class MainFrame extends JFrame
       }
       public void actionPerformed(ActionEvent evt) {
         try{
-          UIManager.setLookAndFeel(info.getClassName());
+          String lnfClassName = info.getClassName();
+          UIManager.setLookAndFeel(lnfClassName);
           for(int i = 0; i< targets.length; i++){
             if(targets[i] instanceof Window){
               SwingUtilities.updateComponentTreeUI(targets[i]);
@@ -499,6 +498,7 @@ public class MainFrame extends JFrame
               SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
             }
           }
+          Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
         }catch(Exception e){
           e.printStackTrace(Err.getPrintWriter());
         }
@@ -1162,51 +1162,11 @@ public class MainFrame extends JFrame
   }
 
   static {
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    } catch(Exception e) {
-      throw new gate.util.GateRuntimeException(e.toString());
-    }
     if(fileChooser == null){
       fileChooser = new JFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
     }
     iconByName = new HashMap();
-    //guess the Unicode font for the platform
-    String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().
-                                             getAvailableFontFamilyNames();
-    String unicodeFontName = null;
-    for(int i = 0; i < fontNames.length; i++){
-      if(fontNames[i].equalsIgnoreCase("Arial Unicode MS")){
-        unicodeFontName = fontNames[i];
-        break;
-      }
-      if(fontNames[i].toLowerCase().indexOf("unicode") != -1){
-        unicodeFontName = fontNames[i];
-      }
-    }//for(int i = 0; i < fontNames.length; i++)
-    if(unicodeFontName != null){
-      FontUIResource font = new FontUIResource(unicodeFontName,
-                                               FontUIResource.PLAIN,
-                                               12);
-      //set font for text components
-      String[] keys = AppearanceDialog.textComponentsKeys;
-      for(int i = 0; i < keys.length; i++){
-        UIManager.put(keys[i], font);
-      }
-
-      //set font for menus
-      keys = AppearanceDialog.menuKeys;
-      for(int i = 0; i < keys.length; i++){
-        UIManager.put(keys[i], font);
-      }
-
-      //set font for other components
-      keys = AppearanceDialog.componentsKeys;
-      for(int i = 0; i < keys.length; i++){
-        UIManager.put(keys[i], font);
-      }
-    }//if(unicodeFontName != null)
 
     listeners = new HashMap();
   }
@@ -1237,18 +1197,16 @@ public class MainFrame extends JFrame
       lowerScroll.getViewport().removeAll();
   }
 */
-  /**File | Exit action performed*/
-  public void jMenuFileExit_actionPerformed(ActionEvent e) {
-    System.exit(0);
-  }
 
-  /**Overridden so we can exit when window is closed*/
+  /**
+   * Overridden so we can exit when window is closed
+   */
   protected void processWindowEvent(WindowEvent e) {
     super.processWindowEvent(e);
     if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-      jMenuFileExit_actionPerformed(null);
+      new ExitGateAction().actionPerformed(null);
     }
-  }
+  }// processWindowEvent(WindowEvent e)
 
   /**
    * Returns the listeners map, a map that holds all the listeners that are
@@ -1750,17 +1708,6 @@ public class MainFrame extends JFrame
                                rie.toString(),
                                "Gate", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
-              Exception ee = rie.getException();
-              while(ee != null){
-                Err.prln("==>From:");
-                ee.printStackTrace(Err.getPrintWriter());
-                if(ee instanceof ResourceInstantiationException)
-                  ee = ((ResourceInstantiationException)ee).getException();
-                else if(ee instanceof ExecutionException)
-                  ee = ((ExecutionException)ee).getException();
-                else ee = null;
-              }
-
             }catch(Exception ex){
               JOptionPane.showMessageDialog(MainFrame.this,
                               "Error!\n"+
@@ -1794,6 +1741,40 @@ public class MainFrame extends JFrame
     }//public void actionPerformed(ActionEvent e)
     Handle handle;
   }//class CloseViewAction
+
+
+  /**
+   * Closes the view associated to a resource.
+   * Does not remove the resource from the system, only its view.
+   */
+  class ExitGateAction extends AbstractAction {
+    public ExitGateAction() {
+      super("Exit GATE");
+      putValue(SHORT_DESCRIPTION, "Closes the application");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      OptionsMap userConfig = Gate.getUserConfig();
+      if(userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT).
+         booleanValue()){
+        //save the window size
+        Integer width = new Integer(MainFrame.this.getWidth());
+        Integer height = new Integer(MainFrame.this.getHeight());
+        userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
+        userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
+        try{
+          Gate.writeUserConfig();
+        }catch(GateException ge){
+          logArea.getOriginalErr().println("Failed to save config data:");
+          ge.printStackTrace(logArea.getOriginalErr());
+        }
+      }
+      setVisible(false);
+      dispose();
+      System.exit(0);
+    }
+  }
+
 
   class OpenDSAction extends AbstractAction {
     public OpenDSAction() {

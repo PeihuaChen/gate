@@ -211,11 +211,6 @@ public class NewResourceDialog extends JDialog {
                                           rie.toString(),
                                           "Gate", JOptionPane.ERROR_MESSAGE);
             rie.printStackTrace(Err.getPrintWriter());
-            Exception innerEx = rie.getException();
-            if(innerEx != null){
-              Err.prln("From: ===>");
-              innerEx.printStackTrace(Err.getPrintWriter());
-            }
             res = null;
             if(sListener != null) sListener.statusChanged("Error loading " +
                                                           nameField.getText() +

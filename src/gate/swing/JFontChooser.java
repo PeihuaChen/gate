@@ -19,6 +19,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.awt.Font;
+import java.awt.font.TextAttribute;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.Dialog;
@@ -27,6 +28,9 @@ import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import javax.swing.plaf.FontUIResource;
 import java.beans.*;
+import java.util.*;
+
+import gate.util.*;
 
 public class JFontChooser extends JPanel {
 
@@ -140,20 +144,6 @@ public class JFontChooser extends JPanel {
   }// initGuiComponents()
 
   protected void initListeners(){
-    //listen for our own properties change events
-    this.addPropertyChangeListener("fontValue",
-                                   new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent evt){
-        Font newFont = (Font)evt.getNewValue();
-        if(newFont == null) return;
-        familyCombo.setSelectedItem(newFont.getName());
-        sizeCombo.setSelectedItem(Integer.toString(newFont.getSize()));
-        boldChk.setSelected(newFont.isBold());
-        italicChk.setSelected(newFont.isItalic());
-        sampleTextArea.setFont(newFont);
-      }
-    });
-
     familyCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         updateFont();
@@ -180,16 +170,21 @@ public class JFontChooser extends JPanel {
   }// initListeners()
 
   private void updateFont(){
-    String family = (String)familyCombo.getSelectedItem();
-    int size = Integer.parseInt((String)sizeCombo.getSelectedItem());
-    int style = Font.PLAIN;
-    if(boldChk.isSelected()) style = Font.BOLD;
-    if(italicChk.isSelected()){
-      if(style == Font.PLAIN) style = Font.ITALIC;
-      else style |= Font.ITALIC;
-    }
-    Font newFont = new Font(family, style, size);
+    Map fontAttrs = new HashMap();
+    fontAttrs.put(TextAttribute.FAMILY, (String)familyCombo.getSelectedItem());
+    fontAttrs.put(TextAttribute.SIZE, new Float((String)sizeCombo.getSelectedItem()));
+
+    if(boldChk.isSelected())
+      fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+    else fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+
+    if(italicChk.isSelected())
+      fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+    else fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
+
+    Font newFont = new Font(fontAttrs);
     setFontValue(newFont);
+//Out.prln("update font " + newFont);
   }//updateFont()
 
   public static void main(String args[]){
@@ -215,30 +210,19 @@ public class JFontChooser extends JPanel {
   }// main
 
   public void setFontValue(java.awt.Font newFontValue) {
-    java.awt.Font  oldFontValue = fontValue;
+    if(newFontValue == null) return;
     fontValue = newFontValue;
-    propertyChangeListeners.firePropertyChange(
-                                      "fontValue", oldFontValue, newFontValue);
+
+    familyCombo.setSelectedItem(fontValue.getName());
+    sizeCombo.setSelectedItem(Integer.toString(fontValue.getSize()));
+    boldChk.setSelected(fontValue.isBold());
+    italicChk.setSelected(fontValue.isItalic());
+    sampleTextArea.setFont(fontValue);
+    repaint();
   }
 
   public java.awt.Font getFontValue() {
     return fontValue;
-  }
-
-  public synchronized void removePropertyChangeListener(PropertyChangeListener l) {
-    super.removePropertyChangeListener(l);
-    propertyChangeListeners.removePropertyChangeListener(l);
-  }
-
-  public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
-    super.addPropertyChangeListener(l);
-    propertyChangeListeners.addPropertyChangeListener(l);
-  }
-
-  public synchronized void addPropertyChangeListener(String propertyName,
-                                                     PropertyChangeListener l) {
-    super.addPropertyChangeListener(propertyName, l);
-    propertyChangeListeners.addPropertyChangeListener(propertyName, l);
   }
 
   JComboBox familyCombo;
@@ -247,6 +231,4 @@ public class JFontChooser extends JPanel {
   JComboBox sizeCombo;
   JTextArea sampleTextArea;
   private java.awt.Font fontValue;
-  private transient PropertyChangeSupport propertyChangeListeners =
-                    new PropertyChangeSupport(this);
 }// class JFontChooser extends JPanel

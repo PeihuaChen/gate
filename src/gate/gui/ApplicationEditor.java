@@ -879,11 +879,6 @@ public class ApplicationEditor extends AbstractVisualResource
           }catch(ExecutionException ee) {
             Gate.setExecutable(null);
             ee.printStackTrace(Err.getPrintWriter());
-            Exception exc = ee.getException();
-            if(exc != null){
-              Err.prln("===> from:");
-              exc.printStackTrace(Err.getPrintWriter());
-            }
             JOptionPane.showMessageDialog(
               ApplicationEditor.this,
               "Execution error while running \"" + controller.getName() +

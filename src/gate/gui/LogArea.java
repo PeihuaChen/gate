@@ -41,6 +41,11 @@ public class LogArea extends XJTextPane {
   /** The popup menu with various actions*/
   protected JPopupMenu popup = null;
 
+  /** The original printstream on System.out */
+  protected PrintStream originalOut;
+
+  /** The original printstream on System.err */
+  protected PrintStream originalErr;
   /** This fields defines the Select all behaviour*/
   protected SelectAllAction selectAllAction = null;
 
@@ -66,9 +71,11 @@ public class LogArea extends XJTextPane {
     Out.setPrintWriter(new PrintWriter(out,true));
 
     // Redirecting System.out
-//    System.setOut(new PrintStream(out,true));
+    originalOut = System.out;
+    System.setOut(new PrintStream(out,true));
     // Redirecting System.err
-//    System.setErr(new PrintStream(err,true));
+    originalErr = System.err;
+    System.setErr(new PrintStream(err,true));
     popup = new JPopupMenu();
     selectAllAction = new SelectAllAction();
     copyAction = new CopyAction();
@@ -91,6 +98,16 @@ public class LogArea extends XJTextPane {
         }//End if
       }// end mouseClicked()
     });// End addMouseListener();
+  }
+
+  /** Returns the original printstream on System.err */
+  public PrintStream getOriginalErr() {
+    return originalErr;
+  }
+
+  /** Returns the original printstream on System.out */
+  public PrintStream getOriginalOut() {
+    return originalOut;
   }// initListeners();
 
   /** Inner class that defines the behaviour of SelectAll action.*/
@@ -193,5 +210,5 @@ public class LogArea extends XJTextPane {
       SwingUtilities.invokeLater(new SwingWriter(new String(data,offset,length),
                                                  style));
     }// write(byte[] data, int offset, int length)
-  }//End class LogAreaOutputStream
+  }////End class LogAreaOutputStream
 }//End class LogArea

@@ -13,7 +13,9 @@
 package gate.util;
 
 import java.util.HashMap;
-
+import java.awt.Font;
+import java.awt.font.TextAttribute;
+import java.util.*;
 /**
  * A map that stores values as strings and provides support for converting some
  * frequently used types to and from string
@@ -24,6 +26,15 @@ public class OptionsMap extends HashMap {
    * Converts the value to string using its toString() method and then stores it
    */
   public Object put(Object key, Object value){
+    if(value instanceof Font){
+      Font font = (Font)value;
+      String family = font.getFamily();
+      int size = font.getSize();
+      boolean italic = font.isItalic();
+      boolean bold = font.isBold();
+      value = family + "#" + size + "#" + italic + "#" + bold;
+    }
+
     Object res = super.put(key, value.toString());
     return res;
   }
@@ -65,6 +76,34 @@ public class OptionsMap extends HashMap {
     }catch(Exception e){};
     return stringValue;
   }
+
+  /**
+   * If the object stored under key is a String then returns its value
+   * otherwise returns null;
+   */
+  public Font getFont(Object key){
+    String stringValue = null;
+    try{
+      stringValue = (String)get(key);
+    }catch(Exception e){};
+    if(stringValue == null) return null;
+    StringTokenizer strTok = new StringTokenizer(stringValue, "#", false);
+    String family = strTok.nextToken();
+    int size = Integer.parseInt(strTok.nextToken());
+    boolean italic = Boolean.valueOf(strTok.nextToken()).booleanValue();
+    boolean bold = Boolean.valueOf(strTok.nextToken()).booleanValue();
+
+    Map fontAttrs = new HashMap();
+    fontAttrs.put(TextAttribute.FAMILY, family);
+    fontAttrs.put(TextAttribute.SIZE, new Float(size));
+    if(bold) fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+    else fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+    if(italic) fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+    else fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
+
+    return new Font(fontAttrs);
+  }
+
 
 
 }

@@ -57,6 +57,7 @@ public class Files {
     * It takes E.g: d:/tmp/file.txt and returns file.txt
     */
   public static String getLastPathComponent(String path){
+    if(path == null || path.length() == 0) return "";
     //we should look both for "/" and "\" as on windows the file separator is"\"
     //but a path coming from an URL will be separated by "/"
     int index = path.lastIndexOf('/');
