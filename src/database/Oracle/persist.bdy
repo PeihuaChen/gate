@@ -233,6 +233,7 @@ create or replace package body persist is
      l_start_node_id number;
      l_end_node_id   number;     
      l_ann_type_id   number;
+     cnt             number;
   begin
      
      -- 1. store nodes in DB
@@ -256,18 +257,30 @@ create or replace package body persist is
      -- 2. store annotation in DN
      
      -- 2.1 get the anotation type ID
-     select at_id
-     into   l_ann_type_id
+     select count(at_id)
+     into   cnt
      from   t_annotation_type
      where  at_name = p_ann_type;
      
      -- 2.2 if there is no such type, then create one
-     if (l_ann_type_id is null) then
+     if (cnt = 0) then
+        
+        --oops, new type
+        --add it
         insert into t_annotation_type(at_id,
                                       at_name)
         values (seq_annotation_type.nextval,
                 p_ann_type)
         returning at_id into l_ann_type_id;
+        
+     else
+     
+        -- get the id
+        select at_id
+        into   l_ann_type_id
+        from   t_annotation_type
+        where  at_name = p_ann_type;
+
      end if;
      
      -- 2.3 insert annotation
