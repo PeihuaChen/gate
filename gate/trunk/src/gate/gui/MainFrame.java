@@ -45,12 +45,11 @@ import guk.im.*;
 
 
 /**
- * The main Gate GUI frame. This is a singleton.
+ * The main Gate GUI frame.
  */
 public class MainFrame extends JFrame
                     implements ProgressListener, StatusListener, CreoleListener{
 
-//  MainFrame thisMainFrame = null;
   JMenuBar menuBar;
   JSplitPane mainSplit;
   JSplitPane leftSplit;
@@ -78,31 +77,22 @@ public class MainFrame extends JFrame
   DefaultMutableTreeNode processingResourcesRoot;
   DefaultMutableTreeNode datastoresRoot;
 
-//  WeakHashMap handleForResourceName;
 
 
 
   Splash splash;
   LogArea logArea;
   JScrollPane logScroll;
-//  JComboBox projectCombo;
-//  DefaultComboBoxModel projectComboModel;
   JToolBar toolbar;
-
   static JFileChooser fileChooser;
 
   ApperanceDialog appearanceDialog;
   CartoonMinder animator;
   TabBlinker logBlinker;
-//  MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
   WaitDialog waitDialog;
 
-//  List openProjects;
-//  ProjectData currentProject;
-
   NewApplicationAction newApplicationAction;
-  //NewProjectAction newProjectAction;
   NewLRAction newLRAction;
   NewPRAction newPRAction;
   NewDSAction newDSAction;
@@ -112,12 +102,34 @@ public class MainFrame extends JFrame
   NewBootStrapAction newBootStrapAction = null;
 
   /**
-   * all the top level contianers of this application; needed for changes of
+   * all the top level containers of this application; needed for changes of
    * look and feel
    */
   Component[] targets;
 
-  static private MainFrame instance;
+  /**
+   * Holds all the icons used in the Gate GUI indexed by filename.
+   * This is needed so we do not need to decode the icon everytime
+   * we need it as that would use unecessary CPU time and memory.
+   * Access to this data is avaialable through the {@link #getIcon()}
+   * method.
+   */
+  static Map iconByName;
+
+  static public Icon getIcon(String filename){
+    Icon result = (Icon)iconByName.get(filename);
+    if(result == null){
+      try{
+        result = new ImageIcon(new URL("gate:/img/" + filename));
+        iconByName.put(filename, result);
+      }catch(MalformedURLException mue){
+        mue.printStackTrace(Err.getPrintWriter());
+      }
+    }
+    return result;
+  }
+
+
 /*
   static public MainFrame getInstance(){
     if(instance == null) instance = new MainFrame();
@@ -314,16 +326,14 @@ public class MainFrame extends JFrame
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
     splashBox.setBackground(Color.white);
 
-    JLabel gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
-        "/gate/resources/img/gateSplash.gif")));
+    JLabel gifLbl = new JLabel(getIcon("gateSplash.gif"));
     Box box = new Box(BoxLayout.X_AXIS);
     box.add(Box.createHorizontalGlue());
     box.add(gifLbl);
     box.add(Box.createHorizontalGlue());
     splashBox.add(box);
 
-    gifLbl = new JLabel(new ImageIcon(MainFrame.class.getResource(
-        "/gate/resources/img/gateHeader.gif")));
+    gifLbl = new JLabel(getIcon("gateHeader.gif"));
     box = new Box(BoxLayout.X_AXIS);
     box.add(gifLbl);
     box.add(Box.createHorizontalGlue());
@@ -489,17 +499,12 @@ public class MainFrame extends JFrame
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.add(newAnnotDiffAction);
     toolsMenu.add(newBootStrapAction);
-    try{
-      toolsMenu.add(
-        new AbstractAction("Unicode editor",
-                           new ImageIcon(new URL("gate:/img/unicode.gif"))){
-        public void actionPerformed(ActionEvent evt){
-          new guk.Editor();
-        }
-      });
-    }catch(MalformedURLException mue){
-      mue.printStackTrace(Err.getPrintWriter());
-    }
+    toolsMenu.add(
+      new AbstractAction("Unicode editor", getIcon("unicode.gif")){
+      public void actionPerformed(ActionEvent evt){
+        new guk.Editor();
+      }
+    });
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
@@ -880,6 +885,7 @@ public class MainFrame extends JFrame
       fileChooser = new JFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
     }
+    iconByName = new HashMap();
   }
 
 /*
@@ -1077,9 +1083,7 @@ public class MainFrame extends JFrame
 
   class NewAnnotDiffAction extends AbstractAction {
     public NewAnnotDiffAction() {
-      super("Annotation Diff",
-      new ImageIcon(MainFrame.class.getResource(
-                                          "/gate/resources/img/annDiff.gif")));
+      super("Annotation Diff", getIcon("annDiff.gif"));
       putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
@@ -1111,9 +1115,7 @@ public class MainFrame extends JFrame
 
   class NewBootStrapAction extends AbstractAction {
     public NewBootStrapAction() {
-      super("BootStrap Wizard",
-      new ImageIcon(MainFrame.class.getResource(
-                                          "/gate/resources/img/annDiff.gif")));
+      super("BootStrap Wizard", getIcon("annDiff.gif"));
     }// NewBootStrapAction
     public void actionPerformed(ActionEvent e) {
       BootStrapDialog bootStrapDialog = new BootStrapDialog(MainFrame.this);
@@ -1461,20 +1463,15 @@ public class MainFrame extends JFrame
                                          leaf, row, hasFocus);
 
       if(value == resourcesTreeRoot) {
-        setIcon(new ImageIcon(getClass().getResource(
-                                          "/gate/resources/img/project.gif")));
+        setIcon(MainFrame.getIcon("project.gif"));
       } else if(value == applicationsRoot) {
-        setIcon(new ImageIcon(getClass().getResource(
-                                    "/gate/resources/img/applications.gif")));
+        setIcon(MainFrame.getIcon("applications.gif"));
       } else if(value == languageResourcesRoot) {
-        setIcon(new ImageIcon(getClass().getResource(
-                                              "/gate/resources/img/lrs.gif")));
+        setIcon(MainFrame.getIcon("lrs.gif"));
       } else if(value == processingResourcesRoot) {
-        setIcon(new ImageIcon(getClass().getResource(
-                                              "/gate/resources/img/prs.gif")));
+        setIcon(MainFrame.getIcon("prs.gif"));
       } else if(value == datastoresRoot) {
-        setIcon(new ImageIcon(getClass().getResource(
-                                              "/gate/resources/img/dss.gif")));
+        setIcon(MainFrame.getIcon("dss.gif"));
       }else{
         //not one of the default root nodes
         value = ((DefaultMutableTreeNode)value).getUserObject();
@@ -1675,13 +1672,9 @@ public class MainFrame extends JFrame
       active = false;
       dying = false;
       this.targetPanel = targetPanel;
-      try{
-        imageLabel = new JLabel(new ImageIcon(new URL("gate:/img/working.gif")));
-        imageLabel.setOpaque(false);
-        imageLabel.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-      }catch(MalformedURLException mue){
-        mue.printStackTrace(Err.getPrintWriter());
-      }
+      imageLabel = new JLabel(getIcon("working.gif"));
+      imageLabel.setOpaque(false);
+      imageLabel.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
     }
 
     public boolean isActive(){

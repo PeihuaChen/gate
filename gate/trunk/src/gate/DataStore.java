@@ -20,6 +20,7 @@ import java.net.*;
 
 import gate.util.*;
 import gate.persist.*;
+import gate.event.*;
 
 /** Models all sorts of data storage.
   */
@@ -94,4 +95,14 @@ public interface DataStore extends FeatureBearer {
   /** Get the name of an LR from its ID. */
   public String getLrName(String lrId) throws PersistenceException;
 
+  /**
+   * Registers a new {@link gate.event.DatastoreListener} with this datastore
+   */
+  public void addDatastoreListener(DatastoreListener l);
+
+  /**
+   * Removes a a previously registered {@link gate.event.DatastoreListener}
+   * from the list listeners for this datastore
+   */
+  public void removeDatastoreListener(DatastoreListener l);
 } // interface DataStore

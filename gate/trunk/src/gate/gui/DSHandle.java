@@ -23,13 +23,13 @@ import java.awt.event.*;
 import javax.swing.tree.*;
 
 import java.util.*;
+import gate.event.*;
 
-public class DSHandle extends DefaultResourceHandle {
+public class DSHandle extends DefaultResourceHandle implements DatastoreListener{
 
   public DSHandle(DataStore datastore) {
     super(datastore);
-    super.setIcon(new ImageIcon(getClass().
-                           getResource("/gate/resources/img/ds.gif")));
+    super.setIcon(MainFrame.getIcon("ds.gif"));
     this.datastore = datastore;
     tooltipText = "Type : Gate datastore";
     initLocalData();
@@ -47,6 +47,11 @@ public class DSHandle extends DefaultResourceHandle {
   protected void initGuiComponents(){
     treeRoot = new DefaultMutableTreeNode(
                  datastore.getFeatures().get("gate.NAME"),true);
+    treeModel = new DefaultTreeModel(treeRoot, true);
+    tree = new JTree(treeModel);
+    tree.setExpandsSelectedPaths(true);
+    smallView = tree;
+    tree.expandPath(new TreePath(treeRoot));
     try {
       Iterator lrTypesIter = datastore.getLrTypes().iterator();
       CreoleRegister cReg = Gate.getCreoleRegister();
@@ -55,30 +60,28 @@ public class DSHandle extends DefaultResourceHandle {
         ResourceData rData = (ResourceData)cReg.get(type);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(
                                                               rData.getName());
+        treeModel.insertNodeInto(node, treeRoot, treeRoot.getChildCount());
+        tree.expandPath(new TreePath(new Object[]{treeRoot, node}));
         Iterator lrIDsIter = datastore.getLrIds(type).iterator();
         while(lrIDsIter.hasNext()){
           String id = (String)lrIDsIter.next();
           DSEntry entry = new DSEntry(datastore.getLrName(id), id, type);
           DefaultMutableTreeNode lrNode =
             new DefaultMutableTreeNode(entry, false);
+          treeModel.insertNodeInto(lrNode, node, node.getChildCount());
           node.add(lrNode);
         }
-        treeRoot.add(node);
       }
     } catch(PersistenceException pe) {
       throw new GateRuntimeException(pe.toString());
     }
-    treeModel = new DefaultTreeModel(treeRoot, true);
-    tree = new JTree(treeModel);
-    smallView = tree;
 
     popup = new JPopupMenu();
     popup.add(new CloseAction());
-    popup.add(new RefreshAction());
   }//protected void initGuiComponents()
 
   protected void initListeners(){
-
+    datastore.addDatastoreListener(this);
     tree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)){
@@ -97,6 +100,7 @@ public class DSHandle extends DefaultResourceHandle {
     });
   }//protected void initListeners()
 
+/*
   class RefreshAction extends AbstractAction {
     public RefreshAction(){
       super("Refresh");
@@ -132,7 +136,7 @@ public class DSHandle extends DefaultResourceHandle {
       });
     }// public void actionPerformed(ActionEvent e)
   }//class RefreshAction
-
+*/
   class CloseAction extends AbstractAction {
     public CloseAction(){
       super("Close");
@@ -226,4 +230,68 @@ public class DSHandle extends DefaultResourceHandle {
   DefaultMutableTreeNode treeRoot;
   DefaultTreeModel treeModel;
   DataStore datastore;
+  public void resourceAdopted(DatastoreEvent e) {
+    //do nothing; SerialDataStore does actually nothing on adopt()
+    //we'll have to listen for RESOURE_WROTE events
+  }
+
+  public void resourceDeleted(DatastoreEvent e) {
+    String resID = e.getResourceID();
+    DefaultMutableTreeNode node = null;
+    Enumeration nodesEnum = treeRoot.depthFirstEnumeration();
+    boolean found = false;
+    while(nodesEnum.hasMoreElements() && !found){
+      node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+      Object userObject = node.getUserObject();
+      found = userObject instanceof DSEntry &&
+              ((DSEntry)userObject).id.equals(resID);
+    }
+    if(found){
+      DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
+      treeModel.removeNodeFromParent(node);
+      if(parent.getChildCount() == 0) treeModel.removeNodeFromParent(parent);
+    }
+  }
+
+  public void resourceWritten(DatastoreEvent e) {
+    Resource res = e.getResource();
+    String resID = e.getResourceID();
+    String resType = ((ResourceData)Gate.getCreoleRegister().
+                      get(res.getClass().getName())).getName();
+    DefaultMutableTreeNode parent = treeRoot;
+    DefaultMutableTreeNode node = null;
+    //first look for the type node
+    Enumeration childrenEnum = parent.children();
+    boolean found = false;
+    while(childrenEnum.hasMoreElements() && !found){
+      node = (DefaultMutableTreeNode)childrenEnum.nextElement();
+      found = node.getUserObject().equals(resType);
+    }
+    if(!found){
+      //exhausted the children without finding the node -> new type
+      node = new DefaultMutableTreeNode(resType);
+      treeModel.insertNodeInto(node, parent, parent.getChildCount());
+    }
+    tree.expandPath(new TreePath(new Object[]{parent, node}));
+
+    //now look for the resource node
+    parent = node;
+    childrenEnum = parent.children();
+    found = false;
+    while(childrenEnum.hasMoreElements() && !found){
+      node = (DefaultMutableTreeNode)childrenEnum.nextElement();
+      found = ((DSEntry)node.getUserObject()).id.equals(resID);
+    }
+    if(!found){
+      //exhausted the children without finding the node -> new resource
+      try{
+        DSEntry entry = new DSEntry(datastore.getLrName(resID), resID,
+                                    res.getClass().getName());
+        node = new DefaultMutableTreeNode(entry, false);
+        treeModel.insertNodeInto(node, parent, parent.getChildCount());
+      }catch(PersistenceException pe){
+        pe.printStackTrace(Err.getPrintWriter());
+      }
+    }
+  }//public void resourceWritten(DatastoreEvent e)
 }//public class DSHandle
