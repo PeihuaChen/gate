@@ -408,14 +408,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Organization recall average in ft-bt-03-aug-2001.html is " +
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-//Oana, you must change this to the F-measure call. You're only using f-precision everywhere
-//please be careful in the future. There's no point doing something quickly if it's not 
-//doing what it's supposed to do. Thanks!
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Organization f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // location type
     annotationSchema.setAnnotationName("Location");
@@ -434,11 +431,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Location recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Location f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // person type
     annotationSchema.setAnnotationName("Person");
@@ -457,11 +454,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Person recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Person f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
      // date type
     annotationSchema.setAnnotationName("Date");
@@ -480,11 +477,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Date recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Date f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // money type
     annotationSchema.setAnnotationName("Money");
@@ -503,11 +500,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Money recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Money f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // Lookup type
     annotationSchema.setAnnotationName("Lookup");
@@ -526,11 +523,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Lookup recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Lookup f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // Token type
     annotationSchema.setAnnotationName("Token");
@@ -549,11 +546,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Token recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Token f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // second document
     storageDir = null;
@@ -593,11 +590,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Organization recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Organization f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // location type
     annotationSchema.setAnnotationName("Location");
@@ -616,11 +613,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Location recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Location f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // person type
     annotationSchema.setAnnotationName("Person");
@@ -639,11 +636,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Person recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Person f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
      // date type
     annotationSchema.setAnnotationName("Date");
@@ -662,11 +659,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Date recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Date f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // money type
     annotationSchema.setAnnotationName("Money");
@@ -685,11 +682,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Money recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Money f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // Lookup type
     annotationSchema.setAnnotationName("Lookup");
@@ -708,11 +705,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Lookup recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Lookup f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // Token type
     annotationSchema.setAnnotationName("Token");
@@ -731,11 +728,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Token recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Token f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // third document
     storageDir = null;
@@ -773,11 +770,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Organization recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Organization f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // location type
     annotationSchema.setAnnotationName("Location");
@@ -797,12 +794,12 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()== 1.0);
 
     assert("Location recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
 
     assert("Location f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // person type
     annotationSchema.setAnnotationName("Person");
@@ -821,11 +818,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Person recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Person f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
      // date type
     annotationSchema.setAnnotationName("Date");
@@ -844,11 +841,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Date recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Date f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // money type
     annotationSchema.setAnnotationName("Money");
@@ -867,11 +864,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Money recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Money f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // Lookup type
     annotationSchema.setAnnotationName("Lookup");
@@ -890,11 +887,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Lookup recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Lookup f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
 
     // Token type
     annotationSchema.setAnnotationName("Token");
@@ -913,11 +910,11 @@ public class TestPR extends TestCase
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
     assert("Token recall average is in in-outlook-09-aug-2001.html "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getRecallAverage()+ " instead of 1.0 ",
+      annotDiff.getRecallAverage()== 1.0);
     assert("Token f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
+      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+      annotDiff.getFMeasureAverage()== 1.0);
   } // testAllPR()
 
 
