@@ -10,11 +10,19 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Wed Oct 17 15:51:02 2001
+ *  auto generated: Wed Oct 17 16:19:47 2001
  *
  *  $Id$
  *
  */
+
+
+DROP VIEW V_DOC_CONTENT;
+
+CREATE OR REPLACE VIEW V_DOC_CONTENT AS
+       SELECT T_DOC_CONTENT.DC_CHARACTER_CONTENT, T_DOC_CONTENT.DC_BINARY_CONTENT, T_DOC_CONTENT.DC_CONTENT_TYPE, T_DOC_ENCODING.ENC_NAME
+       FROM T_DOC_CONTENT, T_DOC_ENCODING
+       WHERE enc_id = dc_encoding_id;
 
 
 DROP VIEW V_LR;
