@@ -28,6 +28,9 @@ import gate.util.Out;
 public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
+  /** DEBUG flag */
+  private static final boolean DEBUG = false;
+
   public static final String
     AST_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -99,8 +102,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
 
     if (annotationTypes != null && annotationTypes.size() > 0)
       inputAS = inputAS.get(new HashSet(annotationTypes));
-      
-    // in case of no one annotation from some of annotationTypes   
+
+    // in case of no one annotation from some of annotationTypes
     if(inputAS == null) return;
 
     //check if we have a BODY annotation
@@ -113,9 +116,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     //get the BODY annotation
     bodyAnnotations = tagAS.get(textTagName);
     if (bodyAnnotations == null || bodyAnnotations.isEmpty()) {
-      Out.prln("AST Warning: No text annotations of type '" + textTagName 
-        + "' in document '" + document.getName()
-        + "' found, so transferring all annotations to the target set");
+      if(DEBUG) {
+        Out.prln("AST Warning: No text annotations of type '" + textTagName
+                 + "' in document '" + document.getName()
+                 + "' found, so transferring all annotations to the target set");
+      }
       outputAS.addAll(inputAS);
       return;
     }
