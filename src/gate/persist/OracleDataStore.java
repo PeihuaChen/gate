@@ -3345,14 +3345,23 @@ public class OracleDataStore extends JDBCDataStore {
    *  of a particular type
    */
   public List findLrs(List constraints, String lrType) throws PersistenceException {
+    return findLrs(constraints, lrType, null, -1);
+  }
+
+  /**
+   *  Get a list of LRs that satisfy some set or restrictions and are
+   *  of a particular type
+   */
+  public List findLrs(List constraints, String lrType,
+                      List orderByConstraints, int limitcount) throws PersistenceException {
       Vector lrs = new Vector();
       CallableStatement stmt = null;
       ResultSet rs = null;
 
       try {
-        String sql = getSQLQuery(constraints,lrType);
+        String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount);
         stmt = this.jdbcConn.prepareCall(sql);
-
+        System.out.println(sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3388,18 +3397,59 @@ public class OracleDataStore extends JDBCDataStore {
       return lrs;
     }
 
+  public long getLrsCount(List constraints, String lrType) throws PersistenceException {
+      Vector lrs = new Vector();
+      CallableStatement stmt = null;
+      ResultSet rs = null;
+
+      try {
+        String sql = getSQLQuery(constraints,lrType, true, null, -1);
+        stmt = this.jdbcConn.prepareCall(sql);
+
+        for (int i = 0; i<sqlValues.size(); i++){
+          if (sqlValues.elementAt(i) instanceof String){
+            stmt.setString(i+1,sqlValues.elementAt(i).toString());
+          }
+          else if (sqlValues.elementAt(i) instanceof Long){
+            stmt.setLong(i+1,((Long) sqlValues.elementAt(i)).longValue());
+          }
+          else if (sqlValues.elementAt(i) instanceof Integer){
+            stmt.setLong(i+1,((Integer) sqlValues.elementAt(i)).intValue());
+          }
+        }
+
+        stmt.execute();
+        rs = stmt.getResultSet();
+        rs.next();
+        return rs.getLong(1);
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't get LRs Count from DB: ["+ sqle+"]");
+      }
+      finally {
+        DBHelper.cleanup(rs);
+        DBHelper.cleanup(stmt);
+      }
+  }
+
   private Vector sqlValues;
 
-  private String getSQLQuery(List filter, String lrType){
+  private String getSQLQuery(List filter, String lrType, boolean count,
+                              List orderByFilter, int limitcount){
     String query="";
     sqlValues = new Vector();
+    String select = "lr_id";
+    String join = getJoinQuery(orderByFilter);
+    if (count){
+      select = "count(*)";
+    }
     if (lrType == null){
-      query = " SELECT lr_id " +
-                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
+      query = " SELECT " + select + " " +
+                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" + join +
                     " WHERE ";
     }
-    query = " SELECT lr_id " +
-                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" +
+    query = " SELECT " + select + " " +
+                    " FROM  "+Gate.DB_OWNER+".t_lang_resource LR" + join +
                     " WHERE LR.lr_type_id = ? ";
 
     if (lrType != null && lrType.equals(DBHelper.CORPUS_CLASS)) {
@@ -3414,7 +3464,6 @@ public class OracleDataStore extends JDBCDataStore {
       if (lrType!=null){
         query = query.concat(" AND ");
       }
-
       for (int i=0; i<filter.size(); i++){
           query = query.concat(getRestrictionPartOfQuery((Restriction) filter.get(i)));
           if (i<filter.size()-1) {
@@ -3423,15 +3472,22 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
+    String endPartOfJoin = getEndPartOfJoin(orderByFilter);
+    query = query.concat(endPartOfJoin);
+
+    if (limitcount>0){
+      query = "select lr_id from ( " + query + ") where rownum<"+limitcount;
+    }
+
     return query;
   }
 
   private String getRestrictionPartOfQuery(Restriction restr){
-    if (restr.getOperator()==Restriction.OPERATOR_LIMIT_ROWSET){
-      String r = " rownum < ? ";
-      sqlValues.addElement(restr.getValue());
-      return r;
-    }
+    //if (restr.getOperator()==Restriction.OPERATOR_LIMIT_ROWSET){
+    //  String r = " rownum < ? ";
+    //  sqlValues.addElement(restr.getValue());
+    //  return r;
+    //}
     String expresion = " EXISTS ("+
                        " SELECT ft_id " +
                        " FROM "+Gate.DB_OWNER+".t_feature FEATURE" +
@@ -3493,5 +3549,46 @@ public class OracleDataStore extends JDBCDataStore {
     return expr.toString();
   }
 
+  private String getJoinQuery(List orderByFilter){
+    String join="";
+    if (orderByFilter!=null){
+      for (int i = 0; i<orderByFilter.size(); i++){
+        join = join.concat(" , "+Gate.DB_OWNER+".t_feature FT"+i);
+      }
+    }
+    return join;
+  }
+
+  private String getEndPartOfJoin(List orderByFilter){
+    String endJoin = "";
+    if (orderByFilter!=null && orderByFilter.size()>0){
+      for (int i=0; i<orderByFilter.size(); i++){
+        endJoin = endJoin.concat(" and lr_id=FT"+i+".ft_entity_id ");
+        endJoin = endJoin.concat(" and  FT"+i+".ft_key= ? ");
+        OrderByRestriction restr = (OrderByRestriction) orderByFilter.get(i);
+        sqlValues.addElement(restr.getKey());
+      }
+      endJoin = endJoin.concat(" order by ");
+      for (int i=0; i<orderByFilter.size(); i++){
+        OrderByRestriction restr = (OrderByRestriction) orderByFilter.get(i);
+        endJoin = endJoin.concat("  FT"+i+".ft_number_value ");
+        if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
+          endJoin = endJoin.concat(" asc, ");
+        } else {
+          endJoin = endJoin.concat(" desc, ");
+        }
+        endJoin = endJoin.concat("  FT"+i+".ft_character_value ");
+        if (restr.getOperator()==OrderByRestriction.OPERATOR_ASCENDING){
+          endJoin = endJoin.concat(" asc ");
+        } else {
+          endJoin = endJoin.concat(" desc ");
+        }
+        if (i<orderByFilter.size()-1){
+          endJoin = endJoin.concat(" , ");
+        }
+      }
+    }
+    return endJoin;
+  }
 }
 

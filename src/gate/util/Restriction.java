@@ -23,7 +23,7 @@ public class Restriction implements java.io.Serializable{
   public static final int OPERATOR_BIGGER = 102;
   public static final int OPERATOR_EQUATION_OR_BIGGER = 103;
   public static final int OPERATOR_EQUATION_OR_LESS = 104;
-  public static final int OPERATOR_LIMIT_ROWSET = 105;
+  //public static final int OPERATOR_LIMIT_ROWSET = 105;
 
   private Object value;
   private String key;
