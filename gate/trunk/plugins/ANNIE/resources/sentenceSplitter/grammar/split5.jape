@@ -18,10 +18,21 @@ Rule: r1
 	annotations.removeAll(toRemove);
 }
 
+//[!!!]
 Rule: r2
 {Token.string=="["}
  (({Split})+):fake
 {Token.string=="]"} 
+-->
+{
+	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");
+	annotations.removeAll(toRemove);
+}
+
+// ."
+Rule: r3
+({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"})
+ ({Split.type=="quote"}):fake
 -->
 {
 	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("fake");

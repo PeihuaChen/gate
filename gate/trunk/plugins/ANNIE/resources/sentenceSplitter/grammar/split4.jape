@@ -14,21 +14,42 @@ Rule: r1
  ({Split.type=="."}|{Split.type=="punctuation"})+):left
 -->
 {
-	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
-	annotations.removeAll(toRemove);
-	gate.FeatureMap features = Factory.newFeatureMap();
-	features.put("type", "multi");
-	annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
+  gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+  annotations.removeAll(toRemove);
+  gate.FeatureMap features = Factory.newFeatureMap();
+  features.put("type", "multi");
+  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
 }
 
-Rule: r1
+Rule: r2
  ({Split.type=="singleQuote"}{Split.type=="singleQuote"}):left
 -->
 {
-	gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
-	annotations.removeAll(toRemove);
-	gate.FeatureMap features = Factory.newFeatureMap();
-	features.put("type", "quote");
-	annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
+  gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+  annotations.removeAll(toRemove);
+  gate.FeatureMap features = Factory.newFeatureMap();
+  features.put("type", "quote");
+  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
 }
 
+
+// blah blah ."
+//the sentence will include the full stop but not the quote
+Rule: r3
+ (({Split}):firstSplit
+  ({Split.type=="quote"}|{Split.type=="singleQuote"})
+ ):left
+-->
+{
+  //we need to include the first split in the sentence
+  gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+  annotations.removeAll(toRemove);
+  gate.FeatureMap features = Factory.newFeatureMap();
+  features.put("type", "splitAndQuote");
+  gate.Annotation firstSplit = (gate.Annotation) 
+                               ((gate.AnnotationSet)bindings.get("firstSplit")).iterator().next();
+  features.put("firstSplit", firstSplit);
+  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Split", features);
+  
+  
+}

@@ -129,15 +129,15 @@ public class SentenceSplitter extends AbstractProcessingResource{
       transducer.removeProgressListener(pListener);
       transducer.removeStatusListener(sListener);
 
-      //copy the results to the output set
-      if(!inputASName.equals(outputASName)){
-        AnnotationSet inputAS = (inputASName == null) ?
-                                document.getAnnotations() :
-                                document.getAnnotations(inputASName);
+      //copy the results to the output set if they are different
+      AnnotationSet inputAS = (inputASName == null) ?
+                              document.getAnnotations() :
+                              document.getAnnotations(inputASName);
 
-        AnnotationSet outputAS = (outputASName == null) ?
-                                 document.getAnnotations() :
-                                 document.getAnnotations(outputASName);
+      AnnotationSet outputAS = (outputASName == null) ?
+                               document.getAnnotations() :
+                               document.getAnnotations(outputASName);
+      if(inputAS != outputAS){
         outputAS.addAll(inputAS.get("Sentence"));
       }
 

@@ -13,12 +13,13 @@ Rule: r1
 :left.Split = {type="quote"}
 
 Rule: r2
- ({Token.string=="\'"}):left  
+ ({Token.string=="\'"}|{Token.string=="\`"}):left  
 -->
 :left.Split = {type="singleQuote"}
 
 Rule: r3
  (({SpaceToken.string=="\n"}|{SpaceToken.string=="\r"})+):left 
- ({Token.orth=="upperInitial"}|{Token.orth=="number"})
+ ({Token.orth=="upperInitial"}|{Token.orth=="allCaps"}|{Token.kind=="number"}|
+  {Token.kind=="punctuation", Token.position=="startpunct"})
 -->
 :left.Split = {type="CR"}

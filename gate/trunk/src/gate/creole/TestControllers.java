@@ -108,8 +108,8 @@ public class TestControllers extends TestCase
     assertNotNull("couldn't get annot with id 580", a);
     assert( // check offset - two values depending on whether saved with \r\n
       "wrong value: " + a.getStartNode().getOffset(),
-      a.getStartNode().getOffset().equals(new Long(1366)) ||
-      a.getStartNode().getOffset().equals(new Long(1367))
+      (a.getStartNode().getOffset().equals(new Long(1366)) ||
+      a.getStartNode().getOffset().equals(new Long(1367)))
     );
     assert( // check offset - two values depending on whether saved with \r\n
       "wrong value: " + a.getEndNode().getOffset(),

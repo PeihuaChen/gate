@@ -10,7 +10,7 @@ Options: control = first
 Rule: r1
 (
  ({Token})+
- ({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"}|{Split.type=="quote"})
+ ({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"})
  ) :left
 -->
 :left.Sentence = {}
@@ -23,3 +23,29 @@ Rule: r2
 ({Split.type=="CR"}|{Split.type=="quote"})
 -->
 :left.Sentence = {}
+
+// blah blah ."
+//the sentence will include the full stop but not the quote
+
+Rule: r3
+(
+ ({Token})+
+ ) :left
+({Split.type=="splitAndQuote"}):split
+-->
+{
+	gate.AnnotationSet sentence = (gate.AnnotationSet)bindings.get("left");
+	gate.AnnotationSet splitSet = (gate.AnnotationSet)bindings.get("split");
+	gate.Annotation firstSplit = (gate.Annotation)
+	                              ((gate.Annotation)splitSet.iterator().next()).
+	                              getFeatures().get("firstSplit");
+	sentence.add(firstSplit);
+	gate.FeatureMap features = Factory.newFeatureMap();
+	annotations.add(sentence.firstNode(), sentence.lastNode(), "Sentence", features);	
+  //add back the quote split
+	splitSet.remove(firstSplit);
+	features = Factory.newFeatureMap();
+	features.put("type", "quote");
+	annotations.add(firstSplit.getEndNode(), splitSet.lastNode(), "Split", features);	
+}
+
