@@ -354,7 +354,7 @@ public class PostgresDataStore extends JDBCDataStore {
       pstmt = this.jdbcConn.prepareStatement(
                 " select persist_create_document(?,?,?,?,?,?,?) ");
       pstmt.setLong(1,_lrID.longValue());
-      pstmt.setString(2,_docURL.toString());
+      pstmt.setString(2,_docURL != null ? _docURL.toString() : "" );
       //do we have doc encoding?
       if (null == _docEncoding) {
         pstmt.setNull(3,java.sql.Types.VARCHAR);
