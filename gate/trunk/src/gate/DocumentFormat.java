@@ -157,7 +157,7 @@ public abstract class DocumentFormat implements Resource,StatusReporter
       e.printStackTrace(System.err);
     }
     StringTokenizer st = new StringTokenizer(contentType, ";");
-    mimeTypeString = st.nextToken();
+    mimeTypeString = st.nextToken().toLowerCase();
     // return the corresponding mime type
     mimeType = (MimeType) mimeString2mimeTypeMap.get(mimeTypeString);
     if (mimeType == null){

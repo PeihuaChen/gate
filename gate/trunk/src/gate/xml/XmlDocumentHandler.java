@@ -18,162 +18,150 @@ import gate.gui.*;
 import org.xml.sax.*;
 
 
-/**
-  * Implements the behaviour of the XML reader
+  /**
+   Implements the behaviour of the XML reader
+   Methods of an object of this class are called by the SAX parser when
+   events will appear.
+   The idea is to parse the XML document and construct Gate annotations objects
+   This class also will replace the content of the Gate document with a new one
+   containing anly text from the XML document
   */
 public class XmlDocumentHandler extends HandlerBase
                                            implements StatusReporter{
 
-  // member data
-
-  // the markupElementsMap
-  private java.util.Map markupElementsMap = null;
-
-  // error handler
-  private SimpleErrorHandler _seh = new SimpleErrorHandler();
-
-  // the content of the XML document, without any tag
-  // for internal use
-  private String tmpDocContent = null;
-
-  // a stack used to remember elements
-  private java.util.Stack stack = null;
-
-
-  // a gate document
-  protected gate.Document doc = null;
-
-  // an annotation set
-  protected gate.AnnotationSet basicAS;
-
-  // listeners for status report
-  protected List myStatusListeners = new LinkedList();
-
-  private int elements = 0;
-  private int elementsRate = 128;
-
   /**
-    * Constructor
+    Constructor initialises some private fields
     */
-  public XmlDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
-    // init stack, tmpDocContent, doc
+  public XmlDocumentHandler(gate.Document aDocument, Map  aMarkupElementsMap){
+    // init stack
     stack = new java.util.Stack();
+    // this string contains the plain text (the text without markup)
     tmpDocContent = new String("");
-    this.doc = doc ;
-    this.markupElementsMap = markupElementsMap;
+    // colector is used later to transform all custom objects into annotation objects
+    colector = new LinkedList();
+    // the Gate document
+    doc = aDocument;
+    // this map contains the elements name that we want to create
+    // if it's null all the elements from the XML documents will be transformed
+    // into Gate annotation objects
+    markupElementsMap = aMarkupElementsMap;
   }
 
   /**
-    * this method is called when the SAX parser encounts the beginning of the
-    * XML document
+     This method is called when the SAX parser encounts the beginning of the
+     XML document.
     */
   public void startDocument() throws org.xml.sax.SAXException {
-    // gets AnnotationSet based on the gate document
-    basicAS = doc.getAnnotations();
   }
 
   /**
-    * this method is called when the SAX parser encounts the end of the
-    * XML document
+    This method is called when the SAX parser encounts the end of the
+    XML document.
+    Here we set the content of the gate Document to be the one generated inside
+    this class (tmpDocContent)
+    After that we use the colector to generate all the annotation reffering this
+    new gate document
     */
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent));
+    // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
+
+    // gets AnnotationSet based on the new gate document
+    basicAS = doc.getAnnotations();
+    // create all the annotations (on this new document) from the collector
+    Iterator anIterator = colector.iterator();
+    while (anIterator.hasNext()){
+      CustomObject obj = (CustomObject) anIterator.next();
+      // create a new annotation and add it to the annotation set
+      try{
+        // the annotation type will be conforming with markupElementsMap
+        //add the annotation to the Annotation Set
+        if (markupElementsMap == null)
+          basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(),
+                      obj.getFM ()
+          );
+        else {
+          // get the type of the annotation from Map
+          String annotationType = (String) markupElementsMap.get(obj.getElemName());
+          if (annotationType != null)
+            basicAS.add(obj.getStart (),obj.getEnd(), annotationType, obj.getFM());
+        }
+
+      }catch (gate.util.InvalidOffsetException e){
+        e.printStackTrace(System.err);
+      }
+    }// while
   }
 
   /**
-    * this method is called when the SAX parser encounts the beginning of an
-    * XML element
+    This method is called when the SAX parser encounts the beginning of an
+    XML element.
+
     */
   public void startElement(String elemName, AttributeList atts){
-    // inform the progress listener about that
-    if ((++elements % elementsRate) == 0)
+    // inform the progress listener to fire only if no of elements processed
+    // so far is a multiple of ELEMENTS_RATE
+    if ((++elements % ELEMENTS_RATE) == 0)
         fireStatusChangedEvent("Processed elements : " + elements);
     // construct a SimpleFeatureMapImpl from the list of attributes
     FeatureMap fm = new SimpleFeatureMapImpl();
-    // for all attributes do
+    //get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
-     String attName = atts.getName(i);
-     //String type = atts.getType(i);
+     String attName  = atts.getName(i);
      String attValue = atts.getValue(i);
      fm.put(attName,attValue);
     }
     // create the START index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
     // initialy the Start index is equal with End index
-    MyCustomObject obj = new MyCustomObject(elemName,fm, startIndex, startIndex);
-    // put it into the stack
-    stack.push (obj);
+    CustomObject obj = new CustomObject(elemName,fm, startIndex, startIndex);
+    // put this object into the stack
+    stack.push(obj);
   }
 
   /**
-    * this method is called when the SAX parser encounts the end of an
-    * XML element
+     This method is called when the SAX parser encounts the end of an
+     XML element.
+     Here we extract
     */
   public void endElement(String elemName) throws SAXException{
     // obj is for internal use
-    MyCustomObject obj = null;
+    CustomObject obj = null;
     // if the stack is not empty, we extract the custom object and delete it
     if (!stack.isEmpty ()){
-      obj = (MyCustomObject) stack.pop ();
+      obj = (CustomObject) stack.pop();
     }
-    // create a new annotation and add it to the annotation set
-    try{
-        // the annotation type will be conforming with markupElementsMap
-        //add the annotation to the Annotation Set
-
-        if (markupElementsMap == null)
-          basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(),
-              obj.GetFM ()
-          );
-        else {
-          // get the type of the annotation from Map
-          String annotationType = (String) markupElementsMap.get(obj.getElemName());
-          if (annotationType != null)
-            basicAS.add(obj.getStart (),obj.getEnd(), annotationType, obj.GetFM());
-        }
-
-    }catch (gate.util.InvalidOffsetException e){
-      e.printStackTrace(System.err);
-    }
+    // put the object into colector
+    // later, when the document ends we will use colector to create all the
+    // annotations
+    colector.add(obj);
   }
 
   /**
-  *  This method is called when the SAX parset encounts text int the XMl doc
+    This method is called when the SAX parser encounts text in the XML doc.
+    Here we calculate the end indices for all the elements present inside the
+    stack and update with the new values.
   */
   public void characters( char[] text, int start, int length) throws SAXException{
-    // some internal objects
+    // create a string object based on the reported text
     String content = new String(text, start, length);
 
-   /*
-    // triming section
-    if (content.charAt(content.length() - 1) == '\n')
-         hasNewLine = true;;
-    content = content.trim();
-    content = content + " ";
-    if (hasNewLine)
-            content = content + "\n";
-    */
-    // if u don't want '\n' inside your document decoment the line below
-    //content = content.replace('\n',' ');
-
-    // used to deal with the stack content later
-    MyCustomObject obj = null;
-
     // calculate the End index for all the elements of the stack
-    // the expression is : End = Current doc length + length
+    // the expression is : End index = Current doc length + text length
     Long end = new Long(tmpDocContent.length() + content.length());
 
+    CustomObject obj = null;
     // iterate through stack to modify the End index of the existing elements
-    java.util.Iterator iterator = stack.iterator();
-    while (iterator.hasNext ()){
+    java.util.Iterator anIterator = stack.iterator();
+    while (anIterator.hasNext ()){
       // get the object and move to the next one
-      obj = (MyCustomObject) iterator.next ();
-      // if obj is not null
+      obj = (CustomObject) anIterator.next ();
+      // if obj is not null then sets its end index
       if (null != obj){
         // sets its End index
-        obj.setEnd (end);
+        obj.setEnd(end);
       }
     }
     // update the document content
@@ -181,7 +169,7 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-  * this method is called when the SAX parser encounts white spaces
+   This method is called when the SAX parser encounts white spaces
   */
   public void ignorableWhitespace(char ch[], int start, int length) throws SAXException{
 
@@ -198,7 +186,7 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-  * error method comment.
+   Error method.We deal with this exception inside SimpleErrorHandler class
   */
   public void error(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
@@ -207,7 +195,7 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-  * fatalError method comment.
+   FatalError method.
   */
   public void fatalError(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
@@ -216,7 +204,7 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-  * warning method comment.
+   Warning method comment.
   */
   public void warning(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
@@ -225,9 +213,8 @@ public class XmlDocumentHandler extends HandlerBase
   }
 
   /**
-  * this method is called when the SAX parser encounts a comment
-  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
-  *
+   This method is called when the SAX parser encounts a comment
+   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void comment(String text) throws SAXException{
     // create a FeatureMap and then add the comment to the annotation set.
@@ -235,83 +222,126 @@ public class XmlDocumentHandler extends HandlerBase
     gate.util.SimpleFeatureMapImpl fm = new gate.util.SimpleFeatureMapImpl();
     fm.put ("text_comment",text);
     Long node = new Long (tmpDocContent.length());
-    try{
-      basicAS.add(node,node, "COMMENT",fm);
-    }catch (gate.util.InvalidOffsetException e){
-      System.out.println(e);
-    }
+    CustomObject anObject = new CustomObject("Comment",fm,node,node);
+    colector.add(anObject);
     */
   }
 
   /**
-  * this method is called when the SAX parser encounts a start of a CDATA section
-  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
+   This method is called when the SAX parser encounts a start of a CDATA section
+   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void startCDATA()throws SAXException{
   }
 
   /**
-  * this method is called when the SAX parser encounts the end of a CDATA section
-  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
+   This method is called when the SAX parser encounts the end of a CDATA section
+   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void endCDATA() throws SAXException{
   }
 
   /**
-  * this method is called when the SAX parser encounts a parsed Entity
-  * It's working only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
+   This method is called when the SAX parser encounts a parsed Entity
+   It works only if the XmlDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void startParsedEntity(String name) throws SAXException{
   }
 
   /**
-  * this method is called when the SAX parser encounts a parsed entity and
-  * informs the application if that entity was parsed or not
-  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
+   This method is called when the SAX parser encounts a parsed entity and
+   informs the application if that entity was parsed or not
+   It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void endParsedEntity(String name, boolean included)throws SAXException{
   }
 
   //StatusReporter Implementation
+
+  /**
+    This methos is called when a listener is registered with this class
+  */
   public void addStatusListener(StatusListener listener){
     myStatusListeners.add(listener);
   }
+  /**
+    This methos is called when a listener is removed
+  */
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
+  /**
+    This methos is called whenever we need to inform the listener about an event
+  */
   protected void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
-} //CustomDocumentHandler
+
+  // XmlDocumentHandler member data
+
+  // this constant indicates when to fire the status listener
+  // this listener will add an overhead and we don't want a big overhead
+  // this listener will be callled from ELEMENTS_RATE to ELEMENTS_RATE
+  final static  int ELEMENTS_RATE = 128;
+
+  // this map contains the elements name that we want to create
+  // if it's null all the elements from the XML documents will be transformed
+  // into Gate annotation objects otherwise only the elements it contains will
+  // be transformed
+  private Map markupElementsMap = null;
+
+  // this object inducates what to do when the parser encounts an error
+  private SimpleErrorHandler _seh = new SimpleErrorHandler();
+
+  // the content of the XML document, without any tag
+  // for internal use
+  private String tmpDocContent = null;
+
+  // a stack used to remember elements and to keep the order
+  private java.util.Stack stack = null;
+
+  // a gate document
+  private gate.Document doc = null;
+
+  // an annotation set used for creating annotation reffering the doc
+  private gate.AnnotationSet basicAS;
+
+  // listeners for status report
+  protected List myStatusListeners = new LinkedList();
+
+  // this reports the the number of elements that have beed processed so far
+  private int elements = 0;
+
+  // we need a colection to retain all the CustomObjects that will be
+  // transformed into annotation over the gate document...
+  // the transformation will take place inside onDocumentEnd() method
+  private List colector = null;
+
+} //XmlDocumentHandler
 
 
 /*
- * The objects belonging to thsi class are used inside the stack
+  The objects belonging to this class are used inside the stack.
+  This class is for internal needs
  */
-class  MyCustomObject{
-
-  // data fields
-  private String elemName = null;
-  private FeatureMap fm = null;
-  private Long start = null;
-  private Long end  = null;
+class  CustomObject{
 
   // constructor
-  public MyCustomObject(String elemName, FeatureMap fm,
-                         Long start, Long end){
-    this.elemName = elemName;
-    this.fm = fm;
-    this.start = start;
-    this.end = end;
+  public CustomObject(String anElemName, FeatureMap aFm,
+                         Long aStart, Long anEnd){
+    elemName = anElemName;
+    fm = aFm;
+    start = aStart;
+    end = anEnd;
   }
 
   // accesor
   public String getElemName(){
     return elemName;
   }
-  public FeatureMap GetFM(){
+  public FeatureMap getFM(){
     return fm;
   }
   public Long getStart(){
@@ -323,19 +353,25 @@ class  MyCustomObject{
 
 
   // mutator
-  public void setElemName(String elemName){
-    this.elemName = elemName;
+  public void setElemName(String anElemName){
+    elemName = anElemName;
   }
-  public void setFM(FeatureMap fm){
-    this.fm = fm;
+  public void setFM(FeatureMap aFm){
+    fm = aFm;
   }
-  public void setStart(Long start){
-    this.start = start;
+  public void setStart(Long aStart){
+    start = aStart;
   }
-  public void setEnd(Long end){
-    this.end = end;
+  public void setEnd(Long anEnd){
+    end = anEnd;
   }
 
-}// MyCustomObject
+  // data fields
+  private String elemName = null;
+  private FeatureMap fm = null;
+  private Long start = null;
+  private Long end  = null;
+
+}// CustomObject
 
 

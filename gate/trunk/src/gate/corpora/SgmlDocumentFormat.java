@@ -55,10 +55,14 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 	  try {
 
       Sgml2Xml sgml2Xml = new Sgml2Xml(doc);
+
+      fireStatusChangedEvent("Performing SGML to XML...");
+      // convert the SGML document
       String xmlUri = sgml2Xml.convert();
+      fireStatusChangedEvent("DONE !");
       //System.out.println("Conversion done..." + xmlUri);
       //System.out.println(sgml2Xml.convert());
-      
+
 		  // Get a parser factory.
 		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		  // Set up the factory to create the appropriate type of parser
@@ -76,7 +80,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
         // create a new Xml document handler
         XmlDocumentHandler xmlDocHandler = new
                             XmlDocumentHandler(doc, this.markupElementsMap);
-        // register a status listener with it 
+        // register a status listener with it
         xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
