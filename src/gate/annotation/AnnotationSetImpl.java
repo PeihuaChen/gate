@@ -67,8 +67,7 @@ implements AnnotationSet
 
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
-    annotsById = new VerboseHashMap(){
-    };
+    annotsById = new VerboseHashMap();
     this.doc = (DocumentImpl) doc;
   } // construction from document
 
