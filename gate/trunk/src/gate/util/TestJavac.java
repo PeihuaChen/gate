@@ -116,6 +116,7 @@ public class TestJavac extends TestCase{
     }catch(GateException ge){
       gotException = true;
     }finally{
+      System.err.flush();
       // re-enable System.out
       System.setErr(syserr);
     }
