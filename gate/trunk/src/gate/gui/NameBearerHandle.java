@@ -154,7 +154,7 @@ public class NameBearerHandle implements Handle,
     }else if(target instanceof LanguageResource) {
       //Language Resources
       popup.addSeparator();
-      popup.add(new XJMenuItem(new RenameAction(), sListenerProxy));
+//      popup.add(new XJMenuItem(new RenameAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
       if(target instanceof gate.corpora.DocumentImpl){
