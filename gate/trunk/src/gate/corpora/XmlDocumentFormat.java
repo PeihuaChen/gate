@@ -30,7 +30,7 @@ import gate.creole.*;
 import javax.xml.parsers.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any

@@ -27,7 +27,7 @@ import gate.creole.*;
 // rtf tools
 import javax.swing.text.rtf.*;
 import javax.swing.text.*;
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any

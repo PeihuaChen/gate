@@ -25,7 +25,7 @@ import gate.email.*;
 import gate.event.*;
 import gate.creole.*;
 
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -62,9 +62,9 @@ public class EmailDocumentFormat extends TextualDocumentFormat
       throw new DocumentFormatException(
                "GATE document is null or no content found. Nothing to parse!");
     }// End if
-    
+
     setNewLineProperty(doc);
-    
+
     // create an EmailDocumentHandler
     EmailDocumentHandler emailDocHandler = null;
     emailDocHandler = new  gate.email.EmailDocumentHandler(
