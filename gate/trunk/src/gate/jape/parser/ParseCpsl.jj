@@ -289,8 +289,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
             }
 
             // construct a parser and parse it
-            if (! Main.batchMode) //fire events if not in batch mode
-              fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {
@@ -1021,6 +1020,12 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.22  2001/09/25 12:04:04  kalina
+// I commented out temporarily the no events in batch mode code as it was
+// not working completely correctly, so I want to reinstate it only after
+// it's fully functional. All tests seems OK on a clean version (well, same
+// mistakes as today due to the feature comparison stuff).
+//
 // Revision 1.21  2001/09/12 15:24:45  kalina
 // Made the batchMode flag in Main public. This is now checked before
 // events are fired and listeners created. No bugs in tests or anywhere else

@@ -100,10 +100,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
         } else {
           ///toParse += line;
           toParse.append(line);
-          if (!Main.batchMode) {
-            fireStatusChanged("Reading " + toParse.toString());
-            fireProgressChanged(lineIdx * 100 / linesCnt);
-          }
+          fireStatusChanged("Reading " + toParse.toString());
+          fireProgressChanged(lineIdx * 100 / linesCnt);
           lineIdx ++;
           readList(toParse.toString(), true);
           ///toParse = "";
@@ -111,8 +109,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
         }
         line = bReader.readLine();
       }
-      if (!Main.batchMode)
-        fireProcessFinished();
+      fireProcessFinished();
     }catch(IOException ioe){
       throw new ResourceInstantiationException(ioe);
     }catch(GazetteerException ge){
@@ -300,8 +297,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    if (!Main.batchMode)
-      fireStatusChanged("Doing lookup in " +
+    fireStatusChanged("Doing lookup in " +
                            document.getSourceUrl().getFile() + "...");
     String content = document.getContent().toString();
     int length = content.length();
@@ -370,8 +366,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
         charIdx ++;
       }
       if(charIdx - oldCharIdx > 256) {
-        if (!Main.batchMode)
-          fireProgressChanged((100 * charIdx )/ length );
+        fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }
     } // while(charIdx < length)
@@ -396,10 +391,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
       }//while(lookupIter.hasNext())
     }
     reset();
-    if (!Main.batchMode) {
       fireProcessFinished();
       fireStatusChanged("Tokenisation complete!");
-    }
   } // run
 
 

@@ -585,10 +585,9 @@ implements Runnable, ProcessingResource{
        annotationSetName.equals("")) annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
 
-    if (! Main.batchMode) //fire event only if needed
-      fireStatusChanged(
+    fireStatusChanged(
         "Tokenising " + document.getSourceUrl().getFile() + "..."
-      );
+    );
 
     String content = document.getContent().toString();
     int length = content.length();
@@ -676,7 +675,7 @@ implements Runnable, ProcessingResource{
         tokenStart = charIdx;
       }
 
-      if(!Main.batchMode && (charIdx - oldCharIdx > 256)){
+      if(charIdx - oldCharIdx > 256){
         fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }
@@ -707,10 +706,8 @@ implements Runnable, ProcessingResource{
     }
 
     reset();
-    if (! Main.batchMode) { //fire events only if needed
-      fireProcessFinished();
-      fireStatusChanged("Tokenisation complete!");
-    }//if
+    fireProcessFinished();
+    fireStatusChanged("Tokenisation complete!");
   } // run
 
   /**

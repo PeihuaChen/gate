@@ -116,8 +116,7 @@ public class XmlDocumentHandler extends DefaultHandler{
     doc.setContent(new DocumentContentImpl(tmpDocContent.toString()));
 
     // fire the status listener
-    if (! Main.batchMode) //fire events if not in batch mode
-      fireStatusChangedEvent("Total elements: " + elements);
+    fireStatusChangedEvent("Total elements: " + elements);
 
     // If basicAs is null then get the default AnnotationSet,
     // based on the gate document.
@@ -175,7 +174,7 @@ public class XmlDocumentHandler extends DefaultHandler{
                                                              Attributes atts){
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
-    if ((++elements % ELEMENTS_RATE) == 0 && !Main.batchMode)
+    if ((++elements % ELEMENTS_RATE) == 0 /*&& !Main.batchMode*/)
         fireStatusChangedEvent("Processed elements : " + elements);
 
     Integer customObjectId = null;
@@ -422,8 +421,8 @@ public class XmlDocumentHandler extends DefaultHandler{
     * event.
   */
   protected void fireStatusChangedEvent(String text){
-    if (Main.batchMode) //fire events if not in batch mode
-      return;
+//    if (Main.batchMode) //fire events if not in batch mode
+//      return;
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);

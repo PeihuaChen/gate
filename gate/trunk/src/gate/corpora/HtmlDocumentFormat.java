@@ -101,13 +101,12 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     HtmlDocumentHandler htmlDocHandler = new
                            HtmlDocumentHandler(doc, this.markupElementsMap);
     // register a status listener with it
-    if (!Main.batchMode)
-      htmlDocHandler.addStatusListener(new StatusListener(){
+    htmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
             fireStatusChanged(text);
           }
-      });
+    });
     try{
       // parse the HTML document
       parser.parse(reader, htmlDocHandler, true);

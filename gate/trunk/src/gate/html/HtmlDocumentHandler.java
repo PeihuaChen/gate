@@ -91,8 +91,8 @@ public class HtmlDocumentHandler extends ParserCallback {
     */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
     // Fire the status listener if the elements processed exceded the rate
-    if (0 == (++elements % ELEMENTS_RATE) && !Main.batchMode)
-        fireStatusChangedEvent("Processed elements : " + elements);
+    if (0 == (++elements % ELEMENTS_RATE))
+      fireStatusChangedEvent("Processed elements : " + elements);
 
     // Construct a feature map from the attributes list
     FeatureMap fm = Factory.newFeatureMap();
@@ -202,8 +202,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
       // notify the listener about the total amount of elements that
       // has been processed
-      if (!Main.batchMode)
-        fireStatusChangedEvent("Total elements : " + elements);
+      fireStatusChangedEvent("Total elements : " + elements);
 
     }//else
 
@@ -213,8 +212,8 @@ public class HtmlDocumentHandler extends ParserCallback {
     */
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // fire the status listener if the elements processed exceded the rate
-    if ((++elements % ELEMENTS_RATE) == 0 && !Main.batchMode)
-       fireStatusChangedEvent("Processed elements : " + elements);
+    if ((++elements % ELEMENTS_RATE) == 0)
+      fireStatusChangedEvent("Processed elements : " + elements);
 
     // construct a feature map from the attributes list
     // these are empty elements

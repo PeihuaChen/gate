@@ -119,13 +119,12 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         GateFormatXmlDocumentHandler gateXmlHandler =
                         new GateFormatXmlDocumentHandler(doc);
         // Register a status listener
-        if (!Main.batchMode)
-          gateXmlHandler.addStatusListener(new StatusListener(){
+        gateXmlHandler.addStatusListener(new StatusListener(){
             public void statusChanged(String text){
               // This is implemented in DocumentFormat.java and inherited here
               fireStatusChanged(text);
             }
-          });
+        });
         // Parse the Gate Document
         xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
       }else{
@@ -136,8 +135,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
                                        this.element2StringMap);
 
         // register a status listener with it
-        if (!Main.batchMode)
-          xmlDocHandler.addStatusListener(new StatusListener(){
+        xmlDocHandler.addStatusListener(new StatusListener(){
             public void statusChanged(String text){
               // this is implemented in DocumentFormat.java and inherited here
               fireStatusChanged(text);
@@ -217,13 +215,12 @@ public class XmlDocumentFormat extends TextualDocumentFormat
                                                     this.element2StringMap);
 
       // register a status listener with it
-      if (!Main.batchMode)
-        xmlDocHandler.addStatusListener(new StatusListener(){
+      xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
             fireStatusChanged(text);
           }
-        }); // xmlDocHandler.addStatusListener(new StatusListener(){
+      }); // xmlDocHandler.addStatusListener(new StatusListener(){
       // parse the document handler
       xmlParser.parse(is, xmlDocHandler );
     } catch (ParserConfigurationException e){

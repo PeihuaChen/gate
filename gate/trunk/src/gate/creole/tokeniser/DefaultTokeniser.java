@@ -27,7 +27,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       FeatureMap params;
       FeatureMap features;
       Map listeners = new HashMap();
-      if (! Main.batchMode) {//fire events if not in batch mode
+//      if (! Main.batchMode) {//fire events if not in batch mode
         listeners.put("gate.event.StatusListener", new StatusListener(){
           public void statusChanged(String text){
             fireStatusChanged(text);
@@ -36,7 +36,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
 
       //tokeniser
         fireStatusChanged("Creating a tokeniser");
-      }
+//      }//if no events
       params = Factory.newFeatureMap();
       if(tokeniserRulesURL != null) params.put("rulesURL",
                                                tokeniserRulesURL);
@@ -49,12 +49,10 @@ public class DefaultTokeniser extends AbstractProcessingResource {
                     params, features, listeners);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
 
-      if (! Main.batchMode) {//fire events if not in batch mode
-        fireProgressChanged(50);
+      fireProgressChanged(50);
 
       //transducer
-        fireStatusChanged("Creating a Jape transducer");
-      }
+      fireStatusChanged("Creating a Jape transducer");
       params.clear();
       if(transducerGrammarURL != null) params.put("grammarURL",
                                                   transducerGrammarURL);
@@ -62,16 +60,14 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features.clear();
       Gate.setHiddenAttribute(features, true);
-      if (! Main.batchMode) //fire events if not in batch mode
+//      if (! Main.batchMode) //fire events if not in batch mode
         listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(51, 100));
       transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
                                                       params, features,
                                                       listeners);
-      if (! Main.batchMode) {//fire events if not in batch mode
-        fireProgressChanged(100);
-        fireProcessFinished();
-      }
+      fireProgressChanged(100);
+      fireProcessFinished();
       transducer.setName("Transducer " + System.currentTimeMillis());
     }catch(ResourceInstantiationException rie){
       throw rie;
@@ -84,8 +80,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   public void run(){
     FeatureMap params = Factory.newFeatureMap();
     try{
-      if (!Main.batchMode)
-        fireProgressChanged(0);
+      fireProgressChanged(0);
       //tokeniser
       params.put("document", document);
       params.put("annotationSetName", annotationSetName);
@@ -100,7 +95,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
 
       ProgressListener pListener = null;
       StatusListener sListener = null;
-      if (!Main.batchMode) {
+//      if (!Main.batchMode) {
         fireProgressChanged(5);
         pListener = new IntervalProgressListener(5, 50);
         sListener = new StatusListener(){
@@ -112,10 +107,10 @@ public class DefaultTokeniser extends AbstractProcessingResource {
       //tokeniser
         tokeniser.addProgressListener(pListener);
         tokeniser.addStatusListener(sListener);
-      }
+//      }
       tokeniser.run();
       tokeniser.check();
-      if (!Main.batchMode) {
+//      if (!Main.batchMode) {
         tokeniser.removeProgressListener(pListener);
         tokeniser.removeStatusListener(sListener);
 
@@ -123,13 +118,13 @@ public class DefaultTokeniser extends AbstractProcessingResource {
         pListener = new IntervalProgressListener(50, 100);
         transducer.addProgressListener(pListener);
         transducer.addStatusListener(sListener);
-      }
+//      }
       transducer.run();
       transducer.check();
-      if (!Main.batchMode) {
+//      if (!Main.batchMode) {
         transducer.removeProgressListener(pListener);
         transducer.removeStatusListener(sListener);
-      }
+//      }
     }catch(ExecutionException ee){
       executionException = ee;
     }catch(Exception e){

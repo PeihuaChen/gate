@@ -133,7 +133,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public boolean add(Object o) {
     if(o instanceof Document){
       boolean res = super.add(o);
-      if(res && !Main.batchMode) fireDocumentAdded(new CorpusEvent(this, (Document)o,
+      if(res) fireDocumentAdded(new CorpusEvent(this, (Document)o,
                                 CorpusEvent.DOCUMENT_ADDED));
       return res;
     }else{
@@ -163,7 +163,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
   public boolean remove(Object o) {
     if(o instanceof Document){
       boolean res = super.remove(o);
-      if(res && !Main.batchMode) //fire only if we need to
+      if(res)
         fireDocumentRemoved(new CorpusEvent(this, (Document)o,
                                   CorpusEvent.DOCUMENT_REMOVED));
       return res;
@@ -232,7 +232,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
 
     public void remove(){
       iterator.remove();
-      if (! Main.batchMode)
+//      if (! Main.batchMode)
         fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, (Document)lastNext,
                                   CorpusEvent.DOCUMENT_REMOVED));
     }
@@ -240,7 +240,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
     Object lastNext;
   }
   protected void fireDocumentAdded(CorpusEvent e) {
-    if (!Main.batchMode && corpusListeners != null) {
+    if (/*!Main.batchMode &&*/ corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -249,7 +249,7 @@ public class CorpusImpl extends TreeSet implements Corpus {
     }
   }
   protected void fireDocumentRemoved(CorpusEvent e) {
-    if (!Main.batchMode && corpusListeners != null) {
+    if (/*!Main.batchMode &&*/ corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

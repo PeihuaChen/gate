@@ -98,7 +98,7 @@ implements JapeConstants, java.io.Serializable
 
     ProgressListener pListener = null;
     StatusListener sListener = null;
-    if (! Main.batchMode) {//fire events if not in batch mode
+//    if (! Main.batchMode) {//fire events if not in batch mode
       pListener = new ProgressListener(){
         public void processFinished(){
           donePhases ++;
@@ -119,23 +119,23 @@ implements JapeConstants, java.io.Serializable
           fireStatusChanged(text);
         }
       };
-    }//if
+//    }//if no events
 
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
       try {
-        if (! Main.batchMode) {//fire events if not in batch mode
+//        if (! Main.batchMode) {//fire events if not in batch mode
           fireStatusChanged("Transducing " + doc.getName() +
                                " (Phase: " + t.getName() + ")...");
           t.addProgressListener(pListener);
           t.addStatusListener(sListener);
-        }//if
+//        }//if
         t.transduce(doc, input, output);
-        if (! Main.batchMode) {//fire events if not in batch mode
+//        if (! Main.batchMode) {//fire events if not in batch mode
           t.removeProgressListener(pListener);
           t.removeStatusListener(sListener);
           fireStatusChanged("");
-        }//if
+//        }//if
       } catch(JapeException e) {
         String errorMessage = new String(
           "Error transducing document " + doc.getSourceUrl() +
@@ -187,6 +187,12 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.19  2001/09/25 12:04:03  kalina
+// I commented out temporarily the no events in batch mode code as it was
+// not working completely correctly, so I want to reinstate it only after
+// it's fully functional. All tests seems OK on a clean version (well, same
+// mistakes as today due to the feature comparison stuff).
+//
 // Revision 1.18  2001/09/13 12:09:50  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.
