@@ -34,7 +34,7 @@ PKGS=	\
 	gate gate.annotation gate.config gate.corpora gate.creole \
 	gate.creole.annotdelete gate.creole.annotransfer \
 	gate.creole.coref gate.creole.dumpingPR gate.creole.gazetteer \
-	gate.creole.ir gate.creole.ir.lucene \
+	gate.creole.ir gate.creole.ir.lucene gate.creole.ml gate.creole.ml.weka\
 	gate.creole.nerc gate.creole.orthomatcher gate.creole.ontology \
 	gate.creole.splitter gate.creole.tokeniser \
 	gate.email gate.event gate.fsm gate.gui gate.html gate.jape \
