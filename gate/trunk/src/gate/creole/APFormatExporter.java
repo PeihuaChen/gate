@@ -166,11 +166,12 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
 
     Map entitiesMap = null;
     if ( document.getFeatures() == null ||
-         document.getFeatures().get(OrthoMatcher.DOC_MATCHES_FEATURE)== null)
+         document.getFeatures().get(AnnieConstants.DOCUMENT_COREF_FEATURE_NAME)
+          == null)
       entitiesMap = new HashMap();
     else
       entitiesMap = (Map)document.getFeatures().
-                                        get(OrthoMatcher.DOC_MATCHES_FEATURE);
+                              get(AnnieConstants.DOCUMENT_COREF_FEATURE_NAME);
     Map namedAnnotSetMap = null;
     if (document.getNamedAnnotationSets() == null)
       namedAnnotSetMap = new HashMap();
@@ -185,7 +186,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
     while(exportedTypesIter.hasNext()){
       String entityType = (String)exportedTypesIter.next();
       // Serialize all entities of type
-      // The keys in the entiitesMap are annotation sets names. The null key
+      // The keys in the entitesMap are annotation sets names. The null key
       // designates the default annotation.
       Set annotationSetNames = namedAnnotSetMap.keySet();
       Iterator annotationSetNamesIter = annotationSetNames.iterator();
