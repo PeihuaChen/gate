@@ -3394,7 +3394,7 @@ public class OracleDataStore extends JDBCDataStore {
    */
   public List findLrs(List constraints, String lrType,
                       List orderByConstraints, int limitcount) throws PersistenceException {
-      Vector lrs = new Vector();
+      Vector lrsIDs = new Vector();
       CallableStatement stmt = null;
       ResultSet rs = null;
 
@@ -3418,23 +3418,21 @@ public class OracleDataStore extends JDBCDataStore {
 
         while (rs.next()) {
           long lr_ID = rs.getLong(1);
-          LanguageResource lr = getLr(lrType,new Long(lr_ID));
-          lrs.addElement(lr);
+          //LanguageResource lr = getLr(lrType,new Long(lr_ID));
+          lrsIDs.addElement(new Long(lr_ID));
         }
-        return lrs;
+        return lrsIDs;
       }
       catch(SQLException sqle) {
         throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
       }
-      catch (SecurityException e){
-        e.printStackTrace();
-      }
+      //catch (SecurityException e){
+      //  e.printStackTrace();
+      //}
       finally {
         DBHelper.cleanup(rs);
         DBHelper.cleanup(stmt);
       }
-
-      return lrs;
     }
 
   public long getLrsCount(List constraints, String lrType) throws PersistenceException {
