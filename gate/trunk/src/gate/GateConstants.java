@@ -92,6 +92,9 @@ public interface GateConstants {
   public static final String
     CORPUS_INDEX_STATISTICS_FEATURE_KEY = "Index_statistics_feature_key";
 
+  /** The key for the WordNet config file*/
+  public static final String WORDNET_CONFIG_FILE = "Wordnet_config_file";
+
 //  /** The index type of corpus*/
 //  public static final int IR_LUCENE_INVFILE = 1001;
 } // GateConstants

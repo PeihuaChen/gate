@@ -18,6 +18,7 @@ package gate.wordnet;
 import java.io.*;
 import java.util.*;
 
+import gate.*;
 //import net.didion.jwnl.*;
 //import net.didion.jwnl.dictionary.*;
 //import net.didion.jwnl.data.*;
@@ -25,7 +26,6 @@ import junit.framework.*;
 
 public class TestWordNet extends TestCase {
 
-  private static final String propertiesFile = "D:/PRJ/jwnl/file_properties.xml";
   private static IndexFileWordNetImpl wnMain = null;
 
   public TestWordNet(String dummy) {
@@ -342,9 +342,11 @@ System.out.println(iSet);
 
   protected void setUp() throws Exception {
 
+    String wnConfigFile = (String)Gate.getUserConfig().
+                          get(GateConstants.WORDNET_CONFIG_FILE);
     if (null == wnMain) {
       wnMain = new IndexFileWordNetImpl();
-      wnMain.setPropertyFile(new File(propertiesFile));
+      wnMain.setPropertyFile(new File(wnConfigFile));
       wnMain.init();
     }
   }
