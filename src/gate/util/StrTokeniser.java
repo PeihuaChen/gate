@@ -1,31 +1,31 @@
 /*
+ *  StrTokeniser.java
  *
- * Copyright (c) 2000-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2001, The University of Sheffield.
  *
- * This file is part of GATE (see http://gate.ac.uk/), and is free
- * software, licenced under the GNU Library General Public License,
- * Version 2, June1991.
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- * A copy of this licence is included in the distribution in the file
- * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  Deriver from Sun code by Valy, sometime or other.
  *
- * Copyright (c) 1995, 1996 Sun Microsystems, Inc. All Rights Reserved.
+ *  Copyright (c) 1995, 1996 Sun Microsystems, Inc. All Rights Reserved.
  *
- * This software is the confidential and proprietary information of Sun
- * Microsystems, Inc. ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Sun.
+ *  This software is the confidential and proprietary information of Sun
+ *  Microsystems, Inc. ("Confidential Information").  You shall not
+ *  disclose such Confidential Information and shall use it only in
+ *  accordance with the terms of the license agreement you entered into
+ *  with Sun.
  *
- * SUN MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
- * SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE, OR NON-INFRINGEMENT. SUN SHALL NOT BE LIABLE FOR ANY DAMAGES
- * SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
- * THIS SOFTWARE OR ITS DERIVATIVES.
+ *  SUN MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
+ *  SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ *  PURPOSE, OR NON-INFRINGEMENT. SUN SHALL NOT BE LIABLE FOR ANY DAMAGES
+ *  SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
+ *  THIS SOFTWARE OR ITS DERIVATIVES.
  *
- * CopyrightVersion 1.1_beta
- *
+ *  CopyrightVersion 1.1_beta
  */
 
 
