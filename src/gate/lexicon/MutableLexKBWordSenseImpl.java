@@ -14,8 +14,9 @@
  */
 
 package gate.lexicon;
+import java.io.Serializable;
 
-public class MutableLexKBWordSenseImpl implements MutableLexKBWordSense {
+public class MutableLexKBWordSenseImpl implements MutableLexKBWordSense, Serializable {
   Word senseWord = null;
   MutableLexKBSynset senseSynset = null;
   int senseNumber = 0;

@@ -16,8 +16,9 @@
 package gate.lexicon;
 
 import java.util.*;
+import java.io.Serializable;
 
-public class MutableWordImpl implements MutableWord {
+public class MutableWordImpl implements MutableWord, Serializable {
   private String lemma = "";
   private List senseList = new ArrayList();
 
@@ -36,6 +37,7 @@ public class MutableWordImpl implements MutableWord {
     MutableLexKBWordSense newSense = new MutableLexKBWordSenseImpl(
         this, newSynset, index, newSynset.getWordSenses().size());
     senseList.add(index, newSense);
+    newSynset.addWordSense(newSense);
     return newSense;
   }
 
