@@ -9,8 +9,10 @@
 				COMMENT="The document to be analysed."
 				RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
 			<PARAMETER NAME="posTagURL"
+				DEFAULT="./pos_tag_dict"
 				COMMENT="The URL of the pos_tag_dict file.">java.net.URL</PARAMETER>
 			<PARAMETER NAME="rulesURL"
+				DEFAULT="./rules"
 				COMMENT="The URL of the rules file.">java.net.URL</PARAMETER>
 			<PARAMETER NAME="posFeature"
 				COMMENT="The name of the feature which holds the POS tag."
