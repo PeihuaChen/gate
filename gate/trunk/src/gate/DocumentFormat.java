@@ -1,6 +1,15 @@
 /*
  *	DocumentFormat.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Hamish Cunningham, 25/May/2000
  *
  *	$Id$
@@ -29,6 +38,14 @@ import org.w3c.www.mime.*;
   */
 public abstract class DocumentFormat implements Resource, StatusReporter
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** The MIME type of this format. */
   private MimeType mimeType;
 
@@ -164,7 +181,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
         try{
           mimeType = new MimeType(mimeTypeString);
         }catch (MimeTypeFormatException e){
-          e.printStackTrace(System.err);
+          e.printStackTrace(Err.getPrintWriter());
         }
       }//if
     }//if
@@ -188,7 +205,7 @@ public abstract class DocumentFormat implements Resource, StatusReporter
     try{
       contentType = url.openConnection().getContentType();
     } catch (IOException e){
-      e.printStackTrace(System.err);
+      e.printStackTrace(Err.getPrintWriter());
     }
     // if a content Type was returned by the server, try to get the mime Type
     // string
@@ -286,11 +303,11 @@ public abstract class DocumentFormat implements Resource, StatusReporter
           aGateDocument.getFeatures().put("MimeType",mime.getType() + "/" +
                                           mime.getSubtype());
         }catch (ClassNotFoundException e){
-          e.printStackTrace(System.err);
+          e.printStackTrace(Err.getPrintWriter());
         }catch (IllegalAccessException e){
-          e.printStackTrace(System.err);
+          e.printStackTrace(Err.getPrintWriter());
         }catch (InstantiationException e){
-          e.printStackTrace(System.err);
+          e.printStackTrace(Err.getPrintWriter());
         }
       }//if
     }//if

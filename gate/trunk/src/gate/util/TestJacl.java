@@ -1,6 +1,15 @@
 /*
  *	TestJacl.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Hamish Cunningham, 16/Mar/00
  *
  *	$Id$
@@ -16,6 +25,14 @@ import tcl.lang.*;
   */
 public class TestJacl extends TestCase
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Construction */
   public TestJacl(String name) { super(name); }
 
@@ -55,22 +72,22 @@ public class TestJacl extends TestCase
     // find the list of script files in the GATE source tree
     // (the parameter to findScripts causes a dir change before the search)
     List scriptPaths = jacl.findScripts(jacl.goToGateSrcScript);
-    // System.out.println("Scripts found: " + scriptPaths); 
+    // Out.println("Scripts found: " + scriptPaths); 
 
     // refresh Jacl.java's list of GATE scripts
-    // System.out.println("Updating Jacl.java....");
+    // Out.println("Updating Jacl.java....");
     // jacl.listGateScripts();
 
     // copy the scripts to the classes tree
-    // System.out.println("Doing copy....");
+    // Out.println("Doing copy....");
     jacl.copyGateScripts(scriptPaths);
 
     // load the scripts (as a test)
-    // System.out.println("Doing load....");
+    // Out.println("Doing load....");
     jacl.loadScripts(scriptPaths);
 
     // tell the world
-    // System.out.println("Tcl scripts found, installed and loaded");
+    // Out.println("Tcl scripts found, installed and loaded");
   } // testListing
 
 

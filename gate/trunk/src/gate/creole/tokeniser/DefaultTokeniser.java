@@ -1,10 +1,20 @@
-/**
- * Title:        GATE<p>
- * Description:  <p>
- * Copyright:    Copyright (c) 1999<p>
- * Company:      Univ Sheffield<p>
+/*
+ * DefaultTokeniser.java
+ *
+ * Copyright (c) 2000-2001, The University of Sheffield.
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free
+ * software, licenced under the GNU Library General Public License,
+ * Version 2, June1991.
+ * 
+ * A copy of this licence is included in the distribution in the file
+ * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
  * @author Hamish, Kalina, Christian, Valentin
+ *
  * @version
+ *
+ * $Id$
  */
 package gate.creole.tokeniser;
 
@@ -86,6 +96,13 @@ import gate.fsm.TestFSM;
 public class DefaultTokeniser implements Runnable, ProcessingResource,
                                          ProcessProgressReporter,
                                          StatusReporter{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /**Creates a tokeniser from the default set of rules included with the gate
     *resources
@@ -137,13 +154,13 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
       }
       line = rulesReader.readLine();
     }
-//System.out.println("\n\n" + getFSMgml());
+//Out.println("\n\n" + getFSMgml());
 //    try{
 //      gate.fsm.TestFSM.showGraph("Tokeniser graph (Non deterministic)", getFSMgml());
       eliminateVoidTransitions();
-//System.out.println("\n\n" + getDFSMgml());
+//Out.println("\n\n" + getDFSMgml());
 //      gate.fsm.TestFSM.showGraph("Tokeniser graph (deterministic)", getDFSMgml());
-//    }catch(EDU.auburn.VGJ.graph.ParseError pe){pe.printStackTrace(System.err);}
+//    }catch(EDU.auburn.VGJ.graph.ParseError pe){pe.printStackTrace(Err.getPrintWriter());}
   }
 
   /**Parses one input line containing a tokeniser rule.
@@ -191,7 +208,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         newState = parseLHS(currentState, st,")");
       }else if(token.equals("\"")){//"unicode_type"
         String sType = parseQuotedString(st, "\"");
-//System.out.println(sType);
+//Out.println(sType);
         newState = new FSMState(this);
         typeId = (Integer)stringTypeIds.get(sType);
         if(null == typeId)
@@ -200,7 +217,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
         currentState.put(uType ,newState);
       }else{// a type with no quotes
         String sType = token;
-//System.out.println(sType);
+//Out.println(sType);
         newState = new FSMState(this);
         typeId = (Integer)stringTypeIds.get(sType);
         if(null == typeId)
@@ -359,7 +376,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
       }
     }
     if(rhsClashSet.size() > 1){
-      System.err.println("Warning, rule clash: " +  rhsClashSet +
+      Err.println("Warning, rule clash: " +  rhsClashSet +
                          "\nSelected last definition: " + dCurrentState.rhs);
     }
     if(newRhs)dCurrentState.buildTokenDesc();
@@ -368,10 +385,10 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     dInitialState = dCurrentState;
     Set nextSet;
     while(!unmarkedDStates.isEmpty()){
-//System.out.println("\n\n=====================" + unmarkedDStates.size());
+//Out.println("\n\n=====================" + unmarkedDStates.size());
       sdCurrentState = (Set)unmarkedDStates.removeFirst();
       for(int type = 0; type < maxTypeId; type++){
-//System.out.print(type);
+//Out.print(type);
         nextSet = new HashSet();
         innerStatesIter = sdCurrentState.iterator();
         while(innerStatesIter.hasNext()){
@@ -400,7 +417,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
               }
             }
             if(rhsClashSet.size() > 1){
-              System.err.println("Warning, rule clash: " +  rhsClashSet +
+              Err.println("Warning, rule clash: " +  rhsClashSet +
                                  "\nSelected last definition: " + dCurrentState.rhs);
             }
             if(newRhs)dCurrentState.buildTokenDesc();
@@ -518,7 +535,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
     FeatureMap newTokenFm;
     while(charIdx < length){
       currentChar = content.charAt(charIdx);
-//System.out.println(currentChar + typesMnemonics[Character.getType(currentChar)+128]);
+//Out.println(currentChar + typesMnemonics[Character.getType(currentChar)+128]);
       nextState = graphPosition.next(((Integer)typeIds.get(
                   new Integer(Character.getType(currentChar)))).intValue());
       if(null != nextState){
@@ -541,9 +558,9 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
                               "DEFAULT_TOKEN", newTokenFm);
           }catch(InvalidOffsetException ioe){
             //This REALLY shouldn't happen!
-            ioe.printStackTrace(System.err);
+            ioe.printStackTrace(Err.getPrintWriter());
           }
-//          System.out.println("Default token: " + tokenStart +
+//          Out.println("Default token: " + tokenStart +
 //                             "->" + tokenStart + " :" + tokenString + ";");
           charIdx  = tokenStart + 1;
         }else{
@@ -553,7 +570,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
           for(int i = 1; i < lastMatchingState.getTokenDesc().length; i++){
             newTokenFm.put(lastMatchingState.getTokenDesc()[i][0],
                            lastMatchingState.getTokenDesc()[i][1]);
-//System.out.println(lastMatchingState.getTokenDesc()[i][0] + "=" +
+//Out.println(lastMatchingState.getTokenDesc()[i][0] + "=" +
 //                           lastMatchingState.getTokenDesc()[i][1]);
           }
           try{
@@ -564,7 +581,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
             //This REALLY shouldn't happen!
             throw new LuckyException(ioe.toString());
           }
-//          System.out.println(lastMatchingState.getTokenDesc()[0][0] +
+//          Out.println(lastMatchingState.getTokenDesc()[0][0] +
 //                             ": " + tokenStart + "->" + lastMatch +
 //                             " :" + tokenString + ";");
           charIdx = lastMatch + 1;
@@ -594,7 +611,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
                           lastMatchingState.getTokenDesc()[0][0], newTokenFm);
       }catch(InvalidOffsetException ioe){
         //This REALLY shouldn't happen!
-        ioe.printStackTrace(System.err);
+        ioe.printStackTrace(Err.getPrintWriter());
       }
     }
     fireProcessFinishedEvent();
@@ -643,7 +660,7 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
                             "creole/tokeniser/DefaultTokeniser.rules"));
       Document doc = Transients.newDocument("Germany England and France   are countries that use ... $$$.");
       dt.tokenise(doc, false);
-    }catch(Exception ex){ex.printStackTrace(System.err);}
+    }catch(Exception ex){ex.printStackTrace(Err.getPrintWriter());}
   }
 */
   public Factory getFactory(){
@@ -741,7 +758,6 @@ public class DefaultTokeniser implements Runnable, ProcessingResource,
 
 
 }//class DefaultTokeniser
-
 
 
 

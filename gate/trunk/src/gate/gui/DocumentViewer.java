@@ -1,11 +1,20 @@
-
-//Title:        GATE
-//Version:
-//Copyright:    Copyright (c) 1999
-//Author:       Hamish, Kalina, Christian, Valentin
-//Company:      Univ Sheffield
-//Description:
-
+/*
+ *  DocumentViewer.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ * 
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ * 
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Author: Hamish, Kalina, Christian, Valentin, 11/07/2000
+ *
+ *  $Id$
+ *
+ */
 package gate.gui;
 
 import java.awt.*;
@@ -21,6 +30,14 @@ import gate.util.*;
 
 
 public class DocumentViewer extends JPanel {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   BorderLayout borderLayout1 = new BorderLayout();
   JScrollPane typeButtonsScroll = new JScrollPane();
   JScrollPane textScroll = new JScrollPane();
@@ -201,7 +218,7 @@ public class DocumentViewer extends JPanel {
     ActionListener anActionListener  = new java.awt.event.ActionListener() {
       public void actionPerformed(ActionEvent e) {
         //:TODO: here call the method showDialog for the selected item
-        System.out.println(((JMenuItem)e.getSource()).getText());
+        Out.println(((JMenuItem)e.getSource()).getText());
       }
     };
 
@@ -247,14 +264,14 @@ public class DocumentViewer extends JPanel {
           textPane.getHighlighter().addHighlight(start, end, hp);
         }
       }catch(javax.swing.text.BadLocationException ble){
-        ble.printStackTrace(System.err);
+        ble.printStackTrace(Err.getPrintWriter());
       }
       for(int i = 0; i < tableView.getRowCount(); i++)
         if(tableView.getModel().getValueAt(i, 2).equals(type))
           tableView.addRowSelectionInterval(i,i);
     }
 
-//System.out.println(type);
+//Out.println(type);
   }
 
   void this_componentResized(ComponentEvent e) {
@@ -298,7 +315,7 @@ public class DocumentViewer extends JPanel {
       selectionTag =
         textPane.getHighlighter().addHighlight(start, end, selectionHP);
     }catch(javax.swing.text.BadLocationException ble){
-      ble.printStackTrace(System.err);
+      ble.printStackTrace(Err.getPrintWriter());
     }
   }
 }

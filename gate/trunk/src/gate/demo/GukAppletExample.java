@@ -128,11 +128,11 @@ public class GukAppletExample extends JApplet implements MUTTManagerObject {
         }
 */
 
-//System.out.println("URL:" +ClassLoader.getSystemResource("fonts/" + font_file));
+//Out.println("URL:" +ClassLoader.getSystemResource("fonts/" + font_file));
         is = ClassLoader.getSystemResourceAsStream("fonts/" + font_file);
         if(is==null){
           showStatus("Bad font file name: " + font_file);
-//System.out.println("Bad font file name: " + font_file);
+//Out.println("Bad font file name: " + font_file);
           Toolkit.getDefaultToolkit().beep();
           Toolkit.getDefaultToolkit().beep();
           //
@@ -458,7 +458,7 @@ public class GukAppletExample extends JApplet implements MUTTManagerObject {
           font_file = "basic.fst";
 
         font = (PCFUnicodeFontSet) loadFont(font_file, true);
-//System.out.println(font);
+//Out.println(font);
         kbd = (pc) ?
             new MUTTKeyboard(MUTTKeyboard.PC_GEOMETRY, getSize(),
                              efont, font, null, Color.blue) :

@@ -1,10 +1,19 @@
 /*
-	CreoleRegister.java
-
-	Hamish Cunningham, 31/Aug/2000
-
-	$Id$
-*/
+ *	CreoleRegister.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
+ *  Hamish Cunningham, 31/Aug/2000
+ *
+ *  $Id$
+ */
 
 package gate;
 
@@ -32,12 +41,12 @@ import gate.util.*;
   * <P> 
   * To register resources clients use the <CODE>registerDirectories</CODE>
   * methods. When resources have been registered they can be accessed via
-  * their <CODE>CreoleData</CODE> objects. So a typical use of the register 
+  * their <CODE>CreoleData</CODE> objects. So a typical use of the register
   * is to: add the set of URLs containing CREOLE directories; register
-  * all resources found at those URLs; browse the set of registered 
+  * all resources found at those URLs; browse the set of registered
   * resources.
   * <P>
-  * In all cases, where a resource or a directory is added which is 
+  * In all cases, where a resource or a directory is added which is
   * already present in the register, the new silently overwrites the old.
   *
   * @see gate.util.Gate

@@ -1,10 +1,19 @@
 /*
-	BasicPatternElement.java - transducer class
-
-	Hamish Cunningham, 24/07/98
-
-	$Id$
-*/
+ *  BasicPatternElement.java - transducer class
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ * 
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ * 
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 24/07/98
+ *
+ *  $Id$
+ */
 
 
 package gate.jape;
@@ -24,8 +33,13 @@ import gate.*;
 public class BasicPatternElement
 extends PatternElement implements JapeConstants, java.io.Serializable
 {
-  /** Debug flag. */
-  static private final boolean debug = false;
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /** A set of Constraint. Used during parsing. */
   private Array constraints1;
@@ -152,15 +166,15 @@ extends PatternElement implements JapeConstants, java.io.Serializable
       JdmAttribute[] constraintAttrs = constraint.getAttributeArray();
       MutableBoolean moreToTry = new MutableBoolean();
 
-      if(debug) {
-        System.out.println(
+      if(DEBUG) {
+        Out.println(
           "BPE.matches: selectAnn on lFP = " + lastFailurePoint +
           "; max(pos,lfp) = " + Math.max(position, lastFailurePoint) +
           "; annotType = " + annotType + "; attrs = " +
           constraintAttrs.toString() + Strings.getNl()
         );
         for(int j=0; j<constraintAttrs.length; j++)
-          System.out.println(
+          Out.println(
             "BPE.matches attr: " + constraintAttrs[j].toString()
           );
       }
@@ -176,7 +190,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
         nextAvailable,
         moreToTry */
       );
-      if(debug) System.out.println(
+      if(DEBUG) Out.println(
         "BPE.matches: selectAnn returned " + match + ".... moreToTry = " +
         moreToTry.value + "    nextAvailable = " + nextAvailable.value
       );
@@ -324,5 +338,4 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     return constraints2;
   }
 } // class BasicPatternElement
-
 

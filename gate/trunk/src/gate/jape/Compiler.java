@@ -1,8 +1,19 @@
-//Title:        Compiler.java - compile .jape files.
-//Version:      $Id$
-//Copyright:    Copyright (c) 1998
-//Author:       Hamish Cunningham
-//Company:      NLP Group, DCS, Univ. of Sheffield
+/*
+ *  Compiler.java - compile .jape files
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 23/02/2000
+ *
+ *  $Id$
+ */
 
 package gate.jape;
 
@@ -18,6 +29,14 @@ import gate.jape.parser.*;
   * Compiler for JAPE files.
   */
 public class Compiler {
+
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /** How much noise to make. */
   static private boolean verbose = false;
@@ -116,12 +135,12 @@ public class Compiler {
 
   /** Hello? Anybody there?? */
   public static void message(String mess) {
-    if(verbose) System.out.println("JAPE compiler: " + mess);
+    if(verbose) Out.println("JAPE compiler: " + mess);
   } // message
 
   /** Ooops. */
   public static void emessage(String mess) {
-    System.err.println("JAPE compiler error: " + mess);
+    Err.println("JAPE compiler error: " + mess);
   } // emessage
 
 
@@ -129,6 +148,11 @@ public class Compiler {
 
 
 // $Log$
+// Revision 1.2  2000/10/10 15:36:35  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.1  2000/02/23 13:46:04  hamish
 // added
 //
@@ -143,4 +167,3 @@ public class Compiler {
 //
 // Revision 1.1  1998/09/18 15:07:41  hamish
 // a functioning compiler in two shakes of a rats tail
-

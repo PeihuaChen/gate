@@ -1,10 +1,19 @@
 /* 
-	PatternElement.java - transducer class
-
-	Hamish Cunningham, 24/07/98
-
-	$Id$
-*/
+ *  PatternElement.java - transducer class
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *
+ *  Hamish Cunningham, 24/07/98
+ *
+ *  $Id$
+ */
 
 
 package gate.jape;
@@ -24,6 +33,14 @@ import gate.*;
 abstract public class PatternElement implements Cloneable, Matcher,
 		      JapeConstants, java.io.Serializable
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Match history stack, for use in rollback. In BasicPatternElements
     * the objects on the stack are Integers giving the number of annots that
     * were cached at that point in the history. In ComplexPatternElements
@@ -75,6 +92,11 @@ abstract public class PatternElement implements Cloneable, Matcher,
 
 
 // $Log$
+// Revision 1.2  2000/10/10 15:36:36  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.1  2000/02/23 13:46:09  hamish
 // added
 //

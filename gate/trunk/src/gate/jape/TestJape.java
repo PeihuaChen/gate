@@ -1,6 +1,15 @@
 /*
  *	TestJape.java
  *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
  *	Hamish Cunningham, 23/Feb/00
  *
  *	$Id$
@@ -25,12 +34,20 @@ import gate.creole.gazeteer.*;
   */
 public class TestJape extends TestCase
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Construction */
   public TestJape(String name) { super(name); }
 
   /** Fixture set up */
   public void setUp() {
-    //System.out.println("TestJape.setUp()");
+    //Out.println("TestJape.setUp()");
   } // setUp
 
   /** Test using the large "combined" grammar from the gate/resources
@@ -60,7 +77,7 @@ public class TestJape extends TestCase
 
     // test the transducers
     batch.transduce(c);
-    //System.out.println(batch.getTransducer());
+    //Out.println(batch.getTransducer());
 
     // check the results
     doc = (Document)c.first();
@@ -92,7 +109,7 @@ public class TestJape extends TestCase
 //      defaultAS.add(new Long(22), new Long(24), "C",feat);
 //      defaultAS.add(new Long(24), new Long(26), "C",feat);
     }catch(gate.util.InvalidOffsetException ioe){
-      ioe.printStackTrace(System.err);
+      ioe.printStackTrace(Err.getPrintWriter());
     }
 
     // run the parser test
@@ -105,7 +122,7 @@ public class TestJape extends TestCase
       throw new JapeException("couldn't open " + japeFileName);
     batch = new Batch(japeFileStream);
     // test code: print the first line of the jape stream
-    // System.out.println(
+    // Out.println(
     //   new BufferedReader(new InputStreamReader(japeFileStream)).readLine()
     // );
 
@@ -114,7 +131,7 @@ public class TestJape extends TestCase
     // check the results
     doc = (Document)c.first();
 //    defaultAS = doc.getAnnotations();
-//    System.out.println(defaultAS);
+//    Out.println(defaultAS);
   } // testBatch()
 
   public void DoTestBigGrammar(String textName) throws GateException {
@@ -122,20 +139,20 @@ public class TestJape extends TestCase
          startGazeteerLoad = 0, startLookup = 0,
          startJapeFileOpen = 0, startCorpusTransduce = 0,
          endProcess = 0;
-    System.out.print("Procesing " + textName + "...\n" +
+    Out.print("Procesing " + textName + "...\n" +
                      "Started at: " + (new Date()) + "\n");
     startCorpusLoad = System.currentTimeMillis();
-    System.out.print("Loading corpus... ");
+    Out.print("Loading corpus... ");
     Corpus corpus = Transients.newCorpus("Jape Corpus");
     try{
     corpus.add(Transients.newDocument(
         Files.getGateResourceAsString("jape/InputTexts/" + textName)));
     }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
+      ioe.printStackTrace(Err.getPrintWriter());
     }
 
     if(corpus.isEmpty()){
-      System.err.println("Missing corpus !");
+      Err.println("Missing corpus !");
       return;
     }
 
@@ -146,17 +163,17 @@ public class TestJape extends TestCase
         Files.getGateResourceAsStream("creole/tokeniser/DiTokeniser.rules"));
 //        Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
     }catch(IOException ioe){
-      System.err.println("Cannot read the tokeniser rules!" +
+      Err.println("Cannot read the tokeniser rules!" +
                          "\nAre the Gate resources in place?");
     }catch(TokeniserException te){
-      te.printStackTrace(System.err);
+      te.printStackTrace(Err.getPrintWriter());
     }
     startCorpusTokenization = System.currentTimeMillis();
-    System.out.print(": " +
+    Out.print(": " +
                        (startCorpusTokenization - startCorpusLoad) +
                        "ms\n");
 
-    System.out.print("Tokenizing the corpus... ");
+    Out.print("Tokenizing the corpus... ");
     int progress = 0;
     int docCnt = corpus.size();
     Iterator docIter = corpus.iterator();
@@ -167,37 +184,37 @@ public class TestJape extends TestCase
     }
 
     startJapeFileOpen = System.currentTimeMillis();
-    System.out.print(": " + (startJapeFileOpen - startCorpusTokenization) +
+    Out.print(": " + (startJapeFileOpen - startCorpusTokenization) +
                      "ms\n");
 
     //Do gazeteer lookup
     gate.creole.gazeteer.DefaultGazeteer gazeteer = null;
     startGazeteerLoad = startLookup = System.currentTimeMillis();
-    System.out.print("Loading gazeteer lists...");
+    Out.print("Loading gazeteer lists...");
     try{
       gazeteer =new gate.creole.gazeteer.DefaultGazeteer(
                     "creole/gazeteer/aventinus3","lists.def");
 
       startLookup = System.currentTimeMillis();
-      System.out.print(": " +
+      Out.print(": " +
                          (startLookup - startGazeteerLoad) +
                          "ms\n");
 
-      System.out.print("Doing gazeteer lookup... ");
+      Out.print("Doing gazeteer lookup... ");
       docIter = corpus.iterator();
       while(docIter.hasNext()){
         currentDoc = (Document)docIter.next();
         gazeteer.doLookup(currentDoc, false);
       }
     }catch(IOException ioe){
-      System.err.println("Cannot read the gazeteer lists!" +
+      Err.println("Cannot read the gazeteer lists!" +
                          "\nAre the Gate resources in place?");
     }catch(GazeteerException ge){
-      ge.printStackTrace(System.err);
+      ge.printStackTrace(Err.getPrintWriter());
     }
 
     startJapeFileOpen = System.currentTimeMillis();
-    System.out.print(": " + (startJapeFileOpen - startLookup) +
+    Out.print(": " + (startJapeFileOpen - startLookup) +
                      "ms\n");
 
 
@@ -206,20 +223,20 @@ public class TestJape extends TestCase
 
 
     try{
-      System.out.print("Opening Jape grammar... ");
+      Out.print("Opening Jape grammar... ");
       Batch batch = new Batch("jape/combined/", "main.jape");
 //      Batch batch = new Batch("jape/combined/", "brian-soc-loc1.jape");
 //      Batch batch = new Batch("z:/gate2/src/gate/resources/jape/combined/main.jape");
 //      Batch batch = new Batch("jape/", "Country.jape");
       startCorpusTransduce = (new Date()).getTime();
-      System.out.print(": " + (startCorpusTransduce - startJapeFileOpen) +
+      Out.print(": " + (startCorpusTransduce - startJapeFileOpen) +
                        "ms\n");
-      System.out.print("Transducing the corpus... ");
+      Out.print("Transducing the corpus... ");
       batch.transduce(corpus);
       endProcess = System.currentTimeMillis();
-      System.out.print(": " + (endProcess - startCorpusTransduce) + "ms\n");
+      Out.print(": " + (endProcess - startCorpusTransduce) + "ms\n");
     }catch(JapeException je){
-      je.printStackTrace(System.err);
+      je.printStackTrace(Err.getPrintWriter());
     }
   }
 
@@ -233,14 +250,14 @@ public class TestJape extends TestCase
   public static void main(String[] args) {
     for(int i = 0; i < 6; i++){
     System.gc();
-System.out.println("Run " + i + "   =============="); 
+    Out.println("Run " + i + "   =============="); 
       try{
         TestJape testJape = new TestJape("Test Jape");
         testJape.setUp();
         if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
        else testJape.DoTestBigGrammar(args[0]);
       }catch(Exception e){
-        e.printStackTrace(System.err);
+        e.printStackTrace(Err.getPrintWriter());
       }
     }
   }
@@ -313,12 +330,12 @@ System.out.println("Run " + i + "   ==============");
 ////      testTransducers(transducers, coll);
 ////
 ////  try {
-////  System.out.println("TestJape: " + coll.firstDocument().selectAnnotations(
+////  Out.println("TestJape: " + coll.firstDocument().selectAnnotations(
 ////    "number", new FeatureMap()));
 ////    coll.sync();
 ////  } catch(Exception e) { e.printStackTrace(); }
 ////
-////      System.out.println("\n\nWow! We reached the end without crashing!!!\n");
+////      Out.println("\n\nWow! We reached the end without crashing!!!\n");
 ////      System.exit(0);
 ////    } // main
 ////
@@ -503,7 +520,7 @@ System.out.println("Run " + i + "   ==============");
 ////      Debug.pr(TestJape.class, "testing compiler");
 ////      File f = new File("jape/grammars/Test4.ser");
 ////      if(! f.exists())
-////        System.out.println("Test4.ser not found");
+////        Out.println("Test4.ser not found");
 ////
 ////      MultiPhaseTransducer t = null;
 ////      try {
@@ -512,13 +529,13 @@ System.out.println("Run " + i + "   ==============");
 ////        t = (MultiPhaseTransducer) ois.readObject();
 ////        ois.close();
 ////      } catch (Exception ex) {
-////      	System.err.println(
+////      	Err.println(
 ////          "Can't read from " + f.getName() + ": " + ex.toString()
 ////        );
 ////      }
 ////      try { t.transduce(coll.firstDocument()); }
 ////      catch(Exception e) {
-////        System.err.println("error transducing: " + e.toString());
+////        Err.println("error transducing: " + e.toString());
 ////      }
 ////
 ////    } // testCompilerOutput

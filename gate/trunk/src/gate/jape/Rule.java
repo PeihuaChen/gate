@@ -1,10 +1,19 @@
 /*
-	Rule.java - transducer class
-
-	Hamish Cunningham, 24/07/98
-
-	$Id$
-*/
+ *  Rule.java - transducer class
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 24/07/98
+ *
+ *  $Id$
+ */
 
 
 package gate.jape;
@@ -22,6 +31,14 @@ import gate.*;
 public class Rule extends Transducer
 implements JapeConstants, java.io.Serializable
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** Construction */
   public Rule(
     String name, int position, int priority,
@@ -33,9 +50,6 @@ implements JapeConstants, java.io.Serializable
     this.lhs = lhs;
     this.rhs = rhs;
   } // Construction
-
-  /** Debug flag. */
-  static private final boolean debug = false;
 
   /** The LHS or pattern of the rule. */
   private LeftHandSide lhs;
@@ -120,14 +134,14 @@ implements JapeConstants, java.io.Serializable
   public boolean matches(
     Document doc, int position, MutableInteger newPosition
   ) {
-    if(debug) System.out.println("trying rule " + name + " at " + position);
+    if(DEBUG) Out.println("trying rule " + name + " at " + position);
     return lhs.matches(doc, position, newPosition);
   } // matches
 
   /** Apply the RHS of this rule (LHS must have been matched first). */
   public void transduce(Document doc, AnnotationSet annotations) throws JapeException {
     // the righthand side does the transduction, using bindings from lhs */
-    if(debug) System.out.println("applying rule " + name);
+    if(DEBUG) Out.println("applying rule " + name);
 //    rhs.transduce(doc);
     /*Debug.pr(
       this, "Rule.transduce: annotations after transduction: " +
@@ -200,6 +214,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.6  2000/10/10 15:36:37  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.5  2000/07/04 14:37:39  valyt
 // Added some support for Jape-ing in a different annotations et than the default one;
 // Changed the L&F for the JapeGUI to the System default

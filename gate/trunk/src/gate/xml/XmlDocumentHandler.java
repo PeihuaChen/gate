@@ -1,5 +1,14 @@
-/**
+/*
  *	XmlDocumentHandler.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
  *	Cristian URSU,  9/May/2000
  *
@@ -30,6 +39,13 @@ import org.xml.sax.*;
   */
 public class XmlDocumentHandler extends HandlerBase
                                            implements StatusReporter{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /**
     * Constructor initialises some private fields
@@ -98,7 +114,7 @@ public class XmlDocumentHandler extends HandlerBase
             basicAS.add(obj.getStart(),obj.getEnd(),annotationType,obj.getFM());
         }
       }catch (gate.util.InvalidOffsetException e){
-        e.printStackTrace(System.err);
+        e.printStackTrace(Err.getPrintWriter());
       }
     }// while
   }
@@ -404,5 +420,4 @@ class  CustomObject{
   private Long end  = null;
 
 }// CustomObject
-
 

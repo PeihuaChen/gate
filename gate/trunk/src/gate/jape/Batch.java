@@ -1,14 +1,25 @@
 /*
- * Batch.java - transducer class
- * Hamish Cunningham, 10/08/98
- * $Id$
+ *  Batch.java - transducer class
  *
- * DEVELOPER NOTES:
+ *  Copyright (c) 2000-2001, The University of Sheffield.
  *
- * This is one that got away; the relation between constructors,
- * initTransducer and parseTransducer are totally screwy and get worse
- * every time I add something (e.g. support for resource loading).
- * We should probably junk this whole thing and start again....
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Hamish Cunningham, 10/08/98
+ *
+ *  $Id$
+ *
+ *  DEVELOPER NOTES:
+ *
+ *  This is one that got away; the relation between constructors,
+ *  initTransducer and parseTransducer are totally screwy and get worse
+ *  every time I add something (e.g. support for resource loading).
+ *  We should probably junk this whole thing and start again....
  */
 
 package gate.jape;
@@ -28,6 +39,14 @@ import gate.gui.*;
   */
 public class Batch implements JapeConstants, java.io.Serializable,
                               ProcessProgressReporter, StatusReporter{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** The name of the transducer file, a .jape or .ser. */
   private String japeFileName;
 
@@ -381,7 +400,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
     // we won! we won! we can smash up all the computers now!
     batch.message("done");
-    System.exit(0);
+//    System.exit(0);
 
   } // main
 
@@ -398,15 +417,15 @@ public class Batch implements JapeConstants, java.io.Serializable,
         "-j japefile(.ser|.jape|.jar) " +
         "(-c CollectionName | filenames)";
 
-    System.err.println(errorMessage);
-    System.err.println(usageMessage);
-    System.exit(1);
+    Err.println(errorMessage);
+    Err.println(usageMessage);
+//    System.exit(1);
 
   } // usage
 
   /** Hello? Anybody there?? */
   public void message(String mess) {
-    if(verbose) System.out.println("Batch: " + mess);
+    if(verbose) Out.println("Batch: " + mess);
   } // message
 
   //StatusReporter Implementation
@@ -443,6 +462,11 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.10  2000/10/10 15:36:35  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.9  2000/07/18 12:09:33  valyt
 // Removed muse from the gate tree
 //

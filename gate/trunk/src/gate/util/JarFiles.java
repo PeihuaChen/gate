@@ -1,10 +1,19 @@
 /*
-	JarFileMerger.java
-
-	Oana Hamza, 09/06/00
-
-	$Id$
-*/
+ *  JarFileMerger.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ * 
+ *  Oana Hamza, 09/06/00
+ *
+ *  $Id$
+ */
 
 package gate.util;
 
@@ -19,6 +28,13 @@ import java.io.*;
   * It is ignored the manifest.
   */
 public class JarFiles {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   private final static int BUFF_SIZE = 65000;
 
@@ -58,7 +74,7 @@ public class JarFiles {
         // create the new input jar files based on the file name
         jarFileSource = new JarFile(sourceJarName);
 
-        // System.out.println("Adding " + sourceJarName + " to "
+        // Out.println("Adding " + sourceJarName + " to "
         // + destinationJarName);
         addJar(jarFileDestination, jarFileSource);
 
@@ -68,8 +84,8 @@ public class JarFiles {
       jarFileDestination.close();
 
     } catch(IOException ioe) {
-      ioe.printStackTrace(System.err);
-      System.exit(1);
+      ioe.printStackTrace(Err.getPrintWriter());
+      //System.exit(1);
     }
 
   }// merge
@@ -148,8 +164,8 @@ public class JarFiles {
         }
       }// while(jarFileEntriesEnum.hasMoreElements())
     } catch (java.io.IOException e) {
-      e.printStackTrace(System.err);
-      System.exit(1);
+      e.printStackTrace(Err.getPrintWriter());
+      // System.exit(1);
     }
   }// addJar
 
@@ -162,9 +178,9 @@ public class JarFiles {
 
   public static void main(String[] args) {
     if(args.length < 2) {
-                   System.err.println("USAGE : JarFiles arg0 arg1 ... argN" +
+                   Err.println("USAGE : JarFiles arg0 arg1 ... argN" +
                                     "(must be at least 2 args)");
-                   System.exit(1);
+                   //System.exit(1);
     }else{
       JarFiles jarFiles = new JarFiles();
       Set filesToMerge = new HashSet();
@@ -174,7 +190,7 @@ public class JarFiles {
     try {
       jarFiles.merge(filesToMerge, args[0]);
     } catch (GateException ge) {
-      ge.printStackTrace(System.err);
+      ge.printStackTrace(Err.getPrintWriter());
     }
     }// if
   }// main

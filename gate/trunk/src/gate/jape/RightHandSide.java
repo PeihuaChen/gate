@@ -1,10 +1,19 @@
 /*
-	RightHandSide.java - transducer class
-
-	Hamish Cunningham, 24/07/98
-
-	$Id$
-*/
+ *  RightHandSide.java - transducer class
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *
+ *  Hamish Cunningham, 24/07/98
+ *
+ *  $Id$
+ */
 
 
 package gate.jape;
@@ -28,6 +37,14 @@ import gate.*;
   */
 public class RightHandSide implements JapeConstants, java.io.Serializable
 {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
+
   /** The "action class" we create to implement the action. Has a static
     * method that performs the action of the RHS.
     */
@@ -176,7 +193,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     readActionClass();
     instantiateActionClass();
 */
-    //System.out.println(actionClassString);
+    //Out.println(actionClassString);
     try {
       actionClassBytes = new Jdk().compile(
         actionClassString.toString(),
@@ -211,7 +228,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     * as an external process.
     */
   public void compileActionClass() throws JapeException {
-    if(debug) System.out.println("RightHandSide: trying to compile action");
+    if(debug) Out.println("RightHandSide: trying to compile action");
 
     // see if we can find the sun compiler class
     Class sunCompilerClass = null;
@@ -270,11 +287,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
         throw e;
       } catch(Exception e) { // print out other sorts, and try javac exec
         compiledOk = new Boolean(false);
-        System.err.println(
+        Err.println(
           "Warning: RHS compiler error: " + e.toString()
         );
       }
-      if(debug) System.out.println("RightHandSide: action compiled ok");
+      if(debug) Out.println("RightHandSide: action compiled ok");
       if(compiledOk.booleanValue())
         return;
     }
@@ -287,20 +304,20 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
         System.getProperty("java.class.path") +
         " " + actionClassJavaFileName
       );
-      if(debug) System.out.println("doing " + actionCompileCommand);
+      if(debug) Out.println("doing " + actionCompileCommand);
 
       Process actionCompile = runtime.exec(actionCompileCommand);
       //InputStream stdout = actionCompile.getInputStream();
       //InputStream stderr = actionCompile.getErrorStream();
       actionCompile.waitFor();
 
-      //System.out.flush();
+      //Out.flush();
       //while(stdout.available() > 0)
-      //  System.out.print((char) stdout.read());
+      //  Out.print((char) stdout.read());
       //while(stderr.available() > 0)
-      //  System.out.print((char) stderr.read());
-      //System.out.flush();
-      if(debug) System.out.println("process complete");
+      //  Out.print((char) stderr.read());
+      //Out.flush();
+      if(debug) Out.println("process complete");
 
     } catch(Exception e) {
       throw new JapeException(
@@ -428,6 +445,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.11  2000/10/10 15:36:36  oana
+// Changed System.out in Out and System.err in Err;
+// Added the DEBUG variable seted on false;
+// Added in the header the licence;
+//
 // Revision 1.10  2000/07/04 14:37:39  valyt
 // Added some support for Jape-ing in a different annotations et than the default one;
 // Changed the L&F for the JapeGUI to the System default

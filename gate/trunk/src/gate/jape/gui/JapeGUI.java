@@ -1,10 +1,19 @@
 /*
-*	JapeGUI.java
-*
-*	Valentin Tablan, 22/May/2000
-*
-*	$Id$
-*/
+ *	JapeGUI.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
+ *	Valentin Tablan, 22/May/2000
+ *
+ *	$Id$
+ */
 package gate.jape.gui;
 
 import javax.swing.*;
@@ -28,6 +37,13 @@ import gate.creole.gazeteer.*;
 public class JapeGUI extends JFrame implements ProgressListener,
                                                StatusListener,
                                                Runnable {
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   public JapeGUI() {
     try  {
@@ -206,9 +222,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
               corpusFiles.add(selectedFiles[i].toURL().toExternalForm());
             }
           }catch(java.net.MalformedURLException mue){
-            mue.printStackTrace(System.err);
+            mue.printStackTrace(Err.getPrintWriter());
           }catch(IOException ioe){
-            ioe.printStackTrace(System.err);
+            ioe.printStackTrace(Err.getPrintWriter());
           }
         }//if(selectedFiles != null)
       }
@@ -230,9 +246,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
               corpus.add(currDoc);
               corpusFiles.add(selectedFile.toURL().toExternalForm());
           }catch(java.net.MalformedURLException mue){
-            mue.printStackTrace(System.err);
+            mue.printStackTrace(Err.getPrintWriter());
           }catch(IOException ioe){
-            ioe.printStackTrace(System.err);
+            ioe.printStackTrace(Err.getPrintWriter());
           }
         }//if(selectedFile != null)
       }
@@ -293,11 +309,11 @@ public class JapeGUI extends JFrame implements ProgressListener,
       }catch(java.net.MalformedURLException mue){
         progressBar.setValue(0);
         statusBar.setText(mue.toString());
-        mue.printStackTrace(System.err);
+        mue.printStackTrace(Err.getPrintWriter());
       }catch(IOException ioe){
         progressBar.setValue(0);
         statusBar.setText(ioe.toString());
-        ioe.printStackTrace(System.err);
+        ioe.printStackTrace(Err.getPrintWriter());
       }
       progressBar.setValue(0);
     }
@@ -312,10 +328,10 @@ public class JapeGUI extends JFrame implements ProgressListener,
     try{
       tokeniser =new DefaultTokeniser(tokeniserRulesFile.getAbsolutePath());
     }catch(IOException ioe){
-      System.err.println("Cannot read the tokeniser rules!" +
+      Err.println("Cannot read the tokeniser rules!" +
                          "\nAre the Gate resources in place?");
     }catch(TokeniserException te){
-      te.printStackTrace(System.err);
+      te.printStackTrace(Err.getPrintWriter());
     }
     tokeniser.addProcessProgressListener(this);
     tokeniser.addStatusListener(this);
@@ -351,16 +367,16 @@ public class JapeGUI extends JFrame implements ProgressListener,
         }
       }
     }catch(IOException ioe){
-      System.err.println("Cannot read the gazeteer lists!" +
+      Err.println("Cannot read the gazeteer lists!" +
                          "\nAre the Gate resources in place?");
     }catch(GazeteerException ge){
-      ge.printStackTrace(System.err);
+      ge.printStackTrace(Err.getPrintWriter());
     }
 //============================
 
 
     //do the jape stuff
-    try { Gate.init(); } catch(Exception e) { System.err.println(e); }
+    try { Gate.init(); } catch(Exception e) { Err.println(e); }
     progressBar.setValue(0);
     startJapeFileOpen = System.currentTimeMillis();
     logTextArea.append("gazeteer lookup time: " +
@@ -383,9 +399,9 @@ public class JapeGUI extends JFrame implements ProgressListener,
       logTextArea.append("transducing time: " +
                          (endProcess - startCorpusTransduce) + "ms\n");
     }catch(FileNotFoundException fnfe){
-      fnfe.printStackTrace(System.err);
+      fnfe.printStackTrace(Err.getPrintWriter());
     }catch(JapeException je){
-      je.printStackTrace(System.err);
+      je.printStackTrace(Err.getPrintWriter());
     }
     statusBar.setText("");
     //select the first document
@@ -424,7 +440,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
           doc.getAnnotations().add(new Long(start),
                                    new Long(end),
                                    "Token", fm);
-//System.out.println("Token: " + content.substring(start, end));
+//Out.println("Token: " + content.substring(start, end));
         }
       }//for
     }catch(InvalidOffsetException ioe){
@@ -547,11 +563,11 @@ public class JapeGUI extends JFrame implements ProgressListener,
 //                javax.swing.text.DefaultHighlighter.DefaultPainter);
         }
       }catch(javax.swing.text.BadLocationException ble){
-        ble.printStackTrace(System.err);
+        ble.printStackTrace(Err.getPrintWriter());
       }
     }
 
-//System.out.println(type);
+//Out.println(type);
   }
 
 
@@ -615,7 +631,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
   JButton tokRulesBtn = new JButton();
 
   void this_windowClosing(WindowEvent e) {
-    System.exit(0);
+    // System.exit(0);
   }
 
   void tokRulesBtn_actionPerformed(ActionEvent e) {
@@ -633,7 +649,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
   //ProgressListener implementation
   public void progressChanged(int i){
     if(lastProgress != i){
-//System.out.println(i);
+//Out.println(i);
       progressBar.setValue(i);
       if(System.currentTimeMillis() - lastProgressUpdate > 300){
         progressBar.paintImmediately(progressBar.getVisibleRect());

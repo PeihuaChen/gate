@@ -1,14 +1,24 @@
 /*
-*	FSMInstance.java
-*
-*	Valentin Tablan, 05/May/2000
-*
-*	$Id$
-*/
+ *	FSMInstance.java
+ *
+ *  Copyright (c) 2000-2001, The University of Sheffield.
+ *  
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June1991.
+ *  
+ *  A copy of this licence is included in the distribution in the file
+ *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  
+ *	Valentin Tablan, 05/May/2000
+ *
+ *	$Id$
+ */
 package gate.fsm;
 
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
+import gate.util.*;
 
 import java.util.*;
 
@@ -24,6 +34,13 @@ import java.util.*;
 * (java.lang.String) to bags of annotations (gate.AnnotationSet)
 */
 public class FSMInstance implements Comparable, Cloneable{
+  /**
+    *  This field is "final static" because it brings in
+    *  the advantage of dead code elimination
+    *  When DEBUG is set on false the code that it guardes will be eliminated
+    *  by the compiler. This will spead up the progam a little bit.
+    */
+  private static final boolean DEBUG = false;
 
   /** Creates a new FSMInstance object.
     *@param supportGraph the transition graph of the FSM
@@ -132,7 +149,7 @@ public Object clone() {
       clone.bindings = (HashMap)bindings.clone();
       return clone;
     }catch (CloneNotSupportedException cnse){
-      cnse.printStackTrace(System.err);
+      cnse.printStackTrace(Err.getPrintWriter());
       return null;
     }
   }
@@ -140,7 +157,7 @@ public Object clone() {
 /*
   public Object clone() {
   //do a classic clone except for bindings which need to be cloned themselves
-//System.out.println("Clone!");
+//Out.println("Clone!");
     FSMInstance clone = FSMInstance.getNewInstance(this.supportGraph,
                                                    this.FSMPosition,
                                                    this.startNode,
