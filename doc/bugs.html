@@ -1,4 +1,4 @@
-<!-- 
+<!--
 bugs.html
 
 Valentin Tablan, April 2001
@@ -33,7 +33,7 @@ Please send us a table entry looking like this:
     &lt;TD>Reported by&lt;/TD>
     &lt;TD>Adopted by&lt;/TD>
     &lt;TD>Reported on&lt;BR>(date/OS/JDK and&lt;BR>GATE versions)&lt;/TD>
-    &lt;TD>Fixed on&lt;BR>(date/GATE version)&lt;/TD>  
+    &lt;TD>Fixed on&lt;BR>(date/GATE version)&lt;/TD>
     &lt;TD>Description&lt;/TD>
     &lt;TD>Test method&lt;/TD>
     &lt;TD>Supporting materials&lt;/TD>
@@ -49,7 +49,7 @@ duplicate the bug. Please provide as much information as possible.
 <P>
 <UL>
 <LI>
-Adopt the bug by filling in the "Adopted by" column and checking in this 
+Adopt the bug by filling in the "Adopted by" column and checking in this
 file.
 <LI>
 Duplicate the bug; if you cannot, mail the person who submitted it and ask
@@ -80,7 +80,7 @@ and check in.
     <TD>___reported_by</TD>
     <TD>___adopted_by</TD>
     <TD>___reported_on ___date ___OS ___JDK ___Gversion</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
+    <TD>___fixed_on ___date ___Gversion</TD>
     <TD>___description</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
@@ -100,7 +100,7 @@ and check in.
     <TH>Reported by</TH>
     <TH>Adopted by</TH>
     <TH>Reported on (date/OS/JDK and GATE versions)</TH>
-    <TH>Fixed on (date/GATE version)</TH>  
+    <TH>Fixed on (date/GATE version)</TH>
     <TH>Description</TH>
     <TH>Test method</TH>
     <TH>Supporting materials</TH>
@@ -109,27 +109,12 @@ and check in.
   </TR>
 <!-- ENTRIES -------------------------------------------------------------->
   <TR>
-    <TD>0004</TD>
-    <TD>gui</TD>
-    <TD>Hamish</TD>
-    <TD>___adopted_by</TD>
-    <TD>16/5/1 NT4 1.3.1 a2build499</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
-    <TD>the applications edit component needs some work - it resizes in a
-    strange fashion e.g. when you select a component to add. in general
-    components shouldn't resize when you're clicking in them methinks</TD>
-    <TD>-</TD>
-    <TD>-</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-  <TR>
     <TD>0006</TD>
     <TD>core</TD>
     <TD>Valentin</TD>
     <TD>___adopted_by</TD>
     <TD>16/5/1 NT4 1.3.1 a2build499</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
+    <TD>___fixed_on ___date ___Gversion</TD>
     <TD>
 AnnotationSetImpl:
 <BR>
@@ -158,7 +143,7 @@ problem.
     <TD>Valentin</TD>
     <TD>___adopted_by</TD>
     <TD>16/5/1 NT4 1.3.1 a2build499</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
+    <TD>___fixed_on ___date ___Gversion</TD>
     <TD>
     gate.initCreoleRegister is looking in resources/gau for creole.xml
     when gate.Main starts up - it shouldn't, as this is only for testing
@@ -174,9 +159,9 @@ problem.
     <TD>Valentin</TD>
     <TD>___adopted_by</TD>
     <TD>12 June 01 ALL:ALL Alpha3</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
-    <TD>Jape grammars don't have direct access to the input annotation set. They only receive the list of 
-    matched annotations. This makes it impossible to reliably remove some of the matched annotations from 
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD>Jape grammars don't have direct access to the input annotation set. They only receive the list of
+    matched annotations. This makes it impossible to reliably remove some of the matched annotations from
     the input AS. All the grammars that do this are assuming that the input AS is the same as the output
     one (which is not guaranteed).</TD>
     <TD>___test_method</TD>
@@ -185,22 +170,6 @@ problem.
     <!--<TD>spare2</TD>-->
   </TR>
 
-  <TR>
-    <TD>0012</TD>
-    <TD>core</TD>
-    <TD>Valentin</TD>
-    <TD>___adopted_by</TD>
-    <TD>13 July 01 ALL:ALL Alpha3</TD>
-    <TD>1<sup>st</sup> June 2001<br>Alpha3 ALL builds</TD>  
-    <TD>
-    when it looks for creole.xml for an external Gate resource in the file system it downcases the whole
-    path (because it comes from a URL?)
-    </TD>
-    <TD>-</TD>
-    <TD>-</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
 
    <TR>
     <TD>0013</TD>
@@ -208,7 +177,7 @@ problem.
     <TD>Diana</TD>
     <TD>___adopted_by</TD>
     <TD>27 July 01 Linux 1.3.1 Alpha3</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
+    <TD>___fixed_on ___date ___Gversion</TD>
     <TD>annotation types which are empty do not get automatically removed from the GUI, nor is it possible to remove them manually (with the Delete key)</TD>
     <TD></TD>
     <TD></TD>
@@ -216,23 +185,6 @@ problem.
     <!--<TD>spare2</TD>-->
   </TR>
 
-  <TR>
-    <TD>0014</TD>
-    <TD>gui</TD>
-    <TD>Diana</TD>
-    <TD>___adopted_by</TD>
-    <TD>02 Aug 01 Linux 1.3.1 Alpha3</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
-    <TD>When adding new annotations, the popup window which should
-    appear to allow you to select an annotation type etc doesn't
-    always appear. Nothing happens at all, except an error message in
-    the command window of the type "Exception occurred during event
-    dispatching:"</TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
 
  <TR>
     <TD>0015</TD>
@@ -240,7 +192,7 @@ problem.
     <TD>Diana</TD>
     <TD>___adopted_by</TD>
     <TD>06 Aug 01 Linux 1.3.1 Alpha3</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>  
+    <TD>___fixed_on ___date ___Gversion</TD>
     <TD>If you manage to create 2 different processing errors/warnings simultaneously (of the type that create pop-up messages), neither pop-up window lets you close it, and nothing can be done until the messages are closed. </TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
@@ -262,7 +214,7 @@ problem.
     <TH>Reported by</TH>
     <TH>Adopted by</TH>
     <TH>Reported on (date/OS/JDK and GATE versions)</TH>
-    <TH>Fixed on (date/GATE version)</TH>  
+    <TH>Fixed on (date/GATE version)</TH>
     <TH>Description</TH>
     <TH>Test method</TH>
     <TH>Supporting materials</TH>
@@ -276,16 +228,31 @@ problem.
     <TD>Horacio</TD>
     <TD>Valentin</TD>
     <TD>April-01 NT4 JDK 1.3 alpha1</TD>
-    <TD>30<sup>th</sup> May 2001<br>Alpha3 build 512</TD>  
+    <TD>30<sup>th</sup> May 2001<br>Alpha3 build 512</TD>
     <TD>Infinite loop in jape processing
         <br>
-        <font color="green">Jape now detects infinite loops and recovers from them by 
+        <font color="green">Jape now detects infinite loops and recovers from them by
         forcing an advance of the input. This might loose some possible
         matches but it's better than waiting forever.
         <br>
         A warning message is displayed on the Err output.</font></TD>
     <TD></TD>
     <TD>directory bugs/0001</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+  <TR>
+    <TD>0002</TD>
+    <TD>gui</TD>
+    <TD>Hamish</TD>
+    <TD>Valentin</TD>
+    <TD>16/5/1 linux6.2/solaris7 1.3.1 a2-build499</TD>
+    <TD>30<sup>th</sup> May 2001<br>Alpha3 build 512</TD>
+    <TD>When a datastore is openned, and double-clicked on, before any
+    other resources are created, the resources tree resizes to near zero
+    size</TD>
+    <TD>-</TD>
+    <TD>-</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
@@ -296,7 +263,7 @@ problem.
     <TD>Hamish</TD>
     <TD>Cristi</TD>
     <TD>16/5/1 NT4 1.3.1 a2build499</TD>
-    <TD>Fixed on 18 May 2001 from alpha2 Build 501</TD>  
+    <TD>Fixed on 18 May 2001 from alpha2 Build 501</TD>
     <TD>when using larger-than-normal fonts, the annotation diff results at
     the bottom of the screen sometimes disappear outside the window</TD>
     <TD>-</TD>
@@ -304,30 +271,30 @@ problem.
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
-  
+
   <TR>
-    <TD>0002</TD>
+    <TD>0004</TD>
     <TD>gui</TD>
     <TD>Hamish</TD>
     <TD>Valentin</TD>
-    <TD>16/5/1 linux6.2/solaris7 1.3.1 a2-build499</TD>
-    <TD>30<sup>th</sup> May 2001<br>Alpha3 build 512</TD>  
-    <TD>When a datastore is openned, and double-clicked on, before any
-    other resources are created, the resources tree resizes to near zero
-    size</TD>
+    <TD>16/5/1 NT4 1.3.1 a2build499</TD>
+    <TD>16/Oct/2001/alpha 3</TD>
+    <TD>the applications edit component needs some work - it resizes in a
+    strange fashion e.g. when you select a component to add. in general
+    components shouldn't resize when you're clicking in them methinks</TD>
     <TD>-</TD>
     <TD>-</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
-  </TR>  
-  
+  </TR>
+
   <TR>
     <TD>0005</TD>
     <TD>gui</TD>
     <TD>Hamish</TD>
     <TD>Valentin</TD>
     <TD>16/5/1 NT4 1.3.1 a2build499</TD>
-    <TD>30<sup>th</sup> May 2001<br>Alpha3 build 512</TD>  
+    <TD>30<sup>th</sup> May 2001<br>Alpha3 build 512</TD>
     <TD>it would be nice if double click on a document in the datastore
     display tree loaded the document, in line with double clicking
     in the resource tree</TD>
@@ -342,7 +309,7 @@ problem.
     <TD>Valentin</TD>
     <TD>Valentin</TD>
     <TD>16/5/1 NT4 1.3.1 a2build499</TD>
-    <TD>1<sup>st</sup> June 2001<br>Alpha3 build 517</TD>  
+    <TD>1<sup>st</sup> June 2001<br>Alpha3 build 517</TD>
     <TD>
     when it looks for creole.xml in the file system it downcases the whole
     path (because it comes from a URL?)
@@ -358,8 +325,8 @@ problem.
     <TD>Kalina</TD>
     <TD>Oana</TD>
     <TD>18/May OS:NT Gate a2build499</TD>
-    <TD>1<sup>st</sup> June 2001<br>Alpha3 build 517</TD>  
-    <TD>Move the list loading from run to the init method, because they are meant to be read only 
+    <TD>1<sup>st</sup> June 2001<br>Alpha3 build 517</TD>
+    <TD>Move the list loading from run to the init method, because they are meant to be read only
 when the NM is initialised, not every time it's run.</TD>
     <TD>-</TD>
     <TD>-</TD>
@@ -372,8 +339,8 @@ when the NM is initialised, not every time it's run.</TD>
     <TD>Kalina</TD>
     <TD>Oana</TD>
     <TD>18/May OS:NT Gate a2build499</TD>
-    <TD>1<sup>st</sup> June 2001<br>Alpha3 build 517</TD>  
-    <TD>I added BT Cellnet and BT Wireless as spurious matches in the spur_match.lst file. However if you 
+    <TD>1<sup>st</sup> June 2001<br>Alpha3 build 517</TD>
+    <TD>I added BT Cellnet and BT Wireless as spurious matches in the spur_match.lst file. However if you
 the NM on the file which I created for testing \resources\gate\texts\namematcher-test.txt, then the NM
 still matches them to BT, when it should not. </TD>
     <TD>just run in GUI, after the NE recogniser, on file namematcher-test from \resources\gate\texts</TD>
@@ -381,7 +348,40 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
-  
+  <TR>
+    <TD>0012</TD>
+    <TD>core</TD>
+    <TD>Valentin</TD>
+    <TD>Valentin</TD>
+    <TD>13 July 01 ALL:ALL Alpha3</TD>
+    <TD>1<sup>st</sup> June 2001<br>Alpha3 ALL builds</TD>
+    <TD>
+    when it looks for creole.xml for an external Gate resource in the file system it downcases the whole
+    path (because it comes from a URL?)
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+  <TR>
+    <TD>0014</TD>
+    <TD>gui</TD>
+    <TD>Diana</TD>
+    <TD>Valentin</TD>
+    <TD>02 Aug 01 Linux 1.3.1 Alpha3</TD>
+    <TD>Oct/2001/ beta1</TD>
+    <TD>When adding new annotations, the popup window which should
+    appear to allow you to select an annotation type etc doesn't
+    always appear. Nothing happens at all, except an error message in
+    the command window of the type "Exception occurred during event
+    dispatching:"</TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 </TABLE>
 
 
