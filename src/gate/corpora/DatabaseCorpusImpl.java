@@ -28,11 +28,28 @@ import gate.util.*;
 
 
 public class DatabaseCorpusImpl extends CorpusImpl
-                                implements DatastoreListener {
+                                implements DatastoreListener,
+                                           EventAwareLanguageResource {
 
-  public DatabaseCorpusImpl() {
+
+  private boolean featuresChanged;
+
+
+  public DatabaseCorpusImpl(String _name,
+                            DatabaseDataStore _ds,
+                            Long _persistenceID,
+                            FeatureMap _features,
+                            Vector _dbDocs) {
 
     super();
+
+    this.name = _name;
+    this.dataStore = _ds;
+    this.lrPersistentId = _persistenceID;
+    this.features = _features;
+    this.documentsList = _dbDocs;
+
+    this.featuresChanged = false;
 
     //4. add self as listener for the data store, so that we'll know when the DS is
     //synced and we'll clear the isXXXChanged flags
@@ -154,15 +171,42 @@ public class DatabaseCorpusImpl extends CorpusImpl
   public void resourceDeleted(DatastoreEvent evt){
 
     Assert.assertNotNull(evt);
-    Assert.assertNotNull(evt.getResourceID());
+    Long  deletedID = (Long)evt.getResourceID();
+    Assert.assertNotNull(deletedID);
 
     //unregister self as listener from the DataStore
-    if (evt.getResourceID().equals(this.getLRPersistenceId())) {
-      //someone deleted this document
+    if (deletedID.equals(this.getLRPersistenceId())) {
+      //someone deleted this corpus
+      this.documentsList.clear();
       getDataStore().removeDatastoreListener(this);
     }
+
+    //check if the ID is of a document the corpus contains
+    Iterator it = this.documentsList.iterator();
+    while (it.hasNext()) {
+      Document doc = (Document)it.next();
+      if (doc.getLRPersistenceId().equals(deletedID)) {
+        this.documentsList.remove(doc);
+        break;
+      }
+    }
+
+
   }
 
   public void resourceWritten(DatastoreEvent evt){
   }
+
+  public boolean isResourceChanged(int changeType) {
+
+    switch(changeType) {
+
+      case EventAwareLanguageResource.RES_FEATURES:
+        return this.featuresChanged;
+      default:
+        throw new IllegalArgumentException();
+    }
+
+  }
+
 }
