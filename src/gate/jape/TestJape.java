@@ -1,4 +1,61 @@
-////  
+/*
+ *	TestJape.java
+ *
+ *	Hamish Cunningham, 23/Feb/00
+ *
+ *	$Id$
+ */
+
+package gate.jape;
+
+import java.util.*;
+import java.io.*;
+import junit.framework.*;
+
+import gate.*;
+import gate.util.*;
+import gate.annotation.*;
+
+/** Tests for the Corpus classes
+  */
+public class TestJape extends TestCase
+{
+  /** Construction */
+  public TestJape(String name) { super(name); }
+
+  /** Fixture set up */
+  public void setUp() {
+    System.out.println("TestJape.setUp()");
+  } // setUp
+
+  /** Batch run */
+  public void testBatch() throws JapeException {
+    Corpus c = Transients.newCorpus("TestJape corpus");
+
+    // run the parser test
+    Batch batch = null;
+///    batch = new Batch("../misc/jape/grammars/Test11.jape");
+
+    // test the transducers
+///    batch.transduce(c);
+
+    // check the results
+
+  } // testBatch()
+
+  /** Test suite routine for the test runner */
+  public static Test suite() {
+    return new TestSuite(TestJape.class);
+  } // main
+
+} // class TestJape
+
+
+
+
+
+//// OLD VERSION:
+////
 ////  //Title:        TestJape.java (Java Annotation Patterns Engine)
 ////  //Version:      $Id$
 ////  //Copyright:    Copyright (c) 1998
@@ -6,7 +63,7 @@
 ////  //Company:      NLP Group, DCS, Univ. of Sheffield
 ////  //Description:  Test class for JAPE.
 ////  
-package gate.jape;
+//// package gate.jape;
 ////  
 ////  import gate.jape.parser.*;
 ////  import gate.*;
@@ -22,7 +79,7 @@ package gate.jape;
 ////    * from the gate2 directory.
 ////    * @author Hamish Cunningham
 ////    */
-public class TestJape {
+//// public class TestJape {
 ////  
 ////    static public void main(String[] args) {
 ////      // initialise GATE
@@ -147,7 +204,7 @@ public class TestJape {
 ////      } catch(gate.jape.parser.ParseException ee) {
 ////        ee.printStackTrace();
 ////      }
-////  
+////
 ////      return transducers;
 ////    } // testParser
 ////  
@@ -270,75 +327,4 @@ public class TestJape {
 ////  
 ////    } // testCompilerOutput
 ////  
-} // class TestJape
-////  
-////  
-////  // $Log$
-////  // Revision 1.1  2000/02/23 13:46:12  hamish
-////  // added
-////  //
-////  // Revision 1.1.1.1  1999/02/03 16:23:02  hamish
-////  // added gate2
-////  //
-////  // Revision 1.21  1998/10/30 15:31:08  kalina
-////  // Made small changes to make compile under 1.2 and 1.1.x
-////  //
-////  // Revision 1.20  1998/09/18 16:54:19  hamish
-////  // save/restore works except for attribute seq
-////  //
-////  // Revision 1.19  1998/09/17 16:48:34  hamish
-////  // added macro defs and macro refs on LHS
-////  //
-////  // Revision 1.18  1998/09/17 12:53:07  hamish
-////  // fixed for new tok; new construction pattern
-////  //
-////  // Revision 1.17  1998/08/19 20:21:45  hamish
-////  // new RHS assignment expression stuff added
-////  //
-////  // Revision 1.16  1998/08/18 12:43:10  hamish
-////  // fixed SPT bug, not advancing newPosition
-////  //
-////  // Revision 1.15  1998/08/10 14:16:42  hamish
-////  // fixed consumeblock bug and added batch.java
-////  //
-////  // Revision 1.14  1998/08/07 16:39:18  hamish
-////  // parses, transduces. time for a break
-////  //
-////  // Revision 1.13  1998/08/07 16:18:48  hamish
-////  // parser pretty complete, with backend link done
-////  //
-////  // Revision 1.12  1998/08/07 12:01:48  hamish
-////  // parser works; adding link to backend
-////  //
-////  // Revision 1.11  1998/08/05 21:58:08  hamish
-////  // backend works on simple test
-////  //
-////  // Revision 1.10  1998/08/04 13:51:36  hamish
-////  // moved creole packages from uk to sheffield
-////  //
-////  // Revision 1.9  1998/08/03 21:45:00  hamish
-////  // moved parser classes to gate.jape.parser
-////  //
-////  // Revision 1.8  1998/08/03 19:51:29  hamish
-////  // rollback added
-////  //
-////  // Revision 1.7  1998/07/31 16:50:20  mks
-////  // RHS compilation works; it runs - and falls over...
-////  //
-////  // Revision 1.6  1998/07/31 13:12:29  mks
-////  // done RHS stuff, not tested
-////  //
-////  // Revision 1.5  1998/07/30 12:16:17  mks
-////  // reorganising
-////  //
-////  // Revision 1.4  1998/07/29 20:34:02  hamish
-////  // resolved conflict
-////  //
-////  // Revision 1.3  1998/07/29 15:08:28  kalina
-////  // not sure...
-////  //
-////  // Revision 1.2  1998/07/29 11:07:13  hamish
-////  // first compiling version
-////  //
-////  // Revision 1.1.1.1  1998/07/28 16:37:46  hamish
-////  // gate2 lives
+////} // class TestJape
