@@ -236,22 +236,36 @@ Priority: 35
 :person -->
 {
  gate.FeatureMap features = Factory.newFeatureMap();
-// create an annotation set consisting of all the annotations for person 
 gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-// create an annotation set consisting of the annotation matching FirstPerson
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
-// if the annotation type FirstPerson doesn't exist, do nothing
-if (firstPerson != null && firstPerson.size()>0)
+  
+ // get all Title annotations that have a gender feature
+ HashSet fNames = new HashSet();
+    fNames.add("gender");
+    gate.AnnotationSet personTitle = personSet.get("Title", fNames);
+
+// if the gender feature exists
+ if (personTitle != null && personTitle.size()>0)
 {
-// if it does exist, take the first element in the set
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-//propagate gender feature (and value) from FirstPerson
+  Out.prln("Titles found " +  personTitle);
+  gate.Annotation personAnn = (gate.Annotation)personTitle.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
 }
-// create some new features
+else
+{
+  //get all firstPerson annotations that have a gender feature
+  //  HashSet fNames = new HashSet();
+   // fNames.add("gender");
+    gate.AnnotationSet firstPerson = personSet.get("FirstPerson", fNames);
+
+  if (firstPerson != null && firstPerson.size()>0)
+ {
+    Out.prln("First persons found " +  firstPerson);
+  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+ }
+}
   features.put("kind", "personName");
-  features.put("rule", "PersonTitle");
-// create a TempPerson annotation and add the features we've created
+  features.put("rule", "PersonFull");
 annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
@@ -423,9 +437,15 @@ Priority: 10
 {
  gate.FeatureMap features = Factory.newFeatureMap();
 gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
-if (firstPerson != null && firstPerson.size()>0)
-{
+  
+  //get all firstPerson annotations that have a gender feature
+    HashSet fNames = new HashSet();
+    fNames.add("gender");
+    gate.AnnotationSet firstPerson = personSet.get("FirstPerson", fNames);
+
+  if (firstPerson != null && firstPerson.size()>0)
+ {
+    Out.prln("First persons found " +  firstPerson);
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
 }
@@ -434,7 +454,6 @@ if (firstPerson != null && firstPerson.size()>0)
 annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
-
 
 Rule: PersonFullStop
 Priority: 50
@@ -1089,3 +1108,10 @@ Priority: 50
 :org
 -->
  :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
+
+
+
+
+
+
+
