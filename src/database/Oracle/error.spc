@@ -65,6 +65,9 @@ create or replace package error is
 
   x_incomplete_data EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_incomplete_data, -20112);
+
+  x_invalid_lr_type EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_lr_type, -20113);
                            
 end error;
 /
