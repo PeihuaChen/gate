@@ -41,7 +41,7 @@ import gate.creole.nerc.*;
   * <A HREF=../gate/TestGate.html>gate.TestGate</A>'s <TT>main</TT> method,
   * which will invoke the
   * JUnit test runner). Also, we can use JUnit's assert methods: e.g.
-  * <TT>assert(corpus.isEmpty());</TT>
+  * <TT>assertTrue(corpus.isEmpty());</TT>
   * tests that a corpus object is empty, and creates a test failure report if
   * this is not the case. (To add a new test class to the suite, see the
   * <A HREF=../gate/util/TestTemplate.html>gate.util.TestTemplate</A> class.)
@@ -135,7 +135,7 @@ public class CookBook extends TestCase
     Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
     // now we have a document
-    assert(
+    assertTrue(
       "should be document but the class is: " + res.getClass().getName(),
       res instanceof gate.Document
     );
@@ -146,7 +146,7 @@ public class CookBook extends TestCase
     int numMarkupAnnotations = markupAnnotations.size();
     if(DEBUG)
       Out.prln("annotations on doc after unpack= " + numMarkupAnnotations);
-    assert(
+    assertTrue(
       "wrong number annots on doc: " + doc + numMarkupAnnotations,
       numMarkupAnnotations == 27
     );
@@ -160,7 +160,7 @@ public class CookBook extends TestCase
     corpus = Factory.newCorpus("My example corpus");
 
     // the corpus interface inherits all the sorted set methods
-    assert(corpus.isEmpty());
+    assertTrue(corpus.isEmpty());
 
   } // testCorpusConstruction
 
@@ -177,7 +177,7 @@ public class CookBook extends TestCase
     Iterator iter = corpus.iterator();
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
-      assert(
+      assertTrue(
         "document url not as expected",
         doc.getSourceUrl().toExternalForm().endsWith("doc0.html") ||
           doc.getSourceUrl().toExternalForm().endsWith("test1.htm")
@@ -209,12 +209,12 @@ public class CookBook extends TestCase
     // putting features on documents
     FeatureMap fm = Factory.newFeatureMap();
     doc1.setFeatures(fm);
-    assert(fm.size() == 0);
+    assertTrue(fm.size() == 0);
     fm.put("author", "segovia");
-    assert(fm.get("author").equals("segovia"));
+    assertTrue(fm.get("author").equals("segovia"));
     fm.put("author", "brendl"); // map puts overwrite existing values
-    assert(fm.get("author").equals("brendl"));
-    assert(fm.size() == 1);
+    assertTrue(fm.get("author").equals("brendl"));
+    assertTrue(fm.size() == 1);
 
   } // testUsingFeatures
 

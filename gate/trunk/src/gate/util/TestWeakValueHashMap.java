@@ -45,7 +45,7 @@ public class TestWeakValueHashMap extends TestCase {
     System.gc();
 
     //the last two values should have dissappeared
-    assert("The weak hash map has not been cleaned:\n" +
+    assertTrue("The weak hash map has not been cleaned:\n" +
            "expected size: 1; actual size: " + wvhm.size(), wvhm.size() == 1);
   }
 
@@ -63,9 +63,9 @@ public class TestWeakValueHashMap extends TestCase {
     //force gc
     System.gc();
 
-    assert("Key misteriously dissappeared", wvhm.containsKey("v1"));
-    assert("Key misteriously preserved", !wvhm.containsKey("v2"));
-    assert("Key misteriously preserved", !wvhm.containsKey("v3"));
+    assertTrue("Key misteriously dissappeared", wvhm.containsKey("v1"));
+    assertTrue("Key misteriously preserved", !wvhm.containsKey("v2"));
+    assertTrue("Key misteriously preserved", !wvhm.containsKey("v3"));
   }
 
   public void testContainsValue(){
@@ -83,7 +83,7 @@ public class TestWeakValueHashMap extends TestCase {
     System.gc();
 
     //the last two values should have dissappeared
-    assert("Value misteriously dissappeared", wvhm.containsValue(value1));
+    assertTrue("Value misteriously dissappeared", wvhm.containsValue(value1));
   }
 
 
@@ -106,7 +106,7 @@ public class TestWeakValueHashMap extends TestCase {
     //populate the Map;
     wvhm.put("null", null);
 
-    assert("The weak hash map does not support null values!",
+    assertTrue("The weak hash map does not support null values!",
            wvhm.get("null") == null);
   }
 

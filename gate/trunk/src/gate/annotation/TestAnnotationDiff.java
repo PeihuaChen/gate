@@ -107,10 +107,10 @@ public class TestAnnotationDiff extends TestCase
 
 //*/
 //*
-    assert("Precision strict changed.That's because of the key/response" +
+    assertTrue("Precision strict changed.That's because of the key/response" +
             " document or" + " code implementation!",
                         0.16666666666666666 == annotDiff.getPrecisionStrict());
-    assert("Recall strict changed.That's because of the key/response" +
+    assertTrue("Recall strict changed.That's because of the key/response" +
     " document or" + " code implementation!",
                     0.18181818181818182 == annotDiff.getRecallStrict());
 

@@ -49,7 +49,7 @@ public class TestTemplate extends TestCase
 
   /** A test */
   public void testSomething() throws Exception {
-    assert(true);
+    assertTrue(true);
   } // testSomething()
 
   /** Test suite routine for the test runner */

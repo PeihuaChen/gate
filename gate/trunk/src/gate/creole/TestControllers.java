@@ -103,7 +103,7 @@ public class TestControllers extends TestCase
       Out.prln(doc.getContent());
     }
     AnnotationSet annots = doc.getAnnotations();
-    assert("no annotations from doc!", !annots.isEmpty());
+    assertTrue("no annotations from doc!", !annots.isEmpty());
     Annotation a = annots.get(new Integer(580));
     assertNotNull("couldn't get annot with id 580", a);
 //sorry, this is no way to write a test!

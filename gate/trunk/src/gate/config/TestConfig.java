@@ -75,7 +75,7 @@ public class TestConfig extends TestCase
     // so it doesn't get accessed in other tests
     CreoleRegister reg = Gate.getCreoleRegister();
     Set dirs = reg.getDirectories();
-    assert(
+    assertTrue(
       "CREOLE register doesn't contain URL from test gate.xml",
       dirs != null && ! dirs.isEmpty() &&
       dirs.contains(new URL("http://somewhere.on.the.net/creole/"))

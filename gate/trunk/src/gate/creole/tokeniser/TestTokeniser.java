@@ -60,7 +60,7 @@ public class TestTokeniser extends TestCase{
     tokeniser.setDocument(doc);
     tokeniser.setAnnotationSetName("TokeniserAS");
     tokeniser.execute();
-    assert(! doc.getAnnotations("TokeniserAS").isEmpty());
+    assertTrue(! doc.getAnnotations("TokeniserAS").isEmpty());
   }
 
   /** Test suite routine for the test runner */

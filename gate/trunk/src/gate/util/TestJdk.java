@@ -46,8 +46,8 @@ public class TestJdk extends TestCase
   /** Jdk tool directory finder */
   public void testFinder() throws Exception {
     String toolsDir = jdk.getToolsHome().getPath();
-    assert(true);
-//    assert(
+    assertTrue(true);
+//    assertTrue(
 //      "Tools dir was found to be: " + toolsDir,
 //      toolsDir.startsWith("w:\\jdk\\jdk1") ||
 //      toolsDir.startsWith("W:\\jdk\\jdk1") ||
@@ -81,7 +81,7 @@ public class TestJdk extends TestCase
       ;
     Gate.init();
     byte[] classBytes = jdk.compile(javaSource, "gate/util/X.java");
-    assert(
+    assertTrue(
       "no bytes returned from compiler",
       classBytes != null && classBytes.length > 0
     );
@@ -96,8 +96,8 @@ public class TestJdk extends TestCase
     // try and instantiate one
     Class theXClass = jdk.defineClass("gate/util/X", classBytes);
     Object theXObject = jdk.instantiateClass(theXClass);
-    assert("couldn't instantiate the X class", theXObject != null);
-    assert(
+    assertTrue("couldn't instantiate the X class", theXObject != null);
+    assertTrue(
       "X instantiated wrongly, name = " + theXObject.getClass().getName(),
       theXObject.getClass().getName().equals("gate.util.X")
     );
@@ -150,7 +150,7 @@ public class TestJdk extends TestCase
     // but life is finite, so:
     if(true) return;
 
-    assert(
+    assertTrue(
       "compiled binary doesn't equal on-disk binary",
       compiledBytes.equals(thisClassBytes)
     );
@@ -166,19 +166,19 @@ public class TestJdk extends TestCase
 
     //loader.addURL(new URL("file:/build/TestJdk.jar"));
     Class dummyClass1 = loader.loadClass("testpkg.Dummy");
-    assert("dummy1 is null", dummyClass1 != null);
+    assertTrue("dummy1 is null", dummyClass1 != null);
     Object dummyObject1 = dummyClass1.newInstance();
-    assert("dummy1 object is null", dummyObject1 != null);
+    assertTrue("dummy1 object is null", dummyObject1 != null);
 
     Class dummyClass2 = loader.reloadClass("testpkg.Dummy");
-    assert("dummy2 is null", dummyClass2 != null);
+    assertTrue("dummy2 is null", dummyClass2 != null);
     Object dummyObject2 = dummyClass2.newInstance();
-    assert("dummy2 object is null", dummyObject2 != null);
+    assertTrue("dummy2 object is null", dummyObject2 != null);
 
     Class dummyClass3 = loader.reloadClass("testpkg.Dummy");
-    assert("dummy3 is null", dummyClass2 != null);
+    assertTrue("dummy3 is null", dummyClass2 != null);
     Object dummyObject3 = dummyClass3.newInstance();
-    assert("dummy3 object is null", dummyObject3 != null);
+    assertTrue("dummy3 object is null", dummyObject3 != null);
 
   } // testReloading
 

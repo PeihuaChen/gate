@@ -110,7 +110,7 @@ public class SessionImpl implements Session {
    *  */
   public boolean equals(Object obj)
   {
-    Assert.assert(obj instanceof Session);
+    Assert.assertTrue(obj instanceof Session);
 
     Session s2 = (Session)obj;
 

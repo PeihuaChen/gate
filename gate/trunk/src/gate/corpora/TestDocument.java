@@ -75,9 +75,9 @@ public class TestDocument extends TestCase
     doc2 = Factory.newDocument(new URL(testServer + "tests/defg"));
     doc3 = Factory.newDocument(new URL(testServer + "tests/abc"));
 
-    assert(doc1.compareTo(doc2) < 0);
-    assert(doc1.compareTo(doc1) == 0);
-    assert(doc1.compareTo(doc3) > 0);
+    assertTrue(doc1.compareTo(doc2) < 0);
+    assertTrue(doc1.compareTo(doc1) == 0);
+    assertTrue(doc1.compareTo(doc3) > 0);
 
   } // testCompareTo()
 

@@ -43,22 +43,22 @@ public class TestCorpus extends TestCase
   public void testCreation() throws Exception {
     Corpus c = Factory.newCorpus("test corpus");
 
-    assert(c.isEmpty());
-    assert(c.getName().equals("test corpus"));
+    assertTrue(c.isEmpty());
+    assertTrue(c.getName().equals("test corpus"));
 
     c.setFeatures(new SimpleFeatureMapImpl());
     c.getFeatures().put("author", "hamish");
     c.getFeatures().put("date", new Integer(180200));
-    assert(c.getFeatures().size() == 2);
+    assertTrue(c.getFeatures().size() == 2);
 
     Corpus c2 = Factory.newCorpus("test corpus2");
     c2.getFeatures().put("author", "hamish");
     c2.getFeatures().put("author", "valy");
-    assert(
+    assertTrue(
       "corpus feature set wrong, size = " + c2.getFeatures().size(),
       c2.getFeatures().size() == 1
     );
-    assert(c2.getFeatures().get("author").equals("valy"));
+    assertTrue(c2.getFeatures().get("author").equals("valy"));
 
   } // testCreation()
 
@@ -69,8 +69,8 @@ public class TestCorpus extends TestCase
     Document d2 = Factory.newDocument("another document");
     d2.setSourceUrl(new URL("http://localhost/1"));
     d2.setSourceUrl(new URL("http://localhost/2"));
-    assert(c.add(d1));
-    assert(c.add(d2));
+    assertTrue(c.add(d1));
+    assertTrue(c.add(d2));
     assertEquals(2, c.size());
   } // testDocumentAddition()
 

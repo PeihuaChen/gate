@@ -44,13 +44,13 @@ public class TestSerialCorpus extends TestCase
     Corpus c = new SerialCorpusImpl(Factory.newCorpus("test"));
     c.setName("test corpus");
 
-    assert(c.isEmpty());
-    assert(c.getName().equals("test corpus"));
+    assertTrue(c.isEmpty());
+    assertTrue(c.getName().equals("test corpus"));
 
     c.setFeatures(new SimpleFeatureMapImpl());
     c.getFeatures().put("author", "hamish");
     c.getFeatures().put("date", new Integer(180200));
-    assert(c.getFeatures().size() == 2);
+    assertTrue(c.getFeatures().size() == 2);
 
 
   } // testCreation()
@@ -62,8 +62,8 @@ public class TestSerialCorpus extends TestCase
     Document d2 = Factory.newDocument("another document");
     d2.setSourceUrl(new URL("http://localhost/1"));
     d2.setSourceUrl(new URL("http://localhost/2"));
-    assert(c.add(d1));
-    assert(c.add(d2));
+    assertTrue(c.add(d1));
+    assertTrue(c.add(d2));
     assertEquals(2, c.size());
 
     Corpus c1 = new SerialCorpusImpl(c);

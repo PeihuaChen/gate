@@ -1112,7 +1112,7 @@ public class AccessControllerImpl
 
     if (source instanceof Group) {
 
-      Assert.assert(subtype == Group.OBJECT_CHANGE_ADDUSER ||
+      Assert.assertTrue(subtype == Group.OBJECT_CHANGE_ADDUSER ||
                     subtype == Group.OBJECT_CHANGE_NAME ||
                     subtype == Group.OBJECT_CHANGE_REMOVEUSER);
 
@@ -1138,16 +1138,16 @@ public class AccessControllerImpl
           }
         }
 
-        Assert.assert(found);
+        Assert.assertTrue(found);
       }
     }
     else {
 
-      Assert.assert(source instanceof User);
+      Assert.assertTrue(source instanceof User);
 
       //the name of the user could be different now (IDs are fixed)
 
-      Assert.assert(subtype == User.OBJECT_CHANGE_NAME);
+      Assert.assertTrue(subtype == User.OBJECT_CHANGE_NAME);
 
       //the name of the group could be different now (IDs are fixed)
       if (subtype == User.OBJECT_CHANGE_NAME) {
@@ -1171,7 +1171,7 @@ public class AccessControllerImpl
           }
         }
 
-        Assert.assert(found);
+        Assert.assertTrue(found);
       }
     }
 

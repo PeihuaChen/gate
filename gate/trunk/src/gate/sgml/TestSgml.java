@@ -40,7 +40,7 @@ public class TestSgml extends TestCase
   } // setUp
 
   public void testSgmlLoading() throws Exception {
-    assert(true);
+    assertTrue(true);
 
     // create the markupElementsMap map
     Map markupElementsMap = null;
@@ -66,7 +66,7 @@ public class TestSgml extends TestCase
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
         doc, doc.getSourceUrl()
     );
-    assert( "Bad document Format was produced. SgmlDocumentFormat was expected",
+    assertTrue( "Bad document Format was produced. SgmlDocumentFormat was expected",
             docFormat instanceof gate.corpora.SgmlDocumentFormat
           );
 
