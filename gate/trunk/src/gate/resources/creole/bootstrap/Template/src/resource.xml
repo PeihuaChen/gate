@@ -1,0 +1,15 @@
+<!-- resource.xml ___RESOURCE___ -->
+<!--  ___AUTHOR___, ___DATE___ -->
+<!-- $Id$ -->
+
+<CREOLE-DIRECTORY>
+
+<CREOLE>
+  <RESOURCE>
+    <NAME>Template</NAME>
+    <JAR>Template.jar</JAR>
+    <CLASS>___PACKAGE___.___CLASSNAME___</CLASS>
+  </RESOURCE>
+</CREOLE>
+
+</CREOLE-DIRECTORY>
