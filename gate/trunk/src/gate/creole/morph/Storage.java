@@ -1,6 +1,7 @@
 package gate.creole.morph;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * <p>Title: Storage.java </p>

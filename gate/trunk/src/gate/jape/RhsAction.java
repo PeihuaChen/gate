@@ -14,11 +14,12 @@
  */
 
 package gate.jape;
-import gate.*;
-import gate.creole.ontology.Ontology;
-
+import java.io.Serializable;
 import java.util.Map;
-import java.io.*;
+
+import gate.AnnotationSet;
+import gate.Document;
+import gate.creole.ontology.Ontology;
 
 /** An interface that defines what the action classes created
   * for RightHandSides look like.

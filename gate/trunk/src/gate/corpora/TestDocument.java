@@ -15,14 +15,16 @@
 
 package gate.corpora;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
+
 import junit.framework.*;
 
 import gate.*;
-import gate.util.*;
-import gate.annotation.*;
+import gate.util.Err;
+import gate.util.GateException;
 
 /** Tests for the Document classes
   */

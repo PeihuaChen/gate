@@ -14,9 +14,11 @@
  */
 package gate.gui;
 
-import javax.swing.*;
 import java.awt.Color;
 import java.awt.Component;
+
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 public class TabBlinker implements Runnable{
     public TabBlinker(JTabbedPane pane, Component comp, Color blinkColor){

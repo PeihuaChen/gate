@@ -2,12 +2,14 @@
 package gate.jape.parser;
 
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
-import gate.util.*;
-import gate.*;
+
+import gate.event.StatusListener;
 import gate.jape.*;
-import gate.event.*;
+import gate.util.Pair;
+import gate.util.Strings;
 
 
 /**

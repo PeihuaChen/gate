@@ -15,14 +15,17 @@
 
 package gate.gui.lexicon;
 
-import javax.swing.*;
-import java.awt.*;
-import gate.lexicon.*;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.*;
-import gate.util.GateRuntimeException;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import gate.gui.OkCancelDialog;
-import java.util.Vector;
-import javax.swing.event.*;
+import gate.lexicon.*;
+import gate.util.GateRuntimeException;
 
 public class ChooseSynsetPanel extends JPanel {
 

@@ -15,7 +15,6 @@
 
 package gate.wordnet;
 
-import gate.util.*;
 
 class RelationImpl implements Relation {
 

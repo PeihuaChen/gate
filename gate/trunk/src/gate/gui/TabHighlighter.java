@@ -13,11 +13,14 @@
 package gate.gui;
 
 
-import javax.swing.*;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.*;
-import javax.swing.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Highligts a tab in a JTabbedPane. Removes the highlight automatically when

@@ -16,10 +16,11 @@
 package gate.creole.annotransfer;
 
 import java.util.*;
+
 import gate.*;
 import gate.creole.*;
-import gate.util.*;
-import gate.corpora.*;
+import gate.util.GateRuntimeException;
+import gate.util.Out;
 
 /**
  * This class is the implementation of the resource ACEPROCESSOR.

@@ -13,14 +13,13 @@
  */
 package gate.creole.ml;
 
-import java.util.*;
-import java.io.*;
+import java.util.List;
 
-import org.jdom.*;
+import org.jdom.Element;
 
-import gate.*;
-import gate.util.*;
+import gate.ProcessingResource;
 import gate.creole.ExecutionException;
+import gate.util.GateException;
 
 /**
  * This interface is used for wrappers to Machine Learning engines.

@@ -14,26 +14,19 @@
 
 package gate.gui;
 
-import java.awt.Frame;
-import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.table.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.NumberFormat;
 
-import java.util.*;
-import java.net.URL;
-import java.io.IOException;
-import java.text.*;
+import javax.swing.*;
+import javax.swing.table.TableCellEditor;
 
 import gate.*;
-import gate.util.*;
-import gate.swing.*;
-import gate.creole.*;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
+import gate.util.Err;
 
 public class NewResourceDialog extends JDialog {
 

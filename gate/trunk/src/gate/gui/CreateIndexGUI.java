@@ -13,17 +13,15 @@
  */
 package gate.gui;
 
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.Insets;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.*;
-import java.io.File;
+import java.util.List;
+
+import javax.swing.*;
 
 import gate.Gate;
 import gate.creole.ir.IREngine;
-import gate.util.*;
 
 /**
  * Provides a gui for creating a IR index on a corpus.

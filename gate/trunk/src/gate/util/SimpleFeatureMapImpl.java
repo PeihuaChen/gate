@@ -16,15 +16,17 @@
 
 package gate.util;
 
-import java.util.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Set;
+import java.util.Vector;
 
-import gate.*;
-import gate.event.*;
-//import gate.creole.*;
-import gate.creole.ontology.*;
+import com.ontotext.gate.ontology.OntologyImpl;
 
-import com.ontotext.gate.ontology.*;
+import gate.FeatureMap;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.Ontology;
+import gate.event.FeatureMapListener;
 
 /** Simple case of features. */
 //>>> DAM: was (derived from HashMap)

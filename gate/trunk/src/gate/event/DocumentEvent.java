@@ -12,9 +12,7 @@
  */
 package gate.event;
 
-import gate.*;
-
-import java.util.EventObject;
+import gate.Document;
 
 /**
  * This class models events fired by an {@link gate.Document}.

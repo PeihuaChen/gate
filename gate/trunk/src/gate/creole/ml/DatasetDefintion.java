@@ -13,14 +13,13 @@
  */
 package gate.creole.ml;
 
-import java.util.*;
-import java.io.*;
-import java.net.URL;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import org.jdom.*;
-import org.jdom.input.*;
+import org.jdom.Element;
 
-import gate.util.*;
+import gate.util.GateException;
 
 /**
  * Stores data describing a dataset.

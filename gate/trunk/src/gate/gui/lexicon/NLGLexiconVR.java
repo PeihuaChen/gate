@@ -14,19 +14,19 @@
  */
 package gate.gui.lexicon;
 
-import gate.creole.*;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import gate.creole.AbstractVisualResource;
+import gate.gui.OkCancelDialog;
 import gate.lexicon.*;
 import gate.util.GateRuntimeException;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.*;
-import java.util.*;
-import gate.util.*;
-import gate.gui.OkCancelDialog;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
+import gate.util.Out;
 
 public class NLGLexiconVR extends AbstractVisualResource {
   public NLGLexiconVR() {

@@ -16,20 +16,20 @@
 package gate.corpora;
 
 //import com.sun.xml.parser.* ;
-import java.util.*;
 import java.io.*;
-import java.net.*;
+import java.net.URLConnection;
 
-import gate.util.*;
-import gate.*;
-import gate.xml.*;
-import gate.event.*;
-import gate.creole.*;
-
-// xml tools
 import javax.xml.parsers.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import gate.*;
+import gate.creole.ResourceInstantiationException;
+import gate.event.StatusListener;
+import gate.util.DocumentFormatException;
+import gate.util.Out;
+import gate.xml.*;
 //import org.w3c.www.mime.*;
 
 /** The format of Documents. Subclasses of DocumentFormat know about

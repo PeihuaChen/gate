@@ -15,10 +15,10 @@
 
 package gate.xml;
 
-import java.io.*;
 import org.xml.sax.*;
 
-import gate.util.*;
+import gate.util.GateSaxException;
+import gate.util.Out;
 
 public class SimpleErrorHandler implements ErrorHandler {
 

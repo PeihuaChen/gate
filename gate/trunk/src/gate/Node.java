@@ -14,9 +14,9 @@
  */
 
 package gate;
-import java.util.*;
-import java.io.*;
-import gate.util.*;
+import java.io.Serializable;
+
+import gate.util.IdBearer;
 
 /** Nodes in AnnotationSets. Immutable.
   */

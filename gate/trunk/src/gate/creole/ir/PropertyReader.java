@@ -14,8 +14,9 @@
 
 package gate.creole.ir;
 
-import gate.Document;
 import java.io.Serializable;
+
+import gate.Document;
 
 
 public interface PropertyReader extends Serializable{

@@ -2,8 +2,9 @@ package gate.util.persistence;
 
 import java.io.Serializable;
 
-import gate.*;
-import gate.creole.*;
+import gate.LanguageAnalyser;
+import gate.creole.AnalyserRunningStrategy;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 
 /**

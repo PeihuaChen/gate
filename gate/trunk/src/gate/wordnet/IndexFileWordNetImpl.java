@@ -15,26 +15,22 @@
 
 package gate.wordnet;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.*;
-import java.net.*;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
-import net.didion.jwnl.*;
+import junit.framework.Assert;
+import net.didion.jwnl.JWNL;
 import net.didion.jwnl.JWNLException;
-import net.didion.jwnl.dictionary.Dictionary;
-import net.didion.jwnl.data.IndexWordSet;
 import net.didion.jwnl.data.IndexWord;
-import net.didion.jwnl.data.Word;
-//import net.didion.jwnl.data.POS;
-
-import junit.framework.*;
+import net.didion.jwnl.dictionary.Dictionary;
 
 import gate.*;
-import gate.util.*;
-import gate.creole.*;
+import gate.creole.AbstractLanguageResource;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
+import gate.util.GateRuntimeException;
+import gate.util.MethodNotImplementedException;
 
 
 public class IndexFileWordNetImpl extends AbstractLanguageResource

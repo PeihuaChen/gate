@@ -15,11 +15,12 @@
 
 package gate.swing;
 
-import javax.swing.JMenuItem;
-import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-import gate.event.*;
+import javax.swing.*;
+
+import gate.event.StatusListener;
 
 public class XJMenuItem extends JMenuItem {
 

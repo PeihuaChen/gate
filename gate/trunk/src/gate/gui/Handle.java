@@ -14,12 +14,12 @@
 package gate.gui;
 
 
-import javax.swing.*;
-import java.util.*;
 import java.awt.Window;
 
-import gate.*;
-import gate.event.*;
+import javax.swing.*;
+
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
 
 /**
  * Interface for classes used to store the information about an open resource.

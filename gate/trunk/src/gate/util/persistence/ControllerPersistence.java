@@ -13,12 +13,11 @@
  */
 package gate.util.persistence;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.persist.PersistenceException;
-
 import java.util.*;
+
+import gate.Controller;
+import gate.creole.ResourceInstantiationException;
+import gate.persist.PersistenceException;
 
 public class ControllerPersistence extends ResourcePersistence {
   /**

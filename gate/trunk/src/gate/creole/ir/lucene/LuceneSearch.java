@@ -14,15 +14,14 @@
 
 package gate.creole.ir.lucene;
 
-import gate.creole.ir.*;
-import java.util.*;
+import java.util.List;
+import java.util.Vector;
 
-import org.apache.lucene.index.*;
-import org.apache.lucene.analysis.*;
-import org.apache.lucene.document.*;
+import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.queryParser.*;
-import org.apache.lucene.store.*;
+
+import gate.creole.ir.*;
 
 /** This class represents Lucene implementation of serching in index. */
 public class LuceneSearch implements Search {

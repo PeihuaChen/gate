@@ -13,12 +13,12 @@
  */
 package gate.util.persistence;
 
+import java.util.*;
+
 import gate.*;
 import gate.creole.*;
-import gate.util.*;
 import gate.persist.PersistenceException;
-
-import java.util.*;
+import gate.util.NameBearer;
 
 /**
  * Holds the data needed to serialise and recreate a {@link Resource}.

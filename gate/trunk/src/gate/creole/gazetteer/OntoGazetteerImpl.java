@@ -16,11 +16,8 @@
 package gate.creole.gazetteer;
 
 import gate.*;
-import gate.creole.*;
-
-
-
-import java.io.*;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 
 /** OntoGazetteerImpl <br>
  *  An ontology-aware gazetteer, producing additional annotations

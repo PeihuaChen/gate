@@ -15,7 +15,7 @@
 
 package gate.wordnet;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 public class SemanticRelationImpl extends RelationImpl
                                   implements SemanticRelation {

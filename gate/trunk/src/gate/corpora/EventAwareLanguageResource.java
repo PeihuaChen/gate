@@ -18,7 +18,6 @@
 
 package gate.corpora;
 
-import gate.*;
 
 public interface EventAwareLanguageResource {
 

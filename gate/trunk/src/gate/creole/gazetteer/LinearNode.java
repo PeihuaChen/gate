@@ -15,7 +15,6 @@
  */
 package gate.creole.gazetteer;
 
-import gate.creole.gazetteer.*;
 
 
 /**Linear node specifies an entry of the type :

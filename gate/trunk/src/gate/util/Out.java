@@ -15,7 +15,7 @@
 
 package gate.util;
 
-import java.io.*;
+import java.io.PrintWriter;
 
 /** Shorthand for the <CODE> System.out.print and println</CODE>
   * methods.

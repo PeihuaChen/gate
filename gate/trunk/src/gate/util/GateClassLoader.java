@@ -17,8 +17,8 @@
 
 package gate.util;
 
-import java.io.*;
-import java.net.*;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /** GATE's class loader, which allows loading of classes over the net.
   * A list of URLs is searched, which should point at .jar files or

@@ -13,15 +13,9 @@
 
 package gate.creole;
 
-import gate.creole.*;
-import gate.*;
-import gate.util.*;
-import gate.jape.*;
-
-import java.net.*;
-import gate.event.*;
-import java.util.*;
-import java.io.*;
+import gate.Resource;
+import gate.jape.Batch;
+import gate.jape.JapeException;
 
 /**
  * A cascaded multi-phase transducer using the Jape language which is a

@@ -13,16 +13,16 @@
  */
 package gate.gui.wordnet;
 
-import gate.*;
-import gate.creole.*;
-import gate.wordnet.*;
-
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.URL;
+
 import javax.swing.*;
-import java.awt.event.*;
-import java.util.*;
-import java.io.*;
-import java.net.*;
+
+import gate.Gate;
+import gate.creole.AbstractVisualResource;
+import gate.wordnet.*;
 
 public class WordNetViewer extends AbstractVisualResource
                            implements ActionListener{

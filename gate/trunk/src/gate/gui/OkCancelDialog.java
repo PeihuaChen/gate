@@ -14,10 +14,11 @@
 
 package gate.gui;
 
-import javax.swing.*;
-import javax.swing.event.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
 
 /**
  * A simple modal dialog that displays a component provided by the user along

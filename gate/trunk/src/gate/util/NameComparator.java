@@ -13,7 +13,6 @@
  */
 package gate.util;
 
-import gate.*;
 import java.util.Comparator;
 
 /**

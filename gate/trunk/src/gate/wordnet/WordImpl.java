@@ -15,14 +15,14 @@
 
 package gate.wordnet;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-import junit.framework.*;
-import net.didion.jwnl.dictionary.*;
-import net.didion.jwnl.data.*;
-import net.didion.jwnl.*;
-import gate.util.*;
+import junit.framework.Assert;
+import net.didion.jwnl.JWNLException;
+import net.didion.jwnl.data.IndexWord;
+import net.didion.jwnl.data.IndexWordSet;
+import net.didion.jwnl.dictionary.Dictionary;
 
 public class WordImpl implements Word {
 

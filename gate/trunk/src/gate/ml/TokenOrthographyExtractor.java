@@ -14,13 +14,12 @@ package gate.ml;
 
 import java.util.*;
 
-import weka.core.*;
-
-
-import gate.*;
-import gate.util.*;
-import gate.creole.ANNIEConstants;
 import weka.core.Attribute;
+import weka.core.FastVector;
+
+import gate.Annotation;
+import gate.creole.ANNIEConstants;
+import gate.util.Out;
 
 public class TokenOrthographyExtractor extends AbstractAttributeExtractor {
   public Attribute getAttribute() {

@@ -14,13 +14,13 @@
 
 package gate.util;
 
-import java.util.*;
-import java.io.*;
-import junit.framework.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
-import gate.*;
-import gate.util.*;
+import junit.framework.*;
+
+import gate.Gate;
 
 public class TestJavac extends TestCase{
   /** Construction */

@@ -14,8 +14,8 @@
 
 package gate.creole.ir;
 
-import java.util.Iterator;
 import java.io.Serializable;
+import java.util.Iterator;
 
 public interface IndexDefinition extends Serializable{
 

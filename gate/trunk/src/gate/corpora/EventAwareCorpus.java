@@ -17,7 +17,7 @@
 
 package gate.corpora;
 
-import java.util.*;
+import java.util.List;
 
 
 public interface EventAwareCorpus extends EventAwareLanguageResource {

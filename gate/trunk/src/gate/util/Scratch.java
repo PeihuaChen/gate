@@ -16,21 +16,19 @@
 
 package gate.util;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
-import java.util.zip.*;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import gate.*;
-import gate.creole.*;
+import gate.creole.ANNIEConstants;
+import gate.creole.Transducer;
+import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.ir.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.persist.*;
-import gate.gui.*;
-
-import org.xml.sax.*;
-import javax.xml.parsers.*;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.gui.MainFrame;
+import gate.persist.SerialDataStore;
 
 /** A scratch pad for experimenting.
   */

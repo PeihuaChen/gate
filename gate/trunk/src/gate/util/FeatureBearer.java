@@ -14,8 +14,7 @@
  */
 
 package gate.util;
-import java.util.*;
-import gate.*;
+import gate.FeatureMap;
 
 /** Classes that have features.
   */

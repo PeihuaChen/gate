@@ -15,9 +15,7 @@
 
 package  gate.annotation;
 
-import java.util.*;
-import gate.*;
-import gate.util.*;
+import gate.Node;
 
 /** Provides an implementation for the interface gate.Node.
  *

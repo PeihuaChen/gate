@@ -15,15 +15,13 @@
 
 package gate.email;
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
-import gate.corpora.*;
-import gate.util.*;
+import junit.framework.Assert;
+
 import gate.*;
-import gate.event.*;
-
-import junit.framework.*;
+import gate.event.StatusListener;
 
 /**
   * This class implements the behaviour of the Email reader

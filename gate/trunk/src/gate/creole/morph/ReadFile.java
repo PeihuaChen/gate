@@ -1,7 +1,7 @@
 package gate.creole.morph;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * <p>Title: ReadFile.java </p>

@@ -14,23 +14,23 @@
 
 package gate.gui;
 
-import gate.creole.*;
-import gate.*;
-import gate.swing.*;
-import gate.util.*;
-import gate.event.*;
-
-
-import javax.swing.*;
-import javax.swing.table.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
-import java.awt.event.*;
-import java.awt.Dimension;
 import java.awt.Component;
-import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.*;
 import java.text.NumberFormat;
 import java.util.*;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import gate.*;
+import gate.creole.*;
+import gate.event.*;
+import gate.swing.*;
+import gate.util.*;
 
 public class SerialControllerEditor extends AbstractVisualResource
                                implements CreoleListener,

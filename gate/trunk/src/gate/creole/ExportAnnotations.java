@@ -10,13 +10,11 @@ package gate.creole;
  * @version 1.0
  */
 
-import gate.*;
-import gate.creole.*;
 import java.sql.*;
 import java.util.*;
-import java.net.*;
-import gate.util.*;
-import javax.swing.*;
+
+import gate.*;
+import gate.util.OffsetComparator;
 
 public class ExportAnnotations
     extends AbstractLanguageAnalyser

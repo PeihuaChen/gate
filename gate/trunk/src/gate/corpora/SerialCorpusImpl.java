@@ -15,19 +15,18 @@
 
 package gate.corpora;
 
+import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 import gate.*;
-import gate.util.*;
-import gate.annotation.*;
-import gate.persist.*;
-import java.io.*;
-import java.net.*;
-import gate.event.*;
-import gate.creole.*;
+import gate.creole.AbstractLanguageResource;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.ir.*;
-import gate.creole.ir.lucene.*;
+import gate.event.*;
+import gate.persist.PersistenceException;
 import gate.security.SecurityException;
+import gate.util.*;
 
 //The initial design was to implement this on the basis of a WeakValueHashMap.
 //However this creates problems, because the user might e.g., add a transient

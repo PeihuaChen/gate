@@ -12,7 +12,6 @@
  */
 package gate.ml;
 
-import weka.core.*;
 
 public abstract class AbstractAttributeExtractor implements AttributeDetector {
 

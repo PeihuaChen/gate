@@ -15,31 +15,33 @@
 
 package gate;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import junit.framework.*;
-import gnu.getopt.*;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import gate.*;
-import gate.annotation.*;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import com.ontotext.gate.gazetteer.TestHashGazetteer;
+
+import gate.annotation.TestAnnotation;
+import gate.annotation.TestAnnotationDiff;
+import gate.config.TestConfig;
 import gate.corpora.*;
 import gate.creole.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.jape.*;
-import gate.xml.*;
-import gate.email.*;
-import gate.html.*;
-import gate.sgml.*;
+import gate.creole.ir.TestIndex;
+import gate.creole.morph.TestMorph;
+import gate.email.TestEmail;
+import gate.html.TestHtml;
+import gate.jape.TestJape;
+import gate.persist.TestPersist;
+import gate.security.TestSecurity;
+import gate.sgml.TestSgml;
 import gate.util.*;
-import gate.config.*;
-import gate.persist.*;
-import gate.security.*;
-import com.ontotext.gate.gazetteer.*;
-import gate.creole.ir.*;
-import gate.wordnet.*;
-import gate.creole.morph.*;
+import gate.wordnet.TestWordNet;
+import gate.xml.TestXml;
+
+import gnu.getopt.Getopt;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.

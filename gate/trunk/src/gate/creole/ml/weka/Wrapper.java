@@ -13,24 +13,31 @@
  */
 package gate.creole.ml.weka;
 
-import java.util.*;
 import java.io.*;
-import javax.swing.*;
-import java.util.zip.*;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import org.jdom.Element;
 
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.meta.FilteredClassifier;
-import weka.filters.*;
+import weka.core.*;
+import weka.filters.Filter;
 
-import gate.creole.ml.*;
-import gate.*;
-import gate.creole.*;
+import gate.ProcessingResource;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.ml.DatasetDefintion;
+import gate.creole.ml.MLEngine;
+import gate.event.StatusListener;
+import gate.gui.ActionsPublisher;
+import gate.gui.MainFrame;
 import gate.util.*;
-import gate.event.*;
-import gate.gui.*;
 
 /**
  * Wrapper class for the WEKA Machine Learning Engine.

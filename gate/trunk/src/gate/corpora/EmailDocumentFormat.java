@@ -15,15 +15,15 @@
 
 package gate.corpora;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.util.Iterator;
 
-import gate.util.*;
 import gate.*;
-import gate.email.*;
-import gate.event.*;
-import gate.creole.*;
+import gate.creole.ResourceInstantiationException;
+import gate.email.EmailDocumentHandler;
+import gate.event.StatusListener;
+import gate.util.DocumentFormatException;
+import gate.util.InvalidOffsetException;
 
 //import org.w3c.www.mime.*;
 

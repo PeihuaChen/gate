@@ -15,17 +15,17 @@
 
 package gate.jape;
 
-import java.util.*;
-import java.io.*;
-import java.text.*;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Iterator;
+
 import junit.framework.*;
 
 import gate.*;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.tokeniser.DefaultTokeniser;
 import gate.util.*;
-import gate.annotation.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.creole.*;
 
 
 

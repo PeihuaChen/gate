@@ -14,16 +14,15 @@
 
 package gate.gui;
 
-import gate.*;
-import gate.annotation.*;
-import gate.persist.*;
-import gate.util.*;
-import gate.creole.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.*;
 
 import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
-import java.util.*;
+
+import gate.creole.BootStrap;
+import gate.util.Err;
 
 /**
   * This class is used to handle BootStrap wizard with the Gate GUI interface.

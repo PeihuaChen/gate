@@ -12,15 +12,14 @@
  */
 package gate.ml;
 
+import java.net.URL;
 import java.util.*;
-import javax.xml.parsers.*;
-import java.net.*;
-
-import gate.*;
-import gate.util.*;
-import gate.creole.*;
 
 import weka.core.*;
+
+import gate.*;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
 /**
  * Collects training data from a corpus.
  * It iterates through the offsets in the annotation set and uses an instance

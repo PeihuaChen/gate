@@ -15,14 +15,13 @@
 
 package gate.creole.tokeniser;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 import gate.*;
 import gate.creole.*;
-import gate.event.*;
 import gate.util.*;
 
 //import EDU.auburn.VGJ.graph.ParseError;

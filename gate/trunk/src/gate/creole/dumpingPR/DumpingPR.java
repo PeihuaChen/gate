@@ -15,13 +15,14 @@
 
 package gate.creole.dumpingPR;
 
-import java.util.*;
-import gate.*;
-import gate.creole.*;
-import gate.corpora.DocumentImpl;
-import gate.util.*;
-import java.net.URL;
 import java.io.*;
+import java.net.URL;
+import java.util.*;
+
+import gate.*;
+import gate.corpora.DocumentImpl;
+import gate.creole.*;
+import gate.util.*;
 
 /**
  * This class implements a DumpingPR which exports a given set of annotation

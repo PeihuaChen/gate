@@ -15,9 +15,7 @@
 
 package gate.security;
 
-import junit.framework.*;
-
-import gate.persist.PersistenceException;
+import junit.framework.Assert;
 
 public class SessionImpl implements Session {
 

@@ -15,11 +15,10 @@
 
 package gate;
 
-import java.util.*;
-import java.io.*;
+import java.util.Collection;
 
-import gate.util.*;
-import gate.creole.*;
+import gate.util.FeatureBearer;
+import gate.util.NameBearer;
 
 /** Models the execution of groups of ProcessingResources.
   */

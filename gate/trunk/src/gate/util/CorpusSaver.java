@@ -15,22 +15,13 @@
 
 package gate.util;
 
+import java.io.File;
+import java.text.NumberFormat;
 import java.util.*;
-import java.io.*;
 
 import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.persist.*;
-import java.net.*;
-import java.text.NumberFormat;
-
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.creole.splitter.*;
-import gate.creole.orthomatcher.*;
-import gate.creole.annotransfer.*;
-import gate.creole.annotdelete.*;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 
 public class CorpusSaver {
 

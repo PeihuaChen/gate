@@ -1,16 +1,19 @@
 package gate.swing;
 
-import javax.swing.*;
-import java.io.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.net.URL;
-import javax.swing.event.*;
-import javax.swing.text.*;
-import java.awt.event.*;
-import javax.swing.text.html.*;
+import java.util.LinkedList;
+import java.util.Vector;
 
-import gate.util.*;
-import gate.event.*;
+import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLFrameHyperlinkEvent;
+
+import gate.event.StatusListener;
+import gate.util.Err;
 
 /**
  * An enhanced version of {@link javax.swing.JEditorPane} that is able of

@@ -15,14 +15,17 @@
 
 package gate.security;
 
-import java.util.*;
 import java.sql.*;
-import junit.framework.*;
+import java.util.List;
+import java.util.Vector;
 
-import gate.*;
+import junit.framework.Assert;
+
+import gate.Gate;
 import gate.event.*;
-import gate.persist.*;
-import gate.util.*;
+import gate.persist.DBHelper;
+import gate.persist.PersistenceException;
+import gate.util.MethodNotImplementedException;
 
 
 public class UserImpl

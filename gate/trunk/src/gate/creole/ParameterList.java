@@ -15,10 +15,13 @@
 
 package gate.creole;
 
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
-import gate.*;
-import gate.util.*;
+
+import gate.Factory;
+import gate.FeatureMap;
+import gate.util.Out;
+import gate.util.Strings;
 
 /** Models resource parameters lists as described in their
   * <TT>creole.xml</TT> metadata. Parameters are stored as lists

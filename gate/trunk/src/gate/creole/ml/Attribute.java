@@ -13,12 +13,13 @@
  */
 package gate.creole.ml;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import org.jdom.*;
+import org.jdom.Element;
 
-import gate.util.*;
+import gate.util.GateException;
 
 /**
  * Describes an attribute associated to a ML instance.

@@ -15,11 +15,7 @@
 
 package gate;
 
-import java.util.*;
-import java.io.*;
-
-import gate.util.*;
-import gate.persist.*;
+import gate.persist.PersistenceException;
 import gate.security.SecurityException;
 
 /** Models all sorts of language resources.

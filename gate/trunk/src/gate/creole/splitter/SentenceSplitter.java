@@ -15,13 +15,11 @@
 package gate.creole.splitter;
 
 import gate.*;
-import gate.util.*;
-import gate.event.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
 import gate.creole.*;
-
-import java.util.*;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.util.InvalidOffsetException;
 /**
  * A sentence splitter. This is module similar to a
  * {@link gate.creole.nerc.Nerc} in the fact that it conatins a tokeniser, a

@@ -15,13 +15,14 @@
 
 package gate.creole;
 
-import java.util.*;
-import java.io.*;
 import java.beans.*;
-import java.lang.reflect.*;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
-
-import gate.*;
+import gate.FeatureMap;
+import gate.Resource;
 import gate.util.*;
 
 

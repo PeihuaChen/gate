@@ -15,15 +15,14 @@
 
 package gate.config;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.URL;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
 import javax.xml.parsers.*;
 
-import gate.*;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 import gate.util.*;
 
 

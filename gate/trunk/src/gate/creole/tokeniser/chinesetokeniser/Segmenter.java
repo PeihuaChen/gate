@@ -1,6 +1,5 @@
 package gate.creole.tokeniser.chinesetokeniser;
 
-import java.lang.*;
 import java.io.*;
 import java.util.*;
 

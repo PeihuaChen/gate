@@ -13,7 +13,6 @@
 
 package gate.event;
 
-import java.util.EventObject;
 import gate.*;
 
 /**

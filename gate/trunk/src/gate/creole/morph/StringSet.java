@@ -1,6 +1,6 @@
 package gate.creole.morph;
 
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * <p>Title: StringSet </p>

@@ -15,10 +15,6 @@
 
 package gate.wordnet;
 
-import java.util.*;
-
-import gate.*;
-import gate.event.*;
 
 
 /** Represents WordNet verb frame.

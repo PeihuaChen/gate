@@ -13,7 +13,8 @@
 
 package gate.event;
 
-import gate.*;
+import gate.Corpus;
+import gate.Document;
 
 /**
  * Models events fired by corpora when documents are added or removed.

@@ -16,13 +16,11 @@
 package gate.creole;
 
 import java.util.*;
-import java.io.*;
 
 import gate.*;
-import gate.util.*;
-import gate.creole.*;
 import gate.event.*;
-import gate.util.profile.*;
+import gate.util.Err;
+import gate.util.profile.Profiler;
 
 /** Execute a list of PRs serially.
  */

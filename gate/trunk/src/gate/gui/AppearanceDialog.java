@@ -14,16 +14,15 @@
  */
 package gate.gui;
 
-import javax.swing.JDialog;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.*;
 
-import gate.swing.*;
-import gate.*;
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+
+import gate.Gate;
+import gate.GateConstants;
+import gate.swing.JFontChooser;
 
 public class AppearanceDialog extends JDialog {
 

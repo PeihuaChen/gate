@@ -13,8 +13,8 @@
  */
 package gate.swing;
 
-import javax.swing.tree.*;
 import javax.swing.event.*;
+import javax.swing.tree.TreePath;
 
 /**
  * An abstract implementation of the TreeTableModel interface. Its main purpose

@@ -15,15 +15,11 @@
 
 package gate.creole.gazetteer;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import java.beans.*;
-import java.lang.reflect.*;
+import java.net.URL;
+
 import junit.framework.*;
 
 import gate.*;
-import gate.util.*;
 import gate.corpora.TestDocument;
 
 public class TestGazetteer extends TestCase {

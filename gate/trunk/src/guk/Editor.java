@@ -18,17 +18,17 @@ package guk;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import javax.swing.undo.*;
-import java.beans.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.util.Locale;
 import java.util.*;
 
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
+import javax.swing.undo.UndoManager;
+
 import guk.im.GateIM;
-import guk.im.GateIMDescriptor;
 
 /**
  * A simple text editor included here to demonstrate the capabilities of the GUK

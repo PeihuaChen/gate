@@ -15,16 +15,16 @@
 
 package gate.corpora;
 
+import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 import gate.*;
-import gate.util.*;
-import gate.annotation.*;
-import gate.persist.*;
-import java.io.*;
-import java.net.*;
+import gate.creole.AbstractLanguageResource;
+import gate.creole.ResourceInstantiationException;
 import gate.event.*;
-import gate.creole.*;
+import gate.util.Err;
+import gate.util.Strings;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.

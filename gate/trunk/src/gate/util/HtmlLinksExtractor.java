@@ -15,12 +15,15 @@
 
 package gate.util;
 
-import javax.swing.text.html.*;
-import javax.swing.text.html.parser.*;
-import javax.swing.text.html.HTMLEditorKit.*;
-import javax.swing.text.*;
-import java.util.*;
 import java.io.*;
+import java.util.*;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.HTMLEditorKit.ParserCallback;
+import javax.swing.text.html.parser.ParserDelegator;
 
 /**
  * This class extracts links from HTML files.

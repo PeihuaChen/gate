@@ -14,15 +14,13 @@
 
 package gate.util;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.*;
-import java.lang.reflect.*;
 
 import gate.*;
-import gate.util.*;
 
 public class TestDiffer extends TestCase{
   /** Construction */

@@ -15,13 +15,12 @@
 package gate.util.persistence;
 
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.persist.PersistenceException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import java.util.*;
-import java.io.*;
+import gate.Corpus;
+import gate.creole.ResourceInstantiationException;
+import gate.persist.PersistenceException;
 
 
 public class CorpusPersistence extends LRPersistence {

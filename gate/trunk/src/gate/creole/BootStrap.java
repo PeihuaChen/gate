@@ -15,17 +15,13 @@
 package gate.creole;
 
 import java.io.*;
-import java.lang.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-import java.beans.*;
+import java.lang.reflect.Method;
 import java.util.*;
 
-import gnu.regexp.*;
 import gate.util.*;
-import gate.*;
-import java.util.jar.*;
+
+import gnu.regexp.RE;
+import gnu.regexp.REException;
 
 /**
   * This class creates a resource (e.g.ProcessingResource, VisualResource or

@@ -13,7 +13,7 @@
 
 package gate.ml;
 
-import weka.core.*;
+import weka.core.Attribute;
 /**
  */
 public interface AttributeDetector{

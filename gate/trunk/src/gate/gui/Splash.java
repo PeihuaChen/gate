@@ -13,9 +13,10 @@
  */
 package gate.gui;
 
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 
 /**
  * A splash screen.

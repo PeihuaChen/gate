@@ -16,7 +16,8 @@
 package gate.lexicon;
 
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 public interface LexicalKnowledgeBase extends Lexicon {
 

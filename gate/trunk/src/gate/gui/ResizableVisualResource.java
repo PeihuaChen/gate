@@ -14,7 +14,7 @@
 
 package gate.gui;
 
-import gate.*;
+import gate.VisualResource;
 /**
  * This interface denotes visual resources that can be resized.
  */

@@ -13,12 +13,10 @@
  */
 package gate.util.persistence;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import gate.DataStore;
+import gate.Factory;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
-
-import java.util.*;
 
 public class DSPersistence implements Persistence{
 

@@ -15,16 +15,14 @@
 
 package gate.xml;
 
+import java.io.File;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
-import java.io.*;
-import java.beans.*;
-
-import gate.util.*;
-import gate.gui.*;
-import gate.*;
 
 import junit.framework.*;
+
+import gate.*;
+import gate.util.Files;
 //import org.w3c.www.mime.*;
 
 

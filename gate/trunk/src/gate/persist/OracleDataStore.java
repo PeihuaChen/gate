@@ -15,25 +15,21 @@
 
 package gate.persist;
 
-import java.sql.*;
-import java.net.*;
-import java.util.*;
 import java.io.*;
+import java.net.URL;
+import java.sql.*;
+import java.util.*;
 
+import junit.framework.Assert;
+import oracle.jdbc.driver.OracleCallableStatement;
 import oracle.sql.*;
-import oracle.jdbc.driver.*;
-
-
-import junit.framework.*;
 
 import gate.*;
+import gate.corpora.DatabaseCorpusImpl;
+import gate.corpora.DatabaseDocumentImpl;
+import gate.security.SecurityException;
+import gate.security.SecurityInfo;
 import gate.util.*;
-import gate.event.*;
-import gate.security.*;
-import gate.security.SecurityException; //hide the more general exception
-import gate.corpora.*;
-import gate.annotation.*;
-import gate.creole.ResourceData;
 
 public class OracleDataStore extends JDBCDataStore {
 

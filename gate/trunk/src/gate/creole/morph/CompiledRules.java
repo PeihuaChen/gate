@@ -1,8 +1,8 @@
 package gate.creole.morph;
 
 import java.util.ArrayList;
-import java.util.regex.*;
-import java.util.Iterator;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * <p>Title: </p>

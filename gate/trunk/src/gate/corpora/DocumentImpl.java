@@ -15,16 +15,16 @@
 
 package gate.corpora;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
-import java.io.*;
 
 import gate.*;
-import gate.annotation.*;
-import gate.util.*;
-import gate.creole.*;
-import gate.gui.*;
+import gate.annotation.AnnotationSetImpl;
+import gate.creole.AbstractLanguageResource;
+import gate.creole.ResourceInstantiationException;
 import gate.event.*;
+import gate.util.*;
 
 /** Represents the commonalities between all sorts of documents.
   *

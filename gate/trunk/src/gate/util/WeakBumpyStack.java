@@ -18,10 +18,9 @@
 
 package gate.util;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.*;
-import java.lang.ref.*;
-
-import gate.*;
 
 /**
  * Weak stack that allow you to bump an element to the front.

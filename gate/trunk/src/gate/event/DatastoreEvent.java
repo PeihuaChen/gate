@@ -12,7 +12,8 @@
  */
 package gate.event;
 
-import gate.*;
+import gate.DataStore;
+import gate.Resource;
 /**
  * This class models events fired by datastores. Such events occur when new
  * resources are adopted by a datastore or when an existing resource from

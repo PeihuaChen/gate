@@ -15,15 +15,15 @@
 
 package gate.security;
 
-import java.util.*;
 import java.sql.*;
-import java.net.*;
+import java.util.*;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
-import gate.*;
+import gate.Gate;
 import gate.event.*;
-import gate.persist.*;
+import gate.persist.DBHelper;
+import gate.persist.PersistenceException;
 import gate.util.MethodNotImplementedException;
 
 

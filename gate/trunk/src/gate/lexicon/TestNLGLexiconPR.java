@@ -1,9 +1,10 @@
 package gate.lexicon;
 
-import gate.util.*;
-import gate.*;
-import gate.creole.*;
 import java.util.Iterator;
+
+import gate.creole.AbstractProcessingResource;
+import gate.creole.ExecutionException;
+import gate.util.Out;
 
 public class TestNLGLexiconPR extends AbstractProcessingResource {
 

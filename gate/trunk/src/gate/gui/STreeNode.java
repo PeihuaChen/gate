@@ -15,15 +15,13 @@
 
 package gate.gui;
 
-import javax.swing.tree.*;
-
-import java.awt.Rectangle;
-
 import java.util.*;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import gate.*;
-import gate.util.*;
+import gate.util.InvalidOffsetException;
+import gate.util.Out;
 
 
 public class STreeNode extends DefaultMutableTreeNode {
@@ -280,6 +278,10 @@ public class STreeNode extends DefaultMutableTreeNode {
 } // STreeNode
 
 // $Log$
+// Revision 1.12  2004/03/25 13:01:03  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.11  2003/01/28 10:01:16  marin
 // [marin] bugfixes from Kali
 //

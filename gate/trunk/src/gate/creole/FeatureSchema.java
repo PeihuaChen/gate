@@ -15,10 +15,8 @@
 
 package gate.creole;
 
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
-
-import gate.util.*;
 
 /**
   * This class describes a schema for a feature. It is used as part of

@@ -15,16 +15,13 @@
 
 package gate.creole;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
 import junit.framework.*;
 
 import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
+import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.GateException;
+import gate.util.Out;
 
 /** Tests for controller classes
   */

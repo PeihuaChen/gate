@@ -22,8 +22,6 @@ package gate.creole.tokeniser;
 
 import java.util.*;
 
-import gate.util.*;
-
 /** Implements a state of the deterministic finite state machine of the
   * tokeniser.
   * It differs from {@link FSMState FSMState} by the definition of the

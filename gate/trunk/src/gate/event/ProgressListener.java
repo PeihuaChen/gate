@@ -15,7 +15,7 @@
 
 package gate.event;
 
-import java.util.*;
+import java.util.EventListener;
 
 /** This interface describes objects that can register themselves as listeners
  * to ProcessProgressReporters.

@@ -15,20 +15,18 @@
 
 package gate;
 
+import java.io.Serializable;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
 
-import gate.corpora.*;
-import gate.util.*;
-import gate.annotation.*;
 import gate.creole.*;
-import gate.persist.*;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.persist.PersistenceException;
+import gate.persist.SerialDataStore;
 import gate.security.*;
 import gate.security.SecurityException;
-import gate.event.*;
+import gate.util.*;
 
 /** Provides static methods for the creation of Resources.
   */

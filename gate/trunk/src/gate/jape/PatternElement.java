@@ -16,10 +16,9 @@
 
 package gate.jape;
 
-import java.util.*;
-import gate.annotation.*;
-import gate.util.*;
-import gate.*;
+import java.util.Stack;
+
+import gate.AnnotationSet;
 
 
 /**
@@ -85,6 +84,10 @@ abstract public class PatternElement implements Cloneable, Matcher,
 
 
 // $Log$
+// Revision 1.5  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.4  2000/11/08 16:35:03  hamish
 // formatting
 //

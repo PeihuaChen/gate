@@ -14,8 +14,10 @@
  */
 package gate.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of a file filter

@@ -14,13 +14,9 @@
 
 package gate.util;
 
-import java.io.*;
-import java.net.*;
+import java.net.URL;
 
 import junit.framework.*;
-
-import gate.*;
-import gate.util.*;
 
 
 public class TestReload extends TestCase{

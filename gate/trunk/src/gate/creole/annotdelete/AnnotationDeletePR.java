@@ -16,9 +16,10 @@
 package gate.creole.annotdelete;
 
 import java.util.*;
+
 import gate.*;
 import gate.creole.*;
-import gate.util.*;
+import gate.util.GateRuntimeException;
 
 /**
  * This class is the implementation of a processing resource which

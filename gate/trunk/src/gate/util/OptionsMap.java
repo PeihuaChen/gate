@@ -12,7 +12,6 @@
  */
 package gate.util;
 
-import java.util.HashMap;
 import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.util.*;

@@ -13,7 +13,7 @@
 package gate.creole;
 
 
-import gate.*;
+import gate.ProcessingResource;
 
 /**
  * Base interface for objects that are used to decide whether a PR member of a

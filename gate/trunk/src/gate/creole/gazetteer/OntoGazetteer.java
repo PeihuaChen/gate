@@ -15,7 +15,6 @@
  */
 package gate.creole.gazetteer;
 
-import java.util.*;
 /**OntoGazetteer
  * <br>
  * A gazetter that exploits a linear gazetter to generate annotations

@@ -13,13 +13,13 @@
  */
 package gate.util.persistence;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.persist.PersistenceException;
+import java.io.Serializable;
+import java.util.Map;
 
-import java.util.*;
-import java.io.*;
+import gate.DataStore;
+import gate.LanguageResource;
+import gate.creole.ResourceInstantiationException;
+import gate.persist.PersistenceException;
 
 public class LRPersistence extends ResourcePersistence {
 

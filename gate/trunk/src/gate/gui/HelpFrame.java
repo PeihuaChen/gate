@@ -1,18 +1,16 @@
 package gate.gui;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.text.html.*;
-import java.awt.*;
-import java.util.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.URL;
-import java.awt.event.*;
-import javax.swing.event.*;
-import java.beans.*;
 
-import gate.swing.*;
-import gate.event.*;
+import javax.swing.*;
+import javax.swing.text.Document;
+
+import gate.event.StatusListener;
+import gate.swing.XJEditorPane;
 
 /**
  * A frame used by Gate to display Help information.

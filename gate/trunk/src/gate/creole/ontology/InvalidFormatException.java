@@ -17,6 +17,7 @@
 package gate.creole.ontology;
 
 import java.net.URL;
+
 import gate.util.GateException;
 
 /** An exception thrown when invalid format of an ontology file is detected */

@@ -14,23 +14,20 @@
 
 package gate.gui;
 
-import gate.*;
-import gate.util.*;
-import gate.swing.*;
-import gate.creole.*;
-
-import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Color;
 import java.awt.Dimension;
-import javax.swing.table.*;
-import javax.swing.event.*;
-import java.awt.event.*;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+
+import gate.Factory;
+import gate.FeatureMap;
 import gate.creole.AbstractVisualResource;
+import gate.swing.XJTable;
+import gate.util.FeatureBearer;
 
 public class FeaturesEditor extends AbstractVisualResource{
 

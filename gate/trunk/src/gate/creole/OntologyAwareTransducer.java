@@ -13,7 +13,6 @@ package gate.creole;
  *  $Id$
  */
 
-import gate.creole.ontology.Ontology;
 import gate.Resource;
 
 /**

@@ -15,15 +15,16 @@
 
 package gate.creole;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
 import java.beans.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.*;
+
 import junit.framework.*;
 
 import gate.*;
-import gate.util.*;
+import gate.util.GateException;
+import gate.util.Out;
 
 /** CREOLE test class
   */

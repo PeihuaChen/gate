@@ -12,7 +12,7 @@
  */
 package gate.event;
 
-import gate.*;
+import gate.Resource;
 
 /**
  * A listener for events fired by the {@link gate.CreoleRegister}

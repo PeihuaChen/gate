@@ -16,11 +16,9 @@
  */
 package guk.im;
 
+import java.awt.event.InputEvent;
 import java.io.*;
 import java.util.*;
-import java.awt.event.*;
-
-import guk.*;
 
 /**
  * A Handler for a locale.

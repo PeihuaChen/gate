@@ -18,7 +18,8 @@
 
  package gate.creole.ontology;
 
- import java.util.*;
+ import java.util.HashSet;
+import java.util.Set;
 
 public abstract class KBPropertyImpl implements KBProperty {
   private String name;

@@ -8,8 +8,9 @@ package gate.util;
  * jar file or directory pointed by the URL to be reloaded.
  */
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
-import java.net.*;
 
 public class ReloadingClassLoader extends ClassLoader {
 

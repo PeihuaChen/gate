@@ -13,7 +13,7 @@
 package gate.creole;
 
 import gate.*;
-import gate.util.*;
+import gate.util.GateRuntimeException;
 
 /**
  * A type running strategy that decides whether the associated PR needs to be

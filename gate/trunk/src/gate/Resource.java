@@ -15,11 +15,11 @@
 
 package gate;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
 
-import gate.util.*;
-import gate.creole.*;
+import gate.creole.ResourceInstantiationException;
+import gate.util.FeatureBearer;
+import gate.util.NameBearer;
 
 /** Models all sorts of resources.
   */

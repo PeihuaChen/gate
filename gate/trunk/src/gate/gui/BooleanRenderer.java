@@ -13,9 +13,10 @@
  */
 package gate.gui;
 
-import javax.swing.table.*;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * A {@link javax.swing.table.TableCellRenderer} used for Booleans

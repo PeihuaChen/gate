@@ -13,13 +13,16 @@
  */
 package gate.gui;
 
-import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
-import gate.*;
-import gate.util.*;
-import gate.creole.*;
+import javax.swing.JScrollPane;
+
+import gate.Gate;
+import gate.Resource;
+import gate.creole.AbstractVisualResource;
+import gate.creole.ResourceData;
+import gate.util.GateRuntimeException;
 
 
 public class PRViewer extends AbstractVisualResource {

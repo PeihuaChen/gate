@@ -16,11 +16,12 @@
 
 package gate.jape;
 
-import java.util.*;
-import gate.annotation.*;
-import gate.event.*;
-import gate.util.*;
-import gate.*;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.util.Out;
+import gate.util.Strings;
 
 /**
   * A CPSL rule. Has an LHS, RHS and a name, and a priority.
@@ -208,6 +209,10 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.14  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.13  2001/09/13 12:09:50  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.

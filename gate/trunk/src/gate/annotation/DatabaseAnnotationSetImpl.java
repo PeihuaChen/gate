@@ -15,12 +15,12 @@ package gate.annotation;
 
 import java.util.*;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
-import gate.event.*;
 import gate.*;
-import gate.util.*;
-import gate.corpora.*;
+import gate.corpora.DatabaseDocumentImpl;
+import gate.corpora.DocumentImpl;
+import gate.event.*;
 //import gate.persist.*;
 
 

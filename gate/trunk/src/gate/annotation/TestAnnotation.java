@@ -16,13 +16,12 @@
 package gate.annotation;
 
 import java.util.*;
-import java.io.*;
+
 import junit.framework.*;
-import java.net.*;
 
 import gate.*;
+import gate.corpora.TestDocument;
 import gate.util.*;
-import gate.corpora.*;
 
 /** Tests for the Annotation classes
   */

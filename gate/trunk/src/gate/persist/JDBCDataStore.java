@@ -15,21 +15,22 @@
 
 package gate.persist;
 
+import java.io.Serializable;
+import java.net.URL;
 import java.sql.*;
-import java.net.*;
 import java.util.*;
-import java.io.*;
 
-import junit.framework.*;
-import oracle.jdbc.driver.*;
+import junit.framework.Assert;
+import oracle.jdbc.driver.OraclePreparedStatement;
 
 import gate.*;
-import gate.util.*;
+import gate.annotation.DatabaseAnnotationSetImpl;
+import gate.annotation.EventAwareAnnotationSet;
+import gate.corpora.*;
 import gate.event.*;
 import gate.security.*;
 import gate.security.SecurityException;
-import gate.corpora.*;
-import gate.annotation.*;
+import gate.util.*;
 
 public abstract class JDBCDataStore extends AbstractFeatureBearer
                                     implements DatabaseDataStore,

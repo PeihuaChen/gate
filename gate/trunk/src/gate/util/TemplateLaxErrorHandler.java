@@ -19,8 +19,10 @@ package gate.util;
 /**
  * TemplateLaxErrorHandler
  */
-import java.io.*;
-import org.xml.sax.*;
+import java.io.File;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 // this import is for the abstract class LaxErrorHandler located in gate.util
 

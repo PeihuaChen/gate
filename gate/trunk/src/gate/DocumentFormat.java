@@ -15,17 +15,15 @@
 
 package gate;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.URL;
+import java.util.*;
 
-import gate.util.*;
-import gate.event.*;
-import gate.creole.*;
-import gate.corpora.RepositioningInfo;
-
-//import org.w3c.www.mime.*;
 import gate.corpora.MimeType;
+import gate.corpora.RepositioningInfo;
+import gate.creole.AbstractLanguageResource;
+import gate.event.StatusListener;
+import gate.util.DocumentFormatException;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any

@@ -13,15 +13,15 @@
 package gate.creole;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Iterator;
+
 import junit.framework.*;
 
 import gate.*;
-import gate.creole.*;
-import gate.creole.tokeniser.*;
 import gate.corpora.TestDocument;
-import gate.util.*;
-import gate.creole.splitter.*;
+import gate.creole.splitter.SentenceSplitter;
+import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.GateException;
 
 /**
  * Test code for the SentenceSplitter and the POS tagger.

@@ -15,7 +15,8 @@
 
 package gate.fsm;
 
-import java.util.*;
+import java.util.Iterator;
+
 import gate.jape.*;
 import gate.util.SimpleArraySet;
 

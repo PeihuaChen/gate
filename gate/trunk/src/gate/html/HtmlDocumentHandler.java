@@ -15,18 +15,19 @@
 
 package gate.html;
 
-import javax.swing.text.html.*;
-import javax.swing.text.html.parser.*;
-import javax.swing.text.html.HTMLEditorKit.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.MutableAttributeSet;
-
 import java.util.*;
 
-import gate.corpora.*;
-import gate.util.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit.ParserCallback;
+
 import gate.*;
-import gate.event.*;
+import gate.corpora.DocumentContentImpl;
+import gate.corpora.RepositioningInfo;
+import gate.event.StatusListener;
+import gate.util.Err;
+import gate.util.InvalidOffsetException;
 
 
 /** Implements the behaviour of the HTML reader.

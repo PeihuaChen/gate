@@ -15,19 +15,18 @@
 
 package gate.config;
 
-import java.util.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Stack;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import javax.xml.parsers.*;
-import java.net.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 import gate.*;
+import gate.creole.ResourceInstantiationException;
 import gate.util.*;
 import gate.xml.SimpleErrorHandler;
-
-////// rem later?
-import gate.creole.*;
 
 
 /** This is a SAX handler for processing <CODE>gate.xml</CODE> files.

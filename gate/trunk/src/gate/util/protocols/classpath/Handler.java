@@ -1,10 +1,9 @@
 package gate.util.protocols.classpath;
 
+import java.io.FileNotFoundException;
 import java.net.*;
-import java.io.*;
 
-import gate.util.*;
-import gate.*;
+import gate.Gate;
 
 /**
  * The handler for the "classpath://" URLs.

@@ -15,18 +15,21 @@
 
 package gate.persist;
 
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import gate.*;
-import gate.creole.*;
-import gate.util.*;
-import gate.event.*;
+import gate.corpora.SerialCorpusImpl;
+import gate.creole.ResourceData;
+import gate.event.DatastoreEvent;
+import gate.event.DatastoreListener;
 import gate.security.*;
 import gate.security.SecurityException;
-import gate.corpora.*;
+import gate.util.*;
 
 /**
  * A data store based on Java serialisation.

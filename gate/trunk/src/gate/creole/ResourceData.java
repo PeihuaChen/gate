@@ -15,9 +15,10 @@
 
 package gate.creole;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import gate.*;
 import gate.util.*;

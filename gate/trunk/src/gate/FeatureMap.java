@@ -14,9 +14,10 @@
  */
 
 package gate;
-import java.util.*;
-import gate.util.*;
-import gate.event.*;
+import java.util.Map;
+import java.util.Set;
+
+import gate.event.FeatureMapListener;
 
 /** An attribute-value matrix. Represents the content of an annotation, the
   * meta-data on a resource, and anything else we feel like.

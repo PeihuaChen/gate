@@ -13,8 +13,7 @@
 
 package gate.event;
 
-import java.util.EventObject;
-import gate.*;
+import gate.Annotation;
 
 /**
  * This class models events fired by an {@link gate.Annotation}.

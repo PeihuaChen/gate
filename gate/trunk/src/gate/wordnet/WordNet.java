@@ -15,11 +15,11 @@
 
 package gate.wordnet;
 
-import java.util.*;
-import java.net.*;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
 
-import gate.*;
-import gate.event.*;
+import gate.LanguageResource;
 
 
 /** Represents WordNet LKB.

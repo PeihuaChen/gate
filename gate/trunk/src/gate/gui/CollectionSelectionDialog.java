@@ -15,17 +15,12 @@
 
 package gate.gui;
 
-import java.awt.Frame;
-import java.awt.Dimension;
-import java.awt.Component;
-import java.awt.event.*;
-import javax.swing.*;
-
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 
-import gate.*;
-import gate.annotation.*;
-import gate.util.*;
+import javax.swing.*;
 
 
 /** This class visually selects some items from a collection and returns

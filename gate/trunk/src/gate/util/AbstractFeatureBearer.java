@@ -14,9 +14,9 @@
  */
 
 package gate.util;
-import java.util.*;
 import java.io.Serializable;
-import gate.*;
+
+import gate.FeatureMap;
 
 /** A convenience implemetation of FeatureBearer.
   * @see FeatureBearer

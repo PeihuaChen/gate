@@ -15,7 +15,7 @@
 
 package gate.creole.tokeniser;
 
-import gate.util.*;
+import gate.util.GateException;
 
 /** The top level exception for all the exceptions fired by the tokeniser */
 public class TokeniserException extends GateException {

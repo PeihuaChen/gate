@@ -12,12 +12,12 @@
  */
 package gate.ml;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Set;
 
-import weka.core.*;
+import weka.core.Attribute;
 
-import gate.*;
-import gate.util.*;
+import gate.Annotation;
 import gate.creole.ANNIEConstants;
 
 

@@ -15,7 +15,7 @@
 
 package gate.xml;
 
-import org.xml.sax.helpers.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 /**

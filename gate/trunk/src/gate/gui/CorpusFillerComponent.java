@@ -12,17 +12,16 @@
  */
 package gate.gui;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.event.*;
-import java.awt.Insets;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.io.*;
-import java.util.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import gate.*;
-import gate.util.*;
+import javax.swing.*;
+
+import gate.Gate;
 
 /**
  * A simple component that allows the user to select a directory and a list of

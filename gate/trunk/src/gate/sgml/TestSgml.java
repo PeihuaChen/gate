@@ -15,15 +15,11 @@
 
 package gate.sgml;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.util.Map;
+
 import junit.framework.*;
-//import org.w3c.www.mime.*;
-import gate.util.*;
-import gate.gui.*;
+
 import gate.*;
-import javax.swing.*;
 
 /** Test class for SGML facilities
   */

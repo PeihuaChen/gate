@@ -15,16 +15,11 @@
 
 package gate.email;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-
-import gate.*;
-import gate.util.*;
-import gate.gui.*;
-import gate.email.*;
+import java.util.Map;
 
 import junit.framework.*;
+
+import gate.Gate;
 //import org.w3c.www.mime.*;
 
 

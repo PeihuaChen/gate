@@ -15,19 +15,14 @@
 
 package gate.util;
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 import gate.*;
+import gate.annotation.AnnotationDiff;
 import gate.creole.*;
-import gate.util.*;
-import gate.persist.*;
-import gate.creole.tokeniser.*;
-import gate.creole.gazetteer.*;
-import gate.creole.splitter.*;
-import gate.creole.orthomatcher.*;
-import gate.creole.annotransfer.*;
-import gate.annotation.*;
+import gate.persist.PersistenceException;
+import gate.persist.SerialDataStore;
 
 public class CorpusBenchmarkTool {
   private static final String MARKED_DIR_NAME = "marked";

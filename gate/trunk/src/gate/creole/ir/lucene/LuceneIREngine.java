@@ -13,9 +13,7 @@
  */
 package gate.creole.ir.lucene;
 
-import gate.creole.ir.Search;
-import gate.creole.ir.IndexManager;
-import gate.creole.ir.IREngine;
+import gate.creole.ir.*;
 
 /**
  * The lucene IR engine.

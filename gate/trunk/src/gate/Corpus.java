@@ -14,14 +14,14 @@
  */
 
 package gate;
-import java.util.*;
-import java.net.URL;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
-import gate.util.*;
-import gate.event.*;
 import gate.creole.ResourceInstantiationException;
+import gate.event.CorpusListener;
+import gate.util.NameBearer;
 
 /** Corpora are lists of Document. TIPSTER equivalent: Collection.
   */

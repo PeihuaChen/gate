@@ -15,17 +15,20 @@
 
 package gate.creole;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
-import org.xml.sax.*;
 import javax.xml.parsers.*;
-import org.xml.sax.helpers.*;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import gate.*;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
 import gate.util.*;
-import gate.event.*;
 
 
 /** This class implements the CREOLE register interface. DO NOT

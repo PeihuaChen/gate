@@ -17,14 +17,11 @@
  */
 package gate.creole.gazetteer;
 
-import java.io.*;
 import java.util.*;
-import java.net.*;
 
-import gate.util.*;
-import gate.creole.*;
-import gate.event.*;
 import gate.*;
+import gate.creole.*;
+import gate.util.*;
 
 /** This component is responsible for doing lists lookup. The implementaion is
  * based on finite state machines.

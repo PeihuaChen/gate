@@ -15,12 +15,13 @@
 
 package gate;
 
+import java.io.File;
+import java.io.Serializable;
+import java.net.URL;
 import java.util.*;
-import java.net.*;
-import java.io.*;
 
-import gate.util.*;
-import gate.event.*;
+import gate.event.CreoleListener;
+import gate.util.GateException;
 
 /** The CREOLE register records the set of resources that are currently
   * known to the system. Each member of the register is a

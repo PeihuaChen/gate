@@ -16,15 +16,12 @@
  */
 package guk.im;
 
-import java.util.Locale;
-import java.awt.*;
+import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.im.spi.InputMethod;
 import java.awt.im.spi.InputMethodDescriptor;
 import java.io.*;
 import java.util.*;
-
-import guk.*;
 
 
 /**

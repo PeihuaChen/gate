@@ -17,8 +17,6 @@
 
 package gate.jape;
 
-import gate.*;
-import gate.util.*;
 import java.io.Serializable;
 
 /**

@@ -1,7 +1,6 @@
 package gate.creole.morph;
 
 import java.util.regex.Pattern;
-import java.util.Comparator;
 /**
  * <p>Title: </p>
  * <p>Description: </p>

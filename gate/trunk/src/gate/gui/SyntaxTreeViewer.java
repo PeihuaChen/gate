@@ -16,24 +16,16 @@
 package gate.gui;
 
 //java imports
-import java.util.*;
-import java.beans.*;
-import java.net.URL;
-
-
-//AWT imports - layouts and events
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.util.*;
 
-//SWING imports
 import javax.swing.*;
-import javax.swing.event.PopupMenuListener;
-import javax.swing.event.PopupMenuEvent;
 
-//GATE imports
-import gate.util.*;
 import gate.*;
 import gate.creole.*;
+import gate.util.*;
 
 
 /**
@@ -1432,7 +1424,12 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.24  2004/03/25 13:01:05  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.23  2003/08/27 15:53:03  valyt
+//
 // removed deprecation warning
 //
 // Revision 1.22  2003/01/28 10:01:16  marin

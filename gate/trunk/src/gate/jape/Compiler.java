@@ -16,11 +16,12 @@
 package gate.jape;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import gate.util.*;
-import gate.annotation.*;
-import gate.jape.parser.*;
+import gate.jape.parser.ParseCpsl;
+import gate.util.Err;
+import gate.util.Out;
 
 /**
   * Compiler for JAPE files.
@@ -142,6 +143,10 @@ public class Compiler {
 
 
 // $Log$
+// Revision 1.8  2004/03/25 13:01:14  valyt
+// Imports optimisation throughout the Java sources
+// (to get rid of annoying warnings in Eclipse)
+//
 // Revision 1.7  2001/09/13 12:09:49  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.

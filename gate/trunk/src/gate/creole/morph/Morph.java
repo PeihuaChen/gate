@@ -19,15 +19,10 @@ package gate.creole.morph;
  */
 
 
-import java.util.*;
-import gate.util.*;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.Resource;
-import gate.creole.ResourceInstantiationException;
-import gate.creole.ExecutionException;
-import gate.ProcessingResource;
-import gate.AnnotationSet;
-import gate.Annotation;
+import java.util.Iterator;
+
+import gate.*;
+import gate.creole.*;
 import gate.util.GateRuntimeException;
 
 /**

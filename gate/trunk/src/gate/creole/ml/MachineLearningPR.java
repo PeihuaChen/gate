@@ -15,12 +15,14 @@ package gate.creole.ml;
 
 import java.util.*;
 
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
 import gate.*;
 import gate.creole.*;
-import gate.gui.*;
+import gate.gui.ActionsPublisher;
 import gate.util.*;
-import org.jdom.*;
-import org.jdom.input.*;
 
 /**
  * This processing resource is used to train a machine learning algorithm with

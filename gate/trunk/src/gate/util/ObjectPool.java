@@ -13,7 +13,7 @@
 package gate.util;
 
 
-import java.util.*;
+import java.util.Vector;
 
 /**
    A generic implementation of pool of references to objects of any kind.

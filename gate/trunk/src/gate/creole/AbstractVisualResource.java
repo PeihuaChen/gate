@@ -15,16 +15,14 @@
 
 package gate.creole;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+
 import javax.swing.JPanel;
 
-
 import gate.*;
-import gate.util.*;
 import gate.gui.Handle;
-
-import java.beans.*;
-import java.util.*;
-import java.lang.reflect.*;
+import gate.util.Strings;
 
 /** A convenience implementation of VisualResource with some default code. */
 public abstract class AbstractVisualResource extends JPanel

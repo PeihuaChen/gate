@@ -13,10 +13,10 @@
  */
 package gate.util.persistence;
 
-import gate.persist.PersistenceException;
-import gate.creole.ResourceInstantiationException;
+import java.io.Serializable;
 
-import java.io.*;
+import gate.creole.ResourceInstantiationException;
+import gate.persist.PersistenceException;
 /**
  * Defines an object that holds persistent data about another object.
  * Storing an arbitrary object will consist of creating an appropiate

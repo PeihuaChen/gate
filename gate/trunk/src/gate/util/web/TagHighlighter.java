@@ -1,7 +1,10 @@
 package gate.util.web;
 
-import org.apache.regexp.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.apache.regexp.RE;
+import org.apache.regexp.RESyntaxException;
 
 public class TagHighlighter {
 

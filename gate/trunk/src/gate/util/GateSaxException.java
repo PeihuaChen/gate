@@ -15,7 +15,6 @@
 
 package gate.util;
 
-import org.xml.sax.*;
 /** An inherited class from  SAX exception in the GATE packages. Can be used
   * to catch any internal exception thrown by the GATE SAX libraries.
   */

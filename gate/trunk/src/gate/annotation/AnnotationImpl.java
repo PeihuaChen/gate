@@ -15,12 +15,14 @@
 
 package gate.annotation;
 
-import java.util.*;
+import java.util.Set;
+import java.util.Vector;
 
 import gate.*;
-import gate.util.*;
-import gate.corpora.*;
-import gate.event.*;
+import gate.event.AnnotationEvent;
+import gate.event.AnnotationListener;
+import gate.util.AbstractFeatureBearer;
+import gate.util.FeatureBearer;
 
 /** Provides an implementation for the interface gate.Annotation
  *

@@ -16,16 +16,16 @@
 
 package gate.jape;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.Vector;
 
-import gate.annotation.*;
-import gate.util.*;
-import gate.event.*;
-import gate.creole.*;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.creole.ExecutionException;
 import gate.creole.ontology.Ontology;
-import gate.*;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
 
 
 /**

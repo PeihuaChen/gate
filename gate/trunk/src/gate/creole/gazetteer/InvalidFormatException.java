@@ -17,6 +17,7 @@
 package gate.creole.gazetteer;
 
 import java.net.URL;
+
 import gate.util.GateException;
 
 /** exception thrown when an invalid format of a file is detected */
