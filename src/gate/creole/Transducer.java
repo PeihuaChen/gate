@@ -35,22 +35,6 @@ public class Transducer extends AbstractLanguageAnalyser {
    * via the {@link #init} method.
    */
   public Transducer() {
-    //fire events if not in batch mode
-    sListener = new StatusListener(){
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    };
-
-    pListener = new ProgressListener(){
-      public void progressChanged(int value){
-        fireProgressChanged(value);
-      }
-
-      public void processFinished(){
-        fireProcessFinished();
-      }
-    };
   }
 
   /*
@@ -70,11 +54,9 @@ public class Transducer extends AbstractLanguageAnalyser {
   public Resource init() throws ResourceInstantiationException {
     if(grammarURL != null && encoding != null){
       try{
-        if(sListener != null){
-          batch = new Batch(grammarURL, encoding, sListener);
-          }else{
-            batch = new Batch(grammarURL, encoding);
-          }
+        fireProgressChanged(0);
+        batch = new Batch(grammarURL, encoding, new InternalStatusListener());
+        fireProcessFinished();
       }catch(JapeException je){
         throw new ResourceInstantiationException(je);
       }
@@ -84,7 +66,7 @@ public class Transducer extends AbstractLanguageAnalyser {
         encoding + ") are needed to create a JapeTransducer!"
       );
 
-      if(pListener != null) batch.addProgressListener(pListener);
+      batch.addProgressListener(new IntervalProgressListener(0, 100));
 
     return this;
   }
@@ -187,24 +169,6 @@ public class Transducer extends AbstractLanguageAnalyser {
   public String getOutputASName() {
     return outputASName;
   }
-  public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
-      v.removeElement(l);
-      statusListeners = v;
-    }
-  }
-
-  public synchronized void addStatusListener(StatusListener l) {
-    Vector v =
-      statusListeners == null
-      ? new Vector(2)
-      : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      statusListeners = v;
-    }
-  }
 
   /**
    * The URL to the jape file used as grammar by this transducer.
@@ -231,55 +195,4 @@ public class Transducer extends AbstractLanguageAnalyser {
    * The {@link gate.AnnotationSet} used as output by the transducer.
    */
   private String outputASName;
-
-  private StatusListener sListener;
-  private ProgressListener pListener;
-  private transient Vector statusListeners;
-  private transient Vector progressListeners;
-
-  /**
-   * If the transducer uses the Appelt match style then this option will be
-   * used to decide whether the longest match or the shortest will be used.
-   */
-  protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
-      }
-    }
-  }
-  public synchronized void removeProgressListener(ProgressListener l) {
-    if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
-      v.removeElement(l);
-      progressListeners = v;
-    }
-  }
-  public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      progressListeners = v;
-    }
-  }
-  protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
-      }
-    }
-  }
-  protected void fireProcessFinished() {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
-      }
-    }
-  }
 }

@@ -41,6 +41,21 @@ public class SerialController extends AbstractController
     return Collections.unmodifiableList(prList);
   }
 
+  /**
+   * Populates this controller from a collection of {@link ProcessingResource}s
+   * (optional operation).
+   *
+   * Controllers that are serializable must implement this method needed by GATE
+   * to restore the contents of the controllers.
+   * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
+   * 	       is not supported by this controller.
+   */
+  public void setPRs(Collection prs){
+    prList.clear();
+    Iterator prIter = prs.iterator();
+    while(prIter.hasNext()) prList.add(prIter.next());
+  }
+
   public void add(int index, ProcessingResource pr){
     prList.add(index, pr);
   }

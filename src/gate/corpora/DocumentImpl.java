@@ -1365,6 +1365,9 @@ extends AbstractLanguageResource implements Document {
   public void setStringContent(String newStringContent) {
     stringContent = newStringContent;
   }
+  public String getStringContent() {
+    return stringContent;
+  }
 /*
   // Methods used to debug serialization problems
   private void writeObject(ObjectOutputStream out) throws IOException{
@@ -1438,5 +1441,5 @@ extends AbstractLanguageResource implements Document {
         }// End if
         return 0;
       }//compare()
-  }// End inner class AnnotationComparator
+  }/// End inner class AnnotationComparator
 } // class DocumentImpl

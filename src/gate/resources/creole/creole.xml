@@ -25,6 +25,11 @@
       <NAME>GATE corpus</NAME>
       <CLASS>gate.corpora.CorpusImpl</CLASS>
       <INTERFACE>gate.Corpus</INTERFACE>
+      <PARAMETER NAME="documentsList"
+                 COMMENT="A list of GATE documents"
+                 OPTIONAL="true"
+                 ITEM_CLASS_NAME="gate.Document"
+                 >java.util.List</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
     <RESOURCE>

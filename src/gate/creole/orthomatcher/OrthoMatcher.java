@@ -26,8 +26,7 @@ import java.io.*;
 import java.net.*;
 import gnu.regexp.*;
 
-public class OrthoMatcher extends AbstractLanguageAnalyser
-                       implements ProcessingResource{
+public class OrthoMatcher extends AbstractLanguageAnalyser{
 
   protected static final String CDGLISTNAME = "cdg";
   protected static final String ALIASLISTNAME = "alias";

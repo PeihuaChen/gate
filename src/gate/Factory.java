@@ -184,7 +184,19 @@ public abstract class Factory {
         throw new ResourceInstantiationException("Bad read from DB: " + e);
       }
       resData.addInstantiation(res);
-      if(features != null) res.getFeatures().putAll(features);
+      if(features != null){
+        if(res.getFeatures() == null){
+          res.setFeatures(newFeatureMap());
+        }
+        res.getFeatures().putAll(features);
+      }
+
+      //set the name
+      if(res.getName() == null){
+        res.setName(resourceName == null ?
+                    resData.getName() + "_" + Gate.genSym() :
+                    resourceName);
+      }
 
       // fire the event
       creoleProxy.fireResourceLoaded(

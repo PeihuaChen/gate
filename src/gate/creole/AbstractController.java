@@ -47,7 +47,7 @@ public abstract class AbstractController extends AbstractResource
    * (optional operation).
    *
    * Controllers that are serializable must implement this method needed by GATE
-   * to restore the contents of the controllers.
+   * to restore their contents.
    * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
    * 	       is not supported by this controller.
    */
