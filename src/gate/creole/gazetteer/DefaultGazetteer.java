@@ -410,10 +410,16 @@ public class DefaultGazetteer extends AbstractGazetteer {
         currentState = nextState;
         //if we have a successful state then store it
         if(currentState.isFinal() &&
-           (matchedRegionStart == 0 ||
-            !isWordInternal(content.charAt(matchedRegionStart - 1))) &&
-           (charIdx + 1 >= content.length()   ||
-            !isWordInternal(content.charAt(charIdx + 1)))
+           (
+            (!wholeWordsOnly.booleanValue())
+             ||
+            ((matchedRegionStart == 0 ||
+             !isWordInternal(content.charAt(matchedRegionStart - 1)))
+             &&
+             (charIdx + 1 >= content.length()   ||
+             !isWordInternal(content.charAt(charIdx + 1)))
+            )
+           )
           ){
           matchedRegionEnd = charIdx;
           lastMatchingState = currentState;
