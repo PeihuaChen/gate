@@ -19,6 +19,7 @@ import java.io.*;
 import java.util.*;
 
 import gate.util.*;
+import gate.creole.ExecutionException;
 import gate.*;
 
 /**
@@ -54,7 +55,7 @@ public class Javac implements GateConstants{
       if(! classesDir.mkdir())throw new GateRuntimeException(
             "Cannot create a temporary directory!");
     }catch(IOException ioe){
-      throw new GateRuntimeException("Cannot create a temporary file!");
+      throw new ExecutionException(ioe);
     }
 
     List sourceFiles = new ArrayList();
