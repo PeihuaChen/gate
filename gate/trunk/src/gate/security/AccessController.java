@@ -89,7 +89,7 @@ public interface AccessController {
 
   /** --- */
   public void close()
-    throws PersistenceException, SecurityException;
+    throws PersistenceException;
 
   /** --- */
 //  public void setGroupName(Group o, String newName, Session s)
