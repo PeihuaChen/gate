@@ -24,21 +24,27 @@ import gate.util.*;
  */
 public interface AnnotationVisualResource extends VisualResource {
   /**
+   * Called by the GUI when this viewer/editor has to initialise itself for a
+   * specific annotation or text span.
+   * @param target the object which will always be a {@link gate.AnnotationSet}
+   */
+  public void setTarget(Object target);
+
+
+  /**
    * Used when the viewer/editor has to display/edit an existing annotation
-   * @param annSet the {@link AnnotationSet} to which the displayed annotation
-   * belongs
    * @param ann the annotation to be displayed or edited
    */
-  public void setAnnotation(AnnotationSet annSet, Annotation ann);
+  public void setAnnotation(Annotation ann);
 
   /**
    * Used when the viewer has to create new annotations.
-   * @param annSet the {@link AnnotationSet} to which the new annotation(s) will
-   * belong
    * @param startOffset the start offset of the span covered by the new
    * annotation(s)
+   * @param endOffset the end offset of the span covered by the new
+   * annotation(s)
    */
-  public void setSpan(AnnotationSet annSet, Long startOffset, Long endOffset);
+  public void setSpan(Long startOffset, Long endOffset);
 
   /**
    * Called by the GUI when the user has pressed the "OK" button. This should
@@ -49,6 +55,6 @@ public interface AnnotationVisualResource extends VisualResource {
   /**
    * Checks whether this viewer/editor can handle a specific annotation type.
    */
-  public boolean canDisplay(String annotationType);
+  public boolean canDisplayAnnotationType(String annotationType);
 
 }//public interface AnnotationVisualResource extends VisualResource

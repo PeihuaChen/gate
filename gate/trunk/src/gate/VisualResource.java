@@ -21,9 +21,24 @@ import java.util.*;
 import javax.swing.*;
 
 import gate.util.*;
+import gate.gui.ResourceHandle;
 
 /** Models all sorts of visual resources.
   */
 public interface VisualResource extends Resource{
+  /**
+   * Called by the GUI when this viewer/editor has to initialise itself for a
+   * specific object.
+   * @param target the object (be it a {@link gate.Resource},
+   * {@link gate.DataStore} or whatever) this viewer has to display
+   */
+  public void setTarget(Object target);
+
+
+  /**
+   * Used by the main GUI to tell this VR what handle created it. The VRs can
+   * use this information e.g. to add items to the popup for the resource.
+   */
+  public void setHandle(ResourceHandle handle);
 
 } // interface VisualResource

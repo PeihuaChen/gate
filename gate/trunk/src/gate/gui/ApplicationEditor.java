@@ -38,11 +38,10 @@ import java.util.*;
 import java.io.IOException;
 import java.net.URL;
 
-public class ApplicationViewer extends AbstractVisualResource
-                               implements CreoleListener,
-                                          GenericVisualResource{
+public class ApplicationEditor extends AbstractVisualResource
+                               implements CreoleListener{
 
-  public ApplicationViewer() {
+  public ApplicationEditor() {
   }
 
   public void setTarget(Object target){
@@ -67,6 +66,12 @@ public class ApplicationViewer extends AbstractVisualResource
     popup.addSeparator();
     popup.add(addMenu);
     popup.add(removeMenu);
+
+    //register the listeners
+    if(handle instanceof StatusListener)
+      addStatusListener((StatusListener)handle);
+    if(handle instanceof ProgressListener)
+      addProgressListener((ProgressListener)handle);
   }//setHandle
 
   public Resource init() throws ResourceInstantiationException{
@@ -194,7 +199,7 @@ public class ApplicationViewer extends AbstractVisualResource
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)){
           if(handle != null && handle.getPopup()!= null)
-            handle.getPopup().show(ApplicationViewer.this, e.getX(), e.getY());
+            handle.getPopup().show(ApplicationEditor.this, e.getX(), e.getY());
         }
       }
     });
@@ -204,7 +209,7 @@ public class ApplicationViewer extends AbstractVisualResource
         int rows[] = modulesTable.getSelectedRows();
         if(rows == null || rows.length == 0){
           JOptionPane.showMessageDialog(
-              ApplicationViewer.this,
+              ApplicationEditor.this,
               "Please select some components from the list of available components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
@@ -229,7 +234,7 @@ public class ApplicationViewer extends AbstractVisualResource
         int rows[] = mainTreeTable.getSelectedRows();
         if(rows == null || rows.length == 0){
           JOptionPane.showMessageDialog(
-              ApplicationViewer.this,
+              ApplicationEditor.this,
               "Please select some components to be removed "+
               "from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
@@ -250,7 +255,7 @@ public class ApplicationViewer extends AbstractVisualResource
               }
             } else {
               JOptionPane.showMessageDialog(
-                  ApplicationViewer.this,
+                  ApplicationEditor.this,
                   "Only processing resources can be removed!\n" +
                   "(Processing resources are the nodes from the first level " +
                   "of the tree)" ,
@@ -270,7 +275,7 @@ public class ApplicationViewer extends AbstractVisualResource
         TreePath[] paths = mainTreeTable.getTree().getSelectionPaths();
         if(paths == null || paths.length == 0){
           JOptionPane.showMessageDialog(
-              ApplicationViewer.this,
+              ApplicationEditor.this,
               "Please select some components to be moved from the " +
               "list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
@@ -298,7 +303,7 @@ public class ApplicationViewer extends AbstractVisualResource
               }
             } else {
               JOptionPane.showMessageDialog(
-                  ApplicationViewer.this,
+                  ApplicationEditor.this,
                   "Only processing resources can be moved!\n" +
                   "(Processing resources are the nodes from the first level of the tree)" ,
                   "Gate", JOptionPane.ERROR_MESSAGE);
@@ -319,7 +324,7 @@ public class ApplicationViewer extends AbstractVisualResource
         TreePath[] paths = mainTreeTable.getTree().getSelectionPaths();
         if(paths == null || paths.length == 0){
           JOptionPane.showMessageDialog(
-              ApplicationViewer.this,
+              ApplicationEditor.this,
               "Please select some components to be moved from the list of used components!\n" ,
               "Gate", JOptionPane.ERROR_MESSAGE);
         } else {
@@ -345,7 +350,7 @@ public class ApplicationViewer extends AbstractVisualResource
               }
             }else{
               JOptionPane.showMessageDialog(
-                  ApplicationViewer.this,
+                  ApplicationEditor.this,
                   "Only processing resources can be moved!\n" +
                   "(Processing resources are the nodes from the first level of the tree)" ,
                   "Gate", JOptionPane.ERROR_MESSAGE);
@@ -363,21 +368,21 @@ public class ApplicationViewer extends AbstractVisualResource
 
     mainTreeTable.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
-        ApplicationViewer.this.validate();
+        ApplicationEditor.this.validate();
       }// public void componentResized(ComponentEvent e)
 
       public void componentShown(ComponentEvent e) {
-        ApplicationViewer.this.validate();
+        ApplicationEditor.this.validate();
       }// public void componentShown(ComponentEvent e)
     });
 
     modulesTable.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
-        ApplicationViewer.this.validate();
+        ApplicationEditor.this.validate();
       }// public void componentResized(ComponentEvent e)
 
       public void componentShown(ComponentEvent e) {
-        ApplicationViewer.this.validate();
+        ApplicationEditor.this.validate();
       }// public void componentShown(ComponentEvent e)
     });
 
@@ -856,7 +861,7 @@ public class ApplicationViewer extends AbstractVisualResource
             }catch(ResourceInstantiationException ie){
               ie.printStackTrace(Err.getPrintWriter());
               JOptionPane.showMessageDialog(
-                ApplicationViewer.this,
+                ApplicationEditor.this,
                 "Could not set parameters for " + pr.getName() + ":\n" +
                 "See the \"Messages\" tab for details",
                 "Gate", JOptionPane.ERROR_MESSAGE);
@@ -930,12 +935,12 @@ public class ApplicationViewer extends AbstractVisualResource
                 exc.printStackTrace(Err.getPrintWriter());
               }
               JOptionPane.showMessageDialog(
-                ApplicationViewer.this,
+                ApplicationEditor.this,
                 "Execution error while running \"" + pr.getName() + "\" :\n " +
                 "See \"Messages\" tab for details!",
                 "Gate", JOptionPane.ERROR_MESSAGE);
             }catch(Exception e){
-              JOptionPane.showMessageDialog(ApplicationViewer.this,
+              JOptionPane.showMessageDialog(ApplicationEditor.this,
                                             "Unhandled execution error!\n " +
                                             "See \"Messages\" tab for details!",
                                             "Gate", JOptionPane.ERROR_MESSAGE);
@@ -1039,7 +1044,7 @@ public class ApplicationViewer extends AbstractVisualResource
                                     calculateValueFromString((String)value);
           }catch(Exception e){
             values[selectedIndex] = oldValue;
-            JOptionPane.showMessageDialog(ApplicationViewer.this,
+            JOptionPane.showMessageDialog(ApplicationEditor.this,
                                           "Invalid value!\n" +
                                           "Is it the right type?",
                                           "Gate", JOptionPane.ERROR_MESSAGE);
@@ -1182,7 +1187,7 @@ public class ApplicationViewer extends AbstractVisualResource
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           JFileChooser fileChooser = MainFrame.getFileChooser();
-          int res = fileChooser.showOpenDialog(ApplicationViewer.this);
+          int res = fileChooser.showOpenDialog(ApplicationEditor.this);
           if(res == fileChooser.APPROVE_OPTION){
             try {
               textField.setText(fileChooser.getSelectedFile().
