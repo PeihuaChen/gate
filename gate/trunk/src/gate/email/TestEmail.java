@@ -14,6 +14,7 @@ import java.io.*;
 
 import gate.util.*;
 import gate.gui.*;
+import gate.email.*;
 
 import junit.framework.*;
 import org.w3c.www.mime.*;
@@ -36,6 +37,7 @@ public class TestEmail extends TestCase
     TestEmail app = new TestEmail("TestEmail");
     try{
       app.testUnpackMarkup();
+      app.testEmail();
     }catch (Exception e){
       e.printStackTrace (System.err);
     }
@@ -112,6 +114,14 @@ public class TestEmail extends TestCase
       */
    //*/
   } // testUnpackMarkup()
+
+  /**
+    final test
+    */
+  public void testEmail(){
+    EmailDocumentHandler emailDocumentHandler = new EmailDocumentHandler();
+    emailDocumentHandler.testSelf();
+  }// testEmail
 
   /** Test suite routine for the test runner */
   public static Test suite() {

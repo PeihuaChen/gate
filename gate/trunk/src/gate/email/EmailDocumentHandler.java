@@ -15,6 +15,7 @@ import gate.util.*;
 import gate.*;
 import gate.gui.*;
 
+import junit.framework.*;
 
   /**
    Implements the behaviour of the Email reader
@@ -22,6 +23,10 @@ import gate.gui.*;
    creates Gate annotations on it.
   */
 public class EmailDocumentHandler implements StatusReporter{
+
+  public EmailDocumentHandler(){
+    setUp();
+  }
 
   /**
     Constructor initialises some private fields
@@ -564,29 +569,114 @@ public class EmailDocumentHandler implements StatusReporter{
   private Collection month = null;
   private Collection zone = null;
 
+
+ // TEST SECTION
+
+  /**
+    Test containsSemicolon
+  */
+  private void testContainsSemicolon() {
+    String str1 = "X-Sender: oana@derwent";
+    String str2 = "X-Sender oana@derwent";
+    String str3 = ":X-Sender oana@derwent";
+    String str4 = "X-Sender oana@derwent:";
+
+    Assert.assert((containsSemicolon(str1) == true));
+    Assert.assert((containsSemicolon(str2)== false));
+    Assert.assert((containsSemicolon(str3) == true));
+    Assert.assert((containsSemicolon(str4) == true));
+  }// testContainsSemicolon
+
+  /**
+    Test containsWhiteSpaces
+    */
+  private void testContainsWhiteSpaces(){
+    String str1 = "Content-Type: TEXT/PLAIN; charset=US-ASCII";
+    String str2 = "Content-Type:TEXT/PLAIN;charset=US-ASCII";
+    String str3 = " Content-Type:TEXT/PLAIN;charset=US-ASCII";
+    String str4 = "Content-Type:TEXT/PLAIN;charset=US-ASCII ";
+
+    Assert.assert((containsWhiteSpaces(str1) == true));
+    Assert.assert((containsWhiteSpaces(str2) == false));
+    Assert.assert((containsWhiteSpaces(str3) == true));
+    Assert.assert((containsWhiteSpaces(str4) == true));
+  }// testContainsWhiteSpaces
+
+  /**
+    Test hasAMeaning
+    */
+  private void testHasAMeaning() {
+    String str1 = "12:05:22";
+    String str2 = "Sep";
+    String str3 = "Fri";
+    String str4 = "2000";
+    String str5 = "GMT";
+    String str6 = "Date: Wed, 13 Sep 2000 13:05:22 +0100 (BST)";
+    String str7 = "12:75:22";
+    String str8 = "September";
+    String str9 = "Friday";
+
+    Assert.assert((hasAMeaning(str1) == true));
+    Assert.assert((hasAMeaning(str2) == true));
+    Assert.assert((hasAMeaning(str3) == true));
+    Assert.assert((hasAMeaning(str4) == true));
+    Assert.assert((hasAMeaning(str5) == true));
+    Assert.assert((hasAMeaning(str6) == false));
+    Assert.assert((hasAMeaning(str7) == false));
+    Assert.assert((hasAMeaning(str8) == false));
+    Assert.assert((hasAMeaning(str9) == false));
+  }// testHasAMeaning
+
+  /**
+    Test isTime
+    */
+  private void testIsTime() {
+    String str1 = "13:05:22";
+    String str2 = "13/05/22";
+    String str3 = "24:05:22";
+
+    Assert.assert((isTime(str1) == true));
+    Assert.assert((isTime(str2) == false));
+    Assert.assert((isTime(str3) == false));
+  }// testIsTime
+
+  /**
+    Test lineBeginsMessage
+    */
+  private void testLineBeginsMessage(){
+    String str1 = "From oana@dcs.shef.ac.uk Wed Sep 13 13:05:23 2000";
+    String str2 = "Date: Wed, 13 Sep 2000 13:05:22 +0100 (BST)";
+    String str3 = "From oana@dcs.shef.ac.uk Sep 13 13:05:23 2000";
+
+    Assert.assert((lineBeginsMessage(str1) == true));
+    Assert.assert((lineBeginsMessage(str2) == false));
+    Assert.assert((lineBeginsMessage(str3) == false));
+
+  }// testLineBeginsMessage
+
+  /**
+    Test lineBeginsWithField
+    */
+  private void testLineBeginsWithField() {
+    String str1 = "Message-ID: <Pine.SOL.3.91.1000913130311.19537A-10@derwent>";
+    String str2 = "%:ContentType TEXT/PLAIN; charset=US-ASCII";
+
+    Assert.assert((lineBeginsWithField(str1) == true));
+    Assert.assert((lineBeginsWithField(str2) == true));
+  }// testLineBeginsWithField
+
+   /**
+     Test final
+     */
+   public void testSelf(){
+     testContainsSemicolon();
+     testContainsWhiteSpaces();
+     testHasAMeaning();
+     testIsTime();
+     testLineBeginsMessage();
+     testLineBeginsWithField();
+   }// testSelf
+
 } //EmailDocumentHandler
 
-/*
-class Position {
-  public Position(){
-  }
-
-  public void setBegin(long aBeginOffset){
-    begin = aBeginOffset;
-  }
-  public void setEnd(long anEndOffset){
-    end = anEndOffset;
-  }
-
-  public long getBegin(){
-    return begin;
-  }
-  public long getEnd(){
-    return end;
-  }
-
-  private long begin = 0;
-  private long end = 0;
-}
-*/
 
