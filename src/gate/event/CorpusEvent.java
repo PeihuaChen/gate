@@ -37,9 +37,10 @@ public class CorpusEvent extends GateEvent {
    * @param type the type of event ({@link DOCUMENT_ADDED} or
    * {@link DOCUMENT_REMOVED}).
    */
-  public CorpusEvent(Corpus source, Document doc, int type){
+  public CorpusEvent(Corpus source, Document doc, int index, int type){
     super(source, type);
     this.document = doc;
+    this.documentIndex = index;
   }
 
   /**
@@ -50,8 +51,21 @@ public class CorpusEvent extends GateEvent {
   }
 
   /**
+   * Gets the index of the dcument this event refers to
+   */
+  public int getDocumentIndex() {
+    return this.documentIndex;
+  }
+
+  /**
    * The document that has been added/removed.
    */
   private gate.Document document;
+  /**
+   * The index of the document which has been removed. Needed because
+   * the document itself might not have been loaded in memory, so the
+   * index could be used instead.
+   */
+  private int documentIndex;
 }
 

@@ -334,24 +334,32 @@ extends AbstractFeatureBearer implements DataStore {
         throw new PersistenceException("Can't save a corpus which " +
                                        "is not of type SerialCorpusImpl!");
       SerialCorpusImpl corpus = (SerialCorpusImpl) lr;
-      List docNames = corpus.getDocumentNames();
-      List docIDs = new ArrayList();
+      //this is a list of the indexes of all newly-adopted documents
+      //which will be used by the SerialCorpusImpl to update the
+      //corresponding document IDs
       for (int i = 0; i < corpus.size(); i++) {
+        //if the document is not in memory, there's little point in saving it
+        if (! corpus.isDocumentLoaded(i) && corpus.isPersistentDocument(i))
+          continue;
         Document doc = (Document) corpus.get(i);
         try {
-          LanguageResource docLR = this.adopt(doc, null);
-          this.sync(docLR);
-          Object ID = docLR.getLRPersistenceId();
-          docIDs.add(ID);
+          //if the document is not already adopted, we need to do that first
+          if (doc.getLRPersistenceId() == null) {
+            if (DEBUG) Out.prln("Document adopted" + doc.getName());
+            doc = (Document) this.adopt(doc, null);
+            this.sync(doc);
+            if (DEBUG) Out.prln("Document sync-ed");
+            corpus.setDocumentPersistentID(i, doc.getLRPersistenceId());
+            if (DEBUG) Out.prln("new document ID " + doc.getLRPersistenceId());
+          } else //if it is adopted, just sync it
+            this.sync(doc);
         } catch (Exception ex) {
           throw new PersistenceException("Error while saving corpus: "
                                          + corpus
-                                         + "because of an error storing document"
+                                         + "because of an error storing document "
                                          + ex.getMessage());
         }
       }//for loop through documents
-
-      corpus.setDocumentData(docNames, docIDs);
     }
 
     // create a File to store the resource in
