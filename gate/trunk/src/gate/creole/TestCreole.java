@@ -354,7 +354,7 @@ public class TestCreole extends TestCase
     Set prs = reg.getPrTypes();
     Set lrs = reg.getLrTypes();
 
-    assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 7);
+    assert("wrong number vrs in reg: " + vrs.size(), vrs.size() == 8);
     assert("wrong number prs in reg: " + prs.size(), prs.size() == 4);
     assert("wrong number lrs in reg: " + lrs.size(), lrs.size() == 3);
   } // testTypeLists()
