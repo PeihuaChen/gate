@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Valentin Tablan, Jan/00
  *
  *  $Id$
@@ -21,21 +21,24 @@ import gate.*;
 import gate.util.*;
 
 /** Provides an implementation for the interface gate.Annotation
-  */
+ *
+ */
 public class AnnotationImpl
   implements Annotation, FeatureBearer, Comparable {
 
-  /** Debug flag */
+  /** Debug flag
+   */
   private static final boolean DEBUG = false;
 
   /** Constructor. Package access - annotations have to be constructed via
-    * AnnotationSets.
-    * @param id The id of the new annotation;
-    * @param start The node from where the annotation will depart;
-    * @param end The node where trhe annotation ends;
-    * @param type The type of the new annotation;
-    * @param features The features of the annotation.
-    */
+   * AnnotationSets.
+   *
+   * @param id The id of the new annotation;
+   * @param start The node from where the annotation will depart;
+   * @param end The node where trhe annotation ends;
+   * @param type The type of the new annotation;
+   * @param features The features of the annotation.
+   */
   AnnotationImpl(
     Integer id, Node start, Node end, String type, FeatureMap features
   ) {
@@ -47,44 +50,51 @@ public class AnnotationImpl
   } // AnnotationImpl
 
 
-  /** The ID of the annotation. */
+  /** The ID of the annotation.
+   */
   public Integer getId() {
     return id;
   } // getId()
 
-  /** The type of the annotation (corresponds to TIPSTER "name"). */
+  /** The type of the annotation (corresponds to TIPSTER "name").
+   */
   public String getType() {
     return type;
   } // getType()
 
   /** The features, or content of this arc (corresponds to TIPSTER
-    * "attributes", and to LDC "label", which is the simplest case).
-    */
+   * "attributes", and to LDC "label", which is the simplest case).
+   */
   public FeatureMap getFeatures() {
     return features;
   } // getFeatures()
 
-  /** Set the feature set */
+  /** Set the feature set
+   */
   public void setFeatures(FeatureMap features) { this.features = features; }
 
-  /** The start node. */
+  /** The start node.
+   */
   public Node getStartNode() {
     return start;
   } // getStartNode()
 
-  /** The end node. */
+  /** The end node.
+   */
   public Node getEndNode() {
     return end;
   } // getEndNode()
 
-  /** String representation of hte annotation */
+  /** String representation of hte annotation
+   */
   public String toString() {
     return "AnnotationImpl: id=" + id + "; type=" + type +
            "; features=" + features + "; start=" + start +
            "; end=" + end + System.getProperty("line.separator");
   } // toString()
 
-  /** Ordering */
+  /** Ordering
+   */
   public int compareTo(Object o) throws ClassCastException {
     Annotation other = (Annotation) o;
     return id.compareTo(other.getId());
@@ -159,8 +169,8 @@ public class AnnotationImpl
   }// equals
 */
   /** This method compares two FeatureMaps
-    * Returns true if their content is
-    */
+   * Returns true if their content is
+   */
   private boolean compareFeatureMaps(FeatureMap oneFm, FeatureMap anotherFm){
     // If the two sets don't have the same size return false
     if (oneFm.size() != anotherFm.size())
@@ -178,9 +188,29 @@ public class AnnotationImpl
     return true;
   }// compareFeatureMaps
 
+  /**
+   * The id of this annotation (for persitency resons)
+   *
+   */
   Integer id;
+  /**
+   * The type of the annotation
+   *
+   */
   String type;
+  /**
+   * The features of the annotation
+   *
+   */
   FeatureMap features;
-  Node start, end;
+  /**
+   * The start node
+   */
+  Node start;
+
+  /**
+   *  The end node
+   */
+  Node end;
 
 } // class AnnotationImpl

@@ -150,13 +150,13 @@ public class ObjectWriter extends Thread {
       } catch(IOException ioe) {
         ioe.printStackTrace(Err.getPrintWriter());
       }
-    };
+    }
 
     private Object _object;
     private InputStream _inputStream;
     private PipedOutputStream _outputStream;
 
-  };
+  }
 
   private Object object;
 
@@ -172,4 +172,4 @@ public class ObjectWriter extends Thread {
 
   private int buffSize = 1024;
 
-} // class ObjectWriter 
+} // class ObjectWriter

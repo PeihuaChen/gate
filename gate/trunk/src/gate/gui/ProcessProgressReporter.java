@@ -16,14 +16,25 @@
 package gate.gui;
 
 /** This interface describes a processing resource that can report on the
-  * progress of its processing activity.
-  * It is useful for implementing progress bars and for waiting on precssing
-  * resources that use theur own thread for processing purposes.
-  */
+ * progress of its processing activity.
+ * It is useful for implementing progress bars and for waiting on precssing
+ * resources that use theur own thread for processing purposes.
+ * 
+ */
 public interface ProcessProgressReporter {
 
+  /** 
+   * Registers a new listener intersted in progress events.
+   * 
+   * @param listener 
+   */
   public void addProcessProgressListener(ProgressListener listener);
   
+  /** 
+   * Removes a ProcessProgressListener.
+   * 
+   * @param listener 
+   */
   public void removeProcessProgressListener(ProgressListener listener);
 
 } // ProcessProgressReporter

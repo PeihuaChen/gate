@@ -17,8 +17,18 @@ package gate.gui;
 
 import java.util.*;
 
+/** 
+ * This interface describes a listener that is interested in status events. This type of listener is intended to be used
+ * by components similar to a status bar which can display messages coming from more components.
+ * 
+ */
 public interface StatusListener extends EventListener{
 
+  /** 
+   * Calleed when there a new status message.
+   * 
+   * @param text 
+   */
   public void statusChanged(String text);
 
 } // interface StatusListener

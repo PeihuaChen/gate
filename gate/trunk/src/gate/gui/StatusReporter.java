@@ -15,10 +15,24 @@
  
 package gate.gui;
 
+/** 
+ * THis interface describes a component able to generate status events (e.g. messages to be displayed in a status bar)
+ * 
+ */
 public interface StatusReporter {
 
+  /** 
+   * Adds a new status listener.
+   * 
+   * @param listener 
+   */
   public void addStatusListener(StatusListener listener);
 
+  /** 
+   * Removes a previously added status listener.
+   * 
+   * @param listener 
+   */
   public void removeStatusListener(StatusListener listener);
 
 } // interface StatusReporter

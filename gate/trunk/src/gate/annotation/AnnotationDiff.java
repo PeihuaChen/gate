@@ -110,7 +110,7 @@ public class AnnotationDiff implements VisualResource{
   }// AnnotationSchema
 
   /** This method is required in VisualResource Interface*/
-  public Component getGui(){
+  public JComponent getGUI(){
     return diffTable;
   }// getViewer
 

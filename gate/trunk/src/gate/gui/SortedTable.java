@@ -23,7 +23,7 @@ import java.awt.*;
 import gate.util.*;
 
 /** This class implements the behaviour of a SortedTable
-  * The user have to provide a SortedTableModel implementation
+  * The user has to provide a SortedTableModel implementation
   */
 public class SortedTable extends JTable {
 

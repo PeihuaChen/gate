@@ -29,95 +29,99 @@ import gate.fsm.TestFSM;
 //import EDU.auburn.VGJ.graph.ParseError;
 
 /** Implementation of a Unicode rule based tokeniser.
-  * The tokeniser gets its rules from a file an {@link java.io.InputStream
-  * InputStream} or a {@link java.io.Reader Reader} which should be sent to one
-  * of the constructors.
-  * The implementations is based on a finite state machine that is built based
-  * on the set of rules.
-  * A rule has two sides, the left hand side (LHS)and the right hand side (RHS)
-  * that are separated by the &quot;&gt;&quot; character. The LHS represents a
-  * regular expression that will be matched against the input while the RHS
-  * describes a Gate2 annotation in terms of annotation type and attribute-value
-  * pairs.
-  * The matching is done using Unicode enumarated types as defined by the {@link
-  * java.lang.Character Character} class. At the time of writing this class the
-  * suported Unicode categories were:
-  * <ul>
-  * <li>UNASSIGNED
-  * <li>UPPERCASE_LETTER
-  * <li>LOWERCASE_LETTER
-  * <li>TITLECASE_LETTER
-  * <li>MODIFIER_LETTER
-  * <li>OTHER_LETTER
-  * <li>NON_SPACING_MARK
-  * <li>ENCLOSING_MARK
-  * <li>COMBINING_SPACING_MARK
-  * <li>DECIMAL_DIGIT_NUMBER
-  * <li>LETTER_NUMBER
-  * <li>OTHER_NUMBER
-  * <li>SPACE_SEPARATOR
-  * <li>LINE_SEPARATOR
-  * <li>PARAGRAPH_SEPARATOR
-  * <li>CONTROL
-  * <li>FORMAT
-  * <li>PRIVATE_USE
-  * <li>SURROGATE
-  * <li>DASH_PUNCTUATION
-  * <li>START_PUNCTUATION
-  * <li>END_PUNCTUATION
-  * <li>CONNECTOR_PUNCTUATION
-  * <li>OTHER_PUNCTUATION
-  * <li>MATH_SYMBOL
-  * <li>CURRENCY_SYMBOL
-  * <li>MODIFIER_SYMBOL
-  * <li>OTHER_SYMBOL
-  * </ul>
-  * The accepted operators for the LHS are "+", "*" and "|" having the usual
-  * interpretations of "1 to n occurences", "0 to n occurences" and
-  * "boolean OR".
-  * For instance this is a valid LHS:
-  * <br>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+
-  * <br>meaning an uppercase letter followed by one or more lowercase letters.
-  *
-  * The RHS describes an annotation that is to be created and inserted in the
-  * annotation set provided in case of a match. The new annotation will span the
-  * text that has been recognised. The RHS consists in the annotation type
-  * followed by pairs of attributes and associated values.
-  * E.g. for the LHS above a possible RHS can be:<br>
-  * Token;kind=upperInitial;<br>
-  * representing an annotation of type &quot;Token&quot; having one attribute
-  * named &quot;kind&quot; with the value &quot;upperInitial&quot;<br>
-  * The entire rule willbe:<br>
-  * <pre>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;kind=upperInitial;</pre>
-  * <br>
-  * The tokeniser ignores all the empty lines or the ones that start with # or
-  * //.
+ * The tokeniser gets its rules from a file an {@link java.io.InputStream
+ * InputStream} or a {@link java.io.Reader Reader} which should be sent to one
+ * of the constructors.
+ * The implementations is based on a finite state machine that is built based
+ * on the set of rules.
+ * A rule has two sides, the left hand side (LHS)and the right hand side (RHS)
+ * that are separated by the &quot;&gt;&quot; character. The LHS represents a
+ * regular expression that will be matched against the input while the RHS
+ * describes a Gate2 annotation in terms of annotation type and attribute-value
+ * pairs.
+ * The matching is done using Unicode enumarated types as defined by the {@link
+ * java.lang.Character Character} class. At the time of writing this class the
+ * suported Unicode categories were:
+ * <ul>
+ * <li>UNASSIGNED
+ * <li>UPPERCASE_LETTER
+ * <li>LOWERCASE_LETTER
+ * <li>TITLECASE_LETTER
+ * <li>MODIFIER_LETTER
+ * <li>OTHER_LETTER
+ * <li>NON_SPACING_MARK
+ * <li>ENCLOSING_MARK
+ * <li>COMBINING_SPACING_MARK
+ * <li>DECIMAL_DIGIT_NUMBER
+ * <li>LETTER_NUMBER
+ * <li>OTHER_NUMBER
+ * <li>SPACE_SEPARATOR
+ * <li>LINE_SEPARATOR
+ * <li>PARAGRAPH_SEPARATOR
+ * <li>CONTROL
+ * <li>FORMAT
+ * <li>PRIVATE_USE
+ * <li>SURROGATE
+ * <li>DASH_PUNCTUATION
+ * <li>START_PUNCTUATION
+ * <li>END_PUNCTUATION
+ * <li>CONNECTOR_PUNCTUATION
+ * <li>OTHER_PUNCTUATION
+ * <li>MATH_SYMBOL
+ * <li>CURRENCY_SYMBOL
+ * <li>MODIFIER_SYMBOL
+ * <li>OTHER_SYMBOL
+ * </ul>
+ * The accepted operators for the LHS are "+", "*" and "|" having the usual
+ * interpretations of "1 to n occurences", "0 to n occurences" and
+ * "boolean OR".
+ * For instance this is a valid LHS:
+ * <br>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+
+ * <br>meaning an uppercase letter followed by one or more lowercase letters.
+ * 
+ * The RHS describes an annotation that is to be created and inserted in the
+ * annotation set provided in case of a match. The new annotation will span the
+ * text that has been recognised. The RHS consists in the annotation type
+ * followed by pairs of attributes and associated values.
+ * E.g. for the LHS above a possible RHS can be:<br>
+ * Token;kind=upperInitial;<br>
+ * representing an annotation of type &quot;Token&quot; having one attribute
+ * named &quot;kind&quot; with the value &quot;upperInitial&quot;<br>
+ * The entire rule willbe:<br>
+ * <pre>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;kind=upperInitial;</pre>
+ * <br>
+ * The tokeniser ignores all the empty lines or the ones that start with # or
+ * //.
+ * 
  */
-
 public class DefaultTokeniser extends AbstractProcessingResource
 implements Runnable, ProcessingResource, ProcessProgressReporter,
            StatusReporter
 {
-  /** Debug flag */
+  /** Debug flag
+   */
   private static final boolean DEBUG = false;
 
-  /**
+  /** 
    * Creates a tokeniser
    */
   public DefaultTokeniser(){
   }
 
+  /** 
+   * Initialises this tokeniser by reading the rules from an external source (provided through an URL) and building
+   * the finite state machine at the core of the tokeniser.
+   * 
+   * @exception ResourceInstantiationException 
+   */
   public Resource init() throws ResourceInstantiationException{
     Reader rulesReader;
     try{
-      if(rulesResourceName != null){
-        rulesReader = new InputStreamReader(
-                            Files.getGateResourceAsStream(rulesResourceName));
-      }else if(rulesURL != null){
+      if(rulesURL != null){
         rulesReader = new InputStreamReader((new URL(rulesURL)).openStream());
       }else{
         /*
-        //they're all null, Scream!
+        //no init data, Scream!
         throw new ResourceInstantiationException(
           "No URL provided for the rules!");
         */
@@ -150,16 +154,20 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     return this;
   }
 
+  /** 
+   * Prepares this Processing resource for a new run.
+   */
   public void reset(){
     document = null;
     annotationSet = null;
   }
 
   /** Parses one input line containing a tokeniser rule.
-    * This will create the necessary FSMState objects and the links
-    * between them.
-    * @param line the string containing the rule
-    */
+   * This will create the necessary FSMState objects and the links
+   * between them.
+   * 
+   * @param line the string containing the rule
+   */
   void parseRule(String line)throws TokeniserException{
     //ignore comments
     if(line.startsWith("#")) return;
@@ -179,19 +187,19 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // parseRule
 
   /** Parses a part or the entire LHS.
-    * @param startState a FSMState object representing the initial state
-    * for the small FSM that will recognise the (part of) the rule parsed
-    * by this method.
-    * @param st a {@link java.util.StringTokenizer StringTokenizer} that
-    * provides the input
-    * @param until the string that marks the end of the section to be
-    * recognised.
-    * This method will first be called by {@link #parseRule(String)} with &quot;
-    * &gt;&quot; in order to parse the entire LHS.
-    * when necessary it will make itself another call to {@link #parseLHS
-    * parseLHS} to parse a region of the LHS (e.g. a &quot;(&quot;,&quot;)&quot;
-    * enclosed part.
-    */
+   * 
+   * @param startState a FSMState object representing the initial state for 
+   *     the small FSM that will recognise the (part of) the rule parsed by this 
+   *     method.
+   * @param st a {@link java.util.StringTokenizer StringTokenizer} that 
+   *     provides the input
+   * @param until the string that marks the end of the section to be 
+   *     recognised. This method will first be called by {@link 
+   *     #parseRule(String)} with &quot; &gt;&quot; in order to parse the entire 
+   *     LHS. when necessary it will make itself another call to {@link #parseLHS 
+   *     parseLHS} to parse a region of the LHS (e.g. a 
+   *     &quot;(&quot;,&quot;)&quot; enclosed part.
+   */
   FSMState parseLHS(FSMState startState, StringTokenizer st, String until)
        throws TokeniserException{
 
@@ -286,12 +294,13 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // parseLHS
 
   /** Parses from the given string tokeniser until it finds a specific
-    * delimiter.
-    * One use for this method is to read everything until the first quote.
-    * @param st a {@link java.util.StringTokenizer StringTokenizer} that
-    * provides the input
-    * @param until a String representing the end delimiter.
-    */
+   * delimiter.
+   * One use for this method is to read everything until the first quote.
+   * 
+   * @param st a {@link java.util.StringTokenizer StringTokenizer} that 
+   *     provides the input
+   * @param until a String representing the end delimiter.
+   */
   String parseQuotedString(StringTokenizer st, String until)
     throws TokeniserException {
 
@@ -311,9 +320,9 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // parseQuotedString
 
   /** Skips the ignorable tokens from the input returning the first significant
-    * token.
-    * The ignorable tokens are defined by {@link #ignoreTokens a set}
-    */
+   * token.
+   * The ignorable tokens are defined by {@link #ignoreTokens a set}
+   */
   protected static String skipIgnoreTokens(StringTokenizer st){
     Iterator ignorables;
     boolean ignorableFound = false;
@@ -333,16 +342,18 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
         if(!ignorableFound) return currentToken;
       } else return null;
     }
-  } // skipIgnoreTokens
-
-  void parseRHS(String rhs) {
-  } // parseRHS
+  }//skipIgnoreTokens
 
   /* Computes the lambda-closure (aka epsilon closure) of the given set of
    * states, that is the set of states that are accessible from any of the
    * states in the given set using only unrestricted transitions.
    * @return a set containing all the states accessible from this state via
    * transitions that bear no restrictions.
+   */
+  /** 
+   * Converts the finite state machine to a deterministic one.
+   * 
+   * @param s 
    */
   private AbstractSet lambdaClosure(Set s){
 
@@ -378,8 +389,8 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // lambdaClosure
 
   /** Converts the FSM from a non-deterministic to a deterministic one by
-    * eliminating all the unrestricted transitions.
-    */
+   * eliminating all the unrestricted transitions.
+   */
   void eliminateVoidTransitions() throws TokeniserException {
 
     Map newStates = new HashMap();
@@ -479,8 +490,8 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // eliminateVoidTransitions
 
   /** Returns a string representation of the non-deterministic FSM graph using
-    * GML (Graph modelling language).
-    */
+   * GML (Graph modelling language).
+   */
   public String getFSMgml(){
     String res = "graph[ \ndirected 1\n";
     String nodes = "", edges = "";
@@ -502,8 +513,8 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // getFSMgml
 
   /** Returns a string representation of the deterministic FSM graph using
-    * GML.
-    */
+   * GML.
+   */
   public String getDFSMgml() {
     String res = "graph[ \ndirected 1\n";
     String nodes = "", edges = "";
@@ -525,15 +536,17 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // getDFSMgml
 
   //no doc required: javadoc will copy it from the interface
+  /**    */
   public FeatureMap getFeatures(){
     return features;
   } // getFeatures
 
+  /**    */
   public void setFeatures(FeatureMap features){
     this.features = features;
   } // setFeatures
 
-  /**
+  /** 
    * The method that does the actual tokenisation.
    */
   public void run() {
@@ -672,14 +685,17 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // run
 
   //StatusReporter Implementation
+  /**    */
   public void addStatusListener(StatusListener listener) {
     myStatusListeners.add(listener);
   } // addStatusListener
 
+  /**    */
   public void removeStatusListener(StatusListener listener) {
     myStatusListeners.remove(listener);
   } // removeStatusListener
 
+  /**    */
   protected void fireStatusChangedEvent(String text) {
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
@@ -687,46 +703,57 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // fireStatusChangedEvent
 
   //ProcessProgressReporter implementation
+  /**    */
   public void addProcessProgressListener(ProgressListener listener) {
     myProgressListeners.add(listener);
   } // addProcessProgressListener
 
+  /**    */
   public void removeProcessProgressListener(ProgressListener listener) {
     myProgressListeners.remove(listener);
   } // removeProcessProgressListener
 
+  /**    */
   protected void fireProgressChangedEvent(int i) {
     Iterator listenersIter = myProgressListeners.iterator();
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).progressChanged(i);
   } // fireProgressChangedEvent
 
+  /**    */
   protected void fireProcessFinishedEvent() {
     Iterator listenersIter = myProgressListeners.iterator();
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
   }
+  /** 
+   * Sets the value of the {@link #rulesURL} property which holds an URL to the file containing the rules for this tokeniser.
+   * 
+   * @param newRulesURL 
+   */
   public void setRulesURL(String newRulesURL) {
     rulesURL = newRulesURL;
   }
+  /** 
+   * Gets the value of the {@link #rulesURL} property hich holds an URL to the file containing the rules for this tokeniser.
+   * 
+   */
   public String getRulesURL() {
     return rulesURL;
   }
-  public void setRulesResourceName(String newRulesResourceName) {
-    rulesResourceName = newRulesResourceName;
-  }
-  public String getRulesResourceName() {
-    return rulesResourceName;
-  }
+  /**    */
   public void setDocument(gate.Document newDocument) {
     document = newDocument;
   }
+  /**    */
   public gate.Document getDocument() {
     return document;
   }
+  /**    */
   public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
     annotationSet = newAnnotationSet;
   }
+  /**    */
   public gate.AnnotationSet getAnnotationSet() {
     return annotationSet;
   }// fireProcessFinishedEvent
@@ -744,55 +771,73 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   }
   */
 
+  /**    */
   protected FeatureMap features  = null;
+  /**    */
   protected List myProgressListeners = new LinkedList();
+  /**    */
   protected List myStatusListeners = new LinkedList();
 
-  /** the annotations et where the new annotations will be added*/
+  /** the annotations et where the new annotations will be adde
+   */
   protected AnnotationSet annotationSet;
 
-  /** The initial state of the non deterministic machine*/
+  /** The initial state of the non deterministic machin
+   */
   protected FSMState initialState;
 
-  /** A set containng all the states of the non deterministic machine*/
+  /** A set containng all the states of the non deterministic machin
+   */
   protected Set fsmStates = new HashSet();
 
-  /** The initial state of the deterministic machine*/
+  /** The initial state of the deterministic machin
+   */
   protected DFSMState dInitialState;
 
-  /** A set containng all the states of the deterministic machine*/
+  /** A set containng all the states of the deterministic machin
+   */
   protected Set dfsmStates = new HashSet();
 
-  /** The separator from LHS to RHS*/
+  /** The separator from LHS to RH
+   */
   static String LHStoRHS = ">";
 
-  /** A set of string representing tokens to be ignored (e.g. blanks)*/
+  /** A set of string representing tokens to be ignored (e.g. blanks
+   */
   static Set ignoreTokens;
 
   /** maps from int (the static value on {@link java.lang.Character} to int
-    * the internal value used by the tokeniser. The ins values used by the
-    * tokeniser are consecutive values, starting from 0 and going as high as
-    * necessary.
-    * They map all the public static int members on{@link java.lang.Character}
-    */
+   * the internal value used by the tokeniser. The ins values used by the
+   * tokeniser are consecutive values, starting from 0 and going as high as
+   * necessary.
+   * They map all the public static int members on{@link java.lang.Character}
+   */
   public static Map typeIds;
 
-  /** The maximum int value used internally as a type id*/
+  /** The maximum int value used internally as a type i
+   */
   public static int maxTypeId;
 
-  /** Maps the internal type ids to the type names*/
+  /** Maps the internal type ids to the type name
+   */
   public static String[] typeMnemonics;
 
-  /** Maps from type names to type internal ids*/
+  /** Maps from type names to type internal id
+   */
   public static Map stringTypeIds;
 
+  /** 
+   * This property holds an URL to the file containing the rules for this tokeniser
+   * 
+   */
   protected String rulesURL = null;
-  protected String rulesResourceName;
 
+  /**    */
   static protected String defaultResourceName =
                             "creole/tokeniser/DefaultTokeniser.rules";
 
-  /** the document to be tokenised */
+  /** the document to be tokenised
+   */
   protected gate.Document document;
 
 
