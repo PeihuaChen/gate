@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 23/02/2000
  *
  *  $Id$
@@ -34,6 +34,8 @@ public class Compiler {
   /** How much noise to make. */
   static private boolean verbose = false;
 
+  static String defaultEncoding = "UTF-8";
+
   /** Take a list of .jape files names and compile them to .ser.
     * Also recognises a -v option which makes it chatty.
     */
@@ -57,12 +59,12 @@ public class Compiler {
   } // main
 
   /** The main compile method, taking a file name. */
-  static public void compile(String japeFileName) {
+  static public void compile(String japeFileName, String encoding) {
     // parse
     message("parsing " + japeFileName);
     Transducer transducer = null;
     try {
-      transducer = parseJape(japeFileName);
+      transducer = parseJape(japeFileName, encoding);
     } catch(JapeException e) {
       emessage("couldn't compile " + japeFileName + ": " + e);
       return;
@@ -83,16 +85,17 @@ public class Compiler {
   static public void compile(Array fileNames) {
     // for each file, compile and save
     for(ArrayIterator i = fileNames.begin(); ! i.atEnd(); i.advance())
-      compile((String) i.get());
+      compile((String) i.get(), defaultEncoding);
   } // compile
 
   /** Parse a .jape and return a transducer, or throw exception. */
-  static public Transducer parseJape(String japeFileName)
+  static public Transducer parseJape(String japeFileName, String encoding)
   throws JapeException {
     Transducer transducer = null;
 
     try {
-      ParseCpsl cpslParser = new ParseCpsl(japeFileName);
+      ParseCpsl cpslParser = new ParseCpsl(new File(japeFileName).toURL(),
+                                           encoding);
       transducer = cpslParser.MultiPhaseTransducer();
     } catch(gate.jape.parser.ParseException e) {
       throw(new JapeException(e.toString()));
@@ -140,6 +143,10 @@ public class Compiler {
 
 
 // $Log$
+// Revision 1.6  2001/02/08 13:46:06  valyt
+// Added full Unicode support for the gazetteer and Jape
+// converted the gazetteer files to UTF-8
+//
 // Revision 1.5  2000/11/08 16:35:02  hamish
 // formatting
 //

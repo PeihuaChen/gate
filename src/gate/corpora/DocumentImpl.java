@@ -141,7 +141,6 @@ extends AbstractLanguageResource implements Document, StatusReporter
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-
     // set up the source URL and create the content
     if(sourceUrl == null && sourceUrlName != null)
       try {
@@ -248,7 +247,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
   public String getEncoding() { return encoding; }
 
   /** Set the encoding of the document content source */
-  public void setEncoding(String encoding) { encoding = encoding; }
+  public void setEncoding(String encoding) { this.encoding = encoding; }
 
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
@@ -494,7 +493,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
   protected DocumentContent content;
 
   /** The encoding of the source of the document content */
-  protected String encoding;
+  protected String encoding = "UTF-8";
 
   /** The range that the content comes from at the source URL
     * (or null if none).

@@ -19,6 +19,7 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 
+import gate.*;
 import gate.util.*;
 import gate.gui.*;
 import gate.email.*;
@@ -50,7 +51,7 @@ public class TestEmail extends TestCase
     Map markupElementsMap = null;
     gate.Document doc = null;
     Gate.init();
-    doc = gate.Factory.newDocument(Gate.getUrl("tests/email/test.eml"));
+    doc = gate.Factory.newDocument(Gate.getUrl("tests/email/test.eml"), "ISO-8859-1");
 
     // get a document format that deals with e-mails
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(

@@ -93,7 +93,7 @@ public class AnnotationEditor extends AbstractVisualResource{
   private boolean tableVisible;
   private boolean textVisible;
   private boolean filtersVisible;
-  private boolean editable;
+  private boolean editable = true;
 
   public AnnotationEditor() {
     initLocalData();
@@ -119,8 +119,9 @@ public class AnnotationEditor extends AbstractVisualResource{
       params.put("markupAware", new Boolean(true));
 
       params.put("sourceUrlName",
+                 "file:///d:/tmp/help-doc.html");
                  //"file:///d:/tmp/F7V.xml");
-                 "http://redmires.dcs.shef.ac.uk/admin/index.html");
+                 //"http://redmires.dcs.shef.ac.uk/admin/index.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/swing/Action.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt/AWTEventMulticaster.html");
       gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
@@ -284,43 +285,52 @@ public class AnnotationEditor extends AbstractVisualResource{
     annotationsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         int row = annotationsTable.rowAtPoint(e.getPoint());
-        //for any type of click -> highlight the annotation
-        int start = ((Long)annotationsTable.getModel().getValueAt(row, 2)).intValue();
-        int end = ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
-        try{
-          highlighter.removeAllHighlights();
-          highlighter.addHighlight(start, end, DefaultHighlighter.DefaultPainter);
-          textPane.scrollRectToVisible(textPane.modelToView(start));
-        }catch(BadLocationException ble){
-          throw new GateRuntimeException(ble.toString());
-        }
-        if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-          //double left click -> edit the annotation
-          Annotation ann = (Annotation)annotationsTable.getModel().
-                                                        getValueAt(row, -1);
-          //find an appropiate schema
-          if(annotationSchemas != null && !annotationSchemas.isEmpty()){
-            Iterator schemasIter = annotationSchemas.iterator();
-            boolean done = false;
-            while(!done && schemasIter.hasNext()){
-              AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
-              if(schema.getAnnotationName().equalsIgnoreCase(ann.getType())){
-                FeatureMap features = ann.getFeatures();
-                annotationEditDialog.setLocationRelativeTo(annotationsTable);
-                FeatureMap newFeatures = annotationEditDialog.show(features,
-                                                                   schema);
-                if(newFeatures != null){
-                  features.clear();
-                  features.putAll(newFeatures);
-                  ((AbstractTableModel)annotationsTable.getModel()).
-                                        fireTableRowsUpdated(row, row);
-                }
-                done = true;
-              }
+        Annotation ann = (Annotation)annotationsTable.getModel().
+                                                      getValueAt(row, -1);
+        EditAnnotationAction editAnnAct = new EditAnnotationAction(ann);
+        if(SwingUtilities.isLeftMouseButton(e)){
+          if(e.getClickCount() == 1){
+            //single left click ->highlight the annotation
+            int start = ((Long)annotationsTable.getModel().getValueAt(row, 2)).intValue();
+            int end = ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
+            try{
+              highlighter.removeAllHighlights();
+              highlighter.addHighlight(start, end, DefaultHighlighter.DefaultPainter);
+              textPane.scrollRectToVisible(textPane.modelToView(start));
+              annotationsTable.requestFocus();
+            }catch(BadLocationException ble){
+              throw new GateRuntimeException(ble.toString());
             }
+          }else if(e.getClickCount() == 2){
+            //double left click -> edit the annotation
+            editAnnAct.actionPerformed(null);
           }
         }else if(SwingUtilities.isRightMouseButton(e)){
           //right click
+          //add delete option
+          JPopupMenu popup = new JPopupMenu();
+          //find the annotation set
+          String setName = (String)annotationsTable.getModel().
+                                                      getValueAt(row, 1);
+          AnnotationSet set = setName.equals("<Default>")?
+                              document.getAnnotations() :
+                              document.getAnnotations(setName);
+          class DeleteAnnotationAction extends AbstractAction{
+            public DeleteAnnotationAction(AnnotationSet set, Annotation ann){
+              super("Delete");
+              this.ann = ann;
+              this.set = set;
+            }
+
+            public void actionPerformed(ActionEvent e){
+              set.remove(ann);
+            }
+            AnnotationSet set;
+            Annotation ann;
+          }
+          popup.add(new DeleteAnnotationAction(set, ann));
+          popup.add(editAnnAct);
+          popup.show(annotationsTable, e.getX(), e.getY());
         }
       }
     });
@@ -451,7 +461,7 @@ public class AnnotationEditor extends AbstractVisualResource{
 
     //LEFT SPLIT
     textPane = new JTextPane();
-//    textPane.setEditable(false);
+    textPane.setEditable(false);
     textPane.setEnabled(true);
     textPane.setEditorKit(new CustomStyledEditorKit());
     Style defaultStyle = textPane.getStyle("default");
@@ -1291,6 +1301,7 @@ System.out.println("Annotation added!");
                         }
                       }
                     }
+                    range = null;
                     SwingUtilities.invokeLater(new Runnable(){
                       public void run(){
                         annotationsTableModel.fireTableDataChanged();
@@ -1405,6 +1416,7 @@ System.out.println("Annotation added!");
     }
 
     public void run(){
+      boolean tableChanged = false;
       while(!stop){
         synchronized(eventQueue){
           if((System.currentTimeMillis() - lastEvent) > sleepInterval){
@@ -1424,16 +1436,32 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
               }else if(currentEvent instanceof AnnotationSetEvent){
                 //annotation set event
                 AnnotationSetEvent asEvt = (AnnotationSetEvent)currentEvent;
+                AnnotationSet set = (AnnotationSet)asEvt.getSource();
+                String setName = set.getName();
+                if(setName == null) setName = "<Default>";
+                Annotation ann = asEvt.getAnnotation();
+                String type = ann.getType();
+                TypeData tData = getTypeData(setName, type);
+
                 if(asEvt.getType() == asEvt.ANNOTATION_ADDED){
-                  AnnotationSet set = (AnnotationSet)asEvt.getSource();
-                  String setName = set.getName();
-                  if(setName == null) setName = "<Default>";
-                  Annotation ann = asEvt.getAnnotation();
-                  String type = ann.getType();
-                  TypeData tData = getTypeData(setName, type);
                   if(tData != null){
                     tData.annotations.add(ann);
                     if(tData.getVisible()){
+                      //update the table
+                      data.add(tData.range.end, ann);
+                      tData.range.end++;
+                      Iterator rangesIter = ranges.
+                                            subList(ranges.indexOf(tData.range) + 1,
+                                                    ranges.size()).
+                                            iterator();
+                      while(rangesIter.hasNext()){
+                        Range aRange = (Range) rangesIter.next();
+                        aRange.start++;
+                        aRange.end++;
+                      }//while(rangesIter.hasNext())
+                      tableChanged = true;
+
+                      //update the text
                       textPane.select(ann.getStartNode().getOffset().intValue(),
                                       ann.getEndNode().getOffset().intValue());
                       textPane.setCharacterAttributes(
@@ -1458,17 +1486,49 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                     while(node != null &&
                           !((TypeData)node.getUserObject()).getSet().equals(setName))
                       node = node.getNextSibling();
-if(node == null) System.out.println("Could not find set: " + setName);
                     node.add(typeNode);
                     stylesTreeModel.nodeStructureChanged(node);
                   }
                 }else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
-throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
+                  tData .annotations.remove(ann);
+                  if(tData.getVisible()){
+                    //update the annotations table
+                    data.remove(ann);
+                    //shorten the range conatining the annotation
+                    tData.range.end--;
+                    //shift all the remaining ranges
+                    Iterator rangesIter = ranges.
+                                          subList(ranges.indexOf(tData.range) + 1,
+                                                  ranges.size()).
+                                          iterator();
+                    while(rangesIter.hasNext()){
+                      Range aRange = (Range) rangesIter.next();
+                      aRange.start--;
+                      aRange.end--;
+                    }//while(rangesIter.hasNext())
+                    tableChanged = true;
+                    //update the text
+                    //hide the highlight
+                    textPane.select(ann.getStartNode().getOffset().intValue(),
+                                    ann.getEndNode().getOffset().intValue());
+                    textPane.setCharacterAttributes(
+                              textPane.getStyle("default"), true);
+                  }//if(tData.getVisible())
                 }
               }else{
                 //unknown event type
               }
             }//while(! eventQueue.isEmpty())
+            if(tableChanged){
+              SwingUtilities.invokeLater(new Runnable(){
+                public void run(){
+                  if(annotationsTableModel != null){
+                    annotationsTableModel.fireTableDataChanged();
+                  }
+                }
+              });
+              tableChanged = false;
+            }
           }
         }//synchronized(eventQueue)
         try{
@@ -1547,6 +1607,39 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
     Annotation annotation;
   }
 
+  protected class EditAnnotationAction extends AbstractAction{
+    public EditAnnotationAction(Annotation ann){
+      super("Edit");
+      this.ann = ann;
+    }
+
+    public void actionPerformed(ActionEvent e){
+      if(!editable) return;
+      //find an appropiate schema
+      if(annotationSchemas != null && !annotationSchemas.isEmpty()){
+        Iterator schemasIter = annotationSchemas.iterator();
+        boolean done = false;
+        while(!done && schemasIter.hasNext()){
+          AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+          if(schema.getAnnotationName().equalsIgnoreCase(ann.getType())){
+            FeatureMap features = ann.getFeatures();
+            annotationEditDialog.setLocationRelativeTo(annotationsTable);
+            FeatureMap newFeatures = annotationEditDialog.show(features,
+                                                               schema);
+            if(newFeatures != null){
+              features.clear();
+              features.putAll(newFeatures);
+              int tableRow = data.indexOf(ann);
+              annotationsTableModel.fireTableRowsUpdated(tableRow, tableRow);
+            }
+            done = true;
+          }
+        }
+      }
+    }//public void actionPerformed(ActionEvent e)
+
+    Annotation ann;
+  }
   protected class NewAnnotationPopupItem extends JMenuItem{
     public NewAnnotationPopupItem(int aStart, int anEnd,
                                   AnnotationSchema aSchema,
@@ -1597,7 +1690,6 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation removed");
     AnnotationSchema schema;
     AnnotationSet targetAS;
   }
-
 
   public class CustomStyledEditorKit extends StyledEditorKit{
     private final ViewFactory defaultFactory = new CustomStyledViewFactory();
