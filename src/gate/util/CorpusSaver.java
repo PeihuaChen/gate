@@ -164,13 +164,15 @@ public class CorpusSaver {
     }
 
     //get the last argument which is the application
-    i++;
-    String appName = args[i];
-    File appFile = new File(appName);
-    if (!appFile.isFile())
-      throw new GateException("Please provide an existing GATE application");
-    else
-      corpusSaver1.setApplicationFile(appFile);
+    if (corpusSaver1.getProcessMode()) {
+      i++;
+      String appName = args[i];
+      File appFile = new File(appName);
+      if (!appFile.isFile())
+        throw new GateException("Please provide an existing GATE application");
+      else
+        corpusSaver1.setApplicationFile(appFile);
+    }
 
     Out.prln("Initialising GATE please wait...");
     corpusSaver1.init();
@@ -191,6 +193,10 @@ public class CorpusSaver {
 
   public void setProcessMode(boolean mode) {
     processMode = mode;
+  }
+
+  public boolean getProcessMode() {
+    return processMode;
   }
 
   public void setSaveMode(boolean mode) {
@@ -223,7 +229,7 @@ public class CorpusSaver {
         //first process it with ANNIE if in process mode
         if (processMode)
           processDocument(doc);
-        
+
         //then store it in the DS and add to corpus
         if (saveMode) {
           LanguageResource lr = ds.adopt(doc, null);
