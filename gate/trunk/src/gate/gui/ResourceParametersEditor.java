@@ -268,8 +268,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     public boolean isCellEditable(int rowIndex,
                               int columnIndex) {
       switch(columnIndex){
-        case 0: return editable &&
-                      ((ParameterDisjunction)
+        case 0: return ((ParameterDisjunction)
                         parameterDisjunctions.get(rowIndex)).size() > 1;
         case 1: return false;
         case 2: return false;

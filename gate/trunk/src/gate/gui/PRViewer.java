@@ -53,16 +53,16 @@ public class PRViewer extends AbstractVisualResource {
 
   public void setTarget(Object target){
     if(target == null) return;
-    if(!(target instanceof ProcessingResource)){
+    if(!(target instanceof Resource)){
       throw new GateRuntimeException(this.getClass().getName() +
                                      " can only be used to display " +
-                                     ProcessingResource.class.getName() +
+                                     Resource.class.getName() +
                                      "\n" + target.getClass().getName() +
                                      " is not a " +
-                                     ProcessingResource.class.getName() + "!");
+                                     Resource.class.getName() + "!");
     }
     if(target != null){
-      ProcessingResource pr = (ProcessingResource)target;
+      Resource pr = (Resource)target;
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                                               get(pr.getClass().getName());
       if(rData != null){

@@ -572,8 +572,6 @@ public class NameBearerHandle implements Handle,
               MainFrame.lockGUI("Saving...");
               // Prepare to write into the xmlFile using the original encoding
               ////////////////////////////////
-              // Save-as-XML always uses UTF-8
-              ////////////////////////////////
               String encoding = ((gate.TextualDocument)target).getEncoding();
 
               OutputStreamWriter writer = new OutputStreamWriter(
