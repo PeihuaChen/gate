@@ -228,9 +228,7 @@ extends AbstractFeatureBearer implements DataStore {
 
     // check the LR's current DS
     DataStore currentDS = lr.getDataStore();
-    if(currentDS == this)         // adopted already
-      return lr;
-    else if(currentDS == null) {  // an orphan - do the adoption
+    if(currentDS == null) {  // an orphan - do the adoption
       lr.setDataStore(this);
 
       // let the world know
@@ -238,7 +236,9 @@ extends AbstractFeatureBearer implements DataStore {
           new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
       );
       return lr;
-    } else {                      // someone else's child
+    } else if(currentDS.equals(this))         // adopted already here
+      return lr;
+    else {                      // someone else's child
       throw new PersistenceException(
         "Can't adopt a resource which is already in a different datastore"
       );
@@ -288,7 +288,7 @@ extends AbstractFeatureBearer implements DataStore {
     */
   public void sync(LanguageResource lr) throws PersistenceException {
     // check that this LR is one of ours (i.e. has been adopted)
-    if(lr.getDataStore() != this)
+    if(lr.getDataStore() == null || ! lr.getDataStore().equals(this))
       throw new PersistenceException(
         "This LR is not stored in this DataStore"
       );
@@ -395,6 +395,7 @@ extends AbstractFeatureBearer implements DataStore {
     // set the dataStore property of the LR (which is transient and therefore
     // not serialised)
     lr.setDataStore(this);
+    lr.setLRPersistenceId(lrPersistenceId);
 
     return lr;
   } // getLr(id)
@@ -492,10 +493,20 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Equality: based on storage dir of other. */
   public boolean equals(Object other) {
-    return
-      other instanceof SerialDataStore
-      &&
-      ((SerialDataStore)other).storageDir.equals(storageDir);
+
+
+    if (! (other instanceof SerialDataStore))
+      return false;
+
+    if (! ((SerialDataStore)other).storageDir.equals(storageDir))
+      return false;
+
+    //check for the name. First with equals, because they can be both null
+    //in which case trying just with equals leads to a null pointer exception
+    if (((SerialDataStore)other).name == name)
+      return true;
+    else
+      return ((SerialDataStore)other).name.equals(name);
   } // equals
 
   public synchronized void removeDatastoreListener(DatastoreListener l) {

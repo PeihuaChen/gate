@@ -222,7 +222,7 @@ public class UserGroupEditor extends JComponent {
 //    jPanel1.setSize(800, 100);
 //    jPanel2.setSize(800, 500);
 
-    displayUsersFirst.setText("Groups per user");
+    displayUsersFirst.setText("Show all users");
     displayUsersFirst.setToolTipText("");
     displayUsersFirst.setActionCommand("usersFirst");
     displayUsersFirst.setSelected(true);
@@ -231,7 +231,7 @@ public class UserGroupEditor extends JComponent {
         displayUsersFirst_itemStateChanged(e);
       }
     });
-    displayGroupsFirst.setText("Users per group");
+    displayGroupsFirst.setText("Show all groups");
     displayGroupsFirst.setActionCommand("groupsFirst");
 
     this.add(jPanel1, null);
