@@ -1170,7 +1170,8 @@ public class AnnotationEditor extends AbstractVisualResource {
             return ann.getEndNode().getOffset();
           }
           case 4:{//Features
-            return ann.getFeatures().toString();
+            if(ann.getFeatures() == null) return null;
+            else return ann.getFeatures().toString();
           }
           default:{
           }
