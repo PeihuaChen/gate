@@ -691,7 +691,7 @@ public class SerialCorpusImpl extends
 
   //we don't keep the transient source, so always return null
   //Sill this must be implemented, coz of the GUI and Factory
-  public Object setTransientSource() {
+  public Object getTransientSource() {
     return null;
   }
 
