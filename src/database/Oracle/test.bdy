@@ -238,6 +238,9 @@ create or replace package body test is
      delete from t_annotation;
      delete from t_annot_set;
      
+     --delete nodes
+     delete from t_node;
+     
      -- documents/corpuses
      delete from t_corpus_document;
      delete from t_document;
