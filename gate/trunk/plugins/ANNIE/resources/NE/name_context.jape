@@ -12,18 +12,19 @@ Rule: Jobtitle1
 )
 (
  {Unknown}
-  (SPACE {Unknown})?
+ (SPACE {Unknown})?
 )
 :person
 -->
 {
-//removes old "unknown" annotation and adds a "Person" one
+//removes old "Unknown" annotation and adds a "Person" one
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("rule ", "NameContext1");
+features.put("rule", "NameContext1");
 annotations.add(person.firstNode(), person.lastNode(), "Person",
 features);
 //System.out.println("test");
+annotations.removeAll(person);
 }
 
 
