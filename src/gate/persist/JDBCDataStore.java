@@ -189,7 +189,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * @param lrClassName class name of the type of resource
    */
   public abstract void delete(String lrClassName, Object lrId)
-    throws PersistenceException;
+    throws PersistenceException,SecurityException;
 
 
   /**
