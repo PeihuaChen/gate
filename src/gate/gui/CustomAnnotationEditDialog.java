@@ -32,11 +32,11 @@ import gate.util.*;
 import gate.creole.*;
 
 /** This class visually adds/edits features and annot type of an annotation
-  * It does this without using an @see gate.creole.AnnotationSchema.
+  * It does this without using an {@link gate.creole.AnnotationSchema}.
   * The user can manipulate annotation and features at his own will.
   * Is his responsability.Although for annotation that have a schema present
   * into the system, this class will not be
-  * used.@see gate.gui.AnnotationEditDialog is highly prioritar in this case.
+  * used.{@link gate.gui.AnnotationEditDialog} is highly prioritar in this case.
   */
 public class CustomAnnotationEditDialog extends JDialog {
 

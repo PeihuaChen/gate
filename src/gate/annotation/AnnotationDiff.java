@@ -216,7 +216,8 @@ public class AnnotationDiff extends AbstractVisualResource{
   /**
     * @param anAnnotationSchema the annotation type being compared.
     * This type is found in annotationSchema object as field
-    * @see  gate.creole.AnnotationSchema#getAnnotationName().
+    * {@link gate.creole.AnnotationSchema#getAnnotationName()}. If is <b>null<b>
+    * then AnnotDiff will throw an exception when it comes to do the diff.
     */
   public void setAnnotationSchema(AnnotationSchema anAnnotationSchema) {
     annotationSchema = anAnnotationSchema;

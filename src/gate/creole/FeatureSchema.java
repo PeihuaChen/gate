@@ -22,7 +22,7 @@ import gate.util.*;
 
 /**
   * This class describes a schema for a feature. It is used as part of
-  * @see gate.creole.AnnotationSchema class.
+  * {@link gate.creole.AnnotationSchema} class.
   */
 public class FeatureSchema implements Serializable {
 

@@ -24,7 +24,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 
-/** This class wraps the @see gate.annotation.AnnotationDiff one. It adds the
+/** This class wraps the {@link gate.annotation.AnnotationDiff} one. It adds the
   * the GUI functionality needed to set up params for AnnotationDiff and also
   * adds the AnnotationDiff as a tool in GATE.
   */
@@ -82,7 +82,7 @@ class AnnotDiffDialog extends JFrame {
     });
   }//updateData()
 
-  /** Initialises the data needed to set up @see gate.annotation.AnnotationDiff
+  /** Initialises the data needed to set up {@link gate.annotation.AnnotationDiff}
     * GUI components will be build using this data.
     */
   public void initLocalData(){

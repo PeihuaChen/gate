@@ -27,8 +27,8 @@ import gate.util.*;
 
 /**
   * This class is used to log all messages from GATE. When an object of this
-  * class is created, it redirects the output of @see gate.util.Out &
-  * @see gate.util.Err.
+  * class is created, it redirects the output of {@link gate.util.Out} &
+  * {@link gate.util.Err}.
   * The output from Err is written with <font color="red">red</font> and the
   * one from Out is written in <b>black</b>.
   */
