@@ -395,8 +395,6 @@ public class MainFrame extends JFrame
 
     JMenu fileMenu = new JMenu("File");
 
-    fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
-    fileMenu.addSeparator();
     newLrMenu = new JMenu("New language resource");
     fileMenu.add(newLrMenu);
     newPrMenu = new JMenu("New processing resource");
@@ -406,6 +404,9 @@ public class MainFrame extends JFrame
     fileMenu.add(new XJMenuItem(newDSAction, this));
     fileMenu.add(new XJMenuItem(openDSAction, this));
     fileMenu.addSeparator();
+    fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
+    fileMenu.addSeparator();
+
     fileMenu.add(new XJMenuItem(new AbstractAction("Exit"){
       {
         putValue(SHORT_DESCRIPTION, "Exits the application");
