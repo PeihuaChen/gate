@@ -39,7 +39,7 @@ extends FeatureBearer, IdBearer, Comparable, Serializable {
   public int compareTo(Object o) throws ClassCastException;
 
   /** This verifies if <b>this</b> annotation is compatible with another one.
-    * Compatible means that they hit the same enity and the FeatureMap of
+    * Compatible means that they hit the same possition and the FeatureMap of
     * <b>this</b> is incuded into aAnnot FeatureMap.
     * @param aAnnot a gate Annotation.
     * @return <code>true</code> if aAnnot is compatible with <b>this</> and

@@ -24,6 +24,7 @@ import gate.event.*;
 
 
 import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 
 /**
@@ -35,7 +36,7 @@ import org.xml.sax.*;
   * This class also will replace the content of the Gate document with a
   * new one containing anly text from the XML document.
   */
-public class XmlDocumentHandler extends HandlerBase{
+public class XmlDocumentHandler extends DefaultHandler{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -119,13 +120,11 @@ public class XmlDocumentHandler extends HandlerBase{
     // If basicAs is null then get the default AnnotationSet,
     // based on the gate document.
     if (basicAS == null)
-      basicAS = doc.getAnnotations();
+      basicAS = doc.getAnnotations("Original markups");
 
     // create all the annotations (on this new document) from the collector
-    Iterator anIterator = colector.iterator();
-    while (anIterator.hasNext()){
-      CustomObject obj = (CustomObject) anIterator.next();
-
+    while (!colector.isEmpty()){
+      CustomObject obj = (CustomObject) colector.getFirst();
       // create a new annotation and add it to the annotation set
       try{
         // the annotation type will be conforming with markupElementsMap
@@ -144,6 +143,7 @@ public class XmlDocumentHandler extends HandlerBase{
       }catch (gate.util.InvalidOffsetException e){
         Err.prln("Error creating an annot :" + obj + " Discarded...");
       }// End try
+      colector.remove(obj);
     }// End while
   }// endDocument();
 
@@ -151,7 +151,9 @@ public class XmlDocumentHandler extends HandlerBase{
     * This method is called when the SAX parser encounts the beginning of an
     * XML element.
     */
-  public void startElement(String elemName, AttributeList atts){
+  public void startElement (String uri, String elemName,String qName,
+                                                             Attributes atts){
+
     // inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -162,34 +164,35 @@ public class XmlDocumentHandler extends HandlerBase{
 
     //get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
-     String attName  = atts.getName(i);
+     String attName  = atts.getLocalName(i);
      String attValue = atts.getValue(i);
      fm.put(attName,attValue);
-    }
+    }// End for
 
     // create the START index of the annotation
-    Long startIndex = new Long(tmpDocContent.length ());
+    Long startIndex = new Long(tmpDocContent.length());
 
     // initialy the Start index is equal with End index
     CustomObject obj = new CustomObject(elemName,fm, startIndex, startIndex);
 
     // put this object into the stack
     stack.push(obj);
-  }
+  }// startElement();
 
   /**
     * This method is called when the SAX parser encounts the end of an
     * XML element.
     * Here we extract
     */
-  public void endElement(String elemName) throws SAXException{
+  public void endElement (String uri, String elemName, String qName)
+                                                         throws SAXException{
     // obj is for internal use
     CustomObject obj = null;
 
     // if the stack is not empty, we extract the custom object and delete it
     if (!stack.isEmpty ()){
       obj = (CustomObject) stack.pop();
-    }
+    }// End if
 
     // put the object into colector
     // later, when the document ends we will use colector to create all the
@@ -206,8 +209,8 @@ public class XmlDocumentHandler extends HandlerBase{
       stringFromMap = (String) element2StringMap.get(elemName);
       if (stringFromMap != null)
           tmpDocContent.append(stringFromMap);
-    }
-  }
+    }// End if
+  }// endElement();
 
   /**
     * This method is called when the SAX parser encounts text in the XML doc.
@@ -218,28 +221,43 @@ public class XmlDocumentHandler extends HandlerBase{
     // create a string object based on the reported text
     String content = new String(text, start, length);
 
+    StringBuffer contentBuffer = new StringBuffer("");
+    int tmpDocContentSize = tmpDocContent.length();
+    boolean incrementStartIndex = false;
+    // If the first char of the text just read "text[0]" is NOT whitespace AND
+    // the last char of the tmpDocContent[SIZE-1] is NOT whitespace then
+    // concatenation "tmpDocContent + content" will result into a new different
+    // word... and we want to avoid that...
+    if ( tmpDocContentSize != 0 &&
+         content.length() != 0 &&
+         !Character.isWhitespace(content.charAt(0)) &&
+         !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1))){
+
+            contentBuffer.append(" ");
+            incrementStartIndex = true;
+    }// End if
+    // update the document content
+    contentBuffer.append(content);
     // calculate the End index for all the elements of the stack
     // the expression is : End index = Current doc length + text length
-    Long end = new Long(tmpDocContent.length() + content.length());
+    Long end = new Long(tmpDocContent.length() + contentBuffer.length());
 
     CustomObject obj = null;
-    // iterate through stack to modify the End index of the existing elements
+    // Iterate through stack to modify the End index of the existing elements
 
     java.util.Iterator anIterator = stack.iterator();
     while (anIterator.hasNext ()){
-
       // get the object and move to the next one
       obj = (CustomObject) anIterator.next ();
+      if (incrementStartIndex && obj.getStart().equals(obj.getEnd())){
+        obj.setStart(new Long(obj.getStart().longValue() + 1));
+      }// End if
+      // sets its End index
+      obj.setEnd(end);
+    }// End while
 
-      // if obj is not null then sets its end index
-      if (null != obj){
-        // sets its End index
-        obj.setEnd(end);
-      }
-    }
-    // update the document content
-    tmpDocContent.append(content);
-  }
+    tmpDocContent.append(contentBuffer.toString());
+  }// characters();
 
   /**
     * This method is called when the SAX parser encounts white spaces
@@ -404,68 +422,70 @@ public class XmlDocumentHandler extends HandlerBase{
   // we need a colection to retain all the CustomObjects that will be
   // transformed into annotation over the gate document...
   // the transformation will take place inside onDocumentEnd() method
-  private List colector = null;
+  private LinkedList colector = null;
+
+  //////// INNER CLASS
+  /**
+    * The objects belonging to this class are used inside the stack.
+    * This class is for internal needs
+    */
+  class  CustomObject {
+
+    // constructor
+    public CustomObject(String anElemName, FeatureMap aFm,
+                           Long aStart, Long anEnd){
+      elemName = anElemName;
+      fm = aFm;
+      start = aStart;
+      end = anEnd;
+    }
+
+    // accesor
+    public String getElemName(){
+      return elemName;
+    }
+
+    public FeatureMap getFM(){
+      return fm;
+    }
+
+    public Long getStart(){
+      return start;
+    }
+
+    public Long getEnd(){
+      return end;
+    }
+
+    // mutator
+    public void setElemName(String anElemName){
+      elemName = anElemName;
+    }
+
+    public void setFM(FeatureMap aFm){
+      fm = aFm;
+    }
+
+    public void setStart(Long aStart){
+      start = aStart;
+    }
+
+    public void setEnd(Long anEnd){
+      end = anEnd;
+    }
+
+    // data fields
+    private String elemName = null;
+
+    private FeatureMap fm = null;
+
+    private Long start = null;
+
+    private Long end  = null;
+
+  } // CustomObject
 
 } //XmlDocumentHandler
 
 
-/**
-  * The objects belonging to this class are used inside the stack.
-  * This class is for internal needs
-  */
-class  CustomObject {
-
-  // constructor
-  public CustomObject(String anElemName, FeatureMap aFm,
-                         Long aStart, Long anEnd){
-    elemName = anElemName;
-    fm = aFm;
-    start = aStart;
-    end = anEnd;
-  }
-
-  // accesor
-  public String getElemName(){
-    return elemName;
-  }
-
-  public FeatureMap getFM(){
-    return fm;
-  }
-
-  public Long getStart(){
-    return start;
-  }
-
-  public Long getEnd(){
-    return end;
-  }
-
-  // mutator
-  public void setElemName(String anElemName){
-    elemName = anElemName;
-  }
-
-  public void setFM(FeatureMap aFm){
-    fm = aFm;
-  }
-
-  public void setStart(Long aStart){
-    start = aStart;
-  }
-
-  public void setEnd(Long anEnd){
-    end = anEnd;
-  }
-
-  // data fields
-  private String elemName = null;
-
-  private FeatureMap fm = null;
-
-  private Long start = null;
-
-  private Long end  = null;
-
-} // CustomObject
 

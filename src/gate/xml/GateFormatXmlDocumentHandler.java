@@ -25,13 +25,14 @@ import gate.event.*;
 
 
 import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 
 /**
   * Implements the behaviour of the XML reader. This is the reader for
   * Gate Xml documents saved with DocumentImplementation.toXml() method.
   */
-public class GateFormatXmlDocumentHandler extends HandlerBase{
+public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -80,7 +81,9 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     * This method is called when the SAX parser encounts the beginning of an
     * XML element.
     */
-  public void startElement(String elemName, AttributeList atts){
+  public void startElement (String uri, String elemName,String qName,
+                                                             Attributes atts){
+
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -106,7 +109,9 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
     * This method is called when the SAX parser encounts the end of an
     * XML element.
     */
-  public void endElement(String elemName) throws SAXException{
+    public void endElement (String uri, String elemName, String qName)
+                                                           throws SAXException{
+
     currentElementStack.pop();
     // Deal with Annotation
     if ("Annotation".equals(elemName)){
@@ -236,11 +241,11 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
 
 
   /** This method deals with a AnnotationSet element. */
-  private void processAnnotationSetElement(AttributeList atts){
+  private void processAnnotationSetElement(Attributes atts){
     if (atts != null){
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
-       String attName  = atts.getName(i);
+       String attName  = atts.getLocalName(i);
        String attValue = atts.getValue(i);
        if ("Name".equals(attName))
           currentAnnotationSet = doc.getAnnotations(attValue);
@@ -249,12 +254,12 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   }//processAnnotationSetElement
 
   /** This method deals with a Annotation element. */
-  private void processAnnotationElement(AttributeList atts){
+  private void processAnnotationElement(Attributes atts){
     if (atts != null){
       currentAnnot = new AnnotationObject();
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
-       String attName  = atts.getName(i);
+       String attName  = atts.getLocalName(i);
        String attValue = atts.getValue(i);
 
        if ("Type".equals(attName))
@@ -299,18 +304,18 @@ public class GateFormatXmlDocumentHandler extends HandlerBase{
   }//processAnnotationElement
 
   /** This method deals with a Features element. */
-  private void processFeatureElement(AttributeList atts){
+  private void processFeatureElement(Attributes atts){
     // The first time feature is calle it will create a features map.
     if (currentFeatureMap == null)
       currentFeatureMap = Factory.newFeatureMap();
   }//processFeatureElement
 
   /** This method deals with a Node element. */
-  private void processNodeElement(AttributeList atts){
+  private void processNodeElement(Attributes atts){
     if (atts != null){
       for (int i = 0; i < atts.getLength(); i++) {
         // Extract name and value
-        String attName  = atts.getName(i);
+        String attName  = atts.getLocalName(i);
         String attValue = atts.getValue(i);
         if ("id".equals(attName)){
           try{

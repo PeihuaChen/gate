@@ -21,6 +21,7 @@ import java.io.*;
 
 import org.xml.sax.*;
 import javax.xml.parsers.*;
+import org.xml.sax.helpers.*;
 
 import gate.*;
 import gate.util.*;
@@ -34,7 +35,7 @@ import gate.event.*;
   * <P>
   * The CREOLE register records the set of resources that are currently
   * known to the system. Each member of the register is a
-  * <A HREF=creole/ResourceData.html>ResourceData</A> object, indexed by
+  * {@link gate.creole.ResourceData} object, indexed by
   * the class name of the resource.
   * @see gate.CreoleRegister
   */
@@ -163,7 +164,7 @@ public class CreoleRegisterImpl extends HashMap
     // create a handler for the directory file and parse it;
     // this will create ResourceData entries in the register
     try {
-      HandlerBase handler = new CreoleXmlHandler(this, directoryUrl);
+      DefaultHandler handler = new CreoleXmlHandler(this, directoryUrl);
       parser.parse(directoryStream, handler);
       if(DEBUG) {
         Out.prln(

@@ -440,6 +440,7 @@ public class AnnotationEditDialog extends JDialog {
                             int rowIndex,
                             int columnIndex){
 
+      if (data == null || data.isEmpty()) return;
       RowData rd = (RowData) data.get(rowIndex);
       switch(columnIndex){
         case 0:{break;}
