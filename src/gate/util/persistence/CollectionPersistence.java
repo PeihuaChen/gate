@@ -18,6 +18,7 @@ import java.io.*;
 
 import gate.persist.PersistenceException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.*;
 
 
 public class CollectionPersistence implements Persistence {
@@ -64,8 +65,16 @@ public class CollectionPersistence implements Persistence {
     //now we have the collection let's populate it
     Iterator elemIter = localList.iterator();
     while(elemIter.hasNext()){
-      result.add(PersistenceManager.
-                 getTransientRepresentation(elemIter.next()));
+      try{
+        result.add(PersistenceManager.
+                   getTransientRepresentation(elemIter.next()));
+      }catch(PersistenceException pe){
+        PersistenceManager.exceptionOccured = true;
+        pe.printStackTrace(Err.getPrintWriter());
+      }catch(ResourceInstantiationException rie){
+        PersistenceManager.exceptionOccured = true;
+        rie.printStackTrace(Err.getPrintWriter());
+      }
     }
 
     return result;
