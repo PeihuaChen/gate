@@ -44,12 +44,12 @@ public class AnnotationSchema {
   public static void main(String[] args){
     URL url = null;
     try{
-      //url = new URL("file:///d:/cursu/XSchema/POSSchema.xml");
+      url = new URL("file:///d:/cursu/XSchema/POSSchema.xml");
       //url = new URL("file:///d:/cursu/XSchema/SentenceSchema.xml");
       //url = new URL("file:///d:/cursu/XSchema/TokenSchema.xml");
       //url = new URL("file:///d:/cursu/XSchema/UtteranceSchema.xml");
       //url = new URL("file:///d:/cursu/XSchema/SyntaxTreeNodeSchema.xml");
-      url = new URL("file:///d:/cursu/XSchema/AllXSchema.xml");
+      //url = new URL("file:///d:/cursu/XSchema/AllXSchema.xml");
     } catch (Exception e){
       e.printStackTrace(Err.getPrintWriter());
     }
@@ -59,16 +59,55 @@ public class AnnotationSchema {
   }
  */
 
+  /**
+    * A map between XSchema types and Java Types
+    */
+  private static Map xSchema2JavaMap = new HashMap();
+  /**
+    * A map between JAva types and XSchema
+    */
+  private static Map java2xSchemaMap = new HashMap();
+
+  static{
+    setUp();
+  }
+
+  /**
+    *  This sets up two Maps between XSchema types and their coresponding
+    *  Java types
+    */
+  private static  void setUp(){
+    xSchema2JavaMap.put("string" ,new String().getClass().getName());
+    xSchema2JavaMap.put("integer",new Integer(12).getClass().getName());
+    xSchema2JavaMap.put("int",new Integer(12).getClass().getName());
+    xSchema2JavaMap.put("boolean" ,new Boolean("true").getClass().getName());
+    xSchema2JavaMap.put("float",new Float(12.12).getClass().getName());
+    xSchema2JavaMap.put("double",new Double(12.12).getClass().getName());
+    xSchema2JavaMap.put("short",new Short((short)12).getClass().getName());
+    xSchema2JavaMap.put("byte",new Byte((byte)12).getClass().getName());
+
+    java2xSchemaMap.put(new String().getClass().getName(),"string");
+    java2xSchemaMap.put(new Integer(12).getClass().getName(),"integer");
+    java2xSchemaMap.put(new Boolean("true").getClass().getName(),"boolean");
+    java2xSchemaMap.put(new Float(12.12).getClass().getName(),"float");
+    java2xSchemaMap.put(new Double(12.12).getClass().getName(),"double");
+    java2xSchemaMap.put(new Short((short)12).getClass().getName(),"short");
+    java2xSchemaMap.put(new Byte((byte)12).getClass().getName(),"byte");
+  }// end setUp
+
   /** The name of the annotation */
   String annotationName = null;
 
   /** Schemas for the attributes */
   Set featureSchemaSet = null;
 
-  /** A store of all AnnotationSchema (all AnnotationSchema must register
-    * here on construction or loading)
+  /**
+    * Constructs an annotation schema. Name and
+    * feature schema set on null
     */
-  static Map annotationSchemaMap = null;
+  public AnnotationSchema(){
+    this(null,null);
+  }//AnnotationSchema
 
   /**
     * Constructs an annotation schema given it's name.
@@ -197,7 +236,7 @@ public class AnnotationSchema {
     String featureType = null;
     String featureUse  = null;
     String featureDefaultValue = null;
-    Set featurePermissibleValuesSet = null;
+    Set    featurePermissibleValuesSet = null;
 
     // Get the value of the name attribute. If this attribute doesn't exists
     // then it will receive a default one.
@@ -206,9 +245,13 @@ public class AnnotationSchema {
       featureName = "UnknownFeature";
     // See if it has a type attribute associated
     featureType = anAttributeElement.getAttributeValue("type");
+    if (featureType != null)
+      // Set it to the corresponding Java type
+      featureType = (String) xSchema2JavaMap.get(featureType);
     // Get the value of use attribute
     featureUse = anAttributeElement.getAttributeValue("use");
     if (featureUse == null)
+      // Set it to the default value
       featureUse = "optional";
     // Get the value of value attribute
     featureDefaultValue = anAttributeElement.getAttributeValue("value");
@@ -217,23 +260,27 @@ public class AnnotationSchema {
     // Let's check if it has a simpleType element inside
     org.jdom.Element simpleTypeElement  =
                                   anAttributeElement.getChild("simpleType");
-    // if it has (!= null) then check to see if it has a restrictionElement
+    // If it has (!= null) then check to see if it has a restrictionElement
     if (simpleTypeElement != null){
       org.jdom.Element restrictionElement =
                               simpleTypeElement.getChild("restriction");
       if (restrictionElement != null){
-        // get the type attribute for restriction element
+        // Get the type attribute for restriction element
         featureType = restrictionElement.getAttributeValue("base");
-        // check to see if that attribute was present. getAttributeValue will
+        // Check to see if that attribute was present. getAttributeValue will
         // return null if it wasn't present
         if (featureType == null)
-            featureType = "UnknownFeatureType";
-        // check to see if there are any enumeration elements inside
+          // If it wasn't present then set it to default type (string)
+          featureType =  (String) xSchema2JavaMap.get("string");
+        else
+          // Set it to the corresponding Java type
+          featureType = (String) xSchema2JavaMap.get(featureType);
+        // Check to see if there are any enumeration elements inside
         List enumerationElementChildrenList =
-                                  restrictionElement.getChildren("enumeration");
+                                 restrictionElement.getChildren("enumeration");
         Iterator enumerationChildrenIterator =
                                 enumerationElementChildrenList.iterator();
-        // check if there is any enumeration element in the list
+        // Check if there is any enumeration element in the list
         if (enumerationChildrenIterator.hasNext())
             featurePermissibleValuesSet = new HashSet();
         while (enumerationChildrenIterator.hasNext()){
@@ -241,16 +288,16 @@ public class AnnotationSchema {
                         (org.jdom.Element) enumerationChildrenIterator.next();
           String permissibleValue =
                             enumerationElement.getAttributeValue("value");
-          // add that value to the featureSchema possible values set.
+          // Add that value to the featureSchema possible values set.
           featurePermissibleValuesSet.add(permissibleValue);
         }// end while
       }// end if( restrictionElement != null)
     }// end if (simpleTypeElement != null)
 
     // If it doesn't have a simpleTypeElement inside and featureType is null,
-    // then we set a default type to UnknownFeatureType
+    // then we set a default type to string
     if (simpleTypeElement == null && featureType == null )
-      featureType = "UnknownFeatureType";
+      featureType =  (String) xSchema2JavaMap.get("string");
 
     // Create an add a featureSchema object
     FeatureSchema featureSchema = new FeatureSchema(
@@ -277,7 +324,7 @@ public class AnnotationSchema {
       Iterator featureSchemaSetIterator = featureSchemaSet.iterator();
       while (featureSchemaSetIterator.hasNext()){
         FeatureSchema fs = (FeatureSchema) featureSchemaSetIterator.next();
-        schemaString.append("   " + fs.toXSchema());
+        schemaString.append("   " + fs.toXSchema(java2xSchemaMap));
       }// end while
       schemaString.append("  </complexType>\n");
       schemaString.append(" </element>\n");
@@ -285,5 +332,6 @@ public class AnnotationSchema {
     schemaString.append("</schema>\n");
     return schemaString.toString();
   }//end toXSchema
+
 }//AnnotationSchema
 

@@ -41,7 +41,11 @@ public class FeatureSchema {
   /** The class name of the feature value*/
   String featureValueClassName = null;
 
-  Object featureDefaultValue = null;
+  /** The default feature value */
+  String featureDefaultValue = null;
+  /** The use of that feature can be one of:
+    *  prohibited | optional | required | default | fixed : optional
+    */
   String featureUse = null;
 
   /** The default or fixed value for that feature*/
@@ -112,14 +116,15 @@ public class FeatureSchema {
   /**
     * This method transforms a feature to its XSchema representation
     */
-  public String toXSchema(){
+  public String toXSchema(Map aJava2XSchemaMap){
     StringBuffer schemaString = new StringBuffer();
     schemaString.append("<attribute name=\"" + featureName + "\" ");
     schemaString.append("use=\"" + featureUse + "\"");
     // If there are no permissible values that means that the type must
     // be specified as an attribute for the attribute element
     if (!isEnumeration())
-      schemaString.append(" type=\"" + featureValueClassName + "\"/>\n");
+      schemaString.append(" type=\"" +
+          (String) aJava2XSchemaMap.get(featureValueClassName) + "\"/>\n");
     else {
       schemaString.append(">\n <simpleType>\n");
       schemaString.append("  <restriction base=\"" + featureValueClassName +
@@ -138,4 +143,50 @@ public class FeatureSchema {
     }// end if else
     return schemaString.toString();
   }// end toXSchema
+
+  /**
+    * This method is used to see if the feature has a default value
+    * @return true if the feature has a default value
+    * @return false if the feature doesn't have a default value
+    */
+  public boolean isDefaultValue(){
+    return "".equals(featureDefaultValue);
+  }//hasDefaultValue
+
+  /**
+    * This method is used to check if the feature is required.
+    * @return true if the feature is required. Otherwhise returns false
+    */
+  public boolean isRequired(){
+    return "required".equals("featureUse");
+  }//isRequired
+  /**
+    * This method is used to check if the feature is default.
+    * @return true if the feature is default. Otherwhise returns false
+    */
+  public boolean isDefault(){
+    return "default".equals("featureUse");
+  }//isDefault
+  /**
+    * This method is used to check if the feature is fixed.
+    * @return true if the feature is fixed. Otherwhise returns false
+    */
+  public boolean isFixed(){
+    return "fixed".equals("featureUse");
+  }//isFixed
+  /**
+    * This method is used to check if the feature is optional.
+    * @return true if the optional is fixed. Otherwhise returns false
+    */
+  public boolean isOptional(){
+    return "optional".equals("featureUse");
+  }//isOptional
+  /**
+    * This method is used to check if the feature is prohibited.
+    * @return true if the prohibited is fixed. Otherwhise returns false
+    */
+  public boolean isProhibited(){
+    return "prohibited".equals("featureUse");
+  }//isProhibited
+
 }//FeatureSchema

@@ -72,7 +72,7 @@ public class TestXSchema extends TestCase
       e.printStackTrace(Err.getPrintWriter());
    }
 
-   AnnotationSchema annotSchema = new AnnotationSchema("");
+   AnnotationSchema annotSchema = new AnnotationSchema();
    // Create an annoatationSchema from a URL.
    annotSchema.fromXSchema(url);
 
