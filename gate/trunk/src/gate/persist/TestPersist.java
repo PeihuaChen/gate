@@ -34,7 +34,7 @@ public class TestPersist extends TestCase
   private static final String JDBC_URL =
 //           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
-//-           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
+//           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
 //           "jdbc:oracle:thin:GATEUSER/gate@nasus:1521:GATE06";
 "jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2";
 
@@ -755,6 +755,11 @@ public class TestPersist extends TestCase
     Document dbDoc = (Document)lr;
     Document doc2 = null;
 
+    //2.5 get exclusive lock
+    if (false == ds.lockLr(lr)) {
+      throw new PersistenceException("document is locked by another user");
+    }
+
     //3. change name
     String oldName = dbDoc.getName();
     String newName = oldName + "__UPD";
@@ -911,6 +916,9 @@ public class TestPersist extends TestCase
     doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
     Assert.assertTrue(false == doc2.getNamedAnnotationSets().containsKey(dummySetName));
 
+    //13. unlock
+    ds.unlockLr(lr);
+
     //close
     ac.close();
     ds.close();
@@ -954,8 +962,15 @@ public class TestPersist extends TestCase
     params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
     lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
+    //2.5 get exclusive lock
+    if (false == ds.lockLr(lr)) {
+      throw new PersistenceException("document is locked by another user");
+    }
+
     //3. try to delete it
     ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
+
+    //no need to unlock
 
     //close
     ds.close();
