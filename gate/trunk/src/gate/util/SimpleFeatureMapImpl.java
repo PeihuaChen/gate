@@ -268,7 +268,6 @@ public class SimpleFeatureMapImpl
       certainly static.
       : should be temporary */
       Ontology o = new OntologyImpl().getOntology(url);
-      o = o.getOntology(url);
 
       OClass c1 = o.getClassByName(value1);
       OClass c2 = o.getClassByName(value2);
