@@ -973,7 +973,7 @@ implements AnnotationSet
     * annotations that end at that node
     */
   Map annotsByEndNode;
-  private transient Vector annotationSetListeners;
+  transient Vector annotationSetListeners;
   private transient Vector gateListeners;
   /**
    *
