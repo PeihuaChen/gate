@@ -39,6 +39,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   private   URL         dbURL;
   private   String      driverName;
 
+  private   AccessController ac;
+
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
@@ -174,6 +176,12 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   public void open() throws PersistenceException {
     try {
       jdbcConn = DBHelper.connect(dbURL);
+
+      //create security factory
+      this.ac = new AccessControllerImpl();
+
+      //open and init the securoty factory with the same DB repository
+      ac.open(dbURL);
     }
     catch(SQLException sqle) {
       throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");
