@@ -35,6 +35,7 @@ public class FSM implements JapeConstants {
     */
   public FSM(SinglePhaseTransducer spt){
     initialState = new State();
+    transducerName = spt.getName();
     Iterator rulesEnum = spt.getRules().iterator();
     Rule currentRule;
 
@@ -44,6 +45,10 @@ public class FSM implements JapeConstants {
       initialState.addTransition(new Transition(null,
                                                 ruleFSM.getInitialState()));
     }
+
+    eliminateVoidTransitions();
+//Out.prln("Transducer " + spt.getName() + " converted to " + allStates.size() + " states");
+
   }
 
   /**
@@ -73,7 +78,7 @@ public class FSM implements JapeConstants {
     for(int i = 0; i < constraints.length; i++){
       // for each row we have to create a sequence of states that will accept
       // the sequence of annotations described by the restrictions on that row.
-      // The final state of such a sequence will always be a finale state which
+      // The final state of such a sequence will always be a final state which
       // will have associated the right hand side of the rule used for this
       // constructor.
 
@@ -105,7 +110,8 @@ public class FSM implements JapeConstants {
                               new LinkedList());
         } else {
           // we got an unknown kind of pattern
-          throw new RuntimeException("Strange looking pattern:"+currentPattern);
+          throw new RuntimeException("Strange looking pattern: " +
+                                     currentPattern);
         }
 
       } // for j
@@ -241,14 +247,6 @@ public class FSM implements JapeConstants {
   } // convertComplexPE
 
   /**
-    * Add a new state to the set of states belonging to this FSM.
-    * @param state the new state to be added
-    */
-  protected void addState(State state) {
-    allStates.add(state);
-  } // addState
-
-  /**
     * Converts this FSM from a non-deterministic to a deterministic one by
     * eliminating all the unrestricted transitions.
     */
@@ -277,12 +275,11 @@ public class FSM implements JapeConstants {
     while(innerStatesIter.hasNext()){
       State currentInnerState = (State)innerStatesIter.next();
       if(currentInnerState.isFinal()){
-if(action != null) Out.prln("ambiguity");
         action = (RightHandSide)currentInnerState.getAction();
         initialState.setAction(action);
         initialState.setFileIndex(currentInnerState.getFileIndex());
         initialState.setPriority(currentInnerState.getPriority());
-//        break;
+        break;
       }
     }
 
@@ -315,13 +312,11 @@ if(action != null) Out.prln("ambiguity");
                 State currentInnerState = (State)innerStatesIter.next();
 
                 if(currentInnerState.isFinal()) {
-if(newState.getAction() != null) Out.prln("ambiguity");
-
                   newState.setAction(
                           (RightHandSide)currentInnerState.getAction());
                   newState.setFileIndex(currentInnerState.getFileIndex());
                   newState.setPriority(currentInnerState.getPriority());
-//                  break;
+                  break;
                 }
               }
             }// if(!dStates.contains(newDState))
@@ -463,5 +458,6 @@ if(newState.getAction() != null) Out.prln("ambiguity");
   private transient Map newStates = new HashMap();
   private transient Set dStates = new HashSet();
 
+  private String transducerName;
 
 } // FSM

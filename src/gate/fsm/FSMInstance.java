@@ -17,6 +17,7 @@ package gate.fsm;
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.util.*;
+import gate.jape.*;
 
 import java.util.*;
 import java.io.*;
@@ -53,13 +54,15 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * "FSMPosition" and made the bindings stored in "bindings".
     */
   public FSMInstance(FSM supportGraph, State FSMPosition,
-                     Node startNode, Node AGPosition, HashMap bindings) {
+                     Node startNode, Node AGPosition, HashMap bindings,
+                     Document document) {
 
     this.supportGraph = supportGraph;
     this.FSMPosition = FSMPosition;
     this.startNode = startNode;
     this.AGPosition = AGPosition;
     this.bindings = bindings;
+    this.document = document;
     length = AGPosition.getOffset().longValue() -
              startNode.getOffset().longValue();
     fileIndex = FSMPosition.getFileIndex();
@@ -145,7 +148,6 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
              fileIndex == otherFSM.fileIndex &&
              bindings.equals(otherFSM.bindings) &&
              FSMPosition.getAction().equals(otherFSM.FSMPosition.getAction());
-      Out.println("FSMInstance.equals() : " + result);
       return result;
     }else{
       throw new ClassCastException(other.getClass().toString());
@@ -210,12 +212,46 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   public String toString() {
     String res = "";
-    res +=  "FSM position :" + FSMPosition.getIndex() +
-            "\nFirst matched ANN at:" + startNode.getId() +
-            "\nLast matched ANN at :" + AGPosition.getId() +
-            "\nPriority :" + priority +
-            "\nFile index :" + fileIndex +
-            "\nBindings     :" + bindings;
+    RightHandSide rhs = getFSMPosition().getAction();
+    if(rhs != null){
+      res += rhs.getPhaseName() + "." + rhs.getRuleName() + ": \"";
+      try{
+        res += document.getContent().getContent(
+                        getStartAGPosition().getOffset(),
+                        getAGPosition().getOffset()).toString() + "\"";
+      }catch(InvalidOffsetException ioe){
+        ioe.printStackTrace(Err.getPrintWriter());
+      }
+
+      Iterator labelIter = bindings.keySet().iterator();
+      res += "\n{";
+      while(labelIter.hasNext()){
+        String label = (String)labelIter.next();
+        Collection annots = (Collection)bindings.get(label);
+        res += "\n" + label + ": ";
+        Iterator annIter = annots.iterator();
+        while(annIter.hasNext()){
+          Annotation ann  = (Annotation)annIter.next();
+          res += ann.getType() + "(\"";
+          try{
+            res += document.getContent().
+                            getContent(ann.getStartNode().getOffset(),
+                                       ann.getEndNode().getOffset()).toString();
+          }catch(InvalidOffsetException ioe){
+            ioe.printStackTrace(Err.getPrintWriter());
+          }
+          res += "\") ";
+        }
+      }
+      res += "\n}";
+    }else{
+      res +=  "FSM position :" + FSMPosition.getIndex() +
+              "\nFirst matched ANN at:" + startNode.getId() +
+              "\nLast matched ANN at :" + AGPosition.getId() +
+              "\nPriority :" + priority +
+              "\nFile index :" + fileIndex +
+              "\nBindings     :" + bindings;
+    }
     return res;
   }
 
@@ -243,6 +279,8 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   private int fileIndex;
 
+
+  private Document document;
   /**
     * The priority in the definition file of the rule from which the AGPosition
     * state was generated.
@@ -256,11 +294,11 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   public static FSMInstance getNewInstance(FSM supportGraph, State FSMPosition,
                                            Node startNode, Node AGPosition,
-                                           HashMap bindings) {
+                                           HashMap bindings, Document doc) {
     FSMInstance res;
     if(myInstances.isEmpty()) res = new FSMInstance(supportGraph, FSMPosition,
                                                     startNode, AGPosition,
-                                                    bindings);
+                                                    bindings, doc);
     else {
       res = (FSMInstance)myInstances.removeFirst();
       res.supportGraph = supportGraph;

@@ -255,6 +255,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
     <multiphase> mptNameTok=<ident>
     { m.setName(mptNameTok.image); }
   )?
+
   // spts
   (
     // sptrannies in this file
@@ -342,12 +343,13 @@ SinglePhaseTransducer SinglePhaseTransducer() :
   (
     <option>
     (
-      optionNameTok=<ident> <assign> optionValueTok=<ident>
+      optionNameTok=<ident> <assign> (optionValueTok=<ident> |
+                                      optionValueTok=<bool>)
       {
         t.setOption(optionNameTok.image, optionValueTok.image);
 
         // control
-        if(optionNameTok.image.equals("control")) {
+        if(optionNameTok.image.equalsIgnoreCase("control")) {
           if(optionValueTok.image.equalsIgnoreCase("appelt"))
             t.setRuleApplicationStyle(APPELT_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("first"))
@@ -360,6 +362,13 @@ SinglePhaseTransducer SinglePhaseTransducer() :
               " (should be brill, appelt or appelt-shortest)"
             );
         } // control
+        else if(optionNameTok.image.equalsIgnoreCase("debug")) {
+          if(optionValueTok.image.equalsIgnoreCase("true") ||
+             optionValueTok.image.equalsIgnoreCase("yes") ||
+             optionValueTok.image.equalsIgnoreCase("y"))
+            t.setDebugMode(true);
+          else t.setDebugMode(false);
+        }
       }
     )*
   )?
@@ -1019,6 +1028,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.24  2001/11/01 15:49:10  valyt
+// DEBUG mode for Japes
+//
 // Revision 1.23  2001/09/25 12:26:10  kalina
 // Removed the final places that used jgl.objectspace
 //

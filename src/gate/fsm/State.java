@@ -29,7 +29,7 @@ public class State implements JapeConstants {
   private static final boolean DEBUG = false;
 
   /**
-   * Build a new state belonging to the given FSM.
+   * Build a new state.
    *
    * @param owner the FSM that owns this state.
    */

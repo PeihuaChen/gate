@@ -97,8 +97,14 @@ public abstract class Transducer implements Serializable
     }
   }
 
+  public void setDebugMode(boolean debugMode) {
+    this.debugMode = debugMode;
+  }
+  public boolean isDebugMode() {
+    return debugMode;
+  }
 
-
+ private boolean debugMode = false;
 
 
 

@@ -98,6 +98,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Debug flag. */
   static final boolean debug = false;
+  private String phaseName;
+  private String ruleName;
 
   /** Construction from the transducer name, rule name and the LHS. */
   public RightHandSide(
@@ -105,6 +107,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   ) {
     // debug = true;
     this.lhs = lhs;
+    this.phaseName = transducerName;
+    this.ruleName = ruleName;
     actionClassName = new String(
       transducerName + ruleName + "ActionClass" + actionClassNumber++
     );
@@ -431,12 +435,27 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   public String shortDesc() {
     String res = "" + actionClassName;
     return res;
+  }
+  public void setPhaseName(String phaseName) {
+    this.phaseName = phaseName;
+  }
+  public String getPhaseName() {
+    return phaseName;
+  }
+  public void setRuleName(String ruleName) {
+    this.ruleName = ruleName;
+  }
+  public String getRuleName() {
+    return ruleName;
   } // toString
 
 } // class RightHandSide
 
 
 // $Log$
+// Revision 1.16  2001/11/01 15:49:09  valyt
+// DEBUG mode for Japes
+//
 // Revision 1.15  2001/09/13 12:09:50  kalina
 // Removed completely the use of jgl.objectspace.Array and such.
 // Instead all sources now use the new Collections, typically ArrayList.
