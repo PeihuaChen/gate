@@ -148,20 +148,59 @@ class CorpusAnnotDiffDialog extends JFrame {
     corpusMap = new HashMap();
 
     CreoleRegister registry =  Gate.getCreoleRegister();
+
+    java.util.List instantiations;
+    Iterator iter;
+    Resource resource;
+    String corpName;
+
     ResourceData resourceData =
                         (ResourceData)registry.get("gate.corpora.CorpusImpl");
     if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
-      java.util.List instantiations = resourceData.getInstantiations();
-      Iterator iter = instantiations.iterator();
-      while (iter.hasNext()){
-        Resource resource = (Resource) iter.next();
-        String corpName = resource.getName ();
+
+      instantiations = resourceData.getInstantiations();
+      iter = instantiations.iterator();
+      while (iter.hasNext()) {
+        resource = (Resource) iter.next();
+        corpName = resource.getName();
         gate.Corpus corp = (Corpus) resource;
         // add it to the Map
         corpusMap.put(corpName, corp);
       }// while
-    }else corpusMap.put("No corpuses found",null);
+    } // if
+    
+    // add serialized one
+    resourceData = (ResourceData)registry.get("gate.corpora.SerialCorpusImpl");
+    if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
 
+      instantiations = resourceData.getInstantiations();
+      iter = instantiations.iterator();
+      while (iter.hasNext()) {
+        resource = (Resource) iter.next();
+        corpName = resource.getName();
+        gate.Corpus corp = (Corpus) resource;
+        // add it to the Map
+        corpusMap.put(corpName, corp);
+      }// while
+    } // if
+
+    // add database one
+    resourceData = (ResourceData)registry.get("gate.corpora.DatabaseCorpusImpl");
+    if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
+
+      instantiations = resourceData.getInstantiations();
+      iter = instantiations.iterator();
+      while (iter.hasNext()) {
+        resource = (Resource) iter.next();
+        corpName = resource.getName();
+        gate.Corpus corp = (Corpus) resource;
+        // add it to the Map
+        corpusMap.put(corpName, corp);
+      }// while
+    } // if
+
+    if(corpusMap.isEmpty()) corpusMap.put("No corpuses found",null);
+    
     keyAnnotationSetMap = new TreeMap();
     responseAnnotationSetMap = new TreeMap();
 
@@ -765,7 +804,7 @@ class CorpusAnnotDiffDialog extends JFrame {
                                  (String)keyDocComboBox.getSelectedItem());
     keyAnnotationSetMap.clear();
 
-    if (keyCorpus != null || 0 != keyCorpus.size()){
+    if (keyCorpus != null && 0 != keyCorpus.size()){
       Map namedAnnotSets;
       Document doc;
       for(int i=0; i<keyCorpus.size(); ++i) {
@@ -792,7 +831,7 @@ class CorpusAnnotDiffDialog extends JFrame {
                                  (String)responseDocComboBox.getSelectedItem());
     responseAnnotationSetMap.clear();
 
-    if (responseCorpus != null || 0 != responseCorpus.size()){
+    if (responseCorpus != null && 0 != responseCorpus.size()){
       Map namedAnnotSets;
       Document doc;
       for(int i=0; i<responseCorpus.size(); ++i) {
