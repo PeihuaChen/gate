@@ -257,7 +257,6 @@ public class TestSecurity extends TestCase
       ac.findGroup(myGroup.getName());
     }
     catch(SecurityException se) {
-
       if(DEBUG)
         Err.prln("++ OK, got exception");
 
@@ -289,7 +288,7 @@ public class TestSecurity extends TestCase
     //group/user in the session is deleted
 
     //12.1 delete user
-    ac.deleteUser(myUser,adminSession);
+    ac.deleteUser(myUser, adminSession);
     //12.2 assert he's deleted from the Security Controller
     exceptionThrown = false;
     try {
