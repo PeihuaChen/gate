@@ -258,6 +258,7 @@
           dir="." 
           logError="true"
           maxmemory="${run.memory}">
+       <jvmarg value="-Dgate.home=${basedir}"/>   
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
        <jvmarg value="-Dsun.java2d.opengl=true"/>
      </java>
@@ -272,6 +273,7 @@
           dir="." 
           logError="true"
           maxmemory="${run.memory}">
+       <jvmarg value="-Dgate.home=${basedir}"/>   
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
        <jvmarg value="-Dsun.java2d.opengl=true"/>
        <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
