@@ -113,7 +113,6 @@ Priority: 20
  {Token.orth == upperInitial, Token.length == "1"}
 )?
 -->
-  //:person.TempPerson = {kind = "personName", rule = GazPersonFirst}
 {
 gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
@@ -142,8 +141,27 @@ Priority: 30
 ({Token.orth == upperInitial})
 :personName2
  -->
-  :personName1.TempPerson = {kind = "personName", rule = PersonFirstContext},
-:personName2.TempPerson = {kind = "personName", rule = PersonFirstContext}
+ // :personName1.TempPerson = {kind = "personName", rule = PersonFirstContext},
+//:personName2.TempPerson = {kind = "personName", rule = PersonFirstContext}
+
+{
+//gate.AnnotationSet personName1 = (gate.AnnotationSet)bindings.get("personName1");
+//gate.Annotation person1Ann = (gate.Annotation)personName1.iterator().next();
+//gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("gender", person1Ann.getFeatures().get("minorType"));
+//features.put("kind", "personName");
+//features.put("rule", "PersonFirstContext");
+//annotations.add(personName1.firstNode(), personName1.lastNode(), "TempPerson",
+//features);
+//gate.AnnotationSet personName2 = (gate.AnnotationSet)bindings.get("personName2");
+//gate.Annotation person2Ann = (gate.Annotation)personName2.iterator().next();
+//gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("gender", person2Ann.getFeatures().get("minorType"));
+//features.put("kind", "personName");
+//features.put("rule", "PersonFirstContext");
+//annotations.add(personName2.firstNode(), personName2.lastNode(), "TempPerson",
+//features);
+}
 
 
 Rule: PersonFirstContext2
@@ -152,7 +170,7 @@ Priority: 40
 
 (
  {Lookup.majorType == person_first}
-):personName1
+):person
 (
  SPACE
  {Token.string == "and"}
@@ -160,9 +178,37 @@ Priority: 40
 )
 ({Token.length == "1"})
 :personName2
- -->
-  :personName1.TempPerson = {kind = "personName", rule = PersonFirstContext2}
+ -->{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "PersonFirstContext2");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
+
+Rule: 	PersonFirstTitle
+Priority: 20
+// Sir Steve
+// Mr Fred
+(
+ (TITLE)
+ (FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
+):person
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "PersonFirstTitle");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 Rule:	PersonTitle
 Priority: 15
@@ -183,8 +229,30 @@ gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("minorType"));
-features.put("kind", "personTitle");
-features.put("rule", "GazPerson");
+features.put("kind", "personName");
+features.put("rule", "PersonTitle");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
+
+Rule:	Silly
+Priority: 50
+// Mr Fred
+
+(
+ (TITLE)
+ ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
+  (SPACE)? 
+ )
+)
+:person -->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "Silly");
 annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
@@ -203,7 +271,16 @@ Priority: 20
  )
 )
 -->
-  :person.TempPerson = {kind = "personName", rule = "FirstPersonStop"}
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "FirstPersonStop");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 Rule: NotFirstPersonStop
 Priority: 50
@@ -251,7 +328,16 @@ Priority: 10
  (SPACE PERSONENDING)?
 )
 :person -->
-  :person.TempPerson = {kind = "personName", rule = "PersonFull"}
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "PersonFull");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 Rule: NotPersonFullReverse
 Priority: 20
@@ -281,8 +367,16 @@ Priority: 5
  (SPACE PERSONENDING)?
 )
 :person -->
-  :person.TempPerson = {kind = "personName", rule = "PersonFullReverse"}
-
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "PersonFullReverse");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 Rule:  PersonSaint
 Priority: 50
@@ -294,8 +388,16 @@ Priority: 50
  (FIRSTNAME)
  )
 :person -->
-  :person.TempPerson = {kind = "personName", rule = "PersonSaint"}
-
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "PersonSaint");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 Rule: PersonLocAmbig
 Priority: 40
@@ -308,8 +410,16 @@ Priority: 40
   {Lookup.majorType == location})
 )
 :person -->
-  :person.TempPerson = {kind = "personName", rule = "PersonLocAmbig"}
-
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("minorType"));
+features.put("kind", "personName");
+features.put("rule", "personLocAmbig");
+annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 ///////////////////////////////////////////////////////////////////
 // Organisation Rules
@@ -719,15 +829,5 @@ Rule:InLoc1
 :locName
 -->
  :locName.TempLocation = {kind = "locName", rule = InLoc1}
-
-
-
-
-
-
-
-
-
-
 
 
