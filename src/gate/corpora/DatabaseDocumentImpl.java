@@ -21,6 +21,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
+import oracle.jdbc.driver.*;
 import junit.framework.*;
 
 import gate.*;
@@ -470,6 +471,12 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       pstmt = this.jdbcConn.prepareStatement(sql1);
       pstmt.setLong(1,asetID.longValue());
+      //pstmt.setFetchSize(100);
+      ((OraclePreparedStatement)pstmt).setRowPrefetch(100);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(1,java.sql.Types.INTEGER);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(2,java.sql.Types.VARCHAR);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(3,java.sql.Types.BIGINT);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(4,java.sql.Types.BIGINT);
       pstmt.execute();
       rs = pstmt.getResultSet();
 
@@ -562,7 +569,14 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     //2. read the features from DB
     try {
-      String sql = " select ann_local_id, " +
+      String sql = " select /*+ use_nl(v.t_annotation v.t_as_annotation) "+
+                   "            use_nl(v.t_feature v.t_annotation) "+
+                   "            index(v.t_feature xt_feature_01) "+
+                   "            use_nl(v.t_feature_key v.t_feature) "+
+                   "           full(v.t_feature_key)           "+
+                   "        */                                  "+
+                   "                                            " +
+                   "        ann_local_id, " +
                    "        key, " +
                    "        ft_value_type, " +
                    "        ft_number_value, " +
@@ -575,6 +589,15 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
+      //pstmt.setFetchSize(100);
+      ((OraclePreparedStatement)pstmt).setRowPrefetch(100);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(1,java.sql.Types.INTEGER);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(2,java.sql.Types.VARCHAR);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(3,java.sql.Types.INTEGER);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(4,java.sql.Types.NUMERIC);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(5,java.sql.Types.VARCHAR);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(6,java.sql.Types.CLOB);
+//      ((OraclePreparedStatement)pstmt).defineColumnType(7,java.sql.Types.BLOB);
       pstmt.execute();
       rs = pstmt.getResultSet();
 
