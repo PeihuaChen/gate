@@ -28,5 +28,29 @@ create or replace package security is
   function <FunctionName>(<Parameter> <Datatype>) return <Datatype>;
 */
 
+
+  /* Group related functionality */
+  
+  /*  -- */
+  procedure set_group_name(p_group_id  IN number,
+                           p_new_name  IN varchar2);
+
+  /*  -- */                           
+  procedure add_user_to_group(p_group_id  IN number,
+                              p_user_id   IN number);
+                           
+  /*  -- */                           
+  procedure remove_user_from_group(p_group_id  IN number,
+                                   p_user_id   IN number);
+
+  /* User related functionality */                                   
+  /*  -- */
+  procedure set_user_name(p_user_id  IN number,
+                          p_new_name IN varchar2);
+
+  /*  -- */
+  procedure set_user_password(p_user_id  IN number,
+                              p_new_pass IN varchar2);
+                           
 end security;
 /
