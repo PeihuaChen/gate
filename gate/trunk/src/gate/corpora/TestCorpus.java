@@ -1,7 +1,7 @@
 /*
  *	TestCorpus.java
  *
- *	Hamish Cunningham, 21/Jan/00
+ *	Hamish Cunningham, 18/Feb/00
  *
  *	$Id$
  */
