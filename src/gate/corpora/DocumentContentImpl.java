@@ -152,16 +152,17 @@ public class DocumentContentImpl implements DocumentContent
       start.longValue() <= end.longValue();
   } // isValidOffsetRange(start,end)
 
-  /* two documents are the same if their contents is the same
+  /** Two documents are the same if their contents is the same
    */
   public boolean equals(Object other) {
     if (!(other instanceof DocumentContentImpl)) return false;
 
     DocumentContentImpl docImpl = (DocumentContentImpl) other;
     return content.equals(docImpl.toString());
-  }
+  } // equals
 
-  public int hashCode(){ return toString().hashCode();}
+  /** Calculate the hash value for the object. */
+  public int hashCode(){ return toString().hashCode(); }
 
   /** Just for now - later we have to cater for different types of
     * content.
