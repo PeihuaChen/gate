@@ -59,6 +59,7 @@ public class ParameterDisjunction implements CreoleListener {
         values[i] = (resource == null) ?
                     null : resource.getParameterValue(params[i].getName());
         if(values[i] == null) values[i] = params[i].getDefaultValue();
+
       }catch(ResourceInstantiationException rie){
         throw new GateRuntimeException(
           "Could not get read accessor method for \"" + names[i] +
