@@ -791,7 +791,12 @@ System.out.println();
 
     docResult = readDocument(lrPersistenceId);
 
-    throw new MethodNotImplementedException();
+    Assert.assert(docResult instanceof DatabaseDocumentImpl);
+    Assert.assertNotNull(docResult.getDataStore());
+    Assert.assert(docResult.getDataStore() instanceof DatabaseDataStore);
+    Assert.assertNotNull(docResult.getLRPersistenceId());
+
+    return docResult;
   }
 
 
@@ -1345,7 +1350,10 @@ System.out.println();
       pstmt.execute();
       rs = pstmt.getResultSet();
 
-      rs.next();
+      if (false == rs.next()) {
+        //ooops mo data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
 
       //4. fill data
 
@@ -1425,7 +1433,7 @@ System.out.println();
                    "        v1.ft_long_character_value " +
                    " from  "+Gate.DB_OWNER+".t_feature v1 " +
                    " where  v1.ft_entity_id = ? " +
-                   "        and v1.ft_enetity_type = ? " +
+                   "        and v1.ft_entity_type = ? " +
                    " order by v1.ft_key";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
