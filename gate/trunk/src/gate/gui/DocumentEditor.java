@@ -100,9 +100,6 @@ public class DocumentEditor extends AbstractVisualResource{
   /**The dialog used for editing the styles used to highlight annotations*/
   protected TextAttributesChooser styleChooser;
 
-  /**The dialog used for editing/adding annotations*/
-  protected AnnotationEditDialog annotationEditDialog;
-
   /**
    * A box containing a {@link javax.swing.JProgressBar} used to keep the user
    * entertained while the text display is being updated
@@ -679,7 +676,6 @@ public class DocumentEditor extends AbstractVisualResource{
 
 
     //Extra Stuff
-    annotationEditDialog = new AnnotationEditDialog();
 
     progressBox = new Box(BoxLayout.X_AXIS);
     progressBox.add(Box.createHorizontalStrut(5));
