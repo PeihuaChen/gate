@@ -271,17 +271,16 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  protected Long createLR(Session s,
-                        String lrType,
+  protected Long createLR(String lrType,
                         String lrName,
                         SecurityInfo si,
                         Long lrParentID)
   throws PersistenceException,SecurityException {
 
     //1. check the session
-    if (this.ac.isValidSession(s) == false) {
-      throw new SecurityException("invalid session provided");
-    }
+//    if (this.ac.isValidSession(s) == false) {
+//      throw new SecurityException("invalid session provided");
+//    }
 
     //2. create a record in DB
     CallableStatement stmt = null;
@@ -289,8 +288,8 @@ public class OracleDataStore extends JDBCDataStore {
     try {
       stmt = this.jdbcConn.prepareCall(
                     "{ call "+Gate.DB_OWNER+".persist.create_lr(?,?,?,?,?,?,?) }");
-      stmt.setLong(1,s.getUser().getID().longValue());
-      stmt.setLong(2,s.getGroup().getID().longValue());
+      stmt.setLong(1,si.getUser().getID().longValue());
+      stmt.setLong(2,si.getGroup().getID().longValue());
       stmt.setString(3,lrType);
       stmt.setString(4,lrName);
       stmt.setInt(5,si.getAccessMode());
@@ -410,7 +409,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
     //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
-    Long lrID = createLR(this.session,DBHelper.DOCUMENT_CLASS,docName,secInfo,null);
+    Long lrID = createLR(DBHelper.DOCUMENT_CLASS,docName,secInfo,null);
 
     //4. create a record in T_DOCUMENT for this document
     CallableStatement stmt = null;
@@ -555,7 +554,7 @@ public class OracleDataStore extends JDBCDataStore {
   throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
-    Long lrID = createLR(this.session,DBHelper.CORPUS_CLASS,corp.getName(),secInfo,null);
+    Long lrID = createLR(DBHelper.CORPUS_CLASS,corp.getName(),secInfo,null);
 
     //2.create am entry in the T_COPRUS table
     Long corpusID = null;
