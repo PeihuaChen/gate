@@ -8,6 +8,7 @@
 
 package gate.corpora;
 
+import com.sun.xml.parser.* ;
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -50,6 +51,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   public void unpackMarkup(Document doc){
 	  try {
 
+
 		  // Get a parser factory.
 		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		  // Set up the factory to create the appropriate type of parser
@@ -66,7 +68,9 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       if (null != doc){
         // parse and construct the gate annotations
         //String s = doc.getContent().toString();
-        //InputStream in = new ByteArrayInputStream(s.getBytes ());
+        //StringReader sr = new StringReader(s);
+        //InputSource is = new InputSource (sr);
+        //doc.getSourceURL ().toString ()
         parser.parse(doc.getSourceURL ().toString (),
                 new gate.xml.CustomDocumentHandler(doc, this.markupElementsMap)
         );

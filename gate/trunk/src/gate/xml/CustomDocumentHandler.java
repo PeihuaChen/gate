@@ -8,7 +8,6 @@
 package gate.xml;
 
 import org.xml.sax.*;
-import com.sun.xml.parser.LexicalEventListener;
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
@@ -16,7 +15,7 @@ import gate.*;
 /**
   * Implements the behaviour of the XML reader
   */
-public class CustomDocumentHandler extends HandlerBase implements LexicalEventListener{
+public class CustomDocumentHandler extends HandlerBase{
 
   // member data
 
@@ -204,6 +203,8 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
 
   /**
   * this method is called when the SAX parser encounts a comment
+  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
+  *
   */
   public void comment(String text) throws SAXException{
     // create a FeatureMap and then add the comment to the annotation set.
@@ -221,18 +222,21 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
 
   /**
   * this method is called when the SAX parser encounts a start of a CDATA section
+  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void startCDATA()throws SAXException{
   }
 
   /**
   * this method is called when the SAX parser encounts the end of a CDATA section
+  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void endCDATA() throws SAXException{
   }
 
   /**
   * this method is called when the SAX parser encounts a parsed Entity
+  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void startParsedEntity(String name) throws SAXException{
   }
@@ -240,6 +244,7 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
   /**
   * this method is called when the SAX parser encounts a parsed entity and
   * informs the application if that entity was parsed or not
+  * It's working only if the CustomDocumentHandler implements a com.sun.parser.LexicalEventListener
   */
   public void endParsedEntity(String name, boolean included)throws SAXException{
   }
