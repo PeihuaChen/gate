@@ -17,8 +17,8 @@ government.lst:organization:government
 hour.lst:time:hour
 ident_prekey.lst:ident_key:pre
 jobtitles.lst:jobtitle
-loc_key.lst:loc_pre_key
-loc_prekey.lst:loc_pre_key
+loc_key.lst:loc_key:post
+loc_prekey.lst:loc_key:pre
 ministry.lst:organization:government
 months.lst:date:month
 mountain.lst:location:region
