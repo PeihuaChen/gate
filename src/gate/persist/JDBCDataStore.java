@@ -62,17 +62,13 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /**
    * Returns the comment displayed by the GUI for this DataStore
    */
-  public String getComment() {
-    throw new MethodNotImplementedException();
-  }
+  public abstract String getComment();
 
   /**
    * Returns the name of the icon to be used when this datastore is displayed
    * in the GUI
    */
-  public String getIconName() {
-    throw new MethodNotImplementedException();
-  }
+  public abstract String getIconName();
 
 
   /** Get the name of an LR from its ID. */
