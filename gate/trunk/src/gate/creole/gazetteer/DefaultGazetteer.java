@@ -367,11 +367,13 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
       }
     } // while(charIdx < length)
 
-    if( null != lastMatchingState &&
-        !Character.isLetter(content.charAt(matchedRegionEnd + 1)) &&
-        (matchedRegionStart == 0 ||
-        !Character.isLetter(content.charAt(matchedRegionStart - 1))
-       )) {
+    if(null != lastMatchingState &&
+       (  matchedRegionEnd +1 == content.length()   ||
+          !Character.isLetter(content.charAt(matchedRegionEnd + 1))
+        )  &&
+       (  matchedRegionStart == 0 ||
+          !Character.isLetter(content.charAt(matchedRegionStart - 1))
+        )) {
       Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
       while(lookupIter.hasNext()) {
         currentLookup = (Lookup)lookupIter.next();
