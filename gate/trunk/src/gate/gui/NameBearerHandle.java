@@ -31,6 +31,7 @@ import gate.creole.*;
 import gate.persist.*;
 import gate.event.*;
 import gate.security.*;
+import gate.security.SecurityException;
 
 /**
  * Class used to store the GUI information about an open entity (resource,
@@ -410,6 +411,11 @@ public class NameBearerHandle implements Handle,
           JOptionPane.showMessageDialog(getLargeView(),
                                         "Save failed!\n " +
                                         pe.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+        } catch(SecurityException se) {
+          JOptionPane.showMessageDialog(getLargeView(),
+                                        "Save failed!\n " +
+                                        se.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
         }
       } else {

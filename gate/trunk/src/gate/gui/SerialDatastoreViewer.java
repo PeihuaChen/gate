@@ -17,6 +17,7 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 import gate.persist.*;
+import gate.security.SecurityException;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -256,6 +257,11 @@ public class SerialDatastoreViewer extends JTree
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
         pe.printStackTrace(Err.getPrintWriter());
+      } catch(SecurityException se){
+        JOptionPane.showMessageDialog(SerialDatastoreViewer.this,
+                                      "Error!\n" + se.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+        se.printStackTrace(Err.getPrintWriter());
       }
     }// public void actionPerformed(ActionEvent e)
     DSEntry entry;
