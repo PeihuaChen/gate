@@ -835,17 +835,17 @@ ex.printStackTrace();
       //we don't have this annotation type in this document
       if (annotDiff == null)
         continue;
-      Out.prln("<TR>");
 
       //increase the number of processed documents
       docNumber++;
       //add precison and recall to the sums
       updateStatistics(annotDiff, annotType);
 
-      Out.prln("<TD> " + annotType + "</TD>");
-
       AnnotationDiff annotDiff1 =
         measureDocs(markedDoc, persDoc, annotType);
+
+      Out.prln("<TR>");
+      Out.prln("<TD> " + annotType + "</TD>");
 
       if (isMoreInfoMode) {
         Out.prln("<TD>" + annotDiff.getCorrectCount() + "</TD>");
@@ -854,40 +854,75 @@ ex.printStackTrace();
         Out.prln("<TD>" + annotDiff.getSpuriousCount() + "</TD>");
       }
 
-      Out.prln("<TD>" + annotDiff.getPrecisionAverage());
+      Out.prln("<TD>");
+
       //check the precision first
-      if (annotDiff1 != null &&
-          annotDiff!= null &&
-          annotDiff1.getPrecisionAverage()<annotDiff.getPrecisionAverage()
-         )
-        Out.prln("<P><Font color=blue> Precision increase on human-marked from " +
-                 annotDiff1.getPrecisionAverage() + " to " +
-                 annotDiff.getPrecisionAverage() + "</Font></P>");
-      else if (annotDiff1 != null
-               && annotDiff != null
-               && annotDiff1.getPrecisionAverage()
-                   > annotDiff.getPrecisionAverage())
-        Out.prln("<P><Font color=red> Precision decrease on human-marked from " +
-                 annotDiff1.getPrecisionAverage() + " to " +
-                 annotDiff.getPrecisionAverage() + "</Font></P>");
+      if (annotDiff1 != null) {
+
+        if (annotDiff1.getPrecisionAverage()
+              < annotDiff.getPrecisionAverage()) {
+            Out.prln("<P><Font color=blue> ");
+            Out.prln(annotDiff.getPrecisionAverage());
+
+            if(!isMoreInfoMode) {
+              Out.pr("<BR>Precision increase on human-marked from ");
+              Out.pr(annotDiff1.getPrecisionAverage() + " to ");
+              Out.prln(annotDiff.getPrecisionAverage());
+            }
+            Out.prln(" </Font></P>");
+          }
+        else if (annotDiff1.getPrecisionAverage()
+               > annotDiff.getPrecisionAverage()) {
+          Out.prln("<P><Font color=red> ");
+          Out.prln(annotDiff.getPrecisionAverage());
+
+          if(!isMoreInfoMode) {
+            Out.pr("<BR>Precision decrease on human-marked from ");
+            Out.pr(annotDiff1.getPrecisionAverage() + " to ");
+            Out.prln(annotDiff.getPrecisionAverage());
+          }
+          Out.prln(" </Font></P>");
+        }
+        else
+          Out.prln("<P> " + annotDiff.getPrecisionAverage() + " </P>");
+      }
+      else
+        Out.prln("<P> " + annotDiff.getPrecisionAverage() + " </P>");
+
       Out.prln("</TD>");
 
-      Out.prln("<TD>" + annotDiff.getRecallAverage());
+      Out.prln("<TD>");
+
       //check the recall now
-      if (annotDiff1 != null &&
-          annotDiff!= null &&
-          annotDiff1.getRecallAverage()<annotDiff.getRecallAverage()
-         )
-        Out.prln("<P><Font color=blue> Recall increase on human-marked from " +
-                 annotDiff1.getRecallAverage() + " to " +
-                 annotDiff.getRecallAverage() + "</Font></P>");
-      else if (annotDiff1 != null
-               && annotDiff != null
-               && annotDiff1.getRecallAverage()
-                   > annotDiff.getRecallAverage())
-        Out.prln("<P><Font color=red> Recall decrease on human-marked from " +
-                 annotDiff1.getRecallAverage() + " to " +
-                 annotDiff.getRecallAverage() + "</Font></P>");
+      if (annotDiff1 != null) {
+
+        if (annotDiff1.getRecallAverage() < annotDiff.getRecallAverage()) {
+          Out.prln("<P><Font color=blue> ");
+          Out.prln(annotDiff.getRecallAverage());
+
+          if(!isMoreInfoMode) {
+            Out.pr("<BR>Recall increase on human-marked from ");
+            Out.pr(annotDiff1.getRecallAverage() + " to ");
+            Out.prln(annotDiff.getRecallAverage());
+          }
+          Out.prln(" </Font></P>");
+        }
+        else if (annotDiff1.getRecallAverage() > annotDiff.getRecallAverage()) {
+          Out.prln("<P><Font color=red> ");
+          Out.prln(annotDiff.getRecallAverage());
+
+          if(!isMoreInfoMode) {
+            Out.pr("<BR>Recall decrease on human-marked from ");
+            Out.pr(annotDiff1.getRecallAverage() + " to ");
+            Out.prln(annotDiff.getRecallAverage());
+          }
+          Out.prln(" </Font></P>");
+        }
+        else
+          Out.prln("<P> " + annotDiff.getRecallAverage() + " </P>");
+      } else
+        Out.prln("<P> " + annotDiff.getRecallAverage() + " </P>");
+
 
       Out.prln("</TD>");
 
@@ -903,8 +938,63 @@ ex.printStackTrace();
         Out.prln("</TD>");
       }
 
-
       Out.prln("</TR>");
+
+      // show one more table line for processed document
+      if(isMoreInfoMode && annotDiff1 != null
+         && (annotDiff1.getPrecisionAverage() != annotDiff.getPrecisionAverage()
+         || annotDiff1.getRecallAverage() != annotDiff.getRecallAverage())
+         ) {
+
+        Out.prln("<TR>");
+        Out.prln("<TD> " + annotType + "_proc" + "</TD>");
+
+        Out.prln("<TD>" + annotDiff1.getCorrectCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff1.getPartiallyCorrectCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff1.getMissingCount() + "</TD>");
+        Out.prln("<TD>" + annotDiff1.getSpuriousCount() + "</TD>");
+
+        Out.prln("<TD>");
+        if (annotDiff1.getPrecisionAverage() < annotDiff.getPrecisionAverage())
+
+          Out.prln("<P><Font color=blue> "  + annotDiff1.getPrecisionAverage()
+                + "</Font></P>");
+        else if (annotDiff1.getPrecisionAverage() > annotDiff.getPrecisionAverage())
+          Out.prln(
+             "<P><Font color=red> " + annotDiff1.getPrecisionAverage()
+             + " </Font></P>");
+        else
+          Out.prln(annotDiff1.getPrecisionAverage());
+
+        Out.prln("</TD>");
+
+        Out.prln("<TD>");
+        if (annotDiff1.getRecallAverage() < annotDiff.getRecallAverage())
+          Out.prln("<P><Font color=blue> " + annotDiff1.getRecallAverage()
+                   + " </Font></P>");
+        else if (annotDiff1.getRecallAverage() > annotDiff.getRecallAverage())
+          Out.prln("<P><Font color=red> " + annotDiff1.getRecallAverage()
+                    + " </Font></P>");
+        else
+           Out.prln(annotDiff1.getRecallAverage());
+
+        Out.prln("</TD>");
+
+        //check the recall now
+        if ( isVerboseMode ) {
+          Out.prln("<TD>");
+          if (annotDiff.getRecallAverage() < threshold) {
+            printAnnotations(annotDiff, markedDoc, cleanDoc);
+          }
+          else {
+            Out.prln("&nbsp;");
+          }
+          Out.prln("</TD>");
+        }
+
+        Out.prln("</TR>");
+      } // if(isMoreInfoMode && annotDiff1 != null)
+
     }//for loop through annotation types
     Out.prln("</TABLE>");
 
@@ -922,13 +1012,13 @@ ex.printStackTrace();
       //we don't have this annotation type in this document
       if (annotDiff == null)
         continue;
-      Out.prln("<TR>");
 
       //increase the number of processed documents
       docNumber++;
       //add precison and recall to the sums
       updateStatistics(annotDiff, annotType);
 
+      Out.prln("<TR>");
       Out.prln("<TD>" + annotType + "</TD>");
 
       if(isMoreInfoMode) {
@@ -953,9 +1043,9 @@ ex.printStackTrace();
       }
 
       Out.prln("</TR>");
+
     }//for loop through annotation types
     Out.prln("</TABLE>");
-
   }//evaluateTwoDocs
 
   protected void printTableHeader() {
