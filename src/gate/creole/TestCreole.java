@@ -122,9 +122,33 @@ public class TestCreole extends TestCase
       fail("wrong number of documents");
   } // testInstanceLists
 
+  /** Test view registration */
+  public void testViews() throws Exception {
+    ResourceData rd = (ResourceData) reg.get("testpkg.TestPR2");
+    assert(
+      "no icon on TPR2",
+      rd.getIcon() != null && rd.getIcon().equals("anIconForTPR2")
+    );
+
+    List v = rd.getViews();
+    if(v == null || v.size() == 0)
+      fail("wrong number of views");
+
+    Iterator iter = v.iterator();
+    while(iter.hasNext()) {
+      FeatureMap feats = (FeatureMap) iter.next();
+
+      assert(
+        "wrong type on TPR2 view",
+        feats != null && feats.size() > 0 &&
+          feats.get("TYPE").equals("gate.gui.SomeViewer")
+      );
+    }
+  } // testViews()
+
   /** Utility method to check that a list of resources are all
-   *  auto-loading.
-   */
+    * auto-loading.
+    */
   protected boolean allAutoloaders(List l) {
     if(l != null) {
       Resource res = null;
@@ -239,8 +263,8 @@ public class TestCreole extends TestCase
     FeatureMap pr2features = pr2.getFeatures();
     assertNotNull("PR1 features are null", pr1features);
     assert(
-      "PR2 got some features from somewhere: " + pr2features,
-      pr2features == null || pr2features.isEmpty()
+      "PR2 got wrong features: " + pr2features,
+      pr2features != null || pr2features.size() != 1
     );
     pr1.run();
     pr2.run();

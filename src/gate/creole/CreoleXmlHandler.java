@@ -60,6 +60,9 @@ public class CreoleXmlHandler extends HandlerBase {
   /** The source URL of the directory file being parsed. */
   private URL sourceUrl;
 
+  /** The features (attributes) of VIEW elements */
+  private FeatureMap viewFeatures = Factory.newFeatureMap();
+
   /** Construction */
   public CreoleXmlHandler(CreoleRegister register, URL directoryUrl) {
     this.register = register;
@@ -106,7 +109,7 @@ public class CreoleXmlHandler extends HandlerBase {
     // record the attributes of this element
     currentAttributes = atts;
 
-    // process attributes of parameter elements
+    // process attributes of parameter and view elements
     if(elementName.toUpperCase().equals("PARAMETER")) {
       if(DEBUG) {
         for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
@@ -121,6 +124,13 @@ public class CreoleXmlHandler extends HandlerBase {
       currentParam.name = currentAttributes.getValue("NAME");
       currentParam.runtime =
         Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
+    } else if(elementName.toUpperCase().equals("VIEW")) {
+      for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
+        viewFeatures.put(
+          currentAttributes.getName(i).toUpperCase(),
+          currentAttributes.getValue(i)
+        );
+      }
     }
 
     // if there are any parameters awaiting addition to the list, add them
@@ -263,6 +273,11 @@ public class CreoleXmlHandler extends HandlerBase {
       resourceData.setInterfaceName((String) contentStack.pop());
 
     //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("ICON")) {
+      checkStack("endElement", "ICON");
+      resourceData.setIcon((String) contentStack.pop());
+
+    //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("OR")) {
       currentParamList.add(currentParamDisjunction);
       currentParamDisjunction = new ArrayList();
@@ -275,6 +290,18 @@ public class CreoleXmlHandler extends HandlerBase {
       if(DEBUG)
         Out.prln("added param: " + currentParam);
       currentParam = new Parameter();
+
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("VIEW")) {
+      checkStack("endElement", "VIEW");
+      String viewType = (String) contentStack.pop();
+      viewFeatures.put("TYPE", viewType);
+      resourceData.addView(viewFeatures);
+      if(DEBUG)
+        Out.prln("added view: " + viewFeatures);
+
+      // clear the holding map for the next view
+      viewFeatures = Factory.newFeatureMap();
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("AUTOLOAD")) {

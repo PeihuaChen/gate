@@ -78,6 +78,15 @@ public class ResourceData extends AbstractFeatureBearer {
   /** Get method for the resource name */
   public String getName() { return name; }
 
+  /** Location of an icon for the resource */
+  protected String icon;
+
+  /** Set method for the resource icon */
+  public void setIcon(String icon) { this.icon = icon; }
+
+  /** Get method for the resource icon */
+  public String getIcon() { return icon; }
+
   /** The stack of instantiations */
   protected BumpyStack instantiationStack = new BumpyStack();
 
@@ -234,6 +243,25 @@ public class ResourceData extends AbstractFeatureBearer {
   /** Is the resource a tool? */
   public boolean isTool() { return tool; }
 
+  /** Add a view (a feature map minimally defining the view's
+    * TYPE and TITLE).
+    */
+  public void addView(FeatureMap viewFeatures) {
+    views.add(viewFeatures);
+  } // addView(FeatureMap)
+
+  /** Get the views registered for this resource. Each member of the
+    * list is a FeatureMap with a TYPE attribute giving the class name
+    * of the viewer. Other data to be passed to the viewer is present as
+    * other features on the map.
+    */
+  public List getViews() {
+    return views;
+  } // getViews()
+
+  /** The list of views registered for this resource */
+  protected List views = new ArrayList();
+
   /** Is this a valid resource data configuration? If not, leave an
     * error message that can be returned by <TT>getValidityMessage()</TT>.
     */
@@ -247,7 +275,7 @@ public class ResourceData extends AbstractFeatureBearer {
   } // isValid()
 
   /** Status message set by isValid() */
-  protected String validityMessage;
+  protected String validityMessage = "";
 
   /** Get validity statues message. */
   public String getValidityMessage() { return validityMessage; }

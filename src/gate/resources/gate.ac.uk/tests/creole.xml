@@ -31,6 +31,8 @@
       <JAR>TestResources.jar</JAR>
       <CLASS>testpkg.TestPR2</CLASS>
       <AUTOLOAD/>
+      <VIEW TITLE="turds float nicely" ANNOT="x">gate.gui.SomeViewer</VIEW>
+      <ICON>anIconForTPR2</ICON>
     </RESOURCE>
 
     <RESOURCE>
