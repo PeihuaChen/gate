@@ -360,7 +360,7 @@ public class TextAttributesChooser extends JDialog {
    * If the user presses the <b>OK</b> button the method will return the values
    * as modified by the user otherwise it will return the attribute set received
    * as input.
-   * @param the attribute set to be used as a starting point for the user's
+   * @param style the attribute set to be used as a starting point for the user's
    * selections
    * @return an {@link javax.swing.text.AttributeSet} containing the values
    * selected by the user.

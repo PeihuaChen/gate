@@ -288,10 +288,7 @@ public class DataCollector extends AbstractLanguageAnalyser {
   List attributeDetectors;
 
   /**
-   * The state of the data collector. Can be one of {@link BEFORE},
-   * {@link INSIDE} or {@link AFTER} according to the relation between the
-   * current location in the document and the instance being constructed.
-   * The value of the state is controlled by the instance detector.
+   * The state of the data collector.
    */
   protected int state;
 

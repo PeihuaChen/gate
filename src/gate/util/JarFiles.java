@@ -45,7 +45,7 @@ public class JarFiles {
     * jarFileNames and put them in a file with the name outputFileName.
     * If the jar entry is manifest then this information isn't added.
     * @param jarFileNames is a set of names of files (jar/zip)
-    * @param outputFileName is the name of the file which contains all the
+    * @param destinationJarName is the name of the file which contains all the
     * classes of jarFilesNames
     */
   public void merge(Set jarFileNames, String destinationJarName)

@@ -581,7 +581,7 @@ public class Sgml2Xml{
     * An element is considered dubious when we don't know if it is  empty
     * or may be closed...
     *
-    * @param aCustomobject an object from the dubiousElements list
+    * @param aCustomObject an object from the dubiousElements list
     */
   private void makeFinalModifications(CustomObject aCustomObject) {
     String endElement = null;

@@ -179,9 +179,9 @@ public class PersistenceManager {
 
   /**
    * Recursively traverses the provided object and replaces it and all its
-   * contents with the appropiate persistent equivalent classes.
+   * contents with the appropriate persistent equivalent classes.
    *
-   * @param the object to be analised and translated into a persistent
+   * @param target the object to be analysed and translated into a persistent
    * equivalent.
    * @return the persistent equivalent value for the provided target
    */

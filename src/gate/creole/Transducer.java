@@ -155,7 +155,7 @@ public class Transducer extends AbstractLanguageAnalyser {
 
   /**
    * Sets the {@link gate.AnnotationSet} to be used as input for the transducer.
-   * @param newInputAS a {@link gate.AnnotationSet}
+   * @param newInputASName a {@link gate.AnnotationSet}
    */
   public void setInputASName(String newInputASName) {
     inputASName = newInputASName;
@@ -171,7 +171,7 @@ public class Transducer extends AbstractLanguageAnalyser {
 
   /**
    * Sets the {@link gate.AnnotationSet} to be used as output by the transducer.
-   * @param newOutputAS a {@link gate.AnnotationSet}
+   * @param newOutputASName a {@link gate.AnnotationSet}
    */
   public void setOutputASName(String newOutputASName) {
     outputASName = newOutputASName;

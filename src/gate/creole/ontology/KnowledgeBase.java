@@ -53,7 +53,7 @@ public interface KnowledgeBase extends Ontology {
   public List getDirectInstances(OClass theClass);
 
   /**Gets the instance with the given name.
-   * @param String the instance name
+   * @param instanceName the instance name
    * @return the OInstance object with this name */
   public OInstance getInstanceByName(String instanceName);
 
@@ -75,7 +75,7 @@ public interface KnowledgeBase extends Ontology {
    * Create a FunctionalProperty with the given domain and range
    * @param domain
    * @param range
-   * @return
+   * @return a {@link KBFunctionalProperty} value.
    */
   public KBFunctionalProperty addFunctionalProperty(String name, KBClass domain, Object range);
 

@@ -25,7 +25,7 @@ public interface KBObjectProperty extends KBProperty {
   /**
    * Returns the set of inverse properties for this property. Null if no
    * such properties. The set contains objects of KBProperty instances.
-   * @return
+   * @return a {@link Set} value.
    */
   public Set getInverseProperties();
 

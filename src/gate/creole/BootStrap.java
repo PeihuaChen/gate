@@ -235,9 +235,9 @@ public class BootStrap {
   }// List featureClass (Class currentClass)
 
   /** create the form for the methods from the class that create the resource
-    * @listMethodExtend is the list with all methods from the class that extends
+    * @param methodsExtendList is the list with all methods from the class that extends
     *  the resource
-    * @interfacesListMethod is the list with all methods from the interfaces
+    * @param methodsInterfacesList is the list with all methods from the interfaces
     * that implement the resource
     */
   public void getMethodsAndFields(List methodsExtendList,
@@ -493,13 +493,13 @@ public class BootStrap {
   /**  Creates the resource and dumps out a project structure using the
     *  structure from gate/resource/creole/templateproject/Template and the
     *  information provided by the user
-    * @resourceName is the name of the resource
-    * @packageName is the name of the new resource
-    * @typeResource is the type of the resource (e.g.ProcessingResource,
+    * @param resourceName is the name of the resource
+    * @param packageName is the name of the new resource
+    * @param typeResource is the type of the resource (e.g.ProcessingResource,
     *  LanguageResource or VisualResource)
-    * @className is the name of the class which implements the resource
-    * @interfacesList is the set of the interfaces that implements the resource
-    * @pathNewProject is the path where it will be the new resource
+    * @param className is the name of the class which implements the resource
+    * @param interfacesList is the set of the interfaces that implements the resource
+    * @param pathNewProject is the path where it will be the new resource
     */
   public void createResource( String resourceName,String packageName,
                               String typeResource,String className,

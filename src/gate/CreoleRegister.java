@@ -205,7 +205,8 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
 
   /**
    * Removes a {@link gate.event.CreoleListener} previously registered with this
-   * CreoleRegister. {@see #addCreoleListener()}
+   * CreoleRegister. 
+   * @see #addCreoleListener(CreoleListener)
    */
   public void removeCreoleListener(CreoleListener l);
 

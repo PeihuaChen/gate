@@ -67,7 +67,7 @@ public class NodePosition {
 
   /**
    * Returns the old start offset
-   * @return
+   * @return a <tt>long</tt> value.
    */
   public long getOldStartNode() {
     return oldStartNode;
@@ -75,7 +75,7 @@ public class NodePosition {
 
   /**
    * Returns the old end offset
-   * @return
+   * @return a <tt>long</tt> value.
    */
   public long getOldEndNode() {
     return oldEndNode;
@@ -83,7 +83,7 @@ public class NodePosition {
 
   /**
    * Returns new start offset
-   * @return
+   * @return  a <tt>long</tt> value.
    */
   public long getNewStartNode() {
     return newStartNode;
@@ -91,7 +91,7 @@ public class NodePosition {
 
   /**
    * Returns the new end offset
-   * @return
+   * @return a <tt>long</tt> value.
    */
   public long getNewEndNode() {
     return newEndNode;
@@ -139,7 +139,7 @@ public class NodePosition {
 
   /**
    * Returns the total deducted spaces
-   * @return
+   * @return a <tt>long</tt> value.
    */
   public long getDeductedSpaces() {
     return deductedSpaces;

@@ -407,7 +407,7 @@ public class ListEditorDialog extends JDialog {
   JButton moveDownBtn;
 
   /**
-   * The model used by the {@link listComponent}
+   * The model used by the {@link #listComponent}
    */
   DefaultListModel listModel;
 

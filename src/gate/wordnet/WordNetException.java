@@ -7,8 +7,6 @@ import gate.util.GateException;
  * Description:
  * Copyright:    Copyright (c) 2000
  * Company:      University Of Sheffield
- * @author
- * @version 1.0
  */
 
 public class WordNetException extends GateException {

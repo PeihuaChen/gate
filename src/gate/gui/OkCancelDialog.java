@@ -107,7 +107,7 @@ public class OkCancelDialog extends JDialog {
   }
 
   /**
-   * @returns true if the user has selected the "OK" button.
+   * @return true if the user has selected the "OK" button.
    */
   public static boolean showDialog(Component parentComponent,
                                    Component contents,

@@ -26,11 +26,8 @@ import gate.creole.*;
 import gate.util.GateRuntimeException;
 
 /**
- * <p>Title: Morph.java </p>
- * <p>Description: This class is a wrapper for {@link Interpreter}, the
- * Morphological Analyzer.</p>
- * @author Niraj Aswani
- * @version 1.0
+ * Description: This class is a wrapper for {@link gate.creole.morph.Interpret},
+ * the Morphological Analyzer.
  */
 public class Morph
     extends AbstractLanguageAnalyser
@@ -197,7 +194,7 @@ public class Morph
 
   /**
    * Sets the rule file to be processed
-   * @param String - rule File name to be processed
+   * @param rulesFile - rule File name to be processed
    */
   public void setRulesFile(String rulesFile) {
     this.rulesFile = rulesFile;
@@ -260,7 +257,7 @@ public class Morph
 
   /**
    * A method which returns if the parser is in caseSenstive mode
-   * @return
+   * @return a {@link Boolean} value.
    */
   public Boolean getCaseSensitive() {
     return this.caseSensitive;

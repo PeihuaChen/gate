@@ -49,10 +49,10 @@ public class AnalyserRunningStrategy implements RunningStrategy{
    *  <li>if {@link #featureName} is null returns true</li>
    *  <li>if {@link #featureName} is not null and the document features contain
    *  such a feature returns true if the value of the feature is
-   *  {@link featureValue} and false otherwise.</li>
+   *  {@link #featureValue} and false otherwise.</li>
    * </ul></li>
    * </ul>
-   * @return
+   * @return a <tt>boolean</tt> value.
    */
   public boolean shouldRun() {
     if(runMode == RUN_ALWAYS) return true;

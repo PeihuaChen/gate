@@ -41,7 +41,7 @@ import gate.util.*;
 
 /**
  * Wrapper class for the WEKA Machine Learning Engine.
- * {@ see http://www.cs.waikato.ac.nz/ml/weka/}
+ * @see <a href="http://www.cs.waikato.ac.nz/ml/weka/">WEKA homepage</a>
  */
 
 public class Wrapper implements MLEngine, ActionsPublisher {

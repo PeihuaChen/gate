@@ -141,7 +141,7 @@ public class Javac implements GateConstants{
   /**
    * Breaks a class name into path components.
    * @param classname
-   * @return
+   * @return a {@link List} of {@link String}s.
    */
   protected static List getPathComponents(String classname){
     //break the classname into pieces
@@ -158,7 +158,7 @@ public class Javac implements GateConstants{
    * Gets a file inside a parent directory from a list of path components.
    * @param workDir
    * @param pathComponents
-   * @return
+   * @return a {@link File} value.
    */
   protected static File getDirectory(File workDir, List pathComponents){
     File currentDir = workDir;

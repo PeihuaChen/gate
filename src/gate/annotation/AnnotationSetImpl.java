@@ -996,7 +996,7 @@ public class AnnotationSetImpl
 
   /**
    *
-   * @return
+   * @return a clone of this set.
    * @throws CloneNotSupportedException
    */
   public Object clone() throws CloneNotSupportedException {

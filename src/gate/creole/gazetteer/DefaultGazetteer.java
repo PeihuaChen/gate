@@ -71,8 +71,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
   /** a map of nodes vs gaz lists */
   private Map listsByNode;
 
-  /** Build a gazetter using the default lists from the agte resources
-   * {@see init()}
+  /** 
+   * Build a gazetter using the default lists from the gate resources
    */
   public DefaultGazetteer(){
   }
@@ -109,9 +109,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
   /** Reads one lists (one file) of phrases
    *
-   * @param listDesc the line from the definition file
-   * @param add
-   * @add if <b>true</b> will add the phrases found in the list to the ones
+   * @param node the node
+   * @param add if <b>true</b> will add the phrases found in the list to the ones
    *     recognised by this gazetter, if <b>false</b> the phrases found in the
    *     list will be removed from the list of phrases recognised by this
    *     gazetteer.

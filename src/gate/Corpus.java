@@ -55,14 +55,14 @@ public interface Corpus extends LanguageResource, List, NameBearer {
    * Transient Corpus objects do nothing,
    * because there would be no way to get the document back
    * again afterwards.
-   * @param Document to be unloaded from memory.
+   * @param doc Document to be unloaded from memory.
    * @return void.
    */
   public void unloadDocument(Document doc);
 
   /**
    * Fills this corpus with documents created on the fly from selected files in
-   * a directory. Uses a link {@FileFilter} to select which files will be used
+   * a directory. Uses a {@link FileFilter} to select which files will be used
    * and which will be ignored.
    * A simple file filter based on extensions is provided in the Gate
    * distribution ({@link gate.util.ExtensionFileFilter}).
@@ -70,7 +70,7 @@ public interface Corpus extends LanguageResource, List, NameBearer {
    * parameter is an URL for uniformity. It needs to be a URL of type file
    * otherwise an InvalidArgumentException will be thrown.
    * An implementation for this method is provided as a static method at
-   * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
    * @param filter the file filter used to select files from the target
    * directory. If the filter is <tt>null</tt> all the files will be accepted.
    * @param encoding the encoding to be used for reading the documents

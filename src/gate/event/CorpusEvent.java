@@ -35,8 +35,8 @@ public class CorpusEvent extends GateEvent {
    * Creates a new CorpusEvent.
    * @param source the corpus that fires the event
    * @param doc the document this event refers to
-   * @param type the type of event ({@link DOCUMENT_ADDED} or
-   * {@link DOCUMENT_REMOVED}).
+   * @param type the type of event ({@link #DOCUMENT_ADDED} or
+   * {@link #DOCUMENT_REMOVED}).
    */
   public CorpusEvent(Corpus source, Document doc, int index, int type){
     super(source, type);

@@ -56,8 +56,8 @@ public class SimpleSortedSet {
     }
 /**
  * the get method retrive the List element by offset key given as argument
- * @param the offset to which the list should be retrived.
- * @returns the list with annotations by this offset or null if there is no
+ * @param elValue the offset to which the list should be retrived.
+ * @return the list with annotations by this offset or null if there is no
  * such offset placed in the map
  */
     public Object get(long elValue)
@@ -68,8 +68,8 @@ public class SimpleSortedSet {
  * add the new annotation to the annotation list for the given offset
  * Note: if the offset is not in the map new empty list is created and the
  * annotation is added to it
- * @param the offset of the annotation
- * @param the annotation instance to be placed in the list
+ * @param elValue the offset of the annotation
+ * @param o the annotation instance to be placed in the list
  * @return true if the offset is already in the map false otherwise
  */
     public boolean add(long elValue, Object o)
@@ -130,7 +130,7 @@ public class SimpleSortedSet {
     /**
      * calculate the index of the first element in the offset's array that is
      * equal or not greater then the given one
-     * @param the value to search for
+     * @param elValue the value to search for
      * @return actually <B>this</B>. Used to mimic the TreeSet.tailSet()
      */
     public SimpleSortedSet tailSet(long elValue)

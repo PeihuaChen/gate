@@ -83,7 +83,7 @@ public abstract class AbstractDocumentView extends AbstractResource
   
   /**
    * Gets the document this view displays.
-   * @return
+   * @return a {@link Document}
    */
   public Document getDocument(){
     return document;

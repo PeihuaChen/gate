@@ -13,7 +13,7 @@
 package gate.creole;
 
 /**
- * Thrown by {@link Executable}s after they have stopped their execution
+ * Thrown by {@link gate.Executable}s after they have stopped their execution
  * as a result of a call to their interrupt() method.
  */
 public class ExecutionInterruptedException extends ExecutionException {

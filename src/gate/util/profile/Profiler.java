@@ -109,7 +109,7 @@ public class Profiler {
   }
 
   /**
-   * @see enableGCCalling(boolean)
+   * @see #enableGCCalling(boolean)
    */
   public boolean isGCCallingEnabled() {
     return m_garbageCollection;

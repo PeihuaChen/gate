@@ -582,7 +582,7 @@ jar/classpath so it's the same as registerBuiltins
 
   /**
    * Returns the curently set executable.
-   * {@see setExecutable()}
+   * @see #setExecutable(gate.Executable)
    */
   public synchronized static gate.Executable getExecutable() {
     return currentExecutable;

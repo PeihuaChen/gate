@@ -21,8 +21,7 @@ import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.util.InvalidOffsetException;
 /**
- * A sentence splitter. This is module similar to a
- * {@link gate.creole.nerc.Nerc} in the fact that it conatins a tokeniser, a
+ * A sentence splitter. This is module contains a tokeniser, a
  * gazetteer and a Jape grammar. This class is used so we can have a different
  * entry in the creole.xml file describing the default resources and to add
  * some minor processing after running the components in order to extract the

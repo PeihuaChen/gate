@@ -72,7 +72,7 @@ public class MappingNode{
   }
 
   /** Gets the class id
-   *  @returm the class id  */
+   *  @return the class id  */
   public String getClassID(){
     return classID;
   }

@@ -82,10 +82,6 @@ public abstract class Factory {
     * @param resourceClassName the name of the class implementing the resource.
     * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
-    * @param listeners The listeners to be registered with the resource during
-    * its initialisation. A {@link java.util.Map} that maps from fully
-    * qualified class name (as a string) to listener (of the type declared by
-    * the key).
     * @return an instantiated resource.
     */
   public static Resource createResource(
@@ -128,10 +124,6 @@ public abstract class Factory {
     * @param resourceClassName the name of the class implementing the resource.
     * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
-    * @param listeners The listeners to be registered with the resource during
-    * its initialisation. A {@link java.util.Map} that maps freom fully
-    * qualified class name (as a string) to listener (of the type declared by
-    * the key).
     * @param features the features for the new resource
     * @return an instantiated resource.
     */

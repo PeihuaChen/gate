@@ -17,7 +17,8 @@ import javax.swing.Icon;
  * drawn vertically and should never be rotated)
  * <hr>
  * NOTE: This class was taken from <br>
- * {@link http://www.macdevcenter.com/pub/a/mac/2002/03/22/vertical_text.html}
+ * <a href="http://www.macdevcenter.com/pub/a/mac/2002/03/22/vertical_text.html">
+ * this location</a>.
  * <br>
  * The author specifies:<br>
  * &quot;Anybody can use the code for any purpose; I don't want any

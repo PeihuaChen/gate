@@ -31,7 +31,7 @@ public class SessionImpl implements Session {
   private Group group;
 
   /** sesion timeout (in minutes)
-   *  @see  AccessControllerImpl.DEFAULT_SESSION_TIMEOUT_MIN
+   *  @see  AccessControllerImpl#DEFAULT_SESSION_TIMEOUT_MIN
    *  */
   private int   timeout;
 
@@ -88,7 +88,7 @@ public class SessionImpl implements Session {
 
   /** returns the timeout (in minutes) of the session
    *
-   *  @see  AccessControllerImpl.DEFAULT_SESSION_TIMEOUT_MIN
+   *  @see  AccessControllerImpl#DEFAULT_SESSION_TIMEOUT_MIN
    *
    *  */
   public int getTimeout() {

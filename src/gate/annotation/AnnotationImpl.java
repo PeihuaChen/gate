@@ -239,9 +239,9 @@ public class AnnotationImpl extends AbstractFeatureBearer
   /** This method verifies if two annotation and are partially compatible.
     * Partially compatible means that they overlap and the FeatureMap of
     * <b>this</b> is incuded into FeatureMap of aAnnot.
-    * @param aAnnot a gate Annotation.
+    * @param anAnnot a gate Annotation.
     * @return <code>true</code> if <b>this</b> is partially compatible with
-    * aAnnot and <code>false</code> otherwise.
+    * anAnnot and <code>false</code> otherwise.
     */
   public boolean isPartiallyCompatible(Annotation anAnnot){
     if (anAnnot == null) return false;

@@ -33,7 +33,7 @@ public class Restriction implements java.io.Serializable{
    *
    * @param key string value of a feature key in document.
    * @param value value of a feature with this key
-   * @operator_  type of operator for cmarision in query
+   * @param operator_  type of operator for comparison in query
    *
    */
   public Restriction(String key, Object value, int operator_){

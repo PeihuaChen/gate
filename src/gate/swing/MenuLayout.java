@@ -65,7 +65,7 @@ public class MenuLayout implements LayoutManager {
    * Used by {@link #minimumLayoutSize} and {@link #preferredLayoutSize}.
    * @param target
    * @param componentSizes
-   * @return
+   * @return a {@link Dimension} value.
    */
   protected Dimension getCompositeSize(Container target,
                                        Dimension[] componentSizes){

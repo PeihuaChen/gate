@@ -22,7 +22,7 @@ import java.util.Iterator;
 
 /**
  * Wrapper class for the Maxent machine learning algorithm.
- * {@ see http://maxent.sourceforge.net/index.html}
+ * @see <a href="http://maxent.sourceforge.net/index.html">Maxent homepage</a>
  */
 public class MaxentWrapper
     implements MLEngine, gate.gui.ActionsPublisher {
@@ -213,7 +213,7 @@ public class MaxentWrapper
    * does not confuse a true in one position with a true in another when, for
    * example, calculating the cutoff.
    *
-   * @param List attributeValues A list of String objects listing all the
+   * @param attributeValues a list of String objects listing all the
    * feature values and the outcome value for an instance.
    */
   void markIndicesOnFeatures(List attributeValues) {
@@ -395,7 +395,7 @@ public class MaxentWrapper
 
   /**
    * Loads the state of this engine from previously saved data.
-   * @param An open InputStream from which the model will be loaded.
+   * @param is An open InputStream from which the model will be loaded.
    */
   public void load(java.io.InputStream is) throws java.io.IOException {
     if (sListener != null) {
@@ -429,7 +429,7 @@ public class MaxentWrapper
 
   /**
    * Saves the state of the engine for reuse at a later time.
-   * @param An open output stream to which the model will be saved.
+   * @param os An open output stream to which the model will be saved.
    */
   public void save(java.io.OutputStream os) throws java.io.IOException {
     if (sListener != null) {

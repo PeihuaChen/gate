@@ -38,7 +38,6 @@ public class Interpret {
 
   /**
    * Constructor
-   * @param fileName name of the program file
    */
   public Interpret() {
 
@@ -46,7 +45,7 @@ public class Interpret {
 
   /**
    * It starts the actual program
-   * @param fileName
+   * @param ruleFileName
    */
   public void init(String ruleFileName) throws ResourceInstantiationException {
     variables = new Storage();
@@ -293,7 +292,7 @@ public class Interpret {
    * This method interprets the line and finds out the type of command and
    * returns the integer indicating the type of the command
    * @param line The program command to be interpreted
-   * @return
+   * @return and <tt>int</tt> value
    */
   private int findCommandType(String line) {
 
@@ -453,7 +452,7 @@ public class Interpret {
   /**
    * This method takes a method signature and searches if the method
    * @param method
-   * @return
+   * @return a <tt>boolean</tt> value.
    */
   private boolean isMethodAvailable(String method) {
     // now first find the name of the method

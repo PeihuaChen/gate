@@ -50,13 +50,13 @@ public interface KBProperty {
    * Returns a set of all KBProperty instances that are in
    * SamePropertyAs relation with this property. Or null if
    * there are no such properties.
-   * @return
+   * @return a {@link Set} value.
    */
   public Set getSamePropertyAs();
 
   /**
    * Add a SubPropertyOf relation between the given property and this.
-   * @param theProperty
+   * @param propertyName
    */
   public void setSubPropertyOf(String propertyName);
 
@@ -66,7 +66,7 @@ public interface KBProperty {
    * such properties. This is not a transitive closure. To obtain
    * the full depth of the property hierarchy, one needs then to
    * get the sub-properties of the sub-properties of this, etc.
-   * @return
+   * @return a {@link Set} value.
    */
   public Set getSubPropertyOf();
 

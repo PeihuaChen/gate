@@ -9,8 +9,7 @@ import java.util.*;
  * </p>
  * <p>Company: University Of Sheffield</p>
  * @author Erik E. Peterson - modified by Niraj Aswani
- * @source http://www.mandarintools.com/segmenter.html
- * @version 1.0
+ * @see <a href="http://www.mandarintools.com/segmenter.html">source</a>
  */
 public class Segmenter {
   //private Hashtable zhwords;

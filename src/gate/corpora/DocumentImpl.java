@@ -610,7 +610,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
    *  DocumentFormat object will unpack the markup in the Document and
    *  add it as annotations. Documents are <B>not</B> markup-aware by default.
    *
-   *  @param b markup awareness status.
+   *  @param newMarkupAware markup awareness status.
    */
   public void setMarkupAware(Boolean newMarkupAware) {
       this.markupAware = newMarkupAware;
@@ -878,7 +878,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 
   /** This method saves all the annotations from aDumpAnnotSet and combines
     * them with the document content.
-    * @param aDumpAnnotationSet is a GATE annotation set prepared to be used
+    * @param aDumpAnnotSet is a GATE annotation set prepared to be used
     * on the raw text from document content. If aDumpAnnotSet is <b>null<b>
     * then an empty string will be returned.
     * @param includeFeatures is a boolean, which controls whether the annotation
@@ -1401,7 +1401,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
 
   /** This method saves all the annotations from aDumpAnnotSet and combines
     * them with the original document content, if preserved as feature.
-    * @param aDumpAnnotationSet is a GATE annotation set prepared to be used
+    * @param aSourceAnnotationSet is a GATE annotation set prepared to be used
     * on the raw text from document content. If aDumpAnnotSet is <b>null<b>
     * then an empty string will be returned.
     * @param includeFeatures is a boolean, which controls whether the annotation
@@ -2096,8 +2096,8 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   }// End isXmlChar()
 
   /** This method saves a FeatureMap as XML elements.
-    * @ param aFeatureMap the feature map that has to be saved as XML.
-    * @ return a String like this: <Feature><Name>...</Name>
+    * @param aFeatureMap the feature map that has to be saved as XML.
+    * @return a String like this: <Feature><Name>...</Name>
     * <Value>...</Value></Feature><Feature>...</Feature>
     */
   private String featuresToXml(FeatureMap aFeatureMap){

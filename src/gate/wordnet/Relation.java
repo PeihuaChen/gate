@@ -24,7 +24,7 @@ public interface Relation {
   /** !    Antonym (noun,verb,adjective,adverb) */
   public static final int REL_ANTONYM = 10001;
 
-  /** @    Hypernym (noun,verb)*/
+  /**    Hypernym (noun,verb)*/
   public static final int REL_HYPERNYM = 10002;
 
   /** ~    Hyponym (noun,verb)*/

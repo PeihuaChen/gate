@@ -294,7 +294,6 @@ public class ChineseTokeniser
   /**
    * Sets the boolean parameter which states if segmenter should produce
    * the space tokens
-   * @param inputFile
    */
   public void setGenerateSpaceTokens(Boolean value) {
     this.generateSpaceTokens = value;
@@ -312,8 +311,8 @@ public class ChineseTokeniser
    * Sets the document to be processed
    * @param document - document to be processed
    */
-  public void setDocument(gate.Document inputFile) {
-    this.document = inputFile;
+  public void setDocument(gate.Document document) {
+    this.document = document;
   }
 
   /**
@@ -324,8 +323,8 @@ public class ChineseTokeniser
   }
 
   /**
-   * Sets the rule file to be processed
-   * @param String - rule File name to be processed
+   * Sets the encoding to be used.
+   * @param encoding the encoding.
    */
   public void setEncoding(String encoding) {
     this.encoding = encoding;
@@ -348,7 +347,7 @@ public class ChineseTokeniser
 
   /**
    * Returns the URL of the file, which contains rules for the tokeniser
-   * @return
+   * @return a {@link java.net.URL} value.
    */
   public java.net.URL getRulesURL() {
     return rulesURL;
@@ -364,7 +363,7 @@ public class ChineseTokeniser
 
   /**
    * Returns the provided annotationset name
-   * @return
+   * @return a {@link String} value.
    */
   public String getAnnotationSetName() {
     return this.annotationSetName;

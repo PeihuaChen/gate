@@ -375,7 +375,7 @@ public class FlexibleGazetteer
 
   /**
    * Returns the document set up by user to work on
-   * @return
+   * @return a {@link Document}
    */
   public gate.Document getDocument() {
     return this.document;
@@ -391,7 +391,7 @@ public class FlexibleGazetteer
 
   /**
    * Returns the outputAnnotationSetName
-   * @return
+   * @return a {@link String} value.
    */
   public String getOutputAnnotationSetName() {
     return this.outputAnnotationSetName;
@@ -407,7 +407,7 @@ public class FlexibleGazetteer
 
   /**
    * Returns the inputAnnotationSetName
-   * @return
+   * @return a {@link String} value.
    */
   public String getInputAnnotationSetName() {
     return this.inputAnnotationSetName;
@@ -426,7 +426,7 @@ public class FlexibleGazetteer
   /**
    * Returns the feature names that are provided by the user to use their values
    * to replace their actual strings in the document
-   * @return
+   * @return a {@link List} value.
    */
   public java.util.List getInputFeatureNames() {
     return this.inputFeatureNames;
@@ -446,7 +446,7 @@ public class FlexibleGazetteer
    * provided annotationSetName
    * @param doc
    * @param annotationSetName
-   * @return
+   * @return an {@link Iterator}
    */
   public Iterator getTokenIterator(gate.Document doc, String annotationSetName) {
     AnnotationSet inputAs = (annotationSetName == null) ? doc.getAnnotations() :

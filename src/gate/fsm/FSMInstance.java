@@ -43,7 +43,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * @param FSMPosition the state this instance will be in
     * @param startNode the node in the AnnotationSet where this FSM instance
     * started the matching
-    * @ AGPosition the node in the AnnotationSet up to which this FSM Instance
+    * @param AGPosition the node in the AnnotationSet up to which this FSM Instance
     * advanced during the matching.
     * @param bindings a HashMap that maps from labels (objects of type String)
     * to sets of annotations (objects of type AnnotationSet). This map stores

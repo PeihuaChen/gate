@@ -57,7 +57,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param aDocument The gate document that will be processed
     * @param aMarkupElementsMap The map containing the elements that will
     * transform into annotations
-    * @param anAnnoatationSet The annotation set that will contain annotations
+    * @param anAnnotationSet The annotation set that will contain annotations
     * resulted from the processing of the gate document
     */
   public HtmlDocumentHandler(gate.Document       aDocument,

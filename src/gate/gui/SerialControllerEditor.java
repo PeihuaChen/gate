@@ -668,7 +668,6 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   /**
    * Called when a PR has been selected in the memeber PRs table;
-   * @param pr
    */
   protected void selectPR(int index){
     ProcessingResource pr = (ProcessingResource)
@@ -1258,128 +1257,128 @@ public class SerialControllerEditor extends AbstractVisualResource
 
 
   /** The controller this editor edits */
-  SerialController controller;
+  protected SerialController controller;
 
   /** The {@link Handle} that created this view */
-  Handle handle;
+  protected Handle handle;
 
   /**
    * The list of actions provided by this editor
    */
-  List actionList;
+  protected List actionList;
   /**
    * Contains all the PRs loaded in the sytem that are not already part of the
    * serial controller
    */
-  XJTable loadedPRsTable;
+  protected XJTable loadedPRsTable;
 
   /**
-   * model for the {@link loadedPRsTable} JTable.
+   * model for the {@link #loadedPRsTable} JTable.
    */
-  LoadedPRsTableModel loadedPRsTableModel;
+  protected LoadedPRsTableModel loadedPRsTableModel;
 
   /**
    * Displays the PRs in the controller
    */
-  XJTable memberPRsTable;
+  protected XJTable memberPRsTable;
 
-  /** model for {@link memberPRsTable}*/
-  MemberPRsTableModel memberPRsTableModel;
+  /** model for {@link #memberPRsTable}*/
+  protected MemberPRsTableModel memberPRsTableModel;
 
   /** Adds one or more PR(s) to the controller*/
-  JButton addButon;
+  protected JButton addButon;
 
   /** Removes one or more PR(s) from the controller*/
-  JButton removeButton;
+  protected JButton removeButton;
 
   /** Moves the module up in the controller list*/
-  JButton moveUpButton;
+  protected JButton moveUpButton;
 
   /** Moves the module down in the controller list*/
-  JButton moveDownButton;
+  protected JButton moveDownButton;
 
   /** A component for editing the parameters of the currently selected PR*/
-  ResourceParametersEditor parametersEditor;
+  protected ResourceParametersEditor parametersEditor;
 
-  /** A JPanel containing the {@link parametersEditor}*/
-  JPanel parametersPanel;
+  /** A JPanel containing the {@link #parametersEditor}*/
+  protected JPanel parametersPanel;
 
-  /** A border for the {@link parametersPanel} */
-  TitledBorder parametersBorder;
+  /** A border for the {@link #parametersPanel} */
+  protected TitledBorder parametersBorder;
 
 
   /** A JPanel containing the running strategy options*/
-  JPanel strategyPanel;
+  protected JPanel strategyPanel;
 
   /** A border for the running strategy options box */
-  TitledBorder strategyBorder;
+  protected TitledBorder strategyBorder;
 
   /**
    * Button for run always.
    */
-  JRadioButton yes_RunRBtn;
+  protected JRadioButton yes_RunRBtn;
 
   /**
    * Button for never run.
    */
-  JRadioButton no_RunRBtn;
+  protected JRadioButton no_RunRBtn;
 
   /**
    * Button for conditional run.
    */
-  JRadioButton conditional_RunRBtn;
+  protected JRadioButton conditional_RunRBtn;
 
   /**
    * The group for run strategy buttons;
    */
-  ButtonGroup runBtnGrp;
+  protected ButtonGroup runBtnGrp;
 
   /**
    * Text field for the feature name for conditional run.
    */
-  JTextField featureNameTextField;
+  protected JTextField featureNameTextField;
 
   /**
    * Text field for the feature value for conditional run.
    */
-  JTextField featureValueTextField;
+  protected JTextField featureValueTextField;
 
   /**
    * A combobox that allows selection of a corpus from the list of loaded
    * corpora.
    */
-  JComboBox corpusCombo;
+  protected JComboBox corpusCombo;
 
-  CorporaComboModel corpusComboModel;
+  protected CorporaComboModel corpusComboModel;
 
   /**The "Add PR" menu; part of the popup menu*/
-  JMenu addMenu;
+  protected JMenu addMenu;
 
   /**The "Remove PR" menu; part of the popup menu*/
-  JMenu removeMenu;
+  protected JMenu removeMenu;
 
   /** Action that runs the application*/
-  RunAction runAction;
+  protected RunAction runAction;
 
   /**
    * Is the controller displayed an analyser controller?
    */
-  boolean analyserMode = false;
+  protected boolean analyserMode = false;
 
   /**
    * Is the controller displayed conditional?
    */
-  boolean conditionalMode = false;
+  protected boolean conditionalMode = false;
 
   /**
    * The PR currently selected (having its parameters set)
    */
-  ProcessingResource selectedPR = null;
+  protected ProcessingResource selectedPR = null;
 
   /**
    * The running strategy for the selected PR.
    */
-  RunningStrategy selectedPRRunStrategy = null;
+  protected RunningStrategy selectedPRRunStrategy = null;
 
   private transient Vector statusListeners;
   private transient Vector progressListeners;

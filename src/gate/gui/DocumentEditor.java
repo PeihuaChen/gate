@@ -158,7 +158,7 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * This highlighter is actually used as a data structure. It is used to keep
    * the data for the selected annotations; the actual highlighting will be
-   * done by the {@link AnnotationEditor#highlighter} as using two different
+   * done by the {@link #highlighter} as using two different
    * highlighters on the same text component is looking for trouble.
    */
   protected Highlighter selectionHighlighter;
@@ -177,18 +177,18 @@ public class DocumentEditor extends AbstractVisualResource
   protected java.util.List data;
 
   /**
-   * a list containing {@link AnnotationEditor.Range} objects. These are the
-   * ranges in the {@link AnnotationEditor#data} structure. A range is a bunch
+   * a list containing {@link Range} objects. These are the
+   * ranges in the {@link #data} structure. A range is a bunch
    * of annotations belonging to the same annotation set that are contiguous
-   * in the {@link AnnotationEditor#data} structure.
+   * in the {@link #data} structure.
    */
   protected java.util.List ranges;
 
   /**
    * A composed map used to get the metadata for an annotation type starting
    * from the annotation set name and the type name.
-   * Annotation set name -> Annotation type -> {@link AnnotationEditor.TypeData}
-   * Maps from String to Map to {@link AnnotationEditor.TypeData}.
+   * Annotation set name -> Annotation type -> {@link TypeData}
+   * Maps from String to Map to {@link TypeData}.
    */
   protected Map typeDataMap;
 
@@ -1128,8 +1128,7 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * Updates this component when the underlying document is changed. This method
    * is only triggered when the document is changed to a new one and not when
-   * the internal data from the document changes. For the document internal
-   * events {@see #DelayedListener}.
+   * the internal data from the document changes.
    */
   protected void this_documentChanged(){
     initLocalData();
@@ -1194,11 +1193,11 @@ public class DocumentEditor extends AbstractVisualResource
    * For the default annotation set of a document (which has no name) the
    * &quot;&lt;Default&gt;&quot; value is used.
    *
-   * Once a {@link AnnotationEditor.TypeData} value has been obtained it can be used to change
+   * Once a {@link TypeData} value has been obtained it can be used to change
    * the way the respective type of annotations are displayed.
    * @param setName a {@link java.lang.String}, the name of the annotation set
    * @param type a {@link java.lang.String}, the name of the type.
-   * @return a {@link AnnotationEditor.TypeData} value
+   * @return a {@link TypeData} value
    */
   protected TypeData getTypeData(String setName, String type){
     Map setMap = (Map)typeDataMap.get(setName);

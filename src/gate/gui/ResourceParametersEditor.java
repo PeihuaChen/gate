@@ -49,7 +49,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
   /**
    * Initialises this GUI component.
    * @param resource the resource for which the parameters need to be set.
-   * @param paramaters a list of lists of {@link Parameter} representing
+   * @param parameters a list of lists of {@link Parameter} representing
    * parameter disjunctions.
    */
   public void init(Resource resource, List parameters){

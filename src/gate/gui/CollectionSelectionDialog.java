@@ -58,7 +58,7 @@ public class CollectionSelectionDialog extends JDialog {
   Frame mainFrame = null;
 
   /** Constructs an ColectionSelectionDialog
-    * @param aFram the parent frame of this dialog
+    * @param aFrame the parent frame of this dialog
     * @param aModal (wheter or not this dialog is modal)
     */
   public CollectionSelectionDialog(Frame aFrame, boolean aModal){
@@ -76,7 +76,7 @@ public class CollectionSelectionDialog extends JDialog {
   }// CollectionSelectionDialog
 
   /** Init local data from a sorce collection
-    * @param aSourceCollection is the collection from what the user will choose
+    * @param aSourceData is the collection from what the user will choose
     */
   protected void initLocalData(Collection aSourceData){
     targetListModel = new DefaultListModel();

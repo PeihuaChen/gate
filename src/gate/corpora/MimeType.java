@@ -97,7 +97,7 @@ public class MimeType {
   /**
    * Gets the value for a particular parameter.
    * @param name the name of the parameter.
-   * @return
+   * @return a {@link java.lang.String} value.
    */
   public java.lang.String getParameterValue(java.lang.String name){
     return (String)parameters.get(name);

@@ -62,8 +62,8 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
   }
 
   /**
-   * Checks whether this PR has been interrupted since the lsat time its
-   * {@link execute()} method was called.
+   * Checks whether this PR has been interrupted since the last time its
+   * {@link #execute()} method was called.
    */
   public synchronized boolean isInterrupted(){
     return interrupted;

@@ -28,8 +28,8 @@ public interface RunningStrategy{
   public boolean shouldRun();
 
   /**
-   * Returns the run mode (see {@link RUN_ALWAYS}, {@link RUN_NEVER},
-   * {@link RUN_CONDITIONAL}).
+   * Returns the run mode (see {@link #RUN_ALWAYS}, {@link #RUN_NEVER},
+   * {@link #RUN_CONDITIONAL}).
    * @return and int value.
    */
   public int getRunMode();

@@ -1075,7 +1075,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
    *  DocumentFormat object will unpack the markup in the Document and
    *  add it as annotations. Documents are <B>not</B> markup-aware by default.
    *
-   *  @param b markup awareness status.
+   *  @param newMarkupAware markup awareness status.
    */
   public void setMarkupAware(Boolean newMarkupAware) {
 
