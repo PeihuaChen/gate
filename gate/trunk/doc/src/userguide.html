@@ -16,7 +16,18 @@
 <!---------------------------------------------------------------------->
 <!---------------------------------------------------------------------->
 <!---------------------------------------------------------------------->
+<CENTER>
 <H1>The GATE User Guide</H1>
+<H2><A HREF=http://www.dcs.shef.ac.uk/~hamish/>Hamish Cunningham</A></H2>
+<H2><A HREF=http://www.dcs.shef.ac.uk/~diana/>Diana Maynard</A></H2>
+</CENTER>
+
+<P>
+<B>
+This version of the document is for GATE version 2 alpha 1, of
+March 2001. It is <B>incomplete</B>, probably inaccurate and almost
+certainly quite annoying, but that's all Bill Gate's fault.
+</B>
 
 <P>
 Contents:
@@ -24,7 +35,7 @@ Contents:
 <LI>
 <A HREF=#introduction>Introduction</A>
 <LI>
-<A HREF=#the-user-interface>The User Interface</A>
+<A HREF=#the-development-environment>The Development Environment</A>
 <LI>
 <A HREF=#the-framework>The Framework</A>
   <UL>
@@ -76,6 +87,19 @@ Version 2 of GATE was released in Spring 2001. It is written in Java,
 and is available as open source free software under the GNU licence
 at <A HREF=http://gate.ac.uk/>http://gate.ac.uk/</A>.
 
+<P>
+The rest of this section gives a general introduction to the system.
+The rest of the document covers:
+<UL>
+<LI>
+how to use the
+<A HREF=#the-development-environment>development environment</A>
+<LI>
+how to use the <A HREF=#the-framework>framework</A>
+<LI>
+the <A HREF=#design>design principles</A> of the architecture and framework.
+</UL>
+
 
 <!---------------------------------------------------------------------->
 <H3>Architectural principles</H3>
@@ -84,14 +108,14 @@ at <A HREF=http://gate.ac.uk/>http://gate.ac.uk/</A>.
 A central idea behind the GATE architecture is that there should be
 no requirement for users to commit to any particular theory of
 language processing: the architecture strives to be non-prescriptive and
-theory-neutral.
+theory-neutral. Therefore there is a very general model of components and the
+data structures they share. This is, of course, both a strength and a
+weakness.
 
 <P>
 (Almost) everything in GATE is a component. Components are
 reusable software chunks with well-defined interfaces
 that are conceptually separate from GATE itself.
-
-<P>
 All component sets are user-extensible and together are called CREOLE - a
 Collection of REusable Objects for Language Engineering.
 
@@ -101,19 +125,29 @@ Collection of REusable Objects for Language Engineering.
 
 <P>
 The framework is a backplane into which plug CREOLE components.
-
-<P>
-A set of components plus the framework is a deployment unit.
-
-<P>
-The development environment facilitates constructing components.
-
+The user gives the system a list of URLs to search when it starts up,
+and components at those locations are loaded by the system. (To be precise
+only their configuration data is loaded to begin with; the actual classes
+are loaded when the user requests the instantiation of a resource.)
 
 <P>
 The backplane performs these functions:
-  component discovery, bootstrapping, loading and reloading;
-  native data structures for common information types;
-  generalised data storage and process execution.
+<UL>
+<LI>
+component discovery, bootstrapping, loading and reloading;
+<LI>
+native data structures for common information types;
+<LI>
+generalised data storage and process execution.
+</UL>
+
+<P>
+A set of components plus the framework is a deployment unit which can be
+embedded in another application.
+
+<P>
+The key task of the 
+development environment is to facilitate constructing components.
 
 
 <!---------------------------------------------------------------------->
@@ -121,25 +155,55 @@ The backplane performs these functions:
 
 <P>
 GATE components are one of three types of specialised Java Beans:
-  Processing Resources
-  Language Resources
-  Visual Resources
+
+<P><B>Resource:</B><BR>
+The top-level interface, which describes all components. What all 
+components share in common is that they can be loaded at runtime,
+and that the set of components is extendable by clients. They
+have Features, which are represented externally to the system as
+"meta-data" in a format such as RDF, plain XML, or Java properties.
+Resources should probably all be Java beans.
+
+<P><B>ProcessingResource:</B><BR>
+Is a resource that is runnable, may be invoked remotely (via RMI),
+and lives in class files. In order to load a PR the system just
+needs to know where to find the class or jar files (which will 
+also include the metadata).
+
+<P><B>LanguageResource:</B><BR>
+Is a resource that consists of data, accessed via a Java abstraction
+layer. They live in relational databases.
+
+<P><B>VisualResource:</B><BR>
+Is a visual Java bean, component of GUIs, including of the main GATE 
+gui.  Like PRs they live in .class or .jar files.
 
 
-<P>
-Bits and pieces
-  Built in components for common processing and data visualisation tasks
-  FST over annotations on text
-  Measurement: precision, recall, diff over annotations on text
-  Support for documents in XML, SGML, HTML, RTF, email
-  Full Unicode
+<!---------------------------------------------------------------------->
+<H3>Bits and pieces</H3>
+
+
+There are built in components for common processing and data visualisation
+tasks.
+
+There is a finite state transduction language operating over
+annotations on text, called JAPE, a Jolly Advanced Pattern Eater. JAPE 
+is based on Doug Appelt's TextPro language.
+
+There is automated measurement: precision, recall, diff over annotations
+on text.
+
+Support for documents in XML, SGML, HTML, RTF, email.
+
+Full Unicode support including editing in a number of languages (not
+supported by native JDK; thanks to Mark Leisher for help with this).
 
 
 
 
 <!---------------------------------------------------------------------->
 <!---------------------------------------------------------------------->
-<A NAME=the-user-interface></A><H2>The User Interface</H2>
+<A NAME=the-development-environment></A><H2>Development Environment</H2>
 
 
 
@@ -147,23 +211,6 @@ Bits and pieces
 <!---------------------------------------------------------------------->
 <A NAME=the-framework></A><H2>The Framework</H2>
 
-<P>
-a CorpusIndex is a type of LanguageResource which is maintained
-by a CorpusIndexer, a type of ProcessingResource. (LRs and PRs
-are described in one of the sections of my thesis and in 
-gate/doc/internal/resources.html; current gate may be checked
-out by "cvs co gate", or from a web server at http://gate.ac.uk/gate.)
-the purpose of a CorpusIndex is to facilitate
-queries relating to Annotations, which are stored in AnnotationSets
-that belong to Documents. Annotations have start and end Nodes;
-Nodes point into the text via character offsets. various subclasses
-of DocumentFormat convert textual markup (like XML, HTML, RTF,
-email...) into Annotations when Documents are created. Annotations
-each have a type (string) and one or more FeatureMaps associated 
-with them encoding the information about text that they hold. 
-an example annotation: there is a Token from char 5 to char 10 with
-feature "POS" equal to "NN". LanguageResources also have features;
-a Corpus might have a feature naming its index, for example.
 
 
 <!---------------------------------------------------------------------->
@@ -175,19 +222,195 @@ a Corpus might have a feature naming its index, for example.
 <A NAME=design></A><H2>Design</H2>
 
 <P>
-<PRE>
-backplane into which specialised java beans plug;
-loose-coupled;
-separation of interface and implementation;
-inter-component communication is handled by model
-  components - LanguageResources, and events;
-distribution and parallelism is handled by controller
-  components (and by distributing data over HTTP and JDBC)
-reason for adding to the normal bean initialisation mech is that
-  LRs, PRs and VRs all have characteristic parameterisation
-  phases; the GATE resources/components model makes 
-  explicit these phases
-</PRE>
+GATE is a backplane into which specialised Java Beans plug.
+These beans are loose-coupled with respect to each other - they communicate
+entirely by means of the GATE framework.
+Inter-component communication is handled by model components -
+LanguageResources, and events.
+
+<P>
+Components are defined by conformance to various interfaces (e.g.
+LanguageResource), ensuring
+separation of interface and implementation.
+
+<P>
+Distribution and parallelism (NOT fully working as yet)
+is handled by controller components (and by distributing data
+over HTTP and JDBC).
+
+<P>
+The reason for adding to the normal bean initialisation mech is that
+LRs, PRs and VRs all have characteristic parameterisation
+phases; the GATE resources/components model makes explicit these phases.
+
+
+<!-------------------------------------------------------------------->
+<A NAME=patterns></A><H3>Patterns</H3>
+
+<P>
+GATE is structured around a number of what we might call principles, or
+patterns, or alternatively, clever ideas stolen from better minds than
+mine. These patterns are:
+<UL>
+<LI>
+modelling most things as extensible sets of <A
+HREF=#components>components</A>;
+<LI>
+separating components into
+<A HREF=#mvc>model, view, or controller</A> types;
+<LI>
+hiding implementation behind <A HREF=#interfaces>interfaces</A>.
+</UL>
+
+<P>
+Four interfaces in the top-level package describe the GATE view of
+components:
+Resource, ProcessingResource, LanguageResource and VisualResource.
+
+
+<!-------------------------------------------------------------------->
+<A NAME=components></A><H3>Components</H3>
+
+<!------------------>
+<H4>Architectural Principle</H4>
+
+<P>
+Wherever users of the architecture may wish to extend the set of a
+particular type of entity, those types should be expressed as components.
+
+<P>
+Another way to express this is to say that the architecture is based on
+<I>agents</I>. I've avoided this in the past because of an association
+between this term and the idea of bits of code moving around between
+machines of their own volition. I take this to be somewhat pointless, and
+probably the result of an anthropomorphic obsession with mobility as a
+correlate of intelligence. If we drop this connotation, however, we can
+say that GATE is an agent-based architecture. If we want to, that is.
+
+
+<!------------------>
+<H4>Framework Expression</H4>
+
+<P>
+Many of the classes in the framework are components, by which we mean
+classes that conform to an interface with certain standard properties. In
+our case these properties are based on the Java Beans component
+architecture, with the addition of component metadata, automated loading
+and standardised storage, threading and distribution.
+
+<P>
+All components inherit from Resource, via one of:
+<UL>
+<LI>
+LanguageResource (LR) represents entities such as lexicons, corpora or
+ontologies;
+<LI>
+VisualResource (VR) represents visualisation and editing components that
+participate in GUIs;
+<LI>
+ProcessingResource (PR) represents entities that are primarily algorithmic,
+such as parsers, generators or ngram modellers.
+</UL>
+
+
+<!-------------------------------------------------------------------->
+<A NAME=mvc></A><H3>Model, view, controller</H3>
+
+<P>
+According to Buschmann et al
+(Pattern-Oriented Software Architecture, 1996),
+the Model-View-Controller (MVC)
+pattern 
+<BLOCKQUOTE>
+...divides an interactive application into three components. The model
+contains the core functionality and data. Views display information to the
+user. Controllers handle user input. Views and controllers together comprise
+the user interface. A change-propagation mechanism ensures consistency between
+the user interface and the model. [p.125]
+</BLOCKQUOTE>
+A variant of MVC, the Document-View pattern, 
+<BLOCKQUOTE>
+...relaxes the separation of view and controller... The View component of
+Document-View combines the responsibilities of controller and view in MVC, and
+implements the user interface of the system.
+</BLOCKQUOTE>
+A benefit of both arrangements is that 
+<BLOCKQUOTE>
+...loose coupling of the document and view components enables multiple
+simultaneous synchronized but different views of the same document.
+</BLOCKQUOTE>
+
+<P>
+Geary (Graphic Java 2, 3rd Edtn., 1999) gives a slightly different view:
+<BLOCKQUOTE>
+MVC separates applications into three types of objects:
+<UL>
+<LI>
+<B>Models:</B> Maintain data and provide data accessor methods
+<LI>
+<B>Views:</B> Paint a visual representation of some or all of a model's data
+<LI>
+<B>Controllers:</B> Handle events
+... By encapsulating what other architectures intertwine, MVC applications are
+much more flexible and reusable than their traditional counterparts.
+</UL>
+[pp. 71, 75]
+</BLOCKQUOTE>
+Swing, the Java user interface framework, uses
+<BLOCKQUOTE>
+a specialised version of the classic MVC meant to support pluggable look and
+feel instead of applications in general.
+[p. 75]
+</BLOCKQUOTE>
+
+<P>
+GATE may be regarded as an MVC architecture in two ways:
+<UL>
+<LI>
+directly, because we use the Swing toolkit for the GUIs;
+<LI>
+by analogy, where LRs are models, VRs are views and PRs are controllers.
+Of these, the latter sits least
+easily with the MVC scheme, as PRs may indeed be controllers but may also
+not be.
+</UL>
+
+
+<!-------------------------------------------------------------------->
+<A NAME=interfaces></A><H3>Interfaces</H3>
+
+<!------------------>
+<H4>Architectural Principle</H4>
+
+<P>
+The implementation of types should generally be hidden from the clients of
+the architecture.
+
+
+<!------------------>
+<H4>Framework Expression</H4>
+
+<P>
+With a few exceptions (such as for utility classes),
+clients of the framework work exclusively with the <TT>gate.*</TT> package.
+This
+package is composed almost entirely of interface definitions.
+Instantiations of these interfaces are obtained via a <TT>DataStore</TT>
+class (which models databases of various types) or via the
+<TT>Transients</TT> class (which creates objects unattached to any
+persistent store).
+
+<P>
+<TT>DataStore</TT> and <TT>Transients</TT> are factory classes.
+
+<P>
+The subsidiary packages of GATE provide the implementations of the
+<TT>gate.*</TT> interfaces that are accessed via factories. They
+themselves avoid directly constructing classes from other packages
+(with a few exceptions, such as JAPE's need for unattached annotation
+sets). Instead they use the factories (which may be obtained from existing
+<TT>LanguageResources</TT> via the <TT>getDataStore</TT> method).
+
 
 
 
