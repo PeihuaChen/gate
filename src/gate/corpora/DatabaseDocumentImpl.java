@@ -45,18 +45,6 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   public DatabaseDocumentImpl(Connection conn) {
 
     //super();
-
-    //preconditions
-    if (null == getLRPersistenceId()) {
-      throw new GateRuntimeException("can't construct a DatabaseDocument - not associated " +
-                                    " with any data store");
-    }
-
-    if (false == getLRPersistenceId() instanceof Long) {
-      throw new GateRuntimeException("can't construct a DatabaseDocument -  " +
-                                      " invalid persistence ID");
-    }
-
     contentLock = new Object();
 
     this.namedAnnotSets = new HashMap();
@@ -86,6 +74,17 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   }
 
   private void _readContent() {
+
+    //preconditions
+    if (null == getLRPersistenceId()) {
+      throw new GateRuntimeException("can't construct a DatabaseDocument - not associated " +
+                                    " with any data store");
+    }
+
+    if (false == getLRPersistenceId() instanceof Long) {
+      throw new GateRuntimeException("can't construct a DatabaseDocument -  " +
+                                      " invalid persistence ID");
+    }
 
     Long lrID = (Long)getLRPersistenceId();
     //0. preconditions
@@ -197,6 +196,16 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
     AnnotationSet as = null;
 
+    //preconditions
+    if (null == getLRPersistenceId()) {
+      throw new GateRuntimeException("can't construct a DatabaseDocument - not associated " +
+                                    " with any data store");
+    }
+
+    if (false == getLRPersistenceId() instanceof Long) {
+      throw new GateRuntimeException("can't construct a DatabaseDocument -  " +
+                                      " invalid persistence ID");
+    }
 
     //have we already read this set?
 
