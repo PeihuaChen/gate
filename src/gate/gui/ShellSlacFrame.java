@@ -253,7 +253,7 @@ public class ShellSlacFrame extends MainFrame {
 
   /** Load serialized application from file. */
   private void createDefaultApplication(String url) {
-    ApplicationLoadRun run = new ApplicationLoadRun(url, super);
+    ApplicationLoadRun run = new ApplicationLoadRun(url, this);
     Thread thread = new Thread(run, "");
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
