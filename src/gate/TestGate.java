@@ -179,13 +179,13 @@ public class TestGate {
       if(! allTests){
         suite.addTest(TestWeakValueHashMap.suite());
       }else {
+        suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestWeakValueHashMap.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestAnnotationDiff.suite());
         suite.addTest(TestConfig.suite());
-        suite.addTest(TestBumpyStack.suite());
         suite.addTest(TestAnnotation.suite());
         suite.addTest(TestEmail.suite());
         suite.addTest(TestXml.suite());
