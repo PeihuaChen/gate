@@ -294,8 +294,142 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   }
 
   /** Adopt a resource for persistence. */
-  public abstract LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
-    throws PersistenceException,gate.security.SecurityException;
+  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
+  throws PersistenceException,SecurityException {
+    //open a new transaction
+    return _adopt(lr,secInfo,true);
+  }
+
+
+  protected LanguageResource _adopt(LanguageResource lr,
+                                  SecurityInfo secInfo,
+                                  boolean openNewTrans)
+  throws PersistenceException,SecurityException {
+
+    LanguageResource result = null;
+
+    //-1. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertNotNull(secInfo);
+    if (false == lr instanceof Document &&
+        false == lr instanceof Corpus) {
+      //only documents and corpuses could be serialized in DB
+      throw new IllegalArgumentException("only Documents and Corpuses could "+
+                                          "be serialized in DB");
+    }
+
+    //0. check SecurityInfo
+    if (false == this.ac.isValidSecurityInfo(secInfo)) {
+      throw new SecurityException("Invalid security settings supplied");
+    }
+
+    //1. user session should be set
+    if (null == this.session) {
+      throw new SecurityException("user session not set");
+    }
+
+    //2. check the LR's current DS
+    DataStore currentDS = lr.getDataStore();
+    if(currentDS == null) {
+      // an orphan - do the adoption (later)
+    }
+    else if(currentDS.equals(this)){         // adopted already
+      return lr;
+    }
+    else {                      // someone else's child
+      throw new PersistenceException(
+        "Can't adopt a resource which is already in a different datastore");
+    }
+
+
+    //3. is the LR one of Document or Corpus?
+    if (false == lr instanceof Document &&
+        false == lr instanceof Corpus) {
+
+      throw new IllegalArgumentException("Database datastore is implemented only for "+
+                                        "Documents and Corpora");
+    }
+
+    //4.is the document already stored in this storage?
+    Object persistID = lr.getLRPersistenceId();
+    if (persistID != null) {
+      throw new PersistenceException("This LR is already stored in the " +
+                                      " database (persistance ID is =["+(Long)persistID+"] )");
+    }
+
+    boolean transFailed = false;
+    try {
+      //5 autocommit should be FALSE because of LOBs
+      if (openNewTrans) {
+//        this.jdbcConn.setAutoCommit(false);
+        beginTrans();
+      }
+
+      //6. perform changes, if anything goes wrong, rollback
+      if (lr instanceof Document) {
+        result =  createDocument((Document)lr,secInfo);
+//System.out.println("result ID=["+result.getLRPersistenceId()+"]");
+      }
+      else {
+        //adopt each document from the corpus in a separate transaction context
+        result =  createCorpus((Corpus)lr,secInfo,true);
+      }
+
+      //7. done, commit
+      if (openNewTrans) {
+//        this.jdbcConn.commit();
+        commitTrans();
+      }
+    }
+/*
+    catch(SQLException sqle) {
+      transFailed = true;
+      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
+    }
+*/
+    catch(PersistenceException pe) {
+      transFailed = true;
+      throw(pe);
+    }
+    catch(SecurityException se) {
+      transFailed = true;
+      throw(se);
+    }
+    finally {
+      //problems?
+      if (transFailed) {
+        rollbackTrans();
+/*        try {
+          this.jdbcConn.rollback();
+        }
+        catch(SQLException sqle) {
+          throw new PersistenceException(sqle);
+        }
+*/
+      }
+    }
+
+    //8. let the world know
+    fireResourceAdopted(
+        new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
+                           result,
+                           result.getLRPersistenceId())
+    );
+
+    //9. fire also resource written event because it's now saved
+    fireResourceWritten(
+      new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
+                          result,
+                          result.getLRPersistenceId()
+      )
+    );
+
+    //10. add the resource to the list of dependent resources - i.e. the ones that the
+    //data store should take care upon closing [and call sync()]
+    this.dependentResources.add(result);
+
+    return result;
+  }
 
   /**
    * Get a resource from the persistent store.
@@ -857,5 +991,14 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
     return si;
   }
+
+  protected abstract Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
+    throws PersistenceException,SecurityException;
+
+  protected abstract Document createDocument(Document doc, Long corpusID,SecurityInfo secInfo)
+    throws PersistenceException,SecurityException;
+
+  protected abstract Document createDocument(Document doc,SecurityInfo secInfo)
+    throws PersistenceException,SecurityException;
 
 }
