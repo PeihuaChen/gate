@@ -38,30 +38,48 @@ public abstract class Factory
   /** The CREOLE register */
   private static CreoleRegister reg = Gate.getCreoleRegister();
 
-  /** Create an instance of a resource, and return it. */
+  /** Create an instance of a resource, and return it.
+    * Callers of this method are responsible for
+    * querying the resource's parameter lists, putting together a set that
+    * is complete apart from runtime parameters, and passing a feature map
+    * containing these parameter settings.
+    *
+    * @param resourceClassName the name of the class implementing the resource.
+    * @param parameters the feature map containing parameters for the resource.
+    * @return an instantiated resource.
+    */
   public static Resource createResource(
     String resourceClassName, FeatureMap parameters
   ) throws ResourceInstantiationException
    {
-    // get the resource metadata and default implementation class
+    // get the resource metadata
     ResourceData resData = (ResourceData) reg.get(resourceClassName);
     if(resData == null)
       throw new ResourceInstantiationException(
         "Couldn't get resource data for " + resourceClassName
       );
-    Class resClass = loadResourceClass(resData);
+
+    // get the default implementation class
+    Class resClass = null;
+    try {
+      resClass = resData.getResourceClass();
+    } catch(ClassNotFoundException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get resource class from the resource data: " + e
+      );
+    }
 
     // type-specific stuff for LRs
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln(resClass.getName() + " is an LR");
 
-    //if the DS param is set, find an appropriate data store wrapper and:
-    /* resClass = dataStoreWrapperClass
-       if none available then
-       throw new ResourceInstantiationException(
-         "Unknown wrapper class " + dataStoreWrapperClass
-       );      OR maybe UnknownDataStoreException
-    */
+//if the DS param is set, find an appropriate data store wrapper and:
+/* resClass = dataStoreWrapperClass
+   if none available then
+   throw new ResourceInstantiationException(
+     "Unknown wrapper class " + dataStoreWrapperClass
+   );      OR maybe UnknownDataStoreException
+*/
 
     // type-specific stuff for PRs
     } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
@@ -70,6 +88,11 @@ public abstract class Factory
     // type-specific stuff for VRs
     } else if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln(resClass.getName() + " is a VR");
+
+    // we have a resource which is not an LR, PR or VR
+    } else {
+      Err.prln("WARNING: instantiating resource which is not a PR, LR or VR:");
+      Err.prln(resData + "END OF WARNING" + Strings.getNl());
     }
 
     // create an object using the resource's default constructor
@@ -97,8 +120,9 @@ public abstract class Factory
     }
 
     // if the features of the resource have not been explicitly set,
-    // set them too the features of the resource data
-    res.setFeatures(resData.getFeatures());
+    // set them to the features of the resource data
+    if(res.getFeatures() == null || res.getFeatures().isEmpty())
+      res.setFeatures(resData.getFeatures());
 
     // initialise the resource
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
@@ -107,25 +131,12 @@ public abstract class Factory
     return res;
   } // create(resourceClassName)
 
-
-  /** Get the class for a resource */
-  public static Class loadResourceClass(ResourceData resData)
-  throws ResourceInstantiationException
-  {
-    Class resClass = null;
-    try {
-      resClass = resData.getResourceClass();
-    } catch(ClassNotFoundException e) {
-      throw new ResourceInstantiationException(
-        "Couldn't get resource class from the resource data" + e
-      );
-    }
-    return resClass;
-  } // loadResourceClass
-
-  /** For each paramter set the appropriate property on the resource
+  /** For each paramter, set the appropriate property on the resource
     * using bean-style reflection.
+    *
     * @see java.beans.Introspector
+    * @param resource the resource to be parameterised.
+    * @param parameters the parameters and their values.
     */
   protected static void setResourceParameters(
     Resource resource, FeatureMap parameters
@@ -155,7 +166,7 @@ public abstract class Factory
         if(setMethod == null) continue;
 
         // get the parameter value for this property, or continue
-        Object paramValue = parameters.get(prop.getDisplayName());
+        Object paramValue = parameters.get(prop.getName());
         if(paramValue == null) continue;
 
         // call the set method with the parameter value
