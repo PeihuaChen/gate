@@ -14,7 +14,7 @@
  *
  */
  
-    --init the DB GUID
+    --init the DB parameters
      insert into t_parameter(par_id,
                                                   par_key,
                                                   par_value_string)
@@ -22,6 +22,13 @@
                     'DB_GUID',
                     rawtohex(sys_guid()));
 
+    insert into t_parameter(par_id,
+                                                  par_key,
+                                                  par_value_date)
+     values (2,
+                    'DB_CREATION_TIME',
+                    sysdate);
+                    
      -- init the LR_TYPE table
      
      insert into t_lr_type(lrtp_id,lrtp_type)
