@@ -2,7 +2,7 @@ package gate.creole.morph;
 
 import java.lang.reflect.Method;
 import java.util.regex.*;
-import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 
 /**
  * <p>Title: Interpret.java </p>
@@ -46,11 +46,11 @@ public class Interpret {
    * It starts the actual program
    * @param fileName
    */
-  public void init(String fileName) throws ExecutionException {
+  public void init(String ruleFileName) throws ResourceInstantiationException {
     variables = new Storage();
     prepareListOfMorphMethods();
     rules = new CompiledRules();
-    file = new ReadFile(fileName);
+    file = new ReadFile(ruleFileName);
     affix = null;
     isDefineRulesSession = false;
     isDefineVarSession = false;
@@ -218,14 +218,14 @@ public class Interpret {
    * class
    */
   private void prepareListOfMorphMethods()
-      throws ExecutionException  {
+      throws ResourceInstantiationException  {
     methods = MorphFunctions.class.getDeclaredMethods();
   }
 
   /**
    * read the program file
    */
-  private void readProgram() throws ExecutionException {
+  private void readProgram() throws ResourceInstantiationException {
     // read the program file
     boolean readStatus = file.read();
 
@@ -240,7 +240,7 @@ public class Interpret {
   /**
    * This method reads each line of the program and interpret them
    */
-  private void interpretProgram() throws ExecutionException  {
+  private void interpretProgram() throws ResourceInstantiationException  {
     // read each line and parse it
     while (file.hasNext()) {
       String currentLine = file.getNext();
@@ -324,7 +324,7 @@ public class Interpret {
   /**
    * This method processes the command to define the variable section
    */
-  private void defineVarsCommand()  throws ExecutionException {
+  private void defineVarsCommand()  throws ResourceInstantiationException {
 
     // variable section can only be defined once
     if (isDefineVarSession) {
@@ -343,7 +343,7 @@ public class Interpret {
   /**
    * This method processes the command to define the rule section
    */
-  private void defineRulesCommand() throws ExecutionException  {
+  private void defineRulesCommand() throws ResourceInstantiationException  {
     if (isDefineRulesSession) {
       generateError("Rule Section already defined - see " +
                     "line " + file.getPointer());
@@ -359,7 +359,7 @@ public class Interpret {
    * @param line
    */
   private void variableDeclarationCommand(String line)
-      throws ExecutionException  {
+      throws ResourceInstantiationException  {
     // ok so first find the variable name and the value for it
     String varName = (line.split("==>"))[0].trim();
     String varValue = (line.split("==>"))[1].trim();
@@ -405,7 +405,7 @@ public class Interpret {
    * @param line
    */
   private void ruleDeclarationCommand(String line)
-      throws ExecutionException  {
+      throws ResourceInstantiationException  {
     // lets divide the rule into two parts
     // LHS and RHS.
     // LHS is a part which requires to be parsed and
@@ -545,10 +545,10 @@ public class Interpret {
    * @param mess - message to be displayed as an error on the standard output
    */
   private void generateError(String mess)
-      throws ExecutionException {
+      throws ResourceInstantiationException {
     System.out.println("\n\n" + mess);
     System.out.println("Program terminated...");
-    throw new ExecutionException("\n\n"+mess);
+    throw new ResourceInstantiationException("\n\n"+mess);
   }
 
   /**
@@ -556,7 +556,7 @@ public class Interpret {
    * @param args
    */
   public static void main(String[] args)
-      throws ExecutionException {
+      throws ResourceInstantiationException {
     if (args == null || args.length < 2) {
       System.out.println("Usage : Compiler <Rules fileName> <word>");
       System.exit( -1);
