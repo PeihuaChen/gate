@@ -102,7 +102,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
    */
   protected boolean useSuffixForDumpFiles = true;
 
-  protected java.net.URL outputFileUrl;
+  protected java.net.URL outputDirectoryUrl;
 
   private static final String DUMPING_PR_SET = "DumpingPRTempSet";
 
@@ -127,7 +127,6 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   /** Run the resource. */
   public void execute() throws ExecutionException {
-
     if(document == null)
       throw new GateRuntimeException("No document to process!");
 
@@ -187,16 +186,17 @@ public class DumpingPR extends AbstractLanguageAnalyser
   } // execute()
 
   protected void write2File(AnnotationSet exportSet) {
-    File outputFile;
+      File outputFile;
 
-//      String source = (String) document.getParameterValue("sourceURL");
-//      URL sourceURL = new URL(source);
-      URL sourceURL = document.getSourceUrl();
-      StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
+      String fileName = getFileName(document.getSourceUrl());
+      fileName = getNewFileName(outputDirectoryUrl, fileName);
+      StringBuffer tempBuff = new StringBuffer(fileName);
       //now append the special suffix if we want to use it
       if (useSuffixForDumpFiles)
         tempBuff.append(this.suffixForDumpFiles);
+
       String outputPath = tempBuff.toString();
+
       if (DEBUG)
         Out.prln(outputPath);
       outputFile = new File(outputPath);
@@ -231,10 +231,11 @@ public class DumpingPR extends AbstractLanguageAnalyser
   }//write2File
 
   protected void write2File() {
-    File outputFile;
+      File outputFile;
 
-      URL sourceURL = document.getSourceUrl();
-      StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
+      String fileName = getFileName(document.getSourceUrl());
+      fileName = getNewFileName(outputDirectoryUrl, fileName);
+      StringBuffer tempBuff = new StringBuffer(fileName);
       //now append the special suffix if we want to use it
       if (useSuffixForDumpFiles)
         tempBuff.append(this.suffixForDumpFiles);
@@ -273,6 +274,32 @@ public class DumpingPR extends AbstractLanguageAnalyser
   }//write2File
 
 
+  protected String getFileName(URL url) {
+    String fileName = url.getFile();
+    int index = fileName.lastIndexOf("/");
+    if(index == -1) index = fileName.lastIndexOf("\\");
+    if(index == -1)
+      return fileName;
+    else {
+      if(index + 1 == fileName.length()) {
+        fileName = fileName.substring(0, fileName.length()-1);
+        index = fileName.lastIndexOf("/");
+        if(index == -1) index = fileName.lastIndexOf("\\");
+        if(index == -1) return fileName;
+      }
+      fileName = fileName.substring(index+1, fileName.length());
+    }
+    return fileName;
+  }
+
+  protected String getNewFileName(URL dir, String file) {
+    String newFile = dir.getFile();
+    if(newFile.endsWith("\\") || newFile.endsWith("/"))
+      return newFile+file;
+    else
+      return newFile+"/"+file;
+  }
+
   protected AnnotationSet renameAnnotations(AnnotationSet annots2Export,
                                    HashMap renameMap){
     Iterator iter = annots2Export.iterator();
@@ -306,7 +333,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   /** set the annotation set name*/
   public void setAnnotationSetName(String newAnnotationSetName) {
-    annotationSetName = newAnnotationSetName;
+    this.annotationSetName = newAnnotationSetName;
   }//setAnnotationSetName
 
   public List getAnnotationTypes() {
@@ -314,7 +341,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
   }
 
   public void setAnnotationTypes(List newTypes) {
-    annotationTypes = newTypes;
+    this.annotationTypes = newTypes;
   }
 
   public List getDumpTypes() {
@@ -325,12 +352,12 @@ public class DumpingPR extends AbstractLanguageAnalyser
     dumpTypes = newTypes;
   }
 
-  public URL getOutputFileUrl() {
-    return this.outputFileUrl;
+  public URL getOutputDirectoryUrl() {
+    return this.outputDirectoryUrl;
   }
 
-  public void setOutputFileUrl(URL file) {
-    outputFileUrl = file;
+  public void setOutputDirectoryUrl(URL file) {
+    this.outputDirectoryUrl = file;
   }
 
   public void setIncludeFeatures(Boolean inclFeatures) {
