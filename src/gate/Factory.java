@@ -376,30 +376,33 @@ public abstract class Factory {
           continue;
 
         // get the parameter value for this property, or continue
+
+        //check whether the parameter has been sent to us
+        if(!parameterValues.keySet().contains(prop.getName())) continue;
+
         Object paramValue = parameterValues.get(prop.getName());
-        if(paramValue == null)  {
-          continue;
-        }
         String paramName = prop.getName();
 
         // convert the parameter to the right type eg String -> URL
-        Class propertyType = prop.getPropertyType();
-        Class paramType = paramValue.getClass();
-        try {
-          if(!propertyType.isAssignableFrom(paramType)) {
-            if(DEBUG) Out.pr("Converting " + paramValue.getClass());
-            paramValue =
-              propertyType.getConstructor(
-                new Class[]{paramType}
-              ).newInstance( new Object[]{paramValue} );
-            if(DEBUG) Out.prln(" to " + paramValue.getClass());
+        if(paramValue != null){
+          Class propertyType = prop.getPropertyType();
+          Class paramType = paramValue.getClass();
+          try {
+            if(!propertyType.isAssignableFrom(paramType)) {
+              if(DEBUG) Out.pr("Converting " + paramValue.getClass());
+              paramValue =
+                propertyType.getConstructor(
+                  new Class[]{paramType}
+                ).newInstance( new Object[]{paramValue} );
+              if(DEBUG) Out.prln(" to " + paramValue.getClass());
+            }
+          } catch(Exception e) {
+            throw new ResourceInstantiationException(
+              "Error converting " + paramValue.getClass() +
+              " to " + paramValue.getClass() + ": " + e.toString()
+            );
           }
-        } catch(Exception e) {
-          throw new ResourceInstantiationException(
-            "Error converting " + paramValue.getClass() +
-            " to " + paramValue.getClass() + ": " + e.toString()
-          );
-        }
+        }//if(paramValue != null)
 
         // call the set method with the parameter value
         Object[] args = new Object[1];

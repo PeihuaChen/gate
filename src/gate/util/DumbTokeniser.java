@@ -53,7 +53,8 @@ public class DumbTokeniser extends AbstractProcessingResource{
     this.annotationSet = annotationSet;
     if(runInNewThread){
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 this);
+                                 this,
+                                 "DumbTokeniser1");
       thread.start();
     } else run();
   }

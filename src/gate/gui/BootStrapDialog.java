@@ -112,7 +112,8 @@ public class BootStrapDialog extends JDialog{
     resourceInterfaces = this.getSelectedInterfaces();
 
     Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                               new CreateResourceRunner());
+                               new CreateResourceRunner(),
+                               "BootstrapDialog1");
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
   }//doCreateResource();

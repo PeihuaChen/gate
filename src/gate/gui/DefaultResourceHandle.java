@@ -422,7 +422,8 @@ public class DefaultResourceHandle implements ResourceHandle {
         }//public void run()
       };
       Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable);
+                                 runnable,
+                                 "DefaultResourceHandle1");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }//public void actionPerformed(ActionEvent e)
