@@ -133,10 +133,8 @@ create or replace package body security is
     has_documents boolean;
   begin
        -- check for documents
-       -- if the group ownes documents then fail
-       can_delete_group(p_grp_id,has_documents);
-       
-       if (has_documents = true) then
+       -- if the group ownes documents then fail                     
+       if (can_delete_group(p_grp_id) = false) then
           raise error.x_group_owns_resources;
        end if;
   
@@ -188,10 +186,8 @@ create or replace package body security is
      has_documents boolean;
   begin
        -- check for documents
-       -- if the user owns documents then fail
-       can_delete_group(p_usr_id,has_documents);
-       
-       if (has_documents = true) then
+       -- if the user owns documents then fail              
+       if (can_delete_group(p_usr_id) = false) then
           raise error.x_user_owns_resources;
        end if;
   
@@ -384,8 +380,8 @@ create or replace package body security is
   
   
   /*******************************************************************************************/
-  procedure can_delete_group(p_grp_id     IN  number,
-                             p_result     OUT boolean)
+  function can_delete_group(p_grp_id     IN  number)
+     return boolean
   is
     cnt number;  
   begin
@@ -396,13 +392,13 @@ create or replace package body security is
      from   t_lang_resource
      where  lr_owner_group_id = p_grp_id;
   
-     p_result:= (cnt = 0);
+     return (cnt = 0);
           
   end;                                                                                                        
 
   /*******************************************************************************************/
-  procedure can_delete_user(p_usr_id     IN  number,
-                             p_result     OUT boolean)
+  function can_delete_user(p_usr_id     IN  number)
+     return boolean
   is
     cnt number;  
   begin
@@ -413,7 +409,7 @@ create or replace package body security is
      from   t_lang_resource
      where  lr_owner_user_id = p_usr_id;
   
-     p_result:= (cnt = 0);
+     return (cnt = 0);
           
   end;                                                                                                        
   
