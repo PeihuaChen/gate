@@ -50,6 +50,7 @@ public class TestNamematch extends TestCase
     Set annotationTypes = new HashSet();
     annotationTypes.add("Organization");
     annotationTypes.add("Person");
+    annotationTypes.add("Location");
 
     //create a namematcher
     FeatureMap params = Factory.newFeatureMap();
@@ -134,8 +135,8 @@ public class TestNamematch extends TestCase
     namematch.run();
     namematch.check();
 
-    // the vector with all the matches from the document
-    Vector matches = namematch.getMatchesDocument();
+    // the set with all the matches from the document
+    List matches = namematch.getMatchesDocument();
     if (matches != null)
       assert(matches.toString().equals("[[9, 7], [8, 6], [5, 3, 0], [4, 2]]"));
 
@@ -157,9 +158,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("3")||value.equals("5"));
         } // for
       } // if
@@ -178,9 +179,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("4"));
         }// for
       } // if
@@ -199,9 +200,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("0")||value.equals("5"));
         } // for
       } // if
@@ -220,9 +221,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("2"));
         } // for
       } // if
@@ -241,9 +242,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("0")||value.equals("3"));
         } // for
       } // if
@@ -262,9 +263,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("8"));
         } // for
       }// if
@@ -283,9 +284,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("9"));
         } // for
       }// if
@@ -304,9 +305,9 @@ public class TestNamematch extends TestCase
     while (i.hasNext()) {
       String type = (String) i.next();
       if (type == "matches") {
-        Vector vector = (Vector)fm1.get(type);
-        for (int j=0; j< vector.size(); j++) {
-          String value = (String)vector.get(j);
+        List list = (List)fm1.get(type);
+        for (int j=0; j< list.size(); j++) {
+          String value = (String)list.get(j);
           assert(value.equals("7"));
         } // for
       }// if
