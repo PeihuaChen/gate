@@ -34,9 +34,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
    */
   protected EventsHandler eventHandler;
 
-  protected HashMap addedAnnotationsList = new HashMap();
-  protected HashMap removedAnnotationsList = new HashMap();
-  protected HashMap updatedAnnotationsList = new HashMap();
+  protected HashSet addedAnnotations = new HashSet();
+  protected HashSet removedAnnotations = new HashSet();
+  protected HashSet updatedAnnotations = new HashSet();
 
   /** Construction from Document. */
   public DatabaseAnnotationSetImpl(Document doc) {
