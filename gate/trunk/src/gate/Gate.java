@@ -438,21 +438,14 @@ jar/classpath so it's the same as registerBuiltins
    * Checks whether a particular class is a Gate defined type
    */
   public static boolean isGateType(String classname){
-    boolean res =  getCreoleRegister().containsKey(classname) ||
-                   classname.equals("gate.Resource")||
-                   classname.equals("gate.LanguageResource")||
-                   classname.equals("gate.ProcessingResource")||
-                   classname.equals("gate.VisualResource")||
-                   classname.equals("gate.Controller")||
-                   classname.equals("gate.Document")||
-                   classname.equals("gate.Corpus")||
-                   classname.equals("gate.DataStore");
+    boolean res = getCreoleRegister().containsKey(classname);
     if(!res){
       try{
         Class aClass = Class.forName(classname);
         res = Resource.class.isAssignableFrom(aClass) ||
-              Controller.class.isAssignableFrom(aClass);
-      }catch(ClassNotFoundException cfe){}
+              Controller.class.isAssignableFrom(aClass) ||
+              DataStore.class.isAssignableFrom(aClass);
+      }catch(ClassNotFoundException cnfe){}
     }
     return res;
   }
