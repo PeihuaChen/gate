@@ -25,9 +25,9 @@
     <path>[lib/jdbc7.2dev-1.2.jar]</path>
     <path>[lib/jena.jar]</path>
     <path>[lib/protege.jar]</path>
-    <path>[lib/lucene-1.2-rc4.jar]</path>
     <path>[lib/servlet-2_3.zip]</path>
     <path>[lib/jakarta-regexp-1.2.jar]</path>
+    <path>[lib/lucene-1.2-rc5.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
