@@ -12,11 +12,13 @@ import java.util.jar.*;
 import java.lang.*;
 import java.io.*;
 
+import java.util.zip.*;
 /** This class is used to merge a set of Jar/Zip Files in a Jar File
   * It is ignored the manifest.
   */
 public class JarFiles {
 
+  private final static int BUFF_SIZE = 65000;
   /** This method takes the content of all jar/zip files from the set
     * jarFileNames and put them in a file with the name outputFileName.
     * If the jar entry is manifest then this information isn't added.
@@ -29,7 +31,6 @@ public class JarFiles {
 
     FileOutputStream outStream = null;
     JarOutputStream  outJar = null;
-    int BUFF_SIZE = 6500;
     byte buffer[] = new byte[BUFF_SIZE];
     // open the JarOutputStream file
     try{
@@ -52,7 +53,6 @@ public class JarFiles {
         Enumeration jarFileEntriesEnum = jarFile.entries();
 
         JarEntry currentJarEntry = null;
-        InputStream currentEntryStream = null;;
         while (jarFileEntriesEnum.hasMoreElements()){
           currentJarEntry = (JarEntry) jarFileEntriesEnum.nextElement();
           // if current entry is manifest then it is skipped
@@ -61,26 +61,28 @@ public class JarFiles {
             continue;
           // current entry is added to the final jar file
           try{
-            //outJar.putNextEntry(new JarEntry(currentJarEntry.getName()));
-            outJar.putNextEntry(currentJarEntry);
+            outJar.putNextEntry(new JarEntry(currentJarEntry.getName()));
           }catch(java.util.zip.ZipException ze){
 
             if(!currentJarEntry.isDirectory())
-              throw new GateException("Error: duplicate file entry \"" +
-                                 currentJarEntry.getName() + "\"!");
+              throw new GateException("Warning: duplicate file entry " +
+                                 currentJarEntry.getName() + " !");
           }
           //the binary data from jar files is added
           // get an input stream
+          InputStream currentEntryStream = null;
           currentEntryStream = jarFile.getInputStream(currentJarEntry);
           // write data to outJar
           int  bytesRead = 0;
           while((bytesRead = currentEntryStream.read(buffer,0,BUFF_SIZE)) != -1)
             outJar.write(buffer,0,bytesRead);
+
+          outJar.flush();
+          // close input stream
+          currentEntryStream.close();
           //close the new added entry
           // prepare to write another one
           outJar.closeEntry();
-          // close input stream
-          currentEntryStream.close();
         }//while(jarFileEntriesEnum.hasMoreElements())
         jarFile.close();
       }catch(IOException ioe){
@@ -89,6 +91,8 @@ public class JarFiles {
     }//while(jarFileNamesIterator.hasNext())
     //close the JarOutputStream outJar
     try{
+
+      outJar.flush();
       outJar.close();
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
@@ -103,15 +107,15 @@ public class JarFiles {
 
   public static void main(String[] args){
     if(args.length < 2){
-    System.err.println("No input files");
+    System.err.println("USAGE : JarFiles arg0 arg1 ... argN (must be at list 2 args)");
     System.exit(1);
     }
     else
     {
       JarFiles jarFiles = new JarFiles();
       Set filesToMerge = new HashSet();
-      for (int i=2;i<=args.length;i++){
-        filesToMerge.add(args[i-1]);
+      for (int i=1; i<args.length; i++){
+        filesToMerge.add(args[i]);
     }
     try{
       jarFiles.merge(filesToMerge, args[0]);
