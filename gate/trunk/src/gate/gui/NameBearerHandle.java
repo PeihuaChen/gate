@@ -167,6 +167,7 @@ public class NameBearerHandle implements Handle,
         popup.addSeparator();
         corpusFiller = new CorpusFillerComponent();
         popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+//        popup.addSeparator();
 //        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
       }
     }//if(resource instanceof LanguageResource)
@@ -444,10 +445,8 @@ public class NameBearerHandle implements Handle,
           URL sourceURL = currentDoc.getSourceUrl();
           String fileName = sourceURL == null ? currentDoc.getName() :
                                                 sourceURL.getFile();
-Out.prln("File name " + sourceURL.getFile());
-Out.prln("Path name " + sourceURL.getPath());
+          fileName = Files.getLastPathComponent(fileName);
           File docFile = new File(dir, fileName);
-Out.prln("Temporary file name " + docFile.toString());
           boolean nameOK = false;
           do{
             if(docFile.exists()){
@@ -509,13 +508,14 @@ Out.prln("Temporary file name " + docFile.toString());
           String className = target.getClass().getName();
           Gate.getClassLoader().reloadClass(className);
           fireStatusChanged("Class " + className + " reloaded!");
-        }catch(ClassNotFoundException cnfe){
+        }catch(Exception ex){
           JOptionPane.showMessageDialog(largeView != null ?
                                         largeView : smallView,
-                                        "Error: \n" + cnfe.toString() +
+                                        "Look what you've done: \n" +
+                                        ex.toString() +
                                         "\nI told you not to do it...",
                                         "Gate", JOptionPane.ERROR_MESSAGE);
-          cnfe.printStackTrace(Err.getPrintWriter());
+          ex.printStackTrace(Err.getPrintWriter());
         }
       }
     }
