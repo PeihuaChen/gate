@@ -22,6 +22,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.util.*;
 import java.io.*;
+import java.net.*;
 
 public class WordNetViewer extends AbstractVisualResource
                            implements ActionListener{
@@ -43,8 +44,8 @@ public class WordNetViewer extends AbstractVisualResource
   protected JPopupMenu adjectivePopup;
   protected JPopupMenu adverbPopup;
 
-  private static final String propertiesFile = "D:/Gate/temp/file_properties.xml";
-  private IndexFileWordNetImpl wnMain = null;
+  private static final String propertiesFile = "file://D:/Gate/temp/file_properties.xml";
+  private WordNet wnMain = null;
 
   private boolean senatnceFrames = false;
   public final static int SENTANCE_FAMES = 33001;
@@ -58,7 +59,7 @@ public class WordNetViewer extends AbstractVisualResource
     try {
       Gate.init();
       wnMain = new IndexFileWordNetImpl();
-      wnMain.setPropertyFile(new File(propertiesFile));
+      wnMain.setPropertyUrl(new URL(propertiesFile));
       wnMain.init();
     } catch (Exception e){
       e.printStackTrace();
@@ -613,6 +614,21 @@ public class WordNetViewer extends AbstractVisualResource
         break;
     }
     return result;
+  }
+
+  /**
+   * Called by the GUI when this viewer/editor has to initialise itself for a
+   * specific object.
+   * @param target the object (be it a {@link gate.Resource},
+   * {@link gate.DataStore} or whatever) this viewer has to display
+   */
+  public void setTarget(Object target){
+
+    if (false == target instanceof WordNet) {
+      throw new IllegalArgumentException();
+    }
+
+    this.wnMain = (WordNet)target;
   }
 
   private class RelationItem extends JMenuItem{
