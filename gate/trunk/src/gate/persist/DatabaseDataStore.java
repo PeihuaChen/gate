@@ -40,4 +40,8 @@ public interface DatabaseDataStore extends DataStore {
   public void deleteSince(Long timestamp)
     throws PersistenceException;
 
+  /** --- */
+  public void setDriver(String driverName)
+    throws PersistenceException;
+
 }
