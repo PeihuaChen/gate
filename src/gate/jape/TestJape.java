@@ -291,6 +291,13 @@ public class TestJape extends TestCase
   public void testRhsErrorMessages2() {
     boolean gotException = false;
 
+    // disable System.out so that the compiler can't splash its error on screen
+    if(DEBUG) System.out.println("hello 1");
+    PrintStream sysout = System.out;
+    System.setOut(new PrintStream(new ByteArrayOutputStream()));
+    if(DEBUG) System.out.println("hello 2");
+
+    // run a JAPE batch on the faulty grammar
     try {
       if(DEBUG) {
         Out.print(
@@ -302,6 +309,11 @@ public class TestJape extends TestCase
     } catch(Exception e) {
       if(DEBUG) Out.prln(e);
       gotException = true;
+    } finally {
+
+      // re-enable System.out
+      System.setOut(sysout);
+      if(DEBUG) System.out.println("hello 3");
     }
 
     assertTrue("Bad JAPE grammar (2) didn't throw an exception", gotException);
