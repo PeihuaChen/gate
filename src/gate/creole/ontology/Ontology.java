@@ -142,6 +142,20 @@ public interface Ontology extends LanguageResource{
     */
   public int getTaxonomicDistance(OClass class1,OClass class2);
 
+  /** Check for subclass relation with transitive closure
+   * @param cls1 the first class
+   * @param cls2 the second class
+   */
+  public boolean isSubClassOf(String cls1, String cls2)
+      throws gate.creole.ontology.NoSuchClosureTypeException;
+
+  /** Check for subclass relation with direct closure
+   * @param cls1 the first class
+   * @param cls2 the second class
+  */
+  public boolean isDirectSubClassOf(String cls1, String cls2)
+      throws gate.creole.ontology.NoSuchClosureTypeException;
+
   /**
    * Checks the equality of two ontologies.
    * @param o the other ontology
