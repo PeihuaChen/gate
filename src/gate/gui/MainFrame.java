@@ -49,77 +49,61 @@ import gate.util.*;
 public class MainFrame extends JFrame
                     implements ProgressListener, StatusListener, CreoleListener{
 
-  JMenuBar menuBar;
-  JSplitPane mainSplit;
-  JSplitPane leftSplit;
-  JLabel statusBar;
-  JProgressBar progressBar;
-  XJTabbedPane mainTabbedPane;
-  JScrollPane projectTreeScroll;
-  JScrollPane lowerScroll;
+  protected JMenuBar menuBar;
+  protected JSplitPane mainSplit;
+  protected JSplitPane leftSplit;
+  protected JLabel statusBar;
+  protected JProgressBar progressBar;
+  protected XJTabbedPane mainTabbedPane;
+  protected JScrollPane projectTreeScroll;
+  protected JScrollPane lowerScroll;
 
-  JPopupMenu appsPopup;
-  JPopupMenu dssPopup;
-  JPopupMenu lrsPopup;
-  JPopupMenu prsPopup;
+  /**
+   * Popup used for right click actions on the Applications node.
+   */
+  protected JPopupMenu appsPopup;
+  /**
+   * Popup used for right click actions on the Datastores node.
+   */
+  protected JPopupMenu dssPopup;
+  
+  /**
+   * Popup used for right click actions on the LRs node.
+   */
+  protected JPopupMenu lrsPopup;
+  
+  /**
+   * Popup used for right click actions on the PRs node.
+   */
+  protected JPopupMenu prsPopup;
 
-  /** used in popups */
-  JMenu newLrsPopupMenu;
-  JMenu newPrsPopupMenu;
-  JMenu newAppPopupMenu;
-
-  /** used in menu bar */
-  JMenu newLrMenu;
-  JMenu newPrMenu;
-  JMenu newAppMenu;
-  JMenu loadANNIEMenu = null;
-  JButton stopBtnx;
-  Action stopActionx;
-
-  JTree resourcesTree;
-  JScrollPane resourcesTreeScroll;
-  DefaultTreeModel resourcesTreeModel;
-  DefaultMutableTreeNode resourcesTreeRoot;
-  DefaultMutableTreeNode applicationsRoot;
-  DefaultMutableTreeNode languageResourcesRoot;
-  DefaultMutableTreeNode processingResourcesRoot;
-  DefaultMutableTreeNode datastoresRoot;
+  protected JCheckBoxMenuItem verboseModeItem;
+  
+  protected JTree resourcesTree;
+  protected JScrollPane resourcesTreeScroll;
+  protected DefaultTreeModel resourcesTreeModel;
+  protected DefaultMutableTreeNode resourcesTreeRoot;
+  protected DefaultMutableTreeNode applicationsRoot;
+  protected DefaultMutableTreeNode languageResourcesRoot;
+  protected DefaultMutableTreeNode processingResourcesRoot;
+  protected DefaultMutableTreeNode datastoresRoot;
 
 
 
 
-  Splash splash;
+  protected Splash splash;
   protected PluginManagerUI pluginManager;
-  LogArea logArea;
-  JScrollPane logScroll;
-  JToolBar toolbar;
+  protected LogArea logArea;
+  protected JScrollPane logScroll;
+  protected JToolBar toolbar;
   static JFileChooser fileChooser;
 
-  AppearanceDialog appearanceDialog;
-  OptionsDialog optionsDialog;
-  CartoonMinder animator;
-  TabHighlighter logHighlighter;
-  NewResourceDialog newResourceDialog;
-  WaitDialog waitDialog;
-
-  NewDSAction newDSAction;
-  OpenDSAction openDSAction;
-  HelpAboutAction helpAboutAction;
-  NewAnnotDiffAction newAnnotDiffAction = null;
-  NewCorpusAnnotDiffAction newCorpusAnnotDiffAction = null;
-  NewBootStrapAction newBootStrapAction = null;
-  NewCorpusEvalAction newCorpusEvalAction = null;
-  GenerateStoredCorpusEvalAction generateStoredCorpusEvalAction = null;
-  StoredMarkedCorpusEvalAction storedMarkedCorpusEvalAction = null;
-  CleanMarkedCorpusEvalAction cleanMarkedCorpusEvalAction = null;
-  VerboseModeCorpusEvalToolAction verboseModeCorpusEvalToolAction = null;
-//  DatastoreModeCorpusEvalToolAction datastoreModeCorpusEvalToolAction = null;
-
-  /**ontology editor action
-   * ontotext.bp*/
-  NewOntologyEditorAction newOntologyEditorAction = null;
-
-  NewGazetteerEditorAction  newGazetteerEditorAction = null;
+  protected AppearanceDialog appearanceDialog;
+  protected OptionsDialog optionsDialog;
+  protected CartoonMinder animator;
+  protected TabHighlighter logHighlighter;
+  protected NewResourceDialog newResourceDialog;
+  protected WaitDialog waitDialog;
 
 
   /**
@@ -129,7 +113,7 @@ public class MainFrame extends JFrame
    * Access to this data is avaialable through the {@link #getIcon(String)}
    * method.
    */
-  static Map iconByName = new HashMap();
+  protected static Map iconByName = new HashMap();
 
   /**
    * A Map which holds listeners that are singletons (e.g. the status listener
@@ -269,29 +253,9 @@ public class MainFrame extends JFrame
     resourcesTreeRoot.add(datastoresRoot);
 
     resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot, true);
-
-    newDSAction = new NewDSAction();
-    openDSAction = new OpenDSAction();
-    helpAboutAction = new HelpAboutAction();
-    newAnnotDiffAction = new NewAnnotDiffAction();
-//    newCorpusAnnotDiffAction = new NewCorpusAnnotDiffAction();
-    newBootStrapAction = new NewBootStrapAction();
-    newCorpusEvalAction = new NewCorpusEvalAction();
-    storedMarkedCorpusEvalAction = new StoredMarkedCorpusEvalAction();
-    generateStoredCorpusEvalAction = new GenerateStoredCorpusEvalAction();
-    cleanMarkedCorpusEvalAction = new CleanMarkedCorpusEvalAction();
-    verboseModeCorpusEvalToolAction = new VerboseModeCorpusEvalToolAction();
-//    datastoreModeCorpusEvalToolAction = new DatastoreModeCorpusEvalToolAction();
-
-    /*ontology editor action initialization
-    ontotext.bp*/
-    newOntologyEditorAction = new NewOntologyEditorAction();
-
-    newGazetteerEditorAction = new NewGazetteerEditorAction();
-
   }
 
-  protected void initGuiComponents(boolean isShellSlacGIU){
+  protected void initGuiComponents(boolean isShellSlacGUI){
     this.getContentPane().setLayout(new BorderLayout());
 
     Integer width =Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH);
@@ -414,13 +378,6 @@ public class MainFrame extends JFrame
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     progressBar.setVisible(false);
 
-    //TOOLBAR
-    toolbar = new JToolBar(JToolBar.HORIZONTAL);
-    toolbar.setFloatable(false);
-    //toolbar.add(new JGateButton(newProjectAction));
-
-
-    this.getContentPane().add(toolbar, BorderLayout.NORTH);
 
     //extra stuff
     newResourceDialog = new NewResourceDialog(
@@ -501,24 +458,38 @@ public class MainFrame extends JFrame
 
     JMenu fileMenu = new XJMenu("File");
 
-    newLrMenu = new XJMenu("New language resource");
-    fileMenu.add(newLrMenu);
-    newPrMenu = new XJMenu("New processing resource");
-    fileMenu.add(newPrMenu);
+    LiveMenu newAPPMenu = new LiveMenu(LiveMenu.APP);
+    newAPPMenu.setText("New application");
+    newAPPMenu.setIcon(getIcon("applications.gif"));
+    fileMenu.add(newAPPMenu);
+    
+    LiveMenu newLRMenu = new LiveMenu(LiveMenu.LR);
+    newLRMenu.setText("New language resource");
+    newLRMenu.setIcon(getIcon("lrs.gif"));
+    fileMenu.add(newLRMenu);
+    
+    LiveMenu newPRMenu = new LiveMenu(LiveMenu.PR);
+    newPRMenu.setText("New processing resource");
+    newPRMenu.setIcon(getIcon("prs.gif"));
+    fileMenu.add(newPRMenu);
 
-    newAppMenu = new JMenu("New application");
-    fileMenu.add(newAppMenu);
-
+    JMenu dsMenu = new JMenu("Datastores");
+    dsMenu.setIcon(getIcon("dss.gif"));
+    dsMenu.add(new XJMenuItem(new NewDSAction(), this));
+    dsMenu.add(new XJMenuItem(new OpenDSAction(), this));
+    fileMenu.add(dsMenu);
+    
     fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
-
+    
     fileMenu.addSeparator();
-    fileMenu.add(new XJMenuItem(newDSAction, this));
-    fileMenu.add(new XJMenuItem(openDSAction, this));
-    fileMenu.addSeparator();
-    loadANNIEMenu = new JMenu("Load ANNIE system");
+    JMenu loadANNIEMenu = new JMenu("Load ANNIE system");
+    loadANNIEMenu.setIcon(getIcon("application.gif"));
+    loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
+    loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
     fileMenu.add(loadANNIEMenu);
-    fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
+    
+//    fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
     
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
     fileMenu.addSeparator();
@@ -592,22 +563,23 @@ public class MainFrame extends JFrame
     menuBar.add(optionsMenu);
 
     JMenu toolsMenu = new XJMenu("Tools");
-    toolsMenu.add(newAnnotDiffAction);
+    toolsMenu.add(new NewAnnotDiffAction());
 //    toolsMenu.add(newCorpusAnnotDiffAction);
-    toolsMenu.add(newBootStrapAction);
+    toolsMenu.add(new NewBootStrapAction());
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
     JMenu corpusEvalMenu = new JMenu("Corpus Benchmark Tools");
+    corpusEvalMenu.setIcon(getIcon("annDiff.gif"));
     toolsMenu.add(corpusEvalMenu);
-    corpusEvalMenu.add(newCorpusEvalAction);
+    corpusEvalMenu.add(new NewCorpusEvalAction());
     corpusEvalMenu.addSeparator();
-    corpusEvalMenu.add(generateStoredCorpusEvalAction);
+    corpusEvalMenu.add(new GenerateStoredCorpusEvalAction());
     corpusEvalMenu.addSeparator();
-    corpusEvalMenu.add(storedMarkedCorpusEvalAction);
-    corpusEvalMenu.add(cleanMarkedCorpusEvalAction);
+    corpusEvalMenu.add(new StoredMarkedCorpusEvalAction());
+    corpusEvalMenu.add(new CleanMarkedCorpusEvalAction());
     corpusEvalMenu.addSeparator();
-    JCheckBoxMenuItem verboseModeItem =
-      new JCheckBoxMenuItem(verboseModeCorpusEvalToolAction);
+    verboseModeItem =
+      new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
 //    JCheckBoxMenuItem datastoreModeItem =
 //      new JCheckBoxMenuItem(datastoreModeCorpusEvalToolAction);
@@ -621,12 +593,12 @@ public class MainFrame extends JFrame
 
     /*add the ontology editor to the tools menu
     ontotext.bp */
-    toolsMenu.add(newOntologyEditorAction);
+    toolsMenu.add(new NewOntologyEditorAction());
 
     if(Gate.isEnableJapeDebug()) {
       // by Shafirin Andrey start
       toolsMenu.add(
-          new AbstractAction("JAPE Debugger", null) {
+          new AbstractAction("JAPE Debugger", getIcon("application.gif")) {
         public void actionPerformed(ActionEvent evt) {
           System.out.println("Creating Jape Debugger");
           new debugger.JapeDebugger();
@@ -639,36 +611,92 @@ public class MainFrame extends JFrame
 
     JMenu helpMenu = new JMenu("Help");
 //    helpMenu.add(new HelpUserGuideAction());
-    helpMenu.add(helpAboutAction);
+    helpMenu.add(new HelpAboutAction());
     menuBar.add(helpMenu);
 
     this.setJMenuBar(menuBar);
 
     //popups
-    newAppPopupMenu = new XJMenu("New");
     appsPopup = new XJPopupMenu();
-    appsPopup.add(newAppPopupMenu);
+    LiveMenu appsMenu = new LiveMenu(LiveMenu.APP);
+    appsMenu.setText("New");
+    appsPopup.add(appsMenu);
     appsPopup.addSeparator();
     appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
-    guiRoots.add(newAppPopupMenu);
+    guiRoots.add(appsMenu);
     guiRoots.add(appsPopup);
 
-    newLrsPopupMenu = new XJMenu("New");
     lrsPopup = new XJPopupMenu();
-    lrsPopup.add(newLrsPopupMenu);
+    LiveMenu lrsMenu = new LiveMenu(LiveMenu.LR);
+    lrsMenu.setText("New");
+    lrsPopup.add(lrsMenu);
     guiRoots.add(lrsPopup);
-    guiRoots.add(newLrsPopupMenu);
+    guiRoots.add(lrsMenu);
 
-    newPrsPopupMenu = new XJMenu("New");
     prsPopup = new XJPopupMenu();
-    prsPopup.add(newPrsPopupMenu);
-    guiRoots.add(newPrsPopupMenu);
+    LiveMenu prsMenu = new LiveMenu(LiveMenu.PR);
+    prsMenu.setText("New");
+    prsPopup.add(prsMenu);
+    guiRoots.add(prsMenu);
     guiRoots.add(prsPopup);
 
     dssPopup = new XJPopupMenu();
-    dssPopup.add(newDSAction);
-    dssPopup.add(openDSAction);
+    dssPopup.add(new NewDSAction());
+    dssPopup.add(new OpenDSAction());
     guiRoots.add(dssPopup);
+    
+    //TOOLBAR
+    toolbar = new JToolBar(JToolBar.HORIZONTAL);
+    toolbar.setFloatable(false);
+    toolbar.add(new LoadResourceFromFileAction());
+    toolbar.add(new LoadANNIEWithDefaultsAction());
+    toolbar.add(new LoadANNIEWithoutDefaultsAction());
+    toolbar.addSeparator();
+    JMenuBar smallMenuBar = new JMenuBar();
+    smallMenuBar.setBorderPainted(false);
+    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    LiveMenu tbNewLRMenu = new LiveMenu(LiveMenu.LR);
+    tbNewLRMenu.setToolTipText("New Language Resource");
+    tbNewLRMenu.setIcon(getIcon("lrs.gif"));
+    smallMenuBar.add(tbNewLRMenu);
+    toolbar.add(smallMenuBar);
+    
+    smallMenuBar = new JMenuBar();
+    smallMenuBar.setBorderPainted(false);
+    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    LiveMenu tbNewPRMenu = new LiveMenu(LiveMenu.PR);
+    tbNewPRMenu.setToolTipText("New Processing Resource");
+    tbNewPRMenu.setIcon(getIcon("prs.gif"));
+    smallMenuBar.add(tbNewPRMenu);
+    toolbar.add(smallMenuBar);
+    
+    smallMenuBar = new JMenuBar();
+    smallMenuBar.setBorderPainted(false);
+    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    LiveMenu tbNewAppMenu = new LiveMenu(LiveMenu.APP);
+    tbNewAppMenu.setToolTipText("New Application");
+    tbNewAppMenu.setIcon(getIcon("applications.gif"));
+    smallMenuBar.add(tbNewAppMenu);
+    toolbar.add(smallMenuBar);
+    
+    smallMenuBar = new JMenuBar();
+    smallMenuBar.setBorderPainted(false);
+    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    JMenu tbDsMenu = new JMenu();
+    tbDsMenu.setToolTipText("Datastores");
+    tbDsMenu.setIcon(getIcon("dss.gif"));
+    tbDsMenu.add(new NewDSAction());
+    tbDsMenu.add(new OpenDSAction());
+    smallMenuBar.add(tbDsMenu);
+    toolbar.add(smallMenuBar);
+    
+    toolbar.addSeparator();
+    toolbar.add(new ManagePluginsAction());
+    toolbar.addSeparator();
+    toolbar.add(new NewAnnotDiffAction());
+    
+    toolbar.add(Box.createGlue());
+    this.getContentPane().add(toolbar, BorderLayout.NORTH);    
   }
 
   protected void initListeners(boolean isShellSlacGIU){
@@ -924,198 +952,6 @@ public class MainFrame extends JFrame
       }
     });
 
-    newLrMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-      public void menuDeselected(MenuEvent e) {
-      }
-      public void menuSelected(MenuEvent e) {
-        newLrMenu.removeAll();
-        //find out the available types of LRs and repopulate the menu
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List lrTypes = reg.getPublicLrTypes();
-        if(lrTypes != null && !lrTypes.isEmpty()){
-          HashMap resourcesByName = new HashMap();
-          Iterator lrIter = lrTypes.iterator();
-          while(lrIter.hasNext()){
-            ResourceData rData = (ResourceData)reg.get(lrIter.next());
-            resourcesByName.put(rData.getName(), rData);
-          }
-          List lrNames = new ArrayList(resourcesByName.keySet());
-          Collections.sort(lrNames);
-          lrIter = lrNames.iterator();
-          while(lrIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.
-                                 get(lrIter.next());
-            newLrMenu.add(new XJMenuItem(new NewResourceAction(rData),
-                                         MainFrame.this));
-          }
-        }
-      }
-    });
-
-    newPrMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-      public void menuDeselected(MenuEvent e) {
-      }
-      public void menuSelected(MenuEvent e) {
-        newPrMenu.removeAll();
-        //find out the available types of LRs and repopulate the menu
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List prTypes = reg.getPublicPrTypes();
-        if(prTypes != null && !prTypes.isEmpty()){
-          HashMap resourcesByName = new HashMap();
-          Iterator prIter = prTypes.iterator();
-          while(prIter.hasNext()){
-            ResourceData rData = (ResourceData)reg.get(prIter.next());
-            resourcesByName.put(rData.getName(), rData);
-          }
-          List prNames = new ArrayList(resourcesByName.keySet());
-          Collections.sort(prNames);
-          prIter = prNames.iterator();
-          while(prIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.
-                                 get(prIter.next());
-            newPrMenu.add(new XJMenuItem(new NewResourceAction(rData),
-                                         MainFrame.this));
-          }
-        }
-      }
-    });
-
-    newLrsPopupMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-      public void menuDeselected(MenuEvent e) {
-      }
-      public void menuSelected(MenuEvent e) {
-        newLrsPopupMenu.removeAll();
-        //find out the available types of LRs and repopulate the menu
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List lrTypes = reg.getPublicLrTypes();
-        if(lrTypes != null && !lrTypes.isEmpty()){
-          HashMap resourcesByName = new HashMap();
-          Iterator lrIter = lrTypes.iterator();
-          while(lrIter.hasNext()){
-            ResourceData rData = (ResourceData)reg.get(lrIter.next());
-            resourcesByName.put(rData.getName(), rData);
-          }
-          List lrNames = new ArrayList(resourcesByName.keySet());
-          Collections.sort(lrNames);
-          lrIter = lrNames.iterator();
-          while(lrIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.
-                                 get(lrIter.next());
-            newLrsPopupMenu.add(new XJMenuItem(new NewResourceAction(rData),
-                                         MainFrame.this));
-          }
-        }
-      }
-    });
-
-    // Adding a listener for loading ANNIE with or without defaults
-    loadANNIEMenu.addMenuListener(new MenuListener(){
-      public void menuCanceled(MenuEvent e){}
-      public void menuDeselected(MenuEvent e){}
-      public void menuSelected(MenuEvent e){
-        loadANNIEMenu.removeAll();
-        loadANNIEMenu.add(new LoadANNIEWithDefaultsAction());
-        loadANNIEMenu.add(new LoadANNIEWithoutDefaultsAction());
-      }// menuSelected();
-    });//loadANNIEMenu.addMenuListener(new MenuListener()
-
-    newPrsPopupMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-      public void menuDeselected(MenuEvent e) {
-      }
-      public void menuSelected(MenuEvent e) {
-        newPrsPopupMenu.removeAll();
-        //find out the available types of LRs and repopulate the menu
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List prTypes = reg.getPublicPrTypes();
-        if(prTypes != null && !prTypes.isEmpty()){
-          HashMap resourcesByName = new HashMap();
-          Iterator prIter = prTypes.iterator();
-          while(prIter.hasNext()){
-            ResourceData rData = (ResourceData)reg.get(prIter.next());
-            resourcesByName.put(rData.getName(), rData);
-          }
-          List prNames = new ArrayList(resourcesByName.keySet());
-          Collections.sort(prNames);
-          prIter = prNames.iterator();
-          while(prIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.
-                                 get(prIter.next());
-            newPrsPopupMenu.add(new XJMenuItem(new NewResourceAction(rData),
-                                         MainFrame.this));
-          }
-        }
-      }
-    });
-
-
-    newAppMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-      public void menuDeselected(MenuEvent e) {
-      }
-      public void menuSelected(MenuEvent e) {
-        newAppMenu.removeAll();
-        //find out the available types of Controllers and repopulate the menu
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List controllerTypes = reg.getPublicControllerTypes();
-        if(controllerTypes != null && !controllerTypes.isEmpty()){
-          HashMap resourcesByName = new HashMap();
-          Iterator controllerTypesIter = controllerTypes.iterator();
-          while(controllerTypesIter.hasNext()){
-            ResourceData rData = (ResourceData)reg.get(controllerTypesIter.next());
-            resourcesByName.put(rData.getName(), rData);
-          }
-          List controllerNames = new ArrayList(resourcesByName.keySet());
-          Collections.sort(controllerNames);
-          controllerTypesIter = controllerNames.iterator();
-          while(controllerTypesIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.
-                                 get(controllerTypesIter.next());
-            newAppMenu.add(new XJMenuItem(new NewResourceAction(rData),
-                                         MainFrame.this));
-          }
-        }
-      }
-    });
-
-
-    newAppPopupMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-      public void menuDeselected(MenuEvent e) {
-      }
-      public void menuSelected(MenuEvent e) {
-        newAppPopupMenu.removeAll();
-        //find out the available types of Controllers and repopulate the menu
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List controllerTypes = reg.getPublicControllerTypes();
-        if(controllerTypes != null && !controllerTypes.isEmpty()){
-          HashMap resourcesByName = new HashMap();
-          Iterator controllerTypesIter = controllerTypes.iterator();
-          while(controllerTypesIter.hasNext()){
-            ResourceData rData = (ResourceData)reg.get(controllerTypesIter.next());
-            resourcesByName.put(rData.getName(), rData);
-          }
-          List controllerNames = new ArrayList(resourcesByName.keySet());
-          Collections.sort(controllerNames);
-          controllerTypesIter = controllerNames.iterator();
-          while(controllerTypesIter.hasNext()){
-            ResourceData rData = (ResourceData)resourcesByName.
-                                 get(controllerTypesIter.next());
-            newAppPopupMenu.add(new XJMenuItem(new NewResourceAction(rData),
-                                         MainFrame.this));
-          }
-        }
-      }
-    });
 
    listeners.put("gate.event.StatusListener", MainFrame.this);
    listeners.put("gate.event.ProgressListener", MainFrame.this);
@@ -1582,8 +1418,7 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setApplicationFile(testApp);
-          theTool.setVerboseMode(
-            MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode());
+          theTool.setVerboseMode(verboseModeItem.isSelected());
 
           Out.prln("Please wait while GATE tools are initialised.");
           //initialise the tool
@@ -1629,8 +1464,7 @@ public class MainFrame extends JFrame
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
           theTool.setStartDirectory(startDir);
           theTool.setMarkedStored(true);
-          theTool.setVerboseMode(
-            MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode());
+          theTool.setVerboseMode(verboseModeItem.isSelected());
 //          theTool.setMarkedDS(
 //            MainFrame.this.datastoreModeCorpusEvalToolAction.isDatastoreMode());
 
@@ -1687,8 +1521,7 @@ public class MainFrame extends JFrame
           theTool.setStartDirectory(startDir);
           theTool.setApplicationFile(testApp);
           theTool.setMarkedClean(true);
-          theTool.setVerboseMode(
-            MainFrame.this.verboseModeCorpusEvalToolAction.isVerboseMode());
+          theTool.setVerboseMode(verboseModeItem.isSelected());
 
           Out.prln("Evaluating human-marked documents against current processing results.");
           //initialise the tool
@@ -1801,6 +1634,8 @@ public class MainFrame extends JFrame
                                     implements ANNIEConstants{
     public LoadANNIEWithDefaultsAction() {
       super("With defaults");
+      putValue(SHORT_DESCRIPTION, "Load ANNIE system using defaults");
+      putValue(SMALL_ICON, getIcon("application.gif"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
       // Loads ANNIE with defaults
@@ -1847,6 +1682,8 @@ public class MainFrame extends JFrame
                                     implements ANNIEConstants{
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
+      putValue(SHORT_DESCRIPTION, "Load ANNIE system wihtout defaults");
+      putValue(SMALL_ICON, getIcon("application.gif"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
       // Loads ANNIE with defaults
@@ -1934,7 +1771,7 @@ public class MainFrame extends JFrame
 
   class NewBootStrapAction extends AbstractAction {
     public NewBootStrapAction() {
-      super("BootStrap Wizard", getIcon("annDiff.gif"));
+      super("BootStrap Wizard", getIcon("application.gif"));
     }// NewBootStrapAction
     public void actionPerformed(ActionEvent e) {
       BootStrapDialog bootStrapDialog = new BootStrapDialog(MainFrame.this);
@@ -1947,6 +1784,7 @@ public class MainFrame extends JFrame
     public ManagePluginsAction(){
       super("Manage CREOLE plugins");
       putValue(SHORT_DESCRIPTION,"Manage CREOLE plugins");
+      putValue(SMALL_ICON, getIcon("param.gif"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2084,6 +1922,7 @@ public class MainFrame extends JFrame
     public NewDSAction(){
       super("Create datastore");
       putValue(SHORT_DESCRIPTION,"Create a new Datastore");
+      putValue(SMALL_ICON, getIcon("ds.gif"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2135,6 +1974,7 @@ public class MainFrame extends JFrame
     public LoadResourceFromFileAction(){
       super("Restore application from file");
       putValue(SHORT_DESCRIPTION,"Restores a previously saved application");
+      putValue(SMALL_ICON, getIcon("controller.gif"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2229,6 +2069,7 @@ public class MainFrame extends JFrame
     public ExitGateAction() {
       super("Exit GATE");
       putValue(SHORT_DESCRIPTION, "Closes the application");
+      putValue(SMALL_ICON, getIcon("exit.gif"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2307,6 +2148,7 @@ public class MainFrame extends JFrame
     public OpenDSAction() {
       super("Open datastore");
       putValue(SHORT_DESCRIPTION,"Open a datastore");
+      putValue(SMALL_ICON, getIcon("ds.gif"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2504,6 +2346,82 @@ public class MainFrame extends JFrame
     }
   }//class OpenDSAction extends AbstractAction
 
+  /**
+   * A menu that self populates based on CREOLE register data before being 
+   * shown. Used for creating new resources of all possible types.
+   */
+  class LiveMenu extends XJMenu{
+    public LiveMenu(int type){
+      super();
+      this.type = type;
+      init();
+    }
+    
+
+    protected void init(){
+      addMenuListener(new MenuListener(){
+        public void menuCanceled(MenuEvent e) {
+        }
+        public void menuDeselected(MenuEvent e) {
+        }
+        public void menuSelected(MenuEvent e) {
+          removeAll();
+          //find out the available types of LRs and repopulate the menu
+          CreoleRegister reg = Gate.getCreoleRegister();
+          List resTypes;
+          switch (type){
+            case LR: 
+              resTypes = reg.getPublicLrTypes();
+              break;
+            case PR:
+              resTypes = reg.getPublicPrTypes();
+              break;
+            case APP:
+              resTypes = reg.getPublicControllerTypes();
+              break;
+            default:
+              throw new GateRuntimeException("Unknown LiveMenu type: " + type);
+          }
+          
+          if(resTypes != null && !resTypes.isEmpty()){
+            HashMap resourcesByName = new HashMap();
+            Iterator resIter = resTypes.iterator();
+            while(resIter.hasNext()){
+              ResourceData rData = (ResourceData)reg.get(resIter.next());
+              resourcesByName.put(rData.getName(), rData);
+            }
+            List resNames = new ArrayList(resourcesByName.keySet());
+            Collections.sort(resNames);
+            resIter = resNames.iterator();
+            while(resIter.hasNext()){
+              ResourceData rData = (ResourceData)resourcesByName.
+                                   get(resIter.next());
+              add(new XJMenuItem(new NewResourceAction(rData),
+                                           MainFrame.this));
+            }
+          }
+        }
+      });
+    }
+    
+    protected int type;
+    /**
+     * Switch for using LR data.
+     */
+    public static final int LR = 1;
+
+    /**
+     * Switch for using PR data.
+     */
+    public static final int PR = 2;
+    
+    /**
+     * Switch for using Controller data.
+     */
+    public static final int APP = 3;
+  }
+  
+  
   class HelpAboutAction extends AbstractAction {
     public HelpAboutAction(){
       super("About");
@@ -2666,137 +2584,6 @@ public class MainFrame extends JFrame
   }
 
 
-  /**
-   * Model for the tree representing the resources loaded in the system
-   */
-/*
-  class ResourcesTreeModel extends DefaultTreeModel {
-    ResourcesTreeModel(TreeNode root){
-      super(root);
-    }
-
-    public Object getRoot(){
-      return resourcesTreeRoot;
-    }
-
-    public Object getChild(Object parent,
-                       int index){
-      return getChildren(parent).get(index);
-    }
-
-    public int getChildCount(Object parent){
-      return getChildren(parent).size();
-    }
-
-    public boolean isLeaf(Object node){
-      return getChildren(node).isEmpty();
-    }
-
-    public int getIndexOfChild(Object parent,
-                           Object child){
-      return getChildren(parent).indexOf(child);
-    }
-
-    protected List getChildren(Object parent) {
-      List result = new ArrayList();
-      if(parent == resourcesTreeRoot){
-        result.add(applicationsRoot);
-        result.add(languageResourcesRoot);
-        result.add(processingResourcesRoot);
-        result.add(datastoresRoot);
-      } else if(parent == applicationsRoot) {
-//        result.addAll(currentProject.getApplicationsList());
-      } else if(parent == languageResourcesRoot) {
-        result.addAll(Gate.getCreoleRegister().getLrInstances());
-      } else if(parent == processingResourcesRoot) {
-        result.addAll(Gate.getCreoleRegister().getPrInstances());
-      } else if(parent == datastoresRoot) {
-        result.addAll(Gate.getDataStoreRegister());
-      }
-      ListIterator iter = result.listIterator();
-      while(iter.hasNext()) {
-        Object value = iter.next();
-        ResourceData rData = (ResourceData)
-                      Gate.getCreoleRegister().get(value.getClass().getName());
-        if(rData != null && rData.isPrivate()) iter.remove();
-      }
-      return result;
-    }
-
-    public synchronized void removeTreeModelListener(TreeModelListener l) {
-      if (treeModelListeners != null && treeModelListeners.contains(l)) {
-        Vector v = (Vector) treeModelListeners.clone();
-        v.removeElement(l);
-        treeModelListeners = v;
-      }
-    }
-
-    public synchronized void addTreeModelListener(TreeModelListener l) {
-      Vector v = treeModelListeners ==
-                    null ? new Vector(2) : (Vector) treeModelListeners.clone();
-      if (!v.contains(l)) {
-        v.addElement(l);
-        treeModelListeners = v;
-      }
-    }
-
-    void treeChanged(){
-      SwingUtilities.invokeLater(new Runnable(){
-        public void run() {
-          fireTreeStructureChanged(new TreeModelEvent(
-                                        this,new Object[]{resourcesTreeRoot}));
-        }
-      });
-    }
-
-    public void valueForPathChanged(TreePath path,
-                                Object newValue){
-      fireTreeNodesChanged(new TreeModelEvent(this,path));
-    }
-
-    protected void fireTreeNodesChanged(TreeModelEvent e) {
-      if (treeModelListeners != null) {
-        Vector listeners = treeModelListeners;
-        int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-          ((TreeModelListener) listeners.elementAt(i)).treeNodesChanged(e);
-        }
-      }
-    }
-
-    protected void fireTreeNodesInserted(TreeModelEvent e) {
-      if (treeModelListeners != null) {
-        Vector listeners = treeModelListeners;
-        int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-          ((TreeModelListener) listeners.elementAt(i)).treeNodesInserted(e);
-        }
-      }
-    }
-
-    protected void fireTreeNodesRemoved(TreeModelEvent e) {
-      if (treeModelListeners != null) {
-        Vector listeners = treeModelListeners;
-        int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-          ((TreeModelListener) listeners.elementAt(i)).treeNodesRemoved(e);
-        }
-      }
-    }
-
-    protected void fireTreeStructureChanged(TreeModelEvent e) {
-      if (treeModelListeners != null) {
-        Vector listeners = treeModelListeners;
-        int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-          ((TreeModelListener) listeners.elementAt(i)).treeStructureChanged(e);
-        }
-      }
-    }
-
-    private transient Vector treeModelListeners;
-  }
-*/
 
   class ProgressBarUpdater implements Runnable{
     ProgressBarUpdater(int newValue){
