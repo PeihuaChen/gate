@@ -260,7 +260,7 @@ public class TestMorph
                                           get(ANNIEConstants.
                                               TOKEN_STRING_FEATURE_NAME));
 
-      System.out.println(morpher+"  "+queryTokenValue);
+//      System.out.println(morpher+"  "+queryTokenValue);
       // run the morpher
       String rootWord = morpher.findBaseWord(queryTokenValue);
 
