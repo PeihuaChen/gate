@@ -35,10 +35,11 @@ jar:
 	../build/jdk.sh jar cvf ../build/gate.jar gate
 
 docs:
+	./jdk.sh javadoc $(SP) $(CP) -private \
+	  -link 'http___COLON___\/\/bradfield.dcs.shef.ac.uk\/Java2_docs\/api\/' \
+	  -d ../doc/javadoc/internal $(PKGS)
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
-	./jdk.sh javadoc $(SP) $(CP) -private \
-	  -d ../doc/javadoc/internal $(PKGS)
 
 clean:
 	rm -rf ../classes/gate `find .. -name '*.~*' -print`
@@ -50,6 +51,10 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.13  2000/02/16 17:11:22  hamish
+# added some more foul mess to jdk.sh to allow Makefile
+# to link to JDK docs when doing the internal javadoc run
+#
 # Revision 1.12  2000/02/16 13:43:38  hamish
 # added jar target
 #

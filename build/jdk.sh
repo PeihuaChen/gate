@@ -45,6 +45,7 @@ if [ $SYS = cygwin ]
 then
   JAVABASE=//w/jdk/jdk1.2
   JAVABASE1='w:\jdk\jdk1.2'
+  JAVABASE2='w:\\jdk\\jdk1.2'
 #  JAVABASE=//w/apps/jdk1.2.2
 #  JAVABASE1='w:\apps\jdk1.2.2'
 elif [ $SYS=unix ] 
@@ -55,9 +56,12 @@ fi
 # convert from UNIX paths to Windoze paths if necessary; do ___JAVABASE___
 if [ $SYS = cygwin ]
 then
+  SUBS=`echo $SUBS |sed -e 's,\\\/,___SLASH___,g'`
   SUBS=`echo $SUBS |sed -e 's,:,;,g'`
-  SUBS=`echo $SUBS |sed -e "s,___JAVABASE___,${JAVABASE1},g"`
+  SUBS=`echo $SUBS |sed -e 's,___COLON___,:,g'`
+  SUBS=`echo $SUBS |sed -e "s,___JAVABASE___,${JAVABASE2},g"`
   SUBS=`echo $SUBS |sed -e 's,/,\\\\,g'`
+  SUBS=`echo $SUBS |sed -e 's,___SLASH___,/,g'`
 fi
 
 # run the command
