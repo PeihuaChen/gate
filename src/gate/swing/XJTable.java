@@ -354,21 +354,8 @@ public class XJTable extends JTable{
         rows[i] = rowModelToView(rows[i]);
         getSelectionModel().addSelectionInterval(rows[i], rows[i]);
       }
-      
-      
     }
 
-    
-//    /**
-//     * Reinitialises the internal data structures with the given sorting order.
-//     * @param order the new sorting order.
-//     */
-//    public void init(int[] order){
-//      sourceToTarget = new int[order.length];
-//      System.arraycopy(order, 0, sourceToTarget, 
-//              0, order.length);
-//      buildTargetToSourceIndex();
-//    }
     
     /**
      * Converts an index from the source coordinates to the target ones.
