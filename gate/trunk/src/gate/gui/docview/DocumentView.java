@@ -19,9 +19,9 @@ import gate.VisualResource;
 import gate.gui.ActionsPublisher;
 
 /**
- * A document viewer is composed out of several views (like the on showing the
+ * A document viewer is composed out of several views (like the one showing the
  * text, the one showing the annotation sets, the on showing the annotations
- * table, etc). This is the base interface for all the document views.
+ * table, etc.). This is the base interface for all the document views.
  * All document views are panes inside a {@link gate.gui.docview.DocumentEditor}
  * object.
  */
@@ -59,9 +59,10 @@ public interface DocumentView extends ActionsPublisher, VisualResource{
   
   /**
    * Notifies this view of its owner.
-   * @param editor the {@link DocumentEditor} that contins this view.
+   * @param editor the {@link DocumentEditor} that contains this view.
    */
   public void setOwner(DocumentEditor editor);
+  
   /**
    * Constant for the CENTRAL type of the view inside the document editor. Views
    * of this type are placed in the center of the document editor.
