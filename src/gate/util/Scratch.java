@@ -44,6 +44,10 @@ public class Scratch
 
   } // main
 
+  public void testFinal(String s){
+
+  }// testFinal()
+
   public void doIt() throws Exception {
     long startTime = System.currentTimeMillis();
 
