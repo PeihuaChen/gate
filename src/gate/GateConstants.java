@@ -69,4 +69,9 @@ public interface GateConstants {
   public static final String
     DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME = "Document_repositioning_info";
 
+  /** Property to set title of application from command line */
+  public static final String TITLE_JAVA_PROPERTY_NAME = "gate.slug.title";
+
+  /** Property to set slug application from command line */
+  public static final String APPLICATION_JAVA_PROPERTY_NAME = "gate.slug.app";
 } // GateConstants
