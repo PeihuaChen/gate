@@ -14,10 +14,12 @@ public class MyPattern implements Comparable {
 
   private Pattern pattern;
   private String function;
+  private String category;
 
-  public MyPattern(Pattern pattern, String function) {
+  public MyPattern(Pattern pattern, String function, String category) {
     this.pattern = pattern;
     this.function = function;
+    this.category = category;
   }
 
   public int compareTo(Object obj) {
@@ -39,5 +41,48 @@ public class MyPattern implements Comparable {
 
   public void setFunction(String function) {
     this.function = function;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public boolean isSameCategory(String category) {
+    if(this.category.equals("*")) {
+       return true;
+    } else {
+      if (this.category.equals("verb")) {
+        if (category.equals("VB") ||
+            category.equals("VBD") ||
+            category.equals("VBG") ||
+            category.equals("VBN") ||
+            category.equals("VBP") ||
+            category.equals("VBZ")) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+      else if (this.category.equals("noun")) {
+        if (category.equals("NN") ||
+            category.equals("NNP") ||
+            category.equals("NNPS") ||
+            category.equals("NNS") ||
+            category.equals("NP") ||
+            category.equals("NPS")) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+
+  public void setCategory(String cat) {
+    this.category = cat;
   }
 }

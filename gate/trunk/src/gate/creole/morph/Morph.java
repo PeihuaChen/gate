@@ -39,7 +39,7 @@ public class Morph
   private gate.Document document;
 
   /** File which cotains rules to be processed */
-  private URL rulesFileURL;
+  private URL rulesFile;
 
   /** Instance of BaseWord class - English Morpher */
   private Interpret interpret;
@@ -69,13 +69,13 @@ public class Morph
    */
   public Resource init() throws ResourceInstantiationException {
     interpret = new Interpret();
-    if (rulesFileURL == null) {
+    if (rulesFile == null) {
       // no rule file is there, simply run the interpret to interpret it and
       throw new ResourceInstantiationException("\n\n No Rule File Provided");
     }
 
     // compile the rules
-    interpret.init(rulesFileURL);
+    interpret.init(rulesFile);
 
     return this;
   }
@@ -113,8 +113,9 @@ public class Morph
     AnnotationSet tokens = inputAs.get(TOKEN_ANNOTATION_TYPE);
     if (tokens == null || tokens.isEmpty()) {
       fireProcessFinished();
-      javax.swing.JOptionPane.showMessageDialog(null, "Either "+document.getName()+" does not have any document or \n please run the English Tokenizer first and then Morpher"); ;
-      return;
+      throw new ExecutionException("Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher");
+      //javax.swing.JOptionPane.showMessageDialog(null, "Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher"); ;
+      //return;
     }
 
     // create iterator to get access to each and every individual token
@@ -130,12 +131,24 @@ public class Morph
       Annotation currentToken = (Annotation) tokensIter.next();
       String tokenValue = (String) (currentToken.getFeatures().
                                     get(TOKEN_STRING_FEATURE_NAME));
+      if(!currentToken.getFeatures().containsKey(TOKEN_CATEGORY_FEATURE_NAME)) {
+        fireProcessFinished();
+        throw new ExecutionException("please run the POS Tagger first and then Morpher");
+        //javax.swing.JOptionPane.showMessageDialog(null, "please run the POS Tagger first and then Morpher"); ;
+        //return;
+      }
+
+      String posCategory = (String) (currentToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME));
+      if(posCategory == null) {
+        posCategory = "*";
+      }
+
       // run the Morpher
       if(!caseSensitive.booleanValue()) {
         tokenValue = tokenValue.toLowerCase();
       }
 
-      String baseWord = interpret.runMorpher(tokenValue);
+      String baseWord = interpret.runMorpher(tokenValue, posCategory);
       String affixWord = interpret.getAffix();
 
       // no need to add affix feature if it is null
@@ -171,8 +184,8 @@ public class Morph
    * @param word
    * @return the rootWord
    */
-  public String findBaseWord(String word) {
-    return interpret.runMorpher(word);
+  public String findBaseWord(String word, String cat) {
+    return interpret.runMorpher(word, cat);
   }
 
   /**
@@ -180,8 +193,8 @@ public class Morph
    * @param word
    * @return the afix of the rootWord
    */
-  public String findAffix(String word) {
-    interpret.runMorpher(word);
+  public String findAffix(String word, String cat) {
+    interpret.runMorpher(word, cat);
     return interpret.getAffix();
   }
 
@@ -197,15 +210,15 @@ public class Morph
    * Sets the rule file to be processed
    * @param rulesFileURL - rule File name to be processed
    */
-  public void setRulesFileURL(URL rulesFileURL) {
-    this.rulesFileURL = rulesFileURL;
+  public void setRulesFile(URL rulesFile) {
+    this.rulesFile = rulesFile;
   }
 
   /**
    * Returns the document under process
    */
-  public URL getRulesFileURL() {
-    return this.rulesFileURL;
+  public URL getRulesFile() {
+    return this.rulesFile;
   }
 
   /**

@@ -23,10 +23,10 @@ public class CompiledRules {
     pointer = 0;
   }
 
-  public boolean add(String pattern, String function) {
+  public boolean add(String pattern, String function, String category) {
     try {
       Pattern p = Pattern.compile(pattern.trim());
-      MyPattern mp = new MyPattern(p, function);
+      MyPattern mp = new MyPattern(p, function, category);
       patterns.add(mp);
       return true;
     } catch(PatternSyntaxException pse) {

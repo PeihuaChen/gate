@@ -67,15 +67,21 @@ public class Interpret {
    * @param word input to the program
    * @return root word
    */
-  public String runMorpher(String word) {
+  public String runMorpher(String word, String category) {
     affix = null;
     rules.resetPointer();
     // do the pattern matching process with each and every available pattern
     // until the pattern is found which can accomodate the given word
     while (rules.hasNext()) {
 
+
       // load the pattern
       MyPattern myPatInst = rules.getNext();
+
+      // first check if this pattern should be considered to match
+      if(!myPatInst.isSameCategory(category)) {
+        continue;
+      }
 
       // proceed only iof the pattern is not null
       if (myPatInst != null) {
@@ -313,10 +319,10 @@ public class Interpret {
       return 2;
     }
     else if (isDefineRulesSession &&
-             (line.charAt(0) == '{' ||
+             /*(line.charAt(0) == '{' ||
               line.charAt(0) == '[' ||
               line.charAt(0) == '(' ||
-              line.charAt(0) == '\"') &&
+              line.charAt(0) == '\"')*/ (line.charAt(0) == '<') &&
              line.split("==>").length == 2) {
       return 3;
     }
@@ -436,6 +442,20 @@ public class Interpret {
     // so RHS part is Ok
     // now we need to check if LHS is written properly
     // and convert it to the pattern that is recognized by the java
+    String category = "";
+    // we need to find out the category
+    int i = 1;
+    for(;i<ruleParts[0].length();i++) {
+      if(ruleParts[0].charAt(i) == '>')
+        break;
+      category = category + ruleParts[0].charAt(i);
+    }
+    if(i >= ruleParts[0].length()) {
+      generateError("Syntax error - pattern not written properly - see " +
+                    "line " + file.getPointer() + " : " + line);
+    }
+
+    ruleParts[0] = ruleParts[0].substring(i+1, ruleParts[0].length());
     String newPattern = ParsingFunctions.convertToRegExp(ruleParts[0],
                                                          variables);
     if (newPattern == null) {
@@ -444,7 +464,7 @@ public class Interpret {
     }
 
     // we need to compile this pattern and finally add into the compiledRules
-    boolean result = rules.add(newPattern, ruleParts[1]);
+    boolean result = rules.add(newPattern, ruleParts[1], category);
     if (!result) {
       // there was some error in the expression so generate the error
       generateError("Syntax error - pattern not declared properly - see" +
@@ -561,8 +581,8 @@ public class Interpret {
    */
   public static void main(String[] args)
       throws ResourceInstantiationException {
-    if (args == null || args.length < 2) {
-      System.out.println("Usage : Compiler <Rules fileName> <word>");
+    if (args == null || args.length < 3) {
+      System.out.println("Usage : Interpret <Rules fileName> <word> <POS>");
       System.exit( -1);
     }
     Interpret interpret = new Interpret();
@@ -571,7 +591,7 @@ public class Interpret {
     }catch(MalformedURLException mue){
       throw new RuntimeException(mue);
     }
-    String rootWord = interpret.runMorpher(args[1]);
+    String rootWord = interpret.runMorpher(args[1], args[2]);
     String affix = interpret.getAffix();
     System.out.println("Root : "+rootWord);
     System.out.println("affix : "+affix);
