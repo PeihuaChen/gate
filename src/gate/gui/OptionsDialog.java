@@ -479,7 +479,6 @@ public class OptionsDialog extends JDialog {
    */
   JCheckBox includeFeaturesOnPreserveFormatChk;
 
-
   /**
    * The name of the look and feel class
    */

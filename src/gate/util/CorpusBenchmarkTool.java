@@ -969,19 +969,15 @@ public class CorpusBenchmarkTool {
     // organization type
     annotationSchema.setAnnotationName(annotType);
     // create an annotation diff
-    FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",keyDoc);
-    parameters.put("responseDocument",respDoc);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",annotSetName);
-    parameters.put("responseAnnotationSetName",annotSetName);
-    //for a start, do not compare the features of the annotations
-    parameters.put("keyFeatureNamesSet", new HashSet());
-    parameters.put("textMode", new Boolean(true));
-
-    // Create Annotation Diff visual resource
-    AnnotationDiff annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
+    AnnotationDiff annotDiff = new AnnotationDiff();
+    annotDiff.setAnnotationSchema(annotationSchema);
+    annotDiff.setKeyDocument(keyDoc);
+    annotDiff.setResponseDocument(respDoc);
+    annotDiff.setKeyAnnotationSetName(annotSetName);
+    annotDiff.setResponseAnnotationSetName(annotSetName);
+    annotDiff.setKeyFeatureNamesSet(new HashSet());
+    annotDiff.setTextMode(new Boolean(true));
+    annotDiff.init();
 
     return annotDiff;
   }
