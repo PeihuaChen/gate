@@ -205,6 +205,18 @@ public class CorefEditor extends AbstractDocumentView implements ActionListener 
       // get the annotationsSet and its type
       AnnotationSet set = getAnnotationSet((String) annotSets.getSelectedItem());
       String type = (String) annotTypes.getSelectedItem();
+      if(type == null) {
+        try {
+          JOptionPane.showMessageDialog(Main.getMainFrame(),
+                                        "No annotation type found to display");
+        }catch(Exception e) {
+          e.printStackTrace();
+        }
+        showAnnotations.setSelected(false);
+        return;
+      }
+
+
       Color color = getColor(type);
       if(type != null) {
         AnnotationSet typeSet = set.get(type);
