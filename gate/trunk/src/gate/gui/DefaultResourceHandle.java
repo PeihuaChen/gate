@@ -350,6 +350,63 @@ public class DefaultResourceHandle implements ResourceHandle {
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
+          if(!(resource instanceof Resource)) return;
+          try{
+            long startTime = System.currentTimeMillis();
+            fireStatusChanged("Reloading " +
+                               resource.getFeatures().get("gate.NAME"));
+            Map listeners = new HashMap();
+            listeners.put("gate.event.StatusListener",
+                          new StatusListener(){
+                            public void statusChanged(String text){
+                              fireStatusChanged(text);
+                            }
+                          });
+
+            listeners.put("gate.event.ProgressListener",
+                          new ProgressListener(){
+                            public void progressChanged(int value){
+                              fireProgressChanged(value);
+                            }
+                            public void processFinished(){
+                              fireProcessFinished();
+                            }
+                          });
+            Resource res = (Resource)resource;
+            try{
+              Factory.setResourceListeners(res, listeners);
+            }catch (Exception e){
+              e.printStackTrace(Err.getPrintWriter());
+            }
+            res.init();
+            try{
+              Factory.removeResourceListeners(res, listeners);
+            }catch (Exception e){
+              e.printStackTrace(Err.getPrintWriter());
+            }
+            long endTime = System.currentTimeMillis();
+            fireStatusChanged(resource.getFeatures().get("gate.NAME") +
+                              " reloaded in " +
+                              NumberFormat.getInstance().format(
+                              (double)(endTime - startTime) / 1000) + " seconds");
+          }catch(ResourceInstantiationException rie){
+            fireStatusChanged("Reload failed");
+            JOptionPane.showMessageDialog(getLargeView(),
+                                          "Reload failed!\n " +
+                                          rie.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+          }
+        }//public void run()
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }//public void actionPerformed(ActionEvent e)
+
+    public void actionPerformed1(ActionEvent e) {
+      Runnable runnable = new Runnable(){
+        public void run(){
           Map listeners = new HashMap();
           listeners.put("gate.event.StatusListener",
                         new StatusListener(){
