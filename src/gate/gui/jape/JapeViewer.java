@@ -59,7 +59,6 @@ public class JapeViewer extends AbstractVisualResource implements ANNIEConstants
   }
 
   private void initGuiComponents() {
-    System.out.println("executing");
     setLayout(new BorderLayout());
     textArea = new JTextArea();
     textArea.setEditable(editable);
