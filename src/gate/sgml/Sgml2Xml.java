@@ -203,6 +203,7 @@ public class Sgml2Xml{
     '>' -> state 4 (we didn't read an attribute but a value of the defaultAtt )
     WS (white spaces) we don't know yet if we read an attribute or the value of
     the defaultAttr -> state 10
+    This state modifies the content onf m_modifier ... it adds text
   */
   private void doState5(char currChar){
     if ( '=' == currChar )
@@ -235,6 +236,7 @@ public class Sgml2Xml{
   */
   private void doState6(char currChar){
     if ( ('\'' == currChar) || ('"' == currChar) ){
+      endPair = currChar;
       if ('\'' == currChar){
         // we have to replace ' with "
         m_modifier = m_modifier.replace(m_cursor - 1, m_cursor,"\"");
@@ -260,11 +262,14 @@ public class Sgml2Xml{
     to state 1
   */
   private void doState7(char currChar){
-    if ( ('\'' == currChar) || ('"' == currChar) ){
+    //if ( ('\'' == currChar) || ('"' == currChar) ){
+    if ( endPair == currChar ){
       if ('\'' == currChar){
         // we have to replace ' with "
         m_modifier = m_modifier.replace(m_cursor - 1, m_cursor,"\"");
       }
+      // reset the endPair
+      endPair = ' ';
       m_currState = 9;
     }
 
@@ -391,6 +396,7 @@ public class Sgml2Xml{
     This method is responsable with document conversion
   */
   public String convert() throws Exception{
+
     while (thereAreCharsToBeProcessed()){
       // read() gets the next char and increment the m_cursor
       m_currChar = read();
@@ -595,6 +601,16 @@ public class Sgml2Xml{
   // we need it when we have to add the defaultAttr (see state 5) or to add "
   // Eg: <w attr1=val1> -> <w [attrStart]attr1[attrEnd]=val1>
   private int attrEnd = 0;
+  // endPair field is used in states 6 and 7....
+  // When we read something like this :
+  // attr=' val1 val2 val3' endPair remembers what is the pair for the beginning
+  // string
+  // Note that a combination like: attr = ' val1 val2 " will have an unexpected
+  // behaviour...
+  // We need this field when we have the following situation
+  // attr1 = " val1 val2 ' val3" . We need to know what is the end pair for ".
+  // In this case we can't allow ' to be the endPair  
+  private char endPair = ' ';
 }//class Sgml2Xml
 
 /*
