@@ -46,6 +46,7 @@ public class PostgresDataStore extends JDBCDataStore {
     this.iconName = DS_ICON_NAME;
   }
 
+
   public void setSecurityInfo(LanguageResource parm1, SecurityInfo parm2) throws gate.persist.PersistenceException, gate.security.SecurityException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
@@ -136,20 +137,13 @@ public class PostgresDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    * has some access (read/write) to the LR
    */
-
   protected boolean canAccessLR(Long lrID,int mode)
     throws PersistenceException, SecurityException{
 
     throw new MethodNotImplementedException();
   }
 
-  /** Adopt a resource for persistence. */
-/*  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
-    throws PersistenceException,gate.security.SecurityException {
 
-    throw new MethodNotImplementedException();
-  }
-*/
 
   /**
    * Try to acquire exlusive lock on a resource from the persistent store.
@@ -229,6 +223,7 @@ public class PostgresDataStore extends JDBCDataStore {
     return lockSucceeded;
   }
 
+
   protected Corpus createCorpus(Corpus corp,SecurityInfo secInfo, boolean newTransPerDocument)
     throws PersistenceException,SecurityException {
 
@@ -299,6 +294,10 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
 
+  /**
+   * helper for adopt
+   * never call directly
+   */
   protected Long createDoc(Long _lrID,
                           URL _docURL,
                           String _docEncoding,
@@ -308,8 +307,69 @@ public class PostgresDataStore extends JDBCDataStore {
                           Long _corpusID)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
+    PreparedStatement pstmt = null;
+    ResultSet rset = null;
+    Long docID = null;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement(
+                " select persist_create_document(?,?,?,?,?,?,?) ");
+      pstmt.setLong(1,_lrID.longValue());
+      pstmt.setString(2,_docURL.toString());
+      //do we have doc encoding?
+      if (null == _docEncoding) {
+        pstmt.setNull(3,java.sql.Types.VARCHAR);
+      }
+      else {
+        pstmt.setString(3,_docEncoding);
+      }
+      //do we have start offset?
+      if (null==_docStartOffset) {
+        pstmt.setNull(4,java.sql.Types.INTEGER);
+      }
+      else {
+        pstmt.setLong(4,_docStartOffset.longValue());
+      }
+      //do we have end offset?
+      if (null==_docEndOffset) {
+        pstmt.setNull(5,java.sql.Types.INTEGER);
+      }
+      else {
+        pstmt.setLong(5,_docEndOffset.longValue());
+      }
+
+      pstmt.setBoolean(6,_docIsMarkupAware.booleanValue());
+
+      //is the document part of a corpus?
+      if (null == _corpusID) {
+        pstmt.setNull(7,java.sql.Types.BIGINT);
+      }
+      else {
+        pstmt.setLong(7,_corpusID.longValue());
+      }
+
+      pstmt.execute();
+      rset = pstmt.getResultSet();
+      if (false == rset.next()) {
+        throw new PersistenceException("empty result set");
+      }
+
+      docID = new Long(rset.getLong(1));
+
+      return docID;
+
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create document [step 4] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rset);
+      DBHelper.cleanup(pstmt);
+    }
+
   }
+
+
 
   protected void updateDocumentContent(Long docID,DocumentContent content)
     throws PersistenceException {
@@ -325,6 +385,7 @@ public class PostgresDataStore extends JDBCDataStore {
 
   protected void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
+
     throw new MethodNotImplementedException();
   }
 
