@@ -1032,24 +1032,28 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   protected class TextMouseListener implements MouseInputListener{    
     public void mouseDragged(MouseEvent e){
-      mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
-      mouseMovementTimer.restart();
+      //do not create annotations while dragging
+      mouseMovementTimer.stop();
     }
     
     public void mouseMoved(MouseEvent e){
       //this triggers select annotation leading to edit annotation or new 
       //annotation actions
-      //ignore if CTRL pressed
-      if((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) return;
+      //ignore movement if CTRL pressed or dragging
+      int modEx = e.getModifiersEx();
+      if((modEx & MouseEvent.CTRL_DOWN_MASK) != 0){
+        mouseMovementTimer.stop();
+        return;
+      }
+      if((modEx & MouseEvent.BUTTON1_DOWN_MASK) != 0){
+        mouseMovementTimer.stop();
+        return;
+      }
       mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
       mouseMovementTimer.restart();
     }
     
     public void mouseClicked(MouseEvent e){
-      //this is required so we can trigger new annotation when selecting text 
-      //by double/triple clicking
-      mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
-      mouseMovementTimer.restart();
     }
     
     public void mousePressed(MouseEvent e){
