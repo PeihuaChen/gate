@@ -1321,6 +1321,8 @@ public class MainFrame extends JFrame
         SerialController controller = new gate.creole.SerialController();
         controller.setName((String)answer);
         NameBearerHandle handle = new NameBearerHandle(controller);
+        handle.addProgressListener(MainFrame.this);
+        handle.addStatusListener(MainFrame.this);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle,
                                                                  false);
         resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
