@@ -34,9 +34,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
    */
   protected EventsHandler eventHandler;
 
-  protected HashSet addedAnnotationIDs = new HashSet();
-  protected HashSet removedAnnotationIDs = new HashSet();
-  protected HashSet updatedAnnotationIDs = new HashSet();
+  protected HashSet addedAnnotations = new HashSet();
+  protected HashSet removedAnnotations = new HashSet();
+  protected HashSet updatedAnnotations = new HashSet();
 
   private boolean validating = false;
 
@@ -128,9 +128,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
 
   public String toString() {
     return super.toString()
-              + "added annots: " + addedAnnotationIDs
-              + "removed annots: " + removedAnnotationIDs
-              + "updated annots: " + updatedAnnotationIDs;
+              + "added annots: " + addedAnnotations
+              + "removed annots: " + removedAnnotations
+              + "updated annots: " + updatedAnnotations;
   }
 
   /**
@@ -148,7 +148,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
         return;
       Annotation ann = e.getAnnotation();
       ann.addAnnotationListener(this);
-      DatabaseAnnotationSetImpl.this.addedAnnotationIDs.add(ann.getId());
+      DatabaseAnnotationSetImpl.this.addedAnnotations.add(ann);
     }
 
     public void annotationRemoved(AnnotationSetEvent e){
@@ -161,18 +161,18 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
       ann.removeAnnotationListener(this);
 
       //1. check if this annot is in the newly created annotations set
-      if (addedAnnotationIDs.contains(ann.getId())) {
+      if (addedAnnotations.contains(ann)) {
         //a new annotatyion that was deleted afterwards, remove it from all sets
-        DatabaseAnnotationSetImpl.this.addedAnnotationIDs.remove(ann.getId());
+        DatabaseAnnotationSetImpl.this.addedAnnotations.remove(ann);
         return;
       }
       //2. check if the annotation was updated, if so, remove it from the
       //update list
-      if (updatedAnnotationIDs.contains(ann.getId())) {
-        DatabaseAnnotationSetImpl.this.updatedAnnotationIDs.remove(ann.getId());
+      if (updatedAnnotations.contains(ann)) {
+        DatabaseAnnotationSetImpl.this.updatedAnnotations.remove(ann);
       }
 
-      DatabaseAnnotationSetImpl.this.removedAnnotationIDs.add(ann.getId());
+      DatabaseAnnotationSetImpl.this.removedAnnotations.add(ann);
     }
 
     public void annotationUpdated(AnnotationEvent e){
@@ -182,11 +182,11 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
       //if so, do not add it to the update list, since it was not stored in the
       //database yet, so the most recent value will be inserted into the DB upon
       //DataStore::sync()
-      if (addedAnnotationIDs.contains(ann.getId())) {
+      if (addedAnnotations.contains(ann)) {
         return;
       }
 
-      DatabaseAnnotationSetImpl.this.updatedAnnotationIDs.add(ann.getId());
+      DatabaseAnnotationSetImpl.this.updatedAnnotations.add(ann);
     }
 
   }//inner class EventsHandler
@@ -252,34 +252,34 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl
     //ok, we're synced now, clear all lists with changed IDs
     synchronized(this) {
 //System.out.println("clearing lists...");
-      this.addedAnnotationIDs.clear();
-      this.updatedAnnotationIDs.clear();
-      this.removedAnnotationIDs.clear();
+      this.addedAnnotations.clear();
+      this.updatedAnnotations.clear();
+      this.removedAnnotations.clear();
     }
   }
 
-  public Collection getAddedAnnotationIDs() {
+  public Collection getAddedAnnotations() {
 //System.out.println("getAddedIDs() called");
     HashSet result = new HashSet();
-    result.addAll(this.addedAnnotationIDs);
+    result.addAll(this.addedAnnotations);
 
     return result;
   }
 
 
-  public Collection getChangedAnnotationIDs() {
+  public Collection getChangedAnnotations() {
 //System.out.println("getChangedIDs() called");
     HashSet result = new HashSet();
-    result.addAll(this.updatedAnnotationIDs);
+    result.addAll(this.updatedAnnotations);
 
     return result;
   }
 
 
-  public Collection getRemovedAnnotationIDs() {
+  public Collection getRemovedAnnotations() {
 //System.out.println("getremovedIDs() called...");
     HashSet result = new HashSet();
-    result.addAll(this.removedAnnotationIDs);
+    result.addAll(this.removedAnnotations);
 
     return result;
   }
