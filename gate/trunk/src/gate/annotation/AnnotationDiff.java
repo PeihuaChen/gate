@@ -1072,12 +1072,12 @@ public class AnnotationDiff extends AbstractVisualResource{
     /** Returns the name of each column in the model*/
     public String getColumnName(int column){
       switch(column){
-        case 0: return "Type - Key";
+        case 0: return "String - Key";
         case 1: return "Start - Key";
         case 2: return "End - Key";
         case 3: return "Features - Key";
         case 4: return "   ";
-        case 5: return "Type - Response";
+        case 5: return "String - Response";
         case 6: return "Start - Response";
         case 7: return "End -Response";
         case 8: return "Features - Response";
@@ -1110,7 +1110,17 @@ public class AnnotationDiff extends AbstractVisualResource{
         //Type - Key
         case 0:{
            if (diffSetElement.getLeftAnnotation() == null) return null;
-           return diffSetElement.getLeftAnnotation().getType();
+//           return diffSetElement.getLeftAnnotation().getType();
+           Annotation annot = diffSetElement.getLeftAnnotation();
+           String theString = "";
+           try {
+             theString = keyDocument.getContent().getContent(
+                    annot.getStartNode().getOffset(),
+                    annot.getEndNode().getOffset()).toString();
+           } catch (gate.util.InvalidOffsetException ex) {
+             Err.prln(ex.getMessage());
+           }
+           return theString;
         }
         // Start - Key
         case 1:{
@@ -1137,7 +1147,17 @@ public class AnnotationDiff extends AbstractVisualResource{
         //Type - Response
         case 5:{
            if (diffSetElement.getRightAnnotation() == null) return null;
-           return diffSetElement.getRightAnnotation().getType();
+//           return diffSetElement.getRightAnnotation().getType();
+           Annotation annot = diffSetElement.getRightAnnotation();
+           String theString = "";
+           try {
+             theString = responseDocument.getContent().getContent(
+                    annot.getStartNode().getOffset(),
+                    annot.getEndNode().getOffset()).toString();
+           } catch (gate.util.InvalidOffsetException ex) {
+             Err.prln(ex.getMessage());
+           }
+           return theString;
         }
         // Start - Response
         case 6:{
