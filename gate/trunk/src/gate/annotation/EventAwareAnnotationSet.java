@@ -10,7 +10,6 @@
  *
  *  Marin Dimitrov, 02/Nov/2001
  *
- *  NOTE: the interface is not public
  *
  *  $Id$
  */
@@ -23,7 +22,7 @@ import gate.AnnotationSet;
 
 
 
-interface EventAwareAnnotationSet extends AnnotationSet {
+public interface EventAwareAnnotationSet extends AnnotationSet {
 
   public Collection getAddedAnnotationIDs();
 
