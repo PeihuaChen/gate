@@ -115,7 +115,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     actionClassString = new StringBuffer(
       "package " + actionsDirName + "; " + nl +
       "import gate.*; import java.io.*; import gate.jape.*; " + nl +
-      "import gate.annotation.*; import gate.util.*;.*; import gate.creole.*; " + nl +
+      "import gate.annotation.*; import gate.util.*; " + nl +
       "public class " + actionClassName +
       " implements java.io.Serializable, RhsAction { " + nl +
       "  public void doit(Document doc, LeftHandSide lhs) { " + nl
@@ -398,10 +398,20 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     return buf.toString();
   } // toString
 
+  /** Create a string representation of the object. */
+  public String shortDesc() {
+    String res = "" + actionClassName;
+    return res;
+  } // toString
+
 } // class RightHandSide
 
 
 // $Log$
+// Revision 1.3  2000/04/20 13:26:42  valyt
+// Added the graph_drawing library.
+// Creating of the NFSM and DFSM now works.
+//
 // Revision 1.2  2000/02/24 17:28:48  hamish
 // more porting to new API
 //

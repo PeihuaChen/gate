@@ -305,6 +305,20 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     return buf.toString();
   } // toString
 
+  /**
+  * Returns a short description.
+  */
+  public String shortDesc(){
+    String res = "";
+    if(constraints1 != null) {
+      for(int len = constraints1.size(), i = 0; i < len; i++)
+        res += ((Constraint) constraints1.at(i)).toString();
+    } else {
+      for(int len = constraints2.length, i = 0; i < len; i++)
+        res += constraints2[i].shortDesc();
+    }
+    return res;
+  }
 } // class BasicPatternElement
 
 
