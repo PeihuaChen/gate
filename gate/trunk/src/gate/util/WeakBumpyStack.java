@@ -11,6 +11,11 @@
  *  $Id$
  */
 
+////////////////////////////////////////////////////////////////////
+//////////// DEVELOPERS: SEE WARNING IN JAVADOC COMMENT FOR
+//////////// THIS CLASS!!!!
+////////////////////////////////////////////////////////////////////
+
 package gate.util;
 
 import java.util.*;
@@ -23,6 +28,14 @@ import gate.*;
  * Objects that are only referenced by this stack will be candidates for
  * garbage collection and wil be removed from the stack as soon as the garbage
  * collector marks them for collection.
+ * <P>
+ * <B>*** WARNING: ***</B> the test for this class,
+ * <TT>TestBumpyStack.testSelfCleaning</TT> is not a proper test; it doesn't
+ * fail even when it should, and only prints a warning when DEBUG is true.
+ * This is because to test it properly you need to force garbage collection,
+ * and that isn't possible. So, if you work on this class <B>you must
+ * turn DEBUG on on TestBumpyStack</B> in order to run the tests in a
+ * meaningfull way.
  */
 public class WeakBumpyStack extends AbstractList
 {
