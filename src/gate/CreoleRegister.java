@@ -102,4 +102,22 @@ public interface CreoleRegister extends Map, Serializable
   /** Get the list of types of VR in the register. */
   public Set getVrTypes();
 
+  /** Get a list of all instantiations of LR in the register. */
+  public List getLrInstances();
+
+  /** Get a list of all instantiations of PR in the register. */
+  public List getPrInstances();
+
+  /** Get a list of all instantiations of VR in the register. */
+  public List getVrInstances();
+
+  /** Get a list of instantiations of a type of LR in the register. */
+  public List getLrInstances(String resourceTypeName);
+
+  /** Get a list of instantiations of a type of PR in the register. */
+  public List getPrInstances(String resourceTypeName);
+
+  /** Get a list of instantiations of a type of VR in the register. */
+  public List getVrInstances(String resourceTypeName);
+
 } // interface CreoleRegister
