@@ -299,8 +299,6 @@ public class OracleDataStore extends JDBCDataStore {
         this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()
       )
     );
-
-    throw new MethodNotImplementedException();
   }
 
   /**
@@ -426,6 +424,7 @@ public class OracleDataStore extends JDBCDataStore {
         result, result.getLRPersistenceId()
       )
     );
+
 
     return result;
   }
@@ -1383,6 +1382,17 @@ System.out.println();
       }
   }
 
+  /** --- */
+  private void deleteFeatures(Long entityID, int entityType)
+    throws PersistenceException {
+
+    //since the avg number of features per document/corpus is relatively small
+    //it's easier to delete the old features and create the new ones instead of
+    //trying to figure out what needs syncing with the DB (i.e.
+    // deleted/new/updated features)
+
+  }
+
   /** get security information for LR . */
   public SecurityInfo getSecurityInfo(LanguageResource lr)
     throws PersistenceException {
@@ -1745,12 +1755,12 @@ System.out.println();
 
     //4. [optional] sync Features
     if (true == dbDoc.isDocumentChanged(DatabaseDocumentImpl.DOC_FEATURES)) {
-      //sunc features
+      _syncFeatures(dbDoc);
     }
 
 
     //3. [optional] sync Annotations
-    throw new MethodNotImplementedException();
+//    throw new MethodNotImplementedException();
   }
 
   private void _syncLR(Long lrID, String newName)
@@ -1761,7 +1771,7 @@ System.out.println();
     try {
       stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.set_lr_name(?,?) }");
       stmt.setLong(1,lrID.longValue());
-      stmt.setString(1,newName);
+      stmt.setString(2,newName);
       stmt.execute();
     }
     catch(SQLException sqle) {
@@ -1819,7 +1829,6 @@ System.out.println();
       DBHelper.cleanup(stmt);
     }
 
-    throw new MethodNotImplementedException();
   }
 
   private void _syncDocumentContent(Document doc)
@@ -1881,6 +1890,56 @@ System.out.println();
 
     throw new MethodNotImplementedException();
   }
+
+
+  private void _syncFeatures(LanguageResource lr)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(lr);
+    Assert.assertNotNull(lr.getLRPersistenceId());
+    Assert.assertEquals(((DatabaseDataStore)lr.getDataStore()).getDatabaseID(),
+                      this.getDatabaseID());
+    Assert.assertTrue(lr instanceof Document || lr instanceof Corpus);
+    //we have to be in the context of transaction
+
+    //1, get ID  in the DB
+    Long lrID = (Long)lr.getLRPersistenceId();
+    int  entityType;
+
+    //2. delete features
+    CallableStatement stmt = null;
+    try {
+      Assert.assertTrue(false == this.jdbcConn.getAutoCommit());
+      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+
+                                                    ".persist.delete_features(?,?) }");
+      stmt.setLong(1,lrID.longValue());
+
+      if (lr instanceof Document) {
+        entityType = DBHelper.FEATURE_OWNER_DOCUMENT;
+      }
+      else if (lr instanceof Corpus) {
+        entityType = DBHelper.FEATURE_OWNER_CORPUS;
+      }
+      else {
+        throw new IllegalArgumentException();
+      }
+
+      stmt.setInt(2,entityType);
+      stmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete features in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+    //3. recreate them
+    createFeatures(lrID,entityType, lr.getFeatures());
+
+  }
+
 
   private void syncCorpus(Corpus corp) throws PersistenceException {
     throw new MethodNotImplementedException();
