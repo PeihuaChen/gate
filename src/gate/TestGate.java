@@ -230,8 +230,18 @@ public class TestGate {
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
       if(! allTests){
-        suite.addTest(TestMorph.suite());
+        suite.addTest(TestControllers.suite());
+        
+        suite.addTest(TestPR.suite());
+
+        suite.addTest(TestSecurity.suite());
+        suite.addTest(TestAnnotationDiff.suite());
+        suite.addTest(TestConfig.suite());
+        suite.addTest(TestAnnotation.suite());
+        suite.addTest(TestEmail.suite());
+        
       } else {
+        
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
@@ -242,10 +252,12 @@ public class TestGate {
         suite.addTest(TestConfig.suite());
         suite.addTest(TestAnnotation.suite());
         suite.addTest(TestEmail.suite());
+        
         suite.addTest(TestXml.suite());
         suite.addTest(TestHtml.suite());
         suite.addTest(TestSgml.suite());
         suite.addTest(TestXSchema.suite());
+        
         suite.addTest(TestCreole.suite());
         suite.addTest(CookBook.suite());
         suite.addTest(TestFiles.suite());
