@@ -34,8 +34,32 @@ import gate.util.GateRuntimeException;
 public class DocumentEditor extends AbstractVisualResource
                             implements ActionsPublisher {
 
+  /**
+   * The document view is just an empty shell. This method publishes the actions
+   * from the contained views. 
+   */
   public List getActions() {
-    return new ArrayList();
+    List actions = new ArrayList();
+    Iterator viewIter;
+    if(getCentralViews() != null){
+      viewIter = getCentralViews().iterator();
+      while(viewIter.hasNext()){
+        actions.addAll(((DocumentView)viewIter.next()).getActions());
+      }
+    }
+    if(getHorizontalViews() != null){
+      viewIter = getHorizontalViews().iterator();
+      while(viewIter.hasNext()){
+        actions.addAll(((DocumentView)viewIter.next()).getActions());
+      }
+    }
+    if(getVerticalViews() != null){
+      viewIter = getVerticalViews().iterator();
+      while(viewIter.hasNext()){
+        actions.addAll(((DocumentView)viewIter.next()).getActions());
+      }
+    }
+    return actions;
   }
 
 
@@ -170,15 +194,18 @@ public class DocumentEditor extends AbstractVisualResource
   }
   
   public List getCentralViews(){
-  	return Collections.unmodifiableList(centralViews);
+  	return centralViews == null ? null : 
+      Collections.unmodifiableList(centralViews);
   }
   
   public List getHorizontalViews(){
-    return Collections.unmodifiableList(horizontalViews);
+    return horizontalViews == null ? null : 
+      Collections.unmodifiableList(horizontalViews);
   }
   
   public List getVerticalViews(){
-    return Collections.unmodifiableList(verticalViews);
+    return verticalViews == null ? null : 
+      Collections.unmodifiableList(verticalViews);
   }
   
 
