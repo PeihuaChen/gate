@@ -43,6 +43,7 @@ public class CorpusBenchmarkTool {
       //create a default tokeniser
       Out.prln("Loading tokeniser");
       FeatureMap params = Factory.newFeatureMap();
+      params.put("annotationSetName", annotSetName);
       tokeniser = (DefaultTokeniser) Factory.createResource(
                       "gate.creole.tokeniser.DefaultTokeniser", params);
 
@@ -53,6 +54,9 @@ public class CorpusBenchmarkTool {
 
       //create a splitter
       Out.prln("Loading sentence splitter");
+      params.clear();
+      params.put("inputASName", annotSetName);
+      params.put("outputASName", annotSetName);
       splitter = (SentenceSplitter) Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter", params);
 
@@ -68,6 +72,8 @@ public class CorpusBenchmarkTool {
 
       //create an orthomatcher
       Out.prln("Loading orthomatcher");
+      params.clear();
+      params.put("annotationSetName", annotSetName);
       orthomatcher = (OrthoMatcher) Factory.createResource(
                       "gate.creole.orthomatcher.OrthoMatcher", params);
     } catch (ResourceInstantiationException ex) {
@@ -144,15 +150,21 @@ public class CorpusBenchmarkTool {
     List inputFiles = null;
     if(args.length < 1) throw new GateException(usage);
     int i = 0;
-    if(args[0].equals("-generate")) {
-      Out.prln("Generating the corpus...");
-      corpusTool.setGenerateMode(true);
-      i++;
-    } else if (args[0].equals("-marked")) {
-      Out.prln("Evaluating stored results only against human-annotated texts...");
-      corpusTool.setMarkedOnly(true);
-      i++;
-    }
+    while (i < args.length-1) {
+      if(args[i].equals("-generate")) {
+        Out.prln("Generating the corpus...");
+        corpusTool.setGenerateMode(true);
+        i++;
+        break;
+      } else if (args[i].equals("-marked")) {
+        Out.prln("Evaluating stored against human-annotated only...");
+        corpusTool.setMarkedOnly(true);
+        i++;
+        break;
+      } else
+        i++; //just ignore the option, which we do not recognise
+    }//while
+
     String dirName = args[i];
     Out.prln(args[i]);
     File dir = new File(dirName);
@@ -164,8 +176,10 @@ public class CorpusBenchmarkTool {
     corpusTool.setStartDirectory(dir);
     corpusTool.execute();
 
-    Out.prln("Overall average precision: " + corpusTool.getPrecisionAverage());
-    Out.prln("Overall average recall: " + corpusTool.getRecallAverage());
+    if (! corpusTool.getGenerateMode()) {
+      Out.prln("Overall average precision: " + corpusTool.getPrecisionAverage());
+      Out.prln("Overall average recall: " + corpusTool.getRecallAverage());
+    }
 
     Out.prln("Finished!");
 
@@ -237,14 +251,12 @@ public class CorpusBenchmarkTool {
     File outDir = outputDir;
     if (outputDir == null) {
       outDir = new File(currDir, PROCESSED_DIR_NAME);
-      outDir.mkdir();
     } else {
       // get rid of the directory, coz datastore wants it clean
-      if (Files.rmdir(outDir))
-        outDir.mkdir(); // create an empty dir of same name
-      else
+      if (!Files.rmdir(outDir))
         Out.prln("cannot delete old output directory: " + outDir);
     }
+    outDir.mkdir();
 
     //create the datastore and process each document
     try {
@@ -541,8 +553,8 @@ public class CorpusBenchmarkTool {
     parameters.put("keyDocument",keyDoc);
     parameters.put("responseDocument",respDoc);
     parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
+    parameters.put("keyAnnotationSetName",annotSetName);
+    parameters.put("responseAnnotationSetName",annotSetName);
     //for a start, do not compare the features of the annotations
     parameters.put("keyFeatureNamesSet", new HashSet());
 
@@ -585,6 +597,8 @@ public class CorpusBenchmarkTool {
    * documents
    */
   private boolean isMarkedOnly = false;
+
+  private String annotSetName = "Key";
 
   /** String to print when wrong command-line args */
   private static String usage =
