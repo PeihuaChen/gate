@@ -18,4 +18,7 @@ package gate.lexicon;
 public interface MutableLexKBWordSense extends LexKBWordSense {
 
   public void setOrderInSynset(int newIndex);
+
+  /** Needed for when senses get renumbered after deletion */
+  public void setSenseNumber(int newNumber);
 }

@@ -32,8 +32,11 @@ public class NLGLexiconImpl extends AbstractLanguageResource
   private String version = "1.0";
   private List synsets = new ArrayList();
   private HashMap words = new HashMap();
+  private List posTypes = new ArrayList();
 
   public NLGLexiconImpl() {
+    for (int i = 0; i < POS_TYPES.length; i++)
+      posTypes.add(POS_TYPES[i]);
   }
 
   public Resource init() throws gate.creole.ResourceInstantiationException {
@@ -45,10 +48,12 @@ public class NLGLexiconImpl extends AbstractLanguageResource
   }
 
   public Iterator getSynsets(Object pos) {
+    if (pos == null)
+      return null;
     List tempList = new ArrayList();
     for (int i=0; i<synsets.size(); i++) {
       LexKBSynset synset = (LexKBSynset) synsets.get(i);
-      if (synset.getPOS().equals(pos))
+      if (pos.equals(synset.getPOS()))
         tempList.add(synset);
     }//for
     return tempList.iterator();
@@ -105,4 +110,32 @@ public class NLGLexiconImpl extends AbstractLanguageResource
     return newSynset;
   }
 
+  public Object[] getPOSTypes() {
+    return posTypes.toArray();
+  }
+
+  public void addPOSType(Object newPOSType) {
+    if (newPOSType == null)
+      return;
+    posTypes.add(newPOSType);
+  }
+
+  public void removeWord(MutableWord theWord) {
+    if (theWord == null)
+      return;
+    theWord.removeSenses();
+    words.remove(theWord.getLemma());
+  }//removeWord
+
+  public void removeSynset(MutableLexKBSynset synset) {
+    if (synset == null)
+      return;
+    List senses = synset.getWordSenses();
+    for (int i = 0; i < senses.size(); i++) {
+      LexKBWordSense sense = (LexKBWordSense) senses.get(i);
+      ((MutableWord) sense.getWord()).removeSense(sense);
+    }//for
+    synset.removeSenses();
+    synsets.remove(synset);
+  }//removeSynset
 }

@@ -82,4 +82,23 @@ public class MutableLexKBSynsetImpl implements MutableLexKBSynset, Serializable 
     return (LexKBWordSense) senses.get(offset);
   }
 
+  public String toString() {
+    StringBuffer theString = new StringBuffer();
+    theString.append("[");
+    for (int i = 0; i < senses.size(); i++) {
+      LexKBWordSense sense = (LexKBWordSense) senses.get(i);
+      theString.append(sense.toString() + ";");
+    }//for
+    theString.append("]");
+    return theString.toString();
+  }//toString
+
+  public void removeSenses(){
+    senses.clear();
+  }
+
+  public void removeSense(LexKBWordSense theSense){
+    senses.remove(theSense);
+  }
+
 }

@@ -23,4 +23,7 @@ public interface MutableWord extends Word {
   /** Add a new sense to this word at the given index*/
   public LexKBWordSense addSense(int index, MutableLexKBSynset wordSynset);
 
+  public void removeSenses();
+
+  public void removeSense(LexKBWordSense theSense);
 }
