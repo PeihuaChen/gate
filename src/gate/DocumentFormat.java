@@ -341,7 +341,7 @@ extends AbstractLanguageResource implements LanguageResource{
 
     // Detect whether or not is a GateXmlDocument
     if (  strBuffer.indexOf("<GateDocument") != -1  ||
-          strBuffer.indexOf("GateDocument") != -1)
+          strBuffer.indexOf(" GateDocument") != -1)
       isGateXmlDocument = true;
     else
       isGateXmlDocument = false;
