@@ -172,7 +172,11 @@ Angel */
         throw
         new DocumentFormatException("XML parser configuration exception ", e);
     } catch (SAXException e){
-        throw new DocumentFormatException(e);
+          // the next line is commented to avoid Document creation fail on error
+//        throw new DocumentFormatException(e);
+          Out.println("Warning: Document remains unparsed. \n"
+              +"\n  Stack Dump: ");
+          e.printStackTrace(Out.getPrintWriter());
     } catch (IOException e){
         throw new DocumentFormatException("I/O exception for " +
                                       doc.getSourceUrl().toString());
