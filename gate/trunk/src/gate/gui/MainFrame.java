@@ -2898,7 +2898,9 @@ public class MainFrame extends JFrame
         /*
           SET ONTOLOGY LIST AND ONTOLOGY
         */
-        Set ontologies = OntologyPool.getPool();
+        Set ontologies = new HashSet(Gate.getCreoleRegister().getLrInstances(
+          "gate.creole.ontology.Ontology"));
+
         editor.setOntologyList(new Vector(ontologies));
 
         editor.visualize();
