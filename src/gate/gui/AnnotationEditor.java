@@ -621,7 +621,13 @@ public class AnnotationEditor extends AbstractVisualResource {
     //RIGHT SIDE - the big tree
     stylesTreeRoot = new DefaultMutableTreeNode(null, true);
     stylesTreeModel = new DefaultTreeModel(stylesTreeRoot, true);
-    stylesTree = new JTree(stylesTreeModel);
+    stylesTree = new JTree(stylesTreeModel){
+      public void updateUI(){
+        super.updateUI();
+        setRowHeight(0);
+      }
+    };
+
     stylesTree.setRootVisible(false);
     stylesTree.setCellRenderer(new NodeRenderer());
     //TIP: setting rowHeight to 0 tells the tree to query its renderer for each
