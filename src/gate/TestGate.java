@@ -34,11 +34,28 @@ import gate.html.*;
 import gate.sgml.*;
 
 
-/** Top-level entry point for GATE test suite.
+/** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
-  * Use a "-t" flag to run the textual UI test runner (useful for
-  * debugging, as there's less confusion to do with threads and
-  * class loaders!).
+  * <P>
+  * Many tests require access to files; generally these files are located
+  * on Web servers. In cases where there is no net connection, or the
+  * Web servers are down, the test files are searched for in the file system
+  * or Jar code base that the system has been loaded from. The search
+  * order for test files is like this:
+  * <UL>
+  * <LI>
+  * <A HREF=http://derwent.dcs.shef.ac.uk:80/gate.ac.uk/>
+  * http://derwent.dcs.shef.ac.uk:80/gate.ac.uk/</A>
+  * <LI>
+  * <A HREF=http://gate.ac.uk:80/>http://gate.ac.uk:80/</A>
+  * <LI>
+  * <A HREF=http://localhost:80/gate.ac.uk/>http://localhost:80/gate.ac.uk/</A>
+  * <LI>
+  * the file system location that the classes came from, e.g.
+  * <TT>z:\gate2\classes</TT>, or <TT>jar:....gate.jar</TT>.
+  * </UL>
+  * This search order can be modified by parameters to the main 
+  * function (see below).
   */
 public class TestGate
 {
@@ -54,6 +71,9 @@ public class TestGate
     * <B>-n</B> means assume there's no net connection
     * <LI>
     * <B>-t</B> means run the test runner in text mode
+    * (useful for
+    * debugging, as there's less confusion to do with threads and
+    * class loaders).
     * </UL>
     */
   public static void main(String[] args) throws Exception {
@@ -117,7 +137,7 @@ public class TestGate
     Gate.init();
 
     TestSuite suite = new TestSuite();
-    suite.addTest(TestCreole.suite());  //*
+    suite.addTest(TestCreole.suite());  /*
     suite.addTest(TestXSchema.suite());
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
@@ -134,7 +154,7 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());      //*/
+    suite.addTest(TestDB.suite());      */
 
     return suite;
   } // suite
