@@ -52,8 +52,6 @@ public class DocumentViewer extends JPanel {
     centerSplit.setOrientation(JSplitPane.VERTICAL_SPLIT);
     textPane.setEditorKit(new RawEditorKit());
     textPane.setEditable(false);
-    textPane.setSelectionColor(new Color(0,0,128));
-    textPane.setSelectedTextColor(Color.green);
     textPane.setText(document.getContent().toString());
     tableView = new SortedTable();
     tableView.setTableModel(new AnnotationSetTableModel(document,
@@ -74,6 +72,8 @@ public class DocumentViewer extends JPanel {
         this_componentResized(e);
       }
     });
+    typeButtonsScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    typeButtonsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     tableScroll.getViewport().add(tableView, null);
     //create the types buttons
     typesBox.removeAll();
@@ -150,20 +150,31 @@ public class DocumentViewer extends JPanel {
       ldim = new Dimension(maxWidth -10, typeButton.getPreferredSize().height -4);
       typeButton.setMinimumSize(bdim);
       typeButton.setMaximumSize(bdim);
+      typeButton.setPreferredSize(bdim);
       ((JLabel)typeButton.getComponent(0)).setMinimumSize(ldim);
       ((JLabel)typeButton.getComponent(0)).setMaximumSize(ldim);
       typesBox.add(typeButton);
     }
+    typeButtonsScroll.getViewport().add(typesBox, null);
+/*
+    typeButtonsScroll.setPreferredSize(
+      new Dimension(maxWidth +
+                    typeButtonsScroll.getVerticalScrollBar().getWidth() + 5,
+                    typeButtonsScroll.getSize().height));
+*/
+    typeButtonsScroll.setPreferredSize(
+      new Dimension(maxWidth +
+                    (new JScrollBar()).getPreferredSize().width + 6,
+                    typeButtonsScroll.getSize().height));
 
     centerSplit.add(textScroll, JSplitPane.TOP);
     centerSplit.add(tableScroll, JSplitPane.BOTTOM);
     textScroll.getViewport().add(textPane, null);
-
     RepaintManager repaintManager = RepaintManager.currentManager(textPane);
 //    repaintManager.setDoubleBufferingEnabled(false);
 //    textPane.setDebugGraphicsOptions(DebugGraphics.LOG_OPTION);
     this.add(typeButtonsScroll, BorderLayout.EAST);
-    typeButtonsScroll.getViewport().add(typesBox, null);
+
     this.add(centerSplit, BorderLayout.CENTER);
   }
 

@@ -34,6 +34,7 @@ import com.objectspace.jgl.*;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
+import gate.gui.*;
 
 
 /**
@@ -97,6 +98,21 @@ public class ParseCpsl implements JapeConstants {
     fileName = "stream";
     dirName = "stream";
   } // ParseCpsl stream constructor
+
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
+  }
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
+  }
+  protected void fireStatusChangedEvent(String text){
+    java.util.Iterator listenersIter = myStatusListeners.iterator();
+    while(listenersIter.hasNext())
+      ((StatusListener)listenersIter.next()).statusChanged(text);
+  }
+  
+  private java.util.List myStatusListeners = new java.util.LinkedList();  
 
   /** Our current file name. */
   private String fileName;
@@ -251,7 +267,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
 
           if(fromResource) { // the grammar is from a resource file
             String resName = phaseNameTok.image + ".jape";
-
+	    fireStatusChangedEvent("Reading " + resName + "...");
             // construct a parser and parse it
             try {
               parser = new ParseCpsl(dirName, resName, macrosMap);
@@ -273,6 +289,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
               );
 
             // construct a parser and parse it
+	    fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(phaseFile.getAbsolutePath(), macrosMap);
             } catch (IOException e) {
@@ -1007,8 +1024,8 @@ String ConsumeBlock() {
 
 
 // $Log$
-// Revision 1.8  2000/07/12 14:34:16  valyt
-// Testing CVS CI
+// Revision 1.9  2000/07/12 17:55:45  valyt
+// *** empty log message ***
 //
 // Revision 1.7  2000/06/09 16:54:34  hamish
 // support for grammars coming from resources

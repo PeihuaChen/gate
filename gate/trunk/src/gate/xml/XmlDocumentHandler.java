@@ -79,7 +79,7 @@ public class XmlDocumentHandler extends HandlerBase
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent));
-    fireStatusChangedEvent("Total elements : " + elements);
+    fireStatusChangedEvent("Total elements: " + elements);
   }
 
   /**

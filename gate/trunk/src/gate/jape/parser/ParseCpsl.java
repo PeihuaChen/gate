@@ -7,6 +7,7 @@ import com.objectspace.jgl.*;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
+import gate.gui.*;
 
 
 /**
@@ -70,6 +71,21 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     fileName = "stream";
     dirName = "stream";
   } // ParseCpsl stream constructor
+
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
+  }
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
+  }
+  protected void fireStatusChangedEvent(String text){
+    java.util.Iterator listenersIter = myStatusListeners.iterator();
+    while(listenersIter.hasNext())
+      ((StatusListener)listenersIter.next()).statusChanged(text);
+  }
+
+  private java.util.List myStatusListeners = new java.util.LinkedList();
 
   /** Our current file name. */
   private String fileName;
@@ -141,7 +157,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
           if(fromResource) { // the grammar is from a resource file
             String resName = phaseNameTok.image + ".jape";
-
+            fireStatusChangedEvent("Reading " + resName + "...");
             // construct a parser and parse it
             try {
               parser = new ParseCpsl(dirName, resName, macrosMap);
@@ -163,6 +179,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
               );}
 
             // construct a parser and parse it
+            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(phaseFile.getAbsolutePath(), macrosMap);
             } catch (IOException e) {
@@ -1140,17 +1157,6 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   final private boolean jj_3R_12() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1161,6 +1167,17 @@ existingAttrName + "\");" + nl +
     if (jj_3R_16()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
