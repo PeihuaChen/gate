@@ -207,7 +207,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       jbInit();
     }
     catch(Exception ex) {
-      ex.printStackTrace();
+      ex.printStackTrace(Err.getPrintWriter());
     }
 
   }
@@ -220,7 +220,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       jbInit();
     }
     catch(Exception ex) {
-      ex.printStackTrace();
+      ex.printStackTrace(Err.getPrintWriter());
     }
   }
 
@@ -317,7 +317,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       setAnnotation(utterance);
 
     } catch (InvalidOffsetException ioe) {
-      ioe.printStackTrace();
+      ioe.printStackTrace(Err.getPrintWriter());
     }
 
   }
@@ -683,7 +683,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       displayedString = currentSet.getDocument().getContent().getContent(
                         utteranceStartOffset, utteranceEndOffset).toString();
     } catch (InvalidOffsetException ioe) {
-      ioe.printStackTrace();
+      ioe.printStackTrace(Err.getPrintWriter());
     }
 
     AnnotationSet allTokens = currentSet.get(utteranceStartOffset,
@@ -733,7 +733,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         tokenText = document.getContent().getContent(
                         tokenBegin, tokenEnd).toString();
       } catch (InvalidOffsetException ioe) {
-        ioe.printStackTrace();
+        ioe.printStackTrace(Err.getPrintWriter());
       }
 
       // create the leaf node
@@ -1434,6 +1434,9 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.20  2001/08/08 16:14:26  kalina
+// A minor change to the tree viewer.
+//
 // Revision 1.19  2001/08/08 14:39:00  kalina
 // Made the dialog to size itself maximum as much as the screen, coz was
 // getting too big without that.

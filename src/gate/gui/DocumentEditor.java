@@ -2087,7 +2087,8 @@ public class DocumentEditor extends AbstractVisualResource{
       boolean allOK = false;
       while(!allOK){
         if(OkCancelDialog.showDialog(DocumentEditor.this,
-                                     tabbedPane, "Edit Annotation")){
+                                     tabbedPane,
+                                     "Edit Annotation")){
           try{
             ((AnnotationVisualResource)((JScrollPane)tabbedPane.
                                         getSelectedComponent()).getViewport().
