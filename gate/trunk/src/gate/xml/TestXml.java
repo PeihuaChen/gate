@@ -85,7 +85,12 @@ public class TestXml extends TestCase
                                                              throws Exception{
     // Load the xml Key Document and unpack it
     gate.Document keyDocument = null;
-    keyDocument = gate.Factory.newDocument(url);
+
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", url);
+    params.put("markupAware", "false");
+    keyDocument = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
 
     assert("Coudn't create a Gate document instance for " +
             url.toString() +

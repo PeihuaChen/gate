@@ -232,7 +232,7 @@ public abstract class Factory
       FeatureMap parameters = newFeatureMap();
       if(DEBUG) Out.prln("Reading the default parameters for  " +
                          res.toString());
-//      parameters.putAll(resData.getParameterList().getInitimeDefaults());
+      parameters.putAll(resData.getParameterList().getInitimeDefaults());
       //overwrite the defaults with the user provided values
       parameters.putAll(parameterValues);
       setResourceParameters(res, parameters);

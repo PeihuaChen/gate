@@ -54,7 +54,12 @@ public class TestSgml extends TestCase
     markupElementsMap.put ("w","Word");
     */
 
-    doc = gate.Factory.newDocument(Gate.getUrl("tests/sgml/Hds.sgm"));
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("sourceUrl", Gate.getUrl("tests/sgml/Hds.sgm"));
+    params.put("markupAware", "false");
+    doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
+
 //    doc = gate.Factory.newDocument(new URL("file:///d:/tmp/Learner/wui2fn08.cls.sgm"));
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
