@@ -77,6 +77,7 @@ public class ShellSlacFrame extends MainFrame {
   } // ShellSlacFrame
 
   protected void initShellSlacLocalData(){
+    createCorpus();
     createDefaultApplication();
   } // initLocalData
 
@@ -215,15 +216,8 @@ public class ShellSlacFrame extends MainFrame {
         Factory.deleteResource(application);
       } // if
       application = (SerialAnalyserController) res;
-      Corpus appCorpus = application.getCorpus();
-      if(appCorpus == null) {
-        createCorpus();
+      if(corpus != null) 
         application.setCorpus(corpus);
-      } 
-      else { // change corpus
-        if(corpus != null) Factory.deleteResource(corpus);
-        corpus = appCorpus;
-      }// if
     } // if
     
     if(res instanceof Corpus) {
@@ -272,6 +266,7 @@ public class ShellSlacFrame extends MainFrame {
     public void actionPerformed(ActionEvent e) {
       if (application != null) {
         try {
+          application.setCorpus(corpus);
           application.execute();
         } catch (ExecutionException ex) {
           ex.printStackTrace();
