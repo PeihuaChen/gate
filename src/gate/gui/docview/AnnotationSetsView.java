@@ -98,16 +98,19 @@ public class AnnotationSetsView extends AbstractDocumentView
     mainTable.getColumnModel().getColumn(SELECTED_COL).setCellRenderer(cellRenderer);
     SetsTableCellEditor cellEditor = new SetsTableCellEditor();
     mainTable.getColumnModel().getColumn(SELECTED_COL).setCellEditor(cellEditor);
+    mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    mainTable.setColumnSelectionAllowed(false);
+    mainTable.setRowSelectionAllowed(true);
     
     mainTable.setTableHeader(null);
-    mainTable.setShowVerticalLines(false);
-    mainTable.setShowHorizontalLines(false);
+    mainTable.setShowGrid(false);
     mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     
     scroller = new JScrollPane(mainTable);
     scroller.getViewport().setOpaque(true);
     scroller.getViewport().setBackground(mainTable.getBackground());
     
+    annotationEditor = new AnnotationEditor(textView, this);
     initListeners();
   }
   
@@ -136,6 +139,18 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void initListeners(){
     document.addDocumentListener(this);
     textMouseListener = new TextMouseListener();
+    mainTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener(){
+        public void valueChanged(ListSelectionEvent e){
+          int selectedRow = mainTable.getSelectedRow();
+          if(selectedRow >= 0){
+	          while(!(tableRows.get(selectedRow) instanceof SetHandler)) 
+	            selectedRow --;
+	          mainTable.getSelectionModel().setSelectionInterval(selectedRow, 
+	                  selectedRow);
+          }
+        }
+    });
   }
     
 	
@@ -359,7 +374,7 @@ public class AnnotationSetsView extends AbstractDocumentView
                 													Object oldValue,
                 													Object newValue){}
       };
-      setLabel.setOpaque(false);
+      setLabel.setOpaque(true);
       setLabel.setFont(setLabel.getFont().deriveFont(Font.BOLD));
       setLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
       
@@ -374,7 +389,7 @@ public class AnnotationSetsView extends AbstractDocumentView
                 													Object newValue){}
       };
       typeChk.setOpaque(false);
-      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+//      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
 
       setChk = new JCheckBox(){
         public void repaint(long tm, int x, int y, int width, int height){}
@@ -388,7 +403,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       setChk.setSelectedIcon(MainFrame.getIcon("expanded.gif"));
       setChk.setIcon(MainFrame.getIcon("closed.gif"));
       setChk.setMaximumSize(setChk.getMinimumSize());
-      setChk.setOpaque(false);
+      setChk.setOpaque(true);
       
     }
     public Component getTableCellRendererComponent(JTable table,
@@ -404,10 +419,16 @@ public class AnnotationSetsView extends AbstractDocumentView
         switch(column){
           case NAME_COL:
             setLabel.setText(sHandler.set.getName());
+            setLabel.setBackground(isSelected ?
+                                   table.getSelectionBackground() :
+                                   table.getBackground());
             return setLabel;
           case SELECTED_COL:
             setChk.setSelected(sHandler.isExpanded());
             setChk.setEnabled(sHandler.typeHandlers.size() > 0);
+            setChk.setBackground(isSelected ?
+                    		         table.getSelectionBackground() :
+                    		         table.getBackground());
             return setChk;
         }
       }else if(value instanceof TypeHandler){
@@ -441,7 +462,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       setChk.setSelectedIcon(MainFrame.getIcon("expanded.gif"));
       setChk.setIcon(MainFrame.getIcon("closed.gif"));
 //      setChk.setMaximumSize(setChk.getMinimumSize());
-      setChk.setOpaque(false);
+      setChk.setOpaque(true);
       setChk.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           fireEditingStopped();
@@ -449,7 +470,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       });
       typeChk = new JCheckBox();
       typeChk.setOpaque(false);
-      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+//      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
       typeChk.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           fireEditingStopped();
@@ -470,6 +491,9 @@ public class AnnotationSetsView extends AbstractDocumentView
           case SELECTED_COL:
             setChk.setSelected(sHandler.isExpanded());
             setChk.setEnabled(sHandler.typeHandlers.size() > 0);
+            setChk.setBackground(isSelected ?
+       		         	             table.getSelectionBackground() :
+       		         	             table.getBackground());
             currentChk = setChk;
             return setChk;
         }
@@ -496,7 +520,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public boolean shouldSelectCell(EventObject anEvent){
-      return false;
+      return true;
     }
     
     public boolean isCellEditable(EventObject anEvent){
@@ -880,7 +904,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void actionPerformed(ActionEvent evt){
-      
+      annotationEditor.setAnnotation(aHandler.ann);
+      annotationEditor.show();
     }
     
     AnnotationHandler aHandler;
@@ -895,6 +920,8 @@ public class AnnotationSetsView extends AbstractDocumentView
   JScrollPane scroller;
   TextualDocumentView textView;
   JEditorPane textPane;
+  AnnotationEditor annotationEditor;
+  
   /**
    * The listener for mouse and mouse motion events in the text view.
    */
