@@ -124,9 +124,8 @@ implements AnnotationSet
    */
   public class VerboseHashMap extends HashMap{
 
-    // NASO
     VerboseHashMap() {
-      super(4);
+      super(Gate.HASH_STH_SIZE);
     } //contructor
 
     public Object remove(Object key){
@@ -652,8 +651,7 @@ implements AnnotationSet
 
     if(annotsByType != null) return;
 
-//    annotsByType = new HashMap(); // NASO
-    annotsByType = new HashMap(4);
+    annotsByType = new HashMap(Gate.HASH_STH_SIZE);
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
@@ -670,8 +668,7 @@ implements AnnotationSet
 
     if(nodesByOffset == null)
       nodesByOffset = new RBTreeMap();
-//    annotsByStartNode = new HashMap(); // NASO
-    annotsByStartNode = new HashMap(4);
+    annotsByStartNode = new HashMap(Gate.HASH_STH_SIZE);
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
@@ -688,8 +685,7 @@ implements AnnotationSet
 
     if(nodesByOffset == null)
       nodesByOffset = new RBTreeMap();
-//    annotsByEndNode = new HashMap(); // NASO
-    annotsByEndNode = new HashMap(4);
+    annotsByEndNode = new HashMap(Gate.HASH_STH_SIZE);
 
     Annotation a;
     Iterator annotIter = annotsById.values().iterator();
