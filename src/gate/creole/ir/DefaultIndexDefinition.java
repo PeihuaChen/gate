@@ -63,4 +63,6 @@ public class DefaultIndexDefinition implements IndexDefinition{
     fields.add(fld);
   }
 
+  /**Serialisation ID*/
+  static final long serialVersionUID = 2925395897153647322L;
 }

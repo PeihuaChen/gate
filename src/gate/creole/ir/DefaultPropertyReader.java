@@ -23,4 +23,5 @@ public class DefaultPropertyReader implements PropertyReader{
     return doc.getContent().toString();
   }
 
+  static final long serialVersionUID = 7334365691679476225L;
 }
