@@ -48,7 +48,7 @@ public class State {
     */
   protected void setAction(RightHandSide rhs){
     action = rhs;
-    isFinal = true;
+    isFinal = (action != null);
   }
 
   /** Sets the value for fileIndex. File index is the index in the jape

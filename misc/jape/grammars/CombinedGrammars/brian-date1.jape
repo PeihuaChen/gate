@@ -281,17 +281,17 @@ Rule:	Year
   :dateName{  // let's do some Java!
 
   int yearValue = -1;
-
+/*
   try {
     yearValue = Integer.parseInt(
                   doc.spanStrings(dateNameAnnots.nth(0)) );
   } catch (NumberFormatException e){
     // the default value of -1 will do
   }
-
+*/
   // if the value looks like a valid year, then add an annotation
   if ( (yearValue < 2100) && (yearValue > 900) ) {
-
+/*
   try {
           JdmSpanSequence spans = new JdmSpanSequence();
           spans.append( new JdmSpan(dateNameAnnots.getLeftmostStart(),
@@ -309,7 +309,7 @@ Rule:	Year
   } catch (JdmException ex) {
     //do nothing for now
   }
-
+*/
 
   } // if
 
@@ -328,8 +328,11 @@ Rule:	Year_AD_BC
 
 
 // $Log$
-// Revision 1.1  1999/02/03 16:23:13  hamish
-// Initial revision
+// Revision 1.2  2000/06/22 13:50:28  valyt
+// Changed TestJdk to accommodate linux
+//
+// Revision 1.1.1.1  1999/02/03 16:23:13  hamish
+// added gate2
 //
 // Revision 1.3  1998/11/25 12:10:30  hamish
 // updates from unix

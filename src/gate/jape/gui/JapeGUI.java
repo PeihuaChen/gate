@@ -95,7 +95,8 @@ public class JapeGUI extends JFrame {
     });
     text.setEditorKit(new RawEditorKit());
     text.setBorder(BorderFactory.createLoweredBevelBorder());
-    text.setEnabled(false);
+    text.setEditable(false);
+    text.setEnabled(true);
     text.setPreferredSize(new Dimension(textViewScroll.getSize().width - 10,
                                         32000));
     jLabel1.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -153,6 +154,7 @@ public class JapeGUI extends JFrame {
   }
 
   void collectionAddBtn_actionPerformed(ActionEvent e) {
+    Document currDoc = null;
     //multi file selection enabled only in JDK 1.3
     if(System.getProperty("java.version").compareTo("1.3") >=0 ){
       //java 1.3 or better
@@ -168,7 +170,8 @@ public class JapeGUI extends JFrame {
           if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
           try{
             for(int i=0; i< selectedFiles.length; i++){
-              corpus.add(Transients.newDocument(selectedFiles[i].toURL()));
+              currDoc = Transients.newDocument(selectedFiles[i].toURL());
+              corpus.add(currDoc);
               corpusFiles.add(selectedFiles[i]);
             }
           }catch(java.net.MalformedURLException mue){
@@ -192,7 +195,8 @@ public class JapeGUI extends JFrame {
         if(selectedFile != null){
           if(corpus == null) corpus = Transients.newCorpus("Jape 2.0");
           try{
-              corpus.add(Transients.newDocument(selectedFile.toURL()));
+              currDoc = Transients.newDocument(selectedFile.toURL());
+              corpus.add(currDoc);
               corpusFiles.add(selectedFile);
           }catch(java.net.MalformedURLException mue){
             mue.printStackTrace(System.err);
@@ -208,6 +212,8 @@ public class JapeGUI extends JFrame {
       currentDoc = (Document) docsIter.next();
       corpusListModel.addElement(currentDoc.getSourceURL().getFile());
     }
+    if(currDoc != null) currentDoc = currDoc;
+    updateAll();
   }
 
   void japeLoadBtn_actionPerformed(ActionEvent e) {
@@ -271,16 +277,18 @@ public class JapeGUI extends JFrame {
                            "ms\n");
 
         statusBar.setText("Tokenizing all the documents...");
+        DefaultTokeniser tokeniser = new DefaultTokeniser();
         int progress = 0;
         int docCnt = corpus.size();
         Iterator docIter = corpus.iterator();
         while(docIter.hasNext()){
           progressBar.setValue(progress++/docCnt);
           currentDoc = (Document)docIter.next();
-          tokenize(currentDoc);
+          tokeniser.tokenise(currentDoc, false);
           progressBar.setValue(progress/docCnt);
         }
         //do the jape stuff
+        Gate.init();
         progressBar.setValue(0);
         startJapeFileOpen = (new Date()).getTime();
         logTextArea.append("corpus tokenization time: " +
@@ -348,64 +356,69 @@ public class JapeGUI extends JFrame {
   }
 
   void updateAll(){
-    //display the current document
-    text.getHighlighter().removeAllHighlights();
-    text.setText(currentDoc.getContent().toString());
-    //get all the annotation types and display the buttons
-    typesPanel.removeAll();
-    Iterator typesIter = currentDoc.getAnnotations().getAllTypes().iterator();
-    String currentType;
+    if(currentDoc == null){
+      text.setText("");
+    }else{
+      //display the current document
+      text.getHighlighter().removeAllHighlights();
+      text.setText(currentDoc.getContent().toString());
+      //get all the annotation types and display the buttons
+      typesPanel.removeAll();
+      Iterator typesIter = currentDoc.getAnnotations().getAllTypes().iterator();
+      String currentType;
 
-    JButton typeButton = new JButton();
-    JLabel typeLabel = new JLabel("Clear all");
-    typeLabel.setBackground(Color.black);
-    typeLabel.setForeground(Color.white);
-    typeButton.add(typeLabel);
-    typeButton.setBackground(Color.black);
-    typeButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        typeButtonPressed("", null);
-      }
-    });
-    typesPanel.add(typeButton);
-    while(typesIter.hasNext()){
-      currentType = (String) typesIter.next();
-      typeButton = new JButton();
-      typeLabel = new JLabel(currentType);
+      JButton typeButton = new JButton();
+      JLabel typeLabel = new JLabel("Clear all");
       typeLabel.setBackground(Color.black);
       typeLabel.setForeground(Color.white);
       typeButton.add(typeLabel);
-      typeButton.setToolTipText(currentType);
-      typeButton.setBackground(new Color(randomGen.nextInt()));
+      typeButton.setBackground(Color.black);
       typeButton.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if(e.getSource() instanceof Container){
-            Container cont = (Container) e.getSource();
-            if(cont.getComponent(0) instanceof JLabel){
-              Color col = cont.getBackground();
-              Color highlightCol = new Color(col.getRed(),
-                                             col.getGreen(),
-                                             col.getBlue(),
-                                             128);
-              typeButtonPressed(((JLabel)cont.getComponent(0)).getText(),
-                                highlightCol);
-            }
-          }
+          typeButtonPressed("", null);
         }
       });
       typesPanel.add(typeButton);
+      while(typesIter.hasNext()){
+        currentType = (String) typesIter.next();
+        typeButton = new JButton();
+        typeLabel = new JLabel(currentType);
+        typeLabel.setBackground(Color.black);
+        typeLabel.setForeground(Color.white);
+        typeButton.add(typeLabel);
+        typeButton.setToolTipText(currentType);
+        typeButton.setBackground(new Color(randomGen.nextInt()));
+        typeButton.addActionListener(new java.awt.event.ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            if(e.getSource() instanceof Container){
+              Container cont = (Container) e.getSource();
+              if(cont.getComponent(0) instanceof JLabel){
+                Color col = cont.getBackground();
+                Color highlightCol = new Color(col.getRed(),
+                                               col.getGreen(),
+                                               col.getBlue(),
+                                               128);
+                typeButtonPressed(((JLabel)cont.getComponent(0)).getText(),
+                                  highlightCol);
+              }
+            }
+          }
+        });
+        typesPanel.add(typeButton);
+      }
+      typesPanel.repaint();
+      //create the table
+      tableView = new JTable(new AnnotationSetTableModel(currentDoc.getAnnotations()));
+      tableViewScroll.getViewport().add(tableView, null);
     }
-    //create the table
-    tableView = new JTable(new AnnotationSetTableModel(currentDoc.getAnnotations()));
-    tableViewScroll.getViewport().add(tableView, null);    
     validate();
   }
 
   void corpusList_mouseClicked(MouseEvent e) {
-    //display the selected document
+    //find out what document we're talking about
     int docIdx = corpusList.locationToIndex(e.getPoint());
     corpusList.setSelectedIndex(docIdx);
-    docIdx++;
+    docIdx++;//just a trick to use the same variable
     Iterator docIter = corpus.iterator();
     while(docIter.hasNext() && docIdx >0 ){
       currentDoc = (Document)docIter.next();
@@ -415,7 +428,24 @@ public class JapeGUI extends JFrame {
       throw(new RuntimeException(
                 "The user has selected an unexistant document! :)"));
     }
-    updateAll();
+    if((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0){
+      JPopupMenu docListPopup = new JPopupMenu();
+      JMenuItem delPopup = new JMenuItem("Drop document");
+      docListPopup.add(delPopup);
+      delPopup.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          //delete the document from the list
+          corpusListModel.removeElement(currentDoc.getSourceURL().getFile());
+          corpus.remove(currentDoc);
+          if(corpus.isEmpty()) currentDoc = null;
+          else currentDoc = (Document)corpus.first();
+          updateAll();
+        }
+      });
+      docListPopup.show(corpusList, e.getPoint().x, e.getPoint().y);
+    }else{
+      updateAll();
+    }
   }
 
   void typeButtonPressed(String type, Color col){

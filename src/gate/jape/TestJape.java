@@ -10,6 +10,7 @@ package gate.jape;
 
 import java.util.*;
 import java.io.*;
+import java.text.*;
 import junit.framework.*;
 
 import gate.*;
@@ -33,6 +34,8 @@ public class TestJape extends TestCase
     * tree.
     */
   public void testCombined() throws IOException, GateException {
+    DoTestBigGrammar("AveShort");
+/*
     Corpus c = Transients.newCorpus("TestJape corpus");
     c.add(
       Transients.newDocument(Files.getResourceAsString("texts/doc0.html"))
@@ -58,6 +61,7 @@ public class TestJape extends TestCase
 
     // check the results
     doc = (Document)c.first();
+  */
   } // testCombined()
 
   /** Batch run */
@@ -91,9 +95,9 @@ public class TestJape extends TestCase
     // run the parser test
     Batch batch = null;
 //    String japeFileName = "/gate/jape/Test11.jape";
-    String japeFileName = "/gate/jape/TestABC.jape";
+    String japeFileName = "jape/InputTexts/TestABC.jape";
 //    String japeFileName = "/gate/jape/Country.jape";
-    InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
+    InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
     batch = new Batch(japeFileStream);
@@ -110,6 +114,90 @@ public class TestJape extends TestCase
 //    System.out.println(defaultAS);
   } // testBatch()
 
+  public void DoTestBigGrammar(String textName){
+    long startCorpusLoad = 0, startCorpusTokenization = 0,
+         startJapeFileOpen = 0, startCorpusTransduce = 0,
+         endProcess = 0;
+    System.out.print("Procesing " + textName + "...\n" +
+                     "Started at: " + (new Date()) + "\n");
+    startCorpusLoad = (new Date()).getTime();
+    System.out.print("Loading corpus... ");
+    Corpus corpus = Transients.newCorpus("Jape Corpus");
+    try{
+    corpus.add(Transients.newDocument(
+        Files.getResourceAsString("jape/InputTexts/" + textName)));
+    }catch(IOException ioe){
+      ioe.printStackTrace(System.err);
+    }
+
+    if(corpus.isEmpty()){
+      System.err.println("Missing corpus !");
+      return;
+    }
+
+    //tokenize all documents
+    DefaultTokeniser tokeniser = new DefaultTokeniser();
+    startCorpusTokenization = (new Date()).getTime();
+    System.out.print(": " +
+                       (startCorpusTokenization - startCorpusLoad) +
+                       "ms\n");
+
+    System.out.print("Tokenizing the corpus... ");
+    int progress = 0;
+    int docCnt = corpus.size();
+    Iterator docIter = corpus.iterator();
+    Document currentDoc;
+    while(docIter.hasNext()){
+      currentDoc = (Document)docIter.next();
+      tokeniser.tokenise(currentDoc, false);
+    }
+    //do the jape stuff
+    Gate.init();
+    startJapeFileOpen = (new Date()).getTime();
+    System.out.print(": " + (startJapeFileOpen - startCorpusTokenization) +
+                     "ms\n");
+    try{
+      System.out.print("Opening Jape grammar... ");
+//      Batch batch = new Batch("jape/combined/", "main.jape");
+      Batch batch = new Batch("z:/gate2/src/gate/resources/jape/combined/main.jape");
+//      Batch batch = new Batch("jape/", "Country.jape");
+      startCorpusTransduce = (new Date()).getTime();
+      System.out.print(": " + (startCorpusTransduce - startJapeFileOpen) +
+                       "ms\n");
+      System.out.print("Transducing the corpus... ");
+      batch.transduce(corpus);
+      endProcess = (new Date()).getTime();
+      System.out.print(": " + (endProcess - startCorpusTransduce) + "ms\n");
+    }catch(JapeException je){
+      je.printStackTrace(System.err);
+    }
+  }
+
+
+  public void tokenize(Document doc){
+    String content = doc.getContent().toString();
+    BreakIterator bi = BreakIterator.getWordInstance();
+    bi.setText(content);
+    int start = bi.first();
+    FeatureMap fm;
+    try{
+      for (int end = bi.next();
+           end != BreakIterator.DONE;
+           start = end, end = bi.next())
+      {
+        if(!Character.isWhitespace(content.charAt(start))){
+          fm = Transients.newFeatureMap();
+          fm.put("string", content.substring(start, end));
+          doc.getAnnotations().add(new Long(start),
+                                   new Long(end),
+                                   "Token", fm);
+//System.out.println("Token: " + content.substring(start, end));
+        }
+      }//for
+    }catch(InvalidOffsetException ioe){
+    }
+  }
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestJape.class);
@@ -120,7 +208,9 @@ public class TestJape extends TestCase
     try{
       TestJape testJape = new TestJape("Test Jape");
       testJape.setUp();
-      testJape.testBatch();
+      testJape.testCombined();
+//      if(args.length < 1) testJape.DoTestBigGrammar("AveShort");
+ //     else testJape.DoTestBigGrammar(args[0]);
     }catch(Exception e){
       e.printStackTrace(System.err);
     }
@@ -139,9 +229,9 @@ public class TestJape extends TestCase
 ////  //Author:       Hamish Cunningham
 ////  //Company:      NLP Group, DCS, Univ. of Sheffield
 ////  //Description:  Test class for JAPE.
-////  
+////
 //// package gate.jape;
-////  
+////
 ////  import gate.jape.parser.*;
 ////  import gate.*;
 ////  import gate.annotation.*;
@@ -150,28 +240,28 @@ public class TestJape extends TestCase
 ////  import java.util.Enumeration;
 ////  import java.io.*;
 ////  import com.objectspace.jgl.*;
-////  
+////
 ////  /**
 ////    * A test harness for JAPE. Uses the Sheffield Tokeniser, and must be run
 ////    * from the gate2 directory.
 ////    * @author Hamish Cunningham
 ////    */
 //// public class TestJape {
-////  
+////
 ////    static public void main(String[] args) {
 ////      // initialise GATE
 ////      Gate.init();
-////  
+////
 ////      // turn debug output on/off
 ////      //Debug.setDebug(true);
 ////      //Debug.setDebug(BasicPatternElement.class, true);
-////  
+////
 ////      // create a collection and run the tokeniser
 ////      Corpus coll = tokenise();
-////  
+////
 ////      // test compiler output
 ////      testCompilerOutput(coll);
-////  
+////
 ////      // got anything?
 ////      try {
 ////        //Debug.pr(this,
@@ -181,29 +271,29 @@ public class TestJape extends TestCase
 ////        Debug.pr(TestJape.class, "TestJape.main: first annotation is: ");
 ////        JdmAnnotation annot = coll.firstDocument().getAnnotations().nth(0);
 ////        Debug.pr(TestJape.class, "TestJape.main: " + annot.toString());
-////  
+////
 ////      } catch(Exception e) { e.printStackTrace(); }
-////  
+////
 ////      // run the backend test
 ////      testBackEnd(coll);
-////  
+////
 ////      // run the parser test
 ////      Transducer[] transducers = testParser(coll);
-////  
+////
 ////      // test the transducers from the parser
 ////      testTransducers(transducers, coll);
-////  
+////
 ////  try {
 ////  System.out.println("TestJape: " + coll.firstDocument().selectAnnotations(
 ////    "number", new FeatureMap()));
 ////    coll.sync();
 ////  } catch(Exception e) { e.printStackTrace(); }
-////  
+////
 ////      System.out.println("\n\nWow! We reached the end without crashing!!!\n");
 ////      System.exit(0);
 ////    } // main
-////  
-////  
+////
+////
 ////    /**
 ////      * Create a collection and put a tokenised doc in it.
 ////      */
@@ -243,12 +333,12 @@ public class TestJape extends TestCase
 ////        return null;
 ////      }
 ////  */
-////  
+////
 ////      // return the result
 ////      return collection;
 ////    } //tokenise
-////  
-////  
+////
+////
 ////    /**
 ////      * Must be run from the gate2 directory.
 ////      * Parse jape/grammars/Test1.cpsl,
@@ -257,7 +347,7 @@ public class TestJape extends TestCase
 ////      */
 ////    static public Transducer[] testParser(Corpus coll) {
 ////      Transducer[] transducers = new Transducer[2];
-////  
+////
 ////      // parse the Test1.cpsl grammar
 ////      try {
 ////        ParseCpsl cpslParser =
@@ -269,7 +359,7 @@ public class TestJape extends TestCase
 ////      } catch(gate.jape.parser.ParseException ee) {
 ////        ee.printStackTrace();
 ////      }
-////  
+////
 ////      // parse the Test2.cpsl grammar
 ////      try {
 ////        File testGrammar2 =
@@ -284,8 +374,8 @@ public class TestJape extends TestCase
 ////
 ////      return transducers;
 ////    } // testParser
-////  
-////  
+////
+////
 ////    /** Test the backend classes (that are normally constructed by the parser -
 ////      * in this case we construct them manually).
 ////      * This example is based on this rule:
@@ -300,26 +390,26 @@ public class TestJape extends TestCase
 ////      Constraint constraint = new Constraint("Token");
 ////      try { constraint.addAttribute(new JdmAttribute("kind", "otherNum"));
 ////      } catch(Exception e) { e.printStackTrace(); }
-////  
+////
 ////      BasicPatternElement bpe = new BasicPatternElement();
 ////      bpe.addConstraint(constraint);
 ////      ConstraintGroup cg1 = new ConstraintGroup();
 ////      cg1.addPatternElement(bpe);
-////  
+////
 ////      ComplexPatternElement cpe = new ComplexPatternElement(
 ////        cg1, JapeConstants.KLEENE_PLUS, "numberList"
 ////      );
-////  
+////
 ////      ConstraintGroup cg2 = new ConstraintGroup();
 ////      cg2.addPatternElement(cpe);
-////  
+////
 ////      LeftHandSide lhs = new LeftHandSide(cg2);
 ////      try {
 ////        lhs.addBinding("numberList", cpe, new HashSet(), false);
 ////      } catch(JapeException e) {
 ////        e.printStackTrace();
 ////      }
-////  
+////
 ////      StringBuffer rhsString = new StringBuffer();
 ////      try {
 ////        File f = new File("jape/grammars/ExampleRhs.txt");
@@ -337,7 +427,7 @@ public class TestJape extends TestCase
 ////        e.printStackTrace();
 ////      }
 ////      Debug.pr(TestJape.class, "TestJape.main: loaded the action class");
-////  
+////
 ////      Rule rule =
 ////        new Rule("numbers", 0, JapeConstants.DEFAULT_PRIORITY, lhs, rhs);
 ////      SinglePhaseTransducer transducer =
@@ -354,12 +444,12 @@ public class TestJape extends TestCase
 ////      } catch(JapeException e) {
 ////        e.printStackTrace();
 ////      }
-////  
+////
 ////      // delete temp files created for Rule RHS actions
 ////  ///    RightHandSide.cleanUp();
 ////      Debug.pr(TestJape.class, "TestJape.main: testBackEnd done");
 ////    } // testBackEnd
-////  
+////
 ////    static public void testTransducers(
 ////      Transducer[] transducers, Corpus coll
 ////    ) {
@@ -376,16 +466,16 @@ public class TestJape extends TestCase
 ////          e.printStackTrace();
 ////        }
 ////      } // for
-////  
+////
 ////    } // testTransducers
-////  
+////
 ////    /** If Test4.ser exists, try running. */
 ////    static public void testCompilerOutput(Corpus coll) {
 ////      Debug.pr(TestJape.class, "testing compiler");
 ////      File f = new File("jape/grammars/Test4.ser");
 ////      if(! f.exists())
 ////        System.out.println("Test4.ser not found");
-////  
+////
 ////      MultiPhaseTransducer t = null;
 ////      try {
 ////        FileInputStream fis = new FileInputStream(f.getPath());
@@ -401,7 +491,7 @@ public class TestJape extends TestCase
 ////      catch(Exception e) {
 ////        System.err.println("error transducing: " + e.toString());
 ////      }
-////  
+////
 ////    } // testCompilerOutput
-////  
+////
 ////} // class TestJape
