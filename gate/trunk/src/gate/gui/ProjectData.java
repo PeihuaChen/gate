@@ -36,8 +36,22 @@ public class ProjectData {
     appList.add(newApp);
   }
 
+  List getApplicationsList(){
+    return appList;
+  }
+
   public void addLR(LRHandle newLR){
     lrList.add(newLR);
+  }
+  List getLRList(){
+    return lrList;
+  }
+
+  public void addPR(PRHandle newPR){
+    prList.add(newPR);
+  }
+  List getPRList(){
+    return prList;
   }
 
   transient File projectFile;

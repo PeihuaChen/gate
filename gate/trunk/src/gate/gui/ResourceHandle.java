@@ -35,9 +35,17 @@ import gate.*;
  * popup menu for right click events, etc.
  */
 class ResourceHandle{
-  public ResourceHandle(Resource resource, String title){
+  public ResourceHandle(Resource resource){
     this.resource = resource;
+    this.title = (String)resource.getFeatures().get("Name");
+    buildViews();
+  }
+
+  public ResourceHandle(String title){
+    this.resource = null;
     this.title = title;
+    largeView = null;
+    smallView = null;
   }
 
   public Icon getSmallIcon(){
@@ -65,11 +73,11 @@ class ResourceHandle{
   }
 
   /**
-   * Returns a list of GUI components capable of diaplaying this resource.
-   * These components will be used as various views of the resource.
+   * Returns the large view for this resource. This view will go into the main
+   * display area.
    */
-  public java.util.List getViewers(){
-    return new ArrayList();
+  public JComponent getLargeView(){
+    return largeView;
   }
 
   public JPopupMenu getPopup(){
@@ -80,8 +88,36 @@ class ResourceHandle{
     this.popup = popup;
   }
 
+  public void setShown(boolean visible){
+    shown = visible;
+  }
+
+  public boolean isShown(){
+    return shown;
+  }
+
+  public String getTooltipText(){
+    return tooltipText;
+  }
+
+  public void setTooltipText(String text){
+    this.tooltipText = text;
+  }
+
+  protected void buildViews(){
+    JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
+    ResourceViewer rView = new ResourceViewer();
+    rView.setResource(resource);
+    view.add("Features", rView);
+    largeView = view;
+    smallView = null;
+  }
   JPopupMenu popup;
   String title;
+  String tooltipText;
   Resource resource;
   Icon smallIcon;
+  boolean shown;
+  JComponent smallView;
+  JComponent largeView;
 }

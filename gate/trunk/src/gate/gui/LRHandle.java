@@ -21,13 +21,21 @@ import java.awt.event.*;
 
 public class LRHandle extends ResourceHandle {
 
-  public LRHandle(LanguageResource res, String title) {
-    super(res, title);
+  public LRHandle(LanguageResource res) {
+    super(res);
     setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/lr.gif")));
     popup = new JPopupMenu();
     popup.add(new CloseLRAction());
+    JTabbedPane view = (JTabbedPane)super.getLargeView();
+    if(resource instanceof gate.Document){
+      AnnotationEditor annView = new AnnotationEditor();
+      annView.setDocument((Document)resource);
+      view.add("Annotations", annView);
+    }
   }
+
+
 
   class CloseLRAction extends AbstractAction{
     public CloseLRAction(){
