@@ -107,7 +107,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
                         rule.getRHS().getActionClassString());
     }
     try{
-      Javac.loadClasses(actionClasses);
+      gate.util.Compiler.loadClasses(actionClasses);
     }catch(Exception e){
       Err.prln("Compile error:\n" + e.getMessage());
 //e.printStackTrace();
