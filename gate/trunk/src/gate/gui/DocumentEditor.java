@@ -49,7 +49,8 @@ import java.io.*;
  * annotations will be restricted to a very crude method allowing the user to
  * add any type of annotations having any features with any String values.
  */
-public class AnnotationEditor extends AbstractVisualResource {
+public class DocumentEditor extends AbstractVisualResource
+                            implements GenericVisualResource {
   //properties
   private transient PropertyChangeSupport propertyChangeListeners =
                                           new PropertyChangeSupport(this);
@@ -190,10 +191,14 @@ public class AnnotationEditor extends AbstractVisualResource {
    * Default constructor. Creats all the components and initialises all the
    * internal data to default values where possible.
    */
-  public AnnotationEditor() {
+  public DocumentEditor() {
+  }
+
+  public Resource init(){
     initLocalData();
     initGuiComponents();
     initListeners();
+    return this;
   }
 
   /** Test code*/
@@ -236,15 +241,15 @@ public class AnnotationEditor extends AbstractVisualResource {
       //check for exceptions
       tokeniser.check();
 
-      AnnotationEditor editor = new AnnotationEditor();
+      DocumentEditor editor = new DocumentEditor();
       frame.getContentPane().add(editor);
       frame.pack();
       frame.setVisible(true);
-      editor.setDocument(doc);
+      editor.setTarget(doc);
 
       //get the annotation schemas
       params =  Factory.newFeatureMap();
-      params.put("xmlFileUrl", AnnotationEditor.class.getResource(
+      params.put("xmlFileUrl", DocumentEditor.class.getResource(
                               "/gate/resources/creole/schema/PosSchema.xml"));
 
       AnnotationSchema annotSchema = (AnnotationSchema)
@@ -335,7 +340,7 @@ public class AnnotationEditor extends AbstractVisualResource {
                      e.getClickCount() == 2){
               if(styleChooser == null){
                 Window parent = SwingUtilities.getWindowAncestor(
-                                  AnnotationEditor.this);
+                                  DocumentEditor.this);
                 styleChooser = parent instanceof Frame ?
                                new TextAttributesChooser((Frame)parent,
                                                          "Please select your options",
@@ -420,7 +425,10 @@ public class AnnotationEditor extends AbstractVisualResource {
           popup.show(annotationsTable, e.getX(), e.getY());
         }
       }
-    });
+    });//annotationsTable.addMouseListener(new MouseAdapter()
+
+
+
     annotationsTable.getInputMap().put(
                   KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0),
                   "Delete");
@@ -808,16 +816,28 @@ public class AnnotationEditor extends AbstractVisualResource {
    * Sets the document to be displayed
    * @param newDocument a {@link gate.Document}
    */
-  public void setDocument(gate.Document newDocument) {
+  public void setTarget(Object target){
+//  public void setDocument(gate.Document newDocument) {
+    if(!(target instanceof gate.Document)){
+      throw new IllegalArgumentException(
+        "The document editor can only display Gate documents!\n" +
+        "The provided resource is not a document but a: " +
+        target.getClass().toString() + "!");
+    }
     gate.Document  oldDocument = document;
-    document = newDocument;
+    document = (gate.Document)target;
     //this needs to be executed even if the new document equals(oldDocument)
     //in order to update the pointers
     if(oldDocument != document) this_documentChanged();
 
     propertyChangeListeners.firePropertyChange("document", oldDocument,
-                                               newDocument);
+                                               target);
   }
+
+  public void setHandle(ResourceHandle handle){
+    //NOP
+  }
+
 
   /**
    * Gets the currently displayed document
@@ -2071,7 +2091,7 @@ public class AnnotationEditor extends AbstractVisualResource {
             //set node
             if(setName.equals("Default")){
               JOptionPane.showMessageDialog(
-                AnnotationEditor.this,
+                DocumentEditor.this,
                 "The default annotation set cannot be deleted!\n" +
                 "It will only be cleared...",
                 "Gate", JOptionPane.ERROR_MESSAGE);
@@ -2124,7 +2144,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       fileChooser.setDialogTitle("Select document to save ...");
       fileChooser.setSelectedFiles(null);
 
-      int res = fileChooser.showDialog(AnnotationEditor.this, "Save");
+      int res = fileChooser.showDialog(DocumentEditor.this, "Save");
       if(res == JFileChooser.APPROVE_OPTION){
         selectedFile = fileChooser.getSelectedFile();
         fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
