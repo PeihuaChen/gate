@@ -371,16 +371,106 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
 
+  /** creates an entry for annotation set in the database */
   protected void createAnnotationSet(Long lrID, AnnotationSet aset)
     throws PersistenceException {
 
-    throw new MethodNotImplementedException();
-  }
+    //1. create a-set
+    String asetName = aset.getName();
+    Long asetID = null;
 
-  protected void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
-    throws PersistenceException {
+    //DB stuff
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
-    throw new MethodNotImplementedException();
+    try {
+      String sql = "select persist_create_annotation_set(?,?)";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+
+      pstmt.setLong(1,lrID.longValue());
+      if (null == asetName) {
+        pstmt.setNull(2,java.sql.Types.VARCHAR);
+      }
+      else {
+        pstmt.setString(2,asetName);
+      }
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("empty result set");
+      }
+
+      asetID = new Long(rs.getLong(1));
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't create a-set [step 1] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+
+    //2. insert annotations/nodes for DEFAULT a-set
+    //for now use a stupid cycle
+    //TODO: pass all the data with one DB call (?)
+
+    try {
+      String sql = "select persist_create_annotation(?,?,?,?,?,?,?,?) ";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+
+
+      Iterator itAnnotations = aset.iterator();
+
+      while (itAnnotations.hasNext()) {
+        Annotation ann = (Annotation)itAnnotations.next();
+        Node start = (Node)ann.getStartNode();
+        Node end = (Node)ann.getEndNode();
+        String type = ann.getType();
+
+        //DB stuff
+        Long annGlobalID = null;
+        pstmt.setLong(1,lrID.longValue());
+        pstmt.setLong(2,ann.getId().longValue());
+        pstmt.setLong(3,asetID.longValue());
+        pstmt.setLong(4,start.getId().longValue());
+        pstmt.setLong(5,start.getOffset().longValue());
+        pstmt.setLong(6,end.getId().longValue());
+        pstmt.setLong(7,end.getOffset().longValue());
+        pstmt.setString(8,type);
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        if (false == rs.next()) {
+          throw new PersistenceException("empty result set");
+        }
+
+        annGlobalID = new Long(rs.getLong(1));
+        DBHelper.cleanup(rs);
+
+        //2.1. set annotation features
+        FeatureMap features = ann.getFeatures();
+        Assert.assertNotNull(features);
+        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+//        createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+      } //while
+    }//try
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_INVALID_ANNOTATION_TYPE:
+          throw new PersistenceException(
+                              "can't create annotation in DB, [invalid annotation type]");
+        default:
+          throw new PersistenceException(
+                "can't create annotation in DB: ["+ sqle.getMessage()+"]");
+      }//switch
+    }//catch
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
   }
 
   /**
@@ -454,6 +544,235 @@ public class PostgresDataStore extends JDBCDataStore {
 
     //delegate
     writeCLOB(src.toString(),dest);
+  }
+
+
+
+  /**
+   *  creates a feature with the specified type/key/value for the specified entity
+   *  entitties are either LRs ot Annotations
+   *  valid values are: boolean,
+   *                    int,
+   *                    long,
+   *                    string,
+   *                    float,
+   *                    Object,
+   *                    boolean List,
+   *                    int List,
+   *                    long List,
+   *                    string List,
+   *                    float List,
+   *                    Object List
+   *
+   */
+
+  private void createFeature(Long entityID, int entityType,String key, Object value, PreparedStatement pstmt)
+    throws PersistenceException {
+
+    //1. what kind of feature value is this?
+    int valueType = findFeatureType(value);
+
+    //2. how many elements do we store?
+    Vector elementsToStore = new Vector();
+
+    switch(valueType) {
+      case DBHelper.VALUE_TYPE_NULL:
+      case DBHelper.VALUE_TYPE_BINARY:
+      case DBHelper.VALUE_TYPE_BOOLEAN:
+      case DBHelper.VALUE_TYPE_FLOAT:
+      case DBHelper.VALUE_TYPE_INTEGER:
+      case DBHelper.VALUE_TYPE_LONG:
+      case DBHelper.VALUE_TYPE_STRING:
+        elementsToStore.add(value);
+        break;
+
+      default:
+        //arrays
+        List arr = (List)value;
+        Iterator itValues = arr.iterator();
+
+        while (itValues.hasNext()) {
+          elementsToStore.add(itValues.next());
+        }
+
+        //normalize , i.e. ignore arrays
+        if (valueType == DBHelper.VALUE_TYPE_BINARY_ARR)
+          valueType = DBHelper.VALUE_TYPE_BINARY;
+        else if (valueType == DBHelper.VALUE_TYPE_BOOLEAN_ARR)
+          valueType = DBHelper.VALUE_TYPE_BOOLEAN;
+        else if (valueType == DBHelper.VALUE_TYPE_FLOAT_ARR)
+          valueType = DBHelper.VALUE_TYPE_FLOAT;
+        else if (valueType == DBHelper.VALUE_TYPE_INTEGER_ARR)
+          valueType = DBHelper.VALUE_TYPE_INTEGER;
+        else if (valueType == DBHelper.VALUE_TYPE_LONG_ARR)
+          valueType = DBHelper.VALUE_TYPE_LONG;
+        else if (valueType == DBHelper.VALUE_TYPE_STRING_ARR)
+          valueType = DBHelper.VALUE_TYPE_STRING;
+    }
+
+    //3. for all elements:
+    for (int i=0; i< elementsToStore.size(); i++) {
+
+        Object currValue = elementsToStore.elementAt(i);
+
+        //3.1. create a dummy feature [LOB hack]
+        Long featID = _createFeature(entityID,entityType,key,currValue,valueType,pstmt);
+
+        if (valueType == DBHelper.VALUE_TYPE_BINARY) {
+          //3.3. BLOBs
+          _updateFeatureLOB(featID,value,valueType);
+        }
+    }
+
+
+  }
+
+
+
+  /**
+   *  helper metod
+   *  iterates a FeatureMap and creates all its features in the database
+   */
+  protected void createFeatures(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException {
+
+    //0. prepare statement ad use it for all features
+    PreparedStatement pstmt = null;
+
+    try {
+      String sql = "select persist_create_feature(?,?,?,?,?,?) ";
+      pstmt = this.jdbcConn.prepareStatement(sql);
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException(sqle);
+    }
+
+    /* when some day Java has macros, this will be a macro */
+    Set entries = features.entrySet();
+    Iterator itFeatures = entries.iterator();
+    while (itFeatures.hasNext()) {
+      Map.Entry entry = (Map.Entry)itFeatures.next();
+      String key = (String)entry.getKey();
+      Object value = entry.getValue();
+      createFeature(entityID,entityType,key,value,pstmt);
+    }
+
+    //3. cleanup
+    DBHelper.cleanup(pstmt);
+  }
+
+  protected void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException {
+  }
+
+  /**
+   *  creates a feature of the specified type/value/valueType/key for the specified entity
+   *  Entity is one of: LR, Annotation
+   *  Value types are: boolean, int, long, string, float, Object
+   */
+  private Long _createFeature(Long entityID,
+                              int entityType,
+                              String key,
+                              Object value,
+                              int valueType,
+                              PreparedStatement pstmt)
+    throws PersistenceException {
+
+    //1. store in DB
+    Long featID = null;
+    ResultSet rs = null;
+
+    try {
+
+      //1.1 set known values + NULLs
+      pstmt.setLong(1,entityID.longValue());
+      pstmt.setInt(2,entityType);
+      pstmt.setString(3,key);
+      pstmt.setNull(4,java.sql.Types.BIGINT);
+      pstmt.setNull(5,java.sql.Types.VARCHAR);
+      pstmt.setInt(6,valueType);
+
+      //1.2 set proper data
+      switch(valueType) {
+
+        case DBHelper.VALUE_TYPE_NULL:
+          break;
+
+        case DBHelper.VALUE_TYPE_BOOLEAN:
+
+          boolean b = ((Boolean)value).booleanValue();
+          pstmt.setLong(4, b ? DBHelper.TRUE : DBHelper.FALSE);
+          break;
+
+        case DBHelper.VALUE_TYPE_INTEGER:
+
+          pstmt.setLong(4,((Integer)value).intValue());
+          break;
+
+        case DBHelper.VALUE_TYPE_LONG:
+
+          pstmt.setLong(4,((Long)value).longValue());
+          break;
+
+        case DBHelper.VALUE_TYPE_FLOAT:
+
+          Double d = (Double)value;
+          pstmt.setDouble(4,d.doubleValue());
+          break;
+
+        case DBHelper.VALUE_TYPE_BINARY:
+          //ignore
+          //will be handled later in processing
+          break;
+
+        case DBHelper.VALUE_TYPE_STRING:
+
+          String s = (String)value;
+          //does it fin into a varchar2?
+          pstmt.setString(5,s);
+          break;
+
+        default:
+          throw new IllegalArgumentException("unsuppoeted feature type");
+      }
+
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("empty result set");
+      }
+
+      featID = new Long(rs.getLong(1));
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_FEATURE_TYPE:
+          throw new PersistenceException("can't create feature [step 1],"+
+                      "[invalid feature type] in DB: ["+ sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException("can't create feature [step 1] in DB: ["+
+                                                      sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(rs);
+//      DBHelper.cleanup(stmt);
+    }
+
+    return featID;
+  }
+
+
+  /**
+   *  updates the value of a feature where the value is string (>4000 bytes, stored as CLOB)
+   *  or Object (stored as BLOB)
+   */
+  private void _updateFeatureLOB(Long featID,Object value, int valueType)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
   }
 
 }
