@@ -10,7 +10,7 @@
  *
  *  $Id$
  */
-package gate.swing;
+package gate.gui;
 
 
 import javax.swing.*;
