@@ -84,6 +84,7 @@ public class TestEmail extends TestCase
     assert(docFormat instanceof gate.corpora.EmailDocumentFormat);
 
     // register a status listener with it
+    /*
     docFormat.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             System.out.println(text);
@@ -91,7 +92,7 @@ public class TestEmail extends TestCase
           public void processFinished(){
           }
       });
-
+   */
       //docFormat.unpackMarkup (doc,"DocumentContent");
       docFormat.unpackMarkup(doc);
       /*
