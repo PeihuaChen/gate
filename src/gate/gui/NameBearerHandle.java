@@ -1285,6 +1285,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                                   corpusFiller,
                                   "Select a directory and allowed extensions");
           if(answer){
+            long startTime = System.currentTimeMillis();
             URL url = null;
             try{
               url = new URL(corpusFiller.getUrlString());
@@ -1301,7 +1302,11 @@ if(preserveFormat) System.out.println("Preserve option set!");
               ((Corpus)target).populate(url, filter,
                                         corpusFiller.getEncoding(),
                                         corpusFiller.isRecurseDirectories());
-              fireStatusChanged("Corpus populated!");
+              long endTime = System.currentTimeMillis();
+              fireStatusChanged("Corpus populated in " +
+                      NumberFormat.getInstance().
+                      format((double)(endTime - startTime) / 1000) +
+                      " seconds!");
 
             }catch(MalformedURLException mue){
               JOptionPane.showMessageDialog(getLargeView(),
