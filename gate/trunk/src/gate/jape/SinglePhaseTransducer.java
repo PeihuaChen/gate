@@ -26,6 +26,13 @@ import gate.event.ProgressListener;
 import gate.fsm.*;
 import gate.util.*;
 
+// by Shafirin Andrey start
+import debugger.resources.pr.TraceContainer;
+import debugger.resources.pr.RuleTrace;
+import debugger.resources.SPTLock;
+import debugger.resources.PhaseController;
+// by Shafirin Andrey end
+
 /**
   * Represents a complete CPSL grammar, with a phase name, options and
   * rule set (accessible by name and by sequence).
@@ -37,6 +44,21 @@ extends Transducer implements JapeConstants, java.io.Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
+
+// by Shafirin Andrey start
+    PhaseController phaseController = null;
+    TraceContainer rulesTrace = null;
+    RuleTrace currRuleTrace = null;
+
+    public PhaseController getPhaseController() {
+        return phaseController;
+    }
+
+    public void setPhaseController(PhaseController phaseController) {
+        this.phaseController = phaseController;
+    }
+// by Shafirin Andrey end
+
 
   /** Construction from name. */
   public SinglePhaseTransducer(String name) {
@@ -197,7 +219,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
     //find the first node of the document
-    Node startNode = ((Annotation) 
+    Node startNode = ((Annotation)
             ((ArrayList)annotationsByOffset.get(offsets.first())).get(0)).
             getStartNode();
 
@@ -210,6 +232,16 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
     //used to decide when to fire progress events
     long oldStartNodeOff = 0;
+
+    // by Shafirin Andrey start (according to Vladimir Karasev)
+    if (gate.Gate.isEnableJapeDebug()) {
+      // by Shafirin Andrey --> if (null != phaseController) {
+      if (null != phaseController) {
+        rulesTrace = new TraceContainer();
+        rulesTrace.putPhaseCut(this, inputAS);
+      }
+    }
+    // by Shafirin Andrey end
 
     //the big while for the actual parsing
     while(startNodeOff != -1){
@@ -251,7 +283,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         //get all the annotations that start where the current FSM finishes
         SimpleSortedSet offsetsTailSet = offsets.tailSet(currentFSM.
                 getAGPosition().getOffset().longValue());
-        ArrayList paths; 
+        ArrayList paths;
         long theFirst = offsetsTailSet.first();
         if(theFirst <0) continue;
         paths = (ArrayList)annotationsByOffset.get(theFirst);
@@ -283,8 +315,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
               currentConstraintsindex = i;
               break;
             }
-						/* ontotext.bp: always try to subsume using an ontology; */
-						/*if null then the ordinary subsume method is started*/
+
+            /* ontotext.bp: always try to subsume using an ontology; */
+            /*if null then the ordinary subsume method is started*/
             if(onePath.getFeatures().
                     subsumes(ontology,
                              currentConstraints[currentConstraintsindex].
@@ -295,6 +328,31 @@ extends Transducer implements JapeConstants, java.io.Serializable
               FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
               newFSMI.setAGPosition(onePath.getEndNode());
               newFSMI.setFSMPosition(currentTransition.getTarget());
+
+              // by Shafirin Andrey start (according to Vladimir Karasev)
+              if(gate.Gate.isEnableJapeDebug()) {
+                if (null != phaseController) {
+                  currRuleTrace = rulesTrace.getStateContainer(currentFSM.
+                      getFSMPosition());
+                  if (currRuleTrace == null) {
+                    currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
+                    currRuleTrace.addAnnotation(onePath);
+                    currRuleTrace.putPattern(onePath,
+                                             currentConstraints[currentConstraintsindex].
+                                             getAttributeSeq());
+                    rulesTrace.add(currRuleTrace);
+                  }
+                  else {
+                    currRuleTrace.addState(newFSMI.getFSMPosition());
+                    currRuleTrace.addAnnotation(onePath);
+                    currRuleTrace.putPattern(onePath,
+                                             currentConstraints[currentConstraintsindex].
+                                             getAttributeSeq());
+                  }
+                }
+              }
+              // by Shafirin Andrey end
+
               //bindings
               java.util.Map binds = newFSMI.getBindings();
               java.util.Iterator labelsIter =
@@ -333,8 +391,36 @@ extends Transducer implements JapeConstants, java.io.Serializable
         while(accFSMs.hasNext()){
           currentAcceptor = (FSMInstance) accFSMs.next();
           currentRHS = currentAcceptor.getFSMPosition().getAction();
+
+          // by Shafirin Andrey start
+          // debugger callback
+          if (gate.Gate.isEnableJapeDebug()) {
+            if (null != phaseController) {
+              SPTLock lock = new SPTLock();
+              phaseController.TraceTransit(rulesTrace);
+              rulesTrace = new TraceContainer();
+              phaseController.RuleMatched(lock, this, currentRHS, doc,
+                                          currentAcceptor.getBindings(),
+                                          inputAS, outputAS);
+            }
+          }
+          // by Shafirin Andrey end
+
           currentRHS.transduce(doc, currentAcceptor.getBindings(),
                                inputAS, outputAS, ontology);
+
+          // by Shafirin Andrey start
+          // debugger callback
+          if (gate.Gate.isEnableJapeDebug()) {
+            if (null != phaseController) {
+              SPTLock lock = new SPTLock();
+              phaseController.RuleFinished(lock, this, currentRHS, doc,
+                                           currentAcceptor.getBindings(),
+                                           inputAS, outputAS);
+            }
+          }
+          // by Shafirin Andrey end
+
           long currentAGPosition = currentAcceptor.getAGPosition().getOffset().longValue();
           if(currentAGPosition > lastAGPosition)
             lastAGPosition = currentAGPosition;
@@ -372,8 +458,36 @@ extends Transducer implements JapeConstants, java.io.Serializable
           }
         }
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
+
+        // by Shafirin Andrey start
+        // debugger callback
+        if(gate.Gate.isEnableJapeDebug()) {
+          if (null != phaseController) {
+            SPTLock lock = new SPTLock();
+            rulesTrace.leaveLast(currentRHS);
+            phaseController.TraceTransit(rulesTrace);
+            rulesTrace = new TraceContainer();
+            phaseController.RuleMatched(lock, this, currentRHS, doc,
+                                        currentAcceptor.getBindings(),
+                                        inputAS, outputAS);
+          }
+        }
+        // by Shafirin Andrey end
+
         currentRHS.transduce(doc, currentAcceptor.getBindings(),
                              inputAS, outputAS, ontology);
+
+        // by Shafirin Andrey start
+        // debugger callback
+        if(gate.Gate.isEnableJapeDebug()) {
+          if (null != phaseController) {
+            SPTLock lock = new SPTLock();
+            phaseController.RuleFinished(lock, this, currentRHS, doc,
+                                         currentAcceptor.getBindings(),
+                                         inputAS, outputAS);
+          }
+        }
+        // by Shafirin Andrey end
 
         //if in matchGroup mode check other possible patterns in this span
         if(isMatchGroupMode()) {
@@ -405,8 +519,36 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   Out.prln("bindings : "+rivalAcceptor.getBindings());
                 }// DEBUG
                 currentRHS = rivalAcceptor.getFSMPosition().getAction();
+
+                // by Shafirin Andrey start
+                // debugger callback
+                if(gate.Gate.isEnableJapeDebug()) {
+                  if (null != phaseController) {
+                    SPTLock lock = new SPTLock();
+                    rulesTrace.leaveLast(currentRHS);
+                    phaseController.TraceTransit(rulesTrace);
+                    rulesTrace = new TraceContainer();
+                    phaseController.RuleMatched(lock, this, currentRHS, doc,
+                                                rivalAcceptor.getBindings(),
+                                                inputAS, outputAS);
+                  }
+                }
+                // by Shafirin Andrey end
+
                 currentRHS.transduce(doc, rivalAcceptor.getBindings(),
                                      inputAS, outputAS, ontology);
+
+                // by Shafirin Andrey start
+                // debugger callback
+                if(gate.Gate.isEnableJapeDebug()) {
+                  if (null != phaseController) {
+                    SPTLock lock = new SPTLock();
+                    phaseController.RuleFinished(lock, this, currentRHS, doc,
+                                                 rivalAcceptor.getBindings(),
+                                                 inputAS, outputAS);
+                  }
+                }
+                // by Shafirin Andrey end
               } // equal rival
             }
           } // while there are fsm instances
@@ -464,6 +606,15 @@ extends Transducer implements JapeConstants, java.io.Serializable
       }
     }//while(startNodeOff != -1)
     fireProcessFinished();
+
+    // by Shafirin Andrey start (according to Vladimir Karasev)
+    if(gate.Gate.isEnableJapeDebug()) {
+      if (null != phaseController) {
+        phaseController.TraceTransit(rulesTrace);
+      }
+    }
+    // by Shafirin Andrey end
+
   } // transduce
 
 
@@ -537,7 +688,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
     * will only "see" the annotations of types found in this list ignoring all
     * other types of annotations.
     */
-  java.util.Set input = new java.util.HashSet();
+ // by Shafirin Andrey start (modifier changed to public)
+  public java.util.Set input = new java.util.HashSet();
+  //java.util.Set input = new java.util.HashSet();
+  // by Shafirin Andrey end
   private transient Vector progressListeners;
 
   protected void fireProgressChanged(int e) {

@@ -41,6 +41,13 @@ public class FSM implements JapeConstants {
     while(rulesEnum.hasNext()){
       currentRule = (Rule) rulesEnum.next();
       FSM ruleFSM = new FSM(currentRule);
+
+      //added by Karter start
+      if(gate.Gate.isEnableJapeDebug()) {
+        ruleHash.putAll(ruleFSM.ruleHash);
+      }
+      //added by Karter end
+
       initialState.addTransition(new Transition(null,
                                                 ruleFSM.getInitialState()));
     }
@@ -61,6 +68,17 @@ public class FSM implements JapeConstants {
 
     initialState = new State();
     LeftHandSide lhs = rule.getLHS();
+
+    //added by Karter start
+    LinkedList ll = new LinkedList();
+    if(gate.Gate.isEnableJapeDebug()) {
+      String label = currentLHSBinding(lhs);
+      ll.add(label);
+      ruleHash.put(rule.getName(), label);
+    }
+    //added by Karter end
+
+
     PatternElement[][] constraints =
                        lhs.getConstraintGroup().getPatternElementDisjunction();
     // the rectangular array constraints is a disjunction of sequences of
@@ -96,17 +114,42 @@ public class FSM implements JapeConstants {
         if(currentPattern instanceof BasicPatternElement) {
           //the easy case
           nextRowState = new State();
-          currentRowState.addTransition(
-            new Transition((BasicPatternElement)currentPattern, nextRowState));
+
+          //added by Karter start
+          LinkedList sll = new LinkedList();
+          if(gate.Gate.isEnableJapeDebug()) {
+            sll.add(currentBasicBinding( (BasicPatternElement) currentPattern));
+            currentRowState.addTransition(
+                new Transition( (BasicPatternElement) currentPattern,
+                               nextRowState
+                               /*added by Karter*/, sll));
+          } else {
+            currentRowState.addTransition(
+              new Transition((BasicPatternElement)currentPattern, nextRowState));
+          }
+          //added by Karter end
+
           currentRowState = nextRowState;
         } else if(currentPattern instanceof ComplexPatternElement) {
 
           // the current pattern is a complex pattern element
           // ..it will probaly be converted into a sequence of states itself.
-          currentRowState =  convertComplexPE(
-                              currentRowState,
-                              (ComplexPatternElement)currentPattern,
-                              new LinkedList());
+
+          // Angel debugger cut
+          if(gate.Gate.isEnableJapeDebug()) {
+            currentRowState = convertComplexPE(
+                currentRowState,
+                (ComplexPatternElement) currentPattern,
+                /*changed by Karter "new LinkedList()"*/ll);
+          } else {
+            currentRowState =  convertComplexPE(
+                                currentRowState,
+                                (ComplexPatternElement)currentPattern,
+                                new LinkedList());
+
+          }
+          // Angel debugger cut
+
         } else {
           // we got an unknown kind of pattern
           throw new RuntimeException("Strange looking pattern: " +
@@ -188,6 +231,15 @@ public class FSM implements JapeConstants {
 
           //the easy case
           nextRowState = new State();
+
+          //added by Karter start
+          if(gate.Gate.isEnableJapeDebug()) {
+            newBindings.add(currentBasicBinding( (BasicPatternElement)
+                                                currentPattern));
+          }
+          //added by Karter end
+
+
           currentRowState.addTransition(
             new Transition((BasicPatternElement)currentPattern,
                             nextRowState,newBindings));
@@ -459,4 +511,133 @@ public class FSM implements JapeConstants {
 
   private String transducerName;
 
+  //added by Karter start
+  private String currentBinding(ComplexPatternElement cpe, int indent) {
+    if (indent == 0)
+      bpeId = 0;
+    String ind = "";
+    for (int i = 0; i < indent; i++) {
+      ind += "   ";
+    }
+    String binds = ind + "(\n";
+    PatternElement[][] pe = cpe.getConstraintGroup().
+        getPatternElementDisjunction();
+    for (int i = 0; i < pe.length; i++) {
+      PatternElement[] patternElements = pe[i];
+      for (int j = 0; j < patternElements.length; j++) {
+        PatternElement patternElement = patternElements[j];
+        if (patternElement instanceof ComplexPatternElement) {
+          ComplexPatternElement complexPatternElement = (ComplexPatternElement)
+              patternElement;
+          binds += currentBinding(complexPatternElement, indent + 1);
+
+        }
+        else {
+          binds += ind + "   {";
+          BasicPatternElement basicPatternElement = (BasicPatternElement)
+              patternElement;
+          Constraint[] cons = basicPatternElement.getConstraints();
+          for (int k = 0; k < cons.length; k++) {
+            Constraint con = cons[k];
+            String annType = con.getAnnotType();
+            gate.FeatureMap fm = con.getAttributeSeq();
+            Iterator iter = fm.keySet().iterator();
+            if (!iter.hasNext())
+              binds += annType + ",";
+            while (iter.hasNext()) {
+              String key = (String) iter.next();
+              binds += annType + "." + key + "==\"" + fm.get(key) + "\",";
+
+            }
+          }
+          binds = binds.substring(0, binds.length() - 1);
+          binds += "}" + " *" + bpeId++ +"*" + "\n";
+        }
+      }
+      binds += ind + "   |\n";
+    }
+    String kleene = "";
+    int klInt = cpe.getKleeneOp();
+    if (klInt == KLEENE_PLUS)
+      kleene = "+";
+    if (klInt == KLEENE_QUERY)
+      kleene = "?";
+    if (klInt == KLEENE_STAR)
+      kleene = "*";
+    binds = binds.substring(0, binds.length() - 5);
+    binds += ")" + kleene + "\n";
+    if (indent == 0)
+      bpeId = 0;
+    return binds;
+  }
+
+  private String currentBasicBinding(BasicPatternElement bpe) {
+    String bind = "";
+    bind += "{";
+    Constraint[] cons = bpe.getConstraints();
+    for (int k = 0; k < cons.length; k++) {
+      Constraint con = cons[k];
+      String annType = con.getAnnotType();
+      gate.FeatureMap fm = con.getAttributeSeq();
+      Iterator iter = fm.keySet().iterator();
+      if (!iter.hasNext())
+        bind += annType + ",";
+      while (iter.hasNext()) {
+        String key = (String) iter.next();
+        bind += annType + "." + key + "==\"" + fm.get(key) + "\",";
+
+      }
+    }
+    bind = bind.substring(0, bind.length() - 1);
+    bind += "}" + " *" + bpeId++ +"*";
+    return bind;
+  }
+
+  private String currentLHSBinding(LeftHandSide lhs) {
+    String binds = "(\n";
+    PatternElement[][] pe = lhs.getConstraintGroup().
+        getPatternElementDisjunction();
+    for (int i = 0; i < pe.length; i++) {
+      PatternElement[] patternElements = pe[i];
+      for (int j = 0; j < patternElements.length; j++) {
+        PatternElement patternElement = patternElements[j];
+        if (patternElement instanceof ComplexPatternElement) {
+          ComplexPatternElement complexPatternElement = (ComplexPatternElement)
+              patternElement;
+          binds += currentBinding(complexPatternElement, 1);
+
+        }
+        else {
+          binds += "   {";
+          BasicPatternElement basicPatternElement = (BasicPatternElement)
+              patternElement;
+          Constraint[] cons = basicPatternElement.getConstraints();
+          for (int k = 0; k < cons.length; k++) {
+            Constraint con = cons[k];
+            String annType = con.getAnnotType();
+            gate.FeatureMap fm = con.getAttributeSeq();
+            Iterator iter = fm.keySet().iterator();
+            if (!iter.hasNext())
+              binds += annType + ",";
+            while (iter.hasNext()) {
+              String key = (String) iter.next();
+              binds += annType + "." + key + "==\"" + fm.get(key) + "\",";
+
+            }
+          }
+          binds = binds.substring(0, binds.length() - 1);
+          binds += "}" + " *" + bpeId++ +"*" + "\n";
+        }
+      }
+      binds += "   |\n";
+    }
+    binds = binds.substring(0, binds.length() - 5);
+    binds += ")\n";
+    bpeId = 0;
+    return binds;
+  }
+
+  int bpeId = 0;
+  public HashMap ruleHash = new HashMap();
+  //added by Karter end
 } // FSM
