@@ -251,6 +251,7 @@ public class TestGate {
 
         //test ontotext gazetteer
         suite.addTest(TestHashGazetteer.suite());
+        suite.addTest(TestFlexibleGazetteer.suite());
 
       } // if(allTests)
 
