@@ -560,9 +560,9 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     public void removeType(TypeHandler tHandler){
       int setRow = tableRows.indexOf(this);
-      int pos = typeHandlers.indexOf(this);
+      int pos = typeHandlers.indexOf(tHandler);
       typeHandlers.remove(pos);
-      typeHandlersByType.remove(name);
+      typeHandlersByType.remove(tHandler.name);
       if(expanded){
         tableRows.remove(setRow + pos + 1);
         tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
@@ -570,6 +570,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(typeHandlers.isEmpty()){
         //the set has no more handlers
         setExpanded(false);
+        tableModel.fireTableRowsUpdated(setRow, setRow);
       }
     }
     
