@@ -25,7 +25,6 @@ import gate.corpora.*;
 import gate.creole.*;
 import gate.creole.tokeniser.*;
 import gate.creole.gazetteer.*;
-import gate.db.*;
 import gate.jape.*;
 import gate.xml.*;
 import gate.email.*;
