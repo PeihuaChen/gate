@@ -140,8 +140,9 @@ public class BootStrapDialog extends JDialog{
         new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
     this.setModal(true);
     // init resource name
-    resourceNameLabel = new JLabel("Resource name");
-    resourceNameLabel.setToolTipText("Here goes the name of the resource" +
+    resourceNameLabel =
+      new JLabel("Resource package, e.g. sheffield.creole.morph");
+    resourceNameLabel.setToolTipText("The Java package of the resource" +
                                      " you want to create");
     resourceNameLabel.setOpaque(true);
     resourceNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -157,7 +158,7 @@ public class BootStrapDialog extends JDialog{
 
     // init resourceTypesComboBox
     resourceTypesLabel = new JLabel("Resource type");
-    resourceTypesLabel.setToolTipText("Select the type of the resource !");
+    resourceTypesLabel.setToolTipText("Resources must be LRs, PRs or VRs");
     resourceTypesLabel.setOpaque(true);
     resourceTypesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     Vector comboCont = new Vector(resourceTypes.keySet());
@@ -167,7 +168,7 @@ public class BootStrapDialog extends JDialog{
     resourceTypesComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     // init class name
-    classNameLabel = new JLabel("Implementing class name");
+    classNameLabel = new JLabel("Implementing class name, e.g. Morpher");
     classNameLabel.setToolTipText("The name of the class that " +
                                   "impements this resource");
     classNameLabel.setOpaque(true);
@@ -183,8 +184,10 @@ public class BootStrapDialog extends JDialog{
 //    classNameTextField.setMaximumSize(dim);
 
     // init interfaces
-    interfacesLabel = new JLabel("Interfaces implemented use ");
-    interfacesLabel.setToolTipText("Write the interfaces implemented separated by comma");
+    interfacesLabel = new JLabel("Interfaces implemented");
+    interfacesLabel.setToolTipText(
+      "Any additional interfaces implemented, separated by comma"
+    );
     interfacesLabel.setOpaque(true);
     interfacesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     interfacesTextField = new JTextField(possibleInterfaces);
@@ -203,7 +206,7 @@ public class BootStrapDialog extends JDialog{
     chooseFolderLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     chooseFolderLabel.setToolTipText("Select the name of the folder where" +
                                   " you want the resource to be created.");
-    chooseFolderButton = new JButton("...");
+    chooseFolderButton = new JButton("Browse");
     chooseFolderButton.setAlignmentX(Component.LEFT_ALIGNMENT);
     chooseFolderTextField = new JTextField();
     chooseFolderTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
