@@ -39,7 +39,7 @@
     <RESOURCE>
       <NAME>GATE Oracle Document</NAME>
       <CLASS>gate.corpora.DatabaseDocumentImpl</CLASS>
-      <COMMENT>GATE Oracle Document</COMMENT>
+      <COMMENT>GATE persistent document (Oracle)</COMMENT>
       <INTERFACE>gate.Document</INTERFACE>
       <ICON>lr.gif</ICON>
       <PRIVATE/>
