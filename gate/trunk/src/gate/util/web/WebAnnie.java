@@ -12,12 +12,8 @@ import gate.gui.*;
 import javax.servlet.*;
 
 /**
- * This class illustrates how to use ANNIE as a sausage machine
- * in another application - put ingredients in one end (URLs pointing
- * to documents) and get sausages (e.g. Named Entities) out the
- * other end.
- * <P><B>NOTE:</B><BR>
- * For simplicity's sake, we don't do any exception handling.
+ * This class is designed to demonstrate ANNIE in a web context. It should be
+ * called from either a servlet or a JSP.
  */
 public class WebAnnie  {
     
@@ -27,12 +23,14 @@ public class WebAnnie  {
     /** The Corpus Pipeline application to contain ANNIE */
     private SerialAnalyserController annieController;
     
+    private String filePath = "";
+
     /**
      * Initialise the ANNIE system. This creates a "corpus pipeline"
      * application that can be used to run sets of documents through
      * the extraction system.
      */
-    public void initAnnie() throws GateException {
+    private void initAnnie() throws GateException {
         
         // create a serial analyser controller to run ANNIE with
         annieController = (SerialAnalyserController)
@@ -41,35 +39,82 @@ public class WebAnnie  {
                                    Factory.newFeatureMap(),
                                    "ANNIE_" + Gate.genSym()
                                    );
+        
+        // Load tokenizer
+        ProcessingResource tokeniser = (ProcessingResource)
+            Factory.createResource("gate.creole.tokeniser.DefaultTokeniser",
+                                   Factory.newFeatureMap());
+        
+        annieController.add(tokeniser);
+        
+        // Load sentence splitter
+        ProcessingResource split = (ProcessingResource)
+            Factory.createResource("gate.creole.splitter.SentenceSplitter",
+                                   Factory.newFeatureMap());
+        
+        annieController.add(split);
+        
+        // Load POS tagger
+        ProcessingResource postagger = (ProcessingResource)
+            Factory.createResource("gate.creole.POSTagger",
+                                   Factory.newFeatureMap());
+        
+        annieController.add(postagger);
 
-        /*
-    "gate.creole.tokeniser.DefaultTokeniser",
-    "gate.creole.gazetteer.DefaultGazetteer",
-    "gate.creole.splitter.SentenceSplitter",
-    "gate.creole.POSTagger",
-    "gate.creole.ANNIETransducer",
-    "gate.creole.orthomatcher.OrthoMatcher"
-        */
+
+        // Load Gazetteer -- this is a two step process
+        FeatureMap gazetteerFeatures = Factory.newFeatureMap();
+        gazetteerFeatures.put("encoding","ISO-8859-1");
+
+        // Step one: Locate the gazetteer file
+        try {
+            URL gazetteerURL =
+                new URL("jar:file:" + filePath +
+                        "muse.jar!/muse/resources/gazetteer/lists.def");
+            gazetteerFeatures.put("listsURL", gazetteerURL);
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        }
         
-        // load each PR as defined in ANNIEConstants
-        for (int i = 0; i < ANNIEConstants.PR_NAMES.length; i++) {
-            // use default parameters
-            FeatureMap params = Factory.newFeatureMap(); 
-            ProcessingResource pr = (ProcessingResource)
-                Factory.createResource(ANNIEConstants.PR_NAMES[i], params);
-            
-            // add the PR to the pipeline controller
-            annieController.add(pr);
-        } // for each ANNIE PR
+        // Step two: Load the gazetteer from the file
+        ProcessingResource gazetteer = (ProcessingResource)
+            Factory.createResource("gate.creole.gazetteer.DefaultGazetteer",
+                                   gazetteerFeatures);
         
+        annieController.add(gazetteer);        
+
+        // Load Grammar -- similar to gazetteer
+        FeatureMap grammarFeatures = Factory.newFeatureMap();
+        
+        try {
+            URL grammarURL =
+                new URL("jar:file:" + filePath +
+                        "muse.jar!/muse/resources/grammar/main/main.jape");
+            grammarFeatures.put("grammarURL", grammarURL);
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        }
+        
+        ProcessingResource grammar = (ProcessingResource)
+            Factory.createResource("gate.creole.ANNIETransducer",
+                                   grammarFeatures);
+        
+        annieController.add(grammar);
+
+        // Load Ortho Matcher
+        ProcessingResource orthoMatcher = (ProcessingResource)
+            Factory.createResource("gate.creole.orthomatcher.OrthoMatcher",
+                                   Factory.newFeatureMap());
+        
+        annieController.add(orthoMatcher);
+
     } // initAnnie()
     
     /**
-     * Run from the command-line, with a list of URLs as argument.
-     * <P><B>NOTE:</B><BR>
-     * This code will run with all the documents in memory - if you
-     * want to unload each from memory after use, add code to store
-     * the corpus in a DataStore.
+     * This method should be called from a servlet or JSP.
+     * @param app The current servlet context, eg the JSP implicit variable "application"
+     * @param url The url of the file to be analysed
+     * @param annotations An array of annotations
      */
     public String process(ServletContext app, String url, String[] annotations)
         throws GateException, IOException {
@@ -81,24 +126,17 @@ public class WebAnnie  {
             System.setProperty("java.protocol.handler.pkgs",
                                "gate.util.protocols");
             
-            System.out.println("before gate init");
-            System.out.println("Freemem: " + Runtime.getRuntime().freeMemory());
-
             // Do the deed
             Gate.init();
-            System.out.println("after gate init");
-            System.out.println("Freemem: " + Runtime.getRuntime().freeMemory());
 
             app.setAttribute(GATE_INIT_KEY, "true");
         }
 
         if (app.getAttribute(ANNIE_CONTROLLER_KEY) == null) {
             // initialise ANNIE (this may take several minutes)
-            System.out.println("before annie init");
-            System.out.println("Freemem: " + Runtime.getRuntime().freeMemory());
+
+            filePath = app.getInitParameter("muse.path");
             this.initAnnie();
-            System.out.println("after annie init");
-            System.out.println("Freemem: " + Runtime.getRuntime().freeMemory());
 
             app.setAttribute(ANNIE_CONTROLLER_KEY, annieController);
         }
@@ -108,8 +146,7 @@ public class WebAnnie  {
         }
 
         
-        // create a GATE corpus and add a document for each command-line
-        // argument
+        // create a GATE corpus and add a document from the URL specified
         Corpus corpus =
             (Corpus) Factory.createResource("gate.corpora.CorpusImpl");
         URL u = new URL(url);
@@ -119,24 +156,28 @@ public class WebAnnie  {
         Document doc = (Document)
             Factory.createResource("gate.corpora.DocumentImpl", params);
         corpus.add(doc);
+            
         
         // tell the pipeline about the corpus and run it
-
         annieController.setCorpus(corpus);
         annieController.execute();
         
         // Get XML marked up document
-
         AnnotationSet defaultAnnotSet = doc.getAnnotations();
         Set annotTypesRequired = new HashSet();
 
-        for (int i=0;i<annotations.length;i++) {
-            annotTypesRequired.add(annotations[i]);
+        if (annotations != null) {
+            for (int i=0;i<annotations.length;i++) {
+                annotTypesRequired.add(annotations[i]);
+            }
+            AnnotationSet selectedAnnotations =
+                defaultAnnotSet.get(annotTypesRequired);
+            return doc.toXml(selectedAnnotations, true);
         }
-        AnnotationSet peopleAndPlaces =
-            defaultAnnotSet.get(annotTypesRequired);
-        return doc.toXml(peopleAndPlaces, true);
-
+        else {
+            return doc.toXml();
+        }
+     
     } // process
     
 } // class WebAnnie
