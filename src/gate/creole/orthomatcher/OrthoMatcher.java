@@ -649,6 +649,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     Object matchesValue = document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
     if (matchesValue != null && (matchesValue instanceof Map))
       ((Map)matchesValue).remove(nameAllAnnots.getName());
+    else if (matchesValue != null)
+      document.getFeatures().remove(DOCUMENT_COREF_FEATURE_NAME);
 
     //get all annotations that have a matches feature
     HashSet fNames = new HashSet();
