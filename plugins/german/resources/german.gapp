@@ -2,16 +2,13 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../gate/plugins/Tools</urlString>
+        <urlString>$relpath$../../Tools</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../gate/plugins/ANNIE</urlString>
+        <urlString>$relpath$../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../gate/plugins/Tools</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../gate/plugins/ANNIE</urlString>
+        <urlString>$relpath$../../TreeTagger</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -80,12 +77,61 @@
                 <entry>
                   <string>rulesURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../gate/plugins/ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>encoding</string>
                   <string>UTF-8</string>
+                </entry>
+              </localMap>
+            </initParams>
+            <features class="gate.util.persistence.MapPersistence">
+              <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+              <localMap/>
+            </features>
+          </pr>
+        </gate.util.persistence.AnalyserRunningStrategyPersistence>
+        <gate.util.persistence.AnalyserRunningStrategyPersistence>
+          <runMode>1</runMode>
+          <pr class="gate.util.persistence.LanguageAnalyserPersistence">
+            <runtimeParams class="gate.util.persistence.MapPersistence">
+              <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+              <localMap>
+                <entry>
+                  <string>document</string>
+                  <null/>
+                </entry>
+                <entry>
+                  <string>outputASName</string>
+                  <string>NE</string>
+                </entry>
+                <entry>
+                  <string>inputASName</string>
+                  <string>NE</string>
+                </entry>
+              </localMap>
+            </runtimeParams>
+            <resourceType>gate.creole.splitter.SentenceSplitter</resourceType>
+            <resourceName>splitter</resourceName>
+            <initParams class="gate.util.persistence.MapPersistence">
+              <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+              <localMap>
+                <entry>
+                  <string>encoding</string>
+                  <string>UTF-8</string>
+                </entry>
+                <entry>
+                  <string>gazetteerListsURL</string>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/gazetteer/lists.def</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
+                </entry>
+                <entry>
+                  <string>transducerURL</string>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/grammar/main.jape</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
             </initParams>
@@ -112,7 +158,7 @@
               </localMap>
             </runtimeParams>
             <resourceType>gate.creole.gazetteer.DefaultGazetteer</resourceType>
-            <resourceName>gazetteer</resourceName>
+            <resourceName>german gazetteer</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
@@ -169,7 +215,7 @@
                 </entry>
                 <entry>
                   <string>wholeWordsOnly</string>
-                  <boolean>false</boolean>
+                  <boolean>true</boolean>
                 </entry>
                 <entry>
                   <string>encoding</string>
@@ -209,11 +255,15 @@
                 </entry>
               </localMap>
             </runtimeParams>
-            <resourceType>gate.creole.ANNIETransducer</resourceType>
-            <resourceName>grammar</resourceName>
+            <resourceType>gate.creole.Transducer</resourceType>
+            <resourceName>german grammar</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
+                <entry>
+                  <string>ontology</string>
+                  <null/>
+                </entry>
                 <entry>
                   <string>encoding</string>
                   <string>UTF-8</string>
@@ -250,11 +300,12 @@
                   <string>annotationTypes</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
-                      <string>ORG</string>
-                      <string>PER</string>
-                      <string>LOC</string>
+                      <string>Organization</string>
+                      <string>Person</string>
+                      <string>Location</string>
+                      <string>Date</string>
                     </localList>
-                    <collectionType>java.util.Arrays$ArrayList</collectionType>
+                    <collectionType>java.util.ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
                 </entry>
               </localMap>
@@ -275,7 +326,7 @@
                 <entry>
                   <string>definitionFileURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../gate/plugins/ANNIE/resources/othomatcher/listsNM.def</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/othomatcher/listsNM.def</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
@@ -313,11 +364,12 @@
         <gate.util.persistence.LanguageAnalyserPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[4]/pr"/>
         <gate.util.persistence.LanguageAnalyserPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[5]/pr"/>
         <gate.util.persistence.LanguageAnalyserPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[6]/pr"/>
+        <gate.util.persistence.LanguageAnalyserPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[7]/pr"/>
       </localList>
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.ConditionalSerialAnalyserController</resourceType>
-    <resourceName>gner</resourceName>
+    <resourceName>german NE</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
