@@ -205,6 +205,7 @@ public class TestGate {
         suite.addTest(TestGazetteer.suite());
         suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestPR.suite());
+        suite.addTest(TestWeakValueHashMap.suite());
       } // if(allTests)
 
     } catch(Exception e) {
