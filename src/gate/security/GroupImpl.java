@@ -193,7 +193,7 @@ public class GroupImpl implements Group{
 
     Group group2 = (Group)obj;
 
-    return (this.name == group2.getName());
+    return (this.id.equals(group2.getID()));
   }
 
 }

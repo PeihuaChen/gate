@@ -134,7 +134,7 @@ public class UserImpl implements User {
 
     User usr2 = (User)obj;
 
-    return (this.id == usr2.getID() && this.name == usr2.getName());
+    return (this.id.equals(usr2.getID()));
   }
 
 }
