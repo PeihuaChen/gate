@@ -35,6 +35,8 @@ class AnnotDiffDialog extends JFrame {
     * combo boxes
     */
   Map  documentsMap = null;
+  Map keyAnnotationSetMap = null;
+  Map responseAnnotationSetMap = null;
   Map  typesMap = null;
   Set  falsePozTypes = null;
   MainFrame mainFrame = null;
@@ -45,11 +47,17 @@ class AnnotDiffDialog extends JFrame {
   JComboBox responseDocComboBox = null;
   JComboBox typesComboBox = null;
   JComboBox falsePozTypeComboBox = null;
+  JComboBox keyDocAnnotSetComboBox = null;
+  JComboBox responseDocAnnotSetComboBox = null;
+  JComboBox responseDocAnnotSetFalsePozComboBox = null;
 
   JLabel keyLabel = null;
   JLabel responseLabel = null;
   JLabel typesLabel = null;
   JLabel falsePozLabel = null;
+  JLabel keyDocAnnotSetLabel = null;
+  JLabel responseDocAnnotSetLabel = null;
+  JLabel responseDocAnnotSetFalsePozLabel = null;
 
   JLabel weightLabel = null;
   JTextField weightTextField = null;
@@ -109,6 +117,9 @@ class AnnotDiffDialog extends JFrame {
       }// while
     }else documentsMap.put("No docs found",null);
 
+    keyAnnotationSetMap = new TreeMap();
+    responseAnnotationSetMap = new TreeMap();
+
     typesMap = new TreeMap();
     // init types map with Type,AnnotationSchema pairs
     typesMap.put("No annot.",null);
@@ -146,6 +157,20 @@ class AnnotDiffDialog extends JFrame {
     keyLabel.setForeground(Color.black);
     keyLabel.setBackground(Color.green);
 
+    // init keyDocAnnotSetComboBox
+    Set comboAsCont = new TreeSet(keyAnnotationSetMap.keySet());
+    keyDocAnnotSetComboBox = new JComboBox(comboAsCont.toArray());
+    keyDocAnnotSetComboBox.setEditable(false);
+    keyDocAnnotSetComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // init its label
+    keyDocAnnotSetLabel = new JLabel("Select the KEY annotation set");
+    keyDocAnnotSetLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    keyDocAnnotSetLabel.setOpaque(true);
+    keyDocAnnotSetLabel.setFont(
+                  keyDocAnnotSetLabel.getFont().deriveFont(Font.BOLD));
+    keyDocAnnotSetLabel.setForeground(Color.black);
+    keyDocAnnotSetLabel.setBackground(Color.green);
+
     // init responseDocComboBox
     responseDocComboBox = new JComboBox(comboCont.toArray());
     responseDocComboBox.setSelectedIndex(0);
@@ -162,6 +187,36 @@ class AnnotDiffDialog extends JFrame {
     responseLabel.setFont(responseLabel.getFont().deriveFont(Font.BOLD));
     responseLabel.setBackground(Color.red);
     responseLabel.setForeground(Color.white);
+
+    // init responseDocAnnotSetComboBox
+    comboAsCont = new TreeSet(responseAnnotationSetMap.keySet());
+    responseDocAnnotSetComboBox = new JComboBox(comboAsCont.toArray());
+    responseDocAnnotSetComboBox.setEditable(false);
+    responseDocAnnotSetComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // init its label
+    responseDocAnnotSetLabel = new JLabel("Select the RESPONSE annot set");
+    responseDocAnnotSetLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    responseDocAnnotSetLabel.setOpaque(true);
+    responseDocAnnotSetLabel.setFont(
+                  responseDocAnnotSetLabel.getFont().deriveFont(Font.BOLD));
+    responseDocAnnotSetLabel.setForeground(Color.white);
+    responseDocAnnotSetLabel.setBackground(Color.red);
+
+    // init responseDocAnnotSetFalsePozComboBox
+    // This combo is used in calculating False Poz
+    comboAsCont = new TreeSet(responseAnnotationSetMap.keySet());
+    responseDocAnnotSetFalsePozComboBox = new JComboBox(comboAsCont.toArray());
+    responseDocAnnotSetFalsePozComboBox.setEditable(false);
+    responseDocAnnotSetFalsePozComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // init its label
+    responseDocAnnotSetFalsePozLabel = new JLabel("Select the RESPONSE annot set");
+    responseDocAnnotSetFalsePozLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    responseDocAnnotSetFalsePozLabel.setOpaque(true);
+    responseDocAnnotSetFalsePozLabel.setFont(
+              responseDocAnnotSetFalsePozLabel.getFont().deriveFont(Font.BOLD));
+    responseDocAnnotSetFalsePozLabel.setForeground(Color.white);
+    responseDocAnnotSetFalsePozLabel.setBackground(Color.red);
+
 
     // init typesComboBox
     Vector typesCont = new Vector(typesMap.keySet());
@@ -206,20 +261,28 @@ class AnnotDiffDialog extends JFrame {
     evalButton = new JButton("Evaluate");
     evalButton.setFont(evalButton.getFont().deriveFont(Font.BOLD));
 
+    // ***************************************************************
     // Put all those components at their place
+    // ***************************************************************
     Box northBox = new Box(BoxLayout.X_AXIS);
     // Arange Key Document components
     Box currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(keyLabel);
     currentBox.add(keyDocComboBox);
+    currentBox.add(Box.createVerticalStrut(10));
+    currentBox.add(responseLabel);
+    currentBox.add(responseDocComboBox);
     northBox.add(currentBox);
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
 
-    // Arange Response Document components
+    // Arange annotation set components
     currentBox = new Box(BoxLayout.Y_AXIS);
-    currentBox.add(responseLabel);
-    currentBox.add(responseDocComboBox);
+    currentBox.add(keyDocAnnotSetLabel);
+    currentBox.add(keyDocAnnotSetComboBox);
+    currentBox.add(Box.createVerticalStrut(10));
+    currentBox.add(responseDocAnnotSetLabel);
+    currentBox.add(responseDocAnnotSetComboBox);
     northBox.add(currentBox);
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
@@ -244,12 +307,18 @@ class AnnotDiffDialog extends JFrame {
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(falsePozLabel);
     currentBox.add(falsePozTypeComboBox);
+    currentBox.add(Box.createVerticalStrut(10));
+    currentBox.add(responseDocAnnotSetFalsePozLabel);
+    currentBox.add(responseDocAnnotSetFalsePozComboBox);
     northBox.add(currentBox);
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
     northBox.add(evalButton);
 
+    initKeyAnnotSetNames();
+    initResponseAnnotSetNames();
     initAnnotTypes();
+    initAnnotTypesFalsePoz();
     this.getContentPane().add(new JScrollPane(northBox),BorderLayout.NORTH);
     this.getContentPane().add(new JScrollPane(annotDiff),BorderLayout.CENTER);
     this.pack();
@@ -299,21 +368,73 @@ class AnnotDiffDialog extends JFrame {
 
     keyDocComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        initKeyAnnotSetNames();
         initAnnotTypes();
       }// actionPerformed();
     });//addActionListener();
 
     responseDocComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        initResponseAnnotSetNames();
         initAnnotTypes();
       }// actionPerformed();
     });//addActionListener();
+
+    keyDocAnnotSetComboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        initAnnotTypes();
+      }// actionPerformed();
+    });//addActionListener();
+
+    responseDocAnnotSetComboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        initAnnotTypes();
+      }// actionPerformed();
+    });//addActionListener();
+
+    responseDocAnnotSetFalsePozComboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        initAnnotTypesFalsePoz();
+      }// actionPerformed();
+    });//addActionListener();
+
   }//initListeners();
 
-  /** Reads the selected keyDocument + the selected responseDocument, does the
-    * intersection of the two annot sets and fill the two combo boxes called
-    * typesComboBox and falsePozTypeComboBox.
-    */
+  private void initAnnotTypesFalsePoz(){
+    gate.Document responseDocument = null;
+    responseDocument = (gate.Document) documentsMap.get(
+                                 (String)responseDocComboBox.getSelectedItem());
+    falsePozTypes.clear();
+    if (responseDocument == null){
+      // init falsePozTypes
+      falsePozTypes.add("No annot.");
+      DefaultComboBoxModel cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
+      falsePozTypeComboBox.setModel(cbm);
+      return;
+    }//End if
+
+    // Fill the responseSet
+    Set responseSet = null;
+    if (responseDocAnnotSetFalsePozComboBox.getSelectedItem() == null ||
+        responseAnnotationSetMap.get(
+                   responseDocAnnotSetFalsePozComboBox.getSelectedItem())==null)
+        responseSet = new HashSet(
+                              responseDocument.getAnnotations().getAllTypes());
+    else{
+      // Get all types of annotation from the selected responseAnnotationSet
+      AnnotationSet as = (AnnotationSet) responseAnnotationSetMap.get(
+                         responseDocAnnotSetFalsePozComboBox.getSelectedItem());
+      responseSet = new HashSet(as.getAllTypes());
+    }// End if
+
+    // Init falsePozTypes
+    falsePozTypes.addAll(responseSet);
+    if (falsePozTypes.isEmpty())
+      falsePozTypes.add("No annot.");
+    DefaultComboBoxModel cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
+    falsePozTypeComboBox.setModel(cbm);
+  }//initAnnotTypesFalsePoz();
+
   private void initAnnotTypes(){
     gate.Document keyDocument = null;
     gate.Document responseDocument = null;
@@ -324,14 +445,12 @@ class AnnotDiffDialog extends JFrame {
                                  (String)responseDocComboBox.getSelectedItem());
 
     typesMap.clear();
-    falsePozTypes.clear();
 
     if (keyDocument == null || responseDocument == null){
       // init types map with Type,AnnotationSchema pairs
       typesMap.put("No annot.",null);
       ComboBoxModel cbm = new DefaultComboBoxModel(typesMap.keySet().toArray());
       typesComboBox.setModel(cbm);
-
       // init falsePozTypes
       falsePozTypes.add("No annot.");
       cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
@@ -340,30 +459,35 @@ class AnnotDiffDialog extends JFrame {
     }//End if
 
     // Do intersection for annotation types...
-    // First add to the keySet all annotations from default set
-    Set keySet = new HashSet(keyDocument.getAnnotations().getAllTypes());
-    // Now add all the annotation from the named sets
-    Map namedAnnotSets = keyDocument.getNamedAnnotationSets();
-    if (namedAnnotSets != null){
-      Iterator iter = namedAnnotSets.values().iterator();
-      while (iter.hasNext()){
-          AnnotationSet annotSet = (AnnotationSet) iter.next();
-          keySet.addAll(annotSet.getAllTypes());
-      }// End while
-    }// End if
-    // Do the same thing for the responseSet too
-    Set responseSet = new HashSet(
-                              responseDocument.getAnnotations().getAllTypes());
-    // Add all the annotation from the named sets
-    namedAnnotSets = responseDocument.getNamedAnnotationSets();
-    if (namedAnnotSets != null){
-      Iterator iter = namedAnnotSets.values().iterator();
-      while (iter.hasNext()){
-        AnnotationSet annotSet = (AnnotationSet) iter.next();
-        responseSet.addAll(annotSet.getAllTypes());
-      }// End while
+    // First fill the keySet;
+    Set keySet = null;
+    if (keyDocAnnotSetComboBox.getSelectedItem()== null ||
+        keyAnnotationSetMap.get(keyDocAnnotSetComboBox.getSelectedItem())==null)
+      // First add to the keySet all annotations from default set
+      keySet = new HashSet(keyDocument.getAnnotations().getAllTypes());
+    else{
+      // Get all types of annotation from the selected keyAnnotationSet
+      AnnotationSet as = (AnnotationSet) keyAnnotationSetMap.get(
+                                  keyDocAnnotSetComboBox.getSelectedItem());
+      keySet = new HashSet(as.getAllTypes());
     }// End if
 
+    // Do the same thing for the responseSet
+    // Fill the responseSet
+    Set responseSet = null;
+    if (responseDocAnnotSetComboBox.getSelectedItem() == null ||
+        responseAnnotationSetMap.get(
+                          responseDocAnnotSetComboBox.getSelectedItem())==null)
+        responseSet = new HashSet(
+                              responseDocument.getAnnotations().getAllTypes());
+    else{
+      // Get all types of annotation from the selected responseAnnotationSet
+      AnnotationSet as = (AnnotationSet) responseAnnotationSetMap.get(
+                                 responseDocAnnotSetComboBox.getSelectedItem());
+      responseSet = new HashSet(as.getAllTypes());
+    }// End if
+
+    // DO intersection between keySet & responseSet
     keySet.retainAll(responseSet);
     Set intersectSet = keySet;
 
@@ -383,14 +507,48 @@ class AnnotDiffDialog extends JFrame {
     DefaultComboBoxModel cbm = new DefaultComboBoxModel(
                                               typesMap.keySet().toArray());
     typesComboBox.setModel(cbm);
-
-    // Init falsePozTypes
-    falsePozTypes.addAll(responseSet);
-    if (falsePozTypes.isEmpty())
-      falsePozTypes.add("No annot.");
-    cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
-    falsePozTypeComboBox.setModel(cbm);
   }//initAnnotTypes();
+
+  /** Reads the selected keyDocument + the selected responseDocument and fill
+   *  the two combo boxes called keyDocAnnotSetComboBox and
+   *  responseDocAnnotSetComboBox.
+    */
+  private void initKeyAnnotSetNames(){
+    gate.Document keyDocument = null;
+    keyDocument = (gate.Document) documentsMap.get(
+                                 (String)keyDocComboBox.getSelectedItem());
+    keyAnnotationSetMap.clear();
+
+    if (keyDocument != null){
+      Map namedAnnotSets = keyDocument.getNamedAnnotationSets();
+      if (namedAnnotSets != null)
+        keyAnnotationSetMap.putAll(namedAnnotSets);
+      keyAnnotationSetMap.put("Default set",null);
+      DefaultComboBoxModel cbm = new DefaultComboBoxModel(
+                                        keyAnnotationSetMap.keySet().toArray());
+      keyDocAnnotSetComboBox.setModel(cbm);
+    }// End if
+  }//initKeyAnnotSetNames();
+
+  private void initResponseAnnotSetNames(){
+    gate.Document responseDocument = null;
+    responseDocument = (gate.Document) documentsMap.get(
+                                 (String)responseDocComboBox.getSelectedItem());
+    responseAnnotationSetMap.clear();
+
+    if (responseDocument != null){
+      Map namedAnnotSets = responseDocument.getNamedAnnotationSets();
+      if (namedAnnotSets != null)
+        responseAnnotationSetMap.putAll(namedAnnotSets);
+      responseAnnotationSetMap.put("Default set",null);
+      DefaultComboBoxModel cbm = new DefaultComboBoxModel(
+                                  responseAnnotationSetMap.keySet().toArray());
+      responseDocAnnotSetComboBox.setModel(cbm);
+      cbm = new DefaultComboBoxModel(
+                                  responseAnnotationSetMap.keySet().toArray());
+      responseDocAnnotSetFalsePozComboBox.setModel(cbm);
+    }// End if
+  }//initResponseAnnotSetNames();
 
   /** It returns the selected KEY gate.Document*/
   public gate.Document getSelectedKeyDocument(){
@@ -419,6 +577,33 @@ class AnnotDiffDialog extends JFrame {
   public String getSelectedFalsePozAnnot(){
     return (String) falsePozTypeComboBox.getSelectedItem();
   }//getSelectedFalsePozAnnot
+
+  /** It returns the selected key AnnotationSet name. It returns null for the
+    * default annotation set.
+    */
+  public String getSelectedKeyAnnotationSetName(){
+   String asName = (String) keyDocAnnotSetComboBox.getSelectedItem();
+   if ("Default set".equals(asName)) return null;
+   else return asName;
+  }//getSelectedKeyAnnotationSetName()
+
+  /** It returns the selected response AnnotationSet name.It returns null for the
+    * default annotation set.
+    */
+  public String getSelectedResponseAnnotationSetName(){
+   String asName = (String) responseDocAnnotSetComboBox.getSelectedItem();
+   if ("Default set".equals(asName)) return null;
+   else return asName;
+  }//getSelectedResponseAnnotationSetName()
+
+  /** It returns the selected response AnnotationSet name for False Poz.
+    * It returns null for the default annotation set.
+    */
+  public String getSelectedResponseAnnotationSetNameFalsePoz(){
+   String asName = (String) responseDocAnnotSetFalsePozComboBox.getSelectedItem();
+   if ("Default set".equals(asName)) return null;
+   else return asName;
+  }//getSelectedResponseAnnotationSetNameFalsePoz()
 
   /**  Inner class that adds a tool tip to the combo boxes with key and response
     *  documents. The tool tip represents the full path of the documents.
@@ -459,8 +644,16 @@ class AnnotDiffDialog extends JFrame {
     /** This method is overridden in order to implement the needed behaviour*/
     public void run(){
       annotDiff.setKeyDocument(thisAnnotDiffDialog.getSelectedKeyDocument());
-      annotDiff.setResponseDocument(thisAnnotDiffDialog.getSelectedResponseDocument());
+      annotDiff.setResponseDocument(
+                          thisAnnotDiffDialog.getSelectedResponseDocument());
       annotDiff.setAnnotationSchema(thisAnnotDiffDialog.getSelectedSchema());
+      annotDiff.setKeyAnnotationSetName(
+                      thisAnnotDiffDialog.getSelectedKeyAnnotationSetName());
+      annotDiff.setResponseAnnotationSetName(
+                  thisAnnotDiffDialog.getSelectedResponseAnnotationSetName());
+      annotDiff.setResponseAnnotationSetNameFalsePoz(
+            thisAnnotDiffDialog.getSelectedResponseAnnotationSetNameFalsePoz());
+
       String falsePozAnnot = thisAnnotDiffDialog.getSelectedFalsePozAnnot();
       if ("No annot.".equals(falsePozAnnot))
             falsePozAnnot = null;

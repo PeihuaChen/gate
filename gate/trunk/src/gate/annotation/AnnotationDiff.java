@@ -43,10 +43,25 @@ public class AnnotationDiff extends AbstractVisualResource{
    *  in comparison*/
   private Document keyDocument = null;
 
+  /** The name of the annotation set. If is null then the default annotation set
+    * will be considered.
+    */
+  private String keyAnnotationSetName = null;
+
   /** This document contains the response annotation set which is being
     * compared against the key annotation set.
     */
   private Document responseDocument = null;
+
+  /** The name of the annotation set. If is null then the default annotation set
+    * will be considered.
+    */
+  private String responseAnnotationSetName = null;
+
+  /** The name of the annotation set considered in calculating FalsePozitive.
+    * If is null then the default annotation set will be considered.
+    */
+  private String responseAnnotationSetNameFalsePoz = null;
 
   /** The annotation schema object used to get the annotation name
     */
@@ -152,6 +167,59 @@ public class AnnotationDiff extends AbstractVisualResource{
   public Document getKeyDocument(){
     return keyDocument;
   }// getKeyDocument
+
+  /** Sets the keyAnnotationSetName in AnnotDiff
+    * @param aKeyAnnotationSetName The name of the annotation set from the
+    * keyDocument.If aKeyAnnotationSetName is null then the default annotation
+    * set will be used.
+    */
+  public void setKeyAnnotationSetName(String aKeyAnnotationSetName){
+    keyAnnotationSetName = aKeyAnnotationSetName;
+  }// setKeyAnnotationSetName();
+
+  /** gets the keyAnnotationSetName.
+    * @return The name of the keyAnnotationSet used in AnnotationDiff. If
+    * returns null then the the default annotation set will be used.
+    */
+  public String getKeyAnnotationSetName(){
+    return keyAnnotationSetName;
+  }// getKeyAnnotationSetName()
+
+  /** Sets the responseAnnotationSetName in AnnotDiff
+    * @param aResponseAnnotationSetName The name of the annotation set from the
+    * responseDocument.If aResponseAnnotationSetName is null then the default
+    * annotation set will be used.
+    */
+  public void setResponseAnnotationSetName(String aResponseAnnotationSetName){
+    responseAnnotationSetName = aResponseAnnotationSetName;
+  }// setResponseAnnotationSetName();
+
+  /** gets the responseAnnotationSetName.
+    * @return The name of the responseAnnotationSet used in AnnotationDiff. If
+    * returns null then the the default annotation set will be used.
+    */
+  public String getResponseAnnotationSetName(){
+    return responseAnnotationSetName;
+  }// getResponseAnnotationSetName()
+
+  /** Sets the responseAnnotationSetNameFalsePoz in AnnotDiff
+    * @param aResponseAnnotationSetNameFalsePoz The name of the annotation set
+    * from the responseDocument.If aResponseAnnotationSetName is null
+    * then the default annotation set will be used.
+    */
+  public void setResponseAnnotationSetNameFalsePoz(
+                                    String aResponseAnnotationSetNameFalsePoz){
+    responseAnnotationSetNameFalsePoz = aResponseAnnotationSetNameFalsePoz;
+  }// setResponseAnnotationSetNameFalsePoz();
+
+  /** gets the responseAnnotationSetNameFalsePoz.
+    * @return The name of the responseAnnotationSetFalsePoz used in
+    * AnnotationDiff. If returns null then the the default annotation
+    * set will be used.
+    */
+  public String getResponseAnnotationSetNameFalsePoz(){
+    return responseAnnotationSetNameFalsePoz;
+  }// getResponseAnnotationSetNamefalsePoz()
 
   ///////////////////////////////////////////////////
   // PRECISION methods
@@ -268,8 +336,12 @@ public class AnnotationDiff extends AbstractVisualResource{
     if (annotationSchema == null)
      throw new ResourceInstantiationException("No annotation schema defined !");
 
-    // Get the key AnnotationSet from the keyDocument
-    keyAnnotSet = keyDocument.getAnnotations().get(
+    if (keyAnnotationSetName == null)
+      // Get the default key AnnotationSet from the keyDocument
+      keyAnnotSet = keyDocument.getAnnotations().get(
+                              annotationSchema.getAnnotationName());
+    else
+      keyAnnotSet = keyDocument.getAnnotations(keyAnnotationSetName).get(
                               annotationSchema.getAnnotationName());
     if (keyAnnotSet == null){
       throw new ResourceInstantiationException("No <" +
@@ -281,9 +353,15 @@ public class AnnotationDiff extends AbstractVisualResource{
     // The alghoritm will modify this annotation set. It is better to make a
     // separate copy of them.
     keyAnnotList = new LinkedList(keyAnnotSet);
-    // Get the response AnnotationSet from the resonseDocument
-    responseAnnotSet = responseDocument.getAnnotations().get(
-                                        annotationSchema.getAnnotationName());
+
+    if (responseAnnotationSetName == null)
+      // Get the response AnnotationSet from the resonseDocument
+      responseAnnotSet = responseDocument.getAnnotations().get(
+                                          annotationSchema.getAnnotationName());
+    else
+      responseAnnotSet = keyDocument.getAnnotations(responseAnnotationSetName).
+                                    get(annotationSchema.getAnnotationName());
+
     if (responseAnnotSet == null){
       throw new ResourceInstantiationException("No <" +
                               annotationSchema.getAnnotationName() +
@@ -682,8 +760,12 @@ public class AnnotationDiff extends AbstractVisualResource{
 
     int no = 0;
     if (annotationTypeForFalsePositive != null)
-     no = responseDocument.getAnnotations().get(
+     if (responseAnnotationSetName == null)
+          no = responseDocument.getAnnotations().get(
                                       annotationTypeForFalsePositive).size();
+     else
+      no = responseDocument.getAnnotations(responseAnnotationSetNameFalsePoz).get(
+                                        annotationTypeForFalsePositive).size();
     if (no != 0){
       // No error here: the formula is the opposite to recall or precission
      falsePositiveStrict = ((double)(typeCounter[SPURIOUS_TYPE] +
