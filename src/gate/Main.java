@@ -184,9 +184,11 @@ public class Main {
   static {
     // find out the version number
     try {
-      BufferedReader reader = new BufferedReader(
-        new InputStreamReader(Files.getGateResourceAsStream("version.txt"))
-      );
+      InputStream ver = Files.getGateResourceAsStream("version.txt");
+//      if (ver==null) {
+//        throw new IOException();
+//      }
+      BufferedReader reader = new BufferedReader(new InputStreamReader(ver));
       Main.version = reader.readLine();
     } catch(IOException ioe) {
       Main.version = "2.0";
@@ -194,9 +196,11 @@ public class Main {
 
     // find out the build number
     try{
-      BufferedReader reader = new BufferedReader(
-        new InputStreamReader(Files.getGateResourceAsStream("build.txt"))
-      );
+      InputStream build = Files.getGateResourceAsStream("build.txt");
+      if (build==null) {
+        throw new IOException();
+      }
+      BufferedReader reader = new BufferedReader(new InputStreamReader(build));
       Main.build = reader.readLine();
     } catch(IOException ioe) {
       Main.build = "0000";
