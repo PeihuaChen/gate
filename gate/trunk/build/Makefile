@@ -55,7 +55,7 @@ depend:
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)
 test: japefiles
-	./jdk.sh java -Djava.compiler=none -classpath gate.jar \
+	./jdk.sh java -Xint -classpath gate.jar \
 	  junit.textui.TestRunner gate.TestGate
 #	  junit.ui.TestRunner gate.TestGate
 #	  junit.ui.LoadingTestRunner gate.TestGate
