@@ -72,16 +72,12 @@ public class EmailDocumentHandler implements StatusReporter{
     *      annotation called messageBody.
     * </ul>
     */
-  public void annotateMessages() {
+  public void annotateMessages() throws IOException,
+                                        gate.util.InvalidOffsetException {
     // obtain a BufferedReader form the Gate document...
     BufferedReader gateDocumentReader = null;
-    try {
-      gateDocumentReader = new BufferedReader(new InputStreamReader(
+    gateDocumentReader = new BufferedReader(new InputStreamReader(
               gateDocument.getSourceUrl().openConnection().getInputStream()));
-    } catch (IOException e){
-      e.printStackTrace();
-    }
-
     // for each line read from the gateDocumentReader do
     // if the line begins an e-mail message then fire a status listener, mark
     // that we are processing an e-mail, update the cursor and go to the next
@@ -121,170 +117,127 @@ public class EmailDocumentHandler implements StatusReporter{
     long nlSize = detectNLSize();
 
     //Out.println("NL SIZE = " + nlSize);
-    try {
-      // read each line from the reader
-      while ((line = gateDocumentReader.readLine()) != null) {
-        // Here we test if the line delimitates two e-mail messages.
-        // Each e-mail message begins with a line like this:
-        // From P.Fairhurst Thu Apr 18 12:22:23 1996
-        // Method lineBeginsMessage() detects such lines.
-        if (lineBeginsMessage(line)) {
 
+    // read each line from the reader
+    while ((line = gateDocumentReader.readLine()) != null){
+      // Here we test if the line delimitates two e-mail messages.
+      // Each e-mail message begins with a line like this:
+      // From P.Fairhurst Thu Apr 18 12:22:23 1996
+      // Method lineBeginsMessage() detects such lines.
+      if (lineBeginsMessage(line)){
             // Inform the status listener to fire only
             // if no. of elements processed.
             // So far is a multiple of ELEMENTS_RATE
-            if ((++ emails % EMAILS_RATE) == 0)
-                fireStatusChangedEvent("Reading emails : " + emails);
-
-            // if there are e-mails read before, then the previous e-mail
-            // ends here.
-            if (true == emailReadBefore) {
-
-              // cursor points at the beggining of the line
-              // e-mail and Body ends before the \n char
-              // email ends as cursor value indicates
-              endEmail = cursor - nlSize ;
-
-              // also the e-mail body ends when an e-mail ends
-              endBody = cursor - nlSize;
-
-              //Annotate an E-mail body (startBody, endEmail)
-              createAnnotation("Body",startBody,endBody,null);
-
-              //Annotate an E-mail message(startEmail, endEmail) Email starts
-              createAnnotation("Message",startEmail,endEmail,null);
-            }
-
-            // if no e-mail was read before, now there is at list one message
-            // read
-            emailReadBefore = true;
-
-            // the cursor is updated with the length of the line + the
-            // new line char
-            cursor += line.length() + nlSize;
-
-            // E-mail starts imediately after this line which sepatates 2
-            // messages
-            startEmail = cursor;
-
-            // E-mail header starts also from here
-            startHeader = cursor;
-
-            // we are inside an e-mail
-            insideAnEmail = true;
-
-            // next is the E-mail header
-            insideHeader = true;
-
-            // no field inside header has been read before
-            fieldReadBefore = false;
-
-            // read the next line
-            continue;
-        }//if (lineBeginsMessage(line))
-
-        if (false == insideAnEmail) {
-          // the cursor is update with the length of the line +
-          // the new line char
+          if ((++ emails % EMAILS_RATE) == 0)
+              fireStatusChangedEvent("Reading emails : " + emails);
+          // if there are e-mails read before, then the previous e-mail
+          // ends here.
+          if (true == emailReadBefore){
+            // cursor points at the beggining of the line
+            // e-mail and Body ends before the \n char
+            // email ends as cursor value indicates
+            endEmail = cursor - nlSize ;
+            // also the e-mail body ends when an e-mail ends
+            endBody = cursor - nlSize;
+            //Annotate an E-mail body (startBody, endEmail)
+            createAnnotation("Body",startBody,endBody,null);
+            //Annotate an E-mail message(startEmail, endEmail) Email starts
+            createAnnotation("Message",startEmail,endEmail,null);
+          }
+          // if no e-mail was read before, now there is at list one message
+          // read
+          emailReadBefore = true;
+          // the cursor is updated with the length of the line + the
+          // new line char
           cursor += line.length() + nlSize;
-
+          // E-mail starts imediately after this line which sepatates 2
+          // messages
+          startEmail = cursor;
+          // E-mail header starts also from here
+          startHeader = cursor;
+          // we are inside an e-mail
+          insideAnEmail = true;
+          // next is the E-mail header
+          insideHeader = true;
+          // no field inside header has been read before
+          fieldReadBefore = false;
           // read the next line
           continue;
-        }//if
-
-        // here we are inside an e-mail message (inside Header or Body)
-        if (true == insideHeader) {
-
-          // E-mail spec sais that E-mail header is separated by E-mail body
-          // by a \n char
-          if (line.equals("")) {
-
-            // this \n sepatates the header of an e-mail form its body
-            // If we are here it means that the header has ended.
-            insideHeader  = false;
-
-            // e-mail header ends here
-            endHeader = cursor - nlSize;
-
-            // update the cursor with the length of \n
-            cursor += line.length() + nlSize;
-
-            // E-mail body starts from here
-            startBody = cursor;
-
-            // if fields were read before, it means that the e-mail has a header
-            if (true == fieldReadBefore) {
-              endField = endHeader;
-
-              //Create a field annotation (fieldName, startField, endField)
-              createAnnotation(aFieldName, startField, endField, null);
-
-              //Create an e-mail header annotation
-              createAnnotation("Header",startHeader,endHeader,null);
-
-            }//if
-            // read the next line
-            continue;
-          }//if (line.equals(""))
-
-          // if line begins with a field then prepare to create an
-          // annotation with the name of the field
-          if (lineBeginsWithField(line)) {
-
-            // if a field was read before, it means that the previous field ends
-            // here
-            if (true == fieldReadBefore) {
-
-              // the previous field end here
-              endField = cursor - nlSize;
-
-              //Create a field annotation (fieldName, startField, endField)
-              createAnnotation(aFieldName, startField, endField, null);
-            }//if
-
-            fieldReadBefore = true;
-            aFieldName = getFieldName();
-            startField = cursor + aFieldName.length() + ":".length();
-          }//if
-
-          // in both cases the cursor is updated and read the next line
-          // the cursor is update with the length of the line +
-          // the new line char
-          cursor += line.length() + nlSize;
-
-          // read the next line
-          continue;
-        }//if (true == insideHeader)
-
-        // here we are inside the E-mail body
-        // the body will end when the e-mail will end.
-        // here we just update the cursor
+      }//if (lineBeginsMessage(line))
+      if (false == insideAnEmail){
+        // the cursor is update with the length of the line +
+        // the new line char
         cursor += line.length() + nlSize;
-
-      }//while
-
-      // it might be possible that the file to contain only one e-mail and
-      // if the file contains only one e-mail message then the variable
-      // emailReadBefore must be set on true value
-      if (true == emailReadBefore) {
-
-        endBody  = cursor - nlSize;
-        endEmail = cursor - nlSize;
-
-        //Annotate an E-mail body (startBody, endEmail)
-        createAnnotation("Body",startBody,endBody,null);
-
-        //Annotate an E-mail message(startEmail, endEmail) Email starts
-        createAnnotation("Message",startEmail,endEmail,null);
-      }
-
-      // if emailReadBefore is not set on true, that means that we didn't
-      // encounter any line like this:
-      // From P.Fairhurst Thu Apr 18 12:22:23 1996
-    } catch (IOException e) {
-      e.printStackTrace(Err.getPrintWriter());
+        // read the next line
+        continue;
+      }//if
+      // here we are inside an e-mail message (inside Header or Body)
+      if (true == insideHeader){
+        // E-mail spec sais that E-mail header is separated by E-mail body
+        // by a \n char
+        if (line.equals("")){
+          // this \n sepatates the header of an e-mail form its body
+          // If we are here it means that the header has ended.
+          insideHeader  = false;
+          // e-mail header ends here
+          endHeader = cursor - nlSize;
+          // update the cursor with the length of \n
+          cursor += line.length() + nlSize;
+          // E-mail body starts from here
+          startBody = cursor;
+          // if fields were read before, it means that the e-mail has a header
+          if (true == fieldReadBefore){
+            endField = endHeader;
+            //Create a field annotation (fieldName, startField, endField)
+            createAnnotation(aFieldName, startField, endField, null);
+            //Create an e-mail header annotation
+            createAnnotation("Header",startHeader,endHeader,null);
+          }//if
+          // read the next line
+          continue;
+        }//if (line.equals(""))
+        // if line begins with a field then prepare to create an
+        // annotation with the name of the field
+        if (lineBeginsWithField(line)){
+          // if a field was read before, it means that the previous field ends
+          // here
+          if (true == fieldReadBefore){
+            // the previous field end here
+            endField = cursor - nlSize;
+            //Create a field annotation (fieldName, startField, endField)
+            createAnnotation(aFieldName, startField, endField, null);
+          }//if
+          fieldReadBefore = true;
+          aFieldName = getFieldName();
+          startField = cursor + aFieldName.length() + ":".length();
+        }//if
+        // in both cases the cursor is updated and read the next line
+        // the cursor is update with the length of the line +
+        // the new line char
+        cursor += line.length() + nlSize;
+        // read the next line
+        continue;
+      }//if (true == insideHeader)
+      // here we are inside the E-mail body
+      // the body will end when the e-mail will end.
+      // here we just update the cursor
+      cursor += line.length() + nlSize;
+    }//while
+    // it might be possible that the file to contain only one e-mail and
+    // if the file contains only one e-mail message then the variable
+    // emailReadBefore must be set on true value
+    if (true == emailReadBefore){
+      endBody  = cursor - nlSize;
+      endEmail = cursor - nlSize;
+      //Annotate an E-mail body (startBody, endEmail)
+      createAnnotation("Body",startBody,endBody,null);
+      //Annotate an E-mail message(startEmail, endEmail) Email starts
+      createAnnotation("Message",startEmail,endEmail,null);
     }
-  } // annotateMessages
+    // if emailReadBefore is not set on true, that means that we didn't
+    // encounter any line like this:
+    // From P.Fairhurst Thu Apr 18 12:22:23 1996
+  }//annotateMessages
 
   /**
     * This method detects if the text file which contains e-mail messages
@@ -326,18 +279,14 @@ public class EmailDocumentHandler implements StatusReporter{
     * feature map.
     */
   private void createAnnotation(String anAnnotationName, long anAnnotationStart,
-                                 long anAnnotationEnd, FeatureMap aFeatureMap) {
+                                 long anAnnotationEnd, FeatureMap aFeatureMap)
+                                       throws gate.util.InvalidOffsetException{
     if (aFeatureMap == null)
         aFeatureMap = new SimpleFeatureMapImpl();
-    try {
-      basicAS.add(new Long(anAnnotationStart), new Long(anAnnotationEnd),
-                  anAnnotationName, aFeatureMap
-                  );
-    } catch (gate.util.InvalidOffsetException e) {
-      e.printStackTrace(Err.getPrintWriter());
-    }
-  } // createAnnotation
-
+    basicAS.add(new Long(anAnnotationStart), new Long(anAnnotationEnd),
+                anAnnotationName, aFeatureMap
+                );
+  }//createAnnotation
   /**
     * Tests if the line begins an e-mail message
     * @param aTextLine a line from the file containing the e-mail messages
@@ -780,4 +729,3 @@ public class EmailDocumentHandler implements StatusReporter{
    } // testSelf
 
 } //EmailDocumentHandler
-

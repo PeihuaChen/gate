@@ -2,14 +2,14 @@
  *	Sgml2Xml.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU,  4/July/2000
  *
  *  $Id$
@@ -19,11 +19,12 @@ package gate.sgml;
 
 import java.util.*;
 import java.io.*;
-
+import java.net.*;
 
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
+
 
 /**
   * Not so fast...
@@ -94,7 +95,8 @@ public class Sgml2Xml{
 
   }
 
-  /*
+/*  I keep this just in case I need some more debuging
+
   public static void main(String[] args){
     Sgml2Xml convertor =
       new Sgml2Xml("<w VVI='res trtetre\" relu = \"stop\">say
@@ -439,10 +441,9 @@ public class Sgml2Xml{
   } // doState13
 
   /**
-    * This method is responsable with document conversion
-    */
-  public String convert() throws Exception {
-
+    This method is responsable with document conversion
+  */
+  public String convert()throws IOException,MalformedURLException {
     while (thereAreCharsToBeProcessed()) {
       // read() gets the next char and increment the m_cursor
       m_currChar = read();

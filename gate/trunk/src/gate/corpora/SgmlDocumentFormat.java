@@ -26,6 +26,7 @@ import gate.*;
 import gate.sgml.*;
 import gate.gui.*;
 import gate.xml.*;
+import gate.creole.*;
 
 import org.w3c.www.mime.*;
 // xml tools
@@ -49,22 +50,13 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
   /** Default construction */
   public SgmlDocumentFormat() { super(); }
 
-  /** Construction with a map of what markup elements we want to
-    * convert when doing unpackMarkup(), and what annotation types
-    * to convert them to.
-    */
-  public SgmlDocumentFormat(Map markupElementsMap) {
-    super(markupElementsMap);
-  } // construction with map
-
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(Document doc) {
-	  try {
-
+  public void unpackMarkup(Document doc) throws DocumentFormatException{
+    try {
       Sgml2Xml sgml2Xml = new Sgml2Xml(doc);
 
       fireStatusChangedEvent("Performing SGML to XML...");
@@ -76,19 +68,18 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
       //Out.println("Conversion done..." + xmlUri);
       //Out.println(sgml2Xml.convert());
+      // Get a parser factory.
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+      // Set up the factory to create the appropriate type of parser
 
-		  // Get a parser factory.
-		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
-		  // Set up the factory to create the appropriate type of parser
+      // Set up the factory to create the appropriate type of parser
       // non validating one
-		  saxParserFactory.setValidating(false);
-
+      saxParserFactory.setValidating(false);
       // non namesapace aware one
-		  saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(false);
 
-      // create it
-		  SAXParser parser = saxParserFactory.newSAXParser();
+      // Create a SAX parser
+      SAXParser parser = saxParserFactory.newSAXParser();
 
       // use it
       if (null != doc){
@@ -107,14 +98,18 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
         });
 
         parser.parse(xmlUri, xmlDocHandler);
-      }
+     }// end if
+    } catch (ParserConfigurationException e){
+        throw
+        new DocumentFormatException("XML parser configuration exception ", e);
+    } catch (SAXException e){
+        throw new DocumentFormatException(e);
+    } catch (IOException e){
+        throw new DocumentFormatException("I/O exception for " +
+                                      doc.getSourceUrl().toString());
+    }
 
-	  } catch (Exception ex) {
-      ex.printStackTrace(Err.getPrintWriter());
-		  //System.exit(2);
-	  }
-
-  }
+  }// unpackMarkup
 
   private String sgml2Xml(Document doc) {
     String xmlUri = doc.getSourceUrl().toString ();
@@ -130,8 +125,8 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup(Document doc,
-                                    String  originalContentFeatureType) {
-
+                                    String  originalContentFeatureType)
+                                                throws DocumentFormatException{
      FeatureMap fm = doc.getFeatures ();
 
      if (fm == null)
@@ -140,6 +135,22 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
-  }
+  }// unpackMarkup
 
-} // class SgmlDocumentFormat
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException{
+    // Register SGML mime type
+    MimeType mime = new MimeType("text","sgml");
+    // Register the class handler for this mime type
+    mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
+                                                                          this);
+    // Register the mime type with mine string
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    // Register file sufixes for this mime type
+    suffixes2mimeTypeMap.put("sgm",mime);
+    suffixes2mimeTypeMap.put("sgml",mime);
+    setMimeType(mime);
+    return this;
+  }// init
+
+}//class SgmlDocumentFormat

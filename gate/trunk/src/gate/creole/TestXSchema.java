@@ -57,7 +57,6 @@ public class TestXSchema extends TestCase
     annotSchema.fromXSchema(url);
 
     String s = annotSchema.toXSchema();
-
     // write back the XSchema fom memory
     // File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
     // load it again.

@@ -75,6 +75,7 @@ public abstract class Factory
     // create an object using the resource's default constructor
     Resource res = null;
     try {
+      if(DEBUG) Out.prln("Creating resource " + resClass.getName());
       res = (Resource) resClass.newInstance();
     } catch(IllegalAccessException e) {
       throw new ResourceInstantiationException(
@@ -88,8 +89,10 @@ public abstract class Factory
 
     // set the parameters of the resource
     try {
+      if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
       setResourceParameters(res, parameters);
     } catch(Exception e) {
+      if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
       throw new ResourceInstantiationException("Parameterisation failure" + e);
     }
 
@@ -98,6 +101,7 @@ public abstract class Factory
     res.setFeatures(resData.getFeatures());
 
     // initialise the resource
+    if(DEBUG) Out.prln("Initialising resource " + res.toString());
     res = res.init();
 
     return res;

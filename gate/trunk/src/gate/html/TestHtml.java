@@ -67,11 +67,6 @@ public class TestHtml extends TestCase
     /*
     markupElementsMap = new HashMap();
     // populate it
-    markupElementsMap.put ("S","Sentence");
-    markupElementsMap.put ("s","Sentence");
-    markupElementsMap.put ("W","Word");
-    markupElementsMap.put ("w","Word");
-    markupElementsMap.put ("p","Paragraph");
     markupElementsMap.put ("h1","Header 1");
     markupElementsMap.put ("H1","Header 1");
     markupElementsMap.put ("A","link");
@@ -79,7 +74,6 @@ public class TestHtml extends TestCase
     */
 
     doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
-
     // get the docFormat that deals with it.
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
                                                         doc, doc.getSourceUrl()
@@ -88,31 +82,7 @@ public class TestHtml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-     /*
-      // register a progress listener with it
-      docFormat.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            Out.println(text);
-          }
-          public void processFinished(){
-          }
-      });
-    */
     docFormat.unpackMarkup (doc,"DocumentContent");
-      /*
-      // timing the operation
-      Date startTime = new Date();
-        docFormat.unpackMarkup (doc,"DocumentContent");
-      Date endTime = new Date();
-      long  time1 = endTime.getTime () - startTime.getTime ();
-      int docSize = doc.getContent().size().intValue();
-      Out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-        docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-       time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024+
-        "." + (docSize/time1*1000)%1024 + " K/second");
-      */
-    //*/
-
   } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */

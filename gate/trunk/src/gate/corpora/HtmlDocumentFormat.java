@@ -31,6 +31,7 @@ import gate.util.*;
 import gate.*;
 import gate.html.*;
 import gate.gui.*;
+import gate.creole.*;
 
 import org.w3c.www.mime.*;
 
@@ -52,56 +53,36 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
   /** Default construction */
   public HtmlDocumentFormat() { super(); }
 
-  /** Construction with a map of what markup elements we want to
-    * convert when doing unpackMarkup(), and what annotation types
-    * to convert them to.
-    */
-  public HtmlDocumentFormat(Map markupElementsMap) {
-    super(markupElementsMap);
-  } // construction with map
-
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(gate.Document doc){
-
-    Reader reader = null;
-    URLConnection conn = null;
-    PrintWriter out = null;
-
-    HTMLEditorKit.Parser parser = new ParserDelegator();
-
+  public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
+    Reader                reader = null;
+    URLConnection         conn = null;
+    PrintWriter           out = null;
+    HTMLEditorKit.Parser  parser = new ParserDelegator();
     try{
       conn = doc.getSourceUrl().openConnection ();
       reader =  new InputStreamReader(conn.getInputStream ());
-    } catch (Exception e) {
-      Out.println (e);
-      e.printStackTrace (Err.getPrintWriter());
-    }
-
-    // create a new Htmldocument handler
-    HtmlDocumentHandler htmlDocHandler = new
+      // create a new Htmldocument handler
+      HtmlDocumentHandler htmlDocHandler = new
                              HtmlDocumentHandler(doc, this.markupElementsMap);
-
-    // register a status listener with it
-    htmlDocHandler.addStatusListener(new StatusListener(){
+      // register a status listener with it
+      htmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
             fireStatusChangedEvent(text);
           }
-    });
-
-    try {
+      });
       // parse the HTML document
       parser.parse(reader, htmlDocHandler, true);
-    } catch (Exception e) {
-      Out.println (e);
-      e.printStackTrace (Err.getPrintWriter());
-    }
 
-  }
+    } catch (IOException e){
+      throw new DocumentFormatException(e);
+    }
+  }//unpackMarkup(doc)
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -111,16 +92,32 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     * content of the Gate document.
     */
    public void unpackMarkup(gate.Document doc,
-                                    String  originalContentFeatureType){
-
+                                    String  originalContentFeatureType)
+                                                throws DocumentFormatException{
      FeatureMap fm = doc.getFeatures ();
-
      if (fm == null)
         fm = new SimpleFeatureMapImpl();
 
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
-  }
+  }//unpackMarkup(doc,originalContentFeatureType)
 
-} // class HtmlDocumentFormat
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException{
+    // Register HTML mime type
+    MimeType mime = new MimeType("text","html");
+    // Register the class handler for this mime type
+    mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
+                                                                          this);
+    // Register the mime type with mine string
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    // Register file sufixes for this mime type
+    suffixes2mimeTypeMap.put("html",mime);
+    suffixes2mimeTypeMap.put("htm",mime);
+    // Set the mimeType for this language resource
+    setMimeType(mime);
+    return this;
+  }// init()
+
+}// class HtmlDocumentFormat

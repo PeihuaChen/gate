@@ -148,28 +148,33 @@ public class HtmlDocumentHandler extends ParserCallback {
       Iterator anIterator = colector.iterator();
       while (anIterator.hasNext()){
         obj = (CustomObject) anIterator.next();
-
-        // construct an annotation from this obj
-        try {
-          if (markupElementsMap == null) {
-             basicAS.add( obj.getStart(),
-                          obj.getEnd(),
-                          obj.getElemName(),
-                          obj.getFM()
-                         );
-          } else {
-            String annotationType =
-                   (String) markupElementsMap.get(obj.getElemName());
-            if (annotationType != null)
+        // Check if a annotation can be created
+        if ( canCreateAnnotation(obj) ){
+          // Construct an annotation from this obj
+          try{
+            if (markupElementsMap == null){
                basicAS.add( obj.getStart(),
                             obj.getEnd(),
-                            annotationType,
+                            obj.getElemName(),
                             obj.getFM()
                            );
+            }else{
+              String annotationType =
+                     (String) markupElementsMap.get(obj.getElemName());
+              if (annotationType != null)
+                 basicAS.add( obj.getStart(),
+                              obj.getEnd(),
+                              annotationType,
+                              obj.getFM()
+                             );
+            }
+          }catch (InvalidOffsetException e){
+              // If we have an exception here,
+              // that means that the error is critical
+              // We already checked if we can create an annotation
+              throw new LuckyException(e.toString());
           }
-        } catch (InvalidOffsetException e) {
-          e.printStackTrace (Err.getPrintWriter());
-        }
+        }// end if
       }//while
 
       // notify the listener about the total amount of elements that
@@ -262,9 +267,8 @@ public class HtmlDocumentHandler extends ParserCallback {
     * of its input streamin order to notify the parserCallback that there
     * is nothing more to parse.
     */
-  public void flush() throws BadLocationException {
-    Out.println("Flush called!!!!!!!!!!!");
-  }
+  public void flush() throws BadLocationException{
+  }// flush
 
   /** This method is called when the HTML parser encounts a comment
     */
@@ -286,6 +290,21 @@ public class HtmlDocumentHandler extends ParserCallback {
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
+
+  /**
+    * This method verifies if data contained by the CustomObject can be used
+    * to create a GATE annotation.
+    */
+  private boolean canCreateAnnotation(CustomObject aCustomObject){
+    long start            = aCustomObject.getStart().longValue();
+    long end              = aCustomObject.getEnd().longValue();
+    long gateDocumentSize = doc.getContent().size().longValue();
+
+    if (start < 0 || end < 0 ) return false;
+    if (start > end ) return false;
+    if ((start > gateDocumentSize) || (end > gateDocumentSize)) return false;
+    return true;
+  }// canCreateAnnotation
 
   // HtmlDocumentHandler member data
 
@@ -381,6 +400,5 @@ class  CustomObject {
   private FeatureMap fm = null;
   private Long start = null;
   private Long end  = null;
-
 } // CustomObject
 

@@ -44,7 +44,7 @@ public class TestSgml extends TestCase
 
   public static void main(String args[]) {
     TestSgml app = new TestSgml("TestSgml");
-    try{
+    try {
       app.testSgmlLoading ();
     }catch (Exception e){
       e.printStackTrace (Err.getPrintWriter());
@@ -64,11 +64,6 @@ public class TestSgml extends TestCase
     markupElementsMap.put ("s","Sentence");
     markupElementsMap.put ("W","Word");
     markupElementsMap.put ("w","Word");
-    markupElementsMap.put ("p","Paragraph");
-    markupElementsMap.put ("h1","Header 1");
-    markupElementsMap.put ("H1","Header 1");
-    markupElementsMap.put ("A","link");
-    markupElementsMap.put ("a","link");
     */
 
     doc = gate.Factory.newDocument(Gate.getUrl("tests/sgml/Hds.sgm"));
@@ -77,43 +72,12 @@ public class TestSgml extends TestCase
     // the parameter MimeType doesn't affect right now the behaviour
     //*
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-        doc, new MimeType("text","sgml")
-    );
-    //*/
-
-    /*
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      doc, doc.getSourceURL()
+        doc, doc.getSourceUrl()
     );
     assert(docFormat instanceof gate.corpora.SgmlDocumentFormat);
-    */
     // set's the map
-      docFormat.setMarkupElementsMap(markupElementsMap);
-      /*
-      // register a progress listener with it
-      docFormat.addStatusListener(new StatusListener(){
-          public void statusChanged(String text){
-            Out.println(text);
-          }
-          public void processFinished(){
-          }
-      });
-      */
-      docFormat.unpackMarkup (doc,"DocumentContent");
-      /*
-      // timing the operation
-      Date startTime = new Date();
-        docFormat.unpackMarkup (doc,"DocumentContent");
-      Date endTime = new Date();
-      // get the size of the doc
-      long  time1 = endTime.getTime () - startTime.getTime ();
-      int docSize = doc.getContent().size().intValue();
-      Out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
-        docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
-      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
-        "." + (docSize/time1*1000)%1024 + " K/second");
-      */
-    //*/
+    docFormat.setMarkupElementsMap(markupElementsMap);
+    docFormat.unpackMarkup (doc,"DocumentContent");
   }// testSgml
 
   /** Test suite routine for the test runner */

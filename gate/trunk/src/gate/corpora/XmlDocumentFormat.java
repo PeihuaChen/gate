@@ -25,6 +25,7 @@ import java.net.*;
 import gate.util.*;
 import gate.*;
 import gate.gui.*;
+import gate.creole.*;
 
 // xml tools
 import javax.xml.parsers.*;
@@ -48,20 +49,12 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   /** Default construction */
   public XmlDocumentFormat() { super(); }
 
-  /** Construction with a map of what markup elements we want to
-    * convert when doing unpackMarkup(), and what annotation types
-    * to convert them to.
-    */
-  public XmlDocumentFormat(Map markupElementsMap) {
-    super(markupElementsMap);
-  } // construction with map
-
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
-  public void unpackMarkup(Document doc){
+  public void unpackMarkup(Document doc) throws DocumentFormatException{
     // create the element2String map
     Map anElement2StringMap = null;
     anElement2StringMap = new HashMap();
@@ -70,25 +63,20 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     anElement2StringMap.put("S","\n\n");
     anElement2StringMap.put("s","\n\n");
     setElement2StringMap(anElement2StringMap);
-
-	  try {
-
+    try {
       // use Excerces XML parser with JAXP
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
       //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
-		  // Get a parser factory.
-		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
-		  // Set up the factory to create the appropriate type of parser
-
+      // Get a parser factory.
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+      // Set up the factory to create the appropriate type of parser
       // non validating one
-		  saxParserFactory.setValidating(false);
-
+      saxParserFactory.setValidating(false);
       // non namesapace aware one
-		  saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(false);
 
       // create it
-		  SAXParser xmlParser = saxParserFactory.newSAXParser();
+      SAXParser xmlParser = saxParserFactory.newSAXParser();
 
       // use it
       if (null != doc){
@@ -110,11 +98,17 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
       }
 
-	  } catch (Exception ex) {
-      ex.printStackTrace(Err.getPrintWriter());
-		  //System.exit(2);
-	  }
-  }
+    } catch (ParserConfigurationException e){
+        throw
+        new DocumentFormatException("XML parser configuration exception ", e);
+    } catch (SAXException e){
+        throw new DocumentFormatException(e);
+    } catch (IOException e){
+        throw new DocumentFormatException("I/O exception for " +
+                                      doc.getSourceUrl().toString());
+    }
+
+  }// unpackMarkup
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -123,8 +117,9 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * It also uses the originalContentfeaturetype to preserve the original
     * content of the Gate document.
     */
-   public void unpackMarkup(Document doc,
-                                    String  originalContentFeatureType){
+   public void unpackMarkup( Document doc,
+                             String  originalContentFeatureType)
+                                                throws DocumentFormatException{
 
      FeatureMap fm = doc.getFeatures ();
 
@@ -134,6 +129,25 @@ public class XmlDocumentFormat extends TextualDocumentFormat
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
      unpackMarkup (doc);
-  }
+  }// unpackMarkup
 
-} // class XmlDocumentFormat
+  /** Initialise this resource, and return it. */
+  public Resource init() throws ResourceInstantiationException{
+    //Out.prln("XML Resource called");
+    // Register XML mime type
+    MimeType mime = new MimeType("text","xml");
+    // Register the class handler for this mime type
+    mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
+                                                                          this);
+    // Register the mime type with mine string
+    mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    // Register file sufixes for this mime type
+    suffixes2mimeTypeMap.put("xml",mime);
+    suffixes2mimeTypeMap.put("xhtm",mime);
+    suffixes2mimeTypeMap.put("xhtml",mime);
+    // Set the mimeType for this language resource
+    setMimeType(mime);
+    return this;
+  }// init()
+
+}//class XmlDocumentFormat

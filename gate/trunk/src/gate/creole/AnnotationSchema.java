@@ -14,7 +14,6 @@
  *
  *  $Id$
  */
-
 package gate.creole;
 
 import java.util.*;
@@ -89,7 +88,7 @@ public class AnnotationSchema extends AbstractLanguageResource
 
     } catch(ParserConfigurationException e) {
       throw new ResourceInstantiationException(
-        "couldn't create annotation schema parser: " + e
+        "Couldn't create annotation schema parser: " + e
       );
     }
   } // setUpStaticData
