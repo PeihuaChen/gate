@@ -771,6 +771,8 @@ public class ApplicationViewer extends AbstractVisualResource
                                             pr.getName() +
                                             ":\n" + ie.toString(),
                                             "Gate", JOptionPane.ERROR_MESSAGE);
+              ie.printStackTrace(Err.getPrintWriter());
+              fireProcessFinished();
               return;
             }
           }
@@ -833,10 +835,10 @@ public class ApplicationViewer extends AbstractVisualResource
             try {
               pr.check();
             } catch(ExecutionException ee) {
-              JOptionPane.showMessageDialog(ApplicationViewer.this,
-                                            "Execution error:\n " +
-                                            ee.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(
+                ApplicationViewer.this,
+                "Execution error while running \"" + pr.getName() + "\" :\n " +
+                ee.toString(), "Gate", JOptionPane.ERROR_MESSAGE);
               ee.printStackTrace(Err.getPrintWriter());
               Exception exc = ee.getException();
               if(exc != null){
