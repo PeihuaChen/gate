@@ -759,7 +759,10 @@ public class CorpusBenchmarkTool {
           Out.prln("<P> Precision increase on human-marked from " +
                    annotDiff1.getPrecisionAverage() + " to " +
                    annotDiff2.getPrecisionAverage() + "</P>");
-        else if (annotDiff1 != null && annotDiff2 != null)
+        else if (annotDiff1 != null
+                 && annotDiff2 != null
+                 && annotDiff1.getPrecisionAverage()
+                     > annotDiff2.getPrecisionAverage())
           Out.prln("<P> Precision decrease on human-marked from " +
                    annotDiff1.getPrecisionAverage() + " to " +
                    annotDiff2.getPrecisionAverage() + "</P>");
@@ -775,7 +778,10 @@ public class CorpusBenchmarkTool {
           Out.prln("<P> Recall increase on human-marked from " +
                    annotDiff1.getRecallAverage() + " to " +
                    annotDiff2.getRecallAverage() + "</P>");
-        else if (annotDiff1 != null && annotDiff2 != null)
+        else if (annotDiff1 != null
+                 && annotDiff2 != null
+                 && annotDiff1.getRecallAverage()
+                     > annotDiff2.getRecallAverage())
           Out.prln("<P> Recall decrease on human-marked from " +
                    annotDiff1.getRecallAverage() + " to " +
                    annotDiff2.getRecallAverage() + "</P>");
