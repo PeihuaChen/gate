@@ -150,6 +150,11 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     return this;
   }
 
+  public void reset(){
+    document = null;
+    annotationSet = null;
+  }
+
   /** Parses one input line containing a tokeniser rule.
     * This will create the necessary FSMState objects and the links
     * between them.
@@ -653,7 +658,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
         ioe.printStackTrace(Err.getPrintWriter());
       }
     }
-
+    reset();
     fireProcessFinishedEvent();
     fireStatusChangedEvent("Tokenisation complete!");
   } // run

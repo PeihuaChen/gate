@@ -169,7 +169,6 @@ public class TestGate {
     suite.addTest(TestDB.suite());
     suite.addTest(TestTokeniser.suite());
     suite.addTest(TestGazetteer.suite());
-
     return suite;
   } // suite
 
