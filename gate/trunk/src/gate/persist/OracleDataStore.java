@@ -1326,6 +1326,7 @@ System.out.println();
     throws PersistenceException {
 
     //1. what kind of feature value is this?
+//System.out.println("key=["+key+"], val=["+value+"]");
     int valueType = findFeatureType(value);
 
     //2. how many elements do we store?
@@ -1373,7 +1374,7 @@ System.out.println();
         Object currValue = elementsToStore.elementAt(i);
 
         //3.1. create a dummy feature [LOB hack]
-        Long featID = _createFeature(entityID,entityType,key,value,valueType);
+        Long featID = _createFeature(entityID,entityType,key,currValue,valueType);
 
         //3.2. update CLOBs if needed
         if (valueType == DBHelper.VALUE_TYPE_STRING) {
@@ -1656,7 +1657,7 @@ System.out.println();
         }//switch
 
         //new feature or part of an array?
-        if (currKey == prevKey && prevKey != null) {
+        if (currKey.equals(prevKey) && prevKey != null) {
           //part of array
           arrFeatures.add(currFeature);
         }
@@ -1665,7 +1666,9 @@ System.out.println();
 
           //is the prev feature an array or a single object?
           if (arrFeatures.size() > 1) {
-            fm.put(prevKey,arrFeatures);
+            //put a clone, because this is a temp array that will
+            //be cleared in few lines
+            fm.put(prevKey, new Vector(arrFeatures));
           }
           else if (arrFeatures.size() == 1) {
             fm.put(prevKey,arrFeatures.elementAt(0));

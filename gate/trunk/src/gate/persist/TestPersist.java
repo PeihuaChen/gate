@@ -380,6 +380,15 @@ public class TestPersist extends TestCase
     assertNotNull(doc);
 
     doc.getFeatures().put("hi there", new Integer(23232));
+    //create a complex feature - array of strings
+    Vector complexFeature = new Vector();
+    complexFeature.add("string 1");
+    complexFeature.add("string 2");
+    complexFeature.add("string 3");
+    complexFeature.add("string 4");
+    complexFeature.add("string 5");
+    doc.getFeatures().put("complex feature",complexFeature);
+
     doc.getAnnotations().add(
       new Long(0), new Long(20), "thingymajig", Factory.newFeatureMap()
     );
@@ -706,7 +715,8 @@ public class TestPersist extends TestCase
       else if (val instanceof String) {
         newVal = new String("UPD__").concat( (String)val).concat("__UPD");
       }
-      fm.put(currKey,newVal);
+      if (newVal != null)
+        fm.put(currKey,newVal);
     }
     dbDoc.sync();
     doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
