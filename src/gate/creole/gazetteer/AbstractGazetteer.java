@@ -41,6 +41,9 @@ public abstract class AbstractGazetteer
    */
   protected Boolean caseSensitive = new Boolean(true);
 
+  /** the linear definition of the gazetteer */
+  protected LinearDefinition definition;
+
   /** reference to mapping definiton info
    *  allows filling of Lookup.ontologyClass according to a list*/
   protected MappingDefinition mappingDefinition;
@@ -64,6 +67,7 @@ public abstract class AbstractGazetteer
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
+
   public String getEncoding() {
     return encoding;
   }
@@ -90,6 +94,14 @@ public abstract class AbstractGazetteer
 
   public MappingDefinition getMappingDefinition(){
     return mappingDefinition;
+  }
+
+  /**get the linear definition of this gazetteer. there is no parallel
+   * set method because the definition is laoded through the listsUrl
+   * on init().
+   * @return the linear definition of the gazetteer */
+  public LinearDefinition getLinearDefinition() {
+    return definition;
   }
 
   /**     */

@@ -52,4 +52,17 @@ extends AbstractGazetteer implements OntoGazetteer {
   public void setGazetteer(Gazetteer gaze) {
     gaz = gaze;
   }
+
+  /**overrides {@link gate.creole.gazetteer.Gazetteer}
+   * and retrieves the linear definition from the underlying
+   * linear gazetteer*/
+  public LinearDefinition getLinearDefinition() {
+    if (null == gaz){
+      throw new gate.util.GateRuntimeException(
+      "linear gazetteer should be set before \n"+
+      "attempting to retrieve the linear definition");
+    }
+    return gaz.getLinearDefinition();
+  }
+
 } // class AbstractOntoGazetteer
