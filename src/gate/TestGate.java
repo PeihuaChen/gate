@@ -34,6 +34,10 @@ public class TestGate
 {
   /** Main routine. */
   public static void main(String[] args) throws Exception {
+
+    // inialise the library.
+    // normally we would also call initCreoleRegister, but that's
+    // done in TestCreole
     Gate.init();
 
     String a[] = new String[1];
