@@ -187,7 +187,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     readActionClass();
     instantiateActionClass();
 */
-    System.out.println(actionClassString);
+    //System.out.println(actionClassString);
     try {
       actionClassBytes = new Jdk().compile(
         actionClassString.toString(),
@@ -438,6 +438,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.8  2000/05/16 10:38:25  hamish
+// removed printout
+//
 // Revision 1.7  2000/05/16 10:30:33  hamish
 // uses new gate.util.Jdk compiler
 //
