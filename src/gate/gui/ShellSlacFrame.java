@@ -381,8 +381,8 @@ public class ShellSlacFrame extends MainFrame {
 
   class RestoreDefaultApplicationAction extends AbstractAction {
     public RestoreDefaultApplicationAction() {
-      super("Restore default application");
-      putValue(SHORT_DESCRIPTION, "Restore default application");
+      super("Create ANNIE application");
+      putValue(SHORT_DESCRIPTION, "Create default ANNIE application");
     } // RestoreDefaultApplicationAction()
 
     public void actionPerformed(ActionEvent e) {
@@ -445,6 +445,44 @@ public class ShellSlacFrame extends MainFrame {
     } // StoreAllDocumentAction()
 
     public void actionPerformed(ActionEvent e) {
+      if(dataStore == null) {
+        // should open a datastore
+        dataStore = openSerialDataStore();
+      } // if
+      
+      if(dataStore != null) {
+        // load from datastore
+        Iterator iter = null;
+        String docID = "";
+        FeatureMap features;
+        Document doc;
+
+        try {
+          iter = dataStore.getLrIds("gate.corpora.DocumentImpl").iterator();
+        } catch (PersistenceException pex) {
+          pex.printStackTrace();
+        } // catch
+        
+        features = Factory.newFeatureMap();
+        features.put(DataStore.LR_ID_FEATURE_NAME, docID);
+        features.put(DataStore.DATASTORE_FEATURE_NAME, dataStore);
+        corpus.cleanup();
+        while(iter.hasNext()) {
+          docID = (String) iter.next();
+          // read the document back
+          features.put(DataStore.LR_ID_FEATURE_NAME, docID);
+          doc = null;
+          try {
+            doc = (Document) 
+              Factory.createResource("gate.corpora.DocumentImpl", features);
+          } catch (gate.creole.ResourceInstantiationException rex) {
+            rex.printStackTrace();
+          } // catch
+
+          if(doc != null) corpus.add(doc);
+        } // while
+      } // if
+      
     } // actionPerformed(ActionEvent e)
   } // class LoadAllDocumentAction extends AbstractAction
   
