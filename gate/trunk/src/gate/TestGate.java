@@ -208,8 +208,8 @@ public class TestGate {
 //        suite.addTest(TestTokeniser.suite());
 //        suite.addTest(TestGazetteer.suite());
 //        suite.addTest(TestSplitterTagger.suite());
-        suite.addTest(TestPR.suite());
         suite.addTest(TestFeatureMap.suite());
+        suite.addTest(TestPR.suite());
       } // if(allTests)
 
     } catch(Exception e) {
