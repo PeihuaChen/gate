@@ -466,6 +466,9 @@ public class SerialControllerEditor extends AbstractVisualResource
     progressListeners.clear();
     statusListeners.clear();
     parametersEditor.cleanup();
+    addMenu.removeAll();
+    removeMenu.removeAll();
+    handle = null;
   }
 
   protected void buildInternalMenus(){

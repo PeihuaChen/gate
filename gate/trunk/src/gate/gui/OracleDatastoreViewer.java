@@ -37,6 +37,7 @@ public class OracleDatastoreViewer extends JTree
 
 
   public void cleanup(){
+    myHandle = null;
   }
 
   /** Accessor for features. */

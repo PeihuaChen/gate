@@ -1041,6 +1041,7 @@ public class DocumentEditor extends AbstractVisualResource
     stylesTreeRoot.removeAllChildren();
     data.clear();
     ranges.clear();
+    myHandle = null;
   }
 
   /**
