@@ -370,7 +370,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     }
 
     public Object getValueAt(Object node, int column){
-      if(node instanceof SerialController){
+      if(node == root){
         return null;
       }else if (node instanceof ProcessingResource){
         ProcessingResource pr = (ProcessingResource)node;
@@ -422,7 +422,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     }
 
     public Object getChild(Object parent, int index){
-      if(parent instanceof SerialController){
+      if(parent == root){
         SerialController sc = (SerialController)parent;
         return sc.get(index);
       }else if (parent instanceof ProcessingResource){
@@ -433,7 +433,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     }
 
     public int getChildCount(Object parent){
-      if(parent instanceof SerialController){
+      if(parent == root){
         SerialController sc = (SerialController)parent;
         return sc.size();
       }else if (parent instanceof ProcessingResource){
@@ -475,10 +475,12 @@ public class ApplicationViewer extends AbstractVisualResource {
             MainFrame frame = MainFrame.getInstance();
             PRHandle prHandle = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("NAME"));
             done = true;
-            Icon icon = prHandle.getIcon();
-            setOpenIcon(icon);
-            setClosedIcon(icon);
-            setLeafIcon(icon);
+            if(prHandle != null){
+              Icon icon = prHandle.getIcon();
+              setOpenIcon(icon);
+              setClosedIcon(icon);
+              setLeafIcon(icon);
+            }
           }
         }
       }else if (value instanceof ParameterDisjunction){
