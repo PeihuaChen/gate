@@ -22,6 +22,12 @@ Macro: FULLSTOP
  {Token.string=="."}
 )
 
+Macro: THREEDOTS
+(
+ {Token.string=="."}
+ {Token.string=="."}
+ {Token.string=="."}
+)
 
 Macro: PUNCT
 (
@@ -30,9 +36,19 @@ Macro: PUNCT
  )
 )
 
+Rule: Ldots
+(
+ ({Token})?
+ THREEDOTS (FULLSTOP)+
+):fake
+-->
+:fake.Ldots = {rule = Ldots}
+
 Rule: Split1
 (
- (PUNCT|FULLSTOP)+
+ (PUNCT|FULLSTOP|THREEDOTS|
+ (FULLSTOP {Token.string == "\""})
+)
 ):split
 -->
 :split.Split = {kind = "internal"}
@@ -53,10 +69,11 @@ Rule: CR
 
 Rule:Fake
 (
- (({Token})+{Token.string == "."})+ {Token}
+ ({Token}{Token.string == "."})+
+ ({Token.kind == word}|{Token.kind == number})
 ):fake
 -->
-{}
+:fake.Fake = {rule = "Fake"}
 
 
 Rule: Abbrev1
@@ -72,3 +89,8 @@ Rule: Abbrev2
 :fake
 -->
 {}
+
+
+
+
+
