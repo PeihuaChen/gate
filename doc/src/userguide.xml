@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xm-well_formed path="C:\Program Files\SoftQuad\XMetaL 2\tmpWorkingFolder\www.oasis-open.org\docbook\xml\4.1.2\docbookx.rlx"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<article class="techreport"> 
+  <title>The GATE User Guide</title> 
+  <articleinfo> 
+	 <author> 
+		<honorific>Dr</honorific> 
+		<firstname><ulink
+		  url="http://www.dcs.shef.ac.uk/~hamish">Hamish</ulink></firstname> 
+		<surname><ulink
+		  url="http://www.dcs.shef.ac.uk/~hamish">Cunningham</ulink></surname> 
+	 </author> 
+	 <author><firstname><ulink
+		  url="http://www.dcs.shef.ac.uk/~diana">Diana</ulink></firstname><surname><ulink
+		  url="http://www.dcs.shef.ac.uk/~diana">Maynard</ulink></surname> 
+	 </author> 
+	 <pubdate>09/03/2001</pubdate> 
+	 <copyright> 
+		<year>1998 - 2001</year> 
+		<holder>University of Sheffield</holder> 
+	 </copyright> 
+  </articleinfo> 
+  <para>This version of the document is for GATE version 2 alpha 1, of March
+	 2001. It is incomplete , probably inaccurate and almost certainly quite
+	 annoying, but that's all 
+	 <link linkend="billgates">Bill Gate's</link> fault. </para> 
+  <section> 
+	 <title>Introduction</title> 
+	 <para>GATE, a General Architecture for Text Engineering
+		<citation>Cun96b,Cun97a,Cun98,Cun99a,Cun00a</citation>, is a software
+		architecture for Language Engineering <citation>Cun99b</citation>, More
+		specifically, it is three things: an architecture; a framework; a development
+		environment.</para> 
+	 <para>By architecture we mean an abstract description of how a language
+		processing system may usefully be constructed, the types of component typically
+		used and so on. By framework we mean an object-oriented class library that
+		implements the architecture and provides a range of services that are useable
+		in a variety of application contexts. One such application is a development
+		environment built on top of the framework. The development environment is
+		analogous to systems like Mathematica for Mathematicians, or JBuilder for Java
+		programmers: it provides a convenient graphical environment for research and
+		development of language processing software.</para> 
+	 <para>Version 1 of GATE was released in 1996. It was written in C++ and
+		Tcl, has been licenced by several hundred organisations, and used in a wide
+		range of language analysis contexts including Information Extraction (IE -
+		<citation>Gai98a,Cun99c</citation>) in English, Greek, Spanish, Swedish,
+		German, Italian and French.</para> 
+	 <para>Version 2 (not the 
+		<link linkend="millenium">millenium edition</link>) of GATE was released
+		in Spring 2001. It is written in Java, and is available as open source free
+		software under the GNU licence at 
+		<ulink url="http://gate.ac.uk/">http://gate.ac.uk/</ulink>.</para> 
+	 <para>For more details about human language processing in general see 
+		<ulink url="http://www.dcs.shef.ac.uk/nlp">Sheffield NLP group</ulink> or
+		this paper on 
+		<ulink url="http://www.dcs.shef.ac.uk/~hamish/LeIntro.html">Language
+		  Engineering</ulink>. For more details about Information Extraction see this 
+		<ulink url="http://www.dcs.shef.ac.uk/~hamish/IE/">User Guide to
+		  IE</ulink> or the Sheffield 
+		<ulink url="http://www.dcs.shef.ac.uk/nlp/extraction">IE
+		  pages</ulink>.</para> 
+	 <para>The rest of this section gives a general introduction to the system.
+		The rest of the document then covers:</para> 
+	 <para> 
+		<orderedlist> 
+		  <listitem> 
+			 <para>how to use the 
+				<link linkend="the-development-environment">development
+				  environment</link></para> 
+		  </listitem> 
+		  <listitem> 
+			 <para>how to use the 
+				<link linkend="frame">framework</link></para> 
+		  </listitem> 
+		  <listitem> 
+			 <para>the 
+				<link linkend="design">design principles</link> of the architecture
+				and framework.</para> 
+		  </listitem> 
+		</orderedlist></para> 
+	 <section> 
+		<title>Architectural principles</title> 
+		<para>A central idea behind the GATE architecture is that there should be
+		  no requirement for users to commit to any particular theory of language
+		  processing: the architecture strives to be non-prescriptive and theory-neutral.
+		  Therefore there is a very general model of components and the data structures
+		  they share. This is, of course, both a strength and a weakness.</para> 
+		<para>(Almost) everything in GATE is a component. Components are reusable
+		  software chunks with well-defined interfaces that are conceptually separate
+		  from GATE itself. All component sets are user-extensible and together are
+		  called CREOLE - a Collection of REusable Objects for Language
+		  Engineering.</para> 
+	 </section> 
+	 <section> 
+		<title>GATE-based development</title> 
+		<para>The framework is a backplane into which plug CREOLE components. The
+		  user gives the system a list of URLs to search when it starts up, and
+		  components at those locations are loaded by the system. (To be precise only
+		  their configuration data is loaded to begin with; the actual classes are loaded
+		  when the user requests the instantiation of a resource.)</para> 
+		<para>The backplane performs these functions: 
+		  <orderedlist> 
+			 <listitem> 
+				<para>component discovery, bootstrapping, loading and
+				  reloading;</para> 
+			 </listitem> 
+			 <listitem> 
+				<para>native data structures for common information types;</para> 
+			 </listitem> 
+			 <listitem> 
+				<para>generalised data storage and process execution.</para> 
+			 </listitem> 
+		  </orderedlist></para> 
+		<para>A set of components plus the framework is a deployment unit which
+		  can be embedded in another application.</para> 
+		<para>The key task of the development environment is to facilitate
+		  constructing components.</para> 
+	 </section> 
+	 <section> 
+		<title>Component types</title> 
+		<para>GATE components are one of three types of specialised Java
+		  Beans:</para> 
+		<para>Resource:</para><blockquote> 
+		  <para>The top-level interface, which describes all components. What all
+			 components share in common is that they can be loaded at runtime, and that the
+			 set of components is extendable by clients. They have Features, which are
+			 represented externally to the system as "meta-data" in a format such as RDF,
+			 plain XML, or Java properties. Resources should probably all be Java
+			 beans.</para></blockquote> 
+		<para>ProcessingResource:</para><blockquote> 
+		  <para>Is a resource that is runnable, may be invoked remotely (via
+			 RMI), and lives in class files. In order to load a PR the system just needs to
+			 know where to find the class or jar files (which will also include the
+			 metadata).</para></blockquote> 
+		<para>LanguageResource:<blockquote> 
+			 <para>Is a resource that consists of data, accessed via a Java
+				abstraction layer. They live in relational
+				databases.</para></blockquote></para> 
+		<para>VisualResource:<blockquote> 
+			 <para>Is a visual Java bean, component of GUIs, including of the main
+				GATE gui. Like PRs they live in .class or .jar
+				files.</para></blockquote></para> 
+	 </section> 
+	 <section> 
+		<title>Bits and pieces</title> 
+		<para>There are built in components for common processing and data
+		  visualisation tasks. There is a finite state transduction language operating
+		  over annotations on text, called JAPE, a Jolly Advanced Pattern Eater. JAPE is
+		  based on Doug Appelt's TextPro language. There is automated measurement:
+		  precision, recall, diff over annotations on text. Support for documents in XML,
+		  SGML, HTML, RTF, email. Full Unicode support including editing in a number of
+		  languages (not supported by native JDK; thanks to Mark Leisher for help with
+		  this).</para> 
+	 </section> 
+  </section> 
+  <section id="the-development-environment"> 
+	 <title>Development Environment</title> 
+	 <para>The GATE development environment is designed to facilitate the
+		creation, development and testing of components for language processing R\D. We
+		describe here how to perform these tasks, and how to use the tools for named
+		entity recognition and results evaluation.</para> 
+	 <para>There are 6 main steps to using GATE.<simplelist><member>Bootstrap
+			 the basic software for new resources</member><member>Instantiate the desired
+			 language resource(s)</member><member>Instantiate appropriate processing
+			 resource(s)</member><member>Create and run an application (a set of
+			 components)</member><member>View the results of the
+			 application</member><member>Apply further tools, e.g. evaluation of the
+			 results.</member></simplelist></para> 
+	 <section> 
+		<title>Bootstrapping New Resources</title> 
+		<para>GATE components may be implemented by a variety of programming
+		  languages and databases, but in each case they are represented to the system as
+		  a Java class. This class may do nothing other than call the underlying program,
+		  or provide an access layer to a database; on the other hand it may implement
+		  the whole component.</para> 
+		<para>The development environment will dump out the basic form of a new
+		  resource Java class to disk for you: select "Bootstrap" from the "Tools"
+		  menu.</para> 
+	 </section> 
+	 <section> 
+		<title>Loading Language Resources</title> 
+		<para>Load a language resource by right clicking on "Language Resources"
+		  and selecting "Create Language Resource". Select "GATE document" and a pop-up
+		  window will appear. Choose a name for the resource, and select a file or url as
+		  the value of "sourceUrl". Note that double clicking in the "values" box brings
+		  up a tree structure to enable selection of documents. Make any changes to
+		  default settings as required (e.g. encoding type used) and click OK. The
+		  document name and icon should appear in the left hand pane, and can be viewed
+		  in the main window by double clicking on the icon. The right hand pane enables
+		  annotations to be selected and viewed. At this stage, the only annotations
+		  displayed will be those which are produced as a result of the text structure
+		  analysis which transforms a text into a GATE document, e.g. xml or html tags.
+		  Additional language resources can be loaded by repeating the procedure.</para> 
+	 </section> 
+	 <section> 
+		<title>Loading Processing Resources</title> 
+		<para>Right click on "Processing Resources" and select "Create processing
+		  resource". Select the type of resource (e.g. tokeniser, gazetteer, etc.) from
+		  the list of options. In the pop-up box, choose a name for the resource, and
+		  either select the default value for the resource, or select a new one. Select
+		  any other values as appropriate (e.g. encoding). Click "OK". An icon should
+		  appear under "Processing Resources" in the left hand pane. Note that it may
+		  take a few seconds for the resource to be loaded. Repeat this procedure until
+		  all necessary resources have been loaded.</para> 
+	 </section> 
+	 <section> 
+		<title>Running an Application</title> 
+		<para>Once all the resources have been loaded, an application can be
+		  created and run. Right click on "Applications" and create a new one. Then
+		  double click on it and the "Design" tab will appear. Here you can select the
+		  resources needed to run the application (these may not be necessarily be all
+		  those which have been loaded). Transfer the necessary components from the set
+		  of "available components" displayed on the right hand side of the main window
+		  to the set of "used components" on the left, by selecting each component and
+		  clicking on the left and right arrows. Ensure that the components are listed on
+		  the left in the correct order for processing (starting from the top). If not,
+		  select a component and move it up or down the list using the up/down arrows at
+		  the bottom of the pane. Once this is complete, move to the left hand pane,
+		  select the language resource to be used (using a left click), and finally right
+		  click on the application and select "Run".</para> 
+	 </section> 
+	 <section> 
+		<title>Viewing the Results</title> 
+		<para>Once the system has run, open the document to be viewed with a
+		  double click. Note that it may take a few seconds for the text to be displayed
+		  if it is long. The annotation types are displayed to the right of the text.
+		  Click on Default (the default annotation set) to display the annotation types.
+		  Then select the annotation types to be viewed. A checkbox will indicate which
+		  types are currently being displayed. The text segments corresponding to these
+		  annotations will be highlighted in the main text window. Fonts and colours of
+		  the annotations can be manually altered by double-clicking on the relevant
+		  annotation. Default colours and font settings can be altered in the same way,
+		  by double-clicking on the default button.</para> 
+		<para>Descriptions of the annotations are simultaneously displayed in the
+		  bottom pane. These lists can be sorted in ascending and descending order by any
+		  column, by clicking on the corresponding column heading. An arrow will appear
+		  indicating the direction of the sorting. Clicking on an entry in the table will
+		  also highlight the respective matching text portion.</para> 
+		<para>Right clicking on some part of the text in the main window will
+		  bring up a box containing a list of the annotations associated with it.
+		  Selecting one of these annotation types will highlight the relevant annotation
+		  description in the lower pane, if present. If not present (because the
+		  corresponding annotation on the right hand pane has not been selected), this
+		  annotation on the right will then be automatically selected and all relevant
+		  text in the main window will be appropriately highlighted.</para> 
+		<para>Although there is no cursor displayed in the various windows, they
+		  can all be scrolled using the keyboard arrows, as well as by using the
+		  scrollbars.</para> 
+		<para>At any time, the main viewer can also be used to display other
+		  information, such as Messages, by clicking on the header at the top of the main
+		  window.</para> 
+	 </section> 
+	 <section> 
+		<title>Adding Annotations</title> 
+		<para>In order to be able to add/edit annotations in GATE, the relevant
+		  Annotation Schemata must first be loaded. This is done by selecting an
+		  Annotation Schema (which is an xml file) from the Language Resources, for each
+		  annotation type.</para> 
+		<para>Once the Annotation Schemata have been loaded, the annotation types
+		  that have a Schema present inside GATE can be added or edited. To add a new
+		  annotation, select the text, right click, and select an annotation set (either
+		  the default set, which contains the annotations already found, or create a new
+		  one). Then select the name of the annotation to be created. If the annotation
+		  can have features, another window will automatically open. Select a feature
+		  from the list of possible features, and click the arrow to transfer it to the
+		  list of current features. The feature values can be edited by clicking on them.
+		  The new annotation will be added to the annotation set, and will appear in the
+		  annotation description table.</para> 
+		<para>An existing annotation can be modified by selecting it from the
+		  table and double clicking on it to bring up the features window. If, however,
+		  the schema has no features defined, then the selected annotation cannot be
+		  edited (since there are no features to edit). All that can be done is to add or
+		  delete the annotation. An annotation can be deleted by selecting it from the
+		  table, right clicking on it, and selecting Delete.</para> 
+	 </section> 
+	 <section> 
+		<title>The Evaluation Tool (Annotation Diff)</title> 
+		<para>The annotation tool is activated by selecting it from the Tools
+		  menu at the top of the window. It will appear in a new window. Select the key
+		  and response documents to be used (note that both must have been previously
+		  loaded into the system), the annotation type to be evaluated, and the
+		  annotation type to be used as the denominator for evaluating false positives
+		  (normally, Token). The user should ensure the key and response documents are
+		  explicitly selected, even if there are no alternative choices of document
+		  presented. Click on "do diff", and the results will be displayed.</para> 
+		<para>In the main window, the key and response annotations will be
+		  displayed. They can be sorted by any category by clicking on the relevant
+		  column header. The key and response annotations will be aligned if their
+		  indices are identical, and are colour coded according to the legend
+		  displayed.</para> 
+		<section> 
+		  <title>Evaluation metrics</title> 
+		  <para>Precision, recall and false positives are also displayed below
+			 the annotation tables, each according to 3 criteria - strict, lenient and
+			 average. The reason for these 3 criteria is to deal with partially correct
+			 responses in different ways.<simplelist><member>The <emphasis>Strict</emphasis>
+				  measure considers all partially correct responses as incorrect
+				  (spurious).</member><member>The <emphasis>Lenient</emphasis> measure considers
+				  all partially correct responses as correct.</member><member>The
+				  <emphasis>Average</emphasis> measure allocates a half weight to partially
+				  correct responses (i.e. it takes the average of strict and
+				  lenient).</member></simplelist></para> 
+		</section> 
+	 </section> 
+  </section> 
+  <section id="frame"> 
+	 <title>The Framework</title> 
+	 <para>This section gives documentation for the framework; see also the 
+		<ulink url="javadoc/index.html">JavaDoc pages</ulink></para> 
+	 <para>The 
+		<ulink url="javadoc/gate/CookBook.html">CookBook</ulink> class gives
+		example code for using the GATE API.</para> 
+	 <para>The GATE framework models language processing components and the
+		language data they operate on as Resources 
+		<ulink url="javadoc/gate/Resource.html">Resources</ulink>. The set of all
+		resources is known as CREOLE, a Collection or REusable Objects for Language
+		Engineering. </para> 
+	 <para>The terms component, resource and CREOLE object are largely
+		synonymous.</para> 
+	 <section> 
+		<title>The Processing Model</title> 
+		<para>Any resource whose primary characteristics are algorithmic, such as
+		  parsers, generators and so on, is modelled as a 
+		  <ulink url="javadoc/gate/ProcessingResource.html">ProcessingResource
+			 (PR)</ulink>. A PR is a Resource that implements the Java Runnable
+		  interface.</para> 
+	 </section> 
+	 <section> 
+		<title>The Visualisation Model</title> 
+		<para>Resources whose task is to display and edit other resources are
+		  modelled as 
+		  <ulink url="javadoc/gate/VisualResource.html">VisualResources
+			 (VRs)</ulink></para> 
+	 </section> 
+	 <section> 
+		<title>The Corpus Model</title> 
+		<para>A 
+		  <ulink url="javadoc/gate/Corpus.html">Corpus</ulink> in GATE is a Java
+		  Set whose members are 
+		  <ulink url="javadoc/gate/Document.html">Documents</ulink>. Both Corpora
+		  and Documents are types of 
+		  <ulink url="javadoc/gate/LanguageResource.html">LanguageResource
+			 (LR)</ulink>; all LRs have a 
+		  <ulink url="javadoc/gate/FeatureMap.html">FeatureMap</ulink> (a Java
+		  Map) associated with them that stored attribute/value information about the
+		  resource. FeatureMaps are also used to associate arbitrary information with
+		  ranges of documents (e.g. pieces of text) via the annotation model (see
+		  below).</para> 
+		<para>Documents have a 
+		  <ulink url="javadoc/gate/DocumentContent.html">DocumentContent</ulink>
+		  which is a text at present (future versions may add support for audiovisual
+		  content) and one or more 
+		  <ulink url="javadoc/gate/AnnotationSet.html">AnnotationSets</ulink>
+		  which are Java Sets.</para> 
+	 </section> 
+	 <section> 
+		<title>The Annotation Model</title> 
+		<para>Annotations are organised in graphs, which are modelled as Java
+		  sets of 
+		  <ulink url="javadoc/gate/Annotation.html">Annotation</ulink>.
+		  Annotations may be considered as the arcs in the graph; they have a start 
+		  <ulink url="javadoc/gate/Node.html">Node</ulink> and an end Node, an
+		  ID, a type and a FeatureMap. Nodes have pointers into the sources document,
+		  e.g. character offsets.</para> 
+		<para>The rest of this section shows some simple examples of annotated
+		  documents.</para> 
+		<para>This material is adapted from<citation>Gri96b</citation>, the
+		  TIPSTER Architecture Design document upon which GATE version 1 was based.
+		  Version 2 has a similar model, although annotations are now graphs, and instead
+		  of multiple spans per annotation each annotation now has a single start/end
+		  node pair. The current model is largely compatible with
+		  <citation>Bir99</citation>, and roughly isomorphic with "stand-off markup" as
+		  latterly adopted by the SGML/XML community.</para> 
+		<para>Each example is shown in the form of a table. At the top of the
+		  table is the document being annotated; immediately below the line with the
+		  document is a ruler showing the position (byte offset) of each character.
+		  (NOTE: the ruler doesn't scale very well in HTML; for a better picture see the
+		  original 
+		  <ulink
+			url="http://www.itl.nist.gov/div894/894.02/related_projects/tipster/docs/arch31.doc">TIPSTER
+			 Architecture Design Document</ulink>.) Underneath this appear the annotations,
+		  one annotation per line. For each annotation is shown its Id, Type, Span
+		  (start/end offsets derived from the start/end nodes), and Features. Integers
+		  are used as the annotation Ids. The features are shown in the form name =
+		  value.</para> 
+		<para>The first example shows a single sentence and the result of three
+		  annotation procedures: tokenization with part-of-speech assignment, name
+		  recognition, and sentence boundary recognition. Each token has a single
+		  feature, its part of speech (pos), using the tag set from the University of
+		  Pennsylvania Tree Bank; each name also has a single feature, indicating the
+		  type of name: person, company, etc. 
+		  <table> 
+		  <title> Result of annotation on a single sentence</title> 
+		  <tgroup cols="5"><colspec colnum="1" colname="col1"
+			 colwidth="1.00*"/><colspec colnum="2" colname="col2" colwidth="3.31*"/><colspec
+			 colnum="3" colname="col3" colwidth="3.49*"/>
+			 <colspec colnum="4" colname="col4" colwidth="3.61*"/><colspec colnum="5"
+			 colname="col5" colwidth="4.51*"/> 
+			 <tbody> 
+				<row><entry namest="col1" nameend="col5"
+				  align="center">Text</entry></row> 
+				<row><entry namest="col1" nameend="col5" align="center">Cyndi
+					 savored the soup.</entry></row> 
+				<row><entry namest="col1" nameend="col5"
+				  align="center">|0...|5...|10..|15..|20</entry></row> 
+				<row><entry namest="col1" nameend="col5"
+				  align="center">Annotations</entry></row> 
+				<row> 
+				  <entry colname="col1" align="center">Id</entry> 
+				  <entry colname="col2" align="center">Type</entry> 
+				  <entry colname="col3" align="center">Span Start</entry> 
+				  <entry colname="col4" align="center">Span End</entry> 
+				  <entry colname="col5" align="center">Features</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">1</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">0</entry> 
+				  <entry colname="col4" align="center">5</entry> 
+				  <entry colname="col5" align="center">pos=NP</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">2</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">6</entry> 
+				  <entry colname="col4" align="center">13</entry> 
+				  <entry colname="col5" align="center">pos=VBD</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">3</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">14</entry> 
+				  <entry colname="col4" align="center">17</entry> 
+				  <entry colname="col5" align="center">pos=DT</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">4</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">18</entry> 
+				  <entry colname="col4" align="center">22</entry> 
+				  <entry colname="col5" align="center"> pos=NN </entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">5</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">22</entry> 
+				  <entry colname="col4" align="center">23</entry> 
+				  <entry colname="col5"></entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">6</entry> 
+				  <entry colname="col2" align="center">name</entry> 
+				  <entry colname="col3" align="center">0</entry> 
+				  <entry colname="col4" align="center">5</entry> 
+				  <entry colname="col5" align="center">name_type=person</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">7</entry> 
+				  <entry colname="col2" align="center">sentence</entry> 
+				  <entry colname="col3" align="center">0</entry> 
+				  <entry colname="col4" align="center">23</entry> 
+				  <entry colname="col5"></entry> 
+				</row> 
+			 </tbody> 
+		  </tgroup> 
+		  </table>	</para> 
+		<para>Annotations will typically be organized to describe a hierarchical
+		  decomposition of a text. A simple illustration would be the decomposition of a
+		  sentence into tokens. A more complex case would be a full syntactic analysis,
+		  in which a sentence is decomposed into a noun phrase and a verb phrase, a verb
+		  phrase into a verb and its complement, etc. down to the level of individual
+		  tokens. Such decompositions can be represented by annotations on nested sets of
+		  spans. Both of these are illustrated in the second example, which is an
+		  elaboration of our first example to include parse information. Each
+		  non-terminal node in the parse tree is represented by an annotation of type
+		  parse.</para> 
+		<table> 
+		<title>Result of annotations including parse information</title> 
+		<tgroup cols="5"><colspec colnum="1" colname="col1"
+		  colwidth="1.00*"/><colspec colnum="2" colname="col2" colwidth="1.92*"/><colspec
+		  colnum="3" colname="col3" colwidth="2.14*"/>
+		  <colspec colnum="4" colname="col4" colwidth="2.12*"/><colspec colnum="5"
+		  colname="col5" colwidth="6.05*"/> 
+		  <tbody> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">Text</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">Cyndi savored
+				  the soup.</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">|0...|5...|10..|15..|20</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">Annotations</entry></row> 
+			 <row><entry colname="col1" align="center">Id</entry> 
+				<entry colname="col2" align="center">Type</entry> 
+				<entry colname="col3" align="center">Span Start</entry> 
+				<entry colname="col4" align="center">Span End</entry> 
+				<entry colname="col5" align="center">Features</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">1</entry> 
+				<entry colname="col2" align="center">token</entry> 
+				<entry colname="col3" align="center">0</entry> 
+				<entry colname="col4" align="center">5</entry> 
+				<entry colname="col5" align="center">pos=NP</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">2</entry> 
+				<entry colname="col2" align="center">token</entry> 
+				<entry colname="col3" align="center">6</entry> 
+				<entry colname="col4" align="center">13</entry> 
+				<entry colname="col5" align="center">pos=VBD</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">3</entry> 
+				<entry colname="col2" align="center">token</entry> 
+				<entry colname="col3" align="center">14</entry> 
+				<entry colname="col4" align="center">17</entry> 
+				<entry colname="col5" align="center">pos=DT</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">4</entry> 
+				<entry colname="col2" align="center">token</entry> 
+				<entry colname="col3" align="center">18</entry> 
+				<entry colname="col4" align="center">22</entry> 
+				<entry colname="col5" align="center"> pos=NN </entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">5</entry> 
+				<entry colname="col2" align="center">token</entry> 
+				<entry colname="col3" align="center">22</entry> 
+				<entry colname="col4" align="center">23</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">6</entry> 
+				<entry colname="col2" align="center">name</entry> 
+				<entry colname="col3" align="center">0</entry> 
+				<entry colname="col4" align="center">5</entry> 
+				<entry colname="col5" align="center">name_type=person</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">7</entry> 
+				<entry colname="col2" align="center">sentence</entry> 
+				<entry colname="col3" align="center">0</entry> 
+				<entry colname="col4" align="center">23</entry> 
+				<entry colname="col5"
+				 align="center">constituents=[1],[2],[3].[4],[5]</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">8</entry> 
+				<entry colname="col2" align="center">parse</entry> 
+				<entry colname="col3" align="center">0</entry> 
+				<entry colname="col4" align="center">5</entry> 
+				<entry colname="col5" align="center">symbol="NP",constituents=
+				  [1]</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">9</entry> 
+				<entry colname="col2" align="center">parse</entry> 
+				<entry colname="col3" align="center">14</entry> 
+				<entry colname="col4" align="center">22</entry> 
+				<entry colname="col5"
+				 align="center">symbol="NP",constituents=[3],[4]</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">10</entry> 
+				<entry colname="col2" align="center">parse</entry> 
+				<entry colname="col3" align="center">6</entry> 
+				<entry colname="col4" align="center">22</entry> 
+				<entry colname="col5"
+				 align="center">symbol="VP",constituents=[2],[9]</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">11</entry> 
+				<entry colname="col2" align="center">parse</entry> 
+				<entry colname="col3" align="center">0</entry> 
+				<entry colname="col4" align="center">22</entry> 
+				<entry colname="col5"
+				 align="center">symbol="S",constituents=[8],[10]</entry> 
+			 </row> 
+		  </tbody> 
+		</tgroup> 
+		</table> 
+		<para>In most cases, the hierarchical structure could be recovered from
+		  the spans. However, it may be desirable to record this structure directly
+		  through a constituents feature whose value is a sequence of annotations
+		  representing the immediate constituents of the initial annotation. For the
+		  annotations of type parse, the constituents are either non-terminals (other
+		  annotations in the parse group) or tokens. For the sentence annotation, the
+		  constituents feature points to the constituent tokens. A reference to another
+		  annotation is represented in the table as "[ Annotation Id]"; for example,
+		  "[3]" represents a reference to annotation 3. Where the value of an feature is
+		  a sequence of items, these items are separated by commas. No special operations
+		  are provided in the current architecture for manipulating constituents. At a
+		  less esoteric level, annotations can be used to record the overall structure of
+		  documents, including in particular documents which have structured headers, as
+		  is shown in the third example (Table 3).</para> 
+		<table> 
+		<title>Annotation showing overall document structure</title> 
+		<tgroup cols="5"><colspec colnum="1" colname="col1"
+		  colwidth="1.00*"/><colspec colnum="2" colname="col2" colwidth="2.52*"/><colspec
+		  colnum="3" colname="col3" colwidth="2.06*"/>
+		  <colspec colnum="4" colname="col4" colwidth="2.20*"/><colspec colnum="5"
+		  colname="col5" colwidth="3.21*"/> 
+		  <tbody> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">Text</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">To: All
+				  Barnyard Animals</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">|0...|5...|10..|15..|20..</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">From: Chicken
+				  Little</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">|25..|30..|35..|40..|45..</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">Date:
+				  November 10,1194</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">....|50..|55..|60..|65..</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">Subject:
+				  Descending Firmament</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">|70..|75..|80..|85..|90..|95..</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">Priority :
+				  Urgent.</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">|100.|105.|110.|115.</entry></row> 
+			 <row><entry namest="col1" nameend="col5" align="center">The sky is
+				  falling. The sky is falling.</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">....|120.|125.|130.|135.|140.|145.|150.</entry></row> 
+			 <row><entry namest="col1" nameend="col5"
+				align="center">Annotations</entry></row> 
+			 <row><entry colname="col1" align="center">Id</entry> 
+				<entry colname="col2" align="center">Type</entry> 
+				<entry colname="col3" align="center">Span Start</entry> 
+				<entry colname="col4" align="center">Span End</entry> 
+				<entry colname="col5" align="center">Features</entry></row> 
+			 <row> 
+				<entry colname="col1" align="center">1</entry> 
+				<entry colname="col2" align="center">Addressee</entry> 
+				<entry colname="col3" align="center">4</entry> 
+				<entry colname="col4" align="center">24</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">2</entry> 
+				<entry colname="col2" align="center">Source</entry> 
+				<entry colname="col3" align="center">31</entry> 
+				<entry colname="col4" align="center">45</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">3</entry> 
+				<entry colname="col2" align="center">Date</entry> 
+				<entry colname="col3" align="center">53</entry> 
+				<entry colname="col4" align="center">69</entry> 
+				<entry colname="col5" align="center">ddmmyy=101194</entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">4</entry> 
+				<entry colname="col2" align="center">Subject</entry> 
+				<entry colname="col3" align="center">78</entry> 
+				<entry colname="col4" align="center">98</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">5</entry> 
+				<entry colname="col2" align="center">Priority</entry> 
+				<entry colname="col3" align="center">109</entry> 
+				<entry colname="col4" align="center">115</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">6</entry> 
+				<entry colname="col2" align="center">name</entry> 
+				<entry colname="col3" align="center">116</entry> 
+				<entry colname="col4" align="center">155</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">7</entry> 
+				<entry colname="col2" align="center">sentence</entry> 
+				<entry colname="col3" align="center">116</entry> 
+				<entry colname="col4" align="center">135</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+			 <row> 
+				<entry colname="col1" align="center">8</entry> 
+				<entry colname="col2" align="center">sentence</entry> 
+				<entry colname="col3" align="center">136</entry> 
+				<entry colname="col4" align="center">155</entry> 
+				<entry colname="col5"></entry> 
+			 </row> 
+		  </tbody> 
+		</tgroup> 
+		</table> 
+		<para>If the Addressee, Source, ... annotations are recorded when the
+		  document is indexed for retrieval, it will be possible to perform retrieval
+		  selectively on information in particular fields. Our final example (Table 4)
+		  involves an annotation which effectively modifies the document. The current
+		  architecture does not make any specific provision for the modification of the
+		  original text. However, some allowance must be made for processes such as
+		  spelling correction. This information will be recorded as a correction feature
+		  on token annotations and possibly on name annotations: 
+		  <table> 
+		  <title>Annotation modifying the document</title> 
+		  <tgroup cols="5"><colspec colnum="1" colname="col1"
+			 colwidth="1.00*"/><colspec colnum="2" colname="col2" colwidth="2.16*"/><colspec
+			 colnum="3" colname="col3" colwidth="2.89*"/>
+			 <colspec colnum="4" colname="col4" colwidth="3.07*"/><colspec colnum="5"
+			 colname="col5" colwidth="8.22*"/> 
+			 <tbody> 
+				<row><entry namest="col1" nameend="col5"
+				  align="center">Text</entry></row> 
+				<row><entry namest="col1" nameend="col5" align="center">Topster
+					 tackles 2 terrorbytes.</entry></row> 
+				<row><entry namest="col1" nameend="col5"
+				  align="center">|0...|5...|10..|15..|20..|25..</entry></row> 
+				<row><entry namest="col1" nameend="col5"
+				  align="center">Annotations</entry></row> 
+				<row><entry colname="col1" align="center">Id</entry> 
+				  <entry colname="col2" align="center">Type</entry> 
+				  <entry colname="col3" align="center">Span Start</entry> 
+				  <entry colname="col4" align="center">Span End</entry> 
+				  <entry colname="col5" align="center">Features</entry></row> 
+				<row> 
+				  <entry colname="col1" align="center">1</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">0</entry> 
+				  <entry colname="col4" align="center">7</entry> 
+				  <entry colname="col5" align="center"> pos=NP correction=TIPSTER
+					 </entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">2</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">8</entry> 
+				  <entry colname="col4" align="center">15</entry> 
+				  <entry colname="col5" align="center">pos=VBZ</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">3</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">16</entry> 
+				  <entry colname="col4" align="center">17</entry> 
+				  <entry colname="col5" align="center">pos=CD</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">4</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">18</entry> 
+				  <entry colname="col4" align="center">29</entry> 
+				  <entry colname="col5" align="center"> pos=NNS
+					 correction=terabytes</entry> 
+				</row> 
+				<row> 
+				  <entry colname="col1" align="center">5</entry> 
+				  <entry colname="col2" align="center">token</entry> 
+				  <entry colname="col3" align="center">29</entry> 
+				  <entry colname="col4" align="center">30</entry> 
+				  <entry colname="col5"></entry> 
+				</row> 
+			 </tbody> 
+		  </tgroup> 
+		  </table></para> 
+	 </section> 
+  </section> 
+  <section id="design"> 
+	 <title>Design</title> 
+	 <para>GATE is a backplane into which specialised Java Beans plug. These
+		beans are loose-coupled with respect to each other - they communicate entirely
+		by means of the GATE framework. Inter-component communication is handled by
+		model components - LanguageResources, and events.</para> 
+	 <para>Components are defined by conformance to various interfaces (e.g.
+		LanguageResource), ensuring separation of interface and implementation.</para> 
+	 <para>Distribution and parallelism (NOT fully working as yet) is handled by
+		controller components (and by distributing data over HTTP and JDBC).</para> 
+	 <para>The reason for adding to the normal bean initialisation mech is that
+		LRs, PRs and VRs all have characteristic parameterisation phases; the GATE
+		resources/components model makes explicit these phases.</para> 
+	 <section> 
+		<title>Patterns</title> 
+		<para>GATE is structured around a number of what we might call
+		  principles, or patterns, or alternatively, clever ideas stolen from better
+		  minds than mine. These patterns are:<simplelist><member>modelling most things
+				as extensible sets of 
+				<link
+				 linkend="components">components</link></member><member>separating components
+				into 
+				<link linkend="mvc">model, view, or controller
+				  types</link>;</member><member>hiding implementation behind 
+				<link
+				 linkend="interfaces">interfaces</link></member></simplelist></para> 
+		<para>Four interfaces in the top-level package describe the GATE view of
+		  components: Resource, ProcessingResource, LanguageResource and
+		  VisualResource.</para> 
+	 </section> 
+	 <section id="components"> 
+		<title>Components</title> 
+		<section> 
+		  <title>Architectural Principle</title> 
+		  <para>Wherever users of the architecture may wish to extend the set of
+			 a particular type of entity, those types should be expressed as
+			 components.</para> 
+		  <para>Another way to express this is to say that the architecture is
+			 based on Agents. I've avoided this in the past because of an association
+			 between this term and the idea of bits of code moving around between machines
+			 of their own volition. I take this to be somewhat pointless, and probably the
+			 result of an anthropomorphic obsession with mobility as a correlate of
+			 intelligence. If we drop this connotation, however, we can say that GATE is an
+			 agent-based architecture. If we want to, that is.</para> 
+		</section> 
+		<section> 
+		  <title>Framework Expression</title> 
+		  <para>Many of the classes in the framework are components, by which we
+			 mean classes that conform to an interface with certain standard properties. In
+			 our case these properties are based on the Java Beans component architecture,
+			 with the addition of component metadata, automated loading and standardised
+			 storage, threading and distribution.</para> 
+		  <para>All components inherit from Resource, via one
+			 of:<simplelist><member>LanguageResource (LR) represents entities such as
+				  lexicons, corpora or ontologies;</member><member>VisualResource (VR) represents
+				  visualisation and editing components that participate in
+				  GUIs;</member><member>ProcessingResource (PR) represents entities that are
+				  primarily algorithmic, such as parsers, generators or ngram
+				  modellers.</member></simplelist></para> 
+		</section> 
+	 </section> 
+	 <section id="mvc"> 
+		<title>Model, view, controller</title> 
+		<para>According to Buschmann et al (Pattern-Oriented Software
+		  Architecture, 1996), the Model-View-Controller (MVC) pattern</para><blockquote>
+		  
+		  <para>...divides an interactive application into three components. The
+			 model contains the core functionality and data. Views display information to
+			 the user. Controllers handle user input. Views and controllers together
+			 comprise the user interface. A change-propagation mechanism ensures consistency
+			 between the user interface and the model.
+			 [p.125]</para></blockquote><blockquote> 
+		  <para>A variant of MVC, the Document-View
+			 pattern,</para></blockquote><blockquote> 
+		  <para>...relaxes the separation of view and controller... The View
+			 component of Document-View combines the responsibilities of controller and view
+			 in MVC, and implements the user interface of the
+			 system.</para></blockquote><blockquote> 
+		  <para>A benefit of both arrangements is
+			 that</para></blockquote><blockquote> 
+		  <para>...loose coupling of the document and view components enables
+			 multiple simultaneous synchronized but different views of the same
+			 document.</para></blockquote> 
+		<para>Geary (Graphic Java 2, 3rd Edtn., 1999) gives a slightly different
+		  view:<blockquote> 
+			 <para>MVC separates applications into three types of
+				objects:<simplelist><member>Models: Maintain data and provide data accessor
+					 methods</member><member>Views: Paint a visual representation of some or all of
+					 a model's data</member><member>Controllers: Handle events ... By encapsulating
+					 what other architectures intertwine, MVC applications are much more flexible
+					 and reusable than their traditional counterparts.</member></simplelist>[pp. 71,
+				75]</para></blockquote>Swing, the Java user interface framework,
+		  uses<blockquote> 
+			 <para>a specialised version of the classic MVC meant to support
+				pluggable look and feel instead of applications in general. [p.
+				75]</para></blockquote></para> 
+		<para>GATE may be regarded as an MVC architecture in two
+		  ways:<simplelist><member>directly, because we use the Swing toolkit for the
+				GUIs;</member><member>by analogy, where LRs are models, VRs are views and PRs
+				are controllers. Of these, the latter sits least easily with the MVC scheme, as
+				PRs may indeed be controllers but may also not be.</member></simplelist></para>
+		
+	 </section> 
+	 <section id="interfaces"> 
+		<title>Interfaces</title> 
+		<section> 
+		  <title>Architectural Principle</title> 
+		  <para>The implementation of types should generally be hidden from the
+			 clients of the architecture.</para> 
+		</section> 
+		<section> 
+		  <title>Framework Expression</title> 
+		  <para>With a few exceptions (such as for utility classes), clients of
+			 the framework work with the gate.* package. This package is mostly composed of
+			 interface definitions. Instantiations of these interfaces are obtained via the
+			 Factory class.</para> 
+		  <para>The subsidiary packages of GATE provide the implementations of
+			 the gate.* interfaces that are accessed via the factory. They themselves avoid
+			 directly constructing classes from other packages (with a few exceptions, such
+			 as JAPE's need for unattached annotation sets). Instead they use the
+			 factory.</para> 
+		</section> 
+	 </section> 
+  </section> 
+  <section> 
+	 <title>Notes</title> 
+	 <para id="millenium">GATE Millenium edition </para> 
+	 <para>One of the (few) beauties of working in a University is that we don't
+		(yet) have a bunch of marketing types breathing down our necks, so we don't
+		have to call this version 7, or GATE Millenium Edition, or whatever.</para> 
+	 <para id="billgates">Bill Gates</para> 
+	 <para>This stuff was supposed to be in 
+		<ulink url="http://www.docbook.org">DocBook</ulink> , but Diana's XMetal
+		crashed - not an unreasonable thing for a program to do once in a while - and
+		in the process completely screwed up her Windoze NT. Operating system is
+		entirely the wrong word. F**kup system, like most MS progeny. [Go ahead sue me.
+		This bit was written by Yorick.]</para> 
+  </section> 
+</article>
