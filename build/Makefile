@@ -73,7 +73,6 @@ docs:
 	  javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/gate/CookBook.txt
-	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
 
 # make the developer Javadocs (inc. private members)
 internaldocs:
@@ -81,6 +80,7 @@ internaldocs:
 	  -s '-link http://bradfield.dcs.shef.ac.uk/Java2_docs/api/' \
 	  javadoc $(SP) $(CP) -private -use \
 	  -d ../doc/javadoc/internal $(PKGS)
+	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
 
 # delete all the class files etc. (doesn't delete gate.jar)
 clean:
