@@ -183,7 +183,8 @@ distrib:
 	for f in $${BINFILES}; do echo $$f >>makedistrib.binary-files; done && \
 	tar -cf - -T makedistrib.binary-files \
 	|gzip -c >$${N}--BINARY.tgz && \
-	rm -rf $${N} makedistrib.binary-files
+	rm -rf $${N} makedistrib.binary-files; echo
+	echo '*** copy tgzs to etag & releases dirs, and unpack in latter'; echo
 
 # make a pretty list of the gate source, missing class files etc.
 list:
