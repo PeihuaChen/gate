@@ -25,6 +25,7 @@ import java.awt.Point;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.tree.*;
+import java.beans.*;
 
 import java.util.*;
 import java.io.*;
@@ -93,6 +94,7 @@ public class MainFrame extends JFrame
   JToolBar toolbar;
 
   JFileChooser fileChooser;
+  TabBlinker logBlinker;
 //  MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
   WaitDialog waitDialog;
@@ -160,47 +162,10 @@ public class MainFrame extends JFrame
   }
 
   protected void initGuiComponents(){
-//    parentFrame = this;
-
     this.getContentPane().setLayout(new BorderLayout());
     this.setSize(new Dimension(800, 600));
     this.setTitle(Main.name + " " + Main.version);
 
-/*
-    CustomResourceHandle handle = new CustomResourceHandle("<No Projects>", null);
-    handle.setSmallIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/project.gif")));
-    JPopupMenu popup = new JPopupMenu();
-    popup.add(newProjectAction);
-    handle.setPopup(popup);
-    projectTreeRoot = new DefaultMutableTreeNode(handle, true);
-    projectTreeModel = new DefaultTreeModel(projectTreeRoot, true);
-    projectTree = new JTree(projectTreeModel);
-    projectTree.setCellRenderer(new ResourceTreeCellRenderer());
-    projectTree.setRowHeight(0);
-    ToolTipManager.sharedInstance().registerComponent(projectTree);
-    //upperTree.setShowsRootHandles(true);
-
-    projectTreeScroll = new JScrollPane(projectTree);
-    lowerScroll = new JScrollPane();
-    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                               projectTreeScroll, lowerScroll);
-    Box leftBox = Box.createVerticalBox();
-    JPanel projectBox = new JPanel();
-    projectBox.setLayout(new BoxLayout(projectBox, BoxLayout.X_AXIS));
-    projectBox.add(new JLabel("Project: "));
-    projectCombo = new JComboBox();
-    projectComboModel = new DefaultComboBoxModel();
-    projectCombo.setModel(projectComboModel);
-    projectCombo.setEditable(false);
-    projectBox.add(projectCombo);
-    projectBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    leftBox.add(projectBox);
-    leftBox.add(Box.createVerticalStrut(5));
-    leftSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
-    leftBox.add(leftSplit);
-*/
-//new version ->
 
 //    resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot);
 //    resourcesTree = new JTree(resourcesTreeModel);
@@ -243,6 +208,7 @@ public class MainFrame extends JFrame
 
     mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
+    logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                leftSplit, mainTabbedPane);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
@@ -271,6 +237,12 @@ public class MainFrame extends JFrame
     fileMenu.add(new JGateMenuItem(newDSAction));
     fileMenu.add(new JGateMenuItem(openDSAction));
     fileMenu.add(new JGateMenuItem(newApplicationAction));
+
+fileMenu.add(new AbstractAction("blink!"){
+  public void actionPerformed(ActionEvent e){
+    logBlinker.startBlinking();
+  }
+});
     menuBar.add(fileMenu);
 
     JMenu editMenu = new JMenu("Edit");
@@ -431,6 +403,42 @@ public class MainFrame extends JFrame
     this.addComponentListener(new ComponentAdapter() {
       public void componentShown(ComponentEvent e) {
         leftSplit.setDividerLocation(0.7);
+      }
+    });
+
+    //blink the messages tab when new information is displayed
+    logArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+      public void insertUpdate(javax.swing.event.DocumentEvent e){
+        changeOccured();
+      }
+      public void removeUpdate(javax.swing.event.DocumentEvent e){
+        changeOccured();
+      }
+      public void changedUpdate(javax.swing.event.DocumentEvent e){
+        changeOccured();
+      }
+      protected void changeOccured(){
+        logBlinker.startBlinking();
+      }
+    });
+
+    logArea.addPropertyChangeListener("document", new PropertyChangeListener(){
+      public void propertyChange(PropertyChangeEvent evt){
+        //add the document listener
+        logArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
+          public void insertUpdate(javax.swing.event.DocumentEvent e){
+            changeOccured();
+          }
+          public void removeUpdate(javax.swing.event.DocumentEvent e){
+            changeOccured();
+          }
+          public void changedUpdate(javax.swing.event.DocumentEvent e){
+            changeOccured();
+          }
+          protected void changeOccured(){
+            logBlinker.startBlinking();
+          }
+        });
       }
     });
   }
@@ -1367,5 +1375,68 @@ public class MainFrame extends JFrame
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
+  }
+
+  class TabBlinker implements Runnable{
+    public TabBlinker(JTabbedPane pane, Component comp, Color blinkColor){
+      this.tPane = pane;
+      this.tab = tPane.indexOfComponent(comp);
+      this.blinkColor = blinkColor;
+      thread = new Thread(this);
+      thread.setPriority(Thread.MIN_PRIORITY);
+    }
+
+    public void run(){
+      oldColor = tPane.getBackgroundAt(tab);
+      synchronized(this){
+        stopIt = false;
+      }
+      while(true){
+        synchronized(this){
+          if(tPane.getSelectedIndex() == tab) stopIt = true;
+          if(stopIt){
+            tPane.setBackgroundAt(tab, oldColor);
+            return;
+          }
+        }
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            if(tPane.getBackgroundAt(tab).equals(oldColor)){
+              tPane.setBackgroundAt(tab, blinkColor);
+            }else{
+              tPane.setBackgroundAt(tab, oldColor);
+            }
+          }
+        });
+        try{
+          Thread.sleep(400);
+        }catch(InterruptedException ie){}
+      }
+    }
+
+    public void stopBlinking(){
+      synchronized(this){
+        if(thread.isAlive()){
+          stopIt = true;
+        }
+      }
+    }
+
+    public void startBlinking(){
+      synchronized(this){
+        if(!thread.isAlive()){
+          thread = new Thread(this);
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }
+      }
+    }
+
+    boolean stopIt;
+    JTabbedPane tPane;
+    int tab;
+    Color blinkColor;
+    Color oldColor;
+    Thread thread;
   }
 }
