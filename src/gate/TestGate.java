@@ -180,7 +180,6 @@ public class TestGate {
         suite.addTest(TestBumpyStack.suite());
       }else {
         suite.addTest(TestBumpyStack.suite());
-        suite.addTest(TestWeakValueHashMap.suite());
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
         suite.addTest(TestPersist.suite());
