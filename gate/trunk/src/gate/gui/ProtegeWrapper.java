@@ -71,12 +71,27 @@ public class ProtegeWrapper extends AbstractVisualResource {
 
     JMenuBar menu = protegeRootPane.getJMenuBar();
     protegeRootPane.setJMenuBar(null);
+    removeToolbar(protegeRootPane);
+    
     frame.remove(protegeRootPane);
 
     JScrollPane scroll = new JScrollPane();
     add(scroll, BorderLayout.CENTER);
     scroll.getViewport().add(protegeRootPane);
   } // initGuiComponents()
+
+  /** Find and remove the Protege toolbar */  
+  private void removeToolbar(JRootPane rootPane) {
+    Container pane = rootPane.getContentPane();
+
+    Component components[] = pane.getComponents();
+    for(int i=0; i<components.length; ++i) {
+      if(components[i] instanceof ProjectToolBar) {
+        pane.remove((ProjectToolBar) components[i]);
+        break;
+      } // if
+    } // for
+  } // removeToolbar(JRootPane rootPane)
   
   private void initListeners() {
   } // initListeners()
