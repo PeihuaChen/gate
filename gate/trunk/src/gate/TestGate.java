@@ -38,7 +38,7 @@ import gate.persist.*;
 import gate.security.*;
 import com.ontotext.gate.gazetteer.*;
 import gate.creole.ir.*;
-import gate.creole.wordnet.*;
+import gate.wordnet.*;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
