@@ -24,6 +24,12 @@ public class DefaultIndexDefinition implements IndexDefinition{
   /** Location (path) of the index store directory */
   private String location;
 
+  /* Niraj */
+  private ArrayList featuresToExclude;
+  private String annotationSet;
+  /* End */
+
+
 //  /**  Type of index see GateConstants.java*/
 //  private int indexType;
 
@@ -37,6 +43,27 @@ public class DefaultIndexDefinition implements IndexDefinition{
   public String getIndexLocation(){
     return location;
   }
+
+
+  /* Niraj */
+  public void setFeaturesToExclude(ArrayList featuresToExclude) {
+    this.featuresToExclude = featuresToExclude;
+  }
+
+  public ArrayList getFeaturesToExclude() {
+    return featuresToExclude;
+  }
+
+  public void setAnnotationSetName(String annotSetName) {
+    this.annotationSet = annotSetName;
+  }
+
+  public String getAnnotationSetName() {
+    return this.annotationSet;
+  }
+
+  /* End */
+
 
 //  /**  @return int index type*/
 //  public int getIndexType(){

@@ -73,6 +73,15 @@ public class SearchPR extends AbstractProcessingResource
       throw new ExecutionException("Searcher is not initialized");
     }
 
+    /* Niraj */
+    // we need to check if this is the corpus with the specified feature
+    String val = (String) corpus.getFeatures().get(gate.creole.ir.lucene.LuceneIndexManager.CORPUS_INDEX_FEATURE);
+    if(!val.equals(gate.creole.ir.lucene.LuceneIndexManager.CORPUS_INDEX_FEATURE_VALUE)) {
+      throw new ExecutionException("This corpus was not indexed by the specified IR");
+    }
+    /* End */
+
+
     try {
       if (((IndexedCorpus) corpus).getIndexManager() == null){
         MainFrame.unlockGUI();
