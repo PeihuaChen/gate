@@ -17,23 +17,6 @@
 
 create or replace package body persist is
 
-  -- Private type declarations
-/*  type <TypeName> is <Datatype>;
-
-  -- Private constant declarations
-  <ConstantName> constant <Datatype> := <Value>;
-
-  -- Private variable declarations
-  <VariableName> <Datatype>;
-
-  -- Function and procedure implementations
-  function <FunctionName>(<Parameter> <Datatype>) return <Datatype> is
-    <LocalVariable> <Datatype>;
-  begin
-    <Statement>;
-    return(<Result>);
-  end;
-*/
 
   /*******************************************************************************************/
   procedure get_timestamp(p_timestamp  OUT number)
@@ -72,6 +55,37 @@ create or replace package body persist is
   end;                                                                                                        
 
 
+  /*******************************************************************************************/
+  procedure create_lr(p_usr_id           IN number,
+                      p_grp_id           IN number,
+                      p_lr_type          IN varchar2,
+                      p_lr_name          IN varchar2,
+                      p_lr_permissions   IN number,
+                      p_lr_parent_id     IN number,
+                      p_lr_id            OUT number)
+  is
+  
+  begin
+     raise error.x_not_implemented;
+  end;                                                                                                        
+
+
+  /*******************************************************************************************/
+  procedure create_document(p_lr_id        IN number,
+                            p_url          IN varchar2,
+                            p_start_offset IN number,
+                            p_end_offset   IN number,
+                            p_is_mrk_aware IN boolean,
+                            p_corpus_id    IN number,
+                            p_doc_id       OUT number,
+                            p_content_id   OUT number)
+  is
+  
+  begin
+     raise error.x_not_implemented;
+  end;                                                                                                        
+  
+  
 /*begin
   -- Initialization
   <Statement>; */
