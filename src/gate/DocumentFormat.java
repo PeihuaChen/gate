@@ -24,8 +24,8 @@ import gate.event.*;
 import gate.creole.*;
 import gate.corpora.RepositioningInfo;
 
-import org.w3c.www.mime.*;
-
+//import org.w3c.www.mime.*;
+import gate.corpora.MimeType;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -410,7 +410,7 @@ extends AbstractLanguageResource implements LanguageResource{
     // If this fails then surrender
     return detectedMimeType;
   }// getTypeFromContent
-  
+
   /**
     * Return the fileSuffix or null if the url doesn't have a file suffix
     * If the url is null then the file suffix will be null also
@@ -453,7 +453,7 @@ extends AbstractLanguageResource implements LanguageResource{
       if(content.length() > 2048) content = content.substring(0, 2048);
       mimeType = getTypeFromContent( content );
     }
-    
+
     if (mimeType != null){
       // If the Gate Document doesn't have a feature map atached then
       // We will create and set one.

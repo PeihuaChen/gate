@@ -25,7 +25,7 @@ import gate.gui.*;
 import gate.*;
 
 import junit.framework.*;
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 
 
 /** Test class for XML facilities

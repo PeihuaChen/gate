@@ -4,7 +4,6 @@
   <fullname>gatelibs</fullname>
   <class>
     <path>[lib/JavaCC.zip]</path>
-    <path>[lib/oro.jar]</path>
     <path>[lib/lucene-1.3-rc1.jar]</path>
     <path>[lib/jakarta-regexp-1.2.jar]</path>
     <path>[lib/j2h.jar]</path>
@@ -20,7 +19,6 @@
     <path>[lib/jacl.jar]</path>
     <path>[lib/protege.jar]</path>
     <path>[lib/ontotext.jar]</path>
-    <path>[lib/jgl3.1.0.jar]</path>
     <path>[lib/heptag.jar]</path>
     <path>[lib/jdom.jar]</path>
     <path>[lib/gnu-regexp-1.0.8.jar]</path>
@@ -30,5 +28,5 @@
     <path>[lib/ext/guk.jar]</path>
     <path>[lib/ext/nl.mpi.lookup.jar]</path>
   </class>
-  <lastmodsaved>1061994185818</lastmodsaved>
+  <lastmodsaved>1061994418988</lastmodsaved>
 </library>

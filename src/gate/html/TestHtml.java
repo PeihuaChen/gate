@@ -22,7 +22,7 @@ import java.io.*;
 import javax.swing.*;
 
 import junit.framework.*;
-import org.w3c.www.mime.*;
+//import org.w3c.www.mime.*;
 
 import gate.util.*;
 import gate.gui.*;
