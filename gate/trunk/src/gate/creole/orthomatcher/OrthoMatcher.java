@@ -24,9 +24,6 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 
-import gnu.regexp.RE;
-import gnu.regexp.REException;
-
 public class OrthoMatcher extends AbstractLanguageAnalyser
                           implements ANNIEConstants{
 
@@ -273,7 +270,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
             nameAnnot.getEndNode().getOffset()
             ).toString();
           // now do the reg. exp. substitutions
-          annotString = regularExpressions(annotString," ", "\\s+");
+          annotString = annotString.replaceAll("\\s+", " ");
 
         } catch (InvalidOffsetException ioe) {
             throw new ExecutionException
@@ -355,7 +352,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
             unknown.getEndNode().getOffset()
             ).toString();
         // now do the reg. exp. substitutions
-        unknownString = regularExpressions(unknownString," ", "\\s+");
+          unknownString = unknownString.replaceAll("\\s+", " ");
       } catch (InvalidOffsetException ioe) {
           throw new ExecutionException
                                  ("Invalid offset of the annotation");
@@ -1729,19 +1726,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     }//if
   }//buildTables
 
-  /** substitute all multiple spaces, tabes and newlines
-    * with a single space
-    */
-  public String regularExpressions ( String text, String replacement,
-                                      String regEx) {
-    String result = text;
-    try {
-      RE re = new RE(regEx);
-      result = re.substituteAll( text,replacement);
-    } catch (REException ree) {ree.printStackTrace();}
-    return result;
-  }
-
+  
   public void setDefinitionFileURL(java.net.URL definitionFileURL) {
     this.definitionFileURL = definitionFileURL;
   }
@@ -1754,7 +1739,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   }
   public String getEncoding() {
     return encoding;
-  }//regularExpressions
+  }
 
 
   private static class Class1 {

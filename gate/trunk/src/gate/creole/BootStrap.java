@@ -20,8 +20,6 @@ import java.util.*;
 
 import gate.util.*;
 
-import gnu.regexp.RE;
-import gnu.regexp.REException;
 
 /**
   * This class creates a resource (e.g.ProcessingResource, VisualResource or
@@ -88,15 +86,14 @@ public class BootStrap {
   /** Determines all the keys from the map "names" in the text and replaces them
     * with their values
     */
-  public String changeKeyValue ( String text, Map map )throws REException {
+  public String changeKeyValue ( String text, Map map ){
 
     Set keys = map.keySet();
     Iterator iteratorKeys = keys.iterator();
     while (iteratorKeys.hasNext()) {
       String key = (String) iteratorKeys.next();
       String value = (String)map.get(key);
-      RE re = new RE(key);
-      text = re.substituteAll(text,value);
+      text = text.replaceAll(key,value);
     } // while
     return text;
   } // changeKeyValue ( String text )
@@ -505,7 +502,7 @@ public class BootStrap {
                               String typeResource,String className,
                               Set interfacesList,String pathNewProject)
                               throws
-                              IOException,ClassNotFoundException, REException,
+                              IOException,ClassNotFoundException,
                               GateException,InterruptedException {
     // the current file created by the system
     File newFile = null;
@@ -648,8 +645,6 @@ public class BootStrap {
       "Documente", interfaces, "z:/test");
     } catch (GateException ge) {
       ge.printStackTrace(Err.getPrintWriter());
-    } catch (REException ree) {
-      ree.printStackTrace(Err.getPrintWriter());
     } catch (ClassNotFoundException cnfe) {
       cnfe.printStackTrace(Err.getPrintWriter());
     } catch (IOException ioe) {

@@ -3,8 +3,8 @@ package gate.util.web;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.regexp.RE;
-import org.apache.regexp.RESyntaxException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TagHighlighter {
 
@@ -30,23 +30,17 @@ public class TagHighlighter {
         while (tags.hasNext()) {
             String tag = (String) tags.next();
             String color = (String) tagColors.get(tag);
-
-            try {
-                RE r = new RE("(<" + tag + " .*?>)");
-                if (r.match(text)) {
-                    text = r.subst(text,
-                                   "<B style=\"color:black;background-color:" +
-                                   color +
-                                   "\">" + r.getParen(1));
-                }  
-                
-                r = new RE("(</" + tag + ">)");
-                if (r.match(text)) {
-                    text = r.subst(text, r.getParen(1) + "</B>");
-                }
-            } catch (RESyntaxException rese) {
-                // log something, I guess
+            Pattern pattern = Pattern.compile("(<" + tag + " .*?>)");
+            String toAppend = "<B style=\"color:black;background-color:" + color + "\">";
+            
+            Matcher matcher = pattern.matcher(text);
+            while (matcher.find()){
+              String group = matcher.group(1);
+              text = text.replaceAll(group,toAppend + group);
             }
+            
+            String closing = "(</" + tag + ">)";
+            text = text.replaceAll(closing,closing+"</B>");
         }
 
         return text;
