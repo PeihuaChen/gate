@@ -49,6 +49,8 @@ public interface ANNIEConstants {
   public static final String LOOKUP_ANNOTATION_TYPE = "Lookup";
   public static final String LOOKUP_MAJOR_TYPE_FEATURE_NAME = "majorType";
   public static final String LOOKUP_MINOR_TYPE_FEATURE_NAME = "minorType";
+  public static final String LOOKUP_ONTOLOGY_FEATURE_NAME = "ontology";
+  public static final String LOOKUP_CLASS_FEATURE_NAME = "class";
 
   public static final String SENTENCE_ANNOTATION_TYPE = "Sentence";
 
