@@ -53,22 +53,22 @@ public class CorpusImpl extends TreeSet implements Corpus
     //There is a persistent implementation for corpora so return true
     return true;
   }
-
+/*
   public boolean canLiveIn(DataStore ds){
     //We only have one type of persistent corpora so we don't need to check
     //the datastore type here.
     return gate.db.CorpusWrapper.checkDS(ds);
   }
-
+*/
   public String getErrorMessage(){
     return gate.db.CorpusWrapper.getErrMsg();
   };
 
 
-  public void setupDS(DataStore ds){
+  public static boolean setupDS(DataStore ds){
     //We only have one type of persistent corpora so we don't need to check
     //the datastore type here.
-    gate.db.CorpusWrapper.setupDatabase(ds);
+    return gate.db.CorpusWrapper.setupDatabase(ds);
   }
 
   public LRDBWrapper getDBWrapper(DataStore ds){

@@ -277,17 +277,18 @@ public class DocumentImpl implements Document
     //There isn't yet a persistent implementation for corpora so return false
     return false;
   }
-
+/*
   public boolean canLiveIn(DataStore ds){
     return false;
   }
-
+*/
   public String getErrorMessage(){
     return null;
   }
 
-  public void setupDS(DataStore ds){
+  public static boolean setupDS(DataStore ds){
     //Do nothing!
+    return false;
   }
 
   public LRDBWrapper getDBWrapper(DataStore ds){

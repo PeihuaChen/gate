@@ -15,7 +15,7 @@ import gate.annotation.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.db.*;
-import gate.jape.*;
+//import gate.jape.*;
 
 
 /** Top-level entry point for GATE test suite.
