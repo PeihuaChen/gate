@@ -357,6 +357,10 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
         reposInfo.addPositionInfo(getRealOffset(), content.length(),
                       tmpDocContent.length()+contentBuffer.length(),
                       content.length());
+        if(DEBUG) {
+          Out.println("Info: "+getRealOffset()+", "+content.length());
+          Out.println("Start: "+start+" len"+length);
+        } // DEBUG
       }
       else {
         // unicode char or &xxx; coding
