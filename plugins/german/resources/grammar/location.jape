@@ -1,0 +1,276 @@
+Phase: Location
+Input: Lookup Token LOC
+Options: control = appelt
+
+
+Rule: Locrest1
+(
+	({Lookup.minorType == "location_rest"})
+
+):CountryName
+-->
+:CountryName.LOC = {kind = "LOC", subtype= "location_rest", rule = "Locrest1"}
+
+Rule: Exception_Locrest1
+Priority: 50
+(
+ {LOC}
+ )
+ -->
+ {}
+ 
+Rule: Locrest_key_prefix
+ (
+ ({Lookup.minorType == "stop"})?
+ {Lookup.majorType == location_key, Lookup.minorType == external}
+ )
+ (
+  {Lookup.minorType == location_rest}
+):key
+-->
+:key.LOC = {kind = "LOC", subtype= "location_rest", rule = "Locrest_key_prefix"}
+
+Rule: City1
+(
+	({Lookup.minorType == "city"})
+
+):CityName
+-->
+:CityName.LOC = {kind = "LOC", subtype= "city", rule = "City1"}
+
+Rule: City_mayor
+
+    (
+	{Token.string == "Bürgermeisters"}
+	|
+	{Token.string == "Bürgermeister"}
+    )
+ 	{Token.string == "von"}
+(
+	{Token.orth == "upperInitial"}
+):mayor
+-->
+:mayor.LOC = {kind = "LOC", subtype= "city", rule = "City_mayor"}
+
+
+Rule: Country1
+(
+	({Lookup.minorType == "country"})
+
+):CountryName
+-->
+:CountryName.LOC = {kind = "LOC", subtype= "country", rule = "Country1"}
+
+Rule: Exception_Location1
+Priority: 20
+(
+	{Token.string == "."}
+	({Lookup.minorType == "stop"})
+)
+-->
+{}
+
+// Bad Homburg
+// Bad Ditzenbach-Gosbach
+// New York
+// Den Haag
+Rule: City_by_prefix
+(
+	(
+	{Token.string == "Bad"}
+	|
+	{Token.string == "BAD"}
+	|
+//	{Token.string == "Den"}
+//	|
+//	{Token.string == "DEN"}
+//	|
+	{Token.string == "New"}
+	|
+	{Token.string == "NEW"}
+	|
+	{Token.string == "Großraum"}
+	|
+	{Token.string == "Kreis"}
+	|
+	{Token.string == "Sankt"}
+
+        )
+	(
+		{Token.orth == "upperInitial"}
+		|
+		{Token.orth == "allCaps"}
+	)
+):city_name
+-->
+:city_name.LOC = {kind = "LOC", subtype="city", rule = "city_by_prefix"}
+
+// guess location on the basis of preposition
+//Rule: Location_by_preposition
+
+//	(
+//	{Token.string == "aus"}
+//	|
+//	{Token.string == "in"}
+//	|
+//	{Token.string == "nach"}
+//	|
+//	{Token.string == "bei"}
+//	)
+//(
+//	(
+//		{Token.orth == "upperIn<PER>[^\/]+<\/PER>itial"}
+//		|
+//		{Token.orth == "allCaps"}
+//	)+
+//):lc
+//-->
+//:lc.LOC = {kind = "PREPLOC", subtype="city/country", rule = "location_by_preposition"}
+
+// guess loc on the basis of "Republik"
+// X(adj) Republik -> X=LOC
+// Republik X -> X=LOC
+Rule: Country_by_republik1
+(
+	(
+	{Token.string == "Republik"}
+	|
+	{Token.string == "REPUBLIK"}
+	)
+	(
+	{Token.orth == "upperInitial"}
+	|
+	{Token.orth == "allCaps"}
+	)
+):rep
+-->
+:rep.LOC = {kind = "LOC", subtype="country", rule = "country_by_republik1"}
+
+Rule: Country_by_republik2
+(
+	(
+	{Token.orth == "upperInitial"}
+	|
+	{Token.orth == "allCaps"}
+	)
+	(
+	{Token.string == "Republik"}
+	|
+	{Token.string == "REPUBLIK"}
+	)
+):rep
+-->
+:rep.LOC = {kind = "LOC", subtype="country", rule = "country_by_republik2"}
+
+
+Rule: Guess_location1
+(
+	(
+	{Token.orth == "upperInitial"}
+	|
+	{Token.orth == "allCaps"}
+	)
+	(
+	{Token.string == "am"}
+	|
+	{Token.string == "AM"}
+	|
+	{Token.string == "/"}
+	)
+	(
+	{Lookup.majorType == "location"}
+	)
+):repa
+-->
+:repa.LOC = {kind = "LOC", subtype="city", rule = "guess_location1"}
+
+Rule: City_by_stadt
+
+	(
+	{Token.string == "Stadt"}
+	|
+	{Token.string == "STADT"}
+	)
+(
+	(
+	{Token.orth == "allCaps"}
+	|
+	{Token.orth == "upperInitial"}
+	)
+	(
+	({Token.string == "\-"})?
+	{Token.orth == "upperInitial"}
+	)*
+):repa
+-->
+:repa.LOC = {kind = "LOC", subtype="city", rule = "city_by_stadt"}
+
+Rule: Location_key1
+(
+	(
+	{Token.orth == "allCaps"}
+	|
+	{Token.orth == "upperInitial"}
+	)
+	(
+	
+		(
+		{Token.string == "\-"}
+		)?
+		(
+		{Token.orth == "upperInitial"}
+		|
+		{Token.orth == "allCaps"}
+		)
+	)*
+	(
+	({Token.string == "\-"})?
+	{Lookup.minorType == "location_key"}
+	)
+	(
+	(
+	{Token.orth == "upperInitial"}
+	|
+	{Token.orth == "allCaps"}
+	)
+		(
+		({Token.string == "\-"})?
+		{Token.orth == "upperInitial"}
+		|
+		{Token.orth == "allCaps"}
+		)*
+	)*
+):key
+-->
+:key.LOC = {kind = "LOC", rule = "location_key1"}
+
+Rule: Location_key1_exception
+Priority: 20
+(
+	(
+	{Lookup.minorType == "stop"}
+	|
+	{Lookup.minorType == "orgtype_prefix"}
+	)
+	(
+	
+		(
+		{Token.string == "\-"}
+		)?
+		(
+		{Token.orth == "upperInitial"}
+		|
+		{Token.orth == "allCaps"}
+		)
+	)*
+	(
+	({Token.string == "\-"})?
+	{Lookup.minorType == "location_key"}
+	)
+):key
+-->
+:key.Exception = {rule = "Location_key1_exception"}
+
+
+
+
