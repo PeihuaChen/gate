@@ -38,24 +38,11 @@ public class Scratch
 
 
   public static void main(String args[]) {
-    Scratch app = new Scratch();
-
-    app.loadDoc("d:/tmp/clangref.rtf");
-
+    //Scratch app = new Scratch();
+    //app.loadMessages("d:/mail_corpora/miguel.mail");
   } // main
 
-  public void loadDoc(String rtfDocName){
-    RTFEditorKit kit = new RTFEditorKit();
-    DefaultStyledDocument doc = new DefaultStyledDocument();
-    try{
-      FileInputStream file = new FileInputStream(rtfDocName);
-      kit.read(file,doc,0);
-      System.out.println("**************************************************");
-      System.out.println(doc.getText(0,doc.getLength()));
-    } catch (Exception e){
-      e.printStackTrace(System.err);
-    }
-    
+  public void loadMessages(String mailFolder){
   }
 
 } // class Scratch
