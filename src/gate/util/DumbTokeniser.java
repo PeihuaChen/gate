@@ -5,11 +5,11 @@ import gate.*;
 import java.util.*;
 import java.text.BreakIterator;
 
-public class DefaultTokeniser implements ProcessingResource,
+public class DumbTokeniser implements ProcessingResource,
                                          ProcessProgressReporter,
                                          Runnable{
 
-  public DefaultTokeniser(){
+  public DumbTokeniser(){
   }
 
   public static void main(String[] args) {
