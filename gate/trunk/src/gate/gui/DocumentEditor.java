@@ -528,6 +528,8 @@ public class DocumentEditor extends AbstractVisualResource{
             //there is selected text -> create a new annotation
             int start = textPane.getSelectionStart();
             int end = textPane.getSelectionEnd();
+
+
             if(getAnnotationSchemas() != null &&
                !getAnnotationSchemas().isEmpty()){
               JPopupMenu popup = new JPopupMenu();
