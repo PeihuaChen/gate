@@ -1613,11 +1613,69 @@ public class AnnotationEditor extends AbstractVisualResource {
             gate.event.DocumentEvent docEvt =
               (gate.event.DocumentEvent)currentEvent;
             if(docEvt.getType() == docEvt.ANNOTATION_SET_REMOVED) {
-System.out.println("REC: AS removed " + docEvt.getAnnotationSetName());
-              throw new UnsupportedOperationException(
-                "DocumentEditor -> Annotation set removed");
+              String setName = docEvt.getAnnotationSetName();
+              //find the set node
+              Enumeration setNodesEnum = stylesTreeRoot.children();
+              DefaultMutableTreeNode setNode = null;
+              boolean done = false;
+              while(!done && setNodesEnum.hasMoreElements()){
+                setNode = (DefaultMutableTreeNode)setNodesEnum.nextElement();
+                done = ((TypeData)setNode.getUserObject()).getSet().
+                       equals(setName);
+              }
+
+              if(!((TypeData)setNode.getUserObject()).getSet().
+                       equals(setName)){
+                throw new GateRuntimeException(
+                      "Could not find the tree node for the " + setName +
+                      " annotation set!");
+              }
+
+              Enumeration typeNodesEnum = setNode.children();
+
+              while(typeNodesEnum.hasMoreElements()){
+                DefaultMutableTreeNode typeNode =
+                  (DefaultMutableTreeNode)typeNodesEnum.nextElement();
+                TypeData tData = (TypeData)typeNode.getUserObject();
+                if(tData.getVisible()){
+                  //1) update the annotations table
+                  data.removeAll(tData.getAnnotations());
+                  //remove the range
+                  int delta = tData.range.end - tData.range.start;
+                  //1a)first shift all following ranges
+                  Iterator rangesIter = ranges.
+                                      subList(ranges.indexOf(tData.range) + 1,
+                                      ranges.size()).
+                                        iterator();
+                  while(rangesIter.hasNext()){
+                    Range aRange = (Range) rangesIter.next();
+                    aRange.start -= delta;
+                    aRange.end -= delta;
+                  }//while(rangesIter.hasNext())
+                  //1b)now remove the range
+                  ranges.remove(tData.range);
+                  tableChanged = true;
+
+                  //2)update the text
+                  //hide the highlights
+                  Iterator annIter = tData.getAnnotations().iterator();
+                  while(annIter.hasNext()){
+                    Annotation ann = (Annotation)annIter.next();
+                    textPane.select(ann.getStartNode().getOffset().intValue(),
+                                    ann.getEndNode().getOffset().intValue());
+                    textPane.setCharacterAttributes(
+                              textPane.getStyle("default"), true);
+                  }//while(annIter.hasNext())
+                }//if(tData.getVisible())
+                //remove the node for the type
+                stylesTreeModel.removeNodeFromParent(typeNode);
+              }//while(typeNodesEnum.hasMoreElements())
+
+              //remove the data for the set
+              typeDataMap.remove(setName);
+              //remove the node for the set
+              stylesTreeModel.removeNodeFromParent(setNode);
             }else if(docEvt.getType() == docEvt.ANNOTATION_SET_ADDED){
-System.out.println("REC: AS added " + docEvt.getAnnotationSetName());
               addAnnotationSet(document.getAnnotations(
                                       docEvt.getAnnotationSetName()),0,0);
             }
@@ -1632,7 +1690,6 @@ System.out.println("REC: AS added " + docEvt.getAnnotationSetName());
             TypeData tData = getTypeData(setName, type);
 
             if(asEvt.getType() == asEvt.ANNOTATION_ADDED){
-System.out.println("REC: Annotation added " + asEvt.getAnnotation());
               if(tData != null){
 //                tData.annotations.add(ann);
                 if(tData.getVisible()){
@@ -1687,7 +1744,6 @@ System.out.println("REC: Annotation added " + asEvt.getAnnotation());
                 stylesTreeModel.insertNodeInto(typeNode, node, i);
               }
             } else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){
-System.out.println("REC: Annotation removed " + asEvt.getAnnotation());
 
 //              tData.annotations.remove(ann);
               if(tData.getVisible()){
@@ -1724,7 +1780,7 @@ System.out.println("REC: Annotation removed " + asEvt.getAnnotation());
                 while(node != null &&
                   !((TypeData)node.getUserObject()).getSet().equals(setName))
                   node = node.getNextSibling();
-                if(node != null){
+                if(node != null && node.getChildCount() > 0){
                   node = (DefaultMutableTreeNode)node.getFirstChild();
                   while(node != null &&
                     !((TypeData)node.getUserObject()).getType().equals(type))
@@ -1944,7 +2000,7 @@ System.out.println("REC: Annotation removed " + asEvt.getAnnotation());
             //set node
             if(setName.equals("Default")){
               JOptionPane.showMessageDialog(
-                stylesTree,
+                AnnotationEditor.this,
                 "The default annotation set cannot be deleted!\n" +
                 "It will only be cleared...",
                 "Gate", JOptionPane.ERROR_MESSAGE);
@@ -1953,13 +2009,19 @@ System.out.println("REC: Annotation removed " + asEvt.getAnnotation());
               document.removeAnnotationSet(setName);
             }
           }else{
+            //type node
+            if(!setName.equals("Default") &&
+               !document.getNamedAnnotationSets().containsKey(setName)){
+              //the set for this type has already bewen removed completely
+              //nothing more do (that's nice :) )
+              return;
+            }
             AnnotationSet set = setName.equals("Default") ?
                                 document.getAnnotations() :
                                 document.getAnnotations(setName);
-            //type node
             if(set != null){
               AnnotationSet subset = set.get(tData.getType());
-              if(subset != null) set.removeAll(subset);
+              if(subset != null) set.removeAll(new ArrayList(subset));
             }//if(set != null)
           }//type node
         }//for(int i = 0; i < paths.length; i++)
