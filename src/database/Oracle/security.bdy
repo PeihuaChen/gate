@@ -1,4 +1,3 @@
-
 create or replace package body security is
 
 /*
@@ -256,7 +255,7 @@ create or replace package body security is
        
        
        if (usr_cnt = 0) then
-          raise error.x_invalid_user_pass;
+          raise error.x_invalid_user_group;
        end if;
        
   end;                                                                                                        
