@@ -26,7 +26,11 @@ NLS_LANG=AMERICAN_AMERICA.UTF8
 
 
 # set GATEJAR and EXTDIR to gate.jar and ext locations
+[ x${GATEJAR} = x ] && [ -f ${GATE_HOME}/bin/gate.jar ] &&
 GATEJAR=${GATE_HOME}/bin/gate.jar
+
+[ x${GATEJAR} = x ] && [ -f ${GATE_HOME}/build/gate.jar ] &&
+GATEJAR=${GATE_HOME}/build/gate.jar
 
 EXTDIR=
 
@@ -67,7 +71,7 @@ then
   [ x$GATE_CONFIG != x ] && GATE_CONFIG=`cygpath -w $GATE_CONFIG`
   GATEJAR=`cygpath -w $GATEJAR`
   EXTDIR=`cygpath -w $EXTDIR`
-  CLASSPATH="`cygpath -w -p ${GATEJAR}`;${OLD_CLASSPATH}"
+  CLASSPATH="`cygpath -w -p ${CLASSPATH}`;${OLD_CLASSPATH}"
 fi
 
 
