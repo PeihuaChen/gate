@@ -19,24 +19,33 @@ import gate.Document;
 
 public class QueryResult{
 
+  /** Persistance document ID.*/
   private Object docID;
+
+  /** Score(relevance) of the result between 0 and 1 */
   private float relevance;
+
+  /** List of Terms*/
   private List fieldValues;
 
+  /** Constructor of the class. */
   public QueryResult(Object docID,float relevance, List fieldValues){
     this.docID = docID;
     this.relevance = relevance;
     this.fieldValues = fieldValues;
   }
 
+  /** @return persistance document ID.*/
   public Object getDocumentID(){
     return docID;
   }
 
+  /** @return relevance of this result. */
   public float getScore(){
     return relevance;
   }
 
+  /** returns certain document fields (if specified) from the search() call */
   public List getFields(){
     return fieldValues;
   }

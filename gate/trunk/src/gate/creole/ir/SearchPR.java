@@ -27,7 +27,6 @@ public class SearchPR extends AbstractProcessingResource
     return null;
   }
 
-
   /**
    * Reinitialises the processing resource. After calling this method the
    * resource should be in the state it is after calling init.
@@ -47,6 +46,4 @@ public class SearchPR extends AbstractProcessingResource
   public void execute() throws ExecutionException {
     //NOT IMPLEMENTED YET
   }
-
-
 }

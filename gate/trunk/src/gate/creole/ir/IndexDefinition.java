@@ -18,12 +18,13 @@ import java.util.Iterator;
 
 public interface IndexDefinition{
 
+  /** @return String  path of index store directory*/
   public String getIndexLocation();
 
-  //public DocumentAnalyzer getAnalyzer();
-
+  /**  @return Iterator of IndexFields, fileds for indexing. */
   public Iterator getIndexFields();
 
+  /**  @return int index type*/
   public int getIndexType();
 
 }

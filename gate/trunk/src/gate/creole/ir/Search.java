@@ -18,17 +18,27 @@ import java.util.List;
 
 public interface Search{
 
+  /** Sets coprus in which will doing search operations. */
   public void setCorpus(IndexedCorpus ic);
 
+  /** Search in corpus with this query. Unlimited result length.*/
   public QueryResultList search(String query)
                          throws IndexException, SearchException;
 
+  /** Search in corpus with this query.
+   *  Size of the result list is limited. */
   public QueryResultList search(String query, int limit)
                          throws IndexException, SearchException;
 
+  /** Search in corpus with this query.
+   *  In each QueryResult will be added values of theise fields.
+   *  Result length is unlimited. */
   public QueryResultList search(String query, List fieldNames)
                          throws IndexException, SearchException;
 
+  /** Search in corpus with this query.
+   *  In each QueryResult will be added values of theise fields.
+   *  Result length is limited. */
   public QueryResultList search(String query, int limit, List fieldNames)
                          throws IndexException, SearchException;
 }

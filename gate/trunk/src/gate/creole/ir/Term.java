@@ -14,20 +14,26 @@
 
 package gate.creole.ir;
 
+/** This class represents pairs NAME-VALUE*/
 public class Term{
 
+  /** Name */
   private String name;
+  /**  Value*/
   private String value;
 
+  /** Constructor of the class. */
   public Term(String name, String value){
     this.name = name;
     this.value = value;
   }
 
+  /** @return String name*/
   public String getName(){
     return name;
   }
 
+  /** @return String value*/
   public String getValue(){
     return value;
   }

@@ -16,6 +16,7 @@ package gate.creole.ir;
 
 public class SearchException extends Exception{
 
+  /** Consructor of the class.*/
   public SearchException(String msg){
     super(msg);
   }
