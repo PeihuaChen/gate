@@ -67,8 +67,22 @@ include Makefile.dep
 
 # regenerate Makefile.dep
 depend:
-	./makejdepend.sh ../src/gate >Makefile.dep
+	: ./makejdepend.sh ../src/gate >Makefile.dep
+	for f in gate.sh; do \
+	  sed -e 's,___CYGPATH___,$(CYGPATH),' -e 's,___JAVA___,$(JAVA),' \
+	    -e 's,___GATEHOME___,'`pwd`',' -e 's,___CYGPATHP___,$(CYGPATHP),' \
+	    $$f.in >$$f; done
+	for f in gate.bat; do \
+	  J="`$(CYGPATH) $(JAVA)`"; J="`echo $${J} |sed 's,\\\,!_!_!,g'`"; \
+	  G="`$(CYGPATH) \`pwd\``"; G="`echo $${G} |sed 's,\\\,!_!_!,g'`"; \
+	  sed -e 's,___JAVA___,'"$${J}"',' -e 's,___GATEHOME___,'"$${G}"',' \
+	    $$f.in >$$f; \
+	  sed -e 's,!_!_!,\\,g' $$f >$$f.temp; mv $$f.temp $$f; \
+	done
 #GUK	./makejdepend.sh ../src/gate ../src/guk >Makefile.dep
+
+#	  sed -e 's,___JAVA___,'"`$(CYGPATH) $(JAVA)`"',' \
+#	    -e 's,___GATEHOME___,'"`$(CYGPATH) \`pwd\``"',' \
 
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)

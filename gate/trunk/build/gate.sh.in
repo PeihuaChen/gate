@@ -1,0 +1,11 @@
+#!/bin/sh
+# gate.sh - UNIX front-end for GATE. Hamish, summer 98
+# $Id$
+
+JAVA=___JAVA___
+CYGPATH="___CYGPATH___"
+CYGPATHP="___CYGPATHP___"
+GATEHOME=___GATEHOME___
+
+${JAVA} -Xmx200m -Djava.ext.dirs=`${CYGPATH} ${GATEHOME}/../lib/ext` \
+  -classpath `${CYGPATHP} ${GATEHOME}/gate.jar` gate.Main $*

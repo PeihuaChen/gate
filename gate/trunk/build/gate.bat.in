@@ -1,0 +1,11 @@
+@echo off
+rem A batch file to run GATE
+rem Kali and Valy, 9/3/1
+rem This batch file was written and tested under Windows NT
+rem $Id$
+
+SET JAVA=___JAVA___
+SET GATEHOME=___GATEHOME___
+
+%JAVA% -Djava.ext.dirs=%GATEHOME%\..\lib\ext -classpath %GATEHOME%\gate.jar -Xmx200m gate.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
+
