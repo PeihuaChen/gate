@@ -419,8 +419,52 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   }
 
   /** reads the GUID from the database */
-  protected abstract String readDatabaseID()
+/*  protected abstract String readDatabaseID()
     throws PersistenceException;
+*/
+  /**
+   *  reads the ID of the database
+   *  every database should have unique string ID
+   */
+  protected String readDatabaseID() throws PersistenceException{
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String  result = null;
+
+    //1. read from DB
+    try {
+      String sql = " select par_value_string " +
+                   " from  "+this.dbSchema+"t_parameter " +
+                   " where  par_key = ? ";
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setString(1,DBHelper.DB_PARAMETER_GUID);
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        throw new PersistenceException("Can't read database parameter ["+
+                                          DBHelper.DB_PARAMETER_GUID+"]");
+      }
+      result = rs.getString(1);
+    }
+    catch(SQLException sqle) {
+        throw new PersistenceException("Can't read database parameter ["+
+                                          sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+    if (DEBUG) {
+      Out.println("reult=["+result+"]");
+    }
+
+    return result;
+  }
+
 
   /**
    * Removes a a previously registered {@link gate.event.DatastoreListener}
