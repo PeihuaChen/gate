@@ -255,9 +255,50 @@ public class ResourceData extends AbstractFeatureBearer {
     * of the viewer. Other data to be passed to the viewer is present as
     * other features on the map.
     */
-  public List getViews() {
-    return views;
-  } // getViews()
+  public List getViews() { return views; }
+
+  /** Get all the views of this resource and those Resource classes that
+    * it inherits from. The method uses reflection to traverse the
+    * inheritance tree as far as gate.Resource; for each inherited class,
+    * if it is itself a resource, its views are added to the list.
+    * <P>
+    * Each member of the
+    * list is a FeatureMap with a TYPE attribute giving the class name
+    * of the vcvs upiewer. Other data to be passed to the viewer is present as
+    * other features on the map.
+    */
+  public List getAllViews() {
+    List allViews = new ArrayList();
+    CreoleRegister reg = Gate.getCreoleRegister();
+
+    // add all the views for the current class
+    allViews.addAll(views);
+
+    // get the class for this resource or give up
+    Class resClass = null;
+    try { resClass = getResourceClass(); } catch(ClassNotFoundException e) { }
+    if(resClass == null) return allViews; // no inherited views
+
+    // iterate over all superclasses up to gate.Resource
+    for(
+        Class superClass = resClass.getSuperclass()    // iterate up from super
+      ;
+        superClass != null &&                          // top of the tree
+        ! superClass.getName().equals("gate.Resource")
+      ;
+        superClass = superClass.getSuperclass()        // on to the next
+    ) {
+      if(Resource.class.isAssignableFrom(superClass)) {
+        ResourceData superResData =
+          (ResourceData) reg.get(superClass.getName());
+        if(superResData == null) continue;
+
+        allViews.addAll(superResData.getViews());
+      }
+    } // for
+
+    return allViews;
+  } // getAllViews()
 
   /** The list of views registered for this resource */
   protected List views = new ArrayList();
