@@ -612,6 +612,243 @@ public class TestAnnotation extends TestCase
     assert(!res.isEmpty());
   }
 
+  /** Test Overlaps */
+  public void testOverlapsAndCoextensive() throws InvalidOffsetException {
+    Node node1 = new NodeImpl(new Integer(1),new Long(10));
+    Node node2 = new NodeImpl(new Integer(2),new Long(20));
+    Node node3 = new NodeImpl(new Integer(3),new Long(15));
+    Node node4 = new NodeImpl(new Integer(4),new Long(15));
+    Node node5 = new NodeImpl(new Integer(5),new Long(20));
+    Node node6 = new NodeImpl(new Integer(6),new Long(30));
+
+    FeatureMap fm1 = new SimpleFeatureMapImpl();
+    fm1.put("color","red");
+    fm1.put("Age",new Long(25));
+    fm1.put(new Long(23), "Cristian");
+
+    FeatureMap fm2 = new SimpleFeatureMapImpl();
+    fm2.put("color","red");
+    fm2.put("Age",new Long(25));
+    fm2.put(new Long(23), "Cristian");
+
+    FeatureMap fm4 = new SimpleFeatureMapImpl();
+    fm4.put("color","red");
+    fm4.put("Age",new Long(26));
+    fm4.put(new Long(23), "Cristian");
+
+    FeatureMap fm3 = new SimpleFeatureMapImpl();
+    fm3.put("color","red");
+    fm3.put("Age",new Long(25));
+    fm3.put(new Long(23), "Cristian");
+    fm3.put("best",new Boolean(true));
+
+    // Start=10, End = 20
+    Annotation annot1 = new AnnotationImpl(new Integer(1),
+                                           node1,
+                                           node2,
+                                           "pos",
+                                           null);
+    // Start=20, End = 30
+    Annotation annot2 = new AnnotationImpl (new Integer(2),
+                                            node2,
+                                            node6,
+                                            "pos",
+                                            null);
+    // Start=20, End = 30
+    Annotation annot3 = new AnnotationImpl (new Integer(3),
+                                            node5,
+                                            node6,
+                                            "pos",
+                                            null);
+    // Start=20, End = 20
+    Annotation annot4 = new AnnotationImpl (new Integer(4),
+                                            node2,
+                                            node5,
+                                            "pos",
+                                            null);
+    // Start=10, End = 30
+    Annotation annot5 = new AnnotationImpl (new Integer(5),
+                                            node1,
+                                            node6,
+                                            "pos",
+                                            null);
+    // Start=10, End = 15
+    Annotation annot6 = new AnnotationImpl (new Integer(6),
+                                            node1,
+                                            node4,
+                                            "pos",
+                                            null);
+    // Start=null, End = null
+    Annotation annot7 = new AnnotationImpl (new Integer(7),
+                                            null,
+                                            null,
+                                            "pos",
+                                            null);
+
+    // MAP
+    // annot1 -> Start=10, End = 20
+    // annot2 -> Start=20, End = 30
+    // annot3 -> Start=20, End = 30
+    // annot4 -> Start=20, End = 20
+    // annot5 -> Start=10, End = 30
+    // annot6 -> Start=10, End = 15
+
+    // Not overlaping situations
+   assert("Those annotations does not overlap!",!annot1.overlaps(annot3));
+   assert("Those annotations does not overlap!",!annot1.overlaps(annot2));
+   assert("Those annotations does not overlap!",!annot2.overlaps(annot1));
+   assert("Those annotations does not overlap!",!annot3.overlaps(annot1));
+   assert("Those annotations does not overlap!",!annot4.overlaps(annot6));
+   assert("Those annotations does not overlap!",!annot6.overlaps(annot4));
+
+   assert("Those annotations does not overlap!",!annot6.overlaps(null));
+   assert("Those annotations does not overlap!",!annot1.overlaps(annot7));
+
+   // Overlaping situations
+   assert("Those annotations does overlap!",annot4.overlaps(annot5));
+   assert("Those annotations does overlap!",annot5.overlaps(annot4));
+   assert("Those annotations does overlap!",annot1.overlaps(annot6));
+   assert("Those annotations does overlap!",annot6.overlaps(annot1));
+   assert("Those annotations does overlap!",annot2.overlaps(annot5));
+   assert("Those annotations does overlap!",annot5.overlaps(annot2));
+
+   // Not coextensive situations
+   assert("Those annotations are not coextensive!",!annot1.coextensive(annot2));
+   assert("Those annotations are not coextensive!",!annot2.coextensive(annot1));
+   assert("Those annotations are not coextensive!",!annot4.coextensive(annot3));
+   assert("Those annotations are not coextensive!",!annot3.coextensive(annot4));
+   assert("Those annotations are not coextensive!",!annot4.coextensive(annot7));
+   assert("Those annotations are not coextensive!",!annot5.coextensive(annot6));
+   assert("Those annotations are not coextensive!",!annot6.coextensive(annot5));
+   //Coextensive situations
+   assert("Those annotations are coextensive!",annot2.coextensive(annot2));
+   assert("Those annotations are coextensive!",annot2.coextensive(annot3));
+   assert("Those annotations are coextensive!",annot3.coextensive(annot2));
+
+  }//testOverlapsAndCoextensive
+
+  /** Test Coextensive */
+  public void testIsPartiallyCompatibleAndCompatible()
+                                                throws InvalidOffsetException {
+    Node node1 = new NodeImpl(new Integer(1),new Long(10));
+    Node node2 = new NodeImpl(new Integer(2),new Long(20));
+    Node node3 = new NodeImpl(new Integer(3),new Long(15));
+    Node node4 = new NodeImpl(new Integer(4),new Long(15));
+    Node node5 = new NodeImpl(new Integer(5),new Long(20));
+    Node node6 = new NodeImpl(new Integer(6),new Long(30));
+
+    FeatureMap fm1 = new SimpleFeatureMapImpl();
+    fm1.put("color","red");
+    fm1.put("Age",new Long(25));
+    fm1.put(new Long(23), "Cristian");
+
+    FeatureMap fm2 = new SimpleFeatureMapImpl();
+    fm2.put("color","red");
+    fm2.put("Age",new Long(25));
+    fm2.put(new Long(23), "Cristian");
+
+    FeatureMap fm4 = new SimpleFeatureMapImpl();
+    fm4.put("color","red");
+    fm4.put("Age",new Long(26));
+    fm4.put(new Long(23), "Cristian");
+
+    FeatureMap fm3 = new SimpleFeatureMapImpl();
+    fm3.put("color","red");
+    fm3.put("Age",new Long(25));
+    fm3.put(new Long(23), "Cristian");
+    fm3.put("best",new Boolean(true));
+
+    // Start=10, End = 20
+    Annotation annot1 = new AnnotationImpl(new Integer(1),
+                                           node1,
+                                           node2,
+                                           "pos",
+                                           fm1);
+    // Start=20, End = 30
+    Annotation annot2 = new AnnotationImpl (new Integer(2),
+                                            node2,
+                                            node6,
+                                            "pos",
+                                            fm2);
+    // Start=20, End = 30
+    Annotation annot3 = new AnnotationImpl (new Integer(3),
+                                            node5,
+                                            node6,
+                                            "pos",
+                                            fm3);
+    // Start=20, End = 20
+    Annotation annot4 = new AnnotationImpl (new Integer(4),
+                                            node2,
+                                            node5,
+                                            "pos",
+                                            fm4);
+    // Start=10, End = 30
+    Annotation annot5 = new AnnotationImpl (new Integer(5),
+                                            node1,
+                                            node6,
+                                            "pos",
+                                            fm3);
+    // Start=10, End = 15
+    Annotation annot6 = new AnnotationImpl (new Integer(6),
+                                            node1,
+                                            node4,
+                                            "pos",
+                                            fm1);
+    // Start=null, End = null
+    Annotation annot7 = new AnnotationImpl (new Integer(7),
+                                            null,
+                                            null,
+                                            "pos",
+                                            null);
+
+// MAP
+  /*
+   annot1 -> Start=10, End = 20,{color="red",Age="25",23="Cristian"}
+   annot2 -> Start=20, End = 30,{color="red",Age="25",23="Cristian"}
+   annot3 -> Start=20, End = 30,{color="red",Age="25",23="Cristian",best="true"}
+   annot4 -> Start=20, End = 20,{color="red",Age="26",23="Cristian"}
+   annot5 -> Start=10, End = 30,{color="red",Age="25",23="Cristian",best="true"}
+   annot6 -> Start=10, End = 15,{color="red",Age="25",23="Cristian"}
+  */
+
+  // Not compatible situations
+  assert("Those annotations are not compatible!",!annot3.isCompatible(annot2));
+
+  // Not partially compatible situations
+  assert("Those annotations are not partially compatible!",
+                                       !annot1.isPartiallyCompatible(annot2));
+  assert("Those annotations are not partially compatible!",
+                                       !annot1.isPartiallyCompatible(annot3));
+  assert("Those annotations are not partially compatible!",
+                                       !annot1.isPartiallyCompatible(annot4));
+  assert("Those annotations are not partially compatible!",
+                                       !annot4.isPartiallyCompatible(annot5));
+
+
+  // Compatible situations
+  assert("Those annotations are compatible!",annot2.isCompatible(annot3));
+  assert("Those annotations are compatible!",annot4.isCompatible(annot4));
+
+  // Partially compatible situations
+  assert("Those annotations are partially compatible!",
+                                        annot2.isPartiallyCompatible(annot3));
+  assert("Those annotations are partially compatible!",
+                                        annot2.isPartiallyCompatible(annot2));
+  assert("Those annotations are partially compatible!",
+                                        annot4.isPartiallyCompatible(annot4));
+  assert("Those annotations are partially compatible!",
+                                        annot1.isPartiallyCompatible(annot5));
+  assert("Those annotations are partially compatible!",
+                                        annot1.isPartiallyCompatible(annot6));
+  assert("Those annotations are partially compatible!",
+                                        annot3.isPartiallyCompatible(annot5));
+  assert("Those annotations are partially compatible!",
+                                        annot5.isPartiallyCompatible(annot3));
+  assert("Those annotations are partially compatible!",
+                                        annot6.isPartiallyCompatible(annot5));
+
+  }// testIsPartiallyCompatibleAndCompatible
+
   public static void main(String[] args){
 
     try{
@@ -621,7 +858,8 @@ public class TestAnnotation extends TestCase
       testAnnot.testIterator();
       testAnnot._testGap();
       testAnnot.tearDown();
-
+      testAnnot.testOverlapsAndCoextensive();
+      testAnnot.testIsPartiallyCompatibleAndCompatible();
     }catch(Throwable t){
       t.printStackTrace();
     }
