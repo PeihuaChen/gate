@@ -81,6 +81,35 @@ public class TestDocument extends TestCase
 
   } // testCompareTo()
 
+  /** Test loading of the original document content */
+
+  public void testOriginalContentPreserving() throws Exception {
+    Document doc = null;
+    String origContent;
+
+    // test the default value of preserve content flag
+    doc = Factory.newDocument(new URL(testServer + testDocument1));
+    origContent = (String) doc.getFeatures().get(
+      GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
+
+    assertNull(
+      "The original content should not be preserved without demand.",
+      origContent);
+
+    DocumentImpl.setPreserveOriginalContent(true);
+
+    doc = Factory.newDocument(new URL(testServer + testDocument1));
+    origContent = (String) doc.getFeatures().get(
+      GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
+
+    assertNotNull("The original content is not preserved on demand.",
+              origContent);
+
+    assertTrue("The original content size is zerro.", origContent.length()>0);
+
+    DocumentImpl.setPreserveOriginalContent(false);
+  } // testOriginalContentPreserving()
+
   /** A comprehensive test */
   public void testLotsOfThings() {
 

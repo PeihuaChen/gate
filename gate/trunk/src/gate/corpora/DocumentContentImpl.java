@@ -92,6 +92,7 @@ public class DocumentContentImpl implements DocumentContent
     uReader.close();
 
     content = new String(buf);
+    originalContent = content;
   } // Contruction from URL and offsets
 
   /** Propagate changes to the document content. */
@@ -169,8 +170,19 @@ public class DocumentContentImpl implements DocumentContent
     */
   String content;
 
+  /**
+   * For preserving the original content of the document.
+   * The edit command didn't affect on the original content.
+   * If you construct the content by URL the originalContent will keep
+   * whole information retrieved by URL even you set some start and end.
+   */
+  String originalContent;
+
+  public String getOriginalContent() { return originalContent; }
+
   /** For ranges */
-  public DocumentContentImpl(String s) { content = s; }
+  public DocumentContentImpl(String s)
+    { content = s; originalContent = content; }
 
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1426940535575467461L;
