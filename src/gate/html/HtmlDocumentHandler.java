@@ -306,9 +306,13 @@ public class HtmlDocumentHandler extends ParserCallback {
     String content = new String(text);
 
     // remove the difference between JDK 1.3 and JDK 1.4
-    if(content.trim().length() == 0) {
+    String trimContent = content.trim();
+    if(trimContent.length() == 0) {
       return;
     } // if
+
+    int trimCorrection = content.indexOf(trimContent.charAt(0));
+    content = trimContent;
 
     StringBuffer contentBuffer = new StringBuffer("");
     int tmpDocContentSize = tmpDocContent.length();
@@ -329,7 +333,8 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // put the repositioning information
     if(reposInfo != null) {
-      int extractedPos = tmpDocContent.length()+contentBuffer.length();
+      int extractedPos = tmpDocContent.length()+contentBuffer.length()
+                    +trimCorrection;
       addRepositioningInfo(content, pos, extractedPos);
     } // if
 
