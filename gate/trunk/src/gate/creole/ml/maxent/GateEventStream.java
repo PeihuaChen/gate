@@ -14,8 +14,6 @@
 
 package gate.creole.ml.maxent;
 
-import opennlp.maxent.EventStream;
-
 /**
  * This class is used by MaxentWrapper. When created, it is passed a data
  * structure containg all the training data for the classifier. It can then
