@@ -150,7 +150,7 @@ public class OrthoMatcher extends AbstractProcessingResource
 
     //check if we've been run on this document before
     if (document.getFeatures().containsKey(DOC_MATCHES_FEATURE))
-      cleanup();
+      docCleanup();
 
     // creates the cdg list from the document
     //no need to create otherwise, coz already done in init()
@@ -315,7 +315,6 @@ public class OrthoMatcher extends AbstractProcessingResource
       while (unknownIter.hasNext()) {
         Integer unknId = (Integer) unknownIter.next();
         Annotation unknown = nameAllAnnots.get(unknId);
-//        Out.prln("Adding new annotation of type" + annots2Remove.get(unknId));
         nameAllAnnots.add(
           unknown.getStartNode(),
           unknown.getEndNode(),
@@ -329,6 +328,8 @@ public class OrthoMatcher extends AbstractProcessingResource
   }
 
   protected void matchWithPrevious(Annotation nameAnnot, String annotString) {
+    boolean matchedUnknown = false;
+
     Iterator prevIter = processedAnnots.keySet().iterator();
     while (prevIter.hasNext()) {
       Integer prevId = (Integer) prevIter.next();
@@ -339,20 +340,15 @@ public class OrthoMatcher extends AbstractProcessingResource
           && ! nameAnnot.getType().equals(unknownType))
          )
         continue;
+      //do not compare two unknown annotations either
+      //they are only matched to those of known types
+      if (  nameAnnot.getType().equals(unknownType)
+            && prevAnnot.getType().equals(unknownType))
+      continue;
 
       //check if we have already matched this annotation to the new one
       if (matchedAlready(nameAnnot, prevAnnot) )
         continue;
-
-      String prevAnnotString = (String) processedAnnots.get(prevId);
-
-
-      // find which annotation string of the two is longer
-      //  this is useful for some of the matching rules
-      String longName = prevAnnotString;
-      String shortName = annotString;
-      longAnnot = prevAnnot;
-      shortAnnot = nameAnnot;
 
       // determine the title from annotation string
       //now changed to a rule, here we just match by gender
@@ -375,6 +371,93 @@ public class OrthoMatcher extends AbstractProcessingResource
 
       }//if
 
+      //if the two annotations match
+      if (matchAnnotations(nameAnnot, annotString,  prevAnnot)) {
+//        Out.prln("Matched " + shortName + "and " + longName);
+        updateMatches(nameAnnot, prevAnnot);
+        //if unknown annotation, we need to change to the new type
+        if (nameAnnot.getType().equals(unknownType)) {
+          matchedUnknown = true;
+//          annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
+          if (prevAnnot.getType().equals(unknownType))
+            annots2Remove.put(nameAnnot.getId(),
+                              annots2Remove.get(prevAnnot.getId()));
+          else
+            annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
+         //also put an attribute to indicate that
+          nameAnnot.getFeatures().put("NMRule", unknownType);
+        }//if unknown
+      }
+
+    }//while through previous annotations
+
+    if (matchedUnknown)
+      processedAnnots.put(nameAnnot.getId(), annotString);
+
+
+  }//matchWithPrevious
+
+  protected boolean matchAnnotations(Annotation newAnnot, String annotString,
+                                     Annotation prevAnnot) {
+
+    // find which annotation string of the two is longer
+    //  this is useful for some of the matching rules
+    String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
+
+    String longName = prevAnnotString;
+    String shortName = annotString;
+    longAnnot = prevAnnot;
+    shortAnnot = newAnnot;
+
+    if (shortName.length()>=longName.length()) {
+      String temp = longName;
+      longName = shortName;
+      shortName = temp;
+      Annotation tempAnn = longAnnot;
+      longAnnot = shortAnnot;
+      shortAnnot = tempAnn;
+    }//if
+
+    tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
+    tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
+
+    List matchesList = (List) prevAnnot.getFeatures().get(MATCHES_FEATURE);
+    if (matchesList == null || matchesList.isEmpty())
+      return apply_rules_namematch(prevAnnot.getType(), shortName,longName);
+
+    //if these two match, then let's see if all the other matching one will too
+    //that's needed, because sometimes names can share a token (e.g., first or
+    //last but not be the same
+    if (apply_rules_namematch(prevAnnot.getType(), shortName,longName)) {
+      List toMatchList = new ArrayList(matchesList);
+      toMatchList.remove(prevAnnot.getId());
+      return matchOtherAnnots(toMatchList, newAnnot, annotString);
+    }
+    return false;
+  }
+
+  protected boolean matchOtherAnnots( List toMatchList, Annotation newAnnot,
+                                      String annotString) {
+
+    //if the list is empty, then we're matching all right :-)
+    if (toMatchList.isEmpty())
+      return true;
+
+    boolean matchedAll = true;
+    int i = 0;
+
+    while (matchedAll && i < toMatchList.size()) {
+      Annotation prevAnnot = nameAllAnnots.get((Integer) toMatchList.get(i));
+
+      // find which annotation string of the two is longer
+      //  this is useful for some of the matching rules
+      String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
+
+      String longName = prevAnnotString;
+      String shortName = annotString;
+      longAnnot = prevAnnot;
+      shortAnnot = newAnnot;
+
       if (shortName.length()>=longName.length()) {
         String temp = longName;
         longName = shortName;
@@ -387,28 +470,13 @@ public class OrthoMatcher extends AbstractProcessingResource
       tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
       tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
 
-      //if the two annotations match
-      if (apply_rules_namematch(prevAnnot.getType(), shortName,longName)) {
-//        Out.prln("Matched " + shortName + "and " + longName);
+      matchedAll = apply_rules_namematch(prevAnnot.getType(), shortName,longName);
 
-        Annotation matchedAnnot =  updateMatches(nameAnnot, prevAnnot);
-        //if unknown annotation, we need to change to the new type
-          if (nameAnnot.getType().equals(unknownType)) {
-//          annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
-            if (matchedAnnot.getType().equals(unknownType))
-              annots2Remove.put(nameAnnot.getId(),
-                                annots2Remove.get(matchedAnnot.getId()));
-            else
-              annots2Remove.put(nameAnnot.getId(), matchedAnnot.getType());
+      i++;
+    }//while
+    return matchedAll;
+  }
 
-          //also put an attribute to indicate that
-            nameAnnot.getFeatures().put("NMRule", unknownType);
-          }//if unknown
-      }
-
-    }//while through previous annotations
-
-  }//matchWithPrevious
 
   protected boolean matchedAlready(Annotation annot1, Annotation annot2) {
     //the two annotations are already matched if the matches list of the first
@@ -462,7 +530,7 @@ public class OrthoMatcher extends AbstractProcessingResource
     return matchedAnnot;
   }
 
-  protected Annotation updateMatches(Annotation newAnnot, Annotation prevAnnot) {
+  protected void updateMatches(Annotation newAnnot, Annotation prevAnnot) {
 
     List matchesList = (List) prevAnnot.getFeatures().get(MATCHES_FEATURE);
     if ((matchesList == null) || matchesList.isEmpty()) {
@@ -491,11 +559,10 @@ public class OrthoMatcher extends AbstractProcessingResource
       else if (unknownNewGender && !unknownPrevGender)
         newAnnot.getFeatures().put(GENDER_FEATURE, prevGender);
     }//if
-    return prevAnnot;
   }
 
 
-  protected void cleanup() {
+  protected void docCleanup() {
     document.getFeatures().remove(DOC_MATCHES_FEATURE);
 
     //get all annotations that have a matches feature
@@ -842,7 +909,7 @@ public class OrthoMatcher extends AbstractProcessingResource
         matched = s1.equalsIgnoreCase(s2);
     else matched =  s1.equals(s2) ;
 //kalina: do not remove, nice for debug
-//    if (matched && (s2.equalsIgnoreCase("chin") || s1.equalsIgnoreCase("chin")))
+//    if (matched && (s2.equalsIgnoreCase("news") || s1.equalsIgnoreCase("news")))
 //        Out.prln("Rule1: Matched " + s1 + "and " + s2);
     return matched;
   }//matchRule1
@@ -1098,7 +1165,7 @@ public class OrthoMatcher extends AbstractProcessingResource
   public boolean matchRule9(String s1,
            String s2) {
 
-//    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
+//    if (s1.equalsIgnoreCase("news") || s2.equalsIgnoreCase("news"))
 //      Out.prln("Rule 9 " + s1 + " and " + s2);
     String s1_short = (String)
                       ((Annotation) tokensLongAnnot.get(
