@@ -21,10 +21,16 @@
         COMMENT="Name of the Minipar command file">
         java.net.URL
     </PARAMETER>
-    <PARAMETER NAME="annotationSetName" 
+    <PARAMETER NAME="annotationInputSetName" 
         RUNTIME="true"
 	  OPTIONAL="true"
         COMMENT="Name of the input Source">
+        java.lang.String
+    </PARAMETER>
+    <PARAMETER NAME="annotationOutputSetName" 
+        RUNTIME="true"
+	  OPTIONAL="true"
+        COMMENT="Name of the output AnnotationSetName">
         java.lang.String
     </PARAMETER>
     <PARAMETER NAME="annotationTypeName" 
