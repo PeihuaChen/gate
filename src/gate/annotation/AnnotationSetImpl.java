@@ -480,6 +480,8 @@ implements AnnotationSet
       Node n = (Node) replacedAreaNodesIter.next();
 
       // remove from nodes map
+if(true)
+throw new LazyProgrammerException("this next call tries to remove from a map based on the value; note index is key; also note that some nodes may have no index....");
       nodesByOffset.remove(n);
 
       // remove annots that start at this node
