@@ -245,6 +245,18 @@
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
 	</target>
+
+  <!-- Make gate.jar archive -->
+	<target name="bigjar" depends="compile,resources">
+		<jar destfile="${binDir}/gate.jar" 
+         update="false"
+         index="true">
+      <fileset dir="${outputDir}/"
+               includes="gate/**,com/**,debugger/**"/>
+      <zipgroupfileset refid="libs"/>
+    </jar>
+	</target>
+
   
   <!-- Everything! -->
 	<target name="all" depends="jar">
