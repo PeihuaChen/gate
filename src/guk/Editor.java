@@ -102,20 +102,42 @@ public class Editor extends JFrame {
    * Component initialization
    */
   private void jbInit() throws Exception {
-    Locale locale = new Locale("en", "GB");
-    Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
-    Arrays.sort(availableLocales, new Comparator(){
+    java.util.List installedLocales = new ArrayList();
+    try{
+      //if this fails guk is not present
+      Class.forName("guk.im.GateIMDescriptor");
+      //add the Gate input methods
+      installedLocales.addAll(Arrays.asList(new guk.im.GateIMDescriptor().
+                                            getAvailableLocales()));
+    }catch(Exception e){
+      //something happened; most probably guk not present.
+      //just drop it, is not vital.
+    }
+    try{
+      //add the MPI IMs
+      //if this fails mpi IM is not present
+      Class.forName("mpi.alt.java.awt.im.spi.lookup.LookupDescriptor");
+
+      installedLocales.addAll(Arrays.asList(
+            new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor().
+            getAvailableLocales()));
+    }catch(Exception e){
+      //something happened; most probably MPI not present.
+      //just drop it, is not vital.
+    }
+    Collections.sort(installedLocales, new Comparator(){
       public int compare(Object o1, Object o2){
         return ((Locale)o1).getDisplayName().compareTo(((Locale)o2).getDisplayName());
       }
     });
     JMenuItem item;
-    if(availableLocales != null && availableLocales.length > 1) {
+    if(!installedLocales.isEmpty()) {
       jMenuIM = new JMenu("Input methods");
       ButtonGroup bg = new ButtonGroup();
-      for(int i = 0; i < availableLocales.length; i++){
-        locale = availableLocales[i];
-        item = new LocaleSelectorMenuItem(locale, frame);
+      Iterator localIter = installedLocales.iterator();
+      while(localIter.hasNext()){
+        Locale aLocale = (Locale)localIter.next();
+        item = new LocaleSelectorMenuItem(aLocale, frame);
         jMenuIM.add(item);
         bg.add(item);
       }
