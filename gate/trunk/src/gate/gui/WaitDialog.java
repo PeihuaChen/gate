@@ -45,9 +45,8 @@ public class WaitDialog extends JWindow implements Runnable{
     centerBox.validate();
     pack();
     Point loc = frame.getLocation();
-    loc.move(frame.getSize().width - getSize().width / 2 ,
-             frame.getSize().height - getSize().height /2 );
-    setLocation(loc);
+    setLocation(loc.x + (frame.getSize().width - getSize().width) / 2 ,
+                loc.y + (frame.getSize().height - getSize().height) /2);
     stop = false;
     Thread thread = new Thread(this);
     thread.setPriority(Thread.MAX_PRIORITY);
@@ -59,15 +58,20 @@ public class WaitDialog extends JWindow implements Runnable{
     JPanel centerPanel = new JPanel();
     centerBox = Box.createVerticalBox();
     centerPanel.setLayout(borderLayout1);
-    centerPanel.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
-    centerBox.setBackground(Color.white);
+//    centerPanel.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
+//    centerPanel.setBorder(new CompoundBorder(new LineBorder(Color.darkGray, 2),
+//                                    new SoftBevelBorder(BevelBorder.LOWERED)));
+    centerPanel.setBorder(new LineBorder(Color.darkGray, 2));
     centerPanel.setBackground(Color.white);
-    this.getContentPane().add(centerPanel);
+    centerBox.setBackground(Color.white);
     picture = new JLabel(new ImageIcon(ClassLoader.getSystemResource(
                     "muse/resources/wait.gif")));
     centerPanel.add(centerBox, BorderLayout.CENTER);
     centerPanel.add(picture, BorderLayout.WEST);
-
+    centerPanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);
+    centerPanel.add(Box.createVerticalStrut(5), BorderLayout.SOUTH);
+    centerPanel.add(Box.createHorizontalStrut(8), BorderLayout.EAST);
+    getContentPane().add(centerPanel, BorderLayout.CENTER);
 
   }
 

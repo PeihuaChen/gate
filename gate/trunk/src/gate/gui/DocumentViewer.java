@@ -77,7 +77,9 @@ public class DocumentViewer extends JPanel {
     tableScroll.getViewport().add(tableView, null);
     //create the types buttons
     typesBox.removeAll();
-    Iterator typesIter = document.getAnnotations().getAllTypes().iterator();
+    LinkedList typeList = new LinkedList(document.getAnnotations().getAllTypes());
+    Collections.sort(typeList);
+    Iterator typesIter = typeList.iterator();
     String currentType;
     int maxWidth = 0;
     LinkedList allButtons = new LinkedList();
@@ -112,7 +114,7 @@ public class DocumentViewer extends JPanel {
       buttonLabel.setHorizontalAlignment(SwingConstants.CENTER);
       typeButton.add(buttonLabel, SwingConstants.CENTER);
       typeButton.setName(currentType);
-      typeButton.setForeground(Color.white);
+//      typeButton.setForeground(Color.white);
       typeButton.setBackground(colGen.getNextColor());
       typeButton.setToolTipText(currentType);
       typeButton.setHorizontalAlignment(JButton.CENTER);
@@ -133,7 +135,7 @@ public class DocumentViewer extends JPanel {
       if(maxWidth < typeButton.getPreferredSize().width)
         maxWidth = typeButton.getPreferredSize().width;
       allButtons.add(typeButton);
-    }
+    }//while(typesIter.hasNext())
     Dimension bdim = new Dimension(maxWidth, clearButton.getPreferredSize().height);
     Dimension ldim = new Dimension(maxWidth -10, clearButton.getPreferredSize().height -4);
     clearButton.setMinimumSize(bdim);
@@ -142,7 +144,7 @@ public class DocumentViewer extends JPanel {
     ((JLabel)clearButton.getComponent(0)).setMaximumSize(ldim);
 
     typesBox.add(clearButton);
-    Collections.sort(allButtons, new ButtonComparator());
+//    Collections.sort(allButtons, new ButtonComparator());
     Iterator buttonsIter = allButtons.iterator();
     while(buttonsIter.hasNext()){
       typeButton = (JButton)buttonsIter.next();
@@ -154,7 +156,7 @@ public class DocumentViewer extends JPanel {
       ((JLabel)typeButton.getComponent(0)).setMinimumSize(ldim);
       ((JLabel)typeButton.getComponent(0)).setMaximumSize(ldim);
       typesBox.add(typeButton);
-    }
+    }//while(buttonsIter.hasNext())
     typeButtonsScroll.getViewport().add(typesBox, null);
 /*
     typeButtonsScroll.setPreferredSize(
