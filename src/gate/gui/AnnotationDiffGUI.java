@@ -46,7 +46,7 @@ public class AnnotationDiffGUI extends JFrame{
     initListeners();
     populateGUI();
   }
-  
+
   protected void initLocalData(){
     differ = new AnnotationDiffer();
     pairings = new ArrayList();
@@ -55,7 +55,7 @@ public class AnnotationDiffGUI extends JFrame{
     resDoc = null;
   }
 
-  
+
   protected void initGUI(){
     getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
@@ -120,7 +120,7 @@ public class AnnotationDiffGUI extends JFrame{
     noFeaturesBtn.setSelected(true);
     weightTxt = new JTextField("1.00");
     getContentPane().add(weightTxt, constraints);
-    //ROW 3 -> the table    
+    //ROW 3 -> the table
     constraints.gridy = 3;
     constraints.gridx = 0;
     constraints.gridwidth = 10;
@@ -139,16 +139,48 @@ public class AnnotationDiffGUI extends JFrame{
         while(!label1.equals(matchLabel[match1])) match1++;
         int match2 = 0;
         while(!label2.equals(matchLabel[match2])) match2++;
-        
+
         return match1 - match2;
       }
     });
+
+    /* Niraj */
+    Comparator startEndComparator = new Comparator() {
+      public int compare(Object o1, Object o2) {
+        String no1 = (String) o1;
+        String no2 = (String) o2;
+        if (no1.trim().equals("") && no2.trim().equals("")) {
+          return 0;
+        }
+        else if (no1.trim().equals("")) {
+          return -1;
+        }
+        else if (no2.trim().equals("")) {
+          return 1;
+        }
+        int n1 = Integer.parseInt(no1);
+        int n2 = Integer.parseInt(no2);
+        if(n1 == n2)
+          return 0;
+        else if(n1 > n2)
+          return 1;
+        else
+          return -1;
+      }
+    };
+
+    diffTable.setComparator(diffTableModel.COL_KEY_START, startEndComparator);
+    diffTable.setComparator(diffTableModel.COL_KEY_END, startEndComparator);
+    diffTable.setComparator(diffTableModel.COL_RES_START, startEndComparator);
+    diffTable.setComparator(diffTableModel.COL_RES_END, startEndComparator);
+    /* End */
+
     diffTable.setSortable(true);
     diffTable.setSortedColumn(DiffTableModel.COL_MATCH);
     diffTable.setAscending(false);
     scroller = new JScrollPane(diffTable);
     getContentPane().add(scroller, constraints);
-    
+
     //build the results pane
     resultsPane = new JPanel();
     resultsPane.setLayout(new GridBagLayout());
@@ -176,7 +208,7 @@ public class AnnotationDiffGUI extends JFrame{
     lbl.setBackground(FALSE_POZITIVE_BG);
     lbl.setOpaque(true);
     resultsPane.add(lbl, constraints);
-    
+
     //COLUMN 1
     constraints.gridx = 1;
     correctLbl = new JLabel("0");
@@ -187,7 +219,7 @@ public class AnnotationDiffGUI extends JFrame{
     resultsPane.add(missingLbl, constraints);
     falsePozLbl = new JLabel("0");
     resultsPane.add(falsePozLbl, constraints);
-    
+
     //COLMUN 2
     constraints.gridx = 2;
     constraints.insets = new Insets(4, 30, 4, 4);
@@ -198,7 +230,7 @@ public class AnnotationDiffGUI extends JFrame{
     resultsPane.add(lbl, constraints);
     lbl = new JLabel("Average:");
     resultsPane.add(lbl, constraints);
-    
+
     //COLMUN 3
     constraints.gridx = 3;
     constraints.insets = new Insets(4, 4, 4, 4);
@@ -221,7 +253,7 @@ public class AnnotationDiffGUI extends JFrame{
     resultsPane.add(precisionLenientLbl, constraints);
     precisionAveLbl = new JLabel("0.0000");
     resultsPane.add(precisionAveLbl, constraints);
-    
+
     //COLMUN 5
     constraints.gridx = 5;
     lbl = new JLabel("F-Measure");
@@ -232,15 +264,15 @@ public class AnnotationDiffGUI extends JFrame{
     resultsPane.add(fmeasureLenientLbl, constraints);
     fmeasureAveLbl = new JLabel("0.0000");
     resultsPane.add(fmeasureAveLbl, constraints);
-    
+
     //COLMUN 6
     constraints.gridx = 6;
     resultsPane.add(new JButton(new HTMLExportAction()), constraints);
-    
+
     //Finished building the results pane
     //Add it to the dialog
-    
-    
+
+
     //ROW 4 - the results
     constraints.gridy = 4;
     constraints.gridx = 0;
@@ -251,21 +283,21 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
     getContentPane().add(resultsPane, constraints);
-    
-    
+
+
     //set the colours
     Color background = diffTable.getBackground();
     getContentPane().setBackground(background);
     scroller.setBackground(background);
     scroller.getViewport().setBackground(background);
     resultsPane.setBackground(background);
-    
+
     featureslistModel = new DefaultListModel();
     featuresList = new JList(featureslistModel);
     featuresList.
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
   }
-  
+
   protected void initListeners(){
     keyDocCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
@@ -286,11 +318,11 @@ public class AnnotationDiffGUI extends JFrame{
           }
           keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
           if(!keySetNames.isEmpty())keySetCombo.setSelectedIndex(0);
-          
+
         }
       }
     });
-    
+
     resDocCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         Document newDoc = (Document)documents.get(resDocCombo.getSelectedIndex());
@@ -310,20 +342,20 @@ public class AnnotationDiffGUI extends JFrame{
           }
           resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
           if(!resSetNames.isEmpty())resSetCombo.setSelectedIndex(0);
-          
+
         }
       }
     });
-    
+
     /**
      * This populates the types combo when set selection changes
      */
     ActionListener setComboActionListener = new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        keySet = keySets == null || keySets.isEmpty()? 
+        keySet = keySets == null || keySets.isEmpty()?
                  null :
                 (AnnotationSet)keySets.get(keySetCombo.getSelectedIndex());
-        resSet = resSets == null || resSets.isEmpty()? 
+        resSet = resSets == null || resSets.isEmpty()?
                 null :
                (AnnotationSet)resSets.get(resSetCombo.getSelectedIndex());
         Set keyTypes = (keySet == null || keySet.isEmpty()) ?
@@ -337,15 +369,15 @@ public class AnnotationDiffGUI extends JFrame{
         annTypeCombo.setModel(new DefaultComboBoxModel(typesList.toArray()));
         if(typesList.size() > 0) annTypeCombo.setSelectedIndex(0);
       }
-    }; 
+    };
     keySetCombo.addActionListener(setComboActionListener);
-    
+
     resSetCombo.addActionListener(setComboActionListener);
-    
+
     someFeaturesBtn.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         if(someFeaturesBtn.isSelected()){
-          if(keySet == null || keySet.isEmpty() || 
+          if(keySet == null || keySet.isEmpty() ||
                   annTypeCombo.getSelectedItem() == null) return;
           Iterator annIter = keySet.
               get((String)annTypeCombo.getSelectedItem()).iterator();
@@ -383,11 +415,11 @@ public class AnnotationDiffGUI extends JFrame{
       }
     });
   }
-  
-  
+
+
   public void pack(){
     super.pack();
-    
+
     setSize(getWidth(), getHeight() + 100);
   }
   protected void populateGUI(){
@@ -408,14 +440,14 @@ public class AnnotationDiffGUI extends JFrame{
       resDocCombo.setSelectedIndex(0);
     }
   }
-  
-  
+
+
   protected class DiffAction extends AbstractAction{
     public DiffAction(){
       super("Do Diff");
       putValue(SHORT_DESCRIPTION, "Performs the diff");
     }
-    
+
     public void actionPerformed(ActionEvent evt){
       Set keys = keySet.get((String)annTypeCombo.getSelectedItem());
       Set responses = resSet.get((String)annTypeCombo.getSelectedItem());
@@ -423,7 +455,7 @@ public class AnnotationDiffGUI extends JFrame{
       if(responses == null) responses = new HashSet();
       if(someFeaturesBtn.isSelected())
         differ.setSignificantFeaturesSet(significantFeatures);
-      else if(allFeaturesBtn.isSelected()) 
+      else if(allFeaturesBtn.isSelected())
         differ.setSignificantFeaturesSet(null);
       else differ.setSignificantFeaturesSet(new HashSet());
       pairings.clear();
@@ -434,7 +466,7 @@ public class AnnotationDiffGUI extends JFrame{
               Integer.toString(differ.getPartiallyCorrectMatches()));
       missingLbl.setText(Integer.toString(differ.getMissing()));
       falsePozLbl.setText(Integer.toString(differ.getSpurious()));
-      
+
       NumberFormat formatter = NumberFormat.getInstance();
       formatter.setMaximumFractionDigits(4);
       formatter.setMinimumFractionDigits(2);
@@ -444,14 +476,14 @@ public class AnnotationDiffGUI extends JFrame{
       precisionStrictLbl.setText(formatter.format(differ.getPrecisionStrict()));
       precisionLenientLbl.setText(formatter.format(differ.getPrecisionLenient()));
       precisionAveLbl.setText(formatter.format(differ.getPrecisionAverage()));
-      
+
       double weight = Double.parseDouble(weightTxt.getText());
       fmeasureStrictLbl.setText(formatter.format(differ.getFMeasureStrict(weight)));
       fmeasureLenientLbl.setText(formatter.format(differ.getFMeasureLenient(weight)));
       fmeasureAveLbl.setText(formatter.format(differ.getFMeasureAverage(weight)));
     }
   }
-  
+
   protected class HTMLExportAction extends AbstractAction{
     public HTMLExportAction(){
       super("Export to HTML");
@@ -460,7 +492,7 @@ public class AnnotationDiffGUI extends JFrame{
       JFileChooser fileChooser = MainFrame.getFileChooser();
       File currentFile = fileChooser.getSelectedFile();
       String nl = Strings.getNl();
-      String parent = (currentFile != null) ? currentFile.getParent() : 
+      String parent = (currentFile != null) ? currentFile.getParent() :
         System.getProperty("user.home");
       String fileName = (resDoc.getSourceUrl() != null) ?
               resDoc.getSourceUrl().getFile() :
@@ -480,11 +512,11 @@ public class AnnotationDiffGUI extends JFrame{
           Writer fw = new BufferedWriter(new FileWriter(saveFile));
           //write the header
           fw.write(HEADER_1);
-          fw.write(resDoc.getName() + " " + 
+          fw.write(resDoc.getName() + " " +
                   annTypeCombo.getSelectedItem().toString() +
                   " annotations");
           fw.write(HEADER_2 + nl);
-          fw.write("<H2>Annotation Diff - comparing " + 
+          fw.write("<H2>Annotation Diff - comparing " +
                   annTypeCombo.getSelectedItem().toString() +
                   " annotations" + "</H2>");
           fw.write("<TABLE cellpadding=\"5\" border=\"0\"");
@@ -494,7 +526,7 @@ public class AnnotationDiffGUI extends JFrame{
           fw.write("\t<TH align=\"left\">Document</TH>" + nl);
           fw.write("\t<TH align=\"left\">Annotation Set</TH>" + nl);
           fw.write("</TR>" + nl);
-          
+
           fw.write("<TR>" + nl);
           fw.write("\t<TH align=\"left\">Key</TH>" + nl);
           fw.write("\t<TD align=\"left\">" + keyDoc.getName() + "</TD>" + nl);
@@ -515,7 +547,7 @@ public class AnnotationDiffGUI extends JFrame{
           fw.write("F-measure: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
           fw.write("<br>");
           fw.write("Correct matches: " + differ.getCorrectMatches() + "<br>" + nl);
-          fw.write("Partially Correct matches: " + 
+          fw.write("Partially Correct matches: " +
               differ.getPartiallyCorrectMatches() + "<br>" + nl);
           fw.write("Missing: " + differ.getMissing() + "<br>" + nl);
           fw.write("False positives: " + differ.getSpurious() + "<br>" + nl);
@@ -531,7 +563,7 @@ public class AnnotationDiffGUI extends JFrame{
           }
           fw.write(HEADER_3 + nl + "<TR>" + nl);
           for(int col = 0; col <= maxColIdx; col++){
-            fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(cols[col]) + 
+            fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(cols[col]) +
                     "</TH>" + nl);
           }
           fw.write("</TR>");
@@ -540,12 +572,12 @@ public class AnnotationDiffGUI extends JFrame{
             fw.write("<TR>");
             for(int col = 0; col <= maxColIdx; col++){
               Color bgCol = diffTableModel.getBackgroundAt(
-                      diffTable.rowViewToModel(row), 
+                      diffTable.rowViewToModel(row),
                       diffTable.convertColumnIndexToModel(cols[col]));
               fw.write("\t<TD bgcolor=\"#" +
                       Integer.toHexString(bgCol.getRGB()).substring(2) +
                       "\">" +
-                      diffTable.getValueAt(row, cols[col]) + 
+                      diffTable.getValueAt(row, cols[col]) +
                       "</TD>" + nl);
             }
             fw.write("</TR>");
@@ -553,21 +585,21 @@ public class AnnotationDiffGUI extends JFrame{
           fw.write(FOOTER);
           fw.flush();
           fw.close();
-          
+
         }catch(IOException ioe){
-          JOptionPane.showMessageDialog(AnnotationDiffGUI.this, ioe.toString(), 
+          JOptionPane.showMessageDialog(AnnotationDiffGUI.this, ioe.toString(),
                   "GATE", JOptionPane.ERROR_MESSAGE);
           ioe.printStackTrace();
         }
       }
     }
-    
+
     static final String HEADER_1 = "<html><head><title>";
     static final String HEADER_2 = "</title></head><body>";
     static final String HEADER_3 = "<table cellpadding=\"0\" border=\"1\">";
     static final String FOOTER = "</table></body></html>";
   }
-  
+
   protected class DiffTableCellRenderer extends DefaultTableCellRenderer{
     public Component getTableCellRendererComponent(JTable table,
             Object value,
@@ -585,20 +617,20 @@ public class AnnotationDiffGUI extends JFrame{
       return res;
     }
   }
-  
+
   protected class DiffTableModel extends AbstractTableModel{
     public int getRowCount(){
       return pairings.size();
     }
-    
+
     public Class getColumnClass(int columnIndex){
       return String.class;
     }
-    
+
     public int getColumnCount(){
       return COL_CNT;
     }
-    
+
     public String getColumnName(int column){
       switch(column){
         case COL_KEY_START: return "Start";
@@ -613,9 +645,9 @@ public class AnnotationDiffGUI extends JFrame{
         default: return "?";
       }
     }
-    
+
     public Color getBackgroundAt(int row, int column){
-      AnnotationDiffer.Pairing pairing = 
+      AnnotationDiffer.Pairing pairing =
         (AnnotationDiffer.Pairing)pairings.get(row);
       Color colKey = pairing.getType() == AnnotationDiffer.CORRECT ?
                      diffTable.getBackground() :
@@ -628,7 +660,7 @@ public class AnnotationDiffGUI extends JFrame{
                        (pairing.getType() == AnnotationDiffer.PARTIALLY_CORRECT ?
                        PARTIALLY_CORRECT_BG :
                          FALSE_POZITIVE_BG);
-      if(pairing.getResponse() == null) colRes = diffTable.getBackground();               
+      if(pairing.getResponse() == null) colRes = diffTable.getBackground();
       switch(column){
         case COL_KEY_START: return colKey;
         case COL_KEY_END: return colKey;
@@ -642,15 +674,15 @@ public class AnnotationDiffGUI extends JFrame{
         default: return diffTable.getBackground();
       }
     }
-    
+
     public Object getValueAt(int row, int column){
-      AnnotationDiffer.Pairing pairing = 
+      AnnotationDiffer.Pairing pairing =
         (AnnotationDiffer.Pairing)pairings.get(row);
       Annotation key = pairing.getKey();
       String keyStr = "";
       try{
         if(key != null && keyDoc != null){
-          keyStr = keyDoc.getContent().getContent(key.getStartNode().getOffset(), 
+          keyStr = keyDoc.getContent().getContent(key.getStartNode().getOffset(),
                   key.getEndNode().getOffset()).toString();
         }
       }catch(InvalidOffsetException ioe){
@@ -661,34 +693,34 @@ public class AnnotationDiffGUI extends JFrame{
       String resStr = "";
       try{
         if(res != null && resDoc != null){
-          resStr = resDoc.getContent().getContent(res.getStartNode().getOffset(), 
+          resStr = resDoc.getContent().getContent(res.getStartNode().getOffset(),
                   res.getEndNode().getOffset()).toString();
         }
       }catch(InvalidOffsetException ioe){
         //this should never happen
         throw new GateRuntimeException(ioe);
       }
-      
+
       switch(column){
-        case COL_KEY_START: return key == null ? "" : 
+        case COL_KEY_START: return key == null ? "" :
           key.getStartNode().getOffset().toString();
         case COL_KEY_END: return key == null ? "" :
           key.getEndNode().getOffset().toString();
         case COL_KEY_STRING: return keyStr;
-        case COL_KEY_FEATURES: return key == null ? "" : 
+        case COL_KEY_FEATURES: return key == null ? "" :
           key.getFeatures().toString();
         case COL_MATCH: return matchLabel[pairing.getType()];
-        case COL_RES_START: return res == null ? "" : 
+        case COL_RES_START: return res == null ? "" :
           res.getStartNode().getOffset().toString();
         case COL_RES_END: return res == null ? "" :
           res.getEndNode().getOffset().toString();
         case COL_RES_STRING: return resStr;
-        case COL_RES_FEATURES: return res == null ? "" : 
+        case COL_RES_FEATURES: return res == null ? "" :
           res.getFeatures().toString();
         default: return "?";
       }
     }
-    
+
     protected static final int COL_CNT = 9;
     protected static final int COL_KEY_START = 0;
     protected static final int COL_KEY_END = 1;
@@ -700,7 +732,7 @@ public class AnnotationDiffGUI extends JFrame{
     protected static final int COL_RES_STRING = 7;
     protected static final int COL_RES_FEATURES = 8;
   }
-  
+
   protected AnnotationDiffer differ;
   protected List pairings;
   protected Document keyDoc;
@@ -711,7 +743,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected List resSets;
   protected AnnotationSet keySet;
   protected AnnotationSet resSet;
-  
+
   protected JList featuresList;
   protected DefaultListModel featureslistModel;
   protected DiffTableModel diffTableModel;
@@ -722,13 +754,13 @@ public class AnnotationDiffGUI extends JFrame{
   protected JComboBox annTypeCombo;
   protected JComboBox resDocCombo;
   protected JComboBox resSetCombo;
-  
+
   protected JRadioButton allFeaturesBtn;
   protected JRadioButton someFeaturesBtn;
   protected JRadioButton noFeaturesBtn;
-  protected JTextField weightTxt; 
+  protected JTextField weightTxt;
   protected JButton doDiffBtn;
-  
+
   protected JPanel resultsPane;
   protected JLabel correctLbl;
   protected JLabel partiallyCorrectLbl;
@@ -743,7 +775,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected JLabel recallAveLbl;
   protected JLabel precisionAveLbl;
   protected JLabel fmeasureAveLbl;
-  
+
   protected static final Color PARTIALLY_CORRECT_BG = new Color(173,215,255);
   protected static final Color MISSING_BG = new Color(255,173,181);;
   protected static final Color FALSE_POZITIVE_BG = new Color(255,231,173);
@@ -753,5 +785,5 @@ public class AnnotationDiffGUI extends JFrame{
     matchLabel[AnnotationDiffer.CORRECT] = "=";
     matchLabel[AnnotationDiffer.PARTIALLY_CORRECT] = "~";
     matchLabel[AnnotationDiffer.WRONG] = "!=";
-  }  
+  }
 }
