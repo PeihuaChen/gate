@@ -1682,7 +1682,7 @@ public class MainFrame extends JFrame
                                     implements ANNIEConstants{
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
-      putValue(SHORT_DESCRIPTION, "Load ANNIE system wihtout defaults");
+      putValue(SHORT_DESCRIPTION, "Load ANNIE system without defaults");
       putValue(SMALL_ICON, getIcon("application.gif"));
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
