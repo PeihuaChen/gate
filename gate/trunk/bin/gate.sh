@@ -2,6 +2,11 @@
 # gate.sh - UNIX front-end for GATE binary distributions. Hamish, May 2001
 # $Id$
 
+####
+#### NOTE: this script does not work under Cygwin (because the 
+#### (windoze jdk expects windows paths; try gate.bat instead)
+####
+
 E=""
 [ x$1 = x-debug ] && E=echo
 
