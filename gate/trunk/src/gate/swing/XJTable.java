@@ -50,7 +50,8 @@ public class XJTable extends JTable{
   }
   
   public XJTable(TableModel model){
-    super(model);
+    super();
+    setModel(model);
   }
   
   public void setModel(TableModel dataModel) {
