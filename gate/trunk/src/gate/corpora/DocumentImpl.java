@@ -474,7 +474,7 @@ extends AbstractLanguageResource implements Document {
     if (aDumpAnnotSet == null)   return docContStrBuff.toString();
 
     TreeMap offsets2CharsMap = new TreeMap();
-    if (content.length()!= 0){
+    if (this.getContent().size().longValue() != 0){
       // Fill the offsets2CharsMap with all the indices where
       // special chars appear
       buildEntityMapFromString(content,offsets2CharsMap);
@@ -800,7 +800,7 @@ extends AbstractLanguageResource implements Document {
     // This is because of the tags size. This measure is made to increase the
     // performance of StringBuffer.
     StringBuffer xmlContent = new StringBuffer(
-         DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
+         DOC_SIZE_MULTIPLICATION_FACTOR*(getContent().size().intValue()));
     // Add xml header
     xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
     // Add the root element
@@ -1153,7 +1153,7 @@ extends AbstractLanguageResource implements Document {
       return false;
 
     long o = offset.longValue();
-    if(o > content.size().longValue() || o < 0)
+    if(o > getContent().size().longValue() || o < 0)
       return false;
 
     return true;
@@ -1360,7 +1360,7 @@ extends AbstractLanguageResource implements Document {
 
   /** Hash code */
   public int hashCode() {
-    int code = content.hashCode();
+    int code = getContent().hashCode();
     int memberCode = (defaultAnnots == null) ? 0 : defaultAnnots.hashCode();
     code += memberCode;
     memberCode = (encoding == null) ? 0 : encoding.hashCode();
