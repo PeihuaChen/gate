@@ -26,7 +26,7 @@ PKGS=	gate gate.annotation gate.corpora gate.creole \
 
 # classpath to build compile commands from
 CP=	-classpath \
-../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/guk.jar:../lib/jdom.jar:
+../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/guk.jar:../lib/jdom.jar:../lib/GnuGetopt.jar
 
 # sourcepath to build compile commands from
 SP=	-sourcepath ../src
