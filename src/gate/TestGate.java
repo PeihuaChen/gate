@@ -209,7 +209,7 @@ public class TestGate {
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
       if(! allTests){
-        suite.addTest(TestPersist.suite());
+        suite.addTest(TestReload.suite());
       } else {
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
@@ -229,6 +229,7 @@ public class TestGate {
         suite.addTest(CookBook.suite());
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJavac.suite());
+        suite.addTest(TestReload.suite());
 //        suite.addTest(TestJdk.suite());
         suite.addTest(TestJape.suite());
         suite.addTest(TestTemplate.suite());
