@@ -17,36 +17,30 @@ public class AnnotationImpl
       *@param end The node where trhe annotation ends;
       *@param type The type of the new annotation;
       */
-    public AnnotationImpl (Long id, gate.Node start, gate.Node end,
-                           String type) {
-        this.id = id;
-        this.start = start;
-        this.end = end;
-        this.type = type;
+    public AnnotationImpl (long id, Node start, Node end, String type) {
+      this.id = id;
+      this.start = start;
+      this.end = end;
+      this.type = type;
     }
 
-    /**Constructor. Builds a new annotation with an automatically assigned ID.
-      *@param start The node from where the annotation will depart;
-      *@param end The node where trhe annotation ends;
-      *@param type The type of the new annotation;
-      */
-    public AnnotationImpl (gate.Node start, gate.Node end,
-                           String type) {
-        this(Tools.gensym(), start, end, type);
+    public AnnotationImpl (Long id, Node start, Node end, String type) {
+      this.id = id.longValue();
+      this.start = start;
+      this.end = end;
+      this.type = type;
     }
-
 
     /** The type of the annotation (corresponds to TIPSTER "name"). */
     public String getType () {
-        return  type;
+      return type;
     }
 
-
     /** The features, or content of this arc (corresponds to TIPSTER
-    * "attributes", and to LDC "label", which is the simplest case).
-    */
+      * "attributes", and to LDC "label", which is the simplest case).
+      */
     public gate.FeatureMap getFeatures () {
-        return  featureMap;
+      return  featureMap;
     }
 
 
@@ -71,7 +65,7 @@ public class AnnotationImpl
     ;
     /**The id of the annotation.*/
     public Long getId () {
-        return  id;
+        return  new Long(id);
     }
 
 
@@ -79,7 +73,7 @@ public class AnnotationImpl
     private gate.FeatureMap featureMap = null;
     private gate.Node start, end;
     private gate.AnnotationStereotype stereotype = null;
-    private Long id;
+    private long id;
 
 }
 
