@@ -258,9 +258,9 @@
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
 
-    <!-- creole.xml for OntoText gazetteer -->
+    <!-- creole.xml for Hash Gazetteer (ex Natural)-->
     <RESOURCE>
-      <NAME>OntoText Gazetteer</NAME>
+      <NAME>Hash Gazetteer</NAME>
       <CLASS>com.ontotext.gate.gazetteer.NaturalGazetteer</CLASS>
       <COMMENT>A list lookup component implemented by OntoText Lab.(www.ontotext.com) For documentation, download and license  agreement please refer to (www.ontotext.com/downloads/index.html#gazetteer). The licence information is also available in licence.ontotext.html in the lib folder of GATE</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
