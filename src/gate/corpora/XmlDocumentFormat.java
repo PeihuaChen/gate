@@ -91,7 +91,6 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         fm = new SimpleFeatureMapImpl();
      fm.put(originalContentFeatureType, doc.getContent().toString());
      doc.setFeatures(fm);
-     System.out.println(doc.getContent().toString());
      unpackMarkup (doc);
   }
 } // class XmlDocumentFormat
