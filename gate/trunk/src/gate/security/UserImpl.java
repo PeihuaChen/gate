@@ -124,9 +124,15 @@ public class UserImpl
 
     try {
       //1.  check the session
-      if (this.ac.isValidSession(s) == false || s.getID() != this.id) {
+      if (this.ac.isValidSession(s) == false) {
         throw new SecurityException("invalid session supplied");
       }
+
+      //1.5 check if user has right to change name
+      if (s.getID() != this.id && false == s.isPrivilegedSession()) {
+        throw new SecurityException("insufficient privileges");
+      }
+
 
       //2. update database
 
