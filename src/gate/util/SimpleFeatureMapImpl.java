@@ -9,7 +9,7 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Hamish Cunningham, 7/Feb/2000
- *  borislav popov, 25/Mar/2002
+ *  borislav popov, 1/May/2002
  *
  *  $Id$
  */
@@ -35,16 +35,13 @@ public class SimpleFeatureMapImpl  extends HashMap implements FeatureMap
 public class SimpleFeatureMapImpl
     extends SimpleMapImpl
 //    extends HashMap
-    implements FeatureMap, java.io.Serializable, java.lang.Cloneable
+    implements FeatureMap, java.io.Serializable, java.lang.Cloneable,
+    gate.creole.ANNIEConstants
 //>>> DAM: end
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** ontology in the feature maps */
-  private static final String ONTOLOGY = "ONTOLOGY";
-  /** ontology class in the feature maps */
-  private static final String CLASS = "CLASS";
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -2747241616127229116L;
@@ -82,10 +79,10 @@ public class SimpleFeatureMapImpl
       ontotext.bp*/
       if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
 
-        if ( key.equals(CLASS) ) {
+        if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
           /* ontology aware processing */
-          Object sfmOntoObj = sfm.get(ONTOLOGY);
-          Object thisOntoObj = this.get(ONTOLOGY);
+          Object sfmOntoObj = sfm.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
+          Object thisOntoObj = this.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
           if (null!=sfmOntoObj && null!= thisOntoObj) {
             if (sfmOntoObj.equals(thisOntoObj)) {
               boolean doSubsume = ontologySubsume(
@@ -147,13 +144,13 @@ public class SimpleFeatureMapImpl
           ) return false;
 
       if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
-        if ( key.equals(CLASS) ) {
+        if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
           /* ontology aware processing */
-          if (!aFeatureNamesSet.contains(ONTOLOGY))
+          if (!aFeatureNamesSet.contains(LOOKUP_ONTOLOGY_FEATURE_NAME))
             continue;
 
-          Object sfmOntoObj = sfm.get(ONTOLOGY);
-          Object thisOntoObj = this.get(ONTOLOGY);
+          Object sfmOntoObj = sfm.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
+          Object thisOntoObj = this.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
           if (null!=sfmOntoObj && null!= thisOntoObj) {
             if (sfmOntoObj.equals(thisOntoObj)) {
               if (! ontologySubsume(
