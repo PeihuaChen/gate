@@ -15,6 +15,8 @@
 
 package gate.util;
 
+import java.io.*;
+
 /** Some utilities for use with Strings. */
 public class Strings {
 
@@ -50,5 +52,24 @@ public class Strings {
 
     return s.toString();
   } // padding
+
+  /** Helper method to add line numbers to a string */
+  public static String addLineNumbers(String text) {
+    // construct a line reader for the text
+    BufferedReader reader = new BufferedReader(new StringReader(text));
+    String line = null;
+    StringBuffer result = new StringBuffer();
+
+    try {
+      for(int lineNum = 1; ( line = reader.readLine() ) != null; lineNum++) {
+        String pad;
+        if(lineNum < 10) pad = " ";
+        else pad = "";
+        result.append(pad + lineNum + "  " + line + Strings.getNl());
+      }
+    } catch(IOException ie) { }
+
+    return result.toString();
+  } // addLineNumbers
 
 } // class Strings
