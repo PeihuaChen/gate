@@ -39,10 +39,16 @@ public class NewResourceDialog extends JDialog {
 
   public NewResourceDialog(Frame frame, String title, boolean modal) {
     super(frame, title, modal);
+    MainFrame.getGuiRoots().add(this);
     initLocalData();
     initGuiComponents();
     initListeners();
   }// public NewResourceDialog(Frame frame, String title, boolean modal)
+
+  public void dispose(){
+    MainFrame.getGuiRoots().remove(this);
+    super.dispose();
+  }
 
   protected void initLocalData(){
   }// protected void initLocalData()

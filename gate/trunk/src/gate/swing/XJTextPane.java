@@ -57,5 +57,6 @@ public class XJTextPane extends JTextPane {
     StyleConstants.setFontSize(defaultStyle, newFont.getSize());
     StyleConstants.setItalic(defaultStyle, newFont.isItalic());
     StyleConstants.setBold(defaultStyle, newFont.isBold());
+    repaint();
   }
 }

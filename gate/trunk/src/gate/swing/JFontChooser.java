@@ -99,6 +99,7 @@ public class JFontChooser extends JPanel {
   }// showDialog
 
   protected void initLocalData() {
+
   }
 
   protected void initGuiComponents() {
@@ -121,7 +122,7 @@ public class JFontChooser extends JPanel {
     fontBox.setLayout(new BoxLayout(fontBox, BoxLayout.X_AXIS));
     fontBox.add(familyCombo);
     fontBox.add(sizeCombo);
-    fontBox.setBorder(BorderFactory.createTitledBorder("Font"));
+    fontBox.setBorder(BorderFactory.createTitledBorder(" Font "));
     add(fontBox);
     add(Box.createVerticalStrut(10));
 
@@ -129,7 +130,7 @@ public class JFontChooser extends JPanel {
     effectsBox.setLayout(new BoxLayout(effectsBox, BoxLayout.X_AXIS));
     effectsBox.add(italicChk);
     effectsBox.add(boldChk);
-    effectsBox.setBorder(BorderFactory.createTitledBorder("Effects"));
+    effectsBox.setBorder(BorderFactory.createTitledBorder(" Effects "));
     add(effectsBox);
     add(Box.createVerticalStrut(10));
 
@@ -138,7 +139,7 @@ public class JFontChooser extends JPanel {
     samplePanel.setLayout(new BoxLayout(samplePanel, BoxLayout.X_AXIS));
     //samplePanel.add(new JScrollPane(sampleTextArea));
     samplePanel.add(sampleTextArea);
-    samplePanel.setBorder(BorderFactory.createTitledBorder("Sample"));
+    samplePanel.setBorder(BorderFactory.createTitledBorder(" Sample "));
     add(samplePanel);
     add(Box.createVerticalStrut(10));
   }// initGuiComponents()
@@ -169,7 +170,7 @@ public class JFontChooser extends JPanel {
     });
   }// initListeners()
 
-  private void updateFont(){
+  protected void updateFont(){
     Map fontAttrs = new HashMap();
     fontAttrs.put(TextAttribute.FAMILY, (String)familyCombo.getSelectedItem());
     fontAttrs.put(TextAttribute.SIZE, new Float((String)sizeCombo.getSelectedItem()));
@@ -183,10 +184,19 @@ public class JFontChooser extends JPanel {
     else fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
 
     Font newFont = new Font(fontAttrs);
-    setFontValue(newFont);
-//Out.prln("update font " + newFont);
+    Font oldFont = fontValue;
+    fontValue = newFont;
+    sampleTextArea.setFont(newFont);
+    String text = sampleTextArea.getText();
+    sampleTextArea.setText("");
+    sampleTextArea.setText(text);
+    sampleTextArea.repaint(100);
+    firePropertyChange("fontValue", oldFont, newFont);
   }//updateFont()
 
+  /**
+   * Test code
+   */
   public static void main(String args[]){
     try{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -209,16 +219,12 @@ public class JFontChooser extends JPanel {
     showDialog(frame, "Fonter", UIManager.getFont("Button.font"));
   }// main
 
-  public void setFontValue(java.awt.Font newFontValue) {
-    if(newFontValue == null) return;
-    fontValue = newFontValue;
-
-    familyCombo.setSelectedItem(fontValue.getName());
-    sizeCombo.setSelectedItem(Integer.toString(fontValue.getSize()));
-    boldChk.setSelected(fontValue.isBold());
-    italicChk.setSelected(fontValue.isItalic());
-    sampleTextArea.setFont(fontValue);
-    repaint();
+  public void setFontValue(java.awt.Font newfontValue) {
+    boldChk.setSelected(newfontValue.isBold());
+    italicChk.setSelected(newfontValue.isItalic());
+    familyCombo.setSelectedItem(newfontValue.getName());
+    sizeCombo.setSelectedItem(Integer.toString(newfontValue.getSize()));
+    this.fontValue = newfontValue;
   }
 
   public java.awt.Font getFontValue() {
