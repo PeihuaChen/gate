@@ -25,7 +25,7 @@ public class AnnotationGraphImpl
     public AnnotationGraphImpl (Document document, Long id) {
         this.document = document;
         this.id = id;
-        nodeSet = new gate.util.TreeMap();
+        nodeSet = new gate.util.RBTreeMap();
     }
 
     /**Constructor.
@@ -91,7 +91,7 @@ public class AnnotationGraphImpl
       *@param features The set of requested features for the annotations to
       *be returned.
       */
-    public gate.AnnotationGraph getAnnotations (String type, FeatureSet features) {
+    public gate.AnnotationGraph getAnnotations (String type, FeatureMap features) {
         return  null;
     } //getAnnotations(String type, FeatureSet features)
 
@@ -118,7 +118,7 @@ public class AnnotationGraphImpl
 
 
     /** Get annotations by type and features */
-    public gate.AnnotationGraph getAnnotations (String type, FeatureSet features, Long offset) {
+    public gate.AnnotationGraph getAnnotations (String type, FeatureMap features, Long offset) {
         return  null;
     } //getAnnotations(String type,FeatureSet features,Long offset)
 
@@ -131,7 +131,7 @@ public class AnnotationGraphImpl
 
     /**Creates a new node with the offset offset
   @param offset the offset in document where the node will point*/
-    public gate.Node putNodeAt (Long id, double offset)
+    public gate.Node putNodeAt (Long id, long offset)
         throws gate.util.InvalidOffsetException
     {
         if (offset > document.getLength()) throw  (new gate.util.InvalidOffsetException("Offset out of bounds: " + offset + ">" + document.getLength()));
@@ -141,7 +141,7 @@ public class AnnotationGraphImpl
         }
 
         ;
-        gate.Node newNode = new NodeImpl(id, new Double(offset));
+        gate.Node newNode = new NodeImpl(id, new Long(offset));
         if (nodeSet.containsKey(newNode.getOffset())) throw  (new gate.util.InvalidOffsetException("There is already a node at the given offset:" + offset));
         nodeSet.put(newNode.getOffset(), newNode);
         return  newNode;
@@ -170,8 +170,8 @@ public class AnnotationGraphImpl
                                      String type, String equivalenceClass) {
         AnnotationImpl annot = new AnnotationImpl(id, start, end, type,
                                                   equivalenceClass);
-        start.addStartAnnotation(annot);
-        end.addEndAnnotation(annot);
+        //start.addStartAnnotation(annot);
+        //end.addEndAnnotation(annot);
         annotations.put(annot.getId(), annot);
         java.util.HashSet sameType = (java.util.HashSet)annotsByType.get(annot.getType());
 
@@ -293,7 +293,7 @@ public class AnnotationGraphImpl
     }
 
 
-    private gate.util.TreeMap nodeSet;
+    private gate.util.RBTreeMap nodeSet;
     private Long id;
     private gate.Document document;
     private java.util.Hashtable annotations = new java.util.Hashtable();

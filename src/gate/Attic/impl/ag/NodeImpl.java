@@ -26,7 +26,7 @@ public class NodeImpl
     *@param offset the (temporal) offset of the Node; Should be <b>null</b>
     *for not anchored nodes.
     */
-    public NodeImpl (Long id, Double offset) {
+    public NodeImpl (Long id, Long offset) {
         this.id = id;
         this.offset = offset;
     } //Node(int i)
@@ -35,7 +35,7 @@ public class NodeImpl
     @param offset The offset for the new node.
     *The id will be assigned automatically as a random, unique Long.
     */
-    public NodeImpl(Double offset){
+    public NodeImpl(Long offset){
       this(Tools.gensym(),offset);
     }
 
@@ -47,7 +47,7 @@ public class NodeImpl
 
 
     /** Offset (will be null when the node is not anchored)*/
-    public Double getOffset () {
+    public Long getOffset () {
         return  offset;
     }
 
@@ -85,7 +85,7 @@ public class NodeImpl
 
 
     private Long id;
-    private Double offset;
+    private Long offset;
     private java.util.Hashtable startAnnotations = new java.util.Hashtable();
     private java.util.Hashtable endAnnotations = new java.util.Hashtable();
 

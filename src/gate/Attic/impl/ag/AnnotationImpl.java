@@ -9,7 +9,7 @@ import gate.util.*;
 /**Provides an implementation for the interface gate.Annotation
 */
 public class AnnotationImpl
-    implements gate.Annotation
+    implements gate.Annotation, FeatureBearer
 {
     /**Constructor. Builds a new annotation.
       *@param id The id of the new annotation;
@@ -48,8 +48,8 @@ public class AnnotationImpl
     /** The features, or content of this arc (corresponds to TIPSTER
     * "attributes", and to LDC "label", which is the simplest case).
     */
-    public gate.FeatureSet getFeatures () {
-        return  featureSet;
+    public gate.FeatureMap getFeatures () {
+        return  featureMap;
     }
 
 
@@ -85,7 +85,7 @@ public class AnnotationImpl
 
 
     private String type = "";
-    private gate.FeatureSet featureSet = null;
+    private gate.FeatureMap featureMap = null;
     private String eqClass = "";
     private gate.Node start, end;
     private gate.AnnotationStereotype stereotype = null;
