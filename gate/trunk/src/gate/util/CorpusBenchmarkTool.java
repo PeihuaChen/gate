@@ -980,13 +980,15 @@ ex.printStackTrace();
       File errFile = new File(errDir, docName.toString());
       String encoding = ((gate.corpora.DocumentImpl)cleanDoc).getEncoding();
       try {
+        errWriter = new FileWriter(errFile, false);
+        /*
         if(encoding == null) {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false));
         } else {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false), encoding);
-        }
+        }*/
       }
       catch (Exception ex) {
         Out.prln("Exception when creating the error file " + errFile + ": "
@@ -1205,13 +1207,15 @@ ex.printStackTrace();
       File errFile = new File(errDir, docName.toString());
       String encoding = ((gate.corpora.DocumentImpl)keyDoc).getEncoding();
       try {
+        errWriter = new FileWriter(errFile, false);
+        /*
         if(encoding == null) {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false));
         } else {
           errWriter = new OutputStreamWriter(
               new FileOutputStream(errFile, false), encoding);
-        }
+        }*/
       }
       catch (Exception ex) {
         Out.prln("Exception when creating the error file " + errFile + ": "
@@ -1577,19 +1581,29 @@ ex.printStackTrace();
     Out.prln("<TD>" + missing + "</TD>");
     Out.prln("<TD>" + spurious + "</TD>");
 
+    String strPrec = (isMoreInfoMode)?
+        avgPrint(precision, 4)
+        :Double.toString(precision);
+    String strRec = (isMoreInfoMode)?
+        avgPrint(recall, 4)
+        :Double.toString(recall);
+    String strFmes = (isMoreInfoMode)?
+        avgPrint(fmeasure, 4)
+        :Double.toString(fmeasure);
+
     if(hasProcessed && (precision < proc_precision))
-      Out.prln("<TD><Font color=red>" + precision + "</TD>");
+      Out.prln("<TD><Font color=red>" + strPrec + "</TD>");
       else if(hasProcessed && (precision > proc_precision))
-        Out.prln("<TD><Font color=blue>" + precision + "</TD>");
+        Out.prln("<TD><Font color=blue>" + strPrec + "</TD>");
         else
-          Out.prln("<TD>" + precision + "</TD>");
+          Out.prln("<TD>" + strPrec + "</TD>");
     if(hasProcessed && (recall < proc_recall))
-      Out.prln("<TD><Font color=red>" + recall + "</TD>");
+      Out.prln("<TD><Font color=red>" + strRec + "</TD>");
       else if(hasProcessed && (recall > proc_recall))
-        Out.prln("<TD><Font color=blue>" + recall + "</TD>");
+        Out.prln("<TD><Font color=blue>" + strRec + "</TD>");
         else
-          Out.prln("<TD>" + recall + "</TD>");
-    Out.prln("<TD>" + fmeasure + "</TD>");
+          Out.prln("<TD>" + strRec + "</TD>");
+    Out.prln("<TD>" + strFmes + "</TD>");
     Out.prln("</TR>");
 
     if(hasProcessed) {
@@ -1602,22 +1616,41 @@ ex.printStackTrace();
       Out.prln("<TD>" + proc_missing + "</TD>");
       Out.prln("<TD>" + proc_spurious + "</TD>");
 
+      String strProcPrec = (isMoreInfoMode)?
+          avgPrint(proc_precision, 4)
+          :Double.toString(proc_precision);
+      String strProcRec = (isMoreInfoMode)?
+          avgPrint(proc_recall, 4)
+          :Double.toString(proc_recall);
+      String strProcFmes = (isMoreInfoMode)?
+          avgPrint(proc_fmeasure, 4)
+          :Double.toString(proc_fmeasure);
+
       if(precision < proc_precision)
-        Out.prln("<TD><Font color=red>" + proc_precision + "</TD>");
+        Out.prln("<TD><Font color=red>" + strProcPrec + "</TD>");
         else if(precision > proc_precision)
-          Out.prln("<TD><Font color=blue>" + proc_precision + "</TD>");
+          Out.prln("<TD><Font color=blue>" + strProcPrec + "</TD>");
           else
-            Out.prln("<TD>" + proc_precision + "</TD>");
+            Out.prln("<TD>" + strProcPrec + "</TD>");
       if(recall < proc_recall)
-        Out.prln("<TD><Font color=red>" + proc_recall + "</TD>");
+        Out.prln("<TD><Font color=red>" + strProcRec + "</TD>");
         else if(recall > proc_recall)
-          Out.prln("<TD><Font color=blue>" + proc_recall + "</TD>");
+          Out.prln("<TD><Font color=blue>" + strProcRec + "</TD>");
           else
-            Out.prln("<TD>" + proc_recall + "</TD>");
-      Out.prln("<TD>" + proc_fmeasure + "</TD>");
+            Out.prln("<TD>" + strProcRec + "</TD>");
+      Out.prln("<TD>" + strProcFmes + "</TD>");
       Out.prln("</TR>");
     }
   }//printStatsForType
+
+  //** Print @param value with @param count digits after decimal point */
+  protected String avgPrint(double value, int count) {
+    double newvalue;
+    double power = Math.pow(10, count);
+    newvalue = Math.round( value * power )/ power;
+    return Double.toString(newvalue);
+  }
+
 
   private double precisionSumCalc = 0;
   private double recallSumCalc = 0;
