@@ -977,7 +977,10 @@ public class DocumentEditor extends AbstractVisualResource
    * Sets the document to be displayed
    */
   public void setTarget(Object target){
-    if(!(target instanceof gate.Document)){
+    if(target == null){
+      document = null;
+      return;
+    }else if(!(target instanceof gate.Document)){
       throw new IllegalArgumentException(
         "The document editor can only display Gate documents!\n" +
         "The provided resource is not a document but a: " +
@@ -3067,7 +3070,7 @@ Out.prln("NULL size");
 
     /**
      * If there is no running thread then starts one and stores it in
-     * the thread member.
+     * the <tt>thread</tt> member.
      */
     public synchronized void testAndStart(){
       synchronized(selectionHighlighter){
