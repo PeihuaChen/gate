@@ -35,7 +35,7 @@ import gate.annotation.*;
 public class TestPR extends TestCase
 {
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   protected static Document doc1;
   protected static Document doc2;
