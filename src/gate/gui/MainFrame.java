@@ -357,8 +357,8 @@ public class MainFrame extends JFrame
       "Mark Leisher, Kevin Humphreys."
     );
     box = new Box(BoxLayout.X_AXIS);
-//    box.add(verLbl);
-
+    box.add(verLbl);
+/*
     JEditorPane authPane = null;
     try{
       authPane = new JEditorPane(new URL("gate:/authors.html"));
@@ -368,6 +368,7 @@ public class MainFrame extends JFrame
       ioe.printStackTrace(Err.getPrintWriter());
     }
     box.add(authPane);
+*/
     box.add(Box.createHorizontalGlue());
 
     splashBox.add(box);
