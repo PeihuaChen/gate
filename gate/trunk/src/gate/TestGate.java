@@ -177,7 +177,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests){
-        suite.addTest(TestPR.suite());
+        suite.addTest(TestWeakValueHashMap.suite());
       }else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestSecurity.suite());
