@@ -330,14 +330,19 @@ extends AbstractLanguageResource implements LanguageResource{
       charReads = aReader.read(cbuf,0,bufferSize);
     } catch (IOException e){
       return null;
-    }
+    }// End try
 
+    if (charReads == -1)
+      // the document is empty
+      return null;
+
+    // Create a string form the buffer and perform some search on it.
     strBuffer = new String(cbuf,0,charReads);
 
     // Detect whether or not is a GateXmlDocument
-    String magicXml = "<GateDocument";
-    if (strBuffer.indexOf(magicXml) != -1){
-      isGateXmlDocument = true;}
+    if (  strBuffer.indexOf("<GateDocument") != -1  ||
+          strBuffer.indexOf("GateDocument") != -1)
+      isGateXmlDocument = true;
     else
       isGateXmlDocument = false;
 
