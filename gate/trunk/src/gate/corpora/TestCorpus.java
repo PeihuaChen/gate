@@ -66,8 +66,6 @@ public class TestCorpus extends TestCase
     assert(c.add(d1));
     assert(c.add(d2));
     assertEquals(2, c.size());
-
-
   } // testDocumentAddition()
 
   /** Test suite routine for the test runner */

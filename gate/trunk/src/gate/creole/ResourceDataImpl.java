@@ -40,7 +40,9 @@ implements ResourceData {
   public String toString() {
     StringBuffer s = new StringBuffer(
       "ResourceDataImpl, name=" + name + "; className=" + className +
-      "; jarFileName=" + jarFileName + "; autoLoading=" + autoLoading +
+      "; jarFileName=" + jarFileName + "; jarFileUrl=" + jarFileUrl +
+      "; autoLoading=" + autoLoading + "; interfaceName=" + interfaceName +
+      "; parameterListsSet=" + parameterListsSet +
       "; features=" + features
     );
 

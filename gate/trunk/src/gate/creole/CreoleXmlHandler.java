@@ -143,6 +143,18 @@ public class CreoleXmlHandler extends HandlerBase {
         register.put(resourceData.getInterfaceName(), resourceData);
       else // index by class name
         register.put(resourceData.getClassName(), resourceData);
+
+      // if the resource is auto-loading, try and load it
+      if(resourceData.isAutoLoading())
+        try {
+          Factory.loadResourceClass(resourceData);
+        } catch(ResourceInstantiationException e) {
+          throw new GateSaxException(
+            "Couldn't load autoloading resource: " +
+            resourceData.getName() + "; problem was: " + e
+          );
+        }
+
       if(DEBUG) Out.println("added: " + resourceData);
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");

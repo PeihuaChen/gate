@@ -30,22 +30,20 @@ import gate.*;
 import gate.gui.*;
 
 
-  /**
-    * Implements the behaviour of the HTML reader
-    * Methods of an object of this class are called by the HTML parser when
-    * events will appear.
-    * The idea is to parse the HTML document and construct Gate annotations
-    * objects.
-    * This class also will replace the content of the Gate document with a
-    * new one containing anly text from the HTML document.
-    */
-public class HtmlDocumentHandler extends ParserCallback{
+/** Implements the behaviour of the HTML reader
+  * Methods of an object of this class are called by the HTML parser when
+  * events will appear.
+  * The idea is to parse the HTML document and construct Gate annotations
+  * objects.
+  * This class also will replace the content of the Gate document with a
+  * new one containing anly text from the HTML document.
+  */
+public class HtmlDocumentHandler extends ParserCallback {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /**
-    * Constructor initialises all the private memeber data.
+  /** Constructor initialises all the private memeber data.
     * This will use the default annotation set taken from the gate document.
     * @param aDocument The gate document that will be processed
     * @param aMarkupElementsMap The map containing the elements that will
@@ -54,8 +52,8 @@ public class HtmlDocumentHandler extends ParserCallback{
   public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap){
     this(aDocument,aMarkupElementsMap,null);
   }
-  /**
-    * Constructor initialises all the private memeber data
+
+  /** Constructor initialises all the private memeber data
     * @param aDocument The gate document that will be processed
     * @param aMarkupElementsMap The map containing the elements that will
     * transform into annotations
@@ -82,8 +80,7 @@ public class HtmlDocumentHandler extends ParserCallback{
     basicAS = anAnnotationSet;
   }
 
-  /**
-    * This method is called when the HTML parser encounts the beginning
+  /** This method is called when the HTML parser encounts the beginning
     * of a tag that means that the tag is paired by an end tag and it's
     * not an empty one.
    */
@@ -109,8 +106,7 @@ public class HtmlDocumentHandler extends ParserCallback{
     stack.push (obj);
   }//handleStartTag
 
-   /**
-     * This method is called when the HTML parser encounts the end of a tag
+   /** This method is called when the HTML parser encounts the end of a tag
      * that means that the tag is paired by a beginning tag
      */
   public void handleEndTag(HTML.Tag t, int pos){
@@ -162,9 +158,8 @@ public class HtmlDocumentHandler extends ParserCallback{
     }//else
   }//handleEndTag
 
-  /**
-    This method is called when the HTML parser encounts an empty tag
-  */
+  /** This method is called when the HTML parser encounts an empty tag
+    */
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // fire the status listener if the elements processed exceded the rate
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -193,9 +188,8 @@ public class HtmlDocumentHandler extends ParserCallback{
     colector.add(obj);
   }//handleSimpleTag
 
-  /**
-    This method is called when the HTML parser encounts text (PCDATA)
-   */
+  /** This method is called when the HTML parser encounts text (PCDATA)
+    */
   public void handleText(char[] text, int pos){
     // create a string object from this text array
     String content = new String(text);
@@ -232,16 +226,15 @@ public class HtmlDocumentHandler extends ParserCallback{
     //Out.println ("ERROR CALLED : " + errorMsg);
   }
 
-  /**
-    * This method is called once, when the HTML parser reaches the end
+  /** This method is called once, when the HTML parser reaches the end
     * of its input streamin order to notify the parserCallback that there
     * is nothing more to parse.
     */
   public void flush() throws BadLocationException{
     Out.println("Flush called!!!!!!!!!!!");
   }
-  /**
-    This method is called when the HTML parser encounts a comment
+
+  /** This method is called when the HTML parser encounts a comment
     */
   public void handleComment(char[] text, int pos){
   }

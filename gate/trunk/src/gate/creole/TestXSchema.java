@@ -23,23 +23,15 @@ import java.net.*;
 
 import junit.framework.*;
 
+import gate.*;
 import gate.util.*;
 
-/** Template test class - to add a new part of the test suite:
-  * <UL>
-  * <LI>
-  * copy this class and change "Template" to the name of the new tests;
-  * <LI>
-  * add a line to TestGate.java in the suite method referencing your new
-  * class;
-  * <LI>
-  * add test methods to this class.
-  * </UL>
+/** Annotation schemas test class.
   */
 public class TestXSchema extends TestCase
 {
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /** Construction */
   public TestXSchema(String name) { super(name); }
@@ -65,6 +57,35 @@ public class TestXSchema extends TestCase
     //annotSchema.fromXSchema(file.toURL());
     annotSchema.fromXSchema(new ByteArrayInputStream(s.getBytes()));
   } // testFromAndToXSchema()
+
+  /** Test creation of annotation schemas via gate.Factory */
+  public void testFactoryCreation() throws Exception {
+
+    FeatureMap parameters = Factory.newFeatureMap();
+    AnnotationSchema schema = (AnnotationSchema)
+      Factory.createResource("gate.creole.AnnotationSchema", parameters);
+
+    if(DEBUG) Out.prln("schema features: " + schema.getFeatures());
+///////////////////
+/*
+
+deal with the XML element properly; it should be processed relative
+  to ResourceData.jarFileUrl minus the jarFile bit....
+
+COULD do: make resource features have creoleDirectoryUrl;
+"XML" element will be there too, and will be relative path from the URL;
+then get init to construct URL to the XML source and read it.
+BUT, doesn't this break the bean-style initialisation convention?
+What is special about jarFile[Url] and xmlSourceUrl....? (Built
+relative to dir URL)
+
+make ASchema beans-style with proper init
+then get it parsing the XML....
+....and tested here
+
+*/
+//////////////////
+  } // testFactoryCreation()
 
   /** Test suite routine for the test runner */
   public static Test suite() {

@@ -45,29 +45,16 @@ public abstract class Factory
    {
     // get the resource metadata and default implementation class
     ResourceData resData = (ResourceData) reg.get(resourceClassName);
-    Class resClass = null;
     if(resData == null)
       throw new ResourceInstantiationException(
         "Couldn't get resource data for " + resourceClassName
       );
-    try {
-      resClass = resData.getResourceClass();
-    } catch(ClassNotFoundException e) {
-      throw new ResourceInstantiationException(
-        "Couldn't get resource class from the resource data" + e
-      );
-    }
-
-// we need instances of LR, PR and VR in order to test whether
-// the resource class is an instance of one of these. eventually
-// these should be anonymous inner classes, statically initialised,
-// and based on AbstractLR, AbstractPR...
-LanguageResource dummyLr = new gate.corpora.CorpusImpl();
-Object dummyPr = new Object();
-Object dummyVr = new Object();
+    Class resClass = loadResourceClass(resData);
 
     // type-specific stuff for LRs
-    if(resClass.isInstance(dummyLr)) {
+    if(LanguageResource.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln(resClass.getName() + " is an LR");
+
 //if the DS param is set, find an appropriate data store wrapper and:
 //resClass = dataStoreWrapperClass
 //if none available then
@@ -76,10 +63,12 @@ Object dummyVr = new Object();
 //);      OR maybe UnknownDataStoreException
 
     // type-specific stuff for PRs
-    } else if(resClass.isInstance(dummyPr)) {
+    } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln(resClass.getName() + " is a PR");
 
     // type-specific stuff for VRs
-    } else if(resClass.isInstance(dummyVr)) {
+    } else if(VisualResource.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln(resClass.getName() + " is a VR");
     }
 
     // create an object using the resource's default constructor
@@ -103,11 +92,31 @@ Object dummyVr = new Object();
       throw new ResourceInstantiationException("Parameterisation failure" + e);
     }
 
+    // if the features of the resource have not been explicitly set,
+    // set them too the features of the resource data
+    res.setFeatures(resData.getFeatures());
+
     // initialise the resource
     res = res.init();
 
     return res;
   } // create(resourceClassName)
+
+
+  /** Get the class for a resource */
+  public static Class loadResourceClass(ResourceData resData)
+  throws ResourceInstantiationException
+  {
+    Class resClass = null;
+    try {
+      resClass = resData.getResourceClass();
+    } catch(ClassNotFoundException e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get resource class from the resource data" + e
+      );
+    }
+    return resClass;
+  } // loadResourceClass
 
   /** For each paramter set the appropriate property on the resource
     * using bean-style reflection.

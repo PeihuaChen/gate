@@ -42,9 +42,8 @@ public class TestCreole extends TestCase
 
   /** Fixture set up */
   public void setUp() throws Exception {
-    // Initialise the creole register
+    // Initialise the GATE library and creole register
     Gate.init();
-    Gate.initCreoleRegister();
 
     // clear the register and the creole directory set
     reg = Gate.getCreoleRegister();
@@ -68,7 +67,6 @@ public class TestCreole extends TestCase
   public void tearDown() throws Exception {
     reg.clear();
     Gate.init();
-    Gate.initCreoleRegister();
   } // tearDown
 
   /** Test resource discovery */
@@ -138,7 +136,30 @@ public class TestCreole extends TestCase
     assert("couldn't find PR1/PR2 res data", pr1rd != null && pr2rd != null);
     assert("wrong name on PR1", pr1rd.getName().equals("Sheffield Test PR 1"));
 
-// try instantiation here
+    // instantiation
+    ProcessingResource pr1 = (ProcessingResource)
+      Factory.createResource("testpkg.TestPR1", Factory.newFeatureMap());
+    ProcessingResource pr2 = (ProcessingResource)
+      Factory.createResource("testpkg.TestPR2", Factory.newFeatureMap());
+
+    // run the beasts
+    FeatureMap pr1features = pr1.getFeatures();
+    FeatureMap pr2features = pr2.getFeatures();
+    assertNotNull("PR1 features are null", pr1features);
+    assert(
+      "PR2 got some features from somewhere: " + pr2features,
+      pr2features == null || pr2features.isEmpty()
+    );
+    pr1.run();
+    pr2.run();
+    assert(
+      "PR1 feature not present",
+      pr1.getFeatures().get("I").equals("have been run, thankyou")
+    );
+    assert(
+      "PR2 feature not present",
+      pr2.getFeatures().get("I").equals("am in a bad mood")
+    );
 
     reg.clear();
   } // testLoading()

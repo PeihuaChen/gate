@@ -1,4 +1,4 @@
-/**
+/*
  *  AnnotationSchema.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
@@ -22,17 +22,19 @@ import java.net.*;
 import java.io.*;
 
 import gate.util.*;
+import gate.*;
 
 import org.xml.sax.*;
 import javax.xml.parsers.*;
 import org.jdom.input.*;
 import org.jdom.*;
 
-/** This class handles all possible annotations together with their attributes,
-  *  values and types
+/** This class handles annotation
+  * schemas: annotation types, together with their attributes,
+  * values and types.
   */
-public class AnnotationSchema {
-
+public class AnnotationSchema extends AbstractLanguageResource
+{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -55,41 +57,42 @@ public class AnnotationSchema {
   }
  */
 
-  /**
-    * A map between XSchema types and Java Types
+  /** A map between XSchema types and Java Types
     */
   private static Map xSchema2JavaMap = new HashMap();
-  /**
-    * A map between JAva types and XSchema
+
+  /** A map between JAva types and XSchema
     */
   private static Map java2xSchemaMap = new HashMap();
 
+//// comments?
   private static DocumentBuilder xmlParser = null;
+
+//// comments?
   static{
     setUp();
   }
 
-  /**
-    *  This sets up two Maps between XSchema types and their coresponding
-    *  Java types
+  /** This sets up two Maps between XSchema types and their coresponding
+    * Java types
     */
-  private static  void setUp(){
-    xSchema2JavaMap.put("string" ,new String().getClass().getName());
-    xSchema2JavaMap.put("integer",new Integer(12).getClass().getName());
-    xSchema2JavaMap.put("int",new Integer(12).getClass().getName());
-    xSchema2JavaMap.put("boolean" ,new Boolean("true").getClass().getName());
-    xSchema2JavaMap.put("float",new Float(12.12).getClass().getName());
-    xSchema2JavaMap.put("double",new Double(12.12).getClass().getName());
-    xSchema2JavaMap.put("short",new Short((short)12).getClass().getName());
-    xSchema2JavaMap.put("byte",new Byte((byte)12).getClass().getName());
+  private static void setUp(){
+    xSchema2JavaMap.put("string",   String.class.getName());
+    xSchema2JavaMap.put("integer",  Integer.class.getName());
+    xSchema2JavaMap.put("int",      Integer.class.getName() );
+    xSchema2JavaMap.put("boolean",  Boolean.class.getName());
+    xSchema2JavaMap.put("float",    Float.class.getName());
+    xSchema2JavaMap.put("double",   Double.class.getName());
+    xSchema2JavaMap.put("short",    Short.class.getName());
+    xSchema2JavaMap.put("byte",     Byte.class.getName());
 
-    java2xSchemaMap.put(new String().getClass().getName(),"string");
-    java2xSchemaMap.put(new Integer(12).getClass().getName(),"integer");
-    java2xSchemaMap.put(new Boolean("true").getClass().getName(),"boolean");
-    java2xSchemaMap.put(new Float(12.12).getClass().getName(),"float");
-    java2xSchemaMap.put(new Double(12.12).getClass().getName(),"double");
-    java2xSchemaMap.put(new Short((short)12).getClass().getName(),"short");
-    java2xSchemaMap.put(new Byte((byte)12).getClass().getName(),"byte");
+    java2xSchemaMap.put(String.class.getName(),   "string");
+    java2xSchemaMap.put(Integer.class.getName(),  "integer");
+    java2xSchemaMap.put(Boolean.class.getName(),  "boolean");
+    java2xSchemaMap.put(Float.class.getName(),    "float");
+    java2xSchemaMap.put(Double.class.getName(),   "double");
+    java2xSchemaMap.put(Short.class.getName(),    "short");
+    java2xSchemaMap.put(Byte.class.getName(),     "byte");
 
     // Get an XML parser
     try {
@@ -108,7 +111,7 @@ public class AnnotationSchema {
     } catch (ParserConfigurationException e){
         e.printStackTrace(Err.getPrintWriter());
     }
-  }// end setUp
+  } // setUp
 
   /** The name of the annotation */
   String annotationName = null;
@@ -116,42 +119,38 @@ public class AnnotationSchema {
   /** Schemas for the attributes */
   Set featureSchemaSet = null;
 
-  /**
-    * Constructs an annotation schema. Name and
+  /** Constructs an annotation schema. Name and
     * feature schema set on null
     */
   public AnnotationSchema(){
     this(null,null);
-  }//AnnotationSchema
+  } // AnnotationSchema
 
-  /**
-    * Constructs an annotation schema given it's name.
+  /** Constructs an annotation schema given it's name.
     * Feature schema that it might contain is set on null
     */
   public AnnotationSchema(String anAnnotationName){
     this(anAnnotationName,null);
-  }//AnnotationSchema
+  } // AnnotationSchema
 
-  /**
-    * Constructs an AnnotationSchema object given it's name and a set of
+  /** Constructs an AnnotationSchema object given it's name and a set of
     * FeatureSchema
     */
   public AnnotationSchema(String anAnnotationName,Set aFeatureSchemaSet){
     annotationName   = anAnnotationName;
     featureSchemaSet = aFeatureSchemaSet;
-  }//AnnotationSchema
+  } // AnnotationSchema
 
-  /**
-   * Returns the value of annotationName field
-   */
+  /** Returns the value of annotationName field
+    */
   public String getAnnotationName(){
     return annotationName;
-  }//getAnnotationName
+  } // getAnnotationName
 
   /** Returns the set of FeatureSchema*/
   public Set getFeatureSchemas(){
     return featureSchemaSet;
-  }//getAttributeSchemas
+  } // getAttributeSchemas
 
   /** Returns a FeatureSchema object from featureSchemaSet, given a
     * feature name.
@@ -165,10 +164,9 @@ public class AnnotationSchema {
         return fs;
     }
     return null;
-  }//getFeatureSchema
+  } // getFeatureSchema
 
-  /**
-    * Creates an AnnotationSchema object from an XSchema file
+  /** Creates an AnnotationSchema object from an XSchema file
     * @param anXSchemaURL the URL where to find the XSchema file
     */
   public void fromXSchema(URL anXSchemaURL){
@@ -186,9 +184,9 @@ public class AnnotationSchema {
     } catch (IOException e) {
       e.printStackTrace(Err.getPrintWriter());
     }
-  }// end fromXSchema
-  /**
-    * Creates an AnnotationSchema object from an XSchema file
+  } // fromXSchema
+
+  /** Creates an AnnotationSchema object from an XSchema file
     * @param anXSchemaInputStream the Input Stream containing the XSchema file
     */
   public void fromXSchema(InputStream anXSchemaInputStream){
@@ -206,10 +204,9 @@ public class AnnotationSchema {
     } catch (IOException e) {
       e.printStackTrace(Err.getPrintWriter());
     }
-  }// end fromXSchema
+  } // end fromXSchema
 
-  /**
-    * This method builds a JDom structure from a W3C Dom one
+  /** This method builds a JDom structure from a W3C Dom one
     * @param aDom W3C dom structure
     * @return org.jdom.Document
     */
@@ -221,9 +218,9 @@ public class AnnotationSchema {
     jDom = jDomBuilder.build(aDom);
     // Don't need dom anymore.
     return jDom;
-  }//buildJdomFromDom
-  /**
-    * This method uses the JDom structure for our XSchema needs
+  } // buildJdomFromDom
+
+  /** This method uses the JDom structure for our XSchema needs
     */
   private void workWithJDom(org.jdom.Document jDom){
     // Use the jDom structure the way we want
@@ -237,9 +234,9 @@ public class AnnotationSchema {
           (org.jdom.Element) rootElementChildrenIterator.next();
     createAnnotationSchemaObject(childElement);
     }//end while
-  }//workWithJdom
-  /**
-    * This method creates an AnnotationSchema object fom an org.jdom.Element
+  } // workWithJdom
+
+  /** This method creates an AnnotationSchema object fom an org.jdom.Element
     * @param anElement is an XSchema element element
     */
   private void createAnnotationSchemaObject(org.jdom.Element anElement){
@@ -261,10 +258,9 @@ public class AnnotationSchema {
         createAndAddFeatureSchemaObject(childElement);
       }// end while
     }//end if
-  }// end createAnnoatationSchemaObject
+  } // createAnnoatationSchemaObject
 
-  /**
-    * This method creates and adds a FeatureSchema object to the current
+  /** This method creates and adds a FeatureSchema object to the current
     * AnnotationSchema one.
     * @param anElement is an XSchema attribute element
     */
@@ -345,10 +341,9 @@ public class AnnotationSchema {
                                                    featureUse,
                                                    featurePermissibleValuesSet);
     featureSchemaSet.add(featureSchema);
-  }// end createAndAddFeatureSchemaObject
+  } // createAndAddFeatureSchemaObject
 
-  /**
-    * Writes an AnnotationSchema to a XSchema files
+  /** Writes an AnnotationSchema to a XSchema files
     */
   public String toXSchema(){
     StringBuffer schemaString = new StringBuffer();
@@ -369,7 +364,7 @@ public class AnnotationSchema {
     }// end if else
     schemaString.append("</schema>\n");
     return schemaString.toString();
-  }//end toXSchema
+  } // toXSchema
 
-}//AnnotationSchema
+} // AnnotationSchema
 
