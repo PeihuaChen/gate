@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Mon Oct 08 19:08:49 2001
+ *  auto generated: Mon Oct 08 19:13:32 2001
  *
  *  $Id$
  *
@@ -116,6 +116,7 @@ CREATE TABLE T_DOC_CONTENT (
        DC_ENCODING_ID       NUMBER NULL,
        DC_CHARACTER_CONTENT CLOB NULL,
        DC_BINARY_CONTENT    BLOB NULL,
+       DC_CONTENT_TYPE      NUMBER NULL,
        PRIMARY KEY (DC_ID), 
        FOREIGN KEY (DC_ENCODING_ID)
                              REFERENCES T_DOC_ENCODING
