@@ -77,12 +77,12 @@
     <RESOURCE>
       <NAME>Hash Gazetteer</NAME>
       <CLASS>com.ontotext.gate.gazetteer.HashGazetteer</CLASS>
-      <COMMENT>A list lookup component implemented by OntoText
-        Lab.(www.ontotext.com) For documentation, download and license
+      <COMMENT>&lt;html&gt;A list lookup component implemented by OntoText
+        Lab (www.ontotext.com).&lt;br&gt; For documentation, download and license
         agreement please refer to
-        (www.ontotext.com/downloads/index.html#gazetteer). The licence
-        information is also available in licence.ontotext.html in the lib
-        folder of GATE</COMMENT>
+        (www.ontotext.com/downloads/index.html#gazetteer).&lt;br&gt;
+        The licence information is also available in licence.ontotext.html in the lib
+        folder of GATE&lt;/html&gt;</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
@@ -270,7 +270,8 @@
         <RESOURCE_DISPLAYED>gate.creole.Transducer</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
-  </CREOLE>
+    
+  </CREOLE>  
   
     <!-- VR Gaze - Gazetteers editor -->
     <RESOURCE>
@@ -280,6 +281,6 @@
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.creole.gazetteer.Gazetteer</RESOURCE_DISPLAYED>
       </GUI>
-    </RESOURCE>
+    </RESOURCE>    
   
 </CREOLE-DIRECTORY>
