@@ -244,6 +244,8 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     */
   public void clear() {
     lrTypes.clear();
+    prTypes.clear();
+    vrTypes.clear();
     directories.clear();
     super.clear();
   } // clear()
