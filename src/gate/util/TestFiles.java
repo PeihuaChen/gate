@@ -39,6 +39,14 @@ public class TestFiles extends TestCase
     assert(resString.startsWith(firstLine));
 
     byte[] resBytes = Files.getResourceAsByteArray(japeResName);
+
+    /*
+    System.out.println(new String(resBytes));
+    System.out.println(resBytes.length);
+    System.out.println(resString);
+    System.out.println(resString.length());
+    */
+    
     char resChars[] = new char[firstLine.length()];
     for(int i=0; i<resChars.length; i++) resChars[i] = (char)resBytes[i];
     resString = new String(resChars);
