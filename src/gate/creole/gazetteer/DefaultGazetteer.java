@@ -49,7 +49,7 @@ import gate.*;
   * will generate annotations of type Lookup having the attributes specified in
   * the definition file.
   */
-public class DefaultGazetteer implements ProcessingResource, Runnable {
+public class DefaultGazetteer implements ProcessingResource{
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -126,7 +126,7 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
           toParse += line.substring(0,line.length()-1);
         } else {
           toParse += line;
-          fireStatusChangedEvent("Reading " + toParse);
+          fireStatusChanged("Reading " + toParse);
           readList(toParse, true);
           toParse = "";
         }
@@ -284,7 +284,7 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
       throw new GateRuntimeException(
         "The annotation set provided does not belong to the current document!");
 
-    fireStatusChangedEvent("Doing lookup in " +
+    fireStatusChanged("Doing lookup in " +
                            document.getSourceUrl().getFile() + "...");
     String content = document.getContent().toString();
     int length = content.length();
@@ -351,7 +351,7 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
         charIdx ++;
       }
       if(charIdx - oldCharIdx > 256) {
-        fireProgressChangedEvent((100 * charIdx )/ length );
+        fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
       }
     } // while(charIdx < length)
@@ -375,8 +375,8 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
         }
       }//while(lookupIter.hasNext())
     }
-    fireProcessFinishedEvent();
-    fireStatusChangedEvent("Tokenisation complete!");
+    fireProcessFinished();
+    fireStatusChanged("Tokenisation complete!");
   } // run
 
   /*
@@ -397,41 +397,7 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
   }//public static void main(String[] args)
   */
 
-  //StatusReporter Implementation
-  public void addStatusListener(StatusListener listener) {
-    myStatusListeners.add(listener);
-  }
 
-  public void removeStatusListener(StatusListener listener) {
-    myStatusListeners.remove(listener);
-  }
-
-  protected void fireStatusChangedEvent(String text) {
-    Iterator listenersIter = myStatusListeners.iterator();
-    while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
-  }
-
-  //ProcessProgressReporter implementation
-  public void addProcessProgressListener(ProgressListener listener) {
-    myProgressListeners.add(listener);
-  }
-
-  public void removeProcessProgressListener(ProgressListener listener) {
-    myProgressListeners.remove(listener);
-  }
-
-  protected void fireProgressChangedEvent(int i) {
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).progressChanged(i);
-  }
-
-  protected void fireProcessFinishedEvent() {
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).processFinished();
-  }
   public void setListsURLStr(String newListsURLStr) {
     listsURLStr = newListsURLStr;
   }
@@ -450,10 +416,20 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
   public gate.AnnotationSet getAnnotationSet() {
     return annotationSet;
   }
-  //ProcessProgressReporter implementation ends here
-
-  /** If this gazetteer is loaded from the classpath instead of files */
-//  boolean fromResource = false;
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
 
   /** The initial state of the FSM that backs this gazetteer */
   FSMState initialState;
@@ -461,10 +437,6 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
   /** A set containing all the states of the FSM backing the gazetteer */
   Set fsmStates = new HashSet();
 
-
-  protected List myProgressListeners = new LinkedList();
-
-  protected List myStatusListeners = new LinkedList();
 
   protected FeatureMap features  = null;
 
@@ -479,5 +451,49 @@ public class DefaultGazetteer implements ProcessingResource, Runnable {
     * generated annotations
     */
   protected AnnotationSet annotationSet;
+
+  private transient Vector progressListeners;
+  private transient Vector statusListeners;
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
 
 } // DefaultGazetteer

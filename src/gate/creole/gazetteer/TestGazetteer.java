@@ -60,7 +60,6 @@ public class TestGazetteer extends TestCase {
     FeatureMap params = Factory.newFeatureMap();
     DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
                           "gate.creole.gazetteer.DefaultGazetteer", params);
-    gaz.init();
 
     //runtime stuff
     gaz.setDocument(doc);

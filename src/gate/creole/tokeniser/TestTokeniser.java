@@ -59,6 +59,7 @@ public class TestTokeniser extends TestCase{
    FeatureMap params = Factory.newFeatureMap();
    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                           "gate.creole.tokeniser.DefaultTokeniser", params);
+
     AnnotationSet tokeniserAS = doc.getAnnotations("TokeniserAS");
     tokeniser.setDocument(doc);
     tokeniser.setAnnotationSet(tokeniserAS);

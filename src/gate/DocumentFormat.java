@@ -84,6 +84,7 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
 
   /** listeners for status report */
   protected List myStatusListeners = new LinkedList();
+  private transient Vector statusListeners;
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.
@@ -108,6 +109,7 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
   static private MimeType  getMimeType(String fileSufix){
     // Get a mimeType string associated with this fileSuffix
     // Eg: for html get "text/html", for xml get "text/xml"
+    if(fileSufix == null) return null;
     return (MimeType) suffixes2mimeTypeMap.get(fileSufix.toLowerCase());
   }//getMimeType
 
@@ -291,20 +293,30 @@ public abstract class DocumentFormat implements LanguageResource, StatusReporter
   public MimeType getMimeType(){return mimeType;}
 
   //StatusReporter Implementation
-  public void addStatusListener(StatusListener listener){
-    myStatusListeners.add(listener);
-  }
 
-  public void removeStatusListener(StatusListener listener){
-    myStatusListeners.remove(listener);
-  }
 
-  // this is a bug in Soraris on JDK 1.21.
-  // it has to be protected not public
-  public void fireStatusChangedEvent(String text){
-    Iterator listenersIter = myStatusListeners.iterator();
-    while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
   }
 
 } // class DocumentFormat
