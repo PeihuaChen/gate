@@ -491,7 +491,7 @@ public class AnnotationDiff extends AbstractVisualResource
 
     // Calculate the diff Set. This set will be used later with graphic
     // visualisation.
-    annotDiffer.setSignificantFeaturesSet(new HashSet());
+    annotDiffer.setSignificantFeaturesSet(getKeyFeatureNamesSet());
     ArrayList choices = (ArrayList) annotDiffer.calculateDiff(keyAnnotSet, responseAnnotSet);
     diffSet = new HashSet();
     for(int i=0;i<choices.size();i++) {
