@@ -266,6 +266,8 @@ public abstract class DocumentFormat implements Resource,StatusReporter
   public void removeStatusListener(StatusListener listener){
     myStatusListeners.remove(listener);
   }
+  // this is a bug in Soraris on JDK 1.21.
+  // it has to be protected not public 
   public void fireStatusChangedEvent(String text){
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
