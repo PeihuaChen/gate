@@ -575,15 +575,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       jj_consume_token(equals);
       attrValPair = AttrVal();
       attrValObj = attrValPair.second;
-      try {
-        c.addAttribute(
-          new JdmAttribute(attrNameTok.image, attrValObj)
-        );
-      } catch(JdmException e) {
-        System.err.println(
-          "couldn't create attribute " + attrNameTok.image + e.toString()
-        );
-      }
+      c.addAttribute(
+        new JdmAttribute(attrNameTok.image, attrValObj)
+      );
       break;
     default:
       jj_la1[22] = jj_gen;
@@ -1033,6 +1027,16 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     return false;
   }
 
+  final private boolean jj_3R_13() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(ident)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(leftBrace)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
   final private boolean jj_3R_19() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -1102,16 +1106,6 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
   final private boolean jj_3R_20() {
     if (jj_scan_token(string)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_13() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(leftBrace)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
