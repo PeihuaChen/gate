@@ -74,10 +74,10 @@
   <property category="sys" name="ExcludeClassEnabled" value="0" />
   <property category="sys" name="InstanceVisibility" value="0" />
   <property category="sys" name="JDK" value="java 1.3.0-C" />
-  <property category="sys" name="JbxEventListener0" value="gate.event.CreoleListener" />
-  <property category="sys" name="JbxEventListener1" value="gate.event.CreoleListener" />
-  <property category="sys" name="JbxEventListener2" value="gate.event.CreoleListener" />
-  <property category="sys" name="JbxEventListener3" value="gate.gui.StatusListener" />
+  <property category="sys" name="JbxEventListener0" value="gate.event.StatusListener" />
+  <property category="sys" name="JbxEventListener1" value="gate.event.ProgressListener" />
+  <property category="sys" name="JbxEventListener2" value="gate.event.StatusListener" />
+  <property category="sys" name="JbxEventListener3" value="gate.event.ProgressListener" />
   <property category="sys" name="JbxEventListener4" value="gate.event.DocumentListener" />
   <property category="sys" name="JbxEventListener5" value="gate.event.GateListener" />
   <property category="sys" name="JbxEventListener6" value="gate.gui.StatusListener" />

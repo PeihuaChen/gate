@@ -88,7 +88,7 @@ public class MainFrame extends JFrame
 //  DefaultComboBoxModel projectComboModel;
   JToolBar toolbar;
 
-  JFileChooser fileChooser;
+  static JFileChooser fileChooser;
   TabBlinker logBlinker;
 //  MainFrame parentFrame;
   NewResourceDialog newResourceDialog;
@@ -109,12 +109,15 @@ public class MainFrame extends JFrame
 
 
   static private MainFrame instance;
-
+/*
   static public MainFrame getInstance(){
     if(instance == null) instance = new MainFrame();
     return instance;
   }
-
+*/
+  static public JFileChooser getFileChooser(){
+    return fileChooser;
+  }
   protected void select(ResourceHandle handle){
     if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       //select
@@ -146,7 +149,7 @@ public class MainFrame extends JFrame
   }//protected void select(ResourceHandle handle)
 
   /**Construct the frame*/
-  private MainFrame() {
+  public MainFrame() {
 //    thisMainFrame = this;
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
     initLocalData();
@@ -236,6 +239,34 @@ public class MainFrame extends JFrame
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
     logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
+
+/*
+UIManager.put("Menu.font",
+              new javax.swing.plaf.FontUIResource("Dialog", Font.ITALIC, 30));
+
+System.out.println("L&F defaults\n===================\n\n\n");
+
+UIDefaults def = UIManager.getLookAndFeelDefaults();
+ArrayList lista = new ArrayList(def.keySet());
+Collections.sort(lista);
+Iterator listIter = lista.iterator();
+while(listIter.hasNext()){
+  Object key = listIter.next();
+  System.out.println("<" + key.getClass().getName() + ">\t" + key +": \t" +
+                     "<" + def.get(key).getClass().getName() + ">\t" + def.get(key));
+}
+/*
+System.out.println("Defaults\n===================\n\n\n");
+def = UIManager.getDefaults();
+lista = new ArrayList(def.keySet());
+//Collections.sort(lista);
+listIter = lista.iterator();
+while(listIter.hasNext()){
+  Object key = listIter.next();
+  System.out.println(key +" : " + def.get(key));
+}
+*/
+
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                leftSplit, mainTabbedPane);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
@@ -293,6 +324,16 @@ public class MainFrame extends JFrame
     }catch(AWTException awte){}
     menuBar.add(editMenu);
 
+    JMenu viewMenu = new JMenu("View");
+    //fileMenu.add(new JGateMenuItem(newProjectAction));
+    fileMenu.add(new XJMenuItem(newLRAction, this));
+    fileMenu.add(new XJMenuItem(newPRAction, this));
+    fileMenu.add(new XJMenuItem(newDSAction, this));
+    fileMenu.add(new XJMenuItem(openDSAction, this));
+    fileMenu.add(new XJMenuItem(newApplicationAction, this));
+    menuBar.add(fileMenu);
+
+
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.add(newBootStrapAction);
     toolsMenu.add(newAnnotDiffAction);
@@ -312,8 +353,6 @@ public class MainFrame extends JFrame
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
 
     //extra stuff
-    fileChooser = new JFileChooser();
-    fileChooser.setMultiSelectionEnabled(false);
     newResourceDialog = new NewResourceDialog(this,
                                               "Resource parameters",
                                               true);
@@ -563,7 +602,7 @@ public class MainFrame extends JFrame
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
       if(res instanceof SerialController){
-        handle = new ApplicationHandle((SerialController)res);
+        handle = new ApplicationHandle((SerialController)res, this, this);
         node = new DefaultMutableTreeNode(handle, false);
         resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
       }else{
@@ -571,6 +610,11 @@ public class MainFrame extends JFrame
       }
     }else if(res instanceof LanguageResource){
       resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
+    }
+
+    if(handle instanceof DefaultResourceHandle){
+      ((DefaultResourceHandle)handle).addProgressListener(MainFrame.this);
+      ((DefaultResourceHandle)handle).addStatusListener(MainFrame.this);
     }
   }
 
@@ -662,6 +706,8 @@ public class MainFrame extends JFrame
     } catch(Exception e) {
       throw new gate.util.GateRuntimeException(e.toString());
     }
+    fileChooser = new JFileChooser();
+    fileChooser.setMultiSelectionEnabled(false);
   }
 
 /*
@@ -913,6 +959,7 @@ public class MainFrame extends JFrame
                         "Please provide a name for the new application:",
                         "Gate",
                         JOptionPane.QUESTION_MESSAGE);
+      if(answer == null) return;
       if (answer instanceof String) {
         try{
           FeatureMap features = Factory.newFeatureMap();
@@ -977,21 +1024,6 @@ public class MainFrame extends JFrame
                                   "Parameters for the new " + rData.getName());
               LanguageResource res = (LanguageResource)
                                                   newResourceDialog.show(rData);
-/*
-              if(res != null){
-                LRHandle handle = new LRHandle(res, currentProject);
-                handle.setTooltipText("<html><b>Type:</b> " +
-                                      rData.getName() + "</html>");
-                handleForResourceName.put(res.getFeatures().get("gate.NAME"), handle);
-                //lrRoot.add(new DefaultMutableTreeNode(handle, false));
-                //projectTreeModel.nodeStructureChanged(lrRoot);
-                resourcesTree.expandPath(new TreePath(
-                            new Object[]{resourcesTreeRoot,
-                              languageResourcesRoot}));
-                //currentProject.addLR(handle);
-                statusChanged(res.getFeatures().get("gate.NAME") + " loaded!");
-              }
-*/
             }
           }else{
             //no lr types

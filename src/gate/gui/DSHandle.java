@@ -139,7 +139,7 @@ public class DSHandle extends DefaultResourceHandle {
       try{
         datastore.close();
       }catch(PersistenceException pe){
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+        JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
@@ -163,11 +163,11 @@ public class DSHandle extends DefaultResourceHandle {
         datastore.getLr(entry.type, entry.id);
         //project.frame.resourcesTreeModel.treeChanged();
       }catch(gate.persist.PersistenceException pe){
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+        JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }catch(ResourceInstantiationException rie){
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+        JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + rie.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
@@ -186,7 +186,7 @@ public class DSHandle extends DefaultResourceHandle {
         datastore.delete(entry.type, entry.id);
         //project.frame.resourcesTreeModel.treeChanged();
       }catch(gate.persist.PersistenceException pe){
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+        JOptionPane.showMessageDialog(getLargeView(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }

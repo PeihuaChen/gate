@@ -54,8 +54,8 @@ public class TextAttributesChooser extends JDialog {
   boolean choice;
 
 
-  public TextAttributesChooser(Frame frame, String title, boolean modal) {
-    super(frame, title, modal);
+  public TextAttributesChooser(Frame parent, String title, boolean modal) {
+    super(parent, title, modal);
     try {
       jbInit();
       pack();
@@ -65,8 +65,20 @@ public class TextAttributesChooser extends JDialog {
     }
   }
 
+  public TextAttributesChooser(Dialog parent, String title, boolean modal) {
+    super(parent, title, modal);
+    try {
+      jbInit();
+      pack();
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+
   public TextAttributesChooser() {
-    this(null, "", false);
+    this((Frame)null, "", false);
   }
 
 
