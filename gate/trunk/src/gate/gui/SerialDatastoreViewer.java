@@ -288,7 +288,7 @@ public class SerialDatastoreViewer extends JTree
   }
 
   public void resourceDeleted(DatastoreEvent e) {
-    String resID = e.getResourceID();
+    String resID = (String) e.getResourceID();
     DefaultMutableTreeNode node = null;
     Enumeration nodesEnum = treeRoot.depthFirstEnumeration();
     boolean found = false;
@@ -307,7 +307,7 @@ public class SerialDatastoreViewer extends JTree
 
   public void resourceWritten(DatastoreEvent e) {
     Resource res = e.getResource();
-    String resID = e.getResourceID();
+    String resID = (String) e.getResourceID();
     String resType = ((ResourceData)Gate.getCreoleRegister().
                       get(res.getClass().getName())).getName();
     DefaultMutableTreeNode parent = treeRoot;

@@ -221,6 +221,11 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setLong(1,ID.longValue());
       stmt.setString(2,lrClassName);
       stmt.execute();
+
+      //let the world know about it
+      fireResourceDeleted(
+        new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
+
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
@@ -228,6 +233,7 @@ public class OracleDataStore extends JDBCDataStore {
     finally {
       DBHelper.cleanup(stmt);
     }
+
   }
 
   /**
@@ -286,6 +292,13 @@ public class OracleDataStore extends JDBCDataStore {
         }
       }
     }
+
+    // let the world know about it
+    fireResourceWritten(
+      new DatastoreEvent(
+        this, DatastoreEvent.RESOURCE_WRITTEN, lr, lr.getLRPersistenceId()
+      )
+    );
 
     throw new MethodNotImplementedException();
   }
@@ -400,7 +413,19 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
-
+    // let the world know
+    fireResourceAdopted(
+        new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
+                           result,
+                           result.getLRPersistenceId())
+    );
+    // fire also resource written event because it's now saved
+    fireResourceWritten(
+      new DatastoreEvent(
+        this, DatastoreEvent.RESOURCE_WRITTEN,
+        result, result.getLRPersistenceId()
+      )
+    );
 
     return result;
   }

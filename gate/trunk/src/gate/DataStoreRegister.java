@@ -65,9 +65,12 @@ public class DataStoreRegister extends HashSet {
    */
   public boolean remove(Object o) {
     boolean res = super.remove(o);
-    if(res) fireDatastoreClosed(
-      new CreoleEvent((DataStore)o, CreoleEvent.DATASTORE_CLOSED)
-    );
+    if(res) {
+      fireDatastoreClosed(
+        new CreoleEvent((DataStore)o, CreoleEvent.DATASTORE_CLOSED)
+      );
+      removeSecurityData((DataStore) o);
+    }
     return res;
   } // remove
 
@@ -101,6 +104,30 @@ public class DataStoreRegister extends HashSet {
   public static void addConfig(Map configData) {
     DataStoreRegister.configData.putAll(configData);
   } // addConfig
+
+  /** A hashmap from datastore to security data (current user and group)*/
+  private static Map securityData = new HashMap();
+
+  /**
+   * Returns the security data for this datastore
+   */
+  public static Map getSecurityData(DataStore ds) {
+    return (Map) securityData.get(ds);
+  } //
+
+  /**
+   * Adds security data for this datastore
+   */
+  public static void addSecurityData(DataStore ds, Map secData){
+    DataStoreRegister.securityData.put(ds, secData);
+  }
+
+  /**
+   * Removes the security data for this datastore
+   */
+  public static void removeSecurityData(DataStore ds){
+    DataStoreRegister.securityData.remove(ds);
+  }
 
   /**
    * Removes a previously registered {@link gate.event.CreoleListener}
