@@ -41,12 +41,12 @@ public class SimpleErrorHandler implements ErrorHandler {
     String publicId = "not available";
     if (ex.getSystemId() != null) systemId = ex.getSystemId();
     if (ex.getPublicId() != null) publicId = ex.getPublicId();
-    Out.prln("SAX parser recoverable error. Error details: \n"+
+    Out.prln("\nSAX parser recoverable error. Error details: \n"+
                                 " Message: " + ex.getMessage() + "\n" +
                                 " System ID: " + systemId +  "\n" +
                                 " Public ID: " + publicId +  "\n" +
                                 " Line: " + ex.getLineNumber() + "\n" +
-                                " Column: "+ ex.getColumnNumber());
+                                " Column: "+ ex.getColumnNumber() + "\n");
   }// error
   /**
     * This fatalError method is called by the SAX parser when it encounts a

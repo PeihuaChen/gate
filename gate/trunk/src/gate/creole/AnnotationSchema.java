@@ -78,7 +78,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
       // A non validating one
       domBuilderFactory.setValidating(false);
       // A non namesapace aware one
-      domBuilderFactory.setNamespaceAware(false);
+      domBuilderFactory.setNamespaceAware(true);
 
       // Create the DOM parser
       xmlParser = domBuilderFactory.newDocumentBuilder();

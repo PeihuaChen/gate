@@ -73,7 +73,7 @@ public class CreoleRegisterImpl extends HashMap
       // non validating one
       saxParserFactory.setValidating(false);
       // non namespace aware one
-      saxParserFactory.setNamespaceAware(false);
+      saxParserFactory.setNamespaceAware(true);
 
       // create the parser
       parser = saxParserFactory.newSAXParser();

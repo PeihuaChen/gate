@@ -182,14 +182,9 @@ public class XmlDocumentHandler extends DefaultHandler{
     FeatureMap fm = Factory.newFeatureMap();
     //Get the name and the value of the attributes and add them to a FeaturesMAP
     for (int i = 0; i < atts.getLength(); i++) {
-      String attName  = getMyLocalName(atts.getQName(i));
+      String attName  = atts.getLocalName(i);
       String attValue = atts.getValue(i);
-// the line bellow should be used if the parser from java 4 would work well
-// with namespaces...
-// because it doesn't the methods getMyLocalName() and detMyURI() are some
-// workarrounds
-//      String attUri = atts.getURI(i);
-      String attUri = getMyURI(atts.getQName(i));
+      String attUri =   atts.getURI(i);
       if (attUri != null && Gate.URI.equals(attUri)){
         if ("gateId".equals(attName)){
           customObjectId = new Integer(attValue);
