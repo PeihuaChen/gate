@@ -232,7 +232,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     for (int i=0; i< arrPronouns.length; i++) {
       Annotation currPronoun = (Annotation)arrPronouns[i];
       while (this.textSentences[prnSentIndex].getEndOffset().longValue() <
-                                      currPronoun.getStartNode().getOffset().longValue()) {
+                                      currPronoun.getEndNode().getOffset().longValue()) {
         prnSentIndex++;
       }
 
