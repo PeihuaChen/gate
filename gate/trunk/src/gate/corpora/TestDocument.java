@@ -38,7 +38,7 @@ public class TestDocument extends TestCase
 
   /** A test test */
   public void testSomething() {
-    assertEquals( 1, 1);
+    assertEquals(1, 1);
   } // testSomething
 
   /** A comprehensive test */

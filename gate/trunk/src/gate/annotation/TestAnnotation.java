@@ -46,6 +46,7 @@ public class TestAnnotation extends TestCase
     basicAS.add(new Long(10), new Long(20), "T3", fm);    // 2
     basicAS.add(new Long(10), new Long(20), "T1", fm);    // 3
 
+    fm = new SimpleFeatureMapImpl();
     fm.put("pos", "NN");
     fm.put("author", "hamish");
     fm.put("version", new Integer(1));
@@ -55,6 +56,7 @@ public class TestAnnotation extends TestCase
     basicAS.add(new Long(15), new Long(40), "T3", fm);    // 6
     basicAS.add(new Long(15), new Long(40), "T1", fm);    // 7 
 
+    fm = new SimpleFeatureMapImpl();
     fm.put("pos", "JJ");
     fm.put("author", "the devil himself");
     fm.put("version", new Long(44));
@@ -196,7 +198,7 @@ public class TestAnnotation extends TestCase
     Iterator iter = sortedAnnots.iterator();
     while(iter.hasNext()) {
       a = (Annotation) iter.next();
-      assertEquals(idCounter++, a.getId().intValue()); // check annot ids
+      assertEquals(idCounter++, a.getId().intValue());      // check annot ids
 
       startNode = a.getStartNode();
       endNode = a.getEndNode();
@@ -214,18 +216,44 @@ public class TestAnnotation extends TestCase
     AnnotationSet asBuf;
     Integer newId;
     FeatureMap fm = new SimpleFeatureMapImpl();
-    Annotation a;
+    Annotation a;         
     Node startNode;
     Node endNode;
 
     FeatureMap constraints = new SimpleFeatureMapImpl();
+    constraints.put("pos", "NN");
 
+//System.out.println(basicAS);
+//System.out.println(constraints);
 
+    asBuf = basicAS.get("T1", constraints);
+    assertEquals(3, asBuf.size());
+    asBuf = basicAS.get("T3", constraints);
+    assertEquals(1, asBuf.size());
+    asBuf = basicAS.get("T1", constraints, new Long(12));
+    assertEquals(2, asBuf.size());
+    asBuf = basicAS.get("T1", constraints, new Long(10));
+    assertEquals(1, asBuf.size()); 
+    asBuf = basicAS.get("T1", constraints, new Long(11));
+    assertEquals(2, asBuf.size()); 
+    asBuf = basicAS.get("T1", constraints, new Long(9));
+    assertEquals(1, asBuf.size());
 
+    constraints.put("pos", "JJ");
+//System.out.println(constraints);
+    asBuf = basicAS.get("T1", constraints, new Long(0));
+    assertEquals(null, asBuf);
+    asBuf = basicAS.get("T1", constraints, new Long(14));
+    assertEquals(2, asBuf.size());
 
+    constraints.put("author", "valentin");
+    asBuf = basicAS.get("T1", constraints, new Long(14));
+    assertEquals(null, asBuf);
 
-
-//    constraints.put( ............ );
+    
+    constraints.put("author", "the devil himself");
+    asBuf = basicAS.get("T1", constraints, new Long(14));
+    assertEquals(2, asBuf.size());
   } // testComplexGet()
 
   /** Test AnnotationSetImpl */
