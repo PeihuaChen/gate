@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1998-2004, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -15,33 +15,21 @@
 
 package gate.gui.docview;
 
-import gate.Annotation;
-import gate.gui.MainFrame;
-import gate.util.GateRuntimeException;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JEditorPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.text.BadLocationException;
+
+import gate.*;
+import gate.creole.AnnotationSchema;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.gui.MainFrame;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
 
 
 /**
@@ -61,85 +49,162 @@ public class AnnotationEditor{
     initGUI();
   }
   
+  protected static void initStaticData(){
+    solAction = new StartOffsetLeftAction();
+    sorAction = new StartOffsetRightAction();
+    eolAction = new EndOffsetLeftAction();
+    eorAction = new EndOffsetRightAction();
+    delAction = new DeleteAnnotationAction();
+    schemasByType = new HashMap();
+    try{
+	    java.util.List schemas = Gate.getCreoleRegister().
+	    	getAllInstances("gate.creole.AnnotationSchema");
+	    for(Iterator schIter = schemas.iterator(); 
+	        schIter.hasNext();){
+	      AnnotationSchema aSchema = (AnnotationSchema)schIter.next();
+	      schemasByType.put(aSchema.getAnnotationName(), aSchema);
+	    }
+    }catch(GateException ge){
+      throw new GateRuntimeException(ge);
+    }
+    
+    CreoleListener creoleListener = new CreoleListener(){
+      public void resourceLoaded(CreoleEvent e){
+        Resource newResource =  e.getResource();
+        if(newResource instanceof AnnotationSchema){
+  	      AnnotationSchema aSchema = (AnnotationSchema)newResource;
+  	      schemasByType.put(aSchema.getAnnotationName(), aSchema);
+        }
+      }
+      
+      public void resourceUnloaded(CreoleEvent e){
+        Resource newResource =  e.getResource();
+        if(newResource instanceof AnnotationSchema){
+  	      AnnotationSchema aSchema = (AnnotationSchema)newResource;
+  	      if(schemasByType.containsValue(aSchema)){
+  	        schemasByType.remove(aSchema.getAnnotationName());
+  	      }
+        }
+      }
+      
+      public void datastoreOpened(CreoleEvent e){
+        
+      }
+      public void datastoreCreated(CreoleEvent e){
+        
+      }
+      public void datastoreClosed(CreoleEvent e){
+        
+      }
+      public void resourceRenamed(Resource resource,
+                              String oldName,
+                              String newName){
+      }  
+    };
+    Gate.getCreoleRegister().addCreoleListener(creoleListener); 
+  }
   
+  protected static void initTopWindow(Window parent){
+    topWindow = new JWindow(parent);
+
+    JPanel pane = new JPanel();
+    pane.setLayout(new GridBagLayout());
+    pane.setBackground(UIManager.getLookAndFeelDefaults().
+            getColor("ToolTip.background"));
+    
+    GridBagConstraints constraints = new GridBagConstraints();
+    
+    
+    typeCombo = new JComboBox();
+    typeCombo.setEditable(true);
+    typeCombo.setBackground(UIManager.getLookAndFeelDefaults().
+            getColor("ToolTip.background"));
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+    constraints.gridwidth = 5;
+    constraints.ipadx = 0;
+    pane.add(typeCombo, constraints);
+    
+    JButton btn = new JButton(solAction);
+    btn.setContentAreaFilled(false);
+    btn.setBorderPainted(false);
+    Insets insets0 = new Insets(0, 0, 0, 0);
+    btn.setMargin(insets0);
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.anchor = GridBagConstraints.CENTER;
+    constraints.gridwidth = 1;
+    constraints.gridy = 1;
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.weightx = 0;
+    constraints.weighty= 0;
+    pane.add(btn, constraints);
+    
+    btn = new JButton(sorAction);
+    btn.setContentAreaFilled(false);
+    btn.setBorderPainted(false);
+    btn.setMargin(insets0);
+    pane.add(btn, constraints);
+    
+    btn = new JButton(delAction);
+    btn.setContentAreaFilled(false);
+    btn.setBorderPainted(false);
+    btn.setMargin(insets0);
+    constraints.weightx = 1;
+    pane.add(btn, constraints);
+    
+    btn = new JButton(eolAction);
+    btn.setContentAreaFilled(false);
+    btn.setBorderPainted(false);
+    btn.setMargin(insets0);
+    constraints.insets = insets0;
+    constraints.weightx = 0;
+    pane.add(btn, constraints);
+    
+    btn = new JButton(eorAction);
+    btn.setContentAreaFilled(false);
+    btn.setBorderPainted(false);
+    btn.setMargin(insets0);
+    pane.add(btn, constraints);
+
+    pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    topWindow.getContentPane().add(pane);
+    hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        topWindow.hide();
+      }
+    });
+    hideTimer.setRepeats(false);
+    topWindow.addMouseListener(new MouseAdapter(){
+      public void mouseEntered(MouseEvent evt){
+        hideTimer.stop();
+      }
+    });
+  }
+  
+  protected static void initBottomWindow(Window parent){
+  }
+
   protected void initGUI(){
     //initialise static windows if not already done
-    if(topWindow == null){
-      solAction = new StartOffsetLeftAction();
-      sorAction = new StartOffsetRightAction();
-      eolAction = new EndOffsetLeftAction();
-      eorAction = new EndOffsetRightAction();
-      delAction = new DeleteAnnotationAction();
-      
-      topWindow = new JWindow(SwingUtilities.
-              getWindowAncestor(textView.getGUI()));
-
-      JPanel pane = new JPanel();
-      pane.setLayout(new GridBagLayout());
-      pane.setBackground(textPane.getBackground());
-      pane.setBackground(textPane.getBackground());
-      GridBagConstraints constraints = new GridBagConstraints();
-      
-      typeCombo = new JComboBox();
-      typeCombo.setEditable(true);
-      constraints.fill = GridBagConstraints.BOTH;
-      constraints.gridx = 0;
-      constraints.gridy = 0;
-      constraints.gridwidth = 5;
-      constraints.ipadx = 0;
-      pane.add(typeCombo, constraints);
-      
-      JButton btn = new JButton(solAction);
-      btn.setContentAreaFilled(false);
-      Dimension btnSize = new Dimension(16, 16);
-      btn.setPreferredSize(btnSize);
-      constraints.fill = GridBagConstraints.NONE;
-      constraints.gridwidth = 1;
-      constraints.gridy = 1;
-      constraints.gridx = GridBagConstraints.RELATIVE;
-      pane.add(btn, constraints);
-      
-      btn = new JButton(sorAction);
-      btn.setContentAreaFilled(false);
-      btn.setPreferredSize(btnSize);
-      pane.add(btn, constraints);
-      
-      btn = new JButton(delAction);
-      btn.setContentAreaFilled(false);
-      constraints.insets = new Insets(0, 10, 0, 10);
-      btn.setPreferredSize(new Dimension(22, 22));
-      pane.add(btn, constraints);
-      
-      btn = new JButton(eolAction);
-      btn.setContentAreaFilled(false);
-      constraints.insets = new Insets(0, 0, 0, 0);
-      btn.setPreferredSize(btnSize);
-      pane.add(btn, constraints);
-      
-      btn = new JButton(eorAction);
-      btn.setContentAreaFilled(false);
-      btn.setPreferredSize(btnSize);
-      pane.add(btn, constraints);
-
-      pane.setBorder(BorderFactory.createRaisedBevelBorder());
-      topWindow.getContentPane().add(pane);
-      hideTimer = new Timer(HIDE_DELAY, new ActionListener(){
-        public void actionPerformed(ActionEvent evt){
-          topWindow.hide();
-        }
-      });
-      hideTimer.setRepeats(false);
-      topWindow.addMouseListener(new MouseAdapter(){
-        public void mouseEntered(MouseEvent evt){
-          hideTimer.stop();
-        }
-      });
+    if(! inited){
+      initStaticData();
+      initTopWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+      initBottomWindow(SwingUtilities.getWindowAncestor(textView.getGUI()));
+      inited = true;
     }
   }
   
   public void setAnnotation(Annotation ann){
    this.ann = ann;
-   typeCombo.setSelectedItem(ann.getType());
+   //repopulate the types combo
+   String annType = ann.getType();
+   Set types = new HashSet(schemasByType.keySet());
+   types.add(annType);
+   java.util.List typeList = new ArrayList(types);
+   Collections.sort(typeList);
+   typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
+   typeCombo.setSelectedItem(annType);
   }
   
   
@@ -186,7 +251,7 @@ public class AnnotationEditor{
     Annotation ann;
   }
 
-  protected class StartOffsetLeftAction extends AnnotationAction{
+  protected static class StartOffsetLeftAction extends AnnotationAction{
     public StartOffsetLeftAction(){
       super("Extend", MainFrame.getIcon("extend-left.gif"));
     }
@@ -196,7 +261,7 @@ public class AnnotationEditor{
     }
   }
   
-  protected class StartOffsetRightAction extends AnnotationAction{
+  protected static class StartOffsetRightAction extends AnnotationAction{
     public StartOffsetRightAction(){
       super("Srink", MainFrame.getIcon("extend-right.gif"));
     }
@@ -206,7 +271,7 @@ public class AnnotationEditor{
     }
   }
 
-  protected class EndOffsetLeftAction extends AnnotationAction{
+  protected static class EndOffsetLeftAction extends AnnotationAction{
     public EndOffsetLeftAction(){
       super("Srink", MainFrame.getIcon("extend-left.gif"));
     }
@@ -216,7 +281,7 @@ public class AnnotationEditor{
     }
   }
   
-  protected class EndOffsetRightAction extends AnnotationAction{
+  protected static class EndOffsetRightAction extends AnnotationAction{
     public EndOffsetRightAction(){
       super("Extend", MainFrame.getIcon("extend-right.gif"));
     }
@@ -227,7 +292,7 @@ public class AnnotationEditor{
   }
   
   
-  protected class DeleteAnnotationAction extends AnnotationAction{
+  protected static class DeleteAnnotationAction extends AnnotationAction{
     public DeleteAnnotationAction(){
       super("Delete", MainFrame.getIcon("delete.gif"));
     }
@@ -250,6 +315,14 @@ public class AnnotationEditor{
   protected static DeleteAnnotationAction delAction;
   protected static Timer hideTimer;
   protected static final int HIDE_DELAY = 1500;
+  
+  protected static boolean inited = false;
+  
+  /**
+   * Stores the Annotation schema objects available in the system.
+   * The annotation types are used as keys for the map.
+   */
+  protected static Map schemasByType;
   
   
   protected TextualDocumentView textView;
