@@ -27,9 +27,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
    */
   protected EventsHandler eventHandler;
 
-  protected HashMap addedAnnotationsList = new HashMap();
-  protected HashMap removedAnnotationsList = new HashMap();
-  protected HashMap updatedAnnotationsList = new HashMap();
+  protected HashSet addedAnnotations = new HashSet();
+  protected HashSet removedAnnotations = new HashSet();
+  protected HashSet updatedAnnotations = new HashSet();
 
   /** Construction from Document. */
   public DatabaseAnnotationSetImpl(Document doc) {
@@ -55,9 +55,9 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
 
   public String toString() {
     return super.toString()
-              + "added annots: " + addedAnnotationsList
-              + "removed annots: " + removedAnnotationsList
-              + "updated annots: " + updatedAnnotationsList;
+              + "added annots: " + addedAnnotations
+              + "removed annots: " + removedAnnotations
+              + "updated annots: " + updatedAnnotations;
   }
 
   /**
@@ -75,7 +75,7 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
         return;
       Annotation ann = e.getAnnotation();
       ann.addAnnotationListener(this);
-      addedAnnotationsList.put(ann.getId(), ann);
+      DatabaseAnnotationSetImpl.this.addedAnnotations.add(ann.getId());
     }
 
     public void annotationRemoved(AnnotationSetEvent e){
@@ -86,12 +86,34 @@ public class DatabaseAnnotationSetImpl extends AnnotationSetImpl {
         return;
       Annotation ann = e.getAnnotation();
       ann.removeAnnotationListener(this);
-      removedAnnotationsList.put(ann.getId(), ann);
+
+      //1. check if this annot is in the newly created annotations set
+      if (addedAnnotations.contains(ann.getId())) {
+        //a new annotatyion that was deleted afterwards, remove it from all sets
+        DatabaseAnnotationSetImpl.this.addedAnnotations.remove(ann.getId());
+        return;
+      }
+      //2. check if the annotation was updated, if so, remove it from the
+      //update list
+      if (updatedAnnotations.contains(ann.getId())) {
+        DatabaseAnnotationSetImpl.this.updatedAnnotations.remove(ann.getId());
+      }
+
+      DatabaseAnnotationSetImpl.this.removedAnnotations.add(ann.getId());
     }
 
     public void annotationUpdated(AnnotationEvent e){
       Annotation ann = (Annotation) e.getSource();
-      updatedAnnotationsList.put(ann.getId(), ann);
+
+      //check if the annotation is newly created
+      //if so, do not add it to the update list, since it was not stored in the
+      //database yet, so the most recent value will be inserted into the DB upon
+      //DataStore::sync()
+      if (addedAnnotations.contains(ann.getId())) {
+        return;
+      }
+
+      DatabaseAnnotationSetImpl.this.updatedAnnotations.add(ann.getId());
     }
 
   }//inner class EventsHandler
