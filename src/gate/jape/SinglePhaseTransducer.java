@@ -131,9 +131,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
         if(currentFSM.getFSMPosition().isFinal()){
           //if the current FSM is in a final state
           acceptingFSMInstances.add(currentFSM.clone());
-  System.out.println("==========================\n" +
-                     "New Accepting FSM:\n" + currentFSM +
-                     "\n==========================");
+//  System.out.println("==========================\n" +
+//                     "New Accepting FSM:\n" + currentFSM +
+//                     "\n==========================");
         }
 
         //this will (should) be optimised
@@ -238,12 +238,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
         FSMInstance currentAcceptor;
         RightHandSide currentRHS;
         long lastAGPosition = startNode.getOffset().longValue();
-  System.out.println("XXXXXXXXXXXXXXXXXXXX All the accepting FSMs are:");
+//  System.out.println("XXXXXXXXXXXXXXXXXXXX All the accepting FSMs are:");
         while(accFSMs.hasNext()){
           currentAcceptor = (FSMInstance) accFSMs.next();
-  System.out.println("==========================\n" +
-                     currentAcceptor +
-                     "\n==========================");
+//  System.out.println("==========================\n" +
+//                     currentAcceptor +
+//                     "\n==========================");
 
           currentRHS = currentAcceptor.getFSMPosition().getAction();
           currentRHS.transduce(doc,currentAcceptor.getBindings());
@@ -255,7 +255,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
             lastAGPosition = currentAGPosition;
           }
         }
-  System.out.println("XXXXXXXXXXXXXXXXXXXX");
+//  System.out.println("XXXXXXXXXXXXXXXXXXXX");
         acceptingFSMInstances.clear();
       }else if(ruleApplicationStyle == APPELT_STYLE){
         //AcceptingFSMInstances is an ordered structure:
@@ -501,6 +501,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.8  2000/05/24 10:22:23  valyt
+// Added Jape GUI
+//
 // Revision 1.7  2000/05/17 19:56:14  valyt
 // Killed some bugs in Jape.
 // It looks like it's working
