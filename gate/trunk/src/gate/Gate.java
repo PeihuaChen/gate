@@ -51,7 +51,7 @@ public class Gate implements GateConstants
    *  re-hashed - a values that seems to be optimal for most of the cases.
    *  */
   public static final int HASH_STH_SIZE = 4;
-
+    
 
   /**
    *  The database schema owner (GATEADMIN is default)
@@ -87,7 +87,9 @@ public class Gate implements GateConstants
     * @see #initCreoleRegister
     */
   public static void init() throws GateException {
-
+    //init local paths
+    initLocalPaths();
+    
     // register the URL handler  for the "gate://" URLs
     System.setProperty(
       "java.protocol.handler.pkgs",
@@ -140,6 +142,121 @@ public class Gate implements GateConstants
   } // init()
   
   /**
+   * Initialises the paths to local files of interest like the GATE home, 
+   * the installed plugins home and site and user configuration files.
+   */
+  protected static void initLocalPaths(){
+    //GATE Home
+    if(gateHome == null){
+      String gateHomeStr = System.getProperty(GATE_HOME_PROPERTY_NAME);
+      if(gateHomeStr != null && gateHomeStr.length() > 0){
+        gateHome = new File(gateHomeStr);
+      }
+      //if failed, try to guess
+      if(gateHome == null || !gateHome.exists()){
+        System.err.println("GATE home system property (\"" + 
+                GATE_HOME_PROPERTY_NAME + "\") not set.\nAttempting to guess...");
+        URL gateURL = Thread.currentThread().getContextClassLoader().
+          getResource("gate/Gate.class");
+        try{
+          if(gateURL.getProtocol().equals("jar")){
+            //running from gate.jar
+            String gateURLStr = gateURL.getFile();
+              File gateJarFile = new File(
+                      new URL(gateURLStr.substring(0, gateURLStr.indexOf('!'))).
+                      getFile());
+              gateHome = gateJarFile.getParentFile().getParentFile();
+          }else if(gateURL.getProtocol().equals("file")){
+            //running from classes directory
+            File gateClassFile = new File(gateURL.getFile());
+            gateHome = gateClassFile.getParentFile().
+              getParentFile().getParentFile();
+          }
+          System.err.println("Using \"" + 
+                  gateHome.getCanonicalPath() + 
+                  "\" as GATE Home.\nIf this is not correct please set it manually" + 
+                  " using the -D" + GATE_HOME_PROPERTY_NAME + 
+                  " option in your start-up script");
+        }catch(Throwable thr){
+          throw new GateRuntimeException(
+                  "Cannot guess GATE Home. Pease set it manually!", thr);
+        }          
+      }
+    }
+    System.out.println("Using " + gateHome.toString() + " as GATE home");
+    
+    //Plugins home
+    if(pluginsHome == null){
+      String pluginsHomeStr = System.getProperty(PLUGINS_HOME_PROPERTY_NAME);
+      if(pluginsHomeStr != null && pluginsHomeStr.length() > 0){
+        File homeFile = new File(pluginsHomeStr);
+        if(homeFile.exists() && homeFile.isDirectory()){
+          pluginsHome = homeFile;
+        }
+      }
+      //if not set, use the GATE Home as a base directory
+      if(pluginsHome == null){
+        File homeFile = new File(gateHome, PLUGINS);
+        if(homeFile.exists() && homeFile.isDirectory()){
+          pluginsHome = homeFile;
+        }
+      }
+      //if still not set, throw exception
+      if(pluginsHome == null){
+        throw new GateRuntimeException(
+                "Could not infer installed plug-ins home!\n" + 
+                "Please set it manually using the -D" + 
+                PLUGINS_HOME_PROPERTY_NAME + " option in your start-up script.");
+      }
+    }
+    System.out.println("Using " + pluginsHome.toString() + 
+            " as installed plug-ins directory.");
+    
+    //site config
+    if(siteConfigFile == null){
+      String siteConfigStr = System.getProperty(SITE_CONFIG_PROPERTY_NAME);
+      if(siteConfigStr != null && siteConfigStr.length() > 0){
+        File configFile = new File(siteConfigStr);
+        if(configFile.exists()) siteConfigFile = configFile;
+      }
+      //if not set, use GATE home as base directory
+      if(siteConfigFile == null){
+        File configFile = new File(gateHome, GATE_DOT_XML);
+        if(configFile.exists()) siteConfigFile = configFile;
+      }
+      //if still not set, throw exception
+      if(siteConfigFile == null){
+        throw new GateRuntimeException(
+            "Could not locate the site configuration file!\n" + 
+            "Please create it at " + 
+            new File(gateHome, GATE_DOT_XML).toString() +
+            " or point to an existing one using the -D" + 
+            SITE_CONFIG_PROPERTY_NAME + " option in your start-up script!");
+      }
+    }
+    System.out.println("Using " + siteConfigFile.toString() + 
+    " as site configuration file.");
+    
+    //user config
+    if(userConfigFile == null){
+      String userConfigStr = System.getProperty(USER_CONFIG_PROPERTY_NAME);
+      if(userConfigStr != null && userConfigStr.length() > 0){
+        File configFile = new File(userConfigStr);
+        if(configFile.exists()) userConfigFile = configFile;
+      }
+      //if still not set, use the user's home as a base directory
+      if(userConfigFile == null){
+        userConfigFile = new File(
+            System.getProperty("user.home") + 
+            Strings.getFileSep() + 
+            (runningOnUnix() ? "." : "") +
+            GATE_DOT_XML);
+      }
+      System.out.println("Using " + userConfigFile + " as user configuration file");
+    }
+  }
+  
+  /**
    * Loads the CREOLE repositories (aka plugins) that the user has selected for 
    * automatic loading.
    * Loads the information about known plugins in memory.
@@ -167,7 +284,7 @@ public class Gate implements GateConstants
       }
     }
     //add all the installed plugins
-    File pluginsHome = new File(System.getProperty(GATE_HOME_SYSPROP_KEY), 
+    File pluginsHome = new File(System.getProperty(GATE_HOME_PROPERTY_NAME), 
             "plugins");
     File[] dirs = pluginsHome.listFiles();
     for(int i = 0; i < dirs.length; i++){
@@ -195,16 +312,16 @@ public class Gate implements GateConstants
 //    }
     
     //process the autoload plugins
-    String pluginPath = getUserConfig().getString(LOAD_PLUGIN_PATH_KEY);
+    String pluginPath = getUserConfig().getString(AUTOLOAD_PLUGIN_PATH_KEY);
     //can be overridden by system property
-    String prop = System.getProperty(LOAD_PLUGIN_PATH_SYSPROP_KEY);
+    String prop = System.getProperty(AUTOLOAD_PLUGIN_PATH_PROPERTY_NAME);
     if(prop != null && prop.length() > 0) pluginPath = prop;
     
     if(pluginPath == null || pluginPath.length() == 0){
       //value not set -> use the default
       try{
         pluginPath = new File(pluginsHome, "ANNIE/").toURL().toString();
-        getUserConfig().put(LOAD_PLUGIN_PATH_KEY, pluginPath);
+        getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, pluginPath);
       }catch(MalformedURLException mue){
         throw new GateRuntimeException(mue);
       }
@@ -280,52 +397,40 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static void initConfigData() throws GateException {
     ConfigDataProcessor configProcessor = new ConfigDataProcessor();
-
-    // url of the builtin config data (for error messages)
-    URL configUrl =
-      Gate.getClassLoader().getResource("gate/resources/" + GATE_DOT_XML);
-
-    // open a stream to the builtin config data file and parse it
-    InputStream configStream = null;
+    //parse the site configuration file
+    URL configURL;
+    try{
+      configURL = siteConfigFile.toURL();
+    }catch(MalformedURLException mue){
+      //this should never happen
+      throw new GateRuntimeException(mue);
+    }
     try {
-      configStream = Files.getGateResourceAsStream(GATE_DOT_XML);
+      InputStream configStream = new FileInputStream(siteConfigFile);
+      configProcessor.parseConfigFile(configStream, configURL);
     } catch(IOException e) {
       throw new GateException(
-        "Couldn't open builtin config data file: " + configUrl + " " + e
+        "Couldn't open site configuration file: " + configURL + " " + e
       );
     }
-    configProcessor.parseConfigFile(configStream, configUrl);
-
-    // parse any command-line initialisation file
-    File siteConfigFile = Gate.getSiteConfigFile();
-    if(siteConfigFile != null) {
+    
+    //parse the user configuration data if present
+    if(userConfigFile != null && userConfigFile.exists()){
+      try{
+        configURL = userConfigFile.toURL();
+      }catch(MalformedURLException mue){
+        //this should never happen
+        throw new GateRuntimeException(mue);
+      }
       try {
-        configUrl = siteConfigFile.toURL();
-        configStream = new FileInputStream(Gate.getSiteConfigFile());
+        InputStream configStream = new FileInputStream(userConfigFile);
+        configProcessor.parseConfigFile(configStream, configURL);
       } catch(IOException e) {
         throw new GateException(
-          "Couldn't open site config data file: " + configUrl + " " + e
+          "Couldn't open user configuration file: " + configURL + " " + e
         );
-      }
-      configProcessor.parseConfigFile(configStream, configUrl);
+      }    
     }
-
-    // parse the user's config file (if it exists)
-    String userConfigName = getUserConfigFileName();
-    File userConfigFile = null;
-    URL userConfigUrl = null;
-    if(DEBUG) { Out.prln("loading user config from " + userConfigName); }
-    configStream = null;
-    boolean userConfigExists = true;
-    try {
-      userConfigFile = new File(userConfigName);
-      configStream = new FileInputStream(userConfigFile);
-      userConfigUrl = userConfigFile.toURL();
-    } catch(IOException e) {
-      userConfigExists = false;
-    }
-    if(userConfigExists)
-      configProcessor.parseConfigFile(configStream, userConfigUrl);
 
     // remember the init-time config options
     originalUserConfig.putAll(userConfig);
@@ -335,25 +440,6 @@ jar/classpath so it's the same as registerBuiltins
         "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
       );
     }
-    
-    
-    //get the CREOLE repositories to load if set trough a sys prop
-    String creolepath = System.getProperty("creole.path");
-    if(creolepath != null && creolepath.length() > 0){
-      StringTokenizer strTok = new StringTokenizer(creolepath, 
-              Strings.getPathSep(), false);
-      while(strTok.hasMoreTokens()){
-        String aPath = strTok.nextToken();
-        //this is an URL
-        try{
-          URL creoleURL = new File(aPath).toURL();
-          Gate.getCreoleRegister().registerDirectories(creoleURL);
-        }catch(MalformedURLException mue){
-          throw new GateRuntimeException(mue);
-        }
-      }
-    }
-    
   } // initConfigData()
 
   /**
@@ -521,6 +607,14 @@ jar/classpath so it's the same as registerBuiltins
    */
   public static Set getRegisteredIREngines(){
     return Collections.unmodifiableSet(registeredIREngines);
+  }
+  
+  /**
+   * Gets the GATE home location.
+   * @return a File value.
+   */
+  public static File getGateHome(){
+    return gateHome;
   }
 
   /** Should we assume we're connected to the net? */
@@ -761,9 +855,6 @@ jar/classpath so it's the same as registerBuiltins
     Gate.siteConfigFile = siteConfigFile;
   } // setSiteConfigFile
 
-  /** Site config file */
-  private static File siteConfigFile;
-
   /** Shorthand for local newline */
   private static String nl = Strings.getNl();
 
@@ -809,6 +900,8 @@ jar/classpath so it's the same as registerBuiltins
     Iterator pluginIter = getKnownPlugins().iterator();
     while(pluginIter.hasNext()){
       URL aPluginURL = (URL)pluginIter.next();
+      //do not save installed plug-ins - they get loaded automatically
+      
       if(knownPluginPath.length() > 0) knownPluginPath += ";";
       knownPluginPath += aPluginURL.toExternalForm();
     }
@@ -822,7 +915,7 @@ jar/classpath so it's the same as registerBuiltins
       if(loadPluginPath.length() > 0) loadPluginPath += ";";
       loadPluginPath += aPluginURL.toExternalForm();
     }
-    getUserConfig().put(LOAD_PLUGIN_PATH_KEY, loadPluginPath);
+    getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, loadPluginPath);
     
     // the user's config file
     String configFileName = getUserConfigFileName();
@@ -1085,6 +1178,24 @@ jar/classpath so it's the same as registerBuiltins
      */
     protected String resourceComment;
   }
+  
+  /**
+   * The top level directory of the GATE installation.
+   */
+  protected static File gateHome;
+
+  
+  /** Site config file */
+  private static File siteConfigFile;
+
+  /** User config file */
+  private static File userConfigFile;
+
+
+  /**
+   * The top level directory for GATE installed plugins.
+   */
+  protected static File pluginsHome;
   
   /**
    * The list of plugins (aka CREOLE directories) the system knows about.
