@@ -20,7 +20,7 @@ import java.util.*;
 import gate.util.*;
 import gate.event.*;
 
-/** An Annotation is an arc in an AnnotationGraph. It is immutable, to avoid
+/** An Annotation is an arc in an AnnotationSet. It is immutable, to avoid
   * the situation where each annotation has to point to its parent graph in
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.

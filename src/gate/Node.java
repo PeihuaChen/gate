@@ -18,7 +18,7 @@ import java.util.*;
 import java.io.*;
 import gate.util.*;
 
-/** Nodes in AnnotationGraphs. Immutable.
+/** Nodes in AnnotationSets. Immutable.
   */
 public interface Node extends IdBearer, Serializable
 {

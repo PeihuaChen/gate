@@ -41,9 +41,9 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
   /** Creates a new FSMInstance object.
     * @param supportGraph the transition graph of the FSM
     * @param FSMPosition the state this instance will be in
-    * @param startNode the node in the AnnotationGraph where this FSM instance
+    * @param startNode the node in the AnnotationSet where this FSM instance
     * started the matching
-    * @ AGPosition the node in the AnnotationGraph up to which this FSM Instance
+    * @ AGPosition the node in the AnnotationSet up to which this FSM Instance
     * advanced during the matching.
     * @param bindings a HashMap that maps from labels (objects of type String)
     * to sets of annotations (objects of type AnnotationSet). This map stores
@@ -96,7 +96,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   public int getFileIndex(){ return fileIndex; }
 
-  /** Returns the node in the AnnotationGraph from which this FSM instance
+  /** Returns the node in the AnnotationSet from which this FSM instance
     * started the matching process.
     * @return a gate.Node object
     */
@@ -108,10 +108,10 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   public Node getAGPosition(){ return AGPosition; }
 
-  /** Sets the current position in the AnnotationGraph.
+  /** Sets the current position in the AnnotationSet.
     * Convenience method for cases when this value is not known at construction
     * time.
-    * @param node a position in the AnnotationGraph
+    * @param node a position in the AnnotationSet
     */
   public void setAGPosition(Node node){
     AGPosition = node;
@@ -261,7 +261,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
   /** The current state of this FSMInstance */
   private State FSMPosition;
 
-  /** The place (Node) in the AnnotationGraph where the matching started*/
+  /** The place (Node) in the AnnotationSet where the matching started*/
   private Node AGPosition, startNode;
 
   /** A map from java.lang.String to gate.AnnotationSet describing all the
@@ -270,7 +270,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   private HashMap bindings;
 
-  /** The size of the matched region in the Annotation Graph*/
+  /** The size of the matched region in the Annotation Set*/
   private long length = 0;
 
   /**

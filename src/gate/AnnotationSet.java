@@ -133,4 +133,4 @@ public interface AnnotationSet extends Set, Cloneable, Serializable
 
   public void removeGateListener(GateListener l);
 
-} // interface AnnotationGraph
+} // interface AnnotationSet
