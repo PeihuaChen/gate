@@ -14,11 +14,21 @@
 
 package gate.security;
 
+import java.util.*;
+import java.sql.*;
+
 import gate.persist.PersistenceException;
 import gate.util.MethodNotImplementedException;
 
 
 public class AccessControllerImpl implements AccessController {
+
+  private HashMap     sessions;
+  private HashMap     timeouts;
+  private Connection  conn;
+  private String      jfbcURL;
+  private String      jdbcDriverName;
+
 
   public AccessControllerImpl() {
   }
@@ -112,4 +122,8 @@ public class AccessControllerImpl implements AccessController {
 
     throw new MethodNotImplementedException();
   }
+
+  /* implementation private methods */
+
+//  private
 }
