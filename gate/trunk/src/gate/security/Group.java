@@ -22,6 +22,9 @@ import gate.persist.PersistenceException;
 public interface Group {
 
   /** --- */
+  public Long getID();
+
+  /** --- */
   public String getName();
 
   /** --- */

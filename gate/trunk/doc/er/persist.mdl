@@ -232,6 +232,28 @@
 			result     	"String"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "canReadLR"
+			quid       	"3BA88DE80238"
+			parameters 	(list Parameters
+			    (object Parameter "lrID"
+				type       	"Long")
+			    (object Parameter "sessionID"
+				type       	"Long"))
+			result     	"boolean"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "canWriteLR"
+			quid       	"3BA88DE80256"
+			parameters 	(list Parameters
+			    (object Parameter "lrID"
+				type       	"Long")
+			    (object Parameter "sessionID"
+				type       	"Long"))
+			result     	"boolean"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
 			uid        	0))
 		module     	"Component View::DataStore"
 		quidu      	"3BA1F7FD038F"
@@ -420,17 +442,17 @@
 		max_height 	28350
 		max_width  	21600
 		origin_x   	0
-		origin_y   	2044
+		origin_y   	2081
 		items      	(list diagram_item_list
 		    (object ClassView "Class" "Logical View::DataStore" @1
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(752, 1360)
+			location   	(784, 1216)
 			label      	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(24, 826)
+			    location   	(56, 632)
 			    fill_color 	16777215
 			    nlines     	1
 			    max_width  	1456
@@ -438,7 +460,7 @@
 			    label      	"DataStore")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(24, 776)
+			    location   	(56, 582)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
@@ -452,14 +474,14 @@
 			quidu      	"3BA1E31200BE"
 			compartment 	(object Compartment
 			    Parent_View 	@1
-			    location   	(24, 887)
+			    location   	(56, 693)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
-			    nlines     	21
-			    max_width  	1462)
+			    nlines     	23
+			    max_width  	1453)
 			width      	1474
-			height     	1192
+			height     	1292
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::FeatureBearer" @2
@@ -513,10 +535,10 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(2080, 1376)
+			location   	(800, 2272)
 			label      	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(1587, 1142)
+			    location   	(307, 2038)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	986
@@ -524,7 +546,7 @@
 			    label      	"DatabaseDataStore")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(1587, 1092)
+			    location   	(307, 1988)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
@@ -538,7 +560,7 @@
 			quidu      	"3BA1EBEC0302"
 			compartment 	(object Compartment
 			    Parent_View 	@4
-			    location   	(1587, 1203)
+			    location   	(307, 2099)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
@@ -553,10 +575,10 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(992, 2688)
+			location   	(1296, 2832)
 			label      	(object ItemLabel
 			    Parent_View 	@5
-			    location   	(673, 2607)
+			    location   	(977, 2751)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	638
@@ -568,12 +590,12 @@
 			quidu      	"3BA1FA57029B"
 			compartment 	(object Compartment
 			    Parent_View 	@5
-			    location   	(673, 2668)
+			    location   	(977, 2812)
 			    icon_style 	"Icon"
 			    fill_color 	16777215
 			    anchor     	2
 			    nlines     	2
-			    max_width  	634)
+			    max_width  	643)
 			width      	656
 			height     	186
 			annotation 	8
@@ -583,10 +605,10 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(2000, 2912)
+			location   	(1936, 2800)
 			label      	(object ItemLabel
 			    Parent_View 	@6
-			    location   	(1845, 2861)
+			    location   	(1781, 2749)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	310
@@ -605,10 +627,10 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(2608, 2640)
+			location   	(2448, 2784)
 			label      	(object ItemLabel
 			    Parent_View 	@7
-			    location   	(2414, 2589)
+			    location   	(2254, 2733)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	388
@@ -634,10 +656,10 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(1968, 2256)
+			location   	(1968, 2272)
 			label      	(object ItemLabel
 			    Parent_View 	@9
-			    location   	(1652, 2050)
+			    location   	(1652, 2066)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	632
@@ -649,12 +671,12 @@
 			quidu      	"3BA2074B027B"
 			compartment 	(object Compartment
 			    Parent_View 	@9
-			    location   	(1652, 2111)
+			    location   	(1652, 2127)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	7
-			    max_width  	628)
+			    max_width  	637)
 			width      	650
 			height     	436
 			annotation 	8
@@ -686,37 +708,7 @@
 			quidu      	"3BA2076D037E"
 			client     	@9
 			supplier   	@4
-			line_style 	0)
-		    (object ClassView "Class" "Logical View::JDBCDataStore" @14
-			ShowCompartmentStereotypes 	TRUE
-			IncludeAttribute 	TRUE
-			IncludeOperation 	TRUE
-			ShowOperationSignature 	TRUE
-			location   	(1968, 2256)
-			label      	(object ItemLabel
-			    Parent_View 	@14
-			    location   	(1652, 2050)
-			    fill_color 	13434879
-			    nlines     	1
-			    max_width  	632
-			    justify    	0
-			    label      	"JDBCDataStore")
-			icon_style 	"Icon"
-			line_color 	3342489
-			fill_color 	13434879
-			quidu      	"3BA2074B027B"
-			compartment 	(object Compartment
-			    Parent_View 	@14
-			    location   	(1652, 2111)
-			    icon_style 	"Icon"
-			    fill_color 	13434879
-			    anchor     	2
-			    nlines     	7
-			    max_width  	628)
-			width      	650
-			height     	436
-			annotation 	8
-			autoResize 	TRUE)))))
+			line_style 	0)))))
     root_subsystem 	(object SubSystem "Component View"
 	quid       	"3BA1E1830101"
 	physical_models 	(list unit_reference_list

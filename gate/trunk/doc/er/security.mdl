@@ -57,6 +57,12 @@
 		quid       	"3BA60505005C"
 		stereotype 	"Interface"
 		operations 	(list Operations
+		    (object Operation "getID"
+			quid       	"3BA8BB030278"
+			result     	"Long"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
 		    (object Operation "getName"
 			quid       	"3BA60816023B"
 			result     	"String"
@@ -73,7 +79,9 @@
 			quid       	"3BA608160263"
 			parameters 	(list Parameters
 			    (object Parameter "newName"
-				type       	"String"))
+				type       	"String")
+			    (object Parameter "sessionID"
+				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -82,6 +90,8 @@
 			quid       	"3BA608790161"
 			parameters 	(list Parameters
 			    (object Parameter "ID"
+				type       	"Long")
+			    (object Parameter "sessionID"
 				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
@@ -91,6 +101,8 @@
 			quid       	"3BA608A303CF"
 			parameters 	(list Parameters
 			    (object Parameter "ID"
+				type       	"Long")
+			    (object Parameter "sessionID"
 				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
@@ -100,6 +112,12 @@
 		quid       	"3BA6053900F7"
 		stereotype 	"Interface"
 		operations 	(list Operations
+		    (object Operation "getID"
+			quid       	"3BA8BAF8036C"
+			result     	"Long"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
 		    (object Operation "getName"
 			quid       	"3BA6075A0141"
 			result     	"String"
@@ -116,7 +134,9 @@
 			quid       	"3BA6076900F2"
 			parameters 	(list Parameters
 			    (object Parameter "newName"
-				type       	"String"))
+				type       	"String")
+			    (object Parameter "sessionID"
+				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -125,12 +145,14 @@
 			quid       	"3BA6077200C3"
 			parameters 	(list Parameters
 			    (object Parameter "newPassw"
-				type       	"String"))
+				type       	"String")
+			    (object Parameter "sessionID"
+				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
 			uid        	0)))
-	    (object Class "SecurityFactory"
+	    (object Class "AccessController"
 		quid       	"3BA60569024A"
 		stereotype 	"Interface"
 		operations 	(list Operations
@@ -170,6 +192,15 @@
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
 			uid        	0)
+		    (object Operation "findSession"
+			quid       	"3BA8B73602A1"
+			parameters 	(list Parameters
+			    (object Parameter "sessionID"
+				type       	"Long"))
+			result     	"Session"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
 		    (object Operation "createGroup"
 			quid       	"3BA60602018C"
 			parameters 	(list Parameters
@@ -193,8 +224,10 @@
 		    (object Operation "deleteUser"
 			quid       	"3BA606540053"
 			parameters 	(list Parameters
-			    (object Parameter "name"
-				type       	"String"))
+			    (object Parameter "usr"
+				type       	"User")
+			    (object Parameter "session"
+				type       	"Session"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -203,7 +236,9 @@
 			quid       	"3BA60665010C"
 			parameters 	(list Parameters
 			    (object Parameter "ID"
-				type       	"Long"))
+				type       	"Long")
+			    (object Parameter "session"
+				type       	"Session"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -211,8 +246,10 @@
 		    (object Operation "deleteGroup"
 			quid       	"3BA606B4026E"
 			parameters 	(list Parameters
-			    (object Parameter "name"
-				type       	"String"))
+			    (object Parameter "grp"
+				type       	"Group")
+			    (object Parameter "session"
+				type       	"Session"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -221,6 +258,8 @@
 			quid       	"3BA606B4028C"
 			parameters 	(list Parameters
 			    (object Parameter "ID"
+				type       	"Long")
+			    (object Parameter "sessionID"
 				type       	"Long"))
 			result     	"void"
 			concurrency 	"Sequential"
@@ -232,16 +271,29 @@
 			    (object Parameter "username"
 				type       	"String")
 			    (object Parameter "password"
-				type       	"String"))
-			result     	"Long"
+				type       	"String")
+			    (object Parameter "groupID"
+				type       	"Long"))
+			result     	"Session"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
 			uid        	0)
 		    (object Operation "logout"
 			quid       	"3BA7573E0113"
 			parameters 	(list Parameters
-			    (object Parameter "sessionID"
-				type       	"Long"))
+			    (object Parameter "session"
+				type       	"Session"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "setSessionTimeout"
+			quid       	"3BA88621039F"
+			parameters 	(list Parameters
+			    (object Parameter "session"
+				type       	"Session")
+			    (object Parameter "timeoutMins"
+				type       	"long"))
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
@@ -259,6 +311,12 @@
 		    (object Operation "getUser"
 			quid       	"3BA75E2B0163"
 			result     	"User"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getGroup"
+			quid       	"3BA8875A02AF"
+			result     	"Group"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
 			uid        	0)))
@@ -279,22 +337,22 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(528, 624)
+			location   	(592, 592)
 			label      	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(194, 465)
+			    location   	(94, 408)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	668
+			    max_width  	996
 			    justify    	0
 			    label      	"Group")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(194, 415)
+			    location   	(94, 358)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	668
+			    max_width  	996
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -304,14 +362,14 @@
 			quidu      	"3BA60505005C"
 			compartment 	(object Compartment
 			    Parent_View 	@1
-			    location   	(194, 526)
+			    location   	(94, 469)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	6
-			    max_width  	675)
-			width      	686
-			height     	442
+			    nlines     	7
+			    max_width  	994)
+			width      	1014
+			height     	492
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::User" @2
@@ -319,22 +377,22 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(544, 1152)
+			location   	(624, 1168)
 			label      	(object ItemLabel
 			    Parent_View 	@2
-			    location   	(166, 1018)
+			    location   	(82, 1009)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	756
+			    max_width  	1084
 			    justify    	0
 			    label      	"User")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@2
-			    location   	(166, 968)
+			    location   	(82, 959)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	756
+			    max_width  	1084
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -344,37 +402,37 @@
 			quidu      	"3BA6053900F7"
 			compartment 	(object Compartment
 			    Parent_View 	@2
-			    location   	(166, 1079)
+			    location   	(82, 1070)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	5
-			    max_width  	762)
-			width      	774
-			height     	392
+			    nlines     	6
+			    max_width  	1081)
+			width      	1102
+			height     	442
 			annotation 	8
 			autoResize 	TRUE)
-		    (object ClassView "Class" "Logical View::SecurityFactory" @3
+		    (object ClassView "Class" "Logical View::AccessController" @3
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(1552, 768)
+			location   	(2112, 592)
 			label      	(object ItemLabel
 			    Parent_View 	@3
-			    location   	(1077, 434)
+			    location   	(1464, 208)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	950
+			    max_width  	1296
 			    justify    	0
-			    label      	"SecurityFactory")
+			    label      	"AccessController")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@3
-			    location   	(1077, 384)
+			    location   	(1464, 158)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	950
+			    max_width  	1296
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -384,24 +442,24 @@
 			quidu      	"3BA60569024A"
 			compartment 	(object Compartment
 			    Parent_View 	@3
-			    location   	(1077, 495)
+			    location   	(1464, 269)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	13
-			    max_width  	956)
-			width      	968
-			height     	792
+			    nlines     	15
+			    max_width  	1294)
+			width      	1314
+			height     	892
 			annotation 	8
 			autoResize 	TRUE)
 		    (object ClassView "Class" "Logical View::Session" @4
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
-			location   	(304, 1584)
+			location   	(208, 1632)
 			label      	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(176, 1500)
+			    location   	(80, 1523)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	256
@@ -409,7 +467,7 @@
 			    label      	"Session")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@4
-			    location   	(176, 1450)
+			    location   	(80, 1473)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
@@ -423,14 +481,14 @@
 			quidu      	"3BA75DEC019E"
 			compartment 	(object Compartment
 			    Parent_View 	@4
-			    location   	(176, 1558)
+			    location   	(80, 1584)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	3
-			    max_width  	225)
+			    nlines     	4
+			    max_width  	241)
 			width      	274
-			height     	292
+			height     	342
 			annotation 	8
 			autoResize 	TRUE)
 		    (object NoteView @5

@@ -70,4 +70,38 @@ public class OracleDataStore extends JDBCDataStore {
 
   }
 
+  /**
+   * Checks if the user (identified by the sessionID)
+   *  has read access to the LR
+   */
+  public boolean canReadLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException{
+
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call gate.has_access(?,?,?,?)} ");
+      //numbers generated from Oracle sequences are BIGINT
+      stmt.registerOutParameter(4,java.sql.Types.INTEGER);
+      stmt.execute();
+      int result = stmt.getInt(4);
+
+      return false;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't check permissions in DB: ["+ sqle.getMessage()+"]");
+    }
+  }
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has write access to the LR
+   */
+  public boolean canWriteLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException{
+
+    throw new MethodNotImplementedException();
+  }
+
+
+
 }

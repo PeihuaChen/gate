@@ -20,45 +20,59 @@ import gate.persist.PersistenceException;
 public interface AccessControler {
 
   /** --- */
-  public Group findGroup(String name);
+  public Group findGroup(String name)
+    throws PersistenceException,SecurityException;;
 
   /** --- */
-  public Group findGroup(Long id);
+  public Group findGroup(Long id)
+    throws PersistenceException,SecurityException;;
 
   /** --- */
-  public User findUser(String name);
+  public User findUser(String name)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public User findUser(Long id);
+  public User findUser(Long id)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public Session findSession(Long id);
+  public Session findSession(Long id)
+    throws SecurityException;
 
   /** --- */
-  public Group createGroup(String name);
+  public Group createGroup(String name)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public void deleteGroup(Long id, Session s);
+  public void deleteGroup(Long id, Session s)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public void deleteGroup(Group grp, Session s);
+  public void deleteGroup(Group grp, Session s)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public User createUser(String name, String passwd);
+  public User createUser(String name, String passwd)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public User deleteUser(User usr, Session s);
+  public User deleteUser(User usr, Session s)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public User deleteUser(Long id, Session s);
+  public User deleteUser(Long id, Session s)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public Session login(String usr_name, String passwd,Long prefGroupID);
+  public Session login(String usr_name, String passwd,Long prefGroupID)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public void logout(Session s);
+  public void logout(Session s)
+    throws PersistenceException,SecurityException;
 
   /** --- */
-  public void setSessionTimeout(Session s, int timeoutMins);
+  public void setSessionTimeout(Session s, int timeoutMins)
+    throws PersistenceException,SecurityException;
 
 }
