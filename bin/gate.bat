@@ -1,60 +1,91 @@
 @echo off
 REM ##############################################
 REM Gate run script by Valentin Tablan 01 Jun 2001
-REM $id$
+REM $Id$
 REM ##############################################
 
 
 REM ##############################################
-REM let's find JAVA
+REM set LOCAT to where we hope gate.jar etc. are located
 REM ##############################################
 
-set RUNJAVA=java
-if not "%JAVA_HOME%" == "" set RUNJAVA="%JAVA_HOME%\bin\java"
-echo Using java in %RUNJAVA%
+if not x%GATE_HOME% == x goto gotGateHome
 
+set LOCAT=%~d0%~p0
+goto doneGateHome
 
-REM ##############################################
-REM let's find GATE
-REM ##############################################
-SET GATE_HOME=%~d0%~p0
-if exist "%GATE_HOME%gate.jar" goto okGate
+:gotGateHome
+set LOCAT=%GATE_HOME%\bin
 
-%~d0
-cd %~p0
-SET GATE_HOME=..\build\
-if exist "%GATE_HOME%gate.jar" goto okGate
-
-echo Could not find gate.jar
-goto finish
-
-
-:okGate
-echo using gate.jar in "%GATE_HOME%gate.jar"
+:doneGateHome
+echo LOCAT: %LOCAT%
 
 
 REM ##############################################
-REM let's find GUK
+REM set SITEGATEXML to where we thing gate.xml is (or "" if not around)
 REM ##############################################
-REM we have gate.jar; let's find guk.jar
-SET GUK_HOME=%~d0%~p0ext
-if exist "%GUK_HOME%\guk*.jar" goto allGo
 
-%~d0
-cd %~p0
-SET GUK_HOME=..\lib\ext\
-if exist "%GUK_HOME%\guk*.jar" goto allGo
+set SITEGATEXML=
+if not x%GATE_CONFIG% == x goto gotGateConfig
 
+if exist %LOCAT%\gate.xml set SITEGATEXML=%LOCAT%\gate.xml
+goto doneGateConfig
 
-echo Could not find guk.jar
-goto finish
+:gotGateConfig
+set SITEGATEXML=%GATE_CONFIG%
+
+:doneGateConfig
+
+echo SITEGATEXML: %SITEGATEXML%
 
 
 REM ##############################################
-REM Run the thing
+REM set GATEJAR and GUK to gate.jar and ext locations
 REM ##############################################
-:allGo
-echo using guk.jar in "%GUK_HOME%guk.jar"
-%RUNJAVA% -Xmx400m -Djava.ext.dirs=%GUK_HOME% -cp "%GATE_HOME%gate.jar"  gate.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
 
-:finish
+set GATEJAR=%LOCAT%\gate.jar
+set GUK=%LOCAT%\ext
+if not exist %GATEJAR% set GATEJAR=%LOCAT%\..\build\gate.jar
+if not exist %GUK%\guk.jar set GUK=%LOCAT%\..\lib\ext
+
+echo GATEJAR: %GATEJAR%
+echo GUK: %GUK%
+
+
+REM ##############################################
+REM set JAVA
+REM ##############################################
+
+set JAVA=%JAVA_HOME%\bin\java.exe
+if not exist %JAVA% set JAVA=java
+
+echo JAVA: %JAVA%
+
+
+REM ##############################################
+REM set CLASSPATH
+REM ##############################################
+
+set CLASSPATH=%GATEJAR%;%CLASSPATH%
+
+echo CLASSPATH: %CLASSPATH%
+
+
+REM ##############################################
+REM if we have a site gate.xml set a var including the -i
+REM ##############################################
+
+if not x%SITEGATEXML% == x set FLAGS=-i %SITEGATEXML%
+
+echo FLAGS: %FLAGS%
+
+
+REM ##############################################
+REM run the beast
+REM ##############################################
+
+set RUN=%JAVA% -Xmx200m -Djava.ext.dirs=%GUK% -classpath %CLASSPATH% gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+echo RUN: %RUN%
+%RUN%
+
