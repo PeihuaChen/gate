@@ -56,7 +56,10 @@ public class TestTokeniser extends TestCase{
       new URL(TestDocument.getTestServerName() + "tests/doc0.html")
     );
     //create a default tokeniser
-    DefaultTokeniser tokeniser = new DefaultTokeniser();
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("rulesResourceName","creole/tokeniser/DefaultTokeniser.rules");
+    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
+                          "gate.creole.tokeniser.DefaultTokeniser", params);
     AnnotationSet tokeniserAS = doc.getAnnotations("TokeniserAS");
     tokeniser.tokenise(doc, tokeniserAS, false);
     assert(!tokeniserAS.isEmpty());
@@ -71,14 +74,14 @@ public class TestTokeniser extends TestCase{
       new URL(TestDocument.getTestServerName() + "tests/doc0.html")
     );
     //create a tokeniser
-    DefaultTokeniser tokeniser = new DefaultTokeniser(
-    Files.getResourceAsStream(Files.getResourcePath() +
-                              "/creole/tokeniser/DefaultTokeniser.rules"));
+    DefaultTokeniser tokeniser = new DefaultTokeniser();
+    tokeniser.setRulesResourceName("/creole/tokeniser/DefaultTokeniser.rules");
+    tokeniser.init();
+
     AnnotationSet tokeniserAS = doc.getAnnotations("TokeniserAS");
     tokeniser.tokenise(doc, tokeniserAS, false);
     assert(!tokeniserAS.isEmpty());
   }
-
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestTokeniser.class);
@@ -91,9 +94,11 @@ public class TestTokeniser extends TestCase{
       testTokeniser1.setUp();
       testTokeniser1.testDefaultTokeniser();
       testTokeniser1.tearDown();
+/*
       testTokeniser1.setUp();
       testTokeniser1.testCustomTokeniser();
       testTokeniser1.tearDown();
+      */
     }catch(Exception e){
       e.printStackTrace();
     }

@@ -20,6 +20,7 @@ package gate.creole.tokeniser;
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
 import java.lang.reflect.*;
 
 import gate.*;
@@ -103,73 +104,54 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** Creates a tokeniser from the default set of rules included with the gate
-    * resources
-    */
-  public DefaultTokeniser()throws IOException,
-                                     TokeniserException {
-    this(Files.getGateResourceAsStream(
-                                    "creole/tokeniser/DefaultTokeniser.rules"));
-    /*
-    init(new InputStreamReader(getClass().getResourceAsStream(
-            "/gate/resources/creole/tokeniser/DefaultTokeniser.rules")));
-    */
+  /**
+   * Creates a tokeniser
+   */
+  public DefaultTokeniser(){
   }
 
-  /** Constructs a DefaultTokeniser from the file with the name specified by
-    * ruleFile
-    * @throws FileNotFoundException if the file cannot be found.
-    * @throws IOException if an I/O error occurs during reading the rules
-    * @throws TokeniserException in case of a malformed rule.
-    */
-  public DefaultTokeniser(String rulesFile) throws FileNotFoundException,
-                                                   IOException,
-                                                   TokeniserException {
-    this(new FileReader(rulesFile));
-  } // DefaultTokeniser(String rulesFile)
-
-  /** Constructs a DefaultTokeniser from an {@link java.io.InputStream
-    * InputStream}.
-    * @throws IOException if an I/O error occurs during reading the rules
-    * @throws TokeniserException in case of a malformed rule.
-    */
-  public DefaultTokeniser(InputStream rulesIOStr) throws IOException,
-                                                   TokeniserException {
-    this(new InputStreamReader(rulesIOStr));
-  } // DefaultTokeniser(InputStream rulesIOStr)
-
-  /** Constructs a DefaultTokeniser from a {@link java.io.Reader Reader}.
-    * @throws IOException if an I/O error occurs during reading the rules
-    * @throws TokeniserException in case of a malformed rule.
-    */
-  public DefaultTokeniser(Reader rulesRdr) throws IOException,
-                                                  TokeniserException {
-    initialState = new FSMState(this);
-    BufferedReader rulesReader = new BufferedReader(rulesRdr);
-    String line = rulesReader.readLine();
-    String toParse = "";
-
-    while (line != null){
-      if(line.endsWith("\\")){
-        toParse += line.substring(0,line.length()-1);
+  public Resource init() throws ResourceInstantiationException{
+    Reader rulesReader;
+    try{
+      if(rulesResourceName != null){
+        rulesReader = new InputStreamReader(
+                            Files.getGateResourceAsStream(rulesResourceName));
+      }else if(rulesURL != null){
+        rulesReader = new InputStreamReader((new URL(rulesURL)).openStream());
       }else{
-        toParse += line;
-        parseRule(toParse);
-        toParse = "";
+        /*
+        //they're all null, Scream!
+        throw new ResourceInstantiationException(
+          "No URL provided for the rules!");
+        */
+        //this should be as above when the resource loader knows how
+        //to set default parameters
+        rulesReader = new InputStreamReader(
+                            Files.getGateResourceAsStream(defaultResourceName));
       }
-      line = rulesReader.readLine();
-    }
-    // Out.println("\n\n" + getFSMgml());
-    // try{
-    // gate.fsm.TestFSM.showGraph(
-    // "Tokeniser graph (Non deterministic)", getFSMgml());
+      initialState = new FSMState(this);
+      BufferedReader bRulesReader = new BufferedReader(rulesReader);
+      String line = bRulesReader.readLine();
+      String toParse = "";
+
+      while (line != null){
+        if(line.endsWith("\\")){
+          toParse += line.substring(0,line.length()-1);
+        }else{
+          toParse += line;
+          parseRule(toParse);
+          toParse = "";
+        }
+        line = bRulesReader.readLine();
+      }
       eliminateVoidTransitions();
-    // Out.println("\n\n" + getDFSMgml());
-    // gate.fsm.TestFSM.showGraph(
-    // "Tokeniser graph (deterministic)", getDFSMgml());
-    // }catch(EDU.auburn.VGJ.graph.ParseError pe)
-    // {pe.printStackTrace(Err.getPrintWriter());}
-  } // DefaultTokeniser(Reader rulesRdr)
+    }catch(java.io.IOException ioe){
+      throw new ResourceInstantiationException(ioe);
+    }catch(TokeniserException te){
+      throw new ResourceInstantiationException(te);
+    }
+    return this;
+  }
 
   /** Parses one input line containing a tokeniser rule.
     * This will create the necessary FSMState objects and the links
@@ -737,7 +719,19 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     Iterator listenersIter = myProgressListeners.iterator();
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
-  } // fireProcessFinishedEvent
+  }
+  public void setRulesURL(String newRulesURL) {
+    rulesURL = newRulesURL;
+  }
+  public String getRulesURL() {
+    return rulesURL;
+  }
+  public void setRulesResourceName(String newRulesResourceName) {
+    rulesResourceName = newRulesResourceName;
+  }
+  public String getRulesResourceName() {
+    return rulesResourceName;
+  }// fireProcessFinishedEvent
   //ProcessProgressReporter implementation ends here
 
   /*
@@ -796,6 +790,13 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
 
   /** Maps from type names to type internal ids*/
   public static Map stringTypeIds;
+
+  protected String rulesURL = null;
+  protected String rulesResourceName;
+
+  static protected String defaultResourceName =
+                            "creole/tokeniser/DefaultTokeniser.rules";
+
 
   /** The static initialiser will inspect the class {@link java.lang.Character}
     * using reflection to find all the public static members and will map them
