@@ -1,9 +1,8 @@
 package gate.xml;
 
 /**
- * <p>Title: Gate2</p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2000</p>
+ * <p>Title: TestRepositioningInfo.java </p>
+ * <p>Description: Test to check if RepositioningInfo works. </p>
  * <p>Company: University Of Sheffield</p>
  * @author Niraj Aswani
  * @version 1.0
@@ -17,9 +16,20 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ * This class tests if Repositinioning Information works.
+ * It creates a document using an inline xml file with preserveOriginalContent
+ * and collectRepositioningInfo options keeping true, which has all
+ * sorts of special entities like &amp, &quot etc. + it contains both
+ * kind of unix and dos types new line characters.  It then saves the
+ * document to the temporary location on the disk using
+ * "save preserving document format" option and then compares the contents of
+ * both the original and the temporary document to see if they are equal.
+ */
 public class TestRepositioningInfo
     extends TestCase {
 
+  /** Constructor */
   public TestRepositioningInfo(String dummy) {
     super(dummy);
   }
@@ -57,6 +67,17 @@ public class TestRepositioningInfo
   } // tearDown
 
 
+  /**
+   * This method tests if Repositinioning Information works.
+   * It creates a document using an xml file with preserveOriginalContent
+   * and collectRepositioningInfo options keeping true and which has all
+   * sorts of special entities like &amp, &quot etc. + it contains both
+   * kind of unix and dos stype new line characters.  It then saves the
+   * document to the temporary location on the disk using
+   * "save preserving document format" option and then compares the contents of
+   * both the original and the temporary document to see if they are equal.
+   * @throws java.lang.Exception
+   */
   public void testRepositioningInfo() throws Exception {
 
     // here we need to save the document to the file
@@ -89,8 +110,10 @@ public class TestRepositioningInfo
   } // suite
 
 
+  /** A test file URL */
   private String testFile = "";
-  private String outputFile = "";
+
+  /** Document instance */
   private Document doc = null;
 
 }
