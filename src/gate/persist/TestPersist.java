@@ -590,7 +590,10 @@ public class TestPersist extends TestCase
     ds.open();
 
     //2. read LR
-    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
+    lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     //3. check name
     String name = lr.getName();
@@ -702,7 +705,10 @@ public class TestPersist extends TestCase
 
     if (DEBUG) Out.prln("ID " + uc01_lrID);
     //2. read LR
-    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,uc01_lrID);
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
+    lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
     Document dbDoc = (Document)lr;
     Document doc2 = null;
 
@@ -873,7 +879,10 @@ public class TestPersist extends TestCase
     ds.open();
 
     //2. read LR
-    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.uc01_lrID);
+    lr = (LanguageResource) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
 
     //3. try to delete it
     ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
@@ -953,7 +962,10 @@ public class TestPersist extends TestCase
     ds.open();
 
     //2. read LR
-    lr = ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, uc101_lrID);
+    lr = (LanguageResource) Factory.createResource(DBHelper.CORPUS_CLASS, params);
 
     //3. check name
     String name = lr.getName();
@@ -999,7 +1011,11 @@ public class TestPersist extends TestCase
     if (DEBUG) Out.prln("ID " + uc101_lrID);
 
     //2. read LR
-    lr = ds.getLr(DBHelper.CORPUS_CLASS,uc101_lrID);
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, uc101_lrID);
+    lr = (LanguageResource) Factory.createResource(DBHelper.CORPUS_CLASS, params);
+
     Corpus dbCorp = (Corpus)lr;
     Corpus corp2 = null;
 
