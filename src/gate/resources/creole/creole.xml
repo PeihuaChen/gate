@@ -169,7 +169,7 @@
         COMMENT="The path to the DTD for the APF file"
   DEFAULT="ace-pilot-ref.dtd">java.lang.String</PARAMETER>
       <PARAMETER NAME="exportFilePath"
-        COMMENT="Source URL where to export"
+        COMMENT="Source URL where to export" RUNTIME="true"
   SUFFIXES="xml">java.net.URL</PARAMETER>
       <PARAMETER
   DEFAULT="Organization;Person;Location;Facility;GPE"
