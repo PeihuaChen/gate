@@ -39,10 +39,20 @@ public class Scratch
   public static void main(String args[]) throws Exception {
 
 
+//    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+//    Map uidefaults  = (Map)javax.swing.UIManager.getDefaults();
+//    List keys = new ArrayList(uidefaults.keySet());
+//    Collections.sort(keys);
+//    Iterator keyIter = keys.iterator();
+//    while(keyIter.hasNext()){
+//      Object key = keyIter.next();
+//      System.out.println(key + " : " + uidefaults.get(key));
+//    }
+
     // initialise the thing
-    Gate.setNetConnected(false);
-    Gate.setLocalWebServer(false);
-    Gate.init();
+//    Gate.setNetConnected(false);
+//    Gate.setLocalWebServer(false);
+//    Gate.init();
 
 //    Scratch oneOfMe = new Scratch();
 //    try{
@@ -52,9 +62,9 @@ public class Scratch
 //    }
 
 
-    CreoleRegister reg = Gate.getCreoleRegister();
-System.out.println("Instances for " + reg.getLrInstances("gate.creole.AnnotationSchema"));
-System.out.println("Instances for " + reg.getAllInstances ("gate.creole.AnnotationSchema"));
+//    CreoleRegister reg = Gate.getCreoleRegister();
+//System.out.println("Instances for " + reg.getLrInstances("gate.creole.AnnotationSchema"));
+//System.out.println("Instances for " + reg.getAllInstances ("gate.creole.AnnotationSchema"));
 
 //System.out.println("VRs for " + reg.getAnnotationVRs("Tree"));
 //System.out.println("VRs for " + reg.getAnnotationVRs());
