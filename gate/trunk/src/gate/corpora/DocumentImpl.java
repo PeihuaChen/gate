@@ -25,6 +25,7 @@ import gate.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.creole.*;
+import gate.gui.*;
 
 /** Represents the commonalities between all sorts of documents.
   *
@@ -128,7 +129,7 @@ import gate.creole.*;
   * newOffset = 4 - ( (3 - 1) - 4 ) = 6
   * </PRE>
   */
-public class DocumentImpl implements Document
+public class DocumentImpl implements Document, StatusReporter
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -161,7 +162,14 @@ public class DocumentImpl implements Document
       DocumentFormat docFormat =
         DocumentFormat.getDocumentFormat(this, sourceUrl);
       try {
-        if(docFormat != null) docFormat.unpackMarkup(this);
+        if(docFormat != null){
+          docFormat.addStatusListener(new StatusListener(){
+            public void statusChanged(String text){
+              fireStatusChanged(text);
+            }
+          });
+          docFormat.unpackMarkup(this);
+        }
       } catch(DocumentFormatException e) {
         throw new ResourceInstantiationException(
           "Couldn't unpack markup in document " + sourceUrlName + e
@@ -375,6 +383,20 @@ public class DocumentImpl implements Document
     }
 
     return orderingString.toString();
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
   } // getOrderingString()
 
   /** The features associated with this document. */
@@ -417,5 +439,15 @@ public class DocumentImpl implements Document
 
   /** Named sets of annotations */
   protected Map namedAnnotSets;
+  private transient Vector statusListeners;
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
 
 } // class DocumentImpl

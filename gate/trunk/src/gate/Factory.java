@@ -110,10 +110,11 @@ public abstract class Factory
       );
     }
 
-    // set the parameters of the resource
+    // set the parameters of the resource and add the listeners
+    List listenersToRemove;
     try {
       if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
-      setResourceParameters(res, parameters);
+      listenersToRemove = setResourceParameters(res, parameters);
     } catch(Exception e) {
       if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
       throw new ResourceInstantiationException("Parameterisation failure" + e);
@@ -128,6 +129,22 @@ public abstract class Factory
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
     res = res.init();
 
+    //remove all the listeners added
+    if(listenersToRemove != null){
+      Iterator listenersIter = listenersToRemove.iterator();
+      while(listenersIter.hasNext()){
+        Object[] data = (Object[])listenersIter.next();
+        try {
+          if(DEBUG) Out.prln("Removing listeners for  " + res.toString());
+          ((Method)data[0]).invoke(res, new Object[]{data[1]});
+        } catch(Exception e) {
+          if(DEBUG) Out.prln("Failed to remove listeners for " + res.toString());
+          throw new ResourceInstantiationException("Parameterisation failure "
+                                                   + e);
+        }
+      }
+    }
+
     return res;
   } // create(resourceClassName)
 
@@ -138,7 +155,7 @@ public abstract class Factory
     * @param resource the resource to be parameterised.
     * @param parameters the parameters and their values.
     */
-  protected static void setResourceParameters(
+  protected static List setResourceParameters(
     Resource resource, FeatureMap parameters
   ) throws
     IntrospectionException, InvocationTargetException,
@@ -156,7 +173,6 @@ public abstract class Factory
     BeanInfo resBeanInfo =
       Introspector.getBeanInfo(resource.getClass(), Object.class);
     PropertyDescriptor[] properties = resBeanInfo.getPropertyDescriptors();
-
     // for each property of the resource bean
     if(properties != null)
       for(int i = 0; i<properties.length; i++) {
@@ -180,15 +196,40 @@ public abstract class Factory
 
         setMethod.invoke(resource, args);
         numParametersSet++;
-
       } // for each property
+
+      //get all the events the bean can fire
+      //a list of triplets: [removeListenerMethod, listener]
+      List removeListenersData = null;
+      EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+      //add the listeners for the initialisation phase
+      if(events != null){
+        EventSetDescriptor event;
+        removeListenersData = new ArrayList();
+        for(int i = 0; i < events.length; i++) {
+          event = events[i];
+          //did we get such a listener?
+          Object listener = parameters.get(event.getListenerType().getName());
+          if(listener != null){
+            Method addListener = event.getAddListenerMethod();
+            // call the set method with the parameter value
+            Object[] args = new Object[1];
+            args[0] = listener;
+            addListener.invoke(resource, args);
+            numParametersSet++;
+            removeListenersData.add(new Object[]{event.getRemoveListenerMethod(),
+                                                 listener});
+          }
+        }
+      }
+
 
       // did we set all the parameters?
       if(numParametersSet != parameters.size())
         throw new GateException(
           "couldn't set all the parameters of resource " + resource
         );
-
+    return removeListenersData;
   } // setResourceParameters
 
   /** Create a new transient Corpus. */
