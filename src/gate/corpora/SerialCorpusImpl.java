@@ -25,6 +25,8 @@ import java.io.*;
 import java.net.*;
 import gate.event.*;
 import gate.creole.*;
+import gate.creole.ir.*;
+import gate.creole.ir.lucene.*;
 import gate.security.SecurityException;
 
 //The initial design was to implement this on the basis of a WeakValueHashMap.
@@ -37,7 +39,8 @@ import gate.security.SecurityException;
 
 public class SerialCorpusImpl extends
           AbstractLanguageResource
-                      implements Corpus, CreoleListener, DatastoreListener {
+                      implements Corpus, CreoleListener,
+                                 DatastoreListener, IndexedCorpus {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -50,6 +53,11 @@ public class SerialCorpusImpl extends
   //here I keep document index as key (same as the index in docDataList
   //which defines the document order) and Documents as value
   protected transient List documents = null;
+
+  protected transient IndexManager indexManager= null;
+  protected transient List addedDocs = null;
+  protected transient List removedDocs = null;
+  protected transient List changedDocs = null;
 
   public SerialCorpusImpl() {
   }
@@ -352,6 +360,9 @@ public class SerialCorpusImpl extends
    * Called by a datastore when a resource has been wrote into the datastore
    */
   public void resourceWritten(DatastoreEvent evt){
+    if (evt.getResourceID().equals(this.getLRPersistenceId())) {
+      thisResourceWritten();
+    }
   }
 
 
@@ -443,6 +454,7 @@ public class SerialCorpusImpl extends
                                             doc.getLRPersistenceId());
     boolean result = docDataList.add(docData);
     documents.add(doc);
+    documentAdded(doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
                                       doc,
                                       docDataList.size()-1,
@@ -467,6 +479,7 @@ public class SerialCorpusImpl extends
       Document oldDoc =  (Document) documents.remove(index);
       if (DEBUG) Out.prln("documents after remove of " + oldDoc.getName()
                           + " are " + documents);
+      documentRemoved(oldDoc);
       fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                           oldDoc,
                                           index,
@@ -629,6 +642,7 @@ public class SerialCorpusImpl extends
     docDataList.add(index, docData);
 
     documents.add(index, doc);
+    documentAdded(doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
                                       doc,
                                       index,
@@ -640,6 +654,7 @@ public class SerialCorpusImpl extends
     if (DEBUG) Out.prln("Remove index called");
     docDataList.remove(index);
     Document res = (Document) documents.remove(index);
+    documentRemoved(res);
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                         res,
                                         index,
@@ -748,5 +763,75 @@ public class SerialCorpusImpl extends
     if (this.dataStore != null)
       this.dataStore.addDatastoreListener(this);
 
+    IndexDefinition  definition = (IndexDefinition) this.getFeatures().get(
+                GateConstants.CORPUS_INDEX_DEFENITION_FEATURE_KEY);
+    if (definition != null){
+      switch (definition.getIndexType()) {
+        case GateConstants.IR_LUCENE_INVFILE:
+          this.indexManager = new LuceneIndexManager(definition, this);
+          break;
+      }
+    }
+    this.addedDocs = new Vector();
+    this.removedDocs = new Vector();
+    this.changedDocs = new Vector();
+
   }//readObject
+
+  public void setIndexDefinition(IndexDefinition definition) {
+    this.getFeatures().put(GateConstants.CORPUS_INDEX_DEFENITION_FEATURE_KEY,
+                            definition);
+    switch (definition.getIndexType()) {
+      case GateConstants.IR_LUCENE_INVFILE:
+        this.indexManager = new LuceneIndexManager(definition, this);
+        break;
+    }
+  }
+
+  public IndexDefinition getIndexDefinition() {
+    return (IndexDefinition) this.getFeatures().get(
+                           GateConstants.CORPUS_INDEX_DEFENITION_FEATURE_KEY);
+  }
+
+  public IndexManager getIndexManager() {
+    return this.indexManager;
+  }
+
+  public IndexStatistics getIndexStatistics(){
+    return (IndexStatistics) this.getFeatures().get(
+                           GateConstants.CORPUS_INDEX_STATISTICS_FEATURE_KEY);
+  }
+
+  private void documentAdded(Document doc) {
+    if (indexManager != null){
+      removedDocs.remove(doc);
+      addedDocs.add(doc);
+    }
+  }
+
+  private void documentRemoved(Document doc) {
+    if (indexManager != null) {
+      addedDocs.remove(doc);
+      removedDocs.add(doc);
+    }
+  }
+
+  private void thisResourceWritten() {
+    if (indexManager != null) {
+      try {
+        for (int i = 0; i<documents.size(); i++) {
+          if (documents.get(i) != null) {
+            Document doc = (Document) documents.get(i);
+            if (!addedDocs.contains(doc) && doc.isModified()) {
+              changedDocs.add(doc);
+            }
+          }
+        }
+        indexManager.sync(addedDocs, removedDocs, changedDocs);
+      } catch (IndexException ie) {
+        ie.printStackTrace();
+      }
+    }
+  }
+
 }
