@@ -484,41 +484,53 @@ public class MainFrame extends JFrame
     }, this));
 
 
+    JMenu imMenu = null;
+    List installedLocales = new ArrayList();
     try{
-      JMenu imMenu = null;
-      Locale locale = new Locale("en", "GB");
       //if this fails guk is not present
       Class.forName("guk.im.GateIMDescriptor");
-      List installedLocales = new ArrayList();
       //add the Gate input methods
       installedLocales.addAll(Arrays.asList(new guk.im.GateIMDescriptor().
                                             getAvailableLocales()));
-      //add the MPI IMs
-      installedLocales.addAll(Arrays.asList(
-            new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor().
-            getAvailableLocales()));
-
-      JMenuItem item;
-      if(!installedLocales.isEmpty()){
-        imMenu = new JMenu("Input methods");
-        ButtonGroup bg = new ButtonGroup();
-        item = new LocaleSelectorMenuItem();
-        imMenu.add(item);
-        item.setSelected(true);
-        imMenu.addSeparator();
-        bg.add(item);
-        for(int i = 0; i < installedLocales.size(); i++){
-          locale = (Locale)installedLocales.get(i);
-          item = new LocaleSelectorMenuItem(locale);
-          imMenu.add(item);
-          bg.add(item);
-        }
-      }
-      if(imMenu != null) optionsMenu.add(imMenu);
     }catch(Exception e){
       //something happened; most probably guk not present.
       //just drop it, is not vital.
     }
+    try{
+      //add the MPI IMs
+      //if this fails mpi IM is not present
+      Class.forName("mpi.alt.java.awt.im.spi.lookup.LookupDescriptor");
+
+      installedLocales.addAll(Arrays.asList(
+            new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor().
+            getAvailableLocales()));
+    }catch(Exception e){
+      //something happened; most probably MPI not present.
+      //just drop it, is not vital.
+    }
+
+    Collections.sort(installedLocales, new Comparator(){
+      public int compare(Object o1, Object o2){
+        return ((Locale)o1).getDisplayName().compareTo(((Locale)o2).getDisplayName());
+      }
+    });
+    JMenuItem item;
+    if(!installedLocales.isEmpty()){
+      imMenu = new JMenu("Input methods");
+      ButtonGroup bg = new ButtonGroup();
+      item = new LocaleSelectorMenuItem();
+      imMenu.add(item);
+      item.setSelected(true);
+      imMenu.addSeparator();
+      bg.add(item);
+      for(int i = 0; i < installedLocales.size(); i++){
+        Locale locale = (Locale)installedLocales.get(i);
+        item = new LocaleSelectorMenuItem(locale);
+        imMenu.add(item);
+        bg.add(item);
+      }
+    }
+    if(imMenu != null) optionsMenu.add(imMenu);
 
     menuBar.add(optionsMenu);
 

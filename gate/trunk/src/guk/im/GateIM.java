@@ -521,7 +521,7 @@ public class GateIM implements InputMethod {
    * The current virtual keyboard map.
    *
    */
-  KeyboardMap keyboardMap;
+  static KeyboardMap keyboardMap;
   /**
    * Should the keyboard map be visible?
    *
