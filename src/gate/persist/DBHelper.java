@@ -135,6 +135,11 @@ public class DBHelper {
   /** dummy encoding type, do not use it */
   public static final String DUMMY_ENCODING =  "-!-";
 
+  /** used internaly, may change in the future */
+  public static final int READ_ACCESS = 0;
+  /** used internaly, may change in the future */
+  public static final int WRITE_ACCESS = 1;
+
   //dummy ID
   /** huh? */
   public static final Long DUMMY_ID;
