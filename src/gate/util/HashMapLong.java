@@ -40,40 +40,40 @@ public class HashMapLong {
      * the main constructor. see the HashMap constructor for description
      */
     public HashMapLong(int initialCapacity, float loadFactor) {
-	if (initialCapacity < 0)
-	    throw new IllegalArgumentException("Illegal Initial Capacity: "+
+        if (initialCapacity < 0)
+            throw new IllegalArgumentException("Illegal Initial Capacity: "+
                                                initialCapacity);
         if (loadFactor <= 0 || Float.isNaN(loadFactor))
             throw new IllegalArgumentException("Illegal Load factor: "+
                                                loadFactor);
         if (initialCapacity==0)
             initialCapacity = 1;
-	this.loadFactor = loadFactor;
-	table = new Entry[initialCapacity];
-	threshold = (int)(initialCapacity * loadFactor);
+        this.loadFactor = loadFactor;
+        table = new Entry[initialCapacity];
+        threshold = (int)(initialCapacity * loadFactor);
     }
 
     public HashMapLong(int initialCapacity) {
-	this(initialCapacity, 0.75f);
+        this(initialCapacity, 0.75f);
     }
 
     public HashMapLong() {
-	this(11, 0.75f);
+        this(11, 0.75f);
     }
 
     public boolean isEmpty() {
-	return count == 0;
+        return count == 0;
     }
 
     public Object get(long key) {
-	Entry tab[] = table;
+        Entry tab[] = table;
     int hash = (int)(key ^ (key >> 32));
     int index = (hash & 0x7FFFFFFF) % tab.length;
     for (Entry e = tab[index]; e != null; e = e.next)
         if ((e.hash == hash) && key == e.key)
             return e.value;
 
-	return null;
+        return null;
     }
 
     /**
@@ -82,25 +82,25 @@ public class HashMapLong {
      * number of keys in this map exceeds its capacity and load factor.
      */
     private void rehash() {
-	int oldCapacity = table.length;
-	Entry oldMap[] = table;
+      int oldCapacity = table.length;
+      Entry oldMap[] = table;
 
-	int newCapacity = oldCapacity * 2 + 1;
-	Entry newMap[] = new Entry[newCapacity];
+      int newCapacity = oldCapacity * 2 + 1;
+      Entry newMap[] = new Entry[newCapacity];
 
-	threshold = (int)(newCapacity * loadFactor);
-	table = newMap;
+      threshold = (int) (newCapacity * loadFactor);
+      table = newMap;
 
-	for (int i = oldCapacity ; i-- > 0 ;) {
-	    for (Entry old = oldMap[i] ; old != null ; ) {
-		Entry e = old;
-		old = old.next;
+      for (int i = oldCapacity; i-- > 0; ) {
+        for (Entry old = oldMap[i]; old != null; ) {
+          Entry e = old;
+          old = old.next;
 
-		int index = (e.hash & 0x7FFFFFFF) % newCapacity;
-		e.next = newMap[index];
-		newMap[index] = e;
-	    }
-	}
+          int index = (e.hash & 0x7FFFFFFF) % newCapacity;
+          e.next = newMap[index];
+          newMap[index] = e;
+        }
+      }
     }
 
     public Object put(long key, Object value) {
