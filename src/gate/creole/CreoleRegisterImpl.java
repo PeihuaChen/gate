@@ -417,13 +417,15 @@ public class CreoleRegisterImpl extends HashMap
              new Object[]{"gate.gui.DocumentEditor",
                           "gate.gui.FeaturesEditor"});
 
+    data.put("gate.creole.SerialController",
+             new Object[]{"gate.gui.ApplicationViewer"});
+
     data.put("gate.Document",
              new Object[]{"gate.gui.DocumentEditor",
                           "gate.gui.FeaturesEditor"});
 
     data.put("gate.Resource",
              new Object[]{"gate.gui.FeaturesEditor"});
-
 
     List result = new ArrayList();
     Object[] VRnames = (Object[])data.get(resourceClassName);
@@ -438,6 +440,9 @@ public class CreoleRegisterImpl extends HashMap
    */
   public List getSmallVRsForResource(String resourceClassName){
     Map data = new HashMap();
+
+    data.put("gate.persist.SerialDataStore",
+             new Object[]{"gate.gui.SerialDatastoreViewer"});
 
     List result = new ArrayList();
     Object[] VRnames = (Object[])data.get(resourceClassName);
