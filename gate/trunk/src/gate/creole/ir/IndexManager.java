@@ -14,14 +14,16 @@
 
 package gate.creole.ir;
 
+import java.util.List;
+
 public interface IndexManager{
 
-  public int getIndexType();
+  public void createIndex() throws IndexException;
 
-  public void createIndex();
+  public void optimizeIndex() throws IndexException;
 
-  public void optimizeIndex();
+  public void deleteIndex() throws IndexException;
 
-  public void deleteIndex();
+  public void sync(List added, List removed, List changed) throws IndexException;
 
 }

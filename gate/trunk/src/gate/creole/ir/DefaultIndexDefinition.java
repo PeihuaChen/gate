@@ -21,6 +21,7 @@ public class DefaultIndexDefinition implements IndexDefinition{
   private DocumentAnalyzer analyzer;
   private List fields;
   private String location;
+  private int indexType;
 
   public DocumentAnalyzer getAnalyzer(){
     return analyzer;
@@ -38,15 +39,23 @@ public class DefaultIndexDefinition implements IndexDefinition{
     return location;
   }
 
+  public int getIndexType(){
+    return indexType;
+  }
+
+  public void setIndexType(int type){
+    this.indexType = type;
+  }
+
   public Iterator getIndexFields(){
     return fields.iterator();
   }
 
   public void addIndexField(IndexField fld){
-    // ????
     if (fields==null){
       fields = new Vector();
     }
     fields.add(fld);
   }
+
 }

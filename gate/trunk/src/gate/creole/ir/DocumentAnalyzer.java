@@ -20,4 +20,6 @@ public interface DocumentAnalyzer{
 
   public Iterator analyze(String content);
 
+  public Iterator analyze(Iterator tokenStream);
+
 }
