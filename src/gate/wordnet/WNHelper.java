@@ -225,6 +225,7 @@ final class WNHelper {
           _type == Relation.REL_SIMILAR_TO ||
           _type == Relation.REL_SUBSTANCE_HOLONYM ||
           _type == Relation.REL_SUBSTANCE_MERONYM ||
+          _type == Relation.REL_SEE_ALSO ||
           _type == Relation.REL_VERB_GROUP;
   }
 
