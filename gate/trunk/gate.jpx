@@ -5,7 +5,7 @@
   <property category="build" name="CopyExtensions.1" value="txt" />
   <property category="build" name="CopyExtensions.2" value="xml" />
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime" name="ConfigurationCount" value="8" />
+  <property category="runtime" name="ConfigurationCount" value="12" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext" />
@@ -26,6 +26,27 @@
   <property category="runtime.1" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin" />
   <property category="runtime.1" name="jsprunner.docbase" value="." />
   <property category="runtime.1" name="jsprunner.jspfile" value="." />
+  <property category="runtime.10" name="ConfigurationName" value="Evaluate corpus" />
+  <property category="runtime.10" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.10" name="application.class" value="gate.util.CorpusBenchmarkTool" />
+  <property category="runtime.10" name="application.parameters" value="E:\gatecorpora\test" />
+  <property category="runtime.10" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.10" name="jsprunner.docbase" value="." />
+  <property category="runtime.10" name="jsprunner.jspfile" value="." />
+  <property category="runtime.11" name="ConfigurationName" value="Evaluate stored against marked" />
+  <property category="runtime.11" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.11" name="application.class" value="gate.util.CorpusBenchmarkTool" />
+  <property category="runtime.11" name="application.parameters" value="-marked_stored -verbose E:\gatecorpora\test" />
+  <property category="runtime.11" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.11" name="jsprunner.docbase" value="." />
+  <property category="runtime.11" name="jsprunner.jspfile" value="." />
+  <property category="runtime.12" name="ConfigurationName" value="Evaluate clean against marked" />
+  <property category="runtime.12" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.12" name="application.class" value="gate.util.CorpusBenchmarkTool" />
+  <property category="runtime.12" name="application.parameters" value="-marked_clean -verbose E:\gatecorpora\test" />
+  <property category="runtime.12" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.12" name="jsprunner.docbase" value="." />
+  <property category="runtime.12" name="jsprunner.jspfile" value="." />
   <property category="runtime.2" name="ConfigurationName" value="Text mode (-t)" />
   <property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.2" name="application.class" value="gate.TestGate" />
@@ -105,6 +126,13 @@
   <property category="runtime.8" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
   <property category="runtime.8" name="jsprunner.docbase" value="." />
   <property category="runtime.8" name="jsprunner.jspfile" value="." />
+  <property category="runtime.9" name="ConfigurationName" value="Generate corpus" />
+  <property category="runtime.9" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.9" name="application.class" value="gate.util.CorpusBenchmarkTool" />
+  <property category="runtime.9" name="application.parameters" value="-generate E:\gatecorpora\test" />
+  <property category="runtime.9" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.9" name="jsprunner.docbase" value="." />
+  <property category="runtime.9" name="jsprunner.jspfile" value="." />
   <property category="sys" name="AuthorLabel" value="@author" />
   <property category="sys" name="BackupPath" value="bak" />
   <property category="sys" name="BeansInstantiate" value="false" />
@@ -114,9 +142,10 @@
   <property category="sys" name="CompanyLabel" value="Company:" />
   <property category="sys" name="Copyright" value="Copyright (c) 2000" />
   <property category="sys" name="CopyrightLabel" value="Copyright:" />
+  <property category="sys" name="DefaultPackage" value="gate.util" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
-  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
+  <property category="sys" name="DocPath" value="doc/javadoc" />
   <property category="sys" name="EventMatch" value="false" />
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
@@ -143,4 +172,3 @@
   <property category="sys" name="warn.auto.packages" value="false" />
   <file path="src/gate/resources/creole/creole.xml" />
 </project>
-
