@@ -1,0 +1,15 @@
+<!-- resource.xml GoldFish -->
+<!--  Luis, 29/10/2004 -->
+<!-- $Id$ -->
+
+<CREOLE-DIRECTORY>
+
+<CREOLE>
+  <RESOURCE>
+    <NAME>Keywords</NAME>
+    <JAR>Keywords.jar</JAR>
+    <CLASS>com.isoco.gate.keywords.KeywordsDetector</CLASS>
+  </RESOURCE>
+</CREOLE>
+
+</CREOLE-DIRECTORY>
