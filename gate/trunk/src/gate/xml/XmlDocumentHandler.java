@@ -237,7 +237,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
           fm.put(attName,list);
         }// End if
       }else{
-        fm.put(attName,attValue);
+        fm.put(atts.getQName(i), attValue);
       }// End if
     }// End for
 
