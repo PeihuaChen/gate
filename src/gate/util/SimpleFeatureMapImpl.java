@@ -21,15 +21,19 @@ import gate.event.*;
 
 /** Simple case of features.
   */
-public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
+//>>> DAM: was (derived from HashMap)
+/*
+public class SimpleFeatureMapImpl  extends HashMap implements FeatureMap
+*/
+//=== DAM: FeatArray optimization, now derived from SimpleMapImpl
+public class SimpleFeatureMapImpl
+    extends SimpleMapImpl
+    implements FeatureMap, java.io.Serializable, java.lang.Cloneable
+//>>> DAM: end
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  // NASO
-  public SimpleFeatureMapImpl() {
-    super(4);
-  }
 
   /** Test if <b>this</b> featureMap includes all features from aFeatureMap
     * @param aFeatureMap object which will be included or not in
@@ -41,27 +45,27 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
     // null is included in everything
     if (aFeatureMap == null) return true;
 
-    // aFeatureMap != null
-    if (!this.keySet().containsAll(aFeatureMap.keySet())) return false;
+    if (size() < aFeatureMap.size()) return false;
 
-    // For each key of this, test if the values are equals
-    Set aFeatureMapKeySet = aFeatureMap.keySet();
-    Iterator aFeatureMapKeySetIter = aFeatureMapKeySet.iterator();
-    while (aFeatureMapKeySetIter.hasNext()){
-      // Get the key from aFeatureMap
-      Object key = aFeatureMapKeySetIter.next();
-      // Get the value corresponding to key from aFeatureMap
-      Object keyValueFromAFeatureMap = aFeatureMap.get(key);
-      // Get the value corresponding to key from this
-      Object keyValueFromThis = this.get(key);
+    SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
 
-      if ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
-           (keyValueFromThis != null && keyValueFromAFeatureMap == null)
-         ) return false;
+    Object key;
+    Object keyValueFromAFeatureMap;
+    Object keyValueFromThis;
+    for (int i=0; i<sfm.m_capacity; i++)
+    {
+      key = sfm.m_keys[i];
+        if (key == null)
+        continue;
+      keyValueFromAFeatureMap = sfm.m_values[i];
+      keyValueFromThis = get(key);
 
-      if (keyValueFromThis != null && keyValueFromAFeatureMap != null)
+      if  ( (keyValueFromThis == null) ^ (keyValueFromAFeatureMap == null))
+        return false;
+
+      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
         if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
-    }// End while
+    } // for
     return true;
   }//subsumes()
 
@@ -84,31 +88,30 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
     // This means that subsumes is supressed.
     if (aFeatureNamesSet.isEmpty()) return true;
 
-    // Intersect aFeatureMap's feature names with afeatureNamesSet
-    // and only for the
-    // resulting feature names try to verify subsume.
-    HashSet intersectSet = new HashSet(aFeatureMap.keySet());
-    intersectSet.retainAll(aFeatureNamesSet);
-    // aFeatureMap != null
-    if (!this.keySet().containsAll(intersectSet)) return false;
+    if (size() < aFeatureNamesSet.size()) return false;
 
-    // For each key from intersect, test if the values are equals
-    Iterator intersectIter = intersectSet.iterator();
-    while (intersectIter.hasNext()){
-      // Get the key from aFeatureMap
-      Object key = intersectIter.next();
-      // Get the value corresponding to key from aFeatureMap
-      Object keyValueFromAFeatureMap = aFeatureMap.get(key);
-      // Get the value corresponding to key from this
-      Object keyValueFromThis = this.get(key);
+    SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
 
-      if ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
-           (keyValueFromThis != null && keyValueFromAFeatureMap == null)
-         ) return false;
+    Object key;
+    Object keyValueFromAFeatureMap;
+    Object keyValueFromThis;
+    for (int i=0; i<sfm.m_capacity; i++) {
+      key = sfm.m_keys[i];
 
-      if (keyValueFromThis != null && keyValueFromAFeatureMap != null)
+// the additional check of the key for being in the aFeatureNamesSet
+      if (key == null || !aFeatureNamesSet.contains(key))
+        continue;
+      keyValueFromAFeatureMap = sfm.m_values[i];
+        keyValueFromThis = get(key);
+
+      if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
+            (keyValueFromThis != null && keyValueFromAFeatureMap == null)
+          ) return false;
+
+      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
         if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
-    }// End while
+    } // for
+
     return true;
   }// subsumes()
 
@@ -118,39 +121,40 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
    *  can keep track of what's updated
    */
   public Object put(Object key, Object value) {
-    Object res = super.put(key,  value);
-    //tell the world if they're listening
+    Object result = super.put(key, value);
     fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
-    return res;
-  }
+    return result;
+  } // put
 
   /**
    * Overriden to fire events, so that the persistent objects
    *  can keep track of what's updated
    */
   public Object remove(Object key) {
-    Object res = super.remove( key);
-    //tell the world if they're listening
+    Object result = super.remove(key);
     fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
-    return res;
-  }
+    return result;
+  } // remove
 
-  /**
-   * Overriden to fire events, so that the persistent objects
-   *  can keep track of what's updated
-   */
   public void clear() {
     super.clear();
     //tell the world if they're listening
     fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
-  }
+  } // clear
 
+  // Views
+    public Object clone() {
+          return super.clone();
+    }
+
+  public boolean equals(Object o) {
+    return super.equals(o);
+  }
 
 //////////////////THE EVENT HANDLING CODE//////////////
 //Needed so an annotation can listen to its features//
 //and update correctly the database//////////////////
   private transient Vector gateListeners;
-
   /**
    *
    * Removes a gate listener
@@ -188,7 +192,7 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
   }//fireAnnotationUpdated
 
 
-
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -2747241616127229116L;
 } // class SimpleFeatureMapImpl
+
