@@ -576,8 +576,7 @@ public class PersistenceManager {
       while(urlIter.hasNext()){
         URL anUrl = (URL)urlIter.next();
         try{
-          if(!Gate.getCreoleRegister().getDirectories().contains(anUrl))
-            Gate.getCreoleRegister().registerDirectories(anUrl);
+          Gate.getCreoleRegister().registerDirectories(anUrl);
         }catch(GateException ge){
           Err.prln("Could not reload creole directory " +
                    anUrl.toExternalForm());
