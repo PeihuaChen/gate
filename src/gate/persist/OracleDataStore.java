@@ -602,7 +602,6 @@ public class OracleDataStore extends JDBCDataStore {
     String docEncoding = null;
     try {
       docEncoding = (String)doc.getParameterValue("encoding");
-      Assert.assertNotNull(docEncoding);
     }
     catch(gate.creole.ResourceInstantiationException re) {
       throw new PersistenceException("cannot create document: error getting " +
@@ -623,7 +622,13 @@ public class OracleDataStore extends JDBCDataStore {
           "{ call "+Gate.DB_OWNER+".persist.create_document(?,?,?,?,?,?,?,?,?) }");
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
-      stmt.setString(3,docEncoding);
+      //do we have doc encoding?
+      if (null == docEncoding) {
+        stmt.setNull(3,java.sql.Types.VARCHAR);
+      }
+      else {
+        stmt.setString(3,docEncoding);
+      }
       //do we have start offset?
       if (null==docStartOffset) {
         stmt.setNull(4,java.sql.Types.NUMERIC);
