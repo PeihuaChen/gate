@@ -71,6 +71,7 @@ public class Transducer extends AbstractLanguageAnalyser {
       try{
         fireProgressChanged(0);
         batch = new Batch(grammarURL, encoding, new InternalStatusListener());
+        batch.setEnableDebugging(enableDebugging.booleanValue());
         fireProcessFinished();
       }catch(Exception e){
         throw new ResourceInstantiationException(e);
@@ -185,6 +186,14 @@ public class Transducer extends AbstractLanguageAnalyser {
     return outputASName;
   }
 
+  public Boolean getEnableDebugging() {
+    return enableDebugging;
+  }
+
+  public void setEnableDebugging(Boolean enableDebugging) {
+    this.enableDebugging = enableDebugging;
+  }
+
   /**
    * The URL to the jape file used as grammar by this transducer.
    */
@@ -210,4 +219,9 @@ public class Transducer extends AbstractLanguageAnalyser {
    * The {@link gate.AnnotationSet} used as output by the transducer.
    */
   private String outputASName;
+
+  /**
+   * A switch used to activate the JAPE debugger.
+   */
+  private Boolean enableDebugging;
 }
