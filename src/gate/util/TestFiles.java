@@ -66,7 +66,7 @@ public class TestFiles extends TestCase
 
     String firstLn = bfr.readLine();
     assert("first line from jape/combined/testloc.jape doesn't match", firstLine.equals(firstLn));
-    
+
     f.delete ();
   } // testWriteTempFile()
 
@@ -74,5 +74,96 @@ public class TestFiles extends TestCase
   public static Test suite() {
     return new TestSuite(TestFiles.class);
   } // suite
+
+  /** Test JarFiles methods */
+  public void testJarFiles(){
+    JarFiles jarFiles = new JarFiles();
+    Set filesToMerge = new HashSet();
+    String jarFilePathFirst = "jartest/ajartest.jar";
+    String jarFilePathSecond ="jartest/bjartest.jar";
+    String jarPathFirst;
+    String jarPathSecond;
+    String jarPathFinal;
+    File resourceFile  = null;
+    File f1 = null;
+    File f2 = null;
+    FileInputStream fileStreamFirst = null;
+    FileInputStream fileStreamSecond = null;
+
+    //open first jar file in a temporal file
+    try{
+      f1 = Files.writeTempFile(Files.getResourceAsStream(jarFilePathFirst));
+    }catch(IOException ioe){
+      ioe.printStackTrace(System.err);
+      System.exit(1);
+    }
+    //open second jar file in a temporal file
+    try{
+      f2 =Files.writeTempFile(Files.getResourceAsStream(jarFilePathSecond));
+    }catch (IOException ioe){
+      ioe.printStackTrace(System.err);
+      System.exit(1);
+    }
+    //create a temporal file in order to put the classes of jar files
+    try{
+    resourceFile = File.createTempFile("jarfinal", ".tmp");
+    }catch(IOException ioe){
+      ioe.printStackTrace(System.err);
+      System.exit(1);
+    }
+    resourceFile.deleteOnExit();
+    //determin the paths of the temporal files
+    jarPathFirst = f1.getAbsolutePath();
+    jarPathSecond = f2.getAbsolutePath();
+    f1.deleteOnExit();
+    f2.deleteOnExit();
+    jarPathFinal = resourceFile.getAbsolutePath();
+    filesToMerge.add(jarPathFirst);
+    filesToMerge.add(jarPathSecond);
+    //close the temporal files
+    try{
+      fileStreamFirst = new FileInputStream(f1);
+    }catch(FileNotFoundException fnfe){
+      fnfe.printStackTrace(System.err);
+    }
+    try{
+      fileStreamSecond = new FileInputStream(f2);
+    }catch(FileNotFoundException fnfe){
+      fnfe.printStackTrace(System.err);
+    }
+    try{
+      fileStreamFirst.close();
+    }catch(IOException ioe){
+      ioe.printStackTrace(System.err);
+    }
+    try{
+      fileStreamSecond.close();
+    }catch(IOException ioe){
+      ioe.printStackTrace(System.err);
+    }
+    //create the final jar file
+    try{
+      jarFiles.merge(filesToMerge,jarPathFinal);
+    }catch(GateException ge){
+      ge.printStackTrace(System.err);
+    }
+  }// testJarFiles
+
+  public void testFind(){
+    String regex = "z:/gate2/doc/.*.html";
+    String filePath = "z:/gate2/doc";
+    Iterator iter;
+    Files files = new Files();
+    Set regfind = new HashSet();
+
+    regfind = files.find(regex,filePath);
+    iter = regfind.iterator();
+    if (iter.hasNext()){
+      while (iter.hasNext()){
+        String verif = iter.next().toString();
+        System.out.println(verif);
+      }
+    }
+  }//testFind
 
 } // class TestFiles
