@@ -156,7 +156,7 @@ public class TestFiles extends TestCase
     Files files = new Files();
     Set regfind = new HashSet();
 
-    regfind = files.find(regex,filePath);
+    regfind = files.Find(regex,filePath);
     iter = regfind.iterator();
     if (iter.hasNext()){
       while (iter.hasNext()){
