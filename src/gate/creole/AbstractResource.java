@@ -292,6 +292,43 @@ extends AbstractFeatureBearer implements Resource, Serializable
     }   // if events != null
   } // removeResourceListeners()
 
+  /**
+   * Checks whether the provided {@link Resource} has values for all the
+   * required parameters from the provided list of parameters.
+   *
+   * @param resource the resource being checked
+   * @param paramters is a {@link List} of {@link List} of {@link Parameter}
+   * representing a list of parameter disjunctions (e.g. the one returned by
+   * {@link ParameterList#getRuntimeParameters()}).
+   * @return <tt>true</tt> if all the required parameters have non null values,
+   * <tt>false</tt> otherwise.
+   * @throw {@link ResourceInstantiationException} if problems occur while
+   * inspecting the parameters for the resource. These will normally be
+   * introspection problems and are usually caused by the lack of a parameter
+   * or of the read accessor for a parameter.
+   */
+  public static boolean checkParameterValues(Resource resource,
+                                             List parameters)
+                throws ResourceInstantiationException{
+    Iterator disIter = parameters.iterator();
+    while(disIter.hasNext()){
+      List disjunction = (List)disIter.next();
+      boolean required = !((Parameter)disjunction.get(0)).isOptional();
+      if(required){
+        //at least one parameter in the disjunction must have a value
+        boolean valueSet = false;
+        Iterator parIter = disjunction.iterator();
+        while(!valueSet && parIter.hasNext()){
+          Parameter par = (Parameter)parIter.next();
+          valueSet = (resource.getParameterValue(par.getName()) != null);
+        }
+        if(!valueSet) return false;
+      }
+    }
+    return true;
+  }
+
+
 
   /**
    * Gets the value of a parameter of this resource.

@@ -25,7 +25,8 @@ import gate.event.*;
 
 /** Execute a list of PRs serially.
   */
-public class SerialController extends AbstractController{
+public class SerialController extends AbstractController
+                              implements CreoleListener{
 
   public SerialController(){
     prList = Collections.synchronizedList(new ArrayList());
@@ -34,35 +35,72 @@ public class SerialController extends AbstractController{
 
   /**
    * Returns all the {@link gate.ProcessingResource}s contained by this
-   * controller.
-   * The actual type of collection returned is a list. The returned list is
-   * backed by this controller; any changes made to it will reflect in its
-   * contents.
+   * controller as an unmodifiable list.
    */
   public Collection getPRs(){
-    return prList;
+    return Collections.unmodifiableList(prList);
+  }
+
+  public void add(int index, ProcessingResource pr){
+    prList.add(index, pr);
+  }
+
+  public void add(ProcessingResource pr){
+    prList.add(pr);
+  }
+
+  public ProcessingResource remove(int index){
+    return (ProcessingResource)prList.remove(index);
+  }
+
+  public boolean remove(ProcessingResource pr){
+    return prList.remove(pr);
+  }
+
+  public ProcessingResource set(int index, ProcessingResource pr){
+    return (ProcessingResource)prList.set(index, pr);
+  }
+
+  /**
+   * Verifies that all PRs have all their required rutime parameters set.
+   */
+  protected void checkParameters() throws ExecutionException{
+    List badPRs;
+    try{
+      badPRs = getOffendingPocessingResources();
+    }catch(ResourceInstantiationException rie){
+      throw new ExecutionException(
+        "Could not check runtime parameters for the processing resources:\n" +
+        rie.toString());
+    }
+    if(badPRs != null && !badPRs.isEmpty()){
+      throw new ExecutionException(
+        "Some of the processing resources in this controller have unset " +
+        "runtime parameters:\n" +
+        badPRs.toString());
+    }
   }
 
 
   /** Run the Processing Resources in sequence. */
   public void execute() throws ExecutionException{
+    //check all the PRs have the right parameters
+    checkParameters();
+
+    //execute all PRs in sequence
     interrupted = false;
-    //stop access to the list of PRs
-    prList = Collections.unmodifiableList(prList);
-    try{
-      for (int i = 0; i < prList.size(); i++){
-        if(isInterrupted()) throw new ExecutionInterruptedException(
-          "The execution of the " + getName() +
-          " application has been abruptly interrupted!");
-        runComponent(i);
-      }
-    }finally{
-      //restore access to the list of PRs
-      prList = Collections.synchronizedList(new ArrayList(prList));
+    for (int i = 0; i < prList.size(); i++){
+      if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the " + getName() +
+        " application has been abruptly interrupted!");
+      runComponent(i);
     }
   } // execute()
 
 
+  /**
+   * Executes a {@link ProcessingResource}.
+   */
   protected void runComponent(int componentIndex) throws ExecutionException{
     ProcessingResource currentPR = (ProcessingResource)
                                    prList.get(componentIndex);
@@ -103,12 +141,26 @@ public class SerialController extends AbstractController{
                currentPR.getClass().getName() +
                "\n" + e.toString() + "\n...nothing to lose any sleep over.");
     }
-  }
+  }//protected void runComponent(int componentIndex)
+
 
   /** The list of contained PRs*/
   protected List prList;
 
   /** A proxy for status events*/
   protected StatusListener sListener;
+  public void resourceLoaded(CreoleEvent e) {
+  }
+  public void resourceUnloaded(CreoleEvent e) {
+    //remove all occurences of the resource from this controller
+    if(e.getResource() instanceof ProcessingResource)
+      while(prList.remove(e.getResource()));
+  }
+  public void datastoreOpened(CreoleEvent e) {
+  }
+  public void datastoreCreated(CreoleEvent e) {
+  }
+  public void datastoreClosed(CreoleEvent e) {
+  }
 
 } // class SerialController

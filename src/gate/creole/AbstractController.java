@@ -182,6 +182,37 @@ public abstract class AbstractController extends AbstractResource
     }
   }
 
+
+  /**
+   * Checks whether all the contained PRs have all the required runtime
+   * parameters set.
+   *
+   * @return a {@link List} of {@link ProcessingResource}s that have required
+   * parameters with null values if they exist <tt>null</tt> otherwise.
+   * @throw {@link ResourceInstantiationException} if problems occur while
+   * inspecting the parameters for one of the resources. These will normally be
+   * introspection problems and are usually caused by the lack of a parameter
+   * or of the read accessor for a parameter.
+   */
+  public List getOffendingPocessingResources()
+         throws ResourceInstantiationException{
+    //take all the contained PRs
+    ArrayList badPRs = new ArrayList(getPRs());
+    //remove the ones that no parameters problems
+    Iterator prIter = getPRs().iterator();
+    while(prIter.hasNext()){
+      ProcessingResource pr = (ProcessingResource)prIter.next();
+      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                                              get(pr.getClass().getName());
+      if(AbstractResource.checkParameterValues(pr,
+                                               rData.getParameterList().
+                                               getRuntimeParameters())){
+        badPRs.remove(pr);
+      }
+    }
+    return badPRs.isEmpty() ? null : badPRs;
+  }
+
   /** Sets the name of this resource*/
   public void setName(String name){
     this.name = name;

@@ -56,7 +56,7 @@ public class TestControllers extends TestCase
   /** Serial controller test 1 */
   public void testSerial1() throws Exception {
     // a controller
-    Controller c1 = new SerialController();
+    SerialController c1 = new SerialController();
     assertNotNull("c1 controller is null", c1);
 
     //get a document
@@ -93,8 +93,8 @@ public class TestControllers extends TestCase
     );
 
     // get the controller to encapsulate the tok and gaz
-    c1.getPRs().add(tokeniser);
-    c1.getPRs().add(gaz);
+    c1.add(tokeniser);
+    c1.add(gaz);
     c1.execute();
 
     // check the resulting annotations
