@@ -49,6 +49,8 @@ public class BootStrap {
     */
   protected static Map names = null;
 
+  protected Map oldNames =null;
+
   /** the size of the buffer */
   private final static int BUFF_SIZE = 65000;
 
@@ -73,6 +75,8 @@ public class BootStrap {
   public BootStrap() {
 
     names = new HashMap();
+
+    oldNames = new HashMap();
 
     listMethodsResource = new ArrayList();
 
@@ -100,14 +104,13 @@ public class BootStrap {
   /** Determines all the keys from the map "names" in the text and replaces them
     * with their values
     */
-  public String changeKeyValue ( String text )throws REException {
+  public String changeKeyValue ( String text, Map map )throws REException {
 
-    Set keys = names.keySet();
+    Set keys = map.keySet();
     Iterator iteratorKeys = keys.iterator();
     while (iteratorKeys.hasNext()) {
-
       String key = (String) iteratorKeys.next();
-      String value = (String)names.get(key);
+      String value = (String)map.get(key);
       text = regularExpressions(text,value,key);
     } // while
     return text;
@@ -346,7 +349,7 @@ public class BootStrap {
   public String addContent(String content,String expr,String interfaces)
                           throws REException{
 
-    String newContent = changeKeyValue(content);
+    String newContent = changeKeyValue(content, names);
 
     REMatch aMatch = null;
 
@@ -376,9 +379,15 @@ public class BootStrap {
       while (iter.hasNext()) {
         Integer index = (Integer)iter.next();
         String type = (String)fields.get(index);
-        newContent = newContent + "\n" + "protected " + type +" " +
+        if (type.endsWith("[]"))
+          newContent = newContent + "\n" + "protected " + type +" " +
+                         type.substring(0,type.length()-2).toLowerCase() +
+                          index.toString() +";";
+
+        else
+          newContent = newContent + "\n" + "protected " + type +" " +
                           type.toLowerCase() + index.toString() +";";
-        i+=1;
+          i+=1;
       }
       newContent = newContent + finalContent;
     }
@@ -409,6 +418,10 @@ public class BootStrap {
     names.put("___PACKAGE___",namePackage);
     names.put("___PACKAGETOP___",listPackages.get(0));
     names.put("___RESOURCE___",nameResource);
+
+    oldNames.put("___PACKAGE___","template");
+    oldNames.put("___PACKAGETOP___","template");
+
 
     return names;
   }
@@ -521,17 +534,18 @@ public class BootStrap {
       StringTokenizer token = new StringTokenizer(valueKey,",");
       while (token.hasMoreTokens()) {
         String nameFile = (String)token.nextToken();
+
         // the new path of the current file from template project
         String newPathFile = nameFile;
 
-        nameFile = regularExpressions(nameFile,"","___PACKAGETOP___/");
-        nameFile = regularExpressions(nameFile,"template","___PACKAGE___");
+        nameFile = changeKeyValue(nameFile,oldNames);
 
         if (key.compareTo("dir") == 0) {
           // the current directory is created
           if (newPathFile.endsWith("___PACKAGE___")) {
             newPathFile = newPathFile.substring(0,newPathFile.length()-14);
-            newPathFile = changeKeyValue(newPathFile);
+            // change the path according to input
+            newPathFile = changeKeyValue(newPathFile,names);
             for (int i=0;i<listPackages.size();i++) {
               newPathFile = newPathFile + "/"+listPackages.get(i);
               newFile = new File(pathNewProject+"/"+newPathFile);
@@ -540,7 +554,8 @@ public class BootStrap {
           } else {
             newPathFile = regularExpressions(
               newPathFile,stringPackages,"___PACKAGE___");
-            newPathFile = changeKeyValue(pathNewProject+"/"+nameFile);
+            // change the path according to input
+            newPathFile = changeKeyValue(pathNewProject+"/"+nameFile,names);
             newFile = new File(newPathFile);
             newFile.mkdir();
           }
@@ -549,16 +564,18 @@ public class BootStrap {
 
           newPathFile = regularExpressions(
             pathNewProject+"/"+newPathFile,stringPackages,"___PACKAGE___");
-          newPathFile = changeKeyValue(newPathFile);
+
+          // change the path according to input
+          newPathFile = changeKeyValue(newPathFile,names);
 
           // the extension of the current file
           String extension = newPathFile.substring(newPathFile.length()-4,
                                                     newPathFile.length());
-
+          // get the input stream
           InputStream currentInputStream =
               Files.getGateResourceAsStream(oldResource+"/"+nameFile);
 
-          if (extension.compareTo(".jav") == 0)
+          if (extension.equals(".jav"))
             newFile = new File(newPathFile+"a");
           else newFile = new File(newPathFile);
 
