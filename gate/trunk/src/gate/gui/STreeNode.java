@@ -50,6 +50,8 @@ public class STreeNode extends DefaultMutableTreeNode {
     //span = annot.getSpans().getElementAt(0);
     //get the first span, there should be no others
     this.annot = annot;
+    this.start = annot.getStartNode().getOffset().longValue();
+    this.end = annot.getEndNode().getOffset().longValue();
   }// public STreeNode(Annotation annot)
 
   public STreeNode(long start, long end) {
@@ -146,6 +148,13 @@ public class STreeNode extends DefaultMutableTreeNode {
     // comes from the default Swing tree node
     List consists = new ArrayList();
 
+    Long lStart = new Long(start), lEnd = new Long(end);
+//    try {
+//      attribs.put("text",
+//                  doc.getContent().getContent(lStart, lEnd).toString());
+//    } catch (InvalidOffsetException ex) {
+//      throw new RuntimeException(ex.getMessage());
+//    }
     attribs.put("text",
                   text.substring( (int) (start - utteranceOffset),
                                  (int) (end - utteranceOffset) )
@@ -167,7 +176,7 @@ public class STreeNode extends DefaultMutableTreeNode {
     //!!! Need to account for the name of the Annot Set
     AnnotationSet theSet = doc.getAnnotations(ADDEDSET);
     try {
-      Integer Id = theSet.add(new Long(start), new Long(end), type, attribs);
+      Integer Id = theSet.add(lStart, lEnd, type, attribs);
       this.annot = theSet.get(Id);
       created = true;
     } catch (InvalidOffsetException ex) {
@@ -189,12 +198,55 @@ public class STreeNode extends DefaultMutableTreeNode {
     if (doc == null || targetAS == null)
       return false;
 
+    HashMap tempId2permId = new HashMap();
+    List newAnnots = new ArrayList();
     AnnotationSet addedSet = doc.getAnnotations(ADDEDSET);
     if (addedSet != null && !addedSet.isEmpty()) {
-      targetAS.addAll(addedSet);
+      Iterator addedIter = addedSet.iterator();
+      while (addedIter.hasNext()) {
+        Annotation annot = (Annotation) addedIter.next();
+        try {
+          Integer permId =
+              targetAS.add(annot.getStartNode().getOffset(),
+                       annot.getEndNode().getOffset(),
+                       annot.getType(),
+                       annot.getFeatures());
+          tempId2permId.put(annot.getId(), permId);
+          newAnnots.add(targetAS.get(permId));
+        } catch (InvalidOffsetException ex) {
+          Out.println("Invalid annotation offsets: "
+                        + annot.getStartNode().getOffset()
+                        + " and/or " + annot.getEndNode().getOffset());
+        }
+      }//while
+
+      //now update the consists Ids, because they have the old Ids in them
+      for (int i=0; i < newAnnots.size(); i++) {
+        Annotation newAnnot = (Annotation) newAnnots.get(i);
+        List children = (List) newAnnot.getFeatures().get(
+            SyntaxTreeViewer.NODE_CONSISTS_FEATURE_NAME);
+        if (children == null || children.size()== 0) {
+          continue;
+        }
+        else {
+          List newList = new ArrayList();
+          for (int k=0; k< children.size(); k++) {
+            Integer oldId = (Integer) children.get(k);
+            if (tempId2permId.get(oldId) != null)
+              newList.add(tempId2permId.get(oldId));
+            else
+              newList.add(oldId);
+          }
+          newAnnot.getFeatures().put(SyntaxTreeViewer.NODE_CONSISTS_FEATURE_NAME,
+                                     newList);
+        }
+      }//for
+
       addedSet.clear();
+
     }
     doc.removeAnnotationSet(ADDEDSET);
+
 
     AnnotationSet removedSet = doc.getAnnotations(REMOVEDSET);
     if (removedSet != null &&  ! removedSet.isEmpty()) {
@@ -228,6 +280,9 @@ public class STreeNode extends DefaultMutableTreeNode {
 } // STreeNode
 
 // $Log$
+// Revision 1.11  2003/01/28 10:01:16  marin
+// [marin] bugfixes from Kali
+//
 // Revision 1.10  2001/12/03 14:04:04  kalina
 // code cleanup in STreeNode.java
 //

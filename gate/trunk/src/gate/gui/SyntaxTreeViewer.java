@@ -568,8 +568,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // sort them from left to right first
     // Should work as
     // annotation implements Comparable
-    LinkedList nodeAnnots = new LinkedList(treeAnnotations);
-    Collections.sort(nodeAnnots);
+    java.util.List nodeAnnots = new ArrayList(treeAnnotations);
+    Collections.sort(nodeAnnots, new gate.util.OffsetComparator());
 
     Vector childrenButtons = new Vector();
     String oldParent = "";
@@ -695,19 +695,9 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       ioe.printStackTrace(Err.getPrintWriter());
     }
 
-    AnnotationSet allTokens = currentSet.get(utteranceStartOffset,
+    AnnotationSet tokensAS = currentSet.get(tokenType, utteranceStartOffset,
                                           utteranceEndOffset);
-    if (allTokens == null || allTokens.isEmpty()) {
-      Out.println("TreeViewer warning: No annotations of type " + tokenType +
-                  "so cannot show or edit the text and the tree annotations.");
-      return;
-    }
-
-    AnnotationSet tokens = allTokens.get(tokenType);
-
-    //if no tokens return
-    //needs improving maybe, just show one solid utterance
-    if (tokens == null || tokens.isEmpty()){
+    if (tokensAS == null || tokensAS.isEmpty()) {
       Out.println("TreeViewer warning: No annotations of type " + tokenType +
                   "so cannot show or edit the text and the tree annotations.");
       return;
@@ -720,20 +710,15 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // the starting Y position
     int buttonY = this.getHeight() - 20 - insets.bottom;
 
-    //We need to go through the nodes this way and get the f***ing tokens
-    //coz there is no way to sort them by startOffset. The compareTo method
-    //only uses the Ids, highly useful!
-    Node startNode = tokens.firstNode();
-    Node endNode = tokens.nextNode(startNode);
+    java.util.List tokens = new ArrayList(tokensAS);
+    //if no tokens to match, do nothing
+    if (tokens.isEmpty())
+       return;
+    Collections.sort(tokens, new gate.util.OffsetComparator());
 
     //loop through the tokens
-    while (startNode != null && endNode != null) {
-      AnnotationSet nextTokenSet = tokens.get(startNode.getOffset());
-
-      if (nextTokenSet == null || nextTokenSet.isEmpty())
-        break;
-
-      Annotation tokenAnnot = (Annotation) nextTokenSet.iterator().next();
+    for (int i= 0; i< tokens.size(); i++) {
+      Annotation tokenAnnot = (Annotation) tokens.get(i);
       Long tokenBegin = tokenAnnot.getStartNode().getOffset();
       Long tokenEnd = tokenAnnot.getEndNode().getOffset();
 
@@ -762,9 +747,6 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       // create the corresponding button
       buttonX = createButton4Node(node, buttonX, buttonY);
 
-      //advance to the next node
-      startNode = tokenAnnot.getEndNode();
-      endNode = tokens.nextNode(startNode);
     } //while
 
 
@@ -849,7 +831,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     button.addMouseListener(this);
     button.setActionCommand("" + node.getID());
     button.setVisible(true);
-    button.enable();
+    button.setEnabled(true);
 
     this.add(button);
     buttons.put(new Integer(node.getID()), button);
@@ -952,7 +934,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       if (popup.getLabel().equals("leaves")) {
         Integer id = new Integer(e.getActionCommand());
 
-        clearSelection();
+//        clearSelection();
         JButton button = (JButton) buttons.get(id);
         selection.add(button);
 
@@ -981,7 +963,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         // add the necessary lines for drawing
         addLines(parent);
 
-        selection.clear();
+        clearSelection();
 
         // repaint the picture!
         this.repaint();
@@ -1370,6 +1352,10 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     treeNodeAnnotationType = newTreeNodeAnnotationType;
   }
 
+  public String getTreeNodeAnnotationType() {
+    return treeNodeAnnotationType;
+  }
+
   public void setTokenType(String newTokenType) {
     if (newTokenType != null && ! newTokenType.equals(""))
       tokenType = newTokenType;
@@ -1446,6 +1432,9 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.22  2003/01/28 10:01:16  marin
+// [marin] bugfixes from Kali
+//
 // Revision 1.21  2002/03/06 17:15:46  kalina
 // Reorganised the source code, so that it now uses constants from
 // ANNIEConstants, GateConstants and parameter constants defined on each PR.
