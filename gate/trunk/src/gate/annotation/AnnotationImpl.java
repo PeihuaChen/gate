@@ -19,6 +19,7 @@ import java.util.*;
 
 import gate.*;
 import gate.util.*;
+import gate.corpora.*;
 
 /** Provides an implementation for the interface gate.Annotation
  *
@@ -105,7 +106,7 @@ public class AnnotationImpl
     * that when equals return false, the values to be different. For speed, it
     * would be beneficial to happen that way.
     */
-/*
+
   public int hashCode(){
     int hashCodeRes = 0;
     if (start != null && start.getOffset() != null)
@@ -116,12 +117,11 @@ public class AnnotationImpl
       hashCodeRes ^= features.hashCode();
     return  hashCodeRes;
   }// hashCode
-*/
+
   /** Returns true if two annotation are Equals.
-   *  Two Annotation are equals if their offsets, types and features are the
+   *  Two Annotation are equals if their offsets, types, id and features are the
    *  same.
    */
-/*
   public boolean equals(Object obj){
     if(obj == null)
       return false;
@@ -136,7 +136,13 @@ public class AnnotationImpl
     if(type != null && (!type.equals(other.getType())))
       return false;
 
-  // If their start offset is not the same then return false
+    // If their types are not equals then return false
+    if((id == null) ^ (other.getId() == null))
+      return false;
+    if((id != null )&& (!id.equals(other.getId())))
+      return false;
+
+    // If their start offset is not the same then return false
     if((start == null) ^ (other.getStartNode() == null))
       return false;
     if(start != null){
@@ -148,7 +154,7 @@ public class AnnotationImpl
         return false;
     }
 
-  // If their end offset is not the same then return false
+    // If their end offset is not the same then return false
     if((end == null) ^ (other.getEndNode() == null))
       return false;
     if(end != null){
@@ -167,7 +173,7 @@ public class AnnotationImpl
       return false;
     return true;
   }// equals
-*/
+
 
   /** This verifies if <b>this</b> annotation is compatible with another one.
     * Compatible means that they hit the same possition and the FeatureMap of
@@ -301,5 +307,55 @@ public class AnnotationImpl
    *  The end node
    */
   Node end;
+
+  public static void main(String[] args) {
+    Document doc = new DocumentImpl();
+    DocumentContent documentContent = new DocumentContentImpl(
+    "The Coca-Cola Co. appointed New York Times Inc. a Eastern Airways GMBH &AMP; COKG new Brothers director - "
+    + "Mr. John Something. Something Times has a Big    Apple very promising future,"+
+    "said New York Times the spokeman New York GMBH. of Eastern Air Coca-Cola"+
+    "Standard and Poor Mr. John Something Smith, Jones Standard and Poor's Smith Jones"
+    +"Standard's GMBH &AMP; COKG The Magic Tricks Co ICI GMBH Imperial Chemical Industries");
+    doc.setContent(documentContent);
+
+    AnnotationSet as = doc.getAnnotations();
+
+    // add some annotations
+    Integer newId;
+    FeatureMap fm = Factory.newFeatureMap();
+    try {
+
+      fm = Factory.newFeatureMap();
+      fm.put("token","org");
+      fm.put("country","USA");
+
+      newId =
+        as.add(new Long(255), new Long(272), "TTTT", fm);
+
+      fm = Factory.newFeatureMap();
+      fm.put("token","person");
+      fm.put("country","USA");
+
+      newId =
+        as.add(new Long(273), new Long(291), "TTTT", fm);
+
+      fm = Factory.newFeatureMap();
+      fm.put("token","org");
+      fm.put("country","USA");
+
+      newId =
+        as.add(new Long(292), new Long(304), "TTTT", fm);
+
+    } catch (InvalidOffsetException ioe) {
+      ioe.printStackTrace();
+    }
+    Out.prln(as.size());
+    Annotation annot = as.get(new Integer (0));
+
+    as.removeAll(as);
+    Out.prln(as.size());
+
+    if (as.contains(annot)) Out.prln("Nu merge"); else Out.prln("merge");
+  }
 
 } // class AnnotationImpl
