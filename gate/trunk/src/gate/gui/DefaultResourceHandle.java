@@ -121,11 +121,7 @@ public class DefaultResourceHandle implements ResourceHandle {
     return resource;
   }
 
-  protected void buildViews() {
-    //build the large views
-    fireStatusChanged("Building views...");
-    JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
-
+  private void addAllViews(){
     /* Fancy discovery code goes here
     ...
     ...
@@ -135,6 +131,11 @@ public class DefaultResourceHandle implements ResourceHandle {
     /* Not so fancy hardcoded views build */
     popup = new JPopupMenu();
     popup.add(new CloseAction());
+    if(resource instanceof Resource){
+      popup.addSeparator();
+      popup.add(new ReloadAction());
+    }
+
     //Language Resources
     if(resource instanceof LanguageResource) {
       popup.addSeparator();
@@ -142,12 +143,10 @@ public class DefaultResourceHandle implements ResourceHandle {
       popup.add(new SaveToAction());
       if(resource instanceof gate.corpora.DocumentImpl) {
         popup.add(new SaveAsXmlAction());
-        popup.addSeparator();
-        popup.add(new ReloadDocumentAction());
         try{
           FeatureMap params = Factory.newFeatureMap();
           params.put("document", resource);
-          view.add("Annotations",
+          largeView.add("Annotations",
                  (JComponent)Factory.createResource("gate.gui.AnnotationEditor",
                                                       params)
                   );
@@ -164,9 +163,15 @@ public class DefaultResourceHandle implements ResourceHandle {
 
     FeaturesEditor fEdt = new FeaturesEditor();
     fEdt.setFeatureBearer(resource);
-    view.add("Features", fEdt);
-    largeView = view;
+    largeView.add("Features", fEdt);
     smallView = null;
+  }
+
+  protected void buildViews() {
+    //build the large views
+    fireStatusChanged("Building views...");
+    largeView = new JTabbedPane(JTabbedPane.BOTTOM);
+    addAllViews();
     fireStatusChanged("Views built!");
   }//protected void buildViews
 
@@ -338,58 +343,73 @@ public class DefaultResourceHandle implements ResourceHandle {
     }
   }//class SaveToAction extends AbstractAction
 
-  class ReloadDocumentAction extends AbstractAction {
-    ReloadDocumentAction() {
+  class ReloadAction extends AbstractAction {
+    ReloadAction() {
       super("Reload");
     }
 
     public void actionPerformed(ActionEvent e) {
-      Map listeners = new HashMap();
-      listeners.put("gate.event.StatusListener",
-                    new StatusListener(){
-                      public void statusChanged(String text){
-                        fireStatusChanged(text);
-                      }
-                    });
+      Runnable runnable = new Runnable(){
+        public void run(){
+          Map listeners = new HashMap();
+          listeners.put("gate.event.StatusListener",
+                        new StatusListener(){
+                          public void statusChanged(String text){
+                            fireStatusChanged(text);
+                          }
+                        });
 
-      listeners.put("gate.event.ProgressListener",
-                    new ProgressListener(){
-                      public void progressChanged(int value){
-                        fireProgressChanged(value);
-                      }
-                      public void processFinished(){
-                        fireProcessFinished();
-                      }
-                    });
-      try{
-        long startTime = System.currentTimeMillis();
-        fireStatusChanged("Reloading " +
-                           resource.getFeatures().get("gate.NAME"));
-        FeatureMap features = Factory.newFeatureMap();
-        features.put("gate.HIDDEN", "true");
-        features.put("gate.NAME", resource.getFeatures().get("gate.NAME"));
-        Resource oldRes = resource;
-        resource = Factory.createResource(resource.getClass().getName(),
-                                          (FeatureMap)resource.getFeatures().
-                                                      get("gate.PARAMETERS"),
-                                          features, listeners);
-        resource.getFeatures().remove("gate.HIDDEN");
-        Factory.deleteResource(oldRes);
-        JTabbedPane view = (JTabbedPane)largeView;
-        ((AnnotationEditor)view.getComponentAt(view.indexOfTab("Annotations"))).
-        setDocument((Document) resource);
-        long endTime = System.currentTimeMillis();
-        fireStatusChanged(resource.getFeatures().get("gate.NAME") +
-                          " reloaded in " +
-                          NumberFormat.getInstance().format(
-                          (double)(endTime - startTime) / 1000) + " seconds");
-      }catch(ResourceInstantiationException rie){
-        fireStatusChanged("Reload failed");
-        JOptionPane.showMessageDialog(getLargeView(),
-                                      "Reload failed!\n " +
-                                      rie.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }
+          listeners.put("gate.event.ProgressListener",
+                        new ProgressListener(){
+                          public void progressChanged(int value){
+                            fireProgressChanged(value);
+                          }
+                          public void processFinished(){
+                            fireProcessFinished();
+                          }
+                        });
+          try{
+            long startTime = System.currentTimeMillis();
+            fireStatusChanged("Reloading " +
+                               resource.getFeatures().get("gate.NAME"));
+            FeatureMap features = Factory.newFeatureMap();
+            features.put("gate.HIDDEN", "true");
+            features.put("gate.NAME", resource.getFeatures().get("gate.NAME"));
+            Resource oldRes = (Resource)resource;
+            resource = Factory.createResource(resource.getClass().getName(),
+                                              (FeatureMap)resource.getFeatures().
+                                                          get("gate.PARAMETERS"),
+                                              features, listeners);
+            resource.getFeatures().remove("gate.HIDDEN");
+            Factory.deleteResource(oldRes);
+
+            largeView.removeAll();
+            addAllViews();
+    /*
+            JTabbedPane view = (JTabbedPane)largeView;
+            ((AnnotationEditor)view.getComponentAt(view.indexOfTab("Annotations"))).
+            setDocument((Document) resource);
+    */
+            long endTime = System.currentTimeMillis();
+            fireStatusChanged(resource.getFeatures().get("gate.NAME") +
+                              " reloaded in " +
+                              NumberFormat.getInstance().format(
+                              (double)(endTime - startTime) / 1000) + " seconds");
+          }catch(ResourceInstantiationException rie){
+            fireStatusChanged("Reload failed");
+            JOptionPane.showMessageDialog(getLargeView(),
+                                          "Reload failed!\n " +
+                                          rie.toString(),
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+          }
+
+
+        }
+      };
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                 runnable);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }//class ReloadAction
 
