@@ -90,6 +90,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       return;
     }
 
+    List annots2Move = new ArrayList();
     Iterator bodyIter = bodyAnnotations.iterator();
     while (bodyIter.hasNext()) {
       Annotation bodyAnn = (Annotation)bodyIter.next();
@@ -99,9 +100,10 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       //get all annotations we want transferred
       AnnotationSet annots2Copy = inputAS.getContained(start, end);
       //copy them to the new set and delete them from the old one
-      outputAS.addAll(annots2Copy);
-      inputAS.removeAll(annots2Copy);
+      annots2Move.addAll(annots2Copy);
     }
+    outputAS.addAll(annots2Move);
+    inputAS.removeAll(annots2Move);
 
 
   } // execute()
