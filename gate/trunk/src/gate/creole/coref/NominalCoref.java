@@ -181,7 +181,7 @@ public class NominalCoref extends AbstractCoreferencer
       nominals.addAll(organizations);
     }
 
-    Out.println("total nominals: " + nominals.size());
+    //  Out.println("total nominals: " + nominals.size());
 
     // sort them according to offset
     nominalArray = nominals.toArray();
@@ -214,13 +214,13 @@ public class NominalCoref extends AbstractCoreferencer
 	      personCategory.equals("PRP") ||
 	      personCategory.equals("PRP$") ||
 	      personCategory.equals("PRPR$")) {
-	      Out.println("ignoring personal pronoun");
+	      //Out.println("ignoring personal pronoun");
 	      continue;
 	  }
 	}
 	
 	previousPeople.add(0, nominal);
-	Out.println("added person");
+	//Out.println("added person");
       }
       else if (nominal.getType().equals(JOBTITLE_CATEGORY)) {
 	  
@@ -237,13 +237,13 @@ public class NominalCoref extends AbstractCoreferencer
 	//if (! tokenCategory.equals("NN") &&
 	//! tokenCategory.equals("NNP")) {
 	if (! tokenCategory.equals("NN")) {
-	  Out.println("Not a singular noun");
+	    // Out.println("Not a singular noun");
 	  continue;
 	}
 	
 	// Don't associate it if it's part of a Person (eg President Bush)
 	if (overlapsAnnotations(nominal, people)) {
-	  Out.println("overlapping annotation");
+	    //Out.println("overlapping annotation");
 	  continue;
 	}
 
@@ -259,7 +259,7 @@ public class NominalCoref extends AbstractCoreferencer
               previousValue.equalsIgnoreCase("an") ||
               previousValue.equalsIgnoreCase("other") ||
               previousValue.equalsIgnoreCase("another")) {
-              Out.println("indefinite");
+              //Out.println("indefinite");
 	    continue;
           }
         }
