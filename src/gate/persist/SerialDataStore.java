@@ -310,6 +310,8 @@ extends AbstractFeatureBearer implements DataStore {
     * image.
     */
   public void sync(LanguageResource lr) throws PersistenceException {
+//    Out.prln("SDS: LR sync called. Saving " + lr.getClass().getName());
+
     // check that this LR is one of ours (i.e. has been adopted)
     if(lr.getDataStore() == null || ! lr.getDataStore().equals(this))
       throw new PersistenceException(
@@ -357,10 +359,14 @@ extends AbstractFeatureBearer implements DataStore {
         //if the document is not in memory, there's little point in saving it
         if ( (!corpus.isDocumentLoaded(i)) && corpus.isPersistentDocument(i))
           continue;
-        if (DEBUG) Out.prln("Saving document at position " + i);
-        if (DEBUG) Out.prln("Document in memory " + corpus.isDocumentLoaded(i));
-        if (DEBUG) Out.prln("is persistent? "+ corpus.isPersistentDocument(i));
-        if (DEBUG) Out.prln("Document name at position" + corpus.getDocumentName(i));
+        if (DEBUG)
+          Out.prln("Saving document at position " + i);
+        if (DEBUG)
+          Out.prln("Document in memory " + corpus.isDocumentLoaded(i));
+        if (DEBUG)
+          Out.prln("is persistent? "+ corpus.isPersistentDocument(i));
+        if (DEBUG)
+          Out.prln("Document name at position" + corpus.getDocumentName(i));
         Document doc = (Document) corpus.get(i);
         try {
           //if the document is not already adopted, we need to do that first
