@@ -1270,19 +1270,25 @@ public class MainFrame extends JFrame
     if(parentWindow instanceof Frame){
       dialog = new JDialog((Frame)parentWindow, "Please wait", true){
         protected void processWindowEvent(WindowEvent e) {
-          getToolkit().beep();
+          if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            getToolkit().beep();
+          }
         }
       };
     }else if(parentWindow instanceof Dialog){
       dialog = new JDialog((Dialog)parentWindow, "Please wait", true){
         protected void processWindowEvent(WindowEvent e) {
-          getToolkit().beep();
+          if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            getToolkit().beep();
+          }
         }
       };
     }else{
       dialog = new JDialog(JOptionPane.getRootFrame(), "Please wait", true){
         protected void processWindowEvent(WindowEvent e) {
-          getToolkit().beep();
+          if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            getToolkit().beep();
+          }
         }
       };
     }
