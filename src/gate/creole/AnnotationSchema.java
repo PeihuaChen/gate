@@ -68,6 +68,7 @@ public class AnnotationSchema {
     */
   private static Map java2xSchemaMap = new HashMap();
 
+  private static DocumentBuilder xmlParser = null;
   static{
     setUp();
   }
@@ -93,6 +94,24 @@ public class AnnotationSchema {
     java2xSchemaMap.put(new Double(12.12).getClass().getName(),"double");
     java2xSchemaMap.put(new Short((short)12).getClass().getName(),"short");
     java2xSchemaMap.put(new Byte((byte)12).getClass().getName(),"byte");
+
+    // Get an XML parser
+    try {
+      // Get a parser factory.
+      DocumentBuilderFactory domBuilderFactory =
+                                          DocumentBuilderFactory.newInstance();
+      // Set up the factory to create the appropriate type of parser
+      // A non validating one
+      domBuilderFactory.setValidating(false);
+      // A non namesapace aware one
+      domBuilderFactory.setNamespaceAware(false);
+
+      // Create the DOM parser
+      xmlParser = domBuilderFactory.newDocumentBuilder();
+      // Parse the document and create the DOM structure
+    } catch (ParserConfigurationException e){
+        e.printStackTrace(Err.getPrintWriter());
+    }
   }// end setUp
 
   /** The name of the annotation */
@@ -158,18 +177,6 @@ public class AnnotationSchema {
     */
   public void fromXSchema(URL anXSchemaURL){
     try {
-      // Get a parser factory.
-      DocumentBuilderFactory domBuilderFactory =
-                                          DocumentBuilderFactory.newInstance();
-
-      // Set up the factory to create the appropriate type of parser
-      // A non validating one
-      domBuilderFactory.setValidating(false);
-      // A non namesapace aware one
-      domBuilderFactory.setNamespaceAware(false);
-
-      // Create the DOM parser
-      DocumentBuilder xmlParser = domBuilderFactory.newDocumentBuilder();
       // Parse the document and create the DOM structure
       org.w3c.dom.Document dom =
                 xmlParser.parse(anXSchemaURL.toString());
@@ -191,8 +198,6 @@ public class AnnotationSchema {
               (org.jdom.Element) rootElementChildrenIterator.next();
         createAnnotationSchemaObject(childElement);
       }//end while
-    } catch (ParserConfigurationException e){
-      e.printStackTrace(Err.getPrintWriter());
     } catch (SAXException e){
       e.printStackTrace(Err.getPrintWriter());
     } catch (IOException e) {
