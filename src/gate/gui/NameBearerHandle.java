@@ -136,6 +136,9 @@ public class NameBearerHandle implements Handle,
     return target;
   }
 
+  public Action getCloseAction(){
+    return new CloseAction();
+  }
   protected void buildViews() {
     //build the popup
     popup = new JPopupMenu();

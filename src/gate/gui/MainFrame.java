@@ -258,6 +258,10 @@ public class MainFrame extends JFrame
     resourcesTree.expandRow(2);
     resourcesTree.expandRow(3);
     resourcesTree.expandRow(4);
+    resourcesTree.getSelectionModel().
+                  setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
+                                   );
+    resourcesTree.setEnabled(true);
     ToolTipManager.sharedInstance().registerComponent(resourcesTree);
     resourcesTreeScroll = new JScrollPane(resourcesTree);
 
@@ -485,10 +489,17 @@ public class MainFrame extends JFrame
       Locale locale = new Locale("en", "GB");
       //if this fails guk is not present
       Class.forName("guk.im.GateIMDescriptor");
-      Locale[] availableLocales = new guk.im.GateIMDescriptor().getAvailableLocales();
-      //Locale[] availableLocales = Locale.getAvailableLocales();
+      List installedLocales = new ArrayList();
+      //add the Gate input methods
+      installedLocales.addAll(Arrays.asList(new guk.im.GateIMDescriptor().
+                                            getAvailableLocales()));
+      //add the MPI IMs
+      installedLocales.addAll(Arrays.asList(
+            new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor().
+            getAvailableLocales()));
+
       JMenuItem item;
-      if(availableLocales != null && availableLocales.length > 1){
+      if(!installedLocales.isEmpty()){
         imMenu = new JMenu("Input methods");
         ButtonGroup bg = new ButtonGroup();
         item = new LocaleSelectorMenuItem();
@@ -496,8 +507,8 @@ public class MainFrame extends JFrame
         item.setSelected(true);
         imMenu.addSeparator();
         bg.add(item);
-        for(int i = 0; i < availableLocales.length; i++){
-          locale = availableLocales[i];
+        for(int i = 0; i < installedLocales.size(); i++){
+          locale = (Locale)installedLocales.get(i);
           item = new LocaleSelectorMenuItem(locale);
           imMenu.add(item);
           bg.add(item);
@@ -588,7 +599,13 @@ public class MainFrame extends JFrame
           }
         }
         if (SwingUtilities.isRightMouseButton(e)) {
-          if(popup != null){
+          if(resourcesTree.getSelectionCount() > 1){
+            //multiple selection in tree-> show a popup for delete all
+            popup = new JPopupMenu();
+            popup.add(new XJMenuItem(new CloseSelectedResourcesAction(),
+                      MainFrame.this));
+            popup.show(resourcesTree, e.getX(), e.getY());
+          }else if(popup != null){
             popup.show(resourcesTree, e.getX(), e.getY());
           }
         } else if(SwingUtilities.isLeftMouseButton(e)) {
@@ -1668,6 +1685,24 @@ public class MainFrame extends JFrame
     Handle handle;
   }//class CloseViewAction
 
+  class CloseSelectedResourcesAction extends AbstractAction {
+    public CloseSelectedResourcesAction() {
+      super("Close all");
+      putValue(SHORT_DESCRIPTION, "Closes the selected resources");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      TreePath[] paths = resourcesTree.getSelectionPaths();
+      for(int i = 0; i < paths.length; i++){
+        Object userObject = ((DefaultMutableTreeNode)paths[i].
+                            getLastPathComponent()).getUserObject();
+        if(userObject instanceof NameBearerHandle){
+          ((NameBearerHandle)userObject).getCloseAction().actionPerformed(null);
+        }
+      }
+    }
+  }
+
 
   /**
    * Closes the view associated to a resource.
@@ -1987,9 +2022,8 @@ public class MainFrame extends JFrame
                                               boolean leaf,
                                               int row,
                                               boolean hasFocus){
-      super.getTreeCellRendererComponent(tree, value, selected, expanded,
+      super.getTreeCellRendererComponent(tree, value, sel, expanded,
                                          leaf, row, hasFocus);
-
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("project.gif"));
         setToolTipText("Gate");
