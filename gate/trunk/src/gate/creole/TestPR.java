@@ -434,7 +434,8 @@ public class TestPR extends TestCase
     compareAnnots(document,doc3);
   } // testAllPR()
 
-  public void compareAnnots(Document keyDocument, Document responseDocument){
+  public void compareAnnots(Document keyDocument, Document responseDocument)
+              throws Exception{
 
     // create annotation schema
     AnnotationSchema annotationSchema = new AnnotationSchema();
@@ -449,17 +450,23 @@ public class TestPR extends TestCase
       annotationSchema.setAnnotationName(annotType);
 
       // create an annotation diff
-      FeatureMap parameters = Factory.newFeatureMap();
-      parameters.put("keyDocument",keyDocument);
-      parameters.put("responseDocument",responseDocument);
-      parameters.put("annotationSchema",annotationSchema);
-      parameters.put("keyAnnotationSetName",null);
-      parameters.put("responseAnnotationSetName",null);
+      AnnotationDiff annotDiff = new AnnotationDiff();
+      annotDiff.setKeyDocument(keyDocument);
+      annotDiff.setResponseDocument(responseDocument);
+      annotDiff.setAnnotationSchema(annotationSchema);
+      annotDiff.setKeyAnnotationSetName(null);
+      annotDiff.setResponseAnnotationSetName(null);
 
-      // Create Annotation Diff visual resource
-      try {
-      AnnotationDiff annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
+      Set significantFeatures = new HashSet(Arrays.asList(
+                    new String[]{"NMRule", "kind", "orgType", "rule",
+                                 "rule1", "rule2", "locType", "gender",
+                                 "majorType", "minorType", "category",
+                                 "length", "orth", "string", "subkind",
+                                 "symbolkind"}));
+      annotDiff.setKeyFeatureNamesSet(significantFeatures);
+      annotDiff.setTextMode(new Boolean(true));
+
+      annotDiff.init();
 
       if (DEBUG){
         if (annotDiff.getFMeasureAverage() != 1.0) {
@@ -485,10 +492,6 @@ public class TestPR extends TestCase
         +responseDocument.getSourceUrl().getFile()+
         " is "+ annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
         annotDiff.getFMeasureAverage()== 1.0);
-      } catch (ResourceInstantiationException rie) {
-        rie.printStackTrace(Err.getPrintWriter());
-      }
-
      }//while
    }// public void compareAnnots
 

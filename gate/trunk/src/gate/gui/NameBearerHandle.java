@@ -388,6 +388,7 @@ public class NameBearerHandle implements Handle,
             NameBearerHandle.this.statusChanged("Saving as XML to " +
              selectedFile.toString() + "...");
             try{
+              MainFrame.lockGUI("Saving...");
               // Prepare to write into the xmlFile using UTF-8 encoding
               OutputStreamWriter writer = new OutputStreamWriter(
                               new FileOutputStream(selectedFile),"UTF-8");
@@ -400,7 +401,9 @@ public class NameBearerHandle implements Handle,
               writer.close();
             } catch (Exception ex){
               ex.printStackTrace(Out.getPrintWriter());
-            }// End try
+            }finally{
+              MainFrame.unlockGUI();
+            }
             NameBearerHandle.this.statusChanged("Finished saving as xml into "+
              " the file : "+ selectedFile.toString());
           }// End if
@@ -672,6 +675,7 @@ public class NameBearerHandle implements Handle,
       DataStore ds = ((LanguageResource)target).getDataStore();
       if(ds != null){
         try {
+          MainFrame.lockGUI("Saving " + ((LanguageResource)target).getName());
           StatusListener sListener = (StatusListener)
                                      gate.gui.MainFrame.getListeners().
                                      get("gate.event.StatusListener");
@@ -695,6 +699,8 @@ public class NameBearerHandle implements Handle,
                                         "Save failed!\n " +
                                         se.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
+        }finally{
+          MainFrame.unlockGUI();
         }
       } else {
         JOptionPane.showMessageDialog(getLargeView(),
