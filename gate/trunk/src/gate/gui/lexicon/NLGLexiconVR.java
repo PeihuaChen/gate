@@ -24,6 +24,8 @@ import java.awt.event.*;
 import java.util.*;
 import gate.util.*;
 import gate.gui.OkCancelDialog;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 public class NLGLexiconVR extends AbstractVisualResource {
   public NLGLexiconVR() {
@@ -36,6 +38,7 @@ public class NLGLexiconVR extends AbstractVisualResource {
     this.addSenseAction = new AddSenseAction();
     this.lookupLemmaAction = new LookupLemmaAction();
     this.addWordAction = new AddWordAction();
+    this.removeSenseAction = new RemoveSenseAction();
   }
 
   protected void initGuiComponents(){
@@ -70,6 +73,8 @@ public class NLGLexiconVR extends AbstractVisualResource {
     sensesTextLabel.setText("Senses");
     addSenseButton = new JButton(addSenseAction);
     addSenseButton.setText("Add Sense");
+    removeSenseButton = new JButton(removeSenseAction);
+    removeSenseButton.setText("Remove Sense");
 
     addWordButton = new JButton(addWordAction);
     addWordButton.setText("Add Word");
@@ -83,6 +88,7 @@ public class NLGLexiconVR extends AbstractVisualResource {
     leftBox.add(lemmaTextField, null);
 
     buttonBox.add(lookupButton);
+    buttonBox.add(Box.createHorizontalStrut(20));
     buttonBox.add(addWordButton);
 
     leftBox.add(buttonBox);
@@ -97,7 +103,12 @@ public class NLGLexiconVR extends AbstractVisualResource {
     leftBox.add(sensesTextLabel, null);
     leftBox.add(sensesScrollPane, null);
     sensesScrollPane.getViewport().add(sensesList, null);
-    leftBox.add(addSenseButton, null);
+
+    Box senseButtonsBox = Box.createHorizontalBox();
+    senseButtonsBox.add(addSenseButton, null);
+    senseButtonsBox.add(Box.createHorizontalStrut(20));
+    senseButtonsBox.add(removeSenseButton, null);
+    leftBox.add(senseButtonsBox);
 
     leftBox.add(Box.createVerticalGlue());
     rightBox.add(Box.createVerticalGlue());
@@ -105,7 +116,12 @@ public class NLGLexiconVR extends AbstractVisualResource {
   }
 
   protected void initListeners(){
-
+    this.sensesList.addListSelectionListener(new ListSelectionListener(){
+      public void valueChanged(ListSelectionEvent event) {
+        LexKBWordSense wordSense = (LexKBWordSense) sensesList.getSelectedValue();
+        updateRightGUI(wordSense);
+      }
+    });
   }
 
   /**
@@ -159,7 +175,7 @@ public class NLGLexiconVR extends AbstractVisualResource {
     } else {
       for (int i= 0; i < senses.size(); i++) {
         LexKBWordSense sense = (LexKBWordSense) senses.get(i);
-        NLGLexiconVR.this.sensesListModel.addElement(sense.toString());
+        NLGLexiconVR.this.sensesListModel.addElement(sense);
         if (senses.size() == 1)
           updateRightGUI(sense);
       }//for loop through senses
@@ -167,14 +183,17 @@ public class NLGLexiconVR extends AbstractVisualResource {
   }
 
   protected void updateRightGUI(LexKBWordSense sense) {
-    if (lexKB == null) return;
+    synsetListModel.clear();
+    posString.setText("");
+    if (sense == null || lexKB == null)
+      return;
     LexKBSynset synset = sense.getSynset();
     this.definitionTextArea.setText(synset.getDefinition());
     this.posString.setText(synset.getPOS().toString());
     this.posString.setEnabled(false);
     for (int i = 0; i < synset.getWordSenses().size(); i++) {
       LexKBWordSense senseI = synset.getWordSense(i);
-      synsetListModel.addElement(senseI.toString());
+      synsetListModel.addElement(senseI);
     }
 
   }//updateRightGUI
@@ -194,8 +213,13 @@ public class NLGLexiconVR extends AbstractVisualResource {
 
       String lemma = NLGLexiconVR.this.lemmaTextField.getText();
       java.util.List wordSenses = (java.util.List) lexKB.lookupWord(lemma);
-      if (wordSenses == null || wordSenses.isEmpty())
-        throw new GateRuntimeException("Please add this word to the lexicon first.");
+      if (wordSenses == null || wordSenses.isEmpty()) {
+        JOptionPane.showMessageDialog(
+            NLGLexiconVR.this,
+            "Please add this word to the lexicon first",
+            "Message", JOptionPane.INFORMATION_MESSAGE);
+        return;
+      }
 
       Word theWord = ((LexKBWordSense) wordSenses.get(0)).getWord();
       if (! (theWord instanceof MutableWord))
@@ -218,6 +242,30 @@ public class NLGLexiconVR extends AbstractVisualResource {
       NLGLexiconVR.this.updateLeftGUI(lemma);
     }//actionPerformed
   }
+
+  /**
+   * Removes the selected sense from the lexicon
+   */
+  protected class RemoveSenseAction extends AbstractAction{
+    RemoveSenseAction(){
+      super("RemoveSense");
+      putValue(SHORT_DESCRIPTION, "Remove the selected sense");
+    }
+    public void actionPerformed(ActionEvent e){
+      if (NLGLexiconVR.this.lexKB == null)
+        return;
+      LexKBWordSense theSense = (LexKBWordSense) sensesList.getSelectedValue();
+      Word theWord = theSense.getWord();
+      if (!( theWord instanceof MutableWord)) {
+        Out.prln("Cannot edit a read-only word/lexicon");
+        return;
+      }
+      ((MutableWord)theWord).removeSense(theSense);
+
+      NLGLexiconVR.this.updateLeftGUI(lemmaTextField.getText());
+    }//actionPerformed
+  }
+
 
   /**
    * Adds an element to the list from the editing component located at the top
@@ -296,6 +344,12 @@ public class NLGLexiconVR extends AbstractVisualResource {
     * An action that adds a new sense to the lexicon
     */
    protected Action addSenseAction;
+
+   protected JButton removeSenseButton;
+   /**
+     * An action that removes a sense from the lexicon
+     */
+    protected Action removeSenseAction;
 
    protected JButton lookupButton;
    /**

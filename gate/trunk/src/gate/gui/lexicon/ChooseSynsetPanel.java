@@ -23,6 +23,7 @@ import gate.util.GateRuntimeException;
 import gate.gui.OkCancelDialog;
 
 public class ChooseSynsetPanel extends JPanel {
+
   public ChooseSynsetPanel(LexicalKnowledgeBase theLex) {
     if (theLex == null)
       throw new GateRuntimeException("To view/edit synsets please provide a valid lexicon");
@@ -38,6 +39,7 @@ public class ChooseSynsetPanel extends JPanel {
 
   protected void initLocalData(){
     this.addSynsetAction = new AddSynsetAction();
+    this.removeSynsetAction = new RemoveSynsetAction();
   }
 
   protected void initGuiComponents(){
@@ -54,6 +56,7 @@ public class ChooseSynsetPanel extends JPanel {
 
     definitionTextArea.setText("");
     definitionTextArea.setWrapStyleWord(true);
+    definitionTextArea.setEditable(false);
     definitionTextLabel.setText("Definition");
 
     this.setLayout(gridLayout1);
@@ -64,6 +67,9 @@ public class ChooseSynsetPanel extends JPanel {
 
     addSynsetButton = new JButton(addSynsetAction);
     addSynsetButton.setText("Add");
+
+    removeSynsetButton = new JButton(removeSynsetAction);
+    removeSynsetButton.setText("Remove");
 
     this.add(mainBox, null);
     mainBox.add(leftBox, null);
@@ -84,7 +90,11 @@ public class ChooseSynsetPanel extends JPanel {
     definitionScroller.setMinimumSize(new Dimension(300, 150));
     rightBox.add(definitionScroller, null);
 
-    rightBox.add(addSynsetButton, null);
+    Box buttonBox = Box.createHorizontalBox();
+    buttonBox.add(addSynsetButton, null);
+    buttonBox.add(Box.createHorizontalStrut(20));
+    buttonBox.add(removeSynsetButton, null);
+    rightBox.add(buttonBox);
 
     leftBox.add(Box.createVerticalGlue());
     leftBox.add(Box.createHorizontalGlue());
@@ -141,7 +151,18 @@ public class ChooseSynsetPanel extends JPanel {
     newDefScroller.setMinimumSize(new Dimension(300, 150));
 
     JLabel defPOS = new JLabel("Part of speech");
-    JComboBox newPOSCombo = new JComboBox(lexKB.getPOSTypes());
+    final JComboBox newPOSCombo = new JComboBox(lexKB.getPOSTypes());
+    newPOSCombo.setEditable(true);
+    newPOSCombo.getEditor().addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Object editedItem = newPOSCombo.getEditor().getItem();
+        if (! (lexKB instanceof MutableLexicalKnowledgeBase))
+          return;
+        newPOSCombo.addItem(editedItem);
+        newPOSCombo.setSelectedItem(editedItem);
+        ((MutableLexicalKnowledgeBase) lexKB).addPOSType(editedItem);
+      }
+    });
     inputPanel.add(defLabel);
     inputPanel.add(newDefScroller);
     inputPanel.add(defPOS);
@@ -151,19 +172,23 @@ public class ChooseSynsetPanel extends JPanel {
         OkCancelDialog.showDialog(this, inputPanel,
                               "Please provide definition and POS of the new synset");
 
-    //else TO DO!!! remove the synset because Cancel has been pressed!!!
     if (! okPressed)
       return;
 
     theSynset.setDefinition(newDefField.getText());
     theSynset.setPOS(newPOSCombo.getSelectedItem());
+    if (newPOSCombo.getModel().getSize() != posComboBox.getModel().getSize()) {
+      posComboBox.removeAllItems();
+      Object[] posTypes = lexKB.getPOSTypes();
+      for (int i=0; i< posTypes.length; i++)
+      posComboBox.addItem(posTypes[i]);
+    }
 
   }
 
 
   /**
-   * Adds an element to the list from the editing component located at the top
-   * of this dialog.
+   * Adds a synset
    */
   protected class AddSynsetAction extends AbstractAction{
     AddSynsetAction(){
@@ -182,6 +207,32 @@ public class ChooseSynsetPanel extends JPanel {
         posComboBox.setSelectedItem(newSynset.getPOS());
         updateGUI(newSynset);
       }
+    }//actionPerformed
+  }
+
+  /**
+   * Removes a synset
+   */
+  protected class RemoveSynsetAction extends AbstractAction{
+    RemoveSynsetAction(){
+      super("RemoveSynset");
+      putValue(SHORT_DESCRIPTION, "Removes a synset from the lexicon");
+    }
+    public void actionPerformed(ActionEvent e){
+      int result = JOptionPane.showConfirmDialog(ChooseSynsetPanel.this,
+        "Deleting the synset will also delete all word senses it contains. Are you sure?",
+        "Warning",
+        JOptionPane.YES_NO_OPTION);
+      if (result == JOptionPane.NO_OPTION)
+        return;
+      if (lexKB == null ||
+          !(lexKB instanceof MutableLexicalKnowledgeBase))
+        return;
+      MutableLexicalKnowledgeBase theKB = (MutableLexicalKnowledgeBase) lexKB;
+      MutableLexKBSynset synset = (MutableLexKBSynset) synsetList.getSelectedValue();
+      theKB.removeSynset(synset);
+
+      updateGUI(null);
     }//actionPerformed
   }
 
@@ -207,6 +258,12 @@ public class ChooseSynsetPanel extends JPanel {
     * An action that adds a new synset to the lexicon
     */
    protected Action addSynsetAction;
+
+   protected JButton removeSynsetButton;
+   /**
+     * An action that removes a synset from the lexicon
+     */
+   protected Action removeSynsetAction;
 
    public static void main(String[] args) {
 
