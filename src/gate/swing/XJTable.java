@@ -520,6 +520,11 @@ public class XJTable extends JTable {
       model.setValueAt(aValue, indexes[aRow], aColumn);
     }
 
+    public boolean isCellEditable(int aRow, int aColumn) {
+      checkModel();
+      return model.isCellEditable(indexes[aRow], aColumn);
+    }
+
     public void sortByColumn(int column) {
       sortingColumns.removeAllElements();
       sortingColumns.addElement(new Integer(column));
