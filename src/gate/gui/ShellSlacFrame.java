@@ -133,11 +133,13 @@ public class ShellSlacFrame extends MainFrame {
 
     fileMenu.addSeparator();
 
+    action = new ImportDocumentAction();
+    fileMenu.add(new XJMenuItem(action, this));
     action = new ExportDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
-    
     action = new ExportAllDocumentAction();
     fileMenu.add(new XJMenuItem(action, this));
+
 /*
     action = new StoreAllDocumentAction();
     action.setEnabled(false);
@@ -160,8 +162,8 @@ public class ShellSlacFrame extends MainFrame {
 */
 
     fileMenu.addSeparator();
+    
 //    action = new ExitGateAction();
-
     // define exit action without save of session
     action = new AbstractAction () {
       public void actionPerformed(ActionEvent e) {
@@ -696,6 +698,32 @@ public class ShellSlacFrame extends MainFrame {
       } // if
     } // actionPerformed(ActionEvent e)
   } // class TestStoreAction extends AbstractAction
+
+  /** Import document action */
+  class ImportDocumentAction extends AbstractAction {
+    public ImportDocumentAction() {
+      super("Import");
+      putValue(SHORT_DESCRIPTION, "Open a document in XML format");
+    } // ImportDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+      fileChooser.setDialogTitle("Select file to Import from");
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+      int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
+      if(res == fileChooser.APPROVE_OPTION) {
+        File file = fileChooser.getSelectedFile();
+        if(file != null) 
+          try {
+            Factory.newDocument(file.toURL());
+          } catch (MalformedURLException mex) {
+            mex.printStackTrace();
+          } catch (ResourceInstantiationException rex) {
+            rex.printStackTrace();
+          } // catch
+      } // if
+    } // actionPerformed(ActionEvent e)
+  } // class ImportDocumentAction extends AbstractAction
 
   /** Export current document action */
   class ExportDocumentAction extends AbstractAction {
