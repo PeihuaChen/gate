@@ -156,7 +156,7 @@ public class CookBook extends TestCase
       Gate.getUrl("tests/doc0.html").toExternalForm()
     );
     params.put("markupAware", new Boolean(true));
-    Resource res = Factory.createResource("gate.Document", params);
+    Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
     // now we have a document
     assert(

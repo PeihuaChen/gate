@@ -43,7 +43,10 @@ public class CreoleXmlHandler extends HandlerBase {
   private ResourceData resourceData;
 
   /** The current parameter list */
-  private List currentParamList = new ArrayList();
+  private ParameterList currentParamList = new ParameterList();
+
+  /** The current parameter disjunction */
+  private List currentParamDisjunction = new ArrayList();
 
   /** The current parameter */
   private Parameter currentParam = new Parameter();
@@ -141,15 +144,14 @@ public class CreoleXmlHandler extends HandlerBase {
 
     //////////////////////////////////////////////////////////////////
     if(elementName.toUpperCase().equals("RESOURCE")) {
-//******************************
-// here should check that the resource has all mandatory elements, e.g. class name
-//******************************
+      // check for validity of the resource data
+      if(! resourceData.isValid())
+        throw new GateSaxException(
+          "Invalid resource data: " + resourceData.getValidityMessage()
+        );
 
       // add the new resource data object to the creole register
-      if(resourceData.getInterfaceName() != null) // index by intf if present
-        register.put(resourceData.getInterfaceName(), resourceData);
-      else // index by class name
-        register.put(resourceData.getClassName(), resourceData);
+      register.put(resourceData.getClassName(), resourceData);
 
       // if the resource is auto-loading, try and load it
       if(resourceData.isAutoLoading())
@@ -164,6 +166,16 @@ public class CreoleXmlHandler extends HandlerBase {
             resourceData.getName() + "; problem was: " + e
           );
         }
+
+      // if there are any parameters awaiting addition to the list, add them
+      if(! currentParamDisjunction.isEmpty()) {
+        currentParamList.add(currentParamDisjunction);
+        currentParamDisjunction = new ArrayList();
+      }
+
+      // add the parameter list to the resource (and reinitialise it)
+      resourceData.setParameterList(currentParamList);
+      currentParamList = new ParameterList();
 
       if(DEBUG) Out.println("added: " + resourceData);
 
@@ -241,15 +253,17 @@ public class CreoleXmlHandler extends HandlerBase {
       resourceData.setInterfaceName((String) contentStack.pop());
 
     //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("PARAMETER-LIST")) {
-      resourceData.addParameterList(currentParamList);
-      currentParamList = new ArrayList();
+    } else if(elementName.toUpperCase().equals("OR")) {
+      currentParamList.add(currentParamDisjunction);
+      currentParamDisjunction = new ArrayList();
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PARAMETER")) {
       checkStack("endElement", "PARAMETER");
-      currentParam.valueString = (String) contentStack.pop();
-      currentParamList.add(currentParam);
+      currentParam.typeName = (String) contentStack.pop();
+      currentParamDisjunction.add(currentParam);
+      if(DEBUG)
+        Out.prln("added param: " + currentParam);
       currentParam = new Parameter();
 
     //////////////////////////////////////////////////////////////////

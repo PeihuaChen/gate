@@ -15,16 +15,13 @@
       <JAR>TestResources.jar</JAR>
       <CLASS>testpkg.TestPR1</CLASS>
 
-      <PARAMETER-LIST>
+      <OR>
 	<PARAMETER RUNTIME="trUe" NAME="HOOPY DOOPY">param0</PARAMETER>
-      </PARAMETER-LIST>
-
-      <PARAMETER-LIST>
 	<PARAMETER DEFAULT="a default"
 	  OPTIONAL="false" NAME="someparam">param1</PARAMETER>
-	<PARAMETER DEFAULT="" COMMENT="a param comment"
-	  OPTIONAL="true" NAME="some other param">param2</PARAMETER>
-      </PARAMETER-LIST>
+      </OR>
+      <PARAMETER DEFAULT="" COMMENT="a param comment"
+	OPTIONAL="true" NAME="some other param">param2</PARAMETER>
 
       <SOME-ARBITRARY-RESOURCE-FEATURE/>
     </RESOURCE>
@@ -40,9 +37,8 @@
       <NAME>Sheffield Test PR 3 (Print Out Tokens)</NAME>
       <JAR>TestResources.jar</JAR>
       <CLASS>testpkg.PrintOutTokens</CLASS>
-      <PARAMETER-LIST>
-	<PARAMETER RUNTIME="true">gate.Document</PARAMETER>
-      </PARAMETER-LIST>
+      <PARAMETER NAME="document"
+        RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
     </RESOURCE>
 
   </CREOLE>
@@ -82,24 +78,20 @@
       <INTERFACE>gate.Document</INTERFACE>
       <COMMENT>GATE document</COMMENT>
 
-      <PARAMETER-LIST>
+      <PARAMETER
+	NAME="sourceUrlName"
+	COMMENT="Source URL name">java.lang.String</PARAMETER>
 
-        <PARAMETER
-	  NAME="sourceUrlName"
-	  COMMENT="Source URL name">java.lang.String</PARAMETER>
+      <PARAMETER NAME="encoding" OPTIONAL="true"
+	COMMENT="Encoding">java.lang.String</PARAMETER>
 
-        <PARAMETER NAME="encoding" OPTIONAL="true"
-	  COMMENT="Encoding">java.lang.String</PARAMETER>
+      <PARAMETER NAME="sourceUrlStartOffset"
+	COMMENT="Start offset for documents based on ranges"
+	OPTIONAL="true">java.lang.Long</PARAMETER>
 
-        <PARAMETER NAME="sourceUrlStartOffset"
-	  COMMENT="Start offset for documents based on ranges"
-	  OPTIONAL="true">java.lang.Long</PARAMETER>
-
-        <PARAMETER NAME="sourceUrlEndOffset"
-	  COMMENT="End offset for documents based on ranges"
-	  OPTIONAL="true">java.lang.Long</PARAMETER>
-
-      </PARAMETER-LIST>
+      <PARAMETER NAME="sourceUrlEndOffset"
+	COMMENT="End offset for documents based on ranges"
+	OPTIONAL="true">java.lang.Long</PARAMETER>
 
       <FUNKY-METADATA-THAING>hubba hubba</FUNKY-METADATA-THAING>
     </RESOURCE>

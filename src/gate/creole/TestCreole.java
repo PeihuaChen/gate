@@ -98,27 +98,26 @@ public class TestCreole extends TestCase
 
     // checks values of parameters of param0 in test pr 1
     assert(pr1rd.getClassName().equals("testpkg.TestPR1"));
-
-    Iterator iter = pr1rd.getParameterListsSet().iterator();
+    Iterator iter = pr1rd.getParameterList().getRuntimeParameters().iterator();
     Iterator iter2 = null;
     Parameter param = null;
     while(iter.hasNext()) {
       iter2 = ((List) iter.next()).iterator();
       while(iter2.hasNext()) {
         param = (Parameter) iter2.next();
-        if(param.valueString.equals("param0"))
+        if(param.typeName.equals("param0"))
           break;
       }
-      if(param.valueString.equals("param0"))
+      if(param.typeName.equals("param0"))
         break;
     }
 
     assert("param0 was null", param != null);
-    assert(param.valueString.equals("param0"));
+    assert(param.typeName.equals("param0"));
     assert(! param.optional);
     assert(param.runtime);
     assert(param.comment == null);
-    assert(param.defaultValueString == null);
+    assert(param.defaultValue == null);
     assert(param.name.equals("HOOPY DOOPY"));
 
     reg.clear();
@@ -132,9 +131,6 @@ public class TestCreole extends TestCase
       "wrong number of resources in the register: " + reg.size(),
       reg.size() == 7
     );
-
-    //ResourceData pr1rd = (ResourceData) reg.get("Sheffield Test PR 1");
-    //ResourceData pr2rd = (ResourceData) reg.get("Sheffield Test PR 2");
     ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
     ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
     assert("couldn't find PR1/PR2 res data", pr1rd != null && pr2rd != null);
@@ -168,10 +164,10 @@ public class TestCreole extends TestCase
     reg.clear();
   } // testLoading()
 
-  /** Test resource indexing by interface */
-  public void testInterfaceIndex() throws Exception {
+  /** Test resource indexing by class */
+  public void testClassIndex() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.Document");
+    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("couldn't find document res data", docRd);
     assert(
       "doc res data has wrong class name",
@@ -192,12 +188,12 @@ public class TestCreole extends TestCase
     );
 
     reg.clear();
-  } // testInterfaceIndex()
+  } // testClassIndex()
 
   /** Test comments on resources */
   public void testComments() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.Document");
+    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("testComments: couldn't find document res data", docRd);
     String comment = docRd.getComment();
     assert(
@@ -205,6 +201,122 @@ public class TestCreole extends TestCase
       comment != null && comment.equals("GATE document")
     );
   } // testComments()
+
+  /** Test parameter defaults */
+  public void testParameterDefaults1() throws Exception {
+
+    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    assertNotNull("Couldn: couldn't find document res data", docRd);
+
+    ParameterList paramList = docRd.getParameterList();
+    if(DEBUG) Out.prln(docRd);
+
+    // runtime params - none for a document
+    Iterator iter = paramList.getRuntimeParameters().iterator();
+    assert("Document has runtime params: " + paramList, ! iter.hasNext());
+
+    // init time params
+    Parameter param = null;
+    iter = paramList.getInitimeParameters().iterator();
+    while(iter.hasNext()) {
+      List paramDisj = (List) iter.next();
+      Iterator iter2 = paramDisj.iterator();
+
+      for(int i=0; iter2.hasNext(); i++) {
+        param = (Parameter) iter2.next();
+
+        switch(i) {
+          case 0:
+            assert(
+              "Doc param 0 wrong type: " + param.getTypeName(),
+              param.getTypeName().equals("java.lang.String")
+            );
+            assert(
+              "Doc param 0 wrong name: " + param.getName(),
+              param.getName().equals("sourceUrlName")
+            );
+            Object defaultValue = param.calculateDefaultValue();
+            assert(
+              "Doc param 0 default should be null but was: " + defaultValue,
+              defaultValue == null
+            );
+            break;
+          case 1:
+            assert(
+              "Doc param 1 wrong name: " + param.getName(),
+              param.getName().equals("encoding")
+            );
+            break;
+          case 2:
+            assert(
+              "Doc param 2 wrong name: " + param.getName(),
+              param.getName().equals("sourceUrlStartOffset")
+            );
+            break;
+          case 3:
+            assert(
+              "Doc param 3 wrong name: " + param.getName(),
+              param.getName().equals("sourceUrlEndOffset")
+            );
+            break;
+          default:
+            fail("Doc has more than 4 params; 5th is: " + param);
+        } // switch
+      }
+    }
+
+  } // testParameterDefaults1()
+
+  /** Test parameter defaults (2) */
+  public void testParameterDefaults2() throws Exception {
+
+    ResourceData rd = (ResourceData) reg.get("testpkg.PrintOutTokens");
+    assertNotNull("Couldn't find testpkg.POT res data", rd);
+
+    // create a document, so that the parameter default will pick it up
+    Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+
+    ParameterList paramList = rd.getParameterList();
+    if(DEBUG) Out.prln(rd);
+
+    // init time params - none for this one
+    Iterator iter = paramList.getInitimeParameters().iterator();
+    assert("POT has initime params: " + paramList, ! iter.hasNext());
+
+    // runtime params
+    Parameter param = null;
+    iter = paramList.getRuntimeParameters().iterator();
+    while(iter.hasNext()) {
+      List paramDisj = (List) iter.next();
+      Iterator iter2 = paramDisj.iterator();
+
+      for(int i=0; iter2.hasNext(); i++) {
+        param = (Parameter) iter2.next();
+
+        switch(i) {
+          case 0:
+            assert(
+              "POT param 0 wrong type: " + param.getTypeName(),
+              param.getTypeName().equals("gate.corpora.DocumentImpl")
+            );
+            assert(
+              "POT param 0 wrong name: " + param.getName(),
+              param.getName().equals("document")
+            );
+            Object defaultValue = param.calculateDefaultValue();
+            assert(
+              "POT param 0 default should be Document but is " +
+              defaultValue.getClass().getName(),
+              defaultValue instanceof Document
+            );
+            break;
+          default:
+            fail("POT has more than 1 param; 2nd is: " + param);
+        } // switch
+      }
+    }
+
+  } // testParameterDefaults2()
 
   /** Test default run() on processing resources */
   public void testDefaultRun() throws Exception {
@@ -224,7 +336,7 @@ public class TestCreole extends TestCase
   /** Test arbitrary metadata elements on resources */
   public void testArbitraryMetadata() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.Document");
+    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("testArbitraryMetadata: couldn't find doc res data", docRd);
     FeatureMap features = docRd.getFeatures();
     String comment = (String) features.get("FUNKY-METADATA-THAING");
@@ -237,7 +349,7 @@ public class TestCreole extends TestCase
   /** Test resource introspection */
   public void testIntrospection() throws Exception {
     // get the gate.Document resource and its class
-    ResourceData docRd = (ResourceData) reg.get("gate.Document");
+    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
     assertNotNull("couldn't find document res data (2)", docRd);
     Class resClass = docRd.getResourceClass();
 
@@ -290,7 +402,8 @@ public class TestCreole extends TestCase
       "sourceUrlName",
       Gate.getUrl("tests/doc0.html").toExternalForm()
     );
-    Resource res = Factory.createResource("gate.Document", params);
+    Resource res =
+      Factory.createResource("gate.corpora.DocumentImpl", params);
   } // testFactory
 
   /** Utility method to print out the values of a property descriptor

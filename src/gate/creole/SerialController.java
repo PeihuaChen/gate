@@ -48,8 +48,17 @@ extends AbstractProcessingResource implements Controller
     Iterator iter = resourceList.iterator();
     while(iter.hasNext()) {
       ProcessingResource pr = (ProcessingResource) iter.next();
+      ResourceData rd =
+        (ResourceData) Gate.getCreoleRegister().get(pr.getClass().getName());
+      ParameterList params = rd.getParameterList();
+      try {
+        Factory.setResourceParameters(pr, params.getRuntimeDefaults());
+      } catch(Exception e) {
+        executionException =
+          new ExecutionException("Couldn't set parameters: " + e);
+        return;
+      }
 
-//reg.parameterise(pr, parameterListIdMap.get(pr));
       pr.run();
       try {
         pr.check();

@@ -78,7 +78,7 @@ import gate.fsm.TestFSM;
  * For instance this is a valid LHS:
  * <br>"UPPERCASE_LETTER" "LOWERCASE_LETTER"+
  * <br>meaning an uppercase letter followed by one or more lowercase letters.
- * 
+ *
  * The RHS describes an annotation that is to be created and inserted in the
  * annotation set provided in case of a match. The new annotation will span the
  * text that has been recognised. The RHS consists in the annotation type
@@ -92,7 +92,7 @@ import gate.fsm.TestFSM;
  * <br>
  * The tokeniser ignores all the empty lines or the ones that start with # or
  * //.
- * 
+ *
  */
 public class DefaultTokeniser extends AbstractProcessingResource
 implements Runnable, ProcessingResource, ProcessProgressReporter,
@@ -102,17 +102,17 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    */
   private static final boolean DEBUG = false;
 
-  /** 
+  /**
    * Creates a tokeniser
    */
   public DefaultTokeniser(){
   }
 
-  /** 
+  /**
    * Initialises this tokeniser by reading the rules from an external source (provided through an URL) and building
    * the finite state machine at the core of the tokeniser.
-   * 
-   * @exception ResourceInstantiationException 
+   *
+   * @exception ResourceInstantiationException
    */
   public Resource init() throws ResourceInstantiationException{
     Reader rulesReader;
@@ -154,7 +154,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     return this;
   }
 
-  /** 
+  /**
    * Prepares this Processing resource for a new run.
    */
   public void reset(){
@@ -165,7 +165,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   /** Parses one input line containing a tokeniser rule.
    * This will create the necessary FSMState objects and the links
    * between them.
-   * 
+   *
    * @param line the string containing the rule
    */
   void parseRule(String line)throws TokeniserException{
@@ -187,17 +187,17 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   } // parseRule
 
   /** Parses a part or the entire LHS.
-   * 
-   * @param startState a FSMState object representing the initial state for 
-   *     the small FSM that will recognise the (part of) the rule parsed by this 
+   *
+   * @param startState a FSMState object representing the initial state for
+   *     the small FSM that will recognise the (part of) the rule parsed by this
    *     method.
-   * @param st a {@link java.util.StringTokenizer StringTokenizer} that 
+   * @param st a {@link java.util.StringTokenizer StringTokenizer} that
    *     provides the input
-   * @param until the string that marks the end of the section to be 
-   *     recognised. This method will first be called by {@link 
-   *     #parseRule(String)} with &quot; &gt;&quot; in order to parse the entire 
-   *     LHS. when necessary it will make itself another call to {@link #parseLHS 
-   *     parseLHS} to parse a region of the LHS (e.g. a 
+   * @param until the string that marks the end of the section to be
+   *     recognised. This method will first be called by {@link
+   *     #parseRule(String)} with &quot; &gt;&quot; in order to parse the entire
+   *     LHS. when necessary it will make itself another call to {@link #parseLHS
+   *     parseLHS} to parse a region of the LHS (e.g. a
    *     &quot;(&quot;,&quot;)&quot; enclosed part.
    */
   FSMState parseLHS(FSMState startState, StringTokenizer st, String until)
@@ -296,8 +296,8 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   /** Parses from the given string tokeniser until it finds a specific
    * delimiter.
    * One use for this method is to read everything until the first quote.
-   * 
-   * @param st a {@link java.util.StringTokenizer StringTokenizer} that 
+   *
+   * @param st a {@link java.util.StringTokenizer StringTokenizer} that
    *     provides the input
    * @param until a String representing the end delimiter.
    */
@@ -350,10 +350,10 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    * @return a set containing all the states accessible from this state via
    * transitions that bear no restrictions.
    */
-  /** 
+  /**
    * Converts the finite state machine to a deterministic one.
-   * 
-   * @param s 
+   *
+   * @param s
    */
   private AbstractSet lambdaClosure(Set s){
 
@@ -546,7 +546,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     this.features = features;
   } // setFeatures
 
-  /** 
+  /**
    * The method that does the actual tokenisation.
    */
   public void run() {
@@ -558,7 +558,8 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
       return;
     }
 
-    if(annotationSet == null) annotationSet = document.getAnnotations();
+    if(annotationSet == null)
+      annotationSet = document.getAnnotations();
     else if(annotationSet.getDocument() != document) {
       executionException = new ExecutionException(
         "The annotation set provided does not belong to the current document!"
@@ -567,7 +568,8 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     }
 
     fireStatusChangedEvent(
-      "Tokenising " + document.getSourceUrl().getFile() + "...");
+      "Tokenising " + document.getSourceUrl().getFile() + "..."
+    );
     String content = document.getContent().toString();
     int length = content.length();
     char currentChar;
@@ -726,17 +728,17 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
     while(listenersIter.hasNext())
       ((ProgressListener)listenersIter.next()).processFinished();
   }
-  /** 
+  /**
    * Sets the value of the {@link #rulesURL} property which holds an URL to the file containing the rules for this tokeniser.
-   * 
-   * @param newRulesURL 
+   *
+   * @param newRulesURL
    */
   public void setRulesURL(String newRulesURL) {
     rulesURL = newRulesURL;
   }
-  /** 
+  /**
    * Gets the value of the {@link #rulesURL} property hich holds an URL to the file containing the rules for this tokeniser.
-   * 
+   *
    */
   public String getRulesURL() {
     return rulesURL;
@@ -826,9 +828,9 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
    */
   public static Map stringTypeIds;
 
-  /** 
+  /**
    * This property holds an URL to the file containing the rules for this tokeniser
-   * 
+   *
    */
   protected String rulesURL = null;
 

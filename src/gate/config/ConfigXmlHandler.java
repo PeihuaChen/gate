@@ -45,6 +45,9 @@ public class ConfigXmlHandler extends HandlerBase {
   /** The current element's attribute list */
   private AttributeList currentAttributes;
 
+  /** A feature map representation of the current element's attribute list */
+  private FeatureMap currentAttributeMap;
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -90,6 +93,7 @@ public class ConfigXmlHandler extends HandlerBase {
 
     // record the attributes of this element for endElement()
     currentAttributes = atts;
+    currentAttributeMap = attributeListToParameterList();
 
     // if it's a SYSTEM, create a new one and set its name
     if(elementName.toUpperCase().equals("SYSTEM")) {
@@ -195,7 +199,7 @@ public class ConfigXmlHandler extends HandlerBase {
     try {
       resourceList.add(
         Factory.createResource(
-          resourceTypeName, attributeListToParameterList()
+          resourceTypeName, currentAttributeMap
         )
       );
     } catch(ResourceInstantiationException e) {
