@@ -77,5 +77,15 @@ public interface GateConstants {
 
   /** Property to set slug application from command line */
   public static final String APPLICATION_JAVA_PROPERTY_NAME = "gate.slug.app";
-  
+
+  /** The key for the feature keeping the IndexDefinition*/
+  public static final String
+    CORPUS_INDEX_DEFENITION_FEATURE_KEY = "Index_definition_feature_key";
+
+  /** The key for the feature keeping the IndexStatistics*/
+  public static final String
+    CORPUS_INDEX_STATISTICS_FEATURE_KEY = "Index_statistics_feature_key";
+
+  /** The index type of corpus*/
+  public static final int IR_LUCENE_INVFILE = 1001;
 } // GateConstants
