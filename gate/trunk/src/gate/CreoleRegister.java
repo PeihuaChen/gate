@@ -56,14 +56,14 @@ public interface CreoleRegister extends Map
     * at the URLs are parsed, and <CODE>CreoleData</CODE> objects added
     * to the register.
     */
-  public void registerDirectories();
+  public void registerDirectories() throws GateException;
    
   /** Register a single CREOLE directory. The <CODE>creole.xml</CODE>
     * file at the URL is parsed, and <CODE>CreoleData</CODE> objects added
     * to the register. If the directory URL has not yet been added it
     * is now added.
     */
-  public void registerDirectories(URL directoryUrl);
+  public void registerDirectories(URL directoryUrl) throws GateException;
 
   /** This is a utility method for creating CREOLE directory files
     * (typically called <CODE>creole.xml</CODE>) from a list of Jar
