@@ -13,7 +13,7 @@ package gate.creole.morph;
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
- *  m2na2, 13/10/2003
+ *  Niraj Aswani, 13/10/2003
  *
  *  $Id$
  */
@@ -32,7 +32,8 @@ import gate.Annotation;
 
 /**
  * <p>Title: Morph.java </p>
- * <p>Description: This class is a wrapper for Interpreter, the Morphological Analyzer.</p>
+ * <p>Description: This class is a wrapper for {@link Interpreter}, the
+ * Morphological Analyzer.</p>
  * @author Niraj Aswani
  * @version 1.0
  */
@@ -72,7 +73,6 @@ public class Morph
    */
   public Resource init() throws ResourceInstantiationException {
     interpret = new Interpret();
-    // If no rule file provided consider the default one
     if (rulesFile == null) {
       // no rule file is there, simply run the interpret to interpret it and
       throw new ResourceInstantiationException("\n\n No Rule File Provided");
@@ -101,6 +101,7 @@ public class Morph
 
     // If no document provided to process throw an exception
     if (document == null) {
+      fireProcessFinished();
       throw new GateRuntimeException("No document to process!");
     }
 
@@ -115,6 +116,7 @@ public class Morph
     // Fetch tokens from the document
     AnnotationSet tokens = inputAs.get(TOKEN_ANNOTATION_TYPE);
     if (tokens == null || tokens.isEmpty()) {
+      fireProcessFinished();
       throw new ExecutionException(
           "Please run the English Tokenizer first and then Morpher");
     }
