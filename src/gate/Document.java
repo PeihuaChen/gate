@@ -13,31 +13,36 @@ import gate.util.*;
 
 /** Represents the commonalities between all sorts of documents.
   */
-public interface Document extends FeatureBearer
+public interface Document extends LanguageResource
 {
   /** Documents are identified by URLs */
-  public URL getUrl();
+  public URL getSourceURL();
 
-  /** The annotation graphs for this document in a map indexed by id*/
-  public Map getAnnotationGraphs();
-
-  public AnnotationGraph getAnnotationGraph(Long id);
-
-  /** The length of the underlying document, e.g. the number of bytes for
-    * textual documents
+  /** Documents may be packed within files; in this case an optional pair of
+    * offsets refer to the location of the document.
     */
-  public double getLength();
+  public Long[] getSourceURLOffsets();
 
-  /** Creates a new empty annotation graph associated with this document
-    * and returns it.
-    */
-  public AnnotationGraph newAnnotationGraph(Long id);
-
-  public Long getId();
-
+  /** The content of the document: a String for text; MPEG for video; etc. */
   public Object getContent();
 
-  //public Object getContent(long startOffset, long endOffset)
-  //throws InvalidOffsetException;
+  /** The portion of content falling between two offsets. */
+  public Object getContent(Long start, Long end) throws InvalidOffsetException;
+
+  /** The size of the set of valid offsets in this document's content.
+    * For texts this will be the length of the string. For audiovisual
+    * materials this will be a measure of time.
+    */
+  public Long size();
+
+  /** Get the default set of annotations. The set is created if it
+    * doesn't exist yet.
+    */
+  public AnnotationSet getAnnotations();
+
+  /** Get a named set of annotations. Creates a new set if one with this
+    * name doesn't exist yet.
+    */
+  public AnnotationSet getAnnotations(String name);
 
 } // interface Document

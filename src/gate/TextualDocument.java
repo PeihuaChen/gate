@@ -15,11 +15,7 @@ import gate.util.*;
   */
 public interface TextualDocument extends Document
 {
-
-  /** The contents of the document */
-  public String getCurrentContent();
-
-  /** The contents of a particular span */
-  public String getContentOf(Annotation a);
+  /** The contents under a particular annotation span. */
+  public String getContent(Annotation a);
 
 } // interface TextualDocument
