@@ -176,7 +176,42 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <pling: "!"> }
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
 <DEFAULT> TOKEN: { <integer: ( ["0"-"9"] )+ > }
-<DEFAULT> TOKEN: { <string: "\"" (~["\""])* "\"" > }
+
+
+//starts a string
+   MORE:
+   {
+      "\"" : IN_STRING
+   } 
+ 
+//reads the contents of the string 
+   <IN_STRING> MORE :
+   {
+      "\\n"  { image.setLength(image.length() - 2); image.append("\n"); }
+    |
+      "\\r"  { image.setLength(image.length() - 2); image.append("\r"); }
+    |
+      "\\t"  { image.setLength(image.length() - 2); image.append("\t"); }
+    | 
+      "\\\""  { image.setLength(image.length() - 2); image.append("\""); }
+    |
+      < ~["\""] >  // Note that here you don't need any action.
+   } 
+
+//finishes the string
+   <IN_STRING> TOKEN :
+   {
+      <string : "\"" > 
+      {
+        // image.setLength(image.length() - 1);
+         matchedToken.image = image.toString();
+      } : DEFAULT 
+   } 
+
+
+
+
+
 <DEFAULT> TOKEN: { <bool: "true" | "false" > }
 <DEFAULT> TOKEN: { <ident: <letter> (<letterOrDigitOrDash>)* > }
 <DEFAULT> TOKEN: {
@@ -818,7 +853,7 @@ String[] AssignmentExpression() :
 
   blockBuffer.append("// RHS assignment block" + nl);
   blockBuffer.append(
-    "      FeatureMap features = Transients.newFeatureMap();" + nl
+    "      FeatureMap features = Factory.newFeatureMap();" + nl
   );
 }
 {
@@ -1021,6 +1056,11 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.11  2001/01/11 15:36:58  valyt
+// -Added support for escape sequences in Jape grammars
+//
+// -changed the generated Jape code to use gate.Factory instead  of gate.Transients
+//
 // Revision 1.10  2000/09/10 18:30:26  valyt
 // Added support for:
 // 	rules priority
