@@ -82,8 +82,31 @@ annotations.removeAll(org);
 }
  
 
-
-//note - move this rule to after final
+Rule:	LocOrganization
+Priority: 20
+// Ealing Police
+(
+ ({TempLocation} |
+  {Lookup.majorType == country_adj})
+ SPACE
+{TempOrganization}
+(SPACE {TempOrganization})?
+)
+:orgName 
+-->  
+{
+//removes TempOrg annotation, gets the rule feature and adds a new Org annotation
+gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
+gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("orgType", orgAnn.getFeatures().get("orgType"));
+features.put("rule1", orgAnn.getFeatures().get("rule"));
+features.put("rule2", "OrgCountryFinal");
+annotations.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+annotations.removeAll(org);
+}
+ 
 
 Rule: OrgFinal
 Priority: 10
@@ -97,6 +120,7 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
 gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
+features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
 features.put("rule2", "OrgFinal");
 annotations.add(org.firstNode(), org.lastNode(), "Organization",
@@ -144,6 +168,7 @@ Priority: 10
 gate.AnnotationSet loc = (gate.AnnotationSet)bindings.get("loc");
 gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
+features.put("locType",locAnn.getFeatures().get("locType"));
 features.put("rule1", locAnn.getFeatures().get("rule"));
 features.put("rule2", "LocFinal");
 annotations.add(loc.firstNode(), loc.lastNode(), "Location",

@@ -548,20 +548,26 @@ Priority: 15
 (SPACE {Lookup.majorType == organization})?
 )
 :orgName -->  
-  :orgName.TempOrganization = {kind = "orgName", rule=GazOrganization}
-
-Rule:	LocOrganization
-Priority: 20
-// Ealing Police
-(
- ({Lookup.majorType == location} |
-  {Lookup.majorType == country_adj})
- SPACE
-{Lookup.majorType == organization}
-(SPACE {Lookup.majorType == organization})?
-)
-:orgName -->  
-  :orgName.TempOrganization = {kind = "orgName", rule=LocOrganization}
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+// create an annotation set consisting of all the annotations for org 
+gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
+// create an annotation set consisting of the annotation matching Lookup
+gate.AnnotationSet org = (gate.AnnotationSet)orgSet.get("Lookup");
+// if the annotation type Lookup doesn't exist, do nothing
+if (org != null && org.size()>0)
+{
+// if it does exist, take the first element in the set
+  gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+//propagate minorType feature (and value) from org
+  features.put("orgType", orgAnn.getFeatures().get("minorType"));
+}
+// create some new features
+  features.put("rule", "GazOrganization");
+// create a TempOrg annotation and add the features we've created
+annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+features);
+}
 
 
 Rule:	OrgXandY
@@ -588,7 +594,7 @@ Priority: 20
 
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXandY"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandY"}
 
 
 Rule:OrgUni
@@ -604,7 +610,7 @@ Priority: 25
  {Token.orth == upperInitial})+
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgDept"}
+  :orgName.TempOrganization = {orgType = "org", rule = "OrgDept"}
 
 
 
@@ -625,7 +631,7 @@ Priority: 25
  )?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgDept"}
+  :orgName.TempOrganization = {orgType = "department", rule = "OrgDept"}
 
 
 
@@ -651,7 +657,7 @@ Priority: 15
  (SPACE {Lookup.majorType == org_ending})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXKey"}
+  :orgName.TempOrganization = {orgType = "unknown",rule = "OrgXKey"}
 
 
 Rule:	OrgXEnding
@@ -674,7 +680,7 @@ Priority: 20
  {Lookup.majorType == cdg}
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXEnding"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXEnding"}
 
 
 
@@ -707,7 +713,7 @@ Priority: 20
  (SPACE {Lookup.majorType == org_ending})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXandYKey"}
+  :orgName.TempOrganization = {orgType = "unknown",rule = "OrgXandYKey"}
 
 
 Rule:	OrgXsKeyBase
@@ -791,7 +797,7 @@ Priority: 30
  )?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXBase"}
+  :orgName.TempOrganization = {orgType = "unknown",rule = "OrgXBase"}
 
 
 Rule:	OrgPreX
@@ -806,7 +812,7 @@ Priority: 30
  (SPACE {Lookup.majorType == org_ending})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgPreX"}
+  :orgName.TempOrganization = {orgType = "unknown",rule = "OrgPreX"}
 
 
 
@@ -824,7 +830,7 @@ Priority: 50
   (CHURCH)
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgChurch"}
+  :orgName.TempOrganization = {orgType = "org", rule = "OrgChurch"}
 
 
 Rule:OrgPersonAmbig
@@ -840,7 +846,7 @@ Priority: 30
 )
 :org 
 -->
- :org.TempOrganization= {kind = "orgName", rule = "OrgPersonAmbig"}
+ :org.TempOrganization = {orgType = "unknown",rule = "OrgPersonAmbig"}
 
  
 
@@ -868,8 +874,27 @@ Priority: 25
   {Lookup.majorType == loc_key, Lookup.minorType == post})?
 )
 :locName -->
-  :locName.TempLocation = {kind = "locName", rule = "Location1"}
 
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+// create an annotation set consisting of all the annotations for org 
+gate.AnnotationSet locSet = (gate.AnnotationSet)bindings.get("locName");
+// create an annotation set consisting of the annotation matching Lookup
+gate.AnnotationSet loc = (gate.AnnotationSet)locSet.get("Lookup");
+// if the annotation type Lookup doesn't exist, do nothing
+if (loc != null && loc.size()>0)
+{
+// if it does exist, take the first element in the set
+  gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
+//propagate minorType feature (and value) from loc
+  features.put("locType", locAnn.getFeatures().get("minorType"));
+}
+// create some new features
+  features.put("rule", "Location1");
+// create a TempLoc annotation and add the features we've created
+annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+features);
+}
 
 Rule:	GazLocation
 Priority: 50
@@ -879,12 +904,31 @@ Priority: 50
   SPACE
  )?
 )
-  (
-	({Lookup.majorType == location})
+  ({Lookup.majorType == location}
   )
 :locName
   --> 	
- :locName.TempLocation = {kind = "locName", rule=GazLocation}
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+// create an annotation set consisting of all the annotations for org 
+gate.AnnotationSet locSet = (gate.AnnotationSet)bindings.get("locName");
+// create an annotation set consisting of the annotation matching Lookup
+gate.AnnotationSet loc = (gate.AnnotationSet)locSet.get("Lookup");
+// if the annotation type Lookup doesn't exist, do nothing
+if (loc != null && loc.size()>0)
+{
+// if it does exist, take the first element in the set
+  gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
+//propagate minorType feature (and value) from loc
+  features.put("locType", locAnn.getFeatures().get("minorType"));
+}
+// create some new features
+  features.put("rule", "GazLocation");
+// create a TempLoc annotation and add the features we've created
+annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+features);
+}
+
 
 
 /////////////////////////////////////////////////////////////////
