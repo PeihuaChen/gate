@@ -1133,10 +1133,10 @@ public class DocumentEditor extends AbstractVisualResource
   protected void this_documentChanged(){
     initLocalData();
 
-    Enumeration enum = stylesTreeRoot.children();
-    while(enum.hasMoreElements()){
+    Enumeration enumeration = stylesTreeRoot.children();
+    while(enumeration.hasMoreElements()){
       stylesTreeModel.removeNodeFromParent((DefaultMutableTreeNode)
-                                           enum.nextElement());
+                                           enumeration.nextElement());
     }
     if(document == null) return;
 
