@@ -557,6 +557,7 @@ public class XJTable extends JTable {
           ((JLabel)res).setIcon(null);
         }
         ((JLabel)res).setHorizontalTextPosition(JLabel.LEFT);
+        ((JLabel)res).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
       }
       return res;
     }// Component getTableCellRendererComponent
