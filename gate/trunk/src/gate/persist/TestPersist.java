@@ -63,11 +63,10 @@ public class TestPersist extends TestCase
 
     SerialDataStore sds = (SerialDataStore)
       Factory.createDataStore("gate.persist.SerialDataStore",
-                              storageDir.toURL().toExternalForm());
+                              storageDir.toURL().toString());
 
 
 //    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
-    sds.create();
     sds.open();
 
     // create a document

@@ -144,8 +144,8 @@ public class NameBearerHandle implements Handle,
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
 
-      popup.addSeparator();
-      popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
+//      popup.addSeparator();
+//      popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
     }
 
     //Language Resources
@@ -402,34 +402,34 @@ public class NameBearerHandle implements Handle,
     }//public void actionPerformed(ActionEvent e)
   }//class SaveAction
 
-  class DumpToFileAction extends AbstractAction {
-    public DumpToFileAction(){
-      super("Save to file");
-      putValue(SHORT_DESCRIPTION, "Save resource into a");
-    }
-
-    public void actionPerformed(ActionEvent ae){
-      JFileChooser fileChooser = MainFrame.getFileChooser();
-
-      fileChooser.setDialogTitle("Select a file for this resource");
-      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
-      if (fileChooser.showSaveDialog(largeView) ==
-                                            fileChooser.APPROVE_OPTION){
-        File file = fileChooser.getSelectedFile();
-        try{
-          PersistentResourceData.saveResourceToFile((Resource)target, file);
-        }catch(Exception e){
-          JOptionPane.showMessageDialog(getLargeView(),
-                          "Error!\n"+
-                           e.toString(),
-                           "Gate", JOptionPane.ERROR_MESSAGE);
-          e.printStackTrace(Err.getPrintWriter());
-        }
-      }
-    }
-
-  }
-
+//  class DumpToFileAction extends AbstractAction {
+//    public DumpToFileAction(){
+//      super("Save to file");
+//      putValue(SHORT_DESCRIPTION, "Save resource into a");
+//    }
+//
+//    public void actionPerformed(ActionEvent ae){
+//      JFileChooser fileChooser = MainFrame.getFileChooser();
+//
+//      fileChooser.setDialogTitle("Select a file for this resource");
+//      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+//      if (fileChooser.showSaveDialog(largeView) ==
+//                                            fileChooser.APPROVE_OPTION){
+//        File file = fileChooser.getSelectedFile();
+//        try{
+//          PersistentResourceData.saveResourceToFile((Resource)target, file);
+//        }catch(Exception e){
+//          JOptionPane.showMessageDialog(getLargeView(),
+//                          "Error!\n"+
+//                           e.toString(),
+//                           "Gate", JOptionPane.ERROR_MESSAGE);
+//          e.printStackTrace(Err.getPrintWriter());
+//        }
+//      }
+//    }
+//
+//  }
+//
 
   class SaveToAction extends AbstractAction {
     public SaveToAction(){
