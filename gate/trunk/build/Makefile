@@ -19,7 +19,7 @@
 # a list of packages used in documentation generation. including a
 # package that contains no classes causes javadoc to bomb
 PKGS=	gate gate.annotation gate.corpora gate.creole \
-	gate.creole.gazeteer gate.creole.tokeniser \
+	gate.creole.gazetteer gate.creole.tokeniser \
 	gate.db gate.email gate.fsm gate.gui gate.html \
 	gate.jape gate.jape.gui gate.jape.parser \
 	gate.sgml gate.util gate.xml
