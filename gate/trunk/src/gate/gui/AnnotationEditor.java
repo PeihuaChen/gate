@@ -409,6 +409,48 @@ public class AnnotationEditor extends AbstractVisualResource {
           });
 
           popup.addSeparator();
+          //add save as XML and preserve format
+          popup.add(new AbstractAction(){
+            {
+              putValue(NAME, "Dump as XML & preserve format");
+            }
+            public void actionPerformed(ActionEvent evt){
+//**********
+              JFileChooser fileChooser = MainFrame.getFileChooser();
+              File selectedFile = null;
+
+              fileChooser.setMultiSelectionEnabled(false);
+              fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+              fileChooser.setDialogTitle("Select document to save ...");
+              fileChooser.setSelectedFiles(null);
+
+              int res = fileChooser.showDialog(AnnotationEditor.this, "Save");
+              if(res == JFileChooser.APPROVE_OPTION){
+                selectedFile = fileChooser.getSelectedFile();
+                fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+                if(selectedFile == null) return;
+                try{
+                  // Prepare to write into the xmlFile using UTF-8 encoding
+                  OutputStreamWriter writer = new OutputStreamWriter(
+                                  new FileOutputStream(selectedFile),"UTF-8");
+
+                  // Write (test the toXml() method)
+                  // This Action is added only when a gate.Document is created.
+                  // So, is for sure that the resource is a gate.Document
+                  writer.write(document.toXml(null));
+                  writer.flush();
+                  writer.close();
+                } catch (Exception ex){
+                  ex.printStackTrace(Out.getPrintWriter());
+                }
+              }// End if
+
+//****************
+            }// actionPerformed();
+          });//new AbstractAction(){
+
+          popup.addSeparator();
+
           //add delete option
           popup.add(new DeleteSelectedAnnotationsAction(annotationsTable));
           popup.addSeparator();

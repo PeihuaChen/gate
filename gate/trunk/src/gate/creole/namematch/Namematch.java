@@ -84,7 +84,7 @@ public class Namematch extends AbstractProcessingResource
     annotationTypes.add("Date");
     try {
       createLists();
-    } catch (IOException ioe) {ioe.printStackTrace();}
+    } catch (IOException ioe) {throw new ResourceInstantiationException(ioe);}
     return this;
   } // init()
 
@@ -122,10 +122,10 @@ public class Namematch extends AbstractProcessingResource
 
     if (nameAllAnnots != null) {
       if (nameAllAnnots.isEmpty()) {
-        Out.prln("No annotations");
+        Out.prln("NameMatcher message: No annotations found.");
         return;
       }
-    } else {Out.prln("No annotations");return;}
+    } else {Out.prln("NameMatcher message: No annotations found.");return;}
 
     // the "unknown" annotations
     AnnotationSet nameAnnotsUnknown;
@@ -540,8 +540,7 @@ public class Namematch extends AbstractProcessingResource
   public void createLists() throws IOException {
     InputStream inputStream = Files.getGateResourceAsStream(
                                               "creole/namematcher/listsNM.def");
-    InputStreamReader inputStreamReader = new InputStreamReader (
-                                                    inputStream);
+    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
     String lineRead = null;

@@ -81,7 +81,9 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // init an annotation set for this gate document
     basicAS = anAnnotationSet;
-  }
+
+    customObjectsId = 0;
+  }//HtmlDocumentHandler
 
   /** This method is called when the HTML parser encounts the beginning
     * of a tag that means that the tag is paired by an end tag and it's
@@ -140,7 +142,6 @@ public class HtmlDocumentHandler extends ParserCallback {
     // if the stack is not empty then we get the object from the stack
     if (!stack.isEmpty()){
       obj = (CustomObject) stack.pop();
-
       // we add it to the colector
       colector.add(obj);
     }
@@ -160,12 +161,14 @@ public class HtmlDocumentHandler extends ParserCallback {
       // If basicAs is null then get the default annotation
       // set from this gate document
       if (basicAS == null)
-        basicAS = doc.getAnnotations();
+        basicAS = doc.getAnnotations("Original markups");
 
+      // sort colector ascending on its id
+      Collections.sort(colector);
       // iterate through colector and construct annotations
-      Iterator anIterator = colector.iterator();
-      while (anIterator.hasNext()){
-        obj = (CustomObject) anIterator.next();
+      while (!colector.isEmpty()){
+        obj = (CustomObject) colector.getFirst();
+        colector.remove(obj);
           // Construct an annotation from this obj
           try{
             if (markupElementsMap == null){
@@ -405,67 +408,81 @@ public class HtmlDocumentHandler extends ParserCallback {
   // this reports the the number of elements that have beed processed so far
   private int elements = 0;
 
+  protected  long customObjectsId = 0;
   // we need a colection to retain all the CustomObjects that will be
   // transformed into annotation over the gate document...
   // the transformation will take place inside onDocumentEnd() method
-  private List colector = null;
+  private LinkedList colector = null;
 
-} // HtmlDocumentHandler
+  // Inner class
+  /**
+    * The objects belonging to this class are used inside the stack.
+    * This class is for internal needs
+    */
+  class  CustomObject implements Comparable {
+
+    // constructor
+    public CustomObject(String anElemName, FeatureMap aFm,
+                           Long aStart, Long anEnd) {
+      elemName = anElemName;
+      fm = aFm;
+      start = aStart;
+      end = anEnd;
+      id = new Long(customObjectsId ++);
+    }// End CustomObject()
+
+    // Methos implemented as required by Comparable interface
+    public int compareTo(Object o){
+      CustomObject obj = (CustomObject) o;
+      return this.id.compareTo(obj.getId());
+    }// compareTo();
+
+    // accesor
+    public String getElemName() {
+      return elemName;
+    }// getElemName()
+
+    public FeatureMap getFM() {
+      return fm;
+    }// getFM()
+
+    public Long getStart() {
+      return start;
+    }// getStart()
+
+    public Long getEnd() {
+      return end;
+    }// getEnd()
+
+    public Long getId(){ return id;}
+
+    // mutator
+    public void setElemName(String anElemName) {
+      elemName = anElemName;
+    }// getElemName()
+
+    public void setFM(FeatureMap aFm) {
+      fm = aFm;
+    }// setFM();
+
+    public void setStart(Long aStart) {
+      start = aStart;
+    }// setStart();
+
+    public void setEnd(Long anEnd) {
+      end = anEnd;
+    }// setEnd();
+
+    // data fields
+    private String elemName = null;
+    private FeatureMap fm = null;
+    private Long start = null;
+    private Long end  = null;
+    private Long id = null;
+
+  } // End inner class CustomObject
+
+}//End class HtmlDocumentHandler
 
 
-/**
-  * The objects belonging to this class are used inside the stack.
-  * This class is for internal needs
-  */
-class  CustomObject {
-
-  // constructor
-  public CustomObject(String anElemName, FeatureMap aFm,
-                         Long aStart, Long anEnd) {
-    elemName = anElemName;
-    fm = aFm;
-    start = aStart;
-    end = anEnd;
-  }
-
-  // accesor
-  public String getElemName() {
-    return elemName;
-  }
-
-  public FeatureMap getFM() {
-    return fm;
-  }
-
-  public Long getStart() {
-    return start;
-  }
-
-  public Long getEnd() {
-    return end;
-  }
-
-  // mutator
-  public void setElemName(String anElemName) {
-    elemName = anElemName;
-  }
-
-  public void setFM(FeatureMap aFm) {
-    fm = aFm;
-  }
-
-  public void setStart(Long aStart) {
-    start = aStart;
-  }
-
-  public void setEnd(Long anEnd) {
-    end = anEnd;
-  }
-
-  // data fields
-  private String elemName = null;
-  private FeatureMap fm = null;
-  private Long start = null;
-  private Long end  = null;
-} // CustomObject
 

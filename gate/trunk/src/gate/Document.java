@@ -96,10 +96,24 @@ public interface Document extends LanguageResource, Comparable {
    */
   public Boolean getMarkupAware();
 
-  /** Returns a GateXml document
+  /** Returns a GateXml document. This document is actually a serialization of
+   *  a Gate Document in XML.
     * @return a string representing a Gate Xml document
     */
   public String toXml();
+
+  /** Returns an XML document aming to preserve the original markups(
+    * the original markup will be in the same place and format as it was
+    * before processing the document) and include (if possible)
+    * the annotations specified in the aSourceAnnotationSet.
+    * <b>Warning:</b> Annotations from the aSourceAnnotationSet will be lost
+    * if they will cause a crosed over situation.
+    * @param aSourceAnnotationSet is an annotation set containing all the
+    * annotations that will be combined with the original marup set.
+    * @return a string representing an XML document containing the original
+    * markup + dumped annotations form the aSourceAnnotationSet
+    */
+  public String toXml(AnnotationSet aSourceAnnotationSet);
 
   /** Make changes to the content.
    */

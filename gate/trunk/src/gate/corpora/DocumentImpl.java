@@ -315,6 +315,319 @@ extends AbstractLanguageResource implements Document {
    */
   public Boolean getMarkupAware() { return markupAware; }
 
+  /** Returns an XML document aming to preserve the original markups(
+    * the original markup will be in the same place and format as it was
+    * before processing the document) and include (if possible)
+    * the annotations specified in the aSourceAnnotationSet.
+    * <b>Warning:</b> Annotations from the aSourceAnnotationSet will be lost
+    * if they will cause a crosed over situation.
+    * @param aSourceAnnotationSet is an annotation set containing all the
+    * annotations that will be combined with the original marup set.
+    * @return a string representing an XML document containing the original
+    * markup + dumped annotations form the aSourceAnnotationSet
+    */
+  public String toXml(AnnotationSet aSourceAnnotationSet){
+    AnnotationSet originalMarkupsAnnotSet =
+                                      this.getAnnotations("Original markups");
+
+    AnnotationSet dumpingSet = this.getAnnotations("Dumping annotation set");
+    // This set will be constructed inside this method. If is not empty, the
+    // annotation contained will be lost.
+    if (!dumpingSet.isEmpty()){
+      Out.print("WARNING: The dumping annotation set was not empty."+
+      "All annotation it contained were lost.");
+      dumpingSet.clear();
+    }// End if
+
+    // Construct the dumping set in that way that all annotations will verify
+    // the condition that there are not annotations which are crossed.
+    // First add all annotation from the original markups
+    fireStatusChanged("Constructing the dumping annotation set.");
+    dumpingSet.addAll(originalMarkupsAnnotSet);
+    // Then take all the annotations from aSourceAnnotationSet and verify if
+    // they can be inserted safely into the dumpingSet. Where not possible,
+    // report.
+    if (aSourceAnnotationSet != null){
+      Iterator iter = aSourceAnnotationSet.iterator();
+      while (iter.hasNext()){
+        Annotation currentAnnot = (Annotation) iter.next();
+        if(insertsSafety(dumpingSet,currentAnnot)){
+          dumpingSet.add(currentAnnot);
+        }else{
+          Out.prln("Warning: Annotation with ID=" + currentAnnot.getId() +
+          ", startOffset=" + currentAnnot.getStartNode().getOffset() +
+          ", endOffset=" + currentAnnot.getEndNode().getOffset() +
+          ", type=" + currentAnnot.getType()+ " was found to violate the" +
+          " crossed over condition. It will be discarded");
+        }// End if
+      }// End while
+    }// End if
+
+    // The dumpingSet is ready to be exported as XML
+    // Here we go.
+    fireStatusChanged("Dumping annotations as XML");
+    StringBuffer xmlDoc = new StringBuffer("");
+    // Add xml header
+    xmlDoc.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+
+    // If the annotation set contains this "PreservingFormatGateDocument"
+    // type, then this is removed because it will be added in the saving
+    // process. The reason of this removal is that if the loaded document
+    // was previously loaded from a PreservingFormatGateDocument then we
+    // don't want to create lots of annotation for this type. This annotation
+    // type should be always the root element of a XML preserving format
+    // GATE document.
+    if(dumpingSet.getAllTypes().contains("PreservingFormatGateDocument"))
+      dumpingSet.removeAll(dumpingSet.get("PreservingFormatGateDocument"));
+
+    FeatureMap docFeatures = this.getFeatures();
+    String mimeTypeStr = null;
+    boolean addRootEndTag = false;
+    if (  docFeatures != null &&
+          null != (mimeTypeStr=(String)docFeatures.get("MimeType")) &&
+          ("text/html".equalsIgnoreCase(mimeTypeStr) ||
+           "text/xml".equalsIgnoreCase(mimeTypeStr) ||
+           "text/sgml".equalsIgnoreCase(mimeTypeStr))
+       ){ /* don't add the root tag */}
+    else{
+      // Add the root start element
+      xmlDoc.append("<PreservingFormatGateDocument>\n");
+      addRootEndTag = true;
+    }// End if
+
+    xmlDoc.append("[CDATA[");
+    xmlDoc.append(saveAnnotationSetAsXml(dumpingSet));
+    xmlDoc.append("]]>");
+
+    if (addRootEndTag){
+      // Add the root end element
+      xmlDoc.append("</PreservingFormatGateDocument>");
+    }// End if
+
+    fireStatusChanged("Done.");
+    return xmlDoc.toString();
+  }//End toXml()
+
+  /** This method verifies if aSourceAnnotation can ve inserted safety into the
+    * aTargetAnnotSet. Safety means that it doesn't violate the crossed over
+    * contition with any annotation from the aTargetAnnotSet.
+    * @param aTargetAnnotSet the annotation set to include the aSourceAnnotation
+    * @param aSourceAnnotation the annotation to be inserted into the
+    * aTargetAnnotSet
+    * @return true if the annotation inserts safety, or false otherwise.
+    */
+  private boolean insertsSafety(AnnotationSet aTargetAnnotSet,
+                                                Annotation aSourceAnnotation){
+
+    if (aTargetAnnotSet == null || aSourceAnnotation == null) return false;
+    if (aSourceAnnotation.getStartNode() == null ||
+        aSourceAnnotation.getStartNode().getOffset()== null) return false;
+    if (aSourceAnnotation.getEndNode() == null ||
+        aSourceAnnotation.getEndNode().getOffset()== null) return false;
+
+    // Get the start and end offsets
+    Long start = aSourceAnnotation.getStartNode().getOffset();
+    Long end =   aSourceAnnotation.getEndNode().getOffset();
+    // Read aSourceAnnotation offsets long
+    long s2 = start.longValue();
+    long e2 = end.longValue();
+
+    // Obtain a set with all annotations annotations that overlap
+    // totaly or partially with the interval defined by the two provided offsets
+    AnnotationSet as = aTargetAnnotSet.get(start,end);
+
+    // Investigate all the annotations from as to see if there is one that
+    // comes in conflict with aSourceAnnotation
+    Iterator it = as.iterator();
+    while(it.hasNext()){
+      Annotation ann = (Annotation) it.next();
+      // Read ann offsets
+      long s1 = ann.getStartNode().getOffset().longValue();
+      long e1 = ann.getEndNode().getOffset().longValue();
+
+      if (s1<s2 && s2<e1 && e1<e2) return false;
+      if (s2<s1 && s1<e2 && e2<e1) return false;
+    }// End while
+    return true;
+  }// insertsSafety()
+
+  /** This method saves all the annotations from aDumpAnnotSet and combines
+    * them with the document content.
+    */
+  private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet){
+    String content = null;
+    if (this.getContent()== null)
+      content = new String("");
+    else
+      content = this.getContent().toString();
+    StringBuffer docContStrBuff = new StringBuffer(content);
+    if (aDumpAnnotSet == null)   return docContStrBuff.toString();
+
+    // The saving alghorithm is as follows:
+    ///////////////////////////////////////////
+    // Construct a set with all ofsetts in descending order.
+    // For each node do as follows
+    // Get an ascending ordered set on endOffset with all annotations that
+    // begin in that node.
+    // Get a set with all annotations that begin end end in this offset.
+    // Get an ascending ordered set on startOffset with all annotations that
+    // ends in that node.
+    // Begin to write start elements with annotations that begins from that node
+    // Begin to write the empty elements if there are any.
+    // Begin to write end elements with annotations that ends in this node
+    // Move to next node
+
+    // Construct a TreeSet with all offsets
+    TreeSet offsets = new TreeSet();
+    Iterator iter = aDumpAnnotSet.iterator();
+    while (iter.hasNext()){
+      Annotation annot = (Annotation) iter.next();
+      offsets.add(annot.getStartNode().getOffset());
+      offsets.add(annot.getEndNode().getOffset());
+    }// End while
+    // ofsets is sorted in ascending order.
+    // Iterate this set in descending order and remove an offset at each
+    // iteration
+    while (!offsets.isEmpty()){
+      Long offset = (Long)offsets.last();
+      // Remove the offset from the set
+      offsets.remove(offset);
+      // Use the offset
+      // Get an annotation set containing all annotation that start before the
+      // offset.
+//      AnnotationSet annotThatStartBefore = aDumpAnnotSet.get(offset);
+      getAnnotThatStartOrEndOrStartAndEndAtOffset(aDumpAnnotSet,offset);
+
+/*
+      // An ascending ordered set on endOffset with annotation that start at
+      // offset
+      Set annotThatStartAtOffset =
+                        getAnnotThatStartAtOffset(annotThatStartBefore,offset);
+      // An ascending ordered set on annot type with annotation that start and
+      // end at offset.
+      Set annotThatStartAndEndAtOffset =
+                   getAnnotThatStartAndEndAtOffset(annotThatStartBefore,offset);
+      // An ascending ordered set on startOffset with annotation that end at
+      // offset
+      Set annotThatEndAtOffset =
+                        getAnnotThatEndAtOffset(annotThatStartBefore,offset);
+*/
+      // Edit docContStrBuff
+      // Start CDATA section
+      StringBuffer tmpBuff = new StringBuffer("<![CDATA[");
+
+      annotThatStartAtOffset.addAll(annotThatStartAndEndAtOffset);
+      Iterator it = annotThatStartAtOffset.iterator();
+      while(it.hasNext()){
+        Annotation a = (Annotation) it.next();
+        if (offset.equals(a.getEndNode().getOffset()))
+          tmpBuff.insert(0,writeEmptyTag(a));
+        else
+          tmpBuff.insert(0,writeStartTag(a));
+      }// End while
+/*
+      it = annotThatStartAndEndAtOffset.iterator();
+      while(it.hasNext()){
+        Annotation a = (Annotation) it.next();
+        tmpBuff.insert(0,writeEmptyTag(a));
+      }// End while
+*/
+      it = annotThatEndAtOffset.iterator();
+      while(it.hasNext()){
+        Annotation a = (Annotation) it.next();
+        tmpBuff.insert(0,writeEndTag(a));
+      }// End while
+
+      // End CDATA section
+      tmpBuff.insert(0,"]]>");
+      // Insert tmpBuff to the location where it belongs in docContStrBuff
+      docContStrBuff.insert(offset.intValue(),tmpBuff.toString());
+    }// End while
+    return docContStrBuff.toString();
+  }// saveAnnotationSetAsXml()
+
+  /** This method fills 3 sets with annotations ordered on endOffset,
+    * startOffset or annotation type (when start = end)
+    * The 3 sets are: annotThatStartAtOffset, annotThatEndAtOffset,
+    * annotThatStartAndEndAtOffset
+    */
+  private void getAnnotThatStartOrEndOrStartAndEndAtOffset(
+                                        AnnotationSet sourceSet, Long offset ){
+    annotThatStartAtOffset = new TreeSet(
+                           new AnnotationComparator(ORDER_ON_ANNOT_ID,DESC));
+    annotThatEndAtOffset = new TreeSet(
+                             new AnnotationComparator(ORDER_ON_ANNOT_ID,ASC));
+    annotThatStartAndEndAtOffset = new TreeSet(
+                              new AnnotationComparator(ORDER_ON_ANNOT_ID,DESC));
+
+    if (sourceSet == null || offset == null) return;
+
+    Iterator it = sourceSet.iterator();
+    while(it.hasNext()){
+      Annotation a = (Annotation) it.next();
+      if (offset.equals(a.getStartNode().getOffset()))
+        if (offset.equals(a.getEndNode().getOffset()))
+          annotThatStartAndEndAtOffset.add(a);
+        else
+          annotThatStartAtOffset.add(a);
+      else if (offset.equals(a.getEndNode().getOffset()))
+                annotThatEndAtOffset.add(a);
+    }// End while
+  }// getAnnotThatStartOrEndOrStartAndEndAtOffset()
+
+  /** Returns a string representing a start tag based on the input annot*/
+  private String writeStartTag(Annotation annot){
+    StringBuffer strBuff = new StringBuffer("");
+    if (annot == null) return strBuff.toString();
+    strBuff.append("<"+annot.getType()+
+                    writeFeatures(annot.getFeatures())+" >");
+    return strBuff.toString();
+  }// writeStartTag()
+
+  /** Returns a string representing an empty tag based on the input annot*/
+  private String writeEmptyTag(Annotation annot){
+    StringBuffer strBuff = new StringBuffer("");
+    if (annot == null) return strBuff.toString();
+    strBuff.append("<"+annot.getType()+
+                    writeFeatures(annot.getFeatures())+" />");
+    return strBuff.toString();
+  }// writeEmptyTag()
+
+  /** Returns a string representing an end tag based on the input annot*/
+  private String writeEndTag(Annotation annot){
+    StringBuffer strBuff = new StringBuffer("");
+    if (annot == null) return strBuff.toString();
+/*
+    if (annot.getType().indexOf(" ") != -1)
+      Out.prln("Warning: Truncating end tag to first word for annot type \""
+      +annot.getType()+ "\". ");
+*/
+    strBuff.append("</"+annot.getType()+">");
+    return strBuff.toString();
+  }// writeEndTag()
+
+  /** Returns a string representing a FeatureMap serialized as XML attributes*/
+  private String writeFeatures(FeatureMap feat){
+    StringBuffer strBuff = new StringBuffer("");
+    if (feat == null) return strBuff.toString();
+    Iterator it = feat.keySet().iterator();
+    while (it.hasNext()){
+      Object key = it.next();
+      Object value = feat.get(key);
+      if((key.getClass().isAssignableFrom(String.class) ||
+          key.getClass().isAssignableFrom(Number.class))
+          &&
+          (value.getClass().isAssignableFrom(String.class) ||
+           value.getClass().isAssignableFrom(Number.class))
+
+        ) strBuff.append(" " + key + "=\"" + value + "\"");
+      else
+        Out.println("Warning: Some features were lost"+
+                    " (they didn't came from String or Number)");
+    }// End while
+    return strBuff.toString();
+  }// writeFeatures()
+
   /** Returns a GateXml document
     * @return a string representing a Gate Xml document
     */
@@ -337,6 +650,7 @@ extends AbstractLanguageResource implements Document {
     xmlContent.append("</TextWithNodes>\n");
     // Serialize as XML all document's annotation sets
     // Serialize the default AnnotationSet
+    fireStatusChanged("Saving the default annotation set ");
     xmlContent.append("<!-- The default annotation set -->\n\n");
     xmlContent.append(annotationSetToXml(this.getAnnotations()));
     // Serialize all others AnnotationSets
@@ -347,11 +661,13 @@ extends AbstractLanguageResource implements Document {
         AnnotationSet annotSet = (AnnotationSet) iter.next();
         xmlContent.append("<!-- Named annotation set -->\n\n");
         // Serialize it as XML
+        fireStatusChanged("Saving " + annotSet.getName()+ " annotation set ");
         xmlContent.append(annotationSetToXml(annotSet));
       }// End while
     }// End if
     // Add the end of GateDocument
     xmlContent.append("</GateDocument>");
+    fireStatusChanged("Done !");
     // return the XmlGateDocument
     return xmlContent.toString();
   }// toXml
@@ -592,6 +908,16 @@ extends AbstractLanguageResource implements Document {
   /** The encoding of the source of the document content */
   protected String encoding = "UTF-8";
 
+  /** Data needed in toXml(AnnotationSet) methos*/
+  private Set annotThatStartAtOffset = null;
+  private Set annotThatStartAndEndAtOffset = null;
+  private Set annotThatEndAtOffset = null;
+  private final int ORDER_ON_START_OFFSET = 0;
+  private final int ORDER_ON_END_OFFSET = 1;
+  private final int ORDER_ON_ANNOT_ID = 2;
+  private final int ASC = 3;
+  private final int DESC = -3;
+
   /** The range that the content comes from at the source URL
     * (or null if none).
     */
@@ -774,4 +1100,47 @@ extends AbstractLanguageResource implements Document {
 */
    /** Freeze the serialization UID. */
   static final long serialVersionUID = -8456893608311510260L;
+
+  /** Inner class needed to compare annotations*/
+  class AnnotationComparator implements java.util.Comparator {
+    int orderOn = -1;
+    int orderType = ASC;
+    /** Constructs a comparator according to one of three sorter types:
+      * ORDER_ON_ANNOT_TYPE, ORDER_ON_END_OFFSET, ORDER_ON_START_OFFSET
+      */
+      public AnnotationComparator(int anOrderOn, int anOrderType){
+        orderOn = anOrderOn;
+        orderType = anOrderType;
+      }// AnnotationComparator()
+
+      /**This method must be implemented according to Comparator interface */
+      public int compare(Object o1, Object o2){
+        Annotation a1 = (Annotation) o1;
+        Annotation a2 = (Annotation) o2;
+        if (orderOn == ORDER_ON_START_OFFSET){
+          if (orderType == ASC)
+            return a1.getStartNode().getOffset().compareTo(
+                                                a2.getStartNode().getOffset());
+          else
+            return -(a1.getStartNode().getOffset().compareTo(
+                                                a2.getStartNode().getOffset()));
+        }// End if
+        if (orderOn == ORDER_ON_END_OFFSET){
+          if (orderType == ASC)
+            return a1.getEndNode().getOffset().compareTo(
+                                                  a2.getEndNode().getOffset());
+          else
+            return -(a1.getEndNode().getOffset().compareTo(
+                                                  a2.getEndNode().getOffset()));
+
+        }// End if
+        if (orderOn == ORDER_ON_ANNOT_ID){
+          if (orderType == ASC)
+            return a1.getId().compareTo(a2.getId());
+          else
+            return -(a1.getId().compareTo(a2.getId()));
+        }// End if
+        return 0;
+      }//compare()
+  }// End inner class AnnotationComparator
 } // class DocumentImpl
