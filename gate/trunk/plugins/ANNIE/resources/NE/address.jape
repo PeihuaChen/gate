@@ -15,7 +15,7 @@
 
 
 Phase:	Address
-Input:  Token SpaceToken Lookup
+Input:  Token Lookup
 Options: control = appelt
 
 /////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ Macro: PHONE_REG
 
 (
   ({Token.kind == number,Token.length == "3"}
-  (SPACE)
+
   ({Token.kind == number,Token.length == "3"} |
    {Token.kind == number,Token.length == "4"}) 
   )
@@ -130,7 +130,6 @@ Macro: PHONE_EXT
   ({Token.string == "ext"})	|
   ({Token.string == "ext"}{Token.string == "."})
  )  
- (SPACE)?
  ({Token.kind == number, Token.length == "4"}|
   {Token.kind == number, Token.length == "5"}|
   {Token.kind == number, Token.length == "6"})
@@ -142,9 +141,8 @@ Macro: PHONE_PREFIX
 
 (
  {Lookup.majorType == phone_prefix}
- (SPACE {Lookup.majorType == phone_prefix})?
+ ({Lookup.majorType == phone_prefix})?
  ({Token.string == ":"})?
- (SPACE)?
 )
   
 //////////////////////////////////////////////////
@@ -157,7 +155,7 @@ Priority: 20
 
 (
 
- (PHONE_AREACODE SPACE)
+ (PHONE_AREACODE)
  (PHONE_REG)
 )
 :phoneNumber -->
@@ -170,7 +168,7 @@ Priority: 100
  (PHONE_PREFIX)
 )
 (
- (PHONE_AREACODE SPACE)
+ (PHONE_AREACODE)
  (PHONE_REG)
 )
 :phoneNumber -->
@@ -185,9 +183,9 @@ Priority: 50
  (PHONE_PREFIX)?
 )
 (
- ((PHONE_COUNTRYCODE SPACE) |
+ ((PHONE_COUNTRYCODE) |
   ({Token.string == "("} 
-   (PHONE_COUNTRYCODE (SPACE)?)
+   (PHONE_COUNTRYCODE)
    {Token.string == ")"})
  )
 
@@ -198,7 +196,6 @@ Priority: 50
  ({Token.kind == number,Token.length == "3"}|
   {Token.kind == number,Token.length == "4"})
       
- (SPACE)
  (PHONE_REG)
 )
 :phoneNumber -->
@@ -225,8 +222,8 @@ Priority: 40
 
 (
 
- (PHONE_AREACODE SPACE)?
- (PHONE_REG) (SPACE)
+ (PHONE_AREACODE)?
+ (PHONE_REG)
  (PHONE_EXT)
 )
 :phoneNumber -->
@@ -240,8 +237,8 @@ Priority: 40
  (PHONE_PREFIX)
 )
 (
- (PHONE_AREACODE SPACE)?
- (PHONE_REG) (SPACE)
+ (PHONE_AREACODE)?
+ (PHONE_REG)
  (PHONE_EXT)
 )
 :phoneNumber -->
@@ -271,7 +268,7 @@ Rule: PhoneOtherContext
 )
 (
  {Token.kind == number}
- (SPACE {Token.kind == number})*
+ ({Token.kind == number})*
 )
 :phoneNumber 
 -->
@@ -293,7 +290,6 @@ Priority: 50
  ({Token.kind == number,Token.length == "1"}|
   {Token.kind == number,Token.length == "2"}
  )
- SPACE
  ({Token.kind == number,Token.length == "1"}|
   {Token.kind == number,Token.length == "2"}
  )
@@ -344,9 +340,7 @@ Priority: 20
 
 (
  {Token.string == "at"}
- (SPACE)?
  {Token.string == ":"}
- (SPACE)?
 )
 (
  ({Token.orth == lowercase}	|
@@ -393,9 +387,8 @@ Rule: StreetName1
 (
  ({Token.kind == number}
   ({Token.string == ","})? 
-  SPACE)?
+  )?
  {Token.orth == upperInitial}
- SPACE
  {Lookup.minorType == "street"}
 )
 :streetAddress -->
@@ -406,15 +399,12 @@ Rule: POBoxAddress
 (
  (({Token.string == "P"}
    ({Token.string == "."})? 
-   (SPACE)?
    {Token.string == "O"}
    ({Token.string == "."})?
   ) |
   ({Token.string == "PO"})
  )
- (SPACE)?
  {Token.string == "Box"}
- (SPACE)
  {Token.kind == number}
 )
 :address -->

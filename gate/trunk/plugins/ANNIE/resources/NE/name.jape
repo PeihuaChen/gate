@@ -15,6 +15,7 @@
 
 
 Phase:	Name
+Input: Token Lookup Title FirstPerson
 Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
@@ -25,14 +26,12 @@ Options: control = appelt
 Macro: TITLE
 (
  {Title}
- (SPACE)?
 )
 
 Macro: INITIALS
 (
   ({Token.orth == upperInitial, Token.length =="1"}
   ({Token.string == "."})?
-  (SPACE)?
   )+
 )
 
@@ -57,13 +56,6 @@ Macro: FIRSTNAMEAMBIG
  {Lookup.majorType == person_first, Lookup.minorType == ambig}
 )
 
-//Macro: LASTNAME
-//(
-// {Token.orth == upperInitial} |
-//  {Token.orth == allCaps} |
-// {Token.orth == mixedCaps}
-//)
-
 
 
 Macro: UPPER
@@ -85,7 +77,7 @@ Macro: PERSONENDING
 Macro: PREFIX
 (
  ({Lookup.majorType == surname, Lookup.minorType == prefix}
-  SPACE)|
+ )|
  (({Token.string == "O"}|{Token.string == "D"})
   {Token.string == "'"}
  )
@@ -140,14 +132,12 @@ Priority: 20
  {Token.category == DT}|
  {Token.category == PRP}|
  {Token.category == RB}
- SPACE
 )?
 (
  {FirstPerson}
 )
 :person 
 ( 
- (SPACE)
  {Token.orth == upperInitial, Token.length == "1"}
 )?
 -->
@@ -171,9 +161,7 @@ Priority: 30
  {FirstPerson}
 ):person1
 (
- SPACE
  {Token.string == "and"}
- SPACE
 )
 ({Token.orth == upperInitial})
 :person2
@@ -210,9 +198,7 @@ Priority: 40
  {FirstPerson}
 ):person
 (
- SPACE
  {Token.string == "and"}
- SPACE
  {Token.length == "1"}
 )
  -->
@@ -242,11 +228,10 @@ Priority: 35
 (
  (TITLE)+
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
-  (SPACE)? 
  )?
   (PREFIX)* 
   (UPPER)
- (SPACE PERSONENDING)?
+ (PERSONENDING)?
 )
 :person -->
 {
@@ -307,12 +292,10 @@ Priority: 18
  ({Title.gender == male}|
   {Title.gender == female}
  ) 
- (SPACE)?
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
-  (SPACE)? 
  )*
  (UPPER)
- (SPACE PERSONENDING)?
+ (PERSONENDING)?
 )
 :person -->
 {
@@ -343,15 +326,13 @@ Priority: 20
 (
  {Lookup.majorType == jobtitle}
 ):jobtitle
- (SPACE)
 (
  (TITLE)?
  ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
-  (SPACE)? 
  )
  (PREFIX)* 
  (UPPER)
- (SPACE PERSONENDING)?
+ (PERSONENDING)?
 )
 :person 
 -->
@@ -366,13 +347,12 @@ Priority: 20
 // e.g. Mary And
 
 (
- (FIRSTNAME (SPACE)?)+
+ (FIRSTNAME)+
 ):person
 (
- (SPACE 
+ (
   ({Lookup.majorType == stop}|
    {Token.category == DT})
-  (SPACE)?
  )
 )
 -->
@@ -398,12 +378,11 @@ Priority: 50
 // e.g. Will And
 
 (
- ((FIRSTNAMEAMBIG (SPACE)?)+ | 
+ ((FIRSTNAMEAMBIG)+ | 
   {Token.category == PRP}|
   {Token.category == DT}
  )
- (SPACE {Lookup.majorType == stop}
-  (SPACE)?
+ ({Lookup.majorType == stop}
  )
 )
 :person -->
@@ -418,12 +397,11 @@ Priority: 50
  {Token.category == PRP}|
  {Token.category == RB}|
  {Lookup.majorType == location}
- SPACE
 )
 (
  (PREFIX)* 
  (UPPER)
- (SPACE PERSONENDING)?
+ (PERSONENDING)?
 ):foo
 -->
 {}
@@ -434,13 +412,12 @@ Priority: 10
 // Fred Jones
 (
  {Token.category == DT}
- SPACE
 )?
 (
- ((FIRSTNAME | FIRSTNAMEAMBIG) (SPACE)? )+
+ ((FIRSTNAME | FIRSTNAMEAMBIG) )+
  (PREFIX)*
  (UPPER)
- (SPACE PERSONENDING)?
+ (PERSONENDING)?
 )
 :person -->
 {
@@ -464,12 +441,11 @@ Priority: 50
 // G.Wilson Fri
 
 (
- ((FIRSTNAME | FIRSTNAMEAMBIG) (SPACE)? )
+ ((FIRSTNAME | FIRSTNAMEAMBIG) )
  (PREFIX)* 
  (UPPER)
 ):person
 (
- (SPACE)
  {Lookup.majorType == date}
 )
 -->
@@ -484,9 +460,8 @@ Priority: 20
 
  (UPPER)
  {Token.string == ","}
- (SPACE)?
  {Token.category == PRP}
- (SPACE PERSONENDING)?
+ (PERSONENDING)?
 )
 :unknown 
 -->
@@ -501,9 +476,8 @@ Priority: 5
 (
  {Token.category ==NNP}
  {Token.string == ","}
- (SPACE)?
- (INITIALS (SPACE)? )+ 
- (SPACE PERSONENDING)?
+ (INITIALS )+ 
+ (PERSONENDING)?
 )
 :person -->
 {
@@ -528,7 +502,6 @@ Priority: 50
 (
  ({Token.string == "St"} ({Token.string == "."})? |
  {Token.string == "Saint"})
- SPACE
  (FIRSTNAME)
  )
 :person -->
@@ -559,7 +532,6 @@ Priority: 40
   (INITIALS
    {Token.string == "."})
  )
-   SPACE 
   {Lookup.majorType == location}
 )
 :person -->
@@ -586,7 +558,6 @@ Macro:  CDG
  (
   ({Lookup.majorType == cdg})|
   ({Token.string == ","} 
-  (SPACE)
   {Lookup.majorType == cdg})
  )
 
@@ -609,7 +580,6 @@ Rule:	GazOrganization
 Priority: 145
 (
  {Token.category == DT}
- SPACE
 )?
 (
 {Lookup.majorType == organization}
@@ -642,9 +612,8 @@ Priority: 50
 (
  ({Lookup.majorType == location} |
   {Lookup.majorType == country_adj})
- SPACE
 {Lookup.majorType == organization}
-(SPACE {Lookup.majorType == organization})?
+({Lookup.majorType == organization})?
 )
 :orgName -->  
   :orgName.TempOrganization = {kind = "orgName", rule=LocOrganization}
@@ -657,20 +626,19 @@ Priority: 20
 // Bradford & Bingley Ltd
 (
  {Token.category == IN}
- (SPACE)
 )?
 
 (
  ({Token.category == NNP}
-  (SPACE)? )+
+  )+
 
  {Token.string == "&"}
 
- ((SPACE)?
+ (
   {Token.orth == upperInitial}
  )+
 
- (SPACE CDG)?
+ (CDG)?
 
 )
 :orgName -->
@@ -684,9 +652,8 @@ Priority: 25
 // A Sheffield University
 (
  {Token.string == "University"}
- SPACE
  {Token.string == "of"}
- (SPACE 
+ (
  {Token.category == NNP})+
 )
 :orgName -->
@@ -700,13 +667,13 @@ Priority: 25
 
 (
  {Token.string == "Department"}
- SPACE
+ 
  {Token.string == "of"}
- (SPACE 
+ (
  {Token.orth == upperInitial})+
- (SPACE
+ (
   {Token.string == "and"}
-  (SPACE 
+  ( 
    {Token.orth == upperInitial})+
  )?
 )
@@ -723,17 +690,15 @@ Priority: 125
 
 (
  {Token.category == DT}
- (SPACE)
 )?
 (
   (UPPER)
-  SPACE
-  (UPPER SPACE)?
-  (UPPER SPACE)?
-  (UPPER SPACE)?
-  (UPPER SPACE)?
+  (UPPER)?
+  (UPPER)?
+  (UPPER)?
+  (UPPER)?
  {Lookup.majorType == org_key}
- (SPACE {Lookup.majorType == org_ending})?
+ ({Lookup.majorType == org_ending})?
 )
 :orgName -->
   :orgName.TempOrganization = {kind = "unknown", rule = "OrgXKey"}
@@ -744,11 +709,9 @@ Priority: 500
 
 (
  {Token.category == DT}
- (SPACE)
 )?
 (
  {Token.category == RB}
- SPACE
  {Lookup.majorType == cdg}
 )
 :label
@@ -764,13 +727,10 @@ Priority: 120
 
 (
  {Token.category == DT}
- (SPACE)
 )?
 (
   (UPPER)
-  SPACE
-  ((UPPER)
-   SPACE)?
+  (UPPER)?
  {Lookup.majorType == cdg}
 )
 :orgName -->
@@ -787,20 +747,18 @@ Priority: 120
 // but NOT A XXX Services Ltd.
 (
  {Token.category == DT}
- (SPACE)
 )?
 (
- (UPPER SPACE)
- (UPPER SPACE)?
+ (UPPER)
+ (UPPER)?
   (({Token.string == "and"} | 
     {Token.string == "&"})
-   (SPACE)?
-   (UPPER SPACE)?
-   (UPPER SPACE)?
-   (UPPER SPACE)?
+   (UPPER)?
+   (UPPER)?
+   (UPPER)?
   )
  {Lookup.majorType == org_key}
- (SPACE {Lookup.majorType == org_ending})?
+ ({Lookup.majorType == org_ending})?
 )
 :orgName -->
   :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandYKey"}
@@ -813,12 +771,12 @@ Priority: 120
 // Queen's Ware
 
 (
-  ((UPPER) SPACE)?
-  ((UPPER) SPACE)?
+  (UPPER)?
+  (UPPER)?
   ({Token.orth == upperInitial}
    {Token.string == "'"}
    ({Token.string == "s"})?
-   SPACE)
+  )
  ({Lookup.majorType == org_key}|
   {Lookup.majorType == org_base})
 )
@@ -835,12 +793,11 @@ Priority: 1000
 
 (
  ({Token.category == DT} 
-  SPACE)?
+ )?
 )
 (
  ({Lookup.majorType == country_adj}|
   {Token.orth == lowercase})
- SPACE
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key})
 )
@@ -858,23 +815,23 @@ Priority: 130
 
 (
  ({Token.category == DT}
-  SPACE)?
+ )?
 )
 (
  (
-  (UPPER SPACE)|
-  {Lookup.majorType == organization} (SPACE)
+  (UPPER)|
+  {Lookup.majorType == organization}
  )
- (UPPER SPACE)?
- (UPPER SPACE)?
+ (UPPER)?
+ (UPPER)?
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}
  )
- (SPACE
+ (
   {Token.string == "of"}
-  (SPACE UPPER)
-  (SPACE UPPER)?
-  (SPACE UPPER)?
+  (UPPER)
+  (UPPER)?
+  (UPPER)?
  )?
 )
 :orgName -->
@@ -884,19 +841,19 @@ Rule:	BaseofOrg
 Priority: 130
 
 (
- (DET SPACE)?
+ (DET)?
 )
 (
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}
  )
- SPACE
+ 
  {Token.string == "of"}
- (SPACE 
+ ( 
   {Token.category == DT}
  )?
- (SPACE UPPER)
- (SPACE UPPER)?
+ (UPPER)
+ (UPPER)?
 )
 :orgName -->
   :orgName.TempOrganization = {kind = "unknown", rule = "BaseofOrg"}
@@ -910,9 +867,9 @@ Priority: 130
 
 (
  {Lookup.majorType == org_pre}
- (SPACE
+ (
   {Token.orth == upperInitial})+
- (SPACE {Lookup.majorType == org_ending})?
+ ({Lookup.majorType == org_ending})?
 )
 :orgName -->
   :orgName.TempOrganization = {kind = "unknown", rule = "OrgPreX"}
@@ -926,10 +883,8 @@ Priority: 150
 
 (
   (SAINT)
-  SPACE
   {Token.orth == upperInitial}
   {Token.string == "'"}({Token.string == "s"})?
-  SPACE
   (CHURCH)
 )
 :orgName -->
@@ -942,10 +897,10 @@ Priority: 130
 // overrides PersonFull
 
 (
- (FIRSTNAME (SPACE)? )
+ (FIRSTNAME )
  ({Lookup.majorType == org_key}|
   {Lookup.majorType == org_base})
- (SPACE {Lookup.majorType == org_ending})?
+ ({Lookup.majorType == org_ending})?
 )
 :org 
 -->
@@ -966,13 +921,12 @@ Priority: 75
 
 (
  {Token.category == DT}
- SPACE
 )?
 (
  ({Lookup.majorType == loc_key, Lookup.minorType == pre}
-  SPACE)?
+ )?
  {Lookup.majorType == location}
- (SPACE
+ (
   {Lookup.majorType == loc_key, Lookup.minorType == post})?
 )
 :locName -->
@@ -1001,7 +955,6 @@ Rule:	GazLocation
 Priority: 70
 (
  {Token.category == DT}
- SPACE
 )?  
 (
  {Lookup.majorType == location}
@@ -1036,11 +989,9 @@ Rule: LocationPost
 Priority: 50
 (
  {Token.category == DT}
- SPACE
 )?
 (
  {Token.category == NNP}
- SPACE
  {Lookup.majorType == loc_key, Lookup.minorType == post}
 )
 :locName
@@ -1056,7 +1007,6 @@ Rule:InLoc1
 
 (
  {Token.string == "in"}
- (SPACE)
 )
 (
  {Lookup.majorType == location, Token.orth == allCaps}
@@ -1069,9 +1019,7 @@ Rule:LocGeneralKey
 Priority: 30
 (
  {Lookup.majorType == loc_general_key}
- SPACE
  {Token.string == "of"}
- SPACE
 )
 (
  (UPPER)
@@ -1087,12 +1035,11 @@ Priority: 1
 
 (
  {Token.string == "company"}
- (SPACE)
 )
 (
  (UPPER)
- (SPACE (UPPER))?
- (SPACE (UPPER))? 
+ (UPPER)?
+ (UPPER)? 
 )
 :org
 -->
@@ -1106,11 +1053,11 @@ Priority: 5
 
 (
  (UPPER)
- (SPACE (UPPER))?
- (SPACE (UPPER))? 
+ (UPPER)?
+ (UPPER)? 
 )
 : org
-(SPACE
+(
  ({Token.string == "offices"} |
  {Token.string == "Offices"} |
  {Token.string == "laboratory"} | 
@@ -1133,12 +1080,11 @@ Priority: 50
   {Token.string == "joins"}|
   {Token.string == "join"}
  )
- SPACE
 )
 (
  (UPPER)
- (SPACE (UPPER))?
- (SPACE (UPPER))?
+ (UPPER)?
+ (UPPER)?
 )
 :org
 -->

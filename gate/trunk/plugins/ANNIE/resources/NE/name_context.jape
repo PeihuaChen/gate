@@ -8,24 +8,23 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
+*  Diana Maynard, 10 Sep 2001
 * 
 *  $Id$
 */
 
-
 Phase:	NameContext
+Input: Lookup Unknown Person Token Organization
 Options: control = appelt
 
 Rule: Jobtitle1
 Priority: 50
 (
  {Lookup.majorType == jobtitle}
- (SPACE)
 )
 (
  {Unknown}
- (SPACE {Unknown})?
+ ({Unknown})?
 )
 :person
 -->
@@ -33,7 +32,7 @@ Priority: 50
 //removes old "Unknown" annotation and adds a "Person" one
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("rule", "Jobtitle1");
+features.put("rule", "JobTitle1");
 annotations.add(person.firstNode(), person.lastNode(), "Person",
 features);
 annotations.removeAll(person);
@@ -44,16 +43,13 @@ Rule:PersonTitle1
 Priority: 40
 (
  {Person.rule1 == PersonTitle}
- SPACE
  {Unknown}
 ):person
 -->
 {
 //removes old "Person" and "Unknown" annotations and adds a new "Person" one
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("rule", "PersonTitle1");
 annotations.add(person.firstNode(), person.lastNode(), "Person",
 features);
@@ -71,9 +67,7 @@ Priority: 10
 ):person
 
 (
- SPACE 
  {Token.string == "from"}
- SPACE
  ({Organization} | {Location})
 )
 -->
@@ -89,17 +83,11 @@ Priority: 20
 ):label
 
 (
- SPACE 
  {Token.string == "from"}
- SPACE
  ({Organization} | {Location})
 )
 -->
   {}
-
-
-
-
 
 
 

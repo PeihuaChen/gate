@@ -8,13 +8,13 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
+*  Diana Maynard, 10 Sep 2001
 * 
 *  $Id$
 */
 
 Phase:	First
-Input: Token SpaceToken
+Input: Token Lookup
 Options: control = appelt
 
 // this has to be run first of all 
@@ -39,8 +39,8 @@ Macro: SPACE
  )
 )
 
-///////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////
 
 Rule: Silly
 // we have to have a rule here, so we'll just have something silly

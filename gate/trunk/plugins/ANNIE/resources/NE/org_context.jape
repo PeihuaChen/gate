@@ -8,12 +8,14 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
+*  Diana Maynard, 10 Sep 2001
 * 
 *  $Id$
 */
 
+
 Phase:	Org_Context
+Input: Token Lookup Organization Unknown Location
 Options: control = appelt
 
 
@@ -25,12 +27,10 @@ Priority: 1
 
 (
  {Token.string == "company"}
- (SPACE)
  (({Token.string == "called"}|
    {Token.string == "dubbed"}|
    {Token.string == "named"}
   )
-  (SPACE)
  )?
 )
 (
@@ -55,7 +55,7 @@ Priority: 5
 (
  {Unknown.kind == PN}
 ): org
-(SPACE
+(
  ({Token.string == "offices"} |
  {Token.string == "Offices"} |
  {Token.string == "laboratory"} | 
@@ -81,7 +81,6 @@ Priority: 5
  {Unknown.kind == PN}
 ):org
 ( 
- (SPACE)
  {Token.string == "shares"}
 )
 -->
@@ -100,9 +99,7 @@ Priority: 10
 
 ( 
  {Token.string == "shares"}
- (SPACE)
  {Token.string == "in"}
- (SPACE)
 )
 (
  {Unknown.kind == PN}
@@ -125,9 +122,7 @@ Priority: 10
 (
  ({Token.string == "officials"}|
   {Token.string == "Officials"})
- SPACE
  {Token.string == "at"}
- SPACE
 )
 (
  {Unknown.kind == PN}
@@ -142,9 +137,11 @@ features);
 annotations.removeAll(org);
 }
 
+
 Rule:JoinOrg
 Priority: 50
 // Smith joined Energis
+// later we should use the morph PR to prevent having to list morphological variants
 
 (
  ({Token.string == "joined"}|
@@ -231,7 +228,6 @@ Priority: 10
  {Token.category == CC}
  (SPACE)
 )
-
 (
  {Unknown.kind == PN}
 ):org
@@ -244,6 +240,8 @@ annotations.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 annotations.removeAll(org);
 }
+
+
 
 Rule: OrgJobtitle
 Priority: 30
@@ -265,13 +263,13 @@ annotations.removeAll(org);
 }
 
 
+
 Rule:LocOrg
 Priority: 20
 // guess that Unknown preceded by Loc is an Org
 
 (
  {Location}
- SPACE
  {Unknown.kind == PN}
 ):org
 -->
@@ -284,6 +282,9 @@ annotations.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 annotations.removeAll(org);
 }
+
+
+
 
 
 

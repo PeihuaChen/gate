@@ -17,7 +17,7 @@
 // handles relative time sequences
 
 Phase:	Name
-//Input: Token Lookup
+Input: Token Lookup TempDate
 Options: control = appelt
 
 Rule: GazDateWords
@@ -26,7 +26,7 @@ Priority: 10
 
 (
  {Lookup.majorType == date_key}
- (SPACE
+ (
   {Lookup.majorType == time_unit}
  )?
 )
@@ -40,9 +40,7 @@ Priority:30
 
 (
  {Token.kind == number}
- (SPACE)
  ({Lookup.majorType == time_unit})
- (SPACE)
  {Token.string == "ago"}
 )
 :date -->
@@ -55,9 +53,7 @@ Priority:30
 
 (
  {Token.kind == number}
- (SPACE)
  ({Lookup.majorType == date_unit})
- (SPACE)
  {Token.string == "ago"}
 )
 :date -->
@@ -71,12 +67,10 @@ Priority: 30
 
 (
  {Lookup.majorType == time_modifier} 
- (SPACE)
  (
   ({Lookup.majorType == number}|
    {Token.kind == number}
   )
-  (SPACE)
  )?
  {Lookup.majorType == date_unit}
 )
@@ -91,14 +85,11 @@ Rule: EarlyDate
  ({Token.string == early}|
   {Token.string == late}
  )
- (SPACE)
  ({Token.string == "in"}
-  (SPACE)
  )?
  ({TempDate}|
   (
    {Lookup.majorType == time_modifier} 
-   (SPACE)
    {Lookup.majorType == date_unit}
   )
  )
@@ -123,25 +114,22 @@ Rule:FiscalDate
 
 (
  {Lookup.minorType == ordinal}
- SPACE
  (
   ({Lookup.majorType == number}|
    {Token.kind == number}
   )
-  (SPACE)
  )?
  {Lookup.majorType == date_unit}
- SPACE
+ 
  ({Token.string == "of"}
-  SPACE)?
+ )?
  ((
    {Token.category == DT}|
    {Token.category == "PRP$"}
   )
-  SPACE
  )?
  ({Lookup.majorType == time_modifier} 
-  (SPACE))?
+ )?
  {Lookup.majorType == date_unit}
 )
 :date -->

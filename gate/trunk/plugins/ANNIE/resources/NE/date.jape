@@ -1,5 +1,5 @@
 /*
-*  date.jape
+*  time.jape
 *
 * Copyright (c) 1998-2001, The University of Sheffield.
 *
@@ -8,13 +8,14 @@
 *  Version 2, June 1991 (in the distribution as file licence.html,
 *  and also available at http://gate.ac.uk/gate/licence.html).
 *
-*  Diana Maynard, 02 Aug 2001
+*  Diana Maynard, 10 Sep 2001
 * 
 *  $Id$
 */
 
-Phase:	Date
-Input: Token SpaceToken Lookup
+
+Phase:	Time
+Input: Token Lookup
 Options: control = appelt
 
 
@@ -45,12 +46,12 @@ Macro: DATE_PRE
 )
 
 Macro: DAY 
-(((DATE_PRE SPACE)?
+(((DATE_PRE)?
   DAY_NAME) |
  DAY_MONTH_NUM)
 
 Macro: MONTH_NAME
-( (DATE_PRE SPACE)?
+( (DATE_PRE)?
   {Lookup.minorType == month})
 
 Macro: MONTH 
@@ -98,7 +99,6 @@ Macro:	XDAY
 (
  ({Token.orth == upperInitial} |
   {Token.orth == allCaps})
- SPACE
  {Token.string == "Day"}
 )
 
@@ -112,7 +112,7 @@ Macro: ORDINAL
      {Token.string == "st"})
     |
    {Lookup.minorType == ordinal})
-   (SPACE
+   (
     {Token.string == "of"})?
 )
 
@@ -153,9 +153,9 @@ Rule: TimeDigital1
 (
  (ONE_DIGIT|TWO_DIGIT){Token.string == ":"} TWO_DIGIT 
 ({Token.string == ":"} TWO_DIGIT)?
-((SPACE)? TIME_AMPM)?	
-(SPACE TIME_DIFF)?
-(SPACE TIME_ZONE)? 
+(TIME_AMPM)?	
+(TIME_DIFF)?
+(TIME_ZONE)? 
 )
 :time
 -->
@@ -172,9 +172,8 @@ Rule:	TimeDigital2
  (ONE_DIGIT|TWO_DIGIT) 
  (({Token.string == ":"}|{Token.string == "."} |{Token.string == "-"} )
   TWO_DIGIT)?
- (SPACE)?
  (TIME_AMPM)
- (SPACE TIME_ZONE)?
+ (TIME_ZONE)?
 )
 :time
 -->
@@ -186,10 +185,8 @@ Rule: TimeOClock
 
 (
  {Lookup.minorType == hour}
- SPACE
  {Token.string == "o"}
  {Token.string == "'"}
- (SPACE)?
  {Token.string == "clock"}
 )
 :time 
@@ -203,21 +200,18 @@ Rule: TimeAnalogue
 // twenty six minutes to twelve
 
 (
- (((({Lookup.majorType == number} SPACE)?
+ (((({Lookup.majorType == number})?
     {Lookup.majorType == number}
    )
-   (SPACE)
    {Token.string == "minutes"}
   ) |
   ({Token.string == "half"} | 
    {Token.string == "quarter"}) 
  )
- (SPACE)
  ({Token.string == "past"}|
   {Token.string == "to"})
- (SPACE)
  {Lookup.minorType == hour}
-) 
+)
 :time 
 -->
  :time.TempTime = {kind = "positive", rule = "TimeAnalogue"}
@@ -229,11 +223,11 @@ Priority: 50
 
 (
  {Lookup.majorType == number}
- ((SPACE)
+ (
   {Lookup.majorType == number}
  )?
 ):time1
-((SPACE)
+(
  {Lookup.minorType == time_key}
 ) 
 -->
@@ -241,10 +235,10 @@ Priority: 50
 
 
 Rule: TimeWords
-// seven thirty
+
 (
  {Lookup.majorType == number}
- ((SPACE)
+ (
   {Lookup.majorType == number}
  )?
 )
@@ -256,12 +250,10 @@ Rule: TimeWords
 
 
 Rule: TimeDigitalContext1
-// 0730 tomorrow
-(SPACE)
+
 (
 (FOUR_DIGIT)
 ):time
-(SPACE)
 {Lookup.minorType == time_key}
  -->
  :time.TempTime = {kind = "positive", rule = "TimeDigitalContext"}
@@ -272,13 +264,11 @@ Priority: 100
 
 (
  {Token.string == "at"}
- (SPACE)
 )
 ({Token.string == "0"}
   ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
- (SPACE)?
  (TIME_AMPM)?
- (SPACE TIME_ZONE)?
+ (TIME_ZONE)?
 )
 :time
  -->
@@ -286,26 +276,24 @@ Priority: 100
 
 
 Rule: TimeDigitalContext2
-//  at 4.30
+
 (
  {Token.string == "at"}
- (SPACE)
 )
 (
  FOUR_DIGIT | 
  ((ONE_DIGIT|TWO_DIGIT)
   ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
  )
- (SPACE)?
  (TIME_AMPM)?
- (SPACE TIME_ZONE)?
+ (TIME_ZONE)?
 )
 :time
  -->
  :time.TempTime = {kind = "positive", rule = "TimeDigitalContext2"}
 
 Rule: TimeDigitalTemp1
-// 4.30
+
 (
  FOUR_DIGIT | 
  ((ONE_DIGIT|TWO_DIGIT)
@@ -316,12 +304,27 @@ Rule: TimeDigitalTemp1
  -->
  :time.TempTime = {kind = "temp", rule = "TimeDigitalTemp"}
 
+Rule: TimeDigitalContext1
+(
+ {Token.string == "in"}
+)?
+((ONE_DIGIT|TWO_DIGIT)
+ ({Token.string == ":"}|{Token.string == "."})
+ TWO_DIGIT
+ ({Token.string == "seconds"}|
+  {Token.string == "minutes"}|
+  {Token.string == "hours"}
+ )
+):time
+-->
+:time.TempTime = {kind = "positive", rule = "TimeDigitalContext1"}
+
+
 
 Rule: TimeDigitalContextConj
 
 (
  {Token.string == "at"}
- (SPACE)
 )
 (
  FOUR_DIGIT | 
@@ -331,9 +334,7 @@ Rule: TimeDigitalContextConj
 )
 :time1
 (
- (SPACE)
  {Token.string == "and"}
- (SPACE)
 )
 (
  FOUR_DIGIT | 
@@ -353,6 +354,17 @@ Rule: TimeDigitalContextConj
 
 // Date Rules
 
+Rule: IgnoreDatePerson
+Priority: 500
+(
+ {Date}
+ {Person}
+)
+:date
+-->
+{}
+
+
 
 Rule:	DateSlash           // UK only
 // Wed, 10/July/00
@@ -360,7 +372,7 @@ Rule:	DateSlash           // UK only
 // July/99
 
 (
- ((DAY_NAME (SPACE|COMMA)* )?
+ ((DAY_NAME (COMMA)? )?
  NUM_OR_ORDINAL SLASH MONTH_NAME (SLASH YEAR)? )|
  (MONTH_NAME SLASH YEAR) 
 )
@@ -376,10 +388,10 @@ Rule:	DateDash
 // 10-July
 
 (  
- ((DAY_NAME (SPACE|COMMA)*)?
-  (NUM_OR_ORDINAL DASH MONTH_NAME (DASH|SPACE) YEAR)) |
+ ((DAY_NAME (COMMA)?)?
+  (NUM_OR_ORDINAL DASH MONTH_NAME (DASH)? YEAR)) |
 
- ((DAY_NAME (SPACE|COMMA)*)?
+ ((DAY_NAME (COMMA)?)?
   NUM_OR_ORDINAL DASH MONTH_NAME)
 )
 :date
@@ -399,52 +411,63 @@ Priority: 20
 // July, 2000
 
 (
- (DAY_NAME SPACE NUM_OR_ORDINAL SPACE MONTH_NAME)|
+ (DAY_NAME NUM_OR_ORDINAL MONTH_NAME)|
 
- (DAY_NAME (COMMA)? SPACE
-  NUM_OR_ORDINAL SPACE MONTH_NAME ((COMMA)? SPACE YEAR)?) 
+ (DAY_NAME (COMMA)? 
+  NUM_OR_ORDINAL MONTH_NAME ((COMMA)? YEAR)?) 
 |
 
- ((DAY_NAME (COMMA)? SPACE)?
- NUM_OR_ORDINAL SPACE MONTH_NAME 
- ((COMMA)? SPACE YEAR)?)
+ ((DAY_NAME (COMMA)? )?
+ NUM_OR_ORDINAL MONTH_NAME 
+ ((COMMA)? YEAR)?)
 |
 
- (NUM_OR_ORDINAL SPACE MONTH_NAME) 
+ (NUM_OR_ORDINAL MONTH_NAME) 
 | 
-(MONTH_NAME (COMMA)? (SPACE)? YEAR)
+(MONTH_NAME (COMMA)? YEAR)
 )
 :date
 -->
  :date.TempDate = {rule = "DateName"}
 
 
-Rule: DateNameSpan
+Rule: DateNameSpan1
 // 5-20 Jan
 
 (
  NUM_OR_ORDINAL
- (SPACE)? 
  {Token.string == "-"}
- (SPACE)?
- (NUM_OR_ORDINAL SPACE MONTH_NAME ((COMMA)? SPACE YEAR)?)
+ (NUM_OR_ORDINAL MONTH_NAME ((COMMA)?  YEAR)?)
 )
 :date
 -->
- :date.TempDate = {rule = "DateSpan"}
+ :date.TempDate = {rule = "DateNameSpan1"}
+
+Rule: DateNameSpan2
+// Jan 5-20
+
+(MONTH_NAME
+
+ NUM_OR_ORDINAL 
+ {Token.string == "-"}
+ (NUM_OR_ORDINAL ((COMMA)?  YEAR)?)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateNameSpan2"}
 
 Rule: DateNameRev
 // Wed. July 1st, 2000
 // Wed, July 1, 2000
 // Wed, July 1st, 2000
 (         
- ((DAY_NAME (COMMA)? SPACE)?
-  MONTH_NAME (SPACE)? 
-  ({Token.string == "the"} SPACE)?
+ ((DAY_NAME (COMMA)? )?
+  MONTH_NAME  
+  ({Token.string == "the"})?
  NUM_OR_ORDINAL 
- ((COMMA)? SPACE YEAR)?) |
+ ((COMMA)? YEAR)?) |
          
- (MONTH_NAME (COMMA)? (SPACE)? YEAR)
+ (MONTH_NAME (COMMA)? YEAR)
 )
 :date
 -->
@@ -490,7 +513,7 @@ DAY_MONTH_NUM SLASH DAY_MONTH_NUM SLASH YEAR
 Rule: ModifierMonth
 //early October
 
-( DATE_PRE (SPACE)?
+( DATE_PRE 
   {Lookup.minorType == month}
 )
 :date -->
@@ -498,11 +521,10 @@ Rule: ModifierMonth
 
 
 Rule: YearAdBc
-Priority: 80
+
 // 1900 AD
 (
  (YEAR 
-  (SPACE)?
   AD_BC)
 )
 :year -->
@@ -513,10 +535,8 @@ Rule: YearSpan1
 // the late 80s
 (
  {Token.string == "the"}
- SPACE
- (DATE_PRE SPACE)?
+ (DATE_PRE)?
  (YEAR)
- (SPACE)?
  ({Token.string == "'"})?
  ({Token.string == "s"})
 )
@@ -528,8 +548,9 @@ Rule: YearSpan2
 
 (
  (FOUR_DIGIT)
- {Token.string == "/"}
- (TWO_DIGIT | ONE_DIGIT)
+ ({Token.string == "/"}|
+  {Token.string == "-"})
+ (FOUR_DIGIT|TWO_DIGIT | ONE_DIGIT)
 )
 :date -->
  :date.TempDate = {rule = "YearSpan2"}
@@ -541,19 +562,13 @@ Priority: 80
 // between 1980 and 1981
 (
  (({Token.string == "from"}| {Token.string == "From"})
-  (SPACE)
   (FOUR_DIGIT)
-  (SPACE) 
   {Token.string == "to"}
-  (SPACE)
   (FOUR_DIGIT)
  ) |
   (({Token.string == "between"}|{Token.string == "Between"}) 
-  (SPACE) 
   (FOUR_DIGIT)
-  (SPACE)
   {Token.string == "and"}
-  (SPACE)
   (FOUR_DIGIT)
  )
 )
@@ -561,28 +576,8 @@ Priority: 80
  :date.TempDate = {rule = "YearSpan3"}
 
 
-Rule: TimeAgo
-Priority:30
-//20 years ago
-(
- {Token.kind == number}
- (SPACE)
- ({Token.string == "years"}|
-  {Token.string == "months"}|
-  {Token.string == "weeks"}|
-  {Token.string == "days"}|
-  {Token.string == "hours"}|
-  {Token.string == "minutes"})
- (SPACE)
- {Token.string == "ago"}
-)
-:date -->
- :date.TempDate = {rule = "TimeAgo"}
-
 Rule: YearContext1
 Priority: 40
-// in 1920
-
 ({Token.string == "in"}|
  {Token.string == "by"}
 )
@@ -627,17 +622,13 @@ Priority: 10
  :date.TempYear = {kind = "positive", rule = "TempYear3"}
 
 
-
-
 Rule: YearWords
 // nineteen twenty three
 // nineteen ten
 
 (
  {Token.string == "nineteen"}
- (SPACE)
  ({Lookup.majorType == number}
-  (SPACE)
  )?
  {Lookup.majorType == number}
 )
@@ -655,5 +646,8 @@ Rule: TimeZone
 :date
 -->
  :date.TempZone = {rule = "TimeZone"}
+
+
+
 
 
