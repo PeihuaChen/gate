@@ -234,6 +234,21 @@ Priority: 20
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneNumberOnly"}
 
 
+Rule: PhoneOtherContext
+// sometimes they're unusual
+// tel: 0124 1963
+
+(
+ (PHONE_PREFIX)
+)
+(
+ {Token.kind == number}
+ (SPACE {Token.kind == number})*
+)
+:phoneNumber 
+-->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneOtherContext"}
+
 ///////////////////////////////////////////////////////////////
 // Postcode Rules
 
