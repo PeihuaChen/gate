@@ -22,6 +22,9 @@ import gate.persist.PersistenceException;
 
 public interface User {
 
+  public static final int OBJECT_CHANGE_NAME        = 1001;
+  public static final int OBJECT_CHANGE_PASSWORD    = 1002;
+
   /** --- */
   public Long getID();
 

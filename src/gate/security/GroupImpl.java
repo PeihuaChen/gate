@@ -20,6 +20,7 @@ import java.sql.*;
 
 import junit.framework.*;
 
+import gate.event.*;
 import gate.persist.PersistenceException;
 import gate.util.MethodNotImplementedException;
 
@@ -41,6 +42,10 @@ public class GroupImpl implements Group{
   /** --- */
   private AccessController ac;
 
+  /** --- */
+  private Vector omListeners;
+
+
 
   public GroupImpl(Long id, String name, List users,AccessController ac,Connection conn) {
 
@@ -49,6 +54,8 @@ public class GroupImpl implements Group{
     this.users = users;
     this.ac = ac;
     this.conn = conn;
+
+    this.omListeners = new Vector();
   }
 
   /** --- */
@@ -130,8 +137,19 @@ public class GroupImpl implements Group{
       throw new PersistenceException("can't add user to group in DB: ["+ sqle.getMessage()+"]");
     }
 
-    //4. update usr collection
+    //4. create ObjectModificationEvent
+    ObjectModificationEvent e = new ObjectModificationEvent(
+                                          this,
+                                          ObjectModificationEvent.OBJECT_MODIFIED,
+                                          this.OBJECT_CHANGE_ADDUSER);
+
+    //5. update usr collection
     this.users.add(usr);
+
+    //6. fire ObjectModificationEvent for all who care
+    for (int i=0; i< this.omListeners.size(); i++) {
+      ((ObjectModificationListener)this.omListeners).objectModified(e);
+    }
 
   }
 
@@ -139,6 +157,7 @@ public class GroupImpl implements Group{
   /** --- */
   public void removeUser(Long userID, Session s)
     throws PersistenceException,SecurityException {
+
 
     User usr = this.ac.findUser(userID);
     removeUser(usr,s);
@@ -194,6 +213,12 @@ public class GroupImpl implements Group{
     Group group2 = (Group)obj;
 
     return (this.id.equals(group2.getID()));
+  }
+
+
+  public void registerObjectModificationListener(ObjectModificationListener l) {
+
+    this.omListeners.add(l);
   }
 
 }
