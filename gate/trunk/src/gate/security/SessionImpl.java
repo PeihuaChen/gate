@@ -19,19 +19,24 @@ import gate.persist.PersistenceException;
 
 public class SessionImpl implements Session {
 
-  /** --- */
+  /** ID of the session */
   private Long  id;
 
-  /** --- */
+  /** User associated with the session */
   private User  user;
 
-  /** --- */
+  /** Group associated with the session
+   *  a user may be member of many groups, but at
+   *  login time only one could be specified */
   private Group group;
 
-  /** --- */
+  /** sesion timeout (in minutes)
+   *  @see  AccessControllerImpl.DEFAULT_SESSION_TIMEOUT_MIN
+   *  */
   private int   timeout;
 
-  /** --- */
+  /** TRUE if user associated with the session is in the
+   *  ADMINS user group, otherwise FALSE */
   private boolean isPrivileged;
 
   /** --- */
@@ -45,25 +50,31 @@ public class SessionImpl implements Session {
 
   /* Session interface */
 
-  /** --- */
+  /** returns the session ID */
   public Long getID() {
 
     return this.id;
   }
 
-  /** --- */
+  /** returns the user associated with the session */
   public User getUser() {
 
     return this.user;
   }
 
-  /** --- */
+  /**
+   *  returns the group associated with the session
+   *  a user may be member of many groups, but at
+   *  login time only one could be specified
+   *
+   */
   public Group getGroup() {
 
     return this.group;
   }
 
-  /** --- */
+  /** TRUE if user associated with the session is in the
+   *  ADMINS user group, otherwise FALSE */
   public boolean isPrivilegedSession() {
 
     return this.isPrivileged;
@@ -72,6 +83,13 @@ public class SessionImpl implements Session {
 
 
   /* misc methods */
+
+
+  /** returns the timeout (in minutes) of the session
+   *
+   *  @see  AccessControllerImpl.DEFAULT_SESSION_TIMEOUT_MIN
+   *
+   *  */
   public int getTimeout() {
 
     return this.timeout;

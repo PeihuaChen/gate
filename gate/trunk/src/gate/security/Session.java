@@ -19,16 +19,17 @@ import gate.persist.PersistenceException;
 
 public interface Session {
 
-  /** --- */
+  /** returns the session ID */
   public Long getID();
 
-  /** --- */
+  /** returns the user associated with the session */
   public User getUser();
 
-  /** --- */
+  /** returns the group associated with the session */
   public Group getGroup();
 
-  /** --- */
+  /** TRUE if user associated with the session is in the
+   *  ADMINS user group, otherwise FALSE */
   public boolean isPrivilegedSession();
 
 
