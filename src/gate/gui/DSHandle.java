@@ -24,10 +24,10 @@ import javax.swing.tree.*;
 
 import java.util.*;
 
-public class DSHandle extends CustomResourceHandle {
+public class DSHandle extends DefaultResourceHandle {
 
-  public DSHandle(DataStore datastore, ProjectData project) {
-    super((String)datastore.getFeatures().get("NAME"), project);
+  public DSHandle(DataStore datastore) {
+    super(datastore);
     super.setIcon(new ImageIcon(getClass().
                            getResource("/gate/resources/img/ds.gif")));
     this.datastore = datastore;
@@ -40,7 +40,7 @@ public class DSHandle extends CustomResourceHandle {
   }
 
   protected void initGuiComponents(){
-    treeRoot = new DefaultMutableTreeNode(datastore.getFeatures().get("NAME"),
+    treeRoot = new DefaultMutableTreeNode(datastore.getFeatures().get("gate.NAME"),
                                           true);
     try{
       Iterator lrTypesIter = datastore.getLrTypes().iterator();
@@ -133,9 +133,8 @@ public class DSHandle extends CustomResourceHandle {
     public void actionPerformed(ActionEvent e){
       try{
         datastore.close();
-        project.remove(myself);
       }catch(PersistenceException pe){
-        JOptionPane.showMessageDialog(project.frame,
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
@@ -153,15 +152,17 @@ public class DSHandle extends CustomResourceHandle {
         FeatureMap params = Factory.newFeatureMap();
         params.put("DataStore", datastore);
         params.put("DataStoreInstanceId", entry.id);
-        Resource res = Factory.createResource(entry.type, params);
+        FeatureMap features = Factory.newFeatureMap();
+        features.put("gate.NAME", entry.name);
+        Resource res = Factory.createResource(entry.type, params, features);
         datastore.getLr(entry.type, entry.id);
-        project.frame.resourcesTreeModel.treeChanged();
+        //project.frame.resourcesTreeModel.treeChanged();
       }catch(gate.persist.PersistenceException pe){
-        JOptionPane.showMessageDialog(project.frame,
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }catch(ResourceInstantiationException rie){
-        JOptionPane.showMessageDialog(project.frame,
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                       "Error!\n" + rie.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }
@@ -178,9 +179,9 @@ public class DSHandle extends CustomResourceHandle {
     public void actionPerformed(ActionEvent e){
       try{
         datastore.delete(entry.type, entry.id);
-        project.frame.resourcesTreeModel.treeChanged();
+        //project.frame.resourcesTreeModel.treeChanged();
       }catch(gate.persist.PersistenceException pe){
-        JOptionPane.showMessageDialog(project.frame,
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
       }

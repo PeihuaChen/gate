@@ -24,6 +24,9 @@ import java.awt.event.*;
 import java.util.*;
 import java.io.*;
 
+/**
+ * @deprecated as of 28/03/2001
+ */
 public class LRHandle extends CustomResourceHandle {
 
   File currentDir = null;
@@ -146,7 +149,7 @@ public class LRHandle extends CustomResourceHandle {
           DataStore oneDS = (DataStore)dsIter.next();
           String name;
           if(oneDS.getFeatures() != null &&
-             (name = (String)oneDS.getFeatures().get("NAME")) != null){
+             (name = (String)oneDS.getFeatures().get("gate.NAME")) != null){
           }else{
             name  = oneDS.getStorageUrl().getFile();
           }

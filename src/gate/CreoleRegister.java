@@ -56,7 +56,7 @@ import gate.event.*;
   * @see gate.util.Gate
   * @see gate.creole.ResourceData
   */
-public interface CreoleRegister extends Map, Serializable
+public interface CreoleRegister extends Map, Serializable, CreoleListener
 {
   /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
   public void addDirectory(URL directoryUrl);
@@ -141,7 +141,7 @@ public interface CreoleRegister extends Map, Serializable
   /**
    * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
    * The register will fire events every time a resource is added to or removed
-   * from the system.
+   * from the system and when a datastore is created, opened or closed.
    */
   public void addCreoleListener(CreoleListener l);
 

@@ -22,6 +22,7 @@ import java.io.*;
 import gate.*;
 import gate.creole.*;
 import gate.config.*;
+import gate.event.*;
 
 /** The class is responsible for initialising the GATE libraries, and
   * providing access to singleton utility objects, such as the GATE class
@@ -69,6 +70,12 @@ public class Gate
 
     // init the data store register
     initDataStoreRegister();
+
+    //The creoleRegister acts as a proxy for datastore related events
+    dataStoreRegister.addCreoleListener(creoleRegister);
+
+    //some of the events are actually fired by the {@link gate.Factory}
+    Factory.addCreoleListener(creoleRegister);
 
     // bring into the system the Default Annotations
     initDefaultAnnotationSchemas();
@@ -368,6 +375,13 @@ public class Gate
     urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");
     return urlBase == null;
   } // tryFileSystem()
+
+  /**
+   * Registers a {@link gate.event.CreoleListener} with the Gate system
+   */
+  public static synchronized void addCreoleListener(CreoleListener l){
+    creoleRegister.addCreoleListener(l);
+  }
 
   /** Set the URL base for GATE files, e.g. <TT>http://gate.ac.uk/</TT>. */
   public static void setUrlBase(URL urlBase) { Gate.urlBase = urlBase; }

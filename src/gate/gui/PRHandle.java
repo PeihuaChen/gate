@@ -19,6 +19,9 @@ import gate.*;
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * @deprecated as of 28/03/2001
+ */
 public class PRHandle extends CustomResourceHandle {
 
   public PRHandle(ProcessingResource res, ProjectData project) {
@@ -31,7 +34,7 @@ public class PRHandle extends CustomResourceHandle {
              getClass().getResource("/gate/resources/img/shefGazetteer.gif")));
     }else{
       setIcon(new ImageIcon(
-             getClass().getResource("/gate/resources/img/genericPr.gif")));
+             getClass().getResource("/gate/resources/img/pr.gif")));
     }
     popup = new JPopupMenu();
     popup.add(new ClosePRAction());

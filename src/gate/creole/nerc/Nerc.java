@@ -53,7 +53,7 @@ public class Nerc extends SerialController {
       tokeniser = (DefaultTokeniser)Factory.createResource(rData.getClassName(),
                                                            params);
       this.add(tokeniser);
-      tokeniser.getFeatures().put("NAME", "Tokeniser " + System.currentTimeMillis());
+      tokeniser.getFeatures().put("gate.NAME", "Tokeniser " + System.currentTimeMillis());
 
       //gazetteer
       params = Factory.newFeatureMap();
@@ -67,7 +67,7 @@ public class Nerc extends SerialController {
       gazetteer = (DefaultGazetteer)Factory.createResource(rData.getClassName(),
                                                            params);
       this.add(gazetteer);
-      gazetteer.getFeatures().put("NAME", "Gazetteer " + System.currentTimeMillis());
+      gazetteer.getFeatures().put("gate.NAME", "Gazetteer " + System.currentTimeMillis());
 
       //transducer
       params = Factory.newFeatureMap();
@@ -81,7 +81,7 @@ public class Nerc extends SerialController {
       transducer = (Transducer)Factory.createResource(rData.getClassName(),
                                                       params);
       this.add(transducer);
-      transducer.getFeatures().put("NAME", "Transducer " + System.currentTimeMillis());
+      transducer.getFeatures().put("gate.NAME", "Transducer " + System.currentTimeMillis());
     }catch(ParameterException pe){
       throw new ResourceInstantiationException(pe);
     }

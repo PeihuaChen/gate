@@ -197,7 +197,7 @@ extends AbstractFeatureBearer implements DataStore {
     String lrPersistenceId = null;
     FeatureMap lrFeatures = lr.getFeatures();
     if(lrFeatures != null) {
-      lrName = (String) lrFeatures.get("NAME");
+      lrName = (String) lrFeatures.get("gate.NAME");
       lrPersistenceId = (String) lrFeatures.get("DataStoreInstanceId");
     }// End if
     if(lrName == null) lrName = lrData.getName();
@@ -342,5 +342,15 @@ extends AbstractFeatureBearer implements DataStore {
 
     return s.toString();
   } // toString()
+
+  public int hashCode(){
+    return getClass().hashCode() ^ storageDir.hashCode();
+  }
+
+  public boolean equals(Object other){
+    return other instanceof SerialDataStore
+           &&
+           ((SerialDataStore)other).storageDir.equals(storageDir);
+  }
 
 } // class SerialDataStore

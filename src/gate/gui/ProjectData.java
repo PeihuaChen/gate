@@ -21,7 +21,9 @@ import javax.swing.tree.*;
 
 import gate.util.*;
 
-
+/**
+ * @deprecated as of 28/03/2001
+ */
 public class ProjectData {
 
   public ProjectData(File projectFile, MainFrame frame) {

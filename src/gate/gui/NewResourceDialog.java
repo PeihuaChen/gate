@@ -177,8 +177,10 @@ public class NewResourceDialog extends JDialog {
       }
       Resource res;
       try{
-        res = Factory.createResource(rData.getClassName(), params, listeners);
-        res.getFeatures().put("NAME", nameField.getText());
+        FeatureMap features = Factory.newFeatureMap();
+        features.put("gate.NAME", nameField.getText());
+        res = Factory.createResource(rData.getClassName(), params,
+                                     features, listeners);
       }catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getOwner(),
                                       "Resource could not be created!\n" +
@@ -512,7 +514,7 @@ public class NewResourceDialog extends JDialog {
       }
       try{
         resource = Factory.createResource(resourceData.getClassName(), params);
-        resource.getFeatures().put("NAME", nameField.getText());
+        resource.getFeatures().put("gate.NAME", nameField.getText());
       }catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getOwner(),
                                       "Resource could not be created!\n" +

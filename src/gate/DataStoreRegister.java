@@ -20,6 +20,7 @@ import java.net.*;
 
 import gate.util.*;
 import gate.persist.*;
+import gate.event.*;
 
 /** Records all the open DataStores.
   */
@@ -55,7 +56,11 @@ public class DataStoreRegister extends HashSet {
    * Overriden here for event registration code.
    */
   public boolean remove(Object o) {
-    return super.remove(o);
+    boolean res = super.remove(o);
+    if(res) fireDatastoreClosed(new CreoleEvent((DataStore)o,
+                                        CreoleEvent.DATASTORE_CLOSED)
+                        );
+    return res;
   } // remove
 
   /**
@@ -63,7 +68,76 @@ public class DataStoreRegister extends HashSet {
    * Overriden here for event registration code.
    */
   public void clear() {
+    Set datastores = new HashSet(this);
     super.clear();
-  } // clear
+
+    Iterator iter = datastores.iterator();
+    while(iter.hasNext()){
+      fireDatastoreClosed(new CreoleEvent((DataStore) iter.next(),
+                                          CreoleEvent.DATASTORE_CLOSED)
+                          );
+    }
+  }
+
+  public synchronized void removeCreoleListener(CreoleListener l) {
+    if (creoleListeners != null && creoleListeners.contains(l)) {
+      Vector v = (Vector) creoleListeners.clone();
+      v.removeElement(l);
+      creoleListeners = v;
+    }
+  }
+  public synchronized void addCreoleListener(CreoleListener l) {
+    Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      creoleListeners = v;
+    }
+  }
+  private transient Vector creoleListeners;
+  protected void fireResourceLoaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
+      }
+    }
+  }
+  protected void fireResourceUnloaded(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
+      }
+    }
+  }
+  protected void fireDatastoreOpened(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
+      }
+    }
+  }
+  protected void fireDatastoreCreated(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
+      }
+    }
+  }
+  protected void fireDatastoreClosed(CreoleEvent e) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
+      }
+    }
+  }/// clear
 
 } // class DataStoreRegister

@@ -16,7 +16,7 @@ package gate.gui;
 
 import javax.swing.*;
 import java.util.*;
-import java.net.URL;
+import java.net.*;
 import java.awt.Component;
 
 import gate.*;
@@ -28,36 +28,36 @@ import gate.creole.*;
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
  */
-class DefaultResourceHandle implements IResourceHandle{
-  public DefaultResourceHandle(Resource res){
+class DefaultResourceHandle implements ResourceHandle{
+
+  public DefaultResourceHandle(FeatureBearer res){
     this.resource = res;
     rData = (ResourceData)Gate.getCreoleRegister().
                                             get(resource.getClass().getName());
-//    this.icon = new ImageIcon(new URL("gate://" + rData.getIcon()));
+    if(rData != null){
+      String iconName = rData.getIcon();
+      if(iconName == null){
+        if(resource instanceof LanguageResource) iconName = "lr.gif";
+        else if(resource instanceof ProcessingResource) iconName = "pr.gif";
+      }
+      try{
+        this.icon = new ImageIcon(new URL("gate:/img/" + iconName));
+      }catch(MalformedURLException mue){
+        mue.printStackTrace(Err.getPrintWriter());
+      }
+    }else{
+      try{
+        this.icon = new ImageIcon(new URL("gate:/img/lr.gif"));
+      }catch(MalformedURLException mue){
+        mue.printStackTrace(Err.getPrintWriter());
+      }
+    }
+
     popup = null;
-    title = (String)resource.getFeatures().get("NAME");
+    title = (String)resource.getFeatures().get("gate.NAME");
     shown = false;
     buildViews();
   }
-/*
-  public DefaultResourceHandle(Resource resource, ProjectData project){
-    this.resource = resource;
-    this.title = (String)resource.getFeatures().get("NAME");
-    this.project = project;
-    buildViews();
-    myself = this;
-  }
-*/
-/*
-  public DefaultResourceHandle(String title, ProjectData project){
-    this.resource = null;
-    this.title = title;
-    this.project = project;
-    largeView = null;
-    smallView = null;
-    myself = this;
-  }
-*/
 
   public Icon getIcon(){
     return icon;
@@ -116,22 +116,45 @@ class DefaultResourceHandle implements IResourceHandle{
   }
 
   public Resource getResource(){
+    if(resource instanceof Resource) return (Resource)resource;
+    else return null;
+  }
+
+  public FeatureBearer getFeatureBearer(){
     return resource;
   }
 
   protected void buildViews(){
     //build the large views
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
-    List views = rData.getAllViews();
-    Iterator viewsIter = views.iterator();
-    while(viewsIter.hasNext()){
-      FeatureMap viewFm = (FeatureMap)viewsIter.next();
-      FeatureMap empty = Factory.newFeatureMap();
-      String type = (String)viewFm.get("TYPE");
+
+    /* Fancy discovery code goes here
+    ...
+    ...
+    ...
+    */
+
+    /* Not so fancy hardcoded views build */
+    //Language Resources
+    if(resource instanceof gate.corpora.DocumentImpl){
+      try{
+        FeatureMap params = Factory.newFeatureMap();
+        params.put("document", resource);
+        view.add("Annotations",
+                 (JComponent)Factory.createResource("gate.gui.AnnotationEditor",
+                                                    params)
+                );
+      }catch(ResourceInstantiationException rie){
+        rie.printStackTrace(Err.getPrintWriter());
+      }
+    }else if(resource instanceof LanguageResource){
+      //catch all unknown LR's
+    }else if(resource instanceof ProcessingResource){
+      //catch all unknown PR's
     }
 
     FeaturesEditor fEdt = new FeaturesEditor();
-    fEdt.setResource(resource);
+    fEdt.setFeatureBearer(resource);
     view.add("Features", fEdt);
     largeView = view;
     smallView = null;
@@ -142,7 +165,7 @@ class DefaultResourceHandle implements IResourceHandle{
   JPopupMenu popup;
   String title;
   String tooltipText;
-  Resource resource;
+  FeatureBearer resource;
   ResourceData rData;
   Icon icon;
   boolean shown;
