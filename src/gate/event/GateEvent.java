@@ -19,6 +19,8 @@ import java.util.EventObject;
  */
 public class GateEvent extends EventObject {
 
+  public static final int FEATURES_UPDATED = 701;
+
   /**
    * Constructor from source and type.
    * @param source the object that initiated this event

@@ -16,9 +16,13 @@
 package gate;
 import java.util.*;
 import gate.util.*;
+import gate.event.*;
 
 /** An attribute-value matrix. Represents the content of an annotation, the
   * meta-data on a resource, and anything else we feel like.
+  *
+  * The event code is needed so a persistent annotation can fire updated events
+  * when its features are updated
   */
 public interface FeatureMap extends Map
 {
@@ -41,5 +45,16 @@ public interface FeatureMap extends Map
     * otherwise.
     */
   public boolean subsumes(FeatureMap aFeatureMap, Set aFeatureNamesSet);
+
+  /**
+   *
+   * Removes a gate listener
+   */
+  public void removeGateListener(GateListener l);
+  /**
+   *
+   * Adds a gate listener
+   */
+  public void addGateListener(GateListener l);
 
 } // interface FeatureMap

@@ -18,11 +18,15 @@ package gate;
 import java.io.*;
 import java.util.*;
 import gate.util.*;
+import gate.event.*;
 
 /** An Annotation is an arc in an AnnotationGraph. It is immutable, to avoid
   * the situation where each annotation has to point to its parent graph in
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.
+  *
+  * The event code is needed so a persistent annotation set can listen to
+  * its annotations and update correctly the database
   */
 public interface Annotation
 extends FeatureBearer, IdBearer, Comparable, Serializable {
@@ -99,6 +103,15 @@ extends FeatureBearer, IdBearer, Comparable, Serializable {
     */
   public boolean overlaps(Annotation aAnnot);
 
-
+  /**
+   *
+   * Removes an annotation listener
+   */
+  public void removeAnnotationListener(AnnotationListener l);
+  /**
+   *
+   * Adds an annotation listener
+   */
+  public void addAnnotationListener(AnnotationListener l) ;
 
 } // interface Annotation,

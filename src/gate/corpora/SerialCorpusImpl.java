@@ -462,8 +462,11 @@ public class SerialCorpusImpl extends
     public Object get(Object key){
       String docName = (String) key;
       Object res = super.get(key);
-      if (res == null)
-        Out.prln("I need to register the document with gate and load it from the DS");
+
+      //if the document is null, then I must get it from the DS
+      if (res == null) {
+        Out.prln("I need to restore the doc from the DS here!");
+      }
       return res;
     }//public Object get(Object key)
 
