@@ -577,6 +577,8 @@ public class MainFrame extends JFrame
     newAppPopupMenu = new JMenu("New");
     appsPopup = new JPopupMenu();
     appsPopup.add(newAppPopupMenu);
+    appsPopup.addSeparator();
+    appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
     guiRoots.add(newAppPopupMenu);
     guiRoots.add(appsPopup);
 
