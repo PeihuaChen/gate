@@ -254,6 +254,7 @@ implements AnnotationSet
   */
   public Node nextNode(Node node){
     indexByStartOffset();
+    indexByEndOffset();
     return (Node)nodesByOffset.getNextOf(
                                new Long(node.getOffset().longValue() + 1)
                                );
@@ -512,6 +513,9 @@ implements AnnotationSet
   /** Get the document this set is attached to. */
   public Document getDocument() { return doc; }
 
+  public Object clone() throws CloneNotSupportedException{
+    return super.clone();
+  }
   /** String representation of the set */
 /*  public String toString() {
 

@@ -11,7 +11,7 @@ import java.util.*;
 import gate.util.*;
 
 /** Annotation sets */
-public interface AnnotationSet extends Set
+public interface AnnotationSet extends Set, Cloneable 
 {
   /** Create and add an annotation with pre-existing nodes,
     * and return its id

@@ -59,6 +59,11 @@ public class State {
   }
 
   /**
+  * Sets the value for fileIndex
+  */
+  protected void setFileIndex(int i){ fileIndex = i; }
+
+  /**
   * Gets the action associated to this state when reaced via a given transition.
   *@param key one of the transitions that reach this state
   *@return the action associated to this state when accessed via the given
@@ -68,6 +73,12 @@ public class State {
     return action;
   }
 
+  /**
+  * Returns the index in the definition file of the rule that generated this
+  * state.
+  * The value for fileIndex is correct only on final states!
+  */
+  int getFileIndex(){return fileIndex; }
   /**
   * Gets the set of all actions associated to this state
   */
@@ -149,18 +160,6 @@ public class State {
   * The right hand side associated to the rule for which this state recognizes
   * the lhs.
   */
-
-  /**
-  * The actions associated to this state.
-  * We use a map because we associate an action to which transition that reaches
-  * this state.
-  */
-//  protected Map actions = new HashMap();
-
-  /**
-  * The member from the time we only used one action for each final state.
-  * It is still here because we might reverse to this architecture.
-  */
   protected RightHandSide action = null;
 
   /**
@@ -173,4 +172,11 @@ public class State {
   * instances.
   */
   protected static int index = 0;
+
+  /**
+  * The index in the definition file of the rule that was used for creating this
+  * state.
+  * NOTE: this member is consistent only for FINAL STAETS!
+  */
+  protected int fileIndex = 0;
 }
