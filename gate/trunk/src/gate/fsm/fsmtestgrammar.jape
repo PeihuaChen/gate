@@ -1,12 +1,13 @@
 // fsmtestgrammar.jape
 // Valy, 14/Apr/00
 
-Phase:	None
-Options: control = appelt
-
-Rule:	FirstRule
-      (
-      {Token}
-      ) :tok1 
+Phase:	first
+Rule:	One
+      (({A})?:a ({B})+:b ({C})*:c)*:abc 
   -->
-	:tok1.Name = {kind = "token"}
+	{}
+
+Rule: Two
+			({A}):a | ({B}):b
+	-->
+	{}

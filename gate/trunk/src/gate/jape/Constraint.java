@@ -159,10 +159,25 @@ implements JapeConstants, java.io.Serializable, Cloneable
     return buf.toString();
   } // toString
 
+  public String shortDesc(){
+    String res = annotType + "(";
+    if(attrs1 == null) {
+      for(int i=0; i<attrs2.length; i++)
+        res +=" " + attrs2[i];
+    } else {
+      res += attrs1.toString();
+    }
+    res += ")";
+    return res;
+  }
 } // class Constraint
 
 
 // $Log$
+// Revision 1.2  2000/04/20 13:26:41  valyt
+// Added the graph_drawing library.
+// Creating of the NFSM and DFSM now works.
+//
 // Revision 1.1  2000/02/23 13:46:05  hamish
 // added
 //

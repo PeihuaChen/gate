@@ -10,6 +10,16 @@ package gate.fsm;
 import gate.jape.*;
 
 import java.util.*;
+import java.io.*;
+
+import EDU.auburn.VGJ.graph.*;
+import EDU.auburn.VGJ.gui.*;
+import EDU.auburn.VGJ.examplealg.ExampleAlg2;
+import EDU.auburn.VGJ.algorithm.tree.TreeAlgorithm;
+import EDU.auburn.VGJ.algorithm.cgd.CGDAlgorithm;
+import EDU.auburn.VGJ.algorithm.shawn.Spring;
+import EDU.auburn.VGJ.algorithm.cartegw.BiconnectGraph;
+
 
 public class TestFSM {
 
@@ -29,14 +39,51 @@ public class TestFSM {
     Enumeration phases = transducer.getPhases().elements();
     while(phases.hasMoreElements()){
       FSM aFSM = new FSM((SinglePhaseTransducer)phases.nextElement());
-      System.out.println(aFSM);
+      System.out.println(aFSM.getGML());
     }
   }
+
+  public void graphTest()throws java.io.IOException,
+                                 EDU.auburn.VGJ.graph.ParseError{
+    Enumeration phases = transducer.getPhases().elements();
+    while(phases.hasMoreElements()){
+      SinglePhaseTransducer phase = (SinglePhaseTransducer)phases.nextElement();
+      FSM aFSM = new FSM(phase);
+      showGraph("Non-deterministic (" + phase.getName() +")",aFSM);
+      aFSM.eliminateVoidTransitions();
+      showGraph("Deterministic (" + phase.getName()+")", aFSM);
+    }
+
+  }
+
+  private void showGraph(String title, FSM fsm) throws java.io.IOException,
+                                 EDU.auburn.VGJ.graph.ParseError{
+      String gml = fsm.getGML();
+      GMLlexer gl = new GMLlexer(new StringBufferInputStream(gml));
+      GMLobject go = new GMLobject(gl, null);
+      Graph graph =
+            new Graph(go.getGMLSubObject("graph", GMLobject.GMLlist, false));
+      GraphWindow graph_editing_window = new GraphWindow(graph);
+      // Here the algorithms are added.
+      TreeAlgorithm talg = new TreeAlgorithm('d');
+      graph_editing_window.addAlgorithm(talg, "Tree Down");
+      talg = new TreeAlgorithm('u');
+      graph_editing_window.addAlgorithm(talg, "Tree Up");
+      talg = new TreeAlgorithm('l');
+      graph_editing_window.addAlgorithm(talg, "Tree Left");
+      talg = new TreeAlgorithm('r');
+      graph_editing_window.addAlgorithm(talg, "Tree Right");
+      graph_editing_window.setTitle(title);
+      graph_editing_window.pack();
+      graph_editing_window.show();
+      graph_editing_window.applyAlgorithm("Tree Right");
+  }
+
   public static void main(String[] args) {
     try{
       TestFSM testFSM = new TestFSM();
       testFSM.setUp();
-      testFSM.testOne();
+      testFSM.graphTest();
       testFSM.tearDown();
     }catch(Exception e){
       e.printStackTrace(System.err);
