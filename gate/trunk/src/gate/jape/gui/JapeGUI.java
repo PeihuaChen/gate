@@ -18,6 +18,7 @@ import gate.*;
 import gate.gui.*;
 import gate.util.*;
 import gate.jape.*;
+import gate.creole.tokeniser.*;
 
 
 /** A small toy inteface for Jape testing and tweaking */
@@ -277,7 +278,16 @@ public class JapeGUI extends JFrame {
                            "ms\n");
 
         statusBar.setText("Tokenizing all the documents...");
-        DefaultTokeniser tokeniser = new DefaultTokeniser();
+        DefaultTokeniser tokeniser = null;
+        try{
+          tokeniser =new DefaultTokeniser(
+            Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+        }catch(IOException ioe){
+          System.err.println("Cannot read the tokeniser rules!" +
+                             "\nAre the Gate resources in place?");
+        }catch(TokeniserException te){
+          te.printStackTrace(System.err);
+        }
         int progress = 0;
         int docCnt = corpus.size();
         Iterator docIter = corpus.iterator();
