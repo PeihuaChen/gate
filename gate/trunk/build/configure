@@ -540,7 +540,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin"
+  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -576,7 +576,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin"
+  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -612,7 +612,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin"
+  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -648,7 +648,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin"
+  ac_dummy="/bin:/usr/bin://w/jdk/jdk1.3/bin:${JAVA_HOME}/bin"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
