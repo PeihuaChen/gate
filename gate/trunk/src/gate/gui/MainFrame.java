@@ -479,7 +479,7 @@ public class MainFrame extends JFrame
 
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
-    String hidden = (String)res.getFeatures().get("gate.hidden");
+    String hidden = (String)res.getFeatures().get("gate.HIDDEN");
     if(hidden != null && hidden.equalsIgnoreCase("true")) return;
     DefaultMutableTreeNode node;
     DefaultMutableTreeNode parent = null;
@@ -498,6 +498,13 @@ public class MainFrame extends JFrame
         node = (DefaultMutableTreeNode)children.nextElement();
         if(((ResourceHandle)node.getUserObject()).getResource() == res){
           resourcesTreeModel.removeNodeFromParent(node);
+          ResourceHandle handle = (ResourceHandle)node.getUserObject();
+          if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
+            mainTabbedPane.remove(handle.getLargeView());
+          }
+          if(lowerScroll.getViewport().getView() == handle.getSmallView()){
+            lowerScroll.getViewport().setView(null);
+          }
           return;
         }
       }
