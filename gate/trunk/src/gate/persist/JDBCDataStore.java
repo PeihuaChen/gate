@@ -28,9 +28,10 @@ public class JDBCDataStore
 extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** --- */
-  private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
+/*  private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
   private static final String jdbcPostgresDriverName = "postgresql.Driver";
   private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
+*/
 
   /** --- */
   protected Connection  jdbcConn;
@@ -44,7 +45,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** --- */
-  private void loadDrivers()
+/*  private void loadDrivers()
     throws ClassNotFoundException {
 
     if (this.driverName != null) {
@@ -56,10 +57,10 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
       Class.forName(this.jdbcSapDBDriverName);
     }
   }
-
+*/
 
   /** --- */
-  protected void cleanup(ResultSet rs)
+/*  protected void cleanup(ResultSet rs)
     throws PersistenceException {
 
     try {
@@ -70,9 +71,9 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
       throw new PersistenceException("an SQL exception occured ["+ sqle.getMessage()+"]");
     }
   }
-
+*/
   /** --- */
-  protected void cleanup(Statement stmt)
+/*  protected void cleanup(Statement stmt)
     throws PersistenceException {
     try {
       if (stmt!=null)
@@ -82,9 +83,9 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
       throw new PersistenceException("an SQL exception occured ["+ sqle.getMessage()+"]");
     }
   }
-
+*/
   /** --- */
-  protected Connection connect(URL connectURL)
+/*  protected Connection connect(URL connectURL)
     throws SQLException,ClassNotFoundException{
 
     loadDrivers();
@@ -92,13 +93,15 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
     return conn;
   }
+*/
 
   /** --- */
-  protected void disconnect() {
+/*  protected void disconnect() {
     throw new MethodNotImplementedException();
 //    this.jdbcConn.close();
-  }
 
+  }
+*/
 
   /*  interface DataStore  */
 
@@ -169,7 +172,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
     try {
-      jdbcConn = connect(dbURL);
+      jdbcConn = DBHelper.connect(dbURL);
     }
     catch(SQLException sqle) {
       throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");
