@@ -6,12 +6,16 @@
  *	$Id$
  */
 
-package gate;
+package gate.corpora;
+
 import java.util.*;
 import java.net.*;
 import java.io.*;
 import junit.framework.*;
+
+import gate.*;
 import gate.util.*;
+import gate.annotation.*;
 
 /** Tests for the Document classes
   */
