@@ -1,0 +1,82 @@
+/*
+*  quoted.jape
+*
+* Copyright (c) 1998-2002, The University of Sheffield.
+*
+*  This file is part of GATE (see http://gate.ac.uk/), and is free
+*  software, licenced under the GNU Library General Public License,
+*  Version 2, June 1991 (in the distribution as file licence.html,
+*  and also available at http://gate.ac.uk/gate/licence.html).
+*
+*  Marin Dimitrov, 14/Jan/2002
+*
+*  $Id$
+*/
+
+
+
+Phase:quoted_text
+Input: Split Token
+Options: control = appelt
+
+//adds the qouted attribute to the sentence annotations
+
+Macro: QUOTE
+(
+   {Token.kind="punctuation",Token.category == "\""}
+   {Token.kind="punctuation",Token.category == "`"}
+)
+
+Macro: NON_QUOTE
+(
+   {Token.kind="word"} |
+   {Token.kind="symbol"} |
+   {Token.kind="number"} |
+   //these are for non-quote punctuation
+   {Token.kind="punctuation",Token.string="!"} |
+   {Token.kind="punctuation",Token.string="!"} |
+   {Token.kind="punctuation",Token.string="#"} |
+   {Token.kind="punctuation",Token.string="%"} |
+   {Token.kind="punctuation",Token.string="&"} |
+   {Token.kind="punctuation",Token.string="'"} |
+   {Token.kind="punctuation",Token.string="*"} |
+   {Token.kind="punctuation",Token.string=","} |
+   {Token.kind="punctuation",Token.string="."} |
+   {Token.kind="punctuation",Token.string="/"} |
+   {Token.kind="punctuation",Token.string=":"} |
+   {Token.kind="punctuation",Token.string=";"} |
+   {Token.kind="punctuation",Token.string="\\"} |
+   {Token.kind="punctuation",Token.string="?"} |
+   {Token.kind="punctuation",Token.string="@"} |
+   {Token.kind="punctuation",Token.string="-"} |
+   {Token.kind="punctuation",Token.string="_"} |
+   {Token.kind="punctuation",Token.string="("} |
+   {Token.kind="punctuation",Token.string="["} |
+   {Token.kind="punctuation",Token.string="{"} |
+   {Token.kind="punctuation",Token.string="<<"} |
+   {Token.kind="punctuation",Token.string=")"} |
+   {Token.kind="punctuation",Token.string="]"} |
+   {Token.kind="punctuation",Token.string="}"} |
+   {Token.kind="punctuation",Token.string=">>"}
+)
+
+
+Rule: rule_Q1
+Priority:11
+(
+ {Split}
+ (({Token})*) :left
+ ({Token.category == "\""})
+ (({Token})+) :quoted
+ ({Token.category == "\""})
+ (({Token})*) :right
+ {Split}
+)
+-->
+{
+System.out.println("pos");
+	gate.AnnotationSet quoted = (gate.AnnotationSet)bindings.get("quoted");
+	gate.FeatureMap features = Factory.newFeatureMap();
+	features.put("firedBy","rule_Q1");
+	annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
+}
