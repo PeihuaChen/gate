@@ -1,6 +1,6 @@
 // enamex.jape
 // diana, 13 Sep 00
-// last modified diana, 05 Jan 01
+// last modified diana, 17 Apr 01
 
 Phase:	Enamex
 //Input: Token SpaceToken Lookup
@@ -11,19 +11,8 @@ Options: control = appelt
 // Person Rules
 
 
-Macro: SPACE
-// space
-// control
-// space control
-// control space
 
-( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-)
-
+/////////////////////////////////////////////////////////////////
 Macro: TITLE
 (
  {Lookup.majorType == title}
@@ -33,15 +22,29 @@ Macro: TITLE
 Macro: INITIALS
 (
   ({Token.orth == upperInitial, Token.length =="1"}
-  ({Token.string == "."})
+  ({Token.string == "."})?
   (SPACE)?
   )+
 )
 
+Macro: INITIALS2
+
+(
+ {Token.orth == allCaps, Token.length == "2"} |
+ {Token.orth == allCaps, Token.length == "3"}
+)
+
+
 Macro: FIRSTNAME
 (
- {Lookup.majorType == person_first}|
+ {Lookup.majorType == person_first, Lookup.minorType == male}|
+ {Lookup.majorType == person_first, Lookup.minorType == female}|
  (INITIALS)
+)
+
+Macro: FIRSTNAMEAMBIG
+(
+ {Lookup.majorType == person_first, Lookup.minorType == ambig}
 )
 
 Macro: LASTNAME
@@ -76,7 +79,7 @@ Macro: DET
 Rule:	GazPerson
 Priority: 50
 (
- {Lookup.majorType == person_full}
+ {Lookup.majorType == person_full, Lookup.minorType == normal}
 )
 :person -->
   :person.TempPerson = {kind = "personName", rule = GazPerson}
@@ -85,9 +88,15 @@ Priority: 50
 Rule:	GazPersonFirst
 Priority: 20
 (
- {Lookup.majorType == person_first}
+ {Lookup.majorType == person_first, Lookup.minorType == male}|
+ {Lookup.majorType == person_first, Lookup.minorType == female}
 )
-:person -->
+:person 
+( 
+ (SPACE)
+ {Token.orth == upperInitial, Token.length == "1"}
+)?
+-->
   :person.TempPerson = {kind = "personName", rule = GazPersonFirst}
 
 
@@ -135,29 +144,48 @@ Priority: 25
 
 (
  (TITLE)
- (FIRSTNAME (SPACE)? )*
+ ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
+  (SPACE)? 
+ )*
  (LASTNAME)
  (SPACE PERSONENDING)?
 )
 :person -->
   :person.TempPerson = {kind = "personName", rule = "PersonTitle"}
 
-Rule: 	NotPersonFull
-Priority: 50
-// must not contain "A" or "The" or "We"
+Rule: 	FirstPersonStop
+Priority: 20
+// surname contains stop words
+// e.g. Mary And
 
 (
- (FIRSTNAME (SPACE)? )+
- (SPACE {Token.string == "A"} |
-  {Token.string == "The"} | 
-  {Token.string == "We"} 
+ (FIRSTNAME (SPACE)?)+
+):person
+(
+ (SPACE {Lookup.majorType == stop}
+  (SPACE)?
+ )
+ (LASTNAME)*
+ (SPACE PERSONENDING)?
+)
+-->
+  :person.TempPerson = {kind = "personName", rule = "FirstPersonStop"}
+
+Rule: NotFirstPersonStop
+Priority: 50
+// ambig first name and surname is stop word
+// e.g. Will And
+
+(
+ (FIRSTNAMEAMBIG (SPACE)?)+
+ (SPACE {Lookup.majorType == stop}
   (SPACE)?
  )
  (LASTNAME)*
  (SPACE PERSONENDING)?
 )
 :person -->
-  :person.TempPerson = {kind = "negative", rule = "NotPersonFull"}
+  :person.TempPerson = {kind = "negative", rule = "FirstPersonStop"}
 
 
 Rule: 	PersonFull
@@ -166,7 +194,7 @@ Priority: 10
 // Fred Jones
 
 (
- (FIRSTNAME (SPACE)? )+
+ ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2) (SPACE)? )+
  (LASTNAME)
  (SPACE PERSONENDING)?
 )
@@ -174,20 +202,23 @@ Priority: 10
   :person.TempPerson = {kind = "personName", rule = "PersonFull"}
 
 
+
 Rule: 	PersonFullReverse
 Priority: 5
 // Jones, F.W.
+// don't allow Jones, Fred because too ambiguous
+// Smith, TF
 
 (
  (LASTNAME)
  {Token.string == ","}
  (SPACE)?
- (INITIALS (SPACE)? )+
+ ((INITIALS (SPACE)? )+ |
+  (INITIALS2)) 
  (SPACE PERSONENDING)?
 )
 :person -->
   :person.TempPerson = {kind = "personName", rule = "PersonFullReverse"}
-
 
 
 Rule:  PersonSaint
@@ -210,12 +241,26 @@ Priority: 40
 
 // Christian name + Location --> Person's Name
 (
- (FIRSTNAME SPACE 
+ ((FIRSTNAME| INITIALS2) SPACE 
   {Lookup.majorType == location})
 )
 :person -->
   :person.TempPerson = {kind = "personName", rule = "PersonLocAmbig"}
 
+Rule: FirstNameContext
+Priority: 40
+// Dear hiranya
+
+(
+ {Token.string == "Dear"}
+ (SPACE)
+)
+(
+ ({Token.orth == upperInitial} |
+  {Token.orth == lowercase})
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "FirstNameContext"}
 
 ///////////////////////////////////////////////////////////////////
 // Organisation Rules
@@ -293,22 +338,43 @@ Priority: 10
   :orgName.TempOrganization = {kind = "orgName", rule = "OrgXandY"}
 
 
-Rule: OrgUni
-Priority: 10
-
+Rule:OrgUni
+Priority: 15
 // University of Sheffield
 // Sheffield University
 // A Sheffield University
-
 (
  {Token.string == "University"}
  SPACE
  {Token.string == "of"}
- SPACE 
- ({Token.orth == upperInitial})+
+ (SPACE 
+ {Token.orth == upperInitial})+
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgUni"}
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgDept"}
+
+
+
+Rule: OrgDept
+Priority: 15
+// Department of Pure Mathematics and Physics
+
+(
+ {Token.string == "Department"}
+ SPACE
+ {Token.string == "of"}
+ (SPACE 
+ {Token.orth == upperInitial})+
+ (SPACE
+  {Token.string == "and"}
+  (SPACE 
+   {Token.orth == upperInitial})+
+ )?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgDept"}
+
+
 
 Rule:	OrgXKey
 Priority: 5
@@ -332,8 +398,31 @@ Priority: 5
 :orgName -->
   :orgName.TempOrganization = {kind = "orgName", rule = "OrgXKey"}
 
+
+Rule:	OrgXEnding
+Priority: 10
+
+// Coca Cola Co.
+
+(
+ {Lookup.majorType == determiner}
+ (SPACE)
+)?
+(
+  ({Token.orth == upperInitial} | 
+   {Token.orth == allCaps})
+  SPACE
+  ({Token.orth == upperInitial}
+   SPACE)*
+ {Lookup.majorType == cdg}
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXEnding"}
+
+
+
 Rule:	OrgXandYKey
-Priority: 5
+Priority: 10
 
 // Aaaa Ltd.
 // Xxx Services Ltd. 
@@ -364,7 +453,7 @@ Priority: 5
 
 
 Rule:	OrgXsKeyBase
-Priority: 5
+Priority: 10
  
 // Gandy's Circus
 // Queen's Ware
@@ -387,25 +476,43 @@ Priority: 5
   :orgName.TempOrganization = {kind = "orgName", rule = "OrgXsKeybase"}
 
 
-Rule:	OrgXBaseContext
-Priority: 30
+
+Rule: NotOrgXBase
+Priority: 100
+// not things like British National
+// or The University
+// NOTE: not sure if we want this for emails or not
+
 (
- (DET SPACE)
+ (DET SPACE)?
 )
 (
- ({Token.orth == upperInitial} | 
-   {Token.orth == allCaps})
-  SPACE
+ ({Lookup.majorType == country_adj}|
+  {Token.orth == lowercase})
+ SPACE
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key})
- (SPACE
-  {Token.string == "of"}
-  SPACE
-  {Token.orth == upperInitial})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXBaseContext"}
+  :orgName.Temp = {kind = "notorgName", rule = "NotOrgXBase"}
 
+
+//Rule: NotOrgXBase
+//Priority: 100
+// not things like British National
+// or The University
+//(
+// (DET SPACE)?
+//)
+//(
+// ({Lookup.majorType == country_adj} | 
+//  (DET))
+// (SPACE)
+// ({Lookup.majorType == org_base}|
+//  {Lookup.majorType == govern_key})
+//)
+//:orgName -->
+//  :orgName.Temp = {kind = "notorgName", rule = "NotOrgXBase"}
 
 
 Rule:	OrgXBase
@@ -435,7 +542,11 @@ Priority: 20
  (SPACE
   {Token.string == "of"}
   SPACE
-  {Token.orth == upperInitial})?
+  {Token.orth == upperInitial}
+  (SPACE
+  {Token.orth == upperInitial}
+  )?
+ )?
 )
 :orgName -->
   :orgName.TempOrganization = {kind = "orgName", rule = "OrgXBase"}
@@ -538,3 +649,5 @@ Rule:AmbigNameLoc1
 :locName
 -->
  :locName.TempLocation = {kind = "locName", rule = AmbigNameLoc1}
+
+

@@ -6,23 +6,7 @@ Phase:	Addrex
 Input:  Token SpaceToken Lookup
 Options: control = appelt
 
-/////////////////////////////////////////////////////////
 
-Macro: SPACE
-// space
-// control
-// space control
-// control space
-
-( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-)
-
-
-/////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 
 // Email Rules
@@ -109,7 +93,9 @@ Macro: PHONE_EXT
   ({Token.string == "ext"}{Token.string == "."})
  )  
  (SPACE)?
- {Token.kind == number}
+ ({Token.kind == number, Token.length == "4"}|
+  {Token.kind == number, Token.length == "5"}|
+  {Token.kind == number, Token.length == "6"})
  ({Token.string == "/"}{Token.kind == number})?
 )
 	

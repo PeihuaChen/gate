@@ -7,20 +7,6 @@ Phase:	Numex
 Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
-Macro: SPACE
-// space
-// control
-// space control
-// control space
-
-( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-)
-
-///////////////////////////////////////////////////////////////
 
 //Money Rules
 
@@ -30,6 +16,7 @@ Macro: MILLION_BILLION
 {Token.string == "million"}|
 {Token.string == "b"}|
 {Token.string == "billion"}|
+{Token.string == "bn"}|
 {Token.string == "k"}|
 {Token.string == "K"}
 )

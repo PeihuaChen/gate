@@ -7,19 +7,6 @@ Input: Token SpaceToken Lookup
 Options: control = appelt
 
 
-Macro: SPACE
-// space
-// control
-// space control
-// control space
-
-( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-)
-
 
 Macro: IDENT
 
@@ -27,6 +14,14 @@ Macro: IDENT
  ({Token.string == "."}|{Token.string == ":"})?
  (SPACE)?
 )
+
+Rule: GazNotIdentifier
+Priority: 100
+(
+ {Lookup.majorType == spur_ident}
+)
+:ident -->
+ :ident.Temp = {rule = "GazNotIdentifier"}  
 
 Rule: Identifier1
 (	({Token.kind == number}	
@@ -39,12 +34,32 @@ Rule: Identifier1
 :ident.TempIdentifier = {rule = "Identifier1"}
 
 
+
+Rule: NotContextIdentifier
+Priority: 100
+// prevents things like "reference list"
+
+(IDENT)
+(
+{Token.kind == word}
+):ident 
+(SPACE | {Token.kind == punctuation})
+-->
+:ident.Temp = {rule = "NotContextIdentifier"}
+
+
 Rule: ContextIdentifier
 (IDENT)
 (
-({Token})+
+(({Token.kind == number}	
+	 {Token.orth == allCaps}) |
+	({Token.orth == allCaps}
+	 {Token.kind == number})
+	({Token.orth == allCaps}|
+	 {Token.kind == number})*)|
+	 ({Token.kind == number})
 ):ident -->
-:ident.TempIdentifier = {rule = "Identifier1"}
+:ident.TempIdentifier = {rule = "ContextIdentifier"}
 
 
 

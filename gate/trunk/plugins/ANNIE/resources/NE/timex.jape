@@ -10,22 +10,6 @@ Options: control = appelt
 
 /////////////////////////////////////////////////
 
-Macro: SPACE
-// space
-// control
-// space control
-// control space
-
-( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-)
-
-
-/////////////////////////////////////////////////
-
 Macro: DAY_NAME 
 ({Lookup.minorType == day })
 
@@ -149,6 +133,8 @@ Macro: TIME_AMPM
 )
 
 
+
+
 ///////////////////////////////////////////////////////////////
 // Time Rules 
 
@@ -227,6 +213,37 @@ Rule: TimeAnalogue
  :time.TempTime = {kind = "positive", rule = "TimeAnalogue"}
 
 
+Rule: TimeWordsContext
+Priority: 50
+// seven thirty tomorrow
+
+(
+ {Lookup.majorType == number}
+ ((SPACE)
+  {Lookup.majorType == number}
+ )?
+):time1
+((SPACE)
+ {Lookup.minorType == time_key}
+) 
+-->
+:time1.TempTime = {kind = "positive", rule = "TimeWordsContext"}
+
+
+Rule: TimeWords
+
+(
+ {Lookup.majorType == number}
+ ((SPACE)
+  {Lookup.majorType == number}
+ )?
+)
+:time
+-->
+  :time.TempTime = {kind = "timeWords", rule = "TimeWords"}
+
+  
+
 
 Rule: TimeDigitalContext1
 
@@ -235,12 +252,27 @@ Rule: TimeDigitalContext1
 (FOUR_DIGIT)
 ):time
 (SPACE)
-{Token.string == "today"}|
-{Token.string == "yesterday"}|
-{Token.string == "tomorrow"}
+{Lookup.minorType == time_key}
  -->
  :time.TempTime = {kind = "positive", rule = "TimeDigitalContext"}
 
+Rule: NotTimeDigitalContext2
+Priority: 100
+// prevent things like "at 0.61 km/h"
+
+(
+ {Token.string == "at"}
+ (SPACE)
+)
+({Token.string == "0"}
+  ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
+ (SPACE)?
+ (TIME_AMPM)?
+ (SPACE TIME_ZONE)?
+)
+:time
+ -->
+ :time.Temp = {rule = "NotTimeDigitalContext2"}
 
 
 Rule: TimeDigitalContext2
@@ -311,17 +343,17 @@ Rule: TimeDigitalContextConj
 
 // Date Rules
 
-Rule: GazDate
-(SPACE | {Token.kind == punctuation})
-(
- ({Lookup.minorType == day}) |
- ({Lookup.minorType == month}) |
- ({Lookup.minorType == festival})
-)
-:date
-(SPACE | {Token.kind == punctuation})
--->
- :date.TempDate = {rule = "GazDate"}
+//Rule: GazDate
+//(SPACE | {Token.kind == punctuation})
+//(
+// ({Lookup.minorType == day}) |
+// ({Lookup.minorType == month}) |
+// ({Lookup.minorType == festival})
+//)
+//:date
+//(SPACE | {Token.kind == punctuation})
+//-->
+// :date.TempDate = {rule = "GazDate"}
 
 
 Rule:	DateSlash           // UK only
@@ -616,10 +648,6 @@ Rule: TimeZone
 :date
 -->
  :date.TempZone = {rule = "TimeZone"}
-////////////////////////////////////////////////////////////
-
-
-
 
 
 

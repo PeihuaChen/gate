@@ -1,0 +1,36 @@
+// first.jape
+// diana, 17 May 01 
+
+Phase:	First
+Input: Token SpaceToken Lookup
+Options: control = appelt
+
+// this has to be run first of all 
+// contains any macros etc needed only for standard grammars
+
+//////////////////////////////////////////////////////////////
+Macro: SPACE
+// space
+// control
+// space control
+// control space
+
+( 
+ ({SpaceToken.kind == space, SpaceToken.length == "1"}
+  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
+ ({SpaceToken.kind == control, SpaceToken.length == "1"}
+  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
+)
+///////////////////////////////////////////////////////////////
+
+
+Rule: Silly
+// we have to have a rule here, so we'll just have something silly
+
+(
+ {Token.string == "afguahughaegarth"}
+)
+:silly
+-->
+ :silly.Silly = {rule = "Silly"}
+
