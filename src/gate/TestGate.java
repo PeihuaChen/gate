@@ -25,6 +25,7 @@ import gate.annotation.*;
 import gate.corpora.*;
 import gate.creole.*;
 import gate.creole.tokeniser.*;
+import gate.creole.gazetteer.*;
 import gate.db.*;
 import gate.jape.*;
 import gate.fsm.*;
@@ -154,8 +155,8 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(TestDB.suite());
-    suite.addTest(TestTokeniser.suite());//*/
-
+    suite.addTest(TestTokeniser.suite());
+    suite.addTest(TestGazetteer.suite());
     return suite;
   } // suite
 

@@ -29,7 +29,7 @@ import gate.gui.*;
 import gate.util.*;
 import gate.jape.*;
 import gate.creole.tokeniser.*;
-import gate.creole.gazeteer.*;
+import gate.creole.gazetteer.*;
 import gate.creole.*;
 
 
@@ -349,10 +349,10 @@ public class JapeGUI extends JFrame implements ProgressListener,
     startLookup = startLookupLoad;
     try{
       if(null != gazeteerListDefFile){
-        gazeteer =new DefaultGazeteer(gazeteerListDefFile.getAbsolutePath());
-        gazeteer.addProcessProgressListener(this);
-        gazeteer.addStatusListener(this);
-        gazeteer.init();
+        gazetteer =new DefaultGazetteer(gazeteerListDefFile.getAbsolutePath());
+        gazetteer.addProcessProgressListener(this);
+        gazetteer.addStatusListener(this);
+        gazetteer.init();
         startLookup = System.currentTimeMillis();
         logTextArea.append("gazeteer lists load time: " +
                            (startLookup - startLookupLoad) +
@@ -360,13 +360,13 @@ public class JapeGUI extends JFrame implements ProgressListener,
         docIter = corpus.iterator();
         while(docIter.hasNext()){
           currentDoc = (Document)docIter.next();
-          gazeteer.doLookup(currentDoc, false);
+          gazetteer.doLookup(currentDoc, false);
         }
       }
     }catch(IOException ioe){
       Err.println("Cannot read the gazeteer lists!" +
                          "\nAre the Gate resources in place?");
-    }catch(GazeteerException ge){
+    }catch(GazetteerException ge){
       ge.printStackTrace(Err.getPrintWriter());
     }
 //============================
@@ -605,7 +605,7 @@ public class JapeGUI extends JFrame implements ProgressListener,
   File tokeniserRulesFile = null;
   File gazeteerListDefFile = null;
   DefaultTokeniser tokeniser =null;
-  DefaultGazeteer gazeteer = null;
+  DefaultGazetteer gazetteer = null;
 
 
   private boolean invokedStandalone = false;

@@ -53,7 +53,7 @@
   <property category="sys" name="CompanyLabel" value="Company:" />
   <property category="sys" name="Copyright" value="Copyright (c) 2000" />
   <property category="sys" name="CopyrightLabel" value="Copyright:" />
-  <property category="sys" name="DefaultPackage" value="gate.creole.tokeniser" />
+  <property category="sys" name="DefaultPackage" value="gate.creole.gazeteer" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
   <property category="sys" name="DocPath" value="doc/javadoc/internal" />
