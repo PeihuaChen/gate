@@ -2548,7 +2548,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - saves a Document in the database */
-  protected void syncDocument(Document doc)
+/*  protected void syncDocument(Document doc)
     throws PersistenceException, SecurityException {
 
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
@@ -2588,13 +2588,13 @@ public class OracleDataStore extends JDBCDataStore {
     _syncAnnotations(doc);
   }
 
-
+*/
 
   /**
    *  helper for sync()
    *  NEVER call directly
    */
-  private void _syncLR(LanguageResource lr)
+  protected void _syncLR(LanguageResource lr)
     throws PersistenceException,SecurityException {
 
     //0.preconditions
@@ -2638,7 +2638,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncDocumentHeader(Document doc)
+  protected void _syncDocumentHeader(Document doc)
     throws PersistenceException {
 
     Long lrID = (Long)doc.getLRPersistenceId();
@@ -2690,7 +2690,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncDocumentContent(Document doc)
+  protected void _syncDocumentContent(Document doc)
     throws PersistenceException {
 
     PreparedStatement pstmt = null;
@@ -2978,7 +2978,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
+  protected void _syncAnnotationSets(Document doc,Collection removedSets,Collection addedSets)
     throws PersistenceException {
 
     //0. preconditions
@@ -3030,7 +3030,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncAnnotations(Document doc)
+  protected void _syncAnnotations(Document doc)
     throws PersistenceException {
 
     //0. preconditions
@@ -3084,7 +3084,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncFeatures(LanguageResource lr)
+  protected void _syncFeatures(LanguageResource lr)
     throws PersistenceException {
 
     //0. preconditions
