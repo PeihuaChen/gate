@@ -629,13 +629,17 @@ implements AnnotationSet
       indexByEndOffset();
     }
 
-    // find existing nodes
+    // find existing nodes if appropriate nodes don't already exist, create them
     Node startNode  = (Node) nodesByOffset.getNextOf(start);
-    Node endNode    = (Node) nodesByOffset.getNextOf(end);
-
-    // if appropriate nodes don't already exist, create them
     if(startNode == null || ! startNode.getOffset().equals(start))
       startNode = new NodeImpl(doc.getNextNodeId(), start);
+
+    Node endNode = null;
+    if(start.equals(end))
+      endNode = startNode;
+    else
+      endNode = (Node) nodesByOffset.getNextOf(end);
+
     if(endNode == null   || ! endNode.getOffset().equals(end))
       endNode = new NodeImpl(doc.getNextNodeId(), end);
 
