@@ -1,0 +1,629 @@
+// timex.jape
+// diana, 13 Sep 00
+// last modified diana 5 Jan 01
+
+
+Phase:	Timex
+Input: Token SpaceToken Lookup
+Options: control = appelt
+
+
+/////////////////////////////////////////////////
+
+Macro: SPACE
+// space
+// control
+// space control
+// control space
+
+( 
+ ({SpaceToken.kind == space, SpaceToken.length == "1"}
+  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
+ ({SpaceToken.kind == control, SpaceToken.length == "1"}
+  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
+)
+
+
+/////////////////////////////////////////////////
+
+Macro: DAY_NAME 
+({Lookup.minorType == day })
+
+Macro: ONE_DIGIT
+({Token.kind == number, Token.length == "1"})
+
+Macro: TWO_DIGIT
+({Token.kind == number, Token.length == "2"})
+
+Macro: FOUR_DIGIT
+({Token.kind == number, Token.length == "4"})
+
+Macro: DAY_MONTH_NUM
+(ONE_DIGIT | TWO_DIGIT)
+
+Macro: DATE_PRE
+// possible modifiers of dates, eg. "early October"
+({Token.string == "early"}|
+ {Token.string == "late"}|
+ {Token.string == "mid"}|
+ {Token.string == "mid-"}|
+ {Token.string == "end"}
+)
+
+Macro: DAY 
+(((DATE_PRE SPACE)?
+  DAY_NAME) |
+ DAY_MONTH_NUM)
+
+Macro: MONTH_NAME
+( (DATE_PRE SPACE)?
+  {Lookup.minorType == month})
+
+Macro: MONTH 
+(MONTH_NAME | DAY_MONTH_NUM)
+
+Macro: SLASH
+  ({Token.string == "/"})
+  
+Macro: DASH
+  {Token.string == "-"}
+
+Macro: OF
+  {Token.string == "of"}
+
+Macro: AD_BC
+	(  {Token.string == "ad"} | {Token.string == "AD"}
+	|
+	  ({Token.string == "a"} {Token.string == "."}
+	   {Token.string == "d"} {Token.string == "."})
+	|
+	  ({Token.string == "A"} {Token.string == "."}
+	   {Token.string == "D"} {Token.string == "."})
+	|
+
+	  {Token.string == "bc"} | {Token.string == "BC"}
+	|
+	  ({Token.string == "b"} {Token.string == "."}
+	   {Token.string == "c"} {Token.string == "."})
+	 
+	|
+ 	  ({Token.string == "B"} {Token.string == "."}
+	   {Token.string == "C"} {Token.string == "."})
+	)
+
+Macro: YEAR
+(        
+ {Lookup.majorType == year}|
+ TWO_DIGIT | FOUR_DIGIT | 
+ {Token.string == "'"}
+ (TWO_DIGIT)
+)
+
+
+Macro:	XDAY
+(
+ ({Token.orth == upperInitial} |
+  {Token.orth == allCaps})
+ SPACE
+ {Token.string == "Day"}
+)
+
+
+Macro: ORDINAL
+(
+   ({Token.kind == number}
+    ({Token.string == "th"}|
+     {Token.string == "rd"}|
+     {Token.string == "nd"}|
+     {Token.string == "st"})
+    |
+   {Lookup.minorType == ordinal})
+   (SPACE
+    {Token.string == "of"})?
+)
+
+Macro: NUM_OR_ORDINAL
+  (ORDINAL | DAY_MONTH_NUM)
+
+
+Macro: COMMA
+({Token.string == ","})
+
+
+Macro:  TIME_ZONE
+(({Lookup.minorType == zone})|
+ ({Token.string == "("}
+  {Lookup.minorType == zone}
+  {Token.string == ")"})
+)
+
+Macro: TIME_DIFF
+(
+ ({Token.string == "+"}|{Token.string == "-"})
+ (FOUR_DIGIT)
+)
+
+Macro: TIME_AMPM
+(
+ {Lookup.minorType == ampm}
+)
+
+
+///////////////////////////////////////////////////////////////
+// Time Rules 
+
+Rule: TimeDigital1
+// 20:14:25
+(
+ (ONE_DIGIT|TWO_DIGIT){Token.string == ":"} TWO_DIGIT 
+({Token.string == ":"} TWO_DIGIT)?
+((SPACE)? TIME_AMPM)?	
+(SPACE TIME_DIFF)?
+(SPACE TIME_ZONE)? 
+)
+:time
+-->
+:time.TempTime = {kind = "positive", rule = "TimeDigital1"}
+
+
+Rule:	TimeDigital2
+
+// 8:14 am
+// 4.34 pm
+// 6am
+
+(
+ (ONE_DIGIT|TWO_DIGIT) 
+ (({Token.string == ":"}|{Token.string == "."} |{Token.string == "-"} )
+  TWO_DIGIT)?
+ (SPACE)?
+ (TIME_AMPM)
+ (SPACE TIME_ZONE)?
+)
+:time
+-->
+:time.TempTime = {kind = "positive", rule = "TimeDigital"}
+
+
+Rule: TimeOClock
+// ten o'clock
+
+(
+ {Lookup.minorType == hour}
+ SPACE
+ {Token.string == "o"}
+ {Token.string == "'"}
+ (SPACE)?
+ {Token.string == "clock"}
+)
+:time 
+-->
+ :time.TempTime = {kind = "positive", rule = "TimeOClock"}
+
+ 
+Rule: TimeAnalogue
+// half past ten
+// ten to twelve
+// twenty six minutes to twelve
+
+(
+ (((({Lookup.majorType == number} SPACE)?
+    {Lookup.majorType == number}
+   )
+   (SPACE)
+   {Token.string == "minutes"}
+  ) |
+  ({Token.string == "half"} | 
+   {Token.string == "quarter"}) 
+ )
+ (SPACE)
+ ({Token.string == "past"}|
+  {Token.string == "to"})
+ (SPACE)
+ {Lookup.minorType == hour}
+)
+:time 
+-->
+ :time.TempTime = {kind = "positive", rule = "TimeAnalogue"}
+
+
+
+Rule: TimeDigitalContext1
+
+(SPACE)
+(
+(FOUR_DIGIT)
+):time
+(SPACE)
+{Token.string == "today"}|
+{Token.string == "yesterday"}|
+{Token.string == "tomorrow"}
+ -->
+ :time.TempTime = {kind = "positive", rule = "TimeDigitalContext"}
+
+
+
+Rule: TimeDigitalContext2
+
+(
+ {Token.string == "at"}
+ (SPACE)
+)
+(
+ FOUR_DIGIT | 
+ ((ONE_DIGIT|TWO_DIGIT)
+  ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
+ )
+ (SPACE)?
+ (TIME_AMPM)?
+ (SPACE TIME_ZONE)?
+)
+:time
+ -->
+ :time.TempTime = {kind = "positive", rule = "TimeDigitalContext2"}
+
+Rule: TimeDigitalTemp1
+
+(
+ FOUR_DIGIT | 
+ ((ONE_DIGIT|TWO_DIGIT)
+  ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
+ )
+)
+:time
+ -->
+ :time.TempTime = {kind = "temp", rule = "TimeDigitalTemp"}
+
+
+Rule: TimeDigitalContextConj
+
+(
+ {Token.string == "at"}
+ (SPACE)
+)
+(
+ FOUR_DIGIT | 
+ ((ONE_DIGIT|TWO_DIGIT)
+  ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
+ )
+)
+:time1
+(
+ (SPACE)
+ {Token.string == "and"}
+ (SPACE)
+)
+(
+ FOUR_DIGIT | 
+ ((ONE_DIGIT|TWO_DIGIT)
+  ({Token.string == ":"}|{Token.string == "-"}|{Token.string == "."}) TWO_DIGIT
+ )
+):time2
+ -->
+ :time1.TempTime = {kind = "positive", rule = "TimeDigitalContextConj"},
+
+:time2.TempTime = {kind = "positive", rule = "TimeDigitalContextConj"}
+
+
+
+
+//////////////////////////////////////////////////////////////////
+
+// Date Rules
+
+Rule: GazDate
+(SPACE | {Token.kind == punctuation})
+(
+ ({Lookup.minorType == day}) |
+ ({Lookup.minorType == month}) |
+ ({Lookup.minorType == festival})
+)
+:date
+(SPACE | {Token.kind == punctuation})
+-->
+ :date.TempDate = {rule = "GazDate"}
+
+
+Rule:	DateSlash           // UK only
+// Wed, 10/July/00
+// 10/July
+// July/99
+
+(
+ ((DAY_NAME (SPACE|COMMA)* )?
+ NUM_OR_ORDINAL SLASH MONTH_NAME (SLASH YEAR)? )|
+ (MONTH_NAME SLASH YEAR) 
+)
+:date
+-->
+ :date.TempDate = {rule = "DateSlash"}
+
+
+
+Rule:	DateDash
+// Wed 10-July-00
+// 10-July 00
+// 10-July
+
+(  
+ ((DAY_NAME (SPACE|COMMA)*)?
+  (NUM_OR_ORDINAL DASH MONTH_NAME (DASH|SPACE) YEAR)) |
+
+ ((DAY_NAME (SPACE|COMMA)*)?
+  NUM_OR_ORDINAL DASH MONTH_NAME)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateDash"}
+
+
+
+Rule: 	DateName
+Priority: 20
+// Wed 10 July
+// Wed 10 July, 2000
+// Sun, 21 May 2000
+// 10th of July, 2000
+// 10 July
+// 10th of July
+// July, 2000
+
+(
+ (DAY_NAME SPACE NUM_OR_ORDINAL SPACE MONTH_NAME)|
+
+ (DAY_NAME (COMMA)? SPACE
+  NUM_OR_ORDINAL SPACE MONTH_NAME ((COMMA)? SPACE YEAR)?) 
+|
+
+ ((DAY_NAME (COMMA)? SPACE)?
+ NUM_OR_ORDINAL SPACE MONTH_NAME 
+ ((COMMA)? SPACE YEAR)?)
+|
+
+ (NUM_OR_ORDINAL SPACE MONTH_NAME) 
+| 
+(MONTH_NAME (COMMA)? SPACE YEAR)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateName"}
+
+
+
+Rule: DateNameRev
+// Wed. July 1st, 2000
+// Wed, July 1, 2000
+// Wed, July 1st, 2000
+(         
+ ((DAY_NAME (COMMA)? SPACE)?
+  MONTH_NAME SPACE 
+  ({Token.string == "the"} SPACE)?
+ NUM_OR_ORDINAL 
+ ((COMMA)? SPACE YEAR)?) |
+         
+ (MONTH_NAME (COMMA)? {SoaceToken} YEAR)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateNameRev"}
+
+
+Rule:	DateNumDash
+// 01-07-00
+// Note: not 07-00
+  
+(
+ (DAY_MONTH_NUM DASH DAY_MONTH_NUM DASH YEAR)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateNumDash"}
+
+Rule:	DateNumDashRev
+// 00-07-01
+// 2000-07
+
+(
+ (YEAR DASH DAY_MONTH_NUM DASH DAY_MONTH_NUM)|
+ (FOUR_DIGIT DASH DAY_MONTH_NUM)
+)
+:date
+-->
+ :date.TempDate = {rule = "DateNumDashRev"}
+
+
+Rule:	DateNumSlash
+// 01/07/00
+// Note: not 07/00
+
+( 
+DAY_MONTH_NUM SLASH DAY_MONTH_NUM SLASH YEAR
+)
+:date
+-->
+ :date.TempDate = {rule = "DateNumSlash"}
+
+
+Rule: ModifierMonth
+//early October
+
+( DATE_PRE (SPACE)?
+  {Lookup.minorType == month}
+)
+:date -->
+ :date.TempDate = {rule = "ModifierMonth"}
+
+
+Rule: YearAdBc
+
+// 1900 AD
+(
+ (YEAR 
+  (SPACE)?
+  AD_BC)
+)
+:year -->
+ :year.YearTemp = {kind = "positive", rule = "YearAdBc"}
+
+Rule: YearSpan1
+// the early 90s
+// the late 80s
+(
+ {Token.string == "the"}
+ SPACE
+ (DATE_PRE SPACE)?
+ (YEAR)
+ (SPACE)?
+ ({Token.string == "'"})?
+ ({Token.string == "s"})
+)
+:date -->
+ :date.TempDate = {rule = "YearSpan1"}
+
+Rule: YearSpan2
+// 1980/81
+
+(
+ (FOUR_DIGIT)
+ {Token.string == "/"}
+ (TWO_DIGIT | ONE_DIGIT)
+)
+:date -->
+ :date.TempDate = {rule = "YearSpan2"}
+
+Rule: YearSpan3
+Priority: 80
+
+// from 1980 to 1981
+// between 1980 and 1981
+(
+ (({Token.string == "from"}| {Token.string == "From"})
+  (SPACE)
+  (FOUR_DIGIT)
+  (SPACE) 
+  {Token.string == "to"}
+  (SPACE)
+  (FOUR_DIGIT)
+ ) |
+  (({Token.string == "between"}|{Token.string == "Between"}) 
+  (SPACE) 
+  (FOUR_DIGIT)
+  (SPACE)
+  {Token.string == "and"}
+  (SPACE)
+  (FOUR_DIGIT)
+ )
+)
+:date -->
+ :date.TempDate = {rule = "YearSpan3"}
+
+
+Rule: TimeAgo
+Priority:30
+(
+ {Token.kind == number}
+ (SPACE)
+ ({Token.string == "years"}|
+  {Token.string == "months"}|
+  {Token.string == "weeks"}|
+  {Token.string == "days"}|
+  {Token.string == "hours"}|
+  {Token.string == "minutes"})
+ (SPACE)
+ {Token.string == "ago"}
+)
+:date -->
+ :date.TempDate = {rule = "TimeAgo"}
+
+Rule: YearContext1
+Priority: 40
+({Token.string == "in"}|
+ {Token.string == "by"}
+)
+(YEAR)
+:date -->
+ :date.TempDate = {rule = "YearContext1"}
+
+
+// Currently, temp1, temp2 and temp3 look good; temp4 is not to be counted
+// but this may change according to the text
+// only positives will be used in final grammar, not negatives
+
+Rule: YearTemp1
+Priority: 30
+// (1987)
+
+({Token.position == startpunct})
+(FOUR_DIGIT)
+:date
+({Token.position == endpunct})
+ -->
+ :date.TempYear = {kind = "positive", rule = "TempYear1"}
+
+
+Rule: TempYear2
+Priority: 20
+// 1987
+
+(
+ {Lookup.majorType == year}
+)
+:date -->
+ :date.TempYear = {kind = "positive", rule = "TempYear2"}
+
+
+Rule: TempYear3
+Priority: 10
+// 1922
+
+(FOUR_DIGIT)
+:date -->
+ :date.TempYear = {kind = "positive", rule = "TempYear3"}
+
+//Rule: TempYear4
+// 20
+//
+//(YEAR)
+//:date -->
+// :date.TempYear = {kind = "negative", rule = "TempYear4"}
+
+
+
+
+Rule: YearWords
+// nineteen twenty three
+// nineteen ten
+
+(
+ {Token.string == "nineteen"}
+ (SPACE)
+ ({Lookup.majorType == number}
+  (SPACE)
+ )?
+ {Lookup.majorType == number}
+)
+ :date -->
+ :date.TempYear = {kind = "positive", rule = "YearWords"}
+
+
+
+Rule: TimeZone
+// +0400
+(
+ (TIME_DIFF)
+ (TIME_ZONE)?
+)
+:date
+-->
+ :date.TempZone = {rule = "TimeZone"}
+////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+

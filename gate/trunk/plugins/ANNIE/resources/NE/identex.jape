@@ -1,0 +1,50 @@
+// identex.jape
+// last modified diana, 14 Jan 01
+
+
+Phase:	Identex
+Input: Token SpaceToken Lookup
+Options: control = appelt
+
+
+Macro: SPACE
+// space
+// control
+// space control
+// control space
+
+( 
+ ({SpaceToken.kind == space, SpaceToken.length == "1"}
+  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
+ ({SpaceToken.kind == control, SpaceToken.length == "1"}
+  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
+)
+
+
+Macro: IDENT
+
+({Lookup.majorType == ident_key, Lookup.minorType == pre}
+ ({Token.string == "."}|{Token.string == ":"})?
+ (SPACE)?
+)
+
+Rule: Identifier1
+(	({Token.kind == number}	
+	 {Token.orth == allCaps}) |
+	({Token.orth == allCaps}
+	 {Token.kind == number})
+	({Token.orth == allCaps}|
+	 {Token.kind == number})*
+):ident -->
+:ident.TempIdentifier = {rule = "Identifier1"}
+
+
+Rule: ContextIdentifier
+(IDENT)
+(
+({Token})+
+):ident -->
+:ident.TempIdentifier = {rule = "Identifier1"}
+
+
+
