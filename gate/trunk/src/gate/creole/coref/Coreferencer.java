@@ -26,11 +26,12 @@ import gate.util.*;
 public class Coreferencer extends AbstractLanguageAnalyser
                           implements ProcessingResource{
 
+  /** --- */
   private static final boolean DEBUG = true;
-//  private Document  doc;
+  /** --- */
   private PronominalCoref pronominalModule;
 
-
+  /** --- */
   public Coreferencer() {
     this.pronominalModule = new PronominalCoref();
   }
@@ -38,9 +39,10 @@ public class Coreferencer extends AbstractLanguageAnalyser
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
+
     Resource result = super.init();
+
     //load all submodules
-//    this.pronominalModule = (PronominalCoref)Factory.createResource("gate.creole.coref.PronominalCoref");
     this.pronominalModule.init();
 
     return result;
@@ -62,19 +64,20 @@ public class Coreferencer extends AbstractLanguageAnalyser
 
   /** Set the document to run on. */
   public void setDocument(Document newDocument) {
+
     Assert.assertNotNull(newDocument);
 
     this.pronominalModule.setDocument(newDocument);
-//    this.qtModule.setDocument(newDocument);
-
     super.setDocument(newDocument);
   }
 
 
+  /** --- */
   public void setAnnotationSetName(String annotationSetName) {
     this.pronominalModule.setAnnotationSetName(annotationSetName);
   }
 
+  /** --- */
   public String getAnnotationSetName() {
     return this.pronominalModule.getAnnotationSetName();
   }
@@ -89,13 +92,22 @@ public class Coreferencer extends AbstractLanguageAnalyser
     generateCorefChains();
   }
 
+  /** --- */
   private void generateCorefChains() throws GateRuntimeException{
 
     //1. get the resolved corefs
     HashMap ana2ant = this.pronominalModule.getResolvedAnaphora();
 
     //2. get the outout annotation set
-    AnnotationSet outputSet = getDocument().getAnnotations(getAnnotationSetName());
+    String asName = getAnnotationSetName();
+    AnnotationSet outputSet = null;
+
+    if (null == asName || asName.equals("")) {
+      outputSet = getDocument().getAnnotations();
+    }
+    else {
+      outputSet = getDocument().getAnnotations(asName);
+    }
 
     //3. generate new annotations
     Iterator it = ana2ant.entrySet().iterator();
@@ -141,22 +153,6 @@ public class Coreferencer extends AbstractLanguageAnalyser
                                     features);
       matches.add(annID);
     }
-
-/*
-
-      //12.add to COREF annotation set
-      corefSet = this.document.getAnnotations("COREF");
-      Long antOffset = new Long(0);
-
-      if (null!= antc) {
-        antOffset = antc.getStartNode().getOffset();
-      }
-
-      //13. create coref annotation
-      FeatureMap features = new SimpleFeatureMapImpl();
-      features.put("antecedent",antOffset);
-      corefSet.add(currPronoun.getStartNode(),currPronoun.getEndNode(),"COREF",features);
-*/
   }
 
 }

@@ -28,6 +28,9 @@ import gate.annotation.*;
 public class PronominalCoref extends AbstractLanguageAnalyser
                               implements ProcessingResource{
 
+  /** --- */
+  private static final boolean DEBUG = true;
+
   //JAPE grammars
   private static final String QT_GRAMMAR_URL = "gate://gate/creole/coref/quoted_text.jape";
   private static final String PLEON_GRAMMAR_URL = "gate://gate/creole/coref/pleonasm.jape";
@@ -51,31 +54,37 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   //scope
   private static final int SENTENCES_IN_SCOPE = 3;
-
+  /** --- */
   private static AnnotationOffsetComparator ANNOTATION_OFFSET_COMPARATOR;
-
+  /** --- */
   private String annotationSetName;
-
+  /** --- */
   private Transducer qtTransducer;
+  /** --- */
   private Transducer pleonTransducer;
-
+  /** --- */
   private AnnotationSet defaultAnnotations;
+  /** --- */
   private Sentence[] textSentences;
+  /** --- */
   private Quote[] quotedText;
+  /** --- */
   private Annotation[] pleonasticIt;
+  /** --- */
   private HashMap personGender;
-
+  /** --- */
   private HashMap anaphor2antecedent;
-
-
+  /** --- */
   private static final FeatureMap PRP_RESTRICTION;
 
+  /** --- */
   static {
     ANNOTATION_OFFSET_COMPARATOR = new AnnotationOffsetComparator();
     PRP_RESTRICTION = new SimpleFeatureMapImpl();
     PRP_RESTRICTION.put(TOKEN_CATEGORY,PRP_CATEGORY);
   }
 
+  /** --- */
   public PronominalCoref() {
 
     this.personGender = new HashMap();
@@ -140,6 +149,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     init();
   } // reInit()
 
+
   /** Set the document to run on. */
   public void setDocument(Document newDocument) {
 
@@ -154,10 +164,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     super.setDocument(newDocument);
   }
 
+  /** --- */
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
 
+
+  /** --- */
   public String getAnnotationSetName() {
     return annotationSetName;
   }
@@ -175,7 +188,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     //1. preprocess
     preprocess();
-
+/*
     //2. remove corefs from previous run
     String annSetName = this.annotationSetName == null ? "COREF"
                                                        : this.annotationSetName;
@@ -184,7 +197,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     if (false == corefSet.isEmpty()) {
       corefSet.clear();
     }
-
+*/
     //3.get personal pronouns
     FeatureMap constraintPRP = new SimpleFeatureMapImpl();
     constraintPRP.put(TOKEN_CATEGORY,PRP_CATEGORY);
@@ -243,10 +256,12 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   }
 
 
+  /** --- */
   public HashMap getResolvedAnaphora() {
     return this.anaphor2antecedent;
   }
 
+  /** --- */
   private Annotation findAntecedent(Annotation currPronoun,int prnSentIndex) {
 
     //0. preconditions
@@ -284,8 +299,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       return _resolve$I$ME$MY$MYSELF$(currPronoun,prnSentIndex);
     }
     else {
-//      throw new MethodNotImplementedException();
-      gate.util.Err.println("["+strPronoun+"] is not handled yet...");
+      if (DEBUG) {
+        gate.util.Err.println("["+strPronoun+"] is not handled yet...");
+      }
       return null;
     }
   }
@@ -320,18 +336,19 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     //get closest pleonasm
     Annotation pleonasm = this.pleonasticIt[closestPleonasmIndex];
 
-System.out.println(pleonasm);
-System.out.println(pronoun);
+//System.out.println(pleonasm);
+//System.out.println(pronoun);
 
     //3. return true only if the proboun is contained in pleonastic fragment
     boolean result =  (pleonasm.getStartNode().getOffset().intValue() <= pronoun.getStartNode().getOffset().intValue()
             &&
             pleonasm.getEndNode().getOffset().intValue() >= pronoun.getEndNode().getOffset().intValue());
-System.out.println("is pleon=["+result+"]");
+//System.out.println("is pleon=["+result+"]");
     return result;
   }
 
 
+  /** --- */
   private Annotation _resolve$HE$HIM$HIS$HIMSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
@@ -380,11 +397,12 @@ System.out.println("is pleon=["+result+"]");
         break;
 
     }
-//gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
+
     return bestAntecedent;
   }
 
 
+  /** --- */
   private Annotation _resolve$SHE$HER$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
@@ -430,11 +448,11 @@ System.out.println("is pleon=["+result+"]");
         break;
     }
 
-//gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
     return bestAntecedent;
   }
 
 
+  /** --- */
   private Annotation _resolve$IT$ITS$ITSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
@@ -449,7 +467,7 @@ System.out.println("is pleon=["+result+"]");
     //0.5 check if the IT is pleonastic
     if (pronounString.equalsIgnoreCase("IT") &&
         isPleonastic(pronoun)) {
-System.out.println("PLEONASM...");
+//System.out.println("PLEONASM...");
       return null;
     }
 
@@ -489,12 +507,11 @@ System.out.println("PLEONASM...");
         break;
     }
 
-//gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
     return bestAntecedent;
-
   }
 
 
+  /** --- */
   private Annotation _resolve$I$ME$MY$MYSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
@@ -602,18 +619,32 @@ System.out.println("PLEONASM...");
       }
     }
 
-//gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
     return bestAntecedent;
   }
 
+
+  /** --- */
   private void preprocess() throws ExecutionException {
 
     //0.5 cleanup
     this.personGender.clear();
     this.anaphor2antecedent.clear();
 
-    //1.get all annotation in the default set
-    this.defaultAnnotations = this.document.getAnnotations();
+    //1.get all annotation in the input set
+    if ( this.annotationSetName == null || this.annotationSetName.equals("")) {
+      this.defaultAnnotations = this.document.getAnnotations();
+    }
+    else {
+      this.defaultAnnotations = this.document.getAnnotations(annotationSetName);
+    }
+
+    //if none found, print warning and exit
+    if (this.defaultAnnotations == null || this.defaultAnnotations.isEmpty()) {
+      Err.prln("Coref Warning: No annotations found for processing!");
+      return;
+    }
+
+
 
     //2.1 remove QT annotations if left from previous execution
     AnnotationSet qtSet = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
@@ -720,6 +751,7 @@ System.out.println("PLEONASM...");
   }
 
 
+  /** --- */
   private String findPersonGender(Annotation person) {
 
     String result = (String)person.getFeatures().get(PERSON_GENDER);
@@ -749,6 +781,7 @@ System.out.println("PLEONASM...");
   }
 
 
+  /** --- */
   private static class AnnotationOffsetComparator implements Comparator {
 
     private int _getOffset(Object o) {
@@ -792,6 +825,7 @@ System.out.println("PLEONASM...");
   }
 
 
+  /** --- */
   private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
@@ -841,6 +875,7 @@ System.out.println("PLEONASM...");
     }
   }
 
+  /** --- */
   private Annotation _chooseAntecedent$IT$ITS$ITSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
@@ -889,23 +924,33 @@ System.out.println("PLEONASM...");
   }
 
 
+  /** --- */
   private class Quote {
 
+    /** --- */
     public static final int ANTEC_AFTER = 1;
+    /** --- */
     public static final int ANTEC_BEFORE = 2;
+    /** --- */
     public static final int ANTEC_BACK = 3;
-
+    /** --- */
     private AnnotationSet antecedentsBefore;
+    /** --- */
     private AnnotationSet antecedentsAfter;
+    /** --- */
     private AnnotationSet antecedentsBackInContext;
+    /** --- */
     private Annotation quoteAnnotation;
 
+
+    /** --- */
     public Quote(Annotation quoteAnnotation) {
 
       this.quoteAnnotation = quoteAnnotation;
       init();
     }
 
+    /** --- */
     private void init() {
 
       //0.preconditions
@@ -929,40 +974,8 @@ System.out.println("PLEONASM...");
       //1.2. get the persons and restrict to these that precede the quote (i.e. not contained
       //in the quote)
       this.antecedentsBefore = generateAntecedentCandidates(startSentenceIndex, ANTEC_BEFORE);
-/*
-      this.antecedentsBefore = new AnnotationSetImpl(startSentence.getPersons());
 
-      Iterator itPersons = this.antecedentsBefore.iterator();
-      while (itPersons.hasNext()) {
-        Annotation currPerson = (Annotation)itPersons.next();
-        if (currPerson.getStartNode().getOffset().intValue() > getStartOffset().intValue()) {
-          itPersons.remove();
-        }
-      }
 
-      //1.3 now get all HE/SHE pronouns that precede the quote in the same sentence
-      AnnotationSet startSentPronouns = defaultAnnotations.getContained(startSentence.getStartOffset(),
-                                                                  this.getStartOffset());
-      AnnotationSet startSentPersonalPronouns = null;
-      if (null != startSentPronouns) {
-        startSentPersonalPronouns = startSentPronouns.get(TOKEN_TYPE,prpTokenRestriction);
-
-        if (null != startSentPersonalPronouns) {
-
-          Iterator it = startSentPersonalPronouns.iterator();
-          while (it.hasNext()) {
-            Annotation currPronoun = (Annotation)it.next();
-            //add to succPersons only if HE/SHE
-            String pronounString = (String)currPronoun.getFeatures().get(TOKEN_STRING);
-
-            if (null != pronounString &&
-                (pronounString.equalsIgnoreCase("he") || pronounString.equalsIgnoreCase("she"))) {
-              this.antecedentsBefore.add(currPronoun);
-            }//if
-          }//while
-        }//if
-      }//if
-*/
       //2. generate the precPersonsInCOntext set
       //2.1. get the persons from the sentence precedeing the sentence containing the quote start
       if (startSentenceIndex > 0) {
@@ -980,49 +993,11 @@ System.out.println("PLEONASM...");
       int endSentenceIndex = quoteEndPos >= 0 ? quoteEndPos
                                               : -quoteEndPos -1 -1; // blame Sun, not me
       this.antecedentsAfter = generateAntecedentCandidates(endSentenceIndex,ANTEC_AFTER);
-/*
-      Sentence endSentence = textSentences[endSentenceIndex];
-
-      //2.2. get the persons and restrict to these that succeed the quote (i.e. not contained
-      //in the quoted fragment)
-      this.antecedentsAfter = new AnnotationSetImpl(endSentence.getPersons());
-      itPersons = this.antecedentsAfter.iterator();
-
-      while (itPersons.hasNext()) {
-        Annotation currPerson = (Annotation)itPersons.next();
-        if (currPerson.getStartNode().getOffset().intValue() < this.getEndOffset().intValue()) {
-          itPersons.remove();
-        }
-      }
-
-      //2.3 now get all HE/SHE pronouns that follow the quote in the same sentence
-      AnnotationSet endSentPronouns = defaultAnnotations.getContained(this.getEndOffset(),
-                                                                  endSentence.getEndOffset());
-
-      AnnotationSet endSentPersonalPronouns = null;
-      if (null != endSentPronouns) {
-        endSentPersonalPronouns = endSentPronouns.get(TOKEN_TYPE,prpTokenRestriction);
-
-        if (null != endSentPersonalPronouns) {
-
-          Iterator it = endSentPersonalPronouns.iterator();
-          while (it.hasNext()) {
-            Annotation currPronoun = (Annotation)it.next();
-            //add to succPersons only if HE/SHE
-            String pronounString = (String)currPronoun.getFeatures().get(TOKEN_STRING);
-
-            if (null != pronounString &&
-                (pronounString.equalsIgnoreCase("he") || pronounString.equalsIgnoreCase("she"))) {
-              this.antecedentsAfter.add(currPronoun);
-            }//if
-          }//while
-        }//if
-      }//if
-*/
       //generate t
     }
 
 
+    /** --- */
     private AnnotationSet generateAntecedentCandidates(int sentenceNumber, int mode) {
 
       //0. preconditions
@@ -1102,16 +1077,17 @@ System.out.println("PLEONASM...");
       return antecedents;
     }
 
+    /** --- */
     public Long getStartOffset() {
       return this.quoteAnnotation.getStartNode().getOffset();
     }
 
-
+    /** --- */
     public Long getEndOffset() {
       return this.quoteAnnotation.getEndNode().getOffset();
     }
 
-
+    /** --- */
     public AnnotationSet getAntecedentCandidates(int type) {
 
       switch(type) {
@@ -1133,17 +1109,25 @@ System.out.println("PLEONASM...");
   }
 
 
+  /** --- */
   private class Sentence {
 
+    /** --- */
     private int sentNumber;
+    /** --- */
     private int paraNumber;
+    /** --- */
     private Long startOffset;
+    /** --- */
     private Long endOffset;
-
+    /** --- */
     private AnnotationSet persons;
+    /** --- */
     private AnnotationSet organizations;
+    /** --- */
     private AnnotationSet locations;
 
+    /** --- */
     public Sentence(int sentNumber,
                     int paraNumber,
                     Long startOffset,
@@ -1161,22 +1145,27 @@ System.out.println("PLEONASM...");
       this.locations = locations;
     }
 
+    /** --- */
     public Long getStartOffset() {
       return this.startOffset;
     }
 
+    /** --- */
     public Long getEndOffset() {
       return this.endOffset;
     }
 
+    /** --- */
     public AnnotationSet getPersons() {
       return this.persons;
     }
 
+    /** --- */
     public AnnotationSet getOrganizations() {
       return this.organizations;
     }
 
+    /** --- */
     public AnnotationSet getLocations() {
       return this.locations;
     }
