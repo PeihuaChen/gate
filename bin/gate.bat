@@ -58,8 +58,8 @@ REM ##############################################
 REM set JAVA
 REM ##############################################
 
-set JAVA=%JAVA_HOME%\bin\java.exe
-if not exist %JAVA% set JAVA=java
+set JAVA=%JAVA_HOME%\bin\javaw.exe
+if not exist %JAVA% set JAVA=javaw.exe
 
 echo JAVA: %JAVA%
 
@@ -89,6 +89,4 @@ REM ##############################################
 set RUN=%JAVA% -Xmx200m -Djava.ext.dirs=%GUK% -classpath "%CLASSPATH%" gate.Main %FLAGS% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 echo RUN: %RUN%
-%RUN%
-pause
-
+start %RUN%
