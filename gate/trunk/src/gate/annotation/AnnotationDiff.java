@@ -929,12 +929,15 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Annotations
     if (annotationTypeForFalsePositive != null)
      // Was it the default set ?
-     if (responseAnnotationSetNameFalsePoz == null)
-          no = responseDocument.getAnnotations().get(
-                                      annotationTypeForFalsePositive).size();
-     else
-      no = responseDocument.getAnnotations(responseAnnotationSetNameFalsePoz).get(
-                                        annotationTypeForFalsePositive).size();
+     if (responseAnnotationSetNameFalsePoz == null){
+      AnnotationSet aSet = responseDocument.getAnnotations().get(
+                                      annotationTypeForFalsePositive);
+          no = aSet == null ? 0 : aSet.size();
+     }else{
+      AnnotationSet aSet = responseDocument.getAnnotations(responseAnnotationSetNameFalsePoz).get(
+                                        annotationTypeForFalsePositive);
+      no = aSet == null? 0 : aSet.size();
+     }
     if (no != 0){
       // No error here: the formula is the opposite to recall or precission
      falsePositiveStrict = ((double)(typeCounter[SPURIOUS_TYPE] +
