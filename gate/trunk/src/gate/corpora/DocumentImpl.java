@@ -201,6 +201,15 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
             // unpack with collectiong of repositioning information
             RepositioningInfo info = new RepositioningInfo();
             docFormat.unpackMarkup(this, info);
+
+            // put here the CRLF and &xxx; correction of RepositioningInfo
+            String origContent = (String) getFeatures().get(
+                GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
+            if(origContent != null) {
+              correctRepositioningForCRLF(origContent, info);
+              correctRepositioningForAmpCodding(origContent, info);
+            } // if
+
             getFeatures().put(
                 GateConstants.DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME, info);
           }
@@ -220,6 +229,29 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
 
     return this;
   } // init()
+
+  /**
+   * Correct repositioning information for substitution of "\r\n" with "\n"
+   */
+  private void correctRepositioningForCRLF(String content,
+                                            RepositioningInfo info) {
+    int index = -1;
+
+    do {
+      index = content.indexOf("\r\n", index+1);
+      if(index != -1) {
+        info.correctInformationOriginalMove(index, 1);
+      } // if
+    } while(index != -1);
+
+  } // correctRepositioningForCRLF
+
+  /**
+   * Correct repositioning information for substitution of "&xxx;" with "y"
+   */
+  private void correctRepositioningForAmpCodding(String content,
+                                            RepositioningInfo info) {
+  } // correctRepositioningForAmpCodding
 
   /** Clear all the data members of the object. */
   public void cleanup() {
@@ -411,6 +443,11 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     * markup + dumped annotations form the aSourceAnnotationSet
     */
   public String toXml(Set aSourceAnnotationSet, boolean includeFeatures){
+
+    if(hasOriginalContentFeatures()) {
+      return saveAnnotationSetAsXmlInOrig(aSourceAnnotationSet,includeFeatures);
+    } // if
+
     AnnotationSet originalMarkupsAnnotSet =
             this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
@@ -706,6 +743,198 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     return docContStrBuff.toString();
   }// saveAnnotationSetAsXml()
 
+  /**
+   *  Return true only if the document has features for original content and
+   *  repositioning information.
+   */
+  private boolean hasOriginalContentFeatures() {
+    FeatureMap features = getFeatures();
+    boolean result = false;
+
+    result =
+    (features.get(GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME) != null)
+      &&
+    (features.get(GateConstants.DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME)
+      != null);
+
+    return result;
+  } // hasOriginalContentFeatures
+
+  /** This method saves all the annotations from aDumpAnnotSet and combines
+    * them with the original document content, if preserved as feature.
+    * @param aDumpAnnotationSet is a GATE annotation set prepared to be used
+    * on the raw text from document content. If aDumpAnnotSet is <b>null<b>
+    * then an empty string will be returned.
+    * @param includeFeatures is a boolean, which controls whether the annotation
+    * features and gate ID are included or not.
+    * @return The XML document obtained from raw text + the information from
+    * the dump annotation set.
+    */
+  private String saveAnnotationSetAsXmlInOrig(Set aSourceAnnotationSet,
+                                        boolean includeFeatures){
+    StringBuffer docContStrBuff;
+
+    String origContent;
+
+    origContent =
+     (String)features.get(GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
+    if(origContent == null) {
+      origContent = "";
+    } // if
+
+    long originalContentSize = origContent.length();
+
+    RepositioningInfo repositioning = (RepositioningInfo)
+      getFeatures().get(GateConstants.DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME);
+
+    docContStrBuff = new StringBuffer(origContent);
+    if (aSourceAnnotationSet == null) return docContStrBuff.toString();
+
+    StatusListener sListener = (StatusListener)
+                               gate.gui.MainFrame.getListeners().
+                               get("gate.event.StatusListener");
+
+    AnnotationSet originalMarkupsAnnotSet =
+            this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+    // Create a dumping annotation set on the document. It will be used for
+    // dumping annotations...
+    AnnotationSet dumpingSet = new AnnotationSetImpl((Document) this);
+    if(sListener != null)
+      sListener.statusChanged("Constructing the dumping annotation set.");
+    // Then take all the annotations from aSourceAnnotationSet and verify if
+    // they can be inserted safely into the dumpingSet. Where not possible,
+    // report.
+    if (aSourceAnnotationSet != null){
+      Iterator iter = aSourceAnnotationSet.iterator();
+      Annotation currentAnnot;
+      while (iter.hasNext()){
+        currentAnnot = (Annotation) iter.next();
+        if(insertsSafety(originalMarkupsAnnotSet, currentAnnot)
+            && insertsSafety(dumpingSet, currentAnnot)){
+          dumpingSet.add(currentAnnot);
+        }else{
+          Out.prln("Warning: Annotation with ID=" + currentAnnot.getId() +
+          ", startOffset=" + currentAnnot.getStartNode().getOffset() +
+          ", endOffset=" + currentAnnot.getEndNode().getOffset() +
+          ", type=" + currentAnnot.getType()+ " was found to violate the" +
+          " crossed over condition. It will be discarded");
+        }// End if
+      }// End while
+    }// End if
+
+    // The dumpingSet is ready to be exported as XML
+    // Here we go.
+    if(sListener != null) sListener.statusChanged("Dumping annotations as XML");
+
+    ///////////////////////////////////////////
+    // Construct a set of annot with all IDs in asc order.
+    // All annotations that end at that offset swap their place in descending
+    // order. For each node write all the tags from left to right.
+
+    // Construct the node set
+    TreeSet offsets = new TreeSet();
+    Iterator iter = aSourceAnnotationSet.iterator();
+    while (iter.hasNext()){
+      Annotation annot = (Annotation) iter.next();
+      offsets.add(annot.getStartNode().getOffset());
+      offsets.add(annot.getEndNode().getOffset());
+    }// End while
+    isRootTag = false;
+
+    // ofsets is sorted in ascending order.
+    // Iterate this set in descending order and remove an offset at each
+    // iteration
+    while (!offsets.isEmpty()){
+      Long offset = (Long)offsets.last();
+      // Remove the offset from the set
+      offsets.remove(offset);
+      // Now, use it.
+      // Returns a list with annotations that needs to be serialized in that
+      // offset.
+      List annotations = getAnnotationsForOffset(aSourceAnnotationSet,offset);
+      // Attention: the annotation are serialized from left to right
+      StringBuffer tmpBuff = new StringBuffer("");
+      Stack stack = new Stack();
+      // Iterate through all these annotations and serialize them
+      Iterator it = annotations.iterator();
+      Annotation a = null;
+      while(it.hasNext()) {
+        a = (Annotation) it.next();
+        it.remove();
+        // Test if a Ends at offset
+        if ( offset.equals(a.getEndNode().getOffset()) ){
+          // Test if a Starts at offset
+          if ( offset.equals(a.getStartNode().getOffset()) ){
+            // Here, the annotation a Starts and Ends at the offset
+            if ( null != a.getFeatures().get("isEmptyAndSpan") &&
+                 "true".equals((String)a.getFeatures().get("isEmptyAndSpan"))){
+
+              // Assert: annotation a with start == end and isEmptyAndSpan
+              tmpBuff.append(writeStartTag(a, includeFeatures));
+              stack.push(a);
+            }else{
+              // Assert annotation a with start == end and an empty tag
+              tmpBuff.append(writeEmptyTag(a));
+              // The annotation is removed from dumped set
+              aSourceAnnotationSet.remove(a);
+            }// End if
+          }else{
+            // Here the annotation a Ends at the offset.
+            // In this case empty the stack and write the end tag
+            while(!stack.isEmpty()){
+              Annotation a1 = (Annotation)stack.pop();
+              tmpBuff.append(writeEndTag(a1));
+            }// End while
+            tmpBuff.append(writeEndTag(a));
+          }// End if
+        }else{
+          // The annotation a does NOT end at the offset. Let's see if it starts
+          // at the offset
+          if ( offset.equals(a.getStartNode().getOffset()) ){
+            // The annotation a starts at the offset.
+            // In this case empty the stack and write the end tag
+            while(!stack.isEmpty()){
+              Annotation a1 = (Annotation)stack.pop();
+              tmpBuff.append(writeEndTag(a1));
+            }// End while
+
+            tmpBuff.append(writeStartTag(a, includeFeatures));
+            // The annotation is removed from dumped set
+            aSourceAnnotationSet.remove(a);
+          }// End if ( offset.equals(a.getStartNode().getOffset()) )
+        }// End if ( offset.equals(a.getEndNode().getOffset()) )
+      }// End while(it.hasNext()){
+
+      // In this case empty the stack and write the end tag
+      while(!stack.isEmpty()){
+        Annotation a1 = (Annotation)stack.pop();
+        tmpBuff.append(writeEndTag(a1));
+      }// End while
+
+      long originalPosition = -1;
+      if ( a != null && offset.equals(a.getEndNode().getOffset()) ) {
+        // end of the annotation correction
+        originalPosition = repositioning.getOriginalPos(offset.intValue()-1)+1;
+      }
+      else {
+        originalPosition = repositioning.getOriginalPos(offset.intValue());
+      } //
+
+      // Insert tmpBuff to the location where it belongs in docContStrBuff
+      if(originalPosition != -1 && originalPosition <= originalContentSize ) {
+        docContStrBuff.insert((int) originalPosition, tmpBuff.toString());
+      }
+      else {
+        Out.prln("Error in the repositioning. The offset ("+offset.intValue()
+        +") could not be positioned in the original document. \n"
+        +"Calculated position is: "+originalPosition);
+      } // if
+
+    }// End while(!offsets.isEmpty())
+
+    return docContStrBuff.toString();
+  } // saveAnnotationSetAsXml()
+
   /** This method returns a list with annotations ordered that way that
     * they can be serialized from left to right, at the offset. If one of the
     * params is null then an empty list will be returned.
@@ -715,7 +944,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     * AND/OR end.
     * @return a list with those annotations that need to be serialized.
     */
-  private List getAnnotationsForOffset(AnnotationSet aDumpAnnotSet,Long offset){
+  private List getAnnotationsForOffset(Set aDumpAnnotSet, Long offset){
     List annotationList = new LinkedList();
     if (aDumpAnnotSet == null || offset == null) return annotationList;
     Set annotThatStartAtOffset = new TreeSet(
