@@ -541,6 +541,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
   public boolean equals(Object other) {
     DocumentImpl doc = (DocumentImpl) other;
 
+// PENDING EQUALS IMPLS
 //    if(! check(content, doc.content)) return false;
 //    if(! check(defaultAnnots, doc.defaultAnnots)) return false;
     if(! check(encoding, doc.encoding)) return false;
@@ -556,6 +557,34 @@ extends AbstractLanguageResource implements Document, StatusReporter
 
     return true;
   } // equals
+
+  /** Hash code */
+  public int hashCode() {
+    int code = content.hashCode();
+    int memberCode = (defaultAnnots == null) ? 0 : defaultAnnots.hashCode();
+    code += memberCode;
+    memberCode = (encoding == null) ? 0 : encoding.hashCode();
+    code += memberCode;
+    memberCode = (features == null) ? 0 : features.hashCode();
+    code += memberCode;
+    code += (markupAware) ? 0 : 1;
+    memberCode = (namedAnnotSets == null) ? 0 : namedAnnotSets.hashCode();
+    code += memberCode;
+    code += nextAnnotationId;
+    code += nextNodeId;
+    memberCode = (sourceUrl == null) ? 0 : sourceUrl.hashCode();
+    code += memberCode;
+    memberCode =
+      (sourceUrlStartOffset == null) ? 0 : sourceUrlStartOffset.hashCode();
+    code += memberCode;
+    memberCode = (sourceUrlName == null) ? 0 : sourceUrlName.hashCode();
+    code += memberCode;
+    memberCode =
+      (sourceUrlEndOffset == null) ? 0 : sourceUrlEndOffset.hashCode();
+    code += memberCode;
+Out.prln("hashcode: " + code);
+    return code;
+  } // hashcode
 
   /** String respresentation */
   public String toString() {

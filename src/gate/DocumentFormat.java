@@ -21,6 +21,7 @@ import java.io.*;
 
 import gate.util.*;
 import gate.gui.*;
+import gate.creole.*;
 
 import org.w3c.www.mime.*;
 
@@ -34,7 +35,8 @@ import org.w3c.www.mime.*;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
-public abstract class DocumentFormat implements LanguageResource, StatusReporter
+public abstract class DocumentFormat
+extends AbstractLanguageResource implements LanguageResource, StatusReporter
 {
   /** Debug flag */
   private static final boolean DEBUG = false;

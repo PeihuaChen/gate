@@ -19,6 +19,7 @@ import java.util.*;
 
 import gate.*;
 import gate.util.*;
+import gate.persist.*;
 
 
 /** A convenience implementation of LanguageResource with some default code.
@@ -29,7 +30,22 @@ extends AbstractResource implements LanguageResource
   /** Get the data store that this LR lives in. Null for transient LRs. */
   public DataStore getDataStore() { return dataStore; }
 
+  /** Set the data store that this LR lives in. */
+  public void setDataStore(DataStore dataStore) throws PersistenceException {
+    this.dataStore = dataStore;
+  } // setDataStore(DS)
+
   /** The data store this LR lives in. */
-  protected DataStore dataStore;
+  transient protected DataStore dataStore;
+
+  /** Save: synchonise the in-memory image of the LR with the persistent
+    * image.
+    */
+  public void sync() throws PersistenceException {
+    if(dataStore == null)
+      throw new PersistenceException("LR has no DataStore");
+
+    dataStore.sync(this);
+  } // sync()
 
 } // class AbstractLanguageResource

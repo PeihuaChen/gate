@@ -22,7 +22,7 @@ PKGS=	gate gate.annotation gate.corpora gate.creole \
 	gate.creole.gazetteer gate.creole.tokeniser \
 	gate.db gate.email gate.fsm gate.gui gate.html \
 	gate.jape gate.jape.parser gate.config \
-	gate.sgml gate.util gate.xml guk guk.im
+	gate.sgml gate.util gate.xml guk guk.im gate.persist
 
 # classpath to build compile commands from
 CP=	-classpath \

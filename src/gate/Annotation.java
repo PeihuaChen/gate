@@ -15,6 +15,7 @@
 
 package gate;
 
+import java.io.*;
 import gate.util.*;
 
 /** An Annotation is an arc in an AnnotationGraph. It is immutable, to avoid
@@ -22,7 +23,8 @@ import gate.util.*;
   * order to tell it to update its indices when it changes.
   * <P> Changes from TIPSTER: no ID; single span only.
   */
-public interface Annotation extends FeatureBearer, IdBearer, Comparable {
+public interface Annotation
+extends FeatureBearer, IdBearer, Comparable, Serializable {
 
   /** The type of the annotation (corresponds to TIPSTER "name"). */
   public String getType();
