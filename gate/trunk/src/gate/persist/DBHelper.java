@@ -20,6 +20,7 @@ import java.net.*;
 import java.util.*;
 
 import gate.util.*;
+import gate.Gate;
 
 public class DBHelper {
 
@@ -361,4 +362,16 @@ public class DBHelper {
     }
   }
 
+  public static String getSchemaPrefix(String jdbcURL) {
+
+    if (jdbcURL.startsWith("jdbc:oracle")) {
+      return Gate.DB_OWNER+".";
+    }
+    else if (jdbcURL.startsWith("jdbc:postgres")) {
+      return "";
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
+  }
 }
