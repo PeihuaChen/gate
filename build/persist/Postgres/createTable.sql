@@ -142,7 +142,7 @@ CREATE TABLE  t_document  (
     doc_id             int4 DEFAULT nextval('seq_document')  NOT NULL ,
     doc_content_id     int4,
     doc_lr_id          int4 NOT NULL ,
-    doc_url            text NOT NULL ,
+    doc_url            text NULL ,
     doc_start          int4,
     doc_end            int4,
     doc_is_markup_aware  bool NOT NULL ,
