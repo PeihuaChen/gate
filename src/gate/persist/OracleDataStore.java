@@ -328,26 +328,30 @@ public class OracleDataStore extends JDBCDataStore {
   throws PersistenceException {
 
     //1. get LOB locators from DB
-    PreparedStatement stmt = null;
+    PreparedStatement pstmt = null;
     ResultSet rs = null;
-    CallableStatement call = null;
+    CallableStatement cstmt = null;
     try {
+Out.prln("PASS 1");
       String sql =  "select dc_content_type, " +
                     "       dc_character_content, " +
                     "       dc_binary_content " +
                     "from "+gate.Gate.DB_OWNER+".t_doc_content " +
                     "where  dc_id = ? ";
-      stmt = this.jdbcConn.prepareStatement(sql);
-      stmt.setLong(1,docContentID.longValue());
-      stmt.execute(sql);
-      rs = stmt.getResultSet();
+//Out.prln(sql);
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,docContentID.longValue());
+      pstmt.executeQuery(sql);
+Out.prln("PASS 1.2");
+      rs = pstmt.getResultSet();
+Out.prln("PASS 1.3");
       rs.next();
-
+Out.prln("PASS 2");
       //important: read the objects in the order they appear in
       //the ResultSet, otherwise data may be lost
-      int contentType = rs.getInt(1);
-      Clob clob = (Clob)rs.getClob(2);
-      Blob blob = (Blob)rs.getBlob(3);
+      long contentType = rs.getLong("DC_CONTENT_TYPE");
+      Clob clob = (Clob)rs.getClob("dc_character_content");
+      Blob blob = (Blob)rs.getBlob("dc_binary_content");
 
       Assert.assert(contentType == DBHelper.CHARACTER_CONTENT ||
                     contentType == DBHelper.BINARY_CONTENT ||
@@ -360,9 +364,11 @@ public class OracleDataStore extends JDBCDataStore {
       long newContentType = DBHelper.CHARACTER_CONTENT;
 
       //3. update content type
-      call = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.change_content_type(?,?) }");
-      call.setLong(1,docContentID.longValue());
-      call.setLong(2,newContentType);
+      cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.change_content_type(?,?) }");
+      cstmt.setLong(1,docContentID.longValue());
+      cstmt.setLong(2,newContentType);
+      cstmt.execute();
+Out.prln("PASS 3");
     }
     catch(IOException ioe) {
       throw new PersistenceException("can't update document content in DB : ["+
@@ -374,7 +380,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
     finally {
       DBHelper.cleanup(rs);
-      DBHelper.cleanup(stmt);
+      DBHelper.cleanup(pstmt);
+      DBHelper.cleanup(cstmt);
     }
 
   }
@@ -467,7 +474,7 @@ public class OracleDataStore extends JDBCDataStore {
     //do we have content at all?
 //Out.prln("SIZE=["+docContent.size()+"]");
     if (docContent.size().longValue() > 0) {
-      updateDocumentContent(docContentID,docContent);
+////      updateDocumentContent(docContentID,docContent);
     }
 
     //6. insert annotations, etc
@@ -993,12 +1000,17 @@ public class OracleDataStore extends JDBCDataStore {
                    "        ft_binary_value " +
                    " from   t_feature " +
                    " where  ft_id = ?";
+Out.prln(sql);
+
       stmtA = this.jdbcConn.prepareStatement(sql);
       stmtA.setLong(1,featID.longValue());
+Out.prln("PASS 1");
       stmtA.execute();
+Out.prln("PASS 2");
       rsA = stmtA.getResultSet();
-
+Out.prln("PASS 3");
       rsA.next();
+Out.prln("PASS 4");
       //NOTE: if the result set contains LOBs always read them
       // in the order they appear in the SQL query
       // otherwise data will be lost
@@ -1015,7 +1027,7 @@ public class OracleDataStore extends JDBCDataStore {
         String s = (String)value;
         writeCLOB(s,clobValue);
       }
-
+Out.prln("PASS 5");
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't create feature [step 2] in DB: ["+ sqle.getMessage()+"]");
