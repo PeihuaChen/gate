@@ -170,6 +170,9 @@ public abstract class Factory {
     }
 
     //set the name
+    if(resourceName == null){
+      resourceName = resData.getName() + "_" + Gate.genSym();
+    }
     res.setName(resourceName);
     // type-specific stuff for LRs
     if(LanguageResource.class.isAssignableFrom(resClass)) {

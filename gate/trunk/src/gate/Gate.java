@@ -85,6 +85,9 @@ public class Gate
     System.setProperty("javax.xml.parsers.SAXParserFactory",
                              "org.apache.xerces.jaxp.SAXParserFactoryImpl");
 
+    //initialise the symbols generator
+    lastSym = 0;
+
     // create class loader and creole register if they're null
     if(classLoader == null)
       classLoader = new GateClassLoader();
@@ -281,6 +284,8 @@ jar/classpath so it's the same as registerBuiltins
     */
   private static boolean netConnected = true;
 
+  private static int lastSym;
+
   /** Should we assume we're connected to the net? */
   public static boolean isNetConnected() { return netConnected; }
 
@@ -452,5 +457,14 @@ jar/classpath so it's the same as registerBuiltins
   public synchronized static gate.Executable getExecutable() {
     return currentExecutable;
   } // getDataStoreRegister
+
+  /**
+   * Returns a new unique string
+   */
+  public synchronized static String genSym() {
+    return Long.toString(lastSym++);
+  } // getDataStoreRegister
+
+
 
 } // class Gate
