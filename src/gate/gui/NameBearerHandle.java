@@ -208,8 +208,7 @@ public class NameBearerHandle implements Handle,
       if(target instanceof gate.ml.DataCollector){
         popup.add(new DumpArffAction());
       }
-      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent
-          || target instanceof com.ontotext.gate.hmm.agent.TrainHMM) {
+      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
         fillHMMActions(popup);
       } // if
     }else if(target instanceof LanguageResource) {
