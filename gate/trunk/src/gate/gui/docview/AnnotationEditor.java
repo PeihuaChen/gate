@@ -81,6 +81,7 @@ public class AnnotationEditor{
       GridBagConstraints constraints = new GridBagConstraints();
       
       typeCombo = new JComboBox();
+      typeCombo.setEditable(true);
       constraints.fill = GridBagConstraints.BOTH;
       constraints.gridx = 0;
       constraints.gridy = 0;
@@ -90,7 +91,6 @@ public class AnnotationEditor{
       
       JButton btn = new JButton(solAction);
       btn.setContentAreaFilled(false);
-//      btn.setHorizontalAlignment(JButton.CENTER);
       Dimension btnSize = new Dimension(16, 16);
       btn.setPreferredSize(btnSize);
       constraints.fill = GridBagConstraints.NONE;
@@ -101,32 +101,23 @@ public class AnnotationEditor{
       
       btn = new JButton(sorAction);
       btn.setContentAreaFilled(false);
-//      btn.setBackground(textPane.getBackground());
-//      btn.setHorizontalAlignment(JButton.CENTER);
       btn.setPreferredSize(btnSize);
       pane.add(btn, constraints);
       
       btn = new JButton(delAction);
       btn.setContentAreaFilled(false);
-//      btn.setBackground(textPane.getBackground());
-//      btn.setHorizontalAlignment(JButton.CENTER);
-//      btn.setIconTextGap(0);
       constraints.insets = new Insets(0, 10, 0, 10);
       btn.setPreferredSize(new Dimension(22, 22));
       pane.add(btn, constraints);
       
       btn = new JButton(eolAction);
       btn.setContentAreaFilled(false);
-//      btn.setBackground(textPane.getBackground());
-//      btn.setHorizontalAlignment(JButton.CENTER);
       constraints.insets = new Insets(0, 0, 0, 0);
       btn.setPreferredSize(btnSize);
       pane.add(btn, constraints);
       
       btn = new JButton(eorAction);
       btn.setContentAreaFilled(false);
-//      btn.setBackground(textPane.getBackground());
-//      btn.setHorizontalAlignment(JButton.CENTER);
       btn.setPreferredSize(btnSize);
       pane.add(btn, constraints);
 
@@ -147,7 +138,8 @@ public class AnnotationEditor{
   }
   
   public void setAnnotation(Annotation ann){
-   this.ann = ann; 
+   this.ann = ann;
+   typeCombo.setSelectedItem(ann.getType());
   }
   
   
