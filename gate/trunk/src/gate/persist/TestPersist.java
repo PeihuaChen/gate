@@ -134,7 +134,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL()
+      "gate.persist.SerialDataStore", storageDir.toURL().toString()
     );
 
     // check we can get empty lists from empty data stores
@@ -316,7 +316,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL()
+      "gate.persist.SerialDataStore", storageDir.toURL().toString()
     );
 
     // create a document with some annotations / features on it
@@ -338,7 +338,7 @@ public class TestPersist extends TestCase
     storageDir = File.createTempFile("TestPersist__", "__StorageDir");
     storageDir.delete();
     DataStore sds2 = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL()
+      "gate.persist.SerialDataStore", storageDir.toURL().toString()
     );
 
     // DSR should have two members
@@ -616,6 +616,13 @@ System.out.println("docid = " +this.uc01_lrID);
       test.testSimple();
       test.tearDown();
 
+      //I put this last because its failure is dependent on the gc() and
+      //there's nothing I can do about it. Maybe I'll remove this from the
+      //test
+      test.setUp();
+      test.testMultipleLrs();
+      test.tearDown();
+
       test.setUp();
       test.testDB_UseCase01();
       test.tearDown();
@@ -630,13 +637,6 @@ System.out.println("docid = " +this.uc01_lrID);
 
       test.setUp();
       test.testDB_UseCase04();
-      test.tearDown();
-
-      //I put this last because its failure is dependent on the gc() and
-      //there's nothing I can do about it. Maybe I'll remove this from the
-      //test
-      test.setUp();
-      test.testMultipleLrs();
       test.tearDown();
 
     }catch(Exception e){
