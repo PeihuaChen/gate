@@ -18,6 +18,7 @@ package gate.wordnet;
 import net.didion.jwnl.data.POS;
 import net.didion.jwnl.data.PointerType;
 
+
 final class WNHelper {
 
   private WNHelper() {
@@ -228,4 +229,26 @@ final class WNHelper {
                _type == Relation.REL_SEE_ALSO;
   }
 
+  public static int AdjPosition2int(net.didion.jwnl.data.Adjective adj) {
+
+    int result;
+
+    if (adj.getAdjectivePosition().equals(net.didion.jwnl.data.Adjective.ATTRIBUTIVE)) {
+      result = Adjective.ADJ_POS_ATTRIBUTIVE;
+    }
+    else if (adj.getAdjectivePosition().equals(net.didion.jwnl.data.Adjective.IMMEDIATE_POSTNOMINAL)) {
+      result = Adjective.ADJ_POS_IMMEDIATE_POSTNOMINAL;
+    }
+    else if (adj.getAdjectivePosition().equals(net.didion.jwnl.data.Adjective.NONE)) {
+      result = Adjective.ADJ_POS_NONE;
+    }
+    else if (adj.getAdjectivePosition().equals(net.didion.jwnl.data.Adjective.PREDICATIVE)) {
+      result = Adjective.ADJ_POS_PREDICATIVE;
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
+
+    return result;
+  }
 }
