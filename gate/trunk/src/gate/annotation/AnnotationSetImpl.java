@@ -852,38 +852,71 @@ public class AnnotationSetImpl
    * before calling this method.
    */
   public void edit(Long start, Long end, DocumentContent replacement) {
+    //make sure we have the indices computed
+    indexByStartOffset();
+    indexByEndOffset();
+    //each edit operation is a combination of delete and insert.
+    //first handle the delete operation
+    if(end.compareTo(start) > 0){
+      //get the nodes that need to be processed (the nodes internal to the
+      //removed section plus the marginal ones
+      List affectedNodes = new ArrayList(nodesByOffset.subMap(start,
+          new Long(end.longValue() + 1)).values());
+      //if we have more than 1 node we need to delete all apart from the first
+      //and move the annotations so that they refer to the one we keep (the first)
+      NodeImpl firstNode = null;
+      if (!affectedNodes.isEmpty()) {
+        firstNode = (NodeImpl) affectedNodes.get(0);
+        List startingAnnotations = new ArrayList();
+        List endingAnnotations = new ArrayList();
+        for (int i = 1; i < affectedNodes.size(); i++) {
+          Node aNode = (Node) affectedNodes.get(i);
+          //save the annotations
+          AnnotationSet annSet = (AnnotationSet) annotsByStartNode.get(aNode.
+              getId());
+          if (annSet != null)
+            startingAnnotations.addAll(annSet);
+          annSet = (AnnotationSet) annotsByEndNode.get(aNode.getId());
+          if (annSet != null)
+            endingAnnotations.addAll(annSet);
+            //remove the node
+          nodesByOffset.remove(aNode.getOffset());
+        }
+        //modify the annotations so they point to the saved node
+        Iterator annIter = startingAnnotations.iterator();
+        while (annIter.hasNext()) {
+          AnnotationImpl anAnnot = (AnnotationImpl) annIter.next();
+          anAnnot.start = firstNode;
+          addToStartOffsetIndex(anAnnot);
+        }
+        annIter = endingAnnotations.iterator();
+        while (annIter.hasNext()) {
+          AnnotationImpl anAnnot = (AnnotationImpl) annIter.next();
+          anAnnot.end = firstNode;
+          addToEndOffsetIndex(anAnnot);
+        }
+        //repair the first node
+        //remove from offset index
+        nodesByOffset.remove(firstNode.getOffset());
+        //change the offset for the saved node
+        firstNode.setOffset(start);
+        //add back to the offset index
+        nodesByOffset.put(firstNode.getOffset(), firstNode);
+      }
+    }
+
+    //now handle the insert
+    //get the user selected behaviour (defaults to append)
+    boolean shouldPrepend = Gate.getUserConfig().
+        getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND).booleanValue();
+
     long s = start.longValue(), e = end.longValue();
     long rlen = // length of the replacement value
         ( (replacement == null) ? 0 : replacement.size().longValue());
-    indexByStartOffset();
-    indexByEndOffset();
-    Iterator replacedAreaNodesIter =
-        nodesByOffset.subMap(start, end).values().iterator();
-    while (replacedAreaNodesIter.hasNext()) {
-      Node n = (Node) replacedAreaNodesIter.next();
-      // remove from nodes map
-//      if(true)
-//        throw new LazyProgrammerException("this next call tries to remove " +
-//          "from a map based on the value; note index is key; also note that " +
-//          "some nodes may have no index....");
-//There is at most one node at any given location so removing is safe.
-//Also note that unrooted nodes have never been implemented so all nodes have
-//offset
-      nodesByOffset.remove(n.getOffset());
-      // remove annots that start at this node
-      AnnotationSet invalidatedAnnots =
-          (AnnotationSet) annotsByStartNode.get(n.getId());
-      if (invalidatedAnnots != null && invalidatedAnnots.size() > 0)
-        removeAll(invalidatedAnnots);
-      // remove annots that end at this node
-      invalidatedAnnots = (AnnotationSet) annotsByEndNode.get(n.getId());
-      if (invalidatedAnnots != null && invalidatedAnnots.size() > 0)
-        removeAll(invalidatedAnnots);
-    } // loop over replaced area nodes
 
-    // update the offsets and the index byt offset for the rest of the nodes
+    // update the offsets and the index by offset for the rest of the nodes
     List nodesAfterReplacement = new ArrayList(
-        nodesByOffset.tailMap(end).values());
+        nodesByOffset.tailMap(start).values());
 
     //remove from the index by offset
     Iterator nodesAfterReplacementIter = nodesAfterReplacement.iterator();
@@ -896,7 +929,11 @@ public class AnnotationSetImpl
     while (nodesAfterReplacementIter.hasNext()) {
       NodeImpl n = (NodeImpl) nodesAfterReplacementIter.next();
       long oldOffset = n.getOffset().longValue();
-      n.setOffset(new Long(oldOffset - ( (e - s) - rlen)));
+      //by default we move all nodes back
+      long newOffset = oldOffset - ( (e - s) - rlen);
+      //for the first node we need behave differently if we prepend
+      if(oldOffset == s && shouldPrepend) newOffset = s;
+      n.setOffset(new Long(newOffset));
     }
     //add back to the index by offset with the new offsets
     nodesAfterReplacementIter = nodesAfterReplacement.iterator();
