@@ -10,25 +10,66 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Mon Oct 15 17:36:34 2001
+ *  auto generated: Mon Oct 15 19:20:04 2001
  *
  *  $Id$
  *
  */
 
 
-DROP INDEX XT_GROUP_01;
+CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON T_ANNOTATION_TYPE
+(
+       AT_NAME                        
+);
+
+CREATE UNIQUE INDEX XT_DOC_ENCODING_01 ON T_DOC_ENCODING
+(
+       ENC_NAME                       
+);
 
 CREATE UNIQUE INDEX XT_GROUP_01 ON T_GROUP
 (
        GRP_NAME                       
 );
 
-DROP INDEX XT_USER_GROUP_01;
+CREATE UNIQUE INDEX XT_LANG_RESOURCE_01 ON T_LANG_RESOURCE
+(
+       LR_LOCKING_USER_ID             
+);
+
+CREATE UNIQUE INDEX XT_LANG_RESOURCE_02 ON T_LANG_RESOURCE
+(
+       LR_OWNER_GROUP_ID              
+);
+
+CREATE UNIQUE INDEX XT_LANG_RESOURCE_03 ON T_LANG_RESOURCE
+(
+       LR_OWNER_USER_ID               
+);
+
+CREATE UNIQUE INDEX XT_LR_TYPE_01 ON T_LR_TYPE
+(
+       LRTP_TYPE                      
+);
+
+CREATE UNIQUE INDEX XT_USER_02 ON T_USER
+(
+       USR_PASS                       
+);
+
+CREATE INDEX XT_USER_01 ON T_USER
+(
+       USR_LOGIN                      
+);
 
 CREATE UNIQUE INDEX XT_USER_GROUP_01 ON T_USER_GROUP
 (
        UGRP_USER_ID                   ,
+       UGRP_GROUP_ID                  
+);
+
+CREATE UNIQUE INDEX XT_USER_GROUP_02 ON T_USER_GROUP
+(
        UGRP_GROUP_ID                  
 );
 
