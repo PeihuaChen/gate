@@ -1,0 +1,5 @@
+WordListLower.lst:common
+WordListUpper.lst:commonUpper
+abbreviations.lst:abbreviation
+letters.lst:singleUpper
+numbers.lst:number
