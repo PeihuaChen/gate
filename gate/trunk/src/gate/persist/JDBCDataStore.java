@@ -427,10 +427,9 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
     Assert.assertNotNull(this.datastoreListeners);
 
-    Vector temp = (Vector)this.datastoreListeners.clone();
-    temp.remove(l);
-
-    this.datastoreListeners = temp;
+    synchronized(this.datastoreListeners) {
+      this.datastoreListeners.remove(l);
+    }
   }
 
 
@@ -438,12 +437,20 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * Registers a new {@link gate.event.DatastoreListener} with this datastore
    */
   public void addDatastoreListener(DatastoreListener l) {
-//System.out.println("listener added...");
+
     Assert.assertNotNull(this.datastoreListeners);
-    if (false == this.datastoreListeners.contains(l)) {
+
+    //this is not thread safe
+/*    if (false == this.datastoreListeners.contains(l)) {
       Vector temp = (Vector)this.datastoreListeners.clone();
       temp.add(l);
       this.datastoreListeners = temp;
+    }
+*/
+    synchronized(this.datastoreListeners) {
+      if (false == this.datastoreListeners.contains(l)) {
+        this.datastoreListeners.add(l);
+      }
     }
   }
 
