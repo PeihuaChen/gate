@@ -41,6 +41,8 @@ public class TestPR extends TestCase
   protected static Document doc2;
   protected static Document doc3;
 
+  protected static List annotationTypes = new ArrayList(10);
+
   /** Construction */
   public TestPR(String name) { super(name); }
 
@@ -65,6 +67,13 @@ public class TestPR extends TestCase
           "tests/in-outlook-09-aug-2001.html")
       );
 
+    annotationTypes.add("Organization");
+    annotationTypes.add("Location");
+    annotationTypes.add("Person");
+    annotationTypes.add("Date");
+    annotationTypes.add("Money");
+    annotationTypes.add("Lookup");
+    annotationTypes.add("Token");
   } // setUp
 
   /** Put things back as they should be after running tests.
@@ -342,19 +351,13 @@ public class TestPR extends TestCase
   /** A test for comparing the annotation sets*/
   public void testAllPR() throws Exception {
 
-    // create annotation schema
-    AnnotationSchema annotationSchema = new AnnotationSchema();
-
     // verify if the saved data store is the same with the just processed file
     // first document
     String urlBaseName = Gate.locateGateFiles();
-
-
 //    RE re1 = new RE("build/gate.jar!");
 //    RE re2 = new RE("jar:");
 //    urlBaseName = re1.substituteAll( urlBaseName,"classes");
 //    urlBaseName = re2.substituteAll( urlBaseName,"");
-
 
     if (urlBaseName.endsWith("/gate/build/gate.jar!/")) {
       StringBuffer buff = new StringBuffer(
@@ -389,181 +392,7 @@ public class TestPR extends TestCase
     Document document = (Document) Factory.createResource(
                                       "gate.corpora.DocumentImpl",
                                       features);
-    // get annotation set
-    AnnotationSet annotSet = document.getAnnotations();
-    // get the annotation set from the first processed document
-    AnnotationSet annotSet1 = doc1.getAnnotations();
-    // compare the annotation set
-
-    // organization type
-    annotationSchema.setAnnotationName("Organization");
-    // create an annotation diff
-    FeatureMap parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    AnnotationDiff annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    if (annotDiff.getFMeasureAverage() != 1.0) {
-      Err.prln("missing annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
-      Err.prln("spurious annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
-      Err.prln("partially-correct annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
-    }
-    assertTrue("Organization precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Organization recall average in ft-bt-03-aug-2001.html is " +
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Organization f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // location type
-    annotationSchema.setAnnotationName("Location");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Location precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Location recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Location f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // person type
-    annotationSchema.setAnnotationName("Person");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Person precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Person recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Person f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-     // date type
-    annotationSchema.setAnnotationName("Date");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Date precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Date recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Date f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // money type
-    annotationSchema.setAnnotationName("Money");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Money precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Money recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Money f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // Lookup type
-    annotationSchema.setAnnotationName("Lookup");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Lookup precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Lookup recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Lookup f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // Token type
-    annotationSchema.setAnnotationName("Token");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc1);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Token precision average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Token recall average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Token f-measure average in ft-bt-03-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
+    compareAnnots(document, doc1);
 
     // second document
     storageDir = null;
@@ -581,182 +410,7 @@ public class TestPR extends TestCase
     document = (Document) Factory.createResource(
                                       "gate.corpora.DocumentImpl",
                                       features);
-    // get annotation set
-    annotSet = document.getAnnotations();
-
-    // get the annotation set from the second processed document
-    AnnotationSet annotSet2 = doc2.getAnnotations();
-
-
-    // organization type
-    annotationSchema.setAnnotationName("Organization");
-    // create an annotation diff
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    if (annotDiff.getFMeasureAverage() != 1.0) {
-      Err.prln("missing annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
-      Err.prln("spurious annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
-      Err.prln("partially-correct annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
-    }
-    assertTrue("Organization precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Organization recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Organization f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // location type
-    annotationSchema.setAnnotationName("Location");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Location precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Location recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Location f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // person type
-    annotationSchema.setAnnotationName("Person");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Person precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Person recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Person f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-     // date type
-    annotationSchema.setAnnotationName("Date");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Date precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Date recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Date f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // money type
-    annotationSchema.setAnnotationName("Money");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Money precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Money recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Money f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // Lookup type
-    annotationSchema.setAnnotationName("Lookup");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Lookup precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Lookup recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Lookup f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // Token type
-    annotationSchema.setAnnotationName("Token");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc2);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Token precision average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Token recall average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Token f-measure average in gu-Am-Brit-4-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
+    compareAnnots(document,doc2);
 
     // third document
     storageDir = null;
@@ -771,192 +425,66 @@ public class TestPR extends TestCase
     features = Factory.newFeatureMap();
     features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
     features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
-    //kalina: fixed one more cut&paste error here!
-    //used to be Document doc =
-    //but then document was passed for comparison and of course,
-    //when comparing with a completely doffierent document
-    //nothing matches!!!
     document = (Document) Factory.createResource(
                                 "gate.corpora.DocumentImpl",
                                 features);
-    // get annotation set
-    annotSet = document.getAnnotations();
-    // get the annotation set from the third processed document
-    AnnotationSet annotSet3 = doc3.getAnnotations();
-
-    // organization type
-    annotationSchema.setAnnotationName("Organization");
-    // create an annotation diff
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    if (annotDiff.getFMeasureAverage() != 1.0) {
-      Err.prln("missing annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
-      Err.prln("spurious annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
-      Err.prln("partially-correct annotations " +
-        annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
-    }
-    assertTrue("Organization precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Organization recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Organization f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // location type
-    annotationSchema.setAnnotationName("Location");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Location precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-
-    assertTrue("Location recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-
-    assertTrue("Location f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // person type
-    annotationSchema.setAnnotationName("Person");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Person precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Person recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Person f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-     // date type
-    annotationSchema.setAnnotationName("Date");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Date precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Date recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Date f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // money type
-    annotationSchema.setAnnotationName("Money");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Money precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Money recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Money f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // Lookup type
-    annotationSchema.setAnnotationName("Lookup");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Lookup precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Lookup recall average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Lookup f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
-
-    // Token type
-    annotationSchema.setAnnotationName("Token");
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",document);
-    parameters.put("responseDocument",doc3);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",null);
-    parameters.put("responseAnnotationSetName",null);
-
-    // Create Annotation Diff visual resource
-    annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-
-    assertTrue("Token precision average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-      annotDiff.getPrecisionAverage()== 1.0);
-    assertTrue("Token recall average is in in-outlook-09-aug-2001.html "+
-      annotDiff.getRecallAverage()+ " instead of 1.0 ",
-      annotDiff.getRecallAverage()== 1.0);
-    assertTrue("Token f-measure average in in-outlook-09-aug-2001.html is "+
-      annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-      annotDiff.getFMeasureAverage()== 1.0);
+    compareAnnots(document,doc3);
   } // testAllPR()
 
+  public void compareAnnots(Document keyDocument, Document responseDocument){
+
+    // create annotation schema
+    AnnotationSchema annotationSchema = new AnnotationSchema();
+    String annotType = null;
+
+    // organization type
+    Iterator iteratorTypes = annotationTypes.iterator();
+    while (iteratorTypes.hasNext()){
+      // get the type of annotation
+      annotType = (String)iteratorTypes.next();
+
+      annotationSchema.setAnnotationName(annotType);
+
+      // create an annotation diff
+      FeatureMap parameters = Factory.newFeatureMap();
+      parameters.put("keyDocument",keyDocument);
+      parameters.put("responseDocument",responseDocument);
+      parameters.put("annotationSchema",annotationSchema);
+      parameters.put("keyAnnotationSetName",null);
+      parameters.put("responseAnnotationSetName",null);
+
+      // Create Annotation Diff visual resource
+      try {
+      AnnotationDiff annotDiff = (AnnotationDiff)
+          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
+
+      if (annotDiff.getFMeasureAverage() != 1.0) {
+        Err.prln("missing annotations " +
+          annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE));
+        Err.prln("spurious annotations " +
+          annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE));
+        Err.prln("partially-correct annotations " +
+         annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE));
+      }
+
+      assertTrue(annotType+ " precision average in "+
+        responseDocument.getSourceUrl().getFile()+
+        " is "+ annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
+        annotDiff.getPrecisionAverage()== 1.0);
+      assertTrue(annotType+" recall average in "
+        +responseDocument.getSourceUrl().getFile()+
+        " is " + annotDiff.getRecallAverage()+ " instead of 1.0 ",
+        annotDiff.getRecallAverage()== 1.0);
+      assertTrue(annotType+" f-measure average in "
+        +responseDocument.getSourceUrl().getFile()+
+        " is "+ annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+        annotDiff.getFMeasureAverage()== 1.0);
+      } catch (ResourceInstantiationException rie) {
+        rie.printStackTrace(Err.getPrintWriter());
+      }
+
+     }//while
+   }// public void compareAnnots
 
   /** Test suite routine for the test runner */
   public static Test suite() {
