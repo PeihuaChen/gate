@@ -16,16 +16,20 @@
 package gate.creole.coref;
 
 import java.util.*;
+import java.net.*;
 
 import junit.framework.*;
 
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
+import gate.annotation.*;
 
 public class PronominalCoref extends AbstractLanguageAnalyser
                               implements ProcessingResource{
 
+  //JAPE grammars
+  private static final String QT_GRAMMAR_URL = "gate://gate/creole/coref/quoted.jape";
 
   //annotation types
   private static final String PERSON_TYPE = "Person";
@@ -33,6 +37,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private static final String LOC_TYPE = "Location";
   private static final String TOKEN_TYPE = "Token";
   private static final String SENTENCE_TYPE = "Sentence";
+  private static final String QUOTED_TEXT_TYPE = "Quoted Text";
 
   //annotation features
   private static final String PRP_CATEGORY = "PRP";
@@ -45,24 +50,43 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   //scope
   private static final int SENTENCES_IN_SCOPE = 3;
 
-  private /*static*/ AnnotationComparator ANNOTATION_COMPARATOR;
+  private static AnnotationOffsetComparator ANNOTATION_OFFSET_COMPARATOR;
 
   private AnnotationSet defaultAnnotations;
   private Sentence[] textSentences;
+  private Quote[] quotedText;
   private HashMap personGender;
+  private Transducer qtTransducer;
 
-/*  static {
-System.out.println("proCoref::static");
-    ANNOTATION_COMPARATOR = new AnnotationComparator();
+  static {
+    ANNOTATION_OFFSET_COMPARATOR = new AnnotationOffsetComparator();
   }
-*/
+
   public PronominalCoref() {
-    personGender = new HashMap();
-ANNOTATION_COMPARATOR = new AnnotationComparator();
+
+    this.personGender = new HashMap();
+    this.qtTransducer = new gate.creole.Transducer();
   }
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
+
+    //0. preconditions
+    Assert.assertNotNull(this.qtTransducer);
+
+    //1. initialise quoted text transducer
+    URL qtGrammarURL = null;
+    try {
+      qtGrammarURL = new URL(QT_GRAMMAR_URL);
+    }
+    catch(MalformedURLException mue) {
+      throw new ResourceInstantiationException(mue);
+    }
+    this.qtTransducer.setGrammarURL(qtGrammarURL);
+    this.qtTransducer.setEncoding("UTF-8");
+    this.qtTransducer.init();
+
+    //2. delegate
     return super.init();
   } // init()
 
@@ -75,22 +99,26 @@ ANNOTATION_COMPARATOR = new AnnotationComparator();
    * resource will change too after calling reInit().
   */
   public void reInit() throws ResourceInstantiationException {
+
+    if (null != this.qtTransducer) {
+      this.qtTransducer.reInit();
+    }
+
     init();
   } // reInit()
 
-  /** Get the document we're running on. */
-/*  public Document getDocument() {
-    return this.doc;
-  }
-*/
-
   /** Set the document to run on. */
-/*
   public void setDocument(Document newDocument) {
+
+    //0. precondition
     Assert.assertNotNull(newDocument);
+
+    //1. set doc for aggregated components
+    this.qtTransducer.setDocument(newDocument);
+
+    //2. delegate
     super.setDocument(newDocument);
   }
-*/
 
   /**
    * This method runs the coreferencer. It assumes that all the needed parameters
@@ -114,12 +142,12 @@ ANNOTATION_COMPARATOR = new AnnotationComparator();
 
     //3.get personal pronouns
     FeatureMap constraintPRP = new SimpleFeatureMapImpl();
-    constraintPRP.put("category",PRP_CATEGORY);
+    constraintPRP.put(TOKEN_CATEGORY,PRP_CATEGORY);
     AnnotationSet personalPronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraintPRP);
 
     //4.get possesive pronouns
     FeatureMap constraintPRP$ = new SimpleFeatureMapImpl();
-    constraintPRP$.put("category",PRP$_CATEGORY);
+    constraintPRP$.put(TOKEN_CATEGORY,PRP$_CATEGORY);
     AnnotationSet possesivePronouns = this.defaultAnnotations.get(TOKEN_TYPE,constraintPRP$);
 
     //5.combine them
@@ -139,14 +167,15 @@ ANNOTATION_COMPARATOR = new AnnotationComparator();
 
     //7.sort them according to offset
     Object[] arrPronouns = pronouns.toArray();
-    java.util.Arrays.sort(arrPronouns,ANNOTATION_COMPARATOR);
+    java.util.Arrays.sort(arrPronouns,ANNOTATION_OFFSET_COMPARATOR);
 
     //8.cleanup - ease the GC
     pronouns = personalPronouns = possesivePronouns = null;
 
     int prnSentIndex = 0;
 
-    //9. process all pronouns
+
+    //10. process all pronouns
     for (int i=0; i< arrPronouns.length; i++) {
       Annotation currPronoun = (Annotation)arrPronouns[i];
       while (this.textSentences[prnSentIndex].getEndOffset().longValue() <
@@ -158,10 +187,10 @@ ANNOTATION_COMPARATOR = new AnnotationComparator();
       Assert.assertTrue(currSentence.getStartOffset().longValue() <= currPronoun.getStartNode().getOffset().longValue());
       Assert.assertTrue(currSentence.getEndOffset().longValue() >= currPronoun.getEndNode().getOffset().longValue());
 
-      //10. find antecedent (if any) for pronoun
+      //11. find antecedent (if any) for pronoun
       Annotation antc = findAntecedent(currPronoun,prnSentIndex);
 
-      //11.create temp annotation set
+      //12.add to COREF annotation set
       corefSet = this.document.getAnnotations("COREF");
       Long antOffset = new Long(0);
 
@@ -169,11 +198,13 @@ ANNOTATION_COMPARATOR = new AnnotationComparator();
         antOffset = antc.getStartNode().getOffset();
       }
 
-      //12. create coref annotation
+      //13. create coref annotation
       FeatureMap features = new SimpleFeatureMapImpl();
       features.put("antecedent",antOffset);
       corefSet.add(currPronoun.getStartNode(),currPronoun.getEndNode(),"COREF",features);
     }
+
+    //done
   }
 
   private Annotation findAntecedent(Annotation currPronoun,int prnSentIndex) {
@@ -184,20 +215,13 @@ ANNOTATION_COMPARATOR = new AnnotationComparator();
     Assert.assertTrue(currPronoun.getType().equals(TOKEN_TYPE));
     Assert.assertTrue(currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
                       currPronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
-//    Assert.assertNotNull(currPronoun.getFeatures().get("string"));
 
+    //1.
     String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING);
 
-    //Assert.assertNotNull(strPronoun);
-if (null == strPronoun) {
-  System.out.println("NULL pronoun! ["+currPronoun+"]");
-  System.out.println("key=["+TOKEN_STRING+"]");
-  System.out.println("value ["+currPronoun.getFeatures().get(TOKEN_STRING)+"]");
-  System.out.println("features=["+currPronoun.getFeatures()+"]");
-  System.out.println("value2 ["+currPronoun.getFeatures().get("string")+"]");
-  System.out.println("["+ "string".equals(TOKEN_STRING) +"]");
-}
+    Assert.assertNotNull(strPronoun);
 
+    //2. delegate processing to the appropriate methods
     if (strPronoun.equalsIgnoreCase("HE") ||
         strPronoun.equalsIgnoreCase("HIM") ||
         strPronoun.equalsIgnoreCase("HIS")) {
@@ -205,11 +229,16 @@ if (null == strPronoun) {
     }
     else if (strPronoun.equalsIgnoreCase("SHE") ||
               strPronoun.equalsIgnoreCase("HER")) {
-      return this._resolve$SHE$HER$(currPronoun,prnSentIndex);
+      return _resolve$SHE$HER$(currPronoun,prnSentIndex);
     }
     else if (strPronoun.equalsIgnoreCase("IT") ||
               strPronoun.equalsIgnoreCase("ITS")) {
-      return this._resolve$IT$ITS$(currPronoun,prnSentIndex);
+      return _resolve$IT$ITS$(currPronoun,prnSentIndex);
+    }
+    else if (strPronoun.equalsIgnoreCase("I") ||
+              strPronoun.equalsIgnoreCase("ME") ||
+              strPronoun.equalsIgnoreCase("MY")) {
+      return _resolve$I$ME$MY$(currPronoun,prnSentIndex);
     }
     else {
 //      throw new MethodNotImplementedException();
@@ -217,6 +246,7 @@ if (null == strPronoun) {
       return null;
     }
   }
+
 
 
   private Annotation _resolve$HE$HIM$HIS$(Annotation pronoun, int sentenceIndex) {
@@ -257,7 +287,7 @@ if (null == strPronoun) {
             bestAntecedent = currPerson;
           }
           else {
-            bestAntecedent = chooseAntecedent(bestAntecedent,currPerson,pronoun);
+            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$(bestAntecedent,currPerson,pronoun);
           }
         }
       }
@@ -307,7 +337,7 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
             bestAntecedent = currPerson;
           }
           else {
-            bestAntecedent = chooseAntecedent(bestAntecedent,currPerson,pronoun);
+            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$(bestAntecedent,currPerson,pronoun);
           }
         }
       }
@@ -372,7 +402,96 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
 
   }
 
-  private void preprocess() {
+
+  private Annotation _resolve$I$ME$MY$(Annotation pronoun, int sentenceIndex) {
+
+    //0. preconditions
+    Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY) ||
+                      pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
+    String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
+    Assert.assertTrue(pronounString.equalsIgnoreCase("I") ||
+                      pronounString.equalsIgnoreCase("MY") ||
+                      pronounString.equalsIgnoreCase("ME"));
+
+    //1.
+    Annotation bestAntecedent = null;
+
+    int closestQuoteIndex = java.util.Arrays.binarySearch(this.quotedText,pronoun,ANNOTATION_OFFSET_COMPARATOR);
+    //normalize index
+    if (closestQuoteIndex < 0) {
+      closestQuoteIndex = -closestQuoteIndex -1 -1;
+    }
+
+    //get closest Quote
+    Quote quoteContext = this.quotedText[closestQuoteIndex];
+
+    //assure that the pronoun is contained in the quoted text fragment
+    //otherwise exit
+
+    if (pronoun.getStartNode().getOffset().intValue() > quoteContext.getEndOffset().intValue() ||
+        pronoun.getEndNode().getOffset().intValue() < quoteContext.getStartOffset().intValue()) {
+      //oops, probably incorrect text - I/My/Me is not part of quoted text fragment
+      //exit
+System.out.println("Oops! ["+pronounString+"] not part of quoted fragment...");
+      return null;
+    }
+
+    //get the Persons that precede/succeed the quoted fragment
+    //the order is:
+    //
+    //[1]. if there exists a Person or pronoun in {he, she} following the quoted fragment but
+    //in the same sentence, then use it
+    //i.e.  ["PRN1(x)...", said X ...A, B, C ....]
+    //
+    //[2]. if there is a Person (NOT a pronoun) in the same sentence,
+    // preceding the quote, then use it
+    //i.e. . [A, B, C...X ..."PRN1(x) ..."...]
+    //
+
+    //try [1]
+    //get the succeeding Persons/pronouns
+    AnnotationSet succCandidates = quoteContext.getAntecedentCandidates(Quote.END_SENTENCE);
+    if (false == succCandidates.isEmpty()) {
+      //cool, we have candidates, pick up the one closest to the end quote
+      Iterator it = succCandidates.iterator();
+
+      while (it.hasNext()) {
+        Annotation currCandidate = (Annotation)it.next();
+        if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) > 0) {
+          //wow, we have a candidate that is closer to the quote
+          bestAntecedent = currCandidate;
+        }
+      }
+
+      //that's all
+      return bestAntecedent;
+    }
+
+    //try [2]
+    //get the preceding Persons/pronouns
+    AnnotationSet precCandidates = quoteContext.getAntecedentCandidates(Quote.START_SENTENCE);
+    if (false == precCandidates.isEmpty()) {
+      //cool, we have candidates, pick up the one closest to the end quote
+      Iterator it = precCandidates.iterator();
+
+      while (it.hasNext()) {
+        Annotation currCandidate = (Annotation)it.next();
+        if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) < 0) {
+          //wow, we have a candidate that is closer to the quote
+          bestAntecedent = currCandidate;
+        }
+      }
+
+      //that's all
+      return bestAntecedent;
+    }
+
+gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
+    return bestAntecedent;
+  }
+
+  private void preprocess() throws ExecutionException {
 
     //0.5 cleanup
     this.personGender.clear();
@@ -380,13 +499,20 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     //1.get all annotation in the default set
     this.defaultAnnotations = this.document.getAnnotations();
 
+    //1.5 remove QT annotation sif left from previous execution
+    AnnotationSet qtSet = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
+    qtSet.clear();
+
+    //1.6. run quoted text transducer to generate "Quoted Text" annotations
+    this.qtTransducer.execute();
+
     //2.get all SENTENCE annotations
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_TYPE);
 
     this.textSentences = new Sentence[sentenceAnnotations.size()];
     Object[]  sentenceArray = sentenceAnnotations.toArray();
 
-    java.util.Arrays.sort(sentenceArray,ANNOTATION_COMPARATOR);
+    java.util.Arrays.sort(sentenceArray,ANNOTATION_OFFSET_COMPARATOR);
 
     for (int i=0; i< sentenceArray.length; i++) {
 
@@ -409,7 +535,7 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
                                                               sentStartOffset,
                                                               sentEndOffset);
 
-      //2.4. create a Sentence for thei SENTENCE annotation
+      //2.5. create a Sentence for thei SENTENCE annotation
       this.textSentences[i] = new Sentence(i,
                                             0,
                                             sentStartOffset,
@@ -419,7 +545,7 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
                                             sentLocs
                                   );
 
-      //2.5. for all PERSONs in the sentence - find their gender using the
+      //2.6. for all PERSONs in the sentence - find their gender using the
       //orthographic coreferences if the gender of some entity is unknown
       Iterator itPersons = sentPersons.iterator();
       while (itPersons.hasNext()) {
@@ -429,6 +555,16 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
       }
     }
 
+    //3. get the quoted text fragments
+    AnnotationSet sentQuotes = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
+    this.quotedText = new Quote[sentQuotes.size()];
+
+    Object[] quotesArray = sentQuotes.toArray();
+    java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
+
+    for (int i =0; i < quotesArray.length; i++) {
+      this.quotedText[i] = new Quote((Annotation)quotesArray[i]);
+    }
   }
 
 
@@ -461,24 +597,50 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
   }
 
 
-  private /*static*/ class AnnotationComparator implements Comparator {
+  private static class AnnotationOffsetComparator implements Comparator {
+
+    private int _getOffset(Object o) {
+
+      if (o instanceof Annotation) {
+        return ((Annotation)o).getEndNode().getOffset().intValue();
+      }
+      else if (o instanceof Sentence) {
+        return ((Sentence)o).getStartOffset().intValue();
+      }
+      else if (o instanceof Quote) {
+        return ((Quote)o).getStartOffset().intValue();
+      }
+      else if (o instanceof Node) {
+        return ((Node)o).getOffset().intValue();
+      }
+      else {
+        throw new IllegalArgumentException();
+      }
+    }
 
     public int compare(Object o1,Object o2) {
 
+      //0. preconditions
       Assert.assertNotNull(o1);
       Assert.assertNotNull(o2);
-      Assert.assertTrue(o1 instanceof Annotation);
-      Assert.assertTrue(o2 instanceof Annotation);
+      Assert.assertTrue(o1 instanceof Annotation ||
+                        o1 instanceof Sentence ||
+                        o1 instanceof Quote ||
+                        o1 instanceof Node);
+      Assert.assertTrue(o2 instanceof Annotation ||
+                        o2 instanceof Sentence ||
+                        o2 instanceof Quote ||
+                        o2 instanceof Node);
 
-      Annotation a1 = (Annotation)o1;
-      Annotation a2 = (Annotation)o2;
+      int offset1 = _getOffset(o1);
+      int offset2 = _getOffset(o2);
 
-      return (a1.getEndNode().getOffset().intValue() - a2.getEndNode().getOffset().intValue());
+      return offset1 - offset2;
     }
   }
 
 
-  private Annotation chooseAntecedent(Annotation ant1, Annotation ant2, Annotation pronoun) {
+  private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
     Assert.assertNotNull(ant1);
@@ -585,6 +747,121 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
   }
 
 
+  private class Quote {
+
+    public static final int END_SENTENCE = 1;
+    public static final int START_SENTENCE = 2;
+    public static final int PREV_SENTENCE = 3;
+
+    private AnnotationSet precPersonsInSentence;
+    private AnnotationSet succPersonsInSentence;
+    private AnnotationSet precPersonsInContext;
+    private Annotation quoteAnnotation;
+
+    public Quote(Annotation quoteAnnotation) {
+
+      this.quoteAnnotation = quoteAnnotation;
+      init();
+    }
+
+    private void init() {
+
+      //0.preconditions
+      Assert.assertNotNull(textSentences);
+
+      //1. generate the precPersons set
+
+      //1.1 locate the sentece containing the opening quote marks
+      int quoteStartPos = java.util.Arrays.binarySearch(textSentences,
+                                                        this.quoteAnnotation.getStartNode(),
+                                                        ANNOTATION_OFFSET_COMPARATOR);
+      int startSentenceIndex = -quoteStartPos -1 -1; // blame Sun, not me
+
+      //1.2. get the persons and restrict to these that precede the quote (i.e. not contained
+      //in the quote)
+      this.precPersonsInSentence = new AnnotationSetImpl(
+                                              textSentences[startSentenceIndex].getPersons());
+      Iterator itPersons = this.precPersonsInSentence.iterator();
+      while (itPersons.hasNext()) {
+        Annotation currPerson = (Annotation)itPersons.next();
+        if (currPerson.getStartNode().getOffset().intValue() > getStartOffset().intValue()) {
+          itPersons.remove();
+        }
+      }
+
+      //2. generate the precPersonsInCOntext set
+      //2.1. get the persons from the sentence precedeing the sentence containing the quote start
+      if (startSentenceIndex > 0) {
+        this.precPersonsInContext = new AnnotationSetImpl(
+                                            textSentences[startSentenceIndex-1].getPersons());
+      }
+
+      //2. generate the succ  Persons set
+      //2.1 locate the sentece containing the closing quote marks
+      int quoteEndPos = java.util.Arrays.binarySearch(textSentences,
+                                                        this.quoteAnnotation.getEndNode(),
+                                                        ANNOTATION_OFFSET_COMPARATOR);
+      int endSentenceIndex = -quoteEndPos -1 -1; // blame Sun, not me
+      Sentence endSentence = textSentences[endSentenceIndex];
+
+      //2.2. get the persons and restrict to these that succeed the quote (i.e. not contained
+      //in the quoted fragment)
+      this.succPersonsInSentence = new AnnotationSetImpl(endSentence.getPersons());
+      itPersons = this.succPersonsInSentence.iterator();
+
+      while (itPersons.hasNext()) {
+        Annotation currPerson = (Annotation)itPersons.next();
+        if (currPerson.getStartNode().getOffset().intValue() < this.getEndOffset().intValue()) {
+          itPersons.remove();
+        }
+      }
+
+      //2.3 now get all HE/SHE pronouns that follow the quote in the same sentence
+      AnnotationSet sentPronouns = defaultAnnotations.getContained(this.getEndOffset(),
+                                                                  endSentence.getEndOffset());
+      FeatureMap restriction = new SimpleFeatureMapImpl();
+      restriction.put(TOKEN_CATEGORY,PRP_CATEGORY);
+
+      AnnotationSet personalPronouns = null;
+      if (null != sentPronouns) {
+        personalPronouns = sentPronouns.get(TOKEN_TYPE,restriction);
+
+        if (null != personalPronouns) {
+          //add to succPersons
+          this.succPersonsInSentence.addAll(personalPronouns);
+        }
+      }
+    }
+
+    public Long getStartOffset() {
+      return this.quoteAnnotation.getStartNode().getOffset();
+    }
+
+    public Long getEndOffset() {
+      return this.quoteAnnotation.getEndNode().getOffset();
+    }
+
+    public AnnotationSet getAntecedentCandidates(int type) {
+
+      switch(type) {
+
+        case END_SENTENCE:
+          return this.succPersonsInSentence;
+
+        case START_SENTENCE:
+          return this.precPersonsInSentence;
+
+        case PREV_SENTENCE:
+          return this.precPersonsInContext;
+
+        default:
+          throw new IllegalArgumentException();
+      }
+    }
+
+  }
+
+
   private class Sentence {
 
     private int sentNumber;
@@ -595,7 +872,6 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     private AnnotationSet persons;
     private AnnotationSet organizations;
     private AnnotationSet locations;
-
 
     public Sentence(int sentNumber,
                     int paraNumber,
@@ -612,9 +888,6 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
       this.persons = persons;
       this.organizations = organizations;
       this.locations = locations;
-    }
-
-    public void addEntity(Annotation entAnnotation,String entType) {
     }
 
     public Long getStartOffset() {
