@@ -163,6 +163,10 @@ public class NameBearerHandle implements Handle,
                                         KeyEvent.VK_X, ActionEvent.CTRL_MASK));
 
         popup.add(saveAsXmlItem);
+        XJMenuItem savePreserveFormatItem =
+                         new XJMenuItem(new DumpPreserveFormatAction(),
+                                        sListenerProxy);
+        popup.add(savePreserveFormatItem);
       }else if(target instanceof Corpus){
         popup.addSeparator();
         corpusFiller = new CorpusFillerComponent();
@@ -407,6 +411,87 @@ public class NameBearerHandle implements Handle,
       thread.start();
     }// actionPerformed()
   }// SaveAsXmlAction
+
+  /**
+   * The action that is fired when the user wants to dump annotations
+   * preserving the original document format.
+   */
+  protected class DumpPreserveFormatAction extends AbstractAction{
+//    private Set annotationsToDump = null;
+
+    public DumpPreserveFormatAction(){
+      super("Save preserving document format");
+    }
+
+
+    /** This method takes care of how the dumping is done*/
+    public void actionPerformed(ActionEvent e){
+      Runnable runableAction = new Runnable(){
+        public void run(){
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          File selectedFile = null;
+
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setDialogTitle("Select document to save ...");
+          fileChooser.setSelectedFiles(null);
+
+          int res = (getLargeView() != null) ?
+                                  fileChooser.showDialog(getLargeView(), "Save"):
+                    (getSmallView() != null) ?
+                                  fileChooser.showDialog(getSmallView(), "Save") :
+                                              fileChooser.showDialog(null, "Save");
+          if(res == JFileChooser.APPROVE_OPTION){
+            selectedFile = fileChooser.getSelectedFile();
+            fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+            if(selectedFile == null) return;
+            if (NameBearerHandle.this!= null)
+              NameBearerHandle.this.statusChanged("Please wait while dumping annotations"+
+              "in the original format to " + selectedFile.toString() + " ...");
+            // This method construct a set with all annotations that need to be
+            // dupmped as Xml. If the set is null then only the original markups
+            // are dumped.
+            Set annotationsToDump = null;
+            //find the shown document editor. If none, just dump the original
+            //markup annotations, i.e., leave the annotationsToDump null
+            if (largeView instanceof JTabbedPane) {
+              Component shownComponent =
+                ((JTabbedPane) largeView).getSelectedComponent();
+              if (shownComponent instanceof DocumentEditor) {
+                //so we only get annotations for dumping if they are shown in the
+                //table of the document editor, which is currently in front
+                //of the user
+                annotationsToDump =
+                  ((DocumentEditor) shownComponent).getDisplayedAnnotations();
+              }//if we have a document editor
+            }//if tabbed pane
+            try{
+              // Prepare to write into the xmlFile using UTF-8 encoding
+              OutputStreamWriter writer = new OutputStreamWriter(
+                                    new FileOutputStream(selectedFile),"UTF-8");
+
+              // Write (test the toXml() method)
+              // This Action is added only when a gate.Document is created.
+              // So, is for sure that the resource is a gate.Document
+              writer.write(((gate.Document)target).toXml(annotationsToDump));
+              writer.flush();
+              writer.close();
+            } catch (Exception ex){
+              ex.printStackTrace(Out.getPrintWriter());
+            }// End try
+            if (NameBearerHandle.this!= null)
+              NameBearerHandle.this.statusChanged("Finished dumping into the "+
+              "file : " + selectedFile.toString());
+          }// End if
+        }// End run()
+      };// End Runnable
+      Thread thread = new Thread(runableAction, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }//public void actionPerformed(ActionEvent e)
+
+  }//class DumpPreserveFormatAction
+
 
   /**
    * Saves a corpus as a set of xml files in a directory.
