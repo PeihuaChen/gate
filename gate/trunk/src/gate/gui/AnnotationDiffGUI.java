@@ -576,7 +576,7 @@ public class AnnotationDiffGUI extends JFrame{
             int row,
             int column){
       Component res = super.getTableCellRendererComponent(table,
-              value, false, true, row, column);
+              value, false, hasFocus, row, column);
       res.setBackground(isSelected ? table.getSelectionBackground() :
               diffTableModel.getBackgroundAt(diffTable.rowViewToModel(row),
                       column));
