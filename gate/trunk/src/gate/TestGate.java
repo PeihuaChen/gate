@@ -207,8 +207,9 @@ public class TestGate {
       // Test bench
       ////////////////////////////////////////////////
       // set this true to run all tests; false to run the just one below
-      boolean allTests = true;
+      boolean allTests = false;
       if(! allTests){
+//        suite.addTest(TestDiffer.suite());
         suite.addTest(TestPR.suite());
       } else {
         suite.addTest(TestWordNet.suite());
@@ -237,6 +238,7 @@ public class TestGate {
         suite.addTest(TestRBTreeMap.suite());
         suite.addTest(TestCorpus.suite());
         suite.addTest(TestSerialCorpus.suite());
+        suite.addTest(TestDiffer.suite());
 //no longer needed as replaced by testPR
 //        suite.addTest(TestTokeniser.suite());
 //        suite.addTest(TestGazetteer.suite());
