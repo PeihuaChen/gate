@@ -42,10 +42,10 @@ public class FeaturesSchemaEditor extends XJTable{
     emptyFeature = new Feature("", null);
     featuresModel = new FeaturesTableModel();
     setModel(featuresModel);
-    //    setTableHeader(null);
+    setTableHeader(null);
     setSortable(false);
-    setAutoResizeMode(AUTO_RESIZE_OFF);
-    setIntercellSpacing(new Dimension(2,2));
+    setAutoResizeMode(AUTO_RESIZE_LAST_COLUMN);
+//    setIntercellSpacing(new Dimension(2,2));
     featureEditorRenderer = new FeatureEditorRenderer();
     getColumnModel().getColumn(ICON_COL).setCellRenderer(featureEditorRenderer);
     getColumnModel().getColumn(NAME_COL).setCellRenderer(featureEditorRenderer);
@@ -66,7 +66,7 @@ public class FeaturesSchemaEditor extends XJTable{
   }
   
   public boolean getScrollableTracksViewportWidth(){
-    return false;
+    return true;
   }
   
   public boolean getScrollableTracksViewportHeight(){
@@ -179,8 +179,10 @@ public class FeaturesSchemaEditor extends XJTable{
       switch(columnIndex){
         case VALUE_COL:
           feature.value = aValue;
-          features.put(feature.name, aValue);
-          fireTableRowsUpdated(rowIndex, rowIndex);
+          if(feature.name != null && feature.name.length() > 0){
+            features.put(feature.name, aValue);
+            fireTableRowsUpdated(rowIndex, rowIndex);
+          }
           break;
         case NAME_COL:
           features.remove(feature.name);
@@ -280,12 +282,13 @@ public class FeaturesSchemaEditor extends XJTable{
           if(row < 0) return;
           Feature feature = (Feature)featureList.get(row);
           if(feature == emptyFeature){
-            Toolkit.getDefaultToolkit().beep();
-            return;
+            feature.value = null;
+            featuresModel.fireTableRowsUpdated(row, row);
+          }else{
+            featureList.remove(row);
+            features.remove(feature.name);
+            populate();
           }
-          featureList.remove(row);
-          features.remove(feature.name);
-          featuresModel.fireTableRowsDeleted(row, row);
         }
       });
     }    
