@@ -91,10 +91,10 @@ public class TestAnnotationDiff extends TestCase
     AnnotationSet responseAnnotSet = null;
     Set diffSet  = null;
     // Get the key AnnotationSet from the keyDocument
-    keyAnnotSet = keyDocument.getAnnotations().get(
+    keyAnnotSet = keyDocument.getAnnotations("Original markups").get(
                               annotationSchema.getAnnotationName());
     // Get the response AnnotationSet from the resonseDocument
-    responseAnnotSet = responseDocument.getAnnotations().get(
+    responseAnnotSet = responseDocument.getAnnotations("Original markups").get(
                                         annotationSchema.getAnnotationName());
 
 //*
@@ -106,6 +106,8 @@ public class TestAnnotationDiff extends TestCase
     parameters.put("keyDocument",keyDocument);
     parameters.put("responseDocument",responseDocument);
     parameters.put("annotationSchema",annotationSchema);
+    parameters.put("keyAnnotationSetName","Original markups");
+    parameters.put("responseAnnotationSetName","Original markups");
 
     // Create Annotation Diff visual resource
     AnnotationDiff annotDiff = (AnnotationDiff)
@@ -113,13 +115,12 @@ public class TestAnnotationDiff extends TestCase
 
 //*/
 //*
-
     assert("Precision strict changed.That's because of the key/response" +
             " document or" + " code implementation!",
-                        0.6666666666666666 == annotDiff.getPrecisionStrict());
+                        0.16666666666666666 == annotDiff.getPrecisionStrict());
     assert("Recall strict changed.That's because of the key/response" +
     " document or" + " code implementation!",
-                    0.7272727272727273 == annotDiff.getRecallStrict());
+                    0.18181818181818182 == annotDiff.getRecallStrict());
 
 
 //*/

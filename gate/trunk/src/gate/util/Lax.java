@@ -27,7 +27,7 @@ import java.io.*;
 /** LAX (LazyProgrammer Api for XML) layer for a SAX parser,
   * based on Sun's JAXP layer...so it works with any JAXP compliant parser
   */
-public class Lax extends org.xml.sax.HandlerBase {
+public class Lax extends org.xml.sax.helpers.DefaultHandler {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -46,13 +46,13 @@ public class Lax extends org.xml.sax.HandlerBase {
 	private LaxErrorHandler _seh = null;
 
   private boolean _validatingParser = false;
-  
+
   private boolean _namespaceAwareParser = false;
 
 	// Initialize class arrays used for reflection
 	static {
 		_caNoArgs = new Class[] {};
-		_caAttrList = new Class[] {org.xml.sax.AttributeList.class};
+		_caAttrList = new Class[] {org.xml.sax.Attributes.class};
 		_caString = new Class[] {java.lang.String.class};
 	}
 
@@ -177,7 +177,8 @@ public class Lax extends org.xml.sax.HandlerBase {
   /**
     * Call all end tag methods in the handler list
     */
-  public void endElement(String sTag) throws SAXException {
+  public void endElement (String uri, String sTag, String qName)
+                                                          throws SAXException{
     int i;
     String sEndMethodName = "end" + sTag;
 
@@ -344,7 +345,9 @@ public class Lax extends org.xml.sax.HandlerBase {
   /**
     * Call all start methods for this tag.
     */
-  public void startElement(String sTag, AttributeList alAttrs) {
+  public void startElement (String uri, String sTag,String qName,
+                                                            Attributes alAttrs){
+
     int i;
     String sStartMethodName = "start" + sTag;
 

@@ -144,7 +144,7 @@ public class HtmlDocumentHandler extends ParserCallback {
       obj = (CustomObject) stack.pop();
       // we add it to the colector
       colector.add(obj);
-    }
+    }// End if
 
     // If element has text between, then customize its apearance
     if ( obj != null &&
@@ -245,33 +245,45 @@ public class HtmlDocumentHandler extends ParserCallback {
   /** This method is called when the HTML parser encounts text (PCDATA)
     */
   public void handleText(char[] text, int pos){
-    // create a string object from this text array
+    // create a string object based on the reported text
     String content = new String(text);
-    int tmpDocContentSize = 0;
-    tmpDocContentSize = tmpDocContent.length();
-/*
+    StringBuffer contentBuffer = new StringBuffer("");
+    int tmpDocContentSize = tmpDocContent.length();
+    boolean incrementStartIndex = false;
     // If the first char of the text just read "text[0]" is NOT whitespace AND
     // the last char of the tmpDocContent[SIZE-1] is NOT whitespace then
     // concatenation "tmpDocContent + content" will result into a new different
     // word... and we want to avoid that...
-    if (tmpDocContentSize != 0)
-     if (!Character.isWhitespace(content.charAt(0)) &&
-      !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1)))
-          content = " " + content;
-*/
-    CustomObject obj = null;
-    Long end = new Long(tmpDocContentSize + content.length());
+    if ( tmpDocContentSize != 0 &&
+         content.length() != 0 &&
+         !Character.isWhitespace(content.charAt(0)) &&
+         !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1))){
 
-    // modify all the elements from the stack with the new calculated end index
-    Iterator iterator = stack.iterator ();
-    while (iterator.hasNext()){
-      obj = (CustomObject) iterator.next();
-      obj.setEnd(end);
-    }
-
+            contentBuffer.append(" ");
+            incrementStartIndex = true;
+    }// End if
     // update the document content
-    tmpDocContent.append(content);
-  }
+    contentBuffer.append(content);
+    // calculate the End index for all the elements of the stack
+    // the expression is : End index = Current doc length + text length
+    Long end = new Long(tmpDocContent.length() + contentBuffer.length());
+
+    CustomObject obj = null;
+    // Iterate through stack to modify the End index of the existing elements
+
+    java.util.Iterator anIterator = stack.iterator();
+    while (anIterator.hasNext ()){
+      // get the object and move to the next one
+      obj = (CustomObject) anIterator.next ();
+      if (incrementStartIndex && obj.getStart().equals(obj.getEnd())){
+        obj.setStart(new Long(obj.getStart().longValue() + 1));
+      }// End if
+      // sets its End index
+      obj.setEnd(end);
+    }// End while
+
+    tmpDocContent.append(contentBuffer.toString());
+  }// end handleText();
 
   /** This method analizes the tag t and adds some \n chars and spaces to the
     * tmpDocContent.The reason behind is that we need to have a readable form

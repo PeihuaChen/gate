@@ -18,6 +18,7 @@ package gate.creole;
 import java.util.*;
 
 import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 import javax.xml.parsers.*;
 import java.net.*;
 
@@ -30,7 +31,7 @@ import gate.util.*;
   * Resource data objects are created and added to the CREOLE register.
   * URLs for resource JAR files are added to the GATE class loader.
   */
-public class CreoleXmlHandler extends HandlerBase {
+public class CreoleXmlHandler extends DefaultHandler {
 
   /** A stack to stuff PCDATA onto for reading back at element ends.
    *  (Probably redundant to have a stack as we only push one item
@@ -52,7 +53,7 @@ public class CreoleXmlHandler extends HandlerBase {
   private Parameter currentParam = new Parameter();
 
   /** The current element's attribute list */
-  private AttributeList currentAttributes;
+  private Attributes currentAttributes;
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -91,7 +92,9 @@ public class CreoleXmlHandler extends HandlerBase {
   } // endDocument
 
   /** Called when the SAX parser encounts the beginning of an XML element */
-  public void startElement(String elementName, AttributeList atts){
+  public void startElement (String uri, String elementName,String qName,
+                                                             Attributes atts){
+
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
@@ -113,7 +116,7 @@ public class CreoleXmlHandler extends HandlerBase {
     if(elementName.toUpperCase().equals("PARAMETER")) {
       if(DEBUG) {
         for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
-          Out.prln(currentAttributes.getName(i));
+          Out.prln(currentAttributes.getLocalName(i));
           Out.prln(currentAttributes.getValue(i));
         }
       }
@@ -127,7 +130,7 @@ public class CreoleXmlHandler extends HandlerBase {
     } else if(elementName.toUpperCase().equals("VIEW")) {
       for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
         viewFeatures.put(
-          currentAttributes.getName(i).toUpperCase(),
+          currentAttributes.getLocalName(i).toUpperCase(),
           currentAttributes.getValue(i)
         );
       }
@@ -157,8 +160,8 @@ public class CreoleXmlHandler extends HandlerBase {
     * they are added to the CreoleRegister when we parsed their complete
     * metadata entries.
     */
-  public void endElement(String elementName)
-  throws GateSaxException {
+  public void endElement (String uri, String elementName, String qName)
+                                                    throws GateSaxException {
     if(DEBUG) Out.prln("endElement: " + elementName);
 
     //////////////////////////////////////////////////////////////////

@@ -199,7 +199,7 @@ public class TestXml extends TestCase
     docFormat.setElement2StringMap(anElement2StringMap);
 
     docFormat.unpackMarkup (doc);
-    AnnotationSet annotSet = doc.getAnnotations();
+    AnnotationSet annotSet = doc.getAnnotations("Original markups");
     assertEquals("For xcex.xml the number of annotations should be:1516",
                                                         1516,annotSet.size());
     gate.corpora.TestDocument.verifyNodeIdConsistency(doc);

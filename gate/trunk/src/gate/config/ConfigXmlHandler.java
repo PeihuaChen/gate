@@ -18,6 +18,7 @@ package gate.config;
 import java.util.*;
 
 import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 import javax.xml.parsers.*;
 import java.net.*;
 
@@ -30,7 +31,7 @@ import gate.creole.*;
 
 /** This is a SAX handler for processing <CODE>gate.xml</CODE> files.
   */
-public class ConfigXmlHandler extends HandlerBase {
+public class ConfigXmlHandler extends DefaultHandler {
 
   /** A stack to stuff PCDATA onto for reading back at element ends.
    *  (Probably redundant to have a stack as we only push one item
@@ -43,7 +44,7 @@ public class ConfigXmlHandler extends HandlerBase {
   private SystemData systemData;
 
   /** The current element's attribute list */
-  private AttributeList currentAttributes;
+  private Attributes currentAttributes;
 
   /** A feature map representation of the current element's attribute list */
   private FeatureMap currentAttributeMap;
@@ -82,7 +83,9 @@ public class ConfigXmlHandler extends HandlerBase {
   } // endDocument
 
   /** Called when the SAX parser encounts the beginning of an XML element */
-  public void startElement(String elementName, AttributeList atts){
+  public void startElement (String uri, String elementName,String qName,
+                                                             Attributes atts){
+
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
@@ -99,7 +102,7 @@ public class ConfigXmlHandler extends HandlerBase {
     if(elementName.toUpperCase().equals("SYSTEM")) {
       systemData = new SystemData();
       for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
-        if(currentAttributes.getName(i).toUpperCase().equals("NAME"))
+        if(currentAttributes.getLocalName(i).toUpperCase().equals("NAME"))
           systemData.systemName = currentAttributes.getValue(i);
       }
     }
@@ -118,8 +121,8 @@ public class ConfigXmlHandler extends HandlerBase {
   /** Called when the SAX parser encounts the end of an XML element.
     * This is actions happen.
     */
-  public void endElement(String elementName)
-  throws GateSaxException {
+  public void endElement (String uri, String elementName, String qName)
+                                                      throws GateSaxException {
     if(DEBUG) Out.prln("endElement: " + elementName);
 
     //////////////////////////////////////////////////////////////////
@@ -220,7 +223,7 @@ public class ConfigXmlHandler extends HandlerBase {
     // for each attribute of this element, add it to the param list
     for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
       params.put(
-        currentAttributes.getName(i), currentAttributes.getValue(i)
+        currentAttributes.getLocalName(i), currentAttributes.getValue(i)
       );
     }
 

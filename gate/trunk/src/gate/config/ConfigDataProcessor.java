@@ -20,6 +20,7 @@ import java.net.*;
 import java.io.*;
 
 import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 import javax.xml.parsers.*;
 
 import gate.*;
@@ -72,7 +73,7 @@ public class ConfigDataProcessor
 
     // create a handler for the config file and parse it
     try {
-      HandlerBase handler = new ConfigXmlHandler(configUrl);
+      DefaultHandler handler = new ConfigXmlHandler(configUrl);
       parser.parse(configStream, handler);
       if(DEBUG) {
         Out.prln(
