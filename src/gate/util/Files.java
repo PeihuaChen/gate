@@ -52,6 +52,20 @@ public class Files {
   public static String getResourcePath(){
     return resourcePath;
   }
+
+  /** It returns the last component in a file path.
+    * It takes E.g: d:/tmp/file.txt and returns file.txt
+    */
+  public static String getLastPathComponent(String theFullPath){
+    String fileName = "";
+    if (theFullPath == null) return fileName;
+    StringTokenizer filePathToken = new StringTokenizer(theFullPath,"/");
+    while (filePathToken.hasMoreTokens()){
+      fileName = filePathToken.nextToken();
+    }// End while
+    return fileName;
+  }// getLastPathComponent()
+
   /** Get a string representing the contents of a text file. */
   public static String getString(String fileName) throws IOException {
     return getString(new File(fileName));
