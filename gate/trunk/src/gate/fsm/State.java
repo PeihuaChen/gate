@@ -130,22 +130,37 @@ public class State implements JapeConstants {
    * @return a string value contining the GML text
    */
   public String getEdgesGML() {
-    String res = "";
+///    String res = "";
+    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+
     Iterator transIter = transitions.iterator();
     BasicPatternElement bpe;
 
     while(transIter.hasNext()) {
       Transition currentTrans = (Transition)transIter.next();
-      res += "edge [ source " + myIndex +
+/*      res += "edge [ source " + myIndex +
              " target " + currentTrans.getTarget().getIndex() +
              " label \"" + currentTrans.shortDesc() + ":";
+*/
+        res.append("edge [ source ");
+        res.append(myIndex);
+        res.append(" target ");
+        res.append(currentTrans.getTarget().getIndex());
+        res.append(" label \"");
+        res.append(currentTrans.shortDesc());
+        res.append(":");
+
              bpe = currentTrans.getConstraints();
-             if(bpe == null) res += "null";
-             else res += bpe.shortDesc();
-             res += " :" + currentTrans.getBindings() +
-             "\" ]\n";
+             if(bpe == null) ///res += "null";
+                res.append("null");
+             else ///res += bpe.shortDesc();
+                res.append(bpe.shortDesc());
+///             res += " :" + currentTrans.getBindings() +              "\" ]\n";
+             res.append(" :");
+             res.append(currentTrans.getBindings());
+             res.append("\" ]\n");
     }
-    return res;
+    return res.toString();
   } // getEdgesGML
 
   /**
@@ -154,14 +169,21 @@ public class State implements JapeConstants {
    * @return a String value.
    */
   public String toString() {
-    String res = "State " + myIndex;
-    if(isFinal()) res += "\nFinal!";
-    res += "\nTransitions:\n";
+///    String res = "State " + myIndex;
+    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+
+    if(isFinal()) ///res += "\nFinal!";
+        res.append("\nFinal!");
+
+    ///res += "\nTransitions:\n";
+    res.append("\nTransitions:\n");
+
     Iterator transIter = transitions.iterator();
     while(transIter.hasNext()){
-      res += transIter.next().toString();
+      ///res += transIter.next().toString();
+      res.append(transIter.next().toString());
     }
-    return res;
+    return res.toString();
   }
 
 

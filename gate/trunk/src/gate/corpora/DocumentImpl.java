@@ -182,12 +182,14 @@ extends AbstractLanguageResource implements Document {
         DocumentFormat.getDocumentFormat(this, sourceUrl);
       try {
         if(docFormat != null){
-          docFormat.addStatusListener(new StatusListener(){
+          StatusListener sListener = new StatusListener(){
             public void statusChanged(String text){
               fireStatusChanged(text);
             }
-          });
+          };
+          docFormat.addStatusListener(sListener);
           docFormat.unpackMarkup(this);
+          docFormat.removeStatusListener(sListener);
         }
       } catch(DocumentFormatException e) {
         throw new ResourceInstantiationException(
@@ -1065,6 +1067,7 @@ extends AbstractLanguageResource implements Document {
     * replaced in strings
     */
   private Map entitiesMap = null;
+
   /** The range that the content comes from at the source URL
     * (or null if none).
     */

@@ -13,6 +13,11 @@
  *  $Id$
  */
 
+ /*
+    modified by OntoText, Aug 29
+
+ */
+
 package gate.creole.tokeniser;
 
 import java.util.*;
@@ -71,7 +76,9 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     * emerging from this state
     */
   String getEdgesGML(){
-    String res = "";
+    ///String res = "";
+    //OT
+    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
     Set nextSet;
     Iterator nextSetIter;
     DFSMState nextState;
@@ -79,14 +86,24 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     for(int i = 0; i< transitionFunction.length; i++){
       nextState = transitionFunction[i];
       if(null != nextState){
+        /*
         res += "edge [ source " + myIndex +
         " target " + nextState.getIndex() +
         " label \"";
         res += SimpleTokeniser.typeMnemonics[i];
         res += "\" ]\n";
+        */
+        //OT
+        res.append("edge [ source ");
+        res.append(myIndex);
+        res.append(" target ");
+        res.append(nextState.getIndex());
+        res.append(" label \"");
+        res.append(SimpleTokeniser.typeMnemonics[i]);
+        res.append("\" ]\n");
       }
     };
-    return res;
+    return res.toString();
   } // getEdgesGML
 
   /** Builds the token description for the token that will be generated when
@@ -99,9 +116,14 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     String token = null,
            type = null,
            attribute = null,
-           value = null,
-           prefix = null,
-           read ="";
+           value = null
+           ///prefix = null,
+           ///read =""
+           ;
+    //OT
+    StringBuffer prefix = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+    StringBuffer read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+
     LinkedList attributes = new LinkedList(),
                values = new LinkedList();
     StringTokenizer mainSt =
@@ -119,18 +141,27 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
       token = SimpleTokeniser.skipIgnoreTokens(mainSt);
 
       if(token.equals("\\")){
-        if(null == prefix) prefix = mainSt.nextToken();
-        else prefix += mainSt.nextToken();
+        if(null == prefix)
+            ///prefix = mainSt.nextToken();
+        //OT
+            prefix = new StringBuffer(mainSt.nextToken());
+        else ///prefix += mainSt.nextToken();
+        //OT
+            prefix.append(mainSt.nextToken());
         continue;
       } else if(null != prefix) {
-        read += prefix;
+        ///read += prefix;
+        //OT
+        read.append(prefix);
         prefix = null;
       }
 
       if(token.equals("\"")){
-
-        read = mainSt.nextToken("\"");
-        if(read.equals("\"")) read = "";
+        ///read = mainSt.nextToken("\"");
+        //OT
+        read = new StringBuffer(mainSt.nextToken("\""));
+        if(read.equals("\"")) ///read = "";
+            read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
         else {
           //delete the remaining enclosing quote and restore the delimiters
           mainSt.nextToken(ignorables + "\\\";=");
@@ -139,26 +170,35 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
       } else if(token.equals("=")) {
 
         if(phase == 1){
-          attribute = read;
-          read = "";
+          ///attribute = read;
+          //OT
+          attribute = read.toString();
+          ///read = "";
+          //OT
+          read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
           phase = 2;
         }else throw new TokeniserException("Invalid attribute format: " +
                                            read);
       } else if(token.equals(";")) {
         if(phase == 0){
-          type = read;
-          read = "";
+          ///type = read;
+          type = read.toString();
+          ///read = "";
+          read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
           //Out.print("Type: " + type);
           attributes.addLast(type);
           values.addLast("");
           phase = 1;
         } else if(phase == 2) {
-          value = read;
-          read = "";
+          ///value = read;
+          value = read.toString();
+          ///read = "";
+          read = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
           phase = 3;
         } else throw new TokeniserException("Invalid value format: " +
                                            read);
-      } else read += token;
+      } else ///read += token;
+            read.append(token);
 
       if(phase == 3) {
         // Out.print("; " + attribute + "=" + value);

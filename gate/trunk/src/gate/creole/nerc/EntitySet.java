@@ -51,12 +51,20 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
     * representation, one-per-line.
     */
   public String toString() {
-    String res = "==== FILE: " + fileName + "\n";
+    ///String res = "==== FILE: " + fileName + "\n";
+    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+
+    res.append("==== FILE: ");
+    res.append(fileName);
+    res.append("\n");
+
     Iterator entIter = myEntities.iterator();
     while(entIter.hasNext()){
-      res += entIter.next().toString() + "\n";
+///      res += entIter.next().toString() + "\n";
+      res.append(entIter.next().toString());
+      res.append("\n");
     }
-    return res;
+    return res.toString();
   }
 
   public int size(){ return myEntities.size();}

@@ -62,6 +62,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
   FSM fsm;
 
+  public FSM getFSM(){
+    return fsm;
+  }
+
   /** Add a rule. */
   public void addRule(Rule rule) {
     rules.add(rule);
@@ -101,6 +105,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     fsm = new FSM(this);
     //convert it to deterministic
     fsm.eliminateVoidTransitions();
+    //clear the old style data structures
+    rules.clear();
+    rules = null;
   } // finish
 
 
@@ -632,10 +639,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
   /** Clean up (delete action class files, for e.g.). */
   public void cleanUp() {
-
-    for(DListIterator i = rules.begin(); ! i.atEnd(); i.advance())
-      ((Rule) i.get()).cleanUp();
-
+//    for(DListIterator i = rules.begin(); ! i.atEnd(); i.advance())
+//      ((Rule) i.get()).cleanUp();
   } // cleanUp
 
   /** A string representation of this object. */
