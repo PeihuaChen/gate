@@ -29,7 +29,6 @@ import gate.creole.gazetteer.*;
 import gate.creole.splitter.*;
 import gate.creole.orthomatcher.*;
 import gate.persist.*;
-import gate.annotation.*;
 import gate.creole.ANNIEConstants;
 
 /** Test the PRs on three documents */
@@ -443,64 +442,64 @@ public class TestPR extends TestCase
     compareAnnots(document,doc3);
   } // testAllPR()
 
-  public void compareAnnots1(Document keyDocument, Document responseDocument)
-              throws Exception{
-    // organization type
-    Iterator iteratorTypes = annotationTypes.iterator();
-    while (iteratorTypes.hasNext()){
-      // get the type of annotation
-      String annotType = (String)iteratorTypes.next();
-      // create annotation schema
-      AnnotationSchema annotationSchema = new AnnotationSchema();
-
-      annotationSchema.setAnnotationName(annotType);
-
-      // create an annotation diff
-      AnnotationDiff annotDiff = new AnnotationDiff();
-      annotDiff.setKeyDocument(keyDocument);
-      annotDiff.setResponseDocument(responseDocument);
-      annotDiff.setAnnotationSchema(annotationSchema);
-      annotDiff.setKeyAnnotationSetName(null);
-      annotDiff.setResponseAnnotationSetName(null);
-
-      Set significantFeatures = new HashSet(Arrays.asList(
-                    new String[]{"NMRule", "kind", "orgType", "rule",
-                                 "rule1", "rule2", "locType", "gender",
-                                 "majorType", "minorType", "category",
-                                 "length", "orth", "string", "subkind",
-                                 "symbolkind"}));
-      annotDiff.setKeyFeatureNamesSet(significantFeatures);
-      annotDiff.setTextMode(new Boolean(true));
-
-      annotDiff.init();
-
-      if (DEBUG){
-        if (annotDiff.getFMeasureAverage() != 1.0) {
-          assertTrue("missing annotations " +
-            annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE)
-            + " spurious annotations " +
-            annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE)
-            + " partially-correct annotations " +
-            annotDiff.getAnnotationsOfType(
-                            AnnotationDiff.PARTIALLY_CORRECT_TYPE),false);
-        }
-      }//if
-
-      assertTrue(annotType+ " precision average in "+
-        responseDocument.getSourceUrl().getFile()+
-        " is "+ annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
-        annotDiff.getPrecisionAverage()== 1.0);
-      assertTrue(annotType+" recall average in "
-        +responseDocument.getSourceUrl().getFile()+
-        " is " + annotDiff.getRecallAverage()+ " instead of 1.0 ",
-        annotDiff.getRecallAverage()== 1.0);
-      assertTrue(annotType+" f-measure average in "
-        +responseDocument.getSourceUrl().getFile()+
-        " is "+ annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
-        annotDiff.getFMeasureAverage()== 1.0);
-     }//while
-   }// public void compareAnnots
-
+//  public void compareAnnots1(Document keyDocument, Document responseDocument)
+//              throws Exception{
+//    // organization type
+//    Iterator iteratorTypes = annotationTypes.iterator();
+//    while (iteratorTypes.hasNext()){
+//      // get the type of annotation
+//      String annotType = (String)iteratorTypes.next();
+//      // create annotation schema
+//      AnnotationSchema annotationSchema = new AnnotationSchema();
+//
+//      annotationSchema.setAnnotationName(annotType);
+//
+//      // create an annotation diff
+//      AnnotationDiff annotDiff = new AnnotationDiff();
+//      annotDiff.setKeyDocument(keyDocument);
+//      annotDiff.setResponseDocument(responseDocument);
+//      annotDiff.setAnnotationSchema(annotationSchema);
+//      annotDiff.setKeyAnnotationSetName(null);
+//      annotDiff.setResponseAnnotationSetName(null);
+//
+//      Set significantFeatures = new HashSet(Arrays.asList(
+//                    new String[]{"NMRule", "kind", "orgType", "rule",
+//                                 "rule1", "rule2", "locType", "gender",
+//                                 "majorType", "minorType", "category",
+//                                 "length", "orth", "string", "subkind",
+//                                 "symbolkind"}));
+//      annotDiff.setKeyFeatureNamesSet(significantFeatures);
+//      annotDiff.setTextMode(new Boolean(true));
+//
+//      annotDiff.init();
+//
+//      if (DEBUG){
+//        if (annotDiff.getFMeasureAverage() != 1.0) {
+//          assertTrue("missing annotations " +
+//            annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE)
+//            + " spurious annotations " +
+//            annotDiff.getAnnotationsOfType(AnnotationDiff.SPURIOUS_TYPE)
+//            + " partially-correct annotations " +
+//            annotDiff.getAnnotationsOfType(
+//                            AnnotationDiff.PARTIALLY_CORRECT_TYPE),false);
+//        }
+//      }//if
+//
+//      assertTrue(annotType+ " precision average in "+
+//        responseDocument.getSourceUrl().getFile()+
+//        " is "+ annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
+//        annotDiff.getPrecisionAverage()== 1.0);
+//      assertTrue(annotType+" recall average in "
+//        +responseDocument.getSourceUrl().getFile()+
+//        " is " + annotDiff.getRecallAverage()+ " instead of 1.0 ",
+//        annotDiff.getRecallAverage()== 1.0);
+//      assertTrue(annotType+" f-measure average in "
+//        +responseDocument.getSourceUrl().getFile()+
+//        " is "+ annotDiff.getFMeasureAverage()+ " instead of 1.0 ",
+//        annotDiff.getFMeasureAverage()== 1.0);
+//     }//while
+//   }// public void compareAnnots
+//
    public void compareAnnots(Document keyDocument, Document responseDocument)
                 throws Exception{
       // organization type
