@@ -2421,7 +2421,7 @@ public class OracleDataStore extends JDBCDataStore {
 */
 
   /** helper for sync() - never call directly */
-  private void _syncRemovedDocumentsFromCorpus(List docLRIDs, Long corpLRID)
+  protected void _syncRemovedDocumentsFromCorpus(List docLRIDs, Long corpLRID)
     throws PersistenceException {
 
     //0.preconditions
@@ -2705,7 +2705,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - saves a Corpus in the database */
-  protected void syncCorpus(Corpus corp)
+/*  protected void syncCorpus(Corpus corp)
     throws PersistenceException,SecurityException {
 
     //0. preconditions
@@ -2800,7 +2800,7 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
   }
-
+*/
 
 
   /**
@@ -2942,7 +2942,7 @@ public class OracleDataStore extends JDBCDataStore {
    *   if the document is already part of the corpus nothing
    *   changes
    */
-  private void addDocumentToCorpus(Long docID,Long corpID)
+  protected void addDocumentToCorpus(Long docID,Long corpID)
   throws PersistenceException,SecurityException {
 
     //0. preconditions
