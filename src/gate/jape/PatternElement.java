@@ -1,7 +1,7 @@
 /* 
  *  PatternElement.java - transducer class
  *
- *  Copyright (c) 1998-2004, The University of Sheffield.
+ *  Copyright (c) 1998-2005, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -84,6 +84,9 @@ abstract public class PatternElement implements Cloneable, Matcher,
 
 
 // $Log$
+// Revision 1.7  2005/01/11 13:51:36  ian
+// Updating copyrights to 1998-2005 in preparation for v3.0
+//
 // Revision 1.6  2004/07/21 17:10:08  akshay
 // Changed copyright from 1998-2001 to 1998-2004
 //
