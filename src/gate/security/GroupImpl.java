@@ -107,6 +107,11 @@ public class GroupImpl
         throw new SecurityException("invalid session supplied");
       }
 
+      //2.1 check if the user is privileged
+      if (false == s.isPrivilegedSession() ) {
+        throw new SecurityException("insufficient privileges to change group name");
+      }
+
       stmt = this.conn.prepareCall(
               "{ call "+Gate.DB_OWNER+".security.set_group_name(?,?)} ");
       stmt.setLong(1,this.id.longValue());
@@ -155,8 +160,13 @@ public class GroupImpl
     }
 
     //2. check the session
-    if (this.ac.isValidSession(s) == false) {
+    if (false == this.ac.isValidSession(s)) {
       throw new SecurityException("invalid session provided");
+    }
+
+    //2.1 check if the user is privileged
+    if (false == s.isPrivilegedSession() ) {
+      throw new SecurityException("insufficient privileges to add users");
     }
 
     //3. update DB
@@ -213,6 +223,11 @@ public class GroupImpl
     //2. check the session
     if (this.ac.isValidSession(s) == false) {
       throw new SecurityException("invalid session provided");
+    }
+
+    //2.1 check if the user is privileged
+    if (false == s.isPrivilegedSession() ) {
+      throw new SecurityException("insufficient privileges to remove users");
     }
 
     //3. update DB
