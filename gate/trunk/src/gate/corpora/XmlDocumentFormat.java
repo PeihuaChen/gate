@@ -8,7 +8,7 @@
 
 package gate.corpora;
 
-import com.sun.xml.parser.* ;
+//import com.sun.xml.parser.* ;
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -51,7 +51,9 @@ public class XmlDocumentFormat extends TextualDocumentFormat
   public void unpackMarkup(Document doc){
 	  try {
 
-
+      // use Excerces XML parser with JAXP
+      //System.setProperty("javax.xml.parsers.SAXParserFactory",
+      //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
 		  // Get a parser factory.
 		  SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		  // Set up the factory to create the appropriate type of parser

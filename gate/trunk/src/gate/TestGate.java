@@ -19,6 +19,7 @@ import gate.jape.*;
 import gate.fsm.*;
 import gate.xml.*;
 import gate.html.*;
+import gate.sgml.*;
 
 
 /** Top-level entry point for GATE test suite.
@@ -59,6 +60,7 @@ public class TestGate
 //    suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
+    suite.addTest(TestSgml.suite());
     suite.addTest(TestJdk.suite());
     suite.addTest(TestJape.suite());
     suite.addTest(TestFSM.suite());
