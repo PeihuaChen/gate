@@ -29,12 +29,10 @@ class ApplicationHandle extends ResourceHandle {
     setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/application.gif")));
     popup = new JPopupMenu();
-    popup.add(new DesignApplicationAction());
-    popup.add(new RunApplicationAction());
 
     largeView = super.getLargeView();
     if(largeView instanceof JTabbedPane){
-      viewer = new ApplicationViewer((SerialController)resource, project);
+      viewer = new ApplicationViewer((SerialController)resource, this);
       largeView.add(viewer, "Design");
       ((JTabbedPane)largeView).setSelectedComponent(viewer);
     }
@@ -42,22 +40,8 @@ class ApplicationHandle extends ResourceHandle {
 
   ApplicationViewer viewer;
 
-  class RunApplicationAction extends AbstractAction{
-    public RunApplicationAction(){
-      super("Run");
-    }
-
-    public void actionPerformed(ActionEvent e){
-    }
-  }
-
-  class DesignApplicationAction extends AbstractAction{
-    public DesignApplicationAction(){
-      super("Design");
-    }
-
-    public void actionPerformed(ActionEvent e){
-    }
+  public JPopupMenu getPopup(){
+    return viewer.getPopup();
   }
 
   class CloseAction extends AbstractAction{

@@ -820,4 +820,7 @@ implements AnnotationSet
       }
     }
   }
+
+ /** Freeze the serialization UID. */
+  static final long serialVersionUID = 1479426765310434166L;
 } // AnnotationSetImpl
