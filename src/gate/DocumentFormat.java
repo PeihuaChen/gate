@@ -27,7 +27,7 @@ import org.w3c.www.mime.*;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
-public abstract class DocumentFormat implements Resource,ProcessProgressReporter
+public abstract class DocumentFormat implements Resource,StatusReporter
 {
   /** The MIME type of this format. */
   private MimeType mimeType;
@@ -59,9 +59,6 @@ public abstract class DocumentFormat implements Resource,ProcessProgressReporter
 
   /** Default construction */
   public DocumentFormat() {}
-
-  // listeners for progress
-  protected List myProgressListeners = new LinkedList();
 
   // listeners for status report
   protected List myStatusListeners = new LinkedList();
@@ -261,26 +258,17 @@ public abstract class DocumentFormat implements Resource,ProcessProgressReporter
 
   public void setFeatures(FeatureMap features){}
 
-  //ProcessProgressReporter implementation
-  public void addProcessProgressListener(ProgressListener listener){
-    myProgressListeners.add(listener);
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
   }
-
-  public void removeProcessProgressListener(ProgressListener listener){
-    myProgressListeners.remove(listener);
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
   }
-
-  protected void fireProgressChangedEvent(int i){
-    Iterator listenersIter = myProgressListeners.iterator();
+  protected void fireStatusChangedEvent(String text){
+    Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).progressChanged(i);
+      ((StatusListener)listenersIter.next()).statusChanged(text);
   }
-
-  protected void fireProcessFinishedEvent(){
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).processFinished();
-  }
-  //ProcessProgressReporter implementation ends here
 
 } // class DocumentFormat

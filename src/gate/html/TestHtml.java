@@ -83,6 +83,14 @@ public class TestHtml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
+      // register a progress listener with it
+      docFormat.addStatusListener(new StatusListener(){
+          public void statusChanged(String text){
+            System.out.println(text);
+          }
+          public void processFinished(){
+          }
+      });
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");

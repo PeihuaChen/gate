@@ -45,9 +45,6 @@ public class HtmlDocumentHandler extends ParserCallback{
   /** an annotation set */
   protected gate.AnnotationSet basicAS;
 
-  // listeners for progress
-  protected List myProgressListeners = new LinkedList();
-
   // listeners for status report
   protected List myStatusListeners = new LinkedList();
 
@@ -73,6 +70,8 @@ public class HtmlDocumentHandler extends ParserCallback{
     * that means that the tag is paired by an end tag
     */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos){
+    // inform the progress listener about that
+    fireStatusChangedEvent("Processing:" + t);
     // construct a feature map from the attributes list
     FeatureMap fm = new SimpleFeatureMapImpl();
     // take all the attributes an put them into the feature map
@@ -135,6 +134,8 @@ public class HtmlDocumentHandler extends ParserCallback{
     * this method is called when the HTML parser encounts only the beginning of a tag
     */
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
+     // inform the progress listener about that
+    fireStatusChangedEvent("Processing:" + t);
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -176,8 +177,6 @@ public class HtmlDocumentHandler extends ParserCallback{
     MyCustomObject obj = null;
     Long end = new Long(tmpDocContent.length() + content.length());
 
-    // inform the progress listener about that
-    fireProgressChangedEvent(pos*100/documentSize);
     Iterator iterator = stack.iterator ();
     while (iterator.hasNext()){
       obj = (MyCustomObject) iterator.next();
@@ -237,27 +236,18 @@ public class HtmlDocumentHandler extends ParserCallback{
     return false;
  }
 
-  //ProcessProgressReporter implementation
-  public void addProcessProgressListener(ProgressListener listener){
-    myProgressListeners.add(listener);
+  //StatusReporter Implementation
+  public void addStatusListener(StatusListener listener){
+    myStatusListeners.add(listener);
   }
-
-  public void removeProcessProgressListener(ProgressListener listener){
-    myProgressListeners.remove(listener);
+  public void removeStatusListener(StatusListener listener){
+    myStatusListeners.remove(listener);
   }
-
-  protected void fireProgressChangedEvent(int i){
-    Iterator listenersIter = myProgressListeners.iterator();
+  protected void fireStatusChangedEvent(String text){
+    Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).progressChanged(i);
+      ((StatusListener)listenersIter.next()).statusChanged(text);
   }
-
-  protected void fireProcessFinishedEvent(){
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).processFinished();
-  }
-  //ProcessProgressReporter implementation ends here
 
 } //CustomDocumentHandler
 

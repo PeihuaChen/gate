@@ -11,9 +11,13 @@ package gate.xml;
 import java.util.*;
 import java.net.*;
 import java.io.*;
+
+import gate.util.*;
+import gate.gui.*;
+
 import junit.framework.*;
 import org.w3c.www.mime.*;
-import gate.util.*;
+
 
 /** Test class for XML facilities
   *
@@ -103,7 +107,16 @@ public class TestXml extends TestCase
     if (docFormat != null){
       // set's the map
       docFormat.setMarkupElementsMap(markupElementsMap);
-
+      /*
+      // register a progress listener with it
+      docFormat.addStatusListener(new StatusListener(){
+          public void statusChanged(String text){
+            System.out.println(text);
+          }
+          public void processFinished(){
+          }
+      });
+      */
       // timing the operation
       Date startTime = new Date();
         docFormat.unpackMarkup (doc,"DocumentContent");
