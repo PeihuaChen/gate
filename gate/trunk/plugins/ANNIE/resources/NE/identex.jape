@@ -29,6 +29,7 @@ Rule: Identifier1
 	({Token.orth == allCaps}
 	 {Token.kind == number})
 	({Token.orth == allCaps}|
+         {Token.string == "."}|
 	 {Token.kind == number})*
 ):ident -->
 :ident.TempIdentifier = {rule = "Identifier1"}
