@@ -352,6 +352,7 @@ public class Editor extends JFrame {
         if(res == JOptionPane.OK_OPTION){
           frame.setVisible(false);
           frame.dispose();
+          
         }
       }// actionPerformed(ActionEvent e)
     };
@@ -614,6 +615,7 @@ public class Editor extends JFrame {
    */
   public void jMenuHelpAbout_actionPerformed(ActionEvent e) {
     Editor_AboutBox dlg = new Editor_AboutBox(this);
+    dlg.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     Dimension dlgSize = dlg.getPreferredSize();
     Dimension frmSize = getSize();
     Point loc = getLocation();
