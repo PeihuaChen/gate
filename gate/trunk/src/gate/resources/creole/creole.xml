@@ -292,15 +292,15 @@
   <!-- creole.xml for Controllers -->
   <CREOLE>
     <RESOURCE>
-      <NAME>Gate Serial Controller</NAME>
-      <COMMENT>A simple serial controller</COMMENT>
+      <NAME>Pipeline</NAME>
+      <COMMENT>A simple serial controller for PR pipelines</COMMENT>
       <CLASS>gate.creole.SerialController</CLASS>
       <ICON>controller.gif</ICON>
     </RESOURCE>
 
     <RESOURCE>
-      <NAME>Gate Serial Analyser Controller</NAME>
-      <COMMENT>A serial controller for language analysers</COMMENT>
+      <NAME>Corpus Pipeline</NAME>
+      <COMMENT>A serial controller for PR pipelines over corpora</COMMENT>
       <CLASS>gate.creole.SerialAnalyserController</CLASS>
       <ICON>controller.gif</ICON>
     </RESOURCE>
