@@ -33,7 +33,7 @@ PKGS=	\
 	gate gate.annotation gate.config gate.corpora gate.creole \
 	gate.creole.annotdelete gate.creole.annotransfer \
 	gate.creole.gazetteer gate.creole.nerc gate.creole.orthomatcher \
-	gate.creole.splitter gate.creole.tokeniser gate.db \
+	gate.creole.splitter gate.creole.tokeniser \
 	gate.email gate.event gate.fsm gate.gui gate.html gate.jape \
 	gate.jape.parser gate.persist gate.security \
 	gate.sgml gate.swing gate.util gate.util.persistence \
