@@ -126,8 +126,8 @@ public class ConfigXmlHandler extends DefaultHandler {
       }
     } else if(elementName.toUpperCase().equals("DBCONFIG")) {
       DataStoreRegister.addConfig(currentAttributeMap);
-    } else if(elementName.toUpperCase().equals(Gate.getGateConfigElement())) {
-      Gate.getGateConfig().putAll(currentAttributeMap);
+    } else if(elementName.toUpperCase().equals(Gate.getUserConfigElement())) {
+      Gate.getUserConfig().putAll(currentAttributeMap);
     }
 
   } // startElement
