@@ -733,7 +733,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
           ).getFeatures().get(STRING_FEATURE)).equalsIgnoreCase(THE_VALUE))
       tokens.remove(0);
 
-    if ( cdg.contains( ((Annotation) tokens.get(tokens.size()-1)
+    //no need to check for cdg if there is only 1 token or less
+    if (tokens.size()<2 && cdg.contains(((Annotation) tokens.get(tokens.size()-1)
           ).getFeatures().get(STRING_FEATURE)) )
       tokens.remove(tokens.size()-1);
 
