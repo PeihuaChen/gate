@@ -48,7 +48,7 @@ public class GateIM implements InputMethod {
   public GateIM(Map supportedLocales) {
     this.supportedLocales = supportedLocales;
     loadedLocales = new HashMap();
-  }
+  }// GateIM(Map supportedLocales)
 
   /**
    * Provides the input method with a context. This method is called by the
@@ -60,7 +60,7 @@ public class GateIM implements InputMethod {
     myContext = context;
     //we don't care about the client window state and position
     myContext.enableClientWindowNotification(this, false);
-  }
+  }// setInputMethodContext(InputMethodContext context)
 
   /**
    * Selects the active locale
@@ -69,7 +69,7 @@ public class GateIM implements InputMethod {
    */
   public boolean setLocale(Locale locale) {
     endComposition();
-    try{
+    try {
       if(supportedLocales.containsKey(locale)){
         currentLocale = locale;
         loadLocale(locale);
@@ -77,12 +77,12 @@ public class GateIM implements InputMethod {
                                                    currentState);
         return true;
       }
-    }catch(IllegalArgumentException iae){
+    } catch(IllegalArgumentException iae){
       iae.printStackTrace();
       return false;
     }
     return false;
-  }
+  }// boolean setLocale(Locale locale)
 
   /**
    * Gets the active locale
@@ -208,12 +208,12 @@ public class GateIM implements InputMethod {
                 }
               }//switch((char)keyCode)
             }
-          }else if((int)'A' <= keyCode && keyCode <= (int)'Z'){
+          } else if((int)'A' <= keyCode && keyCode <= (int)'Z'){
             ch = (char)keyCode;
             if(!shift){
               ch = Character.toLowerCase(ch);
             }
-          }else{
+          } else {
             switch(keyCode){
               case KeyEvent.VK_MINUS:{
                 ch = shift?'_':'-';
@@ -297,7 +297,7 @@ public class GateIM implements InputMethod {
           //undefined state, remain in initial state, cancel composed text
           //send the key char
           composedText = "";
-        }else{
+        } else {
           //advance and compose new text
           currentState = action.getNext();
           composedText = action.getComposedText();
@@ -312,8 +312,8 @@ public class GateIM implements InputMethod {
         if(commit) composedText = "";
         if(keyboardMap != null) keyboardMap.update(currentHandler, currentState);
       }
-    }
-  }
+    }// if
+  }// dispatchEvent(AWTEvent event)
 
   /**
    * Called by the system when the client window has changed size or position.
@@ -339,7 +339,7 @@ public class GateIM implements InputMethod {
                                                             currentState);
       keyboardMap.addJob("SHOW");
     }
-  }
+  }// activate()
 
   /**
    * Deactivates this input method
@@ -350,7 +350,7 @@ public class GateIM implements InputMethod {
     endComposition();
     enabled = false;
 //    if(mapVisible) keyboardMap.addJob("HIDE");
-  }
+  }// deactivate(boolean isTemporary)
 
   /**
    * Hides all the windows displayed by the input method. Currently this only
@@ -420,7 +420,7 @@ public class GateIM implements InputMethod {
    *
    * @param mapvis
    */
-  public void setMapVisible(boolean mapvis){
+  public void setMapVisible(boolean mapvis) {
     if(mapvis){
       mapVisible = true;
       if(keyboardMap == null) keyboardMap = new KeyboardMap(this,
@@ -431,7 +431,7 @@ public class GateIM implements InputMethod {
       mapVisible = false;
       if(keyboardMap != null) keyboardMap.addJob("HIDE");
     }
-  }
+  }// setMapVisible(boolean mapvis)
 
   /**
    * Loads a new locale if it's not already loaded.
@@ -444,15 +444,15 @@ public class GateIM implements InputMethod {
                                    "Unknown locale: " + locale);
     currentHandler = (LocaleHandler)loadedLocales.get(locale);
     if(currentHandler == null){
-      try{
+      try {
         currentHandler = new LocaleHandler(locale, fileName);
         loadedLocales.put(locale, currentHandler);
         currentState = currentHandler.getInitialState();
-      }catch(IOException ioe){
+      } catch(IOException ioe) {
         throw new IllegalArgumentException("Cannot load locale: " + locale);
       }
-    }
-  }
+    }// if
+  }// loadLocale(Locale locale)
 
   /**
    * Returns theinput context for this input method.
@@ -551,4 +551,4 @@ public class GateIM implements InputMethod {
   public static Font getKeyboardFont(){
     return keyboardFont;
   }
-}
+}// class GateIM implements InputMethod

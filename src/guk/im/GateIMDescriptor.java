@@ -40,7 +40,8 @@ public class GateIMDescriptor implements InputMethodDescriptor {
    */
   public GateIMDescriptor() {
     try{
-      InputStream is = GateIM.class.getResourceAsStream(GateIM.getIMBase() + "im.list");
+      InputStream is = GateIM.class.getResourceAsStream(
+                         GateIM.getIMBase() + "im.list");
 	    if (is==null) throw new IllegalArgumentException(
               "Failed to retrieve resource 'im.list'. Please reset classpath.");
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -72,16 +73,16 @@ public class GateIMDescriptor implements InputMethodDescriptor {
                 variant = st.nextToken();
                 supportedLocales.put(new Locale(language,country,variant),
                                      filename);
-              }else{
+              } else {
                 //no variant
                 supportedLocales.put(new Locale(language,country), filename);
               }
-            }else{
+            } else {
               //no country
               throw new IllegalArgumentException(
                 "Invalid input methods definition file!\n");
             }
-          }else{
+          } else {
             //no language
             throw new IllegalArgumentException(
                 "Invalid input methods definition file!\n");
@@ -89,7 +90,7 @@ public class GateIMDescriptor implements InputMethodDescriptor {
         }
         line = br.readLine();
       }
-    }catch(IOException ioe){
+    } catch(IOException ioe){
       ioe.printStackTrace();
     }
   }
@@ -114,7 +115,7 @@ public class GateIMDescriptor implements InputMethodDescriptor {
           Locale l2 = (Locale) b;
           return l1.getDisplayLanguage().compareTo(l2.getDisplayLanguage());
         }else throw new ClassCastException();
-      }
+      }// int compare(Object a, Object b)
     });
     return (Locale[])locales.toArray(new Locale[0]);
   }
@@ -177,4 +178,4 @@ public class GateIMDescriptor implements InputMethodDescriptor {
    *
    */
   Map supportedLocales;
-}
+}// class GateIMDescriptor implements InputMethodDescriptor

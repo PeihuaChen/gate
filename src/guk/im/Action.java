@@ -17,15 +17,16 @@
 package guk.im;
 
 
-/** 
+/**
  * Defines an action in the FSM of the input method.
- * An action starts from a state and goes into another one adding perhaps something to the composed text.
- * 
+ * An action starts from a state and goes into another one adding perhaps
+ * something to the composed text.
+ *
  */
 public class Action {
-  /** 
+  /**
    * Constructor.
-   * 
+   *
    * @param nextState the state this action goes to.
    */
   public Action(State nextState){
@@ -33,39 +34,39 @@ public class Action {
     composedText = null;
   }
 
-  /** 
+  /**
    * Sets the composed text to be added by this action
-   * 
-   * @param text 
+   *
+   * @param text
    */
   public void setComposedText(String text){
     composedText = text;
   }
 
-  /** 
+  /**
    * Gets the composed text added by this action.
-   * 
+   *
    */
   public String getComposedText(){
     return composedText;
   }
 
-  /** 
+  /**
    * Gets the state this action leads to.
-   * 
+   *
    */
   public State getNext(){
     return next;
   }
 
-  /** 
+  /**
    * The text to be added by this action to the composed text.
-   * 
+   *
    */
   String composedText;
-  /** 
+  /**
    * The state this action leads to.
-   * 
+   *
    */
   State next;
 }//class Action
