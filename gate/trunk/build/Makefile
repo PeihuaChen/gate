@@ -24,7 +24,7 @@ depend:
 	./makejdepend.sh ../src/gate >Makefile.dep
 
 test:
-	./jdk.sh java ${CP} junit.ui.TestRunner gate.TestGate
+	./jdk.sh java ${CP} junit.ui.LoadingTestRunner gate.TestGate
 docs:
 	./jdk.sh javadoc $(SP) $(CP) -public \
 	  -d ../doc/javadoc $(PKGS)
@@ -41,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.4  2000/01/21 17:08:17  hamish
+# changed test runner to autoloading version
+#
 # Revision 1.3  2000/01/21 17:01:28  hamish
 # added tests target and junit.jar
 #
