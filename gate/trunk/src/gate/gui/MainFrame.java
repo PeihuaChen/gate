@@ -276,7 +276,7 @@ public class MainFrame extends JFrame
     openDSAction = new OpenDSAction();
     helpAboutAction = new HelpAboutAction();
     newAnnotDiffAction = new NewAnnotDiffAction();
-    newCorpusAnnotDiffAction = new NewCorpusAnnotDiffAction();
+//    newCorpusAnnotDiffAction = new NewCorpusAnnotDiffAction();
     newBootStrapAction = new NewBootStrapAction();
     newCorpusEvalAction = new NewCorpusEvalAction();
     storedMarkedCorpusEvalAction = new StoredMarkedCorpusEvalAction();
@@ -593,7 +593,7 @@ public class MainFrame extends JFrame
 
     JMenu toolsMenu = new XJMenu("Tools");
     toolsMenu.add(newAnnotDiffAction);
-    toolsMenu.add(newCorpusAnnotDiffAction);
+//    toolsMenu.add(newCorpusAnnotDiffAction);
     toolsMenu.add(newBootStrapAction);
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
