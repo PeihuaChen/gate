@@ -410,6 +410,9 @@ public class TestPR extends TestCase
     assert("Organization recall average in ft-bt-03-aug-2001.html is " +
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
+//Oana, you must change this to the F-measure call. You're only using f-precision everywhere
+//please be careful in the future. There's no point doing something quickly if it's not 
+//doing what it's supposed to do. Thanks!
     assert("Organization f-measure average in ft-bt-03-aug-2001.html is "+
       annotDiff.getPrecisionAverage()+ " instead of 1.0 ",
       annotDiff.getPrecisionAverage()== 1.0);
