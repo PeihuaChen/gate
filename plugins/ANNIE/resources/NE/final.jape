@@ -7,7 +7,6 @@
 Phase:	Final
 Options: control = appelt
 
-
 ///////////////////////////////////////////////////////////////
 
 
@@ -316,12 +315,13 @@ Priority: 10
  :ident.Identifier = {rule = "IdentifierFinal"}
 
 
- // Unknown Proper Name
+// Unknown Proper Name
 
-//Rule:Unknown
-//(
-// {Token.orth == upperInitial}
-//)
-//:unknown
-//-->
-// :unknown.Unknown = {kind = "PN", rule = Unknown}
+Rule:Unknown
+( 
+ {POS.category == NNP}
+ (SPACE {POS.category == NNP})*
+) 
+:unknown
+-->
+ :unknown.Unknown = {kind = "PN", rule = Unknown}
