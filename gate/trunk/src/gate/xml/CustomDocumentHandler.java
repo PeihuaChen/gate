@@ -11,6 +11,7 @@ import org.xml.sax.*;
 import com.sun.xml.parser.LexicalEventListener;
 import gate.corpora.*;
 import gate.util.*;
+import gate.*;
 
 /**
   * Implements the behaviour of the XML reader
@@ -90,7 +91,7 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
     */
   public void startElement(String elemName, AttributeList atts){
     // construct a SimpleFeatureMapImpl from the list of attributes
-    SimpleFeatureMapImpl fm = new SimpleFeatureMapImpl();
+    FeatureMap fm = new SimpleFeatureMapImpl();
     // for all attributes do
     for (int i = 0; i < atts.getLength(); i++) {
      String attName = atts.getName(i);
@@ -265,12 +266,12 @@ class  MyCustomObject{
 
   // data fields
   private String elemName = null;
-  private gate.util.SimpleFeatureMapImpl fm = null;
+  private FeatureMap fm = null;
   private Long start = null;
   private Long end  = null;
 
   // constructor
-  public MyCustomObject(String elemName, gate.util.SimpleFeatureMapImpl fm,
+  public MyCustomObject(String elemName, FeatureMap fm,
                          Long start, Long end){
     this.elemName = elemName;
     this.fm = fm;
@@ -282,7 +283,7 @@ class  MyCustomObject{
   public String getElemName(){
     return elemName;
   }
-  public gate.util.SimpleFeatureMapImpl GetFM(){
+  public FeatureMap GetFM(){
     return fm;
   }
   public Long getStart(){
@@ -297,7 +298,7 @@ class  MyCustomObject{
   public void setElemName(String elemName){
     this.elemName = elemName;
   }
-  public void setFM(gate.util.SimpleFeatureMapImpl fm){
+  public void setFM(FeatureMap fm){
     this.fm = fm;
   }
   public void setStart(Long start){

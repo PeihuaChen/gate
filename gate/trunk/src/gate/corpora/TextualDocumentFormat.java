@@ -46,6 +46,11 @@ public class TextualDocumentFormat extends DocumentFormat
     System.out.println("UNPACK called from TextualDocumentFormat");
   }
 
+  public void unpackMarkup(Document doc,
+                                    String  originalContentFeatureType){
+    System.out.println("UNPACK called from TextualDocumentFormat");
+  }
+
   /** Get the factory that created this object. */
   public Factory getFactory() {
     throw new LazyProgrammerException();

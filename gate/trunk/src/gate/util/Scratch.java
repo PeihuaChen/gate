@@ -42,6 +42,9 @@ public class Scratch
     }
     System.exit(0);
    */
+
+   /*
+   // Cristian scratch
    Map map = new HashMap();
 
    ExtendedMimeType mime = new ExtendedMimeType("text","xml");
@@ -49,13 +52,14 @@ public class Scratch
    map.put(new ExtendedMimeType("text","html"),"HTML handler");
 
    System.out.println(map.get(new ExtendedMimeType("text","xml")));
-
+   */
   } // main
 
   public int i;
 
-}
+} // class Scratch
 
+/*
 class ExtendedMimeType extends MimeType{
   public ExtendedMimeType(String type, String subtype){super(type,subtype);}
 
@@ -69,6 +73,5 @@ class ExtendedMimeType extends MimeType{
     System.out.println(this.toString () + " HASH code = " + this.toString ().hashCode());
     return this.toString ().hashCode();
   }
-
-
-} // class Scratch
+}
+*/

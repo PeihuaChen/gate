@@ -25,7 +25,7 @@ public class TestXml extends TestCase
   public void setUp() {
   } // setUp
 
- /*
+
   public static void main(String args[]){
     TestXml app = new TestXml("TestXml");
     try{
@@ -34,7 +34,7 @@ public class TestXml extends TestCase
       System.out.println(e);
     }
   }
- */ 
+ 
 
   /** A test */
   public void testSomething() throws Exception{
@@ -67,7 +67,7 @@ public class TestXml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-    docFormat.unpackMarkup (doc);
+    docFormat.unpackMarkup (doc,"DocumentContent");
 
     // graphic visualisation
     /*
