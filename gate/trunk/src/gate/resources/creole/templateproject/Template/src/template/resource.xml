@@ -1,0 +1,14 @@
+<!-- resource.xml for Fred-->
+<!--  ___AUTHOR___, ___DATE___ -->
+<!-- $Id$ -->
+
+<CREOLE-DIRECTORY>
+
+<CREOLE>
+  <RESOURCE>
+    <NAME>Template</NAME>
+    <CLASS>___CLASSNAME___</CLASS>
+  </RESOURCE>
+</CREOLE>
+
+</CREOLE-DIRECTORY>
