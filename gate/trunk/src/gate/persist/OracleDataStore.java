@@ -215,7 +215,6 @@ public class OracleDataStore extends JDBCDataStore {
    */
   public void delete(String lrClassName, Object lrId)
   throws PersistenceException,SecurityException {
-
     //0. preconditions
     if (false == lrId instanceof Long) {
       throw new IllegalArgumentException();
@@ -1102,6 +1101,22 @@ public class OracleDataStore extends JDBCDataStore {
         }
 
         dbDocs.add(dbDoc);
+        //8. let the world know
+        fireResourceAdopted(new DatastoreEvent(this,
+                                                DatastoreEvent.RESOURCE_ADOPTED,
+                                                dbDoc,
+                                                dbDoc.getLRPersistenceId()
+                                              )
+                            );
+
+        //9. fire also resource written event because it's now saved
+        fireResourceWritten(new DatastoreEvent(this,
+                                                DatastoreEvent.RESOURCE_WRITTEN,
+                                                dbDoc,
+                                                dbDoc.getLRPersistenceId()
+                                              )
+                           );
+
       }
       else if (doc.getDataStore().equals(this)) {
         //persistent doc from the same DataStore
@@ -3233,7 +3248,6 @@ public class OracleDataStore extends JDBCDataStore {
       Iterator it = removedSets.iterator();
       while (it.hasNext()) {
         String setName = (String)it.next();
-
         cstmt.setLong(1,lrID.longValue());
         cstmt.setString(2,setName);
         cstmt.execute();
@@ -3280,7 +3294,6 @@ public class OracleDataStore extends JDBCDataStore {
 
     Iterator it = loadedSets.iterator();
     while (it.hasNext()) {
-
       AnnotationSet as = (AnnotationSet)it.next();
       //check that this set is neither NEW nor DELETED
       //they should be already synced
@@ -3429,6 +3442,14 @@ public class OracleDataStore extends JDBCDataStore {
         //opened one
         try {
           _sync(dbDoc,true);
+
+          // let the world know about it
+          fireResourceWritten( new DatastoreEvent(this,
+                                                  DatastoreEvent.RESOURCE_WRITTEN,
+                                                  dbDoc,
+                                                  dbDoc.getLRPersistenceId()
+                                                  )
+                              );
 
           //if the document is form the same DS but did not belong to the corpus add it now
           //NOTE: if the document already belongs to the corpus then nothing will be changed
