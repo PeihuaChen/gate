@@ -110,6 +110,8 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     // Register file sufixes for this mime type
     suffixes2mimeTypeMap.put("rtf",mime);
+    // Register magic numbers for this mime type
+    magic2mimeTypeMap.put("{\\rtf1",mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;

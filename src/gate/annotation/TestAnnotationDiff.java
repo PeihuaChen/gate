@@ -98,7 +98,7 @@ public class TestAnnotationDiff extends TestCase
                                         annotationSchema.getAnnotationName());
     diffSet = doDiff(keyAnnotSet, responseAnnotSet);
 
-/*
+//*
     // Create an AnnotationDiff object.
     // Creole.xml must contain a entry for AnnotationDiff.
     // If not, you will get an exception (couldn't configure resource metadata)
@@ -106,12 +106,12 @@ public class TestAnnotationDiff extends TestCase
     parameters = Factory.newFeatureMap();
     parameters.put("keyDocument",keyDocument);
     parameters.put("responseDocument",responseDocument);
-    parameters.put("annotationSchema",annotSchema);
+    parameters.put("annotationSchema",annotationSchema);
 
     // Create Annotation Diff visual resource
     AnnotationDiff annotDiff = (AnnotationDiff)
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
-*/
+//*/
 
     assert("Diffset is NULL. It shouldn't be NULL",diffSet!= null);
     assert("Precision changed.That's because of the key/response document or" +
@@ -127,7 +127,7 @@ public class TestAnnotationDiff extends TestCase
     jFrame.getContentPane().add(annotDiff, BorderLayout.CENTER);
     jFrame.pack();
     jFrame.setVisible(true);
-/*/
+*/
 
   } // testDiff()
 

@@ -109,6 +109,8 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     suffixes2mimeTypeMap.put("eml",mime);
     suffixes2mimeTypeMap.put("email",mime);
     suffixes2mimeTypeMap.put("mail",mime);
+    // Register magic numbers for this mime type
+    magic2mimeTypeMap.put("Subject:",mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;

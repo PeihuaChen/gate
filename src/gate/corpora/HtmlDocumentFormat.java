@@ -113,6 +113,8 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     // Register file sufixes for this mime type
     suffixes2mimeTypeMap.put("html",mime);
     suffixes2mimeTypeMap.put("htm",mime);
+    // Register magic numbers for this mime type
+    magic2mimeTypeMap.put("<html",mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;

@@ -60,9 +60,9 @@ public class TestHtml extends TestCase
     markupElementsMap.put ("a","link");
     */
 
-    doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
-    // get the docFormat that deals with it.
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
+   doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
+   // get the docFormat that deals with it.
+   gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
                                                         doc, doc.getSourceUrl()
                                                         );
     assert( "Bad document Format was produced. HtmlDocumentFormat was expected",

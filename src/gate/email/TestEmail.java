@@ -63,6 +63,17 @@ public class TestEmail extends TestCase
     docFormat.unpackMarkup (doc,"DocumentContent");
   } // testUnpackMarkup()
 
+  public static void main(String[] args) {
+    try{
+      Gate.init();
+      TestEmail testEmail = new TestEmail("");
+      testEmail.testUnpackMarkup();
+
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+  }
+
   /**
     * final test
     */

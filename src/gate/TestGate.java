@@ -150,8 +150,9 @@ public class TestGate {
     TestSuite suite = new TestSuite();
 
     try {
+///*
       suite.addTest(TestAnnotationDiff.suite());
-      suite.addTest(TestConfig.suite());                //*
+      suite.addTest(TestConfig.suite());
       suite.addTest(TestBumpyStack.suite());
       suite.addTest(TestAnnotation.suite());
       suite.addTest(TestEmail.suite());
@@ -172,7 +173,8 @@ public class TestGate {
       suite.addTest(TestCorpus.suite());
       suite.addTest(TestDB.suite());
       suite.addTest(TestTokeniser.suite());
-      suite.addTest(TestGazetteer.suite());         //*/
+      suite.addTest(TestGazetteer.suite());
+// */
     } catch(Exception e) {
       Out.prln("can't add tests! exception = " + e);
       throw(e);
