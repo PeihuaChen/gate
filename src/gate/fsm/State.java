@@ -65,8 +65,6 @@ public class State implements JapeConstants {
     isFinal = (action != null);
   }
 
-
-
   /** Sets the value for fileIndex. File index is the index in the jape
    * definition file of the rule that contains as right hand side the action
    * associated to this state. This value is only intended for final states.
