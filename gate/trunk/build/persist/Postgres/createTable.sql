@@ -16,7 +16,7 @@
  */
 
 
-DROP TABLE t_feature_key ;
+DROP TABLE t_feature_key CASCADE;
 
 CREATE TABLE  t_feature_key  (
     fk_id          int4 NOT NULL DEFAULT NEXTVAL('seq_feature_key'),
@@ -25,7 +25,7 @@ CREATE TABLE  t_feature_key  (
 );
 
 
-DROP TABLE  t_user ;
+DROP TABLE  t_user CASCADE;
 
 CREATE TABLE  t_user  (
     usr_id         int4 NOT NULL DEFAULT NEXTVAL('seq_user'),
@@ -35,7 +35,7 @@ CREATE TABLE  t_user  (
 );
 
 
-DROP TABLE  t_group ;
+DROP TABLE  t_group CASCADE;
 
 CREATE TABLE  t_group  (
     grp_id         int4 NOT NULL DEFAULT NEXTVAL('seq_group'),
@@ -44,7 +44,7 @@ CREATE TABLE  t_group  (
 );
 
 
-DROP TABLE  t_user_group ;
+DROP TABLE  t_user_group CASCADE;
 
 CREATE TABLE  t_user_group  (
     ugrp_id            int4 DEFAULT nextval('seq_user_group')  NOT NULL ,
@@ -60,7 +60,7 @@ CREATE TABLE  t_user_group  (
 );
 
 
-DROP TABLE  t_doc_encoding ;
+DROP TABLE  t_doc_encoding CASCADE;
 
 CREATE TABLE  t_doc_encoding  (
     enc_id         int4 NOT NULL DEFAULT NEXTVAL('seq_doc_encoding'),
@@ -68,7 +68,7 @@ CREATE TABLE  t_doc_encoding  (
  PRIMARY KEY ( enc_id )
 );
 
-DROP TABLE  t_doc_content ;
+DROP TABLE  t_doc_content CASCADE;
 
 CREATE TABLE  t_doc_content  (
     dc_id              int4 DEFAULT nextval('seq_doc_content')  NOT NULL ,
@@ -82,7 +82,7 @@ CREATE TABLE  t_doc_content  (
    PRIMARY KEY ( dc_id )
 );
 
-DROP TABLE  t_feature ;
+DROP TABLE  t_feature CASCADE;
 
 CREATE TABLE  t_feature  (
     ft_id              int4 DEFAULT nextval('seq_feature')  NOT NULL ,
@@ -100,7 +100,7 @@ CREATE TABLE  t_feature  (
    PRIMARY KEY ( ft_id )
 );
 
-DROP TABLE  t_lr_type ;
+DROP TABLE  t_lr_type CASCADE;
 
 CREATE TABLE  t_lr_type  (
     lrtp_id        int4 NOT NULL DEFAULT NEXTVAL('seq_lr_type'),
@@ -109,7 +109,7 @@ CREATE TABLE  t_lr_type  (
 );
 
 
-DROP TABLE  t_lang_resource ;
+DROP TABLE  t_lang_resource CASCADE;
 
 CREATE TABLE  t_lang_resource  (
     lr_id              int4 DEFAULT nextval('seq_lang_resource')  NOT NULL ,
@@ -136,7 +136,7 @@ CREATE TABLE  t_lang_resource  (
 );
 
 
-DROP TABLE  t_document ;
+DROP TABLE  t_document CASCADE;
 
 CREATE TABLE  t_document  (
     doc_id             int4 DEFAULT nextval('seq_document')  NOT NULL ,
@@ -156,7 +156,7 @@ CREATE TABLE  t_document  (
 );
 
 
-DROP TABLE  t_node ;
+DROP TABLE  t_node CASCADE;
 
 CREATE TABLE  t_node  (
     node_global_id     int4 DEFAULT nextval('seq_node')  NOT NULL ,
@@ -170,7 +170,7 @@ CREATE TABLE  t_node  (
 );
 
 
-DROP TABLE  t_annotation_type ;
+DROP TABLE  t_annotation_type CASCADE;
 
 CREATE TABLE  t_annotation_type  (
     at_id          int4 NOT NULL DEFAULT NEXTVAL('seq_annotation_type'),
@@ -179,7 +179,7 @@ CREATE TABLE  t_annotation_type  (
 );
 
 
-DROP TABLE  t_annotation ;
+DROP TABLE  t_annotation CASCADE;
 
 CREATE TABLE  t_annotation  (
     ann_global_id      int4 DEFAULT nextval('seq_annotation')  NOT NULL ,
@@ -204,7 +204,7 @@ CREATE TABLE  t_annotation  (
 );
 
 
-DROP TABLE  t_annot_set ;
+DROP TABLE  t_annot_set CASCADE;
 
 CREATE TABLE  t_annot_set  (
     as_id              int4 DEFAULT nextval('seq_annot_set')  NOT NULL ,
@@ -216,7 +216,7 @@ CREATE TABLE  t_annot_set  (
    PRIMARY KEY ( as_id )
 );
 
-DROP TABLE  t_as_annotation ;
+DROP TABLE  t_as_annotation CASCADE;
 
 CREATE TABLE  t_as_annotation  (
     asann_id           int4 DEFAULT nextval('seq_as_annotation')  NOT NULL ,
@@ -232,7 +232,7 @@ CREATE TABLE  t_as_annotation  (
 );
 
 
-DROP TABLE  t_corpus ;
+DROP TABLE  t_corpus CASCADE;
 
 CREATE TABLE  t_corpus  (
     corp_id            int4 DEFAULT nextval('seq_corpus')  NOT NULL ,
@@ -244,7 +244,7 @@ CREATE TABLE  t_corpus  (
 );
 
 
-DROP TABLE  t_corpus_document ;
+DROP TABLE  t_corpus_document CASCADE;
 
 CREATE TABLE  t_corpus_document  (
     cd_id              int4 DEFAULT nextval('seq_corpus_document')  NOT NULL ,
@@ -260,7 +260,7 @@ CREATE TABLE  t_corpus_document  (
 );
 
 
-DROP TABLE  t_parameter ;
+DROP TABLE  t_parameter CASCADE;
 
 CREATE TABLE  t_parameter  (
     par_id         int4 NOT NULL DEFAULT NEXTVAL('seq_parameter'),
