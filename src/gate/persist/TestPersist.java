@@ -38,7 +38,7 @@ public class TestPersist extends TestCase
 
 
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private Long uc01_lrID = null;
   private LanguageResource uc01_LR = null;
 
@@ -61,7 +61,11 @@ public class TestPersist extends TestCase
     storageDir.delete(); // get rid of the temp file
     storageDir.mkdir(); // create an empty dir of same name
 
-    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
+    SerialDataStore sds = (SerialDataStore)
+      Factory.createDataStore("gate.persist.SerialDataStore", storageDir.toURL());
+
+
+//    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
     sds.create();
     sds.open();
 
