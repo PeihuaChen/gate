@@ -1,0 +1,35 @@
+Phase:	Unknown
+Options: control = appelt
+
+
+Rule: Known
+Priority: 100
+(
+ {Location}| 
+ {Person}|
+ {Date}|
+ {Organization}|
+ {Address}|
+ {Money} |
+ {Percent}
+):known
+-->
+{}
+ 
+
+Rule:Unknown
+Priority: 50
+( 
+ {Token.category == NNP}
+) 
+:unknown
+-->
+ :unknown.Unknown = {kind = "PN", rule = Unknown}
+
+
+
+
+
+
+
+
