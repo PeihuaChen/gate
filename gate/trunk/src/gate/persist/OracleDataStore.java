@@ -2016,12 +2016,7 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     // 1. dummy document to be initialized
-//    DatabaseDocumentImpl result = new DatabaseDocumentImpl(this.jdbcConn);
-    DatabaseDocumentImpl result = null;
-    FeatureMap params = Factory.newFeatureMap();
-
-    HashMap initData = new HashMap();
-    initData.put("JDBC_CONN",this.jdbcConn);
+    DatabaseDocumentImpl result = new DatabaseDocumentImpl(this.jdbcConn);
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -2055,7 +2050,7 @@ public class OracleDataStore extends JDBCDataStore {
       //4.0 name
       String lrName = rs.getString("lr_name");
       Assert.assertNotNull(lrName);
-      initData.put("DOC_NAME",lrName);
+      result.setName(lrName);
 
       //4.1 parent
       Long parentID = null;
@@ -2068,8 +2063,7 @@ public class OracleDataStore extends JDBCDataStore {
         Assert.assertNotNull(parentLR);
         Assert.assertTrue(parentLR instanceof DatabaseDocumentImpl);
 
-        //result.setParent(parentLR);
-        initData.put("PARENT_LR",parentLR);
+        result.setParent(parentLR);
       }
 
 
@@ -2077,27 +2071,23 @@ public class OracleDataStore extends JDBCDataStore {
       long markup = rs.getLong("doc_is_markup_aware");
       Assert.assertTrue(markup == this.ORACLE_FALSE || markup == this.ORACLE_TRUE);
       if (markup == this.ORACLE_FALSE) {
-        //result.setMarkupAware(Boolean.FALSE);
-        initData.put("DOC_MARKUP_AWARE",Boolean.FALSE);
+        result.setMarkupAware(Boolean.FALSE);
       }
       else {
-        //result.setMarkupAware(Boolean.TRUE);
-        initData.put("DOC_MARKUP_AWARE",Boolean.TRUE);
+        result.setMarkupAware(Boolean.TRUE);
 
       }
 
       //4.3 datastore
-      initData.put("DS",this);
+      result.setDataStore(this);
 
       //4.4. persist ID
       Long persistID = new Long(rs.getLong("lr_id"));
-      //result.setLRPersistenceId(persistID);
-      initData.put("LR_ID",persistID);
+      result.setLRPersistenceId(persistID);
 
       //4.5  source url
       String url = rs.getString("doc_url");
-      //result.setSourceUrl(new URL(url));
-      initData.put("DOC_SOURCE_URL",new URL(url));
+      result.setSourceUrl(new URL(url));
 
       //4.6. start offset
       Long start = null;
@@ -2107,8 +2097,8 @@ public class OracleDataStore extends JDBCDataStore {
       if (false == rs.wasNull()) {
         start = new Long(longVal);
       }
-//      result.setSourceUrlStartOffset(start);
-      initData.put("DOC_SOURCE_URL_START",start);
+      result.setSourceUrlStartOffset(start);
+//      initData.put("DOC_SOURCE_URL_START",start);
 
       //4.7. end offset
       Long end = null;
@@ -2118,13 +2108,13 @@ public class OracleDataStore extends JDBCDataStore {
       if (false == rs.wasNull()) {
         end = new Long(longVal);
       }
-//      result.setSourceUrlEndOffset(end);
-      initData.put("DOC_SOURCE_URL_END",end);
+      result.setSourceUrlEndOffset(end);
+//      initData.put("DOC_SOURCE_URL_END",end);
 
       //4.8 features
       FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_DOCUMENT);
-      //result.setFeatures(features);
-      initData.put("DOC_FEATURES",features);
+      result.setFeatures(features);
+      //initData.put("DOC_FEATURES",features);
 
       //4.9 set the nextAnnotationID correctly
       long doc_id = rs.getLong("doc_id");
@@ -2165,21 +2155,21 @@ public class OracleDataStore extends JDBCDataStore {
       else
         maxAnnID = rs.getInt(1);
 
-//      result.setNextNodeId(maxNodeID+1);
-      initData.put("DOC_NEXT_NODE_ID",new Integer(maxNodeID+1));
-//      result.setNextAnnotationId(maxAnnID+1);
-      initData.put("DOC_NEXT_ANN_ID",new Integer(maxAnnID+1));
+      result.setNextNodeId(maxNodeID+1);
+//      initData.put("DOC_NEXT_NODE_ID",new Integer(maxNodeID+1));
+      result.setNextAnnotationId(maxAnnID+1);
+//      initData.put("DOC_NEXT_ANN_ID",new Integer(maxAnnID+1));
 
 
-      params.put("initData__$$__", initData);
-      try {
+//      params.put("initData__$$__", initData);
+//      try {
         //here we create the persistent LR via Factory, so it's registered
         //in GATE
-        result = (DatabaseDocumentImpl)Factory.createResource("gate.corpora.DatabaseDocumentImpl", params);
-      }
-      catch (gate.creole.ResourceInstantiationException ex) {
-        throw new GateRuntimeException(ex.getMessage());
-      }
+//        result = (DatabaseDocumentImpl)Factory.createResource("gate.corpora.DatabaseDocumentImpl", params);
+//      }
+//      catch (gate.creole.ResourceInstantiationException ex) {
+//        throw new GateRuntimeException(ex.getMessage());
+//      }
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
