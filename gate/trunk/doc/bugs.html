@@ -217,6 +217,33 @@ problem.
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+
+  <TR>
+    <TD>00017</TD>
+    <TD>gui</TD>
+    <TD>Valentin</TD>
+    <TD>___adopted_by</TD>
+    <TD>01/12/2001 All platforms All JDKs All versions</TD>
+    <TD>___fixed_on ___date ___Gversion</TD>
+    <TD><p>The GUI doesn't block while operations are being executed. This
+    allows for multiple threads to be run at the same time which could lead to
+    dangerous situations as the gate API is not thread safe. Although runing
+    things that not affect each other is many times safe it is sometimes
+    difficult to tell whether two certain operations are interfering with each
+    other so the GUI should lock itself not allowing the user to start a new
+    operation before the current one finished.</p>
+    <P><font color="green"><B>Workaround:</b> Until the gate developers get
+    their act together and implement some mechanism for locking, the users are
+    advised to show patience and allow each operation to finish before starting
+    a new one. This is particularly important for operations involving
+    datastores and executions of applications.
+    </font></p></TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 <!------------------------------------------------------------------------->
 </TABLE>
 
