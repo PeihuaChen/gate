@@ -146,7 +146,7 @@ public class MainFrame extends JFrame
     Icon result = (Icon)iconByName.get(filename);
     if(result == null){
       result = new ImageIcon(MainFrame.class.
-              getResource("/gate/resources/img/" + filename));
+              getResource(Files.getResourcePath() + "/img/" + filename));
       iconByName.put(filename, result);
     }
     return result;
@@ -1157,7 +1157,8 @@ public class MainFrame extends JFrame
 
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
-    if(Gate.getHiddenAttribute(res.getFeatures())) return;
+    if(Gate.getHiddenAttribute(res.getFeatures()) || 
+            res instanceof VisualResource) return;
     NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
