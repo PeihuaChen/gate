@@ -20,17 +20,15 @@ import java.util.*;
 import java.net.*;
 import com.objectspace.jgl.*;
 import gate.annotation.*;
-import gate.gui.*;
 import gate.util.*;
+import gate.event.*;
 import gate.*;
 
 
 /**
   * Represents a single or multiphase transducer.
   */
-public abstract class Transducer implements java.io.Serializable,
-                                            ProcessProgressReporter,
-                                            StatusReporter
+public abstract class Transducer implements java.io.Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -118,6 +116,11 @@ public abstract class Transducer implements java.io.Serializable,
 
 
 // $Log$
+// Revision 1.11  2001/03/06 20:11:14  valyt
+// <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
+//
+// Cleaned up some obsolete classes
+//
 // Revision 1.10  2001/02/08 13:46:07  valyt
 // Added full Unicode support for the gazetteer and Jape
 // converted the gazetteer files to UTF-8

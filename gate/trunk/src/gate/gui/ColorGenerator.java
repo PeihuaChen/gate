@@ -18,7 +18,8 @@ import java.awt.*;
 import java.util.*;
 
 /**
- * This class is used to generate random colours that are evenly distributed in the colours space.
+ * This class is used to generate random colours that are evenly distributed in
+ * the colours space.
  *
  */
 public class ColorGenerator {

@@ -23,7 +23,7 @@ import java.net.*;
 import gate.util.*;
 import gate.*;
 import gate.xml.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.creole.*;
 
 // xml tools

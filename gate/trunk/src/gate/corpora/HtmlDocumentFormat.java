@@ -28,7 +28,7 @@ import javax.swing.text.*;
 import gate.util.*;
 import gate.*;
 import gate.html.*;
-import gate.gui.*;
+import gate.event.*;
 import gate.creole.*;
 
 import org.w3c.www.mime.*;

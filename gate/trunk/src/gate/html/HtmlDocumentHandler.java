@@ -25,7 +25,7 @@ import java.util.*;
 import gate.corpora.*;
 import gate.util.*;
 import gate.*;
-import gate.gui.*;
+import gate.event.*;
 
 
 /** Implements the behaviour of the HTML reader.

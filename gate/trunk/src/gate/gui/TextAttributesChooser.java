@@ -1,3 +1,17 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 13/12/2000
+ *
+ *  $Id$
+ *
+ */
+
 package gate.gui;
 
 import java.awt.*;
@@ -9,6 +23,11 @@ import javax.swing.text.*;
 import javax.swing.colorchooser.*;
 import java.util.*;
 
+/**
+ * A dialog used to set the attributes for text display. The attribute set
+ * includes font family, size, foreground and background colours, italic,
+ * bold, etc.
+ */
 public class TextAttributesChooser extends JDialog {
 
   JComboBox fontFamilyCombo;
@@ -311,6 +330,17 @@ public class TextAttributesChooser extends JDialog {
 
   }
 
+  /**
+   * Initialises all the values for the attributes from the provided attribute
+   * set and displays the dialog allowing the user to make changes.
+   * If the user presses the <b>OK</b> button the method will return the values
+   * as modified by the user otherwise it will return the attribute set received
+   * as input.
+   * @param the attribute set to be used as a starting point for the user's
+   * selections
+   * @return an {@link javax.swing.text.AttributeSet} containing the values
+   * selected by the user.
+   */
   public AttributeSet show(AttributeSet style){
     currentStyle = new SimpleAttributeSet(style);
     //currentStyle.addAttributes(style);
@@ -322,6 +352,10 @@ public class TextAttributesChooser extends JDialog {
     else return style;
   }
 
+  /**
+   * Updates all the GUI components to show the values in the current attribute
+   * set.
+   */
   protected void updateData(){
     fontFamilyCombo.setSelectedItem(StyleConstants.getFontFamily(currentStyle));
     fontSizeCombo.setSelectedItem(new Integer(StyleConstants.getFontSize(currentStyle)).toString());
@@ -342,6 +376,9 @@ public class TextAttributesChooser extends JDialog {
     }else useBackgroundChk.setSelected(false);
   }
 
+  /**
+   * Updates the sample text with the current attributes.
+   */
   protected void updateSample(){
     if(sampleText.getSelectedText() != null &&
        sampleText.getSelectedText().length() > 0){
@@ -354,6 +391,9 @@ public class TextAttributesChooser extends JDialog {
     }
   }//protected void updateSample()
 
+  /**
+   * Test code
+   */
   public static void main(String[] args){
     try{
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

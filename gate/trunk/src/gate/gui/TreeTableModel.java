@@ -1,17 +1,18 @@
-package gate.gui;
 /*
- * %W% %E%
+ *  Copyright (c) 1998-2001, The University of Sheffield.
  *
- * Copyright 1997, 1998 by Sun Microsystems, Inc.,
- * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
- * All rights reserved.
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- * This software is the confidential and proprietary information
- * of Sun Microsystems, Inc. ("Confidential Information").  You
- * shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Sun.
+ *  Valentin Tablan 23/01/2001
+ *
+ *  $Id$
+ *
  */
+
+package gate.gui;
 
 import javax.swing.tree.TreeModel;
 

@@ -129,8 +129,7 @@ import gate.event.*;
   * </PRE>
   */
 public class DocumentImpl
-extends AbstractLanguageResource implements Document, StatusReporter
-{
+extends AbstractLanguageResource implements Document{
   /** Debug flag */
   private static final boolean DEBUG = false;
 

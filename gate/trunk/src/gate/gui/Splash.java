@@ -4,8 +4,18 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 
+/**
+ * A splash screen.
+ * A splash screen is an image that appears on the screen while an application
+ * initialises. The implementation uses a {@link java.awt.Window} (a Frame with
+ * no decorations such as bar or buttons) and can either display a JComponent
+ * as content or an image.
+ */
 public class Splash extends JWindow {
 
+  /**
+   * Constructor from owner and content.
+   */
   public Splash(Window owner, JComponent content) {
     super(owner);
     getContentPane().setLayout(new BorderLayout());
@@ -15,19 +25,32 @@ public class Splash extends JWindow {
     pack();
   }
 
+  /**
+   * Contructor from image.
+   */
   public Splash(String imageResourcePath) {
     this(null, imageResourcePath);
   }
 
+  /**
+   * Constructor from content.
+   */
   public Splash(JComponent content) {
     this(null, content);
   }
 
+  /**
+   * Constructor from owner and image.
+   */
   public Splash(Window owner, String imageResourcePath) {
     this(owner,
          new JLabel(new ImageIcon(Splash.class.getResource(imageResourcePath))));
   }
 
+  /**
+   * Displays the splash screen centered in the owner's space or centered on
+   * the screen if no owner or owner not shown.
+   */
   public void show(){
     Dimension ownerSize;
     Point ownerLocation;
