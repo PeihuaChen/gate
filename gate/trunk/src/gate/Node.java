@@ -15,7 +15,7 @@ import gate.util.*;
 public interface Node
 {
   /** Id */
-  public Integer getId();
+  public String getId();
 
   /** Offset (will be null when the node is not anchored) */
   public Double getOffset();
@@ -28,5 +28,10 @@ public interface Node
 
   /** Does this node precede n? */
   public boolean precedes(Node n);
+
+  public void addStartAnnotation(gate.Annotation annot);
+
+  public void addEndAnnotation(gate.Annotation annot);
+
 
 } // interface Node

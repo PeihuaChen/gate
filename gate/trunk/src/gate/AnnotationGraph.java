@@ -13,7 +13,7 @@ import gate.util.*;
 /** Annotation graphs are defined at 
   * <A HREF=http://www.ldc.upenn.edu/annotation/>the LDC's annotation site</A>
   */
-public interface AnnotationGraph extends SortedSet
+public interface AnnotationGraph 
 {
   /** find a node by ID */
   public Node getNode(String id);
@@ -58,5 +58,12 @@ public interface AnnotationGraph extends SortedSet
 
   /**Creates a new node with the offset offset
   @param offset the offset in document where the node will point*/
-  public void putNodeAt(int id,double offset)throws gate.util.InvalidOffsetException;
+  public Node putNodeAt(String id,double offset)throws gate.util.InvalidOffsetException;
+  /**Returns the Id of the annotation graph*/
+  public String getId();
+
+  public Annotation newAnnotation(String id, Node start, Node end, String type, String equivalenceClass);
+
+  public Annotation newAnnotation(String id,long start, long end, String type, String equivalenceClass);
+
 } // interface AnnotationGraph
