@@ -69,14 +69,14 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
                    member_of(p_usr_id,OWNER_GROUP) and
                    OWNER_GROUP == p_grp_id
          */
-             
+
          /* user is owner, and permisssions are OWNER_WRITE */
          if (l_owner_user = p_usr_id and
                  (l_access_mode = C_PERM_GR_OW or l_access_mode = C_PERM_OR_OW)) then
             /* case 1a */
             return true;
          end if;
-             
+
          /* user is in owning group */
          if (security_is_member_of_group(p_usr_id,l_owner_group) and
              l_owner_group = p_grp_id and
@@ -93,15 +93,15 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
           -- read access request
           -- check read persmissions
           -- read access is granted :
-          -- 1a. permissions are USER_READ and OWNER_USER == p_usr_id
+          -- 1a. OWNER_USER == p_usr_id : owner can always read
           -- 1b. permissions are GROUP_READ and member_of(p_usr_id,OWNER_GROUP)
           -- 1c. permissions are WORLD_READ
           */
-          if (l_access_mode = C_PERM_WR_GW) then
-             /* -- case 1c */
+          if (l_owner_user = p_usr_id) then
+             /* -- case 1a */
              return true;
           end if;
-          
+
           if ((l_access_mode = C_PERM_GR_GW or l_access_mode = C_PERM_GR_OW) and
                security_is_member_of_group(p_usr_id,l_owner_group) and
                l_owner_group = p_grp_id)  then
@@ -113,10 +113,10 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
              /* -- case 1c */
              return true;
           end if;
-          
+
           /*--fail */
           return false;
-       
+
        end if;
 
    END;'
