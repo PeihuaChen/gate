@@ -30,6 +30,11 @@ import gate.util.*;
   * construct objects of this class unless your name is gate.util.Gate
   * (in which case please go back to the source code repository and stop
   * looking at other class's code).
+  * <P>
+  * The CREOLE register records the set of resources that are currently
+  * known to the system. Each member of the register is a
+  * <A HREF=creole/ResourceData.html>ResourceData</A> object, indexed by
+  * the class name of the resource.
   * @see gate.CreoleRegister
   */
 public class CreoleRegisterImpl extends HashMap implements CreoleRegister
@@ -228,11 +233,15 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
     return super.put(key, value);
   } // put(key, value)
 
-  /** Overide HashMap's delete method to update the list of type of LR
+  /** Overide HashMap's delete method to update the list of types of LR
     * in the register.
     */
   public Object remove(Object key) {
     ResourceData rd = (ResourceData) get(key);
+    if(DEBUG) {
+      Out.prln(key);
+      Out.prln(rd);
+    }
     if(LanguageResource.class.isAssignableFrom(rd.getClass()))
       lrTypes.remove(rd.getClassName());
 
