@@ -516,75 +516,141 @@ public class DocumentEditor extends AbstractVisualResource{
             popup.show(textPane, e.getPoint().x, e.getPoint().y);
           } else {
             //there is selected text -> create a new annotation
-            int start = textPane.getSelectionStart();
-            int end = textPane.getSelectionEnd();
-
-
-            if(getAnnotationSchemas() != null &&
-               !getAnnotationSchemas().isEmpty()){
-              JPopupMenu popup = new JPopupMenu();
-              //Add to the default AnnotationSet
-              JMenu menu = new JMenu("Add to Default");
-
-              menu.add(new NewCustomAnnotationPopupItem(
-                                                 start,
-                                                 end,
-                                                 document.getAnnotations()));
-
+            Long startOffset = new Long(textPane.getSelectionStart());
+            Long endOffset = new Long(textPane.getSelectionEnd());
+            JPopupMenu popup = new JPopupMenu();
+            //add new annotation in the Default AS
+            JMenu menu = new JMenu("Add annotation to \"Default\"");
+            menu.add(new XJMenuItem(
+                         new NewAnnotationAction(document.getAnnotations(),
+                                                 startOffset, endOffset),
+                         myHandle));
+            java.util.List customisedAnnTypes = Gate.getCreoleRegister().
+                                                getVREnabledAnnotationTypes();
+            if(!customisedAnnTypes.isEmpty()){
               menu.addSeparator();
-              Iterator schemasIter = getAnnotationSchemas().iterator();
-              while(schemasIter.hasNext()){
-                AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
-                menu.add(new NewAnnotationPopupItem(start, end, schema,
-                         document.getAnnotations()));
+              Iterator typesIter = customisedAnnTypes.iterator();
+              while(typesIter.hasNext()){
+                menu.add(new XJMenuItem(
+                             new NewAnnotationAction(document.getAnnotations(),
+                                                     (String)typesIter.next(),
+                                                     startOffset, endOffset),
+                             myHandle));
               }
-              popup.add(menu);
+            }//if(!customisedAnnTypes.isEmpty())
+            popup.add(menu);
 
-              //Add to a named AnnotationSet
-              Map namedASs = document.getNamedAnnotationSets();
-              if(namedASs != null && !namedASs.isEmpty()){
-                Iterator asIter = namedASs.values().iterator();
-                while(asIter.hasNext()){
-                  AnnotationSet as = (AnnotationSet)asIter.next();
-                  menu = new JMenu("Add to " + as.getName());
-                  menu.add(new NewCustomAnnotationPopupItem(
-                                                     start,
-                                                     end,
-                                                     as));
+            //add a new annotation to a named AnnotationSet
+            Iterator annSetsIter = document.getNamedAnnotationSets().
+                                            keySet().iterator();
+            if(annSetsIter.hasNext()) popup.addSeparator();
+            while(annSetsIter.hasNext()){
+              AnnotationSet set = document.getAnnotations(
+                                           (String)annSetsIter.next());
 
-                  menu.addSeparator();
 
-                  schemasIter = getAnnotationSchemas().iterator();
-                  while(schemasIter.hasNext()){
-                    AnnotationSchema schema =
-                                          (AnnotationSchema)schemasIter.next();
-                    menu.add(new NewAnnotationPopupItem(start, end, schema, as));
-                  }
-                  popup.add(menu);
+              menu = new JMenu("Add annotation to \"" + set.getName() + "\"");
+              menu.add(new XJMenuItem(
+                           new NewAnnotationAction(set, startOffset, endOffset),
+                           myHandle));
+              if(!customisedAnnTypes.isEmpty()){
+                menu.addSeparator();
+                Iterator typesIter = customisedAnnTypes.iterator();
+                while(typesIter.hasNext()){
+                  menu.add(new XJMenuItem(
+                               new NewAnnotationAction(set,
+                                                       (String)typesIter.next(),
+                                                       startOffset, endOffset),
+                               myHandle));
                 }
-              }
-
-              //Add to a new AnnotationSet
-              menu = new JMenu("Add to new annotation set");
-              menu.add(new NewCustomAnnotationPopupItem(
-                                                 start,
-                                                 end,
-                                                 null));
-
-              menu.addSeparator();
-              schemasIter = getAnnotationSchemas().iterator();
-              while(schemasIter.hasNext()){
-                AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
-                menu.add(new NewAnnotationPopupItem(start, end, schema, null));
-              }
+              }//if(!customisedAnnTypes.isEmpty())
               popup.add(menu);
+            }//while(annSetsIter.hasNext())
 
-              //show the popup
-              popup.show(textPane, e.getPoint().x, e.getPoint().y);
-            }
-          }
-        }
-      }
+            //add to a new annotation set
+            menu = new JMenu("Add annotation to a new set");
+            menu.add(new XJMenuItem(
+                         new NewAnnotationAction(null, startOffset, endOffset),
+                         myHandle));
+            if(!customisedAnnTypes.isEmpty()){
+              menu.addSeparator();
+              Iterator typesIter = customisedAnnTypes.iterator();
+              while(typesIter.hasNext()){
+                menu.add(new XJMenuItem(
+                             new NewAnnotationAction(null,
+                                                     (String)typesIter.next(),
+                                                     startOffset, endOffset),
+                             myHandle));
+              }
+            }//if(!customisedAnnTypes.isEmpty())
+            popup.add(menu);
+
+//
+//
+//            if(getAnnotationSchemas() != null &&
+//               !getAnnotationSchemas().isEmpty()){
+//              JPopupMenu popup = new JPopupMenu();
+//              //Add to the default AnnotationSet
+//              JMenu menu = new JMenu("Add to Default");
+//
+//              menu.add(new NewCustomAnnotationPopupItem(
+//                                                 start,
+//                                                 end,
+//                                                 document.getAnnotations()));
+//
+//              menu.addSeparator();
+//              Iterator schemasIter = getAnnotationSchemas().iterator();
+//              while(schemasIter.hasNext()){
+//                AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+//                menu.add(new NewAnnotationPopupItem(start, end, schema,
+//                         document.getAnnotations()));
+//              }
+//              popup.add(menu);
+//
+//              //Add to a named AnnotationSet
+//              Map namedASs = document.getNamedAnnotationSets();
+//              if(namedASs != null && !namedASs.isEmpty()){
+//                Iterator asIter = namedASs.values().iterator();
+//                while(asIter.hasNext()){
+//                  AnnotationSet as = (AnnotationSet)asIter.next();
+//                  menu = new JMenu("Add to " + as.getName());
+//                  menu.add(new NewCustomAnnotationPopupItem(
+//                                                     start,
+//                                                     end,
+//                                                     as));
+//
+//                  menu.addSeparator();
+//
+//                  schemasIter = getAnnotationSchemas().iterator();
+//                  while(schemasIter.hasNext()){
+//                    AnnotationSchema schema =
+//                                          (AnnotationSchema)schemasIter.next();
+//                    menu.add(new NewAnnotationPopupItem(start, end, schema, as));
+//                  }
+//                  popup.add(menu);
+//                }
+//              }
+//
+//              //Add to a new AnnotationSet
+//              menu = new JMenu("Add to new annotation set");
+//              menu.add(new NewCustomAnnotationPopupItem(
+//                                                 start,
+//                                                 end,
+//                                                 null));
+//
+//              menu.addSeparator();
+//              schemasIter = getAnnotationSchemas().iterator();
+//              while(schemasIter.hasNext()){
+//                AnnotationSchema schema = (AnnotationSchema)schemasIter.next();
+//                menu.add(new NewAnnotationPopupItem(start, end, schema, null));
+//              }
+//              popup.add(menu);
+//
+            //show the popup
+            popup.show(textPane, e.getPoint().x, e.getPoint().y);
+          }//there is selected text
+        }//if(SwingUtilities.isRightMouseButton(e))
+      }//mouse clicked
 
       public void mousePressed(MouseEvent e) {
       }
@@ -2268,127 +2334,237 @@ public class DocumentEditor extends AbstractVisualResource{
   }//class EditAnnotationAction
 
   /**
-   * The menu items used for creating a new annotation from the right click
-   * popup menu.
+   * The action that is fired when the user wants to create a new annotation.
+   * It will build a dialog containing all the valid annotation editors.
    */
-  protected class NewAnnotationPopupItem extends JMenuItem {
-    public NewAnnotationPopupItem(int aStart, int anEnd,
-                                  AnnotationSchema aSchema,
-                                  AnnotationSet aTargetAS) {
-
-
-      super(aSchema.getAnnotationName());
-
-      this.start = aStart;
-      this.end = anEnd;
-      this.schema = aSchema;
-      this.targetAS = aTargetAS;
-
-      this.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          String newASName = "foo";
-          if(targetAS == null){
-            Object answer = JOptionPane.showInputDialog(
-                            textPane,
-                            "Please provide a name for the new annotation set:",
-                            "Gate",
-                            JOptionPane.QUESTION_MESSAGE);
-            if(answer == null) return;
-            newASName = (String)answer;
-          }// End if
-
-          FeatureMap features = annotationEditDialog.show(schema);
-          if(features != null){
-            if(targetAS == null){
-              targetAS = document.getAnnotations(newASName);
-            }
-            try{
-              targetAS.add(new Long(start), new Long(end),
-                           schema.getAnnotationName(), features);
-              SwingUtilities.invokeLater(new Runnable(){
-                public void run(){
-                  annotationsTableModel.fireTableDataChanged();
-                }
-              });
-            }catch(InvalidOffsetException ioe){
-              JOptionPane.showMessageDialog(textPane,
-                                            "Invalid input!\n" + ioe.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
-            }
-          }
-        }
-      });
+  class NewAnnotationAction extends AbstractAction{
+    public NewAnnotationAction(AnnotationSet set,
+                               Long startOffset,
+                               Long endOffset){
+      super("New annotation");
+      putValue(SHORT_DESCRIPTION, "Creates a new annotation");
+      this.set = set;
+      this.startOffset = startOffset;
+      this.endOffset = endOffset;
+      this.type = null;
     }
 
-    int start;
-    int end;
-    AnnotationSchema schema;
-    AnnotationSet targetAS;
-  }// End class NewAnnotationPopupItem
+    public NewAnnotationAction(AnnotationSet set, String type,
+                               Long startOffset, Long endOffset){
+      super("New \"" + type + "\" annotation");
+      putValue(SHORT_DESCRIPTION, "Creates a new annotation of type \"" +
+                                  type + "\"");
+      this.set = set;
+      this.startOffset = startOffset;
+      this.endOffset = endOffset;
+      this.type = type;
+    }
+
+    public void actionPerformed(ActionEvent e){
+      //get the lists of editors
+      java.util.List specificEditors;
+      if(type != null) specificEditors = Gate.getCreoleRegister().
+                                         getAnnotationVRs(type);
+      else specificEditors = new ArrayList();
+
+      java.util.List genericEditors = Gate.getCreoleRegister().
+                                      getAnnotationVRs();
+      //create the GUI
+      JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+      //add all the specific editors
+      Iterator editorIter = specificEditors.iterator();
+      while(editorIter.hasNext()){
+        String editorType = (String)editorIter.next();
+        //create the editor
+        AnnotationVisualResource editor;
+        try{
+          editor = (AnnotationVisualResource)
+                                          Factory.createResource(editorType);
+          editor.setTarget(set);
+          editor.setSpan(startOffset, endOffset);
+          tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+                        ((ResourceData)Gate.getCreoleRegister().get(editorType)).
+                                                                getName());
+        }catch(ResourceInstantiationException rie){
+          rie.printStackTrace(Err.getPrintWriter());
+        }
+      }
+
+      //add all the generic editors
+      editorIter = genericEditors.iterator();
+      while(editorIter.hasNext()){
+        String editorType = (String)editorIter.next();
+        //create the editor
+        AnnotationVisualResource editor;
+        try{
+          editor  = (AnnotationVisualResource)
+                                          Factory.createResource(editorType);
+
+          if(type == null ||
+             (type != null && editor.canDisplayAnnotationType(type))){
+            editor.setTarget(set);
+            editor.setSpan(startOffset, endOffset);
+            tabbedPane.add(/*new JScrollPane(*/(Component)editor/*)*/,
+                           ((ResourceData)Gate.getCreoleRegister().
+                                              get(editorType)).getName());
+          }
+        }catch(ResourceInstantiationException rie){
+          rie.printStackTrace(Err.getPrintWriter());
+        }
+
+      }
+
+      //show the modal dialog
+      JOptionPane optionPane = new JOptionPane(tabbedPane,
+                                               JOptionPane.PLAIN_MESSAGE,
+                                               JOptionPane.OK_CANCEL_OPTION);
+      optionPane.setIcon(null);
+      JDialog dialog =  optionPane.createDialog(DocumentEditor.this,
+                                                "Edit the new annotation");
+      dialog.pack();
+      dialog.show();
+
+      //if OK notify the selected editor to save the data
+      if(((Integer)optionPane.getValue()).intValue() == optionPane.OK_OPTION){
+        try{
+          ((AnnotationVisualResource)/*((JScrollPane)*/tabbedPane.
+                                      getSelectedComponent()/*).getViewport().
+                                                              getView()*/
+           ).okAction();
+        }catch(GateException ge){
+          ge.printStackTrace(Err.getPrintWriter());
+        }
+      }
+    }//public void actionPerformed(ActionEvent e)
+
+    AnnotationSet set;
+    Long startOffset;
+    Long endOffset;
+    String type;
+  }//class NewAnnotationAction extends AbstractAction
+
+//  /**
+//   * The menu items used for creating a new annotation from the right click
+//   * popup menu.
+//   */
+//  protected class NewAnnotationPopupItem extends JMenuItem {
+//    public NewAnnotationPopupItem(int aStart, int anEnd,
+//                                  AnnotationSchema aSchema,
+//                                  AnnotationSet aTargetAS) {
+//
+//
+//      super(aSchema.getAnnotationName());
+//
+//      this.start = aStart;
+//      this.end = anEnd;
+//      this.schema = aSchema;
+//      this.targetAS = aTargetAS;
+//
+//      this.addActionListener(new ActionListener() {
+//        public void actionPerformed(ActionEvent e) {
+//          String newASName = "foo";
+//          if(targetAS == null){
+//            Object answer = JOptionPane.showInputDialog(
+//                            textPane,
+//                            "Please provide a name for the new annotation set:",
+//                            "Gate",
+//                            JOptionPane.QUESTION_MESSAGE);
+//            if(answer == null) return;
+//            newASName = (String)answer;
+//          }// End if
+//
+//          FeatureMap features = annotationEditDialog.show(schema);
+//          if(features != null){
+//            if(targetAS == null){
+//              targetAS = document.getAnnotations(newASName);
+//            }
+//            try{
+//              targetAS.add(new Long(start), new Long(end),
+//                           schema.getAnnotationName(), features);
+//              SwingUtilities.invokeLater(new Runnable(){
+//                public void run(){
+//                  annotationsTableModel.fireTableDataChanged();
+//                }
+//              });
+//            }catch(InvalidOffsetException ioe){
+//              JOptionPane.showMessageDialog(textPane,
+//                                            "Invalid input!\n" + ioe.toString(),
+//                                            "Gate", JOptionPane.ERROR_MESSAGE);
+//            }
+//          }
+//        }
+//      });
+//    }
+//
+//    int start;
+//    int end;
+//    AnnotationSchema schema;
+//    AnnotationSet targetAS;
+//  }// End class NewAnnotationPopupItem
 
 
-  /**
-   * The menu items used for creating a new custom annotation from the right click
-   * popup menu.
-   */
-  protected class NewCustomAnnotationPopupItem extends JMenuItem {
-
-    public NewCustomAnnotationPopupItem(int aStart,
-                                        int anEnd,
-                                        AnnotationSet aTargetAS){
-
-
-      super("Create a custom annotation");
-
-      this.start = aStart;
-      this.end = anEnd;
-      this.targetAS = aTargetAS;
-
-      this.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          String newASName = "foo";
-          if(targetAS == null){
-            Object answer = JOptionPane.showInputDialog(
-                            textPane,
-                            "Please provide a name for the new annotation set:",
-                            "Gate",
-                            JOptionPane.QUESTION_MESSAGE);
-            if(answer == null) return;
-            newASName = (String)answer;
-          }// End if
-
-          CustomAnnotationEditDialog customAnnotEditor =
-                                        new CustomAnnotationEditDialog(
-                                                  getAnnotationSchemas());
-          // Creates a new annotation
-          if (customAnnotEditor.show(null) == JFileChooser.APPROVE_OPTION){
-            String annotType = customAnnotEditor.getAnnotType();
-            FeatureMap annotFeat = customAnnotEditor.getFeatures();
-            if(targetAS == null){
-                targetAS = document.getAnnotations(newASName);
-            }// End if
-            try{
-              targetAS.add(new Long(start),new Long(end),annotType, annotFeat);
-              SwingUtilities.invokeLater(new Runnable(){
-                public void run(){
-                  annotationsTableModel.fireTableDataChanged();
-                }
-              });
-            }catch(InvalidOffsetException ioe){
-              JOptionPane.showMessageDialog(textPane,
-                                            "Invalid input!\n" + ioe.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
-            }// End try
-          }// End if
-        }//actionPerformed();
-      });// End new ActionListener
-    }// End addActionListener();
-
-    int start;
-    int end;
-    AnnotationSchema schema;
-    AnnotationSet targetAS;
-  }// End class NewCustomAnnotationPopupItem
+//  /**
+//   * The menu items used for creating a new custom annotation from the right click
+//   * popup menu.
+//   */
+//  protected class NewCustomAnnotationPopupItem extends JMenuItem {
+//
+//    public NewCustomAnnotationPopupItem(int aStart,
+//                                        int anEnd,
+//                                        AnnotationSet aTargetAS){
+//
+//
+//      super("Create a custom annotation");
+//
+//      this.start = aStart;
+//      this.end = anEnd;
+//      this.targetAS = aTargetAS;
+//
+//      this.addActionListener(new ActionListener() {
+//        public void actionPerformed(ActionEvent e) {
+//          String newASName = "foo";
+//          if(targetAS == null){
+//            Object answer = JOptionPane.showInputDialog(
+//                            textPane,
+//                            "Please provide a name for the new annotation set:",
+//                            "Gate",
+//                            JOptionPane.QUESTION_MESSAGE);
+//            if(answer == null) return;
+//            newASName = (String)answer;
+//          }// End if
+//
+//          CustomAnnotationEditDialog customAnnotEditor =
+//                                        new CustomAnnotationEditDialog(
+//                                                  getAnnotationSchemas());
+//          // Creates a new annotation
+//          if (customAnnotEditor.show(null) == JFileChooser.APPROVE_OPTION){
+//            String annotType = customAnnotEditor.getAnnotType();
+//            FeatureMap annotFeat = customAnnotEditor.getFeatures();
+//            if(targetAS == null){
+//                targetAS = document.getAnnotations(newASName);
+//            }// End if
+//            try{
+//              targetAS.add(new Long(start),new Long(end),annotType, annotFeat);
+//              SwingUtilities.invokeLater(new Runnable(){
+//                public void run(){
+//                  annotationsTableModel.fireTableDataChanged();
+//                }
+//              });
+//            }catch(InvalidOffsetException ioe){
+//              JOptionPane.showMessageDialog(textPane,
+//                                            "Invalid input!\n" + ioe.toString(),
+//                                            "Gate", JOptionPane.ERROR_MESSAGE);
+//            }// End try
+//          }// End if
+//        }//actionPerformed();
+//      });// End new ActionListener
+//    }// End addActionListener();
+//
+//    int start;
+//    int end;
+//    AnnotationSchema schema;
+//    AnnotationSet targetAS;
+//  }// End class NewCustomAnnotationPopupItem
 
   /**
    * Fixes the <a
