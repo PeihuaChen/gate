@@ -80,8 +80,7 @@ create or replace package persist is
                             p_end_offset   IN number,
                             p_is_mrk_aware IN number,
                             p_corpus_id    IN number,
-                            p_doc_id       OUT number,
-                            p_content_id   OUT number);
+                            p_doc_id       OUT number);
 
                             
   procedure create_annotation_set(p_lr_id           IN number,

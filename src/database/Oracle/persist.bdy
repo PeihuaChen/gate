@@ -254,10 +254,10 @@ create or replace package body persist is
                             p_end_offset   IN number,
                             p_is_mrk_aware IN number,
                             p_corpus_id    IN number,
-                            p_doc_id       OUT number,
-                            p_content_id   OUT number)
+                            p_doc_id       OUT number)
   is
      l_encoding_id number;
+     l_content_id number;
      l_encoding varchar2(16);
      cnt number;
   begin
@@ -304,7 +304,7 @@ create or replace package body persist is
             empty_clob(),
             empty_blob(),
             persist.EMPTY_CONTENT)
-     returning dc_id into p_content_id;
+     returning dc_id into l_content_id;
      
      --2. create a document entry  
      insert into t_document(doc_id,
@@ -315,7 +315,7 @@ create or replace package body persist is
                             doc_end,
                             doc_is_markup_aware)
      values(seq_document.nextval,
-            p_content_id,
+            l_content_id,
             p_lr_id,
             p_url,
             p_start_offset,
