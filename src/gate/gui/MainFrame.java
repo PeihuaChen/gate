@@ -337,7 +337,7 @@ public class MainFrame extends JFrame {
     DefaultMutableTreeNode node = null;
     if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
     while(node != null && node.getUserObject() != handle){
-      node = (DefaultMutableTreeNode)node.getFirstChild();
+      node = (DefaultMutableTreeNode)node.getNextSibling();
     }
     if(node != null){
       node.removeFromParent();

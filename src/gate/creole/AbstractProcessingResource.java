@@ -42,6 +42,9 @@ extends AbstractFeatureBearer implements ProcessingResource
     return;
   } // run()
 
+  public void setRuntimeParameters(FeatureMap parameters){
+  }
+
   /** Trigger any exception that was caught when <CODE>run()</CODE> was
     * invoked. If there is an exception stored it is cleared by this call.
     */

@@ -31,7 +31,6 @@ import gate.creole.*;
 public class NewResourceDialog extends JDialog {
   public NewResourceDialog(Frame frame, String title, boolean modal) {
     super(frame, title, modal);
-    setLocationRelativeTo(frame);
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -67,6 +66,7 @@ public class NewResourceDialog extends JDialog {
     table.setDefaultRenderer(Boolean.class,
                              new BooleanRenderer());
     table.setIntercellSpacing(new Dimension(10, 10));
+    table.setAutoResizeMode(table.AUTO_RESIZE_LAST_COLUMN);
     JScrollPane scroll = new JScrollPane(table);
     this.getContentPane().add(scroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
@@ -121,6 +121,11 @@ public class NewResourceDialog extends JDialog {
   ArrayList params;
 
   public Resource show(ResourceData rData){
+    setLocationRelativeTo(getParent());
+    /*
+    setLocation( (getParent().getWidth() - getWidth())/2,
+                 (getParent().getHeight() - getHeight())/2);
+*/
     nameField.setText("");
     ParameterList pList = rData.getParameterList();
 //System.out.println(pList.getInitimeParameters());
