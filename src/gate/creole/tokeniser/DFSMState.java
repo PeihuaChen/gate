@@ -36,7 +36,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     * states of the {@link DefaultTokeniser DefaultTokeniser} provided as owner.
     * @param owner a {@link DefaultTokeniser DefaultTokeniser} object
     */
-  public DFSMState(DefaultTokeniser owner){
+  public DFSMState(SimpleTokeniser owner){
     myIndex = index++;
     owner.dfsmStates.add(this);
   }
@@ -82,7 +82,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
         res += "edge [ source " + myIndex +
         " target " + nextState.getIndex() +
         " label \"";
-        res += DefaultTokeniser.typeMnemonics[i];
+        res += SimpleTokeniser.typeMnemonics[i];
         res += "\" ]\n";
       }
     };
@@ -116,7 +116,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     int phase = 0;
 
     while(mainSt.hasMoreTokens()) {
-      token = DefaultTokeniser.skipIgnoreTokens(mainSt);
+      token = SimpleTokeniser.skipIgnoreTokens(mainSt);
 
       if(token.equals("\\")){
         if(null == prefix) prefix = mainSt.nextToken();
@@ -222,7 +222,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
 
   /** The transition function of this state.
     */
-  DFSMState[] transitionFunction = new DFSMState[DefaultTokeniser.maxTypeId];
+  DFSMState[] transitionFunction = new DFSMState[SimpleTokeniser.maxTypeId];
 
   /** The string of the RHS of the rule from which the token
     * description is built

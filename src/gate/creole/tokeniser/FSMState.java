@@ -27,7 +27,7 @@ class FSMState implements java.io.Serializable {
   /** Creates a new FSMState belonging to a specified tokeniser
     * @param owner the tokeniser that contains this new state
     */
-  public FSMState(DefaultTokeniser owner) {
+  public FSMState(SimpleTokeniser owner) {
     myIndex = index++;
     owner.fsmStates.add(this);
   }
@@ -38,7 +38,7 @@ class FSMState implements java.io.Serializable {
     * will be a set.
     */
   Set nextSet(UnicodeType type) {
-    if(null == type) return transitionFunction[DefaultTokeniser.maxTypeId];
+    if(null == type) return transitionFunction[SimpleTokeniser.maxTypeId];
     else return transitionFunction[type.type];
   } // nextSet(UnicodeType type)
 
@@ -57,7 +57,7 @@ class FSMState implements java.io.Serializable {
     * @param state the vaule of the transition function for the given type
     */
   void put(UnicodeType type, FSMState state) {
-    if(null == type) put(DefaultTokeniser.maxTypeId, state);
+    if(null == type) put(SimpleTokeniser.maxTypeId, state);
     else put(type.type, state);
   } // put(UnicodeType type, FSMState state)
 
@@ -92,7 +92,7 @@ class FSMState implements java.io.Serializable {
     Iterator nextSetIter;
     FSMState nextState;
 
-    for(int i = 0; i <= DefaultTokeniser.maxTypeId; i++){
+    for(int i = 0; i <= SimpleTokeniser.maxTypeId; i++){
       nextSet = transitionFunction[i];
       if(null != nextSet){
         nextSetIter = nextSet.iterator();
@@ -101,8 +101,8 @@ class FSMState implements java.io.Serializable {
           res += "edge [ source " + myIndex +
           " target " + nextState.getIndex() +
           " label \"";
-          if(i == DefaultTokeniser.maxTypeId) res += "[]";
-          else res += DefaultTokeniser.typeMnemonics[i];
+          if(i == SimpleTokeniser.maxTypeId) res += "[]";
+          else res += SimpleTokeniser.typeMnemonics[i];
           res += "\" ]\n";
         }//while(nextSetIter.hasNext())
       }
@@ -114,7 +114,7 @@ class FSMState implements java.io.Serializable {
     * (the ids used internally by the tokeniser for the Unicode types) to sets
     * of states.
     */
-  Set[] transitionFunction = new Set[DefaultTokeniser.maxTypeId + 1];
+  Set[] transitionFunction = new Set[SimpleTokeniser.maxTypeId + 1];
 
   /** The RHS string value from which the annotation associated to
     * final states is constructed.
