@@ -38,8 +38,9 @@ public class TestFSM extends TestCase {
 
   public void setUp() throws JapeException, IOException {
 //    String japeFileName = "/gate/fsm/fsmtestgrammar.jape";
-    String japeFileName = "/jape/TestABC.jape";
+    String japeFileName = "jape/TestABC.jape";
     InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
+
     if(japeFileStream == null)
       throw new JapeException("couldn't open " + japeFileName);
     batch = new Batch(japeFileStream);

@@ -13,6 +13,7 @@ import java.net.*;
 import java.io.*;
 import junit.framework.*;
 import org.w3c.www.mime.*;
+import gate.util.*;
 
 /** Test class for XML facilities
   *
@@ -73,7 +74,18 @@ public class TestHtml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-    docFormat.unpackMarkup (doc,"DocumentContent");
+    // timing the operation
+    Date startTime = new Date();
+      docFormat.unpackMarkup (doc,"DocumentContent");
+    Date endTime = new Date();
+    long  time1 = endTime.getTime () - startTime.getTime ();
+    File f = Files.writeTempFile(doc.getSourceURL().openStream());
+    long docSize = f.length();
+    f.delete();
+    System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
+      docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
+      time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
+      "." + (docSize/time1*1000)%1024 + " K/second");
 
     // graphic visualisation
     /*

@@ -75,15 +75,24 @@ public class TestFiles extends TestCase
     return new TestSuite(TestFiles.class);
   } // suite
 
+  public static void main(String args[]){
+    TestFiles app = new TestFiles("TestFiles");
+    try{
+      app.testJarFiles ();
+    }catch (Exception e){
+      e.printStackTrace (System.err);
+    }
+  }
+
   /** Test JarFiles methods */
   public void testJarFiles(){
     JarFiles jarFiles = new JarFiles();
     Set filesToMerge = new HashSet();
     String jarFilePathFirst = "jartest/ajartest.jar";
     String jarFilePathSecond ="jartest/bjartest.jar";
-    String jarPathFirst;
-    String jarPathSecond;
-    String jarPathFinal;
+    String jarPathFirst = null;;
+    String jarPathSecond = null;
+    String jarPathFinal = null;
     File resourceFile  = null;
     File f1 = null;
     File f2 = null;
@@ -92,6 +101,7 @@ public class TestFiles extends TestCase
 
     //open first jar file in a temporal file
     try{
+      System.out.println(Files.getResourceAsStream(jarFilePathFirst));
       f1 = Files.writeTempFile(Files.getResourceAsStream(jarFilePathFirst));
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
