@@ -6,11 +6,8 @@
 MultiPhase:	main
 Phases: 
 
-split1
-split2
-split3
-split4
-split5
-split6
-split7
-split8
+find
+remove
+join
+sentence
+quoted
