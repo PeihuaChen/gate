@@ -56,7 +56,7 @@ public class AnnotationListView extends AbstractDocumentView
   protected void initGUI() {
     tableModel = new AnnotationTableModel();
     table = new XJTable(tableModel);
-//    table.setAutoResizeMode(XJTable.AUTO_RESIZE_LAST_COLUMN);
+    table.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     table.setSortable(true);
     table.setSortedColumn(START_COL);
     table.setIntercellSpacing(new Dimension(2, 0));
