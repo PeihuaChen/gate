@@ -36,17 +36,37 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   /** --- */
   private static final boolean DEBUG = false;
 
-  /** --- */
+  /** jdbc url for the database */
   private   String      dbURL;
+
+  /** jdbc driver name */
   private   String      driverName;
+
+  /**
+   *  GUID of the datastore
+   *  read from T_PARAMETER table
+   *  */
   private   String      dbID;
 
+  /** security session identifying all access to the datastore */
   protected   Session           session;
+
+  /** datastore name? */
   protected   String            name;
 
+  /** jdbc connection, all access to the database is made through this connection
+   */
   protected transient Connection  jdbcConn;
+
+  /** Security factory that contols access to objects in the datastore
+   *  the security session is from this factory
+   *  */
   protected transient AccessController  ac;
+
+  /** anyone interested in datastore related events */
   private   transient Vector datastoreListeners;
+
+  /** resources that should be sync-ed if datastore is close()-d */
   protected transient Vector dependentResources;
 
   /** Do not use this class directly - use one of the subclasses */
@@ -259,7 +279,13 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
   /*  interface DatabaseDataStore  */
 
-  /** --- */
+  /**
+   * starts a transaction
+   * note that if u're already in transaction context this will not open
+   * nested transaction
+   * i.e. many consecutive calls to beginTrans() make no difference if no commit/rollback
+   * is made meanwhile
+   *  */
   public void beginTrans()
     throws PersistenceException,UnsupportedOperationException{
 
@@ -273,7 +299,10 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   }
 
 
-  /** --- */
+  /**
+   * commits transaction
+   * note that this will commit all the uncommited calls made so far
+   *  */
   public void commitTrans()
     throws PersistenceException,UnsupportedOperationException{
 
@@ -287,7 +316,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
   }
 
-  /** --- */
+  /** rollsback a transaction */
   public void rollbackTrans()
     throws PersistenceException,UnsupportedOperationException{
 
@@ -301,7 +330,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
   }
 
-  /** --- */
+  /** not used */
   public Long timestamp()
     throws PersistenceException{
 
@@ -309,20 +338,21 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     throw new MethodNotImplementedException();
   }
 
-  /** --- */
+  /** not used */
   public void deleteSince(Long timestamp)
     throws PersistenceException{
 
     throw new MethodNotImplementedException();
   }
 
-  /** --- */
+  /** specifies the driver to be used to connect to the database? */
   public void setDriver(String driverName)
     throws PersistenceException{
 
     this.driverName = driverName;
   }
-    /** Sets the name of this resource*/
+
+  /** Sets the name of this resource*/
   public void setName(String name){
     this.name = name;
   }
@@ -385,8 +415,8 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     return this.dbID;
   }
 
-  /** --- */
-  public abstract String readDatabaseID()
+  /** reads the GUID from the database */
+  protected abstract String readDatabaseID()
     throws PersistenceException;
 
   /**
@@ -394,9 +424,8 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * from the list listeners for this datastore
    */
   public void removeDatastoreListener(DatastoreListener l) {
-//System.out.println("listener being removed...");
+
     Assert.assertNotNull(this.datastoreListeners);
-//    Assert.assertTrue(this.datastoreListeners.contains(l));
 
     Vector temp = (Vector)this.datastoreListeners.clone();
     temp.remove(l);
@@ -437,14 +466,12 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
     int count = temp.size();
     for (int i = 0; i < count; i++) {
-//System.out.println("notifying listener...");
       ((DatastoreListener)temp.elementAt(i)).resourceDeleted(e);
     }
   }
 
 
   protected void fireResourceWritten(DatastoreEvent e) {
-//System.out.println("lrid=["+e.getResourceID()+"] written...");
     Assert.assertNotNull(datastoreListeners);
     Vector temp = this.datastoreListeners;
 
@@ -453,7 +480,6 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
       ((DatastoreListener)temp.elementAt(i)).resourceWritten(e);
     }
   }
-
 
   public void resourceLoaded(CreoleEvent e) {
     if(DEBUG)
@@ -466,14 +492,14 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
 
 
   public void resourceUnloaded(CreoleEvent e) {
-//Out.prln("RESOURCE UNLOADED res=["+e .getResource().getClass() .toString()+"], src=["+e.getSource().getClass().toString()+"]...");
+
     Assert.assertNotNull(e.getResource());
     if(! (e.getResource() instanceof LanguageResource))
       return;
 
     //1. check it's our resource
     LanguageResource lr = (LanguageResource)e.getResource();
-//Out.prln("CLOSING A RESOURCE...");
+
     //this is a resource from another DS, so no need to do anything
     if(lr.getDataStore() != this)
       return;

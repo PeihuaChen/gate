@@ -56,6 +56,9 @@ public class OracleDataStore extends JDBCDataStore {
   /** used internaly, may change in the future */
   private static final int WRITE_ACCESS = 1;
 
+  /** size of the Oracle varrays used for bulc inserts */
+  private static final int VARRAY_SIZE = 10;
+
   /** the size in bytes if varchar2 column in Oracle
    *  when a String is stored in Oracle it may be too long
    *  for a varchar2 value, and then CLOB will be used
@@ -1291,7 +1294,8 @@ public class OracleDataStore extends JDBCDataStore {
                 " FROM   "+Gate.DB_OWNER+".t_lang_resource LR, " +
                 "        t_lr_type LRTYPE " +
                 " WHERE  LR.lr_type_id = LRTYPE.lrtp_id " +
-                "        AND LRTYPE.lrtp_type = ? "
+                "        AND LRTYPE.lrtp_type = ? " +
+                " ORDER BY lr_name desc"
                 );
       stmt.setString(1,lrType);
 //      stmt.setFetchSize(30);
@@ -1668,13 +1672,13 @@ public class OracleDataStore extends JDBCDataStore {
                                   ArrayDescriptor adString)
     throws PersistenceException {
 
-    String[] stringValues = new String[10];
-    long[] numberValues = new long[10];
-    double[] floatValues = new double[10];
-    long[] entityIDs = new long[10];
-    long[] entityTypes = new long[10];
-    String[] keys = new String[10];
-    long[] valueTypes = new long[10];
+    String[] stringValues = new String[VARRAY_SIZE];
+    long[] numberValues = new long[VARRAY_SIZE];
+    double[] floatValues = new double[VARRAY_SIZE];
+    long[] entityIDs = new long[VARRAY_SIZE];
+    long[] entityTypes = new long[VARRAY_SIZE];
+    String[] keys = new String[VARRAY_SIZE];
+    long[] valueTypes = new long[VARRAY_SIZE];
 
 //System.out.println("num features=["+features.size()+"]");
     //1. store in DB
@@ -1763,9 +1767,9 @@ public class OracleDataStore extends JDBCDataStore {
         ftInd++;
         arrInd++;
 
-        if (ftInd == features.size() || arrInd == 10) {
+        if (ftInd == features.size() || arrInd == VARRAY_SIZE) {
 
-          if (arrInd == 10) {
+          if (arrInd == VARRAY_SIZE) {
             arrInd = 0;
           }
 //System.out.println("1");
@@ -1776,20 +1780,7 @@ public class OracleDataStore extends JDBCDataStore {
           ARRAY arrNumberValues = new ARRAY(adNumber, this.jdbcConn,numberValues);
           ARRAY arrFloatValues = new ARRAY(adNumber, this.jdbcConn,floatValues);
           ARRAY arrStringValues = new ARRAY(adString, this.jdbcConn,stringValues);
-//System.out.println("2");
-/*for (int i=0; i< 10; i++) {
-System.out.println("["+i+"]-------------------");
-System.out.print(entityIDs[i]+" / ");
-System.out.print(entityTypes[i]+" / ");
-System.out.print(keys[i]+" / ");
-System.out.print(valueTypes[i]+" / ");
-System.out.print(numberValues[i]+" / ");
-System.out.print(floatValues[i]+" / ");
-System.out.print(stringValues[i]+" / ");
-System.out.println("-------------------");
-}
-*/
-//System.out.println("3");
+
           OracleCallableStatement ostmt = (OracleCallableStatement)stmt;
           ostmt.setARRAY(1,arrEntityIDs);
           ostmt.setARRAY(2,arrEntityTypes);
@@ -1798,16 +1789,9 @@ System.out.println("-------------------");
           ostmt.setARRAY(5,arrFloatValues);
           ostmt.setARRAY(6,arrStringValues);
           ostmt.setARRAY(7,arrValueTypes);
-          ostmt.setInt(8, arrInd == 0 ? 10 : arrInd);
-//System.out.println("4");
-//System.out.println("last_index=["+arrValueTypes.getLastIndex()+"]");
-//System.out.println("len=["+arrValueTypes.length()+"]");
-//System.out.println("count=["+(arrInd == 0 ? 10 : arrInd)+"]");
-
-
+          ostmt.setInt(8, arrInd == 0 ? VARRAY_SIZE : arrInd);
 
           ostmt.execute();
-//System.out.println("5");
         }
       }
     }
@@ -1987,6 +1971,15 @@ System.out.println("-------------------");
   }
 
 
+  /**
+   *  splits complex features (Lists) into a vector of Feature entries
+   *  each entry contains the entity id,
+   *                          entity type,
+   *                          feature key
+   *                          feature value
+   *                          value type
+   *
+   */
   private Vector normalizeFeature(Long entityID, int entityType,String key, Object value)
     throws PersistenceException {
 
@@ -2063,7 +2056,7 @@ System.out.println("-------------------");
   /**
    *  helper metod
    *  iterates a FeatureMap and creates all its features in the database
-   *   */
+   */
   private void createFeatures(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
@@ -2105,7 +2098,16 @@ System.out.println("-------------------");
   /**
    *  helper metod
    *  iterates a FeatureMap and creates all its features in the database
-   *   */
+   *
+   *  since it uses Oracle VARRAYs the roundtrips between the client and the server
+   *  are minimized
+   *
+   *  make sure the two types STRING_ARRAY and INT_ARRAY have the same name in the
+   *  PL/SQL files
+   *
+   *  also when referencing the types always use the schema owner in upper case
+   *  because the jdbc driver is buggy (see MetaLink note if u care)
+   */
   private void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
@@ -2738,7 +2740,7 @@ System.out.println("-------------------");
    *  reads the ID of the database
    *  every database should have unique string ID
    */
-  public String readDatabaseID() throws PersistenceException{
+  protected String readDatabaseID() throws PersistenceException{
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
