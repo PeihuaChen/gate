@@ -39,6 +39,7 @@ public class OrthoMatcher extends AbstractProcessingResource
   protected static final String LOOKUPNAME = "Lookup";
   protected static final String MATCHES_FEATURE = "matches";
   protected static final String DOC_MATCHES_FEATURE = "MatchesAnnots";
+  protected static final String GENDER_FEATURE = "gender";
 
   /** the document for namematch */
   protected gate.Document document;
@@ -261,6 +262,7 @@ public class OrthoMatcher extends AbstractProcessingResource
         else
           annots2Remove.put(unknown.getId(), matchedAnnot.getType());
         processedAnnots.put(unknown.getId(), unknownString);
+        unknown.getFeatures().put("NMRule", unknownType);
         continue;
       }
 
@@ -326,6 +328,8 @@ public class OrthoMatcher extends AbstractProcessingResource
         //if unknown annotation, we need to change to the new type
         if (nameAnnot.getType().equals(unknownType)) {
           annots2Remove.put(nameAnnot.getId(), prevAnnot.getType());
+          //also put an attribute to indicate that
+          nameAnnot.getFeatures().put("NMRule", unknownType);
         }
       }
 
@@ -398,6 +402,17 @@ public class OrthoMatcher extends AbstractProcessingResource
     }//if
     //add the matches list to the new annotation
     newAnnot.getFeatures().put(MATCHES_FEATURE, matchesList);
+    //propagate the gender if two persons are matched
+    if (prevAnnot.getType().equals(personType)) {
+      String prevGender = (String) prevAnnot.getFeatures().get(GENDER_FEATURE);
+      String newGender = (String) newAnnot.getFeatures().get(GENDER_FEATURE);
+      boolean unknownPrevGender = isUnknownGender(prevGender);
+      boolean unknownNewGender = isUnknownGender(newGender);
+      if (unknownPrevGender && !unknownNewGender)
+        prevAnnot.getFeatures().put(GENDER_FEATURE, newGender);
+      else if (unknownNewGender && !unknownPrevGender)
+        newAnnot.getFeatures().put(GENDER_FEATURE, prevGender);
+    }//if
   }
 
 
@@ -543,55 +558,55 @@ public class OrthoMatcher extends AbstractProcessingResource
   private boolean apply_rules_namematch(String annotationType, String shortName,
                                         String longName) {
     // first apply rule for spurius matches i.e. rule0
-    if (!matchRule0(longName, shortName)) {
-      if (
-           (// rules for all annotations
-            //no longer use rule1, coz I do the check for same string via the
-            //hash table
-              matchRule2(longName, shortName)
-           ||
-              matchRule3(shortName, longName)
-           ||
-              matchRule5(longName, shortName)
-           ) // rules for all annotations
-           ||
-           (// rules for organisation annotations
-               ( annotationType.equals(organizationType))
+    if (matchRule0(longName, shortName))
+      return false;
+    if (
+         (// rules for all annotations
+          //no longer use rule1, coz I do the check for same string via the
+          //hash table
+            matchRule2(longName, shortName)
+         ||
+            matchRule3(shortName, longName)
+         ||
+            matchRule5(longName, shortName)
+         ) // rules for all annotations
+         ||
+         (// rules for organisation annotations
+             ( annotationType.equals(organizationType))
+             &&
+             (    matchRule4(longName, shortName)
+               ||
+                  matchRule6(longName, shortName)
+               ||
+                  matchRule7(longName, shortName)
+               ||
+                  matchRule8(longName, shortName)
+               ||
+                  matchRule9(longName, shortName)
+               ||
+                  matchRule10(longName, shortName)
+               ||
+                  matchRule11(longName, shortName)
+               ||
+                  matchRule13(shortName, longName)
+              )
+           )// rules for organisation annotations
+         ||
+         (// rules for person annotations
+             (    annotationType.equals(personType))
                &&
-               (    matchRule4(longName, shortName)
-                 ||
-                    matchRule6(longName, shortName)
-                 ||
-                    matchRule7(longName, shortName)
-                 ||
-                    matchRule8(longName, shortName)
-                 ||
-                    matchRule9(longName, shortName)
-                 ||
-                    matchRule10(longName, shortName)
-                 ||
-                    matchRule11(longName, shortName)
-                 ||
-                    matchRule13(shortName, longName)
-                )
-             )// rules for organisation annotations
-           ||
-           (// rules for person annotations
-               (    annotationType.equals(personType))
-                 &&
-               (    matchRule4(longName, shortName)
-                 ||
-                    matchRule7(longName, shortName)
-                 ||
-                    matchRule12(shortName, longName)
-                 || //kalina: added this, so it matches names when contain more
-                    //than one first and one last name
-                    matchRule13(shortName, longName)
-                )
-            )// rules for person annotations
-           ) // if
-        return true;
-      } // if (!matchRule0
+             (    matchRule4(longName, shortName)
+               ||
+                  matchRule7(longName, shortName)
+               ||
+                  matchRule12(shortName, longName)
+               || //kalina: added this, so it matches names when contain more
+                  //than one first and one last name
+                  matchRule13(shortName, longName)
+              )
+          )// rules for person annotations
+         ) //if
+      return true;
     return false;
   }//apply_rules
 
@@ -667,6 +682,15 @@ public class OrthoMatcher extends AbstractProcessingResource
     return matchesDocument;
   }
 */
+
+  protected boolean isUnknownGender(String gender) {
+    if (gender == null)
+      return true;
+    if (gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female"))
+      return false;
+    return true;
+
+  } //isUnknownGender
 
   /** RULE #0: If the two names are listed in table of
     * spurius matches then they do NOT match
