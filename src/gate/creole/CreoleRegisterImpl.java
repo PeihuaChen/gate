@@ -123,9 +123,6 @@ public class CreoleRegisterImpl extends HashMap
     */
   public void registerDirectories(URL directoryUrl) throws GateException {
 
-    // add the URL (may overwrite an existing one; who cares)
-    directories.add(directoryUrl);
-
     // directory URLs shouldn't include "creole.xml"
     String urlName = directoryUrl.toExternalForm();
     if(urlName.toLowerCase().endsWith("creole.xml")) {
@@ -145,11 +142,15 @@ public class CreoleRegisterImpl extends HashMap
       throw(new GateException("bad creole.xml URL, based on " + urlName));
     }
 
-    // parse the directory file
-    try {
-      parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
-    } catch(IOException e) {
-      throw(new GateException("couldn't open creole.xml: " + e.toString()));
+    // add the URL
+    //if already present do nothing
+    if(directories.add(directoryUrl)){
+      // parse the directory file
+      try {
+        parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl);
+      } catch(IOException e) {
+        throw(new GateException("couldn't open creole.xml: " + e.toString()));
+      }
     }
   } // registerDirectories(URL)
 

@@ -848,7 +848,6 @@ public class DocumentEditor extends AbstractVisualResource
 
     toolbar.add(Box.createHorizontalGlue());
 
-
     //The text
     textPane = new XJTextPane();
     textPane.setEditable(false);
