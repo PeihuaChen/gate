@@ -30,6 +30,7 @@ public class RawEditorKit extends StyledEditorKit {
      * @exception BadLocationException if pos represents an invalid
      *   location within the document.
      */
+
     public void read(Reader in, Document doc, int pos)
         throws IOException, BadLocationException {
 
@@ -125,6 +126,5 @@ public class RawEditorKit extends StyledEditorKit {
 	    }
 	}
     }
-
 }//class
 
