@@ -428,7 +428,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
      * Gets a string representation for a list value
      */
     protected String textForList(List list){
-      if(list == null) return "[]";
+      if(list == null || list.isEmpty()) return "[]";
       StringBuffer res = new StringBuffer("[");
       Iterator elemIter = list.iterator();
       while(elemIter.hasNext()){
