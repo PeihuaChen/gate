@@ -25,7 +25,6 @@ public class TestXml extends TestCase
 
   /** Fixture set up */
   public void setUp() {
-    System.out.println("SETUP ....");
   } // setUp
 
 
