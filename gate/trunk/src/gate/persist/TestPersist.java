@@ -61,12 +61,8 @@ public class TestPersist extends TestCase
     storageDir.delete(); // get rid of the temp file
     storageDir.mkdir(); // create an empty dir of same name
 
-    SerialDataStore sds = (SerialDataStore)
-      Factory.createDataStore("gate.persist.SerialDataStore",
-                              storageDir.toURL().toString());
-
-
-//    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
+    SerialDataStore sds = new SerialDataStore(storageDir.toURL().toString());
+    sds.create();
     sds.open();
 
     // create a document
@@ -138,7 +134,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL().toExternalForm()
+      "gate.persist.SerialDataStore", storageDir.toURL()
     );
 
     // check we can get empty lists from empty data stores
@@ -320,7 +316,7 @@ public class TestPersist extends TestCase
 
     // create and open a serial data store
     DataStore sds = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL().toExternalForm()
+      "gate.persist.SerialDataStore", storageDir.toURL()
     );
 
     // create a document with some annotations / features on it
@@ -342,7 +338,7 @@ public class TestPersist extends TestCase
     storageDir = File.createTempFile("TestPersist__", "__StorageDir");
     storageDir.delete();
     DataStore sds2 = Factory.createDataStore(
-      "gate.persist.SerialDataStore", storageDir.toURL().toExternalForm()
+      "gate.persist.SerialDataStore", storageDir.toURL()
     );
 
     // DSR should have two members
@@ -473,7 +469,7 @@ public class TestPersist extends TestCase
 
     this.uc01_lrID = (Long)lr.getLRPersistenceId();
     this.uc01_LR = lr;
-
+System.out.println("adopted doc:name=["+((Document)lr).getName()+"], lr_id=["+((Document)lr).getLRPersistenceId()+"]");
     //6.close
     ac.close();
     ds.close();
@@ -536,7 +532,7 @@ public class TestPersist extends TestCase
     //read a document
     //use the one created in UC01
 //this.uc01_lrID = new Long(1041);
-//System.out.println("docid = " +this.uc01_lrID);
+System.out.println("docid = " +this.uc01_lrID);
     LanguageResource lr = null;
 
     //1. open data storage
@@ -545,27 +541,40 @@ public class TestPersist extends TestCase
     ds.setStorageUrl(this.JDBC_URL);
     ds.open();
 
+    //2. read LR
     lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
 
+    //3. check name
     String name = lr.getName();
     Assert.assertNotNull(name);
-    Assert.assert(name.equals(this.uc01_LR.getName()));
+    Assert.assertEquals(name,this.uc01_LR.getName());
 
+    //4. check features
     FeatureMap fm = lr.getFeatures();
     FeatureMap fmOrig = this.uc01_LR.getFeatures();
 
     Assert.assertNotNull(fm);
     Assert.assertNotNull(fmOrig);
+    Assert.assert(fm.size() == fmOrig.size());
 
     Iterator keys = fm.keySet().iterator();
 
     while (keys.hasNext()) {
       String currKey = (String)keys.next();
-//System.out.println("KEY =" +currKey);
-//System.out.println("VAL =" +fm.get(currKey));
       Assert.assert(fmOrig.containsKey(currKey));
       Assert.assertEquals(fm.get(currKey),fmOrig.get(currKey));
     }
+
+    //6. URL
+    Document dbDoc = (Document)lr;
+    Assert.assertEquals(dbDoc.getSourceUrl(),((Document)this.uc01_LR).getSourceUrl());
+
+    //5.start/end
+    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),((Document)this.uc01_LR).getSourceUrlStartOffset());
+    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),((Document)this.uc01_LR).getSourceUrlEndOffset());
+
+    //6.markupAware
+    Assert.assertEquals(dbDoc.getMarkupAware(),((Document)this.uc01_LR).getMarkupAware());
 
     if(DEBUG) {
       Err.prln("Use case 03 passed...");
