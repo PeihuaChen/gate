@@ -1922,7 +1922,7 @@ public class MainFrame extends JFrame
                 } catch (gate.persist.PersistenceException ex) {
                   JOptionPane.showMessageDialog(
                       MainFrame.this, "Persistence error!\n " +
-                                        se.toString(),
+                                        ex.toString(),
                                         "Gate", JOptionPane.ERROR_MESSAGE);
                 }
               }

@@ -99,7 +99,10 @@ public class OkCancelDialog extends JDialog {
                                    Component contents,
                                    String title){
     //construct the dialog
-    Window parent = SwingUtilities.getWindowAncestor(parentComponent);
+    Window parent = null;
+    if(parentComponent != null){
+      parent = SwingUtilities.getWindowAncestor(parentComponent);
+    }
     OkCancelDialog dialog;
     if(parent == null) dialog = new OkCancelDialog(title, contents);
     else if(parent instanceof Frame){
