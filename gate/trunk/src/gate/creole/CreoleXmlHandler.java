@@ -50,7 +50,7 @@ public class CreoleXmlHandler extends DefaultHandler {
   private List currentParamDisjunction = new ArrayList();
 
   /** The current parameter */
-  private Parameter currentParam = new Parameter();
+  private Parameter currentParam;
 
   /** The current element's attribute list */
   private Attributes currentAttributes;
@@ -92,6 +92,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     this.register = register;
     this.sourceUrl = directoryUrl;
     this.creoleFileUrl = creoleFileUrl;
+    currentParam = new Parameter(this.creoleFileUrl);
   } // construction
 
   /** The register object that we add ResourceData objects to during parsing.
@@ -396,7 +397,7 @@ public class CreoleXmlHandler extends DefaultHandler {
       currentParamDisjunction.add(currentParam);
       if(DEBUG)
         Out.prln("added param: " + currentParam);
-      currentParam = new Parameter();
+      currentParam = new Parameter(creoleFileUrl);
     // End PARAMETER processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("AUTOLOAD")) {
