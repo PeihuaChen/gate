@@ -706,7 +706,7 @@ public class AnnotationEditDialog extends JDialog {
       annotSchema.fromXSchema(url);
   */
     } catch (Exception e){
-      e.printStackTrace(System.err);
+      e.printStackTrace(Err.getPrintWriter());
     }
   }// main
 }//AnnotationEditDialog

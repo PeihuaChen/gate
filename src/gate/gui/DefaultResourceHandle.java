@@ -158,6 +158,19 @@ class DefaultResourceHandle implements ResourceHandle{
         }
       }//else if(resource instanceof OtherKindOfLanguageResource){}
     }else if(resource instanceof ProcessingResource){
+      if(resource instanceof SerialController){
+        try{
+          FeatureMap params = Factory.newFeatureMap();
+          params.put("controller", resource);
+          view.add("Design",
+                   (JComponent)Factory.createResource("gate.gui.ApplicationViewer",
+                                                      params)
+                  );
+        }catch(ResourceInstantiationException rie){
+          rie.printStackTrace(Err.getPrintWriter());
+        }
+
+      }//else if(resource instanceof OtherKindOfProcessingResource){}
       //catch all unknown PR's
     }
 
@@ -232,7 +245,7 @@ class DefaultResourceHandle implements ResourceHandle{
           writer.flush();
           writer.close();
         } catch (Exception ex){
-          ex.printStackTrace(System.out);
+          ex.printStackTrace(Out.getPrintWriter());
         }
       }// End if
     }// actionPerformed()
