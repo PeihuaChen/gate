@@ -677,10 +677,38 @@ public class ShellSlacFrame extends MainFrame {
       int res = fileChooser.showOpenDialog(ShellSlacFrame.this);
       if(res == fileChooser.APPROVE_OPTION) {
         File file = fileChooser.getSelectedFile();
-        Runnable run = new ImportRunnable(file);
-        Thread thread = new Thread(run, "");
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
+        
+        String str = "";
+        char chArr[] = new char[1024];
+
+        try {
+          FileReader reader = new FileReader(file);
+          int readedChars = reader.read(chArr);
+          reader.close();
+          str = new String(chArr, 0, readedChars);
+        } catch (Exception ex) {
+          // do nothing - some error, so we shouldn't read file anyway
+        } // catch
+        
+        boolean isGateXmlDocument = false;
+        // Detect whether or not is a GateXmlDocument
+        if(str.indexOf("<GateDocument") != -1  ||
+           str.indexOf(" GateDocument") != -1)
+          isGateXmlDocument = true;
+        
+        if(isGateXmlDocument) {
+          Runnable run = new ImportRunnable(file);
+          Thread thread = new Thread(run, "");
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }
+        else {
+          JOptionPane.showMessageDialog(ShellSlacFrame.this, 
+              "The import file '"+file.getAbsolutePath()+"'\n"
+              +"is not a SLUG document.", 
+              "Import error",
+              JOptionPane.WARNING_MESSAGE);
+        } // if
       } // if
     } // actionPerformed(ActionEvent e)
   } // class ImportDocumentAction extends AbstractAction
