@@ -35,9 +35,10 @@ create or replace package persist is
 
   procedure create_document(p_lr_id        IN number,
                             p_url          IN varchar2,
+                            p_encoding     IN varchar2,
                             p_start_offset IN number,
                             p_end_offset   IN number,
-                            p_is_mrk_aware IN boolean,
+                            p_is_mrk_aware IN number,
                             p_corpus_id    IN number,
                             p_doc_id       OUT number,
                             p_content_id   OUT number);
