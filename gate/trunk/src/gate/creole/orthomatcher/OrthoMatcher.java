@@ -113,10 +113,13 @@ public class OrthoMatcher extends AbstractProcessingResource
   protected FeatureMap tempMap = Factory.newFeatureMap();
 
   /** a buffer in order to read an array of char */
-  private char cbuffer[] = null;
+  private char[] cbuffer = null;
 
   /** the size of the buffer */
   private final static int BUFF_SIZE = 65000;
+
+  /** @link dependency */
+  /*#OrthoMatcher lnkOrthoMatcher;*/
 
   public OrthoMatcher () {
     annotationTypes.add(organizationType);
@@ -1521,5 +1524,8 @@ public class OrthoMatcher extends AbstractProcessingResource
     return result;
   }//regularExpressions
 
+
+  private static class Class1 {
+  }
 } // public class OrthoMatcher
 

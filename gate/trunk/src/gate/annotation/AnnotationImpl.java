@@ -310,4 +310,6 @@ public class AnnotationImpl extends AbstractFeatureBearer
    */
   Node end;
 
+  /** @link dependency */
+  /*#AnnotationImpl lnkAnnotationImpl;*/
 } // class AnnotationImpl
