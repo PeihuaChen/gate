@@ -59,7 +59,7 @@ public class MainFrame extends JFrame
   DefaultMutableTreeNode lrRoot;
   DefaultMutableTreeNode prRoot;
   DefaultMutableTreeNode dsRoot;
-  DefaultMutableTreeNode toolsRoot = null;
+
 
   Splash splash;
   JTextArea logArea;
@@ -201,9 +201,10 @@ public class MainFrame extends JFrame
     }catch(AWTException awte){}
     menuBar.add(editMenu);
 
-    JMenu advancedMenu = new JMenu("Advanced");
-    advancedMenu.add(newBootStrapAction);
-    menuBar.add(advancedMenu);
+    JMenu toolsMenu = new JMenu("Tools");
+    toolsMenu.add(newBootStrapAction);
+    toolsMenu.add(newAnnotDiffAction);
+    menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
     helpMenu.add(helpAboutAction);
@@ -370,7 +371,7 @@ public class MainFrame extends JFrame
     }else if(handle instanceof PRHandle){
       parent = prRoot;
     }else if (handle instanceof AnnotDiffHandle){
-      parent = toolsRoot;
+      parent = null;
     }
     DefaultMutableTreeNode node = null;
     if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
@@ -509,16 +510,6 @@ public class MainFrame extends JFrame
       dsRoot.add(new DefaultMutableTreeNode(handle));
     }
 
-    // TOOLS
-    handle = new ResourceHandle("Tools", currentProject);
-    handle.setSmallIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/genericPr.gif")));
-    toolsRoot = new DefaultMutableTreeNode(handle, true);
-    popup = new JPopupMenu();
-    popup.add(newAnnotDiffAction);
-    handle.setPopup(popup);
-    projectTreeRoot.add(toolsRoot);
-
     projectTreeModel.nodeStructureChanged(projectTreeRoot);
 
     DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -554,13 +545,29 @@ public class MainFrame extends JFrame
       putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e){
-      AnnotDiffHandle handle = new AnnotDiffHandle(thisMainFrame);
+/*      AnnotDiffHandle handle = new AnnotDiffHandle(thisMainFrame);
       handle.setTooltipText("<html><b>Tool:</b> " +
                             "Annotation diff" + "</html>");
       handle.setTitle("Annotation Diff");
-      toolsRoot.add(new DefaultMutableTreeNode(handle, false));
-      projectTreeModel.nodeStructureChanged(toolsRoot);
-      projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(toolsRoot)));
+
+      //show
+      JComponent largeView = handle.getLargeView();
+      if(largeView != null){
+        mainTabbedPane.addTab(handle.getTitle(), handle.getSmallIcon(),
+                              largeView, handle.getTooltipText());
+        mainTabbedPane.setSelectedComponent(handle.getLargeView());
+      }
+      JComponent smallView = handle.getSmallView();
+      if(smallView != null){
+        lowerScroll.getViewport().setView(smallView);
+      }else{
+        lowerScroll.getViewport().setView(null);
+      }
+      handle.setShown(true);
+*/
+      AnnotDiffDialog annotDiffDialog = new AnnotDiffDialog(thisMainFrame);
+      annotDiffDialog.setTitle("Annotation Diff Tool");
+      annotDiffDialog.setVisible(true);
     }// actionPerformed();
   }//class NewAnnotDiffAction
 
