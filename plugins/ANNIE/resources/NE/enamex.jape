@@ -171,7 +171,10 @@ Priority: 50
 // e.g. Will And
 
 (
- (FIRSTNAMEAMBIG (SPACE)?)+
+ ((FIRSTNAMEAMBIG (SPACE)?)+ | 
+  {POS.category == PRP}|
+  {POS.category == DT}
+ )
  (SPACE {Lookup.majorType == stop}
   (SPACE)?
  )
@@ -274,10 +277,10 @@ Priority: 40
 Macro:  CDG
 // cdg is something like "Ltd."
  (
-  ({Token, Lookup.majorType == cdg})|
+  ({Lookup.majorType == cdg})|
   ({Token.string == ","} 
   (SPACE)
-  {Token, Lookup.majorType == cdg})
+  {Lookup.majorType == cdg})
  )
 
 
@@ -296,7 +299,7 @@ Macro: CHURCH
 
 /////////////////////////////////////////////////////////////
 Rule:	GazOrganization
-Priority: 5
+Priority: 15
 
 (
 {Lookup.majorType == organization}
