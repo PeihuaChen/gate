@@ -548,6 +548,14 @@ public class DocumentEditor extends AbstractVisualResource
                         "Delete",
                         new DeleteSelectedAnnotationsAction(stylesTree));
 
+    corefTree.getInputMap().put(
+                  KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0),
+                  "Delete");
+    corefTree.getActionMap().put(
+                        "Delete",
+                        new DeleteSelectedAnnotationsAction(corefTree));
+
+
     //takes care of highliting the selected annotations
     annotationsTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener(){
@@ -743,7 +751,21 @@ public class DocumentEditor extends AbstractVisualResource
           if(path != null){
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.
                                          getLastPathComponent();
-            if(node.getUserObject() instanceof CorefData){
+            //where inside the cell?
+            Rectangle cellRect = corefTree.getPathBounds(path);
+            x -= cellRect.x;
+            y -= cellRect.y;
+            Component cellComp = corefTree.getCellRenderer().
+                                 getTreeCellRendererComponent(corefTree,
+                                                              node, true,
+                                                              false, false,
+                                                              0, true);
+            cellComp.setBounds(cellRect);
+            Component clickedComp = cellComp.getComponentAt(x, y);
+            if(clickedComp instanceof LazyJPanel)
+              clickedComp = clickedComp.getComponentAt(x, y);
+            if(node.getUserObject() instanceof CorefData &&
+               clickedComp instanceof JCheckBox){
               CorefData cData = (CorefData)node.getUserObject();
               cData.setVisible(!cData.getVisible());
               corefTreeModel.nodeChanged(node);
@@ -1389,15 +1411,19 @@ public class DocumentEditor extends AbstractVisualResource
       DefaultMutableTreeNode setNode = (DefaultMutableTreeNode)nodesIter.next();
       corefTreeRoot.add(setNode);
     }
-    corefTreeModel.nodeStructureChanged(corefTreeRoot);
-    //expand the root
-    corefTree.expandPath(new TreePath(new Object[]{corefTreeRoot}));
-    //expand all of root's children
-    Enumeration children = corefTreeRoot.children();
-    while(children.hasMoreElements()){
-      corefTree.expandPath(new TreePath(corefTreeModel.getPathToRoot(
-                           (DefaultMutableTreeNode)children.nextElement())));
-    }
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        corefTreeModel.nodeStructureChanged(corefTreeRoot);
+        //expand the root
+        corefTree.expandPath(new TreePath(new Object[]{corefTreeRoot}));
+        //expand all of root's children
+        Enumeration children = corefTreeRoot.children();
+        while(children.hasMoreElements()){
+          corefTree.expandPath(new TreePath(corefTreeModel.getPathToRoot(
+                               (DefaultMutableTreeNode)children.nextElement())));
+        }
+      }
+    });
     setCorefOptionAvailable(true);
   }//protected void updateCorefTree()
 
@@ -1579,6 +1605,22 @@ public class DocumentEditor extends AbstractVisualResource
       return visible;
     }
 
+    public void removeAnnotations(){
+      AnnotationSet set = setName.equals("Default") ?
+                          document.getAnnotations() :
+                          document.getAnnotations(setName);
+
+      Iterator idIter = annotationIDs.iterator();
+      while(idIter.hasNext()){
+        set.remove(set.get((Integer)idIter.next()));
+      }
+      ((java.util.List)((Map)document.getFeatures().
+        get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME)).
+        get(setName.equals("Default") ? null : setName)).remove(annotationIDs);
+      annotationIDs.clear();
+      updateCorefTree();
+    }
+
     public void setVisible(boolean isVisible){
       if(this.visible == isVisible) return;
       this.visible = isVisible;
@@ -1640,6 +1682,9 @@ public class DocumentEditor extends AbstractVisualResource
       return annotationIDs;
     }
 
+    public String getSetName(){
+      return setName;
+    }
     public String toString(){
       return title;
     }
@@ -3089,7 +3134,25 @@ Out.prln("NULL size");
             }//if(set != null)
           }//type node
         }//for(int i = 0; i < paths.length; i++)
-      }//else if(source == stylesTree)
+      }else if(source == corefTree){
+        TreePath[] paths = corefTree.getSelectionPaths();
+        for(int i = 0; i < paths.length; i++){
+          CorefData cData = (CorefData)((DefaultMutableTreeNode)
+                            paths[i].getLastPathComponent()).getUserObject();
+          class CorefClearer implements Runnable{
+            CorefClearer(CorefData cData){
+              this.cData = cData;
+            }
+            public void run(){
+              cData.removeAnnotations();
+            }
+            CorefData cData;
+          }
+          Thread thread = new Thread(new CorefClearer(cData));
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }
+      }
     }//public void actionPerformed(ActionEvent evt)
     JComponent source;
   }//protected class DeleteSelectedAnnotationsAction
