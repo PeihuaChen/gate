@@ -98,6 +98,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
 
     if (annotationTypes != null && annotationTypes.size() > 0)
       inputAS = inputAS.get(new HashSet(annotationTypes));
+      
+    // in case of no one annotation from some of annotationTypes   
+    if(inputAS == null) return;
 
     //check if we have a BODY annotation
     //if not, just copy all
