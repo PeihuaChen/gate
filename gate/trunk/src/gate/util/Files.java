@@ -389,4 +389,90 @@ public class Files {
     return succeeded;
   } // rmdir(File)
 
+  /**
+   * This method updates an XML element with a new set of attributes.
+   * If the element is not found the XML is unchanged. The attributes
+   * keys and values must all be Strings.
+   *
+   * @param xml A stream of the XML data.
+   * @param elementName The name of the element to update.
+   * @param newAttrs The new attributes to place on the element.
+   * @return A string of the whole XML source, with the element updated.
+   */
+  public static String updateXmlElement(
+    BufferedReader xml, String elementName, Map newAttrs
+  ) throws IOException {
+    String line = null;
+    String nl = Strings.getNl();
+    StringBuffer newXml = new StringBuffer();
+
+    // read the whole source
+    while( ( line = xml.readLine() ) != null ) {
+      newXml.append(line);
+      newXml.append(nl);
+    }
+
+    // find the location of the element
+    int start = newXml.toString().indexOf("<" + elementName);
+    if(start == -1) return newXml.toString();
+    int end =   newXml.toString().indexOf(">", start);
+    if(end == -1)   return newXml.toString();
+
+    // check if the old element is empty (ends in "/>") or not
+    boolean isEmpty = false;
+    if(newXml.toString().charAt(end - 1) == '/') isEmpty = true;
+
+    // create the new element string with the new attributes
+    StringBuffer newElement = new StringBuffer();
+    newElement.append("<");
+    newElement.append(elementName);
+
+    // add in the new attributes
+    Iterator iter = newAttrs.entrySet().iterator();
+    while(iter.hasNext()) {
+      Map.Entry entry = (Map.Entry) iter.next();
+      String key =   (String) entry.getKey();
+      String value = (String) entry.getValue();
+
+      newElement.append(" ");newElement.append(key);
+      newElement.append("=\"");
+      newElement.append(value);
+      newElement.append("\"");
+    }
+
+    // terminate the element
+    if(isEmpty) newElement.append("/");
+    newElement.append(">");
+
+    // replace the old string
+    newXml.replace(start, end + 1, newElement.toString());
+
+    return newXml.toString();
+  } // updateXmlElement(Reader...)
+
+  /**
+   * This method updates an XML element in an XML file
+   * with a new set of attributes. If the element is not found the XML
+   * file is unchanged. The attributes keys and values must all be Strings.
+   *
+   * @param xmlFile An XML file.
+   * @param elementName The name of the element to update.
+   * @param newAttrs The new attributes to place on the element.
+   * @return A string of the whole XML file, with the element updated (the
+   *   file is also overwritten).
+   */
+  public static String updateXmlElement(
+    File xmlFile, String elementName, Map newAttrs
+  ) throws IOException {
+    BufferedReader fileReader = new BufferedReader(new FileReader(xmlFile));
+    String newXml = updateXmlElement(fileReader, elementName, newAttrs);
+    fileReader.close();
+
+    FileWriter fileWriter = new FileWriter(xmlFile);
+    fileWriter.write(newXml);
+    fileWriter.close();
+
+    return newXml;
+  } // updateXmlElement(File...)
+
 } // class Files
