@@ -100,7 +100,7 @@ public class Editor extends JFrame {
   /**
    * Component initialization
    */
-  private void jbInit() throws Exception  {
+  private void jbInit() throws Exception   {
     Locale locale = new Locale("en", "GB");
     Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
     JMenuItem item;
