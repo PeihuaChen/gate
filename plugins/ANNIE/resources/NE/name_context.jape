@@ -73,6 +73,7 @@ Priority: 10
 -->
   :person.Person = {rule = "PersonContext1"}
 
+
 Rule: NotPersonContext1
 Priority: 20
 //if the unknown thing is already an org or person, don't change it

@@ -26,8 +26,8 @@ Options: control = appelt
 Macro: TITLE
 (
  {Title}
+ ({Token.string == "."})?
 )
-
 Macro: INITIALS
 (
   ({Token.orth == upperInitial, Token.length =="1"}
@@ -265,7 +265,7 @@ else
  }
 }
   features.put("kind", "personName");
-  features.put("rule", "PersonFull");
+  features.put("rule", "PersonTitle");
 annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
@@ -354,36 +354,6 @@ Priority: 20
    :jobtitle.JobTitle = {rule = "PersonJobTitle"} 
 
 
-
-Rule: 	FirstPersonStop
-Priority: 20
-// surname contains stop words
-// e.g. Mary And
-
-(
- (FIRSTNAME)+
-):person
-(
- (
-  ({Lookup.majorType == stop}|
-   {Token.category == DT})
- )
-)
--->
-{
- gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
-if (firstPerson != null && firstPerson.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features.put("kind", "personName");
-  features.put("rule", "FirstPersonStop");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
-features);
-}
 
 
 Rule: NotFirstPersonStop
@@ -475,8 +445,6 @@ Rule: NotPersonFullReverse
 Priority: 20
 // XYZ, I
 (
-
-
  (UPPER)
  {Token.string == ","}
  {Token.category == PRP}
@@ -1017,6 +985,19 @@ Priority: 50
 -->
  :locName.TempLocation = {kind = "locName", rule = LocationPost}
 
+Rule:LocKey
+(
+ {Token.category == DT}
+)?
+(
+ ({Lookup.majorType == loc_key, Lookup.minorType == pre}
+ )
+ (UPPER)
+ (
+  {Lookup.majorType == loc_key, Lookup.minorType == post})?
+)
+:locName -->
+:locName.TempLocation = {kind = "locName", rule = LocKey}
 /////////////////////////////////////////////////////////////////
 
 // Context-based Rules
@@ -1108,10 +1089,4 @@ Priority: 50
 :org
 -->
  :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
-
-
-
-
-
-
 
