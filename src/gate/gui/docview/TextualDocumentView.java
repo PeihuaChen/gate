@@ -38,8 +38,18 @@ public class TextualDocumentView extends AbstractDocumentView {
   public TextualDocumentView(){
     hgTagForAnn = new HashMap();
   }
-
-  protected void initListeners(){
+  
+  public Object addHighlight(Annotation ann, Color colour){
+    Highlighter highlighter = textView.getHighlighter();
+    try{
+	    return highlighter.addHighlight(
+	            ann.getStartNode().getOffset().intValue(),
+	            ann.getEndNode().getOffset().intValue(),
+	            new DefaultHighlighter.DefaultHighlightPainter(colour));
+    }catch(BadLocationException ble){
+      //the offsets should always be OK as they come from an annotation
+      throw new GateRuntimeException(ble.toString());
+    }
   }
 
 
@@ -49,19 +59,6 @@ public class TextualDocumentView extends AbstractDocumentView {
 
   public int getType() {
     return CENTRAL;
-  }
-
-
-  protected JEditorPane textView;
-  protected JScrollPane scroller;
-  protected Document document;
-
-
-  /* (non-Javadoc)
-   * @see gate.VisualResource#setTarget(java.lang.Object)
-   */
-  public void setTarget(Object target) {
-    this.document = (Document)target;
   }
 
   /* (non-Javadoc)
@@ -83,28 +80,31 @@ public class TextualDocumentView extends AbstractDocumentView {
     initListeners();
 
   }
-  
-  public Object addHighlight(Annotation ann, Color colour){
-    Highlighter highlighter = textView.getHighlighter();
-    try{
-	    return highlighter.addHighlight(
-	            ann.getStartNode().getOffset().intValue(),
-	            ann.getEndNode().getOffset().intValue(),
-	            new DefaultHighlighter.DefaultHighlightPainter(colour));
-    }catch(BadLocationException ble){
-      //the offsets should always be OK as they come from an annotation
-      throw new GateRuntimeException(ble.toString());
-    }
+
+  protected void initListeners(){
   }
   
   public void removeHighlight(Object tag){
     Highlighter highlighter = textView.getHighlighter();
     highlighter.removeHighlight(tag);
   }
+
+
+  /* (non-Javadoc)
+   * @see gate.VisualResource#setTarget(java.lang.Object)
+   */
+  public void setTarget(Object target) {
+    this.document = (Document)target;
+  }
+  protected Document document;
   
   
   /**
    * Stores the highlighter tags for all the highlighted annotations;
    */
   protected Map hgTagForAnn; 
+  protected JScrollPane scroller;
+
+
+  protected JEditorPane textView;
 }
