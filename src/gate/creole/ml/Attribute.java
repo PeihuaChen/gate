@@ -8,6 +8,7 @@
  *
  *  Valentin Tablan 19/11/2002
  *  semantic type added by Mike Dowman 31-03-2004
+ *  Weightings added by Mike Dowman 24-5-2004
  *
  *  $Id$
  *
@@ -52,6 +53,11 @@ public class Attribute implements Serializable{
     if(anElement == null) position = 0;
     else position = Integer.parseInt(anElement.getTextTrim());
 
+    // find the weighting if present
+    anElement = jdomElement.getChild("WEIGHTING");
+    if (anElement == null) weighting = 1.0;
+    else weighting = Double.parseDouble(anElement.getTextTrim());
+
     //find the class if present
     isClass = jdomElement.getChild("CLASS") != null;
 
@@ -74,6 +80,7 @@ public class Attribute implements Serializable{
     isClass = false;
     position = 0;
     values = null;
+    weighting = 1.0;
   }
 
   public String toString(){
@@ -81,6 +88,7 @@ public class Attribute implements Serializable{
     res.append("Name: " + name + "\n");
     res.append("Type: " + type + "\n");
     res.append("Feature: " + feature + "\n");
+    res.append("Weighting: "+ weighting + "\n");
     Iterator valIter = values.iterator();
     while(valIter.hasNext()){
       res.append("  Value:" + valIter.next().toString() + "\n");
@@ -114,6 +122,14 @@ public class Attribute implements Serializable{
 
   public String getFeature() {
     return feature;
+  }
+
+  public void setWeighting(double weighting) {
+    this.weighting = weighting;
+  }
+
+  public double getWeighting() {
+    return weighting;
   }
 
   public java.util.List getValues() {
@@ -163,4 +179,9 @@ public class Attribute implements Serializable{
   private String feature;
   private java.util.List values;
   private int position;
+  // The SVMLightWrapper allows weighting for attributes to be specified in
+  // the configuration file, and those weightings are stored in this member.
+  // Weightings are (at time of writing) ignored by the Weka and Maxent
+  // wrappers.
+  private double weighting;
 }

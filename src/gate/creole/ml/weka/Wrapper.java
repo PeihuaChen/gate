@@ -55,20 +55,44 @@ public class Wrapper implements MLEngine, ActionsPublisher {
 //    actionsList.add(new SaveDatasetAsArffAction());
   }
 
+  /**
+   * No clean up is needed for this wrapper, so this is just added because its
+   * in the interface.
+   */
+  public void cleanUp() {
+  }
+
   public void setOptions(Element optionsElem) {
     this.optionsElement = optionsElem;
   }
 
-  
+
+  /**
+   * Some wrappers allow batch classification, but this one doesn't, so if
+   * it's ever called just inform the user about this by throwing an exception.
+   *
+   * @param instances This parameter is not used.
+   * @return Nothing is ever returned - an exception is always thrown.
+   * @throws ExecutionException
+   */
+  public List batchClassifyInstances(java.util.List instances)
+      throws ExecutionException {
+    throw new ExecutionException("The Weka wrapper does not support "+
+                                 "batch classification. Remove the "+
+                                 "<BATCH-MODE-CLASSIFICATION/> entry "+
+                                 "from the XML configuration file and "+
+                                 "try again.");
+  }
+
   public void addTrainingInstance(List attributeValues)
   throws ExecutionException{
     Instance instance = buildInstance(attributeValues);
     addTrainingInstance(instance);
   }
-  
+
   protected void addTrainingInstance(Instance instance)
               throws ExecutionException{
-    
+
     if(classifier != null){
       if(classifier instanceof UpdateableClassifier){
         //the classifier can learn on the fly; we need to update it
@@ -344,7 +368,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
       }catch(IOException ioe){
         throw new ResourceInstantiationException(ioe);
       }
-      
+
     }else{
       if(classifier == null){
         //both classifier and datasetFile are null
@@ -353,7 +377,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
                 "definition!\nRunning this PR this way would be pointless!");
       }
     }
-    
+
     //initialise the dataset
     if(sListener != null) sListener.statusChanged("Initialising dataset...");
     FastVector attributes = new FastVector();
@@ -410,7 +434,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
         throw new ResourceInstantiationException(ioe);
       }
     }
-    
+
     if(classifier != null && classifier instanceof UpdateableClassifier){
       try{
         classifier.buildClassifier(dataset);
@@ -501,12 +525,12 @@ public class Wrapper implements MLEngine, ActionsPublisher {
 //      throw new GateRuntimeException(ioe.getMessage());
 //    }
 //  }
-  
-  public void loadDatasetFromArff(FileReader reader) throws IOException, 
+
+  public void loadDatasetFromArff(FileReader reader) throws IOException,
   																													ExecutionException,
   																													Exception{
     Instances newDataset = new Instances(reader);
-    if(!dataset.equalHeaders(newDataset)) 
+    if(!dataset.equalHeaders(newDataset))
       throw new ExecutionException("Loaded dataset incompatible with the one " +
               " in the definition!");
     Enumeration instEnum = newDataset.enumerateInstances();
@@ -558,8 +582,8 @@ public class Wrapper implements MLEngine, ActionsPublisher {
   protected class LoadDatasetFromArffAction extends javax.swing.AbstractAction{
     public LoadDatasetFromArffAction(){
       super("Load data from ARFF");
-      putValue(SHORT_DESCRIPTION, 
-              "Loads training data from a file in ARFF format and " + 
+      putValue(SHORT_DESCRIPTION,
+              "Loads training data from a file in ARFF format and " +
               "appends it to the current dataset.");
     }
 
@@ -595,8 +619,8 @@ public class Wrapper implements MLEngine, ActionsPublisher {
       thread.start();
     }
   }
-  
-  
+
+
   protected class SaveModelAction extends javax.swing.AbstractAction{
     public SaveModelAction(){
       super("Save model");
@@ -696,7 +720,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
    * was built.
    */
   protected boolean datasetChanged = false;
-  
+
   protected File datasetFile;
 
   protected List actionsList;

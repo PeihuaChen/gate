@@ -46,6 +46,30 @@ public class MaxentWrapper
   }
 
   /**
+   * No clean up is needed for this wrapper, so this is just added because its
+   * in the interface.
+   */
+  public void cleanUp() {
+  }
+
+  /**
+   * Some wrappers allow batch classification, but this one doesn't, so if
+   * it's ever called just inform the user about this by throwing an exception.
+   *
+   * @param instances This parameter is not used.
+   * @return Nothing is ever returned - an exception is always thrown.
+   * @throws ExecutionException
+   */
+  public List batchClassifyInstances(java.util.List instances)
+      throws ExecutionException {
+    throw new ExecutionException("The Maxent wrapper does not support "+
+                                 "batch classification. Remove the "+
+                                 "<BATCH-MODE-CLASSIFICATION/> entry "+
+                                 "from the XML configuration file and "+
+                                 "try again.");
+  }
+
+  /**
    * Take a representation of the part of the XML configuration file
    * which corresponds to <OPTIONS>, and store it.
    *
