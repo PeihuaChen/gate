@@ -1550,16 +1550,17 @@ public class OracleDataStore extends JDBCDataStore {
                               int entityType,
                               String key,
                               Object value,
-                              int valueType)
+                              int valueType,
+                              CallableStatement stmt)
     throws PersistenceException {
 
     //1. store in DB
     Long featID = null;
-    CallableStatement stmt = null;
+//    CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".persist.create_feature(?,?,?,?,?,?,?)} ");
+//      stmt = this.jdbcConn.prepareCall(
+//                "{ call "+Gate.DB_OWNER+".persist.create_feature(?,?,?,?,?,?,?)} ");
 
       //1.1 set known values + NULLs
       stmt.setLong(1,entityID.longValue());
@@ -1631,7 +1632,7 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
     finally {
-      DBHelper.cleanup(stmt);
+//      DBHelper.cleanup(stmt);
     }
 
     return featID;
@@ -1728,7 +1729,7 @@ public class OracleDataStore extends JDBCDataStore {
    *                    Object List
    *
    */
-  private void createFeature(Long entityID, int entityType,String key, Object value)
+  private void createFeature(Long entityID, int entityType,String key, Object value, CallableStatement stmt)
     throws PersistenceException {
 
     //1. what kind of feature value is this?
@@ -1779,7 +1780,7 @@ public class OracleDataStore extends JDBCDataStore {
         Object currValue = elementsToStore.elementAt(i);
 
         //3.1. create a dummy feature [LOB hack]
-        Long featID = _createFeature(entityID,entityType,key,currValue,valueType);
+        Long featID = _createFeature(entityID,entityType,key,currValue,valueType,stmt);
 
         //3.2. update CLOBs if needed
         if (valueType == DBHelper.VALUE_TYPE_STRING) {
@@ -1826,16 +1827,31 @@ public class OracleDataStore extends JDBCDataStore {
   private void createFeatures(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
-      /* when some day Java has macros, this will be a macro */
-      Set entries = features.entrySet();
-      Iterator itFeatures = entries.iterator();
-      while (itFeatures.hasNext()) {
-        Map.Entry entry = (Map.Entry)itFeatures.next();
-        String key = (String)entry.getKey();
-        Object value = entry.getValue();
-        createFeature(entityID,entityType,key,value);
-      }
+    //0. prepare statement ad use it for all features
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".persist.create_feature(?,?,?,?,?,?,?)} ");
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException(sqle);
+    }
+
+    /* when some day Java has macros, this will be a macro */
+    Set entries = features.entrySet();
+    Iterator itFeatures = entries.iterator();
+    while (itFeatures.hasNext()) {
+      Map.Entry entry = (Map.Entry)itFeatures.next();
+      String key = (String)entry.getKey();
+      Object value = entry.getValue();
+      createFeature(entityID,entityType,key,value,stmt);
+    }
+
+    //3. cleanup
+    DBHelper.cleanup(stmt);
   }
+
 
 
 
