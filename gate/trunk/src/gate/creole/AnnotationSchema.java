@@ -212,7 +212,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
     * be considered a waist of time, but a JDOM structure is more flexible than
     * a DOM one.
     * @param aDom W3C dom structure
-    * @return @see  org.jdom.Document
+    * @return {@link  org.jdom.Document}
     */
   private org.jdom.Document buildJdomFromDom(org.w3c.dom.Document aDom){
     org.jdom.Document jDom = null;

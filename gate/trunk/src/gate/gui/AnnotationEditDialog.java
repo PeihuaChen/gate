@@ -62,7 +62,7 @@ public class AnnotationEditDialog extends JDialog {
   JList   featureSchemaList = null;
   JButton okButton = null;
   JButton cancelButton = null;
-
+  Frame mainFrame = null;
   FeaturesEditor featuresEditor;
 
   /** Constructs an AnnotationEditDialog
@@ -73,7 +73,7 @@ public class AnnotationEditDialog extends JDialog {
 
     super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
-
+    mainFrame = aFrame;
     buildGuiComponents();
     initListeners();
   }//AnnotationEditDialog
@@ -331,6 +331,10 @@ public class AnnotationEditDialog extends JDialog {
       responseMap = Factory.newFeatureMap();
       if (featureMap != null)
         responseMap.putAll(featureMap);
+
+      JOptionPane.showMessageDialog(mainFrame,
+         "AnnotationSchema specifies no features for this annotation !",
+                                    "Gate", JOptionPane.ERROR_MESSAGE);
       return responseMap;
     }// End if
 

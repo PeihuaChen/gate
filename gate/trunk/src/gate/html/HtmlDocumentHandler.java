@@ -166,8 +166,8 @@ public class HtmlDocumentHandler extends ParserCallback {
       Iterator anIterator = colector.iterator();
       while (anIterator.hasNext()){
         obj = (CustomObject) anIterator.next();
-        // Check if a annotation can be created
-        if ( canCreateAnnotation(obj) ){
+        // Check if an annotation can be created
+//        if ( canCreateAnnotation(obj) ){
           // Construct an annotation from this obj
           try{
             if (markupElementsMap == null){
@@ -190,9 +190,10 @@ public class HtmlDocumentHandler extends ParserCallback {
               // If we have an exception here,
               // that means that the error is critical
               // We already checked if we can create an annotation
-              throw new LuckyException(e.toString());
-          }
-        }// end if
+              // throw new LuckyException(e.toString());
+              Err.prln("Error creating an annot :" + obj + " Discarding...");
+          }// end try
+//        }// end if
       }//while
 
       // notify the listener about the total amount of elements that

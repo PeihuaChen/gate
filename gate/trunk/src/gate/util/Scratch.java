@@ -42,7 +42,6 @@ public class Scratch
     } catch (Exception e) {
       e.printStackTrace(Out.getPrintWriter());
     }
-
   } // main
 
   public void testFinal(String s){

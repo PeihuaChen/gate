@@ -181,7 +181,7 @@ public class TestXml extends TestCase
     anElement2StringMap.put("s","\n");
 
     doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
- //doc = gate.Factory.newDocument(new URL("file:///Z:/Quick Tests/HoratioHtml/Test.html.xml"));
+// doc = gate.Factory.newDocument(new URL("file:///Z:/Quick Tests/HoratioHtml/Test.html.xml"));
 
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
       doc, doc.getSourceUrl()
@@ -197,7 +197,8 @@ public class TestXml extends TestCase
 
     docFormat.unpackMarkup (doc);
     AnnotationSet annotSet = doc.getAnnotations();
-
+    assertEquals("For xcex.xml the number of annotations should be:1516",
+                                                        1516,annotSet.size());
   } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */

@@ -163,11 +163,6 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * It uses the same behaviour as
     * <code>unpackMarkup(Document doc);</code> but the document's old content is
     * preserved into a feature attached to the doc.
-    * <p><b>WARNING :</b> If you are using this method, you should know
-    * that when it comes to dump the document as a GATE XML
-    * one(to assure persistence), it will result in bad document format.
-    * In this case you should use the Java persistency implemented
-    * in @see gate.persist package.</p>
     *
     * @param gate.Document doc The gate document you want to parse and create
     * annotations
