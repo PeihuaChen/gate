@@ -53,7 +53,7 @@ public class XJTable extends JTable {
       sorter = new TableSorter(model);
       super.setModel(sorter);
     }
-  }
+  }// void setModel(TableModel model)
 
   /**
    * Returns the actual table model. Note that gateModel() will return the
@@ -63,7 +63,7 @@ public class XJTable extends JTable {
   public TableModel getActualModel(){
     if(sorter != null)return sorter.getModel();
     else return super.getModel();
-  }
+  }// public TableModel getActualModel()
 
   /**
    * Get the row in the table for a row in the model.
@@ -115,7 +115,8 @@ public class XJTable extends JTable {
     };
     if(sortable) getTableHeader().addMouseListener(headerMouseListener);
     setAutoResizeMode(AUTO_RESIZE_OFF);
-    headerRenderer = new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
+    headerRenderer =
+      new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
 
     getTableHeader().setDefaultRenderer(headerRenderer);
   }//init()
@@ -143,10 +144,10 @@ public class XJTable extends JTable {
               adjustSizes(false);
             }
           });
-        }
-      }
-    }
-  }
+        }//if
+      }//if
+    }//if
+  }// void configureEnclosingScrollPane()
 
 
   /**Resizes all the cells so they accommodate the components at their
@@ -191,7 +192,7 @@ public class XJTable extends JTable {
              setRowHeight(row, cellHeight + rowMargin);
             }
           }//if(renderer != null)
-        }
+        }//for
       }
       width += getColumnModel().getColumnMargin();
       tCol.setPreferredWidth(width);
@@ -388,14 +389,14 @@ public class XJTable extends JTable {
         Object v2 = data.getValueAt(row2, column);
         int result;
         if(v1 instanceof Comparable){
-          try{
+          try {
             result = ((Comparable)v1).compareTo(v2);
-          }catch(ClassCastException cce){
+          } catch(ClassCastException cce) {
             String s1 = v1.toString();
             String s2 = v2.toString();
             result = s1.compareTo(s2);
           }
-        }else{
+        } else {
           String s1 = v1.toString();
           String s2 = v2.toString();
           result = s1.compareTo(s2);
@@ -551,13 +552,14 @@ public class XJTable extends JTable {
       if(res instanceof JLabel){
         if(convertColumnIndexToModel(column) == sortedColumn){
           ((JLabel)res).setIcon(ascending?upIcon:downIcon);
-        }else{
+        } else {
           ((JLabel)res).setIcon(null);
         }
         ((JLabel)res).setHorizontalTextPosition(JLabel.LEFT);
       }
       return res;
-    }
+    }// Component getTableCellRendererComponent
     protected TableCellRenderer oldRenderer;
-  }
+
+  }// class CustomHeaderRenderer extends DefaultTableCellRenderer
 }

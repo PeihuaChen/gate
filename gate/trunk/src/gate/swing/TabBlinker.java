@@ -1,3 +1,17 @@
+/*  TabBlinker.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 30/03/2001
+ *
+ *  $Id$
+ *
+ */
 package gate.swing;
 
 import javax.swing.*;
@@ -12,7 +26,7 @@ public class TabBlinker implements Runnable{
       thread = new Thread(Thread.currentThread().getThreadGroup(),
                           this);
       thread.setPriority(Thread.MIN_PRIORITY);
-    }
+    }// TabBlinker(JTabbedPane pane, Component comp, Color blinkColor)
 
     public void run(){
       oldColor = tPane.getBackgroundAt(tab);
@@ -34,13 +48,13 @@ public class TabBlinker implements Runnable{
             }else{
               tPane.setBackgroundAt(tab, oldColor);
             }
-          }
+          }// run()
         });
-        try{
+        try {
           Thread.sleep(400);
-        }catch(InterruptedException ie){}
-      }
-    }
+        } catch(InterruptedException ie){}
+      }// while
+    }//run()
 
     public void stopBlinking(){
       synchronized(this){
@@ -48,7 +62,7 @@ public class TabBlinker implements Runnable{
           stopIt = true;
         }
       }
-    }
+    }// void stopBlinking()
 
     public void startBlinking(){
       synchronized(this){
@@ -59,7 +73,7 @@ public class TabBlinker implements Runnable{
           thread.start();
         }
       }
-    }
+    }// void startBlinking()
 
     boolean stopIt;
     JTabbedPane tPane;
