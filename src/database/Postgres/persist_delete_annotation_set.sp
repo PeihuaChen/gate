@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION persist_delete_annotation_set(int4,varchar) RETURNS b
    DECLARE
       p_lr_id        alias for $1;
       p_set_name     alias for $2;
-      l_as_id number int4;
+      l_as_id        int4;
 
       x_invalid_annotation_set constant varchar := ''x_invalid_annotation_set'';
 
@@ -44,10 +44,10 @@ CREATE OR REPLACE FUNCTION persist_delete_annotation_set(int4,varchar) RETURNS b
     
       /* 1. delete annotations */
       delete
-      from   t_annotation   ann
+      from   t_annotation  
       where  exists (select members.asann_id
                      from   t_as_annotation members
-                     where  members.asann_ann_id = ann.ann_global_id
+                     where  members.asann_ann_id = t_annotation.ann_global_id
                             and members.asann_as_id = l_as_id);
     
       /* 3. delete set itself */
