@@ -47,6 +47,8 @@ public interface KBClass extends OClass {
    */
   public Set getProperties();
 
+  public KBProperty getPropertyByName(String name);
+
   /**
    * This method supplies all KBProperty inherited from the superclasses of the
    * given class. Null if no such properties exist.
@@ -56,10 +58,4 @@ public interface KBClass extends OClass {
    */
   public Set getInheritedProperties();
 
-  /**
-   * Attaches a property to the current class.
-   * @param theProperty
-   * @return true if the addition was successful, false otherwise.
-   */
-  public boolean addProperty(KBProperty theProperty);
 }

@@ -18,5 +18,77 @@
 
 package gate.creole.ontology;
 
+import java.util.Set;
+
 public interface KBProperty {
+
+  /**
+   * @return the name of the property within the ontology's namespace
+   */
+  public String getName();
+
+  /**
+   * Returns the URI of this property.
+   */
+  public String getURI();
+
+  /**
+   * Sets the URI of the property
+   * @param theURI
+   */
+  public void setURI(String theURI);
+
+  /**
+   * Add a samePropertyAs relation between the two properties.
+   * Each property has a set of these, so it is possible to
+   * have samePropertyAs relation between more than two properties.
+   * @param theProperty
+   */
+  public void setSamePropertyAs(KBProperty theProperty);
+
+  /**
+   * Returns a set of all KBProperty instances that are in
+   * SamePropertyAs relation with this property. Or null if
+   * there are no such properties.
+   * @return
+   */
+  public Set getSamePropertyAs();
+
+  /**
+   * Add a SubPropertyOf relation between the given property and this.
+   * @param theProperty
+   */
+  public void setSubPropertyOf(KBProperty theProperty);
+
+  /**
+   * Return a set of all KBProperty instances that are in a
+   * subPropertyOf relation with this property. Null if no
+   * such properties. This is not a transitive closure. To obtain
+   * the full depth of the property hierarchy, one needs then to
+   * get the sub-properties of the sub-properties of this, etc.
+   * @return
+   */
+  public Set getSubPropertyOf();
+
+  /**
+   * The inverse method to getSubPropertyOf. Null if no super-properties.
+   * @return
+   */
+  public Set getSuperProperties();
+
+  /**
+   * Returns the domain of a property. There is no corresponding set
+   * method, because the property is created at knowledge base level
+   * by specifying its domain and range
+   */
+  public KBClass getDomain();
+
+  /**
+   *
+   * @param value
+   * @return true if this value is compatible with the range
+   * restrictions on the property. False otherwise.
+   */
+  public boolean isValueCompatible(Object value);
+
 }

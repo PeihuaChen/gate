@@ -56,6 +56,25 @@ public interface KnowledgeBase extends Ontology {
    * @return the OInstance object with this name */
   public OInstance getInstanceByName(String instanceName);
 
+  /**
+   * Create a DatatypeProperty with the given domain and range
+   * @param domain
+   * @param range
+   */
+  public KBDatatypeProperty addDatatypeProperty(String name, KBClass domain, Object range);
 
+  /**
+   * Create a FunctionalProperty with the given domain and range
+   * @param domain
+   * @param range
+   * @return
+   */
+  public KBFunctionalProperty addFunctionalProperty(String name, KBClass domain, Object range);
+
+  public KBObjectProperty addObjectProperty(String name, KBClass domain, KBClass range);
+
+  public KBSymmetricProperty addSymmetricProperty(String name, KBClass domain, KBClass range);
+
+  public KBTransitiveProperty addTransitiveProperty(KBClass domain, KBClass range);
 
 }
