@@ -175,8 +175,9 @@ public class Gate implements GateConstants
       if(creoleFile.exists()){
         try{
           URL pluginURL = dirs[i].toURL();
-          if(!knownPlugins.contains(pluginURL)) 
-            knownPlugins.add(pluginURL);
+          addKnownPlugin(pluginURL);
+//          if(!knownPlugins.contains(pluginURL)) 
+//            knownPlugins.add(pluginURL);
         }catch(MalformedURLException mue){
           //this shoulod never happen
           throw new GateRuntimeException(mue);
@@ -185,12 +186,13 @@ public class Gate implements GateConstants
     }
     //we now have a full list of known plugins
     //get the information about the plugins
-    Iterator pluginIter = knownPlugins.iterator();
-    while(pluginIter.hasNext()){
-      URL aPluginURL = (URL)pluginIter.next();
-      DirectoryInfo dInfo = new DirectoryInfo(aPluginURL);
-      pluginData.put(aPluginURL, dInfo);
-    }
+//this data is now lazily populated as required.    
+//    Iterator pluginIter = knownPlugins.iterator();
+//    while(pluginIter.hasNext()){
+//      URL aPluginURL = (URL)pluginIter.next();
+//      DirectoryInfo dInfo = new DirectoryInfo(aPluginURL);
+//      pluginData.put(aPluginURL, dInfo);
+//    }
     
     //process the autoload plugins
     String pluginPath = getUserConfig().getString(LOAD_PLUGIN_PATH_KEY);
@@ -214,13 +216,16 @@ public class Gate implements GateConstants
       String aDir = strTok.nextToken();
       try{
         URL aPluginURL = new URL(aDir);
-        if(!autoloadPlugins.contains(aPluginURL)){
-          autoloadPlugins.add(aPluginURL);
-        }
-        getCreoleRegister().registerDirectories(aPluginURL);
+        addAutoloadPlugin(aPluginURL);
       }catch(MalformedURLException mue){
         System.err.println("Cannot load " + aDir + " CREOLE repository.");
         mue.printStackTrace();
+      }
+      try{
+        Iterator loadPluginsIter = getAutoloadPlugins().iterator();
+        while(loadPluginsIter.hasNext()){  
+          getCreoleRegister().registerDirectories((URL)loadPluginsIter.next());
+        }
       }catch(GateException ge){
         System.err.println("Cannot load " + aDir + " CREOLE repository.");
         ge.printStackTrace();
@@ -801,7 +806,7 @@ jar/classpath so it's the same as registerBuiltins
   public static void writeUserConfig() throws GateException {
     //update the values for knownPluginPath
     String knownPluginPath = "";
-    Iterator pluginIter = knownPlugins.iterator();
+    Iterator pluginIter = getKnownPlugins().iterator();
     while(pluginIter.hasNext()){
       URL aPluginURL = (URL)pluginIter.next();
       if(knownPluginPath.length() > 0) knownPluginPath += ";";
@@ -811,7 +816,7 @@ jar/classpath so it's the same as registerBuiltins
     
     //update the autoload plugin list
     String loadPluginPath = "";
-    pluginIter = autoloadPlugins.iterator();
+    pluginIter = getAutoloadPlugins().iterator();
     while(pluginIter.hasNext()){
       URL aPluginURL = (URL)pluginIter.next();
       if(loadPluginPath.length() > 0) loadPluginPath += ";";
@@ -939,12 +944,10 @@ jar/classpath so it's the same as registerBuiltins
    * @param directory
    */
   public static void removeKnownDirectory(URL directory){
-    DirectoryInfo dInfo = (DirectoryInfo)pluginData.get(directory);
-    if(dInfo != null){
-      creoleRegister.removeDirectory(directory);
-      knownPlugins.remove(directory);
-      pluginData.remove(directory);
-    }
+    knownPlugins.remove(directory);
+    autoloadPlugins.remove(directory);
+    creoleRegister.removeDirectory(directory);
+    pluginData.remove(directory);
   }  
   
   /**
