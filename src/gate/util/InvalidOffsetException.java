@@ -9,8 +9,8 @@
 package gate.util;
 
 /** Used to signal an attempt to create a node with an invalid offset.
-  * An invalid offset is a non integer value for a textual document or
-  * an offset bigger than the document size. 
+  * An invalid offset is a negative value, or
+  * an offset bigger than the document size, or a start greater than an end. 
   */
 public class InvalidOffsetException extends GateException {
 
