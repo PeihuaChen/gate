@@ -31,7 +31,7 @@ import gate.corpora.*;
 public class TestPersist extends TestCase
 {
   /** Debug flag */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
@@ -75,6 +75,7 @@ public class TestPersist extends TestCase
     if(! cannotSync)
       assert("doc adopted but in other datastore already", false);
     doc.setDataStore(null);
+    doc.getFeatures().put("NAME", "Alicia Tonbridge, a Document");
 
     // save the document
     doc = (Document) sds.adopt(doc);
@@ -93,7 +94,7 @@ public class TestPersist extends TestCase
     // test the getLrNames method
     Iterator iter = sds.getLrNames("gate.corpora.DocumentImpl").iterator();
     String name = (String) iter.next();
-    assertEquals(name, "GATE document");
+    assertEquals(name, "Alicia Tonbridge, a Document");
 
     // read the document back
     FeatureMap features = Factory.newFeatureMap();
@@ -122,6 +123,9 @@ public class TestPersist extends TestCase
     DataStore sds = Factory.createDataStore(
       "gate.persist.SerialDataStore", storageDir.toURL()
     );
+
+    // check we can get empty lists from empty data stores
+    List lrTypes = sds.getLrTypes();
 
     // create a document with some annotations / features on it
     String server = TestDocument.getTestServerName();
@@ -312,7 +316,7 @@ public class TestPersist extends TestCase
     );
 
     // DSR should have two members
-    assert("DSR has wrong number elements", dsr.size() == 2);
+    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 2);
 
     // peek at the DSR members
     Iterator dsrIter = dsr.iterator();
@@ -324,8 +328,13 @@ public class TestPersist extends TestCase
     }
 
     // delete the datastores
+    sds.close();
+    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
     sds.delete();
+    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 1);
     sds2.delete();
+    assert("DSR has wrong number elements: " + dsr.size(), dsr.size() == 0);
+
   } // testDSR()
 
 
