@@ -35,9 +35,11 @@ public class TestCreole extends TestCase
     CreoleRegister reg = Gate.getCreoleRegister();
 
     assertEquals(reg.size(), 3);
-Iterator iter = reg.values().iterator();
-while(iter.hasNext())
-  System.out.println(iter.next());
+    if(true) {
+      Iterator iter = reg.values().iterator();
+      while(iter.hasNext())
+        System.out.println(iter.next());
+    }
 
     assert(((ResourceData) reg.get("Sheffield Unicode Tokeniser")).getName()
            .equals("Sheffield Unicode Tokeniser"));
