@@ -71,6 +71,7 @@ public class DBHelper {
   //dummy key
   //hopefully no one will create a feature with such key
   public static final String DUMMY_FEATURE_KEY =  "--NO--SUCH--KEY--";
+  public static final String DUMMY_ENCODING =  "-!-";
   //dummy ID
   public static final Long DUMMY_ID;
 
