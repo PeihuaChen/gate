@@ -1009,10 +1009,33 @@ jar/classpath so it's the same as registerBuiltins
   }
   
   public static void addKnownPlugin(URL pluginURL){
+    pluginURL = normaliseCreoleUrl(pluginURL);
     if(knownPlugins.contains(pluginURL)) return;
     knownPlugins.add(pluginURL);
   }
 
+  /**
+   * Makes sure the provided URL ends with "/" (CREOLE URLs always point to 
+   * directories so thry should always end with a slash.
+   * @param url the URL to be normalised
+   * @return the (maybe) corrected URL.
+   */
+  private static URL normaliseCreoleUrl(URL url){
+    //CREOLE URLs are directory URLs so they should end with "/"
+    String urlName = url.toExternalForm();
+    String separator = "/";
+    if(urlName.endsWith(separator)){
+      return url;
+    }else{
+      urlName += separator;
+      try{
+        return new URL(urlName);
+      }catch(MalformedURLException mue){
+        throw new GateRuntimeException(mue);
+      }
+    }
+  }
+  
   /**
    * Returns the list of CREOLE directories the system loads automatically at
    * start-up.
@@ -1023,6 +1046,7 @@ jar/classpath so it's the same as registerBuiltins
   }
   
   public static void addAutoloadPlugin(URL pluginUrl){
+    pluginUrl = normaliseCreoleUrl(pluginUrl);
     if(autoloadPlugins.contains(pluginUrl))return;
     //make sure it's known
     addKnownPlugin(pluginUrl);
@@ -1050,13 +1074,25 @@ jar/classpath so it's the same as registerBuiltins
    * directory. If the specified directory was loaded, it will be unloaded as 
    * well - i.e. all the metadata relating to resources defined by this 
    * directory will be removed from memory.
-   * @param directory
+   * @param pluginURL
    */
-  public static void removeKnownDirectory(URL directory){
-    knownPlugins.remove(directory);
-    autoloadPlugins.remove(directory);
-    creoleRegister.removeDirectory(directory);
-    pluginData.remove(directory);
+  public static void removeKnownPlugin(URL pluginURL){
+    pluginURL = normaliseCreoleUrl(pluginURL);
+    knownPlugins.remove(pluginURL);
+    autoloadPlugins.remove(pluginURL);
+    creoleRegister.removeDirectory(pluginURL);
+    pluginData.remove(pluginURL);
+  }  
+  
+  /**
+   * Tells the system to remove a plugin URL from the list of plugins that are
+   * loaded automatically at system start-up. This will be reflected in the 
+   * user's configuration data file.
+   * @param pluginURL the URL to be removed.
+   */
+  public static void removeAutoloadPlugin(URL pluginURL){
+    pluginURL = normaliseCreoleUrl(pluginURL);
+    autoloadPlugins.remove(pluginURL);
   }  
   
   /**

@@ -281,7 +281,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           int row = mainTable.getEditingRow();
           row = mainTable.rowViewToModel(row);
           URL toDelete = (URL)Gate.getKnownPlugins().get(row);
-          Gate.removeKnownDirectory(toDelete);
+          Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
           loadNowByURL.remove(toDelete);
           mainTableModel.fireTableDataChanged();
@@ -381,7 +381,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
         }
         if(!load && loaded){
           //set autoload to false
-          Gate.getAutoloadPlugins().remove(aPluginURL);
+          Gate.removeAutoloadPlugin(aPluginURL);
         }
       }
       loadNowByURL.clear();
