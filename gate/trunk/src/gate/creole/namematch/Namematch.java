@@ -83,7 +83,7 @@ public class Namematch extends AbstractProcessingResource
     intCdgList = new Boolean(true);
     annotationTypes.add("Organization");
     annotationTypes.add("Person");
-
+    annotationTypes.add("Location");
     return this;
   } // init()
 
@@ -214,7 +214,6 @@ public class Namematch extends AbstractProcessingResource
 
               // apply name matching rules
               if (apply_rules_namematch(shortName,longName)) {
-
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
 
@@ -229,7 +228,6 @@ public class Namematch extends AbstractProcessingResource
                   if (!matchedAnnot1.containsMatched(matchedByAnnot2Id))
                     matchedAnnot1.addMatchedAnnotId(
                                               matchedAnnot2.matchedAnnotAt(k));
-
                     // then add annot1 to all those annotations
                     // that have been matched with annot2 so far
                     matchedByAnnot2 = (AnnotationMatches)
@@ -252,13 +250,13 @@ public class Namematch extends AbstractProcessingResource
           }// for i
 
           // append the "matches" attribute to existing annotations
+
           for (Enumeration enum =
                             matched_annots.keys(); enum.hasMoreElements() ;) {
             String annot_id = (String) enum.nextElement();
             AnnotationMatches matchedAnnot =
               (AnnotationMatches) matched_annots.get(annot_id);
             Vector matchesVector = matchedAnnot.getMatched();
-
             // remove attribute "matches" if such exists:
             // i.e has the namematcher run on the same doc b4?
             Annotation annot = nameAnnots.get(new Integer(annot_id));
@@ -266,133 +264,6 @@ public class Namematch extends AbstractProcessingResource
             attr.remove("matches");
             attr.put("matches", matchesVector);
           } // for Enumeration
-
-          AnnotationSet nameAnnots1 =
-            document.getAnnotations().get(
-                                      annotationType, Factory.newFeatureMap());
-
-          // get the annotation from the document
-          if ((annotationSetName == null)||(annotationSetName == "")){
-            AnnotationSet namedAnnots = document.getAnnotations();
-
-            FeatureMap fm1;
-            Annotation annot;
-            Iterator iterator;
-
-            // a vector with the matches from the current document
-            matchesDocument = new Vector();
-
-            Map booleanMatches = new HashMap();
-            Iterator iteratorAnnotation = namedAnnots.iterator();
-            while (iteratorAnnotation.hasNext()){
-                booleanMatches.put(iteratorAnnotation.next(),"false");
-              }
-
-            // go through all the annotations and put all the matches in a vector
-            iteratorAnnotation = namedAnnots.iterator();
-            while (iteratorAnnotation.hasNext()){
-              //the vector with the matches of the current annotation
-              Vector matchesAnnotation = new Vector();
-
-              annot = (Annotation)iteratorAnnotation.next();
-              Integer idAnnot = annot.getId();
-
-              fm1 = annot.getFeatures();
-              iterator = fm1.keySet().iterator();
-              while (iterator.hasNext()) {
-                String type = (String) iterator.next();
-                if (type == "matches") {
-                  // add the id of the annotation
-                  String valueId = (String)booleanMatches.get(annot);
-                  if (valueId.compareTo("false")==0)
-                                                matchesAnnotation.add(idAnnot);
-                  // update the vector (true)
-                  booleanMatches.remove(annot);
-                  booleanMatches.put(annot,new String ("true"));
-                  Vector vector = (Vector)fm1.get(type);
-                  for (int j=0; j< vector.size(); j++) {
-                    String value = (String)vector.get(j);
-                    int valueInt =(new Integer(value)).intValue();
-
-                    //verify whether it isn't already in matchesDocument
-                    Annotation newAnnot = namedAnnots.get(new Integer(value));
-                    String id = (String)booleanMatches.get(newAnnot);
-                    if (id.compareTo("false")==0){
-                      matchesAnnotation.add(new Integer(valueInt));
-                      booleanMatches.remove(newAnnot);
-                      booleanMatches.put(newAnnot,new String ("true"));
-                    }
-                  } // for
-                } // if
-              } // while
-              if (matchesAnnotation != null)
-                if (matchesAnnotation.size()>0)
-                  matchesDocument.add(matchesAnnotation);
-            } // for
-          }
-          else {
-            Map namedAnnotationSets = document.getNamedAnnotationSets();
-            Iterator iter = namedAnnotationSets.keySet().iterator();
-
-            while (iter.hasNext()) {
-              AnnotationSet namedAnnots =
-                (AnnotationSet)namedAnnotationSets.get(iter.next());
-
-              FeatureMap fm1;
-              Annotation annot;
-              Iterator iterator;
-
-              // a vector with the matches from the current document
-              matchesDocument = new Vector();
-
-              Map booleanMatches = new HashMap();
-              Iterator iteratorAnnotation = namedAnnots.iterator();
-              while (iteratorAnnotation.hasNext()){
-                booleanMatches.put(iteratorAnnotation.next(),"false");
-              }
-
-              iteratorAnnotation = namedAnnots.iterator();
-              while (iteratorAnnotation.hasNext()){
-                //the vector with the matches of the current annotation
-                Vector matchesAnnotation = new Vector();
-
-                annot = (Annotation)iteratorAnnotation.next();
-                Integer idAnnot = annot.getId();
-                fm1 = annot.getFeatures();
-                iterator = fm1.keySet().iterator();
-                while (iterator.hasNext()) {
-                  String type = (String) iterator.next();
-                  if (type == "matches") {
-                    // add the id of the annotation
-                    String valueId = (String)booleanMatches.get(annot);
-                    if (valueId.compareTo("false")==0)
-                                                matchesAnnotation.add(idAnnot);
-                    // update the vector (true)
-
-                    booleanMatches.remove(annot);
-                    booleanMatches.put(annot,new String ("true"));
-                    Vector vector = (Vector)fm1.get(type);
-                    for (int j=0; j< vector.size(); j++) {
-                      String value = (String)vector.get(j);
-
-                      //verify whether it isn't already in matchesDocument
-                      Annotation newAnnot = namedAnnots.get(new Integer(value));
-                      String id = (String)booleanMatches.get(newAnnot);
-                      if (id.compareTo("false")==0){
-                        matchesAnnotation.add(new Integer(value));
-                        booleanMatches.remove(newAnnot);
-                        booleanMatches.put(newAnnot,new String ("true"));
-                      }
-                    } // for
-                  } // if
-                } // while
-                if (matchesAnnotation != null)
-                  if (matchesAnnotation.size()>0){
-                    matchesDocument.add(matchesAnnotation);
-                  }
-              } // for
-            } // while
-          }// if
         }// else
       }//if
     }//for
@@ -471,128 +342,109 @@ public class Namematch extends AbstractProcessingResource
 
       }
     }//while
-  }
+  }//createAnnotList
 
 
   /** apply_rules_namematch: apply rules similarly to lasie1.5's namematch */
   private boolean apply_rules_namematch(String shortName, String longName) {
-    // apply matching rules only IF:
-    // the two names are of the same type
-    // or one has been classified as "unknown"
-/*    if (   annot1IdValue.equals(annot2IdValue)
-	   ||
-	   (
-	    annot1IdValue.equals("unknown")
-	    &&
-	    !annot2IdValue.equals("unknown")
-           )
-	   ||
-	   (
-	    !annot1IdValue.equals("unknown")
-	    &&
-	    annot2IdValue.equals("unknown")
-	   )
-	   )
-      {*/
-      // first apply rule for spurius matches i.e. rule0
-      if (!matchRule0(longName, shortName)) {
-	if (
-	     (// rules for all annotations
-	        matchRule1(longName, shortName, true)
-	     ||
-		matchRule2(longName, shortName)
-	     ||
-		matchRule3(shortName, longName)
-	     ||
-		matchRule5(longName, shortName)
-	     ) // rules for all annotations
-	     ||
-	     (// rules for organisation annotations
-		 ( annotationType.equals(organizationType))
-		 &&
-		 (    matchRule4(longName, shortName)
-		   ||
-		      matchRule6(longName, shortName)
-                   ||
-		      matchRule7(longName, shortName)
-		   ||
-		      matchRule8(longName, shortName)
-		   ||
-		      matchRule9(longName, shortName)
-		   ||
-		      matchRule10(longName, shortName)
-		   ||
-		      matchRule11(longName, shortName)
-		   ||
-		      matchRule13(shortName, longName)
-		  )
-	       )// rules for organisation annotations
-	     ||
-	     (// rules for person annotations
-		 (    annotationType.equals(personType))
-		   &&
-                 (    matchRule4(longName, shortName)
-                   ||
-		      matchRule7(longName, shortName)
-		   ||
-		      matchRule12(shortName, longName))
-		  )// rules for person annotations
-	     ) // if
-	   return true;
-      } // if (!matchRule0
-//    } // if (annot1.getType().equals(annot2.getType()...
+    // first apply rule for spurius matches i.e. rule0
+    if (!matchRule0(longName, shortName)) {
+      if (
+           (// rules for all annotations
+              matchRule1(longName, shortName, true)
+           ||
+              matchRule2(longName, shortName)
+           ||
+              matchRule3(shortName, longName)
+           ||
+              matchRule5(longName, shortName)
+           ) // rules for all annotations
+           ||
+           (// rules for organisation annotations
+               ( annotationType.equals(organizationType))
+               &&
+               (    matchRule4(longName, shortName)
+                 ||
+                    matchRule6(longName, shortName)
+                 ||
+                    matchRule7(longName, shortName)
+                 ||
+                    matchRule8(longName, shortName)
+                 ||
+                    matchRule9(longName, shortName)
+                 ||
+                    matchRule10(longName, shortName)
+                 ||
+                    matchRule11(longName, shortName)
+                 ||
+                    matchRule13(shortName, longName)
+                )
+             )// rules for organisation annotations
+           ||
+           (// rules for person annotations
+               (    annotationType.equals(personType))
+                 &&
+               (    matchRule4(longName, shortName)
+                 ||
+                    matchRule7(longName, shortName)
+                 ||
+                    matchRule12(shortName, longName))
+                )// rules for person annotations
+           ) // if
+         return true;
+    } // if (!matchRule0
     return false;
-  }
+  }//apply_rules
 
   /** set the document */
   public void setDocument(gate.Document newDocument) {
     document = newDocument;
-  }
+  }//setDocument
 
   /** set the annotations */
   public void setIntExtLists(Boolean newInt_Ext_Lists) {
     intExtLists = newInt_Ext_Lists;
-  }
+  }//setIntExtLists
 
   /** set the annotation set */
   public void setAnnotationSetName(String newAnnotationSetName) {
     annotationSetName = newAnnotationSetName;
-  }
+  }//setAnnotationSetName
 
   /** set the type of the annotation*/
   public void setAnnotationTypes(Set newType) {
     annotationTypes = newType;
-  }
+  }//setAnnotationTypes
 
   public void setOrganizationType(String newOrganizationType) {
     organizationType = newOrganizationType;
-  }
+  }//setOrganizationType
 
   public void setPersonType(String newPersonType) {
     personType = newPersonType;
-  }
+  }//setPersonType
 
   /** set intCdgList */
   public void setIntCdgList(Boolean newIntCdgList) {
     intCdgList = newIntCdgList;
-  }
+  }//setIntCdgList
   /**
    * Gets the document currently set as target for this namematch.
    * @return a {@link gate.Document}
    */
   public gate.Document getDocument() {
     return document;
-  }
+  }//getDocument
 
   /**get the name of the annotation set*/
   public String getAnnotationSetName() {
     return annotationSetName;
-  }
+  }//getAnnotationSetName
 
   /** get the types of the annotation*/
   public Set getAnnotationTypes() {
     return annotationTypes;
-  }
+  }//getAnnotationTypes
 
   /** */
   public String getOrganizationType() {
@@ -628,7 +480,7 @@ public class Namematch extends AbstractProcessingResource
 	spur_match.get(s1).toString().equals(spur_match.get(s2).toString());
       }
     return false;
-  }
+  }//matchRule0
 
   /** RULE #1: If the two names are identical then they are the same
     * Condition(s): depend on case
@@ -639,7 +491,7 @@ public class Namematch extends AbstractProcessingResource
 			     boolean MatchCase) {
     if (MatchCase == true) return s1.equalsIgnoreCase(s2);
     return s1.equals(s2) ;
-  }
+  }//matchRule1
 
 
   /**
@@ -655,7 +507,7 @@ public class Namematch extends AbstractProcessingResource
       return (alias.get(s1).toString().equals(alias.get(s2).toString()));
 
     return false;
-  }
+  }//matchRule2
 
   /**
     * RULE #3: adding a possessive at the end
@@ -691,7 +543,7 @@ public class Namematch extends AbstractProcessingResource
       if (s1_poss != null && matchRule1(s1_poss,s1,true)) return true;
     } // if (s2.endsWith("'s")
     return false;
-  }
+  }//matchRule3
 
   /**
     * RULE #4: Do all tokens other than the punctuation marks
@@ -719,7 +571,7 @@ public class Namematch extends AbstractProcessingResource
       return allTokensMatch;
     } // if (tokens1.countTokens() ==
     return false;
-  }
+  }//matchRule4
 
   /**
     * RULE #5: if the 1st token of one name
@@ -738,7 +590,7 @@ public class Namematch extends AbstractProcessingResource
       return matchRule1(tokens1.nextToken(),s2,true);
 
     return false;
-  }
+  }//matchRule5
 
   /**
     * RULE #6: if one name is the acronym of the other
@@ -767,7 +619,7 @@ public class Namematch extends AbstractProcessingResource
     if (cdg.containsKey(token)) s1 = s1.substring(0,s1.length()-1);
 
     return matchRule1(s1,s2,false);
-  }
+  }//matchRule6
 
   /**
     * RULE #7: if one of the tokens in one of the
@@ -795,7 +647,7 @@ public class Namematch extends AbstractProcessingResource
     //now match previous_token with other name
     if (previous_token != null) return matchRule1(previous_token,s2,false);
     return false;
-  }
+  }//matchRule7
 
   /**
     * RULE #8: if the names match after stripping off "The"
@@ -848,7 +700,7 @@ public class Namematch extends AbstractProcessingResource
     if (!s1.equals("") && !s2.equals("")) return matchRule1(s1,s2,false);
 
     return false;
-  }
+  }//matchRule8
   /**
     * RULE #9: does one of the names match the token
     * just before a trailing company designator
@@ -879,7 +731,7 @@ public class Namematch extends AbstractProcessingResource
       } // if (tokens1.countTokens()>1)
     } // if (!cdg.isEmpty()) {
     return false;
-  }
+  }//matchRule9
 
   /**
     * RULE #10: is one name the reverse of the other
@@ -924,7 +776,7 @@ public class Namematch extends AbstractProcessingResource
     } // if (invoke_rule)
     }//(tokens1.countTokens() >= 3
     return false;
-  }
+  }//matchRule10
 
   /**
     * RULE #11: does one name consist of contractions
@@ -979,7 +831,7 @@ public class Namematch extends AbstractProcessingResource
     } // else if
     } //if (tokens1.countTokens() >= 2)
     return false;
-  }
+  }//matchRule11
 
   /**
     * RULE #12: do the first and last tokens of one name
@@ -1016,7 +868,7 @@ public class Namematch extends AbstractProcessingResource
       return matchRule1(s1_FirstAndLastTokens,s2_FirstAndLastTokens,false);
     } // if (tokens1.countTokens()>1
     return false;
-  }
+  }//matchRule12
 
   /**
     * RULE #13: do multi-word names match except for
@@ -1089,7 +941,7 @@ public class Namematch extends AbstractProcessingResource
     }
     if (matched_tokens >= largerVector.size()-1) return true;
     return false;
-  }
+  }//matchRule13
 
 
   /** Tables for namematch info
@@ -1304,7 +1156,7 @@ public class Namematch extends AbstractProcessingResource
     prepos = new HashMap(2);
     prepos.put("of","prepos");
     prepos.put("for","prepos");
-  }
+  }//buildTables
 
   /** substitute all multiple spaces, tabes and newlines
     * with a single space
@@ -1317,7 +1169,7 @@ public class Namematch extends AbstractProcessingResource
       result = re.substituteAll( text,replacement);
     } catch (REException ree) {ree.printStackTrace();}
     return result;
-  }
+  }//regularExpressions
 
 } // public class Namematch
 
