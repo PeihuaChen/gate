@@ -30,6 +30,8 @@ public class JarFiles {
   /** Debug flag */
   private static final boolean DEBUG = false;
   private StringBuffer dbgString = new StringBuffer();
+  private boolean warning = false;
+  String buggyJar = null;
 
   private final static int BUFF_SIZE = 65000;
 
@@ -73,9 +75,12 @@ public class JarFiles {
         // Out.println("Adding " + sourceJarName + " to "
         // + destinationJarName);
         addJar(jarFileDestination, jarFileSource);
-        dbgString.append(sourceJarName + " added OK ! \n");
+        if (jarFileSource.getName().equals(buggyJar))
+          dbgString.append(sourceJarName + "...problems occured ! \n");
+        else
+          dbgString.append(sourceJarName + "...added OK ! \n");
         jarFileSource.close();
-      }
+      }//End while
 
       jarFileDestination.close();
 
@@ -83,7 +88,8 @@ public class JarFiles {
       ioe.printStackTrace(Err.getPrintWriter());
       //System.exit(1);
     }
-
+    if (warning == true)
+        Out.prln(dbgString);
   }// merge
 
 
@@ -155,9 +161,14 @@ public class JarFiles {
 
         } catch (java.util.zip.ZipException ze) {
           if(!currentJarEntry.isDirectory()){
-            dbgString.append("ERROR while adding " + sourceJar.getName()+ "file !\n");
-            throw new GateException("FATAL ERROR: Duplicate file entry " +
-                                currentJarEntry.getName() + " !\n" + dbgString);
+            warning = true;
+            buggyJar = sourceJar.getName();
+            Out.prln("WARNING: Duplicate file entry " +
+              currentJarEntry.getName() + " (this file will be discarded)..." +
+              "It happened while adding " +
+              sourceJar.getName() +  " !\n");
+            dbgString.append(currentJarEntry.getName() +" file from " +
+                sourceJar.getName() + " was discarded :( !\n");
           }// End if
         }
       }// while(jarFileEntriesEnum.hasMoreElements())
