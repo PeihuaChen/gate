@@ -241,8 +241,8 @@ public class TestPR extends TestCase
     transducer.execute();
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get("Organization").size() +
-      " Organization annotations, instead of the expected 16",
-      doc1.getAnnotations().get("Organization").size()== 16);
+      " Organization annotations, instead of the expected 17",
+      doc1.getAnnotations().get("Organization").size()== 17);
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get("Location").size() +
       " Location annotations, instead of the expected 3",
