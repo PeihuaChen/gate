@@ -961,5 +961,11 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
     return result;
   }
+  public void removeAnnotationSet(String name) {
+    /**@todo: Override this gate.corpora.DocumentImpl method*/
+    super.removeAnnotationSet( name);
+
+    Out.prln("Needs to be overriden to update the changed structures.");
+  }
 
 }
