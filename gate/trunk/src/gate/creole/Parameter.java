@@ -45,7 +45,7 @@ public class Parameter implements Serializable
   public boolean isOptional() { return optional; }
 
   /** Default value for the parameter */
-  Object defaultValue;
+  Object defaultValuex;
 
   /** Calculate and return the default value for this parameter */
   public Object calculateDefaultValue() throws ParameterException {
@@ -56,8 +56,7 @@ public class Parameter implements Serializable
     )
       return null;
 
-    defaultValue = calculateValueFromString(defaultValueString);
-    return defaultValue;
+    return calculateValueFromString(defaultValueString);
   } // calculateDefaultValue()
 
   /** Calculate and return the value for this parameter starting from a String
@@ -120,10 +119,7 @@ public class Parameter implements Serializable
     * @see #calculateDefaultValue()
     */
   public Object getDefaultValue() throws ParameterException {
-    if(defaultValue == null)
-      calculateDefaultValue();
-
-    return defaultValue;
+    return calculateDefaultValue();
   } // getDefaultValue
 
   /** Default value string (unprocessed, from the metadata)
@@ -203,9 +199,13 @@ public class Parameter implements Serializable
 
   /** String representation */
   public String toString() {
-    return "Parameter: valueString=" + typeName + "; optional=" + optional +
-           "; defaultValueString=" + defaultValueString +
-           "; defaultValue=" + defaultValue + "; comment=" +
-           comment + "; runtime=" + runtime + "; name=" + name;
+    try{
+      return "Parameter: valueString=" + typeName + "; optional=" + optional +
+             "; defaultValueString=" + defaultValueString +
+             "; defaultValue=" + getDefaultValue() + "; comment=" +
+             comment + "; runtime=" + runtime + "; name=" + name;
+    }catch(ParameterException pe){
+      throw new GateRuntimeException(pe.toString());
+    }
   } // toString()
 } // class Parameter
