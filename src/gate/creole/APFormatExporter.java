@@ -291,7 +291,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       ann.getEndNode().getOffset());
     }// End try
     xmlDoc.append("          <start>"+ann.getStartNode().getOffset()+
-        "</start><end>"+ann.getEndNode().getOffset()+"</end>\n");
+        "</start><end>"+(ann.getEndNode().getOffset().longValue() - 1)+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </extent>\n");
     // head
@@ -307,7 +307,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       ann.getEndNode().getOffset());
     }// End try
     xmlDoc.append("          <start>"+ann.getStartNode().getOffset()+
-        "</start><end>"+ann.getEndNode().getOffset()+"</end>\n");
+        "</start><end>"+(ann.getEndNode().getOffset().longValue() - 1)+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </head>\n");
     xmlDoc.append("      </entity_mention>\n");
@@ -330,7 +330,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser{
       ann.getEndNode().getOffset());
     }// End try
     xmlDoc.append("          <start>"+ann.getStartNode().getOffset()+
-        "</start><end>"+ann.getEndNode().getOffset()+"</end>\n");
+        "</start><end>"+(ann.getEndNode().getOffset().longValue() - 1)+"</end>\n");
     xmlDoc.append("          </charseq>\n");
     xmlDoc.append("        </name>\n");
     xmlDoc.append("      </entity_attributes>\n");
