@@ -97,7 +97,7 @@ public class FlexibleGazetteer
     long totalDeductedSpaces = 0;
     fireStatusChanged("Replacing contents with the feature value...");
 
-    outer:while (tokenIter.hasNext()) {
+    outer:while (tokenIter != null && tokenIter.hasNext()) {
       Annotation currentToken = (Annotation) tokenIter.next();
 
       // check if it is a chinesesplit
@@ -218,7 +218,7 @@ public class FlexibleGazetteer
 
     // now the tempDoc has been looked up, we need to shift the tokens from
     // this temp document to the original document
-    fireStatusChanged("Transfering new tages to the original one...");
+    fireStatusChanged("Transfering new tags to the original one...");
     Iterator tokensIter = getTokenIterator(tempDoc, outputAnnotationSetName);
     AnnotationSet original = (outputAnnotationSetName == null) ?
                              document.getAnnotations() :
@@ -227,7 +227,7 @@ public class FlexibleGazetteer
     long difference = 0;
 
     int foundNode = -1;
-    while (tokensIter.hasNext()) {
+    while (tokensIter != null && tokensIter.hasNext()) {
       Annotation currentToken = (Annotation) (tokensIter.next());
       long startOffset = currentToken.getStartNode().getOffset().longValue();
       long endOffset = currentToken.getEndNode().getOffset().longValue();
@@ -451,7 +451,15 @@ public class FlexibleGazetteer
   public Iterator getTokenIterator(gate.Document doc, String annotationSetName) {
     AnnotationSet inputAs = (annotationSetName == null) ? doc.getAnnotations() :
                             doc.getAnnotations(annotationSetName);
+    AnnotationSet tempSet = inputAs.get();
+    if(tempSet == null)
+      return null;
+
     List tokens = new ArrayList(inputAs.get());
+
+    if(tokens == null)
+      return null;
+
     Comparator offsetComparator = new OffsetComparator();
     Collections.sort(tokens, offsetComparator);
     Iterator tokenIter = tokens.iterator();

@@ -112,8 +112,8 @@ public class Morph
     AnnotationSet tokens = inputAs.get(TOKEN_ANNOTATION_TYPE);
     if (tokens == null || tokens.isEmpty()) {
       fireProcessFinished();
-      throw new ExecutionException(
-          "Please run the English Tokenizer first and then Morpher");
+      javax.swing.JOptionPane.showMessageDialog(null, "Either "+document.getName()+" does not have any document or \n please run the English Tokenizer first and then Morpher"); ;
+      return;
     }
 
     // create iterator to get access to each and every individual token
@@ -125,7 +125,7 @@ public class Morph
     int lastReport = 0;
 
     //lets process each token one at a time
-    while (tokensIter.hasNext()) {
+    while (tokensIter != null && tokensIter.hasNext()) {
       Annotation currentToken = (Annotation) tokensIter.next();
       String tokenValue = (String) (currentToken.getFeatures().
                                     get(TOKEN_STRING_FEATURE_NAME));
