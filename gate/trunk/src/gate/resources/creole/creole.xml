@@ -428,11 +428,5 @@
         <MAIN_VIEWER/>
       </GUI>
     </RESOURCE>
-    <!-- creole.xml for Annotation Diff -->
-    <RESOURCE>
-      <NAME>GATE Annotation Diff</NAME>
-      <CLASS>gate.annotation.AnnotationDiff</CLASS>
-    </RESOURCE>
-    <TOOL/>
   </CREOLE>
 </CREOLE-DIRECTORY>

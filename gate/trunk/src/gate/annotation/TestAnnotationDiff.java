@@ -97,18 +97,17 @@ public class TestAnnotationDiff extends TestCase
     // Creole.xml must contain a entry for AnnotationDiff.
     // If not, you will get an exception (couldn't configure resource metadata)
 
-    parameters = Factory.newFeatureMap();
-    parameters.put("keyDocument",keyDocument);
-    parameters.put("responseDocument",responseDocument);
-    parameters.put("annotationSchema",annotationSchema);
-    parameters.put("keyAnnotationSetName",
-                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
-    parameters.put("responseAnnotationSetName",
-                                GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
     // Create Annotation Diff visual resource
-    AnnotationDiff annotDiff = (AnnotationDiff)
-          Factory.createResource("gate.annotation.AnnotationDiff",parameters);
+    AnnotationDiff annotDiff = new AnnotationDiff();
+    annotDiff.setKeyDocument(keyDocument);
+    annotDiff.setResponseDocument(responseDocument);
+    annotDiff.setAnnotationSchema(annotationSchema);
+    annotDiff.setKeyAnnotationSetName(
+                  GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+    annotDiff.setResponseAnnotationSetName(
+                  GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+    annotDiff.init();
 
 //*/
 //*
