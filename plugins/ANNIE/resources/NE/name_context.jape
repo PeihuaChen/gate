@@ -5,7 +5,7 @@ Phase:	NameContext1
 Options: control = appelt
 
 Rule: Jobtitle1
-
+Priority: 50
 (
  {Lookup.majorType == jobtitle}
  (SPACE)
@@ -26,5 +26,74 @@ features);
 //System.out.println("test");
 annotations.removeAll(person);
 }
+
+
+Rule:PersonTitle1
+Priority: 40
+(
+ {TempPerson.rule == PersonTitle}
+ SPACE
+ {Unknown}
+):person
+-->
+{
+//removes old "Person" nd "Unknown" annotations and adds a new "Person" one
+gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule", "PersonTitle1");
+annotations.add(person.firstNode(), person.lastNode(), "Person",
+features);
+annotations.removeAll(person);
+}
+
+
+
+Rule: PersonContext1
+Priority: 10
+//note: this should really move to grammar following co-ref
+
+(
+ {Token.orth == upperInitial}
+):person
+
+(
+ SPACE 
+ {Token.string == "from"}
+ SPACE
+ ({Organization} | {Location})
+)
+-->
+  :person.Person = {rule = "PersonContext1"}
+
+Rule: NotPersonContext1
+Priority: 20
+//if the unknown thing is already an org or person, don't change it
+
+
+(
+ ({Organization}|{Person})
+):label
+
+(
+ SPACE 
+ {Token.string == "from"}
+ SPACE
+ ({Organization} | {Location})
+)
+-->
+  {}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
