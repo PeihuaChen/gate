@@ -62,7 +62,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     //get the names of all sets
     Map namedSets = document.getNamedAnnotationSets();
     //nothing left to do if there are no named sets
-    if (namedSets.isEmpty())
+    if (namedSets == null || namedSets.isEmpty())
       return;
 
     //loop through the sets and delete them all unless they're original markups
