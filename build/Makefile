@@ -11,8 +11,7 @@
 ############################################################################
 
 PKGS=	gate gate.util gate.annotation gate.corpora gate.jape \
-	gate.jape.parser gate.db
-#	gate.fsm
+	gate.jape.parser gate.db gate.fsm
 CP=	-classpath \
 ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar
 SP=	-sourcepath ../src
