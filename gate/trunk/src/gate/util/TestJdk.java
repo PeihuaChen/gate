@@ -134,6 +134,9 @@ if(true) return;
   } // testCompiler2()
 
 
+  /** Test reloading of classes. */
+
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestJdk.class);
