@@ -620,7 +620,7 @@ public class Editor extends JFrame {
     dlg.setLocation((frmSize.width - dlgSize.width) / 2 + loc.x,
                     (frmSize.height - dlgSize.height) / 2 + loc.y);
     dlg.setModal(true);
-    dlg.show();
+    dlg.setVisible(true);
   }// jMenuHelpAbout_actionPerformed(ActionEvent e)
 
   /**

@@ -278,7 +278,7 @@ public class OptionsDialog extends JDialog {
 
     cancelButton.setAction(new AbstractAction("Cancel"){
       public void actionPerformed(ActionEvent evt){
-        hide();
+        setVisible(false);
       }
     });
     textBtn.setSelected(true);
@@ -310,7 +310,7 @@ public class OptionsDialog extends JDialog {
     initListeners();
     pack();
     setLocationRelativeTo(getOwner());
-    super.show();
+    super.setVisible(true);
   }
 
   public static void main(String args[]){
@@ -404,7 +404,7 @@ public class OptionsDialog extends JDialog {
                      new Boolean(doceditInsertAppendChk.isSelected()));
       userConfig.put(GateConstants.DOCEDIT_INSERT_PREPEND,
                      new Boolean(doceditInsertPrependChk.isSelected()));
-      hide();
+      setVisible(false);
     }// void actionPerformed(ActionEvent evt)
   }
 

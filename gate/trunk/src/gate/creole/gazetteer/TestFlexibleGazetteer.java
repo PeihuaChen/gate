@@ -43,7 +43,7 @@ public class TestFlexibleGazetteer extends TestCase {
     // Display the gui for debugging purposes.
     if (DEBUG) {
       MainFrame mainFrame = new MainFrame();
-      mainFrame.show();
+      mainFrame.setVisible(true);
     }
 
     //get a document - take it from the gate server.

@@ -203,13 +203,13 @@ public class CollectionSelectionDialog extends JDialog {
   /** This method is called when the user press the OK button*/
   private void doOk(){
     buttonPressed = JFileChooser.APPROVE_OPTION;
-    this.hide();
+    this.setVisible(false);
   }//doOk();
 
   /** This method is called when the user press the CANCEL button*/
   private void doCancel(){
     buttonPressed = JFileChooser.CANCEL_OPTION;
-    this.hide();
+    this.setVisible(false);
   }//doCancel();
   /** Called when user press remove button*/
   private void doRemove(){
@@ -254,7 +254,7 @@ public class CollectionSelectionDialog extends JDialog {
     initLocalData(aSourceData);
     initGuiComponents();
     initListeners();
-    super.show();
+    super.setVisible(true);
     return buttonPressed;
   }// show()
 }//CollectionSelectionDialog class

@@ -482,7 +482,7 @@ public class MainFrame extends JFrame
     JButton okBtn = new JButton("OK");
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        splash.hide();
+        splash.setVisible(false);
       }
     });
     okBtn.setBackground(Color.white);
@@ -1377,7 +1377,7 @@ public class MainFrame extends JFrame
     //the Swing thread sounds good for that
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        guiLock.show();
+        guiLock.setVisible(true);
       }
     });
 
@@ -1394,7 +1394,7 @@ public class MainFrame extends JFrame
     //check whether GUI is up
     if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
 
-    if(guiLock != null) guiLock.hide();
+    if(guiLock != null) guiLock.setVisible(false);
     guiLock = null;
   }
 
@@ -1920,7 +1920,7 @@ public class MainFrame extends JFrame
     }// NewBootStrapAction
     public void actionPerformed(ActionEvent e) {
       BootStrapDialog bootStrapDialog = new BootStrapDialog(MainFrame.this);
-      bootStrapDialog.show();
+      bootStrapDialog.setVisible(true);
     }// actionPerformed();
   }//class NewBootStrapAction
 

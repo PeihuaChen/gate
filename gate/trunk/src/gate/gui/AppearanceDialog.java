@@ -139,7 +139,7 @@ public class AppearanceDialog extends JDialog {
     oldComponentsFont = componentsFont = UIManager.getFont("Button.font");
     oldTextComponentsFont = textComponentsFont =
                             UIManager.getFont("TextPane.font");
-    super.show();
+    super.setVisible(true);
   }// show(Component[] targets)
 
 
@@ -200,7 +200,7 @@ public class AppearanceDialog extends JDialog {
     JButton btn = new JButton("Show dialog");
     btn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        apperanceDialog1.show();
+        apperanceDialog1.setVisible(true);
       }
     });
 
@@ -304,7 +304,7 @@ public class AppearanceDialog extends JDialog {
 
     public void actionPerformed(ActionEvent evt){
       applyBtn.getAction().actionPerformed(evt);
-      hide();
+      setVisible(false);
     }
   }// class OKAction extends AbstractAction
 
@@ -328,7 +328,7 @@ public class AppearanceDialog extends JDialog {
           );
         }
       }
-      hide();
+      setVisible(false);
     }// void actionPerformed(ActionEvent evt)
   }// class CancelAction extends AbstractAction
 

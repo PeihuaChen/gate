@@ -99,14 +99,14 @@ public class NewResourceDialog extends JDialog {
         if(cellEditor != null){
           cellEditor.stopCellEditing();
         }
-        hide();
+        setVisible(false);
       }//public void actionPerformed(ActionEvent e)
     });
 
     cancelBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = true;
-        hide();
+        setVisible(false);
       }//public void actionPerformed(ActionEvent e)
     });
   }//protected void initListeners()
@@ -139,7 +139,7 @@ public class NewResourceDialog extends JDialog {
     nameField.requestFocusInWindow();
     userCanceled = true;
     setModal(true);
-    super.show();
+    super.setVisible(true);
     if(userCanceled) return false;
     else return true;
   }//show();
@@ -168,7 +168,7 @@ public class NewResourceDialog extends JDialog {
     nameField.requestFocus();
     userCanceled = true;
 //    setModal(true);
-    super.show();
+    super.setVisible(true);
     if(userCanceled) return;
     else{
       Runnable runnable = new Runnable(){

@@ -73,18 +73,18 @@ public class JFontChooser extends JPanel {
     });
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        dialog.hide();
+        dialog.setVisible(false);
       }
     });
 
     cancelBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        dialog.hide();
+        dialog.setVisible(false);
         fontChooser.setFontValue(null);
       }
     });
 
-    dialog.show();
+    dialog.setVisible(true);
 
     return fontChooser.getFontValue();
   }// showDialog

@@ -94,7 +94,7 @@ public class Splash extends JWindow {
       frameSize.width = ownerSize.width;
     setLocation(ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
                 ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
-    super.show();
+    super.setVisible(true);
   }// public void show()
 
 }// class Splash

@@ -214,7 +214,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
                                              JOptionPane.QUESTION_MESSAGE,
                                              JOptionPane.OK_CANCEL_OPTION);
         dialog.createDialog(CorpusEditor.this,
-                            "Add document(s) to corpus").show();
+                            "Add document(s) to corpus").setVisible(true);
 
         if(((Integer)dialog.getValue()).intValue() == JOptionPane.OK_OPTION){
           int[] selection = docList.getSelectedIndices();

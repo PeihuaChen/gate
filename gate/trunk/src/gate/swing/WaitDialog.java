@@ -77,7 +77,7 @@ public class WaitDialog extends JWindow implements Runnable {
                                "WaitDialog1");
     thread.setPriority(Thread.MAX_PRIORITY);
     thread.start();
-    show();
+    setVisible(true);
   }
 
   /**
@@ -103,7 +103,7 @@ public class WaitDialog extends JWindow implements Runnable {
                                "WaitDialog2");
     thread.setPriority(Thread.MAX_PRIORITY);
     thread.start();
-    show();
+    setVisible(true);
   }
 
   /**    */
