@@ -105,7 +105,10 @@ public class UserImpl
    *  user is member of  */
   public List getGroups() {
 
-    Vector copy = new Vector(groups.subList(0,groups.size()-1));
+    /** NOTE that we're returning a copy of the actuall collection of groups
+     *  so that someone would not accidentaly modify it */
+    Vector copy = new Vector();
+    copy.addAll(this.groups);
     return copy;
   }
 
@@ -365,5 +368,31 @@ public class UserImpl
   public void processGateEvent(GateEvent e){
     throw new MethodNotImplementedException();
   }
+
+
+  /*package*/ void setGroups(Vector groupIDs) {
+
+    for (int i=0; i< groupIDs.size(); i++) {
+      Long grp_id = (Long)groupIDs.elementAt(i);
+      Group grp = null;
+
+      try {
+        grp = (Group)this.ac.findGroup(grp_id);
+      }
+      catch(SecurityException se) {
+        Assert.fail();
+      }
+      catch(PersistenceException se) {
+        Assert.fail();
+      }
+
+      //is valid?
+      Assert.assertNotNull(grp);
+      Assert.assert(grp instanceof Group);
+      //add to our collection, which was empty so far
+      this.groups.add(grp);
+    }
+  }
+
 
 }
