@@ -85,7 +85,9 @@ public class LogArea extends JTextPane {
       int startPosition = styledDoc.getLength();
       // Append it to the log area
       try{
-          styledDoc.insertString(startPosition,String.valueOf(c),style);
+          synchronized(styledDoc){
+            styledDoc.insertString(startPosition,String.valueOf(c),style);
+          }// End synchronize
       } catch(BadLocationException e){
         e.printStackTrace(System.err);
       }// End try
@@ -98,9 +100,11 @@ public class LogArea extends JTextPane {
       int startPosition = styledDoc.getLength();
       // Append the string to the log area
       try{
-          styledDoc.insertString( startPosition,
-                                  new String(data,offset,length),
-                                  style);
+          synchronized(styledDoc){
+            styledDoc.insertString( startPosition,
+                                    new String(data,offset,length),
+                                    style);
+          } // End synchronize
       } catch(BadLocationException e){
           e.printStackTrace(System.err);
       }// End try
