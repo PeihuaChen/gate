@@ -47,7 +47,7 @@ public class TestDocument extends TestCase
   public void setUp() {
 
     try{
-      Gate.init();
+//      Gate.init();
       testServer = Gate.getUrl().toExternalForm();
     } catch (GateException e){
       e.printStackTrace(Err.getPrintWriter());

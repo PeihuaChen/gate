@@ -43,7 +43,7 @@ public class TestEmail extends TestCase
     // create the markupElementsMap map
     Map markupElementsMap = null;
     gate.Document doc = null;
-    Gate.init();
+//    Gate.init();
     doc = gate.Factory.newDocument(Gate.getUrl("tests/email/test.eml"), "ISO-8859-1");
 
     // get a document format that deals with e-mails
