@@ -37,8 +37,9 @@ create or replace package body persist is
   
   begin
        select lr_name
-       into p_lr_name
-       from t_lang_resource;
+       into   p_lr_name
+       from   t_lang_resource
+       where  lr_id = p_lr_id;
 
   exception
        when NO_DATA_FOUND then
