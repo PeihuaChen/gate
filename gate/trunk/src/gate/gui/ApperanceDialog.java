@@ -1,16 +1,20 @@
+/*  ApperanceDialog.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 12/04/2001
+ *
+ *  $Id$
+ *
+ */
 package gate.gui;
 
 import javax.swing.JDialog;
-
-/**
- * Title:        Gate2
- * Description:
- * Copyright:    Copyright (c) 2000
- * Company:      University Of Sheffield
- * @author
- * @version 1.0
- */
-
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.plaf.FontUIResource;
@@ -27,16 +31,16 @@ public class ApperanceDialog extends JDialog {
     super(owner, title, modal);
     this.targets = targets;
     init();
-  }
+  }// ApperanceDialog
 
   public ApperanceDialog(Dialog owner, String title, boolean modal,
                          Component[] targets) {
     super(owner, title, modal);
     this.targets = targets;
     init();
-  }
+  }//ApperanceDialog
 
-  protected void init(){
+  protected void init() {
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -44,14 +48,14 @@ public class ApperanceDialog extends JDialog {
     cancelBtn.getAction().actionPerformed(null);
   }
 
-  protected void initLocalData(){
+  protected void initLocalData() {
     oldMenusFont = menusFont = UIManager.getFont("Menu.font");
     oldComponentsFont = componentsFont = UIManager.getFont("Button.font");
     oldTextComponentsFont = textComponentsFont =
                             UIManager.getFont("TextPane.font");
-  }
+  }// initLocalData()
 
-  protected void initGuiComponents(){
+  protected void initGuiComponents() {
     getContentPane().setLayout(new BoxLayout(getContentPane(),
                                              BoxLayout.Y_AXIS));
     //add the radio buttons
@@ -90,9 +94,9 @@ public class ApperanceDialog extends JDialog {
 
     setResizable(false);
 
-  }
+  }// initGuiComponents()
 
-  protected void initListeners(){
+  protected void initListeners() {
     fontChooser.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         pack();
@@ -105,32 +109,32 @@ public class ApperanceDialog extends JDialog {
         String selectedButton = bGroup.getSelection().getActionCommand();
         if(selectedButton.equals("menus")){
           menusFont = fontChooser.getFontValue();
-        }else if(selectedButton.equals("components")){
+        } else if(selectedButton.equals("components")){
           componentsFont = fontChooser.getFontValue();
-        }else if(selectedButton.equals("text components")){
+        } else if(selectedButton.equals("text components")){
           textComponentsFont = fontChooser.getFontValue();
         }
-      }
+      }// propertyChange(PropertyChangeEvent e)
     });
 
     menusRBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fontChooser.setFontValue(menusFont);
-      }
+      }// public void actionPerformed(ActionEvent e)
     });
 
     componentsRBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fontChooser.setFontValue(componentsFont);
-      }
+      }// public void actionPerformed(ActionEvent e)
     });
 
     textComponentsRBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         fontChooser.setFontValue(textComponentsFont);
-      }
+      }// public void actionPerformed(ActionEvent e)
     });
-  }
+  }// initListeners()
 
   public void show(Component[] targets) {
     this.targets = targets;
@@ -139,20 +143,20 @@ public class ApperanceDialog extends JDialog {
     oldTextComponentsFont = textComponentsFont =
                             UIManager.getFont("TextPane.font");
     super.show();
-  }
+  }// show(Component[] targets)
 
 
-  protected void setUIDefaults(Object[] keys, Object value){
+  protected void setUIDefaults(Object[] keys, Object value) {
     for(int i = 0; i < keys.length; i++){
       UIManager.put(keys[i], value);
     }
-  }
+  }// setUIDefaults(Object[] keys, Object value)
 
 
   public static void main(String[] args) {
-    try{
+    try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-    }catch(Exception e){
+    } catch(Exception e){
       e.printStackTrace();
     }
 
@@ -174,7 +178,7 @@ public class ApperanceDialog extends JDialog {
     frame.getContentPane().add(btn);
     frame.setSize(new Dimension(300, 300));
     frame.setVisible(true);
-  }
+  }// public static void main(String[] args)
 
   JRadioButton menusRBtn;
   JRadioButton componentsRBtn;
@@ -249,16 +253,18 @@ public class ApperanceDialog extends JDialog {
       setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
       SwingUtilities.updateComponentTreeUI(ApperanceDialog.this);
       for(int i = 0; i< targets.length; i++){
-        if(targets[i] instanceof Window){
+        if(targets[i] instanceof Window) {
           SwingUtilities.updateComponentTreeUI(targets[i]);
-        }else{
-          SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
+        } else {
+          SwingUtilities.updateComponentTreeUI(
+            SwingUtilities.getRoot(targets[i])
+          );
         }
       }
-    }
+    }// void actionPerformed(ActionEvent evt)
   }
 
-  class OKAction extends AbstractAction{
+  class OKAction extends AbstractAction {
     OKAction(){
       super("OK");
     }
@@ -267,9 +273,9 @@ public class ApperanceDialog extends JDialog {
       applyBtn.getAction().actionPerformed(evt);
       hide();
     }
-  }
+  }// class OKAction extends AbstractAction
 
-  class CancelAction extends AbstractAction{
+  class CancelAction extends AbstractAction {
     CancelAction(){
       super("Cancel");
     }
@@ -278,16 +284,19 @@ public class ApperanceDialog extends JDialog {
       setUIDefaults(menuKeys, new FontUIResource(oldMenusFont));
       setUIDefaults(componentsKeys, new FontUIResource(oldComponentsFont));
       setUIDefaults(textComponentsKeys, new FontUIResource(oldTextComponentsFont));
-      SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(ApperanceDialog.this));
+      SwingUtilities.updateComponentTreeUI(
+                                  SwingUtilities.getRoot(ApperanceDialog.this));
       for(int i = 0; i< targets.length; i++){
         if(targets[i] instanceof Window){
           SwingUtilities.updateComponentTreeUI(targets[i]);
-        }else{
-          SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
+        } else {
+          SwingUtilities.updateComponentTreeUI(
+            SwingUtilities.getRoot(targets[i])
+          );
         }
       }
       hide();
-    }
-  }
+    }// void actionPerformed(ActionEvent evt)
+  }// class CancelAction extends AbstractAction
 
-}
+}// class ApperanceDialog
