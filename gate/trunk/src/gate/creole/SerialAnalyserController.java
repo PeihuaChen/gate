@@ -25,7 +25,8 @@ import java.util.*;
  * It has a {@link gate.Corpus} and its execute method runs all the analysers in
  * turn over each of the documents in the corpus.
  */
-public class SerialAnalyserController extends SerialController {
+public class SerialAnalyserController extends SerialController
+              implements CorpusController{
 
   public gate.Corpus getCorpus() {
     return corpus;
