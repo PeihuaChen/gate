@@ -116,11 +116,6 @@ public class MainFrame extends JFrame
   NewAnnotDiffAction newAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
 //  NewCorpusEvalAction newCorpusEvalAction = null;
-  /**
-   * all the top level containers of this application; needed for changes of
-   * look and feel
-   */
-  Component[] targets;
 
   /**
    * Holds all the icons used in the Gate GUI indexed by filename.
@@ -440,7 +435,6 @@ public class MainFrame extends JFrame
     splashBox.add(Box.createVerticalStrut(10));
     splash = new Splash(this, splashBox);
 
-    targets = new Component[]{this, newResourceDialog, splash};
 
     //MENUS
     menuBar = new JMenuBar();
@@ -497,14 +491,14 @@ public class MainFrame extends JFrame
       if(availableLocales != null && availableLocales.length > 1){
         imMenu = new JMenu("Input methods");
         ButtonGroup bg = new ButtonGroup();
-        item = new LocaleSelectorMenuItem(this);
+        item = new LocaleSelectorMenuItem();
         imMenu.add(item);
         item.setSelected(true);
         imMenu.addSeparator();
         bg.add(item);
         for(int i = 0; i < availableLocales.length; i++){
           locale = availableLocales[i];
-          item = new LocaleSelectorMenuItem(locale, this);
+          item = new LocaleSelectorMenuItem(locale);
           imMenu.add(item);
           bg.add(item);
         }
@@ -2338,34 +2332,45 @@ public class MainFrame extends JFrame
   }
 */
   class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
-    public LocaleSelectorMenuItem(Locale locale, JFrame pframe) {
+    public LocaleSelectorMenuItem(Locale locale) {
       super(locale.getDisplayName());
-      this.frame = pframe;
       me = this;
       myLocale = locale;
       this.addActionListener(new ActionListener()  {
         public void actionPerformed(ActionEvent e) {
-          me.setSelected(frame.getInputContext().selectInputMethod(myLocale));
+          Iterator rootIter = MainFrame.getGuiRoots().iterator();
+          while(rootIter.hasNext()){
+            Object aRoot = rootIter.next();
+            if(aRoot instanceof Window){
+              me.setSelected(((Window)aRoot).getInputContext().
+                              selectInputMethod(myLocale));
+            }
+          }
         }
       });
     }
 
-    public LocaleSelectorMenuItem(JFrame pframe) {
+    public LocaleSelectorMenuItem() {
       super("System default  >>" +
             Locale.getDefault().getDisplayName() + "<<");
-      this.frame = pframe;
       me = this;
       myLocale = Locale.getDefault();
       this.addActionListener(new ActionListener()  {
         public void actionPerformed(ActionEvent e) {
-          me.setSelected(frame.getInputContext().selectInputMethod(myLocale));
+          Iterator rootIter = MainFrame.getGuiRoots().iterator();
+          while(rootIter.hasNext()){
+            Object aRoot = rootIter.next();
+            if(aRoot instanceof Window){
+              me.setSelected(((Window)aRoot).getInputContext().
+                              selectInputMethod(myLocale));
+            }
+          }
         }
       });
     }
 
     Locale myLocale;
     JRadioButtonMenuItem me;
-    JFrame frame;
   }////class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
 }
