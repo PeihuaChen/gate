@@ -25,6 +25,13 @@ import java.io.FileWriter;
 import org.w3c.tidy.Tidy;
 */
 
+import java.io.*;
+// xml DOM import
+
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+
+
 /**
   * A scratch pad for experimenting.
   */
@@ -33,7 +40,8 @@ public class Scratch
 
   //*
   public static void main(String args[]) {
-
+   // Hamish scratch
+  /*
     FlavorMap sysFlavors = SystemFlavorMap.getDefaultFlavorMap();
     System.out.println(sysFlavors);
 
@@ -51,11 +59,69 @@ public class Scratch
       System.out.println(flavor);
     }
     System.exit(0);
-   //*/
+   */
 
    // Cristian scratch
+   // XML DOM
+  File xmlFile = null;
+  org.w3c.dom.Document dom = null;
+  try{
+    // load the xml resource
+    xmlFile = Files.writeTempFile(Files.getResourceAsStream("creole/creole.xml"));
+  } catch (Exception e){
+    e.printStackTrace (System.err);
+  }
+  try{
+    // Get a parser factory.
+    DocumentBuilderFactory domBuilderFactory = DocumentBuilderFactory.newInstance();
+	  // Set up the factory to create the appropriate type of parser
+    // non validating one
+    domBuilderFactory.setValidating(false);
+    // a non namesapace aware one
+    domBuilderFactory.setNamespaceAware(false);
+    // create it
+    DocumentBuilder domParser = domBuilderFactory.newDocumentBuilder();
+    // we have the DOM parser and we will use it to parse the xmlFile and
+    // construct the DOM model
 
+    dom = domParser.parse(xmlFile);
+    xmlFile.delete ();
+  } catch (ParserConfigurationException e){
+    e.printStackTrace(System.err);
+  } catch (org.xml.sax.SAXException e){
+    // this exception is raised because DOM uses a SAX parser in order to load
+    // its structure
+    e.printStackTrace(System.err);
+  } catch (IOException e){
+     e.printStackTrace(System.err);
+  }
 
+  // now we have the dom and we have to query it in order to access our data
+  // to get help on working with DOM : http://java.sun.com/xml/docs/api/index.html
+
+  NodeList nodeList = dom.getElementsByTagName("resource");
+  for (int i = 0; i < nodeList.getLength(); i++){
+    org.w3c.dom.Node node = nodeList.item(i);
+    System.out.println("ELEMENT: " + node.getNodeName());
+    // take its attributes
+    System.out.print("ATTRIBUTES: ");
+    NamedNodeMap namedNodeMap = node.getAttributes();
+    for (int attIdx = 0 ; attIdx < namedNodeMap.getLength(); attIdx ++){
+      org.w3c.dom.Node attNode = namedNodeMap.item(attIdx);
+      System.out.print(attNode.getNodeName() + "=\"" + attNode.getNodeValue() + "\"");
+    }
+    System.out.println();
+    // deal with its other children like another Elements or TEXT nodes
+    NodeList elemNodeList = node.getChildNodes();
+    for (int j = 0; j < elemNodeList.getLength(); j++){
+      org.w3c.dom.Node elemNode = elemNodeList.item(j);
+      if (elemNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE)
+        // do something with the element contained into a resource element
+      if (elemNode.getNodeType() == org.w3c.dom.Node.TEXT_NODE )
+        System.out.println("TEXT: " + elemNode.getNodeValue() );
+    }
+    System.out.println("---------------------------------------------------");
+  }
 
   /*
 
