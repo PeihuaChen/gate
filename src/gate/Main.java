@@ -132,32 +132,34 @@ public class Main {
     //show the splash
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        //build the Spash
+        //build the Splash
         JPanel splashBox = new JPanel();
-        splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
+        splashBox.setLayout(new GridBagLayout());
         splashBox.setBackground(Color.white);
-
+        
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(2, 2, 2, 2);
+        
         String splashName =
           System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
         if(splashName == null) {
           splashName = "gateSplash.gif";
         } // if
 
-        JLabel gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
-            "/gate/resources/img/"+splashName)));
-        Box box = new Box(BoxLayout.X_AXIS);
-        box.add(Box.createHorizontalGlue());
-        box.add(gifLbl);
-        box.add(Box.createHorizontalGlue());
-        splashBox.add(box);
-        gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
-            "/gate/resources/img/gateHeader.gif")));
-        box = new Box(BoxLayout.X_AXIS);
-        box.add(Box.createHorizontalGlue());
-        box.add(gifLbl);
-        box.add(Box.createHorizontalGlue());
-        splashBox.add(box);
-        splashBox.add(Box.createVerticalStrut(15));
+        constraints.gridy = 0;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.CENTER;
+        JLabel gifLbl = new JLabel(MainFrame.getIcon("gateHeader.gif"));
+        splashBox.add(gifLbl, constraints);
+        
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        gifLbl = new JLabel(MainFrame.getIcon(splashName));
+        splashBox.add(gifLbl, constraints);
+        gifLbl = new JLabel(MainFrame.getIcon("sponsors.gif"));
+        splashBox.add(gifLbl, constraints);
+        
         splash = new Splash(splashBox);
         splash.showSplash();
       }
