@@ -118,17 +118,18 @@ public class OrthoMatcher extends AbstractProcessingResource
   /** the size of the buffer */
   private final static int BUFF_SIZE = 65000;
 
-  public OrthoMatcher () {}
+  public OrthoMatcher () {
+    annotationTypes.add(organizationType);
+    annotationTypes.add(personType);
+    annotationTypes.add("Location");
+    annotationTypes.add("Date");
+  }
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     cbuffer = new char[BUFF_SIZE];
 
     //initialise the list of annotations which we will match
-    annotationTypes.add(organizationType);
-    annotationTypes.add(personType);
-    annotationTypes.add("Location");
-    annotationTypes.add("Date");
     try {
       createLists();
     } catch (IOException ioe) {ioe.printStackTrace();}
