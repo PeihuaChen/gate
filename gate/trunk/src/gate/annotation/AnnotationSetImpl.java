@@ -433,6 +433,38 @@ implements AnnotationSet
 
   /**
     * Select annotations by offset. This returns the set of annotations
+    * that overlap strictly with the interval defined by the two
+    * provided offsets.The result will include all the annotations that
+    * start at the start offset and end strictly at the end offset
+    */
+  public AnnotationSet getStrict(Long startOffset, Long endOffset) {
+    //the result will include all the annotations that
+    //start at the start offset and end strictly at the end offset
+    if(annotsByStartNode == null) indexByStartOffset();
+    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    Iterator nodesIter;
+    Iterator annotsIter;
+    Node currentNode;
+    Annotation currentAnnot;
+    //find all the annots that start at the start offset
+    currentNode = (Node) nodesByOffset.get(startOffset);
+    if(currentNode != null) {
+      Set fromPoint = (Set) annotsByStartNode.get(currentNode.getId());
+      if (fromPoint != null) {
+        annotsIter = fromPoint.iterator();
+        while (annotsIter.hasNext()) {
+          currentAnnot = (Annotation) annotsIter.next();
+          if(currentAnnot.getEndNode().getOffset().compareTo(endOffset) == 0){
+            resultSet.add(currentAnnot);
+          } // if
+        } // while
+      } // if
+    } // if
+    return resultSet;
+  }//getStrict(startOfset, endOffset)
+
+  /**
+    * Select annotations by offset. This returns the set of annotations
     * of the given type
     * that overlap totaly or partially with the interval defined by the two
     * provided offsets.The result will include all the annotations that either:
