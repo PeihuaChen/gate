@@ -34,7 +34,7 @@ public class CookBook extends TestCase
 {
   /** Constructing a corpus */
   public void testCorpusConstruction() {
-    Corpus corpus = new gate.corpora.CorpusImpl("My example corpus");
+    Corpus corpus = Transients.newCorpus("My example corpus");
     assert(corpus.isEmpty());
   } // constructCorpus
 
