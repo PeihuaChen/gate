@@ -145,7 +145,7 @@ public class CreateIndexDialog extends JDialog {
     did.setIndexLocation(location);
 
     if (content.isSelected()) {
-      did.addIndexField(new IndexField("body", new DefaultPropertyReader(), false));
+      did.addIndexField(new IndexField("body", new DocumentContentReader(), false));
     }
 
     for (int i = 0; i<fields.size(); i++){
