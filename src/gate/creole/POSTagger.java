@@ -36,6 +36,9 @@ public class POSTagger extends AbstractLanguageAnalyser {
   public static final String
     TAG_RULES_URL_PARAMETER_NAME = "rulesURL";
 
+  public static final String
+      TAG_ENCODING_PARAMETER_NAME = "encoding";
+
   public POSTagger() {
   }
 
@@ -110,10 +113,11 @@ public class POSTagger extends AbstractLanguageAnalyser {
             currentToken = (Annotation)(tokensIter.hasNext() ?
                                        tokensIter.next() : null);
           }
+          tagger.setEncoding(this.encoding);
           //run the POS tagger
           List taggerList = tagger.runTagger(sentencesForTagger);
           if(taggerList != null && taggerList.size() > 0){
-            List taggerResults = (List) taggerList.get(0); 
+            List taggerResults = (List) taggerList.get(0);
             //add the results
             //make sure no malfunction occurred
             if(taggerResults.size() != tokensInCurrentSentence.size())
@@ -262,6 +266,10 @@ Out.prln("POS after execution time:" + postTime);
   public void setRulesURL(java.net.URL newRulesURL) {
     rulesURL = newRulesURL;
   }
+  public void setEncoding(String encoding) {
+    this.encoding = encoding;
+  }
+
   public java.net.URL getRulesURL() {
     return rulesURL;
   }
@@ -271,9 +279,13 @@ Out.prln("POS after execution time:" + postTime);
   public String getInputASName() {
     return inputASName;
   }
+  public String getEncoding() {
+    return this.encoding;
+  }
 
   protected hepple.postag.POSTagger tagger;
   private java.net.URL lexiconURL;
   private java.net.URL rulesURL;
   private String inputASName;
+  private String encoding;
 }
