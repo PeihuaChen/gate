@@ -623,6 +623,18 @@ public class MainFrame extends JFrame
     ontotext.bp */
     toolsMenu.add(newOntologyEditorAction);
 
+    if(Gate.isEnableJapeDebug()) {
+      // by Shafirin Andrey start
+      toolsMenu.add(
+          new AbstractAction("JAPE Debugger", null) {
+        public void actionPerformed(ActionEvent evt) {
+          System.out.println("Creating Jape Debugger");
+          new debugger.JapeDebugger();
+        }
+      });
+      // by Shafirin Andrey end
+    }
+
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");

@@ -2744,4 +2744,13 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       this.dataStore.addDatastoreListener(this);
   }
 
+  /**
+   * This method added by Shafirin Andrey, to allow access to
+   * protected member {@link #defaultAnnots}
+   * Required for JAPE-Debugger.
+   * */
+  public void setDefaultAnnotations(AnnotationSet defaultAnnotations) {
+      defaultAnnots = defaultAnnotations;
+  }
+
 } // class DocumentImpl

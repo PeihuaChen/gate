@@ -754,4 +754,13 @@ jar/classpath so it's the same as registerBuiltins
   /** Tell GATE whether to start SLUG GUI. */
   public static void setSlugGui(boolean b) { slugGui = b; }
 
+  /** Flag for Jape Debugger integration. */
+  private static boolean enableJapeDebug = false;
+
+  /** Should we enable Jape Debugger. */
+  public static boolean isEnableJapeDebug() { return enableJapeDebug; }
+
+  /** Tell GATE whether to enable Jape Debugger. */
+  public static void setEnableJapeDebug(boolean b) { enableJapeDebug = b; }
+
 } // class Gate

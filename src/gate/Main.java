@@ -509,7 +509,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hd:ei:as");
+    Getopt g = new Getopt("GATE main", args, "hd:ei:asj");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -571,6 +571,10 @@ public class Main {
         case 's':
           Gate.setSlugGui(true);
           break;
+          // -j enable Jape Debugger
+          case 'j':
+            Gate.setEnableJapeDebug(true);
+            break;
 
 
 
