@@ -34,19 +34,32 @@ import gate.util.*;
 public class CollectionSelectionDialog extends JDialog {
 
   // Local data
+  ////////////////////////////
+  /** This is the model for the list that the user will choose from*/
   DefaultListModel sourceListModel = null;
+  /** This is the model for the list that the user chosed*/
   DefaultListModel targetListModel = null;
+  /** A value indicating which button has been pressed (Ok or Cancel)*/
   int buttonPressed = JFileChooser.CANCEL_OPTION;
   // Gui Components
+  /////////////////////////
+  /** The button that removes items from the target list*/
   JButton removeButton = null;
+  /** The button that adds items to the target list*/
   JButton addButton = null;
+  /** The source list which contains the items that the user will select from*/
   JList   sourceList = null;
+  /** The source list which contains the items that the user choosed*/
   JList   targetList = null;
+  /** The Ok button*/
   JButton okButton = null;
+  /** The Cancel button*/
   JButton cancelButton = null;
+  /** A label for the source list*/
   JLabel sourceLabel = null;
+  /** A label for the target list*/
   JLabel targetLabel = null;
-
+  /** The parent frame for this dialog*/
   Frame mainFrame = null;
 
   /** Constructs an ColectionSelectionDialog
@@ -67,7 +80,9 @@ public class CollectionSelectionDialog extends JDialog {
     this(null, true);
   }// CollectionSelectionDialog
 
-  /** Init local data*/
+  /** Init local data from a sorce collection
+    * @param aSourceCollection is the collection from what the user will choose
+    */
   protected void initLocalData(Collection aSourceData){
     targetListModel = new DefaultListModel();
     sourceListModel = new DefaultListModel();
@@ -173,17 +188,17 @@ public class CollectionSelectionDialog extends JDialog {
         doOk();
       }// actionPerformed();
     });// addActionListener();
-   cancelButton.addActionListener(new ActionListener() {
+    cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doCancel();
       }// actionPerformed();
     });// addActionListener();
-   addButton.addActionListener(new ActionListener() {
+    addButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doAdd();
       }// actionPerformed();
     });// addActionListener();
-   removeButton.addActionListener(new ActionListener() {
+    removeButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         doRemove();
       }// actionPerformed();
@@ -235,10 +250,10 @@ public class CollectionSelectionDialog extends JDialog {
       return buttonPressed;
     }// End if
     if (aSourceData == null){
-      JOptionPane.showMessageDialog(mainFrame,
-      "Feature selection dialog coud not been created because data source null!",
-      "Gate", JOptionPane.ERROR_MESSAGE);
-      return buttonPressed;
+     JOptionPane.showMessageDialog(mainFrame,
+     "Feature selection dialog coud not been created because data source null!",
+     "Gate", JOptionPane.ERROR_MESSAGE);
+     return buttonPressed;
     }// End if
     this.setTitle(aTitle);
     initLocalData(aSourceData);
@@ -247,8 +262,4 @@ public class CollectionSelectionDialog extends JDialog {
     super.show();
     return buttonPressed;
   }// show()
-
-  //////////////////////////////////////////
-  // Inner classes
-  //////////////////////////////////////////
 }//CollectionSelectionDialog class

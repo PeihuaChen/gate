@@ -71,21 +71,13 @@ public class TestAnnotationDiff extends TestCase
           Gate.getUrl("tests/annotDiff/KeyDocument.xml")
 //            new URL("file:///Z:/testAnnotDiff/key1.xml")
        );
-    gate.DocumentFormat keyDocFormat = gate.DocumentFormat.getDocumentFormat(
-      keyDocument, keyDocument.getSourceUrl()
-    );
-    keyDocFormat.unpackMarkup (keyDocument,"DocumentContent");
+
     // Load the xml Response Document and unpack it
     gate.Document responseDocument =
         gate.Factory.newDocument(
             Gate.getUrl("tests/annotDiff/ResponseDocument.xml")
 //            new URL("file:///Z:/testAnnotDiff/response1.xml")
         );
-    gate.DocumentFormat responseDocFormat =
-        gate.DocumentFormat.getDocumentFormat(
-                responseDocument, responseDocument.getSourceUrl()
-        );
-    responseDocFormat.unpackMarkup (responseDocument,"DocumentContent");
 
     AnnotationSet keyAnnotSet = null;
     AnnotationSet responseAnnotSet = null;

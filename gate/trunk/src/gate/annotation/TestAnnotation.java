@@ -845,32 +845,88 @@ public class TestAnnotation extends TestCase
    annot5 -> Start=10, End = 30,{color="red",Age="25",23="Cristian",best="true"}
    annot6 -> Start=10, End = 15,{color="red",Age="25",23="Cristian"}
   */
-
   // Not compatible situations
   assert("Those annotations are not compatible!",!annot3.isCompatible(annot2));
 
   // Not partially compatible situations
-  assert("Those annotations are not partially compatible!",
+  // They don't overlap
+  assert("Those annotations("+ annot1 +" & " +
+                               annot2+ ") are not partially compatible!",
                                        !annot1.isPartiallyCompatible(annot2));
-  assert("Those annotations are not partially compatible!",
-                                       !annot1.isPartiallyCompatible(annot3));
-  assert("Those annotations are not partially compatible!",
-                                       !annot1.isPartiallyCompatible(annot4));
-  assert("Those annotations are not partially compatible!",
-                                       !annot4.isPartiallyCompatible(annot5));
 
+  // Again they don't overlap
+  assert("Those annotations("+ annot1 +" & " +
+                               annot3+ ") are not partially compatible!",
+                                       !annot1.isPartiallyCompatible(annot3));
+  // Fails because of the age value
+  assert("Those annotations("+ annot1 +" & " +
+                               annot4+ ") are not partially compatible!",
+                                       !annot1.isPartiallyCompatible(annot4));
+  // Fails because of the value of Age
+  assert("Those annotations("+ annot4 +" & " +
+                               annot5+ ") are not partially compatible!",
+                                       !annot4.isPartiallyCompatible(annot5));
+  // Features from annot6 does not subsumes features annot3
+  assert("Those annotations("+ annot3 +" & " +
+                               annot6+ ") are not partially compatible!",
+                               !annot3.isPartiallyCompatible(annot6,null));
+  // Features from annot2 does not subsumes features annot5
+  assert("Those annotations("+ annot5 +" & " +
+                               annot2+ ") are not partially compatible!",
+                               !annot5.isPartiallyCompatible(annot2,null));
+  Set keySet = new HashSet();
+  // They don't overlap
+  assert("Those annotations("+ annot2 +" & " +
+                               annot4+ ") are not partially compatible!",
+                               !annot2.isPartiallyCompatible(annot4,keySet));
+  keySet.add("color");
+  keySet.add("Age");
+  keySet.add("best");
+  // Fails because of best feture
+  assert("Those annotations("+ annot5 +" & " +
+                               annot2+ ") are not partially compatible!",
+                               !annot5.isPartiallyCompatible(annot2,keySet));
+  // Fails because start=end in both cases and they don't overlap
+  assert("Those annotations("+ annot4 +" & " +
+                               annot4+ ") are not partially compatible!",
+                                        !annot4.isPartiallyCompatible(annot4));
+
+  /*
+   annot1 -> Start=10, End = 20,{color="red",Age="25",23="Cristian"}
+   annot2 -> Start=20, End = 30,{color="red",Age="25",23="Cristian"}
+   annot3 -> Start=20, End = 30,{color="red",Age="25",23="Cristian",best="true"}
+   annot4 -> Start=20, End = 20,{color="red",Age="26",23="Cristian"}
+   annot5 -> Start=10, End = 30,{color="red",Age="25",23="Cristian",best="true"}
+   annot6 -> Start=10, End = 15,{color="red",Age="25",23="Cristian"}
+  */
 
   // Compatible situations
-  assert("Those annotations are compatible!",annot2.isCompatible(annot3));
-  assert("Those annotations are compatible!",annot4.isCompatible(annot4));
+  assert("Those annotations("+ annot2 +" & " +
+                               annot3+ ") should be compatible!",
+                                      annot2.isCompatible(annot3));
+  assert("Those annotations("+ annot2 +" & " +
+                               annot3+ ") should be compatible!",
+                                      annot2.isCompatible(annot3,null));
+  assert("Those annotations("+ annot2 +" & " +
+                               annot3+ ") should be compatible!",
+                                     annot2.isCompatible(annot3,new HashSet()));
+  assert("Those annotations("+ annot4 +" & " +
+                               annot4+ ") should be compatible!",
+                                        annot4.isCompatible(annot4));
+  keySet = new HashSet();
+  keySet.add("color");
+  keySet.add(new Long(23));
+  assert("Those annotations("+ annot3 +" & " +
+                               annot2+ ") should be compatible!",
+                                      annot3.isCompatible(annot2,keySet));
 
   // Partially compatible situations
-  assert("Those annotations are partially compatible!",
+  assert("Those annotations("+ annot2 +" & " +
+                               annot3+ ") should be partially compatible!",
                                         annot2.isPartiallyCompatible(annot3));
-  assert("Those annotations are partially compatible!",
+  assert("Those annotations("+ annot2 +" & " +
+                               annot2+ ") should be partially compatible!",
                                         annot2.isPartiallyCompatible(annot2));
-  assert("Those annotations are partially compatible!",
-                                        annot4.isPartiallyCompatible(annot4));
   assert("Those annotations are partially compatible!",
                                         annot1.isPartiallyCompatible(annot5));
   assert("Those annotations are partially compatible!",
