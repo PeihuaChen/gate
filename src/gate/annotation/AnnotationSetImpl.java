@@ -748,9 +748,9 @@ implements AnnotationSet
             hash += annot.hashCode();
     }
     int nameHash = (name == null ? 0 : name.hashCode());
-    int docHash = (doc == null ? 0 : doc.hashCode());
+    //int docHash = (doc == null ? 0 : doc.hashCode());
 
-    return hash ^ nameHash ^ docHash;
+    return hash ^ nameHash;// ^ docHash;
   }
 
   /** The name of this set */
