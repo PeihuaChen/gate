@@ -232,7 +232,8 @@ public class NameBearerHandle implements Handle,
         corpusFiller = new CorpusFillerComponent();
         popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
         popup.addSeparator();
-        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
+        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(false), sListenerProxy));
+        popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(true), sListenerProxy));
         if (target instanceof IndexedCorpus){
           popup.addSeparator();
           popup.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
@@ -590,9 +591,16 @@ public class NameBearerHandle implements Handle,
    * Saves a corpus as a set of xml files in a directory.
    */
   class SaveCorpusAsXmlAction extends AbstractAction {
-    public SaveCorpusAsXmlAction(){
+    private boolean preserveFormat;
+    public SaveCorpusAsXmlAction(boolean preserveFormat){
       super("Save As Xml...");
       putValue(SHORT_DESCRIPTION, "Saves this corpus in XML");
+      this.preserveFormat = preserveFormat;
+
+      if(preserveFormat) {
+        putValue(NAME, "Save As Xml preserve format...");
+        putValue(SHORT_DESCRIPTION, "Saves this corpus in XML preserve format");
+      } // if
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {
@@ -698,9 +706,52 @@ public class NameBearerHandle implements Handle,
                 }while(!nameOK);
                 //save the file
                 try{
+                  String content = "";
+                  // check for preserve format flag
+                  if(preserveFormat) {
+                    Set annotationsToDump = null;
+                    // Find the shown document editor. 
+                    // If none, just dump the original markup annotations, 
+                    // i.e., leave the annotationsToDump null
+                    if (largeView instanceof JTabbedPane) {
+                      Component shownComponent =
+                        ((JTabbedPane) largeView).getSelectedComponent();
+                      if (shownComponent instanceof DocumentEditor) {
+                        // so we only get annotations for dumping 
+                        // if they are shown in the table of the document editor, 
+                        // which is currently in front of the user
+                        annotationsToDump =
+                          ((DocumentEditor) shownComponent).getDisplayedAnnotations();
+                      }//if we have a document editor
+                    }//if tabbed pane
+
+                    //determine if the features need to be saved first
+                    Boolean featuresSaved =
+                        Gate.getUserConfig().getBoolean(
+                          GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
+                    boolean saveFeatures = true;
+                    if (featuresSaved != null)
+                      saveFeatures = featuresSaved.booleanValue();
+            
+                    // Write with the toXml() method
+                    content = currentDoc.toXml(annotationsToDump, saveFeatures);
+                  }
+                  else {
+                    content = currentDoc.toXml();
+                  } // if
+
+                  // Prepare to write into the xmlFile using the original encoding
+                  String encoding = ((gate.TextualDocument)currentDoc).getEncoding();
+                  if(encoding == null || encoding.length() == 0)
+                    encoding = System.getProperty("file.encoding");
+                  if(encoding == null || encoding.length() == 0) 
+                    encoding = "UTF-8";
+          
                   OutputStreamWriter writer = new OutputStreamWriter(
-                                new FileOutputStream(docFile),"UTF-8");
-                  writer.write(currentDoc.toXml());
+                                                new FileOutputStream(docFile),
+                                                encoding);
+
+                  writer.write(content);
                   writer.flush();
                   writer.close();
                 }catch(IOException ioe){
