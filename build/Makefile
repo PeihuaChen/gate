@@ -10,7 +10,7 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util gate.annotation
+PKGS=	gate gate.util gate.annotation gate.corpora
 CP=	-classpath \
 ../classes:../lib/junit.jar
 SP=	-sourcepath ../src
@@ -41,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.10  2000/02/11 14:59:37  hamish
+# added corpora pkg
+#
 # Revision 1.9  2000/02/10 16:01:42  hamish
 # removed impl pkg
 #
