@@ -92,6 +92,7 @@ public class Transducer extends AbstractProcessingResource {
       if(document == null) throw new ParameterException("No document provided!");
       if(inputASName != null && inputASName.equals("")) inputASName = null;
       if(outputASName != null && outputASName.equals("")) outputASName = null;
+      batch.setPreferLongestMatch(preferLongestMatch);
       batch.transduce(document,
                       inputASName == null ?
                         document.getAnnotations() :
@@ -238,6 +239,12 @@ public class Transducer extends AbstractProcessingResource {
   private transient StatusListener sListener;
   private transient Vector statusListeners;
   private transient Vector progressListeners;
+
+  /**
+   * If the transducer uses the Appelt match style then this option will be
+   * used to decide whether the longest match or the shortest will be used.
+   */
+  private Boolean preferLongestMatch;
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
@@ -278,5 +285,11 @@ public class Transducer extends AbstractProcessingResource {
         ((ProgressListener) listeners.elementAt(i)).processFinished();
       }
     }
+  }
+  public void setPreferLongestMatch(Boolean newPreferLongestMatch) {
+    preferLongestMatch = newPreferLongestMatch;
+  }
+  public Boolean getPreferLongestMatch() {
+    return preferLongestMatch;
   }
 }

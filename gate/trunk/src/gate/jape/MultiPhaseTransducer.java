@@ -92,6 +92,15 @@ implements JapeConstants, java.io.Serializable
       ((Transducer) i.get()).finish();
   } // finish
 
+  public void setPreferLongestMatch(Boolean newPreferLongestMatch) {
+    super.setPreferLongestMatch(newPreferLongestMatch);
+    Enumeration phasesEnum = phases.elements();
+    while(phasesEnum.hasMoreElements()){
+      ((Transducer)phasesEnum.nextElement()).
+          setPreferLongestMatch(preferLongestMatch);
+    }
+  }
+
   /** Transduce the document by running each phase in turn. */
   public void transduce(Document doc, AnnotationSet input,
                         AnnotationSet output) throws JapeException {
@@ -178,7 +187,12 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.15  2001/05/16 19:03:45  valyt
+// Added a new option for jape in order to allow the use of the shortest match in appelt rules
+//
 // Revision 1.14  2001/04/30 16:56:32  valyt
+//
+//
 // Unification of the NAME attribute implementation.
 //
 // Revision 1.13  2001/04/17 18:18:06  valyt

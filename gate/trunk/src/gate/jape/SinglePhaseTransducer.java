@@ -558,10 +558,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
       } else if(ruleApplicationStyle == APPELT_STYLE) {
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
-        // just execute the longest (last) rule.
+        // just execute the longest (last) rule or the shortest one according
+        //to the options
 
         FSMInstance currentAcceptor =
-                                    (FSMInstance)acceptingFSMInstances.last();
+          (preferLongestMatch.booleanValue()) ?
+          (FSMInstance)acceptingFSMInstances.last() :
+          (FSMInstance)acceptingFSMInstances.first();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG

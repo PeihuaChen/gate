@@ -414,10 +414,12 @@ public class DefaultResourceHandle implements ResourceHandle {
             fireProcessFinished();
           }catch(ResourceInstantiationException rie){
             fireStatusChanged("reinitialisation failed");
+            rie.printStackTrace(Err.getPrintWriter());
             JOptionPane.showMessageDialog(getLargeView(),
                                           "Reload failed!\n " +
-                                          rie.toString(),
+                                          "See \"Messages\" tab for details!",
                                           "Gate", JOptionPane.ERROR_MESSAGE);
+            fireProcessFinished();
           }
         }//public void run()
       };
