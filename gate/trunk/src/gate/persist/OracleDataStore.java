@@ -293,7 +293,12 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setString(3,lrType);
       stmt.setString(4,lrName);
       stmt.setInt(5,si.getAccessMode());
-      stmt.setLong(6,lrParentID.longValue());
+      if (null == lrParentID) {
+        stmt.setNull(6,java.sql.Types.BIGINT);
+      }
+      else {
+        stmt.setLong(6,lrParentID.longValue());
+      }
       //Oracle numbers are BIGNINT
       stmt.registerOutParameter(7,java.sql.Types.BIGINT);
       stmt.execute();
@@ -422,8 +427,8 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setLong(1,lrID.longValue());
       stmt.setString(2,docURL.toString());
       stmt.setString(3,docEncoding);
-      stmt.setLong(4,docStartOffset.longValue());
-      stmt.setLong(5,docEndOffset.longValue());
+      stmt.setLong(4,(null==docStartOffset)? 0 : docStartOffset.longValue());
+      stmt.setLong(5,(null==docEndOffset)? 0 : docEndOffset.longValue());
       stmt.setBoolean(6,docIsMarkupAware.booleanValue());
       //is the document part of a corpus?
       stmt.setLong(7,null == corpusID ? 0 : corpusID.longValue());
