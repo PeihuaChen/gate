@@ -34,7 +34,8 @@ public interface WordNet extends LanguageResource {
 
   public Iterator getSynsets();
 
-  public Iterator getSynsets(int pos);
+  public Iterator getSynsets(int pos)
+    throws WordNetException;
 
   public Iterator getUniqueBeginners();
 
