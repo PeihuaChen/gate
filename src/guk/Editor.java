@@ -169,16 +169,16 @@ public class Editor extends JFrame {
           if(res1 == filer.APPROVE_OPTION){
             //we have the file, what's the encoding?
             Object[] encodings = { "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
-                                   "ISO-8859-1", "US-ASCII" };
-            Object encoding = JOptionPane.showInputDialog(
-                      frame,
-                      "Please select the encoding for the chosen file",
-                      "Gate",
-                      JOptionPane.INFORMATION_MESSAGE,
-                      null,
-                      encodings,
-                      encodings[0]
-                      );
+                                   "ISO-8859-1", "US-ASCII"};
+            JComboBox encodingsCombo = new JComboBox(encodings);
+            encodingsCombo.setEditable(true);
+            int res2 = JOptionPane.showConfirmDialog(frame,
+                                          encodingsCombo,
+                                          "Encoding?",
+                                          JOptionPane.OK_CANCEL_OPTION,
+                                          JOptionPane.QUESTION_MESSAGE);
+            Object encoding = (res2 == JOptionPane.OK_OPTION) ?
+                              encodingsCombo.getSelectedItem() : null;
             if(encoding == null) return;
             file = filer.getSelectedFile();
             try {
@@ -235,16 +235,16 @@ public class Editor extends JFrame {
           else {
             //get the encoding
             Object[] encodings = { "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16",
-                                   "ISO-8859-1", "US-ASCII" };
-            Object encoding = JOptionPane.showInputDialog(
-                      frame,
-                      "Please select the encoding for the chosen file",
-                      "Gate",
-                      JOptionPane.INFORMATION_MESSAGE,
-                      null,
-                      encodings,
-                      encodings[0]
-                      );
+                                   "ISO-8859-1", "US-ASCII"};
+            JComboBox encodingsCombo = new JComboBox(encodings);
+            encodingsCombo.setEditable(true);
+            int res2 = JOptionPane.showConfirmDialog(frame,
+                                          encodingsCombo,
+                                          "Encoding?",
+                                          JOptionPane.OK_CANCEL_OPTION,
+                                          JOptionPane.QUESTION_MESSAGE);
+            Object encoding = (res2 == JOptionPane.OK_OPTION) ?
+                              encodingsCombo.getSelectedItem() : null;
             if(encoding == null) return;
             try {
               OutputStreamWriter writer = new OutputStreamWriter(

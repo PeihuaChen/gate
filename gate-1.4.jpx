@@ -4,7 +4,7 @@
   <property category="build" name="CopyExtensions.1" value="txt"/>
   <property category="build" name="CopyExtensions.2" value="xml"/>
   <property category="idl" name="ProcessIDL" value="false"/>
-  <property category="runtime" name="ConfigurationCount" value="16"/>
+  <property category="runtime" name="ConfigurationCount" value="17"/>
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.0" name="application.class" value="gate.TestGate"/>
   <property category="runtime.0" name="application.parameters" value="-i y:\gate.xml"/>
@@ -106,6 +106,11 @@
   <property category="runtime.16" name="appserver.vmparameters" value="-Dvbroker.agent.port=14000 -Djava.library.path=/Borland/AppServer/lib;/Borland/AppServer/bin"/>
   <property category="runtime.16" name="jsprunner.docbase" value="."/>
   <property category="runtime.16" name="jsprunner.jspfile" value="."/>
+  <property category="runtime.17" name="ConfigurationName" value="GUK Editor"/>
+  <property category="runtime.17" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
+  <property category="runtime.17" name="application.class" value="guk.Editor"/>
+  <property category="runtime.17" name="jsprunner.launchuri" value="/"/>
+  <property category="runtime.17" name="test.harness" value="junit.textui.TestRunner"/>
   <property category="runtime.2" name="ConfigurationName" value="Shell GUI"/>
   <property category="runtime.2" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner"/>
   <property category="runtime.2" name="application.class" value="gate.Main"/>
