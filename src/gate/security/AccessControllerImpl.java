@@ -117,10 +117,54 @@ public class AccessControllerImpl
   public void close()
     throws PersistenceException{
 
-   throw new MethodNotImplementedException();
-   //1. deregister self as listener
-   //2. delete all groups/users collections
-   //3.
+    //0. Invalidate all sessions
+    this.sessions.clear();
+    this.sessionLastUsed.clear();
+    this.sessionTimeouts.clear();
+
+    //1. deregister self as listener for groups
+    Set groupMappings = this.groupsByName.entrySet();
+    Iterator itGroups = groupMappings.iterator();
+
+    while (itGroups.hasNext()) {
+      Map.Entry mapEntry = (Map.Entry)itGroups.next();
+      GroupImpl  grp = (GroupImpl)mapEntry.getValue();
+      grp.unregisterObjectModificationListener(this,
+                                               ObjectModificationEvent.OBJECT_MODIFIED);
+    }
+
+    //1.1. deregister self as listener for users
+    Set userMappings = this.usersByName.entrySet();
+    Iterator itUsers = userMappings.iterator();
+
+    while (itUsers.hasNext()) {
+      Map.Entry mapEntry = (Map.Entry)itUsers.next();
+      UserImpl  usr = (UserImpl)mapEntry.getValue();
+      usr.unregisterObjectModificationListener(this,
+                                             ObjectModificationEvent.OBJECT_MODIFIED);
+    }
+
+    //1.2 release all listeners registered for this object
+    this.omCreationListeners.removeAllElements();
+    this.omDeletionListeners.removeAllElements();
+    this.omModificationListeners.removeAllElements();
+
+
+    //2. delete all groups/users collections
+    this.groupsByID.clear();
+    this.groupsByName.clear();
+    this.usersByID.clear();
+    this.groupsByName.clear();
+
+    //3.close connection
+    try {
+      this.jdbcConn.close();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't close connection to DB:["+
+                                      sqle.getMessage()+"]");
+    }
+
   }
 
   /** --- */
