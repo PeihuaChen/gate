@@ -46,6 +46,22 @@ create or replace package body persist is
   end;                                                                                                        
 
 
+  /*******************************************************************************************/
+  procedure get_lr_name(p_lr_id     IN number,
+                        p_lr_name   OUT varchar2)
+  is
+  
+  begin
+       select lr_name
+       into p_lr_name
+       from t_lang_resource;
+
+  exception
+       when NO_DATA_FOUND then
+          raise error.x_invalid_lr;
+
+  end;                                                                                                        
+
 
 /*begin
   -- Initialization

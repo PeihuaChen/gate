@@ -31,5 +31,9 @@ create or replace package persist is
 
   procedure get_timestamp(p_timestamp  OUT number);
 
+  procedure get_lr_name(p_lr_id     IN number,
+                        p_lr_name   OUT varchar2);
+  
+    
 end persist;
 /
