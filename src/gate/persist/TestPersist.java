@@ -27,6 +27,7 @@ import oracle.sql.*;
 //import oracle.jdbc.driver.*;
 
 import gate.*;
+import gate.event.DatastoreListener;
 import gate.util.*;
 import gate.corpora.*;
 import gate.security.*;
@@ -493,6 +494,7 @@ public class TestPersist extends TestCase
     FeatureMap fm  = Factory.newFeatureMap();
 //    fm.put("FLOAT feature ZZZ",new Double(101.102d));
 //    fm.put("ASCII feature",ASCII_STRING);
+//      fm.put("INT feature",new Integer(1212));
 //    fm.put("UNICODE feature",UNICODE_STRING);
     doc.getAnnotations().add(
       new Long(0), new Long(20), "thingymajig", fm);
@@ -616,6 +618,7 @@ public class TestPersist extends TestCase
     Assert.assertTrue(lr instanceof DatabaseDocumentImpl);
     Assert.assertNotNull(lr.getDataStore());
     Assert.assertTrue(lr.getDataStore() instanceof DatabaseDataStore);
+    Assert.assertEquals(doc.getAnnotations(), ((DatabaseDocumentImpl)lr).getAnnotations());
 
     sampleDoc_lrID = (Long)lr.getLRPersistenceId();
     if (DEBUG) Out.prln("lr id: " + this.sampleDoc_lrID);
@@ -763,6 +766,9 @@ public class TestPersist extends TestCase
     }
 
     //close
+    ds.removeDatastoreListener((DatastoreListener)lr);
+    lr = null;
+
     ds.close();
     ac.close();
 
@@ -821,9 +827,17 @@ public class TestPersist extends TestCase
     String newName = oldName + "__UPD";
     dbDoc.setName(newName);
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertEquals(newName,dbDoc.getName());
     Assert.assertEquals(newName,doc2.getName());
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
     //4. change features
     FeatureMap fm = dbDoc.getFeatures();
@@ -847,9 +861,16 @@ public class TestPersist extends TestCase
         fm.put(currKey,newVal);
     }
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertEquals(fm,dbDoc.getFeatures());
     Assert.assertEquals(fm,doc2.getFeatures());
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
     //6. URL
     URL docURL = dbDoc.getSourceUrl();
@@ -857,9 +878,16 @@ public class TestPersist extends TestCase
     newURL = new URL(docURL.toString()+".UPDATED");
     dbDoc.setSourceUrl(newURL);
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertEquals(newURL,dbDoc.getSourceUrl());
     Assert.assertEquals(newURL,doc2.getSourceUrl());
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
     //5.start/end
     Long newStart = new Long(123);
@@ -868,11 +896,19 @@ public class TestPersist extends TestCase
     dbDoc.setSourceUrlEndOffset(newEnd);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertEquals(newStart,dbDoc.getSourceUrlStartOffset());
     Assert.assertEquals(newStart,doc2.getSourceUrlStartOffset());
     Assert.assertEquals(newEnd,dbDoc.getSourceUrlEndOffset());
     Assert.assertEquals(newEnd,doc2.getSourceUrlEndOffset());
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
 
     //6.markupAware
@@ -881,9 +917,17 @@ public class TestPersist extends TestCase
     dbDoc.setMarkupAware(newMA);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertEquals(newMA,doc2.getMarkupAware());
     Assert.assertEquals(newMA,dbDoc.getMarkupAware());
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
 
     //7. content
@@ -892,19 +936,35 @@ public class TestPersist extends TestCase
     dbDoc.setContent(contNew);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertEquals(contNew,dbDoc.getContent());
     Assert.assertEquals(contNew,doc2.getContent());
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
     //8. encoding
     String encOld = (String)dbDoc.
       getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
     dbDoc.setParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME,"XXX");
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     String encNew = (String)doc2.
       getParameterValue(Document.DOCUMENT_ENCODING_PARAMETER_NAME);
     Assert.assertEquals(encNew,encOld);
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
 
     //9. add annotations
@@ -912,34 +972,53 @@ public class TestPersist extends TestCase
     Assert.assertNotNull(dbDocSet);
 
     FeatureMap fm1 = new SimpleFeatureMapImpl();
-    fm.put("string key","string value");
+    fm1.put("string key","string value");
 
     Integer annInd = dbDocSet.add(new Long(0), new Long(10),
                                 "TEST TYPE",
                                 fm1);
 
     dbDoc.sync();
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     AnnotationSet doc2Set = doc2.getAnnotations("TEST SET");
     Assert.assertTrue(dbDocSet.size() == doc2Set.size());
-    Assert.assertEquals(doc2Set,dbDocSet);
+//--    Assert.assertEquals(doc2Set,dbDocSet);
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
 
     //9.1. change+add annotations
     Annotation dbDocAnn = dbDocSet.get(annInd);
 
+    FeatureMap fm2 = new SimpleFeatureMapImpl();
+    fm2.put("string2","uuuuuu");
+    fm2.put("int2",new Integer(98989898));
     Integer newInd = dbDocSet.add(dbDocAnn.getStartNode().getOffset(),
                                     dbDocAnn.getEndNode().getOffset(),
                                     dbDocAnn.getType() + "__XX",
-                                    new SimpleFeatureMapImpl());
+                                    fm2);
     Annotation dbDocAnnNew = dbDocSet.get(newInd);
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     doc2Set = doc2.getAnnotations("TEST SET");
     Assert.assertTrue(dbDocSet.size() == doc2Set.size());
     Assert.assertEquals(doc2Set,dbDocSet);
     Assert.assertTrue(doc2Set.contains(dbDocAnnNew));
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 /*
     //10. iterate named annotations
     Map namedOld = ((DocumentImpl)this.uc01_LR).getNamedAnnotationSets();
@@ -960,14 +1039,21 @@ public class TestPersist extends TestCase
     aset.addAll(dbDoc.getAnnotations());
     dbDoc.sync();
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
     Assert.assertTrue(doc2.getNamedAnnotationSets().containsKey(dummySetName));
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().containsValue(aset));
     Assert.assertTrue(doc2.getNamedAnnotationSets().containsValue(aset));
     Assert.assertTrue(dbDoc.getNamedAnnotationSets().size() == doc2.getNamedAnnotationSets().size());
+    Assert.assertEquals(doc2.getNamedAnnotationSets(),dbDoc.getNamedAnnotationSets());
 
-    Assert.assertTrue(doc2.getNamedAnnotationSets().equals(dbDoc.getNamedAnnotationSets()));
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
     //12. remove aset
     dbDoc.removeAnnotationSet(dummySetName);
@@ -975,13 +1061,24 @@ public class TestPersist extends TestCase
     Assert.assertTrue(false == ((EventAwareDocument)dbDoc).getLoadedAnnotationSets().contains(dummySetName));
     Assert.assertTrue(false == dbDoc.getNamedAnnotationSets().containsKey(dummySetName));
 
-    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+//--    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,sampleDoc_lrID);
+    params.clear();
+    params.put(DataStore.DATASTORE_FEATURE_NAME, ds);
+    params.put(DataStore.LR_ID_FEATURE_NAME, this.sampleDoc_lrID);
+    doc2= (Document) Factory.createResource(DBHelper.DOCUMENT_CLASS, params);
+
     Assert.assertTrue(false == doc2.getNamedAnnotationSets().containsKey(dummySetName));
+
+    Factory.deleteResource(doc2);
+    doc2 = null;
 
     //13. unlock
     ds.unlockLr(lr);
 
     //close
+    Factory.deleteResource(dbDoc);
+    dbDoc = null;
+
     ac.close();
     ds.close();
 
@@ -1332,10 +1429,11 @@ public class TestPersist extends TestCase
   }
 
 
+
   public static void main(String[] args){
     try{
 
-//System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
+System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
       Gate.setLocalWebServer(false);
       Gate.setNetConnected(false);
       Gate.init();
@@ -1355,33 +1453,6 @@ public class TestPersist extends TestCase
         throw new RuntimeException();
       }
 */
-
-      test.setUp();
-      test.testDelete();
-      test.tearDown();
-
-      test.setUp();
-      test.testDSR();
-      test.tearDown();
-
-      test.setUp();
-      test.testMultipleLrs();
-      test.tearDown();
-
-      test.setUp();
-//      test.testSaveRestore();
-      test.tearDown();
-
-      test.setUp();
-      test.testSimple();
-      test.tearDown();
-
-      //I put this last because its failure is dependent on the gc() and
-      //there's nothing I can do about it. Maybe I'll remove this from the
-      //test
-      test.setUp();
-      test.testMultipleLrs();
-      test.tearDown();
 
       /* oracle */
 
@@ -1415,7 +1486,8 @@ public class TestPersist extends TestCase
 
 
       /* postgres */
-/*      test.setUp();
+
+      test.setUp();
       test.testPostgres_01();
       test.tearDown();
 
@@ -1442,7 +1514,34 @@ public class TestPersist extends TestCase
       test.setUp();
       test.testPostgres_103();
       test.tearDown();
-*/
+
+      test.setUp();
+      test.testDelete();
+      test.tearDown();
+
+      test.setUp();
+      test.testDSR();
+      test.tearDown();
+
+      test.setUp();
+      test.testMultipleLrs();
+      test.tearDown();
+
+      test.setUp();
+//      test.testSaveRestore();
+      test.tearDown();
+
+      test.setUp();
+      test.testSimple();
+      test.tearDown();
+
+      //I put this last because its failure is dependent on the gc() and
+      //there's nothing I can do about it. Maybe I'll remove this from the
+      //test
+      test.setUp();
+      test.testMultipleLrs();
+      test.tearDown();
+
       if (DEBUG) {
         Err.println("done.");
       }
@@ -1523,6 +1622,8 @@ public class TestPersist extends TestCase
   }
 
 */
+
+
 /*
   public void testPostgres01() throws Exception {
 
@@ -1570,10 +1671,12 @@ System.out.println(result);
 
       rs.close();
       pstmt2.close();
+
       c.commit();
 
     }
-    catch(Exception e) {
+    catch(SQLException e) {
+System.out.println(e.getErrorCode());
       e.printStackTrace();
     }
 
