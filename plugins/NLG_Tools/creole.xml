@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<!-- creole.xml directory file for GATE builtins -->
+<CREOLE-DIRECTORY>
+
+  <!-- Language Resources -->
+  <CREOLE>
+
+  <!-- OntoLexImpl -->
+
+    <RESOURCE>
+      <NAME>GATE OntoLex Mapping</NAME>
+      <CLASS>gate.lexicon.OntoLexKBImpl</CLASS>
+      <COMMENT>GATE OntoLex mapping</COMMENT>
+      <INTERFACE>gate.lexicon.OntoLexLR</INTERFACE>
+      <ICON>lrs.gif</ICON>
+        <PARAMETER NAME="ontologyIdentifier"
+    DEFAULT="gate:/creole/ontology/demo.daml"
+    COMMENT="Ontology URL">java.net.URL</PARAMETER>
+        <PARAMETER NAME="lexKBIdentifier"
+    COMMENT="Lexicon Id">java.lang.String</PARAMETER>
+    </RESOURCE>
+
+  <!-- NLG Lexicon -->
+
+    <RESOURCE>
+      <NAME>GATE NLG Lexicon</NAME>
+      <CLASS>gate.lexicon.NLGLexiconImpl</CLASS>
+      <COMMENT>GATE NLG Lexicon</COMMENT>
+      <INTERFACE>gate.lexicon.NLGLexicon</INTERFACE>
+      <ICON>lrs.gif</ICON>
+    </RESOURCE>
+  </CREOLE>
+
+  <!-- Visual Resources -->
+  <CREOLE>
+    <RESOURCE>
+      <NAME>NLG Lexicon Editor</NAME>
+      <CLASS>gate.gui.lexicon.NLGLexiconVR</CLASS>
+	<JAR>miakt.jar</JAR>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.lexicon.MutableLexicalKnowledgeBase</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>OntoLex Mapping Editor</NAME>
+      <CLASS>gate.gui.lexicon.OntoLexEditorVR</CLASS>
+      <!-- type values can be "large" or "small"-->
+	<JAR>miakt.jar</JAR>
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.lexicon.OntoLexLR</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+  </CREOLE>
+
+
+</CREOLE-DIRECTORY>
