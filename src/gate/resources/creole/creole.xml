@@ -206,7 +206,7 @@
       <PARAMETER NAME="document" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="caseSensitive" DEFAULT="false" OPTIONAL="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="annotationTypes" RUNTIME="true" OPTIONAL="true">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="annotationTypes" DEFAULT="Organization;Person;Location;Date" RUNTIME="true" OPTIONAL="true">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="organizationType" DEFAULT="Organization" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="personType" DEFAULT="Person" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="extLists" DEFAULT="true" OPTIONAL="true">java.lang.Boolean</PARAMETER>
