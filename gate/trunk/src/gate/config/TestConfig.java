@@ -22,6 +22,7 @@ import junit.framework.*;
 
 import gate.*;
 import gate.util.*;
+import gate.creole.*;
 
 /** CREOLE test class
   */
@@ -76,10 +77,17 @@ public class TestConfig extends TestCase
       dirs.contains(new URL("http://somewhere.on.the.net/creole/"))
     );
 
-/*****************************************************
-do some tests on systems the systems created (all occurences
-of Controller in CreoleRegister)
-*********************************************/
+    // get a test system
+    ResourceData controllerResData =
+      (ResourceData) reg.get("gate.creole.SerialController");
+    assertNotNull("no resdata for serial controller", controllerResData);
+    ProcessingResource controller =
+      (ProcessingResource) controllerResData.getInstantiations().pop();
+    assertNotNull("no controller instance", controller);
+
+    // try running the system
+    controller.run();
+    controller.check();
   } // testConfigReading()
 
   /** Test suite routine for the test runner */

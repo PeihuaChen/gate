@@ -22,7 +22,7 @@ import gate.gui.*;
 import java.util.*;
 import java.text.BreakIterator;
 
-public class DumbTokeniser extends AbstractResource
+public class DumbTokeniser extends AbstractProcessingResource
 implements ProcessingResource, ProcessProgressReporter, Runnable
 {
   /** Debug flag */
