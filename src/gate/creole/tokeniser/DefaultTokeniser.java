@@ -75,6 +75,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   }
 
   public void execute() throws ExecutionException{
+    interrupted = false;
     //set the parameters
     try{
       FeatureMap params = Factory.newFeatureMap();
@@ -105,13 +106,25 @@ public class DefaultTokeniser extends AbstractProcessingResource {
     };
 
     //tokeniser
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" tokeniser has been abruptly interrupted!");
     tokeniser.addProgressListener(pListener);
     tokeniser.addStatusListener(sListener);
-    tokeniser.execute();
+    try{
+      tokeniser.execute();
+    }catch(ExecutionInterruptedException eie){
+      throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" tokeniser has been abruptly interrupted!");
+    }
     tokeniser.removeProgressListener(pListener);
     tokeniser.removeStatusListener(sListener);
 
   //transducer
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" tokeniser has been abruptly interrupted!");
     pListener = new IntervalProgressListener(50, 100);
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
@@ -120,6 +133,17 @@ public class DefaultTokeniser extends AbstractProcessingResource {
     transducer.removeProgressListener(pListener);
     transducer.removeStatusListener(sListener);
   }//execute
+
+
+  /**
+   * Notifies all the PRs in this controller that they should stop their
+   * execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+    tokeniser.interrupt();
+    transducer.interrupt();
+  }
 
   public void setTokeniserRulesURL(java.net.URL tokeniserRulesURL) {
     this.tokeniserRulesURL = tokeniserRulesURL;

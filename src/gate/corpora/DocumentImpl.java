@@ -182,11 +182,11 @@ extends AbstractLanguageResource implements Document {
         DocumentFormat.getDocumentFormat(this, sourceUrl);
       try {
         if(docFormat != null){
-            StatusListener sListener = new StatusListener(){
-              public void statusChanged(String text){
-                fireStatusChanged(text);
-              }
-            };
+          StatusListener sListener = new StatusListener(){
+            public void statusChanged(String text){
+              fireStatusChanged(text);
+            }
+          };
           docFormat.addStatusListener(sListener);
           docFormat.unpackMarkup(this);
           docFormat.removeStatusListener(sListener);
@@ -202,7 +202,7 @@ extends AbstractLanguageResource implements Document {
     return this;
   } // init()
 
-  public void clear() {
+  public void cleanup() {
     if (defaultAnnots != null) defaultAnnots.clear();
     defaultAnnots = null;
     if (entitiesMap!= null) entitiesMap.clear();
@@ -1231,7 +1231,7 @@ extends AbstractLanguageResource implements Document {
   private String stringContent;
   private Boolean markupAware = new Boolean(false);
   protected void fireStatusChanged(String e) {
-    if (/*!Main.batchMode &&*/ statusListeners != null) {
+    if (statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1334,7 +1334,7 @@ extends AbstractLanguageResource implements Document {
     }
   }
   protected void fireAnnotationSetAdded(DocumentEvent e) {
-    if (/*!Main.batchMode &&*/ documentListeners != null) {
+    if (documentListeners != null) {
       Vector listeners = documentListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1343,7 +1343,7 @@ extends AbstractLanguageResource implements Document {
     }
   }
   protected void fireAnnotationSetRemoved(DocumentEvent e) {
-    if (/*!Main.batchMode &&*/ documentListeners != null) {
+    if (documentListeners != null) {
       Vector listeners = documentListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

@@ -1,6 +1,4 @@
 /*
- *  AbstractProcessingResource.java
- *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -8,11 +6,10 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Hamish Cunningham, 10/Nov/2000
+ *  Valentin Tablan 27 Sep 2001
  *
- *  $Id$
+ *  $I$
  */
-
 package gate.creole;
 
 import java.util.*;
@@ -21,61 +18,37 @@ import gate.*;
 import gate.util.*;
 import gate.event.*;
 
-/** A convenience implementation of ProcessingResource with some default
-  * code.
-  */
-abstract public class AbstractProcessingResource
-extends AbstractResource implements ProcessingResource
-{
-  /** Initialise this resource, and return it. */
-  public Resource init() throws ResourceInstantiationException {
-    return this;
-  } // init()
 
-  /** Run the resource. It doesn't make sense not to override
-   *  this in subclasses so the default implementation signals an
-   *  exception.
+public abstract class AbstractController extends AbstractNameBearer
+                                         implements Controller {
+
+  //executable code
+  /**
+   * Starts the execution of this executable
    */
-  public void execute() throws ExecutionException{
+  public void execute() throws ExecutionException {
     throw new ExecutionException(
-      "Resource " + getClass() + " hasn't overriden the execute() method"
-    );
-  } // execute()
+      "Controller " + getClass() + " hasn't overriden the execute() method"
+    );  }
 
   /**
-   * Reinitialises the processing resource. After calling this method the
-   * resource should be in the state it is after calling init.
-   * If the resource depends on external resources (such as rules files) then
-   * the resource will re-read those resources. If the data used to create
-   * the resource has changed since the resource has been created then the
-   * resource will change too after calling reInit().
-   * The implementation in this class simply calls {@link #init()}. This
-   * functionality must be overriden by derived classes as necessary.
-   */
-  public void reInit() throws ResourceInstantiationException{
-    init();
-  } // reInit()
-
-  /** should clear all internal data of the resource. Does nothing now */
-  public void cleanup() {
-  }
-
-  /**
-   * Checks whether this PR has been interrupted since the lsat time its
-   * {@link execute()} method was called.
-   */
-  public synchronized boolean isInterrupted(){
-    return interrupted;
-  }
-
-  /**
-   * Notifies this PR that it should stop its execution as soon as possible.
+   * Notifies all the PRs in this controller that they should stop their
+   * execution as soon as possible.
    */
   public synchronized void interrupt(){
     interrupted = true;
+    Iterator prIter = getPRs().iterator();
+    while(prIter.hasNext()){
+      ((ProcessingResource)prIter.next()).interrupt();
+    }
+  }
+
+  public synchronized boolean isInterrupted() {
+    return interrupted;
   }
 
 
+  //events code
   /**
    * Removes a {@link gate.event.StatusListener} from the list of listeners for
    * this processing resource
@@ -185,7 +158,8 @@ extends AbstractResource implements ProcessingResource
 
     int start;
     int end;
-  }//IntervalProgressListener
+  }//CustomProgressListener
+
 
   /**
    * A simple status listener used to forward the events upstream.
@@ -194,7 +168,7 @@ extends AbstractResource implements ProcessingResource
     public void statusChanged(String message){
       fireStatusChanged(message);
     }
-  }//InternalStatusListener
+  }
 
   /**
    * The list of {@link gate.event.StatusListener}s registered with this
@@ -208,5 +182,6 @@ extends AbstractResource implements ProcessingResource
    */
   private transient Vector progressListeners;
 
+
   protected boolean interrupted = false;
-} // class AbstractProcessingResource
+}

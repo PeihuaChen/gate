@@ -286,7 +286,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
 
     public void remove(){
       iterator.remove();
-//      if (! Main.batchMode)
         fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, (Document)lastNext,
                                   CorpusEvent.DOCUMENT_REMOVED));
     }
@@ -329,7 +328,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
   }
 
   protected void fireDocumentAdded(CorpusEvent e) {
-    if (/*!Main.batchMode &&*/ corpusListeners != null) {
+    if (corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -338,7 +337,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus {
     }
   }
   protected void fireDocumentRemoved(CorpusEvent e) {
-    if (/*!Main.batchMode &&*/ corpusListeners != null) {
+    if (corpusListeners != null) {
       Vector listeners = corpusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

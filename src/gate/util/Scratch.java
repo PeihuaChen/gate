@@ -184,9 +184,9 @@ System.out.println("VRs for " + reg.getAnnotationVRs());
     );
 
     // get the controller to encapsulate the tok and gaz
-    c1.add(tokeniser);
-    c1.add(gaz);
-    c1.add(trans);
+    c1.getPRs().add(tokeniser);
+    c1.getPRs().add(gaz);
+    c1.getPRs().add(trans);
 
     Out.prln((System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
     Out.prln("dumping state");

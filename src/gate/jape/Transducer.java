@@ -23,6 +23,7 @@ import java.io.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.event.*;
+import gate.creole.*;
 import gate.*;
 
 
@@ -43,7 +44,7 @@ public abstract class Transducer implements Serializable
   /** Transduce a document.  */
   public abstract void transduce(Document doc, AnnotationSet inputAS,
                                  AnnotationSet outputAS)
-                                 throws JapeException;
+                                 throws JapeException, ExecutionException;
 
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
@@ -55,6 +56,24 @@ public abstract class Transducer implements Serializable
 
   /** Create a string representation of the object with padding. */
   public abstract String toString(String pad);
+
+
+  /**
+   * Checks whether this PR has been interrupted since the lsat time its
+   * {@link execute()} method was called.
+   */
+  public synchronized boolean isInterrupted(){
+    return interrupted;
+  }
+
+  /**
+   * Notifies this PR that it should stop its execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+  }
+
+  protected boolean interrupted = false;
 
 
   public void setBaseURL(java.net.URL newBaseURL) {
@@ -93,8 +112,6 @@ public abstract class Transducer implements Serializable
    * be used. By default it is true.
    */
   protected void fireProgressChanged(int e) {
-//    if (Main.batchMode)
-//      return;
     if (progressListeners != null || progressListeners.isEmpty()) {
       Vector listeners = progressListeners;
       int count = listeners.size();
@@ -104,7 +121,7 @@ public abstract class Transducer implements Serializable
     }
   }
   protected void fireProcessFinished() {
-    if (progressListeners != null /*&& !Main.batchMode*/) {
+    if (progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -127,7 +144,7 @@ public abstract class Transducer implements Serializable
     }
   }
   protected void fireStatusChanged(String e) {
-    if (statusListeners != null /*&& !Main.batchMode*/) {
+    if (statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

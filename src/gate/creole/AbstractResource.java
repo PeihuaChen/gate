@@ -106,6 +106,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
         }
         done = true;
       }//if(prop.getName().equals(paramaterName))
+      i++;
     }//while(!done && i < properties.length)
     if(done) return value;
     else throw new ResourceInstantiationException(
@@ -208,6 +209,89 @@ extends AbstractFeatureBearer implements Resource, Serializable
       setParameterValue(resource, parName, parameters.get(parName));
     }
   }
+
+
+  /**
+   * Adds listeners to a resource.
+   * @param listeners The listeners to be registered with the resource. A
+   * {@link java.util.Map} that maps from fully qualified class name (as a
+   * string) to listener (of the type declared by the key).
+   * @param resource the resource that listeners will be registered to.
+   */
+  public static void setResourceListeners(Resource resource, Map listeners)
+  throws
+    IntrospectionException, InvocationTargetException,
+    IllegalAccessException, GateException
+  {
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInfo = Introspector.getBeanInfo(
+      resource.getClass(), Object.class
+    );
+
+    // get all the events the bean can fire
+    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+
+    // add the listeners
+    if (events != null) {
+      EventSetDescriptor event;
+      for(int i = 0; i < events.length; i++) {
+        event = events[i];
+
+        // did we get such a listener?
+        Object listener =
+          listeners.get(event.getListenerType().getName());
+        if(listener != null) {
+          Method addListener = event.getAddListenerMethod();
+
+          // call the set method with the parameter value
+          Object[] args = new Object[1];
+          args[0] = listener;
+          addListener.invoke(resource, args);
+        }
+      } // for each event
+    }   // if events != null
+  } // setResourceListeners()
+
+  /**
+   * Removes listeners from a resource.
+   * @param listeners The listeners to be removed from the resource. A
+   * {@link java.util.Map} that maps from fully qualified class name
+   * (as a string) to listener (of the type declared by the key).
+   * @param resource the resource that listeners will be removed from.
+   */
+  public static void removeResourceListeners(Resource resource, Map listeners)
+                     throws IntrospectionException, InvocationTargetException,
+                            IllegalAccessException, GateException{
+
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInfo = Introspector.getBeanInfo(
+      resource.getClass(), Object.class
+    );
+
+    // get all the events the bean can fire
+    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+
+    //remove the listeners
+    if(events != null) {
+      EventSetDescriptor event;
+      for(int i = 0; i < events.length; i++) {
+        event = events[i];
+
+        // did we get such a listener?
+        Object listener =
+          listeners.get(event.getListenerType().getName());
+        if(listener != null) {
+          Method removeListener = event.getRemoveListenerMethod();
+
+          // call the set method with the parameter value
+          Object[] args = new Object[1];
+          args[0] = listener;
+          removeListener.invoke(resource, args);
+        }
+      } // for each event
+    }   // if events != null
+  } // removeResourceListeners()
+
 
   /**
    * Gets the value of a parameter of this resource.

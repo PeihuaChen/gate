@@ -80,9 +80,9 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
                            HtmlDocumentHandler(doc, this.markupElementsMap);
     // Create a Status Listener
     StatusListener statusListener = new StatusListener(){
-          public void statusChanged(String text){
-            fireStatusChanged(text);
-          }
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
     };
     // Register the listener with htmlDocHandler
     htmlDocHandler.addStatusListener(statusListener);

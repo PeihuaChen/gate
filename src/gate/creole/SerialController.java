@@ -25,33 +25,77 @@ import gate.event.*;
 
 /** Execute a list of PRs serially.
   */
-public class SerialController
-extends ArrayList implements Controller, List
-{
-  /** Run the Processing Resources in sequence. */
-  public void execute() throws ExecutionException{
-    Iterator iter = iterator();
-    while(iter.hasNext()) {
-      ProcessingResource pr = (ProcessingResource) iter.next();
-      ResourceData rd =
-        (ResourceData) Gate.getCreoleRegister().get(pr.getClass().getName());
-      ParameterList params = rd.getParameterList();
-      try {
-        pr.setParameterValues(params.getRuntimeDefaults());
-      } catch(Exception e) {
-        throw new ExecutionException("Couldn't set parameters: " + e);
-      }
-      pr.execute();
-    } // for each PR in the resourceList
+public class SerialController extends AbstractController{
 
-  } // execute()
-
-  public boolean isInterrupted(){
-    return interrupted;
+  public SerialController(){
+    prList = new ArrayList();
+    sListener = new InternalStatusListener();
   }
 
-  public void interrupt(){
-    interrupted = true;
+  /**
+   * Returns all the {@link gate.ProcessingResource}s contained by this
+   * controller.
+   * The actual type of collection returned is a list. The returned list is
+   * backed by this controller; any changes made to it will reflect in its
+   * contents.
+   */
+  public Collection getPRs(){
+    return prList;
+  }
+
+
+  /** Run the Processing Resources in sequence. */
+  public void execute() throws ExecutionException{
+    interrupted = false;
+    for (int i = 0; i < prList.size(); i++){
+      if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the " + getName() +
+        " application has been abruptly interrupted!");
+      runComponent(i);
+    }
+  } // execute()
+
+
+  protected void runComponent(int componentIndex) throws ExecutionException{
+    ProcessingResource currentPR = (ProcessingResource)
+                                   prList.get(componentIndex);
+
+    //create the listeners
+    FeatureMap listeners = Factory.newFeatureMap();
+    listeners.put("gate.event.StatusListener", sListener);
+    int componentProgress = 100 / prList.size();
+    listeners.put("gate.event.ProgressListener",
+                  new IntervalProgressListener(
+                          componentIndex * componentProgress,
+                          (componentIndex +1) * componentProgress)
+                  );
+
+    //add the listeners
+    try{
+      AbstractResource.setResourceListeners(currentPR, listeners);
+    }catch(Exception e){
+      // the listeners setting failed; nothing important
+      Err.prln("Could not set listeners for " + currentPR.getClass().getName() +
+               "\n" + e.toString() + "\n...nothing to lose any sleep over.");
+    }
+
+    //start DB transactions
+
+    //run the thing
+    currentPR.execute();
+
+    //commit DB transactions
+
+
+    //remove the listeners
+    try{
+      AbstractResource.removeResourceListeners(currentPR, listeners);
+    }catch(Exception e){
+      // the listeners removing failed; nothing important
+      Err.prln("Could not clear listeners for " +
+               currentPR.getClass().getName() +
+               "\n" + e.toString() + "\n...nothing to lose any sleep over.");
+    }
   }
 
     /** Sets the name of this resource*/
@@ -66,9 +110,6 @@ extends ArrayList implements Controller, List
 
   protected String name;
 
-  public void setRuntimeParameters(FeatureMap parameters){
-  }
-
   /** Get the feature set */
   public FeatureMap getFeatures() { return features; }
 
@@ -78,14 +119,11 @@ extends ArrayList implements Controller, List
   /** The feature set */
   protected FeatureMap features;
 
-  /**
-   * Two controller that contain the same modules are not equal.
-   * Two controllers are only equal if they are the same.
-   * equals() overriden to return "==".
-   */
-  public boolean equals(Object other){
-    return this == other;
-  }
+  /** The list of contained PRs*/
+  protected ArrayList prList;
 
-  protected boolean interrupted = false;
+  /** A proxy for status events*/
+  protected StatusListener sListener;
+
+
 } // class SerialController

@@ -77,6 +77,9 @@ public class MainFrame extends JFrame
   JMenu newLrMenu;
   JMenu newPrMenu;
 
+  JButton stopBtn;
+  Action stopAction;
+
   JTree resourcesTree;
   JScrollPane resourcesTreeScroll;
   DefaultTreeModel resourcesTreeModel;
@@ -231,6 +234,7 @@ public class MainFrame extends JFrame
       }
     };
 
+
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
     resourcesTree.setRowHeight(0);
     //expand all nodes
@@ -290,24 +294,51 @@ public class MainFrame extends JFrame
 
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                leftSplit, mainTabbedPane);
+
     mainSplit.setDividerLocation(leftSplit.getPreferredSize().width + 10);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
 
     southBox = Box.createHorizontalBox();
     statusBar = new JLabel();
-    progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+
+    UIManager.put("ProgressBar.cellSpacing", new Integer(0));
+    progressBar = new JProgressBar(JProgressBar.HORIZONTAL){
+      public Dimension getPreferredSize(){
+        Dimension pSize = super.getPreferredSize();
+        pSize.height = 5;
+        return pSize;
+      }
+    };
+
+    progressBar.setBorder(BorderFactory.createEmptyBorder());
+    progressBar.setForeground(new Color(150, 75, 150));
     progressBar.setBorderPainted(false);
     progressBar.setStringPainted(false);
     progressBar.setOrientation(JProgressBar.HORIZONTAL);
-    Dimension dim = new Dimension(300, progressBar.getPreferredSize().height);
-    progressBar.setMaximumSize(dim);
-    progressBar.setMinimumSize(dim);
-    progressBar.setPreferredSize(dim);
-    Box tempBox = Box.createHorizontalBox();
-    southBox.add(new JLabel(" "));
-    southBox.add(statusBar);
-    southBox.add(Box.createHorizontalGlue());
-    southBox.add(progressBar);
+    progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 5));
+
+    Box sbBox = Box.createHorizontalBox();
+    sbBox.add(statusBar);
+    sbBox.add(new JLabel(" "));
+    sbBox.add(Box.createHorizontalGlue());
+    Box tempVBox = Box.createVerticalBox();
+    tempVBox.add(sbBox);
+    tempVBox.add(progressBar);
+
+    stopAction = new StopAction();
+    stopAction.setEnabled(false);
+    stopBtn = new JButton(stopAction);
+//    stopBtn.setBorder(  BorderFactory.createLineBorder(Color.black, 1));BorderFactory.createEtchedBorder()
+    stopBtn.setBorder(BorderFactory.createCompoundBorder(
+                                    BorderFactory.createEmptyBorder(2,3,2,3),
+                                    BorderFactory.createLineBorder(Color.black,
+                                                                   1)));
+    stopBtn.setForeground(Color.red);
+
+    southBox.add(Box.createRigidArea(
+                     new Dimension(5, stopBtn.getPreferredSize().height)));
+    southBox.add(tempVBox);
+    southBox.add(Box.createHorizontalStrut(5));
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
 
@@ -316,6 +347,7 @@ public class MainFrame extends JFrame
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
     //toolbar.add(new JGateButton(newProjectAction));
+
 
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
 
@@ -830,6 +862,15 @@ public class MainFrame extends JFrame
   public void progressChanged(int i) {
     //progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
+    if((!stopAction.isEnabled()) &&
+       (Gate.getExecutable() != null)){
+      stopAction.setEnabled(true);
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          southBox.add(stopBtn, 0);
+        }
+      });
+    }
     if(!animator.isActive()) animator.activate();
     if(oldValue != i){
       SwingUtilities.invokeLater(new ProgressBarUpdater(i));
@@ -842,6 +883,14 @@ public class MainFrame extends JFrame
    */
   public void processFinished() {
     //progressBar.setStringPainted(false);
+    if(stopAction.isEnabled()){
+      stopAction.setEnabled(false);
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run(){
+          southBox.remove(stopBtn);
+        }
+      });
+    }
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
     animator.deactivate();
   }
@@ -853,7 +902,7 @@ public class MainFrame extends JFrame
   public void resourceLoaded(CreoleEvent e) {
     Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())) return;
-    NameBearerHandle handle = new NameBearerHandle(res);
+    NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     if(res instanceof ProcessingResource){
       resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
@@ -906,7 +955,7 @@ public class MainFrame extends JFrame
 
     ds.setName(ds.getStorageUrl().getFile());
 
-    NameBearerHandle handle = new NameBearerHandle(ds);
+    NameBearerHandle handle = new NameBearerHandle(ds, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
     resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
     handle.addProgressListener(MainFrame.this);
@@ -1320,7 +1369,8 @@ public class MainFrame extends JFrame
       if (answer instanceof String) {
         SerialController controller = new gate.creole.SerialController();
         controller.setName((String)answer);
-        NameBearerHandle handle = new NameBearerHandle(controller);
+        NameBearerHandle handle = new NameBearerHandle(controller,
+                                                       MainFrame.this);
         handle.addProgressListener(MainFrame.this);
         handle.addStatusListener(MainFrame.this);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle,
@@ -1354,6 +1404,20 @@ public class MainFrame extends JFrame
     }
     ResourceData rData;
   }
+
+
+  class StopAction extends AbstractAction {
+    public StopAction(){
+      super(" Stop! ");
+      putValue(SHORT_DESCRIPTION,"Stops the current action");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Executable ex = Gate.getExecutable();
+      if(ex != null) ex.interrupt();
+    }
+  }
+
 
   class NewDSAction extends AbstractAction {
     public NewDSAction(){

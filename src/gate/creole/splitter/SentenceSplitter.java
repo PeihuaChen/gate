@@ -87,6 +87,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
   }
 
   public void execute() throws ExecutionException{
+    interrupted = false;
     //set the runtime parameters
     FeatureMap params;
     if(inputASName != null && inputASName.equals("")) inputASName = null;
@@ -111,6 +112,9 @@ public class SentenceSplitter extends AbstractProcessingResource{
     fireProgressChanged(5);
 
     //run the gazetteer
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" sentence splitter has been abruptly interrupted!");
     pListener = new IntervalProgressListener(5, 10);
     sListener = new StatusListener(){
       public void statusChanged(String text){
@@ -124,6 +128,9 @@ public class SentenceSplitter extends AbstractProcessingResource{
     gazetteer.removeStatusListener(sListener);
 
     //run the transducer
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" sentence splitter has been abruptly interrupted!");
     pListener = new IntervalProgressListener(11, 90);
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
@@ -147,6 +154,15 @@ public class SentenceSplitter extends AbstractProcessingResource{
     fireProcessFinished();
   }//execute()
 
+  /**
+   * Notifies all the PRs in this controller that they should stop their
+   * execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+    gazetteer.interrupt();
+    transducer.interrupt();
+  }
 
   public void setTransducerURL(java.net.URL newTransducerURL) {
     transducerURL = newTransducerURL;

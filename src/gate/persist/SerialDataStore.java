@@ -500,7 +500,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
   protected void fireResourceAdopted(DatastoreEvent e) {
-    if (datastoreListeners != null /*&& !Main.batchMode*/) {
+    if (datastoreListeners != null) {
       Vector listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -509,7 +509,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
   protected void fireResourceDeleted(DatastoreEvent e) {
-    if (datastoreListeners != null /*&& !Main.batchMode*/) {
+    if (datastoreListeners != null) {
       Vector listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -518,7 +518,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
   }
   protected void fireResourceWritten(DatastoreEvent e) {
-    if (datastoreListeners != null /*&& !Main.batchMode*/) {
+    if (datastoreListeners != null) {
       Vector listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
