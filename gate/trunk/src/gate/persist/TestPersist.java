@@ -44,6 +44,83 @@ public class TestPersist extends TestCase
   private static LanguageResource uc01_LR = null;
   private static LanguageResource uc101_LR = null;
 
+  private final String VERY_LONG_STRING =
+  "The memory of Father came back to her. Ever since she had seen him retreat from those "+
+  "twelve-year-old boys she often imagined him in this situation: he is on a sinking ship; "+
+  "there are only a few lifeboats and there isn't enough room for everyone; there is a "+
+  "furious stampede on the deck. At first Father rushes along with the others, but when he "+
+  "sees how they push and shove, ready to trample each other under foot, and a wild-eyed "+
+  "woman strikes him with her fist because he is in her way, he suddenly stops and steps "+
+  "aside. And in the end he merely watches the overloaded lifeboats as they are slowly "+
+  "lowered amid shouts and curses, towards the raging waves. "+
+  "What name to give to that attitude? Cowardice? No. Cowards are afraid of dying and will "+
+  "fight to survive. Nobility? Undoubtedly, if he had acted out of regard for his fellows. "+
+  "But Agnes did not believe this was the motive. What was it then? She couldn't say. Only "+
+  "one thing seemed certain: on a sinking ship where it was necessary to fight in order to "+
+  "boat a lifeboat, Father would have been condemned in advance. "+
+  "Yes, that much was certain. The question that arises is htis: had Father hated the people "+
+  "on the ship, just as she now hates the motorcyclist and the man who mocked her because "+
+  "she covered her ears? No, Agnes cannot imagine that Father was capable of hatred. "+
+  "Hate traps us by binding us too tightly to our adversary. This is the obscenity of war: "+
+  "the intimacy of mutually shed blood, the lascivious of two soldiers who, eye to eye, "+
+  "bayonet each other. Agnes was sure: it is precisely this kind of intimacy that her "+
+  "father found repugnant.The melee on the ship filled him with such disgust that he "+
+  "preferred to drown. The physical contact with people who struck and trampled and killed "+
+  "one another seemed far worse to him than a solitary death in the purity of the waters. "+
+  "[p.25-26] "+
+  "In our world, where there are more and more faces, more and more alike, it is difficult "+
+  "for an individual to reinforce the originality of the self and to become convinced of "+
+  "its inimitatable uniqueness. There are two methods for cultivating the uniqueness of the "+
+  "self: the method of addition and the method of subtraction. Agnes subtracts from herself "+
+  "everything that is exterior and borrowed, in order to come closer to her sheer essence "+
+  "(even with the risk that zero lurks at the bottom of subtarction). Laura's method is "+
+  "precisely the opposite: in order to make herself even more visible, perceivable, seizable, "+
+  "sizeable, she keeps adding to it more and more attributes and she attemptes to identify "+
+  "herself with them (with the risk that the essence of the self may be buried by the "+
+  "additional attributes). "+
+  "Let's take her car as an example. After her divorce, Laura remained alone in a large "+
+  "apartment and felt lonely. She longed for a pet to share her solitude. First she thought "+
+  "of a dog, but soon realized that a dog needed a kind of care she would be unable to "+
+  "provide. And she got a cat. It was a big Siamese cat, beautiful and wicked. As she "+
+  "lived with her car and regaled her friends with stories about it, the animal that she "+
+  "picked more or less by accident, without any special conviction (after all, her first "+
+  "choice was a dog!), took on an evr growing significance: she began to lavish praise "+
+  "on her pet and forced everyone to admire it. She saw in the cat a superb independence, "+
+  "pride, freedon of action and constancy of charm (so different from human charm, which "+
+  "is always spoiled by moments of clumsiness and unattractiveness); in the cat, she saw "+
+  "her paradigm; in the cat she saw herself. "+
+  " "+
+   "The method of addition is quite charming if it involves adding to the self such "+
+   "things as a cat, a dog, roast pork, love of the sea or of cold showers. But the matter "+
+   "becomes less idyllic if a person decides to add love for communism, for the homeland, "+
+   "for Mussolini, for Roman Catolicism or atheism, for facism or antifacism. In both cases "+
+   "the method remains exactly the same: a person stubbornly defending the superiority of "+
+   "cats over other animals is doing basically the same as the one who maintains that "+
+   "Mussolini was the sole saviour of Italy: he is proud of this attribute of the self and "+
+   "he tries to make this attribute (a cat or Mussolini) acknowledged or loved by everyone. "+
+   "Here is that strange paradox to which all people cultivating the self by way of the "+
+   "addition method are subject: they use addition in order to create unique, inimitable "+
+   "self, yet because they automatically become prpagandists for the added attributes, they are "+
+   "actually doing everything in their power to make as many others as possible similar "+
+   "to themselves; as a result, their uniqueness (so painfully gained) quickly begins to disappear. "+
+   "We may ask ourselves why a person who loves a cat (or Mussolini) is not satisfied to "+
+   "keep his love to himself, and wants to force it on others. Let's seek the answer by "+
+   "recalling the young woman in the sauna, who belligerently asserted that she loved "+
+   "cold showers. She thereby managed to differentiate herself at once from one half of the "+
+   "human race, namely the half that prefers hot showers. Unfortunately, that other half "+
+   "resembled her all the more. Alas, how sad! Many people, few ideas, so how are we "+
+   "differentiate ourselves from each other? The young woman knew only one way of overcoming "+
+   "the disadvantage of her similarity to that enourmous throng devoted to cold showers: "+
+   "she had to proclaim her credo \"I adore cold showers!\" as soon as she appeared in the "+
+   "door of the sauna and to proclaim it with such fervour as to make the millions of other "+
+   "women who also enjoy cold showers seem like pale imitations of herself. Let me put it "+
+   "another way: a mere (simple and innocent) love for showers can become an attribute "+
+   "of the self only on condition that we let the world we are ready to fight for it. "+
+   "The one who chooses as an atrtibyte of the self a love for Mussolini becomes a "+
+   "political warrior, while the partisan of cats, music or antique furniture bestows "+
+   "gifts on his surroundings. "+
+    "[p.111-113]";
+
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
 
@@ -382,6 +459,7 @@ public class TestPersist extends TestCase
     assertNotNull(doc);
 
     doc.getFeatures().put("hi there", new Integer(23232));
+    doc.getFeatures().put("LONG STRING", this.VERY_LONG_STRING);
     //create a complex feature - array of strings
     Vector complexFeature = new Vector();
     complexFeature.add("string 1");
@@ -433,7 +511,7 @@ public class TestPersist extends TestCase
     corp.getFeatures().put("my BOOL feature ", new Boolean("false"));
     corp.getFeatures().put("my INT feature ", new Integer("1234"));
     corp.getFeatures().put("my LONG feature ", new Long("123456789"));
-
+    corp.getFeatures().put("my LONG STRING feature", this.VERY_LONG_STRING);
     return corp;
   }
 
