@@ -330,7 +330,11 @@ class AnnotDiffDialog extends JFrame {
     jSplit.setOneTouchExpandable(true);
     jSplit.setOpaque(true);
     jSplit.setAlignmentY(Component.TOP_ALIGNMENT);
-    this.getContentPane().add(jSplit);
+    JPanel mainBox = new JPanel();
+    mainBox.setLayout(new BoxLayout(mainBox,BoxLayout.Y_AXIS));
+    mainBox.add(jSplit);
+    mainBox.setMaximumSize(Toolkit.getDefaultToolkit().getScreenSize());
+    this.getContentPane().add(mainBox);
     this.pack();
     ////////////////////////////////
     // Center it on screen
