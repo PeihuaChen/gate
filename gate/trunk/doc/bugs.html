@@ -484,19 +484,6 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <!--<TD>spare2</TD>-->
   </TR>
 
-  <TR>
-    <TD>00083</TD>
-    <TD>core/jape</TD>
-    <TD>Valentin</TD>
-    <TD>___adopted_by</TD>
-    <TD>21/08/2002 Win(NT/2K/XP) 1.4 Gate 2.1alpha(895)</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>Feature strings (e.g. Token.string) are destroyed in theyr way to jape.
-    It looks like they are converted to byte[] and back to string using the platform default. This destroys all unicode values.</TD>
-    <TD>run the attached application</TD>
-    <TD><a href="bugs/i18nBug.zip">i18nBug.zip</a></TD>
-  </TR>
-
 <!------------------------------------------------------------------------->
 </TABLE>
 
@@ -1627,6 +1614,21 @@ gate.corpora.DocumentImpl
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
+  </TR>
+
+  <TR>
+    <TD>00083</TD>
+    <TD>core/jape</TD>
+    <TD>Valentin</TD>
+    <TD>Valentin</TD>
+    <TD>21/08/2002 Win(NT/2K/XP) 1.4 Gate 2.1alpha(895)</TD>
+    <TD>30 May 2002 2.1 beta</TD>
+    <TD>Feature strings (e.g. Token.string) are destroyed in their way to jape.
+    It looks like they are converted to byte[] and back to string using the platform default. This destroys all unicode values.<hr>
+    The problem was actually in the LogArea not in Jape. It's fixed now.
+    The attached application works fine now.</TD>
+    <TD>run the attached application</TD>
+    <TD><a href="bugs/i18nBug.zip">i18nBug.zip</a></TD>
   </TR>
 
 
