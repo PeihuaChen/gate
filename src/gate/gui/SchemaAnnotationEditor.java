@@ -270,7 +270,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   protected void buildGuiComponents(){
     this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
     // Create the annotationSchema JComboBox box
-    Box annotSchBox = Box.createVerticalBox();
+
+    JPanel annotSchBox = new JPanel();
+    annotSchBox.setLayout(new BoxLayout(annotSchBox, BoxLayout.Y_AXIS));
+    annotSchBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     annotSchBox.add(Box.createVerticalStrut(5));
     annotSchemaComboBox = new JComboBox(name2annotSchemaMap.keySet().toArray());
     annotSchemaComboBox.setEditable(false);
@@ -281,8 +284,11 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     annotSchBox.add(annotSchemaLabel);
     annotSchBox.add(annotSchemaComboBox);
 
+
     //Create the main box
-    Box componentsBox = Box.createHorizontalBox();
+    JPanel componentsBox = new JPanel();
+    componentsBox.setLayout(new BoxLayout(componentsBox, BoxLayout.X_AXIS));
+    componentsBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     // Create the feature table
     featuresTable = new JTable();
