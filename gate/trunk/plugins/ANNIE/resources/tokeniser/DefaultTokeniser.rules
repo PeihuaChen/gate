@@ -85,8 +85,8 @@
 "DECIMAL_DIGIT_NUMBER"+ >Token;kind=number;
 
 #whitespace#
-(SPACE_SEPARATOR)+ >SpaceToken;kind=space;
-(CONTROL)+ >SpaceToken;kind=control;
+(SPACE_SEPARATOR) >SpaceToken;kind=space;
+(CONTROL) >SpaceToken;kind=control;
 
 #symbols#
 (MODIFIER_SYMBOL|MATH_SYMBOL|OTHER_SYMBOL) + > Token;kind=symbol;

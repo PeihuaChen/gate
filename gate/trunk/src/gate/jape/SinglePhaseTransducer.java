@@ -453,7 +453,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           // if the current FSM is in a final state
           acceptingFSMInstances.add(currentFSM.clone());
           //if we're only looking for the shortest stop here
-          if(ruleApplicationStyle == APPELT_SHORTEST_STYLE) break whileloop2;
+          if(ruleApplicationStyle == FIRST_STYLE) break whileloop2;
         }
         //all the annotations that start from the current node.
         AnnotationSet paths = annotations.get(
@@ -571,7 +571,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         //advance in AG
         startNode = currentAcceptor.getAGPosition();
 
-      } else if(ruleApplicationStyle == APPELT_SHORTEST_STYLE) {
+      } else if(ruleApplicationStyle == FIRST_STYLE) {
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
         // just execute the shortest (first) rule
