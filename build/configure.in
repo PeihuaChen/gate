@@ -35,6 +35,17 @@ AC_PATH_PROG(CYGPATH, cygpath, echo)
 CYGPATHP=$CYGPATH
 
 
+# tools.jar
+JAVAC_DIR=`dirname \`dirname $JAVAC\``
+TOOLSJAR=`find $JAVAC_DIR -name tools.jar -print`
+if test ! -f "$TOOLSJAR"
+then
+  echo "Can't find tools.jar; JAVAC_DIR=${JAVAC_DIR}; TOOLSJAR=${TOOLSJAR}; try setting JAVA_HOME?"
+  exit 1
+fi
+echo tools.jar is ${TOOLSJAR}
+
+
 # Just what is this beast we're running on?
 AC_CANONICAL_SYSTEM
 case "$host" in
@@ -89,6 +100,7 @@ AC_SUBST(ECHON)
 AC_SUBST(ECHOC)
 AC_SUBST(JAVA)
 AC_SUBST(JAVAC)
+AC_SUBST(TOOLSJAR)
 AC_SUBST(JAR)
 AC_SUBST(JAVADOC)
 AC_SUBST(build)
