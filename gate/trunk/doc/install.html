@@ -44,17 +44,23 @@ An open mind and a sense of humour.
 </UL>
 
 <P>
-After unpacking the distribution (using tar/gunzip, or winzip, or whatever)
-you can run the GATE development environment from the build directory using
-gate.sh (on UNIX or in a Cygwin environment) or gate.bat (from a DOS shell).
-In each case the setting of JAVA_HOME will be used if set; otherwise it is
-assumed that java is in PATH.
+Using the binary distribution:
+<UL>
+<LI>
+Unpack the distribution, creating a directory containing jar files and
+scripts.
+<LI>
+To run the development environment:<BR>
+on Windows, click on gate.bat; on UNIX run gate.sh.
+(These assume that JAVA_HOME is set, or that "java" is in your PATH.)
+<LI>
+To embed GATE as a library, put gate.jar in your CLASSPATH and tell java that
+guk.jar is an extension (-Djava.ext.dirs=path-to-guk.jar).
+</UL>
 
 <P>
-<B>To user GATE as a library</B>, put gate.jar
-on your classpath, and (for Unicode support) guk.jar in
-the JDK extensions directory. (See your Java system documentation if this
-doesn't mean anything to you.)
+To use GATE from Borland JBuilder take a full distribution or source
+distribution, unpack and click on gate.jpx.
 
 <P>
 See the <A HREF=userguide.html>user guide</A> for more details of using GATE.
@@ -148,7 +154,7 @@ to note that drinking milk is a good cure for an acid stomach.)
 
 <P>
 You can also use a development environment like Borland JBuilder (click on the
-gate2.jpx file) or Emacs JDE (use the prj.el file), but note that it's still
+gate.jpx file) or Emacs JDE (use the prj.el file), but note that it's still
 advisable to use the Makefile to generate documentation, the jar file and so on.
 
 
