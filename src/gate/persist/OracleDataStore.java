@@ -2438,7 +2438,7 @@ public class OracleDataStore extends JDBCDataStore {
     Iterator it = addedSets.iterator();
     while (it.hasNext()) {
       String setName = (String)it.next();
-      AnnotationSet aset = (AnnotationSet)doc.getNamedAnnotationSets().get(setName);
+      AnnotationSet aset = doc.getAnnotations(setName);
 
       Assert.assertNotNull(aset);
       Assert.assertTrue(aset instanceof DatabaseAnnotationSetImpl);
