@@ -267,7 +267,8 @@ public class XmlDocumentHandler extends DefaultHandler{
   /**
     * This method is called when the SAX parser encounts text in the XML doc.
     * Here we calculate the end indices for all the elements present inside the
-    * stack and update with the new values.
+    * stack and update with the new values. For entities, this method is called
+    * separatley regardless of the text sourinding the entity.
     */
   public void characters( char[] text,int start,int length) throws SAXException{
     // create a string object based on the reported text
@@ -278,14 +279,44 @@ public class XmlDocumentHandler extends DefaultHandler{
     // If the first char of the text just read "text[0]" is NOT whitespace AND
     // the last char of the tmpDocContent[SIZE-1] is NOT whitespace then
     // concatenation "tmpDocContent + content" will result into a new different
-    // word... and we want to avoid that...
+    // word... and we want to avoid that, because the tokenizer, gazetter and
+    // Jape work on the raw text and concatenating tokens might be not good.
     if ( tmpDocContentSize != 0 &&
          content.length() != 0 &&
          !Character.isWhitespace(content.charAt(0)) &&
          !Character.isWhitespace(tmpDocContent.charAt(tmpDocContentSize - 1))){
 
+         // If we are here it means that a concatenation between the last
+         // token in the tmpDocContent and the content(which doesn't start
+         // with a white space) will be performed. In order to prevent this,
+         // we will add a " " space char in order to assure taht the 2 tokens
+         // stay apart. Howerver we will except from this rule the most known
+         // internal entities like &, <, >, etc
+         if (
+              (
+                 // Testing the length against 1 makes it more likely that
+                 // an internal entity was called. characters() gets called for
+                 // each entity separately.
+                 (content.length() == 1)
+                  &&
+                 (content.charAt(0) == '&' ||
+                  content.charAt(0) == '<' ||
+                  content.charAt(0) == '>' ||
+                  content.charAt(0) == '"' ||
+                  content.charAt(0) == '\''
+                  )
+               ) ||
+               (tmpDocContent.charAt(tmpDocContentSize - 1) == '&' ||
+                tmpDocContent.charAt(tmpDocContentSize - 1) == '<' ||
+                tmpDocContent.charAt(tmpDocContentSize - 1) == '>' ||
+                tmpDocContent.charAt(tmpDocContentSize - 1) == '"' ||
+                tmpDocContent.charAt(tmpDocContentSize - 1) == '\''
+               )){// do nothing. The content will be appended
+         }else{
+            // In all other cases append " "
             contentBuffer.append(" ");
             incrementStartIndex = true;
+        }// End if
     }// End if
     // update the document content
     contentBuffer.append(content);
