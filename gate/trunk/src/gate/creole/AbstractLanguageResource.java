@@ -76,4 +76,36 @@ extends AbstractResource implements LanguageResource
   public void cleanup() {
   } //clear()
 
+  /**
+   * Returns true of an LR has been modified since the last sync.
+   * Always returns false for transient LRs.
+   */
+  public boolean isModified() {return false;}
+
+  /**
+   * Returns the parent LR of this LR.
+   * Only relevant for LRs that support shadowing. Most do not by default.
+   */
+  public LanguageResource getParent()
+    throws PersistenceException,SecurityException {
+    if(dataStore == null)
+      throw new PersistenceException("LR has no DataStore");
+    throw new UnsupportedOperationException("getParent method not " +
+                                            "supported by this LR");
+  }//getParent
+
+  /**
+   * Sets the parent LR of this LR.
+   * Only relevant for LRs that support shadowing. Most do not by default.
+   */
+  public void setParent(LanguageResource parentLR)
+    throws PersistenceException,SecurityException {
+    if(dataStore == null)
+      throw new PersistenceException("LR has no DataStore");
+    throw new UnsupportedOperationException("setParent method not " +
+                                            "supported by this LR");
+  }//setParent
+
+
+
 } // class AbstractLanguageResource
