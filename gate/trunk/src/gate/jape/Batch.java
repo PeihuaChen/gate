@@ -566,6 +566,7 @@ public class Batch implements JapeConstants {
   private gate.FeatureMap features;
   private transient Vector progressListeners;
   private transient Vector statusListeners;
+  private boolean enableDebugging;
 
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
@@ -615,6 +616,14 @@ public class Batch implements JapeConstants {
    */
   public void setOntology(gate.creole.ontology.Ontology ontology) {
     transducer.setOntology(ontology);
+  }
+  public boolean isEnableDebugging() {
+    return enableDebugging;
+  }
+  public void setEnableDebugging(boolean enableDebugging) {
+    this.enableDebugging = enableDebugging;
+    //propagate
+    if(transducer != null) transducer.setEnableDebugging(enableDebugging);
   }
 
 

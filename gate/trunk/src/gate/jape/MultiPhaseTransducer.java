@@ -178,6 +178,15 @@ implements JapeConstants, java.io.Serializable
     cleanUp();
   } // transduce
 
+  public void setEnableDebugging(boolean enableDebugging) {
+    this.enableDebugging = enableDebugging;
+    //propagate
+    for(int i = 0; i < phases.size(); i++){
+      ((Transducer)phases.get(i)).setEnableDebugging(enableDebugging);
+    }
+  }
+
+
   /** Ask each phase to clean up (delete action class files, for e.g.). */
   public void cleanUp() {
 
@@ -217,7 +226,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.24  2003/11/14 12:45:47  valyt
+// enableDebugging parameter
+//
 // Revision 1.23  2002/05/14 09:43:17  valyt
+//
 // Ontology Aware JAPE transducers
 //
 // Revision 1.22  2002/03/13 11:19:37  valyt

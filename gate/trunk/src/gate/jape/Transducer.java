@@ -107,7 +107,10 @@ public abstract class Transducer implements Serializable
     return debugMode;
   }
 
- private boolean debugMode = false;
+  /**
+   * Switch used to enable printing debug messages
+   */
+  private boolean debugMode = false;
 
 
 
@@ -115,6 +118,12 @@ public abstract class Transducer implements Serializable
 
   private transient Vector progressListeners;
   private transient Vector statusListeners;
+
+  /**
+   * Switch used to activate the JAPE debugger
+   */
+  protected boolean enableDebugging;
+
   /**
    * This property affects the Appelt style of rules application.
    * If true then the longest match will be fired otherwise the shortest will
@@ -176,6 +185,14 @@ public abstract class Transducer implements Serializable
    */
   public void setOntology(Ontology ontology) {
     this.ontology = ontology;
+  }
+
+  public boolean isEnableDebugging() {
+    return enableDebugging;
+  }
+
+  public void setEnableDebugging(boolean enableDebugging) {
+    this.enableDebugging = enableDebugging;
   }
 
   //ProcessProgressReporter implementation ends here
