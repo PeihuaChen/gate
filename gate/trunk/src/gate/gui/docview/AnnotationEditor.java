@@ -278,17 +278,12 @@ public class AnnotationEditor{
   public boolean isShowing(){
     return bottomWindow.isShowing();
   }
-
-  protected void sizeWindows(){
-    bottomWindow.pack();
-  }
   
   /**
    * Shows the UI(s) involved in annotation editing.
    *
    */
   public void show(boolean autohide){
-    sizeWindows();
     placeWindows();
     bottomWindow.setVisible(true);
     if(autohide) hideTimer.restart();
@@ -296,20 +291,26 @@ public class AnnotationEditor{
   
   protected void placeWindows(){
     //calculate position
-    int x, yTop, yBottom;
     try{
 		  Rectangle startRect = textPane.modelToView(ann.getStartNode().
 		    getOffset().intValue());
-		  x = startRect.x;
 		  Rectangle endRect = textPane.modelToView(ann.getEndNode().
 				    getOffset().intValue());
-		  yBottom = endRect.y + endRect.height;
+      Point topLeft = textPane.getLocationOnScreen();
+      int x = topLeft.x + startRect.x;
+      int y = topLeft.y + endRect.y + endRect.height;
+      //ensure window doesn't get off the screen
+      bottomWindow.pack();
+//      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//      if(x + bottomWindow.getSize().width > screenSize.width){
+//        int newWidth = 
+//      }
+      bottomWindow.setLocation(x, y);
+      
     }catch(BadLocationException ble){
       //this should never occur
       throw new GateRuntimeException(ble);
     }
-    Point topLeft = textPane.getLocationOnScreen();
-    bottomWindow.setLocation(x + topLeft.x, yBottom + topLeft.y); 
   }
   
   public void hide(){
