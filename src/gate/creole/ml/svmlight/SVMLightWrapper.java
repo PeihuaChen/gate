@@ -26,7 +26,7 @@ import java.util.List;
  * {@ see http://svmlight.joachims.org/}
  */
 public class SVMLightWrapper
-    implements MLEngine, gate.gui.ActionsPublisher {
+    implements AdvancedMLEngine, gate.gui.ActionsPublisher {
 
   static boolean DEBUG = false;
 
@@ -1393,6 +1393,10 @@ public class SVMLightWrapper
     }
   }
 
+  public boolean supportsBatchMode(){
+    return true;
+  }
+  
   protected java.util.HashMap nominalValue2IntegerHash;
 
   protected gate.creole.ml.DatasetDefintion datasetDefinition;

@@ -25,7 +25,7 @@ import java.util.Iterator;
  * @see <a href="http://maxent.sourceforge.net/index.html">Maxent homepage</a>
  */
 public class MaxentWrapper
-    implements MLEngine, gate.gui.ActionsPublisher {
+    implements AdvancedMLEngine, gate.gui.ActionsPublisher {
 
   boolean DEBUG=false;
 
@@ -502,6 +502,10 @@ public class MaxentWrapper
     return datasetDefinition;
   }
 
+  public boolean supportsBatchMode(){
+    return false;
+  }
+  
   /**
    * This allows the model, including its parameters to be saved to a file.
    */
