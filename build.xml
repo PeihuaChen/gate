@@ -178,12 +178,24 @@
   
   <!-- Run the beast -->
   <target name="run">
+    <condition property="mac.dock.name.option"
+               value="-Xdock:name=&quot;GATE 3.0&quot;">
+      <os family="mac"/>
+    </condition>
+    <condition property="mac.dock.name.option"
+               value="">
+      <not><os family="mac"/></not>
+    </condition>    
     <java classname="gate.Main" 
           classpathref="run.class.path" 
           fork="true"
           spawn="false"
           maxmemory="200m">
-       <jvmarg value="-Djava.ext.dirs=${extDir}"/>   
+       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
+       <jvmarg value="-Dcom.apple.macos.useScreenMenuBar=true"/>
+       <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
+       <jvmarg value="-Dcom.apple.mrj.application.live-resize=true"/>
+       <jvmarg value="${mac.dock.name.option}"/>
      </java>
   </target>
   
