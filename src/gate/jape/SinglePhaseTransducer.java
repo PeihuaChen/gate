@@ -102,13 +102,27 @@ extends Transducer implements JapeConstants, java.io.Serializable
       ((Rule) i.next()).finish();
     //build the finite state machine transition graph
     fsm = new FSM(this);
-    //convert it to deterministic
-    fsm.eliminateVoidTransitions();
     //clear the old style data structures
     rules.clear();
     rules = null;
   } // finish
 
+
+  private void addAnnotationsByOffset(Map map, SortedSet keys, Set annotations){
+    Iterator annIter = annotations.iterator();
+    while(annIter.hasNext()){
+      Annotation ann = (Annotation)annIter.next();
+      Long offset = ann.getStartNode().getOffset();
+      List annsAtThisOffset = null;
+      if(keys.add(offset)){
+        annsAtThisOffset = new LinkedList();
+        map.put(offset, annsAtThisOffset);
+      }else{
+        annsAtThisOffset = (List)map.get(offset);
+      }
+      annsAtThisOffset.add(ann);
+    }
+  }//private void addAnnotationsByOffset()
 
   /**
     * Transduce a document using the annotation set provided and the current
@@ -116,37 +130,34 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
+
     if (! Main.batchMode) //fire events if not in batch mode
       fireProgressChanged(0);
 
-    //the input annotations will be read from this list
-    ArrayList annotations = new ArrayList();
+    //the input annotations will be read from this map
+    //maps offset to list of annotations
+    Map annotationsByOffset = new HashMap();
+    SortedSet offsets = new TreeSet();
+
 
     //select only the annotations of types specified in the input list
     //Out.println("Input:" + input);
-    if(input.isEmpty()) annotations.addAll(inputAS);
+    if(input.isEmpty()) addAnnotationsByOffset(annotationsByOffset,
+                                               offsets, inputAS);
     else{
       Iterator typesIter = input.iterator();
       AnnotationSet ofOneType = null;
       while(typesIter.hasNext()){
         ofOneType = inputAS.get((String)typesIter.next());
         if(ofOneType != null){
-          annotations.addAll(ofOneType);
+          addAnnotationsByOffset(annotationsByOffset, offsets, ofOneType);
         }
       }
     }
-    if(annotations.isEmpty()){
-      if (!Main.batchMode)
-        fireProcessFinished();
+    if(annotationsByOffset.isEmpty()){
+      if (!Main.batchMode) fireProcessFinished();
       return;
     }
-    //sort the input by start offset
-    Collections.sort(annotations, new OffsetComparator());
-
-//System.out.println("Input:" + annotations);
-    //the next input annotation will be read from the annotations list at
-    //this offset
-    int inputIndex = 0;
 
     //define data structures
     //FSM instances that haven't blocked yet
@@ -158,21 +169,24 @@ extends Transducer implements JapeConstants, java.io.Serializable
     java.util.SortedSet acceptingFSMInstances = new java.util.TreeSet();
     FSMInstance currentFSM;
 
+    //find the first node of the document
+    Node startNode = ((Annotation)
+                      ((List)annotationsByOffset.
+                             get(offsets.first())).get(0)).
+                      getStartNode();
 
-    //used to decide when to fire progress events
-    int oldStartNodeOff = 0;
-    //used to decide when to fire progress events
-    int lastNodeOff = ((Annotation)annotations.get(annotations.size() -1)).
-                      getEndNode().getOffset().intValue();
-    //used to decide when to fire progress events
-    int startNodeOff;
+    //used to calculate the percentage of processing done
+    long lastNodeOff = doc.getContent().size().longValue();
+
+    //the offset of the node where the matching currently starts
+    //the value -1 marks no more annotations to parse
+    long startNodeOff = startNode.getOffset().longValue();
 
     //the big while for the actual parsing
-    while(inputIndex < annotations.size()){
-//Out.prln("Index: " + inputIndex);
-      // startNode: the node from the current matching attepmt starts.
-      gate.Node startNode = ((Annotation)annotations.get(inputIndex)).
-                            getStartNode();
+    while(startNodeOff != -1){
+
+      //used to decide when to fire progress events
+      long oldStartNodeOff = startNodeOff;
 
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
@@ -212,127 +226,89 @@ extends Transducer implements JapeConstants, java.io.Serializable
           if(ruleApplicationStyle == FIRST_STYLE) break whileloop2;
         }
         //get all the annotations that start where the current FSM finishes
-        Annotation someAnn;
-        int localInputIndex = inputIndex;
-        //skip what was recognised already
-        while(localInputIndex < annotations.size() &&
-              (someAnn = (Annotation)annotations.get(localInputIndex)).
-              getStartNode().getOffset().
-              compareTo(currentFSM.getAGPosition().getOffset()) < 0 ){
-          localInputIndex++;
+        SortedSet offsetsTailSet = offsets.tailSet(
+                                    currentFSM.getAGPosition().getOffset());
+        List paths;
+        if(offsetsTailSet.isEmpty()){
+          paths = new ArrayList();
+        }else{
+          paths = (List)annotationsByOffset.get(offsetsTailSet.first());
         }
-
-        List paths = new ArrayList();
-        if(localInputIndex < annotations.size()){
-          Node nextNode = ((Annotation)annotations.get(localInputIndex)).
-                          getStartNode();
-          while(localInputIndex < annotations.size() &&
-                (someAnn = (Annotation)annotations.get(localInputIndex++)).
-                getStartNode() == nextNode){
-            paths.add(someAnn);
-          }
-        }
-//System.out.println("Paths: " + paths + "\n^localInputIndex: " + localInputIndex);
         if(!paths.isEmpty()){
-          Iterator pathsIter = paths.iterator();
-          Annotation onePath;
-          State currentState = currentFSM.getFSMPosition();
-          Iterator transitionsIter;
-          FeatureMap features = Factory.newFeatureMap();
-          //foreach possible annotation
-          while(pathsIter.hasNext()){
-            onePath = (Annotation)pathsIter.next();
-            transitionsIter = currentState.getTransitions().iterator();
-            Transition currentTransition;
-            Constraint[] currentConstraints;
-            transitionsWhile:
-            while(transitionsIter.hasNext()){
-              currentTransition = (Transition)transitionsIter.next();
-              //check if the current transition can use the curent annotation (path)
-              currentConstraints =
-                           currentTransition.getConstraints().getConstraints();
-              String annType;
-              //we assume that all annotations in a contraint are of the same type
-              for(int i = 0; i<currentConstraints.length; i++){
-                annType = currentConstraints[i].getAnnotType();
-                //if wrong type try next transition
-                if(!annType.equals(onePath.getType()))continue transitionsWhile;
-                features.clear();
-                features.putAll(currentConstraints[i].getAttributeSeq());
+          Set matchResults = currentFSM.getFSMPosition().attemptMatch(paths);
+          if(matchResults != null &&
+             !matchResults.isEmpty()){
+            Iterator resultsIter = matchResults.iterator();
+            while(resultsIter.hasNext()){
+              Object[] oneMatch = (Object[])resultsIter.next();
+              FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
+              //set the FSM position
+              newFSMI.setFSMPosition((State)oneMatch[2]);
+
+              //set the AG position
+              List matchedAnns = (List)oneMatch[0];
+              Node endNode = ((Annotation)matchedAnns.get(0)).getEndNode();
+              for(int i = 1; i < matchedAnns.size(); i++){
+                Node otherEndNode = ((Annotation)matchedAnns.get(i)).
+                                    getEndNode();
+                if(endNode.getOffset().compareTo(otherEndNode.getOffset()) < 0)
+                  endNode = otherEndNode;
               }
-              if(onePath.getFeatures().entrySet().containsAll(features.entrySet())){
-                //we have a match
-  //System.out.println("Match!");
-                //create a new FSMInstance, advance it over the current annotation
-                //take care of the bindings  and add it to ActiveFSM
-                FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
-                newFSMI.setAGPosition(onePath.getEndNode());
-                newFSMI.setFSMPosition(currentTransition.getTarget());
-                //bindings
-                java.util.Map binds = newFSMI.getBindings();
-                java.util.Iterator labelsIter =
-                                   currentTransition.getBindings().iterator();
-                String oneLabel;
-                AnnotationSet boundAnnots, newSet;
+              newFSMI.setAGPosition(endNode);
+
+              //update the bindings
+              Map bindings = newFSMI.getBindings();
+              if(oneMatch[1] != null){
+                Iterator labelsIter = ((List)oneMatch[1]).iterator();
                 while(labelsIter.hasNext()){
-                  oneLabel = (String)labelsIter.next();
-                  boundAnnots = (AnnotationSet)binds.get(oneLabel);
-                  if(boundAnnots != null){
-                    newSet = new AnnotationSetImpl(boundAnnots);
+                  Object oneLabel = labelsIter.next();
+                  AnnotationSet boundAnns = (AnnotationSet)bindings.get(oneLabel);
+                  if(boundAnns == null){
+                    boundAnns = new AnnotationSetImpl(doc);
                   }else{
-                    newSet = new AnnotationSetImpl(doc);
+                    boundAnns = new AnnotationSetImpl(boundAnns);
                   }
-                  newSet.add(onePath);
-                  binds.put(oneLabel, newSet);
+                  boundAnns.addAll(matchedAnns);
+                  bindings.put(oneLabel, boundAnns);
                 }//while(labelsIter.hasNext())
-                activeFSMInstances.addLast(newFSMI);
-              }//if match
-            }//while(transitionsIter.hasNext())
-          }//while(pathsIter.hasNext())
-        }//if(paths != null)
+              }
+              activeFSMInstances.addLast(newFSMI);
+
+            }//while(resultsIter.hasNext())
+          }//if(!matchResults.isEmpty())
+        }//if(!paths.isEmpty())
       }//while(!activeFSMInstances.isEmpty())
 
 
       //FIRE THE RULE
+
+      Long lastAGPosition = null;
+
       if(acceptingFSMInstances.isEmpty()){
         //no rule to fire, advance to the next input offset
-        while(inputIndex < annotations.size() &&
-              ((Annotation)annotations.get(inputIndex)).
-              getStartNode() == startNode){
-          inputIndex++;
-        }
+        lastAGPosition = new Long(startNodeOff + 1);
       } else if(ruleApplicationStyle == BRILL_STYLE) {
       //System.out.println("Brill acceptor");
         // fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
         FSMInstance currentAcceptor;
         RightHandSide currentRHS;
-        long lastAGPosition = startNode.getOffset().longValue();
-        //  Out.println("XXXXXXXXXXXXXXXXXXXX All the accepting FSMs are:");
+        lastAGPosition = startNode.getOffset();
 
         while(accFSMs.hasNext()){
           currentAcceptor = (FSMInstance) accFSMs.next();
-          //  Out.println("==========================\n" +
-                  //                     currentAcceptor +
-                  //                     "\n==========================");
 
           currentRHS = currentAcceptor.getFSMPosition().getAction();
           currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
 
-          long currentAGPosition =
-               currentAcceptor.getAGPosition().getOffset().longValue();
-          if(lastAGPosition <= currentAGPosition){
+          Long currentAGPosition = currentAcceptor.getAGPosition().getOffset();
+          if(currentAGPosition.compareTo(lastAGPosition) > 0)
             lastAGPosition = currentAGPosition;
-          }
         }
-        //advance the index on input
-        while(inputIndex < annotations.size() &&
-              ((Annotation)annotations.get(inputIndex)).
-              getStartNode().getOffset().longValue() < lastAGPosition){
-          inputIndex++;
-        }
+
       } else if(ruleApplicationStyle == APPELT_STYLE ||
                 ruleApplicationStyle == FIRST_STYLE) {
+
 //System.out.println("Appelt acceptor");
         // AcceptingFSMInstances is an ordered structure:
         // just execute the longest (last) rule
@@ -341,14 +317,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
-        long lastAGPosition = currentAcceptor.getAGPosition().
-                              getOffset().longValue();
-        //advance the index on input
-        while(inputIndex < annotations.size() &&
-              ((Annotation)annotations.get(inputIndex)).
-              getStartNode().getOffset().longValue() < lastAGPosition){
-          inputIndex++;
-        }
+        lastAGPosition = currentAcceptor.getAGPosition().getOffset();
       }
 //      else if(ruleApplicationStyle == FIRST_STYLE) {
 //        // AcceptingFSMInstances is an ordered structure:
@@ -368,29 +337,44 @@ extends Transducer implements JapeConstants, java.io.Serializable
 //        }
 //      }
       else throw new RuntimeException("Unknown rule application style!");
+      //advance on input
+      SortedSet OffsetsTailSet = offsets.tailSet(lastAGPosition);
+      if(OffsetsTailSet.isEmpty()){
+        //no more input, phew! :)
+        startNodeOff = -1;
+        fireProcessFinished();
+      }else{
+        Long nextKey = (Long)OffsetsTailSet.first();
+        startNode = ((Annotation)
+                      ((List)annotationsByOffset.get(nextKey)).get(0)).
+                    getStartNode();
+        startNodeOff = startNode.getOffset().longValue();
 
-      //eliminate the possibility for infinite looping
-      if(inputIndex < annotations.size() &&
-         ((Annotation)annotations.get(inputIndex)).getStartNode() == startNode){
-        Out.prln("Jape warning: recovered from infinite looping!");
-        //advance to the next offset
-        while(inputIndex < annotations.size() &&
-              ((Annotation)annotations.get(inputIndex)).
-              getStartNode() == startNode){
-          inputIndex++;
-        }
-      }
+        //eliminate the possibility for infinite looping
+        if(oldStartNodeOff == startNodeOff){
+          //we are about to step twice in the same place, ...skip ahead
+          lastAGPosition = new Long(startNodeOff + 1);
+          OffsetsTailSet = offsets.tailSet(lastAGPosition);
+          if(OffsetsTailSet.isEmpty()){
+            //no more input, phew! :)
+            startNodeOff = -1;
+            fireProcessFinished();
+          }else{
+            nextKey = (Long)OffsetsTailSet.first();
+            startNode = ((Annotation)
+                          ((List)annotationsByOffset.get(nextKey)).get(0)).
+                        getStartNode();
+            startNodeOff =startNode.getOffset().longValue();
+          }
+        }//if(oldStartNodeOff == startNodeOff)
 
-       if(inputIndex < annotations.size()){
-         startNodeOff = ((Annotation)annotations.get(inputIndex)).
-                        getStartNode().getOffset().intValue();
         //fire the progress event
         if(!Main.batchMode && (startNodeOff - oldStartNodeOff > 1024)){
-          fireProgressChanged(100 * startNodeOff / lastNodeOff);
+          fireProgressChanged((int)(100 * startNodeOff / lastNodeOff));
           oldStartNodeOff = startNodeOff;
         }
-       }
-    }//while(inputIndex < annotations.size())
+      }
+    }//while(startNodeOff != -1)
     if (! Main.batchMode) //fire events if not in batch mode
       fireProcessFinished();
   } // transduce
@@ -403,6 +387,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce1(Document doc, AnnotationSet annotationSet)
                                                           throws JapeException {
+/*
     if (! Main.batchMode) //fire events if not in batch mode
       fireProgressChanged(0);
 
@@ -432,7 +417,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     FSM fsm = new FSM(this);
 
     //convert it to deterministic
-    fsm.eliminateVoidTransitions();
+    fsm.minimise();
 
 
     //define data structures
@@ -613,12 +598,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
           // System.out.println("done");
         }
 
-      /*
-        AnnotationSet res = annotations.get(startNode.getOffset());
-        if(!res.isEmpty())
-          startNode = ((Annotation)res.iterator().next()).getStartNode();
-        else startNode = lastNode;
-      */
+//        AnnotationSet res = annotations.get(startNode.getOffset());
+//        if(!res.isEmpty())
+//          startNode = ((Annotation)res.iterator().next()).getStartNode();
+//        else startNode = lastNode;
       } else if(ruleApplicationStyle == BRILL_STYLE) {
         // fire the rules corresponding to all accepting FSM instances
         java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
@@ -656,11 +639,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
       } else throw new RuntimeException("Unknown rule application style!");
       //release all the accepting instances as they have done their job
-      /*
-        Iterator acceptors = acceptingFSMInstances.iterator();
-        while(acceptors.hasNext())
-        FSMInstance.returnInstance((FSMInstance)acceptors.next());
-      */
+//        Iterator acceptors = acceptingFSMInstances.iterator();
+//        while(acceptors.hasNext())
+//        FSMInstance.returnInstance((FSMInstance)acceptors.next());
       acceptingFSMInstances.clear();
       startNodeOff = startNode.getOffset().intValue();
 
@@ -672,6 +653,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     // FSMInstance.clearInstances();
     if (! Main.batchMode) //fire events if not in batch mode
       fireProcessFinished();
+*/
+
   } // transduce
 
 
@@ -686,6 +669,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce2(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
+/*
     if (! Main.batchMode) //fire events if not in batch mode
       fireProgressChanged(0);
 
@@ -929,6 +913,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     // FSMInstance.clearInstances();
     if (! Main.batchMode) //fire events if not in batch mode
       fireProcessFinished();
+*/
   } // transduce
 
 

@@ -35,6 +35,7 @@ import gate.util.*;
 public class ResourceInstantiationException extends GateException {
   /** Debug flag */
   private static final boolean DEBUG = false;
+  private Exception exception = null;
 
   public ResourceInstantiationException() {
     super();
@@ -46,5 +47,12 @@ public class ResourceInstantiationException extends GateException {
 
   public ResourceInstantiationException(Exception e) {
     super(e.toString());
+    this.exception = e;
   }
+
+
+  public Exception getException(){
+    return exception;
+  }
+
 } // ResourceInstantiationException

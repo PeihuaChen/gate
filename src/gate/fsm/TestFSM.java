@@ -71,33 +71,33 @@ public class TestFSM extends TestCase {
   public void tearDown() {
   }
 
-  /** Does some kind of a test that verifies whether parsing the jape file
-    * results in a graph. It doesn't check the structure graph.
-    */
-  public void testOne() {
-    Iterator phases = transducer.getPhases().iterator();
-    while(phases.hasNext()) {
-      FSM aFSM = ((SinglePhaseTransducer)phases.next()).getFSM();
-      //Out.println(aFSM.getGML());
-      String gml = aFSM.getGML();
-      assert(gml.startsWith("graph["));
-    }
-  } // testOne
+//  /** Does some kind of a test that verifies whether parsing the jape file
+//    * results in a graph. It doesn't check the structure graph.
+//    */
+//  public void testOne() {
+//    Iterator phases = transducer.getPhases().iterator();
+//    while(phases.hasNext()) {
+//      FSM aFSM = ((SinglePhaseTransducer)phases.next()).getFSM();
+//      //Out.println(aFSM.getGML());
+//      String gml = aFSM.getGML();
+//      assert(gml.startsWith("graph["));
+//    }
+//  } // testOne
 
-  /** Will try to parse a .jape file and display the graphs resulted. */
-  public void graphTest()throws java.io.IOException,
-                                 EDU.auburn.VGJ.graph.ParseError {
-    Iterator phases = transducer.getPhases().iterator();
-
-    while(phases.hasNext()) {
-      SinglePhaseTransducer phase = (SinglePhaseTransducer)phases.next();
-      FSM aFSM = new FSM(phase);
-      showGraph("Non-deterministic (" + phase.getName() +")",aFSM.getGML());
-      aFSM.eliminateVoidTransitions();
-      showGraph("Deterministic (" + phase.getName()+")", aFSM.getGML());
-    }
-
-  } // graphTest
+//  /** Will try to parse a .jape file and display the graphs resulted. */
+//  public void graphTest()throws java.io.IOException,
+//                                 EDU.auburn.VGJ.graph.ParseError {
+//    Iterator phases = transducer.getPhases().iterator();
+//
+//    while(phases.hasNext()) {
+//      SinglePhaseTransducer phase = (SinglePhaseTransducer)phases.next();
+//      FSM aFSM = new FSM(phase);
+//      showGraph("Non-deterministic (" + phase.getName() +")",aFSM.getGML());
+//      aFSM.eliminateVoidTransitions();
+//      showGraph("Deterministic (" + phase.getName()+")", aFSM.getGML());
+//    }
+//
+//  } // graphTest
 
   /** Opens anew window containing the visual representation of a FSM and
     * having a given title
@@ -127,17 +127,17 @@ public class TestFSM extends TestCase {
     graph_editing_window.applyAlgorithm("Tree Right");
   } // showGraph
 
-  /** runs the graphical test*/
-  public static void main(String[] args) {
-    try{
-      TestFSM testFSM = new TestFSM("TestFSM");
-      testFSM.setUp();
-      testFSM.graphTest();
-      testFSM.tearDown();
-    } catch(Exception e) {
-      e.printStackTrace(Err.getPrintWriter());
-    }
-  }
+//  /** runs the graphical test*/
+//  public static void main(String[] args) {
+//    try{
+//      TestFSM testFSM = new TestFSM("TestFSM");
+//      testFSM.setUp();
+//      testFSM.graphTest();
+//      testFSM.tearDown();
+//    } catch(Exception e) {
+//      e.printStackTrace(Err.getPrintWriter());
+//    }
+//  }
 
   /** Test suite routine for the test runner */
   public static Test suite() {
