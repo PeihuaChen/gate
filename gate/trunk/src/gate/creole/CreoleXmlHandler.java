@@ -28,7 +28,7 @@ public class CreoleXmlHandler extends HandlerBase {
   private ResourceData resourceData;
 
   /** Are we debugging? */
-  private static final boolean debug = false;
+  private static final boolean DEBUG = false;
 
   /** Construction */
   public CreoleXmlHandler(CreoleRegister register){ this.register = register; }
@@ -59,7 +59,7 @@ public class CreoleXmlHandler extends HandlerBase {
     if(elementName.toUpperCase().equals("RESOURCE"))
       resourceData = new ResourceDataImpl();
 
-    if(debug) {
+    if(DEBUG) {
       System.out.println(
         elementName + " " +
         ((atts.getLength() > 0) ? atts.toString() : "")
@@ -82,7 +82,7 @@ public class CreoleXmlHandler extends HandlerBase {
     if(elementName.toUpperCase().equals("RESOURCE")) {
       register.put(resourceData.getName(), resourceData);
       
-      if(debug)
+      if(DEBUG)
         System.out.println("added: " + resourceData);
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
@@ -105,20 +105,20 @@ public class CreoleXmlHandler extends HandlerBase {
 
     String content = new String(text, start, length);
 
-// not sure why this gets called when all that text is is spaces...
-// but don't want to do anything with them, hence this loop:
-boolean isSpaces = true;
-char contentChars[] = content.toCharArray();
-for(int i=0, len=contentChars.length; i < len; i++)
-  if(! Character.isWhitespace(contentChars[i])) {
-    isSpaces = false;
-    break;
-  }
-if(isSpaces) return;
+    // not sure why this gets called when all that text is is spaces...
+    // but don't want to do anything with them, hence this loop:
+    boolean isSpaces = true;
+    char contentChars[] = content.toCharArray();
+    for(int i=0, len=contentChars.length; i < len; i++)
+      if(! Character.isWhitespace(contentChars[i])) {
+        isSpaces = false;
+        break;
+      }
+    if(isSpaces) return;
 
     elementStack.push(content);
 
-    if(debug) System.out.println(content);
+    if(DEBUG) System.out.println(content);
 
   } // characters
 

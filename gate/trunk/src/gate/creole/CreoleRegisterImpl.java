@@ -31,7 +31,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
   private Set directories = new HashSet();
 
   /** Are we debugging? */
-  private static final boolean debug = false;
+  private static final boolean DEBUG = false;
 
   /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
   public void addDirectory(URL directoryUrl) {
@@ -76,7 +76,7 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
         directoryUrl =
           new URL(urlName + ((needSlash) ? "/creole.xml" : "creole.xml"));
       } catch(MalformedURLException e) {
-        if(debug) System.out.println(e);
+        if(DEBUG) System.out.println(e);
         throw(new GateException(e));
       }
     }
@@ -102,13 +102,13 @@ public class CreoleRegisterImpl extends HashMap implements CreoleRegister
       parser.parse(directoryUrl.openStream(), handler);
 
 	  } catch (IOException e) {
-      if(debug) System.out.println(e);
+      if(DEBUG) System.out.println(e);
       throw(new GateException(e));
 	  } catch (SAXException e) {
-      if(debug) System.out.println(e);
+      if(DEBUG) System.out.println(e);
       throw(new GateException(e));
 	  } catch (ParserConfigurationException e) {
-      if(debug) System.out.println(e);
+      if(DEBUG) System.out.println(e);
       throw(new GateException(e));
 	  }
 

@@ -24,7 +24,7 @@ public class TestCreole extends TestCase
   public TestCreole(String name) { super(name); }
 
   /** Debug flag */
-  private static final boolean debug = false;
+  private static final boolean DEBUG = false;
 
   /** Fixture set up */
   public void setUp() throws Exception {
@@ -36,7 +36,7 @@ public class TestCreole extends TestCase
   public void testRegister() throws Exception {
 
     CreoleRegister reg = Gate.getCreoleRegister();
-    if(debug) {
+    if(DEBUG) {
       Iterator iter = reg.values().iterator();
       while(iter.hasNext())
         System.out.println(iter.next());
