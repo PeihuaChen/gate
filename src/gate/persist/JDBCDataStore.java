@@ -161,18 +161,9 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     }
 
     //1. close security factory
-      ac.close();
+    ac.close();
 
-    //2. close the JDBC connection
-    try {
-      //rollback uncommited transactions
-      this.jdbcConn.rollback();
-      this.jdbcConn.close();
-    }
-    catch (SQLException sqle) {
-      throw new PersistenceException("cannot close JDBC connection, DB error is ["+
-                                      sqle.getMessage() +"]");
-    }
+    DBHelper.disconnect(this.jdbcConn);
 
     //finally unregister this datastore from the GATE register of datastores
     Gate.getDataStoreRegister().remove(this);
