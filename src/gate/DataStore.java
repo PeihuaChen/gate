@@ -176,4 +176,17 @@ public interface DataStore extends FeatureBearer, NameBearer {
   public void unlockLr(LanguageResource lr)
   throws PersistenceException,SecurityException;
 
+  /**
+   * sets the "parent" of this resource
+   */
+  public void setParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException;
+
+  /**
+   * returns the "parent" of this resource
+   */
+  public void getParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException;
+
+
 } // interface DataStore

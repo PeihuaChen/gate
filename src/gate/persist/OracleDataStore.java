@@ -3116,4 +3116,24 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
+
+
+  /**
+   * sets the "parent" of this resource
+   */
+  public void setParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    throw new MethodNotImplementedException();
+  }
+
+
+
+  /**
+   * returns the "parent" of this resource
+   */
+  public void getParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    throw new MethodNotImplementedException();
+  }
+
 }

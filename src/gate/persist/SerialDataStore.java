@@ -713,5 +713,21 @@ extends AbstractFeatureBearer implements DataStore {
     return;
   }
 
+  /**
+   * sets the "parent" of this resource
+   */
+  public void setParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * returns the "parent" of this resource
+   */
+  public void getParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException {
+    throw new UnsupportedOperationException();
+  }
+
 
 } // class SerialDataStore

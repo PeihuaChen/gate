@@ -524,4 +524,16 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     return this.session;
   }
 
+  /**
+   * sets the "parent" of this resource
+   */
+  public abstract void setParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException;
+
+  /**
+   * returns the "parent" of this resource
+   */
+  public abstract void getParentLr(LanguageResource lr)
+  throws PersistenceException,SecurityException;
+
 }
