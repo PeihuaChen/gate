@@ -192,13 +192,23 @@ public class Gate
       );
 
     // is the host listening at the port?
-    try{ socket = new Socket(hostName, serverPort); } catch (IOException e){ }
-    if(socket != null) {
-      urlBase = new URL("http", hostName, serverPort, path);
-      return true;
+    try{
+      URL url = new URL("http://" + hostName + ":" + serverPort + "/");
+      URLConnection uConn =  url.openConnection();
+      HttpURLConnection huConn = null;
+      if(uConn instanceof HttpURLConnection)
+        huConn = (HttpURLConnection)uConn;
+      if(huConn.getResponseCode() == -1) return false;
+    } catch (IOException e){
+      return false;
     }
 
-    return false;
+//    if(socket != null) {
+      urlBase = new URL("http", hostName, serverPort, path);
+      return true;
+//    }
+
+//    return false;
   } // tryNetServer()
 
   /** Try to find GATE files in the local file system */

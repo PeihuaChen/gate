@@ -91,21 +91,20 @@ public class HtmlDocumentHandler extends ParserCallback {
     */
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
 
-    // fire the status listener if the elements processed exceded the rate
+    // Fire the status listener if the elements processed exceded the rate
     if (0 == (++elements % ELEMENTS_RATE))
         fireStatusChangedEvent("Processed elements : " + elements);
 
-    // construct a feature map from the attributes list
+    // Construct a feature map from the attributes list
     FeatureMap fm = new SimpleFeatureMapImpl();
 
-    // take all the attributes an put them into the feature map
+    // Take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
       Enumeration enum = a.getAttributeNames();
       while (enum.hasMoreElements()){
         Object attribute = enum.nextElement();
         fm.put(attribute.toString(),(a.getAttribute(attribute)).toString());
       }// while
-
     }// if
 
     // create the start index of the annotation
@@ -116,6 +115,11 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // put it into the stack
     stack.push (obj);
+
+    // Just analize the tag t and add some\n chars and spaces to the
+    // tmpDocContent.The reason behind is that we need to have a readable form
+    // for the final document.
+    customizeAppearanceOfDocument(t);
   }//handleStartTag
 
    /** This method is called when the HTML parser encounts the end of a tag
@@ -192,9 +196,10 @@ public class HtmlDocumentHandler extends ParserCallback {
     if ((++elements % ELEMENTS_RATE) == 0)
        fireStatusChangedEvent("Processed elements : " + elements);
 
-    // if the HTML tag is BR then we add a new line character to the document
-    if (HTML.Tag.BR == t)
-      tmpDocContent.append("\n");
+    // Just analize the tag t and add some\n chars and spaces to the
+    // tmpDocContent.The reason behind is that we need to have a readable form
+    // for the final document.
+    customizeAppearanceOfDocument(t);
 
     // construct a feature map from the attributes list
     // these are empty elements
@@ -254,6 +259,18 @@ public class HtmlDocumentHandler extends ParserCallback {
     // update the document content
     tmpDocContent.append(content);
   }
+
+  /** This method analizes the tag t and adds some \n chars and spaces to the
+    * tmpDocContent.The reason behind is that we need to have a readable form
+    * for the final document. This method modifies the content of tmpDocContent.
+    * @param t the Html tag encounted by the HTML parser
+    */
+  protected void customizeAppearanceOfDocument(HTML.Tag t){
+    // if the HTML tag is BR then we add a new line character to the document
+    if (HTML.Tag.BR == t)
+      tmpDocContent.append("\n");
+
+  }// customizeAppearanceOfDocument
 
   /**
     * This method is called when the HTML parser encounts an error

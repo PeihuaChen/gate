@@ -108,6 +108,7 @@ implements AnnotationSet
 
       // remove from offset indices
       removeFromOffsetIndex(lastNext);
+
     } // remove()
 
   }; // AnnotationSetIterator
@@ -123,7 +124,6 @@ implements AnnotationSet
     boolean wasPresent = removeFromIdIndex(a);
     removeFromTypeIndex(a);
     removeFromOffsetIndex(a);
-
     return wasPresent;
   } // remove(o)
 
