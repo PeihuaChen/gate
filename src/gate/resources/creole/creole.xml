@@ -285,10 +285,12 @@
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="databaseInstanceName"
+      <PARAMETER NAME="databaseInstanceURL"
         COMMENT="Ms-Access Database Source Name"
-        OPTIONAL="false"
-        SUFFIXES="def">java.lang.String</PARAMETER>
+        OPTIONAL="false">java.lang.String</PARAMETER>
+      <PARAMETER NAME="tableName" RUNTIME="true"
+        COMMENT="table in which to store the information"
+        OPTIONAL="false">java.lang.String</PARAMETER>
   </RESOURCE>
 
     <!-- creole.xml for JapeTransducer -->
