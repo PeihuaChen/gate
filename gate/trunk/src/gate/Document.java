@@ -31,10 +31,8 @@ public interface Document extends LanguageResource, Comparable
     */
   public DocumentContent getContent();
 
-  /**
-    * mutator method
+  /** Mutator method
     */
-   // added by Cristian URSU on 7/June/2000 
   public void setContent(DocumentContent newContent);
 
   /** Get the default set of annotations. The set is created if it
