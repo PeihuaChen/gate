@@ -144,52 +144,59 @@ public class AnnotationSetImpl
   }; // AnnotationSetIterator
 
   /**
-       * Class used for the indexById structure. This is a {@link java.util.HashMap}
+   *  This is a {@link java.util.HashMap}
    * that fires events when elements are removed.
+   * 
+   * This class has been used in a previous version for the indexById structure 
+   * which now uses a simple HashMap.
+   * 
+   * This class is kept here for backwards compatibility of old serial 
+   * datastores.
+   *  
    */
-//  public class VerboseHashMap
-//      extends HashMap {
-//    VerboseHashMap() {
-//      super(Gate.HASH_STH_SIZE);
-//    } //contructor
-//
-//    public Object remove(Object key) {
-//      Object res = super.remove(key);
-//      if (res != null) {
-//        if (owner == null) {
-//          fireAnnotationRemoved(new AnnotationSetEvent(
-//              AnnotationSetImpl.this,
-//              AnnotationSetEvent.ANNOTATION_REMOVED,
-//              getDocument(), (Annotation) res));
-//        }
-//        else {
-//          owner.fireAnnotationRemoved(new AnnotationSetEvent(
-//              AnnotationSetImpl.this,
-//              AnnotationSetEvent.ANNOTATION_REMOVED,
-//              getDocument(), (Annotation) res));
-//        }
-//      }
-//      return res;
-//    } //public Object remove(Object key)
-//
-//    static final long serialVersionUID = -4832487354063073511L;
-//
-//    /**
-//     * The annotation set this maps is part of.
-//     * This is an ugly hack in order to fix a bug: database annotation sets
-//     * didn't fire annotation removed events.
-//     */
-//    private transient AnnotationSetImpl owner;
-//
-//    /**
-//     * Sets the annotation set this maps is part of.
-//     * This is an ugly hack in order to fix a bug: database annotation sets
-//     * didn't fire annotation removed events.
-//     */
-//    public void setOwner(AnnotationSetImpl newOwner) {
-//      this.owner = newOwner;
-//    }
-//  } //protected class VerboseHashMap extends HashMap
+  public class VerboseHashMap
+      extends HashMap {
+    VerboseHashMap() {
+      super(Gate.HASH_STH_SIZE);
+    } //contructor
+
+    public Object remove(Object key) {
+      Object res = super.remove(key);
+      if (res != null) {
+        if (owner == null) {
+          fireAnnotationRemoved(new AnnotationSetEvent(
+              AnnotationSetImpl.this,
+              AnnotationSetEvent.ANNOTATION_REMOVED,
+              getDocument(), (Annotation) res));
+        }
+        else {
+          owner.fireAnnotationRemoved(new AnnotationSetEvent(
+              AnnotationSetImpl.this,
+              AnnotationSetEvent.ANNOTATION_REMOVED,
+              getDocument(), (Annotation) res));
+        }
+      }
+      return res;
+    } //public Object remove(Object key)
+
+    static final long serialVersionUID = -4832487354063073511L;
+
+    /**
+     * The annotation set this maps is part of.
+     * This is an ugly hack in order to fix a bug: database annotation sets
+     * didn't fire annotation removed events.
+     */
+    private transient AnnotationSetImpl owner;
+
+    /**
+     * Sets the annotation set this maps is part of.
+     * This is an ugly hack in order to fix a bug: database annotation sets
+     * didn't fire annotation removed events.
+     */
+    public void setOwner(AnnotationSetImpl newOwner) {
+      this.owner = newOwner;
+    }
+  } //protected class VerboseHashMap extends HashMap
 
   /** Get an iterator for this set */
   public Iterator iterator() {
