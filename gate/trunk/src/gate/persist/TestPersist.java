@@ -31,15 +31,7 @@ import gate.security.*;
   */
 public class TestPersist extends TestCase
 {
-  private static final String JDBC_URL =
-//           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
-//           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
-//           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
-//           "jdbc:oracle:thin:GATEUSER/gate@nasus:1521:GATE06";
-"jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2";
-
-
-
+  private static String JDBC_URL;
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -130,6 +122,11 @@ public class TestPersist extends TestCase
 
   /** Fixture set up */
   public void setUp() throws Exception {
+    if (! Gate.getDataStoreRegister().getConfigData().containsKey("url-test"))
+      throw new GateRuntimeException("DB URL not configured in gate.xml");
+    else
+      JDBC_URL =
+        (String) Gate.getDataStoreRegister().getConfigData().get("url-test");
   } // setUp
 
   /** Put things back as they should be after running tests
