@@ -89,6 +89,16 @@ public abstract class DocumentFormat implements Resource
     suffixes2mimeStringMap.put("htm",mime.toString());
     suffixes2mimeStringMap.put("html",mime.toString());
 
+    // register SGML mime type
+    mime = new MimeType("text","sgml");
+    mime.addParameter ("ClassHandler","gate.corpora.SgmlDocumentFormat");
+    // register the class with this map type
+    mimeString2mimeTypeMap.put (mime.getType() + "/" + mime.getSubtype(), mime);
+
+    suffixes2mimeStringMap.put("sgm",mime.toString());
+    suffixes2mimeStringMap.put("sgml",mime.toString());
+
+
   }
 
   /** Unpack the markup in the document. This converts markup from the

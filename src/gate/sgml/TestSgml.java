@@ -1,12 +1,12 @@
 /*
- *	TestHtml.java
+ *	TestSgml.java
  *
  *	Cristian URSU,  8/May/2000
  *
  *	$Id$
  */
 
-package gate.html;
+package gate.sgml;
 
 import java.util.*;
 import java.net.*;
@@ -21,10 +21,10 @@ import javax.swing.*;
 /** Test class for XML facilities
   *
   */
-public class TestHtml extends TestCase
+public class TestSgml extends TestCase
 {
   /** Construction */
-  public TestHtml(String name) { super(name); }
+  public TestSgml(String name) { super(name); }
 
   /** Fixture set up */
   public void setUp() {
@@ -32,17 +32,17 @@ public class TestHtml extends TestCase
 
 
   public static void main(String args[]){
-    TestHtml app = new TestHtml("TestHtml");
+    TestSgml app = new TestSgml("TestHtml");
     try{
-      app.testSomething ();
+      app.testSgmlLoading ();
     }catch (Exception e){
       e.printStackTrace (System.err);
     }
   }
 
 
-  /** A test */
-  public void testSomething() throws Exception{
+
+  public void testSgmlLoading() throws Exception {
     assert(true);
 
     // create the markupElementsMap map
@@ -62,23 +62,18 @@ public class TestHtml extends TestCase
     */
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
-             // new URL("http://www.funideas.com/visual_gallery.htm")
-            new URL ("http://www.dcs.shef.ac.uk/~hamish/GateIntro.html")
-            //new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/F71")
-            //new URL ("http://www.webhelp.com/home.html")
-            //new URL ("http://big2.hotyellow98.com/sys/signup.cgi")
-            //new URL ("http://www.epilot.com/SearchResults.asp?keyword=costume+baie&page=&source=&TokenID=82C7BE897D9643EDB3CB8A28E398A488")
+            new URL ("http://www.dcs.shef.ac.uk/~cursu/sgml/HDS")
     );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
 
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-        new MimeType("text","html")
+        new MimeType("text","sgml")
     );
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-    //*
+
     // timing the operation
     Date startTime = new Date();
       docFormat.unpackMarkup (doc,"DocumentContent");
@@ -87,23 +82,34 @@ public class TestHtml extends TestCase
     File f = Files.writeTempFile(doc.getSourceURL().openStream());
     long docSize = f.length();
     f.delete();
+    /*
     System.out.println("unpacMarkup() time for " + doc.getSourceURL () + "(" +
       docSize/1024 + "." + docSize % 1024 + " K)" + "=" + time1 / 1000 + "." +
       time1 % 1000 + " sec," + " processing rate = " + docSize/time1*1000/1024 +
       "." + (docSize/time1*1000)%1024 + " K/second");
-    //*/
-
+    */
     // graphic visualisation
-    /*
+
     if (docFormat != null){
-        docFormat.unpackMarkup (doc);
+     /*
+      JFrame jFrame = new JFrame();
+      JScrollPane tableViewScroll = new JScrollPane();
+            //create the table
+      SortedTable tableView = new SortedTable();
+      tableView.setTableModel(new AnnotationSetTableModel(doc.getAnnotations(),doc));
+      tableViewScroll.getViewport().add(tableView, null);
+      jFrame.getContentPane().add(tableViewScroll);
+      jFrame.setSize(800,600);
+      jFrame.setVisible(true);
+     */
+     /*
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
-        gate.Corpus corpus = gate.Transients.newCorpus("HTML Test");
+        gate.Corpus corpus = gate.Transients.newCorpus("SGML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
+      */
     }
-    */
-  } // testSomething()
+  }// testSgml
 
   class AnnotationSetTableModel extends gate.gui.SortedTableModel{
     public gate.Document currentDoc = null;
@@ -139,30 +145,70 @@ public class TestHtml extends TestCase
     }
     
     public Object getMaxValue(int column){
-      Collection data = new TreeSet();
+      String maxValue = null;
+      int maxValueLength = 0;
+
       switch(column){
         case 0:
-                 for (int i = 0 ; i < getRowCount(); i++)
-                    data.add( ((gate.Annotation) m_data.get(i)).getStartNode().getOffset());
-                 return data.toArray()[data.size()];
+                 for (int i = 0 ; i < getRowCount(); i++){
+                   String strValue = ((gate.Annotation) m_data.get(i)).getStartNode().getOffset().toString();
+                   int length = strValue.length();
+                   if (length > maxValueLength){
+                      maxValueLength = length;
+                      maxValue = strValue;
+                   }
+                 }
+                 return maxValue;
 
         case 1:
-                  for (int i = 0 ; i < getRowCount(); i++)
-                    data.add( ((gate.Annotation) m_data.get(i)).getEndNode().getOffset());
-                  return data.toArray()[data.size()];
+                 for (int i = 0 ; i < getRowCount(); i++){
+                   String strValue = ((gate.Annotation) m_data.get(i)).getEndNode().getOffset().toString();
+                   int length = strValue.length();
+                   if (length > maxValueLength){
+                      maxValueLength = length;
+                      maxValue = strValue;
+                   }
+                 }
+                 return maxValue;
 
         case 2:
-                 return new String ("rrrrrrrrrrrrrrrrrrr");
+                 for (int i = 0 ; i < getRowCount(); i++){
+                   String strValue = ((gate.Annotation) m_data.get(i)).getType();
+                   int length = strValue.length();
+                   if (length > maxValueLength){
+                      maxValueLength = length;
+                      maxValue = strValue;
+                   }
+                 }
+                 return maxValue;
 
         case 3:
-                  return new String ("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-
+                 for (int i = 0 ; i < getRowCount(); i++){
+                   String strValue = ((gate.Annotation) m_data.get(i)).getFeatures().toString();
+                   int length = strValue.length();
+                   if (length > maxValueLength){
+                      maxValueLength = length;
+                      maxValue = strValue;
+                   }
+                 }
+                 return maxValue;
         case 4:
-                 return new String ("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-
+        //*
+                 for (int i = 0 ; i < getRowCount(); i++){
+                   String strValue = currentDoc.getContent().toString().substring(
+                                     ((gate.Annotation) m_data.get(i)).getStartNode().getOffset().intValue(),
+                                     ((gate.Annotation) m_data.get(i)).getEndNode().getOffset().intValue());
+                   int length = strValue.length();
+                   if (length > maxValueLength){
+                      maxValueLength = length;
+                      maxValue = strValue;
+                   }
+                 }
+                 return maxValue;
+          //*/
      }
      return null;
-    }
+    }// getMaxValue()
 
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return false;
@@ -251,7 +297,7 @@ public class TestHtml extends TestCase
 
   /** Test suite routine for the test runner */
   public static Test suite() {
-    return new TestSuite(TestHtml.class);
+    return new TestSuite(TestSgml.class);
   } // suite
 
 } // class TestXml
