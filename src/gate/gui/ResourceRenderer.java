@@ -103,7 +103,7 @@ public class ResourceRenderer extends JLabel
       rData = (ResourceData)Gate.getCreoleRegister().
                                  get(value.getClass().getName());
     }else{
-      text = (value == null) ? "" : value.toString();
+      text = (value == null) ? "<none>" : value.toString();
     }
     if(rData != null){
       toolTipText = "<HTML>Type: <b>" + rData.getName() + "</b></HTML>";
