@@ -19,9 +19,7 @@ import java.io.*;
 import java.util.*;
 
 import gate.*;
-//import net.didion.jwnl.*;
-//import net.didion.jwnl.dictionary.*;
-//import net.didion.jwnl.data.*;
+import gate.util.*;
 import junit.framework.*;
 
 public class TestWordNet extends TestCase {
@@ -52,6 +50,13 @@ public class TestWordNet extends TestCase {
   }
 
   public void testWN_01() throws Exception {
+    //test the presence of the WN files
+    String wnConfigFile = (String)Gate.getUserConfig().
+                          get(GateConstants.WORDNET_CONFIG_FILE);
+    if(wnConfigFile == null){
+      Err.prln("WordNet not present. Test aborted...");
+      return;
+    }
     //test synset access - read all senses for a word and compare them with the entries from the
     //WN16 index files
 
@@ -122,6 +127,14 @@ public class TestWordNet extends TestCase {
 
 
   public void testWN_02() throws Exception {
+    //test the presence of the WN files
+    String wnConfigFile = (String)Gate.getUserConfig().
+                          get(GateConstants.WORDNET_CONFIG_FILE);
+    if(wnConfigFile == null){
+      Err.prln("WordNet not present. Test aborted...");
+      return;
+    }
+
     //test hypernymy - traverse upwards the hierarchy starting from some word
     //compare the result with the WN16 index files
     //get all synsets for "cup"
@@ -202,6 +215,14 @@ public class TestWordNet extends TestCase {
   }
 
   public void testWN_03() throws Exception {
+    //test the presence of the WN files
+    String wnConfigFile = (String)Gate.getUserConfig().
+                          get(GateConstants.WORDNET_CONFIG_FILE);
+    if(wnConfigFile == null){
+      Err.prln("WordNet not present. Test aborted...");
+      return;
+    }
+
     //test hyponymy - check all direct hyponyms of a word
     //compare the result with the WN16 index files
 
