@@ -361,11 +361,6 @@ public class AnnotationEditor extends AbstractVisualResource {
             int end =
               ((Long)annotationsTable.getModel().getValueAt(row, 3)).intValue();
             try{
-            /*
-              highlighter.removeAllHighlights();
-              highlighter.addHighlight(start, end,
-                                          DefaultHighlighter.DefaultPainter);
-            */
               textPane.scrollRectToVisible(textPane.modelToView(start));
               annotationsTable.requestFocus();
             }catch(BadLocationException ble){
@@ -581,8 +576,7 @@ public class AnnotationEditor extends AbstractVisualResource {
     annotationsTableModel = new AnnotationsTableModel();
     annotationsTable = new XJTable(annotationsTableModel);
     annotationsTable.setIntercellSpacing(new Dimension(10, 5));
-    annotationsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-    //annotationsTable.setRowMargin(10);
+
     tableScroll = new JScrollPane(annotationsTable);
     tableScroll.setOpaque(true);
 

@@ -44,10 +44,6 @@ public interface ResourceHandle {
 
   public JPopupMenu getPopup();
 
-  public boolean isShown();
-
-  public void setShown(boolean shown);
-
   public String getTooltipText();
 
   public Resource getResource();

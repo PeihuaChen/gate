@@ -63,7 +63,8 @@ public class NewResourceDialog extends JDialog {
     nameBox.add(new JLabel("Name: "));
     nameBox.add(Box.createHorizontalStrut(5));
     nameField = new JTextField(30);
-    nameField.setMaximumSize(nameField.getPreferredSize());
+    nameField.setMaximumSize(
+        new Dimension(Integer.MAX_VALUE, nameField.getPreferredSize().height));
     nameBox.add(nameField);
     nameBox.add(Box.createHorizontalStrut(5));
     nameBox.add(Box.createHorizontalGlue());
@@ -163,7 +164,7 @@ public class NewResourceDialog extends JDialog {
   JFileChooser fileChooser;
   Map listeners;
 
-  public Resource show(ResourceData rData){
+  public synchronized Resource show(ResourceData rData){
     this.resourceData = rData;
     setLocationRelativeTo(getParent());
     nameField.setText("");
