@@ -146,17 +146,18 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     */
   static private MimeType  getMimeType(URL url){
     String mimeTypeString = null;
+    String contentType = null;
     InputStream is = null;
     MimeType mimeType = null;
     String fileSufix = null;
 
     try{
-      is = url.openConnection().getInputStream();
-      mimeTypeString = URLConnection.guessContentTypeFromStream(is);
+      contentType = url.openConnection().getContentType();
     } catch (IOException e){
       e.printStackTrace(System.err);
     }
-
+    StringTokenizer st = new StringTokenizer(contentType, ";");
+    mimeTypeString = st.nextToken();
     // return the corresponding mime type
     mimeType = (MimeType) mimeString2mimeTypeMap.get(mimeTypeString);
     if (mimeType == null){
