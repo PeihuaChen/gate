@@ -78,14 +78,7 @@ public class PostgresDataStore extends JDBCDataStore {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
   }
-  public boolean canReadLR(Object lrID) throws gate.security.SecurityException, gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
-  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo) throws gate.security.SecurityException, gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
-    throw new MethodNotImplementedException();
-  }
+
 
   public List findLrIds(List constraints) throws gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
@@ -95,4 +88,25 @@ public class PostgresDataStore extends JDBCDataStore {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
     throw new MethodNotImplementedException();
   }
+
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has some access (read/write) to the LR
+   */
+
+  protected boolean canAccessLR(Long lrID,int mode)
+    throws PersistenceException, SecurityException{
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** Adopt a resource for persistence. */
+  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
+    throws PersistenceException,gate.security.SecurityException {
+
+    throw new MethodNotImplementedException();
+  }
+
+
 }

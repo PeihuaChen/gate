@@ -51,11 +51,6 @@ public class OracleDataStore extends JDBCDataStore {
   /** "false" value for Oracle (supports no boolean type) */
   private static final int ORACLE_FALSE = 0;
 
-  /** used internaly, may change in the future */
-  private static final int READ_ACCESS = 0;
-  /** used internaly, may change in the future */
-  private static final int WRITE_ACCESS = 1;
-
   /** size of the Oracle varrays used for bulc inserts */
   private static final int VARRAY_SIZE = 10;
 
@@ -1221,35 +1216,35 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Object lrID)
+/*  public boolean canReadLR(Object lrID)
     throws PersistenceException, SecurityException{
 
-    return canAccessLR((Long) lrID,READ_ACCESS);
+    return canAccessLR((Long) lrID,DBHelper.READ_ACCESS);
   }
-
+*/
 
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Object lrID)
+/*  public boolean canWriteLR(Object lrID)
     throws PersistenceException, SecurityException{
 
-    return canAccessLR((Long) lrID,WRITE_ACCESS);
+    return canAccessLR((Long) lrID,DBHelper.WRITE_ACCESS);
   }
-
+*/
 
 
   /**
    * Checks if the user (identified by the sessionID)
    * has some access (read/write) to the LR
    */
-  private boolean canAccessLR(Long lrID,int mode)
+  protected boolean canAccessLR(Long lrID,int mode)
     throws PersistenceException, SecurityException{
 
     //0. preconditions
-    Assert.assertTrue(READ_ACCESS == mode || WRITE_ACCESS == mode);
+    Assert.assertTrue(DBHelper.READ_ACCESS == mode || DBHelper.WRITE_ACCESS == mode);
 
     //1. is session initialised?
     if (null == this.session) {
