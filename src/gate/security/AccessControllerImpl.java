@@ -21,6 +21,7 @@ import java.net.*;
 
 import junit.framework.*;
 
+import gate.*;
 import gate.event.*;
 import gate.persist.*;
 import gate.util.MethodNotImplementedException;
@@ -197,7 +198,8 @@ public class AccessControllerImpl
     Long new_id;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.create_group(?,?)} ");
+      stmt = this.jdbcConn.prepareCall(
+              "{ call "+Gate.DB_OWNER+".security.create_group(?,?)} ");
       stmt.setString(1,name);
       //numbers generated from Oracle sequences are BIGINT
       stmt.registerOutParameter(2,java.sql.Types.BIGINT);
@@ -205,7 +207,8 @@ public class AccessControllerImpl
       new_id = new Long(stmt.getLong(1));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't create a group in DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException(
+                "can't create a group in DB: ["+ sqle.getMessage()+"]");
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -253,7 +256,8 @@ public class AccessControllerImpl
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.delete_group(?) } ");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.delete_group(?) } ");
       stmt.setLong(1,grp.getID().longValue());
       stmt.execute();
     }
@@ -284,7 +288,8 @@ public class AccessControllerImpl
     Long new_id;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.create_user(?,?,?)} ");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.create_user(?,?,?)} ");
       stmt.setString(1,name);
       stmt.setString(2,passwd);
       //numbers generated from Oracle sequences are BIGINT
@@ -329,7 +334,8 @@ public class AccessControllerImpl
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.delete_user(?) } ");
+      stmt = this.jdbcConn.prepareCall(
+                  "{ call "+Gate.DB_OWNER+".security.delete_user(?) } ");
       stmt.setLong(1,usr.getID().longValue());
       stmt.execute();
     }
@@ -385,7 +391,8 @@ public class AccessControllerImpl
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.login(?,?,?)} ");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.login(?,?,?)} ");
       stmt.setString(1,usr_name);
       stmt.setString(2,passwd);
       stmt.setLong(3,prefGroupID.longValue());
@@ -516,7 +523,8 @@ public class AccessControllerImpl
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.can_delete_group(?,?) }");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.can_delete_group(?,?) }");
       stmt.setLong(1,grp.getID().longValue());
       stmt.registerOutParameter(2,java.sql.Types.INTEGER);
       stmt.execute();
@@ -547,7 +555,8 @@ public class AccessControllerImpl
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call security.can_delete_user(?,?) }");
+      stmt = this.jdbcConn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.can_delete_user(?,?) }");
       stmt.setLong(1,usr.getID().longValue());
       stmt.registerOutParameter(2,java.sql.Types.INTEGER);
       stmt.execute();
@@ -583,7 +592,7 @@ public class AccessControllerImpl
       //1.1 read groups
       sql = " SELECT grp_id, " +
             "        grp_name "+
-            " FROM   t_group";
+            " FROM   "+Gate.DB_OWNER+".t_group";
       rs = stmt.executeQuery(sql);
 
 
@@ -602,7 +611,7 @@ public class AccessControllerImpl
       //1.2 read users
       sql = " SELECT usr_id, " +
             "        usr_login "+
-            " FROM   t_user";
+            " FROM   "+Gate.DB_OWNER+".t_user";
       rs = stmt.executeQuery(sql);
 
       while (rs.next()) {
@@ -619,7 +628,7 @@ public class AccessControllerImpl
       //1.3 read user/group relations
       sql = " SELECT    UGRP_GROUP_ID, " +
             "           UGRP_USER_ID "+
-            " FROM      t_user_group " +
+            " FROM      "+Gate.DB_OWNER+".t_user_group " +
             " ORDER BY  UGRP_GROUP_ID asc";
       rs = stmt.executeQuery(sql);
 

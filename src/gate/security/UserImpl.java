@@ -19,6 +19,7 @@ import java.util.*;
 import java.sql.*;
 import junit.framework.*;
 
+import gate.*;
 import gate.event.*;
 import gate.persist.PersistenceException;
 
@@ -88,7 +89,8 @@ public class UserImpl implements User {
         throw new SecurityException("invalid session supplied");
       }
 
-      stmt = this.conn.prepareCall("{ call security.set_user_name(?,?)} ");
+      stmt = this.conn.prepareCall(
+              "{ call "+Gate.DB_OWNER+".security.set_user_name(?,?)} ");
       stmt.setLong(1,this.id.longValue());
       stmt.setString(2,newName);
       stmt.execute();
@@ -112,7 +114,8 @@ public class UserImpl implements User {
         throw new SecurityException("invalid session supplied");
       }
 
-      stmt = this.conn.prepareCall("{ call security.set_user_password(?,?)} ");
+      stmt = this.conn.prepareCall(
+              "{ call "+Gate.DB_OWNER+".security.set_user_password(?,?)} ");
       stmt.setLong(1,this.id.longValue());
       stmt.setString(2,newPass);
       stmt.execute();

@@ -20,6 +20,7 @@ import java.sql.*;
 
 import junit.framework.*;
 
+import gate.*;
 import gate.event.*;
 import gate.persist.PersistenceException;
 import gate.util.MethodNotImplementedException;
@@ -89,7 +90,8 @@ public class GroupImpl implements Group{
         throw new SecurityException("invalid session supplied");
       }
 
-      stmt = this.conn.prepareCall("{ call security.set_group_name(?,?)} ");
+      stmt = this.conn.prepareCall(
+              "{ call "+Gate.DB_OWNER+".security.set_group_name(?,?)} ");
       stmt.setLong(1,this.id.longValue());
       stmt.setString(2,newName);
       stmt.execute();
@@ -127,7 +129,8 @@ public class GroupImpl implements Group{
     CallableStatement stmt = null;
 
     try {
-      stmt = this.conn.prepareCall("{ call security.add_user_to_group(?,?)} ");
+      stmt = this.conn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.add_user_to_group(?,?)} ");
       stmt.setLong(1,this.id.longValue());
       stmt.setLong(2,usr.getID().longValue());
       stmt.execute();
@@ -182,7 +185,8 @@ public class GroupImpl implements Group{
     CallableStatement stmt = null;
 
     try {
-      stmt = this.conn.prepareCall("{ call security.remove_user_from_group(?,?)} ");
+      stmt = this.conn.prepareCall(
+                "{ call "+Gate.DB_OWNER+".security.remove_user_from_group(?,?)} ");
       stmt.setLong(1,this.id.longValue());
       stmt.setLong(2,usr.getID().longValue());
       stmt.execute();
