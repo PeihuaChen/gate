@@ -326,7 +326,9 @@ public class AnnotationSetImpl
       // we check for matching constraints by simple equality. a
       // feature map satisfies the constraints if it contains all the
       // key/value pairs from the constraints map
-      if (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
+
+//      if (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
+      if( a.getFeatures().subsumes(constraints))
         resultSet.add(a);
     } // while
     if (resultSet.isEmpty())
