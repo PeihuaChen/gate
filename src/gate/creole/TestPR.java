@@ -95,50 +95,77 @@ public class TestPR extends TestCase
     //run the tokeniser for doc1
     tokeniser.setDocument(doc1);
     tokeniser.execute();
-    assert(doc1.getAnnotations().size()== 1286);
+    assert("Found "+ doc1.getAnnotations().size() +
+      " Token annotations, instead of the expected 1286.",
+      doc1.getAnnotations().size()== 1286);
 
     //run the tokeniser for doc2
     tokeniser.setDocument(doc2);
     tokeniser.execute();
-    assert(doc2.getAnnotations().size()== 2144);
+    assert("Found "+ doc2.getAnnotations().size() +
+      " Token annotations, instead of the expected 2144.",
+      doc2.getAnnotations().size()== 2144);
 
     //run the tokeniser for doc3
     tokeniser.setDocument(doc3);
     tokeniser.execute();
-    assert(doc3.getAnnotations().size()== 2812);
+    assert("Found "+ doc3.getAnnotations().size() +
+      " Token annotations, instead of the expected 2812.",
+      doc3.getAnnotations().size()== 2812);
 
     //run gazetteer for doc1
     gaz.setDocument(doc1);
     gaz.execute();
-    assert(doc1.getAnnotations().get("Lookup").size()== 47);
+    assert("Found "+ doc1.getAnnotations().get("Lookup").size() +
+      " Lookup annotations, instead of the expected 47.",
+      doc1.getAnnotations().get("Lookup").size()== 47);
 
     //run gazetteer for doc2
     gaz.setDocument(doc2);
     gaz.execute();
-    assert(doc2.getAnnotations().get("Lookup").size()== 99);
+    assert("Found "+ doc2.getAnnotations().get("Lookup").size() +
+      " Lookup annotations, instead of the expected 99.",
+      doc2.getAnnotations().get("Lookup").size()== 99);
 
     //run gazetteer for doc3
     gaz.setDocument(doc3);
     gaz.execute();
-    assert(doc3.getAnnotations().get("Lookup").size() == 112);
+    assert("Found "+ doc3.getAnnotations().get("Lookup").size() +
+      " Lookup annotations, instead of the expected 112.",
+      doc3.getAnnotations().get("Lookup").size()== 112);
 
     //run splitter for doc1
     splitter.setDocument(doc1);
     splitter.execute();
-    assert(doc1.getAnnotations().get("Sentence").size() == 27);
-    assert(doc1.getAnnotations().get("Split").size() == 45);
+    assert("Found "+ doc1.getAnnotations().get("Sentence").size() +
+      " Sentence annotations, instead of the expected 27.",
+      doc1.getAnnotations().get("Sentence").size()== 27);
+
+    assert("Found "+ doc1.getAnnotations().get("Split").size() +
+      " Split annotations, instead of the expected 45.",
+      doc1.getAnnotations().get("Split").size()== 45);
 
     //run splitter for doc2
     splitter.setDocument(doc2);
     splitter.execute();
-    assert(doc2.getAnnotations().get("Sentence").size() == 64);
-    assert(doc2.getAnnotations().get("Split").size() == 88);
+    assert("Found "+ doc2.getAnnotations().get("Sentence").size() +
+      " Sentence annotations, instead of the expected 64.",
+      doc2.getAnnotations().get("Sentence").size()== 64);
+
+    assert("Found "+ doc2.getAnnotations().get("Split").size() +
+      " Split annotations, instead of the expected 88.",
+      doc2.getAnnotations().get("Split").size()== 88);
 
     //run splitter for doc3
     splitter.setDocument(doc3);
     splitter.execute();
-    assert(doc3.getAnnotations().get("Sentence").size() == 87);
-    assert(doc3.getAnnotations().get("Split").size() == 109);
+    assert("Found "+ doc3.getAnnotations().get("Sentence").size() +
+      " Sentence annotations, instead of the expected 87.",
+      doc3.getAnnotations().get("Sentence").size()== 87);
+
+    assert("Found "+ doc3.getAnnotations().get("Split").size() +
+      " Split annotations, instead of the expected 109.",
+      doc3.getAnnotations().get("Split").size()== 109);
 
     //run the tagger for doc1
     tagger.setDocument(doc1);
@@ -150,7 +177,9 @@ public class TestPR extends TestCase
       if (token.getFeatures().containsKey("category"))
         count = count + 1;
     }
-    assert(count == 657);
+    assert("Found "+ count +
+      " Token annotations with category feature, instead of the expected 657.",
+      count == 657);
 
     //run the tagger for doc2
     tagger.setDocument(doc2);
@@ -162,7 +191,9 @@ public class TestPR extends TestCase
       if (token.getFeatures().containsKey("category"))
         count = count + 1;
     }
-    assert(count == 1081);
+    assert("Found "+ count +
+      " Token annotations with category feature, instead of the expected 1081.",
+      count == 1081);
 
     //run the tagger for doc3
     tagger.setDocument(doc3);
@@ -174,34 +205,66 @@ public class TestPR extends TestCase
       if (token.getFeatures().containsKey("category"))
         count = count + 1;
     }
-    assert(count == 1376);
+    assert("Found "+ count +
+      " Token annotations with category feature, instead of the expected 1376.",
+      count == 1376);
 
     //run the transducer for doc1
     transducer.setDocument(doc1);
     transducer.execute();
-    assert(doc1.getAnnotations().get("Organization").size()== 16);
-    assert(doc1.getAnnotations().get("Location").size()== 3);
-    assert(doc1.getAnnotations().get("Person").size()== 3);
-    assert(doc1.getAnnotations().get("Date").size()== 6);
-    assert(doc1.getAnnotations().get("Money").size()== 1);
+    assert("Found "+ doc1.getAnnotations().get("Organization").size() +
+      " Organization annotations, instead of the expected 16",
+      doc1.getAnnotations().get("Organization").size()== 16);
+    assert("Found "+ doc1.getAnnotations().get("Location").size() +
+      " Location annotations, instead of the expected 3",
+      doc1.getAnnotations().get("Location").size()== 3);
+    assert("Found "+ doc1.getAnnotations().get("Person").size() +
+      " Person annotations, instead of the expected 3",
+      doc1.getAnnotations().get("Person").size()== 3);
+    assert("Found "+ doc1.getAnnotations().get("Date").size() +
+      " Date annotations, instead of the expected 6",
+      doc1.getAnnotations().get("Date").size()== 6);
+    assert("Found "+ doc1.getAnnotations().get("Money").size() +
+      " Money annotations, instead of the expected 1",
+      doc1.getAnnotations().get("Money").size()== 1);
 
     //run the transducer for doc2
     transducer.setDocument(doc2);
     transducer.execute();
-    assert(doc2.getAnnotations().get("Organization").size()== 18);
-    assert(doc2.getAnnotations().get("Location").size()== 9);
-    assert(doc2.getAnnotations().get("Person").size()== 1);
-    assert(doc2.getAnnotations().get("Date").size()== 6);
-    assert(doc2.getAnnotations().get("Money").size()== 3);
+    assert("Found "+ doc2.getAnnotations().get("Organization").size() +
+      " Organization annotations, instead of the expected 18",
+      doc2.getAnnotations().get("Organization").size()== 18);
+    assert("Found "+ doc2.getAnnotations().get("Location").size() +
+      " Location annotations, instead of the expected 9",
+      doc2.getAnnotations().get("Location").size()== 9);
+    assert("Found "+ doc2.getAnnotations().get("Person").size() +
+      " Person annotations, instead of the expected 1",
+      doc2.getAnnotations().get("Person").size()== 1);
+    assert("Found "+ doc2.getAnnotations().get("Date").size() +
+      " Date annotations, instead of the expected 6",
+      doc2.getAnnotations().get("Date").size()== 6);
+    assert("Found "+ doc2.getAnnotations().get("Money").size() +
+      " Money annotations, instead of the expected 3",
+      doc2.getAnnotations().get("Money").size()== 3);
 
     //run the transducer for doc3
     transducer.setDocument(doc3);
     transducer.execute();
-    assert(doc3.getAnnotations().get("Organization").size()== 9);
-    assert(doc3.getAnnotations().get("Location").size()== 12);
-    assert(doc3.getAnnotations().get("Person").size()== 8);
-    assert(doc3.getAnnotations().get("Date").size()== 7);
-    assert(doc3.getAnnotations().get("Money").size()== 4);
+    assert("Found "+ doc3.getAnnotations().get("Organization").size() +
+      " Organization annotations, instead of the expected 9",
+      doc3.getAnnotations().get("Organization").size()== 9);
+    assert("Found "+ doc3.getAnnotations().get("Location").size() +
+      " Location annotations, instead of the expected 12",
+      doc3.getAnnotations().get("Location").size()== 12);
+    assert("Found "+ doc3.getAnnotations().get("Person").size() +
+      " Person annotations, instead of the expected 8",
+      doc3.getAnnotations().get("Person").size()== 8);
+    assert("Found "+ doc3.getAnnotations().get("Date").size() +
+      " Date annotations, instead of the expected 7",
+      doc3.getAnnotations().get("Date").size()== 7);
+    assert("Found "+ doc3.getAnnotations().get("Money").size() +
+      " Money annotations, instead of the expected 4",
+      doc3.getAnnotations().get("Money").size()== 4);
 
     // run the orthomatcher for doc1
     orthomatcher.setDocument(doc1);
@@ -213,7 +276,9 @@ public class TestPR extends TestCase
       if (annot.getFeatures().containsKey("matches"))
         count = count + 1;
     }
-    assert(count == 29);
+    assert("Found "+ count +
+      " annotations with matches feature, instead of the expected 29.",
+      count == 29);
 
     //run the orthomatcher for doc2
     orthomatcher.setDocument(doc2);
@@ -225,7 +290,9 @@ public class TestPR extends TestCase
       if (annot.getFeatures().containsKey("matches"))
         count = count + 1;
     }
-    assert(count == 35);
+    assert("Found "+ count +
+      " annotations with matches feature, instead of the expected 35.",
+      count == 35);
 
     //run the orthomatcher for doc3
     orthomatcher.setDocument(doc3);
@@ -237,7 +304,10 @@ public class TestPR extends TestCase
       if (annot.getFeatures().containsKey("matches"))
         count = count + 1;
     }
-    assert(count == 22);
+    assert("Found "+ count +
+      " annotations with matches feature, instead of the expected 22.",
+      count == 22);
+
   } // testAllPR()
 
   /** Test suite routine for the test runner */
