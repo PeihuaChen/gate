@@ -1,9 +1,9 @@
-/* 
-	Gate.java
+/*
+  Gate.java
 
-	Hamish Cunningham, 31/07/98
+  Hamish Cunningham, 31/07/98
 
-	$Id$
+  $Id$
 */
 
 
