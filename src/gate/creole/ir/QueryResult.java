@@ -23,7 +23,10 @@ public class QueryResult{
   private float relevace;
   private List fieldValues;
 
-  public QueryResult(Document doc,float relevance, List fieldNames){
+  public QueryResult(Object docID,float relevance, List fieldValues){
+    this.docID = docID;
+    this.relevace = relevace;
+    this.fieldValues = fieldValues;
   }
 
   public Object getDocumentID(){
