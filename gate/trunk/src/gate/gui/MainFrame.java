@@ -1531,7 +1531,7 @@ public class MainFrame extends JFrame
       putValue(SHORT_DESCRIPTION,"Create a new Corpus Annotation Diff Tool");
     }// NewCorpusAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
-      CorpusAnnotDiffDialog annotDiffDialog = 
+      CorpusAnnotDiffDialog annotDiffDialog =
         new CorpusAnnotDiffDialog(MainFrame.this);
       annotDiffDialog.setTitle("Corpus Annotation Diff Tool");
       annotDiffDialog.setVisible(true);
@@ -1577,6 +1577,7 @@ public class MainFrame extends JFrame
           theTool.init();
           //and execute it
           theTool.execute();
+          theTool.printStatistics();
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
@@ -1626,6 +1627,7 @@ public class MainFrame extends JFrame
           theTool.init();
           //and execute it
           theTool.execute();
+          theTool.printStatistics();
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
@@ -1680,6 +1682,7 @@ public class MainFrame extends JFrame
           theTool.init();
           //and execute it
           theTool.execute();
+          theTool.printStatistics();
 
           Out.prln("Overall average precision: " + theTool.getPrecisionAverage());
           Out.prln("Overall average recall: " + theTool.getRecallAverage());
