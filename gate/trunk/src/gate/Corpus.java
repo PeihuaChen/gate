@@ -15,9 +15,13 @@
 
 package gate;
 import java.util.*;
+import java.net.URL;
+import java.io.FileFilter;
+import java.io.IOException;
 
 import gate.util.*;
 import gate.event.*;
+import gate.creole.ResourceInstantiationException;
 
 /** Corpora are lists of Document. TIPSTER equivalent: Collection.
   */
@@ -53,6 +57,27 @@ public interface Corpus extends LanguageResource, List, NameBearer {
    */
   public void unloadDocument(Document doc);
 
+  /**
+   * Fills this corpus with documents created on the fly from selected files in
+   * a directory. Uses a link {@FileFilter} to select which files will be used
+   * and which will be ignored.
+   * A simple file filter based on extensions is provided in the Gate
+   * distribution ({@link gate.util.ExtensionFileFilter}).
+   * @param directory the directory from which the files will be picked. This
+   * parameter is an URL for uniformity. It needs to be a URL of type file
+   * otherwise an InvalidArgumentException will be thrown.
+   * An implementation for this method is provided as a static method at
+   * {@link gate.corpora.CorpusImpl#populate(Corpus,URL,FileFilter,boolean)}.
+   * @param filter the file filter used to select files from the target
+   * directory. If the filter is <tt>null</tt> all the files will be accepted.
+   * @param recurseDirectories should the directory be parsed recursively?. If
+   * <tt>true</tt> all the files from the provided directory and all its
+   * children directories (on as many levels as necessary) will be picked if
+   * accepted by the filter otherwise the children directories will be ignored.
+   */
+  public void populate(URL directory, FileFilter filter,
+                       boolean recurseDirectories)
+                       throws IOException, ResourceInstantiationException;
 
   /**
    * Removes one of the listeners registered with this corpus.
