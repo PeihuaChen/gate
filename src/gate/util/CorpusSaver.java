@@ -64,95 +64,13 @@ public class CorpusSaver {
 
   public void initPRs() {
     try {
-      FeatureMap params = Factory.newFeatureMap();
-
-      //create a default tokeniser
-      Out.prln("Loading tokeniser <P>");
-//      String rulesURL = this.configs.getProperty("tokeniserRulesURL");
-//      if (rulesURL != null && !rulesURL.equals(""))
-//        params.put("tokeniserRulesURL", rulesURL);
-//      String grammarsURL = this.configs.getProperty("tokeniserGrammarURL");
-//      if (grammarsURL != null && !grammarsURL.equals(""))
-//        params.put("transducerGrammarURL", grammarsURL);
-      //the annots are put in temp, as they are going to be transfered to the
-      //new set
-      params.put(DefaultTokeniser.DEF_TOK_ANNOT_SET_PARAMETER_NAME, "temp");
-      tokeniser = (DefaultTokeniser) Factory.createResource(
-                      "gate.creole.tokeniser.DefaultTokeniser", params);
-
-      //create a default gazetteer
-      Out.prln("Loading gazetteer <P>");
-      params.clear();
-//      String listsURL = this.configs.getProperty("gazetteerListsURL");
-//      if (listsURL != null && !listsURL.equals(""))
-//        params.put("listsURL", listsURL);
-//      String caseSensitive = this.configs.getProperty("gazetteerCaseSensitive");
-//      if (caseSensitive != null && !caseSensitive.equals(""))
-//        params.put("caseSensitive", new Boolean(caseSensitive));
-      params.put(DefaultGazetteer.DEF_GAZ_ANNOT_SET_PARAMETER_NAME, "temp");
-      gazetteer = (DefaultGazetteer) Factory.createResource(
-                      "gate.creole.gazetteer.DefaultGazetteer", params);
-
-      //create the Annotation set transfer
-      Out.prln("Loading annotation set transfer <P>");
-      params.clear();
-      params.put("inputASName", "temp");
-      params.put("outputASName", annotSetName);
-      //transfer only the annotations under the body tag (BNC spesific)
-      setTransfer = (AnnotationSetTransfer) Factory.createResource(
-                      "gate.creole.annotransfer.AnnotationSetTransfer", params);
-
-      //create a splitter
-      Out.prln("Loading sentence splitter <P>");
-      params.clear();
-//      listsURL = this.configs.getProperty("splitterGazetteerURL");
-//      if (listsURL != null && !listsURL.equals(""))
-//        params.put("gazetteerListsURL", listsURL);
-//      grammarsURL = this.configs.getProperty("splitterGrammarURL");
-//      if (grammarsURL != null && !grammarsURL.equals(""))
-//        params.put("transducerURL", grammarsURL);
-      params.put(SentenceSplitter.SPLIT_INPUT_AS_PARAMETER_NAME, annotSetName);
-      params.put(SentenceSplitter.SPLIT_OUTPUT_AS_PARAMETER_NAME, annotSetName);
-      splitter = (SentenceSplitter) Factory.createResource(
-                      "gate.creole.splitter.SentenceSplitter", params);
-
-      //create a tagger
-      Out.prln("Loading POS tagger <P>");
-      params.clear();
-//      String lexiconURL = this.configs.getProperty("taggerLexiconURL");
-//      if (lexiconURL != null && !lexiconURL.equals(""))
-//        params.put("lexiconURL", lexiconURL);
-//      rulesURL = this.configs.getProperty("taggerRulesURL");
-//      if (rulesURL != null && !rulesURL.equals(""))
-//        params.put("rulesURL", rulesURL);
-      params.put(POSTagger.TAG_INPUT_AS_PARAMETER_NAME, annotSetName);
-      tagger = (POSTagger) Factory.createResource(
-                      "gate.creole.POSTagger", params);
-
-      //create a grammar
-      Out.prln("Loading grammars for transducer <P>");
-      params.clear();
-//      String grammarURL = this.configs.getProperty("grammarURL");
-//      if (grammarURL != null && !grammarURL.equals(""))
-//        params.put("grammarURL", grammarURL);
-      params.put(ANNIETransducer.TRANSD_INPUT_AS_PARAMETER_NAME, annotSetName);
-      params.put(ANNIETransducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, annotSetName);
-      transducer = (ANNIETransducer) Factory.createResource(
-                      "gate.creole.ANNIETransducer", params);
-
-      //create an orthomatcher
-      Out.prln("Loading orthomatcher <P>");
-      params.clear();
-      params.put(OrthoMatcher.OM_ANN_SET_PARAMETER_NAME, annotSetName);
-      orthomatcher = (OrthoMatcher) Factory.createResource(
-                      "gate.creole.orthomatcher.OrthoMatcher", params);
-
-      Out.prln("Loading document reset PR <P>");
-      params.clear();
-      annotDeletePR = (AnnotationDeletePR) Factory.createResource(
-                    "gate.creole.annotdelete.AnnotationDeletePR", params);
-    } catch (ResourceInstantiationException ex) {
-      throw new GateRuntimeException("Corpus Benchmark Tool:"+ex.getMessage());
+      if (applicationFile == null)
+        Out.prln("Application not set!");
+      Out.prln("App file is: " + applicationFile.getAbsolutePath());
+      application = (Controller) gate.util.persistence.PersistenceManager
+                                   .loadObjectFromFile(applicationFile);
+    } catch (Exception ex) {
+      throw new GateRuntimeException("Corpus Saver: "+ex.getMessage());
     }
   }//initPRs
 
@@ -163,6 +81,11 @@ public class CorpusSaver {
       Factory.deleteResource(theCorpus);
       if(ds !=null)
         ds.close();
+      if (application != null) {
+        Iterator iter = new ArrayList(application.getPRs()).iterator();
+        while (iter.hasNext())
+          Factory.deleteResource((Resource) iter.next());
+      }
     } catch (Exception ex) {
       throw new GateRuntimeException(ex.getMessage());
     }
@@ -204,7 +127,7 @@ public class CorpusSaver {
     CorpusSaver corpusSaver1 = new CorpusSaver();
 
     if(args.length < 2)
-      throw new GateException("usage: [-process] source_directory datastore_path");
+      throw new GateException("usage: [-process] source_directory datastore_path application");
     int i = 0;
     while (i < args.length && args[i].startsWith("-")) {
       if(args[i].equals("-process")) {
@@ -230,6 +153,15 @@ public class CorpusSaver {
                                      + "GATE serial datastore");
     corpusSaver1.setDSPath(storagePath);
 
+    //get the last argument which is the application
+    i++;
+    String appName = args[i];
+    File appFile = new File(appName);
+    if (!appFile.isFile())
+      throw new GateException("Please provide an existing GATE application");
+    else
+      corpusSaver1.setApplicationFile(appFile);
+
     corpusSaver1.init();
     corpusSaver1.setStartDir(dir);
     double timeBefore = System.currentTimeMillis();
@@ -252,6 +184,11 @@ public class CorpusSaver {
   public void setDSPath(String path){
     dsPath = path;
   }
+
+  public void setApplicationFile(File newAppFile) {
+    applicationFile = newAppFile;
+  }
+
 
   protected void saveFiles(List files) {
     if (files==null || files.isEmpty() || theCorpus == null || ds == null)
@@ -280,51 +217,25 @@ public class CorpusSaver {
 
   protected void processDocument(Document doc) {
     try {
-      tokeniser.setDocument(doc);
-      tokeniser.execute();
-
-      gazetteer.setDocument(doc);
-      gazetteer.execute();
-
-      setTransfer.setDocument(doc);
-      String tagName = "text";
-      AnnotationSet body = doc.getAnnotations(
-                    GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get(tagName);
-      if (body == null || body.isEmpty())
-        tagName = "stext";
-      body = doc.getAnnotations(
-                    GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get(tagName);
-      if (body == null || body.isEmpty())
-        tagName = "body";
-      setTransfer.setTextTagName(tagName);
-      setTransfer.execute();
-
-      splitter.setDocument(doc);
-      splitter.execute();
-
-      tagger.setDocument(doc);
-      tagger.execute();
-
-      transducer.setDocument(doc);
-      transducer.execute();
-
-      orthomatcher.setDocument(doc);
-      orthomatcher.execute();
-
-      annotDeletePR.setDocument(doc);
-      List annotTypes = new ArrayList();
-      annotTypes.add(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
-      annotTypes.add(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE);
-      annotTypes.add("Unknown");
-      annotTypes.add("TempIdentifier");
-      annotTypes.add("Temp");
-      annotTypes.add(ANNIEConstants.LOOKUP_ANNOTATION_TYPE);
-      annotTypes.add("Split");
-      annotDeletePR.setAnnotationTypes(annotTypes);
-      annotDeletePR.execute();
-    } catch (gate.creole.ExecutionException ex) {
-      throw new GateRuntimeException("Corpus generation error: " +
-                                     ex.getMessage());
+      if (application instanceof CorpusController) {
+        Corpus tempCorpus = Factory.newCorpus("temp");
+        tempCorpus.add(doc);
+        ((CorpusController)application).setCorpus(tempCorpus);
+        application.execute();
+        Factory.deleteResource(tempCorpus);
+        tempCorpus = null;
+      } else {
+        Iterator iter = application.getPRs().iterator();
+        while (iter.hasNext())
+          ((ProcessingResource) iter.next()).setParameterValue("document", doc);
+        application.execute();
+      }
+    } catch (ResourceInstantiationException ex) {
+      throw new RuntimeException("Error executing application: "
+                                    + ex.getMessage());
+    } catch (ExecutionException ex) {
+      throw new RuntimeException("Error executing application: "
+                                    + ex.getMessage());
     }
   }
 
@@ -339,15 +250,8 @@ public class CorpusSaver {
   private Corpus theCorpus;
   private String annotSetName = "NE";
   private String dsPath = "d:\\bnc";
-
-  private DefaultTokeniser tokeniser;
-  private DefaultGazetteer gazetteer;
-  private SentenceSplitter splitter;
-  private POSTagger tagger;
-  private ANNIETransducer transducer;
-  private OrthoMatcher orthomatcher;
-  private AnnotationSetTransfer setTransfer;
-  private AnnotationDeletePR annotDeletePR;
+  private Controller application = null;
+  private File applicationFile = null;
 
   private boolean processMode = false;
 }
