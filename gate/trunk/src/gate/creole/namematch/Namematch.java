@@ -248,6 +248,7 @@ public class Namematch extends AbstractProcessingResource
 
               // apply name matching rules
               if (apply_rules_namematch(shortName,longName)) {
+
                 AnnotationMatches matchedAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot2 = new AnnotationMatches();
                 AnnotationMatches matchedByAnnot1 = new AnnotationMatches();
@@ -321,24 +322,24 @@ public class Namematch extends AbstractProcessingResource
                     Integer id = annot1.getId();
                     Long start = annot1.getStartNode().getOffset();
                     Long end = annot1.getEndNode().getOffset();
-                    FeatureMap fm = annot1.getFeatures();
                     // remove the "unknown" annotation
                     nameAnnotsUnknown.remove(annot1);
                     try {
                       // add the annotation with the new type
-                      nameAnnotsUnknown.add(id,start,end,annotationType,fm);
+                      nameAnnotsUnknown.add(
+                        id,start,end,annotationType,Factory.newFeatureMap());
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } else if ((nameAnnotsUnknown.contains(annot2))
                       && (!nameAnnotsUnknown.contains(annot1))){
                     Integer id = annot2.getId();
                     Long start = annot2.getStartNode().getOffset();
                     Long end = annot2.getEndNode().getOffset();
-                    FeatureMap fm = annot2.getFeatures();
                     // remove the "unknown" annotation
                     nameAnnotsUnknown.remove(annot2);
                     try {
                       // add the annotation with the new type
-                      nameAnnotsUnknown.add(id,start,end,annotationType,fm);
+                      nameAnnotsUnknown.add(
+                        id,start,end,annotationType,Factory.newFeatureMap());
                     } catch (InvalidOffsetException ioe){ioe.printStackTrace();}
                   } // else if
                 }//if
