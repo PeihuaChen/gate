@@ -29,10 +29,11 @@ import gate.annotation.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl {
 
-  protected boolean     isContentRead;
-  protected Object      contentLock;
-  protected Connection  jdbcConn;
-  protected HashMap     annotSetsRead;
+  private boolean     isContentRead;
+  private Object      contentLock;
+  private Connection  jdbcConn;
+  private HashSet     annotationsRead;
+
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -50,7 +51,9 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     }
 
     contentLock = new Object();
-    annotSetsRead = new HashMap();
+
+    this.namedAnnotSets = new HashMap();
+    this.defaultAnnots = new AnnotationSetImpl(this);
 
     this.isContentRead = false;
     this.jdbcConn = conn;
@@ -181,36 +184,56 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   private void _getAnnotations(String name) {
 
+    AnnotationSet as = null;
+
+
     //have we already read this set?
-    if (this.annotSetsRead.containsKey(name)) {
-      //we've already read it - do nothing
-      //super methods will take care
-      return;
+
+    if (null == name) {
+      //default set
+      if (this.defaultAnnots != null) {
+        //the default set is alredy red - do nothing
+        //super methods will take care
+        return;
+      }
+      else {
+        this.defaultAnnots = new AnnotationSetImpl(this);
+        //go on with processing
+      }
     }
     else {
-      Long lrID = (Long)getLRPersistenceId();
-      Long asetID = null;
-      //0. preconditions
-      Assert.assertNotNull(lrID);
+      //named set
+      if (this.namedAnnotSets.containsKey(name)) {
+        //we've already read it - do nothing
+        //super methods will take care
+        return;
+      }
+    }
 
-      //1. read a-set info
-      PreparedStatement pstmt = null;
-      ResultSet rs = null;
-      try {
-        String sql = " select v1.as_id " +
-                     " from  "+Gate.DB_OWNER+".v_annotation_set v1 " +
-                     " where  v1.lr_id = ? ";
-        //do we have aset name?
-        String clause = null;
-        if (null != name) {
-          clause =   "        and v1.as_name = ? ";
-        }
-        else {
-          clause =   "        and v1.as_name is null ";
-        }
-        sql = sql + clause;
 
-        pstmt = this.jdbcConn.prepareStatement(sql);
+    Long lrID = (Long)getLRPersistenceId();
+    Long asetID = null;
+    //0. preconditions
+    Assert.assertNotNull(lrID);
+
+    //1. read a-set info
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    try {
+      String sql = " select v1.as_id " +
+                   " from  "+Gate.DB_OWNER+".v_annotation_set v1 " +
+                   " where  v1.lr_id = ? ";
+      //do we have aset name?
+      String clause = null;
+      if (null != name) {
+        clause =   "        and v1.as_name = ? ";
+      }
+      else {
+        clause =   "        and v1.as_name is null ";
+      }
+      sql = sql + clause;
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
         pstmt.setLong(1,lrID.longValue());
         if (null != name) {
           pstmt.setString(2,name);
@@ -230,10 +253,10 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
         //1.5, create a-set
         if (null == name) {
-          AnnotationSet as = new AnnotationSetImpl(this);
+          as = new AnnotationSetImpl(this);
         }
         else {
-          AnnotationSet as = new AnnotationSetImpl(this,name);
+          as = new AnnotationSetImpl(this,name);
         }
       }
       catch(SQLException sqle) {
@@ -255,14 +278,12 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       //3. read annotations
 
       try {
-        String sql = " select v1.ann_id, " +
-                     "        v1.ann_id, " +
-                     "        v1.at_name " +
-                     " from  "+Gate.DB_OWNER+".v_annot_set v1 " +
-                     "       "+Gate.DB_OWNER+".v_document v2 " +
-                     " where  v1.lr_id = ? " +
-                     "        and v1.doc_id = v2.as_doc_id " +
-                     "        and v2.and as_name = ? ";
+        String sql = " select ann_id, " +
+                     "        at_name " +
+                     "        start_offset " +
+                     "        end_offset " +
+                     " from  "+Gate.DB_OWNER+".v_annotation  " +
+                     " where  asann_as_id_id = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
@@ -270,14 +291,25 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       rs = pstmt.getResultSet();
 
       while (rs.next()) {
-        //Annotation ann = new AnnotationImpl();
+        //1. read data memebers
+        Long annID = new Long(rs.getLong(1));
+        String type = rs.getString(2);
+        Long startOffset = new Long(rs.getLong(3));
+        Long endOffset = new Long(rs.getLong(4));
+
+        //2. get the features
+        FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
+        //fm may be null
+
+        //3. add to annotation set
+        as.add(startOffset,endOffset,type,fm);
       }
-
-      //3, add to a-set
-
     }
     catch(SQLException sqle) {
       throw new SynchronisationException("can't read content from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(InvalidOffsetException oe) {
+      throw new SynchronisationException(oe);
     }
     finally {
       try {
@@ -289,13 +321,18 @@ public class DatabaseDocumentImpl extends DocumentImpl {
       }
     }
 
-      //4. update internal data members
-
-      //5. read features for the annotations in this a-set
-      throw new MethodNotImplementedException();
-
-      //6. update annotations
+    //4. update internal data members
+    if (name == null) {
+      //default as
+      this.defaultAnnots = as;
     }
+    else {
+      //named as
+      this.namedAnnotSets.put(name,as);
+    }
+
+    //don't return the new aset, the super method will take care
+    return;
   }
 
 
