@@ -143,24 +143,24 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         // set repositioning object
         xmlDocHandler.setRepositioningInfo(repInfo);
         // Parse the document handler
-/* Angel
+///* Angel
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
-Angel */
-      // try to choose concret parser (Xerces)
+//Angel */
+//      // try to choose concret parser (Xerces)
 // Angel - start
-      org.apache.xerces.parsers.SAXParser newxmlParser =
-          new org.apache.xerces.parsers.SAXParser();
-      // Set up the factory to create the appropriate type of parser
-      // non validating one
-      // http://xml.org/sax/features/validation set to false
-      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
-      // namesapace aware one
-      // http://xml.org/sax/features/namespaces set to true
-      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-
-      newxmlParser.setContentHandler(xmlDocHandler);
-      newxmlParser.setReaderFactory(new StreamingCharFactory());
-      newxmlParser.parse(doc.getSourceUrl().toString());
+//      org.apache.xerces.parsers.SAXParser newxmlParser =
+//          new org.apache.xerces.parsers.SAXParser();
+//      // Set up the factory to create the appropriate type of parser
+//      // non validating one
+//      // http://xml.org/sax/features/validation set to false
+//      newxmlParser.setFeature("http://xml.org/sax/features/validation", false);
+//      // namesapace aware one
+//      // http://xml.org/sax/features/namespaces set to true
+//      newxmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
+//
+//      newxmlParser.setContentHandler(xmlDocHandler);
+//      newxmlParser.setReaderFactory(new StreamingCharFactory());
+//      newxmlParser.parse(doc.getSourceUrl().toString());
 // Angel - end
         ((DocumentImpl) doc).setNextAnnotationId(
                                           xmlDocHandler.getCustomObjectsId());
