@@ -10,6 +10,7 @@ package gate;
 import java.util.*;
 import junit.framework.*;
 import gate.annotation.*;
+import gate.corpora.*;
 import gate.util.*;
 
 /** Top-level entry point for GATE test suite.
@@ -40,7 +41,7 @@ public class TestGate
     TestSuite suite = new TestSuite();
     suite.addTest(TestDocument.suite());
     suite.addTest(TestAnnotation.suite());
-    suite.addTest(gate.util.TestRBTreeMap.suite());
+    suite.addTest(TestRBTreeMap.suite());
     return suite;
   } // suite
 
