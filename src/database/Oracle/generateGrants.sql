@@ -13,27 +13,12 @@
  *  $Id$
  */
 
-/*
- *  usage:
- *
- *  sqlplus USER/PASS@SID @generateGrants.sql
- *  
- *  where USER is a user with SELECT_CATALOG_ROLE granted
- *  so that he can access the ALL_xxx views
- *  (use SYSTEM if u're lazy)
- *  
- *  the result.sql file contains all the grant statemments 
- *  plus some junk lines (containing 'XX') that shouls be 
- *  removed manually (or with script)
- *  
- */
- 
  
 spool result.sql;
 /
 
  
-select 'grant select,insert,update,delete on ' || owner || '.' || table_name || ' to GATEUSER' 
+select 'grant select,insert,update,delete on ' || owner || '.' || table_name || ' to GATEUSER;' 
 as xx
 from sys.all_tables
 where owner='GATEADMIN'
