@@ -25,7 +25,7 @@ public class CorefEditor extends AbstractDocumentView{
    */
   protected void initGUI(){
     // TODO Auto-generated method stub
-    //
+    //foo
   }
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#registerHooks()
