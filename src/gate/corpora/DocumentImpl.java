@@ -469,6 +469,15 @@ extends AbstractLanguageResource implements Document {
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
+  /**
+   * Removes one of the named annotation sets.
+   * Note that the default annotation set cannot be removed.
+   * @param name the name of the annotation set to be removed
+   */
+  public void removeAnnotationSet(String name){
+    namedAnnotSets.remove(name);
+  }
+
   /** Get the features associated with this document. */
   public FeatureMap getFeatures() { return features; }
 
