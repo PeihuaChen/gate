@@ -97,6 +97,7 @@ public class TestJavac extends TestCase{
         " //some public methods" + nl +
         " public void foo(){" + nl +
         " String nullStr = null;" + nl +
+        "// This should cause a compile error:" + nl +
         " nullStr = 123;" + nl +
         "} " + nl +
         " " + nl +
