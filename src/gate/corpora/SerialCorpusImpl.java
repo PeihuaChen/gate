@@ -47,7 +47,8 @@ public class SerialCorpusImpl extends
   private transient Corpus transientCorpus;
   private java.util.List docDataList = null;
 
-  //here I keep document pers ID as key and Documents as value
+  //here I keep document index as key (same as the index in docDataList
+  //which defines the document order) and Documents as value
   private transient java.util.HashMap documents = null;
 
   public SerialCorpusImpl(){
@@ -258,7 +259,11 @@ public class SerialCorpusImpl extends
       return false;
     Document doc = (Document) o;
 
-    documents.put(doc.getName(), doc);
+    //add the document with its index in the docDataList
+    //in this case, since it's going to be added to the end
+    //the index will be the size of the docDataList before
+    //the addition
+    documents.put(new Integer(docDataList.size()), doc);
     DocumentData docData = new DocumentData(doc.getName(),
                                             doc.getLRPersistenceId());
     return docDataList.add(docData);
@@ -275,6 +280,7 @@ public class SerialCorpusImpl extends
     boolean found = false;
     DocumentData docData = null;
 
+    int index = 0;
     //try finding a document with the same name and persistent ID
     Iterator iter = docDataList.iterator();
     while (iter.hasNext() && !found) {
@@ -282,11 +288,12 @@ public class SerialCorpusImpl extends
       if (docData.getDocumentName().equals(doc.getName()) &&
           docData.getPersistentID().equals(doc.getLRPersistenceId()))
         found = true;
+      index++;
     }
 
     if(found) { //we found it, so remove it
       docDataList.remove(docData);
-      documents.remove(doc.getName());
+      documents.remove(new Integer(index));
     }
 
     return found;
@@ -365,8 +372,7 @@ public class SerialCorpusImpl extends
     if (transientCorpus != null)
       return transientCorpus.get(index);
 
-    String docName = ((DocumentData) docDataList.get(index)).getDocumentName();
-    return documents.get(docName);
+    return documents.get(new Integer(index));
   }
 
   public Object set(int index, Object element){
@@ -381,9 +387,8 @@ public class SerialCorpusImpl extends
     if (transientCorpus != null)
       return transientCorpus.remove(index);
 
-    String name = ((DocumentData) docDataList.get(index)).getDocumentName();
     docDataList.remove(index);
-    return documents.remove(name);
+    return documents.remove(new Integer(index));
   }
 
   public int indexOf(Object o){
@@ -405,6 +410,18 @@ public class SerialCorpusImpl extends
   public List subList(int fromIndex, int toIndex){
     throw new gate.util.MethodNotImplementedException();
   }
+
+  /**
+   * readObject - calls the default readObject() and then initialises the
+   * transient data
+   *
+   * @serialData Read serializable fields. No optional data read.
+   */
+  private void readObject(ObjectInputStream s)
+      throws IOException, ClassNotFoundException {
+    s.defaultReadObject();
+    documents = new VerboseHashMap();
+  }//readObject
 
   /**
    * Class used for the documents structure. This is a {@link java.util.HashMap}
@@ -460,15 +477,32 @@ public class SerialCorpusImpl extends
     }//public Object remove(Object key)
 
     public Object get(Object key){
-      String docName = (String) key;
+      if (! (key instanceof Integer))
+        return null;
       Object res = super.get(key);
+      int index = ((Integer) key).intValue();
 
       //if the document is null, then I must get it from the DS
       if (res == null) {
-        Out.prln("I need to restore the doc from the DS here!");
+        FeatureMap features = Factory.newFeatureMap();
+        features.put(DataStore.DATASTORE_FEATURE_NAME,
+                     SerialCorpusImpl.this.dataStore);
+        try {
+          features.put(DataStore.LR_ID_FEATURE_NAME,
+                      ((DocumentData)docDataList.get(index)).getPersistentID());
+          Resource lr = Factory.createResource( "gate.corpora.DocumentImpl",
+                                                features);
+          res = lr;
+        } catch (ResourceInstantiationException ex) {
+          Err.prln("Error reading document inside a serialised corpus.");
+          throw new GateRuntimeException(ex.getMessage());
+        }
+
       }
       return res;
     }//public Object get(Object key)
+
+
 
   }//protected class VerboseHashMap extends HashMap
 

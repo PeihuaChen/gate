@@ -38,7 +38,7 @@ public class TestPersist extends TestCase
 
 
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /** Construction */
   public TestPersist(String name) throws GateException { super(name); }
@@ -225,8 +225,8 @@ public class TestPersist extends TestCase
 
     // check that the versions we read back match the originals
     Corpus diskCorp = (Corpus) lrsFromDisk.get(0);
-//    Document diskDoc = (Document) lrsFromDisk.get(1);
-//    Document diskDoc2 = (Document) lrsFromDisk.get(2);
+
+    Document diskDoc = (Document) diskCorp.get(0);
 
     if (DEBUG) Out.prln("Documents in corpus: " + corp.getDocumentNames());
     assert("corp name != mem name", corp.getName().equals(diskCorp.getName()));
@@ -234,11 +234,28 @@ public class TestPersist extends TestCase
     if (DEBUG) Out.prln("Disk features " + diskCorp.getFeatures());
     assert("corp feat != mem feat",
            corp.getFeatures().equals(diskCorp.getFeatures()));
-//    assert("doc from disk not equal to memory version", doc.equals(diskDoc));
+    if (DEBUG)
+      Out.prln("Annotations in doc: " + diskDoc.getAnnotations());
+    assert("doc annotations from disk not equal to memory version",
+          doc.getAnnotations().equals(diskDoc.getAnnotations()));
+    assert("doc from disk not equal to memory version",
+          doc.equals(diskDoc));
+
+    List allLRs =
+      Gate.getCreoleRegister().getLrInstances("gate.corpora.DocumentImpl");
+    assert("wrong number of documents in Creole register", allLRs.size() == 4);
+    Iterator iter = allLRs.iterator();
+    while (iter.hasNext()) {
+      LanguageResource lr = (LanguageResource)iter.next();
+      if (DEBUG) Out.prln("Gate knows about resource: " + lr.getName() +
+                         " of type " + lr.getClass().getName());
+
+    }
+
 //    assert("doc2 from disk not equal to memory version", doc2.equals(diskDoc2));
 
     // delete the datastore
-    if (DEBUG) sds.delete();
+    sds.delete();
   } // testMultipleLrs()
 
   /** Test LR deletion */
