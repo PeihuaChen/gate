@@ -105,6 +105,11 @@
 		</copy>
 		<copy file="${buildDir}/build.txt" todir="${outputDir}/gate/resources"/>
 		<copy file="${buildDir}/version.txt" todir="${outputDir}/gate/resources"/>
+		<copy todir="${outputDir}/gate/util"
+		      includeEmptyDirs="true">
+			<fileset dir="${srcDir}/gate/util"
+               includes="*.tcl"/>
+		</copy>
 	</target>
 
 
