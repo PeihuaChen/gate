@@ -812,7 +812,7 @@ implements AnnotationSet
     * before calling this method.
     */
   public void edit(Long start, Long end, DocumentContent replacement) {
-
+Out.prln("Edit at " + start + " - " + end);
     long s = start.longValue(), e = end.longValue();
     long rlen = // length of the replacement value
       ( (replacement == null) ? 0 : replacement.size().longValue() );
@@ -826,12 +826,15 @@ implements AnnotationSet
       Node n = (Node) replacedAreaNodesIter.next();
 
       // remove from nodes map
-      if(true)
-        throw new LazyProgrammerException("this next call tries to remove " +
-          "from a map based on the value; note index is key; also note that " +
-          "some nodes may have no index....");
+//      if(true)
+//        throw new LazyProgrammerException("this next call tries to remove " +
+//          "from a map based on the value; note index is key; also note that " +
+//          "some nodes may have no index....");
 
-      nodesByOffset.remove(n);
+//There is at most one node at any given location so removing is safe.
+//Also note that unrooted nodes have never been implemented so all nodes have
+//offset
+      nodesByOffset.remove(n.getOffset());
 
       // remove annots that start at this node
       AnnotationSet invalidatedAnnots =
@@ -937,12 +940,9 @@ implements AnnotationSet
     *  to the AnnotationSets and annotations from the sets are the same
     */
   public boolean equals(Object other) {
-
     if (!super.equals(other)) return false;
-
     if (other instanceof AnnotationSetImpl) {
       AnnotationSet annotSet = (AnnotationSet) other;
-
       // verify the documents which belong to
 //this leads to cyclic checks Document -> AnnotationSet -> Document
 //REMOVED!
@@ -955,7 +955,6 @@ implements AnnotationSet
     } else {
       if (!(other instanceof Set)) return false;
     }
-
     return true;
   } // equals
 
