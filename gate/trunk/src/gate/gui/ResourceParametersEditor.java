@@ -97,6 +97,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                      setCellEditor(new ParameterValueEditor());
 
     setIntercellSpacing(new Dimension(5, 5));
+    
+    setAutoResizeMode(AUTO_RESIZE_LAST_COLUMN);
 
     setSurrendersFocusOnKeystroke(true);
   }// protected void initGuiComponents()
