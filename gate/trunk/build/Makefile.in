@@ -33,8 +33,8 @@ PKGS=	gate gate.annotation gate.config gate.corpora gate.creole \
 	gate.creole.gazetteer gate.creole.namematch \
 	gate.creole.nerc gate.creole.tokeniser \
 	gate.db gate.email gate.event gate.fsm gate.gui gate.html \
-	gate.jape gate.jape.parser gate.persist gate.sgml gate.swing \
-	gate.util gate.xml gate.security guk guk.im  
+	gate.jape gate.jape.parser gate.persist gate.security gate.sgml \
+	gate.swing gate.util gate.util.persistence gate.xml guk guk.im  
 
 # classpath to build compile commands from
 CP=	-classpath \
