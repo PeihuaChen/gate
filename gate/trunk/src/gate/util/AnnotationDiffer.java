@@ -18,8 +18,8 @@ import java.util.*;
 import gate.Annotation;
 
 public class AnnotationDiffer {
-  
-  
+
+
   public static interface Pairing{
     public Annotation getKey();
     public Annotation getResponse();
@@ -91,10 +91,14 @@ public class AnnotationDiffer {
       finalChoices.add(bestChoice);
       switch(bestChoice.type){
         case CORRECT:{
+          if(correctAnnotations == null) correctAnnotations = new HashSet();
+          correctAnnotations.add(bestChoice.getResponse());
           correctMatches++;
           break;
         }
         case PARTIALLY_CORRECT:{
+          if(partiallyCorrectAnnotations == null) partiallyCorrectAnnotations = new HashSet();
+          partiallyCorrectAnnotations.add(bestChoice.getResponse());
           partiallyCorrectMatches++;
           break;
         }
@@ -105,6 +109,8 @@ public class AnnotationDiffer {
     for(int i = 0; i < keyChoices.size(); i++){
       List aList = (List)keyChoices.get(i);
       if(aList == null || aList.isEmpty()){
+        if(missingAnnotations == null) missingAnnotations = new HashSet();
+        missingAnnotations.add((Annotation)(keyList.get(i)));
         finalChoices.add(new Choice(i, -1, WRONG));
         missing ++;
       }
@@ -114,54 +120,68 @@ public class AnnotationDiffer {
     for(int i = 0; i < responseChoices.size(); i++){
       List aList = (List)responseChoices.get(i);
       if(aList == null || aList.isEmpty()){
+        if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
+        spuriousAnnotations.add((Annotation)(responseList.get(i)));
         finalChoices.add(new Choice(-1, i, WRONG));
         spurious ++;
       }
     }
-    
+
     return finalChoices;
   }
 
   public double getPrecisionStrict(){
-    return (double)correctMatches / responseList.size();
+    return (double)((double)correctMatches / (double)responseList.size());
   }
 
   public double getRecallStrict(){
-    return (double)correctMatches / keyList.size();
+    return (double)((double)correctMatches / (double)keyList.size());
   }
 
   public double getPrecisionLenient(){
-    return (double)(correctMatches + partiallyCorrectMatches) / responseList.size();
+    return (double)((double)(correctMatches + partiallyCorrectMatches) / (double)responseList.size());
+  }
+
+  public double getPrecisionAverage() {
+    return (double)((double)(getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0));
   }
 
   public double getRecallLenient(){
-    return (double)(correctMatches + partiallyCorrectMatches) / keyList.size();
+    return (double)((double)(correctMatches + partiallyCorrectMatches) / (double)keyList.size());
+  }
+
+  public double getRecallAverage() {
+    return (double)((double)(getRecallLenient() + getRecallStrict()) / (double)(2.0));
   }
 
   public double getFMeasureStrict(double beta){
     double precision = getPrecisionStrict();
     double recall = getRecallStrict();
     double betaSq = beta * beta;
-    return ((betaSq + 1) * precision * recall ) /
-           (betaSq * precision + recall);
+    return (double)(((betaSq + 1) * precision * recall ) /
+           (double)(betaSq * precision + recall));
   }
 
   public double getFMeasureLenient(double beta){
     double precision = getPrecisionLenient();
     double recall = getRecallLenient();
     double betaSq = beta * beta;
-    return ((betaSq + 1) * precision * recall ) /
-           (betaSq * precision + recall);
+    return (double)(((betaSq + 1) * precision * recall ) /
+           (double)(betaSq * precision + recall));
   }
-  
+
+  public double getFMeasureAverage(double beta) {
+    return (double)(((double)(getFMeasureLenient(beta) + getFMeasureStrict(beta)) / (double)(2.0)));
+  }
+
   public int getCorrectMatches(){
     return correctMatches;
   }
-  
+
   public int getPartiallyCorrectMatches(){
     return partiallyCorrectMatches;
   }
-  
+
   public int getMissing(){
     return missing;
   }
@@ -169,7 +189,7 @@ public class AnnotationDiffer {
   public int getSpurious(){
     return spurious;
   }
-  
+
   public int getFalsePositivesStrict(){
     return responseList.size() - correctMatches;
   }
@@ -210,8 +230,8 @@ public class AnnotationDiffer {
     }
   }
 
-  
-  
+
+
   /**
    * Performs some basic checks over the internal data structures from the last
    * run.
@@ -288,7 +308,7 @@ public class AnnotationDiffer {
    * Represents a pairing of a key annotation with a response annotation and
    * the associated score for that pairing.
    */
-	class Choice implements Pairing{
+   public class Choice implements Pairing{
     Choice(int keyIndex, int responseIndex, int type) {
       this.keyIndex = keyIndex;
       this.responseIndex = responseIndex;
@@ -303,16 +323,16 @@ public class AnnotationDiffer {
         return score;
       }
     }
-    
+
     public Annotation getKey(){
       return keyIndex == -1 ? null : (Annotation)keyList.get(keyIndex);
     }
-    
+
     public Annotation getResponse(){
-      return responseIndex == -1 ? null : 
+      return responseIndex == -1 ? null :
         (Annotation)responseList.get(responseIndex);
     }
-    
+
     public int getType(){
       return type;
     }
@@ -379,7 +399,7 @@ public class AnnotationDiffer {
     int score;
     boolean scoreCalculated;
   }
-	
+
 	protected static class ChoiceScoreComparator implements Comparator{
     /**
      * Compares two choices:
@@ -398,11 +418,11 @@ public class AnnotationDiffer {
       return res;
 	  }
 	}
-  
-	
+
+
 	public static class PairingOffsetComparator implements Comparator{
     /**
-     * Compares two choices based on start offset of key (or response 
+     * Compares two choices based on start offset of key (or response
      * if key not present) and type if offsets are equal.
      */
 	  public int compare(Object o1, Object o2){
@@ -421,10 +441,10 @@ public class AnnotationDiffer {
 	      //compare by type
 	      res = second.getType() - first.getType();
 	    }
-	    
-//	    
-//	    
-//	    
+
+//
+//
+//
 //	    //choices with keys are smaller than ones without
 //	    if(key1 == null && key2 != null) return 1;
 //	    if(key1 != null && key2 == null) return -1;
@@ -439,7 +459,7 @@ public class AnnotationDiffer {
 //	      //both keys are present
 //	      res = key1.getStartNode().getOffset().compareTo(
 //	          key2.getStartNode().getOffset());
-//	      
+//
 //	      if(res == 0){
 //		      //choices with responses are smaller than ones without
 //		      if(res1 == null && res2 != null) return 1;
@@ -459,9 +479,46 @@ public class AnnotationDiffer {
 //	    }
       return res;
 	  }
-	  
+
 	}
-  
+
+  /**
+   * A method that returns specific type of annotations
+   * @param type
+   * @return
+   */
+  public Set getAnnotationsOfType(int type) {
+    switch(type) {
+      case CORRECT_TYPE:
+        return correctAnnotations;
+      case PARTIALLY_CORRECT_TYPE:
+        return partiallyCorrectAnnotations;
+      case SPURIOUS_TYPE:
+        return spuriousAnnotations;
+      case MISSING_TYPE:
+        return missingAnnotations;
+      default:
+        return null;
+    }
+  }
+
+
+  public HashSet correctAnnotations, partiallyCorrectAnnotations, missingAnnotations, spuriousAnnotations;
+
+
+  /** A correct type when all annotation are corect represented by Green color*/
+  public static final int CORRECT_TYPE = 1;
+  /** A partially correct type when all annotation are corect represented
+   *  by Blue color*/
+  public static final int PARTIALLY_CORRECT_TYPE = 2;
+  /** A spurious type when annotations in response were not present in key.
+   *  Represented by Red color*/
+  public static final int SPURIOUS_TYPE = 3;
+  /** A missing type when annotations in key were not present in response
+   *  Represented by Yellow color*/
+  public static final int MISSING_TYPE = 4;
+
+
   public static final int CORRECT = 2;
   public static final int PARTIALLY_CORRECT = 1;
   public static final int WRONG = 0;
@@ -502,5 +559,5 @@ public class AnnotationDiffer {
    * A list with the choices selected for the best result.
    */
   protected List finalChoices;
-  
+
 }
