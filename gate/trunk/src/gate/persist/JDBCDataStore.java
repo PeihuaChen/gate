@@ -473,6 +473,10 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
       System.out.println("resource loaded...");
   }
 
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+  }
+
 
   public void resourceUnloaded(CreoleEvent e) {
 //Out.prln("RESOURCE UNLOADED res=["+e .getResource().getClass() .toString()+"], src=["+e.getSource().getClass().toString()+"]...");

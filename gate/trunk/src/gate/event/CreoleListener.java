@@ -12,6 +12,8 @@
  */
 package gate.event;
 
+import gate.*;
+
 /**
  * A listener for events fired by the {@link gate.CreoleRegister}
  * ({@link gate.event.CreoleEvent}).
@@ -36,5 +38,11 @@ public interface CreoleListener extends java.util.EventListener{
 
   /**Called when a {@link gate.DataStore} has been closed*/
   public void datastoreClosed(CreoleEvent e);
+
+  /**
+   * Called when the creole register has renamed a resource.1
+   */
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName);
 
 }

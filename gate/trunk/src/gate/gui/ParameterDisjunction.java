@@ -184,6 +184,11 @@ public class ParameterDisjunction implements CreoleListener {
   public void resourceUnloaded(CreoleEvent e) {
     updateValues(e.getResource());
   }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+    updateValues(resource);
+  }
   public void datastoreOpened(CreoleEvent e) {
   }
   public void datastoreCreated(CreoleEvent e) {

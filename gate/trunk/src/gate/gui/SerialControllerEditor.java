@@ -61,6 +61,18 @@ public class SerialControllerEditor extends AbstractVisualResource
     popup.add(addMenu);
     popup.add(removeMenu);
 
+    popup.addPopupMenuListener(new PopupMenuListener() {
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        buildInternalMenus();
+        addMenu.setEnabled(addMenu.getItemCount() > 0);
+        removeMenu.setEnabled(removeMenu.getItemCount() > 0);
+      }
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+      }
+      public void popupMenuCanceled(PopupMenuEvent e) {
+      }
+    });
+
     //register the listeners
     if(handle instanceof StatusListener)
       addStatusListener((StatusListener)handle);
@@ -424,16 +436,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
 
       public void menuSelected(MenuEvent e) {
-        addMenu.removeAll();
-        Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
-        while(prIter.hasNext()){
-          ProcessingResource pr = (ProcessingResource)prIter.next();
-          if(Gate.getHiddenAttribute(pr.getFeatures())){
-            //ignore this resource
-          }else{
-            addMenu.add(new AddPRAction(pr));
-          }
-        }// while
+        buildInternalMenus();
       }
     });
 
@@ -445,19 +448,36 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
 
       public void menuSelected(MenuEvent e) {
-        removeMenu.removeAll();
-        Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
-        while(prIter.hasNext()){
-          ProcessingResource pr = (ProcessingResource)prIter.next();
-          if(Gate.getHiddenAttribute(pr.getFeatures())){
-            //ignore this resource
-          }else{
-            removeMenu.add(new RemovePRAction(pr));
-          }
-        }// while
+        buildInternalMenus();
       }
     });
   }//protected void initListeners()
+
+  protected void buildInternalMenus(){
+    addMenu.removeAll();
+    Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
+    while(prIter.hasNext()){
+      ProcessingResource pr = (ProcessingResource)prIter.next();
+      if(Gate.getHiddenAttribute(pr.getFeatures())){
+        //ignore this resource
+      }else{
+        Action act = new AddPRAction(pr);
+        if(act.isEnabled()) addMenu.add(act);
+      }
+    }// while
+
+    removeMenu.removeAll();
+    prIter = Gate.getCreoleRegister().getPrInstances().iterator();
+    while(prIter.hasNext()){
+      ProcessingResource pr = (ProcessingResource)prIter.next();
+      if(Gate.getHiddenAttribute(pr.getFeatures())){
+        //ignore this resource
+      }else{
+        Action act = new RemovePRAction(pr);
+        if(act.isEnabled()) removeMenu.add(act);
+      }
+    }// while
+  }
 
   /**
    * Stops the current edits for parameters; sets the paarmeters for the
@@ -540,6 +560,14 @@ public class SerialControllerEditor extends AbstractVisualResource
       repaint(100);
     }
   }//public void resourceUnloaded(CreoleEvent e)
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+    if(Gate.getHiddenAttribute(resource.getFeatures())) return;
+    if(resource instanceof ProcessingResource){
+      repaint(100);
+    }
+  }
 
   public void datastoreOpened(CreoleEvent e) {
   }

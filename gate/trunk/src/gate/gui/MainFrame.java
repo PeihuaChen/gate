@@ -229,7 +229,7 @@ public class MainFrame extends JFrame
     resourcesTreeRoot.add(languageResourcesRoot);
     resourcesTreeRoot.add(processingResourcesRoot);
     resourcesTreeRoot.add(datastoresRoot);
-    resourcesTreeModel = new DefaultTreeModel(resourcesTreeRoot, true);
+    resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot, true);
 
     newDSAction = new NewDSAction();
     openDSAction = new OpenDSAction();
@@ -261,7 +261,14 @@ public class MainFrame extends JFrame
       }
     };
 
-    resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
+    resourcesTree.setEditable(true);
+    ResourcesTreeCellRenderer treeCellRenderer =
+                              new ResourcesTreeCellRenderer();
+    resourcesTree.setCellRenderer(treeCellRenderer);
+    resourcesTree.setCellEditor(new ResourcesTreeCellEditor(resourcesTree,
+                                                          treeCellRenderer,
+                                                          null));
+
     resourcesTree.setRowHeight(0);
     //expand all nodes
     resourcesTree.expandRow(0);
@@ -1058,7 +1065,6 @@ public class MainFrame extends JFrame
     handle.addStatusListener(MainFrame.this);
 
     JPopupMenu popup = handle.getPopup();
-    popup.addSeparator();
 
     // Create a CloseViewAction and a menu item based on it
     CloseViewAction cva = new CloseViewAction(handle);
@@ -1066,7 +1072,14 @@ public class MainFrame extends JFrame
     // Add an accelerator ATL+F4 for this action
     menuItem.setAccelerator(KeyStroke.getKeyStroke(
                                       KeyEvent.VK_H, ActionEvent.CTRL_MASK));
-    popup.add(menuItem);
+    popup.insert(menuItem, 1);
+    popup.insert(new JPopupMenu.Separator(), 2);
+
+    popup.insert(new XJMenuItem(
+                  new RenameResourceAction(
+                      new TreePath(resourcesTreeModel.getPathToRoot(node))),
+                  MainFrame.this) , 3);
+
     // Put the action command in the component's action map
     if (handle.getLargeView() != null)
       handle.getLargeView().getActionMap().put("Hide current view",cva);
@@ -1159,6 +1172,10 @@ public class MainFrame extends JFrame
         }
       }
     }
+  }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
   }
 
   /**
@@ -1701,7 +1718,7 @@ public class MainFrame extends JFrame
    */
   class CloseViewAction extends AbstractAction {
     public CloseViewAction(Handle handle) {
-      super("Close this view");
+      super("Hide this view");
       putValue(SHORT_DESCRIPTION, "Hides this view");
       this.handle = handle;
     }
@@ -1712,6 +1729,19 @@ public class MainFrame extends JFrame
     }//public void actionPerformed(ActionEvent e)
     Handle handle;
   }//class CloseViewAction
+
+  class RenameResourceAction extends AbstractAction{
+    RenameResourceAction(TreePath path){
+      super("Rename");
+      putValue(SHORT_DESCRIPTION, "Renames the resource");
+      this.path = path;
+    }
+    public void actionPerformed(ActionEvent e) {
+      resourcesTree.startEditingAtPath(path);
+    }
+
+    TreePath path;
+  }
 
   class CloseSelectedResourcesAction extends AbstractAction {
     public CloseSelectedResourcesAction() {
@@ -2065,8 +2095,8 @@ public class MainFrame extends JFrame
     }
   }
 
-  protected class ResourceTreeCellRenderer extends DefaultTreeCellRenderer {
-    public ResourceTreeCellRenderer() {
+  protected class ResourcesTreeCellRenderer extends DefaultTreeCellRenderer {
+    public ResourcesTreeCellRenderer() {
       setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
     }
     public Component getTreeCellRendererComponent(JTree tree,
@@ -2121,6 +2151,91 @@ public class MainFrame extends JFrame
         setToolTipText(((Handle)handle).getTooltipText());
       }
       return this;
+    }
+  }
+
+  protected class ResourcesTreeCellEditor extends DefaultTreeCellEditor {
+    ResourcesTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer,
+                           TreeCellEditor editor ){
+      super(tree, renderer, editor);
+    }
+
+        /**
+     * Starts the editing timer.
+     */
+    protected void startEditingTimer() {
+      if(timer == null) {
+        timer = new javax.swing.Timer(500, this);
+        timer.setRepeats(false);
+      }
+      timer.start();
+    }
+
+    /**
+     * This is the original implementation from the super class with some
+     * changes (e.g. proper discovery of icon)
+     */
+    public Component getTreeCellEditorComponent(JTree tree, Object value,
+                                                boolean isSelected,
+                                                boolean expanded,
+                                                boolean leaf, int row) {
+      setTree(tree);
+      lastRow = row;
+      //this sets the icon to thew default value
+      determineOffset(tree, value, isSelected, expanded, leaf, row);
+      //lets find the actual icon
+      if(renderer != null) {
+        renderer.getTreeCellRendererComponent(tree, value, isSelected, expanded,
+                                              leaf, row, false);
+        editingIcon = renderer.getIcon();
+      }
+
+      editingComponent = realEditor.getTreeCellEditorComponent(tree, value,
+                          isSelected, expanded,leaf, row);
+
+      TreePath        newPath = tree.getPathForRow(row);
+
+      canEdit = (lastPath != null && newPath != null && lastPath.equals(newPath));
+
+      Font font = getFont();
+
+      if(font == null) {
+        if(renderer != null) font = renderer.getFont();
+        if(font == null)font = tree.getFont();
+      }
+      editingContainer.setFont(font);
+      return editingContainer;
+    }
+
+    public boolean isCellEditable(EventObject event) {
+      Object userObject = ((DefaultMutableTreeNode)resourcesTree.
+                           getPathForRow(lastRow).getLastPathComponent()).
+                           getUserObject();
+      if(userObject instanceof Handle){
+        if(((Handle)userObject).getTarget() instanceof Resource)
+          return super.isCellEditable(event);
+      }
+      return false;
+    }
+  }//protected class ResourcesTreeCellEditor extends DefaultTreeCellEditor {
+
+  protected class ResourcesTreeModel extends DefaultTreeModel {
+    ResourcesTreeModel(TreeNode root, boolean asksAllowChildren){
+      super(root, asksAllowChildren);
+    }
+
+    public void valueForPathChanged(TreePath path, Object newValue){
+      DefaultMutableTreeNode   aNode = (DefaultMutableTreeNode)
+                                       path.getLastPathComponent();
+      Object userObject = aNode.getUserObject();
+      if(userObject instanceof Handle){
+        Object target = ((Handle)userObject).getTarget();
+        if(target instanceof Resource){
+          Gate.getCreoleRegister().setResourceName((Resource)target,
+                                                   (String)newValue);
+        }
+      }
+      nodeChanged(aNode);
     }
   }
 

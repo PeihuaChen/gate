@@ -154,7 +154,6 @@ public class NameBearerHandle implements Handle,
     }else if(target instanceof LanguageResource) {
       //Language Resources
       popup.addSeparator();
-//      popup.add(new XJMenuItem(new RenameAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
       if(target instanceof gate.corpora.DocumentImpl){
@@ -176,11 +175,6 @@ public class NameBearerHandle implements Handle,
       popup.addSeparator();
       popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
     }
-//    if(target instanceof Resource){
-//      popup.addSeparator();
-//      popup.add(new XJMenuItem(new ReloadClassAction(), sListenerProxy));
-//    }
-
 
     fireStatusChanged("Building views...");
 
@@ -575,28 +569,6 @@ public class NameBearerHandle implements Handle,
       }
     }
   }
-
-  class RenameAction extends AbstractAction {
-    public RenameAction(){
-      super("Rename");
-      putValue(SHORT_DESCRIPTION, "Rename this language resource");
-    }
-    public void actionPerformed(ActionEvent e){
-      LanguageResource lr = (LanguageResource)target;
-
-      String newName = JOptionPane.showInputDialog(
-                                     getLargeView(),
-                                    "Please enter the LR's new name");
-
-      //don't change if nothing selected
-      if (newName == null || newName.equals(""))
-        return;
-      lr.setName(newName);
-
-    }//public void actionPerformed(ActionEvent e)
-  }//class RenameAction
-
-
 
   class SaveAction extends AbstractAction {
     public SaveAction(){
@@ -1045,6 +1017,11 @@ public class NameBearerHandle implements Handle,
 
   public void resourceUnloaded(CreoleEvent e) {
     if(getTarget() == e.getResource()) cleanup();
+  }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+    if(target == resource) title = target.getName();
   }
 
   public void datastoreOpened(CreoleEvent e) {

@@ -1520,6 +1520,9 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   }
   public void datastoreCreated(CreoleEvent e) {
   }
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+  }
   public void datastoreClosed(CreoleEvent e) {
     if (! e.getDatastore().equals(this.getDataStore()))
       return;

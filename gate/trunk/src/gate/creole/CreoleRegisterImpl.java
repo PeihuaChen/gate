@@ -642,6 +642,16 @@ public class CreoleRegisterImpl extends HashMap
     return Collections.unmodifiableList(responseList);
   }//getAnnotationVRs()
 
+   /**
+    * Renames an existing resource.
+    */
+   public void setResourceName(Resource res, String newName){
+    String oldName = res.getName();
+    res.setName(newName);
+    fireResourceRenamed(res, oldName, newName);
+   }
+
+
   /**
    * Returns a list of strings representing annotations types for which
    * there are custom viewers/editor registered.
@@ -760,6 +770,7 @@ public class CreoleRegisterImpl extends HashMap
       }
     }
   }
+
   protected void fireResourceUnloaded(CreoleEvent e) {
     if (creoleListeners != null) {
       Vector listeners = creoleListeners;
@@ -769,6 +780,20 @@ public class CreoleRegisterImpl extends HashMap
       }
     }
   }
+
+  protected void fireResourceRenamed(Resource res, String oldName,
+                                     String newName) {
+    if (creoleListeners != null) {
+      Vector listeners = creoleListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((CreoleListener) listeners.elementAt(i)).resourceRenamed(res,
+                                                                  oldName,
+                                                                  newName);
+      }
+    }
+  }
+
   protected void fireDatastoreOpened(CreoleEvent e) {
     if (creoleListeners != null) {
       Vector listeners = creoleListeners;
@@ -804,6 +829,11 @@ public class CreoleRegisterImpl extends HashMap
 
   public void resourceUnloaded(CreoleEvent e) {
     fireResourceUnloaded(e);
+  }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+    fireResourceRenamed(resource, oldName, newName);
   }
 
   public void datastoreOpened(CreoleEvent e) {

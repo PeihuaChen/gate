@@ -171,6 +171,11 @@ public class SerialController extends AbstractController
     if(e.getResource() instanceof ProcessingResource)
       while(prList.remove(e.getResource()));
   }
+
+  public void resourceRenamed(Resource resource, String oldName,
+                              String newName){
+  }
+
   public void datastoreOpened(CreoleEvent e) {
   }
   public void datastoreCreated(CreoleEvent e) {
