@@ -1,21 +1,28 @@
 /*
-*	EntityDescriptor.java
-*
-*	Valentin Tablan, July/2000
-*
-*	$Id$
-*/
+ *  EntityDescriptor.java
+ *
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan, July/2000
+ *
+ *  $Id$
+ */
 
 package gate.creole.nerc;
 
 import gate.*;
 import gate.util.*;
 
-/**Represents a single named entity*/
+/** Represents a single named entity */
 public class EntityDescriptor {
 
-  /**Constructs a new entity descriptor*/
-  public EntityDescriptor(String string, String category, int start, int end){
+  /** Constructs a new entity descriptor */
+  public EntityDescriptor(String string, String category, int start, int end) {
     this.string = normaliseString(string);
     this.category = category;
     offsets = new int[2];
@@ -23,8 +30,8 @@ public class EntityDescriptor {
     offsets[1] = end;
   }
 
-  /**Constructs a new entity descriptor starting from a Gate annotation*/
-  public EntityDescriptor(Document document, Annotation annotation){
+  /** Constructs a new entity descriptor starting from a Gate annotation */
+  public EntityDescriptor(Document document, Annotation annotation) {
     offsets = new int[2];
     offsets[0] = annotation.getStartNode().getOffset().intValue();
     offsets[1] = annotation.getEndNode().getOffset().intValue();
@@ -33,34 +40,34 @@ public class EntityDescriptor {
                                     annotation.getStartNode().getOffset(),
                                     annotation.getEndNode().getOffset()).
                                     toString());
-    }catch(InvalidOffsetException ioe){
+    } catch(InvalidOffsetException ioe){
       ioe.printStackTrace();
     }
     category = annotation.getType();
   }
 
-  /**Returns a normalised string for the entity. This is the string from the
-    *text document the entity was descovered in, with all whitespace sequences
-    *replaced by a single space character
+  /** Returns a normalised string for the entity. This is the string from the
+    * text document the entity was descovered in, with all whitespace sequences
+    * replaced by a single space character
     */
   public String getString(){
     return string;
   }
 
-  /**Returns the category of the entity*/
+  /** Returns the category of the entity*/
   public String getCategory(){
     return category;
   }
 
-  /**Returns a pair of integers specifying the character offsets in the original
-    *file where the entity occured
+  /** Returns a pair of integers specifying the character offsets in the
+    * original file where the entity occured
     */
   public int[] getOffsets(){
     return offsets;
   }
 
-  /**Returns a string giving the category, offsets and normalised string for the
-    *entity, with no newlines.
+  /** Returns a string giving the category, offsets and normalised string for
+    * the entity, with no newlines.
     */
   public String toString(){
     return category + " " + offsets[0] + " " + offsets[1] + " " + string;
@@ -70,9 +77,9 @@ public class EntityDescriptor {
   String category;
   int[] offsets;
 
-  /**Normalises a string. That is removes all the leading and trailing
-    *whitespace characters and replaces all inner whitespace sequences with a
-    *single space character
+  /** Normalises a string. That is removes all the leading and trailing
+    * whitespace characters and replaces all inner whitespace sequences with a
+    * single space character
     */
   protected String normaliseString(String text){
     String res = "";
