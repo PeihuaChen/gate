@@ -12,9 +12,6 @@ import java.io.*;
 
 /** Shorthand for the <CODE> System.err.print and println</CODE>
   * methods.
-  * The users of this class should take care to explicitly flush the
-  * out member field when they use print() or pr()
-  * Eg: Out.getPrintWriter().flush(); is required when working with pr or print
   */
 public class Err {
 
@@ -34,50 +31,59 @@ public class Err {
 
   // print() and println() methods definition
   ////////////////////////////////////////////////
-  
+
   /** @see java.io.PrintWriter#print(boolean) */
   public static void print(boolean b) {
     err.print(b);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(char) */
   public static void print(char c) {
     err.print(c);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(int) */
   public static void print(int i) {
     err.print(i);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(long) */
   public static void print(long l) {
     err.print(l);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(float) */
   public static void print(float f) {
     err.print(f);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(double) */
   public static void print(double d) {
     err.print(d);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(char[]) */
   public static void print(char s[]) {
     err.print(s);
+    err.flush();    
   }
 
   /** @see java.io.PrintWriter#print(java.lang.String) */
   public static void print(String s) {
     err.print(s);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#print(java.lang.Object) */
   public static void print(Object obj) {
     err.print(obj);
+    err.flush();
   }
 
   /** @see java.io.PrintWriter#println() */
