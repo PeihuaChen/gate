@@ -54,6 +54,10 @@ import gate.security.*;
 import junit.framework.*;
 //import guk.im.*;
 
+/**needed in order to register the Ontology Editor Tool
+ * ontotext.bp*/
+import com.ontotext.gate.vr.*;
+import com.ontotext.gate.ontology.*;
 
 /**
  * The main Gate GUI frame.
@@ -124,6 +128,10 @@ public class MainFrame extends JFrame
   StoredMarkedCorpusEvalAction storedMarkedCorpusEvalAction = null;
   CleanMarkedCorpusEvalAction cleanMarkedCorpusEvalAction = null;
   VerboseModeCorpusEvalToolAction verboseModeCorpusEvalToolAction = null;
+
+  /**ontology editor action
+   * ontotext.bp*/
+  NewOntologyEditorAction newOntologyEditorAction = null;
 
   /**
    * Holds all the icons used in the Gate GUI indexed by filename.
@@ -251,6 +259,10 @@ public class MainFrame extends JFrame
     generateStoredCorpusEvalAction = new GenerateStoredCorpusEvalAction();
     cleanMarkedCorpusEvalAction = new CleanMarkedCorpusEvalAction();
     verboseModeCorpusEvalToolAction = new VerboseModeCorpusEvalToolAction();
+
+    /*ontology editor action initialization
+    ontotext.bp*/
+    newOntologyEditorAction = new NewOntologyEditorAction();
 
   }
 
@@ -588,6 +600,11 @@ public class MainFrame extends JFrame
         new guk.Editor();
       }
     });
+
+    /*add the ontology editor to the tools menu
+    ontotext.bp */
+    toolsMenu.add(newOntologyEditorAction);
+
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
@@ -2814,4 +2831,30 @@ public class MainFrame extends JFrame
     JRadioButtonMenuItem me;
   }////class LocaleSelectorMenuItem extends JRadioButtonMenuItem
 
-}
+  /**ontotext.bp
+   * This class represent an action which brings up the Ontology Editor tool*/
+  class NewOntologyEditorAction extends AbstractAction {
+    public NewOntologyEditorAction(){
+      super("Ontology Editor", getIcon("controller.gif"));
+      putValue(SHORT_DESCRIPTION,"Start the Ontology Editor");
+    }// NewAnnotDiffAction
+
+    public void actionPerformed(ActionEvent e) {
+      OntologyEditor editor = new OntologyEditorImpl();
+      try {
+        editor.init();
+
+        /*
+          SET ONTOLOGY LIST AND ONTOLOGY
+        */
+        Set ontologies = OntologyPool.getPool();
+        editor.setOntologyList(new Vector(ontologies));
+
+        editor.visualize();
+      } catch ( ResourceInstantiationException ex ) {
+        ex.printStackTrace(Err.getPrintWriter());
+      }
+    }// actionPerformed();
+  }//class NewOntologyEditorAction
+
+} // class MainFrame
