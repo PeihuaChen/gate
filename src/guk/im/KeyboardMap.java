@@ -52,19 +52,21 @@ public class KeyboardMap implements Runnable{
    */
   public void run(){
     //do all the initialisations
-    this.window = im.getContext().createInputMethodWindow(null, true);
-    if(window instanceof Frame) ((Frame)window).setTitle(
-                      handler.locale.getDisplayName() +
-                      " keyboard map");
+    this.window = im.getContext().createInputMethodJFrame(null, true);
+    window.setTitle(handler.locale.getDisplayName() + " keyboard map");
     window.setVisible(false);
-    window.addWindowListener(new WindowAdapter(){
-
+    window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    window.addComponentListener(new ComponentAdapter(){
+      public void componentHidden(ComponentEvent e){
+        window.dispose();
+      }
     });
-    window.setLayout(new GridLayout(1,1));
+    
+    window.getContentPane().setLayout(new GridLayout(1,1));
     GridBagLayout layout = new GridBagLayout();
     contentPane = new JPanel(layout);
     contentPane.setDoubleBuffered(true);
-    window.add(contentPane, BorderLayout.CENTER);
+    window.getContentPane().add(contentPane, BorderLayout.CENTER);
 
     labelForKey = new HashMap();
     GUIforString = new HashMap();
@@ -908,9 +910,8 @@ public class KeyboardMap implements Runnable{
     if(newHandler != handler){
       handler = newHandler;
       state = newState;
-      if(window instanceof Frame) ((Frame)window).setTitle(
-                              handler.locale.getDisplayLanguage() + " (" +
-                              handler.locale.getVariant() + ") keyboard map");
+      window.setTitle(handler.locale.getDisplayLanguage() + " (" +
+                      handler.locale.getVariant() + ") keyboard map");
       //read keycaps
       labelForKey.clear();
       Map keyCap = handler.getKeyCap();
@@ -1050,7 +1051,7 @@ public class KeyboardMap implements Runnable{
   /**
    * The window used for displaying the keyboard map
    */
-  Window window;
+  JFrame window;
   /**
    * The content pane that holds all the KeyGUIs.
    *
