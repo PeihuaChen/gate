@@ -431,7 +431,8 @@
   <target name="test" depends="jar">
     <junit fork="true" 
            showoutput="false"
-           printsummary="yes">
+           printsummary="yes"
+           maxmemory="200m">
       <classpath refid="run.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
