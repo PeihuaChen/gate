@@ -1538,7 +1538,7 @@ public class OracleDataStore extends JDBCDataStore {
    *  helper metod
    *  iterates a FeatureMap and creates all its features in the database
    */
-  private void createFeatures(Long entityID, int entityType, FeatureMap features)
+  protected void createFeatures(Long entityID, int entityType, FeatureMap features)
     throws PersistenceException {
 
     //0. prepare statement ad use it for all features
@@ -2321,7 +2321,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+/*  protected void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     //0.preconditions
@@ -2423,7 +2423,7 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(cstmt);
     }
   }
-
+*/
 
 
   /** helper for sync() - never call directly */
