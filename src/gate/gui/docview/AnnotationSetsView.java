@@ -176,7 +176,6 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void registerHooks(){
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
-//    textPane.addCaretListener(textCaretListener);
     textPane.addAncestorListener(textAncestorListener);
   }
 
@@ -189,7 +188,6 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void unregisterHooks(){
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
-//    textPane.removeCaretListener(textCaretListener);
     textPane.removeAncestorListener(textAncestorListener);
   }
   
@@ -254,8 +252,12 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
     });
     
+    
+    mouseStoppedMovingAction = new MouseStoppedMovingAction();
+    mouseMovementTimer = new javax.swing.Timer(MOUSE_MOVEMENT_TIMER_DELAY, 
+            mouseStoppedMovingAction);
+    mouseMovementTimer.setRepeats(false);
     textMouseListener = new TextMouseListener();
-    textCaretListener = new TextCaretListener();
     textAncestorListener = new AncestorListener(){
       public void ancestorAdded(AncestorEvent event){
         if(wasShowing) annotationEditor.show(false);
@@ -1008,28 +1010,24 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**
    * A mouse listener used for events in the text view. 
    */
-  protected class TextMouseListener implements MouseInputListener{
-    public TextMouseListener(){
-      selectAction = new SelectAnnotationAction();
-      timer = new javax.swing.Timer(DELAY, selectAction);
-      timer.setRepeats(false);
+  protected class TextMouseListener implements MouseInputListener{    
+    public void mouseDragged(MouseEvent e){
+      mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
+      mouseMovementTimer.restart();
     }
     
-    public void mouseDragged(MouseEvent e){
-      
-    }
     public void mouseMoved(MouseEvent e){
       //this triggers select annotation leading to edit annotation or new 
       //annotation actions
-      selectAction.setTextLocation(textPane.viewToModel(e.getPoint()));
-      timer.restart();
+      mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
+      mouseMovementTimer.restart();
     }
     
     public void mouseClicked(MouseEvent e){
       //this is required so we can trigger new annotation when selecting text 
       //by double/triple clicking
-      selectAction.setTextLocation(textPane.viewToModel(e.getPoint()));
-      timer.restart();
+      mouseStoppedMovingAction.setTextLocation(textPane.viewToModel(e.getPoint()));
+      mouseMovementTimer.restart();
     }
     
     public void mousePressed(MouseEvent e){
@@ -1044,36 +1042,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void mouseExited(MouseEvent e){
-      timer.stop();
-      
+      mouseMovementTimer.stop();
     }
-    
-    javax.swing.Timer timer;
-    SelectAnnotationAction selectAction;
-    public static final int DELAY = 300;
-    
   }//protected class TextMouseListener implements MouseInputListener
   
-  
-  protected class TextCaretListener implements CaretListener{
-    public TextCaretListener(){
-      caretListenerTimer = new javax.swing.Timer(TIMER_DELAY,
-      		new NewAnnotationAction());
-      caretListenerTimer.setRepeats(false);
-    }
     
-    public void caretUpdate(CaretEvent e){
-      caretListenerTimer.stop();
-      int dot = e.getDot();
-      int mark = e.getMark();
-      if(dot == mark) return;
-      caretListenerTimer.restart();
-    }
-    
-    javax.swing.Timer caretListenerTimer;
-    private static final int TIMER_DELAY = 500;
-  }
-  
   protected class NewAnnotationSetAction extends AbstractAction{
     public NewAnnotationSetAction(){
       super("New");
@@ -1125,55 +1098,52 @@ public class AnnotationSetsView extends AbstractDocumentView
    * Used to select an annotation for editing.
    *
    */
-  protected class SelectAnnotationAction extends AbstractAction{
-    public SelectAnnotationAction(){
-      super("Edit annotation");
-    }
+  protected class MouseStoppedMovingAction extends AbstractAction{
     
     public void actionPerformed(ActionEvent evt){
-      List annotsAtPoint = new ArrayList();
-      Iterator shIter = setHandlers.iterator();
-      while(shIter.hasNext()){
-        SetHandler sHandler = (SetHandler)shIter.next();
-        Iterator annIter = sHandler.set.get(new Long(textLocation),
-                                            new Long(textLocation)).iterator();
-        while(annIter.hasNext()){
-          Annotation ann = (Annotation)annIter.next();
-          if(sHandler.getTypeHandler(ann.getType()).isSelected()){
-            annotsAtPoint.add(new AnnotationHandler(sHandler.set, ann));
+      //first check for selection hovering
+      //if inside selection, add new annotation.
+      if(textPane.getSelectionStart() <= textLocation &&
+         textPane.getSelectionEnd() >= textLocation){
+        new NewAnnotationAction().actionPerformed(evt);
+      }else{
+        //now check for annotations at location
+        List annotsAtPoint = new ArrayList();
+        Iterator shIter = setHandlers.iterator();
+        while(shIter.hasNext()){
+          SetHandler sHandler = (SetHandler)shIter.next();
+          Iterator annIter = sHandler.set.get(new Long(textLocation),
+                                              new Long(textLocation)).iterator();
+          while(annIter.hasNext()){
+            Annotation ann = (Annotation)annIter.next();
+            if(sHandler.getTypeHandler(ann.getType()).isSelected()){
+              annotsAtPoint.add(new AnnotationHandler(sHandler.set, ann));
+            }
           }
         }
-      }
-      
-      if(annotsAtPoint.size() > 0){
-        if(annotsAtPoint.size() > 1){
-	        JPopupMenu popup = new JPopupMenu();
-	        Iterator annIter = annotsAtPoint.iterator();
-	        while(annIter.hasNext()){
-	          AnnotationHandler aHandler = (AnnotationHandler)annIter.next();
-	          popup.add(new HighlightMenuItem(
-	                  new EditAnnotationAction(aHandler),
-	                  aHandler.ann.getStartNode().getOffset().intValue(),
-	                  aHandler.ann.getEndNode().getOffset().intValue(),
-	                  popup));
-	        }
-	        try{
-		        Rectangle rect =  textPane.modelToView(textLocation);
-		        popup.show(textPane, rect.x + 10, rect.y);
-	        }catch(BadLocationException ble){
-	          throw new GateRuntimeException(ble);
-	        }
-	      }else{
-	        //only one annotation: start the editing directly
-	        new EditAnnotationAction((AnnotationHandler)annotsAtPoint.get(0)).
-	        	actionPerformed(null);
-	      }
-      }else{
-        //no highlighted annotations at point
-        //if inside selection, add new annotation.
-        if(textPane.getSelectionStart() <= textLocation &&
-           textPane.getSelectionEnd() >= textLocation){
-          new NewAnnotationAction().actionPerformed(evt);
+        if(annotsAtPoint.size() > 0){
+          if(annotsAtPoint.size() > 1){
+            JPopupMenu popup = new JPopupMenu();
+            Iterator annIter = annotsAtPoint.iterator();
+            while(annIter.hasNext()){
+              AnnotationHandler aHandler = (AnnotationHandler)annIter.next();
+              popup.add(new HighlightMenuItem(
+                      new EditAnnotationAction(aHandler),
+                      aHandler.ann.getStartNode().getOffset().intValue(),
+                      aHandler.ann.getEndNode().getOffset().intValue(),
+                      popup));
+            }
+            try{
+              Rectangle rect =  textPane.modelToView(textLocation);
+              popup.show(textPane, rect.x + 10, rect.y);
+            }catch(BadLocationException ble){
+              throw new GateRuntimeException(ble);
+            }
+          }else{
+            //only one annotation: start the editing directly
+            new EditAnnotationAction((AnnotationHandler)annotsAtPoint.get(0)).
+              actionPerformed(null);
+          }
         }
       }
     }
@@ -1310,9 +1280,10 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   protected TextMouseListener textMouseListener;
   
-  protected TextCaretListener textCaretListener; 
-  
+  protected javax.swing.Timer mouseMovementTimer;
+  private static final int MOUSE_MOVEMENT_TIMER_DELAY = 500;
   protected AncestorListener textAncestorListener; 
+  protected MouseStoppedMovingAction mouseStoppedMovingAction;
   
   protected String lastAnnotationType = "_New_";
   
