@@ -35,14 +35,10 @@ public class TestRepositioningInfo
   }
 
   /**
-   * This method sets up the parameters for the files to be testes
-   * It initialises the Tokenizer and sets up the other parameters for
-   * the morph program
+   * This method sets up the parameters for the files to be tested
    */
   protected void setUp() {
 
-    // initialise the rule file that will be used to find the base word
-    //testFile = "gate:/creole/gazeteer/test-inline.xml";
     testFile = TestDocument.getTestServerName() + "tests/test-inline.xml";
 
     // creating documents
@@ -61,7 +57,7 @@ public class TestRepositioningInfo
     }
   }
 
-  /** Fixture tear down - does nothing */
+  /** Fixture tear down - removes the document resource */
   public void tearDown() throws Exception {
     Factory.deleteResource(doc);
   } // tearDown
