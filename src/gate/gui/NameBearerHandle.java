@@ -1345,7 +1345,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
       if (getWindow() instanceof Dialog){
         cid = new CreateIndexDialog((Dialog) getWindow(), (IndexedCorpus) target);
       }
-      cid.show();
+      cid.setVisible(true);
     }
   }
 

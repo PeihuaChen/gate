@@ -373,7 +373,7 @@ public class BootStrapDialog extends JDialog{
 
    cancelButton.addActionListener(new java.awt.event.ActionListener(){
       public void actionPerformed(ActionEvent e){
-        thisBootStrapDialog.hide();
+        thisBootStrapDialog.setVisible(false);
       }//actionPerformed
    });
 
@@ -433,7 +433,7 @@ public class BootStrapDialog extends JDialog{
                                        className,
                                        resourceInterfaces,
                                        pathNewProject);
-        thisBootStrapDialog.hide();
+        thisBootStrapDialog.setVisible(false);
         JOptionPane.showMessageDialog(mainFrame,
                                       resourceName + " creation succeeded !\n" +
                                       "Look for it in " + pathNewProject,

@@ -142,14 +142,14 @@ public class ListEditorDialog extends JDialog {
     okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCancelled = false;
-        hide();
+        setVisible(false);
       }
     });
 
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCancelled = true;
-        hide();
+        setVisible(false);
       }
     });
 
@@ -231,7 +231,7 @@ public class ListEditorDialog extends JDialog {
     pack();
     userCancelled = true;
     setModal(true);
-    super.show();
+    super.setVisible(true);
     return userCancelled ? null : Arrays.asList(listModel.toArray());
   }
 

@@ -3459,7 +3459,7 @@ Out.prln("NULL size");
       if(searchDialog.isVisible()){
         searchDialog.toFront();
       }else{
-        searchDialog.show();
+        searchDialog.setVisible(true);
       }
     }
   }
@@ -3585,7 +3585,7 @@ Out.prln("NULL size");
           putValue(SHORT_DESCRIPTION, "Cancel");
         }
         public void actionPerformed(ActionEvent evt){
-          searchDialog.hide();
+          searchDialog.setVisible(false);
         }
       };
 

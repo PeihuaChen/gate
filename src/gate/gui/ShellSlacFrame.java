@@ -1041,7 +1041,7 @@ public class ShellSlacFrame extends MainFrame {
         JButton ok = new JButton("Close");
         ok.addActionListener( new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            AboutPaneDialog.this.hide();
+            AboutPaneDialog.this.setVisible(false);
           }
         });
         pane.add(ok, BorderLayout.SOUTH);
@@ -1081,7 +1081,7 @@ public class ShellSlacFrame extends MainFrame {
           if(canShowInPane) {
             dlg.setSize(300, 200);
             dlg.setLocationRelativeTo(ShellSlacFrame.this);
-            dlg.show();
+            dlg.setVisible(true);
           } // if
           else {
             BufferedReader reader = new BufferedReader(

@@ -155,7 +155,7 @@ public class UserGroupEditor extends JComponent {
     //DISPLAY FRAME
     frame.pack();
     frame.setSize(800, 600);
-    frame.show();
+    frame.setVisible(true);
 
   }
 

@@ -371,7 +371,7 @@ public class TextAttributesChooser extends JDialog {
     updateData();
     updateSample();
     setModal(true);
-    super.show();
+    super.setVisible(true);
     if(choice) return currentStyle;
     else return style;
   }// public AttributeSet show(AttributeSet style)
