@@ -151,8 +151,10 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 Angel */
       // try to choose concret parser (Xerces)
 // Angel - start
-      org.apache.xerces.parsers.SAXParser newxmlParser =
-          new org.apache.xerces.parsers.SAXParser();
+
+      org.xml.sax.XMLReader newxmlParser = xmlParser.getXMLReader();
+      //Niraj org.apache.xerces.parsers.SAXParser newxmlParser =
+        //  Niraj new org.apache.xerces.parsers.SAXParser();
       // Set up the factory to create the appropriate type of parser
       // non validating one
       // http://xml.org/sax/features/validation set to false
@@ -256,8 +258,9 @@ Angel */
 
 // Angel - start
       // try to choose concret parser
-      org.apache.xerces.parsers.SAXParser newxmlParser =
-          new org.apache.xerces.parsers.SAXParser();
+      org.xml.sax.XMLReader newxmlParser = xmlParser.getXMLReader();
+      // Niraj org.apache.xerces.parsers.SAXParser newxmlParser =
+          // Niraj new org.apache.xerces.parsers.SAXParser();
       // Set up the factory to create the appropriate type of parser
       // non validating one
       // http://xml.org/sax/features/validation set to false
