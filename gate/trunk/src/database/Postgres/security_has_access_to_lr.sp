@@ -72,7 +72,7 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
              
          /* user is owner, and permisssions are OWNER_WRITE */
          if (l_owner_user = p_usr_id and
-                 (access_mode = C_PERM_GR_OW or access_mode = C_PERM_OR_OW)) then
+                 (l_access_mode = C_PERM_GR_OW or l_access_mode = C_PERM_OR_OW)) then
             /* case 1a */
             return true;
          end if;
