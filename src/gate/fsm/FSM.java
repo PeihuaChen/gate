@@ -281,10 +281,11 @@ public class FSM implements JapeConstants {
     */
   public void eliminateVoidTransitions() {
 
-    Set dStates = new HashSet();
+    dStates.clear(); //kalina: replaced from new HashSet()
     LinkedList unmarkedDStates = new LinkedList();
     AbstractSet currentDState = new HashSet();
-    Map newStates = new HashMap();
+    //kalina: prefer clear coz faster than init()
+    newStates.clear();
 
     currentDState.add(initialState);
     currentDState = lambdaClosure(currentDState);
@@ -429,21 +430,34 @@ public class FSM implements JapeConstants {
   public String getGML() {
 
     String res = "graph[ \ndirected 1\n";
-    String nodes = "", edges = "";
+///    String nodes = "", edges = "";
+    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
+
     Iterator stateIter = allStates.iterator();
     while (stateIter.hasNext()){
       State currentState = (State)stateIter.next();
       int stateIndex = currentState.getIndex();
-      nodes += "node[ id " + stateIndex +
+/*      nodes += "node[ id " + stateIndex +
                " label \"" + stateIndex;
+*/
+        nodes.append("node[ id ");
+        nodes.append(stateIndex);
+        nodes.append(" label \"");
+        nodes.append(stateIndex);
+
              if(currentState.isFinal()){
-              nodes += ",F";
+/*              nodes += ",F";
               nodes += "\\n" + currentState.getAction().shortDesc();
+*/
+              nodes.append(",F\\n" + currentState.getAction().shortDesc());
              }
-             nodes +=  "\"  ]\n";
-      edges += currentState.getEdgesGML();
+///             nodes +=  "\"  ]\n";
+             nodes.append("\"  ]\n");
+///      edges += currentState.getEdgesGML();
+      edges.append(currentState.getEdgesGML());
     }
-    res += nodes + edges + "]\n";
+    res += nodes.toString() + edges.toString() + "]\n";
     return res;
   } // getGML
 
@@ -468,6 +482,10 @@ public class FSM implements JapeConstants {
     * The set of states for this FSM
     */
   private transient Collection allStates =  new HashSet();
+
+  //kalina: added this member here to minimise HashMap allocation
+  private transient Map newStates = new HashMap();
+  private transient Set dStates = new HashSet();
 
   /**
     * The top level FSM that contains this FSM, null if this FSM is a top

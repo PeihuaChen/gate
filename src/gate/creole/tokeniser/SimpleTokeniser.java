@@ -125,15 +125,21 @@ implements Runnable, ProcessingResource{
       initialState = new FSMState(this);
       BufferedReader bRulesReader = new BufferedReader(rulesReader);
       String line = bRulesReader.readLine();
-      String toParse = "";
+      ///String toParse = "";
+      StringBuffer toParse = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
 
       while (line != null){
         if(line.endsWith("\\")){
-          toParse += line.substring(0,line.length()-1);
+          ///toParse += line.substring(0,line.length()-1);
+          toParse.append(line.substring(0,line.length()-1));
         }else{
-          toParse += line;
+          /*toParse += line;
           parseRule(toParse);
           toParse = "";
+          */
+          toParse.append(line);
+          parseRule(toParse.toString());
+          toParse.delete(0,toParse.length());
         }
         line = bRulesReader.readLine();
       }
@@ -301,14 +307,16 @@ implements Runnable, ProcessingResource{
     if(st.hasMoreElements()) token = st.nextToken();
     else return null;
 
-    String type = "";
+    ///String type = "";
+    StringBuffer type = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
 
     while(!token.equals(until)){
-      type += token;
+      //type += token;
+      type.append(token);
       if(st.hasMoreElements())token = st.nextToken();
       else throw new InvalidRuleException("Tokeniser rule ended too soon!");
     }
-    return type;
+    return type.toString();
   } // parseQuotedString
 
   /** Skips the ignorable tokens from the input returning the first significant
@@ -385,7 +393,8 @@ implements Runnable, ProcessingResource{
    */
   void eliminateVoidTransitions() throws TokeniserException {
 
-    Map newStates = new HashMap();
+    //kalina:clear() faster than init() which is called with init()
+    newStates.clear();
     Set sdStates = new HashSet();
     LinkedList unmarkedDStates = new LinkedList();
     DFSMState dCurrentState = new DFSMState(this);
@@ -486,21 +495,32 @@ implements Runnable, ProcessingResource{
    */
   public String getFSMgml(){
     String res = "graph[ \ndirected 1\n";
-    String nodes = "", edges = "";
+    ///String nodes = "", edges = "";
+    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
 
     Iterator fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
       FSMState currentState = (FSMState)fsmStatesIter.next();
       int stateIndex = currentState.getIndex();
-      nodes += "node[ id " + stateIndex +
+      /*nodes += "node[ id " + stateIndex +
                " label \"" + stateIndex;
+        */
+        nodes.append("node[ id ");
+        nodes.append(stateIndex);
+        nodes.append(" label \"");
+        nodes.append(stateIndex);
+
              if(currentState.isFinal()){
-              nodes += ",F\\n" + currentState.getRhs();
+              ///nodes += ",F\\n" + currentState.getRhs();
+              nodes.append(",F\\n" + currentState.getRhs());
              }
-             nodes +=  "\"  ]\n";
-      edges += currentState.getEdgesGML();
+             ///nodes +=  "\"  ]\n";
+             nodes.append("\"  ]\n");
+      ///edges += currentState.getEdgesGML();
+      edges.append(currentState.getEdgesGML());
     }
-    res += nodes + edges + "]\n";
+    res += nodes.toString() + edges.toString() + "]\n";
     return res;
   } // getFSMgml
 
@@ -509,21 +529,32 @@ implements Runnable, ProcessingResource{
    */
   public String getDFSMgml() {
     String res = "graph[ \ndirected 1\n";
-    String nodes = "", edges = "";
+    ///String nodes = "", edges = "";
+    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
+                 edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
 
     Iterator dfsmStatesIter = dfsmStates.iterator();
     while (dfsmStatesIter.hasNext()) {
       DFSMState currentState = (DFSMState)dfsmStatesIter.next();
       int stateIndex = currentState.getIndex();
-      nodes += "node[ id " + stateIndex +
+/*      nodes += "node[ id " + stateIndex +
                " label \"" + stateIndex;
+*/
+        nodes.append("node[ id ");
+        nodes.append(stateIndex);
+        nodes.append(" label \"");
+        nodes.append(stateIndex);
+
              if(currentState.isFinal()){
-              nodes += ",F\\n" + currentState.getRhs();
+///              nodes += ",F\\n" + currentState.getRhs();
+              nodes.append(",F\\n" + currentState.getRhs());
              }
-             nodes +=  "\"  ]\n";
-      edges += currentState.getEdgesGML();
+///             nodes +=  "\"  ]\n";
+             nodes.append("\"  ]\n");
+///      edges += currentState.getEdgesGML();
+        edges.append(currentState.getEdgesGML());
     }
-    res += nodes + edges + "]\n";
+    res += nodes.toString() + edges.toString() + "]\n";
     return res;
   } // getDFSMgml
 
@@ -561,6 +592,7 @@ implements Runnable, ProcessingResource{
     String content = document.getContent().toString();
     int length = content.length();
     char currentChar;
+
     DFSMState graphPosition = dInitialState;
 
     //the index of the first character of the token trying to be recognised
@@ -622,6 +654,7 @@ implements Runnable, ProcessingResource{
           //                       lastMatchingState.getTokenDesc()[i][1]);
           }
 
+
           try {
             annotationSet.add(new Long(tokenStart),
                             new Long(lastMatch + 1),
@@ -660,6 +693,7 @@ implements Runnable, ProcessingResource{
                        lastMatchingState.getTokenDesc()[i][1]);
       }
 
+
       try {
         annotationSet.add(new Long(tokenStart),
                           new Long(lastMatch + 1),
@@ -668,7 +702,9 @@ implements Runnable, ProcessingResource{
         //This REALLY shouldn't happen!
         throw new GateRuntimeException(ioe.toString());
       }
+
     }
+
     reset();
     fireProcessFinishedEvent();
     fireStatusChangedEvent("Tokenisation complete!");
@@ -847,6 +883,8 @@ implements Runnable, ProcessingResource{
   private java.net.URL rulesURL;
   private String encoding;
   private transient Vector progressListeners;
+  //kalina: added this as method to minimise too many init() calls
+  protected transient Map newStates = new HashMap();
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}

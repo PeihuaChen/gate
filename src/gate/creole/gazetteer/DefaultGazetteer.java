@@ -89,19 +89,23 @@ public class DefaultGazetteer extends AbstractProcessingResource
       reader = new InputStreamReader(listsURL.openStream(), encoding);
       bReader = new BufferedReader(reader);
       line = bReader.readLine();
-      String toParse = "";
+      ///String toParse = "";
+      StringBuffer toParse = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
 
       int lineIdx = 0;
       while (line != null) {
         if(line.endsWith("\\")) {
-          toParse += line.substring(0,line.length()-1);
+          ///toParse += line.substring(0,line.length()-1);
+          toParse.append(line.substring(0,line.length()-1));
         } else {
-          toParse += line;
-          fireStatusChanged("Reading " + toParse);
+          ///toParse += line;
+          toParse.append(line);
+          fireStatusChanged("Reading " + toParse.toString());
           fireProgressChanged(lineIdx * 100 / linesCnt);
           lineIdx ++;
-          readList(toParse, true);
-          toParse = "";
+          readList(toParse.toString(), true);
+          ///toParse = "";
+          toParse.delete(0,toParse.length());
         }
         line = bReader.readLine();
       }
@@ -233,20 +237,32 @@ public class DefaultGazetteer extends AbstractProcessingResource
    */
   public String getFSMgml() {
     String res = "graph[ \ndirected 1\n";
-    String nodes = "", edges = "";
+    ///String nodes = "", edges = "";
+    StringBuffer nodes = new StringBuffer(gate.Config.STRINGBUFFER_SIZE),
+                edges = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
     Iterator fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
       FSMState currentState = (FSMState)fsmStatesIter.next();
       int stateIndex = currentState.getIndex();
-      nodes += "node[ id " + stateIndex +
+      /*nodes += "node[ id " + stateIndex +
                " label \"" + stateIndex;
+      */
+      nodes.append("node[ id ");
+      nodes.append(stateIndex);
+      nodes.append(" label \"");
+      nodes.append(stateIndex);
+
              if(currentState.isFinal()){
-              nodes += ",F\\n" + currentState.getLookupSet();
+              ///nodes += ",F\\n" + currentState.getLookupSet();
+              nodes.append(",F\\n");
+              nodes.append(currentState.getLookupSet());
              }
-             nodes +=  "\"  ]\n";
-      edges += currentState.getEdgesGML();
+             ///nodes +=  "\"  ]\n";
+             nodes.append("\"  ]\n");
+      //edges += currentState.getEdgesGML();
+      edges.append(currentState.getEdgesGML());
     }
-    res += nodes + edges + "]\n";
+    res += nodes.toString() + edges.toString() + "]\n";
     return res;
   } // getFSMgml
 

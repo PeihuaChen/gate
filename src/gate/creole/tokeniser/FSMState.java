@@ -87,7 +87,8 @@ class FSMState implements java.io.Serializable {
   /** Returns a GML representation of all the edges emerging
     * from this state */
   String getEdgesGML() {
-    String res = "";
+///    String res = "";
+    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
     Set nextSet;
     Iterator nextSetIter;
     FSMState nextState;
@@ -98,16 +99,27 @@ class FSMState implements java.io.Serializable {
         nextSetIter = nextSet.iterator();
         while(nextSetIter.hasNext()){
           nextState = (FSMState)nextSetIter.next();
-          res += "edge [ source " + myIndex +
+/*          res += "edge [ source " + myIndex +
           " target " + nextState.getIndex() +
           " label \"";
-          if(i == SimpleTokeniser.maxTypeId) res += "[]";
-          else res += SimpleTokeniser.typeMnemonics[i];
-          res += "\" ]\n";
+*/
+            res.append("edge [ source ");
+            res.append(myIndex);
+            res.append(" target ");
+            res.append(nextState.getIndex());
+            res.append(" label \"");
+
+          if(i == SimpleTokeniser.maxTypeId) ///res += "[]";
+                res.append("[]");
+          else ///res += SimpleTokeniser.typeMnemonics[i];
+                res.append(SimpleTokeniser.typeMnemonics[i]);
+
+          ///res += "\" ]\n";
+          res.append("\" ]\n");
         }//while(nextSetIter.hasNext())
       }
     };
-    return res;
+    return res.toString();
   } // getIndex
 
   /** The transition function of this state. It's an array mapping from int

@@ -84,7 +84,8 @@ public class EntityDescriptor implements Serializable{
     * single space character
     */
   protected String normaliseString(String text){
-    String res = "";
+///    String res = "";
+    StringBuffer res = new StringBuffer(gate.Config.STRINGBUFFER_SIZE);
     if(text == null) return null;
     int charIdx = 0;
     boolean lastWasSpace = false;
@@ -98,13 +99,15 @@ public class EntityDescriptor implements Serializable{
         lastWasSpace = true;
       }else{
         //reading non-spaces
-        if(lastWasSpace) res += " ";
-        res += text.charAt(charIdx);
+        if(lastWasSpace) ///res += " ";
+                res.append(" ");
+///        res += text.charAt(charIdx);
+        res.append(text.charAt(charIdx));
         lastWasSpace = false;
       }
       charIdx++;
     }//while(charIdx < text.length())
-    return res;
+    return res.toString();
   }
 
 }

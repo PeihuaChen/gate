@@ -77,7 +77,7 @@ public class TestFSM extends TestCase {
   public void testOne() {
     Enumeration phases = transducer.getPhases().elements();
     while(phases.hasMoreElements()) {
-      FSM aFSM = new FSM((SinglePhaseTransducer)phases.nextElement());
+      FSM aFSM = ((SinglePhaseTransducer)phases.nextElement()).getFSM();
       //Out.println(aFSM.getGML());
       String gml = aFSM.getGML();
       assert(gml.startsWith("graph["));
