@@ -86,7 +86,7 @@ public class MainFrame extends JFrame
 
 
   Splash splash;
-  JTextArea logArea;
+  LogArea logArea;
   JScrollPane logScroll;
   JComboBox projectCombo;
   DefaultComboBoxModel projectComboModel;
@@ -219,8 +219,12 @@ public class MainFrame extends JFrame
     dssPopup.add(openDSAction);
     // <- new version
 
-    logArea = new JTextArea("Gate 2 started at: " + new Date().toString());
+    // Create a new logArea and redirect the Out and Err output to it.
+    logArea = new LogArea();
     logScroll = new JScrollPane(logArea);
+    // Out has been redirected to the logArea
+    Out.prln("Gate 2 started at: " + new Date().toString());
+
     mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,

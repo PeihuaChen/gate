@@ -65,6 +65,8 @@ public class TestConfig extends TestCase
         "Couldn't open config data test file: " + configUrl + " " + e
       );
     }
+    if (DEBUG)
+      Out.prln("Parsing config file ... " + configStream + "from URL" + configUrl);
     configProcessor.parseConfigFile(configStream, configUrl);
 
     // check that we got the CREOLE dir entry; then remove it
