@@ -21,11 +21,13 @@ import java.net.*;
 
 import junit.framework.*;
 
+import gate.event.*;
 import gate.persist.*;
 import gate.util.MethodNotImplementedException;
 
 
-public class AccessControllerImpl implements AccessController {
+public class AccessControllerImpl
+  implements AccessController, ObjectModificationListener {
 
   public static final int DEFAULT_SESSION_TIMEOUT_MIN = 60;
 
@@ -113,9 +115,12 @@ public class AccessControllerImpl implements AccessController {
 
   /** --- */
   public void close()
-    throws PersistenceException,SecurityException {
+    throws PersistenceException{
 
    throw new MethodNotImplementedException();
+   //1. deregister self as listener
+   //2. delete all groups/users collections
+   //3.
   }
 
   /** --- */
@@ -591,7 +596,10 @@ public class AccessControllerImpl implements AccessController {
       Vector grpMembers = (Vector)groupMembers.get(grpId);
       String grpName = (String)groupNames.get(grpId);
 
-      Group grp = new GroupImpl(grpId,grpName,grpMembers,this,this.jdbcConn);
+      GroupImpl grp = new GroupImpl(grpId,grpName,grpMembers,this,this.jdbcConn);
+      //register as listener for thsi group
+      grp.registerObjectModificationListener(this);
+
       //add to collection
       this.groupsByID.put(grp.getID(),grp);
       this.groupsByName.put(grp.getName(),grp);
@@ -604,10 +612,106 @@ public class AccessControllerImpl implements AccessController {
       Vector usrGroups = (Vector)userGroups.get(usrId);
       String usrName = (String)userNames.get(usrId);
 
-      User usr = new UserImpl(usrId,usrName,usrGroups,this,this.jdbcConn);
+      UserImpl usr = new UserImpl(usrId,usrName,usrGroups,this,this.jdbcConn);
+      //register as listener for thsi user
+      usr.registerObjectModificationListener(this);
+
       //add to collection
       this.usersByID.put(usr.getID(),usr);
       this.usersByName.put(usr.getName(),usr);
     }
+  }
+
+
+  /* ObjectModificationListener methods */
+
+  public void objectCreated(ObjectModificationEvent e) {
+    throw new MethodNotImplementedException();
+  }
+
+  public void objectModified(ObjectModificationEvent e) {
+
+    Object source = e.getSource();
+    int type = e.getType();
+    int subtype = e.getSubType();
+
+    Assert.assert(source instanceof Group || source instanceof User);
+    Assert.assert(type == ObjectModificationEvent.OBJECT_MODIFIED);
+
+    if (source instanceof Group) {
+
+      Assert.assert(subtype == Group.OBJECT_CHANGE_ADDUSER ||
+                    subtype == Group.OBJECT_CHANGE_NAME ||
+                    subtype == Group.OBJECT_CHANGE_REMOVEUSER);
+
+      //the name of the group could be different now (IDs are fixed)
+      if (subtype == Group.OBJECT_CHANGE_NAME) {
+        //rehash
+        //any better idea how to do it?
+        Set mappings = this.groupsByName.entrySet();
+        Iterator it = mappings.iterator();
+
+        boolean found = false;
+        while (it.hasNext()) {
+          Map.Entry mapEntry = (Map.Entry)it.next();
+          String key = (String)mapEntry.getKey();
+          Group  grp = (Group)mapEntry.getValue();
+
+          if (false == key.equals(grp.getName())) {
+            //gotcha
+            this.groupsByName.remove(key);
+            this.groupsByName.put(grp.getName(),grp);
+            found = true;
+            break;
+          }
+        }
+
+        Assert.assert(found);
+      }
+    }
+    else {
+
+      Assert.assert(source instanceof User);
+
+      //the name of the user could be different now (IDs are fixed)
+
+      Assert.assert(subtype == User.OBJECT_CHANGE_NAME ||
+                    subtype == User.OBJECT_CHANGE_PASSWORD);
+
+      //the name of the group could be different now (IDs are fixed)
+      if (subtype == User.OBJECT_CHANGE_NAME) {
+        //rehash
+        //any better idea how to do it?
+        Set mappings = this.usersByName.entrySet();
+        Iterator it = mappings.iterator();
+
+        boolean found = false;
+        while (it.hasNext()) {
+          Map.Entry mapEntry = (Map.Entry)it.next();
+          String key = (String)mapEntry.getKey();
+          User  usr = (User)mapEntry.getValue();
+
+          if (false == key.equals(usr.getName())) {
+            //gotcha
+            this.groupsByName.remove(key);
+            this.groupsByName.put(usr.getName(),usr);
+            found = true;
+            break;
+          }
+        }
+
+        Assert.assert(found);
+      }
+    }
+
+
+  }
+
+  public void objectDeleted(ObjectModificationEvent e) {
+    throw new MethodNotImplementedException();
+  }
+
+  public void processGateEvent(GateEvent e){
+    throw new MethodNotImplementedException();
   }
 }
