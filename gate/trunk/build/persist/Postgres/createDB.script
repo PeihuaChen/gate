@@ -59,3 +59,4 @@
 \i security_can_delete_group.sp
 \i security_can_delete_user.sp
 
+\i grants.sql
