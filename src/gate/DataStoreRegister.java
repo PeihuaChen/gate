@@ -98,8 +98,8 @@ public class DataStoreRegister extends HashSet {
 
   /**
    * Adds configuration data (e.g. from <TT>gate.xml</TT> files) to
-   * the register. New attribute/value pairs are added to the existing
-   * set.
+   * the register. New key/value pairs are added to the existing
+   * set (this will overwrite existing pairs whose keys match new ones).
    */
   public static void addConfig(Map configData) {
     DataStoreRegister.configData.putAll(configData);
