@@ -125,7 +125,8 @@ extends AbstractLanguageResource implements LanguageResource{
   abstract public void unpackMarkup(Document doc)
                                       throws DocumentFormatException;
 
-  abstract public void unpackMarkup(Document doc, RepositioningInfo repInfo)
+  abstract public void unpackMarkup(Document doc, RepositioningInfo repInfo,
+                                        RepositioningInfo ampCodingInfo)
                                       throws DocumentFormatException;
   /** Unpack the markup in the document. This method calls unpackMarkup on the
     * GATE document, but after it saves its content as a feature atached to

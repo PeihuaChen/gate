@@ -56,7 +56,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 
   /** Old style of unpackMarkup (without collecting of RepositioningInfo) */
   public void unpackMarkup(Document doc) throws DocumentFormatException {
-    unpackMarkup(doc, (RepositioningInfo) null);
+    unpackMarkup(doc, (RepositioningInfo) null, (RepositioningInfo) null);
   } // unpackMarkup
 
 
@@ -75,8 +75,8 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * doc will be parsed. Using a URL is recomended because the parser will
     * report errors corectlly if the XML document is not well formed.
     */
-  public void unpackMarkup(Document doc,
-                  RepositioningInfo repInfo) throws DocumentFormatException {
+  public void unpackMarkup(Document doc, RepositioningInfo repInfo,
+              RepositioningInfo ampCodingInfo) throws DocumentFormatException {
     if( (doc == null) ||
         (doc.getSourceUrl() == null && doc.getContent() == null)){
 
@@ -111,7 +111,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     GateFormatXmlDocumentHandler gateXmlHandler = null;
     XmlDocumentHandler xmlDocHandler = null;
     if (docHasContentButNoValidURL)
-      parseDocumentWithoutURL(doc, repInfo);
+      parseDocumentWithoutURL(doc, repInfo, ampCodingInfo);
     else try {
       // use Excerces XML parser with JAXP
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
@@ -142,6 +142,9 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         xmlDocHandler.addStatusListener(statusListener);
         // set repositioning object
         xmlDocHandler.setRepositioningInfo(repInfo);
+        // set the object with ampersand coding positions
+        xmlDocHandler.setAmpCodingInfo(ampCodingInfo);
+
         // Parse the document handler
 /* Angel
         xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
@@ -192,7 +195,8 @@ Angel */
    *  string
    */
   private void parseDocumentWithoutURL(gate.Document aDocument,
-                                        RepositioningInfo repInfo)
+                                        RepositioningInfo repInfo,
+                                        RepositioningInfo ampCodingInfo)
                                               throws DocumentFormatException {
 
     XmlDocumentHandler xmlDocHandler = null;
@@ -231,6 +235,8 @@ Angel */
       xmlDocHandler.addStatusListener(statusList);
       // set repositioning object
       xmlDocHandler.setRepositioningInfo(repInfo);
+      // set the object with ampersand coding positions
+      xmlDocHandler.setAmpCodingInfo(ampCodingInfo);
       // Parse the document handler
 /* Angel
 //      xmlParser.parse(is, xmlDocHandler);

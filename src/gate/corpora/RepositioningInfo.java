@@ -198,7 +198,7 @@ public class RepositioningInfo extends ArrayList {
    * Return the position info index containing <B>@param absPos</B>
    * If there is no such position info return -1.
    */
-  private int getIndexByOriginalPosition(long absPos) {
+  public int getIndexByOriginalPosition(long absPos) {
     PositionInfo currPI = null;
     int result = -1;
 
@@ -225,12 +225,14 @@ public class RepositioningInfo extends ArrayList {
   /**
    * Return the position info index containing <B>@param absPos</B>
    * or the index of record before this position.
+   * Result is -1 if the position is before the first record.
+   * Rezult is size() if the position is after the last record.
    */
-  private int getIndexByOriginalPositionFlow(long absPos) {
+  public int getIndexByOriginalPositionFlow(long absPos) {
     PositionInfo currPI = null;
-    int result = -1;
 
     int size = size();
+    int result = size;
     long origPos, origLen;
 
     // Find with the liniear algorithm. Could be extended to binary search.
@@ -341,6 +343,11 @@ public class RepositioningInfo extends ArrayList {
     // correct the index when the originalPos precede all records
     if(index == -1) {
       index = 0;
+    } // if
+
+    // position is after all records in list
+    if(index == size()) {
+      return;
     } // if
 
     for(int i = index+1; i<size(); ++i) {

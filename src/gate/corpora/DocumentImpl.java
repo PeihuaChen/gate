@@ -200,14 +200,20 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
           if(docFormat.getShouldCollectRepositioning().booleanValue()) {
             // unpack with collectiong of repositioning information
             RepositioningInfo info = new RepositioningInfo();
-            docFormat.unpackMarkup(this, info);
 
-            // put here the CRLF and &xxx; correction of RepositioningInfo
             String origContent = (String) getFeatures().get(
                 GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME);
+
+            RepositioningInfo ampCodingInfo = new RepositioningInfo();
             if(origContent != null) {
+              collectInformationForAmpCodding(origContent, ampCodingInfo);
+            } // if
+
+            docFormat.unpackMarkup(this, info, ampCodingInfo);
+
+            if(origContent != null) {
+              // CRLF correction of RepositioningInfo
               correctRepositioningForCRLF(origContent, info);
-              correctRepositioningForAmpCodding(origContent, info);
             } // if
 
             getFeatures().put(
@@ -243,15 +249,47 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
         info.correctInformationOriginalMove(index, 1);
       } // if
     } while(index != -1);
-
   } // correctRepositioningForCRLF
 
   /**
-   * Correct repositioning information for substitution of "&xxx;" with "y"
+   * Collect information for substitution of "&xxx;" with "y"
+   *
+   * It couldn't be collected a position information about
+   * some unicode and &-coded symbols during parsing. The parser "hide" the
+   * information about the position of such kind of parsed text.
+   * So, there is minimal chance to have &-coded symbol inside the covered by
+   * repositioning records area. The new record should be created for every
+   * coded symbol outside the existing records.
    */
-  private void correctRepositioningForAmpCodding(String content,
+  private void collectInformationForAmpCodding(String content,
                                             RepositioningInfo info) {
-  } // correctRepositioningForAmpCodding
+
+    if(content == null || info == null) return;
+
+    int ampIndex = -1;
+    int semiIndex;
+
+    do {
+      ampIndex = content.indexOf('&', ampIndex+1);
+      if(ampIndex != -1) {
+        semiIndex = content.indexOf(';', ampIndex+1);
+        if(semiIndex != -1) {
+          info.addPositionInfo(ampIndex, semiIndex-ampIndex+1, 0, 0);
+        } // if - semicolon found
+      } // if - ampersand found
+    } while (ampIndex != -1);
+
+    // correct the collected information to adjust it's positions
+    // with reported by the parser
+    int index = -1;
+
+    do {
+      index = content.indexOf("\r\n", index+1);
+      if(index != -1) {
+        info.correctInformationOriginalMove(index, -1);
+      } // if
+    } while(index != -1);
+  } // collectInformationForAmpCodding
 
   /** Clear all the data members of the object. */
   public void cleanup() {
