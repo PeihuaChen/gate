@@ -116,13 +116,13 @@
   <property category="sys" name="CopyrightLabel" value="Copyright:" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
-  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
+  <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
   <property category="sys" name="EventMatch" value="false" />
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
   <property category="sys" name="InstanceVisibility" value="4" />
-  <property category="sys" name="JDK" value="java 1.3.1-b24" />
-  <property category="sys" name="JbxEventListener0" value="java.beans.PropertyChangeListener" />
+  <property category="sys" name="JDK" value="java 1.3.0_02" />
+  <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener" />
   <property category="sys" name="JbxEventListener1" value="gate.event.DocumentListener" />
   <property category="sys" name="JbxEventListener2" value="java.beans.PropertyChangeListener" />
   <property category="sys" name="JbxEventListener3" value="gate.event.StatusListener" />
