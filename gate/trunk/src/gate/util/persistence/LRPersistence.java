@@ -38,6 +38,9 @@ public class LRPersistence extends ResourcePersistence {
     }
 
     super.extractDataFromSource(source);
+    //LR's will have the features saved by their respective persistence
+    //mechanism
+    features = null;
 
     LanguageResource lr = (LanguageResource)source;
     if(lr.getDataStore() == null){
