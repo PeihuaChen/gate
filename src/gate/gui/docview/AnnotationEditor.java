@@ -190,10 +190,6 @@ public class AnnotationEditor{
       public void mouseEntered(MouseEvent evt){
         hideTimer.stop();
       }
-      public void mouseExited(MouseEvent evt){
-        System.out.println("Exit!");
-        hideTimer.restart();
-      }
     };
 
     bottomWindow.getRootPane().addMouseListener(windowMouseListener);
