@@ -139,13 +139,13 @@ public class RDFFormatExporter extends AbstractLanguageAnalyser {
     String exportFilePathStr = null;
 
     if (exportFilePath == null) {
-      exportFilePathStr = new String(document.getSourceUrl().getFile() +
+      exportFilePathStr = new String(document.getSourceUrl().getFile() + "." +
                                     EXPORT_EXTS[this.exportFormat]);
     }
     else {
       exportFilePathStr = new String(exportFilePath.getPath()+
                                     "/" +
-                                    document.getName() +
+                                    document.getName() + "." +
                                     EXPORT_EXTS[this.exportFormat]);
     }
 //System.out.println("export path:" +exportFilePathStr);
