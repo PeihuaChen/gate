@@ -16,6 +16,8 @@ package gate.gui;
 
 import java.awt.Frame;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 
@@ -28,41 +30,153 @@ import gate.creole.*;
 public class NewResourceDialog extends JDialog {
   public NewResourceDialog(Frame frame, String title, boolean modal) {
     super(frame, title, modal);
-    outerClass = this;
+    setLocationRelativeTo(frame);
+    initLocalData();
+    initGuiComponents();
+    initListeners();
+  }
+
+  protected void initLocalData(){
     params = new ArrayList();
-System.out.println("0" + params);
+  }
+
+  protected void initGuiComponents(){
+    this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
+                                                  BoxLayout.Y_AXIS));
+    //name field
+    Box nameBox = Box.createHorizontalBox();
+    nameBox.add(Box.createHorizontalStrut(5));
+    nameBox.add(new JLabel("Name: "));
+    nameBox.add(Box.createHorizontalStrut(5));
+    nameField = new JTextField(30);
+    nameField.setMaximumSize(nameField.getPreferredSize());
+    nameBox.add(nameField);
+    nameBox.add(Box.createHorizontalStrut(5));
+    nameBox.add(Box.createHorizontalGlue());
+    this.getContentPane().add(nameBox);
+    this.getContentPane().add(Box.createVerticalStrut(5));
+
+    //parameters table
     tableModel = new ParametersTableModel();
     table = new XJTable(tableModel);
-    this.getContentPane().add(table, BorderLayout.CENTER);
+    table.setDefaultRenderer(ParameterDisjunction.class,
+                             new ParameterDisjunctionRenderer());
+    table.setDefaultEditor(ParameterDisjunction.class,
+                           new ParameterDisjunctionEditor());
+    JScrollPane scroll = new JScrollPane(table);
+    this.getContentPane().add(scroll);
+    this.getContentPane().add(Box.createVerticalStrut(5));
+    this.getContentPane().add(Box.createVerticalGlue());
+
+    //buttons box
+    JPanel buttonsBox = new JPanel();
+    buttonsBox.setLayout(new BoxLayout(buttonsBox, BoxLayout.X_AXIS));
+    //buttonsBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+    buttonsBox.add(Box.createHorizontalStrut(10));
+    buttonsBox.add(okBtn = new JButton("OK"));
+    buttonsBox.add(Box.createHorizontalStrut(10));
+    buttonsBox.add(cancelBtn = new JButton("Cancel"));
+    buttonsBox.add(Box.createHorizontalStrut(10));
+    this.getContentPane().add(buttonsBox);
+    this.getContentPane().add(Box.createVerticalStrut(5));
+    setSize(400, 300);
+  }
+
+
+  protected void initListeners(){
+    okBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        userCanceled = false;
+        String name = nameField.getText();
+        if(name == null || name.length() == 0){
+          JOptionPane.showMessageDialog(getOwner(),
+                                        "Please give a name for the new resource!\n",
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+        }else{
+          hide();
+        }
+      }
+    });
+
+    cancelBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        userCanceled = true;
+        hide();
+      }
+    });
   }
 
   ParametersTableModel tableModel;
-  JTable table;
+  XJTable table;
+  JComboBox parametersCombo;
+  JButton okBtn, cancelBtn;
+  JTextField nameField;
 
+
+  boolean userCanceled;
   ArrayList params;
-  NewResourceDialog outerClass;
 
   public Resource show(ResourceData rData){
+    nameField.setText("");
     ParameterList pList = rData.getParameterList();
+//System.out.println(pList.getInitimeParameters());
     Iterator parIter = pList.getInitimeParameters().iterator();
+    params.clear();
     while(parIter.hasNext()){
       params.add(new ParameterDisjunction((List)parIter.next()));
     }
     tableModel.fireTableDataChanged();
+    pack();
     super.show();
-    return null;
+    if(userCanceled) return null;
+    else{
+      //create the new resource
+      FeatureMap params = Factory.newFeatureMap();
+      for(int i=0; i< tableModel.getRowCount(); i++){
+        ParameterDisjunction pDisj = (ParameterDisjunction)
+                                     tableModel.getValueAt(i,0);
+        if(pDisj.getValue() != null){
+          params.put(pDisj.getName(), pDisj.getValue());
+        }
+      }
+      Resource res;
+      try{
+        res = Factory.createResource(rData.getClassName(), params);
+        res.getFeatures().put("Name", nameField.getText());
+      }catch(ResourceInstantiationException rie){
+        JOptionPane.showMessageDialog(getOwner(),
+                                      "Resource could not be created!\n" +
+                                      rie.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+        res = null;
+      }
+
+      return res;
+    }
+  }
+
+  int getRowCnt(){
+    return params.size();
   }
 
   //inner classes
-  class ParametersTableModel extends DefaultTableModel{
+  protected class ParametersTableModel extends AbstractTableModel{
+
+    public ParametersTableModel(){
+    }
+
+    public void fireTableDataChanged(){
+      super.fireTableDataChanged();
+    }
+
     public int getColumnCount(){return 4;}
 
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
-        case 0: return String.class;
+        case 0: return ParameterDisjunction.class;
         case 1: return String.class;
         case 2: return Boolean.class;
-        case 3: return Object.class;
+        case 3: return String.class;
         default: return Object.class;
       }
     }
@@ -87,7 +201,8 @@ System.out.println("0" + params);
     }
 
     public int getRowCount(){
-      /*return outerClass.params.size();*/
+      return getRowCnt();
+      /*
       if(params == null){
         System.out.println("Null indeed!");
         return 0;
@@ -95,6 +210,7 @@ System.out.println("0" + params);
         System.out.println("Like hell null!");
         return params.size();
       }
+      */
     }
 
     public Object getValueAt(int rowIndex,
@@ -102,7 +218,7 @@ System.out.println("0" + params);
       ParameterDisjunction pDisj =
                     (ParameterDisjunction)params.get(rowIndex);
       switch(columnIndex){
-        case 0: return pDisj.getName();
+        case 0: return pDisj;
         case 1: return pDisj.getType();
         case 2: return pDisj.getRequired();
         case 3: return pDisj.getValue();
@@ -117,7 +233,7 @@ System.out.println("0" + params);
                     (ParameterDisjunction)params.get(rowIndex);
       switch(columnIndex){
         case 0:{
-          pDisj.setName((String) aValue);
+          pDisj.setSelectedIndex(((Integer)aValue).intValue());
           break;
         }
         case 1:{
@@ -127,57 +243,145 @@ System.out.println("0" + params);
           break;
         }
         case 3:{
-          pDisj.setValue(aValue);
+          pDisj.setValue((String)aValue);
           break;
         }
         default:{}
       }
     }
-
   }///class FeaturesTableModel extends DefaultTableModel
 
+  class ParameterDisjunctionRenderer extends DefaultTableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table,
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row,
+                                                   int column){
+      ParameterDisjunction pDisj = (ParameterDisjunction)value;
+      Component comp = super.getTableCellRendererComponent(table,
+                                                           pDisj.getName(),
+                                                           isSelected, hasFocus,
+                                                           row, column);
+      if(comp instanceof JLabel){
+        try{
+          JLabel label = (JLabel)comp;
+          label.setToolTipText(pDisj.getComment());
+          label.setHorizontalTextPosition(JLabel.LEFT);
+          if(pDisj.size() > 1){
+            label.setIcon(new ImageIcon(getClass().
+                          getResource("/gate/resources/img/down.gif")));
+
+          }else{
+            label.setIcon(null);
+          }
+        }catch(Exception e){}
+      }
+      return comp;
+    }
+
+  }
+
+  class ParameterDisjunctionEditor extends DefaultCellEditor{
+    public ParameterDisjunctionEditor(){
+      super(new JComboBox());
+      combo = (JComboBox)super.getComponent();
+    }
+
+    public Component getTableCellEditorComponent(JTable table,
+                                             Object value,
+                                             boolean isSelected,
+                                             int row,
+                                             int column){
+     ParameterDisjunction pDisj = (ParameterDisjunction)value;
+
+     combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
+     return combo;
+    }
+    public Object getCellEditorValue(){
+      return new Integer(combo.getSelectedIndex());
+    }
+    JComboBox combo;
+  }
+
   class ParameterDisjunction{
+    /**
+     * gets a list of {@link gate.creole.Parameter}
+     */
     public ParameterDisjunction(List options){
       this.options = options;
-      selectedIndex = 0;
+      Iterator paramsIter = options.iterator();
+      names = new String[options.size()];
+      int i = 0;
+      while(paramsIter.hasNext()){
+        names[i++] = ((Parameter)paramsIter.next()).getComment();
+      }
+      values = new Object[options.size()];
+      setSelectedIndex(0);
     }
 
     public void setSelectedIndex(int index){
       selectedIndex = index;
-      Parameter par = (Parameter)options.get(selectedIndex);
-      required = !par.isOptional();
-      typeName = par.getTypeName();
-      name = par.getName();
-      try{
-        value = par.getDefaultValue();
-      }catch(ParameterException pe){
-        throw new GateRuntimeException(pe.toString());
+      currentParameter = (Parameter)options.get(selectedIndex);
+      if(values[selectedIndex] == null){
+        try{
+          values[selectedIndex] = currentParameter.getDefaultValue();
+        }catch(Exception e){
+          values[selectedIndex] = "";
+        }
       }
+      tableModel.fireTableDataChanged();
     }
 
     public int size(){
       return options.size();
     }
 
-    public Boolean getRequired(){return new Boolean(required);}
-
-    public void setValue(Object aValue){
-      value = aValue;
+    public Boolean getRequired(){
+      return new Boolean(!currentParameter.isOptional());
     }
-    public Object getValue(){return value;}
 
-    public String getType(){return typeName;}
-
-    public String getName(){return name;}
-    public void setName(String name){
-      //NOP
+    public String getName(){
+      return currentParameter.getName();
     }
+
+    public String getComment(){
+      return currentParameter.getComment();
+    }
+
+    public String getType(){
+      return currentParameter.getTypeName();
+    }
+
+    public String[] getNames(){
+      return names;
+    }
+
+    public void setValue(String stringValue){
+      Object oldValue = values[selectedIndex];
+      try{
+        values[selectedIndex] = currentParameter.
+                                calculateValueFromString(stringValue);
+      }catch(Exception e){
+        values[selectedIndex] = oldValue;
+        JOptionPane.showMessageDialog(getContentPane(),
+                                      "Invalid value!\n" +
+                                      "Is it the right type?",
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+    public Object getValue(){
+      return values[selectedIndex];
+    }
+
 
     int selectedIndex;
     List options;
     boolean required;
-    Object value;
     String typeName;
     String name;
+    String[] names;
+    Parameter currentParameter;
+    Object[] values;
   }
 }

@@ -20,7 +20,7 @@ import java.awt.event.*;
 class ApplicationHandle extends ResourceHandle {
 
   public ApplicationHandle(String applicationName) {
-    super(null, applicationName);
+    super(applicationName);
     setSmallIcon(new ImageIcon(
            getClass().getResource("/gate/resources/img/application.gif")));
     popup = new JPopupMenu();

@@ -17,7 +17,10 @@ package gate.gui;
 import gate.*;
 
 import javax.swing.*;
+import java.awt.BorderLayout;
 import javax.swing.table.*;
+
+import java.util.*;
 
 import gate.creole.AbstractVisualResource;
 
@@ -31,30 +34,41 @@ public class ResourceViewer extends AbstractVisualResource {
 
 
   protected void initLocalData(){
+    features = new ArrayList();
   }
 
   protected void initGuiComponents(){
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    table = new XJTable();
-
+    tableModel = new FeaturesTableModel();
+    table = new XJTable(tableModel);
+    JScrollPane scroll = new JScrollPane(table);
+    this.add(scroll, BorderLayout.CENTER);
   }
 
   protected void initListeners(){
   }
+
   public void setResource(gate.Resource newResource) {
     resource = newResource;
+    features.clear();
+    features.addAll(resource.getFeatures().entrySet());
+    tableModel.fireTableDataChanged();
   }
+
   public gate.Resource getResource() {
     return resource;
   }
 
-  JTable table;
+  XJTable table;
+  FeaturesTableModel tableModel;
   private gate.Resource resource;
+  List features;
 
-  class FeaturesTableModel extends DefaultTableModel{
+  class FeaturesTableModel extends AbstractTableModel{
     public int getColumnCount(){return 2;}
-
-    public Class getColumnClass(int columnIndex){ return String.class;}
+    public int getRowCount(){
+      return features.size();
+    }
 
     public String getColumnName(int columnIndex){
       switch(columnIndex){
@@ -64,5 +78,33 @@ public class ResourceViewer extends AbstractVisualResource {
       }
     }//public String getColumnName(int columnIndex)
 
+    public Class getColumnClass(int columnIndex){
+      return String.class;
+    }
+
+    public boolean isCellEditable(int rowIndex,
+                              int columnIndex){
+      return false;
+    }
+
+    public Object getValueAt(int rowIndex,
+                         int columnIndex){
+      Map.Entry entry = (Map.Entry)features.get(rowIndex);
+      switch(columnIndex){
+        case 0:{
+          return entry.getKey().toString();
+        }
+        case 1:{
+          return entry.getValue().toString();
+        }
+        default:{
+          return null;
+        }
+      }
+    }
+
+    public void setValueAt(Object aValue,
+                       int rowIndex,
+                       int columnIndex){}
   }///class FeaturesTableModel extends DefaultTableModel
 }
