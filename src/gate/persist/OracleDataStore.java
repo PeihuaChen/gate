@@ -448,9 +448,6 @@ public class OracleDataStore extends JDBCDataStore {
       )
     );
 
-    //unload the transient LR, so the user realises it is no longer valid
-//    Factory.deleteResource(lr);
-
     return result;
   }
 
