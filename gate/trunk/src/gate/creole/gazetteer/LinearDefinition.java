@@ -92,18 +92,31 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   throws ResourceInstantiationException {
     GazetteerList list = new GazetteerList();
     try {
-      String path = url.getPath();
+      URL turl = url;
+      if (-1 != url.getProtocol().indexOf("gate")) {
+        turl = gate.util.protocols.gate.Handler.class.getResource(
+                      gate.util.Files.getResourcePath() + url.getPath()
+                    );
+      } // if gate:path url
+
+
+      String path = turl.getPath();
       int slash = path.lastIndexOf("/");
-      if (-1 == slash ) {
-        slash = 0;
-      } else {
+      if (-1 != slash ) {
         path = path.substring(0,slash+1);
       }
+
+      File f = new File(path+listName);
+      if (!f.exists())
+        f.createNewFile();
+
       URL lurl = new URL(url,listName);
       list.setURL(lurl);
       list.load();
     } catch (MalformedURLException murle ) {
       throw new ResourceInstantiationException(murle);
+    } catch (IOException ioex) {
+       throw new ResourceInstantiationException(ioex);
     }
     return list;
   } // loadSingleList
