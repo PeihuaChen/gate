@@ -40,6 +40,9 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   /** set of lists as strings*/
   private List lists = new ArrayList();
 
+  /**the encoding of the list */
+  private String encoding = "UTF-8";
+
   /** a mapping between a list and a node */
   private Map nodesByList = new HashMap();
 
@@ -50,6 +53,18 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   private boolean isModified = false;
 
   public LinearDefinition() {
+  }
+
+  /** set the encoding of the linear def
+   *  @param encod the encoding to be set */
+  public void setEncoding(String encod) {
+    encoding = encod;
+  }
+
+  /** get the encoding of the linear def
+   *  @return the encoding of the list*/
+  public String getEncoding() {
+    return encoding;
   }
 
   /**
@@ -67,6 +82,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         GazetteerList list = new GazetteerList();
         URL lurl = new URL(url,node.getList());
         list.setURL(lurl);
+        list.setEncoding(encoding);
         list.load();
 
         gazListsByNode.put(node,list);
