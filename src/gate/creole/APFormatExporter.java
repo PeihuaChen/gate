@@ -71,7 +71,10 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       exportFilePathStr = new String(document.getSourceUrl().getFile() +
                                                                   ".apf.xml");
     else
-      exportFilePathStr = exportFilePath.getPath()+ "/"+docId + ".apf.xml";
+      //kalina: changed it to be just the filename as Di wanted it this way
+      exportFilePathStr = exportFilePath.getPath()+ "/"+
+        gate.util.Files.getLastPathComponent(document.getSourceUrl().getFile())
+        + ".apf.xml";
 
     if (DEBUG)
       Out.prln("Export file path = "+ exportFilePathStr);
@@ -158,7 +161,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
     String fileName = "";
     fileName = gate.util.Files.getLastPathComponent(
                                             document.getSourceUrl().getFile());
-/*
+
     // File name contains now the last token
     if (DEBUG)
       Out.prln("From initDocId, fileName ="+ fileName);
@@ -176,11 +179,6 @@ public class APFormatExporter extends AbstractLanguageAnalyser
       tmpDocId.replace(tmpDocId.length()-1,tmpDocId.length(),"");
       docId = tmpDocId.toString();
     }// End if
-*/
-
-  //kalina: before the APF exporter was removing the last extension but
-  //Di said this is a bad idea, so commenting it all out and making it simple
-  docId = fileName;
   }// initDocId()
 
   /** Returns the xml document conforming to APF dtd.*/
