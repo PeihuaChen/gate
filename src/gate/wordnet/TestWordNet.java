@@ -365,6 +365,7 @@ System.out.println(iSet);
 
     String wnConfigFile = (String)Gate.getUserConfig().
                           get(GateConstants.WORDNET_CONFIG_FILE);
+    if(wnConfigFile == null) return;
     if (null == wnMain) {
       wnMain = new IndexFileWordNetImpl();
       wnMain.setPropertyUrl(new File(wnConfigFile).toURL());
