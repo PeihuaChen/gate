@@ -110,6 +110,7 @@ and check in.
 <!------------------------------------------------------------------------->
 <H2><a name="known">Known Bugs</a></H2>
 
+
 <TABLE border="1" cellspacing="5">
 <!--  HEADER  ------------------------------------------------------------->
   <TR>
@@ -440,9 +441,63 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+  <TR>
+    <TD>0018</TD>
+    <TD>Oracle DB</TD>
+    <TD>-</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>Dec 05 2001 Beta1</TD>
+    <TD>When documents with changed annotations were synchronised then the annotations were added to the database with
+    reference to the LanguageResource of the document, not the document itself<br>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+<TR>
+    <TD>0019</TD>
+    <TD>Oracle DB</TD>
+    <TD>-</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>Dec 04 2001 Beta1</TD>
+    <TD>Deleting a document was not working for Oracle DataStore - misplaced <i>delete</i> statements caused foreign key violation<br>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+<TR>
+    <TD>0020</TD>
+    <TD>Oracle DB</TD>
+    <TD>-</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>Dec 04 2001 Beta1</TD>
+    <TD>Synchronising a document caused sometimes duplicating an annotation<br>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+<TR>
+    <TD>0021</TD>
+    <TD>Oracle DB</TD>
+    <TD>-</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>Dec 04 2001 Beta1</TD>
+    <TD>adding a document node in the database would use wrong node_id - IDs were not initialised properly when the document was read
+    from DB<br>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 
 </TABLE>
-
 
 
 <!------------------------------------------------------------------------->
