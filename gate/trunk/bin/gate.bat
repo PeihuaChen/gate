@@ -5,6 +5,11 @@ REM $Id$
 REM ##############################################
 
 REM ##############################################
+REM set NLS_LANG for Oracle
+REM ##############################################
+set NLS_LANG=AMERICAN_AMERICA.UTF8
+
+REM ##############################################
 REM set LOCAT to where we hope gate.jar etc. are located
 REM ##############################################
 

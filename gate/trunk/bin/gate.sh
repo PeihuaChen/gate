@@ -5,6 +5,9 @@
 E=""
 [ x$1 = x-debug ] && E=echo
 
+# set NLS_LANG for Oracle
+NLS_LANG=AMERICAN_AMERICA.UTF8
+
 # set LOCAT to where we hope gate.jar etc. are located
 if [ x$GATE_HOME != x ]
 then
