@@ -15,6 +15,8 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -126,11 +128,6 @@ public class TextualDocumentView extends AbstractDocumentView {
     });
   }
 
-
-  public Component getGUI() {
-    return scroller;
-  }
-
   public int getType() {
     return CENTRAL;
   }
@@ -139,6 +136,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
+System.out.println("init GUI");    
     textView = new JEditorPane();
     textView.setContentType("text/plain");
     textView.setEditorKit(new StyledEditorKit());
@@ -156,15 +154,28 @@ public class TextualDocumentView extends AbstractDocumentView {
       if(aView instanceof AnnotationListView) 
         annotationListView = (AnnotationListView)aView;
     }
-
     initListeners();
   }
-
-  protected void unregisterHooks(){}
-  protected void registerHooks(){}
+  
+  public Component getGUI(){
+    return scroller;
+  }
   
   protected void initListeners(){
+    textView.addComponentListener(new ComponentAdapter(){
+      public void componentResized(ComponentEvent e){
+        try{
+    	    scroller.getViewport().setViewPosition(
+    	            textView.modelToView(0).getLocation());
+    	    scroller.paintImmediately(textView.getBounds());
+        }catch(BadLocationException ble){
+          //ignore
+        }
+      }
+    });
   }
+  protected void unregisterHooks(){}
+  protected void registerHooks(){}
   
   
   /**

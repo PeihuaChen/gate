@@ -60,12 +60,6 @@ public class AnnotationSetsView extends AbstractDocumentView
   
 
   /* (non-Javadoc)
-   * @see gate.gui.docview.DocumentView#getGUI()
-   */
-  public Component getGUI() {
-    return mainPanel;
-  }
-  /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
    */
   public int getType() {
@@ -92,10 +86,12 @@ public class AnnotationSetsView extends AbstractDocumentView
               getAnnotations((String)setsIter.next())));
     }
     tableRows.addAll(setHandlers);
-    mainTable = new XJTable(tableModel = new SetsTableModel());
+    mainTable = new XJTable();
+    tableModel = new SetsTableModel();
     ((XJTable)mainTable).setSortable(false);
-    mainTable.setRowMargin(0);
-    mainTable.getColumnModel().setColumnMargin(0);
+    mainTable.setModel(tableModel);
+//    mainTable.setRowMargin(0);
+//    mainTable.getColumnModel().setColumnMargin(0);
     SetsTableCellRenderer cellRenderer = new SetsTableCellRenderer();
     mainTable.getColumnModel().getColumn(NAME_COL).setCellRenderer(cellRenderer);
     mainTable.getColumnModel().getColumn(SELECTED_COL).setCellRenderer(cellRenderer);
@@ -138,6 +134,14 @@ public class AnnotationSetsView extends AbstractDocumentView
     initListeners();
   }
   
+  public Component getGUI(){
+    return mainPanel;
+  }
+  protected void guiShown(){
+    tableModel.fireTableRowsUpdated(0, tableModel.getRowCount() -1);
+  }
+
+  
   /**
    * This method will be called whenever the view becomes active. Implementers 
    * should use this to add hooks (such as mouse listeners) to the other views
@@ -166,6 +170,13 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected void initListeners(){
     document.addDocumentListener(this);
+    mainTable.addComponentListener(new ComponentAdapter(){
+      public void componentResized(ComponentEvent e){
+        //trigger a resize for the columns
+        mainTable.fixColumnSizes();
+//        tableModel.fireTableRowsUpdated(0, 0);
+      }
+    });
     textMouseListener = new TextMouseListener();
     textCaretListener = new TextCaretListener();
     textAncestorListener = new AncestorListener(){
@@ -1103,7 +1114,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   List setHandlers;
   List tableRows; 
-  JTable mainTable;
+  XJTable mainTable;
   SetsTableModel tableModel;
   JScrollPane scroller;
   JPanel mainPanel;
