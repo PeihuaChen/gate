@@ -1344,7 +1344,32 @@ String suffixForDumpFiles</TD>
     <TD>
  AnnotDiff to display the strings of the key and response annotations rather than their type
  which is already shown in the list above.
+    </tr>
 
+  <TR>
+    <TD>00068</TD>
+    <TD>core  -  serialization</TD>
+    <TD>Marin</TD>
+    <TD>Kalina</TD>
+    <TD>beta1</TD>
+    <TD>06 march 2002; beta1</TD>
+    <TD>
+         1. open serialized corpus (no matter what storage)
+        2. create new doc
+        3. add to corpus
+        4. close new doc
+        5. sync corpus
+
+        u end up with:
+
+=========
+Error reading document inside a serialised corpus.
+Exception occurred during event dispatching:
+gate.util.GateRuntimeException: No instance id for class
+gate.corpora.DocumentImpl
+ at gate.corpora.SerialCorpusImpl.get(SerialCorpusImpl.java:595)
+ at gate.persist.SerialDataStore.sync(SerialDataStore.java:370)
+   </tr>
 </TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
