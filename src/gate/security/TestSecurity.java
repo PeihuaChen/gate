@@ -44,8 +44,8 @@ public class TestSecurity extends TestCase
   private static final String JDBC_URL =
 //            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //"jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
-           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
-//"jdbc:oracle:thin:GATEUSER/gate2@grindleford:1521:gatedb2";
+//           "jdbc:oracle:thin:GATEUSER/gate@onto-text:1521:GATE05";
+"jdbc:oracle:thin:GATEUSER/gate2@grindleford:1521:gatedb2";
 
   private boolean exceptionThrown = true;
 
