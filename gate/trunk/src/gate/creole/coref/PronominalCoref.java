@@ -165,6 +165,8 @@ public class PronominalCoref extends AbstractProcessingResource
     //1.
     boolean antecedentFound = false;
     int scopeFirstIndex = sentenceIndex - SENTENCES_IN_SCOPE;
+    if (scopeFirstIndex < 0 ) scopeFirstIndex = 0;
+
     int currSentenceIndex = sentenceIndex;
     Annotation bestAntecedent = null;
 
@@ -177,17 +179,24 @@ public class PronominalCoref extends AbstractProcessingResource
         Annotation currPerson = (Annotation)it.next();
         String gender = (String)currPerson.getFeatures().get(PERSON_GENDER);
 
-        if (null != gender && gender.equalsIgnoreCase("MALE")) {
+        if (null == gender ||
+            gender.equalsIgnoreCase("MALE") ||
+            gender.equalsIgnoreCase("UNKNOWN")) {
           //hit
           antecedentFound = true;
 
-          if (null == bestAntecedent ||
-              currPerson.getStartNode().getOffset().longValue() >
-                                  bestAntecedent.getStartNode().getOffset().longValue()) {
+          if (null == bestAntecedent) {
             bestAntecedent = currPerson;
+          }
+          else {
+            bestAntecedent = chooseAntecedent(bestAntecedent,currPerson,pronoun);
           }
         }
       }
+
+      if (0 == currSentenceIndex--)
+        break;
+
     }
 gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
     return bestAntecedent;
@@ -206,6 +215,7 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     //1.
     boolean antecedentFound = false;
     int scopeFirstIndex = sentenceIndex - SENTENCES_IN_SCOPE;
+    if (scopeFirstIndex < 0 ) scopeFirstIndex = 0;
     int currSentenceIndex = sentenceIndex;
     Annotation bestAntecedent = null;
 
@@ -218,17 +228,23 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
         Annotation currPerson = (Annotation)it.next();
         String gender = (String)currPerson.getFeatures().get(PERSON_GENDER);
 
-        if (null != gender && gender.equalsIgnoreCase("FEMALE")) {
+        if (null == gender ||
+            gender.equalsIgnoreCase("FEMALE") ||
+            gender.equalsIgnoreCase("UNKNOWN")) {
           //hit
           antecedentFound = true;
 
-          if (null == bestAntecedent ||
-              currPerson.getStartNode().getOffset().longValue() >
-                                  bestAntecedent.getStartNode().getOffset().longValue()) {
+          if (null == bestAntecedent) {
             bestAntecedent = currPerson;
+          }
+          else {
+            bestAntecedent = chooseAntecedent(bestAntecedent,currPerson,pronoun);
           }
         }
       }
+
+      if (0 == currSentenceIndex--)
+        break;
     }
 
 gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntecedent);
@@ -305,6 +321,62 @@ gate.util.Err.println("found antecedent for ["+pronounString+"] : " + bestAntece
     }
   }
 
+
+  private Annotation chooseAntecedent(Annotation ant1, Annotation ant2, Annotation pronoun) {
+
+    //0. preconditions
+    Assert.assertNotNull(ant1);
+    Assert.assertNotNull(ant2);
+    Assert.assertNotNull(pronoun);
+    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP_CATEGORY));
+    String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
+    Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
+                      pronounString.equalsIgnoreCase("HER") ||
+                      pronounString.equalsIgnoreCase("HE") ||
+                      pronounString.equalsIgnoreCase("HIS"));
+
+    if (pronounString.equalsIgnoreCase("HE") ||
+        pronounString.equalsIgnoreCase("HIS")||
+        pronounString.equalsIgnoreCase("SHE") ||
+        pronounString.equalsIgnoreCase("HER")) {
+
+      Long offset1 = ant1.getStartNode().getOffset();
+      Long offset2 = ant2.getStartNode().getOffset();
+      Long offsetPrn = pronoun.getStartNode().getOffset();
+
+      long diff1 = offsetPrn.longValue() - offset1.longValue();
+      long diff2 = offsetPrn.longValue() - offset2.longValue();
+      Assert.assertTrue(diff1 != 0 && diff2 != 0);
+
+      //get the one CLOSEST AND PRECEDING the pronoun
+      if (diff1 > 0 && diff2 > 0) {
+        //we have [...antecedentA...AntecedentB....pronoun...] ==> choose B
+        if (diff1 < diff2)
+          return ant1;
+        else
+          return ant2;
+      }
+      else if (diff1 < 0 && diff2 < 0){
+        //we have [...pronoun ...antecedentA...AntecedentB.......] ==> choose A
+        if (Math.abs(diff1) < Math.abs(diff2))
+          return ant1;
+        else
+          return ant2;
+      }
+      else {
+        Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+        //we have [antecedentA...pronoun...AntecedentB] ==> choose A
+        if (diff1 > 0)
+          return ant1;
+        else
+          return ant2;
+      }
+
+    }
+    else {
+      throw new MethodNotImplementedException();
+    }
+  }
 
 /*  private static class SentenceComparator implements Comparator {
 
