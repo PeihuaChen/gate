@@ -66,6 +66,11 @@ public class AnnotationDiff extends AbstractVisualResource{
   /** The annotation schema object used to get the annotation name*/
   private AnnotationSchema annotationSchema = null;
 
+  /** A set of feature names bellonging to annotations from keyAnnotList
+    * used in isCompatible() and isPartiallyCompatible() methods
+    */
+  private Set keyFeatureNamesSet = null;
+
   /** The precision strict value (see NLP Information Extraction)*/
   private double precisionStrict = 0.0;
   /** The precision lenient value (see NLP Information Extraction)*/
@@ -105,16 +110,16 @@ public class AnnotationDiff extends AbstractVisualResource{
   protected static NumberFormat formatter = NumberFormat.getInstance();
 
   /** The components that will stay into diffPanel*/
-  private XJTable diffTable = new XJTable();
+  private XJTable diffTable = null;
 
   /** Used to represent the result of diff. See DiffSetElement class.*/
   private Set diffSet = null;
 
   /** This field is used in doDiff() and detectKeyType() methods and holds all
    *  partially correct keys */
-  private Set keyPartiallySet = new HashSet();
+  private Set keyPartiallySet = null;
   /** This field is used in doDiff() and detectResponseType() methods*/
-  private Set responsePartiallySet = new HashSet();
+  private Set responsePartiallySet = null;
 
   /** This list is created from keyAnnotationSet at init() time*/
   private java.util.List keyAnnotList = null;
@@ -158,7 +163,7 @@ public class AnnotationDiff extends AbstractVisualResource{
   private Color colors[] = new Color[MAX_TYPES];
 
   /** A scroll for the AnnotDiff's table*/
-  private JScrollPane scrollPane = new JScrollPane();
+  private JScrollPane scrollPane = null;
 
   /** Used to store the no. of annotations from response,identified as belonging
     * to one of the previous types.
@@ -207,13 +212,29 @@ public class AnnotationDiff extends AbstractVisualResource{
     keyAnnotationSetName = aKeyAnnotationSetName;
   } // setKeyAnnotationSetName();
 
-  /** gets the keyAnnotationSetName.
+  /** Gets the keyAnnotationSetName.
     * @return The name of the keyAnnotationSet used in AnnotationDiff. If
     * returns null then the the default annotation set will be used.
     */
   public String getKeyAnnotationSetName(){
     return keyAnnotationSetName;
   } // getKeyAnnotationSetName()
+
+  /** Sets the keyFeatureNamesSet in AnnotDiff.
+    * @param aKeyFeatureNamesSet a set containing the feature names from key
+    * that will be used in isPartiallyCompatible()
+    */
+  public void setKeyFeatureNamesSet(Set aKeyFeatureNamesSet){
+    keyFeatureNamesSet = aKeyFeatureNamesSet;
+  }//setKeyFeatureNamesSet();
+
+  /** Gets the keyFeatureNamesSet in AnnotDiff.
+    * @return A set containing the feature names from key
+    * that will be used in isPartiallyCompatible()
+    */
+  public Set getKeyFeatureNamesSet(){
+    return keyFeatureNamesSet;
+  }//getKeyFeatureNamesSet();
 
   /** Sets the responseAnnotationSetName in AnnotDiff
     * @param aResponseAnnotationSetName The name of the annotation set from the
@@ -388,12 +409,15 @@ public class AnnotationDiff extends AbstractVisualResource{
     * calculation and so on.
     */
   public Resource init() throws ResourceInstantiationException {
-
     colors[DEFAULT_TYPE] = WHITE;
     colors[CORRECT_TYPE] = GREEN;
     colors[SPURIOUS_TYPE] = RED;
     colors[PARTIALLY_CORRECT_TYPE] = BLUE;
     colors[MISSING_TYPE] = YELLOW;
+
+    // Initialize the partially sets...
+    keyPartiallySet = new HashSet();
+    responsePartiallySet = new HashSet();
 
     // Do the diff, P&R calculation and so on
     AnnotationSet keyAnnotSet = null;
@@ -459,11 +483,13 @@ public class AnnotationDiff extends AbstractVisualResource{
     formatter.setMinimumFractionDigits(4);
 
     // Create an Annotation diff table model
-    AnnotationDiffTableModel diffModel=new AnnotationDiffTableModel(diffSet);
+    diffTable = new XJTable();
+    scrollPane = new JScrollPane(diffTable);
+    AnnotationDiffTableModel diffModel= new AnnotationDiffTableModel(diffSet);
     // Set the model for our table
     diffTable.setModel(diffModel);
     // Set the cell renderer.
-    AnnotationDiffCellRenderer cellRenderer=new AnnotationDiffCellRenderer();
+    AnnotationDiffCellRenderer cellRenderer = new AnnotationDiffCellRenderer();
     diffTable.setDefaultRenderer(java.lang.String.class,cellRenderer);
     diffTable.setDefaultRenderer(java.lang.Long.class,cellRenderer);
 
@@ -489,8 +515,6 @@ public class AnnotationDiff extends AbstractVisualResource{
     BoxLayout boxLayout = new BoxLayout(this,BoxLayout.Y_AXIS);
     this.setLayout(boxLayout);
 
-    // Put the table into a JScrollPanel
-    scrollPane.getViewport().setView(diffTable);
     // Add the tableScroll to the diffPanel
     this.add(scrollPane);
 
@@ -707,7 +731,7 @@ public class AnnotationDiff extends AbstractVisualResource{
       while(responseIterator.hasNext()){
         Annotation responseAnnot = (Annotation) responseIterator.next();
 
-        if(keyAnnot.isPartiallyCompatible(responseAnnot)){
+        if(keyAnnot.isPartiallyCompatible(responseAnnot,keyFeatureNamesSet)){
           keyPartiallySet.add(keyAnnot);
           responsePartiallySet.add(responseAnnot);
           if (keyAnnot.coextensive(responseAnnot)){
@@ -756,7 +780,8 @@ public class AnnotationDiff extends AbstractVisualResource{
           while (respParIter.hasNext()){
             DiffSetElement diffElem = (DiffSetElement) respParIter.next();
             Annotation respAnnot = diffElem.getRightAnnotation();
-            if (respAnnot != null && keyAnnot.isPartiallyCompatible(respAnnot)){
+            if (respAnnot != null && keyAnnot.isPartiallyCompatible(respAnnot,
+                                                          keyFeatureNamesSet)){
                 diffElement = new DiffSetElement( keyAnnot,
                                                   null,
                                                   DEFAULT_TYPE,
@@ -872,13 +897,14 @@ public class AnnotationDiff extends AbstractVisualResource{
     Iterator iter = responsePartiallySet.iterator();
     while(iter.hasNext()){
       Annotation a = (Annotation) iter.next();
-      if (anAnnot.isPartiallyCompatible(a)) return DEFAULT_TYPE;
+      if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet))
+        return DEFAULT_TYPE;
     } // End while
 
     iter = responseAnnotList.iterator();
     while(iter.hasNext()){
       Annotation a = (Annotation) iter.next();
-      if (anAnnot.isPartiallyCompatible(a)){
+      if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet)){
          responsePartiallySet.add(a);
          keyPartiallySet.add(anAnnot);
          return DEFAULT_TYPE;
@@ -900,13 +926,14 @@ public class AnnotationDiff extends AbstractVisualResource{
     Iterator iter = keyPartiallySet.iterator();
     while(iter.hasNext()){
       Annotation a = (Annotation) iter.next();
-      if (a.isPartiallyCompatible(anAnnot)) return PARTIALLY_CORRECT_TYPE;
+      if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet))
+        return PARTIALLY_CORRECT_TYPE;
     } // End while
 
     iter = keyAnnotList.iterator();
     while(iter.hasNext()){
       Annotation a = (Annotation) iter.next();
-      if (a.isPartiallyCompatible(anAnnot)){
+      if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet)){
          responsePartiallySet.add(anAnnot);
          keyPartiallySet.add(a);
          return PARTIALLY_CORRECT_TYPE;
