@@ -114,58 +114,46 @@
       <PARAMETER NAME="xmlFileUrl" COMMENT="The url to the definition file"
         SUFFIXES="xml;xsd">java.net.URL</PARAMETER>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/AddressSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/AddressSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE="gate:/creole/schema/DateSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/DateSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/FacilitySchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/FacilitySchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/GpeSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE ="schema/GpeSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/IdentifierSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/IdentifierSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml"
-          />
+        <PARAM NAME ="xmlFileUrl" VALUE ="schema/PersonSchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/LocationSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/LocationSchema.xml" />
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/MoneySchema.xml"
-          />
+        <PARAM NAME ="xmlFileUrl" VALUE ="schema/MoneySchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/OrganizationSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/OrganizationSchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/PercentSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/PercentSchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml"
-          />
+        <PARAM NAME ="xmlFileUrl" VALUE ="schema/PersonSchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/TokenSchema.xml"
-          />
+        <PARAM NAME ="xmlFileUrl" VALUE ="schema/TokenSchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE
-          ="gate:/creole/schema/SyntaxTreeNodeSchema.xml" />
+        <PARAM NAME ="xmlFileUrl" VALUE="schema/SyntaxTreeNodeSchema.xml"/>
       </AUTOINSTANCE>
       <AUTOINSTANCE>
-        <PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/CorefSchema.xml"
-          />
+        <PARAM NAME ="xmlFileUrl" VALUE ="schema/CorefSchema.xml"/>
       </AUTOINSTANCE>
     </RESOURCE>
   </CREOLE>
