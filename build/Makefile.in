@@ -38,7 +38,7 @@ PKGS=	gate gate.annotation gate.config gate.corpora gate.creole \
 
 # classpath to build compile commands from
 CP=	-classpath \
-`$(CYGPATHP) ../classes:../lib/junit.jar:../lib/dbswing.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/xerces.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar:../lib/heptag.jar`
+`$(CYGPATHP) ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/xerces.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar:../lib/heptag.jar`
 
 # sourcepath to build compile commands from
 SP=	-sourcepath `$(CYGPATHP) ../src`

@@ -5,7 +5,7 @@
   <property category="build" name="CopyExtensions.1" value="txt" />
   <property category="build" name="CopyExtensions.2" value="xml" />
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime" name="ConfigurationCount" value="7" />
+  <property category="runtime" name="ConfigurationCount" value="8" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint -Xmx150m -Djava.ext.dirs=z:/gate/lib/ext" />
@@ -98,6 +98,13 @@
   <property category="runtime.7" name="jsprunner.docbase" value="." />
   <property category="runtime.7" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
   <property category="runtime.7" name="jsprunner.launchuri" value="/D%|/apps/JBuilder4/bin" />
+  <property category="runtime.8" name="ConfigurationName" value="Profile PRs" />
+  <property category="runtime.8" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.8" name="application.class" value="gate.creole.ProfilePRs" />
+  <property category="runtime.8" name="application.parameters" value="-dir z:/test/news" />
+  <property category="runtime.8" name="application.vmparameters" value="-Djava.ext.libs=lib/ext -Xmx500m" />
+  <property category="runtime.8" name="jsprunner.docbase" value="." />
+  <property category="runtime.8" name="jsprunner.jspfile" value="." />
   <property category="sys" name="AuthorLabel" value="@author" />
   <property category="sys" name="BackupPath" value="bak" />
   <property category="sys" name="BeansInstantiate" value="false" />
@@ -107,6 +114,7 @@
   <property category="sys" name="CompanyLabel" value="Company:" />
   <property category="sys" name="Copyright" value="Copyright (c) 2000" />
   <property category="sys" name="CopyrightLabel" value="Copyright:" />
+  <property category="sys" name="DefaultPackage" value="gate.gui" />
   <property category="sys" name="Description" value="" />
   <property category="sys" name="DescriptionLabel" value="Description:" />
   <property category="sys" name="DocPath" value="doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc/doc\javadoc" />
@@ -114,13 +122,13 @@
   <property category="sys" name="EventStyle" value="1" />
   <property category="sys" name="ExcludeClassEnabled" value="0" />
   <property category="sys" name="InstanceVisibility" value="4" />
-  <property category="sys" name="JDK" value="java 1.3.1-b24" />
-  <property category="sys" name="JbxEventListener0" value="gate.event.CreoleListener" />
-  <property category="sys" name="JbxEventListener1" value="java.beans.PropertyChangeListener" />
-  <property category="sys" name="JbxEventListener2" value="java.beans.PropertyChangeListener" />
-  <property category="sys" name="JbxEventListener3" value="gate.event.StatusListener" />
-  <property category="sys" name="JbxEventListener4" value="gate.event.ProgressListener" />
-  <property category="sys" name="JbxEventListener5" value="gate.event.CreoleListener" />
+  <property category="sys" name="JDK" value="java 1.3.0-C" />
+  <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener" />
+  <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener" />
+  <property category="sys" name="JbxEventListener2" value="gate.event.StatusListener" />
+  <property category="sys" name="JbxEventListener3" value="gate.event.ProgressListener" />
+  <property category="sys" name="JbxEventListener4" value="gate.event.DocumentListener" />
+  <property category="sys" name="JbxEventListener5" value="gate.event.GateListener" />
   <property category="sys" name="JbxEventListener6" value="gate.gui.StatusListener" />
   <property category="sys" name="JbxEventListener7" value="gate.gui.ProgressListener" />
   <property category="sys" name="LastTag" value="0" />
