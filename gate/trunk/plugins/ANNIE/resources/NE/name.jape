@@ -867,11 +867,11 @@ Priority: 25
  )?
 )
 (
- ({Lookup.majorType == loc_key, Lookup.minorType == pre}
+ ({Lookup.majorType == loc_pre_key}
   SPACE)?
  {Lookup.majorType == location}
  (SPACE
-  {Lookup.majorType == loc_key, Lookup.minorType == post})?
+  {Lookup.majorType == loc_post_key})?
 )
 :locName -->
 
