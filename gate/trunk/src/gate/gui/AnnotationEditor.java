@@ -1221,7 +1221,7 @@ System.out.println("Annotation added!");
         style = textPane.addStyle(set, textPane.getStyle("default"));
       }else{
         style = textPane.addStyle(set + "." + type, textPane.getStyle(set));
-        StyleConstants.setForeground(style, colGenerator.getNextColor());http://online.amerada.co.uk
+        StyleConstants.setBackground(style, colGenerator.getNextColor().brighter());
         //add an intermediary style that will be used for the actual display
         textPane.addStyle("_" + set + "." + type, style);
         //add the style that will be used for the actual display
