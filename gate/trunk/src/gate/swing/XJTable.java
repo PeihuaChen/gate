@@ -80,7 +80,7 @@ public class XJTable extends JTable{
   public void updateUI() {
     super.updateUI();
     getTableHeader().addMouseListener(new HeaderMouseListener());
-    fixColumnSizes();
+    adjustSizes();
   }
   
   public Dimension getPreferredSize(){
@@ -102,7 +102,7 @@ public class XJTable extends JTable{
    * sizes of the renderers.
    *
    */
-  public void fixColumnSizes(){
+  public void adjustSizes(){
     Iterator colIter = columnData.iterator();
     while(colIter.hasNext()){
       ((ColumnData)colIter.next()).adjustColumnWidth();
@@ -201,14 +201,14 @@ public class XJTable extends JTable{
                     firstRow, lastRow, column, type));
             if(isSortable()) sort();
             newColumns();
-            fixColumnSizes();
+            adjustSizes();
           }else if(lastRow == Integer.MAX_VALUE){
             //all data changed (including the number of rows)
             init(sourceModel);
             fireTableChanged(new TableModelEvent(this,  
                     firstRow, lastRow, column, type));
             if(isSortable()) sort();
-            fixColumnSizes();
+            adjustSizes();
           }else{
             //the rows should have normal values
             //if the sortedColumn is not affected we don't care
@@ -221,7 +221,7 @@ public class XJTable extends JTable{
               
             }
             if(column == TableModelEvent.ALL_COLUMNS){
-              fixColumnSizes();
+              adjustSizes();
             }else{
               ((ColumnData)columnData.get(column)).adjustColumnWidth();
             }
@@ -239,7 +239,7 @@ public class XJTable extends JTable{
             fireTableDataChanged();
           }
           if(isSortable()) sort();
-          if(column == TableModelEvent.ALL_COLUMNS) fixColumnSizes();
+          if(column == TableModelEvent.ALL_COLUMNS) adjustSizes();
           else ((ColumnData)columnData.get(column)).adjustColumnWidth();
           break;
         case TableModelEvent.DELETE:

@@ -90,7 +90,7 @@ public class AnnotationListView extends AbstractDocumentView
     table.addComponentListener(new ComponentAdapter(){
       public void componentResized(ComponentEvent e){
         //trigger a resize for the columns
-        table.fixColumnSizes();
+        table.adjustSizes();
 //        tableModel.fireTableDataChanged();
       }
     });

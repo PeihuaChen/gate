@@ -173,7 +173,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     mainTable.addComponentListener(new ComponentAdapter(){
       public void componentResized(ComponentEvent e){
         //trigger a resize for the columns
-        mainTable.fixColumnSizes();
+        mainTable.adjustSizes();
 //        tableModel.fireTableRowsUpdated(0, 0);
       }
     });
