@@ -1920,7 +1920,8 @@ public class MainFrame extends JFrame
                   panel2.add(usrField);
                   JPasswordField pwdField = new JPasswordField(30);
                   panel2.add(pwdField);
-                  JTextField grpField = new JTextField(30);
+                  JComboBox grpField = new JComboBox(ac.listGroups().toArray());
+                  grpField.setSelectedIndex(0);
                   panel2.add(grpField);
 
                   listPanel.add(panel1);
@@ -1932,7 +1933,7 @@ public class MainFrame extends JFrame
                                                 "Please enter login details")){
                     userName = usrField.getText();
                     userPass = new String(pwdField.getPassword());
-                    group = grpField.getText();
+                    group = (String) grpField.getSelectedItem();
                     if(OkCancelDialog.userHasPressedCancel)
                       return;
                     if(userName.equals("") || userPass.equals("") || group.equals("")) {
