@@ -932,7 +932,22 @@ System.out.println();
       return docResult;
     }
     else if (lrClassName.equals(DBHelper.CORPUS_CLASS)) {
-      throw new MethodNotImplementedException();
+      Corpus corpResult = null;
+      corpResult = readCorpus(lrPersistenceId);
+
+      Assert.assertTrue(corpResult instanceof DatabaseCorpusImpl);
+      Assert.assertNotNull(corpResult.getDataStore());
+      Assert.assertTrue(corpResult.getDataStore() instanceof DatabaseDataStore);
+      Assert.assertNotNull(corpResult.getLRPersistenceId());
+
+      //register the read doc as listener for sync events
+      addDatastoreListener((DatastoreListener)corpResult);
+
+      //add the resource to the list of dependent resources - i.e. the ones that the
+      //data store should take care upon closing [and call sync()]
+      this.dependentResources.add(corpResult);
+
+      return corpResult;
     }
     else {
       throw new IllegalArgumentException("resource class should be either Document" +
@@ -1467,6 +1482,98 @@ System.out.println();
     throws PersistenceException, SecurityException {
 
     throw new MethodNotImplementedException();
+  }
+
+
+  private DatabaseCorpusImpl readCorpus(Object lrPersistenceId)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(lrPersistenceId);
+
+    if (false == lrPersistenceId instanceof Long) {
+      throw new IllegalArgumentException();
+    }
+
+    //3. read from DB
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    DatabaseCorpusImpl result = null;
+
+    try {
+      String sql = " select lr_name " +
+                   " from  "+Gate.DB_OWNER+".t_lang_resource " +
+                   " where  lr_id = ? ";
+System.out.println(sql);
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lrPersistenceId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (false == rs.next()) {
+        //ooops mo data found
+        throw new PersistenceException("Invalid LR ID supplied - no data found");
+      }
+
+      //4. fill data
+
+      //4.1 name
+      String lrName = rs.getString("lr_name");
+      Assert.assertNotNull(lrName);
+
+      //4.8 features
+      FeatureMap features = readFeatures((Long)lrPersistenceId,DBHelper.FEATURE_OWNER_DOCUMENT);
+
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+System.out.println(">>>>>>>>>>>>>>>>");
+      sql = " select doc_lr_id " +
+            " from "+Gate.DB_OWNER+".t_document        doc, " +
+            "      "+Gate.DB_OWNER+".t_corpus_document corpdoc, " +
+            "      "+Gate.DB_OWNER+".t_corpus          corp " +
+            " where doc.doc_id = corpdoc.cd_doc_id " +
+            "       and corpdoc.cd_corp_id = corp.corp_id " +
+            "       and corp_lr_id = ? ";
+System.out.println(sql);
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,((Long)lrPersistenceId).longValue());
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      Vector docLRIDs = new Vector();
+      while (rs.next()) {
+        Long docLRID = new Long(rs.getLong("doc_lr_id"));
+        docLRIDs.add(docLRID);
+      }
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+
+
+      Vector dbDocs = new Vector();
+      for (int i=0; i< docLRIDs.size(); i++) {
+        Long currLRID = (Long)docLRIDs.elementAt(i);
+        Document dbDoc = (Document)getLr(DBHelper.DOCUMENT_CLASS,currLRID);
+        dbDocs.add(dbDoc);
+      }
+
+      result = new DatabaseCorpusImpl(lrName,
+                                      this,
+                                      (Long)lrPersistenceId,
+                                      features,
+                                      dbDocs);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(Exception e) {
+      throw new PersistenceException(e);
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+    }
+
+    return result;
   }
 
 
