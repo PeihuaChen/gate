@@ -32,7 +32,6 @@ public class TestGate
     a[0] = "gate.TestGate";
     // use the next line if you're running with output to console in text mode:
     // a[1] = "-wait";
-
     if(args.length > 0 && args[0].equals("-t")) // text runner mode
       junit.textui.TestRunner.main(a);
     else {
