@@ -161,11 +161,13 @@ extends AbstractLanguageResource implements Document {
           "has to be set in order to construct a Gate document!");
       }
       content = new DocumentContentImpl(stringContent);
+      getFeatures().put("gate.SourceURL", "created from String");
     }else{
       try {
         content = new DocumentContentImpl(
           sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset
         );
+        getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
       } catch(IOException e) {
         throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
