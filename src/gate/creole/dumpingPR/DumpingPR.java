@@ -58,7 +58,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
   public static final String
     DPR_FILE_SUFFIX_PARAMETER_NAME = "suffixForDumpFiles";
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * A list of annotation types, which are to be dumped into the output file
@@ -170,9 +170,10 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   protected void write2File(AnnotationSet exportSet) {
     File outputFile;
-    String source = (String) document.getFeatures().get("gate.SourceURL");
-    try {
-      URL sourceURL = new URL(source);
+
+//      String source = (String) document.getParameterValue("sourceURL");
+//      URL sourceURL = new URL(source);
+      URL sourceURL = document.getSourceUrl();
       StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
       //now append the special suffix if we want to use it
       if (useSuffixForDumpFiles)
@@ -181,13 +182,6 @@ public class DumpingPR extends AbstractLanguageAnalyser
       if (DEBUG)
         Out.prln(outputPath);
       outputFile = new File(outputPath);
-    } catch (java.net.MalformedURLException ex) {
-      if (outputFileUrl != null)
-        outputFile = new File(outputFileUrl.getFile());
-      else
-        throw new GateRuntimeException("Cannot export GATE annotations because"
-                     + "document does not have a valid source URL.");
-    }
 
     try {
       // Prepare to write into the xmlFile using the doc's encoding if there
