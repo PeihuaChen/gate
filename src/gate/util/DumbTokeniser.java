@@ -9,7 +9,7 @@
  *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
  *  Valentin Tablan, 27/06/2000
  *
  *  $Id$
@@ -18,20 +18,16 @@
 package gate.util;
 
 import gate.*;
+import gate.creole.*;
 import gate.gui.*;
 
 import java.util.*;
 import java.text.BreakIterator;
 
-public class DumbTokeniser implements ProcessingResource,
-                                         ProcessProgressReporter,
-                                         Runnable{
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+public class DumbTokeniser extends AbstractResource
+implements ProcessingResource, ProcessProgressReporter, Runnable
+{
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
   public DumbTokeniser(){
@@ -182,7 +178,7 @@ public class DumbTokeniser implements ProcessingResource,
             }else //does not contain letters or digits
               fm.put("kind", "other");
           }
-          fm.put("String", content.substring(tokenStart, charIdx));          
+          fm.put("String", content.substring(tokenStart, charIdx));
           annotationSet.add(new Long(tokenStart), new Long(charIdx),
                             "Token", fm);
           tokenStart = charIdx;

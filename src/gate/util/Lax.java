@@ -2,14 +2,14 @@
  *	Lax.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU, 07/July/2000
  *
  *	$Id$
@@ -17,11 +17,6 @@
 
 package gate.util;
 
-/*
- *  LAX (LazyProgrammer Api for XML) layer for a SAX parser,
- *  based on Sun's JAXP layer...so it works with any JAXP compliant parser
- *
- */
 import org.xml.sax.*;
 import java.lang.reflect.*;
 import javax.xml.parsers.*;
@@ -31,13 +26,11 @@ import org.xml.sax.SAXParseException;
 import java.util.*;
 import java.io.*;
 
+/** LAX (LazyProgrammer Api for XML) layer for a SAX parser,
+  * based on Sun's JAXP layer...so it works with any JAXP compliant parser
+  */
 public class Lax extends org.xml.sax.HandlerBase {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
 	// LAX translates XML content into method calls on this object

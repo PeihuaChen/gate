@@ -2,14 +2,14 @@
  *	TextualDocumentFormat.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU, 26/May/2000
  *
  *	$Id$
@@ -54,6 +54,11 @@ public class TextualDocumentFormat extends DocumentFormat
   public TextualDocumentFormat(Map markupElementsMap) {
     super(markupElementsMap);
   } // construction with map
+
+  /** Initialise this resource, and return it. */
+  public Resource init() {
+    return Gate.getCreoleRegister().init(this);
+  } // init()
 
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. XML, RTF) into annotations in GATE format.

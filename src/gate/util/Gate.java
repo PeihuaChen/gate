@@ -104,7 +104,9 @@ public class Gate
       // no network servers; try for a local host web server.
       // we use InetAddress to get host name instead of using "localhost" coz
       // badly configured Windoze IP sometimes doesn't resolve the latter
-      if(tryNetServer(
+      if(
+        isLocalWebServer() &&
+        tryNetServer(
           InetAddress.getLocalHost().getHostName(), 80, "/gate.ac.uk/"
         )
       ) {
@@ -160,6 +162,17 @@ public class Gate
   /** Tell GATE whether to assume we're connected to the net. */
   public static void setNetConnected(boolean b) { netConnected = b; }
 
+  /** Flag controlling whether we should try to access a web server on
+    * localhost, e.g. when setting up a base URL.
+    */
+  private static boolean localWebServer = true;
+
+  /** Should we assume there's a local web server? */
+  public static boolean isLocalWebServer() { return localWebServer; }
+
+  /** Tell GATE whether to assume there's a local web server. */
+  public static void setLocalWebServer(boolean b) { localWebServer = b; }
+
   /** Try to contact a network server. When sucessfull sets urlBase to an HTTP
     * URL for the server.
     * @param hostName the name of the host to try and connect to
@@ -198,7 +211,7 @@ public class Gate
       basePath.substring(0, basePath.length() - aGateResourceName.length());
     if(DEBUG) Out.prln("tryFileSystem: " + urlBaseName);
 
-    urlBase = new URL(urlBaseName);
+    urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");
     return urlBase == null;
   } // tryFileSystem()
 

@@ -40,6 +40,15 @@ public class CreoleXmlHandler extends HandlerBase {
   /** The current resource data object */
   private ResourceData resourceData;
 
+  /** The current parameter list */
+  private List currentParamList = new ArrayList();
+
+  /** The current parameter */
+  private Parameter currentParam = new Parameter();
+
+  /** The current element's attribute list */
+  private AttributeList currentAttributes;
+
   /**
     *  This field is "final static" because it brings in
     *  the advantage of dead code elimination
@@ -68,6 +77,7 @@ public class CreoleXmlHandler extends HandlerBase {
 
   /** Called when the SAX parser encounts the end of the XML document */
   public void endDocument() throws SAXException {
+    if(DEBUG) Out.prln("end document");
     if(! elementStack.isEmpty()) {
       StringBuffer errorMessage =
         new StringBuffer("document ended but element stack not empty:");
@@ -79,16 +89,35 @@ public class CreoleXmlHandler extends HandlerBase {
 
   /** Called when the SAX parser encounts the beginning of an XML element */
   public void startElement(String elementName, AttributeList atts){
-    //elementStack.push(elementName);
-
-    if(elementName.toUpperCase().equals("RESOURCE"))
-      resourceData = new ResourceDataImpl();
-
     if(DEBUG) {
+      Out.pr("startElement: ");
       Out.println(
         elementName + " " +
-        ((atts.getLength() > 0) ? atts.toString() : "")
+        ((atts != null) && (atts.getLength() > 0) ? atts.toString() : "")
       );
+    }
+
+    if(elementName.toUpperCase().equals("RESOURCE")) {
+      resourceData = new ResourceDataImpl();
+      resourceData.setFeatures(Transients.newFeatureMap());
+    }
+    currentAttributes = atts;
+
+    // process attributes of parameter elements
+    if(elementName.toUpperCase().equals("PARAMETER")) {
+      if(DEBUG) {
+        for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
+          Out.prln(currentAttributes.getName(i));
+          Out.prln(currentAttributes.getValue(i));
+        }
+      }
+      currentParam.comment = currentAttributes.getValue("COMMENT");
+      currentParam.defaultValueString = currentAttributes.getValue("DEFAULT");
+      currentParam.optional =
+        Boolean.valueOf(currentAttributes.getValue("OPTIONAL")).booleanValue();
+      currentParam.name = currentAttributes.getValue("NAME");
+      currentParam.runtime =
+        Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
     }
   } // startElement
 
@@ -101,23 +130,22 @@ public class CreoleXmlHandler extends HandlerBase {
       );
   } // checkStack
 
-  /** Called when the SAX parser encounts the end of an XML element */
+  /** Called when the SAX parser encounts the end of an XML element.
+    * This is where ResourceData objects get values set, and where
+    * they are added to the CreoleRegister when we parsed their complete
+    * metadata entries.
+    */
   public void endElement(String elementName)
   throws SAXException {
+    if(DEBUG) Out.prln("endElement: " + elementName);
 
     if(elementName.toUpperCase().equals("RESOURCE")) {
-
       // add the new resource data object to the creole register
       register.put(resourceData.getName(), resourceData);
-      if(DEBUG)
-        Out.println("added: " + resourceData);
-
+      if(DEBUG) Out.println("added: " + resourceData);
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
-
-      // add the resource name
       resourceData.setName((String) elementStack.pop());
-
     } else if(elementName.toUpperCase().equals("JAR")) {
       checkStack("endElement", "JAR");
 
@@ -144,21 +172,31 @@ public class CreoleXmlHandler extends HandlerBase {
           throw new SAXException("bad URL " + jarFileUrl + e);
         }
       }
-
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
-
-      // add class name
       resourceData.setClassName((String) elementStack.pop());
-
+    } else if(elementName.toUpperCase().equals("PARAMETER-LIST")) {
+      resourceData.addParameterList(currentParamList);
+      currentParamList = new ArrayList();
+    } else if(elementName.toUpperCase().equals("PARAMETER")) {
+      checkStack("endElement", "PARAMETER");
+      currentParam.valueString = (String) elementStack.pop();
+      currentParamList.add(currentParam);
+      currentParam = new Parameter();
     } else if(elementName.toUpperCase().equals("AUTOLOAD")) {
-
-      // add autoloading flag
       resourceData.setAutoLoading(true);
+    } else if(elementName.toUpperCase().equals("CREOLE")) {
+    } else if(elementName.toUpperCase().equals("CREOLE-DIRECTORY")) {
+    } else { // arbitrary elements get added as features of the resource data
+      if(resourceData != null)
+        resourceData.getFeatures().put(
+          elementName.toUpperCase(),
+          ((elementStack.isEmpty()) ? null : (String) elementStack.pop())
+        );
     }
   } // endElement
 
-  /** Called when the SAX parset encounts text in the XML doc */
+  /** Called when the SAX parser encounts text in the XML doc */
   public void characters(char[] text, int start, int length)
   throws SAXException {
 

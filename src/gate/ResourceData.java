@@ -25,7 +25,7 @@ import gate.util.*;
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
   */
-public interface ResourceData {
+public interface ResourceData extends FeatureBearer {
   /** String representation */
   public String toString();
 
@@ -66,6 +66,12 @@ public interface ResourceData {
 
   /** Get method for the resource jar file URL */
   public URL getJarFileUrl();
+
+  /** Add a parameter list */
+  public void addParameterList(List parameterList);
+
+  /** Get the set of parameter lists */
+  public Set getParameterListsSet();
 
   /** Set method for resource autoloading flag */
   public void setAutoLoading(boolean autoLoading);

@@ -56,8 +56,11 @@ import gate.util.*;
   * @see gate.util.Gate
   * @see gate.ResourceData
   */
-public interface CreoleRegister extends Map
+public interface CreoleRegister extends Map, Serializable
 {
+  /** Initialise a resource, and return it. */
+  public Resource init(Resource resource);
+
   /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
   public void addDirectory(URL directoryUrl);
 

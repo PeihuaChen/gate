@@ -61,7 +61,7 @@ public class TestGate
     boolean autoloadingMode = false;
 
     // process command-line options
-    Getopt g = new Getopt("GATE test suite", args, "tna");
+    Getopt g = new Getopt("GATE test suite", args, "tnNa");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -70,6 +70,10 @@ public class TestGate
           break;
         case 'n':
           Gate.setNetConnected(false);
+          break;
+        case 'N':
+          Gate.setNetConnected(false);
+          Gate.setLocalWebServer(false);
           break;
         case 'a':
           autoloadingMode = true;
@@ -113,7 +117,7 @@ public class TestGate
     Gate.init();
 
     TestSuite suite = new TestSuite();
-    suite.addTest(TestCreole.suite());  //*
+    suite.addTest(TestCreole.suite());  /*
     suite.addTest(TestXSchema.suite());
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
@@ -130,7 +134,7 @@ public class TestGate
     suite.addTest(TestRBTreeMap.suite());
     suite.addTest(TestCorpus.suite());
     suite.addTest(CookBook.suite());
-    suite.addTest(TestDB.suite());      //*/
+    suite.addTest(TestDB.suite());      */
 
     return suite;
   } // suite
