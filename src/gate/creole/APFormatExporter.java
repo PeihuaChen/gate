@@ -301,10 +301,18 @@ public class APFormatExporter extends AbstractLanguageAnalyser
   private void serializeAnEntityMention(Annotation ann){
     if (ann == null) return;
     String entityMentionType = "NAME";
+    String entityMentionRole = null;
     FeatureMap fm = ann.getFeatures();
-    if (fm != null && null != fm.get("ENTITY_MENTION_TYPE"))
-      entityMentionType = (String) fm.get("ENTITY_MENTION_TYPE");
-    xmlDoc.append("      <entity_mention TYPE=\""+entityMentionType+"\">\n");
+    if (fm != null){
+      if( null != fm.get("ENTITY_MENTION_TYPE"))
+        entityMentionType = (String) fm.get("ENTITY_MENTION_TYPE");
+      entityMentionRole = (String) fm.get("ROLE");
+    }// End if
+    if(entityMentionRole != null)
+      xmlDoc.append("      <entity_mention TYPE=\""+entityMentionType+"\""+
+      " ROLE=\"" + entityMentionRole + "\">\n");
+    else
+      xmlDoc.append("      <entity_mention TYPE=\""+entityMentionType+"\">\n");
     // extent
     xmlDoc.append("        <extent>\n");
     xmlDoc.append("          <charseq>\n");
