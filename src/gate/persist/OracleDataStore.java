@@ -327,34 +327,42 @@ public class OracleDataStore extends JDBCDataStore {
   protected void updateDocumentContent(Long docContentID,DocumentContent content)
   throws PersistenceException {
 
-    Statement stmt = null;
+    //1. get LOB locators from DB
+    PreparedStatement stmt = null;
     ResultSet rs = null;
+    CallableStatement call = null;
     try {
-      stmt = this.jdbcConn.createStatement();
       String sql =  "select dc_content_type, " +
                     "       dc_character_content, " +
                     "       dc_binary_content " +
-                    "from "+gate.Gate.DB_OWNER+".t_doc_content";
+                    "from "+gate.Gate.DB_OWNER+".t_doc_content " +
+                    "where  dc_id = ? ";
+      stmt = this.jdbcConn.prepareStatement(sql);
+      stmt.setLong(1,docContentID.longValue());
       stmt.execute(sql);
       rs = stmt.getResultSet();
+      rs.next();
 
-      while (rs.next()) {
-        //important: read the objects in the order they appear in
-        //the ResultSet, otherwise data may be lost
-        int contentType = rs.getInt(1);
-        Clob clob = (Clob)rs.getClob(2);
-        Blob blob = (Blob)rs.getBlob(3);
+      //important: read the objects in the order they appear in
+      //the ResultSet, otherwise data may be lost
+      int contentType = rs.getInt(1);
+      Clob clob = (Clob)rs.getClob(2);
+      Blob blob = (Blob)rs.getBlob(3);
 
-        Assert.assert(contentType == DBHelper.CHARACTER_CONTENT ||
-                      contentType == DBHelper.BINARY_CONTENT);
+      Assert.assert(contentType == DBHelper.CHARACTER_CONTENT ||
+                    contentType == DBHelper.BINARY_CONTENT ||
+                    contentType == DBHelper.EMPTY_CONTENT);
 
-        if (contentType == DBHelper.CHARACTER_CONTENT) {
-          writeCLOB(content.toString(),clob);
-        }
-        else {
-          throw new MethodNotImplementedException();
-        }
-      }
+
+      //2. write data using the LOB locators
+      //NOTE: so far only character content is supported
+      writeCLOB(content.toString(),clob);
+      long newContentType = DBHelper.CHARACTER_CONTENT;
+
+      //3. update content type
+      call = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.change_content_type(?,?) }");
+      call.setLong(1,docContentID.longValue());
+      call.setLong(2,newContentType);
     }
     catch(IOException ioe) {
       throw new PersistenceException("can't update document content in DB : ["+
@@ -455,7 +463,12 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //5. fill document content (record[s] in T_DOC_CONTENT)
-    updateDocumentContent(docContentID,docContent);
+
+    //do we have content at all?
+//Out.prln("SIZE=["+docContent.size()+"]");
+    if (docContent.size().longValue() > 0) {
+      updateDocumentContent(docContentID,docContent);
+    }
 
     //6. insert annotations, etc
 
