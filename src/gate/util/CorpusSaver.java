@@ -40,21 +40,23 @@ public class CorpusSaver {
   }
 
   public void init() {
-    File path = new File(dsPath);
-    try {
-     ds = Factory.openDataStore("gate.persist.SerialDataStore",
-                                path.toURL().toString());
-    } catch (Exception ex) {
-      throw new gate.util.GateRuntimeException(ex.getMessage());
-    }
+    if (saveMode) {
+      File path = new File(dsPath);
+      try {
+       ds = Factory.openDataStore("gate.persist.SerialDataStore",
+                                  path.toURL().toString());
+      } catch (Exception ex) {
+        throw new gate.util.GateRuntimeException(ex.getMessage());
+      }
 
-    try {
-      Corpus corpus = Factory.newCorpus("bnc");
-      LanguageResource lr = ds.adopt(corpus, null);
-      ds.sync(lr);
-      theCorpus = (Corpus) lr;
-    } catch (Exception ex) {
-      throw new GateRuntimeException(ex.getMessage());
+      try {
+        Corpus corpus = Factory.newCorpus("bnc");
+        LanguageResource lr = ds.adopt(corpus, null);
+        ds.sync(lr);
+        theCorpus = (Corpus) lr;
+      } catch (Exception ex) {
+        throw new GateRuntimeException(ex.getMessage());
+      }
     }
 
     if (processMode)
@@ -77,10 +79,12 @@ public class CorpusSaver {
   public void execute() {
     execute(startDir);
     try {
-      ds.sync(theCorpus);
-      Factory.deleteResource(theCorpus);
-      if(ds !=null)
-        ds.close();
+      if (saveMode) {
+        ds.sync(theCorpus);
+        Factory.deleteResource(theCorpus);
+        if (ds != null)
+          ds.close();
+      }
       if (application != null) {
         Iterator iter = new ArrayList(application.getPRs()).iterator();
         while (iter.hasNext())
@@ -92,7 +96,7 @@ public class CorpusSaver {
   }
 
   public void execute(File dir) {
-    if (dir == null || ds == null)
+    if (dir == null || (saveMode && ds == null))
       return;
     //first set the current directory to be the given one
     currDir = dir;
@@ -127,11 +131,15 @@ public class CorpusSaver {
     CorpusSaver corpusSaver1 = new CorpusSaver();
 
     if(args.length < 2)
-      throw new GateException("usage: [-process] source_directory datastore_path application");
+      throw new GateException("usage: [-process|-process-only] source_directory datastore_path application");
     int i = 0;
     while (i < args.length && args[i].startsWith("-")) {
       if(args[i].equals("-process")) {
-        Out.prln("ANNIE processing the corpus enabled. <P>");
+        Out.prln("Processing and saving the corpus enabled. <P>");
+        corpusSaver1.setProcessMode(true);
+      } else if (args[i].equals("-process_only")) {
+        Out.prln("Processing only enabled. <P>");
+        corpusSaver1.setSaveMode(false);
         corpusSaver1.setProcessMode(true);
       }
       i++; //just ignore the option, which we do not recognise
@@ -146,12 +154,14 @@ public class CorpusSaver {
     if(i+1 >= args.length)
       throw new GateRuntimeException("Datastore path not provided");
 
-    String storagePath = args[i+1];
-    File storage = new File(storagePath);
-    if (!storage.isDirectory())
-      throw new GateRuntimeException("Please provide path to an existing "
-                                     + "GATE serial datastore");
-    corpusSaver1.setDSPath(storagePath);
+    if (corpusSaver1.getSaveMode()) {
+      String storagePath = args[i + 1];
+      File storage = new File(storagePath);
+      if (!storage.isDirectory())
+        throw new GateRuntimeException("Please provide path to an existing "
+                                       + "GATE serial datastore");
+      corpusSaver1.setDSPath(storagePath);
+    }
 
     //get the last argument which is the application
     i++;
@@ -162,12 +172,14 @@ public class CorpusSaver {
     else
       corpusSaver1.setApplicationFile(appFile);
 
+    Out.prln("Initialising GATE please wait...");
     corpusSaver1.init();
     corpusSaver1.setStartDir(dir);
+    Out.prln("Processing...");
     double timeBefore = System.currentTimeMillis();
     corpusSaver1.execute();
     double timeAfter = System.currentTimeMillis();
-    Out.prln("BNC saved in " +
+    Out.prln("Done in " +
       NumberFormat.getInstance().format((timeAfter-timeBefore)/1000)
       + " seconds");
 
@@ -181,6 +193,14 @@ public class CorpusSaver {
     processMode = mode;
   }
 
+  public void setSaveMode(boolean mode) {
+    saveMode = mode;
+  }
+
+  public boolean getSaveMode() {
+    return saveMode;
+  }
+
   public void setDSPath(String path){
     dsPath = path;
   }
@@ -191,7 +211,8 @@ public class CorpusSaver {
 
 
   protected void saveFiles(List files) {
-    if (files==null || files.isEmpty() || theCorpus == null || ds == null)
+    if (files==null || files.isEmpty() ||
+        (saveMode && (theCorpus == null || ds == null)))
       return;
 
     for(int i=0; i<files.size(); i++) {
@@ -203,12 +224,14 @@ public class CorpusSaver {
         if (processMode)
           processDocument(doc);
         //then store it in the DS and add to corpus
-        LanguageResource lr = ds.adopt(doc, null);
-        theCorpus.add(lr);
-        theCorpus.unloadDocument((Document)lr);
-        Factory.deleteResource(doc);
-        if (lr != doc)
-          Factory.deleteResource(lr);
+        if (saveMode) {
+          LanguageResource lr = ds.adopt(doc, null);
+          theCorpus.add(lr);
+          theCorpus.unloadDocument( (Document) lr);
+          Factory.deleteResource(doc);
+          if (lr != doc)
+            Factory.deleteResource(lr);
+        }
       } catch (Exception ex) {
         throw new GateRuntimeException(ex.getClass() + " " + ex.getMessage());
       }
@@ -254,4 +277,5 @@ public class CorpusSaver {
   private File applicationFile = null;
 
   private boolean processMode = false;
+  private boolean saveMode = true;
 }
