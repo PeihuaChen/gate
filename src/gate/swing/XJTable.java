@@ -125,32 +125,32 @@ public class XJTable extends JTable {
   }//init()
 
 
-  protected void configureEnclosingScrollPane(){
-    super.configureEnclosingScrollPane();
-    //if we're into a scroll pane resize with it
-    Container p = getParent();
-    if (p instanceof JViewport) {
-      Container gp = p.getParent();
-      if (gp instanceof JScrollPane) {
-        JScrollPane scrollPane = (JScrollPane)gp;
-        // Make certain we are the viewPort's view and not, for
-        // example, the rowHeaderView of the scrollPane -
-        // an implementor of fixed columns might do this.
-        JViewport viewport = scrollPane.getViewport();
-        if (viewport != null && viewport.getView() == this) {
-          scrollPane.addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent e) {
-              adjustSizes();
-            }
-
-            public void componentShown(ComponentEvent e) {
-              adjustSizes();
-            }
-          });
-        }//if
-      }//if
-    }//if
-  }// void configureEnclosingScrollPane()
+//  protected void configureEnclosingScrollPane(){
+//    super.configureEnclosingScrollPane();
+//    //if we're into a scroll pane resize with it
+//    Container p = getParent();
+//    if (p instanceof JViewport) {
+//      Container gp = p.getParent();
+//      if (gp instanceof JScrollPane) {
+//        JScrollPane scrollPane = (JScrollPane)gp;
+//        // Make certain we are the viewPort's view and not, for
+//        // example, the rowHeaderView of the scrollPane -
+//        // an implementor of fixed columns might do this.
+//        JViewport viewport = scrollPane.getViewport();
+//        if (viewport != null && viewport.getView() == this) {
+//          scrollPane.addComponentListener(new ComponentAdapter() {
+//            public void componentResized(ComponentEvent e) {
+//              adjustSizes();
+//            }
+//
+//            public void componentShown(ComponentEvent e) {
+//              adjustSizes();
+//            }
+//          });
+//        }//if
+//      }//if
+//    }//if
+//  }// void configureEnclosingScrollPane()
 
 
   /**Resizes all the cells so they accommodate the components at their
@@ -173,13 +173,14 @@ public class XJTable extends JTable {
       //compute the sizes
       if(getTableHeader() != null){
 	      width = headerRenderer.getTableCellRendererComponent(
-	                  this, tCol.getHeaderValue(), false, false,0,column
-	              ).getPreferredSize().width;
+	                  this, tCol.getHeaderValue(), true, true ,0 , column
+	              ).getPreferredSize().width + getColumnModel().getColumnMargin();
 	    }else{
 	    	width = 0;
 	    }
+      TableCellRenderer renderer = tCol.getCellRenderer();
+      if(renderer == null) renderer = getDefaultRenderer(getColumnClass(column));
       for(int row = 0; row < getRowCount(); row ++){
-        TableCellRenderer renderer = getCellRenderer(row,column);
         if(renderer == null){
           renderer = getDefaultRenderer(getModel().getColumnClass(column));
         }
@@ -201,7 +202,7 @@ public class XJTable extends JTable {
       int marginWidth = getColumnModel().getColumnMargin(); 
       if(marginWidth > 0) width += marginWidth; 
       tCol.setPreferredWidth(width);
-      tCol.setWidth(width);
+//      tCol.setWidth(width);
       totalWidth += width;
     }
     int totalHeight = 0;
@@ -211,33 +212,33 @@ public class XJTable extends JTable {
     setPreferredScrollableViewportSize(dim);
     setPreferredSize(dim);
 
-    //extend the last column if autoresize
-    if(getAutoResizeMode() != AUTO_RESIZE_OFF){
-	    Container p = getParent();
-	    if (p instanceof JViewport) {
-	      Container gp = p.getParent();
-	      if (gp instanceof JScrollPane) {
-	        JScrollPane scrollPane = (JScrollPane)gp;
-	        // Make certain we are the viewPort's view and not, for
-	        // example, the rowHeaderView of the scrollPane -
-	        // an implementor of fixed columns might do this.
-	        JViewport viewport = scrollPane.getViewport();
-	        if (viewport == null || viewport.getView() != this) {
-	            return;
-	        }
-	        int portWidth = scrollPane.getSize().width -
-	                        scrollPane.getInsets().left -
-	                        scrollPane.getInsets().right;
-	        if(scrollPane.getVerticalScrollBar().isVisible())
-	          portWidth -= scrollPane.getVerticalScrollBar().getWidth();
-	        if(totalWidth < portWidth){
-	          int width = tCol.getWidth() + portWidth - totalWidth - 2;
+//    //extend the last column if autoresize
+//    if(getAutoResizeMode() != AUTO_RESIZE_OFF){
+//	    Container p = getParent();
+//	    if (p instanceof JViewport) {
+//	      Container gp = p.getParent();
+//	      if (gp instanceof JScrollPane) {
+//	        JScrollPane scrollPane = (JScrollPane)gp;
+//	        // Make certain we are the viewPort's view and not, for
+//	        // example, the rowHeaderView of the scrollPane -
+//	        // an implementor of fixed columns might do this.
+//	        JViewport viewport = scrollPane.getViewport();
+//	        if (viewport == null || viewport.getView() != this) {
+//	            return;
+//	        }
+//	        int portWidth = scrollPane.getSize().width -
+//	                        scrollPane.getInsets().left -
+//	                        scrollPane.getInsets().right;
+//	        if(scrollPane.getVerticalScrollBar().isVisible())
+//	          portWidth -= scrollPane.getVerticalScrollBar().getWidth();
+//	        if(totalWidth < portWidth){
+//	          int width = tCol.getWidth() + portWidth - totalWidth - 2;
 //	          tCol.setPreferredWidth(width);
-	          tCol.setWidth(width);
-	        }//if(totalWidth < portWidth)
-	      }//if (gp instanceof JScrollPane)
-	    }//if (p instanceof JViewport)
-    }
+////	          tCol.setWidth(width);
+//	        }//if(totalWidth < portWidth)
+//	      }//if (gp instanceof JScrollPane)
+//	    }//if (p instanceof JViewport)
+//    }
   }//protected void adjustSizes()
 
   /**
@@ -559,7 +560,7 @@ public class XJTable extends JTable {
           ((JLabel)res).setIcon(null);
         }
         ((JLabel)res).setHorizontalTextPosition(JLabel.LEFT);
-        ((JLabel)res).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+//        ((JLabel)res).setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
       }
       return res;
     }// Component getTableCellRendererComponent
