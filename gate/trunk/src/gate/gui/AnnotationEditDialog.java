@@ -171,9 +171,9 @@ public class AnnotationEditDialog extends JDialog {
     removeFeatButton = new JButton(">>");
     addFeatButton = new JButton("<<");
 
-    buttBox.add(removeFeatButton);
-    buttBox.add(Box.createVerticalStrut(10));
     buttBox.add(addFeatButton);
+    buttBox.add(Box.createVerticalStrut(10));
+    buttBox.add(removeFeatButton);
 
     componentsBox.add(buttBox);
 
@@ -447,7 +447,7 @@ public class AnnotationEditDialog extends JDialog {
       return data.size();
     }//getRowCount()
 
-
+    /** Returns the value at row,column from Table Model */
     public Object getValueAt( int rowIndex,
                               int columnIndex){
 
@@ -456,41 +456,45 @@ public class AnnotationEditDialog extends JDialog {
       switch(columnIndex){
         case 0: return rd.getFeatureSchema().getFeatureName();
         case 1: return (rd.getValue() == null)? new String(""): rd.getValue();
-        case 2: return (rd.getFeatureSchema().getValueClassName() == null)?
-                      new String(""): rd.getFeatureSchema().getValueClassName();
+        case 2: {
+                  // Show only the last substring. For example, for
+                  // java.lang.Integer -> Integer
+                  String type = rd.getFeatureSchema().getValueClassName();
+                  if(type == null)
+                      return new String("");
+                  else{
+                    int start = type.lastIndexOf(".");
+                    if ((start > -1) && (start < type.length()))
+                      return type.substring(start+1,type.length());
+                    else return type;
+                  }// End if
+                }
 
         default: return "?";
-      }
+      }// End Switch
     }//getValueAt
 
+    /** Set the value from the Cell Editor into the table model*/
     public void setValueAt( Object aValue,
                             int rowIndex,
                             int columnIndex){
 
       RowData rd = (RowData) data.get(rowIndex);
       switch(columnIndex){
-        case 0:{
-
-          break;
-        }
+        case 0:{break;}
         case 1:{
           //String className = rd.getFeatureSchema().getValueClassName();
           rd.setValue(aValue);
           // adaug in table model a randul i, valoarea citita
           // Mai intiai se face conversia la tipul dorit
-
           break;
         }
-        case 2:{
-          break;
-        }
-        case 3:{
-
-          break;
-        }
+        case 2:{break;}
+        case 3:{break;}
         default:{}
-      }
-    }
+      }// End switch
+    }// setValueAt();
+
   }///class FeaturesTableModel extends DefaultTableModel
 
   class RowData {
