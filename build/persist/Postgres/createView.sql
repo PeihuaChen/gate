@@ -51,7 +51,7 @@ create view v_annotation_features (ann_local_id,
           t_feature.ft_value_type,
           t_feature.ft_number_value,
           t_feature.ft_character_value,
-          t_feature.ft_long_character_value,
+          null /*ft_long_character_value*/ ,
           t_feature.ft_binary_value
    from t_as_annotation,
         t_feature,
