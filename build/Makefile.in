@@ -132,7 +132,10 @@ gukdemo:
 
 # make the user guide
 ../doc/userguide.html: ../doc/src/userguide.html
-	cp $? $@
+	cp $? $@ && cd ../doc && \
+	$(RUN) -cp `$(CYGPATH) ../lib/Bib2HTML.jar` Bib2HTML.RunBib2HTML \
+	  ../../sale/big.bib userguide.html && \
+	rm userguide.html.bak
 
 # make the javadoc documentation
 docs: ../doc/userguide.html
