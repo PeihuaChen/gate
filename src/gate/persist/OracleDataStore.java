@@ -1269,13 +1269,20 @@ public class OracleDataStore extends JDBCDataStore {
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
+    FeatureMap fm = new SimpleFeatureMapImpl();
 
     //1. read from DB
     try {
-      String sql = " select v1.*, " +
-                   " from  "+Gate.DB_OWNER+".v_feature v1 " +
+      String sql = " select v1.ft_key, " +
+                   "        v1.ft_value_type, " +
+                   "        v1.ft_number_value, " +
+                   "        v1.ft_binary_value, " +
+                   "        v1.ft_character_value, " +
+                   "        v1.ft_long_character_value " +
+                   " from  "+Gate.DB_OWNER+".t_feature v1 " +
                    " where  v1.ft_entity_id = ? " +
-                   "        and v1.ft_enetity_type = ?";
+                   "        and v1.ft_enetity_type = ? " +
+                   " order by v1.ft_key";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,entityID.longValue());
@@ -1283,20 +1290,133 @@ public class OracleDataStore extends JDBCDataStore {
       pstmt.execute();
       rs = pstmt.getResultSet();
 
-      //3. create feature map
+      //3. fill feature map
+      Vector arrFeatures = new Vector();
+      String prevKey = DBHelper.DUMMY_FEATURE_KEY;
+      String currKey = null;
+      Object currFeature = null;
+
+
       while (rs.next()) {
+        //NOTE: because there are LOBs in the resulset
+        //the columns should be read in the order they appear
+        //in the query
+        currKey = rs.getString(1);
+
+        Long valueType = new Long(rs.getLong(2));
+
+        //we don't quite know what is the type of the NUMBER
+        //stored in DB
+        Object numberValue = null;
+
+        //for all numeric types + boolean -> read from DB as appropriate
+        //Java object
+        switch(valueType.intValue()) {
+
+          case JDBCDataStore.VALUE_TYPE_BOOLEAN:
+            numberValue = new Boolean(rs.getBoolean(3));
+            break;
+
+          case JDBCDataStore.VALUE_TYPE_FLOAT:
+            numberValue = new Float(rs.getFloat(3));
+            break;
+
+          case JDBCDataStore.VALUE_TYPE_INTEGER:
+            numberValue = new Integer(rs.getInt(3));
+            break;
+
+          case JDBCDataStore.VALUE_TYPE_LONG:
+            numberValue = new Long(rs.getLong(3));
+            break;
+        }
+
+        //don't forget to read the rest of the current row
+        Blob blobValue = rs.getBlob(4);
+        String stringValue = rs.getString(5);
+        Clob clobValue = rs.getClob(6);
+
+        switch(valueType.intValue()) {
+          case JDBCDataStore.VALUE_TYPE_BINARY:
+            throw new MethodNotImplementedException();
+
+          case JDBCDataStore.VALUE_TYPE_BOOLEAN:
+          case JDBCDataStore.VALUE_TYPE_FLOAT:
+          case JDBCDataStore.VALUE_TYPE_INTEGER:
+          case JDBCDataStore.VALUE_TYPE_LONG:
+            currFeature = numberValue;
+            break;
+
+          case JDBCDataStore.VALUE_TYPE_STRING:
+            //this one is tricky too
+            //if the string is < 4000 bytes long then it's stored as varchar2
+            //otherwise as CLOB
+            if (null == stringValue) {
+              //oops, we got CLOB
+              StringBuffer temp = new StringBuffer();
+              readCLOB(clobValue,temp);
+              currFeature = temp.toString();
+            }
+            else {
+              currFeature = stringValue;
+            }
+            break;
+
+          default:
+            throw new PersistenceException("Invalid feature type found in DB");
+        }//switch
+
+        //new feature or part of an array?
+        if (currKey.equals(prevKey)) {
+          //part of array
+          arrFeatures.add(currFeature);
+        }
+        else {
+          //add prev feature to feature map
+
+          //is the prev feature an array or a single object?
+          if (arrFeatures.size() > 1) {
+            fm.put(prevKey,arrFeatures);
+          }
+          else if (arrFeatures.size() == 1) {
+            fm.put(prevKey,arrFeatures.elementAt(0));
+          }
+          else {
+            //do nothing, this is the dummy feature
+            ;
+          }//if
+
+          //now clear the array from previous fesature(s) and put the new
+          //one there
+          arrFeatures.clear();
+
+          prevKey = currKey;
+          arrFeatures.add(currFeature);
+        }//if
+      }//while
+
+      //add the last feature
+      if (arrFeatures.size() > 1) {
+        fm.put(currKey,arrFeatures);
+      }
+      else if (arrFeatures.size() == 1) {
+        fm.put(currKey,arrFeatures.elementAt(0));
       }
 
-      throw new MethodNotImplementedException();
-
-    }
+    }//try
     catch(SQLException sqle) {
       throw new PersistenceException("can't read features from DB: ["+ sqle.getMessage()+"]");
+    }
+    catch(IOException ioe) {
+      throw new PersistenceException("can't read features from DB: ["+ ioe.getMessage()+"]");
     }
     finally {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
     }
+
+    return fm;
   }
+
+
 
 }
