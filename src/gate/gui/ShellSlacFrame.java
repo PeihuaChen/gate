@@ -244,21 +244,19 @@ public class ShellSlacFrame extends MainFrame {
   /** Here default ANNIE is created. Could be changed. */
   private void createDefaultApplication() {
     // Loads ANNIE with defaults
+    Runnable loadAction = new ANNIERunnable(ShellSlacFrame.this);
 
-//    SwingUtilities.invokeLater(new Runnable() {
-//      public void run(){
-        Runnable loadAction = new ANNIERunnable(ShellSlacFrame.this);
-        Thread thread = new Thread(loadAction, "");
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
-//      }
-//    });
+    Thread thread = new Thread(loadAction, "");
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
   } // createDefaultApplication
 
   /** Load serialized application from file. */
   private void createDefaultApplication(String url) {
-    ApplicationLoadRun run = new ApplicationLoadRun(url);
-    SwingUtilities.invokeLater(run);
+    ApplicationLoadRun run = new ApplicationLoadRun(url, super);
+    Thread thread = new Thread(run, "");
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
   } // createDefaultApplication
 
   /** Create corpus for application */
@@ -793,14 +791,17 @@ public class ShellSlacFrame extends MainFrame {
   /** Load application from file */  
   private class ApplicationLoadRun implements Runnable {
     private String appURL;
-    public ApplicationLoadRun(String url) {
+    private MainFrame appFrame;
+    public ApplicationLoadRun(String url, MainFrame frame) {
       appURL = url;
+      appFrame = frame;
     }
     
     public void run(){
       File file = new File(appURL);
       boolean appLoaded = false;  
       
+      appFrame.lockGUI("Application from '"+appURL+"' is being loaded...");
       if( file.exists() ) {
         try {
           gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
@@ -813,6 +814,7 @@ public class ShellSlacFrame extends MainFrame {
           ioex.printStackTrace();
         } // catch
       } // if
+      appFrame.unlockGUI();
 
       if(!appLoaded) {
         // file do not exist. Show a message
