@@ -83,6 +83,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   public Resource init() throws ResourceInstantiationException {
     featureList = new ArrayList();
     emptyFeature = new Feature("", null);
+    featureList.add(emptyFeature);
     initGUI();
     return this;
   }//init()
