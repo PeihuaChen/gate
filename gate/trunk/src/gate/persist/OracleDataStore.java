@@ -793,14 +793,7 @@ public class OracleDataStore extends JDBCDataStore {
       Node start = (Node)ann.getStartNode();
       Node end = (Node)ann.getEndNode();
       String type = ann.getType();
-      FeatureMap annFeatures = ann.getFeatures();
-
-/*
-System.out.println("ANN>>> ["+ann.getType()+"]");
-System.out.println("START>>> ["+start+"]");
-System.out.println("END>>> ["+end+"]");
-System.out.println();
-*/
+//      FeatureMap annFeatures = ann.getFeatures();
 
       //DB stuff
       Long annGlobalID = null;
@@ -2037,6 +2030,205 @@ System.out.println();
     }
   }
 
+
+  private void _syncAddedAnnotations(Document doc, AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    //0.preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(as);
+    Assert.assertNotNull(changes);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(as instanceof DatabaseAnnotationSetImpl);
+    Assert.assertTrue(changes.size() > 0);
+
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    CallableStatement cstmt = null;
+    Long lrID = (Long)doc.getLRPersistenceId();
+    Long docID = null;
+    Long asetID = null;
+
+    try {
+      //1. get the a-set ID in the database
+      String sql = " select as_id,  " +
+                   "        as_doc_id " +
+                   " from  "+Gate.DB_OWNER+".v_annotation_set " +
+                   " where  lr_id = ? ";
+      //do we have aset name?
+      String clause = null;
+      String name = as.getName();
+      if (null != name) {
+        clause =   "        and as_name = ? ";
+      }
+      else {
+        clause =   "        and as_name is null ";
+      }
+      sql = sql + clause;
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      if (null != name) {
+        pstmt.setString(2,name);
+      }
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (rs.next()) {
+        asetID = new Long(rs.getLong("as_id"));
+        docID = new Long(rs.getLong("as_doc_id"));
+      }
+      else {
+        throw new PersistenceException("cannot find annotation set with" +
+                                      " name=["+name+"] , LRID=["+lrID+"] in database");
+      }
+
+      //3. insert the new annotations from this set
+
+      //3.1. prepare call
+      cstmt = this.jdbcConn.prepareCall(
+              "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?,?,?,?) }");
+
+      Long annGlobalID = null;
+      Iterator it = changes.iterator();
+
+      while (it.hasNext()) {
+
+        //3.2. insert annotation
+        Annotation ann = (Annotation)it.next();
+
+        Node start = (Node)ann.getStartNode();
+        Node end = (Node)ann.getEndNode();
+        String type = ann.getType();
+
+        cstmt.setLong(1,docID.longValue()); //annotations are linked with documents, not LRs!
+        cstmt.setLong(2,ann.getId().longValue());
+        cstmt.setLong(3,asetID.longValue());
+        cstmt.setLong(4,start.getId().longValue());
+        cstmt.setLong(5,start.getOffset().longValue());
+        cstmt.setLong(6,end.getId().longValue());
+        cstmt.setLong(7,end.getOffset().longValue());
+        cstmt.setString(8,type);
+        cstmt.registerOutParameter(9,java.sql.Types.BIGINT);
+
+        cstmt.execute();
+        annGlobalID = new Long(cstmt.getLong(9));
+
+        //3.3. set annotation features
+        FeatureMap features = ann.getFeatures();
+        Assert.assertNotNull(features);
+        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't add annotations in DB : ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+      DBHelper.cleanup(cstmt);
+    }
+  }
+
+
+  private void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    //technically this approach sux
+    //at least it works
+
+    //1. delete
+    _syncRemovedAnnotations(doc,as,changes);
+    //2. recreate
+    _syncAddedAnnotations(doc,as,changes);
+  }
+
+
+  private void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException {
+    //0.preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(as);
+    Assert.assertNotNull(changes);
+    Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
+    Assert.assertTrue(as instanceof DatabaseAnnotationSetImpl);
+    Assert.assertTrue(changes.size() > 0);
+
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    CallableStatement cstmt = null;
+    Long lrID = (Long)doc.getLRPersistenceId();
+    Long docID = null;
+    Long asetID = null;
+
+    try {
+      //1. get the a-set ID in the database
+      String sql = " select as_id,  " +
+                   "        as_doc_id " +
+                   " from  "+Gate.DB_OWNER+".v_annotation_set " +
+                   " where  lr_id = ? ";
+      //do we have aset name?
+      String clause = null;
+      String name = as.getName();
+      if (null != name) {
+        clause =   "        and as_name = ? ";
+      }
+      else {
+        clause =   "        and as_name is null ";
+      }
+      sql = sql + clause;
+
+      pstmt = this.jdbcConn.prepareStatement(sql);
+      pstmt.setLong(1,lrID.longValue());
+      if (null != name) {
+        pstmt.setString(2,name);
+      }
+      pstmt.execute();
+      rs = pstmt.getResultSet();
+
+      if (rs.next()) {
+        asetID = new Long(rs.getLong("as_id"));
+        docID = new Long(rs.getLong("as_doc_id"));
+      }
+      else {
+        throw new PersistenceException("cannot find annotation set with" +
+                                      " name=["+name+"] , LRID=["+lrID+"] in database");
+      }
+
+      //3. delete the removed annotations from this set
+
+      //3.1. prepare call
+      cstmt = this.jdbcConn.prepareCall(
+              "{ call "+Gate.DB_OWNER+".persist.delete_annotation(?,?) }");
+
+
+      Iterator it = changes.iterator();
+
+      while (it.hasNext()) {
+
+        //3.2. insert annotation
+        Annotation ann = (Annotation)it.next();
+
+        cstmt.setLong(1,docID.longValue()); //annotations are linked with documents, not LRs!
+        cstmt.setLong(2,ann.getId().longValue());
+        cstmt.execute();
+      }
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete annotations in DB : ["+
+                                      sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(rs);
+      DBHelper.cleanup(pstmt);
+      DBHelper.cleanup(cstmt);
+    }
+  }
+
+
   private void _syncAnnotations(Document doc)
     throws PersistenceException {
 
@@ -2048,43 +2240,34 @@ System.out.println();
                       this.getDatabaseID());
 
 
-    //1. default
-    EventAwareAnnotationSet eas = (EventAwareAnnotationSet)doc.getAnnotations();
+    //1. get the sets read from the DB for this document
+    //chnaged annotations can occur only in such sets
+    Collection loadedSets = ((EventAwareDocument)doc).getLoadedAnnotationSets();
 
-    Collection anns = null;
-    anns = eas.getAddedAnnotationIDs();
-    if (anns.size()>0) {
-        //add code
-    }
+    Iterator it = loadedSets.iterator();
+    while (it.hasNext()) {
 
-    anns = eas.getRemovedAnnotationIDs();
-    if (anns.size()>0) {
-        //add code
-    }
+      AnnotationSet as = (AnnotationSet)it.next();
+      EventAwareAnnotationSet eas = (EventAwareAnnotationSet)as;
+      Assert.assertNotNull(as);
 
-    anns = eas.getChangedAnnotationIDs();
-    if (anns.size()>0) {
-        //add code
-    }
-
-    //2. iterate all the annotation sets
-    Iterator itSets = doc.getNamedAnnotationSets().values().iterator();
-    while (itSets.hasNext()) {
-      EventAwareAnnotationSet aset = (EventAwareAnnotationSet)itSets.next();
-
-      anns = aset.getAddedAnnotationIDs();
+      Collection anns = null;
+      anns = eas.getAddedAnnotations();
+      Assert.assertNotNull(anns);
       if (anns.size()>0) {
-        //add code
+        _syncAddedAnnotations(doc,as,anns);
       }
 
-      anns = aset.getRemovedAnnotationIDs();
+      anns = eas.getRemovedAnnotations();
+      Assert.assertNotNull(anns);
       if (anns.size()>0) {
-        //add code
+        _syncRemovedAnnotations(doc,as,anns);
       }
 
-      anns = aset.getChangedAnnotationIDs();
+      anns = eas.getChangedAnnotations();
+      Assert.assertNotNull(anns);
       if (anns.size()>0) {
-        //add code
+        _syncChangedAnnotations(doc,as,anns);
       }
     }
   }
