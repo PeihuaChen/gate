@@ -254,10 +254,8 @@ public class MainFrame extends JFrame
     datastoresRoot = new DefaultMutableTreeNode("Data stores", true);
     resourcesTreeRoot.add(applicationsRoot);
     resourcesTreeRoot.add(languageResourcesRoot);
-    if(!isShellSlacGIU) {
-      resourcesTreeRoot.add(processingResourcesRoot);
-      resourcesTreeRoot.add(datastoresRoot);
-    } // if
+    resourcesTreeRoot.add(processingResourcesRoot);
+    resourcesTreeRoot.add(datastoresRoot);
 
     resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot, true);
 
@@ -286,7 +284,6 @@ public class MainFrame extends JFrame
     this.setSize(new Dimension(width == null ? 800 : width.intValue(),
                                height == null ? 600 : height.intValue()));
 
-    this.setTitle(Main.name + " " + Main.version);
     try{
       this.setIconImage(Toolkit.getDefaultToolkit().getImage(
             new URL("gate:/img/gateIcon.gif")));
@@ -814,40 +811,39 @@ public class MainFrame extends JFrame
       }
     });
 
+    addComponentListener(new ComponentAdapter() {
+      public void componentHidden(ComponentEvent e) {
+
+      }
+
+      public void componentMoved(ComponentEvent e) {
+      }
+
+      public void componentResized(ComponentEvent e) {
+      }
+
+      public void componentShown(ComponentEvent e) {
+        leftSplit.setDividerLocation((double)0.7);
+      }
+    });
+
     if(isShellSlacGIU) {
-      addComponentListener(new ComponentAdapter() {
+      mainSplit.setDividerSize(0);
+      mainSplit.getTopComponent().setVisible(false);
+      mainSplit.getTopComponent().addComponentListener(new ComponentAdapter() {
         public void componentHidden(ComponentEvent e) {
-
         }
-
         public void componentMoved(ComponentEvent e) {
+          mainSplit.setDividerLocation(0);
         }
-
         public void componentResized(ComponentEvent e) {
+          mainSplit.setDividerLocation(0);
         }
-
         public void componentShown(ComponentEvent e) {
-          mainSplit.setDividerLocation((double)0.0);
+          mainSplit.setDividerLocation(0);
         }
       });
-    }
-    else {
-      addComponentListener(new ComponentAdapter() {
-        public void componentHidden(ComponentEvent e) {
-
-        }
-
-        public void componentMoved(ComponentEvent e) {
-        }
-
-        public void componentResized(ComponentEvent e) {
-        }
-
-        public void componentShown(ComponentEvent e) {
-          leftSplit.setDividerLocation((double)0.7);
-        }
-      });
-    }
+    } // if
 
     //blink the messages tab when new information is displayed
     logArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener(){
