@@ -268,6 +268,8 @@ public class AccessControllerImpl
           throw new PersistenceException(
                 "can't create a group in DB, name is not unique: ["
                   + sqle.getMessage()+"]");
+          break;
+
         default:
           throw new PersistenceException(
                 "can't create a group in DB: ["+ sqle.getMessage()+"]");
@@ -337,6 +339,8 @@ public class AccessControllerImpl
           throw new PersistenceException(
                 "can't delete a group from DB, the group owns LR(s): ["
                   + sqle.getMessage()+"]");
+          break;
+
         default:
           throw new PersistenceException(
                 "can't delete a group from DB: ["+ sqle.getMessage()+"]");
@@ -422,6 +426,8 @@ public class AccessControllerImpl
           throw new PersistenceException(
                 "can't create a user in DB, name is not unique: ["
                   + sqle.getMessage()+"]");
+          break;
+
         default:
           throw new PersistenceException(
                 "can't create a user in DB: ["+ sqle.getMessage()+"]");
@@ -476,6 +482,8 @@ public class AccessControllerImpl
           throw new PersistenceException(
                 "can't delete user from DB, the user owns LR(s): ["
                   + sqle.getMessage()+"]");
+          break;
+
         default:
           throw new PersistenceException(
                 "can't delete user from DB: ["+ sqle.getMessage()+"]");
@@ -571,10 +579,13 @@ public class AccessControllerImpl
       {
         case DBHelper.X_ORACLE_INVALID_USER_NAME :
           throw new SecurityException("Login failed: incorrect user");
+          break;
         case DBHelper.X_ORACLE_INVALID_USER_PASS :
           throw new SecurityException("Login failed: incorrect password");
+          break;
         case DBHelper.X_ORACLE_INVALID_USER_GROUP :
           throw new SecurityException("Login failed: incorrect group");
+          break;
         default:
           throw new PersistenceException("can't login user, DB error is: ["+
                                           sqle.getMessage()+"]");
