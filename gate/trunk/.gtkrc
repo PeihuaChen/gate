@@ -1,0 +1,12 @@
+# -- THEME AUTO-WRITTEN DO NOT EDIT
+include "/usr/share/themes/Default/gtk/gtkrc"
+
+style "user-font"
+{
+  font="-adobe-helvetica-medium-r-normal--*-120-*-*-*-*-*-*"
+}
+widget_class "*" style "user-font"
+
+include "~/.gtkrc.mine"
+
+# -- THEME AUTO-WRITTEN DO NOT EDIT

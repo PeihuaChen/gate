@@ -1,0 +1,28 @@
+Gdk-Message: Got event for unknown window: 0
+
+Xlib:  extension "XFree86-Misc" missing on display "bradfield:0.0".
+Xlib:  extension "XFree86-Misc" missing on display "bradfield:0.0".
+Gdk-Message: Got event for unknown window: 0
+
+X Error of failed request:  BadWindow (invalid Window parameter)
+  Major opcode of failed request:  20 (X_GetProperty)
+  Resource id in failed request:  0x2800001
+  Serial number of failed request:  31
+  Current serial number in output stream:  31
+xscreensaver disabling server builtin screensaver.
+xscreensaver: you can re-enable it with "xset s on".
+rm: cannot remove `/root/.gnome//gmc-YHUy0u': No such file or directory
+subshell.c: couldn't get terminal settings: Inappropriate ioctl for device
+icewm: sm: unknown line c 117f000001000095080886900000006420011 gmc-desktop-icon Home directory 0:0:80:66 0 1 0
+icewm: sm: unknown line w 0
+
+GnomeUI-WARNING **: Could not open help topics file NULL
+
+** WARNING **: Root window clicks will not work as no GNOME-compliant window manager could be found!
+
+** WARNING **: Root window clicks will not work as no GNOME-compliant window manager could be found!
+
+Gdk-CRITICAL **: file gdkwindow.c: line 726 (gdk_window_unref): assertion `window != NULL' failed.
+10358e2620000095088231700000023730002 Panel panel 1210:0:70:1024 0 1 8
+118fa70901000095262874800000014350001 GnomeTerminal GnomeTerminal 208:79:945:837 0 0 4
+got c 10358e2620000095088231700000023730002 Panel panel 1210:0:70:1024 0 1 8
