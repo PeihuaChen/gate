@@ -162,7 +162,7 @@ public class NameBearerHandle implements Handle,
 
         popup.add(saveAsXmlItem);
       }else if(target instanceof Corpus){
-        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
+//        popup.add(new XJMenuItem(new PopulateCorpusAction(), sListenerProxy));
       }
     }//if(resource instanceof LanguageResource)
 

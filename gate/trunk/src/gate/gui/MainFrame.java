@@ -1456,6 +1456,7 @@ public class MainFrame extends JFrame
               // Add the PR to the sac
               sac.add(pr);
             }// End for
+            statusChanged("ANNIE loaded!");
           }catch(gate.creole.ResourceInstantiationException ex){
             ex.printStackTrace(Err.getPrintWriter());
           }// End try
