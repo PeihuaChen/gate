@@ -34,6 +34,7 @@ public class TestCoref extends TestCase {
   }
 
   public static void main(String[] args) {
+
     try{
       Gate.init();
       TestCoref testCoref = new TestCoref("");
@@ -62,7 +63,7 @@ public class TestCoref extends TestCase {
 
 
   private void runANNIE(Document doc) throws Exception {
-
+System.out.println("starting ANNIE modules...");
     DefaultTokeniser englishTokeniser = (DefaultTokeniser)Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
     DefaultGazetteer gazeteer = (DefaultGazetteer)Factory.createResource("gate.creole.gazetteer.DefaultGazetteer");
     SentenceSplitter split = (SentenceSplitter)Factory.createResource("gate.creole.splitter.SentenceSplitter");
@@ -119,6 +120,7 @@ System.out.println("starting use case 01...");
     Coreferencer corefMain = (Coreferencer)Factory.createResource("gate.creole.coref.Coreferencer");
     corefMain.init();
     corefMain.setDocument(doc);
+System.out.println("starting COREF...");
     corefMain.execute();
 System.out.println("case 01 finished...");
     return;
