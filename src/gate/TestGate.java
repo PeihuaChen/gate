@@ -162,7 +162,7 @@ public class TestGate {
       boolean allTests = true;
 
       if(! allTests)
-        suite.addTest(TestPersist.suite());
+        suite.addTest(TestSplitterTagger.suite());
       else {
         suite.addTest(TestControllers.suite());
         suite.addTest(TestPersist.suite());
@@ -189,6 +189,7 @@ public class TestGate {
         suite.addTest(TestDB.suite());
         suite.addTest(TestTokeniser.suite());
         suite.addTest(TestGazetteer.suite());
+        suite.addTest(TestSplitterTagger.suite());
       } // if(allTests)
 
     } catch(Exception e) {
