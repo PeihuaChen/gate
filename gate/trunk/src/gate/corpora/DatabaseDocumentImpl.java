@@ -36,6 +36,11 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   private boolean     contentChanged;
   private boolean     featuresChanged;
+  private boolean     nameChanged;
+
+  public static final int DOC_NAME = 1001;
+  public static final int DOC_CONTENT = 1002;
+  public static final int DOC_FEATURES = 1003;
 
   public DatabaseDocumentImpl(Connection conn) {
 
@@ -55,13 +60,14 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     contentLock = new Object();
 
     this.namedAnnotSets = new HashMap();
-    this.defaultAnnots = new AnnotationSetImpl(this);
+    this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
 
     this.isContentRead = false;
     this.jdbcConn = conn;
 
     this.contentChanged = false;
     this.featuresChanged = false;
+    this.nameChanged = false;
   }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
@@ -202,7 +208,7 @@ public class DatabaseDocumentImpl extends DocumentImpl {
         return;
       }
       else {
-        this.defaultAnnots = new AnnotationSetImpl(this);
+        this.defaultAnnots = new DatabaseAnnotationSetImpl(this);
         //go on with processing
       }
     }
@@ -258,10 +264,10 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
         //1.5, create a-set
         if (null == name) {
-          as = new AnnotationSetImpl(this);
+          as = new DatabaseAnnotationSetImpl(this);
         }
         else {
-          as = new AnnotationSetImpl(this,name);
+          as = new DatabaseAnnotationSetImpl(this,name);
         }
       }
       catch(SQLException sqle) {
@@ -561,11 +567,6 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     this.contentChanged = true;
   }
 
-
-  public boolean isContentChanged() {
-    return this.contentChanged;
-  }
-
   /** Set the feature set */
   public void setFeatures(FeatureMap features) {
     super.setFeatures(features);
@@ -573,9 +574,41 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     this.featuresChanged = true;
   }
 
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    super.setName(name);
 
-  public boolean isFeatureChanged() {
-    return this.featuresChanged;
+    this.nameChanged = true;
+  }
+
+
+  private List getAnnotationsForOffset(AnnotationSet aDumpAnnotSet,Long offset){
+    throw new MethodNotImplementedException();
+  }
+
+  /** Generate and return the next annotation ID */
+  public Integer getNextAnnotationId() {
+    throw new MethodNotImplementedException();
+  } // getNextAnnotationId
+
+  public Integer getNextNodeId() {
+    throw new MethodNotImplementedException();
+  }
+
+  public boolean isDocumentChanged(int changeType) {
+
+    switch(changeType) {
+
+      case DatabaseDocumentImpl.DOC_CONTENT:
+        return this.contentChanged;
+      case DatabaseDocumentImpl.DOC_FEATURES:
+        return this.featuresChanged;
+      case DatabaseDocumentImpl.DOC_NAME:
+        return this.nameChanged;
+      default:
+        throw new IllegalArgumentException();
+    }
+
   }
 
 }
