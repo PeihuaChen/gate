@@ -64,15 +64,7 @@ public class POSTagger extends AbstractProcessingResource {
                                document.getAnnotations(outputASName);
       //prepare the input for HepTag
       //define a comparator for annotations by start offset
-      Comparator offsetComparator = new Comparator(){
-        public int compare(Object o1,
-                     Object o2){
-          Annotation a1 = (Annotation)o1;
-          Annotation a2 = (Annotation)o2;
-          return a1.getStartNode().getOffset().compareTo(
-                  a2.getStartNode().getOffset());
-        }
-      };
+      Comparator offsetComparator = new OffsetComparator();
       AnnotationSet as = inputAS.get("Sentence");
       if(as != null && as.size() > 0){
         List sentences = new ArrayList(as);
@@ -88,34 +80,12 @@ public class POSTagger extends AbstractProcessingResource {
           if(tokensSet == null) continue;
           List tokens = new ArrayList(tokensSet);
           Collections.sort(tokens, offsetComparator);
-          List sentence = new ArrayList();
+          List sentence = new ArrayList(tokens.size());
           Iterator tokIter = tokens.iterator();
-          //contains pairs (startOffset, endOffset)
-          List locations = new ArrayList();
-          //where will the next write in locations take place
-          int i = 0;
           while(tokIter.hasNext()){
             Annotation token = (Annotation)tokIter.next();
-            Long start = token.getStartNode().getOffset();
-            Long end = token.getEndNode().getOffset();
-            String text = document.getContent().getContent(start, end).
-                                   toString();
-            if(text.length() > 3 && text.endsWith("n't")){
-              Long start1 = start;
-              Long end1 = new Long(end.longValue() - 3);
-              Long start2 = end1;
-              Long end2 = end;
-              sentence.add(text.substring(0, text.length() -3));
-              locations.add(new Object[]{start1, end1});
-              i++;
-              sentence.add("n't");
-              locations.add(new Object[]{start2, end2});
-              i++;
-            }else{
-              sentence.add(text);
-              locations.add(new Object[]{start, end});
-              i++;
-            }
+            String text = (String)token.getFeatures().get("string");
+            sentence.add(text);
           }//while(tokIter.hasNext())
 
           //run the POSTagger over this sentence
@@ -125,21 +95,17 @@ public class POSTagger extends AbstractProcessingResource {
           //add the results to the output annotation set
           //we only get one sentence
           List sentenceFromTagger = (List)taggerResults.get(0);
-          if(sentenceFromTagger.size() != locations.size()){
+          if(sentenceFromTagger.size() != sentence.size()){
             throw new GateRuntimeException(
               "POS Tagger malfunction: the output size (" +
               sentenceFromTagger.size() +
               ") is different from the input size (" +
-              locations.size() + ")!");
+              sentence.size() + ")!");
           }
-          FeatureMap fm;
-          for(i = 0; i< locations.size(); i++){
-            fm = Factory.newFeatureMap();
+          for(int i = 0; i< sentence.size(); i++){
             String category = ((String[])sentenceFromTagger.get(i))[1];
-            fm.put("category", category);
-            outputAS.add((Long)((Object[])locations.get(i))[0],
-                         (Long)((Object[])locations.get(i))[1],
-                         "POS",fm);
+            Annotation token = (Annotation)tokens.get(i);
+            token.getFeatures().put("category", category);
           }//for(i = 0; i<= locations.size(); i++)
         }//while(sentIter.hasNext())
       }else{

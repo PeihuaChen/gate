@@ -441,6 +441,9 @@ public class Nerc extends SerialController {
     return taggerLexiconURL;
   }
 
+  /**
+   * A progress listener used to convert a 0..100 interval into a smaller one
+   */
   class CustomProgressListener implements ProgressListener{
     CustomProgressListener(int start, int end){
       this.start = start;

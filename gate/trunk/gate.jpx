@@ -100,11 +100,6 @@
   <property category="sys" name="VersionLabel" value="@version" />
   <property category="sys" name="WorkingDirectory" value="." />
   <property category="sys" name="warn.auto.packages" value="false" />
-  <property category="team" name="ignorePath.0" value="classes/dependency cache" />
-  <property category="team" name="ignorePath.1" value="classes/gate" />
-  <property category="team" name="ignorePath.2" value="classes/guk" />
-  <property category="team" name="ignorePath.3" value="doc/userguide.html" />
-  <property category="team" name="ignorePath.4" value="build/testpkg/testpkg" />
   <file path="src/gate/resources/creole/creole.xml" />
 </project>
 
