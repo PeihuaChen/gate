@@ -82,7 +82,7 @@ public class NameBearerHandle implements Handle,
     if (largeView != null){
       largeView.getActionMap().put("Close resource",
                         new CloseAction());
-      if (target instanceof gate.corpora.DocumentImpl){
+      if (target instanceof gate.TextualDocument){
         largeView.getActionMap().put("Save As XML", new SaveAsXmlAction());
       }// End if
     }// End if
@@ -188,7 +188,7 @@ public class NameBearerHandle implements Handle,
       popup.addSeparator();
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
-      if(target instanceof gate.corpora.DocumentImpl){
+      if(target instanceof gate.TextualDocument){
         XJMenuItem saveAsXmlItem =
                          new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
         saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -431,9 +431,15 @@ public class NameBearerHandle implements Handle,
              selectedFile.toString() + "...");
             try{
               MainFrame.lockGUI("Saving...");
-              // Prepare to write into the xmlFile using UTF-8 encoding
+              // Prepare to write into the xmlFile using the original encoding
+              String encoding = ((gate.TextualDocument)target).getEncoding();
+              if(encoding == null || encoding.length() == 0)
+                encoding = System.getProperty("file.encoding");
+              if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
+
               OutputStreamWriter writer = new OutputStreamWriter(
-                              new FileOutputStream(selectedFile),"UTF-8");
+                                            new FileOutputStream(selectedFile),
+                                            encoding);
 
               // Write (test the toXml() method)
               // This Action is added only when a gate.Document is created.
@@ -513,9 +519,15 @@ public class NameBearerHandle implements Handle,
               }//if we have a document editor
             }//if tabbed pane
             try{
-              // Prepare to write into the xmlFile using UTF-8 encoding
+              // Prepare to write into the xmlFile using the original encoding
+              String encoding = ((gate.TextualDocument)target).getEncoding();
+              if(encoding == null || encoding.length() == 0)
+                encoding = System.getProperty("file.encoding");
+              if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
+
               OutputStreamWriter writer = new OutputStreamWriter(
-                                    new FileOutputStream(selectedFile),"UTF-8");
+                                            new FileOutputStream(selectedFile),
+                                            encoding);
 
               //determine if the features need to be saved first
               Boolean featuresSaved =
