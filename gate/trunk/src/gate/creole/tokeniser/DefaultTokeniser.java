@@ -539,7 +539,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
   public void run() {
     //check the input
     if(document == null) {
-      runtimeException = new ProcessingResourceRuntimeException(
+      runtimeException = new ExecutionException(
         "No document to tokenise!"
       );
       return;
@@ -547,7 +547,7 @@ implements Runnable, ProcessingResource, ProcessProgressReporter,
 
     if(annotationSet == null) annotationSet = document.getAnnotations();
     else if(annotationSet.getDocument() != document) {
-      runtimeException = new ProcessingResourceRuntimeException(
+      runtimeException = new ExecutionException(
         "The annotation set provided does not belong to the current document!"
       );
       return;

@@ -1,5 +1,5 @@
 /*
- *  ProcessingResourceRuntimeException.java
+ *  ExecutionException.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -22,19 +22,19 @@ import gate.util.*;
   * These cannot be thrown at run time because <CODE>run()</CODE>
   * is inheritted from  <CODE>runnable</CODE> and doesn't throw anything.
   */
-public class ProcessingResourceRuntimeException extends GateException {
+public class ExecutionException extends GateException {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  public ProcessingResourceRuntimeException() {
+  public ExecutionException() {
     super();
   }
 
-  public ProcessingResourceRuntimeException(String s) {
+  public ExecutionException(String s) {
     super(s);
   }
 
-  public ProcessingResourceRuntimeException(Exception e) {
+  public ExecutionException(Exception e) {
     super(e.toString());
   }
-} // ProcessingResourceRuntimeException
+} // ExecutionException
