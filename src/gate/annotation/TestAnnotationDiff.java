@@ -71,6 +71,7 @@ public class TestAnnotationDiff extends TestCase
     gate.Document keyDocument =
        gate.Factory.newDocument(
           Gate.getUrl("tests/annotDiff/KeyDocument.xml")
+//            new URL("file:///Z:/testAnnotDiff/key1.xml")
        );
     gate.DocumentFormat keyDocFormat = gate.DocumentFormat.getDocumentFormat(
       keyDocument, keyDocument.getSourceUrl()
@@ -80,6 +81,7 @@ public class TestAnnotationDiff extends TestCase
     gate.Document responseDocument =
         gate.Factory.newDocument(
             Gate.getUrl("tests/annotDiff/ResponseDocument.xml")
+//            new URL("file:///Z:/testAnnotDiff/response1.xml")
         );
     gate.DocumentFormat responseDocFormat =
         gate.DocumentFormat.getDocumentFormat(
@@ -110,23 +112,26 @@ public class TestAnnotationDiff extends TestCase
     // Create Annotation Diff visual resource
     AnnotationDiff annotDiff = (AnnotationDiff)
           Factory.createResource("gate.annotation.AnnotationDiff",parameters);
+
 //*/
-/*
-    assert("Diffset is NULL. It shouldn't be NULL",diffSet!= null);
-    assert("Precision changed.That's because of the key/response document or" +
-            " code implementation!",
-            new Double(0.6666666666666666).equals(precision));
-    assert("Recall changed.That's because of the key/response document or" +
-            " code implementation!",
-            new Double(0.7272727272727273).equals(recall));
-*/
-    // Display the component
 //*
+
+    assert("Precision strict changed.That's because of the key/response" +
+            " document or" + " code implementation!",
+                        0.6666666666666666 == annotDiff.getPrecisionStrict());
+    assert("Recall strict changed.That's because of the key/response" +
+    " document or" + " code implementation!",
+                    0.7272727272727273 == annotDiff.getRecallStrict());
+
+
+//*/
+    // Display the component
+/*
     JFrame jFrame = new JFrame("AnnotationDiff GUI");
     jFrame.getContentPane().add(annotDiff, BorderLayout.CENTER);
     jFrame.pack();
     jFrame.setVisible(true);
-//*/
+*/
 
   } // testDiff()
 
