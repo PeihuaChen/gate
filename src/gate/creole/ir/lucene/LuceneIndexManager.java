@@ -177,7 +177,7 @@ public class LuceneIndexManager implements IndexManager{
       if (field.isPreseved()) {
         luceneDoc.add(Field.Keyword(field.getName(),valueForIndexing));
       } else {
-        luceneDoc.add(Field.Text(field.getName(),valueForIndexing));
+        luceneDoc.add(Field.UnStored(field.getName(),valueForIndexing));
       } // if-else keyword or text
 
     }// while (add all fields)
