@@ -284,7 +284,8 @@ jar/classpath so it's the same as registerBuiltins
        // if we're assuming a net connection, try network servers
       if(isNetConnected()) {
         if(
-          tryNetServer("derwent.dcs.shef.ac.uk", 80, "/gate.ac.uk/") ||
+          tryNetServer("gate-internal.dcs.shef.ac.uk", 80, "/") ||
+   //       tryNetServer("derwent.dcs.shef.ac.uk", 80, "/gate.ac.uk/") ||
           tryNetServer("gate.ac.uk", 80, "/")
         ) {
             if(DEBUG) Out.prln("getUrl() returned " + urlBase);
