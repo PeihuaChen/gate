@@ -1,6 +1,16 @@
 #!/bin/sh
 # jdk.sh - crossplatform jdk invocation
 #
+# This is a bit of a mess; it would best be replaced with some
+# judicious use of "cygpath". But it works, so....
+#
+# To modify: edit the settings of JAVABASE* in the big if clause near
+# the bottom. The first case is for CYGWIN, and the last for UNIX
+# where a path is set, and the middle one for UNIX where JAVA_HOME
+# is set.
+#
+# How it works:
+#
 # We get called with e.g. a java or javac command in UNIX style,
 # then, depending on platform, we do:
 #   path prefixing on $1
