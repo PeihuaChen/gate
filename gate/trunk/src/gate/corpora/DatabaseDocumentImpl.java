@@ -214,6 +214,10 @@ public class DatabaseDocumentImpl extends DocumentImpl
       rs.next();
 
       String encoding = rs.getString(1);
+      if (encoding.equals(DBHelper.DUMMY_ENCODING)) {
+        //no encoding was specified for this document
+        encoding = "";
+      }
       Clob   clb = rs.getClob(2);
       Blob   blb = rs.getBlob(3);
       long   contentType = rs.getLong(4);
