@@ -7,7 +7,6 @@ Phase:	Numex
 Options: control = appelt
 
 ///////////////////////////////////////////////////////////////
-
 //Money Rules
 
 
@@ -42,13 +41,16 @@ Macro: AMOUNT_NUMBER
 // to be included in a number
  
 (({Token.kind == number}
-(({Token.string == ","}|
-  {Token.string == "."})
-{Token.kind == number})*
-|
-(NUMBER_WORDS))
-(SPACE)?
-(MILLION_BILLION)?
+  (({Token.string == ","}|
+    {Token.string == "."}
+   )
+   {Token.kind == number}
+  )*
+  |
+  (NUMBER_WORDS)
+ )
+ (SPACE)?
+ (MILLION_BILLION)?
 )
 
 
@@ -70,22 +72,20 @@ Rule:	MoneySymbolUnit
 // not $1$21
 // $20US
 
-//N.B. Must be preceded and followed by space (or ? else?)
 
-  (SPACE |
-   {Token.kind == punctuation, Token.position == startpunct}     
-)
-  (   
-      ({Token.symbolkind == currency})
-      (SPACE)?
-      (AMOUNT_NUMBER)
-      ((SPACE)?
-	{Lookup.majorType == currency_unit})?
-  ) 
+//(SPACE | {Token.kind == punctuation}     
+//)
+(   
+ ({Token.symbolkind == currency})
+ (SPACE)?
+ (AMOUNT_NUMBER)
+ ((SPACE)?
+  {Lookup.majorType == currency_unit}
+ )?
+) 
 :number 
- (SPACE |
-   {Token.kind == punctuation, Token.position == endpunct}     
-)
+// (SPACE | {Token.kind == punctuation}
+// )
  -->
   :number.Money = {kind = "number", rule = "MoneySymbolUnit"}
 
