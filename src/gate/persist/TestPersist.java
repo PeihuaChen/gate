@@ -32,9 +32,9 @@ import gate.security.*;
 public class TestPersist extends TestCase
 {
   private static final String JDBC_URL =
-//           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
+           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
-"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
 
 
   /** Debug flag */
@@ -468,8 +468,9 @@ public class TestPersist extends TestCase
     Assert.assert(lr.getDataStore() instanceof DatabaseDataStore);
 
     this.uc01_lrID = (Long)lr.getLRPersistenceId();
-    this.uc01_LR = lr;
-System.out.println("adopted doc:name=["+((Document)lr).getName()+"], lr_id=["+((Document)lr).getLRPersistenceId()+"]");
+//    this.uc01_LR = lr;
+    this.uc01_LR = doc;
+//System.out.println("adopted doc:name=["+((Document)lr).getName()+"], lr_id=["+((Document)lr).getLRPersistenceId()+"]");
     //6.close
     ac.close();
     ds.close();
@@ -576,9 +577,66 @@ System.out.println("docid = " +this.uc01_lrID);
     //6.markupAware
     Assert.assertEquals(dbDoc.getMarkupAware(),((Document)this.uc01_LR).getMarkupAware());
 
+    //7. content
+    DocumentContent cont = dbDoc.getContent();
+    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+
+    //7. access the contect again and assure it's not read from the DB twice
+    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+
+    //8. encoding
+    String encNew = (String)dbDoc.getParameterValue("encoding");
+    String encOld = (String)((DocumentImpl)this.uc01_LR).getParameterValue("encoding");
+    Assert.assertEquals(encNew,encOld);
+
+    //9. default annotations
+    AnnotationSet defaultNew = dbDoc.getAnnotations();
+    AnnotationSet defaultOld = ((DocumentImpl)this.uc01_LR).getAnnotations();
+
+    Assert.assertNotNull(defaultNew);
+    Assert.assert(defaultNew.size() == defaultOld.size());
+    Iterator itDefault = defaultNew.iterator();
+
+    while (itDefault.hasNext()) {
+      Annotation currAnn = (Annotation)itDefault.next();
+      Assert.assert(defaultOld.contains(currAnn));
+    }
+
+    //10. iterate named annotations
+    Map namedOld = ((DocumentImpl)this.uc01_LR).getNamedAnnotationSets();
+    Iterator itOld = namedOld.keySet().iterator();
+    while (itOld.hasNext()) {
+      String asetName = (String)itOld.next();
+      AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
+      AnnotationSet asetNew = (AnnotationSet)dbDoc.getAnnotations(asetName);
+      Assert.assertNotNull(asetNew);
+      Assert.assertEquals(asetNew,asetOld);
+//      Features fmNew = asetNew.getFea
+    }
+
+
+    //11. ALL named annotation (ensure nothing is read from DB twice)
+/*    Map namedNew = dbDoc.getNamedAnnotationSets();
+
+    Assert.assertNotNull(namedNew);
+    Assert.assert(namedNew.size() == namedOld.size());
+
+    Iterator itNames = namedNew.keySet().iterator();
+    while (itNames.hasNext()) {
+      String asetName = (String)itNames.next();
+      AnnotationSet asetNew = (AnnotationSet)namedNew.get(asetName);
+      AnnotationSet asetOld = (AnnotationSet)namedOld.get(asetName);
+      Assert.assertNotNull(asetNew);
+      Assert.assertNotNull(asetOld);
+      Assert.assertEquals(asetNew,asetOld);
+    }
+*/
     if(DEBUG) {
       Err.prln("Use case 03 passed...");
     }
+
+    //9.
+
   }
 
   public void testDB_UseCase04() throws Exception {
