@@ -20,9 +20,9 @@ import java.net.*;
 import java.util.*;
 import java.io.*;
 
-import oracle.sql.CLOB;
-import oracle.sql.BLOB;
+import oracle.sql.*;
 import oracle.jdbc.driver.*;
+
 
 import junit.framework.*;
 
@@ -905,7 +905,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //7. create features
-    createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+//    createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+    createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //9. create a DatabaseDocument wrapper and return it
 
@@ -1024,7 +1025,8 @@ public class OracleDataStore extends JDBCDataStore {
         //2.1. set annotation features
         FeatureMap features = ann.getFeatures();
         Assert.assertNotNull(features);
-        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+//        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+        createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
       } //while
     }//try
     catch(SQLException sqle) {
@@ -1106,7 +1108,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //4. create features
-    createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
+//    createFeatures(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
+    createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     //5. create a DatabaseCorpusImpl and return it
 /*    Corpus dbCorpus = new DatabaseCorpusImpl(corp.getName(),
@@ -1654,6 +1657,173 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /**
+   *  creates a feature of the specified type/value/valueType/key for the specified entity
+   *  Entity is one of: LR, Annotation
+   *  Value types are: boolean, int, long, string, float, Object
+   */
+  private void _createFeatureBulk(Vector features,
+                                  CallableStatement stmt,
+                                  ArrayDescriptor adNumber,
+                                  ArrayDescriptor adString)
+    throws PersistenceException {
+
+    String[] stringValues = new String[10];
+    long[] numberValues = new long[10];
+    double[] floatValues = new double[10];
+    long[] entityIDs = new long[10];
+    long[] entityTypes = new long[10];
+    String[] keys = new String[10];
+    long[] valueTypes = new long[10];
+
+//System.out.println("num features=["+features.size()+"]");
+    //1. store in DB
+    try {
+
+      int ftInd = 0;
+      int arrInd = 0;
+      Iterator it = features.iterator();
+
+      while (it.hasNext()) {
+
+        Feature currFeature = (Feature)it.next();
+        entityIDs[arrInd] = currFeature.entityID.longValue();
+        entityTypes[arrInd] = currFeature.entityType;
+        keys[arrInd] = currFeature.key;
+        valueTypes[arrInd] = currFeature.valueType;
+//System.out.println("ftype=["+currFeature.valueType+"]");
+        //preconditions
+        Assert.assertTrue(currFeature.valueType == DBHelper.VALUE_TYPE_BOOLEAN ||
+                          currFeature.valueType == DBHelper.VALUE_TYPE_FLOAT ||
+                          currFeature.valueType == DBHelper.VALUE_TYPE_INTEGER ||
+                          currFeature.valueType == DBHelper.VALUE_TYPE_LONG ||
+                          currFeature.valueType == DBHelper.VALUE_TYPE_NULL ||
+                          currFeature.valueType == DBHelper.VALUE_TYPE_STRING
+                          );
+
+
+        Object value = currFeature.value;
+
+        switch(currFeature.valueType) {
+
+          case DBHelper.VALUE_TYPE_NULL:
+            numberValues[arrInd] = 0;
+            floatValues[arrInd] = 0;
+            stringValues[arrInd] = "";
+            break;
+
+          case DBHelper.VALUE_TYPE_BOOLEAN:
+            boolean b = ((Boolean)value).booleanValue();
+            numberValues[arrInd] = b ? this.ORACLE_TRUE : this.ORACLE_FALSE;
+            floatValues[arrInd] = 0;
+            stringValues[arrInd] = "";
+            break;
+
+          case DBHelper.VALUE_TYPE_INTEGER:
+            numberValues[arrInd] = ((Integer)value).intValue();
+            floatValues[arrInd] = 0;
+            stringValues[arrInd] = "";
+            break;
+
+          case DBHelper.VALUE_TYPE_LONG:
+            numberValues[arrInd] = ((Long)value).longValue();
+            floatValues[arrInd] = 0;
+            stringValues[arrInd] = "";
+            break;
+
+          case DBHelper.VALUE_TYPE_FLOAT:
+            floatValues[arrInd] = ((Double)value).doubleValue();
+            numberValues[arrInd] = 0;
+            stringValues[arrInd] = "";
+            break;
+
+          case DBHelper.VALUE_TYPE_BINARY:
+            Assert.fail();
+            break;
+
+          case DBHelper.VALUE_TYPE_STRING:
+            String s = (String)value;
+            //does it fin into a varchar2?
+
+            if (fitsInVarchar2(s)) {
+              stringValues[arrInd] = s;
+              floatValues[arrInd] = 0;
+              numberValues[arrInd] = 0;
+            }
+            else {
+              Assert.fail();
+            }
+            break;
+
+          default:
+            throw new IllegalArgumentException("unsuppoeted feature type");
+        }
+
+        //save the features?
+        ftInd++;
+        arrInd++;
+
+        if (ftInd == features.size() || arrInd == 10) {
+
+          if (arrInd == 10) {
+            arrInd = 0;
+          }
+//System.out.println("1");
+          ARRAY arrEntityIDs = new ARRAY(adNumber, this.jdbcConn,entityIDs);
+          ARRAY arrEntityTypes = new ARRAY(adNumber, this.jdbcConn,entityTypes);
+          ARRAY arrKeys = new ARRAY(adString, this.jdbcConn,keys);
+          ARRAY arrValueTypes = new ARRAY(adNumber, this.jdbcConn,valueTypes);
+          ARRAY arrNumberValues = new ARRAY(adNumber, this.jdbcConn,numberValues);
+          ARRAY arrFloatValues = new ARRAY(adNumber, this.jdbcConn,floatValues);
+          ARRAY arrStringValues = new ARRAY(adString, this.jdbcConn,stringValues);
+//System.out.println("2");
+/*for (int i=0; i< 10; i++) {
+System.out.println("["+i+"]-------------------");
+System.out.print(entityIDs[i]+" / ");
+System.out.print(entityTypes[i]+" / ");
+System.out.print(keys[i]+" / ");
+System.out.print(valueTypes[i]+" / ");
+System.out.print(numberValues[i]+" / ");
+System.out.print(floatValues[i]+" / ");
+System.out.print(stringValues[i]+" / ");
+System.out.println("-------------------");
+}
+*/
+//System.out.println("3");
+          OracleCallableStatement ostmt = (OracleCallableStatement)stmt;
+          ostmt.setARRAY(1,arrEntityIDs);
+          ostmt.setARRAY(2,arrEntityTypes);
+          ostmt.setARRAY(3,arrKeys);
+          ostmt.setARRAY(4,arrNumberValues);
+          ostmt.setARRAY(5,arrFloatValues);
+          ostmt.setARRAY(6,arrStringValues);
+          ostmt.setARRAY(7,arrValueTypes);
+          ostmt.setInt(8, arrInd == 0 ? 10 : arrInd);
+//System.out.println("4");
+//System.out.println("last_index=["+arrValueTypes.getLastIndex()+"]");
+//System.out.println("len=["+arrValueTypes.length()+"]");
+//System.out.println("count=["+(arrInd == 0 ? 10 : arrInd)+"]");
+
+
+
+          ostmt.execute();
+//System.out.println("5");
+        }
+      }
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+
+        case DBHelper.X_ORACLE_INVALID_FEATURE_TYPE:
+          throw new PersistenceException("can't create feature [step 1],"+
+                      "[invalid feature type] in DB: ["+ sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException("can't create feature [step 1] in DB: ["+
+                                                      sqle.getMessage()+"]");
+      }
+    }
+  }
 
   /**
    *  updates the value of a feature where the value is string (>4000 bytes, stored as CLOB)
@@ -1817,6 +1987,61 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  private Vector normalizeFeature(Long entityID, int entityType,String key, Object value)
+    throws PersistenceException {
+
+    //1. what kind of feature value is this?
+    int valueType = findFeatureType(value);
+
+    //2. how many elements do we store?
+    Vector elementsToStore = new Vector();
+    Vector features = new Vector();
+
+    switch(valueType) {
+      case DBHelper.VALUE_TYPE_NULL:
+      case DBHelper.VALUE_TYPE_BINARY:
+      case DBHelper.VALUE_TYPE_BOOLEAN:
+      case DBHelper.VALUE_TYPE_FLOAT:
+      case DBHelper.VALUE_TYPE_INTEGER:
+      case DBHelper.VALUE_TYPE_LONG:
+      case DBHelper.VALUE_TYPE_STRING:
+        elementsToStore.add(value);
+        break;
+
+      default:
+        //arrays
+        List arr = (List)value;
+        Iterator itValues = arr.iterator();
+
+        while (itValues.hasNext()) {
+          elementsToStore.add(itValues.next());
+        }
+
+        //normalize , i.e. ignore arrays
+        if (valueType == DBHelper.VALUE_TYPE_BINARY_ARR)
+          valueType = DBHelper.VALUE_TYPE_BINARY;
+        else if (valueType == DBHelper.VALUE_TYPE_BOOLEAN_ARR)
+          valueType = DBHelper.VALUE_TYPE_BOOLEAN;
+        else if (valueType == DBHelper.VALUE_TYPE_FLOAT_ARR)
+          valueType = DBHelper.VALUE_TYPE_FLOAT;
+        else if (valueType == DBHelper.VALUE_TYPE_INTEGER_ARR)
+          valueType = DBHelper.VALUE_TYPE_INTEGER;
+        else if (valueType == DBHelper.VALUE_TYPE_LONG_ARR)
+          valueType = DBHelper.VALUE_TYPE_LONG;
+        else if (valueType == DBHelper.VALUE_TYPE_STRING_ARR)
+          valueType = DBHelper.VALUE_TYPE_STRING;
+    }
+
+    for (int i=0; i< elementsToStore.size(); i++) {
+
+      Object currValue = elementsToStore.elementAt(i);
+      Feature currFeature = new Feature(entityID,entityType,key,currValue,valueType);
+      features.add(currFeature);
+    }
+
+    return features;
+  }
+
 
   /**
    *  checks if a String should be stores as VARCHAR2 or CLOB
@@ -1844,10 +2069,19 @@ public class OracleDataStore extends JDBCDataStore {
 
     //0. prepare statement ad use it for all features
     CallableStatement stmt = null;
+    CallableStatement stmtBulk = null;
+    ArrayDescriptor adNumber = null;
+    ArrayDescriptor adString = null;
 
     try {
       stmt = this.jdbcConn.prepareCall(
                     "{ call "+Gate.DB_OWNER+".persist.create_feature(?,?,?,?,?,?,?)} ");
+
+      stmtBulk = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".persist.create_feature_bulk(?,?,?,?,?,?,?,?)} ");
+
+      adNumber = ArrayDescriptor.createDescriptor("GATEADMIN.PERSIST.INTARRAY", this.jdbcConn);
+      adString = ArrayDescriptor.createDescriptor("GATEADMIN.PERSIST.CHARARRAY", this.jdbcConn);
     }
     catch (SQLException sqle) {
       throw new PersistenceException(sqle);
@@ -1868,6 +2102,92 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /**
+   *  helper metod
+   *  iterates a FeatureMap and creates all its features in the database
+   *   */
+  private void createFeaturesBulk(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException {
+
+    //0. prepare statement ad use it for all features
+    CallableStatement stmt = null;
+    CallableStatement stmtBulk = null;
+    ArrayDescriptor adNumber = null;
+    ArrayDescriptor adString = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".persist.create_feature(?,?,?,?,?,?,?)} ");
+
+      stmtBulk = this.jdbcConn.prepareCall(
+                    "{ call "+Gate.DB_OWNER+".persist.create_feature_bulk(?,?,?,?,?,?,?,?)} ");
+
+      //ACHTUNG!!!
+      //using toUpper for schema owner is necessary because of the dull JDBC driver
+      //otherwise u'll end up with "invalid name pattern" Oracle error
+      adString = ArrayDescriptor.createDescriptor(Gate.DB_OWNER.toUpperCase()+".STRING_ARRAY", this.jdbcConn);
+      adNumber = ArrayDescriptor.createDescriptor(Gate.DB_OWNER.toUpperCase()+".INT_ARRAY", this.jdbcConn);
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException(sqle);
+    }
+
+    /* when some day Java has macros, this will be a macro */
+    Vector entityFeatures = new Vector();
+
+    Set entries = features.entrySet();
+    Iterator itFeatures = entries.iterator();
+    while (itFeatures.hasNext()) {
+      Map.Entry entry = (Map.Entry)itFeatures.next();
+      String key = (String)entry.getKey();
+      Object value = entry.getValue();
+      Vector normalizedFeatures = normalizeFeature(entityID,entityType,key,value);
+      entityFeatures.addAll(normalizedFeatures);
+    }
+
+    //iterate all features, store LOBs directly and other features with bulk store
+    Iterator itEntityFeatures = entityFeatures.iterator();
+
+    while (itEntityFeatures.hasNext()) {
+
+      Feature currFeature = (Feature)itEntityFeatures.next();
+
+      if (currFeature.valueType == DBHelper.VALUE_TYPE_STRING) {
+          //does this string fit into a varchar2 or into clob?
+          String s = (String)currFeature.value;
+          if (false == this.fitsInVarchar2(s)) {
+            // Houston, we have a problem
+            // put the string into a clob
+            Long featID = _createFeature(currFeature.entityID,
+                                         currFeature.entityType,
+                                         currFeature.key,
+                                         currFeature.value,
+                                         currFeature.valueType,
+                                         stmt);
+            _updateFeatureLOB(featID,currFeature.value,currFeature.valueType);
+            itEntityFeatures.remove();
+          }
+      }
+      else if (currFeature.valueType == DBHelper.VALUE_TYPE_BINARY) {
+        //3.3. BLOBs
+        Long featID = _createFeature(currFeature.entityID,
+                                     currFeature.entityType,
+                                     currFeature.key,
+                                     currFeature.value,
+                                     currFeature.valueType,
+                                     stmt);
+        _updateFeatureLOB(featID,currFeature.value,currFeature.valueType);
+        itEntityFeatures.remove();
+      }
+    }
+
+    //now we have the data for the bulk store
+    _createFeatureBulk(entityFeatures, stmtBulk, adNumber, adString);
+
+    //3. cleanup
+    DBHelper.cleanup(stmt);
+    DBHelper.cleanup(stmtBulk);
+  }
 
 
   /** get security information for LR . */
@@ -2755,7 +3075,8 @@ public class OracleDataStore extends JDBCDataStore {
         //3.3. set annotation features
         FeatureMap features = ann.getFeatures();
         Assert.assertNotNull(features);
-        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+//        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+        createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
       }
     }
     catch(SQLException sqle) {
@@ -3024,7 +3345,8 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     //3. recreate them
-    createFeatures(lrID,entityType, lr.getFeatures());
+    //createFeatures(lrID,entityType, lr.getFeatures());
+    createFeaturesBulk(lrID,entityType, lr.getFeatures());
 
   }
 
@@ -3647,5 +3969,25 @@ public class OracleDataStore extends JDBCDataStore {
     }
     return endJoin.toString();
   }
+
+
+  private class Feature {
+
+    Long entityID;
+    int entityType;
+    String key;
+    Object value;
+    int valueType;
+
+    public Feature(Long eid, int eType, String key, Object value, int vType) {
+
+      this.entityID = eid;
+      this.entityType = eType;
+      this.key = key;
+      this.value = value;
+      this.valueType = vType;
+    }
+  }
+
 }
 
