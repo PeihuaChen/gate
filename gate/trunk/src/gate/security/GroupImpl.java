@@ -107,6 +107,19 @@ public class GroupImpl implements Group{
 
     //2. update memebr variable
     this.name = newName;
+
+    //3. create ObjectModificationEvent
+    ObjectModificationEvent e = new ObjectModificationEvent(
+                                          this,
+                                          ObjectModificationEvent.OBJECT_MODIFIED,
+                                          this.OBJECT_CHANGE_NAME);
+
+
+    //4. fire ObjectModificationEvent for all who care
+    for (int i=0; i< this.omListeners.size(); i++) {
+      ((ObjectModificationListener)this.omListeners).objectModified(e);
+    }
+
   }
 
 
@@ -203,8 +216,20 @@ public class GroupImpl implements Group{
       throw new PersistenceException("can't remove user from group in DB: ["+ sqle.getMessage()+"]");
     }
 
-    //4. update usr collection
+    //4. create ObjectModificationEvent
+    ObjectModificationEvent e = new ObjectModificationEvent(
+                                          this,
+                                          ObjectModificationEvent.OBJECT_MODIFIED,
+                                          this.OBJECT_CHANGE_REMOVEUSER);
+
+    //5. update usr collection
     this.users.remove(usr);
+
+    //6. fire ObjectModificationEvent for all who care
+    for (int i=0; i< this.omListeners.size(); i++) {
+      ((ObjectModificationListener)this.omListeners).objectModified(e);
+    }
+
   }
 
 

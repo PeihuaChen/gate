@@ -104,8 +104,19 @@ public class UserImpl implements User {
       DBHelper.cleanup(stmt);
     }
 
-    //3. update member variable
+    //4. create ObjectModificationEvent
+    ObjectModificationEvent e = new ObjectModificationEvent(
+                                          this,
+                                          ObjectModificationEvent.OBJECT_MODIFIED,
+                                          this.OBJECT_CHANGE_NAME);
+
+    //5. update member variable
     this.name = newName;
+
+    //6. fire ObjectModificationEvent for all who care
+    for (int i=0; i< this.omListeners.size(); i++) {
+      ((ObjectModificationListener)this.omListeners).objectModified(e);
+    }
 
 
   }
