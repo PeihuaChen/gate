@@ -1249,7 +1249,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
           strBuff.append("gate:");
         }
         strBuff.append("annotMaxId=\"");
-        strBuff.append(getNextAnnotationId());
+        strBuff.append(nextAnnotationId);
         strBuff.append("\"");
         strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
         strBuff.append(">");
