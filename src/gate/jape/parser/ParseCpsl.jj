@@ -123,7 +123,30 @@ PARSER_END(ParseCpsl)
 // parsed tokens
 
 <DEFAULT> TOKEN [IGNORE_CASE]: { <multiphase:   "Multiphase:"> }
-<DEFAULT> TOKEN [IGNORE_CASE]: { <phases:        "Phases:"> }
+
+// phases has its own lexical state so we can deal with relative paths
+// pointing to grammar files
+<DEFAULT> TOKEN [IGNORE_CASE]: { <phases:        "Phases:"> :IN_PHASES }
+<IN_PHASES> TOKEN: {
+  <path: (["A"-"Z", "a"-"z", "0"-"9", "-", "_", "/", "\\", "."])+ >
+}
+<IN_PHASES> SPECIAL_TOKEN: { // ignore whitespace
+  <phasesWhiteSpace: (<space>)+>
+}
+<IN_PHASES> SPECIAL_TOKEN: { // single-line C++/Java style comments
+  <phasesSingleLineCStyleComment: "//" (~["\n", "\r"])* <newline>>
+}
+<IN_PHASES> SPECIAL_TOKEN: { // single-line comments CPSL style
+  <phasesSingleLineCpslStyleComment: ";;" (~["\n", "\r"])* <newline>>
+}
+<IN_PHASES> SPECIAL_TOKEN: {
+  <phasesCommentStart: ("/*" | "#|")> : PHASES_WITHIN_COMMENT
+}
+<PHASES_WITHIN_COMMENT> MORE: { <phasesCommentChars: ~[]> }
+<PHASES_WITHIN_COMMENT> SPECIAL_TOKEN: {
+  <phasesCommentEnd: ("*/" | "|#")> : IN_PHASES
+}
+
 <DEFAULT> TOKEN [IGNORE_CASE]: { <phase:        "Phase:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <input:        "Input:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <option:       "Options:"> }
@@ -165,10 +188,6 @@ PARSER_END(ParseCpsl)
       } : DEFAULT
    }
 
-
-
-
-
 <DEFAULT> TOKEN: { <bool: "true" | "false" > }
 <DEFAULT> TOKEN: { <ident: <letter> (<letterOrDigitOrDash>)* > }
 <DEFAULT> TOKEN: {
@@ -209,9 +228,9 @@ PARSER_END(ParseCpsl)
 <DEFAULT> SPECIAL_TOKEN: { // single-line comments CPSL style
   <singleLineCpslStyleComment: ";;" (~["\n", "\r"])* <newline>>
 }
-<DEFAULT> SPECIAL_TOKEN: { <commentStart: ("/*" | "#|")> : WithinComment }
-<WithinComment> MORE: { <commentChars: ~[]> }
-<WithinComment> SPECIAL_TOKEN: { <commentEnd: ("*/" | "|#")> : DEFAULT }
+<DEFAULT> SPECIAL_TOKEN: { <commentStart: ("/*" | "#|")> : WITHIN_COMMENT }
+<WITHIN_COMMENT> MORE: { <commentChars: ~[]> }
+<WITHIN_COMMENT> SPECIAL_TOKEN: { <commentEnd: ("*/" | "|#")> : DEFAULT }
 
 <DEFAULT> TOKEN: { // catch all for Java block processing
   <other: (~[])>
@@ -249,7 +268,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
     (
       <phases>
       (
-        phaseNameTok=<ident>
+        phaseNameTok=<path>
         {
           ParseCpsl parser = null;
 
@@ -263,12 +282,14 @@ MultiPhaseTransducer MultiPhaseTransducer() :
             }
 
             if(sptURL == null){
-              throw(new ParseException("Resource not found: base = " + baseURL.toString() +
-                                       " path = " + sptPath));
+              throw(new ParseException(
+                "Resource not found: base = " + baseURL.toString() +
+                " path = " + sptPath
+              ));
             }
 
             // construct a parser and parse it
-      fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {
@@ -999,7 +1020,11 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.19  2001/05/18 16:30:00  hamish
+// now supports paths in phase names
+//
 // Revision 1.18  2001/05/17 16:02:42  valyt
+//
 // Jape grammars now can match using the "first" style
 //
 // Tokeniser only matches one character per (Space)Tokens in case of whitespace or control characters

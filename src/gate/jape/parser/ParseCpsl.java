@@ -104,7 +104,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       jj_consume_token(phases);
       label_2:
       while (true) {
-        phaseNameTok = jj_consume_token(ident);
+        phaseNameTok = jj_consume_token(path);
           ParseCpsl parser = null;
 
             // check file exists
@@ -117,12 +117,14 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             }
 
             if(sptURL == null){
-              {if (true) throw(new ParseException("Resource not found: base = " + baseURL.toString() +
-                                       " path = " + sptPath));}
+              {if (true) throw(new ParseException(
+                "Resource not found: base = " + baseURL.toString() +
+                " path = " + sptPath
+              ));}
             }
 
             // construct a parser and parse it
-      fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
+            fireStatusChangedEvent("Reading " + phaseNameTok.image + "...");
             try {
               parser = new ParseCpsl(sptURL, encoding, macrosMap);
             } catch (IOException e) {
@@ -140,7 +142,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
               m.addPhase(s.getName(), s);
           }
         switch (jj_nt.kind) {
-        case ident:
+        case path:
           ;
           break;
         default:
@@ -296,7 +298,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       ;
     }
     lhs = LeftHandSide();
-    jj_consume_token(51);
+    jj_consume_token(58);
     rhs = RightHandSide(phaseName, ruleName, lhs);
     try { rhs.createActionClass(); } catch(JapeException e)
     {
@@ -1114,6 +1116,17 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
   final private boolean jj_3R_12() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1128,17 +1141,6 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   public ParseCpslTokenManager token_source;
   ASCII_CharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1148,8 +1150,8 @@ existingAttrName + "\");" + nl +
   private boolean jj_semLA;
   private int jj_gen;
   final private int[] jj_la1 = new int[30];
-  final private int[] jj_la1_0 = {0x400,0x1000,0x20000000,0x1800,0x20000000,0x2000,0x20000000,0x4000,0x18000,0x18000,0x20000,0x20000000,0x28000000,0x0,0x28000000,0x28000000,0x0,0x8000000,0x80000,0x20100000,0x0,0x40000,0x0,0x78100000,0x0,0x20000000,0x0,0x20000000,0x78100000,0x0,};
-  final private int[] jj_la1_1 = {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x821,0xa0,0x8,0xa0,0xa0,0x10,0x20,0x0,0x0,0x1,0x0,0x4,0x0,0x10,0x821,0x801,0x0,0x1,0x10,};
+  final private int[] jj_la1_0 = {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x8000000,0x0,0x2000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8000000,0x0,};
+  final private int[] jj_la1_1 = {0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x0,0x0,0x0,0x0,0x41090,0x5014,0x400,0x5014,0x5014,0x800,0x1004,0x0,0x10,0x80,0x0,0x200,0x3c,0x800,0x41090,0x40080,0x10,0xbc,0x800,};
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
@@ -1307,8 +1309,8 @@ existingAttrName + "\");" + nl +
 
   final public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[52];
-    for (int i = 0; i < 52; i++) {
+    boolean[] la1tokens = new boolean[59];
+    for (int i = 0; i < 59; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
@@ -1327,7 +1329,7 @@ existingAttrName + "\");" + nl +
         }
       }
     }
-    for (int i = 0; i < 52; i++) {
+    for (int i = 0; i < 59; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
