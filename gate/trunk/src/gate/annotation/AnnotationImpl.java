@@ -179,7 +179,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
 
     //if someone cares about the annotation changes, then we need to
     //track the events from the new feature
-    if (! annotationListeners.isEmpty())
+    if (annotationListeners != null && ! annotationListeners.isEmpty())
       this.features.addFeatureMapListener(eventHandler);
 
     //finally say that the annotation features have been updated
