@@ -867,18 +867,19 @@ public class PostgresDataStore extends JDBCDataStore {
 */
 
   /** helper for sync() - never call directly */
-  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+/*  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
   }
-
+*/
   /** helper for sync() - never call directly */
-  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+/*  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
   }
+*/
 
   /**
    *  reads the features of an entity

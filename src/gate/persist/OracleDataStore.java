@@ -2427,7 +2427,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+/*  protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
 
     //technically this approach sux
@@ -2438,7 +2438,7 @@ public class OracleDataStore extends JDBCDataStore {
     //2. recreate
     _syncAddedAnnotations(doc,as,changes);
   }
-
+*/
 
   /** helper for sync() - never call directly */
   private void _syncRemovedDocumentsFromCorpus(List docLRIDs, Long corpLRID)
@@ -2482,7 +2482,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
+/*  protected void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
     throws PersistenceException {
     //0.preconditions
     Assert.assertNotNull(doc);
@@ -2563,7 +2563,7 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(cstmt);
     }
   }
-
+*/
 
 
   /** helper for sync() - never call directly */
