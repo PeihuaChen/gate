@@ -25,8 +25,10 @@ public class DefaultIndexDefinition implements IndexDefinition{
   private String location;
 
   /* Niraj */
+  // Annic Specific Changes
   private ArrayList featuresToExclude;
   private String annotationSet;
+  private String baseTokenAnnotationType;
   /* End */
 
 
@@ -46,6 +48,7 @@ public class DefaultIndexDefinition implements IndexDefinition{
 
 
   /* Niraj */
+  // Annic specific changes
   public void setFeaturesToExclude(ArrayList featuresToExclude) {
     this.featuresToExclude = featuresToExclude;
   }
@@ -62,6 +65,13 @@ public class DefaultIndexDefinition implements IndexDefinition{
     return this.annotationSet;
   }
 
+  public void setBaseTokenAnnotationType(String baseTokenAnnotationType) {
+    this.baseTokenAnnotationType = baseTokenAnnotationType;
+  }
+
+  public String getBaseTokenAnnotationType() {
+    return this.baseTokenAnnotationType;
+  }
   /* End */
 
 
