@@ -62,9 +62,46 @@ create or replace package body persist is
                       p_lr_parent_id     IN number,
                       p_lr_id            OUT number)
   is
-  
+    l_lr_type number;
   begin
-     raise error.x_not_implemented;
+     
+     -- 1. sanity check
+     if (false = security.is_valid_security_data(p_lr_permissions,p_grp_id,p_usr_id)) then
+        raise error.x_incomplete_data;
+     end if;
+     
+     -- 3. check if the LR type supplied is valid
+     select lrtp_id
+     into   l_lr_type
+     from   t_lr_type
+     where  lrtp_type = p_lr_type;
+     
+     
+     -- 2. create a lang_resource record
+     insert into t_lang_resource(lr_id,
+                                 lr_type_id,
+                                 lr_owner_user_id,
+                                 lr_locking_user_id,
+                                 lr_owner_group_id,
+                                 lr_name,
+                                 lr_access_mode,
+                                 lr_parent_id)
+     values (seq_lang_resource.nextval,
+            l_lr_type,
+            p_usr_id,
+            null,
+            p_grp_id,
+            p_lr_name,
+            p_lr_permissions,
+            p_lr_parent_id)
+     returning lr_id into p_lr_id;           
+     
+     
+     exception
+        when NO_DATA_FOUND then
+           raise error.x_invalid_lr_type;
+           
+     
   end;                                                                                                        
 
 
@@ -116,8 +153,6 @@ create or replace package body persist is
                 p_corpus_id,
                 p_doc_id);                
      end if;     
-     
-     raise error.x_not_implemented;
                                      
   end;                                                                                                        
   
