@@ -840,7 +840,7 @@ System.out.println();
 
   /** -- */
   private Corpus createCorpus(Corpus corp,SecurityInfo secInfo)
-  throws PersistenceException,SecurityException {
+    throws PersistenceException,SecurityException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
     Long lrID = createLR(DBHelper.CORPUS_CLASS,corp.getName(),secInfo,null);
@@ -869,7 +869,16 @@ System.out.println();
     while (itDocuments.hasNext()) {
       Document doc = (Document)itDocuments.next();
 
-      Document dbDoc = createDocument(doc,corpusID,secInfo);
+      //3.1. ensure that the document is either transient or is from the
+      // same DataStore
+      if (doc.getLRPersistenceId() == null || doc.getDataStore().equals(this)) {
+        Document dbDoc = createDocument(doc,corpusID,secInfo);
+      }
+      else {
+        //skip others
+        gate.util.Err.prln("document ["+doc.getLRPersistenceId()+"] is adopted from another "+
+                            " datastore. Skipped.");
+      }
     }
 
     //4. create features
