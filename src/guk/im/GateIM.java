@@ -171,7 +171,7 @@ public class GateIM implements InputMethod {
                   break;
                 }
                 case '3':{
-                  ch = '£';
+                  ch = '\u00a3'; //pound symbol
                   break;
                 }
                 case '4':{

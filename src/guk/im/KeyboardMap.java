@@ -117,10 +117,10 @@ public class KeyboardMap implements Runnable{
     currentKey = new Key(ch, currentModifiers);
     currentGui = new KeyGUI(sKey, '2', '\"',(JLabel)labelForKey.get(currentKey));
     GUIforString.put(sKey, currentGui);
-    if(shift) ch = '£'; else ch = '3';
+    if(shift) ch = '\u00a3'; else ch = '3';  //pound symbol
     sKey = "3";
     currentKey = new Key(ch, currentModifiers);
-    currentGui = new KeyGUI(sKey, '3', '£',(JLabel)labelForKey.get(currentKey));
+    currentGui = new KeyGUI(sKey, '3', '\u00a3',(JLabel)labelForKey.get(currentKey)); //pound symbol
     GUIforString.put(sKey, currentGui);
     if(shift) ch = '$'; else ch = '4';
     sKey = "4";
@@ -157,10 +157,10 @@ public class KeyboardMap implements Runnable{
     currentKey = new Key(ch, currentModifiers);
     currentGui = new KeyGUI(sKey, '0', ')',(JLabel)labelForKey.get(currentKey));
     GUIforString.put(sKey, currentGui);
-    if(shift) ch = '¬'; else ch = '`';
+    if(shift) ch = '\u00ac'; else ch = '`';  //negation symbol
     sKey = "`";
     currentKey = new Key(ch, currentModifiers);
-    currentGui = new KeyGUI(sKey, '`', '¬',(JLabel)labelForKey.get(currentKey));
+    currentGui = new KeyGUI(sKey, '`', '\u00ac',(JLabel)labelForKey.get(currentKey)); //negation symbol
     GUIforString.put(sKey, currentGui);
     if(shift) ch = '_'; else ch = '-';
     sKey = "-";
@@ -497,7 +497,7 @@ public class KeyboardMap implements Runnable{
                           }
 
 
-                          case '¬':{
+                          case '\u00ac':{ //negation symbol
                             key += '`';
                             break;
                           }
@@ -509,7 +509,7 @@ public class KeyboardMap implements Runnable{
                             key += '2';
                             break;
                           }
-                          case '£':{
+                          case '\u00a3':{ //pound symbol
                             key += '3';
                             break;
                           }
@@ -746,8 +746,7 @@ public class KeyboardMap implements Runnable{
                             break;
                           }
 
-
-                          case '¬':{
+                          case '\u00ac':{ //negation symbol
                             key += '`';
                             break;
                           }
@@ -759,7 +758,7 @@ public class KeyboardMap implements Runnable{
                             key += '2';
                             break;
                           }
-                          case '£':{
+                          case '\u00a3':{ //pound symbol
                             key += '3';
                             break;
                           }
