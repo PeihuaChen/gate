@@ -29,15 +29,26 @@ public class TestJape extends TestCase
   } // setUp
 
   /** Batch run */
-  public void testBatch() throws JapeException {
+  public void testBatch() throws JapeException, IOException {
     Corpus c = Transients.newCorpus("TestJape corpus");
-
+    c.add(
+      Transients.newDocument("http://derwent.dcs.shef.ac.uk/tests/doc0.html")
+    );
+    
     // run the parser test
     Batch batch = null;
-///    batch = new Batch("../misc/jape/grammars/Test11.jape");
+    String japeFileName = "/gate/jape/Test11.jape";
+    InputStream japeFileStream = Class.class.getResourceAsStream(japeFileName);
+    if(japeFileStream == null)
+      throw new JapeException("couldn't open " + japeFileName);
+    batch = new Batch(japeFileStream);
+    // test code: print the first line of the jape stream
+    // System.out.println(
+    //   new BufferedReader(new InputStreamReader(japeFileStream)).readLine()
+    // );
 
     // test the transducers
-///    batch.transduce(c);
+//    batch.transduce(c);
 
     // check the results
 
