@@ -40,6 +40,21 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** Keep the refference to this structure */
+  private RepositioningInfo reposInfo = null;
+
+  /** Set repositioning information structure refference. If you set this
+   *  refference to <B>null</B> information wouldn't be collected.
+   */
+  public void setRepositioningInfo(RepositioningInfo info) {
+    reposInfo = info;
+  } // setRepositioningInfo
+
+  /** Return current RepositioningInfo object */
+  public RepositioningInfo getRepositioningInfo() {
+    return reposInfo;
+  } // getRepositioningInfo
+
   /**
     * Constructs a XmlDocumentHandler object. The annotationSet set will be the
     * default one taken from the gate document.
@@ -319,6 +334,14 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
             incrementStartIndex = true;
         }// End if
     }// End if
+
+    // put the repositioning information
+    if(reposInfo != null) {
+      reposInfo.addPositionInfo(getRealOffset(), content.length(),
+                    tmpDocContent.length()+contentBuffer.length(),
+                    content.length());
+    } // if
+
     // update the document content
     contentBuffer.append(content);
     // calculate the End index for all the elements of the stack
