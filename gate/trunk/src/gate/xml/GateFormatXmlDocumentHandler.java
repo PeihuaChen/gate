@@ -16,6 +16,7 @@
 package gate.xml;
 
 import java.util.*;
+import java.lang.reflect.*;
 
 import gate.corpora.*;
 import gate.annotation.*;
@@ -92,16 +93,22 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     // Set the curent element being processed
     currentElementStack.add(elemName);
 
-    if ("AnnotationSet".equals(elemName))
+    if("AnnotationSet".equals(elemName))
       processAnnotationSetElement(atts);
 
-    if ("Annotation".equals(elemName))
+    if("Annotation".equals(elemName))
       processAnnotationElement(atts);
 
-    if ("Feature".equals(elemName))
+    if("Feature".equals(elemName))
       processFeatureElement(atts);
 
-    if ("Node".equals(elemName))
+    if("Name".equals(elemName))
+      processNameElement(atts);
+
+    if("Value".equals(elemName))
+      processValueElement(atts);
+
+    if("Node".equals(elemName))
       processNodeElement(atts);
   }// startElement
 
@@ -128,7 +135,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if ("Value".equals(elemName) && "Feature".equals(
                         (String)currentElementStack.peek())){
       // If the Value tag was empty, then an empty string will be created.
-      if (currentFeatureValue == null) currentFeatureValue = new String("");
+      if (currentFeatureValue == null) currentFeatureValue = "";
     }// End if
     // Deal with Feature
     if ("Feature".equals(elemName)){
@@ -147,11 +154,19 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
           "The annotation that cause it is " +
           currentAnnot +
           "Please check the document with a text editor before trying again.");
-//          currentFeatureMap = Factory.newFeatureMap();
         }// End if
-        currentFeatureMap.put(currentFeatureName,currentFeatureValue);
-        // reset currentFeaturename and currentFeatureValue
+        // Create the appropiate feature name and values
+        // If those object cannot be created, their string representation will
+        // be used.
+        currentFeatureMap.put(createFeatKey(),createFeatValue());
+//        currentFeatureMap.put(currentFeatureName,currentFeatureValue);
+        // Reset current key
+        currentFeatureKeyClassName = null;
+        currentFeatureKeyItemClassName = null;
         currentFeatureName = null;
+        // Reset current value
+        currentFeatureValueClassName = null;
+        currentFeatureValueItemClassName = null;
         currentFeatureValue = null;
       }// End if
       // Reset the Name & Value pair.
@@ -261,7 +276,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if (atts != null){
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
-       String attName  = atts.getQName(i);
+       String attName  = atts.getLocalName(i);
        String attValue = atts.getValue(i);
        if ("Name".equals(attName))
           currentAnnotationSet = doc.getAnnotations(attValue);
@@ -269,13 +284,27 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     }// End if
   }//processAnnotationSetElement
 
+  /** This method deals with the start of a Name element*/
+  private void processNameElement(Attributes atts){
+    if (atts == null) return;
+    currentFeatureKeyClassName = atts.getValue("className");
+    currentFeatureKeyItemClassName = atts.getValue("itemClassName");
+  }// End processNameElement();
+
+  /** This method deals with the start of a Value element*/
+  private void processValueElement(Attributes atts){
+    if (atts == null) return;
+    currentFeatureValueClassName = atts.getValue("className");
+    currentFeatureValueItemClassName = atts.getValue("itemClassName");
+  }// End processValueElement();
+
   /** This method deals with a Annotation element. */
   private void processAnnotationElement(Attributes atts){
     if (atts != null){
       currentAnnot = new AnnotationObject();
       for (int i = 0; i < atts.getLength(); i++) {
        // Extract name and value
-       String attName  = atts.getQName(i);
+       String attName  = atts.getLocalName(i);
        String attValue = atts.getValue(i);
 
        if ("Type".equals(attName))
@@ -286,7 +315,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
           Integer id = new Integer(attValue);
           Long offset = (Long)id2Offset.get(id);
           if (offset == null){
-//            currentAnnot.setStart(new Long(0));
             throw new GateRuntimeException("Couldn't found Node with id = " +
             id +
             ".It was specified in annot " +
@@ -302,7 +330,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
           Integer id = new Integer(attValue);
           Long offset = (Long) id2Offset.get(id);
           if (offset == null){
-//            currentAnnot.setEnd(new Long(0));
             throw new GateRuntimeException("Couldn't found Node with id = " +
             id+
             ".It was specified in annot " +
@@ -314,8 +341,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
             currentAnnot.setEnd(offset);
          }// End if
        } catch (NumberFormatException e){
-//          currentAnnot.setStart(new Long(0));
-//          currentAnnot.setEnd(new Long(0));
           throw new GateRuntimeException("Offsets problems.Couldn't create"+
           " Integers from" + " id[" +
           attValue + "]) in annot " +
@@ -339,13 +364,16 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     if (atts != null){
       for (int i = 0; i < atts.getLength(); i++) {
         // Extract name and value
-        String attName  = atts.getQName(i);
+        String attName  = atts.getLocalName(i);
         String attValue = atts.getValue(i);
+//System.out.println("Node : " + attName + "=" +attValue);
         if ("id".equals(attName)){
           try{
             Integer id = new Integer(attValue);
             id2Offset.put(id,new Long(tmpDocContent.length()));
           }catch(NumberFormatException e){
+            throw new GateRuntimeException("Coudn't create a node from " +
+                        attValue + " Expected an integer.");
           }// End try
         }// End if
       }// End for
@@ -394,6 +422,126 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         currentFeatureValue = currentFeatureValue + text;
     }// End If
   }//processTextOfValueElement();
+
+  /** Creates a feature key using this information:
+    * currentFeatureKeyClassName, currentFeatureKeyItemClassName,
+    * currentFeatureName. See createFeatObject() method for more details.
+    */
+  private Object createFeatKey(){
+    return createFeatObject(currentFeatureKeyClassName,
+                            currentFeatureKeyItemClassName,
+                            currentFeatureName);
+  }//createFeatKey()
+
+  /** Creates a feature value using this information:
+    * currentFeatureValueClassName, currentFeatureValueItemClassName,
+    * currentFeatureValue. See createFeatObject() method for more details.
+    */
+  private Object createFeatValue(){
+    return createFeatObject(currentFeatureValueClassName,
+                            currentFeatureValueItemClassName,
+                            currentFeatureValue);
+  }//createFeatValue()
+
+  /** This method tries to reconstruct an object given its class name and its
+   *  string representation. If the object is a Collection then the items
+   *  from its string representation must be separated by a ";". In that
+   *  case, the currentFeatureValueItemClassName is used to create items
+   *  belonging to this class.
+   *  @param aFeatClassName represents the name of the class of
+   *  the feat object being created. If it is null then the javaLang.String will
+   *  be used as default.
+   *  @param aFeatItemClassName is it used only if aFeatClassName is a
+   *  collection.If it is null then java.lang.String will be used as default;
+   *  @param aFeatStringRepresentation sais it all
+   *  @return an Object created from  aFeatClassName and its
+   *  aFeatStringRepresentation. If not possible, then aFeatStringRepresentation
+   *  is returned.
+   *  @throws GateRuntimeException If it can't create an item, that
+   *  does not comply with its class definition, to add to the
+   *  collection.
+   */
+  private Object createFeatObject( String aFeatClassName,
+                                   String aFeatItemClassName,
+                                   String aFeatStringRepresentation){
+    // If the string rep is null then the object will be null;
+    if (aFeatStringRepresentation == null) return null;
+    if (aFeatClassName == null) aFeatClassName = "java.lang.String";
+    if (aFeatItemClassName == null) aFeatItemClassName = "java.lang.String";
+    Class currentFeatClass = null;
+    try{
+      currentFeatClass = Gate.getClassLoader().loadClass(aFeatClassName);
+    }catch (ClassNotFoundException cnfex){
+      return aFeatStringRepresentation;
+    }// End try
+    if (java.util.Collection.class.isAssignableFrom(currentFeatClass)){
+      Class itemClass = null;
+      Collection featObject = null;
+      try{
+        featObject = (Collection) currentFeatClass.newInstance();
+        try{
+          itemClass = Gate.getClassLoader().loadClass(aFeatItemClassName);
+        }catch(ClassNotFoundException cnfex){
+          Out.prln("Warning: Item class "+ aFeatItemClassName + " not found."+
+          "Adding items as Strings to the feature called \"" + currentFeatureName
+          + "\" in the annotation " + currentAnnot);
+          itemClass = java.lang.String.class;
+        }// End try
+        // Let's detect if itemClass takes a constructor with a String as param
+        Class[] paramsArray = new Class[1];
+        paramsArray[0] = java.lang.String.class;
+        Constructor itemConstructor = null;
+        boolean addItemAsString = false;
+        try{
+         itemConstructor = itemClass.getConstructor(paramsArray);
+        }catch (NoSuchMethodException  nsme){
+          addItemAsString = true;
+        }catch (SecurityException se){
+          addItemAsString = true;
+        }// End try
+        StringTokenizer strTok = new StringTokenizer(
+                                                aFeatStringRepresentation,";");
+        Object[] params = new Object[1];
+        Object itemObj = null;
+        while (strTok.hasMoreTokens()){
+          String itemStrRep = strTok.nextToken();
+          if (addItemAsString) featObject.add(itemStrRep);
+          else{
+            params[0] = itemStrRep;
+            try{
+              itemObj = itemConstructor.newInstance(params);
+            }catch (Exception e){
+              throw new GateRuntimeException("An item("+
+               itemStrRep +
+              ")  does not comply with its class" +
+              " definition("+aFeatItemClassName+").Happened while tried to"+
+              " add feature: " +
+              aFeatStringRepresentation + " to the annotation " + currentAnnot);
+            }// End try
+            featObject.add(itemObj);
+          }// End if
+        }// End while
+      }catch(InstantiationException instex ){
+        return aFeatStringRepresentation;
+      }catch (IllegalAccessException iae){
+        return aFeatStringRepresentation;
+      }// End try
+      return featObject;
+    }// End if
+    // If currentfeatClass is not a Collection,test to see if
+    // it has a constructor that takes a String as param
+    Class[] params = new Class[1];
+    params[0] = java.lang.String.class;
+    try{
+      Constructor featConstr = currentFeatClass.getConstructor(params);
+      Object[] featConstrParams = new Object[1];
+      featConstrParams[0] = aFeatStringRepresentation;
+      Object featObject = featConstr.newInstance(featConstrParams);
+      return featObject;
+    } catch(Exception e){
+      return aFeatStringRepresentation;
+    }// End try
+  }// createFeatObject()
 
   /**
     * This method is called when the SAX parser encounts a comment
@@ -479,9 +627,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** A gate document */
   private gate.Document doc = null;
 
-  /** An annotation set used for creating annotation reffering the doc */
-  private gate.AnnotationSet basicAS = null;
-
   /** Listeners for status report */
   protected List myStatusListeners = new LinkedList();
 
@@ -490,75 +635,91 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
   /** We need a colection to retain all the CustomObjects that will be
     * transformed into annotation over the gate document...
-    * The transformation will take place inside onDocumentEnd() method.
+    * At the end of every annotation set read the objects in the colector are
+    * transformed into annotations...
     */
   private List colector = null;
+  /** Maps nodes Ids to their offset in the document text. Those offsets will
+    * be used when creating annotations
+    */
   private Map id2Offset = new TreeMap();
-
+  /** Holds the current element read.*/
   private Stack currentElementStack = new Stack();
+  /** This inner objects maps an annotation object. When an annotation from the
+    * xml document was read this structure is filled out
+    */
   private AnnotationObject currentAnnot = null;
+  /** A map holding current annotation's features*/
   private FeatureMap  currentFeatureMap = null;
+  /** A key of the current feature*/
   private String currentFeatureName = null;
+  /** The value of the current feature*/
   private String currentFeatureValue = null;
+  /** The class name of the key in the current feature*/
+  private String currentFeatureKeyClassName = null;
+  /** If the key is a collection then we need to know the class name of the
+    * items present in this collection. The next field holds just that.
+    */
+  private String currentFeatureKeyItemClassName = null;
+  /** The class name for the value in the current feature*/
+  private String currentFeatureValueClassName = null;
+  /** If the value is a collection then we need to know the class name of the
+    * items present in this collection. The next field holds just that.
+    */
+  private String currentFeatureValueItemClassName = null;
+  /** the current annotation set that is being created and filled with
+    * annotations
+    */
   private AnnotationSet currentAnnotationSet = null;
 
-}//XmlDocumentHandler
+  /** An inner class modeling the information contained by an annotation.*/
+  class  AnnotationObject {
+    /** Constructor */
+    public AnnotationObject(){}//AnnotationObject
+    /** Accesor for the annotation type modeled here as ElemName */
+    public String getElemName(){
+      return elemName;
+    }//getElemName
+    /** Accesor for the feature map*/
+    public FeatureMap getFM(){
+      return fm;
+    }// getFM()
+    /** Accesor for the start ofset*/
+    public Long getStart(){
+      return start;
+    }// getStart()
+    /** Accesor for the end offset*/
+    public Long getEnd(){
+      return end;
+    }// getEnd()
+    /** Mutator for the annotation type */
+    public void setElemName(String anElemName){
+      elemName = anElemName;
+    }// setElemName();
+    /** Mutator for the feature map*/
+    public void setFM(FeatureMap aFm){
+      fm = aFm;
+    }// setFM();
+    /** Mutator for the start offset*/
+    public void setStart(Long aStart){
+      start = aStart;
+    }// setStart();
+    /** Mutator for the end offset*/
+    public void setEnd(Long anEnd){
+      end = anEnd;
+    }// setEnd();
 
-/**
-  */
-class  AnnotationObject{
+    public String toString(){
+      return " [type=" + elemName +
+      " startNode=" + start+
+      " endNode=" + end+
+      " features="+ fm +"] ";
+    }
+    // Data fields
+    private String elemName = null;
+    private FeatureMap fm = null;
+    private Long start = null;
+    private Long end  = null;
+  } // AnnotationObject
+}//GateFormatXmlDocumentHandler
 
-  // Constructor
-  public AnnotationObject(){
-  }//AnnotationObject
-
-  // accesor
-  public String getElemName(){
-    return elemName;
-  }//getElemName
-
-  public FeatureMap getFM(){
-    return fm;
-  }
-
-  public Long getStart(){
-    return start;
-  }
-
-  public Long getEnd(){
-    return end;
-  }
-
-  // mutator
-  public void setElemName(String anElemName){
-    elemName = anElemName;
-  }
-
-  public void setFM(FeatureMap aFm){
-    fm = aFm;
-  }
-
-  public void setStart(Long aStart){
-    start = aStart;
-  }
-
-  public void setEnd(Long anEnd){
-    end = anEnd;
-  }
-
-  public String toString(){
-    return " [type=" + elemName +
-    " startNode=" + start+
-    " endNode=" + end+
-    " features="+ fm +"] ";
-  }
-  // data fields
-  private String elemName = null;
-
-  private FeatureMap fm = null;
-
-  private Long start = null;
-
-  private Long end  = null;
-
-} // CustomObject

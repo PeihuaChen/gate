@@ -115,12 +115,9 @@ public class APFormatExporter extends AbstractLanguageAnalyser
 
   /** Initialises the docId with documents' file name without the complete path*/
   private void initDocId(){
-    StringTokenizer filePathToken = new StringTokenizer(
-                                      document.getSourceUrl().getFile(),"/");
-    String fileName = new String("");
-    while (filePathToken.hasMoreTokens()){
-      fileName = filePathToken.nextToken();
-    }// End while
+    String fileName = "";
+    fileName = gate.util.Files.getLastPathComponent(
+                                            document.getSourceUrl().getFile());
     // File name contains now the last token
     if (DEBUG)
       Out.prln("From initDocId, fileName ="+ fileName);

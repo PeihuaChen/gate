@@ -793,7 +793,9 @@ extends AbstractLanguageResource implements Document {
   /** Returns a GateXml document that is a custom XML format for wich there is
     * a reader inside GATE called gate.xml.GateFormatXmlHandler.
     * What it does is to serialize a GATE document in an XML format.
-    * @return a string representing a Gate Xml document
+    * @return a string representing a Gate Xml document. If saved in a file,this
+    * string must be written using the UTF-8 encoding because the first line
+    * in the generated xml document is <?xml version="1.0" encoding="UTF-8" ?>
     */
   public String toXml(){
     // Initialize the xmlContent with 3 time the size of the current document.

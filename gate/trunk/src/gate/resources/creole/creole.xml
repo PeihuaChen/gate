@@ -109,6 +109,7 @@
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/OrganizationSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PercentSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/PersonSchema.xml" /></AUTOINSTANCE>
+      <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/TokenSchema.xml" /></AUTOINSTANCE>
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl" VALUE ="gate:/creole/schema/SyntaxTreeNodeSchema.xml" /></AUTOINSTANCE>
     </RESOURCE>
   </CREOLE>
