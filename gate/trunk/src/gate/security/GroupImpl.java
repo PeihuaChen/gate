@@ -83,8 +83,8 @@ public class GroupImpl implements Group{
       }
 
       stmt = this.conn.prepareCall("{ call security.set_group_name(?,?)} ");
-      stmt.setLong(0,this.id.longValue());
-      stmt.setString(1,newName);
+      stmt.setLong(1,this.id.longValue());
+      stmt.setString(2,newName);
       stmt.execute();
       //release stmt???
     }
@@ -121,8 +121,8 @@ public class GroupImpl implements Group{
 
     try {
       stmt = this.conn.prepareCall("{ call security.add_user_to_group(?,?)} ");
-      stmt.setLong(0,this.id.longValue());
-      stmt.setLong(1,usr.getID().longValue());
+      stmt.setLong(1,this.id.longValue());
+      stmt.setLong(2,usr.getID().longValue());
       stmt.execute();
       //release stmt???
     }
@@ -164,8 +164,8 @@ public class GroupImpl implements Group{
 
     try {
       stmt = this.conn.prepareCall("{ call security.remove_user_from_group(?,?)} ");
-      stmt.setLong(0,this.id.longValue());
-      stmt.setLong(1,usr.getID().longValue());
+      stmt.setLong(1,this.id.longValue());
+      stmt.setLong(2,usr.getID().longValue());
       stmt.execute();
       //release stmt???
     }
