@@ -296,21 +296,18 @@ extends AbstractFeatureBearer implements DataStore {
 
     // create an indentifier for this resource
     String lrName = null;
-    String lrPersistenceId = null;
-    FeatureMap lrFeatures = lr.getFeatures();
-    if(lrFeatures != null) {
-      lrName = lr.getName();
-      lrPersistenceId = (String) lrFeatures.get(DataStore.LR_ID_FEATURE_NAME);
-    }
+    Object lrPersistenceId = null;
+    lrName = lr.getName();
+    lrPersistenceId = lr.getLRPersistenceId();
     if(lrName == null)
       lrName = lrData.getName();
     if(lrPersistenceId == null) {
       lrPersistenceId = constructPersistenceId(lrName);
-      lr.getFeatures().put(DataStore.LR_ID_FEATURE_NAME, lrPersistenceId);
+      lr.setLRPersistenceId(lrPersistenceId);
     }
 
     // create a File to store the resource in
-    File resourceFile = new File(resourceTypeDirectory, lrPersistenceId);
+    File resourceFile = new File(resourceTypeDirectory, (String) lrPersistenceId);
 
     // dump the LR into the new File
     try {
@@ -330,7 +327,7 @@ extends AbstractFeatureBearer implements DataStore {
     // let the world know about it
     fireResourceWritten(
       new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_WRITTEN, lr, lrPersistenceId
+        this, DatastoreEvent.RESOURCE_WRITTEN, lr, (String) lrPersistenceId
       )
     );
   } // sync(LR)
