@@ -19,6 +19,8 @@ import java.sql.*;
 import java.net.*;
 import java.util.*;
 
+import gate.util.*;
+
 public class DBHelper {
 
   /** --- */
@@ -122,6 +124,21 @@ public class DBHelper {
     }
 
     return conn;
+  }
+
+  /** --- */
+  public static void readCLOB(java.sql.Clob src, StringBuffer dest)
+    throws SQLException {
+
+    throw new MethodNotImplementedException();
+  }
+
+
+  /** --- */
+  public static void writeCLOB(StringBuffer src,java.sql.Clob dest)
+    throws SQLException {
+
+    throw new MethodNotImplementedException();
   }
 
 }
