@@ -1,23 +1,23 @@
 /*
- * @(#)StrTokeniser.java	1.15 97/01/28
- * 
+ *
  * Copyright (c) 2000-2001, The University of Sheffield.
- * 
+ *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
  * Version 2, June1991.
- * 
+ *
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- * 
+ *
+>>>>>>> 1.2
  * Copyright (c) 1995, 1996 Sun Microsystems, Inc. All Rights Reserved.
- * 
+ *
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Sun.
- * 
+ *
  * SUN MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
  * SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
@@ -63,9 +63,9 @@ class StrTokeniser implements Enumeration {
      * <p>
      * If the <code>returnTokens</code> flag is <code>true</code>, then
      * the delimiter characters are also returned as tokens. Each
-     * delimiter is returned as a string of length one. If the flag is 
-     * <code>false</code>, the delimiter characters are skipped and only 
-     * serve as separators between tokens. 
+     * delimiter is returned as a string of length one. If the flag is
+     * <code>false</code>, the delimiter characters are skipped and only
+     * serve as separators between tokens.
      *
      * @param   str            a string to be parsed.
      * @param   delim          the delimiters.
@@ -82,9 +82,9 @@ class StrTokeniser implements Enumeration {
     }
 
     /**
-     * Constructs a string tokenizer for the specified string. The 
-     * characters in the <code>delim</code> argument are the delimiters 
-     * for separating tokens. 
+     * Constructs a string tokenizer for the specified string. The
+     * characters in the <code>delim</code> argument are the delimiters
+     * for separating tokens.
      *
      * @param   str     a string to be parsed.
      * @param   delim   the delimiters.
@@ -95,10 +95,10 @@ class StrTokeniser implements Enumeration {
     }
 
     /**
-     * Constructs a string tokenizer for the specified string. The 
-     * tokenizer uses the default delimiter set, which is 
+     * Constructs a string tokenizer for the specified string. The
+     * tokenizer uses the default delimiter set, which is
      * <code>"&#92;t&#92;n&#92;r"</code>: the space character, the tab
-     * character, the newline character, and the carriage-return character. 
+     * character, the newline character, and the carriage-return character.
      *
      * @param   str   a string to be parsed.
      * @since   JDK1.0
@@ -146,7 +146,7 @@ class StrTokeniser implements Enumeration {
 	}
 
 	int start = currentPosition;
-	while ((currentPosition < maxPosition) && 
+	while ((currentPosition < maxPosition) &&
 	       (delimiters.indexOf(str.charAt(currentPosition)) < 0)) {
 	    currentPosition++;
 	}
@@ -158,8 +158,8 @@ class StrTokeniser implements Enumeration {
     }
 
     /**
-     * Returns the next token in this string tokenizer's string. The new 
-     * delimiter set remains the default after this call. 
+     * Returns the next token in this string tokenizer's string. The new
+     * delimiter set remains the default after this call.
      *
      * @param      delim   the new delimiters.
      * @return     the next token, after switching to the new delimiter set.
@@ -175,7 +175,7 @@ class StrTokeniser implements Enumeration {
     /**
      * Returns the same value as the <code>hasMoreTokens</code>
      * method. It exists so that this class can implement the
-     * <code>Enumeration</code> interface. 
+     * <code>Enumeration</code> interface.
      *
      * @return  <code>true</code> if there are more tokens;
      *          <code>false</code> otherwise.
@@ -214,9 +214,9 @@ class StrTokeniser implements Enumeration {
     }
 
     /**
-     * Calculates the number of times that this tokenizer's 
-     * <code>nextToken</code> method can be called before it generates an 
-     * exception. 
+     * Calculates the number of times that this tokenizer's
+     * <code>nextToken</code> method can be called before it generates an
+     * exception.
      *
      * @return  the number of tokens remaining in the string using the current
      *          delimiter set.
@@ -243,7 +243,7 @@ class StrTokeniser implements Enumeration {
 	    }
 
 	    int start = currpos;
-	    while ((currpos < maxPosition) && 
+	    while ((currpos < maxPosition) &&
 		   (delimiters.indexOf(str.charAt(currpos)) < 0)) {
 		currpos++;
 	    }

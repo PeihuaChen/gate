@@ -62,10 +62,14 @@ public class TestFSM extends TestCase {
       throw new JapeException("couldn't open " + japeFileName);
     batch = new Batch(japeFileStream);
 */
+
     Gate.init();
     String resPath = "gate/resources/jape/combined/";
     String resName = "brian-soc-loc1.jape";
-    batch = new Batch(resPath, resName);
+//    batch = new Batch(resPath, resName);
+
+String japeFileName = "d:/tmp/jape/persontest.jape";
+batch = new Batch(japeFileName);
 
     transducer = (MultiPhaseTransducer)batch.getTransducer();
     transducer.finish();
