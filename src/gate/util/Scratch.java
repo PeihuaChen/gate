@@ -16,8 +16,10 @@
 
 package gate.util;
 
+import java.awt.Color;
 import java.io.*;
 import java.util.*;
+import java.util.prefs.Preferences;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -30,6 +32,7 @@ import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.ir.*;
 import gate.creole.tokeniser.DefaultTokeniser;
 import gate.gui.MainFrame;
+import gate.gui.docview.AnnotationSetsView;
 import gate.persist.SerialDataStore;
 
 /** A scratch pad for experimenting.
@@ -40,15 +43,27 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
+    Preferences prefRoot = Preferences.userNodeForPackage(AnnotationSetsView.class);
+    System.out.println(prefRoot.keys().length);
+    prefRoot.removeNode();
+    prefRoot = Preferences.userNodeForPackage(AnnotationSetsView.class);
+    System.out.println(prefRoot.keys().length);
+    Color col = new Color(100, 101, 102, 103);
+    int rgb = col.getRGB();
+    int alpha = col.getAlpha();
+    int rgba = rgb | (alpha << 24);
+    Color col1 = new Color(rgba, true);
+    System.out.println(col + " a: " + col.getAlpha());
+    System.out.println(col1+ " a: " + col1.getAlpha());
+    System.out.println(col.equals(col1));
+//    Map defaultsMap = UIManager.getLookAndFeelDefaults();
+//    System.out.println(defaultsMap.keySet());
     
-    Map defaultsMap = UIManager.getLookAndFeelDefaults();
-    System.out.println(defaultsMap.keySet());
     
-    
-    double a = 16.99;
-    double b = 9.99;
-    double c = a - b;
-    System.out.println(c);
+//    double a = 16.99;
+//    double b = 9.99;
+//    double c = a - b;
+//    System.out.println(c);
 
 //    Runtime.getRuntime().exec(new String[]{"cmd",
 //                                           "C:\\Program Files\\GATE 2.2\\bin\\gate.bat"},
