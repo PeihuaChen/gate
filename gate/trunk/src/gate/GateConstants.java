@@ -69,6 +69,10 @@ public interface GateConstants {
   public static final String
     DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME = "Document_repositioning_info";
 
+  /** */
+  public static final String
+    DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME = "Document_add_space_on_unpack";
+
   /** Property to set title of application from command line */
   public static final String TITLE_JAVA_PROPERTY_NAME = "gate.slug.title";
 
@@ -96,7 +100,7 @@ public interface GateConstants {
     CORPUS_INDEX_STATISTICS_FEATURE_KEY = "Index_statistics_feature_key";
 
   /** Document property to set throw of exception on parsing format error */
-  public static final String THROWEX_FORMAT_PROPERTY_NAME = 
+  public static final String THROWEX_FORMAT_PROPERTY_NAME =
     "throwExceptionOnFormatError";
 
   /** The key for the WordNet config file*/
