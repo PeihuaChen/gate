@@ -23,16 +23,38 @@ import gate.util.*;
 import gate.event.*;
 
 public class JDBCDataStore
-extends AbstractFeatureBearer implements DataStore{
+extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** --- */
-  private Connection jdbcConn;
+  private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
+  private static final String jdbcPostgresDriverName = "postgresql.Driver";
+  private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
+
+  /** --- */
+  private Connection  jdbcConn;
+  private URL         dbURL;
+  private String      driverName;
 
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
     throw new MethodNotImplementedException();
   }
+
+  /** --- */
+  private void loadDrivers()
+    throws ClassNotFoundException {
+
+    if (this.driverName != null) {
+      Class.forName(this.driverName);
+    }
+    else {
+      Class.forName(this.jdbcOracleDriverName);
+      Class.forName(this.jdbcPostgresDriverName);
+      Class.forName(this.jdbcSapDBDriverName);
+    }
+  }
+
 
   /** --- */
   protected void cleanup(ResultSet rs) {
@@ -45,8 +67,13 @@ extends AbstractFeatureBearer implements DataStore{
   }
 
   /** --- */
-  protected Connection connect(URL connectURL) {
-    throw new MethodNotImplementedException();
+  protected Connection connect(URL connectURL)
+    throws SQLException,ClassNotFoundException{
+
+    loadDrivers();
+    Connection conn = DriverManager.getConnection(connectURL.toString());
+
+    return conn;
   }
 
   /** --- */
@@ -54,6 +81,9 @@ extends AbstractFeatureBearer implements DataStore{
     throw new MethodNotImplementedException();
 //    this.jdbcConn.close();
   }
+
+
+  /*  interface DataStore  */
 
   /**
    * Returns the comment displayed by the GUI for this DataStore
@@ -94,7 +124,14 @@ extends AbstractFeatureBearer implements DataStore{
 
   /** Set the URL for the underlying storage mechanism. */
   public void setStorageUrl(URL storageUrl) throws PersistenceException {
-    throw new MethodNotImplementedException();
+
+    if (!storageUrl.toString().startsWith("jdbc:")) {
+      throw new PersistenceException("Incorrect JDBC url (should start with \"jdbc:\")");
+    }
+    else {
+      this.dbURL = storageUrl;
+    }
+
   }
 
   /** Get the URL for the underlying storage mechanism. */
@@ -114,7 +151,15 @@ extends AbstractFeatureBearer implements DataStore{
 
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
-    throw new MethodNotImplementedException();
+    try {
+      jdbcConn = connect(dbURL);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("could not get DB connection ["+ sqle.getMessage() +"]");
+    }
+    catch(ClassNotFoundException clse) {
+      throw new PersistenceException("cannot locate JDBC driver ["+ clse.getMessage() +"]");
+    }
   }
 
   /** Close the data store. */
@@ -195,4 +240,52 @@ extends AbstractFeatureBearer implements DataStore{
   public List getLrNames(String lrType) throws PersistenceException {
     throw new MethodNotImplementedException();
   }
+
+
+
+  /*  interface DatabaseDataStore  */
+
+  /** --- */
+  public void beginTrans()
+    throws PersistenceException,UnsupportedOperationException{
+
+    throw new MethodNotImplementedException();
+  }
+
+
+  /** --- */
+  public void commitTrans()
+    throws PersistenceException,UnsupportedOperationException{
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  public void rollbackTrans()
+    throws PersistenceException,UnsupportedOperationException{
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  public Long timestamp()
+    throws PersistenceException{
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  public void deleteSince(Long timestamp)
+    throws PersistenceException{
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  public void setDriver(String driverName)
+    throws PersistenceException{
+
+    this.driverName = driverName;
+  }
+
 }
