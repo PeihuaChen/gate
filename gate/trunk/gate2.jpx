@@ -3,7 +3,7 @@
 <!--JBuilder XML Project-->
 <project>
   <property category="idl" name="ProcessIDL" value="false" />
-  <property category="runtime" name="ConfigurationCount" value="3" />
+  <property category="runtime" name="ConfigurationCount" value="5" />
   <property category="runtime.0" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
   <property category="runtime.0" name="application.class" value="gate.TestGate" />
   <property category="runtime.0" name="application.vmparameters" value="-Xint" />
@@ -30,6 +30,20 @@
   <property category="runtime.3" name="application.vmparameters" value="-Djava.compiler=NONE" />
   <property category="runtime.3" name="jsprunner.docbase" value="." />
   <property category="runtime.3" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.4" name="ConfigurationName" value="No net connection and no local server (-N)" />
+  <property category="runtime.4" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.4" name="application.class" value="gate.TestGate" />
+  <property category="runtime.4" name="application.parameters" value="-N" />
+  <property category="runtime.4" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
+  <property category="runtime.4" name="jsprunner.docbase" value="." />
+  <property category="runtime.4" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
+  <property category="runtime.5" name="ConfigurationName" value="Text mode, no net connection and no local server (-t -N)" />
+  <property category="runtime.5" name="RunnableType" value="com.borland.jbuilder.runtime.ApplicationRunner" />
+  <property category="runtime.5" name="application.class" value="gate.TestGate" />
+  <property category="runtime.5" name="application.parameters" value="-N -t" />
+  <property category="runtime.5" name="application.vmparameters" value="-Xint -Djava.compiler=NONE" />
+  <property category="runtime.5" name="jsprunner.docbase" value="." />
+  <property category="runtime.5" name="jsprunner.jspfile" value="D%|/apps/JBuilder4/bin" />
   <property category="sys" name="AuthorLabel" value="@author" />
   <property category="sys" name="BackupPath" value="bak" />
   <property category="sys" name="BeansInstantiate" value="false" />
