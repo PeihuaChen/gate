@@ -129,9 +129,18 @@ public class TestConfig extends TestCase
     File userConfigFile = new File(configName);
     File savedConfigFile = null;
     if(userConfigFile.exists()) {
+      if(DEBUG) {
+        Out.prln(userConfigFile);
+        Out.prln("can write: " + userConfigFile.canWrite());
+      }
+      String userConfigDirectory = userConfigFile.getParent();
+      if(userConfigDirectory == null)
+        userConfigDirectory = "";
       savedConfigFile = new File(
+        userConfigDirectory + Strings.getFileSep() +
         "__saved_gate.xml__for_TestConfig__" + System.currentTimeMillis()
       );
+      if(DEBUG) Out.prln(savedConfigFile);
       boolean renamed = userConfigFile.renameTo(savedConfigFile);
       assertTrue("rename failed", renamed);
     }
