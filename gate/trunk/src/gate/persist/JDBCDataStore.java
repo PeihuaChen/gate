@@ -41,7 +41,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   protected String      dbSchema;
 
   /** jdbc driver name */
-  private   String      driverName;
+//  private   String      driverName;
 
   /**
    *  GUID of the datastore
@@ -349,12 +349,12 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   }
 
   /** specifies the driver to be used to connect to the database? */
-  public void setDriver(String driverName)
+/*  public void setDriver(String driverName)
     throws PersistenceException{
 
     this.driverName = driverName;
   }
-
+*/
   /** Sets the name of this resource*/
   public void setName(String name){
     this.name = name;
