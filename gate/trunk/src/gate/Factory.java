@@ -77,10 +77,15 @@ public abstract class Factory
     * @param resourceClassName the name of the class implementing the resource.
     * @param parameterValues the feature map containing
     *   parameterValues for the resource.
+    * @param listeners The listeners to be registered with the resource during
+    * its initialisation. A {@link java.util.Map} that maps freom fully
+    * qualified class name (as a string) to listener (of the type declared by
+    * the key).
     * @return an instantiated resource.
     */
   public static Resource createResource(
-    String resourceClassName, FeatureMap parameterValues
+    String resourceClassName, FeatureMap parameterValues,
+    Map listeners
   ) throws ResourceInstantiationException
    {
     // get the resource metadata
@@ -168,13 +173,25 @@ public abstract class Factory
     }
 
     // set the parameterValues of the resource and add the listeners
-    List listenersToRemove;
     try {
       if(DEBUG) Out.prln("Setting the parameters for  " + res.toString());
-      listenersToRemove = setResourceParameters(res, parameterValues);
+      setResourceParameters(res, parameterValues);
     } catch(Exception e) {
       if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
       throw new ResourceInstantiationException("Parameterisation failure" + e);
+    }
+
+    //set the listeners if any
+
+    if(listeners != null && !listeners.isEmpty()){
+      // set the parameterValues of the resource and add the listeners
+      try {
+        if(DEBUG) Out.prln("Setting the listeners for  " + res.toString());
+          setResourceListeners(res, listeners);
+      } catch(Exception e) {
+        if(DEBUG) Out.prln("Failed to set the listeners for " + res.toString());
+        throw new ResourceInstantiationException("Parameterisation failure" + e);
+      }
     }
 
     // if the features of the resource have not been explicitly set,
@@ -189,20 +206,15 @@ public abstract class Factory
     if(DEBUG) Out.prln("Initialising resource " + res.toString());
     res = res.init();
 
-    //remove all the listeners added
-    if(listenersToRemove != null){
-      Iterator listenersIter = listenersToRemove.iterator();
-      while(listenersIter.hasNext()){
-        Object[] data = (Object[])listenersIter.next();
-        try {
-          if(DEBUG) Out.prln("Removing listeners for  " + res.toString());
-          ((Method)data[0]).invoke(res, new Object[]{data[1]});
-        } catch(Exception e) {
-          if(DEBUG) Out.prln("Failed to remove listeners for " + res);
-          throw new ResourceInstantiationException(
-            "Failed to remove listeners for " + e
-          );
-        }
+    //remove the listeners if any
+    if(listeners != null && !listeners.isEmpty()){
+      // set the parameterValues of the resource and add the listeners
+      try {
+        if(DEBUG) Out.prln("Removing the listeners for  " + res.toString());
+          removeResourceListeners(res, listeners);
+      } catch(Exception e) {
+        if(DEBUG) Out.prln("Failed to remove the listeners for " + res.toString());
+        throw new ResourceInstantiationException("Parameterisation failure" + e);
       }
     }
 
@@ -213,6 +225,24 @@ public abstract class Factory
                               );
     return res;
   } // create(resourceClassName)
+
+  /** Create an instance of a resource, and return it.
+    * Callers of this method are responsible for
+    * querying the resource's parameter lists, putting together a set that
+    * is complete apart from runtime parameters, and passing a feature map
+    * containing these parameter settings.
+    *
+    * @param resourceClassName the name of the class implementing the resource.
+    * @param parameterValues the feature map containing
+    *   parameterValues for the resource.
+    * @return an instantiated resource.
+    */
+  public static Resource createResource(
+    String resourceClassName, FeatureMap parameterValues
+  ) throws ResourceInstantiationException
+   {
+      return createResource(resourceClassName, parameterValues, null);
+   }
 
   /** Delete an instance of a resource. This involves removing it from
     * the stack of instantiations maintained by this resource type's
@@ -239,7 +269,7 @@ public abstract class Factory
     * @param resource the resource to be parameterised.
     * @param parameterValues the parameters and their values.
     */
-  public static List setResourceParameters(
+  public static void setResourceParameters(
     Resource resource, FeatureMap parameterValues
   ) throws
     IntrospectionException, InvocationTargetException,
@@ -303,37 +333,6 @@ public abstract class Factory
         numParametersSet++;
       } // for each property
 
-    // get all the events the bean can fire
-    // a list of pairs: [removeListenerMethod, listener]
-    List removeListenersData = null;
-    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
-
-    // add the listeners for the initialisation phase
-    if(events != null) {
-      EventSetDescriptor event;
-      removeListenersData = new ArrayList();
-
-      for(int i = 0; i < events.length; i++) {
-        event = events[i];
-
-        // did we get such a listener?
-        Object listener =
-          parameterValues.get(event.getListenerType().getName());
-        if(listener != null){
-          Method addListener = event.getAddListenerMethod();
-
-          // call the set method with the parameter value
-          Object[] args = new Object[1];
-          args[0] = listener;
-          addListener.invoke(resource, args);
-          numParametersSet++;
-          removeListenersData.add(
-            new Object[] { event.getRemoveListenerMethod(), listener }
-          );
-        }
-      } // for each event
-    }   // if events != null
-
     // did we set all the parameters?
     // Where the number of parameters that
     // are successfully set on the resource != the number of parameter
@@ -343,8 +342,81 @@ public abstract class Factory
         "couldn't set all the parameters of resource " +
         resource.getClass().getName()
       );
-    return removeListenersData;
   } // setResourceParameters
+
+  /**
+   * Adds listeners to a resource.
+   * @param listeners The listeners to be registered with the resource. A
+   * {@link java.util.Map} that maps from fully qualified class name (as a
+   * string) to listener (of the type declared by the key).
+   * @param resource the resource that listeners will be registered to.
+   */
+  protected static void setResourceListeners(Resource resource, Map listeners)
+  throws    IntrospectionException, InvocationTargetException,
+            IllegalAccessException, GateException{
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInfo = Introspector.getBeanInfo(resource.getClass(),
+                                                    Object.class);
+    // get all the events the bean can fire
+    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+    // add the listeners
+    if(events != null) {
+      EventSetDescriptor event;
+      for(int i = 0; i < events.length; i++) {
+        event = events[i];
+
+        // did we get such a listener?
+        Object listener =
+          listeners.get(event.getListenerType().getName());
+        if(listener != null){
+          Method addListener = event.getAddListenerMethod();
+
+          // call the set method with the parameter value
+          Object[] args = new Object[1];
+          args[0] = listener;
+          addListener.invoke(resource, args);
+        }
+      } // for each event
+    }   // if events != null
+  }//protected static void setResourceListeners()
+
+  /**
+   * Removes listeners from a resource.
+   * @param listeners The listeners to be removed from the resource. A
+   * {@link java.util.Map} that maps from fully qualified class name
+   * (as a string) to listener (of the type declared by the key).
+   * @param resource the resource that listeners will be removed from.
+   */
+  protected static void removeResourceListeners(Resource resource,
+                                                Map listeners)
+                        throws IntrospectionException,
+                               InvocationTargetException,
+                               IllegalAccessException, GateException{
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInfo = Introspector.getBeanInfo(resource.getClass(),
+                                                    Object.class);
+    // get all the events the bean can fire
+    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+    // add the listeners
+    if(events != null) {
+      EventSetDescriptor event;
+      for(int i = 0; i < events.length; i++) {
+        event = events[i];
+
+        // did we get such a listener?
+        Object listener =
+          listeners.get(event.getListenerType().getName());
+        if(listener != null){
+          Method removeListener = event.getRemoveListenerMethod();
+
+          // call the set method with the parameter value
+          Object[] args = new Object[1];
+          args[0] = listener;
+          removeListener.invoke(resource, args);
+        }
+      } // for each event
+    }   // if events != null
+  }//protected static void removeResourceListeners()
 
   /** Create a new transient Corpus. */
   public static Corpus newCorpus(String name)

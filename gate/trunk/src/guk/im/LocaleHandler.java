@@ -47,6 +47,8 @@ public class LocaleHandler{
   //System.out.println("Loading " + fileName);
     this.locale = locale;
     InputStream is = GateIM.class.getResourceAsStream(GateIM.getIMBase() + fileName);
+	  if (is==null) throw new IllegalArgumentException
+	   ("Failed to retrieve resource '"+fileName+"'. Please reset classpath.");
     BufferedReader br = new BufferedReader(new InputStreamReader(is));
     String line = br.readLine();
     initialState = new State();

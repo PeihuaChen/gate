@@ -21,9 +21,11 @@ import java.awt.Dimension;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
+import javax.swing.event.*;
 
 import java.util.*;
-
+import java.net.URL;
+import java.io.IOException;
 import gate.*;
 import gate.util.*;
 import gate.creole.*;
@@ -31,13 +33,22 @@ import gate.creole.*;
 public class NewResourceDialog extends JDialog {
   public NewResourceDialog(Frame frame, String title, boolean modal) {
     super(frame, title, modal);
+    if(frame instanceof MainFrame){
+      fileChooser = ((MainFrame)frame).fileChooser;
+    }else{
+      fileChooser = new JFileChooser();
+    }
     initLocalData();
     initGuiComponents();
     initListeners();
+
   }
 
   protected void initLocalData(){
     params = new ArrayList();
+    listeners = new HashMap();
+    listeners.put("gate.event.ProgressListener", getParent());
+    listeners.put("gate.event.StatusListener", getParent());
   }
 
   protected void initGuiComponents(){
@@ -61,10 +72,13 @@ public class NewResourceDialog extends JDialog {
     table = new XJTable(tableModel);
     table.setDefaultRenderer(ParameterDisjunction.class,
                              new ParameterDisjunctionRenderer());
-    table.setDefaultEditor(ParameterDisjunction.class,
-                           new ParameterDisjunctionEditor());
     table.setDefaultRenderer(Boolean.class,
                              new BooleanRenderer());
+    table.setDefaultEditor(ParameterDisjunction.class,
+                           new ParameterDisjunctionEditor());
+    table.setDefaultEditor(Object.class,
+                           new CustomEditor());
+
     table.setIntercellSpacing(new Dimension(10, 10));
     table.setAutoResizeMode(table.AUTO_RESIZE_LAST_COLUMN);
     JScrollPane scroll = new JScrollPane(table);
@@ -90,6 +104,11 @@ public class NewResourceDialog extends JDialog {
   protected void initListeners(){
     okBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
+          table.editingStopped(new ChangeEvent(
+                                table.getCellEditor(table.getEditingRow(),
+                                                    table.getEditingColumn())));
+        }
         userCanceled = false;
         String name = nameField.getText();
         if(name == null || name.length() == 0){
@@ -105,6 +124,11 @@ public class NewResourceDialog extends JDialog {
     cancelBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = true;
+        if(table.getEditingColumn() != -1 && table.getEditingRow() != -1){
+          table.editingCanceled(new ChangeEvent(
+                                table.getCellEditor(table.getEditingRow(),
+                                                    table.getEditingColumn())));
+        }
         hide();
       }
     });
@@ -115,20 +139,20 @@ public class NewResourceDialog extends JDialog {
   JComboBox parametersCombo;
   JButton okBtn, cancelBtn;
   JTextField nameField;
+  ResourceData resourceData;
+  Resource resource;
 
 
   boolean userCanceled;
   ArrayList params;
+  JFileChooser fileChooser;
+  Map listeners;
 
   public Resource show(ResourceData rData){
+    this.resourceData = rData;
     setLocationRelativeTo(getParent());
-    /*
-    setLocation( (getParent().getWidth() - getWidth())/2,
-                 (getParent().getHeight() - getHeight())/2);
-*/
     nameField.setText("");
     ParameterList pList = rData.getParameterList();
-//System.out.println(pList.getInitimeParameters());
     Iterator parIter = pList.getInitimeParameters().iterator();
     params.clear();
     while(parIter.hasNext()){
@@ -150,7 +174,7 @@ public class NewResourceDialog extends JDialog {
       }
       Resource res;
       try{
-        res = Factory.createResource(rData.getClassName(), params);
+        res = Factory.createResource(rData.getClassName(), params, listeners);
         res.getFeatures().put("NAME", nameField.getText());
       }catch(ResourceInstantiationException rie){
         JOptionPane.showMessageDialog(getOwner(),
@@ -339,6 +363,52 @@ public class NewResourceDialog extends JDialog {
     JComboBox combo;
   }
 
+  class CustomEditor extends DefaultCellEditor{
+    CustomEditor(){
+      super(new JTextField());
+      textField = (JTextField)getComponent();
+      button = new JButton(new ImageIcon(getClass().getResource(
+                               "/gate/resources/img/loadFile.gif")));
+      button.setToolTipText("Set from file...");
+      textButtonBox = Box.createHorizontalBox();
+
+      button.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          int res = fileChooser.showOpenDialog(NewResourceDialog.this);
+          if(res == fileChooser.APPROVE_OPTION){
+            try{
+              textField.setText(fileChooser.getSelectedFile().
+                                toURL().toExternalForm());
+            }catch(IOException ioe){}
+          }
+        }
+      });
+    }
+
+    public Component getTableCellEditorComponent(JTable table,
+                                                 Object value,
+                                                 boolean isSelected,
+                                                 int row,
+                                                 int column){
+      String type = (String)table.getValueAt(row, 1);
+      if(type.equals("java.net.URL")){
+        textButtonBox.removeAll();
+        textButtonBox.add(super.getTableCellEditorComponent(table, value,
+                                                            isSelected,
+                                                            row, column));
+        textButtonBox.add(button);
+        return textButtonBox;
+      }else{
+        return super.getTableCellEditorComponent(table, value, isSelected,
+                                                 row, column);
+      }
+    }
+
+    JButton button;
+    JTextField textField;
+    Box textButtonBox;
+  }
+
   class ParameterDisjunction{
     /**
      * gets a list of {@link gate.creole.Parameter}
@@ -419,4 +489,30 @@ public class NewResourceDialog extends JDialog {
     Parameter currentParameter;
     Object[] values;
   }
+
+  class ResourceLoader implements Runnable{
+    public void run(){
+      //create the new resource
+      FeatureMap params = Factory.newFeatureMap();
+      params.put("gate.event.StatusListener", getParent());
+      params.put("gate.event.ProgressListener", getParent());
+      for(int i=0; i< tableModel.getRowCount(); i++){
+        ParameterDisjunction pDisj = (ParameterDisjunction)
+                                     tableModel.getValueAt(i,0);
+        if(pDisj.getValue() != null){
+          params.put(pDisj.getName(), pDisj.getValue());
+        }
+      }
+      try{
+        resource = Factory.createResource(resourceData.getClassName(), params);
+        resource.getFeatures().put("NAME", nameField.getText());
+      }catch(ResourceInstantiationException rie){
+        JOptionPane.showMessageDialog(getOwner(),
+                                      "Resource could not be created!\n" +
+                                      rie.toString(),
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
+        resource = null;
+      }
+    }//run()
+  }//class ResourceLoader implements Runnable
 }

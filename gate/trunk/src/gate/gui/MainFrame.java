@@ -161,6 +161,7 @@ public class MainFrame extends JFrame
     progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
     progressBar.setStringPainted(true);
     Dimension dim = new Dimension(300, progressBar.getPreferredSize().height);
+    progressBar.setStringPainted(false);
     progressBar.setMaximumSize(dim);
     progressBar.setMinimumSize(dim);
     progressBar.setPreferredSize(dim);
@@ -335,6 +336,7 @@ public class MainFrame extends JFrame
   }
 
   public void progressChanged(int i){
+    progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
     if(oldValue != i){
       SwingUtilities.invokeLater(new ProgressBarUpdater(i));
@@ -346,6 +348,7 @@ public class MainFrame extends JFrame
    *
    */
   public void processFinished(){
+    progressBar.setStringPainted(false);
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
   }
 
@@ -681,45 +684,52 @@ public class MainFrame extends JFrame
     }
 
     public void actionPerformed(ActionEvent e){
-      CreoleRegister reg = Gate.getCreoleRegister();
-      List prTypes = reg.getPublicPrTypes();
-      if(prTypes != null && !prTypes.isEmpty()){
-        HashMap resourcesByName = new HashMap();
-        Iterator lrIter = prTypes.iterator();
-        while(lrIter.hasNext()){
-          ResourceData rData = (ResourceData)reg.get(lrIter.next());
-          resourcesByName.put(rData.getName(), rData);
-        }
-        List prNames = new ArrayList(resourcesByName.keySet());
-        Collections.sort(prNames);
-        Object answer = JOptionPane.showInputDialog(
-                            parentFrame,
-                            "Select type of Language resource",
-                            "Gate", JOptionPane.QUESTION_MESSAGE,
-                            null, prNames.toArray(),
-                            prNames.get(0));
-        if(answer != null){
-          ResourceData rData = (ResourceData)resourcesByName.get(answer);
-          newResourceDialog.setTitle("Parameters for the new " + rData.getName());
-          ProcessingResource res = (ProcessingResource)newResourceDialog.show(rData);
-          if(res != null){
-            PRHandle handle = new PRHandle(res, currentProject);
-            handle.setTooltipText("<html><b>Type:</b> " +
-                                  rData.getName() + "</html>");
-            prRoot.add(new DefaultMutableTreeNode(handle, false));
-            projectTreeModel.nodeStructureChanged(prRoot);
-            projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(prRoot)));
-            currentProject.addPR(handle);
+      Runnable runnable = new Runnable(){
+        public void run(){
+          CreoleRegister reg = Gate.getCreoleRegister();
+          List prTypes = reg.getPublicPrTypes();
+          if(prTypes != null && !prTypes.isEmpty()){
+            HashMap resourcesByName = new HashMap();
+            Iterator lrIter = prTypes.iterator();
+            while(lrIter.hasNext()){
+              ResourceData rData = (ResourceData)reg.get(lrIter.next());
+              resourcesByName.put(rData.getName(), rData);
+            }
+            List prNames = new ArrayList(resourcesByName.keySet());
+            Collections.sort(prNames);
+            Object answer = JOptionPane.showInputDialog(
+                                parentFrame,
+                                "Select type of Language resource",
+                                "Gate", JOptionPane.QUESTION_MESSAGE,
+                                null, prNames.toArray(),
+                                prNames.get(0));
+            if(answer != null){
+              ResourceData rData = (ResourceData)resourcesByName.get(answer);
+              newResourceDialog.setTitle("Parameters for the new " + rData.getName());
+              ProcessingResource res = (ProcessingResource)newResourceDialog.show(rData);
+              if(res != null){
+                PRHandle handle = new PRHandle(res, currentProject);
+                handle.setTooltipText("<html><b>Type:</b> " +
+                                      rData.getName() + "</html>");
+                prRoot.add(new DefaultMutableTreeNode(handle, false));
+                projectTreeModel.nodeStructureChanged(prRoot);
+                projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(prRoot)));
+                currentProject.addPR(handle);
+              }
+            }
+          }else{
+            //no lr types
+            JOptionPane.showMessageDialog(parentFrame,
+                                          "Could not find any registered types " +
+                                          "of resources...\n" +
+                                          "Check your Gate installation!",
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
           }
         }
-      }else{
-        //no lr types
-        JOptionPane.showMessageDialog(parentFrame,
-                                      "Could not find any registered types " +
-                                      "of resources...\n" +
-                                      "Check your Gate installation!",
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
-      }
+      };
+      Thread thread = new Thread(runnable);
+      thread.setPriority(thread.MIN_PRIORITY);
+      thread.start();
     }
   }//class NewPRAction extends AbstractAction
 
@@ -915,6 +925,7 @@ public class MainFrame extends JFrame
     }
     public void run(){
       progressBar.setValue(value);
+//      progressBar.paintImmediately(progressBar.getBounds());
     }
 
     int value;

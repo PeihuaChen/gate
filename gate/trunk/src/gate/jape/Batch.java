@@ -78,8 +78,16 @@ implements JapeConstants{
 
   public Batch(URL url, String encoding, StatusListener sListener)
          throws JapeException {
-    this(url, encoding);
+
     this.addStatusListener(sListener);
+    this.japeURL = url;
+    this.encoding =  encoding;
+    parseJape();
+    if(transducer != null) transducer.addStatusListener(new StatusListener() {
+      public void statusChanged(String text){
+        fireStatusChangedEvent(text);
+      }
+    });
   } // full init constructor
 
 
@@ -532,7 +540,13 @@ implements JapeConstants{
 } // class Batch
 
 // $Log$
+// Revision 1.21  2001/03/08 20:11:35  valyt
+// Added "select URL as file" facility
+// redesigned the listeners setting in Factory to make it more flexible and better looking
+// recompiled Jape to conform with the changes
+//
 // Revision 1.20  2001/03/06 20:11:14  valyt
+//
 // <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
 //
 // Cleaned up some obsolete classes
