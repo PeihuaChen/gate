@@ -31,12 +31,15 @@ Macro: BE
     {Token.category=="VB",Token.string=="be"} |
     {Token.category=="VBP",Token.string=="be"} |
     {Token.category=="VBP",Token.string=="become"} |
+    {Token.category=="VBP",Token.string=="remain"} |
     {Token.category=="VBZ",Token.string=="is"} |
     {Token.category=="VBZ",Token.string=="Is"} |
     {Token.category=="VBZ",Token.string=="becomes"} |
+    {Token.category=="VBZ",Token.string=="remains"} |
     {Token.category=="VBD",Token.string=="was"} |
     {Token.category=="VBD",Token.string=="Was"} |
-    {Token.category=="VBD",Token.string=="became"}
+    {Token.category=="VBD",Token.string=="became"} |
+    {Token.category=="VBD",Token.string=="remained"}
 )
 
 Macro: BEEN
