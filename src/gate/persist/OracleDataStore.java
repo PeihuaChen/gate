@@ -35,6 +35,8 @@ import gate.annotation.*;
 
 public class OracleDataStore extends JDBCDataStore {
 
+  private static final boolean DEBUG = false;
+
   private static final int ORACLE_TRUE = 1;
   private static final int ORACLE_FALSE = 0;
 
@@ -1540,7 +1542,7 @@ public class OracleDataStore extends JDBCDataStore {
 
   /** --- */
   public String readDatabaseID() throws PersistenceException{
-System.out.println("READ PARAM called...");
+
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     String  result = null;
@@ -1570,8 +1572,12 @@ System.out.println("READ PARAM called...");
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
     }
-System.out.println("reult=["+result+"]");
-      return result;
+
+    if (DEBUG) {
+      Out.println("reult=["+result+"]");
+    }
+
+    return result;
   }
 
 
