@@ -18,14 +18,14 @@
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="tokeniserRulesURL"
-        DEFAULT="application/tokeniser/DefaultTokeniser.rules"
+        DEFAULT="resources/tokeniser/DefaultTokeniser.rules"
         COMMENT="The URL for the rules file" SUFFIXES="rules" >
         java.net.URL</PARAMETER>     
       <PARAMETER NAME="encoding"
         COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
         java.lang.String</PARAMETER>
        <PARAMETER NAME="transducerGrammarURL"
-        DEFAULT="application/tokeniser/postprocess.jape"
+        DEFAULT="resources/tokeniser/postprocess.jape"
         COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
       <ICON>shefTokeniser.gif</ICON>
@@ -46,7 +46,7 @@
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="listsURL"
-        DEFAULT="application/gazetteer/cebuano/lists.def"
+        DEFAULT="resources/gazetteer/cebuano/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8"
@@ -74,7 +74,7 @@
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="listsURL"
-        DEFAULT="application/tokeniser/lists.def"
+        DEFAULT="resources/tokeniser/lists.def"
         COMMENT="The URL to the file with list of lists" SUFFIXES="def">
         java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8"
@@ -106,7 +106,7 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
-         DEFAULT="application/grammar/main.jape"
+         DEFAULT="resources/grammar/main.jape"
         SUFFIXES="jape">java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
@@ -129,7 +129,7 @@
         COMMENT="The annotation set to be used as output for the transducer"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
-         DEFAULT="application/tokeniser/join.jape"
+         DEFAULT="resources/tokeniser/join.jape"
         SUFFIXES="jape">java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding" DEFAULT="UTF-8"
         COMMENT="The encoding used for reading the grammar">
@@ -149,10 +149,10 @@
       <PARAMETER NAME="inputASName"
         COMMENT="The name of the annotation set used for input"
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="lexiconURL" DEFAULT="application/postag/lexicon"
+      <PARAMETER NAME="lexiconURL" DEFAULT="resources/postag/lexicon"
         COMMENT="The URL for the lexicon file"
         >java.net.URL</PARAMETER>
-      <PARAMETER NAME="rulesURL" DEFAULT="application/postag/ruleset"
+      <PARAMETER NAME="rulesURL" DEFAULT="resources/postag/ruleset"
         COMMENT="The URL for the ruleset file"
         >java.net.URL</PARAMETER>
       <PARAMETER NAME="encoding"
