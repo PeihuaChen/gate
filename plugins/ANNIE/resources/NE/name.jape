@@ -246,7 +246,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
 // if the gender feature exists
  if (personTitle != null && personTitle.size()>0)
 {
-  Out.prln("Titles found " +  personTitle);
+  //Out.prln("Titles found " +  personTitle);
   gate.Annotation personAnn = (gate.Annotation)personTitle.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
 }
@@ -259,7 +259,7 @@ else
 
   if (firstPerson != null && firstPerson.size()>0)
  {
-    Out.prln("First persons found " +  firstPerson);
+    //Out.prln("First persons found " +  firstPerson);
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
  }
@@ -445,7 +445,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
 
   if (firstPerson != null && firstPerson.size()>0)
  {
-    Out.prln("First persons found " +  firstPerson);
+    //Out.prln("First persons found " +  firstPerson);
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
 }
