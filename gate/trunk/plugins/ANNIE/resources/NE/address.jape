@@ -137,7 +137,7 @@ Priority: 20
 
 Rule: PhoneRegContext
 Priority: 100
-
+// tel: 0114 222 1929
 (
  (PHONE_PREFIX)
 )
@@ -207,6 +207,7 @@ Priority: 40
 
 Rule:PhoneRegExtContext
 Priority: 40
+// tel: 12345 ext. 1234
 (
  (PHONE_PREFIX)
 )
