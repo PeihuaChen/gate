@@ -56,6 +56,8 @@ public class TestGazetteer extends TestCase {
     AnnotationSet gazAS = doc.getAnnotations("GazetteerAS");
     gaz.setAnnotationSet(gazAS);
     gaz.run();
+    //check for exceptions
+    gaz.check();
     assert(!gazAS.isEmpty());
   }
 
