@@ -64,11 +64,22 @@ public class Lookup implements java.io.Serializable {
   public String list;
 
   /**Returns a string representation of this lookup in the format
-   * majorType.minorType */
+   * This method is used in equals()
+   * that caused this method to implement dualistic behaviour :
+   * i.e. whenever class and ontology are filled then use the
+   * long version,incl. list, ontology and class;
+   * else return just majorType.minorType */
   public String toString(){
     StringBuffer b = new StringBuffer();
-    b.append(list);
-    b.append(".");
+    boolean longVersion = false;
+    if (null!=ontology && null!=oClass){
+      longVersion = true;
+    }
+
+    if ( longVersion ) {
+      b.append(list);
+      b.append(".");
+    }
     b.append(majorType);
     b.append(".");
     if (null != minorType) {
@@ -78,7 +89,7 @@ public class Lookup implements java.io.Serializable {
         b.append(languages);
       }//if
     }//if
-    if (null!=ontology && null!=oClass){
+    if (longVersion) {
       b.append("|");
       b.append(ontology);
       b.append(":");
