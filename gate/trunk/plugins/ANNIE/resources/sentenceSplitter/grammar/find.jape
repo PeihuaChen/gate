@@ -57,12 +57,15 @@ Rule: Split1
 Rule: CR
 // must be at least 2 CRs or Newlines plus optional spaces to generate a split
 (
+
  ({SpaceToken.string == "\n"}|
   ({SpaceToken.string=="\n"}{SpaceToken.string=="\r"}))
  ({SpaceToken.kind == space})*
 
- ({SpaceToken.string == "\n"}|
-  ({SpaceToken.string=="\n"}{SpaceToken.string=="\r"}))+
+ ({SpaceToken.string == "\n"}
+  | ({SpaceToken.string=="\n"}{SpaceToken.string=="\r"})
+  | {SpaceToken.string=="\n\r"}
+  | {SpaceToken.string=="\r\n"} )+
  ({SpaceToken.kind == space})*
 ):cr
 -->
@@ -91,8 +94,3 @@ Rule: Abbrev2
 :fake
 -->
 {}
-
-
-
-
-
