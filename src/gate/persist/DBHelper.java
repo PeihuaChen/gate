@@ -124,7 +124,7 @@ public class DBHelper {
   private static boolean  driversLoaded;
   private static HashMap pools;
 
-  private static final int POOL_SIZE = 5;
+  private static final int POOL_SIZE = 20;
 
   static {
     DUMMY_ID = new Long(Long.MIN_VALUE);
@@ -219,19 +219,19 @@ public class DBHelper {
       return connect(connectURL);
     }
     else {
-      ObjectPool currPool = null;
+      ConnectionPool currPool = null;
 
       synchronized(pools) {
         if (false == pools.containsKey(connectURL)) {
-          currPool = new ObjectPool(POOL_SIZE);
+          currPool = new ConnectionPool(POOL_SIZE, connectURL);
           pools.put(connectURL, currPool);
         }
         else {
-          currPool = (ObjectPool)pools.get(connectURL);
+          currPool = (ConnectionPool) pools.get(connectURL);
         }
       }
 
-      return (Connection)currPool.get();
+      return currPool.get();
     }
   }
 
@@ -252,7 +252,7 @@ public class DBHelper {
         throw new PersistenceException(sqle);
       }
 
-      ObjectPool currPool = (ObjectPool)pools.get(jdbcURL);
+      ConnectionPool currPool = (ConnectionPool) pools.get(jdbcURL);
       currPool.put(conn);
     }
   }

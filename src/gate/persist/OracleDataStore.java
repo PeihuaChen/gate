@@ -3412,10 +3412,13 @@ public class OracleDataStore extends JDBCDataStore {
       Vector lrsIDs = new Vector();
       CallableStatement stmt = null;
       ResultSet rs = null;
+      Connection conn = null;
 
       try {
-        String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount);
-        stmt = this.jdbcConn.prepareCall(sql);
+        Vector sqlValues = new Vector();
+        String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount, sqlValues);
+        conn = DBHelper.connect(this.getStorageUrl(), true);
+        stmt = conn.prepareCall(sql);
         //System.out.println(sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
@@ -3433,7 +3436,6 @@ public class OracleDataStore extends JDBCDataStore {
 
         while (rs.next()) {
           long lr_ID = rs.getLong(1);
-          //LanguageResource lr = getLr(lrType,new Long(lr_ID));
           lrsIDs.addElement(new Long(lr_ID));
         }
         return lrsIDs;
@@ -3441,12 +3443,13 @@ public class OracleDataStore extends JDBCDataStore {
       catch(SQLException sqle) {
         throw new PersistenceException("can't get LRs from DB: ["+ sqle+"]");
       }
-      //catch (SecurityException e){
-      //  e.printStackTrace();
-      //}
+      catch (ClassNotFoundException cnfe){
+        throw new PersistenceException("can't not find driver: ["+ cnfe +"]");
+      }
       finally {
         DBHelper.cleanup(rs);
         DBHelper.cleanup(stmt);
+        DBHelper.disconnect(conn, true);
       }
     }
 
@@ -3454,10 +3457,13 @@ public class OracleDataStore extends JDBCDataStore {
       Vector lrs = new Vector();
       CallableStatement stmt = null;
       ResultSet rs = null;
+      Connection conn = null;
 
       try {
-        String sql = getSQLQuery(constraints,lrType, true, null, -1);
-        stmt = this.jdbcConn.prepareCall(sql);
+        Vector sqlValues = new Vector();
+        String sql = getSQLQuery(constraints,lrType, true, null, -1, sqlValues);
+        conn = DBHelper.connect(this.getStorageUrl(), true);
+        stmt = conn.prepareCall(sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3478,19 +3484,20 @@ public class OracleDataStore extends JDBCDataStore {
       catch(SQLException sqle) {
         throw new PersistenceException("can't get LRs Count from DB: ["+ sqle+"]");
       }
+      catch (ClassNotFoundException cnfe){
+        throw new PersistenceException("can't not find driver: ["+ cnfe +"]");
+      }
       finally {
         DBHelper.cleanup(rs);
         DBHelper.cleanup(stmt);
+        DBHelper.disconnect(conn, true);
       }
   }
 
-  private Vector sqlValues;
-
   private String getSQLQuery(List filter, String lrType, boolean count,
-                              List orderByFilter, int limitcount){
+                              List orderByFilter, int limitcount, Vector sqlValues){
     StringBuffer query = new StringBuffer("");
-    sqlValues = new Vector();
-    String join = getJoinQuery(orderByFilter);
+    String join = getJoinQuery(orderByFilter, sqlValues);
     String select = "lr_id";
     if (count){
       select = "count(*)";
@@ -3515,14 +3522,14 @@ public class OracleDataStore extends JDBCDataStore {
         query = query.append(" AND ");
       }
       for (int i=0; i<filter.size(); i++){
-          query = query.append(getRestrictionPartOfQuery((Restriction) filter.get(i)));
+          query = query.append(getRestrictionPartOfQuery((Restriction) filter.get(i),sqlValues));
           if (i<filter.size()-1) {
             query = query.append(" AND ");
           }
       }
     }
 
-    String endPartOfJoin = getEndPartOfJoin(orderByFilter);
+    String endPartOfJoin = getEndPartOfJoin(orderByFilter,sqlValues);
     query = query.append(endPartOfJoin);
 
     if (limitcount>0){
@@ -3533,7 +3540,7 @@ public class OracleDataStore extends JDBCDataStore {
     return query.toString();
   }
 
-  private String getRestrictionPartOfQuery(Restriction restr){
+  private String getRestrictionPartOfQuery(Restriction restr, Vector sqlValues){
     StringBuffer expresion = new StringBuffer(
                       " EXISTS ("+
                        " SELECT ft_id " +
@@ -3551,10 +3558,10 @@ public class OracleDataStore extends JDBCDataStore {
       expresion = expresion.append(" AND ");
       switch (this.findFeatureType(restr.getValue())){
         case DBHelper.VALUE_TYPE_INTEGER:
-          expresion = expresion.append(getNumberExpresion(restr));
+          expresion = expresion.append(getNumberExpresion(restr, sqlValues));
           break;
         case DBHelper.VALUE_TYPE_LONG:
-          expresion = expresion.append(getNumberExpresion(restr));
+          expresion = expresion.append(getNumberExpresion(restr, sqlValues));
           break;
         default:
           expresion = expresion.append(" FEATURE.ft_character_value = ? ");
@@ -3568,8 +3575,7 @@ public class OracleDataStore extends JDBCDataStore {
     return expresion.toString();
   }
 
-  private String getNumberExpresion(Restriction restr){
-
+  private String getNumberExpresion(Restriction restr, Vector sqlValues){
     StringBuffer expr = new StringBuffer("FEATURE.ft_number_value ");
 
     switch (restr.getOperator()){
@@ -3598,7 +3604,7 @@ public class OracleDataStore extends JDBCDataStore {
     return expr.toString();
   }
 
-  private String getJoinQuery(List orderByFilter){
+  private String getJoinQuery(List orderByFilter, Vector sqlValues){
     StringBuffer join = new StringBuffer("");
     if (orderByFilter!=null){
       for (int i = 0; i<orderByFilter.size(); i++){
@@ -3609,7 +3615,7 @@ public class OracleDataStore extends JDBCDataStore {
     return join.toString();
   }
 
-  private String getEndPartOfJoin(List orderByFilter){
+  private String getEndPartOfJoin(List orderByFilter, Vector sqlValues){
     StringBuffer endJoin = new StringBuffer("");
     if (orderByFilter!=null && orderByFilter.size()>0){
       for (int i=0; i<orderByFilter.size(); i++){
