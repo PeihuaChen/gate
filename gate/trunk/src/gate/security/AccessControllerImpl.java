@@ -391,6 +391,7 @@ public class AccessControllerImpl
       stmt.setString(1,usr_name);
       stmt.setString(2,passwd);
       stmt.setLong(3,prefGroupID.longValue());
+      stmt.execute();
     }
     catch(SQLException sqle) {
       switch(sqle.getErrorCode())
@@ -504,6 +505,67 @@ public class AccessControllerImpl
                               MY_VERY_SECRET_CONSTANT);
   }
 
+
+  private boolean canDeleteGroup(Group grp)
+    throws PersistenceException, SecurityException{
+
+    //1. check group localy
+    if (false == this.groupsByID.containsValue(grp)) {
+      throw new SecurityException("no such group (id=["+grp.getID()+"])");
+    }
+
+    //2. check DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.can_delete_group(?,?) }");
+      stmt.setLong(1,grp.getID().longValue());
+      stmt.registerOutParameter(2,java.sql.Types.INTEGER);
+      stmt.execute();
+      boolean res = stmt.getBoolean(2);
+
+      return res;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't perform document checks, DB error is: ["+
+                                          sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+  }
+
+
+  private boolean canDeleteUser(User usr)
+    throws PersistenceException, SecurityException{
+
+    //1. check group localy
+    if (false == this.usersByID.containsValue(usr)) {
+      throw new SecurityException("no such user (id=["+usr.getID()+"])");
+    }
+
+    //2. check DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.can_delete_user(?,?) }");
+      stmt.setLong(1,usr.getID().longValue());
+      stmt.registerOutParameter(2,java.sql.Types.INTEGER);
+      stmt.execute();
+      boolean res = stmt.getBoolean(2);
+
+      return res;
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't perform document checks, DB error is: ["+
+                                          sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+  }
 
   private void init()
     throws PersistenceException {
