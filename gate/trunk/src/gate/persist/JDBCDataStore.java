@@ -137,6 +137,13 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
   /** Close the data store. */
   public void close() throws PersistenceException {
 
+
+    //0. sync all dependednt resources
+    for (int i=0; i< this.dependentResources.size(); i++) {
+      LanguageResource lr = (LanguageResource)this.dependentResources.elementAt(0);
+      sync(lr);
+    }
+
     //1. close security factory
     ac.close();
 
@@ -149,12 +156,6 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     catch (SQLException sqle) {
       throw new PersistenceException("cannot close JDBC connection, DB error is ["+
                                       sqle.getMessage() +"]");
-    }
-
-    //sync all dependednt resources
-    for (int i=0; i< this.dependentResources.size(); i++) {
-      LanguageResource lr = (LanguageResource)this.dependentResources.elementAt(0);
-      sync(lr);
     }
 
     //finally unregister this datastore from the GATE register of datastores
