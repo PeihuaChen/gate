@@ -54,6 +54,12 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * what annotation type names to use.
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
+    if ( (doc == null) ||
+         (doc.getSourceUrl() == null && doc.getContent() == null)){
+
+      throw new DocumentFormatException(
+               "GATE document is null or no content found. Nothing to parse!");
+    }// End if
     try {
       Sgml2Xml sgml2Xml = new Sgml2Xml(doc);
 

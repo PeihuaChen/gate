@@ -38,7 +38,12 @@ public class SimpleErrorHandler implements ErrorHandler {
     */
   public void error(SAXParseException ex) throws SAXException {
     File fInput = new File (ex.getSystemId());
-    throw new GateSaxException("Recoverable error:" + fInput.getPath() +
+
+    if (fInput != null)
+      Out.prln("SAX parser recoverable error:" + fInput.getPath() +
+                                  ": line " + ex.getLineNumber() + ": " + ex);
+    else
+      Out.prln("SAX parser recoverable error:" +
                                   ": line " + ex.getLineNumber() + ": " + ex);
   }// error
   /**
@@ -47,8 +52,12 @@ public class SimpleErrorHandler implements ErrorHandler {
     */
   public void fatalError(SAXParseException ex) throws SAXException {
     File fInput = new File(ex.getSystemId());
-    throw new GateSaxException("Fatal error: " + fInput.getName() +
+    if (fInput != null)
+      throw new GateSaxException("Fatal error: " + fInput.getName() +
                                 ": line " + ex.getLineNumber() + ": " + ex);
+    else
+      throw new GateSaxException("Fatal error:" + ex.getLineNumber() +
+              ": " + ex);
   }// fatalError
   /**
     * This warning is called by the SAX parser when there is the danger of a
@@ -56,7 +65,12 @@ public class SimpleErrorHandler implements ErrorHandler {
     */
   public void warning(SAXParseException ex) throws SAXException {
     File fInput = new File(ex.getSystemId());
-    throw new GateSaxException("Warning: " + fInput.getName() +
+    if (fInput != null)
+      Out.prln("SAX parser warning: " + fInput.getName() +
                               ": line " + ex.getLineNumber() + ": " + ex);
+    else
+      Out.prln("SAX parser warning: " +
+                              " : line " + ex.getLineNumber() + ": " + ex);
+
   }// warning
 }// end class SimpleErrorHandler

@@ -62,18 +62,33 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     PrintWriter           out = null;
     HTMLEditorKit.Parser  parser = new ParserDelegator();
 
-    try{
-      conn = doc.getSourceUrl().openConnection();
-      reader =  new InputStreamReader(conn.getInputStream());
-    } catch (IOException ex){
-      DocumentContent content =  doc.getContent();
-      if(content == null)
-        throw new DocumentFormatException("The document doesn't have a" +
-        " valid URL and also no content");
-       reader = new InputStreamReader(
-                      new ByteArrayInputStream(content.toString().getBytes())
-               );
-    }// End try
+    if ( (doc == null) ||
+         (doc.getSourceUrl() == null && doc.getContent() == null)){
+
+      throw new DocumentFormatException(
+               "GATE document is null or no content found. Nothing to parse!");
+    }// End if
+
+    if (doc.getSourceUrl() == null)
+        // If doc's source URL is null then the document content will be parsed
+        // If we are here, it's for sure that document content is not null
+        reader = new InputStreamReader(
+             new ByteArrayInputStream(doc.getContent().toString().getBytes()));
+    else {
+      try{
+        conn = doc.getSourceUrl().openConnection();
+        reader =  new InputStreamReader(conn.getInputStream());
+      } catch (IOException e){
+        if (doc.getContent() == null)
+            throw new DocumentFormatException(
+                  "GATE document doesn't have content or a valid URL." +
+                  " Nothing to parse!");
+        else
+          reader = new InputStreamReader(
+              new ByteArrayInputStream(doc.getContent().toString().getBytes()));
+
+      }// End try
+    }// End if
 
     // create a new Htmldocument handler
     HtmlDocumentHandler htmlDocHandler = new

@@ -54,6 +54,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     * what annotation type names to use.
     */
   public void unpackMarkup(Document doc) throws DocumentFormatException{
+/*
     // create the element2String map
     Map anElement2StringMap = null;
     anElement2StringMap = new HashMap();
@@ -62,7 +63,35 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     anElement2StringMap.put("S","\n\n");
     anElement2StringMap.put("s","\n\n");
     setElement2StringMap(anElement2StringMap);
-    try {
+*/
+    if ( (doc == null) ||
+         (doc.getSourceUrl() == null && doc.getContent() == null)){
+
+      throw new DocumentFormatException(
+               "GATE document is null or no content found. Nothing to parse!");
+    }// End if
+
+    boolean docHasContentButNoValidURL = false;
+    // This is a test to see if the GATE document has a valid URL or a valid
+    // content. If doesn't has a valid URL then try to parse its content as XML
+    try{
+      if (doc.getSourceUrl() == null && doc.getContent() != null){
+        // The doc's url is null but there is a content.
+        docHasContentButNoValidURL = true;
+      }else {URLConnection conn = doc.getSourceUrl().openConnection();}
+    }catch (IOException ex1){
+      // The URL is not null but is not valid.
+      if(doc.getContent() == null)
+        // The document content is also null. There is nothing we can do.
+        throw new DocumentFormatException("The document doesn't have a" +
+        " valid URL and also no content");
+
+      docHasContentButNoValidURL = true;
+    }// End try
+
+    if (docHasContentButNoValidURL)
+      parseDocumentWithoutURL(doc);
+    else try {
       // use Excerces XML parser with JAXP
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
       //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
@@ -73,46 +102,38 @@ public class XmlDocumentFormat extends TextualDocumentFormat
       saxParserFactory.setValidating(false);
       // non namesapace aware one
       saxParserFactory.setNamespaceAware(false);
-
       // create it
       SAXParser xmlParser = saxParserFactory.newSAXParser();
+      if (isGateXmlDocument){
+        // Construct the appropiate xml handler for the job.
+        GateFormatXmlDocumentHandler gateXmlHandler =
+                        new GateFormatXmlDocumentHandler(doc);
+        // Register a status listener
+        gateXmlHandler.addStatusListener(new StatusListener(){
+          public void statusChanged(String text){
+            // This is implemented in DocumentFormat.java and inherited here
+            fireStatusChanged(text);
+          }
+        });
+        // Parse the Gate Document
+        xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
+      }else{
+        // create a new Xml document handler
+        XmlDocumentHandler xmlDocHandler =  new
+                    XmlDocumentHandler(doc,
+                                       this.markupElementsMap,
+                                       this.element2StringMap);
 
-      // use it
-      if (null != doc){
-        if (isGateXmlDocument){
-          // Construct the appropiate xml handler for the job.
-          GateFormatXmlDocumentHandler gateXmlHandler =
-                          new GateFormatXmlDocumentHandler(doc);
-          // Register a status listener
-          gateXmlHandler.addStatusListener(new StatusListener(){
-            public void statusChanged(String text){
-              // This is implemented in DocumentFormat.java and inherited here
-              fireStatusChanged(text);
-            }
-          });
-
-          // Parse the Gate Document
-          xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
-        }else{
-          // create a new Xml document handler
-          XmlDocumentHandler xmlDocHandler =  new
-                      XmlDocumentHandler(doc,
-                                         this.markupElementsMap,
-                                         this.element2StringMap);
-
-          // register a status listener with it
-          xmlDocHandler.addStatusListener(new StatusListener(){
-            public void statusChanged(String text){
-              // this is implemented in DocumentFormat.java and inherited here
-              fireStatusChanged(text);
-            }
-          });
-
-          // parse the document handler
-          xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
-        }// End if
+        // register a status listener with it
+        xmlDocHandler.addStatusListener(new StatusListener(){
+          public void statusChanged(String text){
+            // this is implemented in DocumentFormat.java and inherited here
+            fireStatusChanged(text);
+          }
+        });
+        // parse the document handler
+        xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
       }// End if
-
     } catch (ParserConfigurationException e){
         throw
         new DocumentFormatException("XML parser configuration exception ", e);
@@ -121,7 +142,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
     } catch (IOException e){
         throw new DocumentFormatException("I/O exception for " +
                                       doc.getSourceUrl().toString());
-    }
+    }// End if else try
 
   }// unpackMarkup
 
@@ -145,6 +166,55 @@ public class XmlDocumentFormat extends TextualDocumentFormat
      doc.setFeatures(fm);
      unpackMarkup (doc);
   }// unpackMarkup
+
+  private void parseDocumentWithoutURL(gate.Document aDocument)
+                                              throws DocumentFormatException {
+
+//    ByteArrayInputStream in =  new ByteArrayInputStream(
+//                                  aDocument.getContent().toString().getBytes());
+    try{
+      Reader reader = new InputStreamReader(
+        new ByteArrayInputStream(aDocument.getContent().toString().getBytes()),
+        "UTF-8");
+      InputSource is = new InputSource(reader);
+
+
+      // use Excerces XML parser with JAXP
+      // System.setProperty("javax.xml.parsers.SAXParserFactory",
+      //                         "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+      // Get a parser factory.
+      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+      // Set up the factory to create the appropriate type of parser
+      // non validating one
+      saxParserFactory.setValidating(false);
+      // non namesapace aware one
+      saxParserFactory.setNamespaceAware(false);
+      // create it
+      SAXParser xmlParser = saxParserFactory.newSAXParser();
+      // create a new Xml document handler
+      XmlDocumentHandler xmlDocHandler =  new XmlDocumentHandler(aDocument,
+                                                    this.markupElementsMap,
+                                                    this.element2StringMap);
+
+      // register a status listener with it
+      xmlDocHandler.addStatusListener(new StatusListener(){
+        public void statusChanged(String text){
+          // this is implemented in DocumentFormat.java and inherited here
+          fireStatusChanged(text);
+        }
+      }); // xmlDocHandler.addStatusListener(new StatusListener(){
+      // parse the document handler
+      xmlParser.parse(is, xmlDocHandler );
+    } catch (ParserConfigurationException e){
+        throw new DocumentFormatException(
+                        "XML parser configuration exception ", e);
+    } catch (SAXException e){
+        throw new DocumentFormatException(e);
+    } catch (IOException e){
+        throw new DocumentFormatException(e);
+    }// End try
+
+  }// End parseDocumentWithoutURL()
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException{

@@ -51,13 +51,18 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     */
 
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
+    if ( (doc == null) ||
+         (doc.getSourceUrl() == null && doc.getContent() == null)){
+
+      throw new DocumentFormatException(
+               "GATE document is null or no content found. Nothing to parse!");
+    }// End if
     // create an EmailDocumentHandler
     EmailDocumentHandler emailDocHandler = null;
-    emailDocHandler = new
-                      gate.email.EmailDocumentHandler( doc,
+    emailDocHandler = new  gate.email.EmailDocumentHandler(
+                                                       doc,
                                                        this.markupElementsMap,
-                                                       this.element2StringMap
-                                                      );
+                                                       this.element2StringMap);
     // register a status listener with it
     emailDocHandler.addStatusListener(new StatusListener() {
       public void statusChanged(String text) {
