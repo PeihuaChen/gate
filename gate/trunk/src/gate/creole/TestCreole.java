@@ -319,6 +319,72 @@ public class TestCreole extends TestCase
 
   } // testParameterDefaults2()
 
+  /** Test parameters */
+  public void testParameters() throws Exception {
+
+    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    assertNotNull("Couldn: couldn't find document res data", docRd);
+
+    ParameterList paramList = docRd.getParameterList();
+    if(DEBUG) Out.prln(docRd);
+
+    // runtime params - none for a document
+    Iterator iter = paramList.getRuntimeParameters().iterator();
+    assert("Document has runtime params: " + paramList, ! iter.hasNext());
+
+    // init time params
+    Parameter param = null;
+    iter = paramList.getInitimeParameters().iterator();
+    while(iter.hasNext()) {
+      List paramDisj = (List) iter.next();
+      Iterator iter2 = paramDisj.iterator();
+
+      for(int i=0; iter2.hasNext(); i++) {
+        param = (Parameter) iter2.next();
+
+        switch(i) {
+          case 0:
+            assert(
+              "Doc param 0 wrong type: " + param.getTypeName(),
+              param.getTypeName().equals("java.lang.String")
+            );
+            assert(
+              "Doc param 0 wrong name: " + param.getName(),
+              param.getName().equals("sourceUrlName")
+            );
+            Object defaultValue = param.calculateDefaultValue();
+            assert(
+              "Doc param 0 default should be null but was: " + defaultValue,
+              defaultValue == null
+            );
+            break;
+          case 1:
+            assert(
+              "Doc param 1 wrong name: " + param.getName(),
+              param.getName().equals("encoding")
+            );
+            break;
+          case 2:
+            assert(
+              "Doc param 2 wrong name: " + param.getName(),
+              param.getName().equals("sourceUrlStartOffset")
+            );
+            defaultValue = param.getDefaultValue();
+            break;
+          case 3:
+            assert(
+              "Doc param 3 wrong name: " + param.getName(),
+              param.getName().equals("sourceUrlEndOffset")
+            );
+            break;
+          default:
+            fail("Doc has more than 4 params; 5th is: " + param);
+        } // switch
+      }
+    }
+
+  } // testParameters()
+
   /** Test default run() on processing resources */
   public void testDefaultRun() throws Exception {
     ProcessingResource defaultPr = new AbstractProcessingResource() {
