@@ -13,6 +13,8 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.annotation.*;
+import java.io.*;
+import java.net.*;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
@@ -30,15 +32,6 @@ public class CorpusImpl extends TreeSet implements Corpus
     this.features = features;
   } // Construction from name and features
 
-  /** Construction from name features and documents map.
-    *This is actually a copy-constructor.
-    */
-  public CorpusImpl(String name, FeatureMap features, Map docsById) {
-    this.name = name;
-    this.features = features;
-    this.docsById = docsById;
-  } // Construction from name features and documents
-
   /** Get the name of the corpus. */
   public String getName() { return name; }
 
@@ -48,56 +41,16 @@ public class CorpusImpl extends TreeSet implements Corpus
     return null;
   }
 
-  /**Get the documents. Only available to derived classes*/
-  public Map getDocsById(){
-    return docsById;
-  }
   /** Get the features associated with this corpus. */
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
 
-  public Document getDocument(long id){
-    return (DocumentImpl)docsById.get(new Long(id));
-  }
-
-
-//Persistence stuff
-  public boolean isPersistent(){
-  //This class does not define persistent objects.
-    return false;
-  }
-
-  public boolean isPersistenceCapable(){
-    //There is a persistent implementation for corpora so return true
-    return true;
-  }
-
-  public String getErrorMessage(){
-    return gate.db.Checker.errMsg;
-  };
-
-  public static boolean setupDS(DataStore ds){
-    //We only have one type of persistent corpora so we don't need to check
-    //the datastore type here.
-    return gate.db.CorpusWrapper.setupDatabase(ds);
-  }
-
-  public LRDBWrapper getDBWrapper(DataStore ds){
-    //We only have one type of persistent corpora so we don't need to check
-    //the datastore type here.
-    return new gate.db.CorpusWrapper(ds, this);
-  }
-//END persistence stuff
-
   /** The name of the corpus */
   protected String name;
 
   /** The features associated with this corpus. */
   protected FeatureMap features;
-
-  /**The documents contained by this corpus*/
-  protected Map docsById;
 
 } // class CorpusImpl
