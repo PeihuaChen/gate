@@ -23,6 +23,7 @@
     <path>[lib/javacompiler.jar]</path>
     <path>[lib/jdbc7.2dev-1.2.jar]</path>
     <path>[lib/jena.jar]</path>
+    <path>[lib/protege.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
