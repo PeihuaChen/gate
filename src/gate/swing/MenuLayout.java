@@ -15,7 +15,8 @@
 package gate.swing;
 
 import java.awt.*;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+
 
 /**
  * A layout designed to allow Java menus to make better use of the screen
@@ -67,9 +68,16 @@ public class MenuLayout implements LayoutManager {
   protected Dimension getCompositeSize(Container target,
                                        Dimension[] componentSizes){
     //find the origin of the popup
-    Point location = target.isShowing() ?
-        target.getLocationOnScreen() :
-        new Point(0, 0);
+    Point location = new Point(0, 0);
+    if(target.isShowing()){
+      location = target.getLocationOnScreen();
+    }else{
+      if(target instanceof JPopupMenu){
+        Component invoker = ((JPopupMenu)target).getInvoker();
+        if(invoker != null) location = invoker.getLocationOnScreen();
+      }
+    }
+
     //correct offscreen showing
     if(location.x < 0 || location.y < 0){
       location.x = Math.max(0, location.x);
@@ -83,12 +91,12 @@ public class MenuLayout implements LayoutManager {
     if (gc != null) {
       contentsBounds = gc.getBounds();
       screenInsets = toolkit.getScreenInsets(gc);
+    }else{
     }
 
     // take screen insets (e.g. taskbar) into account
     contentsBounds.width -= screenInsets.left + screenInsets.right;
     contentsBounds.height -= screenInsets.top + screenInsets.bottom;
-
     //take the location into account assuming that the largest side will be used
     contentsBounds.height = Math.max(location.y,
                                      contentsBounds.height - location.y);
@@ -97,7 +105,6 @@ public class MenuLayout implements LayoutManager {
     Insets insets = target.getInsets();
     contentsBounds.width -= insets.left + insets.right;
     contentsBounds.height -= insets.top + insets.bottom;
-
     Dimension dim = new Dimension(0, 0);
     int previousColumnsWidth = 0;
     int previousColumnsHeight = 0;
@@ -134,6 +141,12 @@ public class MenuLayout implements LayoutManager {
    */
   protected GraphicsConfiguration findGraphicsConfiguration(Component target){
     GraphicsConfiguration gc = null;
+    if(!target.isShowing()){
+      if(target instanceof JPopupMenu){
+        Component invoker = ((JPopupMenu)target).getInvoker();
+        if(invoker != null) target = invoker;
+      }
+    }
     if(target.isShowing()){
       Point position = target.getLocationOnScreen();
       Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -172,68 +185,6 @@ public class MenuLayout implements LayoutManager {
   }
 
 
-  /**
-   * Centers the elements in the specified column, if there is any slack.
-   * @param target the component which needs to be moved
-   * @param x the x coordinate
-   * @param y the y coordinate
-   * @param width the width dimensions
-   * @param height the height dimensions
-   * @param columnStart the beginning of the column
-   * @param columnEnd the the ending of the column
-   */
-  private void moveComponents(Container target, int x, int y, int width,
-                              int height, int columnStart, int columnEnd) {
-    for (int i = columnStart; i < columnEnd; i++) {
-      Component m = target.getComponent(i);
-      Rectangle mbounds = m.getBounds();
-      if (m.isVisible()) {
-        m.setLocation(x + (width - mbounds.width) / 2, y);
-        y += mbounds.height;
-      }
-    }
-  }
-
-  /**
-   * Lays out the container.
-   * @param target the specified component being laid out.
-   * @see Container
-   */
-  public void layoutContainer1(Container target) {
-    Insets insets = target.getInsets();
-    Rectangle bounds = target.getBounds();
-    int maxheight = bounds.height - (insets.top + insets.bottom);
-    int nmembers = target.getComponentCount();
-    int y = 0;
-    int x = insets.left;
-    int rowv = 0;
-    int start = 0;
-
-    for (int i = 0; i < nmembers; i++) {
-      Component m = target.getComponent(i);
-      if (m.isVisible()) {
-        Dimension d = m.getPreferredSize();
-        m.setSize(d.width, d.height);
-
-        if ( (y == 0) || ( (y + d.height) <= maxheight)) {
-          y += d.height;
-          rowv = Math.max(rowv, d.width);
-        }
-        else {
-          moveComponents(target, x, insets.top , rowv, maxheight - y,
-                         start, i);
-          x += rowv;
-          y = d.height;
-          rowv = d.width;
-          start = i;
-        }
-      }
-    }
-    moveComponents(target, x, insets.top, rowv, maxheight - y, start,
-                   nmembers);
-  }
-
-
   public void layoutContainer(Container target) {
     Insets insets = target.getInsets();
     Rectangle bounds = target.getBounds();
@@ -257,7 +208,7 @@ public class MenuLayout implements LayoutManager {
       Component comp = target.getComponent(i);
       if (comp.isVisible()) {
         Dimension d = comp.getPreferredSize();
-        comp.setSize(d.width, d.height);
+        comp.setSize(d);
         if (y + d.height <= maxheight) {
           comp.setLocation(x, y);
           y += d.height;
