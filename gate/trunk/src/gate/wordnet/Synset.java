@@ -35,9 +35,9 @@ public interface Synset {
 
   public WordSense getWordSense(int offset);
 
-  public List getSemanticRealtions();
+  public List getSemanticRealtions() throws WordNetException;
 
-  public List getSemanticRealtions(int type);
+  public List getSemanticRealtions(int type) throws WordNetException;
 
 }
 

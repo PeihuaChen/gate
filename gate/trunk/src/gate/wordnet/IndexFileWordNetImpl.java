@@ -16,6 +16,7 @@
 package gate.wordnet;
 
 import java.util.Iterator;
+import java.util.List;
 import java.io.*;
 
 import net.didion.jwnl.*;
@@ -59,6 +60,11 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   } // init()
 
 
+  public Dictionary getJWNLDictionary() {
+    return this.wnDictionary;
+  }
+
+
   public void setPropertyFile(File properties) {
 
     //0.
@@ -84,12 +90,11 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   }
 
 
-  public Iterator getSynsets(int POS)
+  public Iterator getSynsets(int _pos)
     throws WordNetException {
 
-    net.didion.jwnl.data.POS pos = null;
-
-    switch(POS) {
+    net.didion.jwnl.data.POS pos = WNHelper.int2POS(_pos);
+/*    switch(POS) {
 
       case WordNet.POS_ADJECTIVE:
         pos = net.didion.jwnl.data.POS.ADJECTIVE;
@@ -110,7 +115,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
       default:
         throw new IllegalArgumentException();
     }
-
+*/
     try {
       net.didion.jwnl.data.Synset jwnSynset = null;
 
@@ -185,6 +190,16 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   public void setDataStore(DataStore dataStore) throws PersistenceException{
     throw new UnsupportedOperationException();
   }
+
+
+  public List lookupWord(String lemma){
+    throw new MethodNotImplementedException();
+  }
+
+  public List lookupWord(String lemma, int pos){
+    throw new MethodNotImplementedException();
+  }
+
 
   class SynsetIterator implements java.util.Iterator {
 

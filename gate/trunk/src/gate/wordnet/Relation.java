@@ -46,10 +46,11 @@ public interface Relation {
 
   public int getType();
 
-  public Relation getInverse();
+  public int getInverseType();
 
-  public String getSymbol();
+  public String getLabel();
 
+  public boolean isApplicableTo(int pos);
 
 }
 

@@ -25,23 +25,21 @@ import gate.event.*;
  */
 public interface WordSense {
 
-  public Iterator getWordSenses();
-
   public Word getWord();
 
   public int getPOS();
 
   public Synset getSynset();
 
-  public int getSenseNumner();
+  public int getSenseNumber();
 
   public int getOrderInSynset();
 
   public boolean isSemcor();
 
-  public Iterator getLexicalRealtions();
+  public List getLexicalRealtions();
 
-  public Iterator getLexicalRealtions(int type);
+  public List getLexicalRealtions(int type);
 
 }
 

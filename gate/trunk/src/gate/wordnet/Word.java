@@ -25,7 +25,7 @@ import gate.event.*;
  */
 public interface Word {
 
-  public Iterator getWordSenses();
+  public List getWordSenses() throws WordNetException;
 
   public String getLemma();
 
