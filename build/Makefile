@@ -10,7 +10,7 @@
 #
 ############################################################################
 
-PKGS=	gate gate.util gate.impl.ag
+PKGS=	gate gate.util gate.impl.ag gate.annotation
 CP=	-classpath \
 ../classes:../lib/junit.jar
 SP=	-sourcepath ../src
@@ -41,6 +41,9 @@ list:
 ############################################################################
 #
 # $Log$
+# Revision 1.7  2000/02/07 16:48:12  hamish
+# added annotation pkg
+#
 # Revision 1.6  2000/01/28 17:08:18  hamish
 # added impl/ag package
 #
