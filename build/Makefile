@@ -105,6 +105,10 @@ jape: ../src/gate/jape/parser/ParseCpsl.java \
 	cd ../src/gate/jape/parser; \
 	../../../../build/jdk.sh java -cp ../../../../lib/JavaCC.zip \
 	  COM.sun.labs.javacc.Main ParseCpsl.jj
+# if we want to put .japes into the jar file, uncomment the below
+#	cd ../src && for f in `find . -name '*.jape' -print`; \
+#	do cp $$f ../classes/$$f; done
+
 ../src/gate/jape/parser/ParseCpsl.html: ../src/gate/jape/parser/ParseCpsl.jj \
   ../src/gate/jape/parser/ParseCpslPlain.html
 	cd ../src/gate/jape/parser; \
