@@ -24,6 +24,12 @@ Read this documentation along with a copy of the
 <A HREF=CookBook.txt>source code</A>.
 
 <P>
+Rule 1: if it's not in the <TT>gate</TT> package, don't use it!
+Contact the <A HREF=mailto:santa@north.pole>GATE development team</A>
+and tell them what you're trying to do, and we'll try and make that
+available at the top level. (The other packages are for internal use.)
+
+<P>
 The CookBook is set up as
 part of the GATE test suite (using the JUnit framework), so there's an easy
 way to run the examples (viz.,
