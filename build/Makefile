@@ -39,7 +39,8 @@ COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
 # having the main test class as first target, and -Xdepend in the (1.2)
 # javac options, means that most classes get compiled by a single call
 # to javac
-all: ../classes/gate/TestGate.class classes resources
+all: ../classes/gate/TestGate.class classes resources \
+	TestJdk.jar TestResources.jar
 
 # build the whole thing
 everything: depend all jar docs internaldocs test
@@ -99,7 +100,7 @@ jaclsh:
 docs:
 	./jdk.sh \
 	  -s '-link http://java.sun.com/products/jdk/1.3/docs/api/' \
-	  javadoc $(SP) $(CP) -public \
+	  javadoc $(SP) $(CP) -J-Xmx200m -public \
 	  -d ../doc/javadoc $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/gate/CookBook.txt
 
@@ -107,7 +108,7 @@ docs:
 internaldocs: 
 	./jdk.sh \
 	  -s '-link http://redmires.dcs.shef.ac.uk/java1.3docs/api/' \
-	  javadoc $(SP) $(CP) -private -use \
+	  javadoc $(SP) $(CP) -J-Xmx200m -private -use \
 	  -d ../doc/javadoc/internal $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
 
@@ -128,7 +129,7 @@ java2html:
 
 # delete all the class files etc. (doesn't delete gate.jar)
 clean:
-	rm -f classes.jar
+	rm -f classes.jar TestJdk.jar TestResources.jar
 	rm -rf `find ../classes/* -print |grep -v CVS` \
 	  `find .. -name '*.~*' -print`
 
@@ -167,11 +168,17 @@ japefiles:
 	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
 	  COM.sun.labs.jjdoc.JJDocMain  ParseCpsl.jj
 
+# make the resources test jar
+TestResources.jar: testpkg/TestPR1.java testpkg/TestPR2.java \
+	testpkg/creole.xml
+	./jdk.sh javac -classpath ../classes -d testpkg testpkg/Test*.java
+	cd testpkg && ../jdk.sh jar cvf ../TestResources.jar \
+	  testpkg/Test*.class creole.xml
+
 # make the testpkg.Dummy jar used by TestJdk to test class reloading
 TestJdk.jar: testpkg/Dummy.java
-	$(COMPILE) testpkg/Dummy.java
-	cd ../classes && ../build/jdk.sh jar cvf TestJdk.jar testpkg; \
-	mv TestJdk.jar ../build; rm -r testpkg
+	./jdk.sh javac -classpath ../classes -d testpkg testpkg/Dummy.java
+	cd testpkg && ../jdk.sh jar cvf ../TestJdk.jar testpkg/Dummy.class
 
 # make a list of gate packages
 gatepackages:
