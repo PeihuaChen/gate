@@ -205,7 +205,21 @@ public class OracleDataStore extends JDBCDataStore {
       }
     }
 
-    //let the world know about it
+    //5. delete from the list of dependent resources
+    boolean resourceFound = false;
+    Iterator it = this.dependentResources.iterator();
+    while (it.hasNext()) {
+      LanguageResource lr = (LanguageResource)it.next();
+      if (lr.getLRPersistenceId().equals(lrId)) {
+        resourceFound = true;
+        it.remove();
+        break;
+      }
+    }
+
+    Assert.assertTrue(resourceFound);
+
+    //6. let the world know about it
     fireResourceDeleted(
       new DatastoreEvent(this, DatastoreEvent.RESOURCE_DELETED, null, lrId));
   }
@@ -213,14 +227,16 @@ public class OracleDataStore extends JDBCDataStore {
   private void deleteDocument(Long lrId)
   throws PersistenceException {
 
-    Long ID = (Long)lrId;
+    //0. preconditions
+    Assert.assertNotNull(lrId);
 
     CallableStatement stmt = null;
 
+    //1. delete from DB
     try {
       stmt = this.jdbcConn.prepareCall(
                       "{ call "+Gate.DB_OWNER+".persist.delete_document(?) }");
-      stmt.setLong(1,ID.longValue());
+      stmt.setLong(1,lrId.longValue());
       stmt.execute();
     }
     catch(SQLException sqle) {
@@ -340,7 +356,6 @@ public class OracleDataStore extends JDBCDataStore {
   public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
   throws PersistenceException,SecurityException {
 
-//System.out.println("adopt called...");
     LanguageResource result = null;
 
     //-1. preconditions
@@ -2085,7 +2100,15 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.execute();
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't change document data: ["+ sqle.getMessage()+"]");
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR :
+          throw new PersistenceException("invalid LR supplied: no such document: ["+
+                                                            sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException("can't change document data: ["+
+                                                            sqle.getMessage()+"]");
+      }
     }
     finally {
       DBHelper.cleanup(stmt);
@@ -2370,7 +2393,6 @@ public class OracleDataStore extends JDBCDataStore {
     Iterator it = addedSets.iterator();
     while (it.hasNext()) {
       String setName = (String)it.next();
-System.out.println("set name=["+setName+"]");
       AnnotationSet aset = (AnnotationSet)doc.getNamedAnnotationSets().get(setName);
 
       Assert.assertNotNull(aset);
