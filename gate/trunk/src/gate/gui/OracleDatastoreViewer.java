@@ -26,6 +26,7 @@ import java.util.*;
 import java.text.NumberFormat;
 
 import gate.event.*;
+import java.beans.*;
 
 public class OracleDatastoreViewer extends JTree
                                    implements VisualResource,
@@ -67,7 +68,17 @@ public class OracleDatastoreViewer extends JTree
    */
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
-    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInf = null;
+    try {
+      resBeanInf = Introspector.getBeanInfo(this.getClass(), Object.class);
+    } catch(Exception e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get bean info for resource " + this.getClass().getName()
+        + Strings.getNl() + "Introspector exception was: " + e
+      );
+    }
+    AbstractResource.setParameterValue(this, resBeanInf, paramaterName, parameterValue);
   }
 
   /**

@@ -28,6 +28,7 @@ import gate.*;
 import gate.gui.*;
 import gate.swing.*;
 import gate.creole.*;
+import java.beans.*;
 
 /**
   * This class compare two annotation sets on annotation type given by the
@@ -342,7 +343,17 @@ public class AnnotationDiff extends AbstractVisualResource{
    */
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
-    AbstractResource.setParameterValue(this, paramaterName, parameterValue);
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInf = null;
+    try {
+      resBeanInf = Introspector.getBeanInfo(this.getClass(), Object.class);
+    } catch(Exception e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get bean info for resource " + this.getClass().getName()
+        + Strings.getNl() + "Introspector exception was: " + e
+      );
+    }
+    AbstractResource.setParameterValue(this, resBeanInf, paramaterName, parameterValue);
   }
 
   /**
