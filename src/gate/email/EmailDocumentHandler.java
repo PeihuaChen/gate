@@ -147,21 +147,21 @@ public class EmailDocumentHandler implements StatusReporter{
           // if no e-mail was read before, now there is at list one message
           // read
           emailReadBefore = true;
-          // the cursor is updated with the length of the line + the
-          // new line char
-          cursor += line.length() + nlSize;
-          // E-mail starts imediately after this line which sepatates 2
-          // messages
+          // E-mail starts imediately from the beginning of this line which
+          // sepatates 2 messages.
           startEmail = cursor;
           // E-mail header starts also from here
           startHeader = cursor;
-          // we are inside an e-mail
+          // The cursor is updated with the length of the line + the
+          // new line char
+          cursor += line.length() + nlSize;
+          // We are inside an e-mail
           insideAnEmail = true;
-          // next is the E-mail header
+          // Next is the E-mail header
           insideHeader = true;
-          // no field inside header has been read before
+          // No field inside header has been read before
           fieldReadBefore = false;
-          // read the next line
+          // Read the next line
           continue;
       }//if (lineBeginsMessage(line))
       if (false == insideAnEmail){
@@ -283,9 +283,10 @@ public class EmailDocumentHandler implements StatusReporter{
                                        throws gate.util.InvalidOffsetException{
     if (aFeatureMap == null)
         aFeatureMap = new SimpleFeatureMapImpl();
-    basicAS.add(new Long(anAnnotationStart), new Long(anAnnotationEnd),
-                anAnnotationName, aFeatureMap
-                );
+    basicAS.add( new Long(anAnnotationStart),
+                 new Long(anAnnotationEnd),
+                 anAnnotationName.toLowerCase(),
+                 aFeatureMap);
   }//createAnnotation
   /**
     * Tests if the line begins an e-mail message
