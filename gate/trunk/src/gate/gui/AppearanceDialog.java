@@ -24,16 +24,16 @@ import java.beans.*;
 
 import gate.swing.*;
 
-public class ApperanceDialog extends JDialog {
+public class AppearanceDialog extends JDialog {
 
-  public ApperanceDialog(Frame owner, String title, boolean modal,
+  public AppearanceDialog(Frame owner, String title, boolean modal,
                          Component[] targets) {
     super(owner, title, modal);
     this.targets = targets;
     init();
   }// ApperanceDialog
 
-  public ApperanceDialog(Dialog owner, String title, boolean modal,
+  public AppearanceDialog(Dialog owner, String title, boolean modal,
                          Component[] targets) {
     super(owner, title, modal);
     this.targets = targets;
@@ -161,7 +161,7 @@ public class ApperanceDialog extends JDialog {
     }
 
     JFrame frame = new JFrame("Foo frame");
-    final ApperanceDialog apperanceDialog1 = new ApperanceDialog(frame,
+    final AppearanceDialog apperanceDialog1 = new AppearanceDialog(frame,
                                                            "Font appearance",
                                                            true,
                                                            new Component[]{frame});
@@ -200,7 +200,7 @@ public class ApperanceDialog extends JDialog {
 
   Component[] targets;
 
-  static String[] menuKeys = new String[]{"CheckBoxMenuItem.acceleratorFont",
+  public static String[] menuKeys = new String[]{"CheckBoxMenuItem.acceleratorFont",
                                           "CheckBoxMenuItem.font",
                                           "Menu.acceleratorFont",
                                           "Menu.font",
@@ -210,7 +210,7 @@ public class ApperanceDialog extends JDialog {
                                           "RadioButtonMenuItem.acceleratorFont",
                                           "RadioButtonMenuItem.font"};
 
-  static String[] componentsKeys =
+  public static String[] componentsKeys =
                              new String[]{"Button.font",
                                           "CheckBox.font",
                                           "ColorChooser.font",
@@ -235,12 +235,11 @@ public class ApperanceDialog extends JDialog {
                                           "Tree.font",
                                           "Viewport.font"};
 
-  static String[] textComponentsKeys =
+  public static String[] textComponentsKeys =
                              new String[]{"EditorPane.font",
                                           "TextArea.font",
                                           "TextField.font",
                                           "TextPane.font"};
-
 
   class ApplyAction extends AbstractAction{
     ApplyAction(){
@@ -251,7 +250,7 @@ public class ApperanceDialog extends JDialog {
       setUIDefaults(menuKeys, new FontUIResource(menusFont));
       setUIDefaults(componentsKeys, new FontUIResource(componentsFont));
       setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
-      SwingUtilities.updateComponentTreeUI(ApperanceDialog.this);
+      SwingUtilities.updateComponentTreeUI(AppearanceDialog.this);
       for(int i = 0; i< targets.length; i++){
         if(targets[i] instanceof Window) {
           SwingUtilities.updateComponentTreeUI(targets[i]);
@@ -285,7 +284,7 @@ public class ApperanceDialog extends JDialog {
       setUIDefaults(componentsKeys, new FontUIResource(oldComponentsFont));
       setUIDefaults(textComponentsKeys, new FontUIResource(oldTextComponentsFont));
       SwingUtilities.updateComponentTreeUI(
-                                  SwingUtilities.getRoot(ApperanceDialog.this));
+                                  SwingUtilities.getRoot(AppearanceDialog.this));
       for(int i = 0; i< targets.length; i++){
         if(targets[i] instanceof Window){
           SwingUtilities.updateComponentTreeUI(targets[i]);

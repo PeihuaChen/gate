@@ -25,9 +25,13 @@ import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.*;
+import java.awt.GraphicsEnvironment;
+
 import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
+import javax.swing.plaf.FontUIResource;
+
 import java.beans.*;
 
 import java.util.*;
@@ -91,7 +95,7 @@ public class MainFrame extends JFrame
   JToolBar toolbar;
   static JFileChooser fileChooser;
 
-  ApperanceDialog appearanceDialog;
+  AppearanceDialog appearanceDialog;
   CartoonMinder animator;
   TabBlinker logBlinker;
   NewResourceDialog newResourceDialog;
@@ -361,17 +365,6 @@ public class MainFrame extends JFrame
     );
     box = new Box(BoxLayout.X_AXIS);
     box.add(verLbl);
-/*
-    JEditorPane authPane = null;
-    try{
-      authPane = new JEditorPane(new URL("gate:/authors.html"));
-    }catch(MalformedURLException mue){
-      mue.printStackTrace(Err.getPrintWriter());
-    }catch(IOException ioe){
-      ioe.printStackTrace(Err.getPrintWriter());
-    }
-    box.add(authPane);
-*/
     box.add(Box.createHorizontalGlue());
 
     splashBox.add(box);
@@ -424,7 +417,7 @@ public class MainFrame extends JFrame
 
 
     JMenu optionsMenu = new JMenu("Options");
-    appearanceDialog = new ApperanceDialog(this, "Fonts", true, targets);
+    appearanceDialog = new AppearanceDialog(this, "Fonts", true, targets);
     optionsMenu.add(new XJMenuItem(new AbstractAction("Fonts"){
       {
         putValue(SHORT_DESCRIPTION, "Set the fonts used in the application");
@@ -962,6 +955,41 @@ public class MainFrame extends JFrame
       fileChooser.setMultiSelectionEnabled(false);
     }
     iconByName = new HashMap();
+    //guess the Unicode font for the platform
+    String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().
+                                             getAvailableFontFamilyNames();
+    String unicodeFontName = null;
+    for(int i = 0; i < fontNames.length; i++){
+      if(fontNames[i].equalsIgnoreCase("Arial Unicode MS")){
+        unicodeFontName = fontNames[i];
+        break;
+      }
+      if(fontNames[i].toLowerCase().indexOf("unicode") != -1){
+        unicodeFontName = fontNames[i];
+      }
+    }//for(int i = 0; i < fontNames.length; i++)
+    if(unicodeFontName != null){
+      FontUIResource font = new FontUIResource(unicodeFontName,
+                                               FontUIResource.PLAIN,
+                                               12);
+      //set font for text components
+      String[] keys = AppearanceDialog.textComponentsKeys;
+      for(int i = 0; i < keys.length; i++){
+        UIManager.put(keys[i], font);
+      }
+
+      //set font for menus
+      keys = AppearanceDialog.menuKeys;
+      for(int i = 0; i < keys.length; i++){
+        UIManager.put(keys[i], font);
+      }
+
+      //set font for other components
+      keys = AppearanceDialog.componentsKeys;
+      for(int i = 0; i < keys.length; i++){
+        UIManager.put(keys[i], font);
+      }
+    }//if(unicodeFontName != null)
   }
 
 /*
@@ -1245,11 +1273,13 @@ public class MainFrame extends JFrame
           newResourceDialog.show(rData);
         }
       };
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                 runnable,
-                                 "MainFrame2");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
+      SwingUtilities.invokeLater(runnable);
+
+//      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+//                                 runnable,
+//                                 "MainFrame2");
+//      thread.setPriority(Thread.MIN_PRIORITY);
+//      thread.start();
     }
 
     ResourceData rData;

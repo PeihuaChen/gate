@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
 import java.awt.event.*;
 import java.util.EventObject;
 
+import java.beans.*;
+
 
 /**
  * A TreeTable component. That is a component that looks like a table apart
@@ -50,11 +52,23 @@ public class JTreeTable extends XJTable {
     super();
     this.treeTableModel = model;
 
-    // Create the tree. It will be used by the table renderer to generate
-    //nice pictures
+    initLocalData();
+    initGuiComponents();
+    initListeners();
+
+    super.setSortable(false);
+  }
+
+  protected void initLocalData(){
+  }
+
+  protected void initGuiComponents(){
+    // Create the tree. It will be used by the table renderer to draw the cells
+    //in the first column
     tree = new CustomJTree();
     tree.setModel(treeTableModel);
     tree.setEditable(false);
+
     // Install a tableModel representing the visible rows in the tree.
     super.setModel(new TreeTableModelAdapter(treeTableModel));
 
@@ -66,22 +80,27 @@ public class JTreeTable extends XJTable {
       }
     });
 
-    //Install the renderer
-    //getColumnModel().getColumn(0).setCellRenderer(new TreeTableCellRenderer());
-    //getColumnModel().getColumn(0).setCellEditor(new TreeTableCellEditor());
+    //Install the renderer and editor
+    getColumnModel().getColumn(0).setCellRenderer(new TreeTableCellRenderer());
+    getColumnModel().getColumn(0).setCellEditor(new TreeTableCellEditor());
 
-    //getColumn(getColumnName(0)).setCellRenderer(new TreeTableCellRenderer());
-    setDefaultRenderer(TreeTableModel.class, new TreeTableCellRenderer());
-    setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
-    //setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
+    setShowGrid(false);
+  }
+
+  protected void initListeners(){
     //install the mouse listener that will forward the mouse events to the tree
     addMouseListener(new MouseHandler());
 
-    setShowGrid(false);
-
-    super.setSortable(false);
+    getColumnModel().getColumn(0).addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        if(e.getPropertyName().equals("width")){
+          int width = ((Number)e.getNewValue()).intValue();
+          int height = tree.getSize().height;
+          tree.setSize(width, height);
+        }
+      }
+    });
   }
-
 
   /**
    * Overrides the setSortable() method from {@link XJTable} so the table is NOT
@@ -113,7 +132,7 @@ public class JTreeTable extends XJTable {
 
   /**
    * The renderer used to display the table cells containing tree nodes.
-   * Will use an inernal JTree object to paint the nodes.
+   * Will use an internal JTree object to paint the nodes.
    */
   public class TreeTableCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table,
@@ -121,41 +140,10 @@ public class JTreeTable extends XJTable {
                      boolean isSelected,
                      boolean hasFocus,
                      int row, int column) {
-
-      tree.setBackground(table.getBackground());
-      tree.setSize(tree.getPreferredSize());
-      visibleRow = row;
-
-      Rectangle rect = tree.getRowBounds(row);
-      tree.setPreferredSize(null);
-      this.setPreferredSize(new Dimension(tree.getPreferredSize().width,
-                                          rect.height));
-      //get the tooltip
-      Component comp = tree.getCellRenderer().getTreeCellRendererComponent(
-          tree, tree.getPathForRow(row).getLastPathComponent(),
-          isSelected, false, false,row,hasFocus);
-      if(comp != null && comp instanceof JComponent){
-        setToolTipText(((JComponent)comp).getToolTipText());
-      }else{
-        setToolTipText(null);
-      }
-      return this;
+      tree.setVisibleRow(row);
+      return tree;
     }
-
-    /**
-     * This tricks the tree into doing the job for us :)
-     */
-    public void paint(Graphics g){
-      Rectangle rect = tree.getRowBounds(visibleRow);
-      Rectangle bounds = g.getClipBounds();
-      g.translate(0, -rect.y);
-      g.setClip(bounds.x, rect.y, bounds.width, rect.height);
-      tree.paint(g);
-    }
-
-    int visibleRow;
-  }
-
+  }//public class TreeTableCellRenderer extends DefaultTableCellRenderer
 
   /**
    * The editor used to edit the nodes in the tree. It only forwards the
@@ -167,6 +155,7 @@ public class JTreeTable extends XJTable {
       super(new JTextField());
       //placeHolder = new PlaceHolder();
       editor = tree.getCellEditor();
+      setClickCountToStart(0);
     }
 
     public Component getTableCellEditorComponent(JTable table,
@@ -174,7 +163,19 @@ public class JTreeTable extends XJTable {
                                                  boolean isSelected,
                                                  int row,
                                                  int column) {
+
       editor = tree.getCellEditor();
+
+      editor.addCellEditorListener(new CellEditorListener() {
+        public void editingStopped(ChangeEvent e) {
+          fireEditingStopped();
+        }
+
+        public void editingCanceled(ChangeEvent e) {
+          fireEditingCanceled();
+        }
+      });
+
       editorComponent = editor.getTreeCellEditorComponent(
                     tree, tree.getPathForRow(row).getLastPathComponent(),
                     isSelected, tree.isExpanded(row),
@@ -182,20 +183,15 @@ public class JTreeTable extends XJTable {
                       tree.getPathForRow(row).getLastPathComponent()
                     ),
                     row);
-      //return placeHolder;
-      return editorComponent;
+      Box box = Box.createHorizontalBox();
+      box.add(Box.createHorizontalStrut(tree.getRowBounds(row).x));
+      box.add(editorComponent);
+      return box;
+//      return editorComponent;
     }
 
     public Object getCellEditorValue() {
       return editor == null ? null : editor.getCellEditorValue();
-    }
-/*
-    public boolean isCellEditable(EventObject anEvent){
-      return editor == null ? false : editor.isCellEditable(anEvent);
-    }
-
-    public boolean shouldSelectCell(EventObject anEvent){
-      return editor == null ? false : editor.shouldSelectCell(anEvent);
     }
 
     public boolean stopCellEditing(){
@@ -206,32 +202,8 @@ public class JTreeTable extends XJTable {
       if(editor != null) editor.cancelCellEditing();
     }
 
-    public void addCellEditorListener(CellEditorListener l){
-      if(editor != null) editor.addCellEditorListener(l);
-    }
-
-    public void removeCellEditorListener(CellEditorListener l){
-      if(editor != null) editor.removeCellEditorListener(l);
-    }
-*/
-/*
-    class PlaceHolder extends Component{
-      public void setBounds(Rectangle rect){
-        editorComponent.setBounds(rect);
-      }
-
-      public void setBounds(int x, int y, int w, int h){
-        editorComponent.setBounds(x, y, w, h);
-      }
-
-      public void paint(Graphics g){
-        editorComponent.paint(g);
-      }
-    }//class PlaceHolder extends Component
-*/
     TreeCellEditor editor;
     Component editorComponent;
-//    PlaceHolder placeHolder;
   }
 
   /**
@@ -359,7 +331,8 @@ public class JTreeTable extends XJTable {
     }
 
     public void setValueAt(Object value, int row, int column) {
-      treeTableModel.setValueAt(value, nodeForRow(row), column);
+      Object node = nodeForRow(row);
+      treeTableModel.setValueAt(value, node, column);
     }
   }//class TreeTableModelAdapter extends AbstractTableModel
 
@@ -367,14 +340,41 @@ public class JTreeTable extends XJTable {
    * The JTree used for rendering the first column.
    */
   class CustomJTree extends JTree {
-    public void setEditable(boolean editable){
-      super.setEditable(false);
-    }
 
     public void updateUI(){
       super.updateUI();
       setRowHeight(0);
     }
+
+
+    public void setVisibleRow(int row){
+      visibleRow = row;
+    }
+
+    /**
+     * Paints only the current cell in the table
+     */
+    public void paint(Graphics g){
+      Rectangle rect = getRowBounds(visibleRow);
+      Rectangle bounds = g.getClipBounds();
+      g.translate(0, -rect.y);
+      g.setClip(bounds.x, rect.y, bounds.width, rect.height);
+      super.paint(g);
+    }
+
+
+    public Dimension getPreferredSize(){
+      return new Dimension(super.getPreferredSize().width,
+                           getRowBounds(visibleRow).height);
+    }
+
+
+    public void validate(){}
+    public void revalidate(){}
+    public void repaint(long tm, int x, int y, int width, int height){}
+    public void repaint(Rectangle r){}
+
+    protected int visibleRow;
   }
 
 /*

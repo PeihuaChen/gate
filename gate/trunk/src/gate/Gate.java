@@ -62,6 +62,9 @@ public class Gate
         + "|" + "gate.util.protocols"
     );
 
+//    System.setProperty("javax.xml.parsers.SAXParserFactory",
+//                             "org.apache.crimson.jaxp.SAXParserFactoryImpl");
+
     // create class loader and creole register if they're null
     if(classLoader == null)
       classLoader = new GateClassLoader();
