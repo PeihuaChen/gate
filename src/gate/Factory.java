@@ -358,7 +358,8 @@ public abstract class Factory {
   public static void deleteResource(Resource resource) {
     ResourceData rd =
       (ResourceData) reg.get(resource.getClass().getName());
-    rd.removeInstantiation(resource);
+    if(rd!= null)
+      rd.removeInstantiation(resource);
     resource.cleanup();
     creoleProxy.fireResourceUnloaded(
       new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
