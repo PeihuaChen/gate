@@ -10,12 +10,18 @@
  *
  *  Marin Dimitrov, 19/Sep/2001
  * 
- *  auto generated: Tue Oct 23 18:41:50 2001
+ *  auto generated: Thu Oct 25 12:20:09 2001
  *
  *  $Id$
  *
  */
 
+
+CREATE UNIQUE INDEX XT_ANNOT_SET_01 ON T_ANNOT_SET
+(
+       AS_DOC_ID                      ,
+       AS_NAME                        
+);
 
 CREATE UNIQUE INDEX XT_ANNOTATION_TYPE_01 ON T_ANNOTATION_TYPE
 (
