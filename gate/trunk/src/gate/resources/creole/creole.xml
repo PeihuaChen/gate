@@ -309,6 +309,9 @@
       <PARAMETER NAME="annotationTypes" RUNTIME="true" DEFAULT="Person;Location;Date">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="dumpTypes" RUNTIME="true" OPTIONAL="true" DEFAULT="Person;Location;Date" COMMENT="A list of the new names to be used instead of the ANNIE types given for dumping">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="outputFileUrl" RUNTIME="true" OPTIONAL="true" COMMENT="The url of the output file" SUFFIXES="xml;html;txt">java.net.URL</PARAMETER>
+      <PARAMETER NAME="includeFeatures" OPTIONAL="true" COMMENT="Whether or not to include features when exporting the GATE annotations" DEFAULT="false">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="useSuffixForDumpFiles" OPTIONAL="true" COMMENT="Whether or not to use a suffix for the dump files" DEFAULT="true">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="suffixForDumpFiles" OPTIONAL="true" COMMENT="The suffix used for files, if suffix adding is set to true" DEFAULT=".gate">java.lang.String</PARAMETER>      
     </RESOURCE>
   </CREOLE>
   <!-- creole.xml for Controllers -->
