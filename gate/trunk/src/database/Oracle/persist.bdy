@@ -374,6 +374,26 @@ create or replace package body persist is
      returning ft_id into p_feat_id;
      
   end;
+
+
+  /*******************************************************************************************/
+  procedure change_content_type(p_cont_id        in number,
+                                p_new_type       in number)     
+  is         
+  begin
+    
+    if (p_new_type not in (persist.CHARACTER_CONTENT,
+                           persist.BINARY_CONTENT,
+                           persist.EMPTY_CONTENT)) then
+                           
+       raise error.x_invalid_content_type;
+    end if;
+    
+    update t_doc_content
+    set    dc_content_type = p_new_type
+    where  dc_id = p_cont_id;
+      
+  end;
   
 /*begin
   -- Initialization
