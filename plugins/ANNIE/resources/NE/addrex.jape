@@ -120,15 +120,27 @@ Macro: PHONE_PREFIX
 )
   
 //////////////////////////////////////////////////
+Rule: PhoneRegContext
+Priority: 100
+
+(
+ (PHONE_PREFIX)
+)
+(
+
+ (PHONE_AREACODE SPACE)
+ (PHONE_REG)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegContext"}
+
+
 Rule:PhoneReg
 Priority: 20
 // regular types of number
 // 01234 123 456
 // (01234) 123456
 
-(
- (PHONE_PREFIX)?
-)
 (
 
  (PHONE_AREACODE SPACE)
@@ -137,13 +149,38 @@ Priority: 20
 :phoneNumber -->
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneReg"}
 
+Rule: PhoneFullContext
+Priority: 100
+(
+ (PHONE_PREFIX)
+)
+
+(
+ ((PHONE_COUNTRYCODE SPACE) |
+  ({Token.string == "("} 
+   (PHONE_COUNTRYCODE (SPACE)?)
+   {Token.string == ")"})
+ )
+
+ ({Token.string == "("} 
+   {Token.string == "0"} 
+   {Token.string == ")"})?
+
+ ({Token.kind == number,Token.length == "3"}|
+  {Token.kind == number,Token.length == "4"})
+      
+ (SPACE)
+ (PHONE_REG)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneFullContext"}
+
+
 Rule:PhoneFull
 Priority: 50
 // +44 161 222 1234
 // +44 (0)161 222 1234
-(
- (PHONE_PREFIX)?
-)
+
 (
  ((PHONE_COUNTRYCODE SPACE) |
   ({Token.string == "("} 
@@ -175,14 +212,24 @@ Priority: 10
 :phoneNumber --> 
  :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneExt"}
 
+PhoneRegExtContext
+Priority: 80
+(
+ (PHONE_PREFIX)
+)
+(
+
+ (PHONE_AREACODE SPACE)?
+ (PHONE_REG) (SPACE)
+ (PHONE_EXT)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegExtContext"}
+
+
 Rule:PhoneRegExt
 Priority: 30
 
-// 01234 12345 ext. 1234
-// 01234 12345 x1234/5
-(
- (PHONE_PREFIX)?
-)
 (
 
  (PHONE_AREACODE SPACE)?
@@ -244,6 +291,8 @@ Priority: 50
 // www.amazon.com
 
 Rule: Url1
+Priority: 50
+
 (	((({Token.string == "http"}	|
 	   {Token.string == "ftp"})
 	   {Token.string == ":"}
@@ -269,6 +318,38 @@ Rule: Url1
         {Token.string == "."})*
 ):urlAddress -->
 :urlAddress.Url = {kind = "urlAddress", rule = "Url1"}
+
+Rule: UrlContext
+Priority:20
+
+(
+ {Token.string == "at"}
+ (SPACE)?
+ {Token.string == ":"}
+ (SPACE)?
+)
+(
+ ({Token.orth == lowercase}	|
+        {Token.orth == upperInitial}	|
+        {Token.kind == number}		|
+        {Token.kind == punctuation}	|
+        {Token.kind == symbol}		|
+	{Token.string == "."})+ 
+	
+        {Token.string == "."}
+	
+  	({Token.orth == lowercase}	|
+        {Token.orth == upperInitial}	|
+        {Token.kind == number}		|
+        {Token.kind == punctuation}	|
+        {Token.kind == symbol}		|
+	{Token.string == "/"}		|
+        {Token.string == "."})*
+)
+:urlAddress 
+-->
+ :urlAddress.Url = {kind = "urlAddress", rule = "UrlContext"}
+
 
 ////////////////////////////////////////////////////////
 
