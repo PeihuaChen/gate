@@ -1358,47 +1358,47 @@ public class TestPersist extends TestCase
 
 }
 
-//  public void testOracle_01() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase01();
-//  }
-//
-//  public void testOracle_02() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase02();
-//  }
-//
-//  public void testOracle_03() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase03();
-//  }
-//
-//  public void testOracle_04() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase04();
-//  }
-//
-//  public void testOracle_101() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase101();
-//  }
-//
-//  public void testOracle_102() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase102();
-//  }
-//
-//  public void testOracle_103() throws Exception {
-//
-//    prepareDB("oracle");
-//    _testDB_UseCase103();
-//  }
+  public void testOracle_01() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase01();
+  }
+
+  public void testOracle_02() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase02();
+  }
+
+  public void testOracle_03() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase03();
+  }
+
+  public void testOracle_04() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase04();
+  }
+
+  public void testOracle_101() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase101();
+  }
+
+  public void testOracle_102() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase102();
+  }
+
+  public void testOracle_103() throws Exception {
+
+    prepareDB("oracle");
+    _testDB_UseCase103();
+  }
 
   public void testPostgres_01() throws Exception {
 
@@ -1469,35 +1469,35 @@ System.setProperty(Gate.GATE_CONFIG_PROPERTY,"y:/gate.xml")    ;
 */
 
       /* oracle */
-//
-//      test.setUp();
-//      test.testOracle_01();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_02();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_03();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_04();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_101();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_102();
-//      test.tearDown();
-//
-//      test.setUp();
-//      test.testOracle_103();
-//      test.tearDown();
-//
+
+      test.setUp();
+      test.testOracle_01();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_02();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_03();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_04();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_101();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_102();
+      test.tearDown();
+
+      test.setUp();
+      test.testOracle_103();
+      test.tearDown();
+
 
       /* postgres */
 
