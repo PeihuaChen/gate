@@ -111,70 +111,80 @@ public class SimpleFeatureMapImpl
     return true;
   }//subsumes()
 
-	/** Tests if <b>this</b> featureMap object includes aFeatureMap features. <br>
-	  * If the feature map contains <code>class</code> and (optionally) <code>ontology</code> features:<br>
-	  * then the ontologyLR is used to provide ontology based subsume with respect to the subClassOf relations.
-	  * @param ontologyLR an ontology to be used for the subsume
-		* @param aFeatureMap object which will be included  or not in  <b>this</b>
-		* FeatureMap obj.
-		* @return <code>true</code> if <b>this</b> includes aFeatureMap
-		* and <code>false</code> if not.
-		*/
-	public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap) {
+   /** Tests if <b>this</b> featureMap object includes aFeatureMap features. <br>
+   * If the feature map contains <code>class</code> and (optionally) <code>ontology</code> features:<br>
+   * then the ontologyLR is used to provide ontology based subsume with respect to the subClassOf relations.
+   * @param ontologyLR an ontology to be used for the subsume
+   * @param aFeatureMap object which will be included  or not in  <b>this</b>
+   * FeatureMap obj.
+   * @return <code>true</code> if <b>this</b> includes aFeatureMap
+   * and <code>false</code> if not.
+   */
+  public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap) {
 
-		if (ontologyLR == null) { return this.subsumes(aFeatureMap);  }
+    if (ontologyLR == null) {
+      return this.subsumes(aFeatureMap);
+    }
 
-		if (aFeatureMap == null) return true;
+    if (aFeatureMap == null)
+      return true;
 
-		if (this.size() < aFeatureMap.size()) return false;
+    if (this.size() < aFeatureMap.size())
+      return false;
 
-		SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl)aFeatureMap;
+    SimpleFeatureMapImpl sfm = (SimpleFeatureMapImpl) aFeatureMap;
 
-		Object key;
-		Object keyValueFromAFeatureMap;
-		Object keyValueFromThis;
+    Object key;
+    Object keyValueFromAFeatureMap;
+    Object keyValueFromThis;
 
-		for (int i = 0; i < sfm.count; i++) {
-			key = sfm.theKeys[i];
-			keyValueFromAFeatureMap = sfm.theValues[i];
-			int v = super.getSubsumeKey(key);
-			if (v < 0) return false;
-			keyValueFromThis = theValues[v];//was: get(key);
+    for (int i = 0; i < sfm.count; i++) {
+      key = sfm.theKeys[i];
+      keyValueFromAFeatureMap = sfm.theValues[i];
+      int v = super.getSubsumeKey(key);
+      if (v < 0)
+        return false;
+      keyValueFromThis = theValues[v]; //was: get(key);
 
-			if  ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
-						(keyValueFromThis != null && keyValueFromAFeatureMap == null)
-					) return false;
+      if ( (keyValueFromThis == null && keyValueFromAFeatureMap != null) ||
+          (keyValueFromThis != null && keyValueFromAFeatureMap == null)
+          )
+        return false;
 
-			/*ontology aware subsume implementation based on the ontology LR
-			ontotext.bp*/
-			if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
+      /*ontology aware subsume implementation based on the ontology LR
+          ontotext.bp*/
+      if ( (keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
 
-				if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
-					/* ontology aware processing */
-					OClass c1 = ontologyLR.getClassByName(keyValueFromAFeatureMap.toString());
-					OClass c2 = ontologyLR.getClassByName(keyValueFromThis.toString());
+        if (key.equals(LOOKUP_CLASS_FEATURE_NAME)) {
+          // ontology aware processing
 
-					/* no such class in the ontology */
-					if (null== c1 || null== c2) return false;
-					Set subs1;
-					if (!c1.equals(c2)){
-						try {
-							subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
-						} catch (gate.creole.ontology.NoSuchClosureTypeException x) {
-							throw new gate.util.GateRuntimeException(x);
-						}
-						if (!subs1.contains(c2)) return false;
-					}
-				} else {
-					/* processing without ontology awareness */
-					if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
-				}  // else
+          try {
 
-			} // if
-		} // for
+            if (DEBUG) {
+              Out.prln("\nClass in rule: " + keyValueFromAFeatureMap.toString());
+              Out.prln("\nClass in annotation: " + keyValueFromThis.toString());
+              Out.prln("\nisSubClassOf: " +
+                       ontologyLR.isSubClassOf(keyValueFromAFeatureMap.toString(),
+                                               keyValueFromThis.toString()));
+            }
 
-		return true;
-	}//subsumes(ontology)
+            return ontologyLR.isSubClassOf(keyValueFromAFeatureMap.toString(),
+                                           keyValueFromThis.toString());
+          } catch (Exception ex) {
+            throw new gate.util.GateRuntimeException(ex);
+          }
+        }
+        else {
+          /* processing without ontology awareness */
+          if (!keyValueFromThis.equals(keyValueFromAFeatureMap))
+            return false;
+        } // else
+
+      } // if
+    } // for
+
+    return true;
+  } //subsumes(ontology)
 
 
   /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
@@ -342,25 +352,12 @@ public class SimpleFeatureMapImpl
       : should be temporary */
       Ontology o = new OntologyImpl().getOntology(url);
 
-      OClass c1 = o.getClassByName(value1);
-      OClass c2 = o.getClassByName(value2);
+      result = o.isSubClassOf(value1, value2);
 
-      if (null!= c1 && null!= c2) {
-        if (c1.equals(c2)) {
-          result = true;
-        } else {
-          Set subs1;
-          try {
-            subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
-          } catch (gate.creole.ontology.NoSuchClosureTypeException x) {
-            throw new gate.creole.ResourceInstantiationException(x);
-          }
-          if (subs1.contains(c2))
-            result = true;
-        } // else
-      } // if not null classes
     } catch  (gate.creole.ResourceInstantiationException x) {
       x.printStackTrace(Err.getPrintWriter());
+    } catch (gate.creole.ontology.NoSuchClosureTypeException clex) {
+      clex.printStackTrace(Err.getPrintWriter());
     }
     return result;
   } // ontologySubsume
