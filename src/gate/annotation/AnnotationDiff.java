@@ -482,15 +482,10 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Iterate throught all elements from keyList and find those in the response
     // List which satisfies isCompatible() and isPartiallyCompatible() relations
     Iterator keyIterator = aKeyAnnotList.iterator();
-    boolean stopLoop = false;
-    while(keyIterator.hasNext() && !stopLoop){
+    while(keyIterator.hasNext()){
       Annotation keyAnnot = (Annotation) keyIterator.next();
       Iterator responseIterator = aResponseAnnotList.iterator();
-      // There are no elements in responseSet, then quit this loop.
-      if (!responseIterator.hasNext()){
-        stopLoop = true;
-        continue;
-      } // end if
+
       DiffSetElement diffElement = null;
       while(responseIterator.hasNext()){
         Annotation responseAnnot = (Annotation) responseIterator.next();
@@ -552,6 +547,7 @@ public class AnnotationDiff extends AbstractVisualResource{
                 break;
             }// End if
           }// End while
+          // If is still nul then it means that the key annotation is missing
           if (diffElement == null)
             diffElement = new DiffSetElement( keyAnnot,
                                               null,
@@ -582,7 +578,8 @@ public class AnnotationDiff extends AbstractVisualResource{
       responseIter.remove();
     }// End while
 
-    // CALCULATE ALL (NLP) MEASURES
+    // CALCULATE ALL (NLP) MEASURES like
+    // Precistion, Recall and FalsePositive
     if (actual != 0){
 
       precisionStrict =  (double)typeCounter[CORRECT_TYPE]/actual;
@@ -597,10 +594,11 @@ public class AnnotationDiff extends AbstractVisualResource{
       recallAverage = (double) (recallStrict + recallLenient) / 2;
     }// End if
 
+
     int no = 0;
     if (annotationTypeForFalsePositive != null)
-      no =
-         responseDocument.getAnnotations(annotationTypeForFalsePositive).size();
+     no = responseDocument.getAnnotations().get(
+                                      annotationTypeForFalsePositive).size();
     if (no != 0){
       // No error here: the formula is the opposite to recall or precission
       falsePositiveStrict = (double) (typeCounter[SPURIOUS_TYPE] +
