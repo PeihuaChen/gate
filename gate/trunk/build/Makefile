@@ -60,14 +60,15 @@ test: japefiles
 #	  junit.ui.LoadingTestRunner gate.TestGate
 
 # build gate.jar. recursively includes all the .jar and .zip from lib too
-jar: classes.jar tcl japefiles resources
+jar: tcl japefiles resources classes.jar
 	rm -f gate.jar
 	./jdk.sh java -cp classes.jar gate.util.JarFiles gate.jar \
 	  classes.jar ../lib/*.jar ../lib/*.zip
 
 # just the gate classes in a jar
 classes.jar:
-	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar gate
+	cd ../classes && ../build/jdk.sh jar cvf ../build/classes.jar \
+	  gate resources
 
 # copy the resources directory into "classes"
 resources:
@@ -127,6 +128,7 @@ java2html:
 
 # delete all the class files etc. (doesn't delete gate.jar)
 clean:
+	rm -f classes.jar
 	rm -rf `find ../classes/* -print |grep -v CVS` \
 	  `find .. -name '*.~*' -print`
 
