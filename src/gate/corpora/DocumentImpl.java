@@ -985,7 +985,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       // if there are chars to be replaced and if there are, they would be
       // replaced.
       if (!offsets2CharsMap.isEmpty()){
-        Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+        Long offsChar = (Long) offsets2CharsMap.lastKey();
         while( !offsets2CharsMap.isEmpty() &&
                        offsChar.intValue() >= offset.intValue()){
           // Replace the char at offsChar with its corresponding entity form
@@ -996,7 +996,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
           offsets2CharsMap.remove(offsChar);
           // Investigate next offsChar
           if (!offsets2CharsMap.isEmpty())
-            offsChar = (Integer) offsets2CharsMap.lastKey();
+            offsChar = (Long) offsets2CharsMap.lastKey();
         }// End while
       }// End if
       // Insert tmpBuff to the location where it belongs in docContStrBuff
@@ -1006,7 +1006,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     // So, if there are any more items in offsets2CharsMap they need to be
     // replaced
     while (!offsets2CharsMap.isEmpty()){
-      Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+      Long offsChar = (Long) offsets2CharsMap.lastKey();
       // Replace the char with its entity
       docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
       (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
@@ -1026,6 +1026,11 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     StringBuffer docContStrBuff = filterNonXmlChars(new StringBuffer(content));
     if (aDumpAnnotList == null)   return docContStrBuff.toString();
 
+    StringBuffer resultStrBuff = new StringBuffer(
+        DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
+    // last offset position used to extract portions of text
+    Long lastOffset = new Long(0);
+
     TreeMap offsets2CharsMap = new TreeMap();
     HashMap annotsForOffset = new HashMap(100);
     if (this.getContent().size().longValue() != 0){
@@ -1042,49 +1047,58 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     // Construct the node set
     TreeSet offsets = new TreeSet();
     Iterator iter = aDumpAnnotList.iterator();
+    Annotation annot;
+    Long start;
+    Long end;
     while (iter.hasNext()){
-      Annotation annot = (Annotation) iter.next();
-      offsets.add(annot.getStartNode().getOffset());
-      offsets.add(annot.getEndNode().getOffset());
-      if (annotsForOffset.containsKey(annot.getStartNode().getOffset())) {
-        ((List) annotsForOffset.get(annot.getStartNode().getOffset())).add(annot);
+      annot = (Annotation) iter.next();
+      start = annot.getStartNode().getOffset();
+      end = annot.getEndNode().getOffset();
+      offsets.add(start);
+      offsets.add(end);
+      if (annotsForOffset.containsKey(start)) {
+        ((List) annotsForOffset.get(start)).add(annot);
       } else {
         List newList = new ArrayList(10);
         newList.add(annot);
-        annotsForOffset.put(annot.getStartNode().getOffset(), newList);
+        annotsForOffset.put(start, newList);
       }
-      if (annotsForOffset.containsKey(annot.getEndNode().getOffset())) {
-        ((List) annotsForOffset.get(annot.getEndNode().getOffset())).add(annot);
+      if (annotsForOffset.containsKey(end)) {
+        ((List) annotsForOffset.get(end)).add(annot);
       } else {
         List newList = new ArrayList(10);
         newList.add(annot);
-        annotsForOffset.put(annot.getEndNode().getOffset(), newList);
+        annotsForOffset.put(end, newList);
       }
     }// End while
 
     // ofsets is sorted in ascending order.
     // Iterate this set in descending order and remove an offset at each
     // iteration
-    while (!offsets.isEmpty()){
-      Long offset = (Long)offsets.last();
-      // Remove the offset from the set
-      offsets.remove(offset);
+    Iterator offsetIt = offsets.iterator();
+    Long offset;
+    List annotations;
+    // This don't have to be a large buffer - just for tags
+    StringBuffer tmpBuff = new StringBuffer(255);
+    Stack stack = new Stack();
+    while (offsetIt.hasNext()){
+      offset = (Long)offsetIt.next();
       // Now, use it.
       // Returns a list with annotations that needs to be serialized in that
       // offset.
-//      List annotations = getAnnotationsForOffset(aDumpAnnotList,offset);
-      List annotations = (List) annotsForOffset.get(offset);
-      annotations = getAnnotationsForOffset(annotations,offset);
-      // Attention: the annotation are serialized from left to right
-//      StringBuffer tmpBuff = new StringBuffer("");
-      StringBuffer tmpBuff = new StringBuffer(
-          DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
-      Stack stack = new Stack();
+      annotations = (List) annotsForOffset.get(offset);
+      // order annotations in list for offset to print tags in correct order
+      annotations = getAnnotationsForOffset(annotations, offset);
+      // clear structures
+      tmpBuff.setLength(0);
+      stack.clear();
+
       // Iterate through all these annotations and serialize them
       Iterator it = annotations.iterator();
+      Annotation a;
+      Annotation annStack;
       while(it.hasNext()){
-        Annotation a = (Annotation) it.next();
-        it.remove();
+        a = (Annotation) it.next();
         // Test if a Ends at offset
         if ( offset.equals(a.getEndNode().getOffset()) ){
           // Test if a Starts at offset
@@ -1107,8 +1121,8 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
             // In this case empty the stack and write the end tag
             if (!stack.isEmpty()){
               while(!stack.isEmpty()){
-                Annotation a1 = (Annotation)stack.pop();
-                tmpBuff.append(writeEndTag(a1));
+                annStack = (Annotation)stack.pop();
+                tmpBuff.append(writeEndTag(annStack));
               }// End while
             }// End if
             tmpBuff.append(writeEndTag(a));
@@ -1121,13 +1135,12 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
             // In this case empty the stack and write the end tag
             if (!stack.isEmpty()){
               while(!stack.isEmpty()){
-                Annotation a1 = (Annotation)stack.pop();
-                tmpBuff.append(writeEndTag(a1));
+                annStack = (Annotation)stack.pop();
+                tmpBuff.append(writeEndTag(annStack));
               }// End while
             }// End if
             tmpBuff.append(writeStartTag(a, includeFeatures));
             // The annotation is removed from dumped set
-            aDumpAnnotList.remove(a);
           }// End if ( offset.equals(a.getStartNode().getOffset()) )
         }// End if ( offset.equals(a.getEndNode().getOffset()) )
       }// End while(it.hasNext()){
@@ -1135,46 +1148,227 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       // In this case empty the stack and write the end tag
       if (!stack.isEmpty()){
         while(!stack.isEmpty()){
-          Annotation a1 = (Annotation)stack.pop();
-          tmpBuff.append(writeEndTag(a1));
+          annStack = (Annotation)stack.pop();
+          tmpBuff.append(writeEndTag(annStack));
         }// End while
       }// End if
 
-      // Before inserting tmpBuff into docContStrBuff we need to check
-      // if there are chars to be replaced and if there are, they would be
-      // replaced.
-      if (!offsets2CharsMap.isEmpty()){
-        Integer offsChar = (Integer) offsets2CharsMap.lastKey();
-        while( !offsets2CharsMap.isEmpty() &&
-                       offsChar.intValue() >= offset.intValue()){
-          // Replace the char at offsChar with its corresponding entity form
-          // the entitiesMap.
-          docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
-          (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
-          // Discard the offsChar after it was used.
-          offsets2CharsMap.remove(offsChar);
-          // Investigate next offsChar
-          if (!offsets2CharsMap.isEmpty())
-            offsChar = (Integer) offsets2CharsMap.lastKey();
-        }// End while
-      }// End if
-      // Insert tmpBuff to the location where it belongs in docContStrBuff
-      docContStrBuff.insert(offset.intValue(),tmpBuff.toString());
+      // extract text from content and replace spec chars
+      StringBuffer partText = new StringBuffer();
+      SortedMap offsetsInRange =
+          offsets2CharsMap.subMap(lastOffset, offset);
+      Long tmpOffset;
+      Long tmpLastOffset = lastOffset;
+      String replacement;
+
+      // Before inserting tmpBuff into the buffer we need to check
+      // if there are chars to be replaced in range
+      if(!offsetsInRange.isEmpty()) {
+        tmpOffset = (Long) offsetsInRange.firstKey();
+        replacement =
+            (String)entitiesMap.get((Character)offsets2CharsMap.get(tmpOffset));
+        partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
+                                               tmpOffset.intValue()));
+        partText.append(replacement);
+        tmpLastOffset = new Long(tmpOffset.longValue()+1);
+      }
+      partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
+                                               offset.intValue()));
+      resultStrBuff.append(partText);
+      // Insert tmpBuff to the result string
+      resultStrBuff.append(tmpBuff.toString());
+      lastOffset = offset;
     }// End while(!offsets.isEmpty())
+
+    // get text to the end of content
+    // extract text from content and replace spec chars
+    StringBuffer partText = new StringBuffer();
+    SortedMap offsetsInRange =
+        offsets2CharsMap.subMap(lastOffset, new Long(docContStrBuff.length()));
+    Long tmpOffset;
+    Long tmpLastOffset = lastOffset;
+    String replacement;
+
     // Need to replace the entities in the remaining text, if there is any text
-    // So, if there are any more items in offsets2CharsMap they need to be
-    // replaced
-    while (!offsets2CharsMap.isEmpty()){
-      Integer offsChar = (Integer) offsets2CharsMap.lastKey();
-      // Replace the char with its entity
-      docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
-      (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
-      // remove the offset from the map
-      offsets2CharsMap.remove(offsChar);
-    }// End while
-    return docContStrBuff.toString();
+    // So, if there are any more items in offsets2CharsMap for remaining text
+    // they need to be replaced
+    if(!offsetsInRange.isEmpty()) {
+      tmpOffset = (Long) offsetsInRange.firstKey();
+      replacement =
+          (String)entitiesMap.get((Character)offsets2CharsMap.get(tmpOffset));
+      partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
+                                             tmpOffset.intValue()));
+      partText.append(replacement);
+      tmpLastOffset = new Long(tmpOffset.longValue()+1);
+    }
+    partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
+                                             docContStrBuff.length()));
+    resultStrBuff.append(partText);
+
+    return resultStrBuff.toString();
   }// saveAnnotationSetAsXml()
 
+/* Old method created by Cristian. Create content backward.
+
+    private String saveAnnotationSetAsXml(List aDumpAnnotList,
+                                          boolean includeFeatures){
+      String content = null;
+      if (this.getContent()== null)
+        content = new String("");
+      else
+        content = this.getContent().toString();
+      StringBuffer docContStrBuff = filterNonXmlChars(new StringBuffer(content));
+      if (aDumpAnnotList == null)   return docContStrBuff.toString();
+
+      TreeMap offsets2CharsMap = new TreeMap();
+      HashMap annotsForOffset = new HashMap(100);
+      if (this.getContent().size().longValue() != 0){
+        // Fill the offsets2CharsMap with all the indices where
+        // special chars appear
+        buildEntityMapFromString(content,offsets2CharsMap);
+      }//End if
+      // The saving alghorithm is as follows:
+      ///////////////////////////////////////////
+      // Construct a set of annot with all IDs in asc order.
+      // All annotations that end at that offset swap their place in descending
+      // order. For each node write all the tags from left to right.
+
+      // Construct the node set
+      TreeSet offsets = new TreeSet();
+      Iterator iter = aDumpAnnotList.iterator();
+      while (iter.hasNext()){
+        Annotation annot = (Annotation) iter.next();
+        offsets.add(annot.getStartNode().getOffset());
+        offsets.add(annot.getEndNode().getOffset());
+        if (annotsForOffset.containsKey(annot.getStartNode().getOffset())) {
+          ((List) annotsForOffset.get(annot.getStartNode().getOffset())).add(annot);
+        } else {
+          List newList = new ArrayList(10);
+          newList.add(annot);
+          annotsForOffset.put(annot.getStartNode().getOffset(), newList);
+        }
+        if (annotsForOffset.containsKey(annot.getEndNode().getOffset())) {
+          ((List) annotsForOffset.get(annot.getEndNode().getOffset())).add(annot);
+        } else {
+          List newList = new ArrayList(10);
+          newList.add(annot);
+          annotsForOffset.put(annot.getEndNode().getOffset(), newList);
+        }
+      }// End while
+
+      // ofsets is sorted in ascending order.
+      // Iterate this set in descending order and remove an offset at each
+      // iteration
+      while (!offsets.isEmpty()){
+        Long offset = (Long)offsets.last();
+        // Remove the offset from the set
+        offsets.remove(offset);
+        // Now, use it.
+        // Returns a list with annotations that needs to be serialized in that
+        // offset.
+//      List annotations = getAnnotationsForOffset(aDumpAnnotList,offset);
+        List annotations = (List) annotsForOffset.get(offset);
+        annotations = getAnnotationsForOffset(annotations,offset);
+        // Attention: the annotation are serialized from left to right
+//      StringBuffer tmpBuff = new StringBuffer("");
+        StringBuffer tmpBuff = new StringBuffer(
+            DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
+        Stack stack = new Stack();
+        // Iterate through all these annotations and serialize them
+        Iterator it = annotations.iterator();
+        while(it.hasNext()){
+          Annotation a = (Annotation) it.next();
+          it.remove();
+          // Test if a Ends at offset
+          if ( offset.equals(a.getEndNode().getOffset()) ){
+            // Test if a Starts at offset
+            if ( offset.equals(a.getStartNode().getOffset()) ){
+              // Here, the annotation a Starts and Ends at the offset
+              if ( null != a.getFeatures().get("isEmptyAndSpan") &&
+                   "true".equals((String)a.getFeatures().get("isEmptyAndSpan"))){
+
+                // Assert: annotation a with start == end and isEmptyAndSpan
+                tmpBuff.append(writeStartTag(a, includeFeatures));
+                stack.push(a);
+              }else{
+                // Assert annotation a with start == end and an empty tag
+                tmpBuff.append(writeEmptyTag(a));
+                // The annotation is removed from dumped set
+                aDumpAnnotList.remove(a);
+              }// End if
+            }else{
+              // Here the annotation a Ends at the offset.
+              // In this case empty the stack and write the end tag
+              if (!stack.isEmpty()){
+                while(!stack.isEmpty()){
+                  Annotation a1 = (Annotation)stack.pop();
+                  tmpBuff.append(writeEndTag(a1));
+                }// End while
+              }// End if
+              tmpBuff.append(writeEndTag(a));
+            }// End if
+          }else{
+            // The annotation a does NOT end at the offset. Let's see if it starts
+            // at the offset
+            if ( offset.equals(a.getStartNode().getOffset()) ){
+              // The annotation a starts at the offset.
+              // In this case empty the stack and write the end tag
+              if (!stack.isEmpty()){
+                while(!stack.isEmpty()){
+                  Annotation a1 = (Annotation)stack.pop();
+                  tmpBuff.append(writeEndTag(a1));
+                }// End while
+              }// End if
+              tmpBuff.append(writeStartTag(a, includeFeatures));
+              // The annotation is removed from dumped set
+              aDumpAnnotList.remove(a);
+            }// End if ( offset.equals(a.getStartNode().getOffset()) )
+          }// End if ( offset.equals(a.getEndNode().getOffset()) )
+        }// End while(it.hasNext()){
+
+        // In this case empty the stack and write the end tag
+        if (!stack.isEmpty()){
+          while(!stack.isEmpty()){
+            Annotation a1 = (Annotation)stack.pop();
+            tmpBuff.append(writeEndTag(a1));
+          }// End while
+        }// End if
+
+        // Before inserting tmpBuff into docContStrBuff we need to check
+        // if there are chars to be replaced and if there are, they would be
+        // replaced.
+        if (!offsets2CharsMap.isEmpty()){
+          Long offsChar = (Long) offsets2CharsMap.lastKey();
+          while( !offsets2CharsMap.isEmpty() &&
+                         offsChar.intValue() >= offset.intValue()){
+            // Replace the char at offsChar with its corresponding entity form
+            // the entitiesMap.
+            docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
+            (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+            // Discard the offsChar after it was used.
+            offsets2CharsMap.remove(offsChar);
+            // Investigate next offsChar
+            if (!offsets2CharsMap.isEmpty())
+              offsChar = (Long) offsets2CharsMap.lastKey();
+          }// End while
+        }// End if
+        // Insert tmpBuff to the location where it belongs in docContStrBuff
+        docContStrBuff.insert(offset.intValue(),tmpBuff.toString());
+      }// End while(!offsets.isEmpty())
+      // Need to replace the entities in the remaining text, if there is any text
+      // So, if there are any more items in offsets2CharsMap they need to be
+      // replaced
+      while (!offsets2CharsMap.isEmpty()){
+        Long offsChar = (Long) offsets2CharsMap.lastKey();
+        // Replace the char with its entity
+        docContStrBuff.replace(offsChar.intValue(),offsChar.intValue()+1,
+        (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
+        // remove the offset from the map
+        offsets2CharsMap.remove(offsChar);
+      }// End while
+      return docContStrBuff.toString();
+    }// saveAnnotationSetAsXml()
+*/
 
   /**
    *  Return true only if the document has features for original content and
@@ -1432,14 +1626,17 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   }// getAnnotationsForOffset()
 
   private List getAnnotationsForOffset(List aDumpAnnotList, Long offset){
-    List annotationList = new LinkedList();
+    List annotationList = new ArrayList();
     if (aDumpAnnotList == null || offset == null) return annotationList;
-    Set annotThatStartAtOffset = new TreeSet(
-                          new AnnotationComparator(ORDER_ON_END_OFFSET,DESC));
-    Set annotThatEndAtOffset = new TreeSet(
-                          new AnnotationComparator(ORDER_ON_START_OFFSET,DESC));
-    Set annotThatStartAndEndAtOffset = new TreeSet(
-                          new AnnotationComparator(ORDER_ON_ANNOT_ID,ASC));
+    Set annotThatStartAtOffset;
+    Set annotThatEndAtOffset;
+    Set annotThatStartAndEndAtOffset;
+    annotThatStartAtOffset = new TreeSet(
+        new AnnotationComparator(ORDER_ON_END_OFFSET, DESC));
+    annotThatEndAtOffset = new TreeSet(
+        new AnnotationComparator(ORDER_ON_START_OFFSET, DESC));
+    annotThatStartAndEndAtOffset = new TreeSet(
+        new AnnotationComparator(ORDER_ON_ANNOT_ID, ASC));
 
     // Fill these tree lists with annotation tat start, end or start and
     // end at the offset.
@@ -1456,10 +1653,12 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
           annotThatEndAtOffset.add(ann);
       }// End if
     }// End while
+
     annotationList.addAll(annotThatEndAtOffset);
-    annotThatEndAtOffset = null;
     annotationList.addAll(annotThatStartAtOffset);
+    annotThatEndAtOffset = null;
     annotThatStartAtOffset = null;
+
     iter = annotThatStartAndEndAtOffset.iterator();
     while(iter.hasNext()){
       Annotation ann = (Annotation) iter.next();
@@ -1664,13 +1863,15 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     }// End if
     // Fill the Map with the offsets of the special chars
     Iterator entitiesMapIterator = entitiesMap.keySet().iterator();
+    Character c;
+    int fromIndex;
     while(entitiesMapIterator.hasNext()){
-      Character c = (Character) entitiesMapIterator.next();
-      int fromIndex = 0;
+      c = (Character) entitiesMapIterator.next();
+      fromIndex = 0;
       while (-1 != fromIndex){
         fromIndex = aScanString.indexOf(c.charValue(),fromIndex);
         if (-1 != fromIndex){
-          aMapToFill.put(new Integer(fromIndex),c);
+          aMapToFill.put(new Long(fromIndex),c);
           fromIndex ++;
         }// End if
       }// End while
@@ -1860,10 +2061,11 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     */
   private StringBuffer filterNonXmlChars(StringBuffer aStrBuffer){
     if (aStrBuffer == null) return new StringBuffer("");
-    String space = new String(" ");
+//    String space = new String(" ");
+    char space = ' ';
     for (int i=aStrBuffer.length()-1;i>=0; i--){
       if (!isXmlChar(aStrBuffer.charAt(i)))
-        aStrBuffer.replace(i,i+1,space);
+        aStrBuffer.setCharAt(i, space);
     }// End for
     return aStrBuffer;
   }// filterNonXmlChars()
@@ -2051,7 +2253,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
       // Before inserting this string into the textWithNodes, check to see if
       // there are any chars to be replaced with their corresponding entities
       if (!offsets2CharsMap.isEmpty()){
-        Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+        Long offsChar = (Long) offsets2CharsMap.lastKey();
         while( !offsets2CharsMap.isEmpty() &&
                        offsChar.intValue() >= offset.intValue()){
           // Replace the char at offsChar with its corresponding entity form
@@ -2063,7 +2265,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
           offsets2CharsMap.remove(offsChar);
           // Investigate next offsChar
           if (!offsets2CharsMap.isEmpty())
-            offsChar = (Integer) offsets2CharsMap.lastKey();
+            offsChar = (Long) offsets2CharsMap.lastKey();
         }// End while
       }// End if
       // Now it is safe to insert the node
@@ -2073,7 +2275,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
     // So, if there are any more items in offsets2CharsMap they need to be
     // replaced
     while (!offsets2CharsMap.isEmpty()){
-      Integer offsChar = (Integer) offsets2CharsMap.lastKey();
+      Long offsChar = (Long) offsets2CharsMap.lastKey();
       // Replace the char with its entity
       textWithNodes.replace(offsChar.intValue(),offsChar.intValue()+1,
       (String)entitiesMap.get((Character)offsets2CharsMap.get(offsChar)));
