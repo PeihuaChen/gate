@@ -75,6 +75,9 @@ public interface GateConstants {
   /** Property to set icon of application from command line */
   public static final String APP_ICON_JAVA_PROPERTY_NAME = "gate.slug.icon";
 
+  /** Property to set splash of application from command line */
+  public static final String APP_SPLASH_JAVA_PROPERTY_NAME = "gate.slug.splash";
+
   /** Property to set help about box from command line */
   public static final String ABOUT_URL_JAVA_PROPERTY_NAME = "gate.slug.abouturl";
 

@@ -131,34 +131,38 @@ public class Main {
 
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
     //show the splash
-    if(!Gate.isSlugGui()) {
-      SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
-          //build the Spash
-          JPanel splashBox = new JPanel();
-          splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
-          splashBox.setBackground(Color.white);
-  
-          JLabel gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
-              "/gate/resources/img/gateSplash.gif")));
-          Box box = new Box(BoxLayout.X_AXIS);
-          box.add(Box.createHorizontalGlue());
-          box.add(gifLbl);
-          box.add(Box.createHorizontalGlue());
-          splashBox.add(box);
-          gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
-              "/gate/resources/img/gateHeader.gif")));
-          box = new Box(BoxLayout.X_AXIS);
-          box.add(Box.createHorizontalGlue());
-          box.add(gifLbl);
-          box.add(Box.createHorizontalGlue());
-          splashBox.add(box);
-          splashBox.add(Box.createVerticalStrut(15));
-          splash = new Splash(splashBox);
-          splash.show();
-        }
-      });
-    } // if - isShellSlackGui()
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        //build the Spash
+        JPanel splashBox = new JPanel();
+        splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
+        splashBox.setBackground(Color.white);
+
+        String splashName = 
+          System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
+        if(splashName == null) {
+          splashName = "gateSplash.gif";
+        } // if
+
+        JLabel gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
+            "/gate/resources/img/"+splashName)));
+        Box box = new Box(BoxLayout.X_AXIS);
+        box.add(Box.createHorizontalGlue());
+        box.add(gifLbl);
+        box.add(Box.createHorizontalGlue());
+        splashBox.add(box);
+        gifLbl = new JLabel(new ImageIcon(Main.class.getResource(
+            "/gate/resources/img/gateHeader.gif")));
+        box = new Box(BoxLayout.X_AXIS);
+        box.add(Box.createHorizontalGlue());
+        box.add(gifLbl);
+        box.add(Box.createHorizontalGlue());
+        splashBox.add(box);
+        splashBox.add(Box.createVerticalStrut(15));
+        splash = new Splash(splashBox);
+        splash.show();
+      }
+    });
     
     // initialise the library and load user CREOLE directories
     try{
