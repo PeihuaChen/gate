@@ -455,11 +455,6 @@ public class OracleDataStore extends JDBCDataStore {
         commitTrans();
       }
     }
-/*    catch(SQLException sqle) {
-      transFailed = true;
-      throw new PersistenceException("Cannot start/commit a transaction, ["+sqle.getMessage()+"]");
-    }
-*/
     catch(PersistenceException pe) {
       transFailed = true;
       throw(pe);
@@ -1285,9 +1280,7 @@ public class OracleDataStore extends JDBCDataStore {
                       " ORDER BY lr_name"
                       );
       stmt.setString(1,lrType);
-      //stmt.setFetchSize(30);
-      ((OraclePreparedStatement)stmt).setRowPrefetch(30);
-//      ((OraclePreparedStatement)stmt).defineColumnType(1,java.sql.Types.BIGINT);
+      ((OraclePreparedStatement)stmt).setRowPrefetch(DBHelper.CHINK_SIZE_SMALL);
       stmt.execute();
       rs = stmt.getResultSet();
 
@@ -1328,9 +1321,7 @@ public class OracleDataStore extends JDBCDataStore {
                 " ORDER BY lr_name desc"
                 );
       stmt.setString(1,lrType);
-//      stmt.setFetchSize(30);
-      ((OraclePreparedStatement)stmt).setRowPrefetch(30);
-//      ((OraclePreparedStatement)stmt).defineColumnType(1,java.sql.Types.VARCHAR);
+      ((OraclePreparedStatement)stmt).setRowPrefetch(DBHelper.CHINK_SIZE_SMALL);
       stmt.execute();
       rs = stmt.getResultSet();
 
@@ -2347,11 +2338,14 @@ public class OracleDataStore extends JDBCDataStore {
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
 
-      sql = " select doc_lr_id " +
+      sql = " select lr_id ," +
+            "         lr_name " +
             " from "+Gate.DB_OWNER+".t_document        doc, " +
+            "      "+Gate.DB_OWNER+".t_lang_resource   lr, " +
             "      "+Gate.DB_OWNER+".t_corpus_document corpdoc, " +
             "      "+Gate.DB_OWNER+".t_corpus          corp " +
-            " where doc.doc_id = corpdoc.cd_doc_id " +
+            " where lr.lr_id = doc.doc_lr_id " +
+            "       and doc.doc_id = corpdoc.cd_doc_id " +
             "       and corpdoc.cd_corp_id = corp.corp_id " +
             "       and corp_lr_id = ? ";
       pstmt = this.jdbcConn.prepareStatement(sql);
@@ -2359,15 +2353,18 @@ public class OracleDataStore extends JDBCDataStore {
       pstmt.execute();
       rs = pstmt.getResultSet();
 
-      Vector docLRIDs = new Vector();
+      //--Vector docLRIDs = new Vector();
+      Vector documentData = new Vector();
       while (rs.next()) {
-        Long docLRID = new Long(rs.getLong("doc_lr_id"));
-        docLRIDs.add(docLRID);
+        Long docLRID = new Long(rs.getLong("lr_id"));
+        String docName = rs.getString("lr_name");
+        //--docLRIDs.add(docLRID);
+        documentData.add(new DocumentData(docName, docLRID));
       }
       DBHelper.cleanup(rs);
       DBHelper.cleanup(pstmt);
 
-
+/*
       Vector dbDocs = new Vector();
       for (int i=0; i< docLRIDs.size(); i++) {
         Long currLRID = (Long)docLRIDs.elementAt(i);
@@ -2383,12 +2380,13 @@ public class OracleDataStore extends JDBCDataStore {
 
         dbDocs.add(dbDoc);
       }
-
+*/
       result = new DatabaseCorpusImpl(lrName,
                                       this,
                                       (Long)lrPersistenceId,
                                       features,
-                                      dbDocs);
+  //                                    dbDocs);
+                                      documentData);
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't read LR from DB: ["+ sqle.getMessage()+"]");
@@ -3138,6 +3136,46 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
 
+  /** helper for sync() - never call directly */
+  private void _syncRemovedDocumentsFromCorpus(List docLRIDs, Long corpLRID)
+    throws PersistenceException {
+
+    //0.preconditions
+    Assert.assertNotNull(docLRIDs);
+    Assert.assertNotNull(corpLRID);
+    Assert.assertTrue(docLRIDs.size() > 0);
+
+    CallableStatement cstmt = null;
+
+    try {
+      cstmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+
+                                                ".persist.remove_document_from_corpus(?,?) }");
+
+      Iterator it = docLRIDs.iterator();
+      while (it.hasNext()) {
+        Long currLRID = (Long)it.next();
+        cstmt.setLong(1,currLRID.longValue());
+        cstmt.setLong(2,corpLRID.longValue());
+        cstmt.execute();
+      }
+    }
+    catch(SQLException sqle) {
+
+      switch(sqle.getErrorCode()) {
+        case DBHelper.X_ORACLE_INVALID_LR :
+          throw new PersistenceException("invalid LR supplied: no such document: ["+
+                                                            sqle.getMessage()+"]");
+        default:
+          throw new PersistenceException("can't change document data: ["+
+                                                            sqle.getMessage()+"]");
+      }
+    }
+    finally {
+      DBHelper.cleanup(cstmt);
+    }
+
+  }
+
 
   /** helper for sync() - never call directly */
   private void _syncRemovedAnnotations(Document doc,AnnotationSet as, Collection changes)
@@ -3392,7 +3430,7 @@ public class OracleDataStore extends JDBCDataStore {
     Assert.assertEquals(this,corp.getDataStore());
     Assert.assertNotNull(corp.getLRPersistenceId());
 
-    EventAwareLanguageResource dbCorpus = (EventAwareLanguageResource)corp;
+    EventAwareCorpus dbCorpus = (EventAwareCorpus)corp;
 
     //1. sync the corpus name?
     if (dbCorpus.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
@@ -3404,11 +3442,25 @@ public class OracleDataStore extends JDBCDataStore {
       _syncFeatures(corp);
     }
 
+    //2.5 get removed documents and detach (not remove) them from the corpus in the
+    //database
+    List removedDocLRIDs = dbCorpus.getRemovedDocuments();
+    if (removedDocLRIDs.size() > 0) {
+      _syncRemovedDocumentsFromCorpus(removedDocLRIDs,(Long)corp.getLRPersistenceId());
+    }
+
     //3. get all documents
-    Iterator it = corp.iterator();
+    //--Iterator it = corp.iterator();
+    Iterator it = dbCorpus.getLoadedDocuments().iterator();
+
     while (it.hasNext()) {
       Document dbDoc = (Document)it.next();
-//System.out.println("found doc ["+dbDoc.getName()+"]");
+      //note - document may be NULL which means it was not loaded (load on demand)
+      //just ignore it then
+      if (null == dbDoc) {
+        continue;
+      }
+
       //adopt/sync?
       if (null == dbDoc.getLRPersistenceId()) {
         //doc was never adopted, adopt it
