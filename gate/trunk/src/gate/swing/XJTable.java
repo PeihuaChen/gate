@@ -118,17 +118,35 @@ public class XJTable extends JTable {
     headerRenderer = new CustomHeaderRenderer(getTableHeader().getDefaultRenderer());
 
     getTableHeader().setDefaultRenderer(headerRenderer);
-
-    addComponentListener(new ComponentAdapter() {
-      public void componentResized(ComponentEvent e) {
-        adjustSizes(false);
-      }
-
-      public void componentShown(ComponentEvent e) {
-        adjustSizes(false);
-      }
-    });
   }//init()
+
+
+  protected void configureEnclosingScrollPane(){
+    super.configureEnclosingScrollPane();
+    //if we're into a scroll panere resize with it
+    Container p = getParent();
+    if (p instanceof JViewport) {
+      Container gp = p.getParent();
+      if (gp instanceof JScrollPane) {
+        JScrollPane scrollPane = (JScrollPane)gp;
+        // Make certain we are the viewPort's view and not, for
+        // example, the rowHeaderView of the scrollPane -
+        // an implementor of fixed columns might do this.
+        JViewport viewport = scrollPane.getViewport();
+        if (viewport != null && viewport.getView() == this) {
+          scrollPane.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+              adjustSizes(false);
+            }
+
+            public void componentShown(ComponentEvent e) {
+              adjustSizes(false);
+            }
+          });
+        }
+      }
+    }
+  }
 
 
   /**Resizes all the cells so they accommodate the components at their
@@ -202,7 +220,8 @@ public class XJTable extends JTable {
           }
           int portWidth = scrollPane.getSize().width -
                           scrollPane.getInsets().left -
-                          scrollPane.getInsets().right;
+                          scrollPane.getInsets().right -
+                          scrollPane.getVerticalScrollBar().getWidth();
           if(totalWidth < portWidth){
             int width = tCol.getMinWidth() + portWidth - totalWidth;
             tCol.setPreferredWidth(width);

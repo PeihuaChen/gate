@@ -56,7 +56,7 @@ public class MainFrame extends JFrame
   Box southBox;
   JLabel statusBar;
   JProgressBar progressBar;
-  JTabbedPane mainTabbedPane;
+  XJTabbedPane mainTabbedPane;
   JScrollPane projectTreeScroll;
   JScrollPane lowerScroll;
 
@@ -115,6 +115,36 @@ public class MainFrame extends JFrame
     return instance;
   }
 
+  protected void select(ResourceHandle handle){
+    if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
+      //select
+      JComponent largeView = handle.getLargeView();
+      if(largeView != null) {
+        mainTabbedPane.setSelectedComponent(largeView);
+      }
+      JComponent smallView = handle.getSmallView();
+      if(smallView != null) {
+        lowerScroll.getViewport().setView(smallView);
+      } else {
+        lowerScroll.getViewport().setView(null);
+      }
+    } else {
+      //show
+      JComponent largeView = handle.getLargeView();
+      if(largeView != null) {
+        mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(),
+                              largeView, handle.getTooltipText());
+        mainTabbedPane.setSelectedComponent(handle.getLargeView());
+      }
+      JComponent smallView = handle.getSmallView();
+      if(smallView != null) {
+        lowerScroll.getViewport().setView(smallView);
+      } else {
+        lowerScroll.getViewport().setView(null);
+      }
+    }
+  }//protected void select(ResourceHandle handle)
+
   /**Construct the frame*/
   private MainFrame() {
 //    thisMainFrame = this;
@@ -167,9 +197,6 @@ public class MainFrame extends JFrame
       mue.printStackTrace(Err.getPrintWriter());
     }
 
-
-//    resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot);
-//    resourcesTree = new JTree(resourcesTreeModel);
     resourcesTree = new JTree(resourcesTreeModel);
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
     resourcesTree.setRowHeight(0);
@@ -206,7 +233,7 @@ public class MainFrame extends JFrame
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
     Out.prln("Gate 2 started at: " + new Date().toString());
-    mainTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages",null, logScroll, "Gate log", 0);
     logBlinker = new TabBlinker(mainTabbedPane, logScroll, Color.red);
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -384,33 +411,64 @@ public class MainFrame extends JFrame
         } else if(SwingUtilities.isLeftMouseButton(e)) {
           if(e.getClickCount() == 2 && handle != null) {
             //double click - show the resource
-            if(handle.isShown()) {
-              //select
-              JComponent largeView = handle.getLargeView();
-              if(largeView != null) {
-                mainTabbedPane.setSelectedComponent(largeView);
-              }
-              JComponent smallView = handle.getSmallView();
-              if(smallView != null) {
-                lowerScroll.getViewport().setView(smallView);
-              } else {
-                lowerScroll.getViewport().setView(null);
-              }
-            } else {
-              //show
-              JComponent largeView = handle.getLargeView();
-              if(largeView != null) {
-                mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(),
-                                      largeView, handle.getTooltipText());
-                mainTabbedPane.setSelectedComponent(handle.getLargeView());
-              }
-              JComponent smallView = handle.getSmallView();
-              if(smallView != null) {
-                lowerScroll.getViewport().setView(smallView);
-              } else {
-                lowerScroll.getViewport().setView(null);
-              }
-              handle.setShown(true);
+            select(handle);
+          }
+        }
+      }
+
+      public void mousePressed(MouseEvent e) {
+      }
+
+      public void mouseReleased(MouseEvent e) {
+      }
+
+      public void mouseEntered(MouseEvent e) {
+      }
+
+      public void mouseExited(MouseEvent e) {
+      }
+    });
+
+    mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        JComponent largeView = (JComponent)mainTabbedPane.getSelectedComponent();
+        Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+        boolean done = false;
+        DefaultMutableTreeNode node = resourcesTreeRoot;
+        while(!done && nodesEnum.hasMoreElements()){
+          node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+          done = node.getUserObject() instanceof ResourceHandle &&
+                 ((ResourceHandle)node.getUserObject()).getLargeView()
+                  == largeView;
+        }
+        if(done){
+          select((ResourceHandle)node.getUserObject());
+        }else{
+          //the selected item is not a resource (maiber the log area?)
+          lowerScroll.getViewport().setView(null);
+        }
+      }
+    });
+
+    mainTabbedPane.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if(SwingUtilities.isRightMouseButton(e)){
+          int index = mainTabbedPane.getIndexAt(e.getPoint());
+          if(index != -1){
+            JComponent view = (JComponent)mainTabbedPane.getComponentAt(index);
+            Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+            boolean done = false;
+            DefaultMutableTreeNode node = resourcesTreeRoot;
+            while(!done && nodesEnum.hasMoreElements()){
+              node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+              done = node.getUserObject() instanceof ResourceHandle &&
+                     ((ResourceHandle)node.getUserObject()).getLargeView()
+                      == view;
+            }
+            if(done){
+              ResourceHandle handle = (ResourceHandle)node.getUserObject();
+              JPopupMenu popup = handle.getPopup();
+              popup.show(mainTabbedPane, e.getX(), e.getY());
             }
           }
         }
@@ -428,6 +486,7 @@ public class MainFrame extends JFrame
       public void mouseExited(MouseEvent e) {
       }
     });
+
 
     this.addComponentListener(new ComponentAdapter() {
       public void componentShown(ComponentEvent e) {

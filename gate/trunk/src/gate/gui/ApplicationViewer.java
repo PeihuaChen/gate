@@ -56,6 +56,10 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
     this.controller = controller;
   }
 
+  public void setHandle(ResourceHandle handle){
+    this.handle = handle;
+  }
+
   public Resource init(){
     initLocalData();
     initGuiComponents();
@@ -104,13 +108,13 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
     mainBox.add(scroller);
 
     Box buttonsBox = Box.createVerticalBox();
-    addModuleBtn = new JButton("",
+    addModuleBtn = new JButton("Add component",
                                new ImageIcon(
                                  ApplicationViewer.class.getResource(
                                  "/gate/resources/img/left2.gif"))
                                );
     addModuleBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
-    removeModuleBtn = new JButton("",
+    removeModuleBtn = new JButton("Remove component",
                                   new ImageIcon(
                                     ApplicationViewer.class.getResource(
                                     "/gate/resources/img/right2.gif"))
@@ -121,11 +125,11 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
     buttonsBox.add(Box.createVerticalStrut(5));
     buttonsBox.add(removeModuleBtn);
     buttonsBox.add(Box.createVerticalGlue());
-    upBtn = new JButton(
+    upBtn = new JButton("Move up",
                 new ImageIcon(
                     ApplicationViewer.class.getResource(
                     "/gate/resources/img/up.gif")));
-    downBtn = new JButton(
+    downBtn = new JButton("Move down",
               new ImageIcon(
                   ApplicationViewer.class.getResource(
                   "/gate/resources/img/down.gif")));
@@ -165,7 +169,8 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
     this.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)){
-          popup.show(ApplicationViewer.this, e.getX(), e.getY());
+          if(handle != null && handle.getPopup()!= null)
+            handle.getPopup().show(ApplicationViewer.this, e.getX(), e.getY());
         }
       }
     });
@@ -690,6 +695,15 @@ public class ApplicationViewer extends AbstractVisualResource implements CreoleL
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
         public void run(){
+          //stop edits
+          if(mainTreeTable.getEditingColumn() != -1 &&
+            mainTreeTable.getEditingRow() != -1){
+            mainTreeTable.editingStopped(
+                new ChangeEvent(mainTreeTable.getCellEditor(
+                                mainTreeTable.getEditingRow(),
+                                mainTreeTable.getEditingColumn())));
+          }
+
           MainFrame.getInstance().showWaitDialog();
           Iterator prsIter = controller.iterator();
           while(prsIter.hasNext()){

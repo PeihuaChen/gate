@@ -28,21 +28,19 @@ class ApplicationHandle extends DefaultResourceHandle {
 
   public ApplicationHandle(SerialController controller) {
     super(controller);
-
-    largeView = super.getLargeView();
-    if(largeView instanceof JTabbedPane){
-      try{
-        FeatureMap params = Factory.newFeatureMap();
-        params.put("controller", resource);
-        appView =(ApplicationViewer)Factory.createResource(
-                                      "gate.gui.ApplicationViewer",
-                                      params);
-        largeView.add("Design", appView);
-        ((JTabbedPane)largeView).setSelectedComponent(appView);
-      }catch(ResourceInstantiationException rie){
-        rie.printStackTrace(Err.getPrintWriter());
-      }
+    try{
+      FeatureMap params = Factory.newFeatureMap();
+      params.put("controller", controller);
+      appView = (ApplicationViewer)Factory.createResource(
+                            "gate.gui.ApplicationViewer", params);
+      appView.setHandle(this);
+      JTabbedPane view = (JTabbedPane)super.getLargeView();
+      view.add("Design", appView);
+      view.setSelectedComponent(appView);
+    }catch(ResourceInstantiationException rie){
+      rie.printStackTrace(Err.getPrintWriter());
     }
+
     viewPopupElements = new MenuElement[]{};
   }
 
