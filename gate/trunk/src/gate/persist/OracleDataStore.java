@@ -287,7 +287,9 @@ public class OracleDataStore extends JDBCDataStore {
     ResultSet rs = null;
     try {
       stmt = this.jdbcConn.createStatement();
-      String sql =  "select dc_content " +
+      String sql =  "select dc_content_type, " +
+                    "       dc_character_content, " +
+                    "       dc_binary_content " +
                     "from "+gate.Gate.DB_OWNER+".t_doc_content";
       stmt.execute(sql);
       rs = stmt.getResultSet();
@@ -295,8 +297,19 @@ public class OracleDataStore extends JDBCDataStore {
       while (rs.next()) {
         //important: read the objects in the order they appear in
         //the ResultSet, otherwise data may be lost
-        Clob clob = (Clob)rs.getObject(1);
-        writeCLOB(content.toString(),clob);
+        int contentType = rs.getInt(1);
+        Clob clob = (Clob)rs.getClob(2);
+        Blob blob = (Blob)rs.getBlob(3);
+
+        Assert.assert(contentType == DBHelper.CHARACTER_CONTENT ||
+                      contentType == DBHelper.BINARY_CONTENT);
+
+        if (contentType == DBHelper.CHARACTER_CONTENT) {
+          writeCLOB(content.toString(),clob);
+        }
+        else {
+          throw new MethodNotImplementedException();
+        }
       }
     }
     catch(IOException ioe) {
@@ -329,7 +342,7 @@ public class OracleDataStore extends JDBCDataStore {
   throws PersistenceException {
 
     //1. get the data to be stored
-    AnnotationSet docAnnotations = doc.getAnnotations();
+    AnnotationSet defaultAnnotations = doc.getAnnotations();
     DocumentContent docContent = doc.getContent();
     FeatureMap docFeatures = doc.getFeatures();
     String docName  = doc.getName();
@@ -346,6 +359,7 @@ public class OracleDataStore extends JDBCDataStore {
       throw new PersistenceException("cannot create document: error getting " +
                                      " document encoding ["+re.getMessage()+"]");
     }
+
 
     //3. create a Language Resource (an entry in T_LANG_RESOURCE) for this document
     Long lrID = null;// = this.createLR(this.session,"gate.corpora.DocumentImpl",?,?);
@@ -375,7 +389,10 @@ public class OracleDataStore extends JDBCDataStore {
       docContentID = new Long(stmt.getLong(9));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't create LR [step 4] in DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't create document [step 4] in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
     }
 
     //5. fill document content (record[s] in T_DOC_CONTENT)
@@ -383,10 +400,89 @@ public class OracleDataStore extends JDBCDataStore {
 
     //6. insert annotations, etc
 
+    //6.1. create default annotation set
+    createAnnotationSet(docID,defaultAnnotations);
+
+    //6.2. create named annotation sets
+    Map namedAnns = doc.getNamedAnnotationSets();
+    Set setAnns = namedAnns.entrySet();
+    Iterator itAnns = setAnns.iterator();
+
+    while (itAnns.hasNext()) {
+      Map.Entry mapEntry = (Map.Entry)itAnns.next();
+      //String currAnnName = (String)mapEntry.getKey();
+      AnnotationSet currAnnSet = (AnnotationSet)mapEntry.getValue();
+
+      //create a-sets
+      createAnnotationSet(docID,currAnnSet);
+    }
+
+
     //7. commit?
 
     throw new MethodNotImplementedException();
   }
+
+
+
+  /** -- */
+  private void createAnnotationSet(Long docID, AnnotationSet aset)
+    throws PersistenceException {
+
+    //1. create a-set
+    String asetName = aset.getName();
+    Long asetID = null;
+    //DB stuff
+    CallableStatement stmt = null;
+      try {
+        stmt = this.jdbcConn.prepareCall(
+            "{ call "+Gate.DB_OWNER+".persist.create_annotation_set(?,?,?) }");
+        stmt.setLong(1,docID.longValue());
+        stmt.setString(2,asetName);
+        stmt.registerOutParameter(3,java.sql.Types.BIGINT);
+        stmt.execute();
+        asetID = new Long(stmt.getLong(3));
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't create a-set [step 1] in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
+
+
+    //2. insert annotations/nodes for DEFAULT a-set
+    //for now use a stupid cycle
+    //TODO: pass all the data with one DB call (?)
+    Iterator itAnnotations = aset.iterator();
+    while (itAnnotations.hasNext()) {
+      Annotation ann = (Annotation)itAnnotations.next();
+      Node start = (Node)ann.getStartNode();
+      Node end = (Node)ann.getEndNode();
+      String type = ann.getType();
+
+      //DB stuff
+
+      try {
+        stmt = this.jdbcConn.prepareCall(
+            "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?) }");
+        stmt.setLong(1,docID.longValue());
+        stmt.setLong(2,asetID.longValue());
+        stmt.setLong(3,start.getOffset().longValue());
+        stmt.setLong(4,end.getOffset().longValue());
+        stmt.setString(5,type);
+
+        stmt.execute();
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException("can't create document [step 6] in DB: ["+ sqle.getMessage()+"]");
+      }
+      finally {
+        DBHelper.cleanup(stmt);
+      }
+    }
+  }
+
 
 
   /** -- */
