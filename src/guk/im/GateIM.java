@@ -179,7 +179,7 @@ public class GateIM implements InputMethod {
                   break;
                 }
                 case '3':{
-                  ch = '£';
+                  ch = 'Â£';
                   break;
                 }
                 case '4':{
