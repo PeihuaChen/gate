@@ -26,7 +26,8 @@ import java.io.*;
 import java.net.*;
 import gnu.regexp.*;
 
-public class OrthoMatcher extends AbstractLanguageAnalyser{
+public class OrthoMatcher extends AbstractLanguageAnalyser
+                          implements AnnieConstants{
 
   protected static final String CDGLISTNAME = "cdg";
   protected static final String ALIASLISTNAME = "alias";
@@ -36,8 +37,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
   protected static final String SPURLISTNAME = "spur_match";
 
   protected static final String LOOKUPNAME = "Lookup";
-  protected static final String MATCHES_FEATURE = "matches";
-  public static final String DOC_MATCHES_FEATURE = "MatchesAnnots";
   protected static final String GENDER_FEATURE = "gender";
   protected static final String KIND_FEATURE = "kind";
   protected static final String STRING_FEATURE = "string";
@@ -160,7 +159,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
     //check if we've been run on this document before
     //and clean the doc if needed
     docCleanup();
-    Map matchesMap = (Map)document.getFeatures().get(DOC_MATCHES_FEATURE);
+    Map matchesMap = (Map)document.getFeatures().
+                     get(DOCUMENT_COREF_FEATURE_NAME);
 //    if(matchesMap != null && matchesMap.containsKey(nameAllAnnots.getName())){
 //      docCleanup();
 //    }
@@ -186,7 +186,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
       matchesMap.put(nameAllAnnots.getName(), matchesDocFeature);
       //we need to put it even if it was already present in order to triger
       //the update events
-      document.getFeatures().put(DOC_MATCHES_FEATURE, matchesMap);
+      document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, matchesMap);
 
       //cannot do clear() as this has already been put on the document
       //so I need a new one for the next run of matcher
@@ -366,7 +366,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
         nameAllAnnots.remove(unknown);
 
         //change the id in the matches list
-        List mList = (List)unknown.getFeatures().get(MATCHES_FEATURE);
+        List mList = (List)unknown.getFeatures().
+                     get(ANNOTATION_COREF_FEATURE_NAME);
         mList.remove(unknId);
         mList.add(newID);
       }//while
@@ -467,7 +468,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
     tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
     tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
 
-    List matchesList = (List) prevAnnot.getFeatures().get(MATCHES_FEATURE);
+    List matchesList = (List) prevAnnot.getFeatures().
+                              get(ANNOTATION_COREF_FEATURE_NAME);
     if (matchesList == null || matchesList.isEmpty())
       return apply_rules_namematch(prevAnnot.getType(), shortName,longName);
 
@@ -558,7 +560,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
   protected boolean matchedAlready(Annotation annot1, Annotation annot2) {
     //the two annotations are already matched if the matches list of the first
     //contains the id of the second
-    List matchesList = (List) annot1.getFeatures().get(MATCHES_FEATURE);
+    List matchesList = (List) annot1.getFeatures().
+                       get(ANNOTATION_COREF_FEATURE_NAME);
     if ((matchesList == null) || matchesList.isEmpty())
       return false;
     else if (matchesList.contains(annot2.getId()))
@@ -588,12 +591,14 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
         && !newAnnot.getType().equals(unknownType) )
       return matchedAnnot;
 
-    List matchesList = (List) matchedAnnot.getFeatures().get(MATCHES_FEATURE);
+    List matchesList = (List) matchedAnnot.getFeatures().
+                       get(ANNOTATION_COREF_FEATURE_NAME);
     if ((matchesList == null) || matchesList.isEmpty()) {
       //no previous matches, so need to add
       if (matchesList == null) {
         matchesList = new ArrayList();
-        matchedAnnot.getFeatures().put(MATCHES_FEATURE, matchesList);
+        matchedAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME,
+                                       matchesList);
         matchesDocFeature.add(matchesList);
       }//if
       matchesList.add(matchedAnnot.getId());
@@ -603,18 +608,19 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
       matchesList.add(newAnnot.getId());
     }//if
     //add the matches list to the new annotation
-    newAnnot.getFeatures().put(MATCHES_FEATURE, matchesList);
+    newAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
     return matchedAnnot;
   }
 
   protected void updateMatches(Annotation newAnnot, Annotation prevAnnot) {
 
-    List matchesList = (List) prevAnnot.getFeatures().get(MATCHES_FEATURE);
+    List matchesList = (List) prevAnnot.getFeatures().
+                              get(ANNOTATION_COREF_FEATURE_NAME);
     if ((matchesList == null) || matchesList.isEmpty()) {
       //no previous matches, so need to add
       if (matchesList == null) {
         matchesList = new ArrayList();
-        prevAnnot.getFeatures().put(MATCHES_FEATURE, matchesList);
+        prevAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
         matchesDocFeature.add(matchesList);
       }//if
       matchesList.add(prevAnnot.getId());
@@ -624,7 +630,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
       matchesList.add(newAnnot.getId());
     }//if
     //add the matches list to the new annotation
-    newAnnot.getFeatures().put(MATCHES_FEATURE, matchesList);
+    newAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
     //propagate the gender if two persons are matched
     if (prevAnnot.getType().equals(personType)) {
       String prevGender = (String) prevAnnot.getFeatures().get(GENDER_FEATURE);
@@ -640,12 +646,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
 
 
   protected void docCleanup() {
-    Map matchesMap = (Map)document.getFeatures().get(DOC_MATCHES_FEATURE);
+    Map matchesMap = (Map)document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
     if(matchesMap != null) matchesMap.remove(nameAllAnnots.getName());
 
     //get all annotations that have a matches feature
     HashSet fNames = new HashSet();
-    fNames.add(MATCHES_FEATURE);
+    fNames.add(ANNOTATION_COREF_FEATURE_NAME);
     AnnotationSet annots =
                   nameAllAnnots.get(null, fNames);
 
@@ -657,7 +663,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser{
     Iterator iter = annots.iterator();
     while (iter.hasNext()) {
       while (iter.hasNext())
-        ((Annotation) iter.next()).getFeatures().remove(MATCHES_FEATURE);
+        ((Annotation) iter.next()).getFeatures().
+                                   remove(ANNOTATION_COREF_FEATURE_NAME);
     } //while
   }//cleanup
 
