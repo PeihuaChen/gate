@@ -141,7 +141,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
   /** Get the name of an LR from its ID. */
-  public String getLrName(String lrId) throws PersistenceException {
+  public String getLrName(Object lrId) throws PersistenceException {
     throw new MethodNotImplementedException();
   }
 
@@ -220,7 +220,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * @param lrId a data-store specific unique identifier for the resource
    * @param lrClassName class name of the type of resource
    */
-  public void delete(String lrClassName, String lrId)
+  public void delete(String lrClassName, Object lrId)
   throws PersistenceException {
     throw new MethodNotImplementedException();
   }
@@ -259,7 +259,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * <B>Don't use this method - use Factory.createResource with
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
-  public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
     throw new MethodNotImplementedException();
   }
@@ -283,7 +283,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Long lrID, Session s)
+  public boolean canReadLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
     throw new MethodNotImplementedException();
@@ -292,7 +292,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Long lrID, Session s)
+  public boolean canWriteLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException{
 
     throw new MethodNotImplementedException();

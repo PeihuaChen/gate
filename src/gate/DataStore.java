@@ -60,7 +60,7 @@ public interface DataStore extends FeatureBearer {
    * @param lrId a data-store specific unique identifier for the resource
    * @param lrClassName class name of the type of resource
    */
-  public void delete(String lrClassName, String lrId)
+  public void delete(String lrClassName, Object lrId)
   throws PersistenceException;
 
   /**
@@ -89,7 +89,7 @@ public interface DataStore extends FeatureBearer {
    * <B>Don't use this method - use Factory.createResource with
    * DataStore and DataStoreInstanceId parameters set instead.</B>
    */
-  LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  LanguageResource getLr(String lrClassName, Object lrId)
   throws PersistenceException;
 
   /** Get a list of the types of LR that are present in the data store. */
@@ -102,7 +102,7 @@ public interface DataStore extends FeatureBearer {
   public List getLrNames(String lrType) throws PersistenceException;
 
   /** Get the name of an LR from its ID. */
-  public String getLrName(String lrId) throws PersistenceException;
+  public String getLrName(Object lrId) throws PersistenceException;
 
   /**
    * Registers a new {@link gate.event.DatastoreListener} with this datastore
@@ -131,14 +131,14 @@ public interface DataStore extends FeatureBearer {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Long lrID, Session s)
+  public boolean canReadLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException;
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Long lrID, Session s)
+  public boolean canWriteLR(Object lrID, Session s)
     throws PersistenceException, gate.security.SecurityException;
 
 } // interface DataStore
