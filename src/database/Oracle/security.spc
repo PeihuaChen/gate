@@ -79,12 +79,13 @@ create or replace package security is
                              p_result  OUT boolean);
 
   /*  -- */                           
-  procedure can_delete_group(p_grp_id     IN  number,
-                             p_result     OUT boolean);
+  function can_delete_group(p_grp_id     IN  number)
+     return boolean;
+
 
   /*  -- */                           
-  procedure can_delete_user(p_usr_id     IN  number,
-                            p_result     OUT boolean);
+  function can_delete_user(p_usr_id     IN  number)
+     return boolean;
                            
 end security;
 /
