@@ -384,15 +384,28 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     * the original markup will be in the same place and format as it was
     * before processing the document) and include (if possible)
     * the annotations specified in the aSourceAnnotationSet.
+    * It is equivalent to toXml(aSourceAnnotationSet, true).
+    */
+  public String toXml(Set aSourceAnnotationSet){
+    return toXml(aSourceAnnotationSet, true);
+  }
+
+  /** Returns an XML document aming to preserve the original markups(
+    * the original markup will be in the same place and format as it was
+    * before processing the document) and include (if possible)
+    * the annotations specified in the aSourceAnnotationSet.
     * <b>Warning:</b> Annotations from the aSourceAnnotationSet will be lost
     * if they will cause a crosed over situation.
     * @param aSourceAnnotationSet is an annotation set containing all the
     * annotations that will be combined with the original marup set. If the
     * param is <code>null</code> it will only dump the original markups.
+    * @param includeFeatures is a boolean that controls whether the annotation
+    * features should be included or not. If false, only the annotation type
+    * is included in the tag.
     * @return a string representing an XML document containing the original
     * markup + dumped annotations form the aSourceAnnotationSet
     */
-  public String toXml(Set aSourceAnnotationSet){
+  public String toXml(Set aSourceAnnotationSet, boolean includeFeatures){
     AnnotationSet originalMarkupsAnnotSet =
             this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
@@ -473,7 +486,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
 //      addGatePreserveFormatTag = true;
     }// End if
 
-    xmlDoc.append(saveAnnotationSetAsXml(dumpingSet));
+    xmlDoc.append(saveAnnotationSetAsXml(dumpingSet, includeFeatures));
 
 //    if (addGatePreserveFormatTag){
 //      // Add the root end element
@@ -531,10 +544,13 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     * @param aDumpAnnotationSet is a GATE annotation set prepared to be used
     * on the raw text from document content. If aDumpAnnotSet is <b>null<b>
     * then an empty string will be returned.
+    * @param includeFeatures is a boolean, which controls whether the annotation
+    * features and gate ID are included or not.
     * @return The XML document obtained from raw text + the information from
     * the dump annotation set.
     */
-  private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet){
+  private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet,
+                                        boolean includeFeatures){
     String content = null;
     if (this.getContent()== null)
       content = new String("");
@@ -598,7 +614,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
                 // The first annot in the last offset is the ROOT one
                 isRootTag = true;
               }// End if
-              tmpBuff.append(writeStartTag(a));
+              tmpBuff.append(writeStartTag(a, includeFeatures));
               stack.push(a);
             }else{
               // Assert annotation a with start == end and an empty tag
@@ -635,7 +651,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
               // The first annot in the last offset is the ROOT one.
               isRootTag = true;
             }// End if
-            tmpBuff.append(writeStartTag(a));
+            tmpBuff.append(writeStartTag(a, includeFeatures));
             // The annotation is removed from dumped set
             aDumpAnnotSet.remove(a);
           }// End if ( offset.equals(a.getStartNode().getOffset()) )
@@ -744,20 +760,41 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   }// getAnnotationsForOffset()
 
   /** Returns a string representing a start tag based on the input annot*/
-  private String writeStartTag(Annotation annot){
+  private String writeStartTag(Annotation annot, boolean includeFeatures){
+    AnnotationSet originalMarkupsAnnotSet =
+            this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
     if (!addGatePreserveFormatTag && isRootTag){
-      strBuff.append("<"+annot.getType()+
-            " xmlns:gate=\"http://www.gate.ac.uk\"" +
-            " gate:gateId=\"" + annot.getId()+"\"" +
-            " gate:annotMaxId=\"" + getNextAnnotationId() + "\""+
-                    writeFeatures(annot.getFeatures())+" >");
+      //the features are included either if desired or if that's an annotation
+      //from the original markup of the document. We don't want for example to
+      //spoil all links in an HTML file!
+      if (includeFeatures)
+        strBuff.append("<"+annot.getType()+
+              " xmlns:gate=\"http://www.gate.ac.uk\"" +
+              " gate:gateId=\"" + annot.getId()+"\"" +
+              " gate:annotMaxId=\"" + getNextAnnotationId() + "\""+
+                      writeFeatures(annot.getFeatures())+" >");
+      else if (originalMarkupsAnnotSet.contains(annot))
+        strBuff.append("<"+annot.getType()+
+                      writeFeatures(annot.getFeatures())+" >");
+       else
+         strBuff.append("<"+annot.getType()+">");
       // Once the root tag was writen then there will be no other Root tag
       isRootTag = false;
     }else{
-      strBuff.append("<"+annot.getType()+" gate:gateId=\"" +annot.getId()+"\""+
-                    writeFeatures(annot.getFeatures())+" >");
+      //the features are included either if desired or if that's an annotation
+      //from the original markup of the document. We don't want for example to
+      //spoil all links in an HTML file!
+      if (includeFeatures)
+        strBuff.append("<"+annot.getType()+" gate:gateId=\"" +annot.getId()+"\""+
+                      writeFeatures(annot.getFeatures())+" >");
+      else if (originalMarkupsAnnotSet.contains(annot))
+        strBuff.append("<"+annot.getType()+
+                      writeFeatures(annot.getFeatures())+" >");
+      else
+        strBuff.append("<"+annot.getType()+">");
     }// End if
     return strBuff.toString();
   }// writeStartTag()
