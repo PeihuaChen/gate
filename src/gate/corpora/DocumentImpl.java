@@ -129,7 +129,8 @@ import gate.event.*;
   * </PRE>
   */
 public class DocumentImpl
-extends AbstractLanguageResource implements Document, CreoleListener, DatastoreListener {
+extends AbstractLanguageResource implements TextualDocument, CreoleListener,
+                                            DatastoreListener {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -158,6 +159,10 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
+    //make sure we have an encoding
+    if(encoding == null || encoding.length() == 0)
+      encoding = System.getProperty("file.encoding");
+    if(encoding == null || encoding.length() == 0) encoding = "UTF-8";
 
     // set up the source URL and create the content
     if(sourceUrl == null) {
@@ -171,7 +176,6 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       getFeatures().put("gate.SourceURL", "created from String");
     } else {
       try {
-
         content = new DocumentContentImpl(
           sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset);
         getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
@@ -699,44 +703,34 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     if(sListener != null) sListener.statusChanged("Dumping annotations as XML");
     StringBuffer xmlDoc = new StringBuffer(
           DOC_SIZE_MULTIPLICATION_FACTOR*(this.getContent().size().intValue()));
-    // Add xml header
-//    xmlDoc.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 
-    // If the annotation set contains this "GatePreserveFormat"
-    // type, then this is removed because it will be added in the saving
-    // process. The reason of this removal is that if the loaded document
-    // was previously loaded from a GatePreserveFormat then we
-    // don't want to create lots of annotation for this type. This annotation
-    // type should be always the root element of a XML preserving format
-    // GATE document.
-    FeatureMap docFeatures = this.getFeatures();
-    String mimeTypeStr = null;
-//    addGatePreserveFormatTag = false;
-    if (  docFeatures != null &&
-          null != (mimeTypeStr=(String)docFeatures.get("MimeType")) &&
-          (
-            "text/html".equalsIgnoreCase(mimeTypeStr) ||
-            "text/xml".equalsIgnoreCase(mimeTypeStr) ||
-            "text/sgml".equalsIgnoreCase(mimeTypeStr)
-           )
-       ){
-          /* don't add the root tag */
-    }else{
-      // Add the root start element
-//      xmlDoc.append("<GatePreserveFormat"+
-//                    " xmlns:gate=\"http://www.gate.ac.uk\"" +
-//                    " gate:annotMaxId=\"" +
-//                    getNextAnnotationId() +
-//                    "\">");
-//      addGatePreserveFormatTag = true;
-    }// End if
+    // Add xml header if original format was xml
+    String mimeType = getFeatures() == null ?
+                      null :
+                      (String)getFeatures().get("MimeType");
+    boolean wasXML = mimeType != null && mimeType.equalsIgnoreCase("text/xml");
+//    boolean needsRootTag = false;
+    if(wasXML){
+      String defaultEncoding = System.getProperty("file.encoding");
+      if(defaultEncoding == null) defaultEncoding = "UTF-8";
+      xmlDoc.append("<?xml version=\"1.0\" encoding=\"" +
+                    (encoding == null ? defaultEncoding : encoding) +
+                    "\" ?>" + Strings.getNl());
+      // Add the root start element if not already there
+//      AnnotationSet aType = dumpingSet.get("GatePreserveFormat");
+//      if(aType == null || aType.isEmpty()){
+//        needsRootTag = true;
+//        xmlDoc.append("<GatePreserveFormat " +
+//                      "xmlns:gate=\"http://www.gate.ac.uk\" " +
+//                      "gate:annotMaxId=\"" + getNextAnnotationId() + "\">");
+//      }
+    }
 
     xmlDoc.append(saveAnnotationSetAsXml(dumpingSet, includeFeatures));
 
-//    if (addGatePreserveFormatTag){
-//      // Add the root end element
+//    if(wasXML && needsRootTag){
 //      xmlDoc.append("</GatePreserveFormat>");
-//    }// End if
+//    }
     if(sListener != null) sListener.statusChanged("Done.");
     return xmlDoc.toString();
   }//End toXml()
@@ -2143,6 +2137,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       documentListeners = v;
     }
   }
+
   protected void fireAnnotationSetAdded(DocumentEvent e) {
     if (documentListeners != null) {
       Vector listeners = documentListeners;
@@ -2152,6 +2147,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       }
     }
   }
+
   protected void fireAnnotationSetRemoved(DocumentEvent e) {
     if (documentListeners != null) {
       Vector listeners = documentListeners;
