@@ -853,7 +853,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** --- */
-  protected void readCLOB(java.sql.Clob src, StringBuffer dest)
+  public static void readCLOB(java.sql.Clob src, StringBuffer dest)
     throws SQLException, IOException {
 
     int readLength = 0;
@@ -886,7 +886,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** --- */
-  protected void writeCLOB(String src,java.sql.Clob dest)
+  public static void writeCLOB(String src,java.sql.Clob dest)
     throws SQLException, IOException {
 
     //preconditions
@@ -913,7 +913,7 @@ public class OracleDataStore extends JDBCDataStore {
   }
 
   /** --- */
-  protected void writeCLOB(StringBuffer src,java.sql.Clob dest)
+  public static void writeCLOB(StringBuffer src,java.sql.Clob dest)
     throws SQLException, IOException {
 
     //delegate
@@ -1187,22 +1187,20 @@ public class OracleDataStore extends JDBCDataStore {
     }
 
     // 1. dummy document to be initialized
-    Document result = new DocumentImpl();
+    Document result = new DatabaseDocumentImpl(this.jdbcConn);
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
     //3. read from DB
     try {
-      String sql = " select v1.lr_name, " +
-                   "        v1.lrtp_type, " +
-                   "        v1.lr_id, " +
-                   "        v2.doc_url, " +
-                   "        v2.doc_is_markup_aware " +
-                   " from  "+Gate.DB_OWNER+".v_lr v1, " +
-                   "       "+Gate.DB_OWNER+".v_document v2, " +
-                   " where  v2.doc_lr_id = v1.lr_id " +
-                   "        and v1.lr_id = ? ";
+      String sql = " select lr_name, " +
+                   "        lrtp_type, " +
+                   "        lr_id, " +
+                   "        doc_url, " +
+                   "        doc_is_markup_aware " +
+                   " from  "+Gate.DB_OWNER+".v_document " +
+                   " where  lr_id = ? ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,((Long)lrPersistenceId).longValue());
