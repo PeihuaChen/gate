@@ -25,80 +25,68 @@ public class JarFiles {
     * classes of jarFilesNames
     */
   public void merge(Set jarFileNames, String outputFileName) throws GateException{
-    Iterator iter;
     String jarFileName;
-    Enumeration enum;
-    Enumeration en;
+
     FileOutputStream outStream = null;
     JarOutputStream  outJar = null;
-    byte buffer[] = new byte[1000];
-
-    //open the FileOutputStream file
-    try{
-      outStream = new FileOutputStream(outputFileName);
-    }catch(IOException ioe){
-      ioe.printStackTrace(System.err);
-      System.exit(1);
-    }
-
+    int BUFF_SIZE = 6500;
+    byte buffer[] = new byte[BUFF_SIZE];
     // open the JarOutputStream file
     try{
-      outJar = new JarOutputStream(outStream);
+      outJar = new JarOutputStream(new FileOutputStream(outputFileName));
     }catch(IOException ioe){
       ioe.printStackTrace(System.err);
       System.exit(1);
     }
-    iter=jarFileNames.iterator();
-    while(iter.hasNext()) {
-      jarFileName = (String)iter.next();
-      JarFile jarFile;
+    // iterate throught the Jar files set
+    Iterator jarFileNamesIterator = jarFileNames.iterator();
+    while(jarFileNamesIterator.hasNext()) {
+      jarFileName = (String) jarFileNamesIterator.next();
+
+      JarFile jarFile = null;
       // open a Jar File
       try{
+        // create a new jarFile based on jarFileName
         jarFile = new JarFile(jarFileName);
-        enum = jarFile.entries();
-        JarEntry currentJarEntry;
-        InputStream currentEntryStream;
-        while (enum.hasMoreElements())
-        {
-          currentJarEntry = (JarEntry)enum.nextElement();
+        // get an enumeration of all entries
+        Enumeration jarFileEntriesEnum = jarFile.entries();
+
+        JarEntry currentJarEntry = null;
+        InputStream currentEntryStream = null;;
+        while (jarFileEntriesEnum.hasMoreElements()){
+          currentJarEntry = (JarEntry) jarFileEntriesEnum.nextElement();
           // if current entry is manifest then it is skipped
           if(currentJarEntry.getName().equalsIgnoreCase("META-INF/") ||
              currentJarEntry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF"))
             continue;
           // current entry is added to the final jar file
           try{
-            outJar.putNextEntry(new JarEntry(currentJarEntry.getName()));
+            //outJar.putNextEntry(new JarEntry(currentJarEntry.getName()));
+            outJar.putNextEntry(currentJarEntry);
           }catch(java.util.zip.ZipException ze){
-            if(currentJarEntry.isDirectory())
-              System.err.println("Warning: duplicate directory \"" +
-                                 currentJarEntry.getName() + "\"!");
-            else{
+
+            if(!currentJarEntry.isDirectory())
               throw new GateException("Error: duplicate file entry \"" +
                                  currentJarEntry.getName() + "\"!");
-            }
           }
-          //the data from jar files is added
+          //the binary data from jar files is added
+          // get an input stream
           currentEntryStream = jarFile.getInputStream(currentJarEntry);
-          int read = 0;
-          do{
-            read = currentEntryStream.read(buffer,0,1000);
-            if(read != -1){
-              outJar.write(buffer,0,read);
-            }
-          }while(read != -1);
-
+          // write data to outJar
+          int  bytesRead = 0;
+          while((bytesRead = currentEntryStream.read(buffer,0,BUFF_SIZE)) != -1)
+            outJar.write(buffer,0,bytesRead);
+          //close the new added entry
+          // prepare to write another one
           outJar.closeEntry();
+          // close input stream
           currentEntryStream.close();
-        }
-      try{
+        }//while(jarFileEntriesEnum.hasMoreElements())
         jarFile.close();
       }catch(IOException ioe){
         ioe.printStackTrace(System.err);
       }
-      }catch(IOException ioe){
-        ioe.printStackTrace(System.err);
-      }
-    }
+    }//while(jarFileNamesIterator.hasNext())
     //close the JarOutputStream outJar
     try{
       outJar.close();
