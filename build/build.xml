@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="GATE-nightly" default="testSuite" basedir="..">
+<project name="buildUtils" default="testSuite" basedir="..">
 <!-- 
 ANT build file used by the nightly build and test process.
 Adds some more targets to the ones already defined by the main build file.
