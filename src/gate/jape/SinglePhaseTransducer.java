@@ -444,7 +444,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
         Collections.sort(acceptingFSMInstances, Collections.reverseOrder());
 
-        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.get(0);
+        Iterator accFSMs = acceptingFSMInstances.iterator();
+        FSMInstance currentAcceptor = (FSMInstance)accFSMs.next();
+
         if(isDebugMode()){
           //see if we have any conflicts
           Iterator accIter = acceptingFSMInstances.iterator();
@@ -472,6 +474,45 @@ extends Transducer implements JapeConstants, java.io.Serializable
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, currentAcceptor.getBindings(),
                              inputAS, outputAS, ontology);
+
+        //if in matchGroup mode check other possible patterns in this span
+        if(isMatchGroupMode()) {
+          //Out.prln("Jape grammar in MULTI application style.");
+          // ~bp:  check for other matching fsm instances with same length,
+          // priority and rule index : if such execute them also.
+          FSMInstance rivalAcceptor;
+          String currentAcceptorString = null;
+          while (accFSMs.hasNext()) {
+            rivalAcceptor =(FSMInstance) accFSMs.next();
+            // gets the rivals that are NOT COMPLETELY IDENTICAL with the
+            // current acceptor.
+            if (rivalAcceptor.compareTo(currentAcceptor)==0 &&
+                !(rivalAcceptor.equals(currentAcceptor))){
+              if (isDebugMode()){ /*depends on the debug option in the transducer */
+                if (currentAcceptorString == null) {
+                  // first rival
+                  currentAcceptorString = currentAcceptor.toString();
+                  Out.prln("~Jape Grammar Transducer : "+
+                  "\nConcurrent Patterns by length,priority and index (all transduced):");
+                  Out.prln(currentAcceptorString);
+                  Out.prln("bindings : "+currentAcceptor.getBindings());
+                  Out.prln("Rivals Follow: ");
+                }
+                Out.prln(rivalAcceptor);
+                Out.prln("bindings : "+rivalAcceptor.getBindings());
+              } // DEBUG
+              currentRHS = rivalAcceptor.getFSMPosition().getAction();
+              currentRHS.transduce(doc, rivalAcceptor.getBindings(),
+                                   inputAS, outputAS, ontology);
+            } // equal rival
+            else {
+              // if rival is not equal this means that there are no further
+              // equal rivals (since sorted is the list)
+              break;
+            } // else
+          } // while there are fsm instances
+
+        } // matchGroupMode
 
         //if in ONCE mode stop after first match
         if(ruleApplicationStyle == ONCE_STYLE) return;

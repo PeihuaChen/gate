@@ -112,7 +112,16 @@ public abstract class Transducer implements Serializable
    */
   private boolean debugMode = false;
 
+  public void setMatchGroupMode(boolean mode) {
+    matchGroupMode = mode;
+  }
+  public boolean isMatchGroupMode() {
+    return matchGroupMode;
+  }
 
+  /** Switch used to enable multiple LHS mathcing  in case of pattern coverage
+   * over one and same span with different annotation groups */
+  private boolean matchGroupMode = false;
 
   private URL baseURL;
 
