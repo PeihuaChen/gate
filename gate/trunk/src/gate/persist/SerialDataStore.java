@@ -634,7 +634,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
-  public boolean canReadLR(Object lrID, Session session)
+  public boolean canReadLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException{
 
     return true;
@@ -643,7 +643,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
-  public boolean canWriteLR(Object lrID, Session session)
+  public boolean canWriteLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException{
 
     return true;
