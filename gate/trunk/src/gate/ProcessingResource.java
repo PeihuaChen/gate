@@ -29,4 +29,10 @@ public interface ProcessingResource extends Resource, Runnable
 {
   /** Trigger any exception that was caught when run() was invoked. */
   public void check() throws ExecutionException;
+
+  /**
+   * Sets the runtime parameters from a {@link FeatureMap}
+   */
+  public void setRuntimeParameters(FeatureMap parameters);
+
 } // interface ProcessingResource

@@ -118,10 +118,10 @@ public class AnnotationEditor extends AbstractVisualResource{
       FeatureMap params = Factory.newFeatureMap();
       params.put("markupAware", new Boolean(true));
 
-      params.put("sourceUrlName",
-                 "file:///d:/tmp/help-doc.html");
+      params.put("sourceUrl",
+                 //"file:///d:/tmp/help-doc.html");
                  //"file:///d:/tmp/F7V.xml");
-                 //"http://redmires.dcs.shef.ac.uk/admin/index.html");
+                 "http://redmires.dcs.shef.ac.uk/admin/index.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/swing/Action.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt/AWTEventMulticaster.html");
       gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
@@ -472,6 +472,7 @@ public class AnnotationEditor extends AbstractVisualResource{
     annotationsTableModel = new AnnotationsTableModel();
     annotationsTable = new XJTable(annotationsTableModel);
     annotationsTable.setIntercellSpacing(new Dimension(10, 5));
+    annotationsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     //annotationsTable.setRowMargin(10);
     tableScroll = new JScrollPane(annotationsTable);
     tableScroll.setOpaque(true);
@@ -1486,7 +1487,15 @@ throw new UnsupportedOperationException("DocumentEditor -> Annotation set remove
                     while(node != null &&
                           !((TypeData)node.getUserObject()).getSet().equals(setName))
                       node = node.getNextSibling();
-                    node.add(typeNode);
+                    //we have to add typeNode to node
+                    //find the right place
+                    int i = 0;
+                    while(i < node.getChildCount() &&
+                          ((TypeData)
+                            ((DefaultMutableTreeNode)node.getChildAt(i)).
+                            getUserObject()
+                          ).getType().compareTo(tData.getType())<0) i++;
+                    node.insert(typeNode, i);
                     stylesTreeModel.nodeStructureChanged(node);
                   }
                 }else if(asEvt.getType() == asEvt.ANNOTATION_REMOVED){

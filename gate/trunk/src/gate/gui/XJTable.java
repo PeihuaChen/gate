@@ -103,7 +103,8 @@ public class XJTable extends JTable {
 
     //delete the current rowModel in order to get a new updated one
     //this way we fix a bug in JTable
-    setRowHeight(Math.max(getRowHeight(0), 10));
+    //setRowHeight(Math.max(getRowHeight(0), 10));
+    setRowHeight(Math.max(getRowHeight(0), 1));
     for(int column = 0; column < getColumnCount(); column ++){
       int width;
       tCol = getColumnModel().getColumn(column);
@@ -135,7 +136,7 @@ public class XJTable extends JTable {
       }
       width += getColumnModel().getColumnMargin();
       tCol.setPreferredWidth(width);
-      tCol.setMinWidth(width);
+      //tCol.setMinWidth(width);
       totalWidth += width;
     }
     if(! headerOnly){
@@ -145,30 +146,32 @@ public class XJTable extends JTable {
       dim = new Dimension(totalWidth, totalHeight);
       setPreferredScrollableViewportSize(dim);
       //extend the last column
-      Container p = getParent();
-      if (p instanceof JViewport) {
-        Container gp = p.getParent();
-        if (gp instanceof JScrollPane) {
-          JScrollPane scrollPane = (JScrollPane)gp;
-          // Make certain we are the viewPort's view and not, for
-          // example, the rowHeaderView of the scrollPane -
-          // an implementor of fixed columns might do this.
-          JViewport viewport = scrollPane.getViewport();
-          if (viewport == null || viewport.getView() != this) {
-              return;
-          }
-          int portWidth = scrollPane.getSize().width -
-                          scrollPane.getInsets().left -
-                          scrollPane.getInsets().right - 4;
-          totalWidth = getMinimumSize().width;
-          if(totalWidth < portWidth){
-            int width = tCol.getMinWidth() + portWidth - totalWidth;
-            tCol.setPreferredWidth(width);
-            tCol.setMinWidth(width);
+      if(getAutoResizeMode() != AUTO_RESIZE_OFF){
+        Container p = getParent();
+        if (p instanceof JViewport) {
+          Container gp = p.getParent();
+          if (gp instanceof JScrollPane) {
+            JScrollPane scrollPane = (JScrollPane)gp;
+            // Make certain we are the viewPort's view and not, for
+            // example, the rowHeaderView of the scrollPane -
+            // an implementor of fixed columns might do this.
+            JViewport viewport = scrollPane.getViewport();
+            if (viewport == null || viewport.getView() != this) {
+                return;
+            }
+            int portWidth = scrollPane.getSize().width -
+                            scrollPane.getInsets().left -
+                            scrollPane.getInsets().right - 4;
+            totalWidth = getMinimumSize().width;
+            if(totalWidth < portWidth){
+              int width = tCol.getMinWidth() + portWidth - totalWidth;
+              tCol.setPreferredWidth(width);
+              //tCol.setMinWidth(width);
+            }
           }
         }
-      }
-    }
+      }//if(getAutoResizeMode() != AUTO_RESIZE_OFF)
+    }//if(! headerOnly)
   }
 
   public void setSortedColumn(int column){

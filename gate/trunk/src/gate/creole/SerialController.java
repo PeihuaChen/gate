@@ -70,6 +70,9 @@ extends ArrayList implements Controller, List
     }
   } // check()
 
+  public void setRuntimeParameters(FeatureMap parameters){
+  }
+
   /** Any exception caught during run() invocations are stored here. */
   protected ExecutionException executionException  = null;
 
@@ -82,5 +85,13 @@ extends ArrayList implements Controller, List
   /** The feature set */
   protected FeatureMap features;
 
+  /**
+   * Two controller that contain the same modules are not equal.
+   * Two controllers are only equal if they are the same.
+   * equals() overriden to return "==".
+   */
+  public boolean equals(Object other){
+    return this == other;
+  }
 
 } // class SerialController

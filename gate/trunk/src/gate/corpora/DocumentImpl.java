@@ -557,6 +557,7 @@ extends AbstractLanguageResource implements Document, StatusReporter
 
   /** Equals */
   public boolean equals(Object other) {
+    if(other == null)return false;
     DocumentImpl doc = (DocumentImpl) other;
 
 // PENDING EQUALS IMPLS
