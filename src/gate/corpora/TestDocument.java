@@ -2,14 +2,14 @@
  *	TestDocument.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 21/Jan/00
  *
  *	$Id$
@@ -42,7 +42,7 @@ public class TestDocument extends TestCase
   public TestDocument(String name) { super(name); setUp();}
 
   /** Base of the test server URL */
-  protected static String testServer = null;;
+  protected static String testServer = null;
 
   /** Name of test document 1 */
   protected String testDocument1;
@@ -51,16 +51,10 @@ public class TestDocument extends TestCase
   public void setUp() {
     try{
       Gate.init();
+      testServer = Gate.getUrl().toExternalForm();
     } catch (GateException e){
       e.printStackTrace(Err.getPrintWriter());
     }
-    if (Gate.isGateHomeReachable())
-      testServer = "http://derwent.dcs.shef.ac.uk/gate.ac.uk/";
-    else if (Gate.isGateAcUkReachable())
-      testServer = "http://www.gate.ac.uk/";
-    else throw new
-      LazyProgrammerException("Derwent and www.gate.ac.uk are not reachable");
-
 
     testDocument1 = "tests/html/test2.htm";
   } // setUp
@@ -69,17 +63,8 @@ public class TestDocument extends TestCase
   public static String getTestServerName() {
     if(testServer != null) return testServer;
     else{
-      try{
-        Gate.init();
-      } catch (GateException e){
-        e.printStackTrace(Err.getPrintWriter());
-      }
-      if (Gate.isGateHomeReachable())
-        testServer = "http://derwent.dcs.shef.ac.uk/gate.ac.uk/";
-      else if (Gate.isGateAcUkReachable())
-        testServer = "http://www.gate.ac.uk/";
-      else throw new
-        LazyProgrammerException("Derwent and www.gate.ak.uk are not reachable");
+      try { testServer = Gate.getUrl().toExternalForm(); }
+      catch(Exception e) { }
       return testServer;
     }
   }

@@ -2,14 +2,14 @@
  *	TestJdk.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Hamish Cunningham, 16/Mar/00
  *
  *	$Id$
@@ -166,15 +166,7 @@ if(true) return;
   public void testReloading() throws Exception {
 
     GateClassLoader loader = Gate.getClassLoader();
-
-    if (Gate.isGateHomeReachable())
-      loader.addURL(new URL(
-        "http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/TestJdk.jar")
-      );
-    else if (Gate.isGateAcUkReachable())
-      loader.addURL(new URL("http://gate.ac.uk/tests/TestJdk.jar"));
-    else
-      throw new LazyProgrammerException();
+    loader.addURL(Gate.getUrl("tests/TestJdk.jar"));
 
     //loader.addURL(new URL("file:/build/TestJdk.jar"));
     Class dummyClass1 = loader.loadClass("testpkg.Dummy");

@@ -56,31 +56,18 @@ public class TestXSchema extends TestCase
   /** A test */
   public void testFromAndToXSchema() throws Exception {
 
-   URL url = null;
-   // init detects if Derwent or www.gate.ac.uk are reachable
-   Gate.init();
-   try{
-     if (Gate.isGateHomeReachable())
-      url =
-   new URL ("http://derwent.dcs.shef.ac.uk/gate.ac.uk/tests/xml/POSSchema.xml");
-     else if (Gate.isGateAcUkReachable())
-              url = new URL("http://www.gate.ac.uk/tests/xml/POSSchema.xml");
-          else
-            throw new LazyProgrammerException(
-                                "Derwent and www.gate.ak.uk are not reachable");
-   } catch (Exception e){
-      e.printStackTrace(Err.getPrintWriter());
-   }
+    AnnotationSchema annotSchema = new AnnotationSchema();
 
-   AnnotationSchema annotSchema = new AnnotationSchema();
-   // Create an annoatationSchema from a URL.
-   annotSchema.fromXSchema(url);
+    // Create an annoatationSchema from a URL.
+    URL url = Gate.getUrl("tests/xml/POSSchema.xml");
+    annotSchema.fromXSchema(url);
 
-   String s = annotSchema.toXSchema();
-   // write back the XSchema fom memory
-   File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
-   // load it again.
-   annotSchema.fromXSchema(file.toURL());
+    String s = annotSchema.toXSchema();
+
+    // write back the XSchema fom memory
+    File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
+    // load it again.
+    annotSchema.fromXSchema(file.toURL());
 
   } // testFromAndToXSchema()
 
