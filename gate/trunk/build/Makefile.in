@@ -41,6 +41,7 @@ PKGS=	\
 	gate.jape.parser gate.persist gate.security gate.print \
 	gate.sgml gate.swing gate.util gate.util.persistence \
 	gate.util.protocols.classpath gate.util.protocols.gate gate.xml \
+	gate.wordnet \
 	guk guk.im
 
 # classpath to build compile commands from
