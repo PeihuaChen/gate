@@ -72,6 +72,28 @@ public class TestReload extends TestCase{
                       !firstResult.equals(secondResult));
   }
 
+  public void testUnload() throws Exception {
+    ReloadingClassLoader loader = new ReloadingClassLoader();
+    //load first version
+    URL url = Gate.class.getResource(Files.getResourcePath() +
+                                     "/gate.ac.uk/tests/first.jar");
+    loader.load(url);
+    //try the class
+    Class c = loader.loadClass("loader.Scratch", true);
+    String firstResult = c.newInstance().toString();
+
+    //unload first version
+    loader.unload(url);
+
+    //try to get an error
+    try{
+      c = loader.loadClass("loader.Scratch", true);
+      Assert.assertTrue("Class was found after being unloaded!", false);
+    }catch(ClassNotFoundException cnfe){
+      if(DEBUG) System.out.println("OK: got exception");
+    }
+  }
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 }
