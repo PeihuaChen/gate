@@ -1,5 +1,10 @@
-    <!-- creole.xml for SearchPR -->
+<?xml version="1.0"?>
+<!-- $Id$ -->
+<CREOLE-DIRECTORY>
+  <CREOLE>   
+   <!-- creole.xml for SearchPR -->
     <RESOURCE>
+      <JAR>ir.jar</JAR>
       <NAME>SearchPR</NAME>
       <CLASS>gate.creole.ir.SearchPR</CLASS>
       <COMMENT>provides IR functionality</COMMENT>
@@ -18,4 +23,15 @@
         COMMENT="The search implementation">java.lang.String</PARAMETER>
       <ICON>binoculars.gif</ICON>
     </RESOURCE>
-
+    <!-- Viewer -->
+    <RESOURCE>
+      <NAME>Search Results</NAME>
+      <CLASS>gate.gui.SearchPRViewer</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.ir.SearchPR</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+  </CREOLE>
+</CREOLE-DIRECTORY>
