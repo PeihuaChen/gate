@@ -28,8 +28,9 @@ import gate.event.*;
 import gate.security.*;
 
 
-public abstract class JDBCDataStore
-extends AbstractFeatureBearer implements DatabaseDataStore{
+public abstract class JDBCDataStore extends AbstractFeatureBearer
+                                    implements DatabaseDataStore,
+                                                CreoleListener {
 
   /** --- */
 /*  private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
@@ -38,22 +39,23 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 */
 
   /** --- */
-  protected Connection  jdbcConn;
   private   String      dbURL;
   private   String      driverName;
   private   String      dbID;
 
-
-  protected   AccessController  ac;
   protected   Session           session;
   protected   String            name;
 
-  private transient Vector datastoreListeners;
+  protected transient Connection  jdbcConn;
+  protected transient AccessController  ac;
+  private   transient Vector datastoreListeners;
+  protected transient Vector dependentResources;
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
 
     this.datastoreListeners = new Vector();
+    this.dependentResources = new Vector();
   }
 
 
@@ -91,7 +93,6 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   public String getStorageUrl() {
 
     return this.dbURL;
-
   }
 
 
@@ -150,9 +151,14 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
                                       sqle.getMessage() +"]");
     }
 
+    //sync all dependednt resources
+    for (int i=0; i< this.dependentResources.size(); i++) {
+      LanguageResource lr = (LanguageResource)this.dependentResources.elementAt(0);
+      sync(lr);
+    }
+
     //finally unregister this datastore from the GATE register of datastores
     Gate.getDataStoreRegister().remove(this);
-
   }
 
   /**
@@ -429,5 +435,21 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   }
 
 
+  public void resourceLoaded(CreoleEvent e) {
+System.out.println("resource loaded...");
+  }
+  public void resourceUnloaded(CreoleEvent e) {
+System.out.println("resource unloaded...");
+  }
+  public void datastoreOpened(CreoleEvent e) {
+System.out.println("datastore opened...");
+  }
+  public void datastoreCreated(CreoleEvent e) {
+System.out.println("datastore created...");
+  }
+  public void datastoreClosed(CreoleEvent e) {
+System.out.println("datastore closed...");
+    //sync all dependent resources
+  }
 
 }
