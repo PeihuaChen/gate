@@ -49,6 +49,14 @@ public class AccessControllerImpl implements AccessController {
   private HashMap     groupsByID;
   private HashMap     groupsByName;
 
+  private static long MY_VERY_SECRET_CONSTANT;
+
+  static {
+    MY_VERY_SECRET_CONSTANT = Math.round(Math.random()*1024) *
+                                Math.round(Math.random()*1024) +
+                                    Math.round(Math.PI * Math.E);
+  }
+
   /** --- */
   public AccessControllerImpl() {
 
@@ -180,6 +188,9 @@ public class AccessControllerImpl implements AccessController {
     catch(SQLException sqle) {
       throw new PersistenceException("can't create a group in DB: ["+ sqle.getMessage()+"]");
     }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
 
     //2. create GroupImpl for the new group and put in collections
     // users list is empty
@@ -230,6 +241,9 @@ public class AccessControllerImpl implements AccessController {
     catch(SQLException sqle) {
       throw new PersistenceException("can't delete a group from DB: ["+ sqle.getMessage()+"]");
     }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
 
     //4. delete from collections
     this.groupsByID.remove(grp.getID());
@@ -261,6 +275,9 @@ public class AccessControllerImpl implements AccessController {
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't create a user in DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
     }
 
     //2. create UserImpl for the new user and put in collections
@@ -299,6 +316,9 @@ public class AccessControllerImpl implements AccessController {
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't delete user from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
     }
 
     //4. delete from collections
@@ -358,6 +378,9 @@ public class AccessControllerImpl implements AccessController {
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't login user, DB error is: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(stmt);
     }
 
     if (LOGIN_FAILED == login_result) {
@@ -453,6 +476,17 @@ public class AccessControllerImpl implements AccessController {
     //need a hint?
     return new Long(((System.currentTimeMillis() << 16) >> 16)*
                       (Math.round(Math.random()*1024))*
-                          Runtime.getRuntime().freeMemory());
+                          Runtime.getRuntime().freeMemory()*
+                              MY_VERY_SECRET_CONSTANT);
+  }
+
+
+  private void init() {
+
+    //1. read all groups and users from DB
+
+    //2. create USerImpl's and GroupImpl's and put them in collections
+
+    throw new MethodNotImplementedException();
   }
 }
