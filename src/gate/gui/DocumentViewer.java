@@ -27,7 +27,9 @@ import gate.gui.*;
 import gate.util.*;
 
 //import guk.*;
-
+/**
+ * @deprecated  As of 21 Jan 2001, replaced by {@link DocumentEditor}
+ */
 public class DocumentViewer extends JPanel {
 
   /** Debug flag */

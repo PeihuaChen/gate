@@ -36,6 +36,7 @@ import gate.util.*;
 
 import gate.*;
 import gate.corpora.*;
+import gate.event.*;
 
 
 /** Implementation of AnnotationSet. Has a number of indices, all bar one
@@ -122,6 +123,14 @@ implements AnnotationSet
     boolean wasPresent = removeFromIdIndex(a);
     removeFromTypeIndex(a);
     removeFromOffsetIndex(a);
+    if(wasPresent){
+      AnnotationSetEvent evt = new AnnotationSetEvent(
+                                    this,
+                                    AnnotationSetEvent.ANNOTATION_REMOVED,
+                                    doc, a);
+      fireAnnotationRemoved(evt);
+      fireGateEvent(evt);
+    }
     return wasPresent;
   } // remove(o)
 
@@ -274,6 +283,56 @@ implements AnnotationSet
     return res;
   } // get(offset)
 
+    /** Select annotations by offset. This returns the set of annotations
+    * that overlap totaly or partially with the interval defined by the two
+    * provided offsets
+    */
+  public AnnotationSet get(Long startOffset, Long endOffset) {
+    //the result will include all the annotations that either:
+    //-start before the start offset and end strictly after it
+    //or
+    //-start at a position between the start and the end offsets
+//System.out.println("Get(" + startOffset + ", " + endOffset + ");");
+    if(annotsByStartNode == null) indexByStartOffset();
+    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+    Iterator nodesIter;
+    Iterator annotsIter;
+    Node currentNode;
+    Annotation currentAnnot;
+    //find all the annots that start strictly before the start offset and end
+    //strictly after it
+    nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
+//System.out.print("Nodes: [");
+    while(nodesIter.hasNext()){
+      currentNode = (Node)nodesIter.next();
+//System.out.print(currentNode + ", ");
+      Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
+      if(fromPoint != null){
+        annotsIter = (fromPoint).iterator();
+        while(annotsIter.hasNext()){
+          currentAnnot = (Annotation)annotsIter.next();
+//System.out.println(currentAnnot);
+          if(currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0){
+            resultSet.add(currentAnnot);
+//System.out.println(currentAnnot);
+          }
+        }
+      }
+    }
+//System.out.println("]");
+    //find all the annots that start at or after the start offset but strictly
+    //before the end offset
+    nodesIter = nodesByOffset.subMap(startOffset, endOffset).values().iterator();
+    while(nodesIter.hasNext()){
+      currentNode = (Node)nodesIter.next();
+      Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
+      if(fromPoint != null) resultSet.addAll(fromPoint);
+    }
+    return resultSet;
+  }//get(startOfset, endOffset)
+
+
+
   /** Select annotations by type, features and offset */
   public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
 
@@ -340,6 +399,12 @@ implements AnnotationSet
     Object oldValue = annotsById.put(a.getId(), a);
     addToTypeIndex(a);
     addToOffsetIndex(a);
+    AnnotationSetEvent evt = new AnnotationSetEvent(
+                                    this,
+                                    AnnotationSetEvent.ANNOTATION_ADDED,
+                                    doc, a);
+    fireAnnotationAdded(evt);
+    fireGateEvent(evt);
     return oldValue != a;
   } // add(o)
 
@@ -601,6 +666,20 @@ implements AnnotationSet
   public Object clone() throws CloneNotSupportedException{
     return super.clone();
   }
+  public synchronized void removeAnnotationSetListener(AnnotationSetListener l) {
+    if (annotationSetListeners != null && annotationSetListeners.contains(l)) {
+      Vector v = (Vector) annotationSetListeners.clone();
+      v.removeElement(l);
+      annotationSetListeners = v;
+    }
+  }
+  public synchronized void addAnnotationSetListener(AnnotationSetListener l) {
+    Vector v = annotationSetListeners == null ? new Vector(2) : (Vector) annotationSetListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      annotationSetListeners = v;
+    }
+  }
   /** String representation of the set */
   /*public String toString() {
 
@@ -656,4 +735,47 @@ implements AnnotationSet
     * annotations that end at that node
     */
   Map annotsByEndNode;
+  private transient Vector annotationSetListeners;
+  private transient Vector gateListeners;
+  protected void fireAnnotationAdded(AnnotationSetEvent e) {
+    if (annotationSetListeners != null) {
+      Vector listeners = annotationSetListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((AnnotationSetListener) listeners.elementAt(i)).annotationAdded(e);
+      }
+    }
+  }
+  protected void fireAnnotationRemoved(AnnotationSetEvent e) {
+    if (annotationSetListeners != null) {
+      Vector listeners = annotationSetListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((AnnotationSetListener) listeners.elementAt(i)).annotationRemoved(e);
+      }
+    }
+  }
+  public synchronized void removeGateListener(GateListener l) {
+    if (gateListeners != null && gateListeners.contains(l)) {
+      Vector v = (Vector) gateListeners.clone();
+      v.removeElement(l);
+      gateListeners = v;
+    }
+  }
+  public synchronized void addGateListener(GateListener l) {
+    Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      gateListeners = v;
+    }
+  }
+  protected void fireGateEvent(GateEvent e) {
+    if (gateListeners != null) {
+      Vector listeners = gateListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((GateListener) listeners.elementAt(i)).processGateEvent(e);
+      }
+    }
+  }
 } // AnnotationSetImpl

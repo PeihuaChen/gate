@@ -93,8 +93,8 @@ implements JapeConstants, java.io.Serializable
   } // finish
 
   /** Transduce the document by running each phase in turn. */
-  public void transduce(Document doc, AnnotationSet annotations)
-                                                          throws JapeException {
+  public void transduce(Document doc, AnnotationSet input,
+                        AnnotationSet output) throws JapeException {
     ProgressListener pListener = new ProgressListener(){
       public void processFinished(){
         donePhases ++;
@@ -123,7 +123,7 @@ implements JapeConstants, java.io.Serializable
                                " (Phase: " + t.getName() + ")...");
         t.addProcessProgressListener(pListener);
         t.addStatusListener(sListener);
-        t.transduce(doc, annotations);
+        t.transduce(doc, input, output);
         t.removeProcessProgressListener(pListener);
         t.removeStatusListener(sListener);
         fireStatusChangedEvent("");
@@ -172,12 +172,15 @@ implements JapeConstants, java.io.Serializable
 
   //needed by FSM
   public Array getPhases(){ return phases; }
-  
+
 } // class MultiPhaseTransducer
 
 
 
 // $Log$
+// Revision 1.11  2001/01/21 20:51:31  valyt
+// Added the DocumentEditor class and the necessary changes to the gate API
+//
 // Revision 1.10  2000/11/08 16:35:03  hamish
 // formatting
 //

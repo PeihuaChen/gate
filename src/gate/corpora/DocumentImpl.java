@@ -24,6 +24,7 @@ import gate.annotation.*;
 import gate.util.*;
 import gate.creole.*;
 import gate.gui.*;
+import gate.event.*;
 
 /** Represents the commonalities between all sorts of documents.
   *
@@ -259,6 +260,9 @@ public class DocumentImpl implements Document, StatusReporter
   public AnnotationSet getAnnotations() {
     if(defaultAnnots == null)
       defaultAnnots = new AnnotationSetImpl(this);
+    fireAnnotationSetAdded(new DocumentEvent(this,
+                                             DocumentEvent.ANNOTATION_SET_ADDED,
+                                             null));
     return defaultAnnots;
   } // getAnnotations()
 
@@ -273,6 +277,11 @@ public class DocumentImpl implements Document, StatusReporter
     if(namedSet == null) {
       namedSet = new AnnotationSetImpl(this, name);
       namedAnnotSets.put(name, namedSet);
+      DocumentEvent evt = new DocumentEvent(this,
+                                            DocumentEvent.ANNOTATION_SET_ADDED,
+                                            name);
+      fireAnnotationSetAdded(evt);
+      fireGateEvent(evt);
     }
     return namedSet;
   } // getAnnotations(name)
@@ -512,12 +521,69 @@ public class DocumentImpl implements Document, StatusReporter
   /** Named sets of annotations */
   protected Map namedAnnotSets;
   private transient Vector statusListeners;
+  private transient Vector documentListeners;
+  private transient Vector gateListeners;
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+  public synchronized void removeDocumentListener(DocumentListener l) {
+    if (documentListeners != null && documentListeners.contains(l)) {
+      Vector v = (Vector) documentListeners.clone();
+      v.removeElement(l);
+      documentListeners = v;
+    }
+  }
+  public synchronized void addDocumentListener(DocumentListener l) {
+    Vector v = documentListeners == null ? new Vector(2) : (Vector) documentListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      documentListeners = v;
+    }
+  }
+  protected void fireAnnotationSetAdded(DocumentEvent e) {
+    if (documentListeners != null) {
+      Vector listeners = documentListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DocumentListener) listeners.elementAt(i)).annotationSetAdded(e);
+      }
+    }
+  }
+  protected void fireAnnotationSetRemoved(DocumentEvent e) {
+    if (documentListeners != null) {
+      Vector listeners = documentListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DocumentListener) listeners.elementAt(i)).annotationSetRemoved(e);
+      }
+    }
+  }
+  public synchronized void removeGateListener(GateListener l) {
+    if (gateListeners != null && gateListeners.contains(l)) {
+      Vector v = (Vector) gateListeners.clone();
+      v.removeElement(l);
+      gateListeners = v;
+    }
+  }
+  public synchronized void addGateListener(GateListener l) {
+    Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      gateListeners = v;
+    }
+  }
+  protected void fireGateEvent(GateEvent e) {
+    if (gateListeners != null) {
+      Vector listeners = gateListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((GateListener) listeners.elementAt(i)).processGateEvent(e);
       }
     }
   }

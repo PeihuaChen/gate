@@ -17,6 +17,7 @@ package gate;
 
 import java.util.*;
 import gate.util.*;
+import gate.event.*;
 
 /** Annotation sets */
 public interface AnnotationSet extends Set, Cloneable
@@ -71,6 +72,12 @@ public interface AnnotationSet extends Set, Cloneable
     */
   public AnnotationSet get(Long offset);
 
+  /** Select annotations by offset. This returns the set of annotations
+    * that overlap totaly or partially with the interval defined by the two
+    * provided offsets
+    */
+  public AnnotationSet get(Long startOffset, Long endOffset);
+
   /** Get the node with the smallest offset */
   public Node firstNode();
 
@@ -92,5 +99,13 @@ public interface AnnotationSet extends Set, Cloneable
 
   /** Get the document this set is attached to. */
   public Document getDocument();
+
+  public void addAnnotationSetListener(AnnotationSetListener l);
+
+  public void removeAnnotationSetListener(AnnotationSetListener l);
+
+  public void addGateListener(GateListener l);
+
+  public void removeGateListener(GateListener l);
 
 } // interface AnnotationGraph

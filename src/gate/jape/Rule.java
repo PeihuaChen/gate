@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -132,8 +132,8 @@ implements JapeConstants, java.io.Serializable
   } // matches
 
   /** Apply the RHS of this rule (LHS must have been matched first). */
-  public void transduce(Document doc, AnnotationSet annotations)
-                                                          throws JapeException {
+  public void transduce(Document doc, AnnotationSet inputAS,
+                        AnnotationSet outputAS) throws JapeException {
     // the righthand side does the transduction, using bindings from lhs */
     if(DEBUG) Out.println("applying rule " + name);
 //    rhs.transduce(doc);
@@ -209,6 +209,9 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.10  2001/01/21 20:51:31  valyt
+// Added the DocumentEditor class and the necessary changes to the gate API
+//
 // Revision 1.9  2000/11/08 16:35:03  hamish
 // formatting
 //

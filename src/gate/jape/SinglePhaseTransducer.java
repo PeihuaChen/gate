@@ -384,8 +384,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
     * Transduce a document using the annotation set provided and the current
     * rule application style.
     */
-  public void transduce(Document doc, AnnotationSet annotationSet)
-                                                          throws JapeException {
+  public void transduce(Document doc, AnnotationSet inputAS,
+                        AnnotationSet outputAS) throws JapeException {
     fireProgressChangedEvent(0);
 
     //the input annotations will be read from this set
@@ -393,16 +393,16 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
     //select only the annotations of types specified in the input list
     //Out.println("Input:" + input);
-    if(input.isEmpty()) annotations = annotationSet;
+    if(input.isEmpty()) annotations = inputAS;
     else{
+      annotations = new AnnotationSetImpl(doc);
       Iterator typesIter = input.iterator();
       AnnotationSet ofOneType = null;
       while(typesIter.hasNext()){
-        ofOneType = annotationSet.get((String)typesIter.next());
+        ofOneType = inputAS.get((String)typesIter.next());
         if(ofOneType != null){
     //Out.println("Adding " + ofOneType.getAllTypes());
-          if(annotations == null) annotations = ofOneType;
-          else annotations.addAll(ofOneType);
+          annotations.addAll(ofOneType);
         }
       }
     }
@@ -546,7 +546,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   //                     "\n==========================");
 
           currentRHS = currentAcceptor.getFSMPosition().getAction();
-          currentRHS.transduce(doc, annotations, currentAcceptor.getBindings());
+          currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
 
           long currentAGPosition =
                currentAcceptor.getAGPosition().getOffset().longValue();
@@ -563,7 +563,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         FSMInstance currentAcceptor =
                                     (FSMInstance)acceptingFSMInstances.last();
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
-        currentRHS.transduce(doc, annotations, currentAcceptor.getBindings());
+        currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
         startNode = currentAcceptor.getAGPosition();
 
@@ -654,6 +654,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.25  2001/01/21 20:51:31  valyt
+// Added the DocumentEditor class and the necessary changes to the gate API
+//
 // Revision 1.24  2000/11/20 12:53:58  valyt
 // A new faster Jape
 //
