@@ -119,8 +119,8 @@ public class AnnotationEditor extends AbstractVisualResource{
       params.put("markupAware", new Boolean(true));
 
       params.put("sourceUrlName",
-                 "file:///d:/tmp/F7V.xml");
-                 //"http://redmires.dcs.shef.ac.uk/admin/index.html");
+                 //"file:///d:/tmp/F7V.xml");
+                 "http://redmires.dcs.shef.ac.uk/admin/index.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/swing/Action.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt/AWTEventMulticaster.html");
       gate.Document doc = (gate.Document)Factory.createResource("gate.corpora.DocumentImpl", params);
@@ -145,7 +145,8 @@ public class AnnotationEditor extends AbstractVisualResource{
 
       //get the annotation schemas
       params =  Factory.newFeatureMap();
-      params.put("xmlFileUrl", new java.net.URL("file:///Z:/gate2/src/gate/resources/creole/schema/PosSchema.xml"));
+      params.put("xmlFileUrl", AnnotationEditor.class.getResource(
+                              "/gate/resources/creole/schema/PosSchema.xml"));
 
       AnnotationSchema annotSchema = (AnnotationSchema)
          Factory.createResource("gate.creole.AnnotationSchema", params);

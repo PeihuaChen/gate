@@ -580,7 +580,8 @@ public class AnnotationEditDialog extends JDialog {
     try {
       Gate.init();
       FeatureMap parameters = Factory.newFeatureMap();
-      parameters.put("xmlFileUrl", new java.net.URL("file:///Z:/gate2/src/gate/resources/creole/schema/PosSchema.xml"));
+      parameters.put("xmlFileUrl", AnnotationEditDialog.class.getResource(
+                              "/gate/resources/creole/schema/PosSchema.xml"));
 
       AnnotationSchema annotSchema = (AnnotationSchema)
          Factory.createResource("gate.creole.AnnotationSchema", parameters);
