@@ -119,6 +119,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         currentFeatureMap = Factory.newFeatureMap();
       currentAnnot.setFM(currentFeatureMap);
       colector.add(currentAnnot);
+      // Reset current Annot and current featue map
       currentAnnot = null;
       currentFeatureMap = null;
       return;
@@ -149,6 +150,9 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 //          currentFeatureMap = Factory.newFeatureMap();
         }// End if
         currentFeatureMap.put(currentFeatureName,currentFeatureValue);
+        // reset currentFeaturename and currentFeatureValue
+        currentFeatureName = null;
+        currentFeatureValue = null;
       }// End if
       // Reset the Name & Value pair.
       currentFeatureName = null;
@@ -206,6 +210,10 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       return;
     }// End if
     if ("Value".equals((String)currentElementStack.peek())){
+//if (currentFeatureName != null && "string".equals(currentFeatureName) &&
+//currentAnnot!= null && "Token".equals(currentAnnot.getElemName()) &&
+//currentAnnot.getEnd().longValue() == 1063)
+//System.out.println("Content=" + content + " start="+ start + " length=" + length);
       processTextOfValueElement(content);
       return;
     }// End if
@@ -359,7 +367,12 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       "Please check the document with a text editor or something before" +
       " trying again.");
     else{
-      currentFeatureName = text;
+      // In the entities case, characters() gets called separately for each
+      // entity so the text needs to be appended.
+      if (currentFeatureName == null)
+          currentFeatureName = text;
+      else
+        currentFeatureName = currentFeatureName + text;
     }// End If
   }//processTextOfNameElement();
 
@@ -373,7 +386,12 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       "Please check the document with a text editor or something before" +
       " trying again.");
     else{
-      currentFeatureValue = text;
+      // In the entities case, characters() gets called separately for each
+      // entity so the text needs to be appended.
+      if (currentFeatureValue == null)
+        currentFeatureValue = text;
+      else
+        currentFeatureValue = currentFeatureValue + text;
     }// End If
   }//processTextOfValueElement();
 

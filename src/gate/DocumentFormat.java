@@ -299,6 +299,7 @@ extends AbstractLanguageResource implements LanguageResource{
   protected static MimeType guessTypeUsingMagicNumbers(InputStream aInputStream,
                                                             String anEncoding){
 
+    if (aInputStream == null) return null;
     InputStreamReader reader = null;
     if (anEncoding != null)
       try{

@@ -314,13 +314,13 @@ public class AnnotationImpl extends AbstractFeatureBearer
         aAnnot.getStartNode().getOffset() == null ||
         aAnnot.getEndNode().getOffset() == null) return false;
 
-    if ( (aAnnot.getEndNode().getOffset().longValue() ==
-          aAnnot.getStartNode().getOffset().longValue()) &&
-          this.getStartNode().getOffset().longValue() <=
-          aAnnot.getStartNode().getOffset().longValue() &&
-          aAnnot.getEndNode().getOffset().longValue() <=
-          this.getEndNode().getOffset().longValue()
-       ) return true;
+//    if ( (aAnnot.getEndNode().getOffset().longValue() ==
+//          aAnnot.getStartNode().getOffset().longValue()) &&
+//          this.getStartNode().getOffset().longValue() <=
+//          aAnnot.getStartNode().getOffset().longValue() &&
+//          aAnnot.getEndNode().getOffset().longValue() <=
+//          this.getEndNode().getOffset().longValue()
+//       ) return true;
 
 
     if ( aAnnot.getEndNode().getOffset().longValue() <=
