@@ -50,6 +50,8 @@ public interface Relation {
 
   public String getLabel();
 
+  public String getSymbol();
+
   public boolean isApplicableTo(int pos);
 
 }

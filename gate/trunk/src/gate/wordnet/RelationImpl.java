@@ -29,6 +29,10 @@ class RelationImpl implements Relation {
     return this.type;
   }
 
+  public String getSymbol() {
+    return WNHelper.int2PointerType(this.type).getKey();
+  }
+
   public String getLabel() {
     return WNHelper.int2PointerType(this.type).getLabel();
   }
