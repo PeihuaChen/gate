@@ -27,4 +27,7 @@ public interface Resource extends FeatureBearer, Serializable
   /** Initialise this resource, and return it. */
   public Resource init();
 
+  ?
+ sxkjfdlsdfjlkdsj
+
 } // interface Resource
