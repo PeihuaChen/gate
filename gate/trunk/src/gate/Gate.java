@@ -42,12 +42,19 @@ public class Gate
     // "http://gate.ac.uk/creole/"
   };
 
+  /** Minimum version of JDK we support */
+  protected static final String MIN_JDK_VERSION = "1.3";
+
+  /** Get the minimum supported version of the JDK */
+  public static String getMinJdkVersion() { return MIN_JDK_VERSION; }
+
   /** Initialisation - must be called by all clients before using
     * any other parts of the library. Also initialises the CREOLE
     * register and reads config data (<TT>gate.xml</TT> files).
     * @see #initCreoleRegister
     */
   public static void init() throws GateException {
+
     // register the URL handler  for the "gate://" URLs
     System.setProperty(
       "java.protocol.handler.pkgs",
@@ -76,6 +83,13 @@ public class Gate
 
     // some of the events are actually fired by the {@link gate.Factory}
     Factory.addCreoleListener(creoleRegister);
+
+    // check we have a useable JDK
+    if(System.getProperty("java.version").compareTo(MIN_JDK_VERSION) < 0) {
+      throw new GateException(
+        "GATE requires JDK " + MIN_JDK_VERSION + " or newer"
+      );
+    }
   } // init()
 
   /** Initialise the CREOLE register. */
