@@ -284,6 +284,42 @@ implements AnnotationSet
     return resultSet;
   } // get(type, constraints)
 
+  /** Select annotations by type and feature names */
+  public AnnotationSet get(String type, Set featureNames) {
+    if(annotsByType == null) indexByType();
+
+    AnnotationSet typeSet= null;
+    if (type != null) {
+      //if a type is provided, try finding annotations of this type
+      typeSet = get(type);
+      //if none exist, then return coz nothing left to do
+      if(typeSet == null)
+       return null;
+    }
+
+    AnnotationSet resultSet = new AnnotationSetImpl(doc);
+
+    Iterator iter = null;
+    if (type != null)
+      iter = typeSet.iterator();
+    else
+      iter = annotsById.values().iterator();
+
+    while(iter.hasNext()) {
+      Annotation a = (Annotation) iter.next();
+
+      // we check for matching constraints by simple equality. a
+      // feature map satisfies the constraints if it contains all the
+      // key/value pairs from the constraints map
+      if( a.getFeatures().keySet().containsAll( featureNames ) )
+        resultSet.add(a);
+    } // while
+
+    if(resultSet.isEmpty())
+      return null;
+    return resultSet;
+  } // get(type, featureNames)
+
   /** Select annotations by offset. This returns the set of annotations
     * whose start node is the least such that it is less than or equal
     * to offset. If a positional index doesn't exist it is created.
