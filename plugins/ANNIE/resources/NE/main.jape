@@ -17,16 +17,17 @@ MultiPhase:	TestTheGrammars
 Phases: 
 
 first
+firstname
 name
 date_pre
 date
 number
 address
 identifier
-//final
-//unknown
-//org_context
-//name_context
+final
+unknown
+org_context
+name_context
 
 
 
