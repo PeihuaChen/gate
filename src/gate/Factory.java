@@ -30,8 +30,7 @@ import gate.event.*;
 
 /** Provides static methods for the creation of Resources.
   */
-public abstract class Factory
-{
+public abstract class Factory {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -277,8 +276,11 @@ public abstract class Factory
         if(DEBUG) Out.prln("Removing the listeners for  " + res.toString());
           removeResourceListeners(res, listeners);
       } catch(Exception e) {
-        if(DEBUG) Out.prln("Failed to remove the listeners for " + res.toString());
-        throw new ResourceInstantiationException("Parameterisation failure" + e);
+        if (DEBUG) Out.prln(
+          "Failed to remove the listeners for " + res.toString()
+        );
+        throw new
+          ResourceInstantiationException("Parameterisation failure" + e);
       }
     }
 
@@ -366,7 +368,7 @@ public abstract class Factory
     List paramsThatGotSet = new ArrayList();
 
     // for each property of the resource bean
-    if(properties != null)
+    if (properties != null)
       for(int i = 0; i<properties.length; i++) {
         // get the property's set method, or continue
         PropertyDescriptor prop = properties[i];
@@ -385,7 +387,7 @@ public abstract class Factory
         // convert the parameter to the right type eg String -> URL
         Class propertyType = prop.getPropertyType();
         Class paramType = paramValue.getClass();
-        try{
+        try {
           if(!propertyType.isAssignableFrom(paramType)) {
             if(DEBUG) Out.pr("Converting " + paramValue.getClass());
             paramValue =
@@ -456,7 +458,7 @@ public abstract class Factory
     EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
 
     // add the listeners
-    if(events != null) {
+    if (events != null) {
       EventSetDescriptor event;
       for(int i = 0; i < events.length; i++) {
         event = events[i];
@@ -464,7 +466,7 @@ public abstract class Factory
         // did we get such a listener?
         Object listener =
           listeners.get(event.getListenerType().getName());
-        if(listener != null){
+        if(listener != null) {
           Method addListener = event.getAddListenerMethod();
 
           // call the set method with the parameter value
@@ -506,7 +508,7 @@ public abstract class Factory
         // did we get such a listener?
         Object listener =
           listeners.get(event.getListenerType().getName());
-        if(listener != null){
+        if(listener != null) {
           Method removeListener = event.getRemoveListenerMethod();
 
           // call the set method with the parameter value
@@ -520,7 +522,7 @@ public abstract class Factory
 
   /** Create a new transient Corpus. */
   public static Corpus newCorpus(String name)
-  throws ResourceInstantiationException
+                                          throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
     parameterValues.put("name", name);
@@ -530,7 +532,7 @@ public abstract class Factory
 
   /** Create a new transient Document from a URL. */
   public static Document newDocument(URL sourceUrl)
-  throws ResourceInstantiationException
+                                          throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
     parameterValues.put("sourceUrl", sourceUrl);
@@ -540,7 +542,7 @@ public abstract class Factory
 
   /** Create a new transient Document from a URL and an encoding. */
   public static Document newDocument(URL sourceUrl, String encoding)
-  throws ResourceInstantiationException
+                                          throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
     parameterValues.put("sourceUrl", sourceUrl);
@@ -551,7 +553,7 @@ public abstract class Factory
 
   /** Create a new transient textual Document from a string. */
   public static Document newDocument(String content)
-  throws ResourceInstantiationException
+                                          throws ResourceInstantiationException
   {
     FeatureMap params = newFeatureMap();
     params.put("stringContent", content);
@@ -628,12 +630,15 @@ public abstract class Factory
   public static synchronized void addCreoleListener(CreoleListener l){
     creoleProxy.addCreoleListener(l);
   }
-  static{
+  static {
     creoleProxy = new CreoleProxy();
   }
 
 } // abstract Factory
 
+/**
+ *
+ */
 class CreoleProxy {
 
   public synchronized void removeCreoleListener(CreoleListener l) {
@@ -641,27 +646,27 @@ class CreoleProxy {
       Vector v = (Vector) creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
-    }
-  }
+    }// if
+  }// removeCreoleListener(CreoleListener l)
 
   public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+    Vector v =
+      creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
-    }
-  }
+    }// if
+  }// addCreoleListener(CreoleListener l)
 
-  private transient Vector creoleListeners;
   protected void fireResourceLoaded(CreoleEvent e) {
     if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
-      }
-    }
-  }
+      }// for
+    }// if
+  }// fireResourceLoaded(CreoleEvent e)
 
   protected void fireResourceUnloaded(CreoleEvent e) {
     if (creoleListeners != null) {
@@ -669,9 +674,9 @@ class CreoleProxy {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
-      }
-    }
-  }
+      }// for
+    }// if
+  }// fireResourceUnloaded(CreoleEvent e)
 
   protected void fireDatastoreOpened(CreoleEvent e) {
     if (creoleListeners != null) {
@@ -679,9 +684,9 @@ class CreoleProxy {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
-      }
-    }
-  }
+      }// for
+    }// if
+  }// fireDatastoreOpened(CreoleEvent e)
 
   protected void fireDatastoreCreated(CreoleEvent e) {
     if (creoleListeners != null) {
@@ -689,9 +694,9 @@ class CreoleProxy {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
-      }
-    }
-  }
+      }// for
+    }// if
+  }// fireDatastoreCreated(CreoleEvent e)
 
   protected void fireDatastoreClosed(CreoleEvent e) {
     if (creoleListeners != null) {
@@ -699,7 +704,10 @@ class CreoleProxy {
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
-      }
-    }
-  }
+      }// for
+    }// if
+  }// fireDatastoreClosed(CreoleEvent e)
+
+  private transient Vector creoleListeners;
+
 }//class CreoleProxy
