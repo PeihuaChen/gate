@@ -2682,10 +2682,6 @@ Out.prln("NULL size");
                                  AnnotationSetListener{
 
     public void annotationSetAdded(gate.event.DocumentEvent e) {
-//      if(e.getAnnotationSetName() == null) return;
-//      addAnnotationSet(document.getAnnotations(e.getAnnotationSetName()),
-//                       0,0);
-
       String setName = e.getAnnotationSetName();
       AnnotationSet as = (setName == null ? document.getAnnotations() :
                              document.getAnnotations(setName));
@@ -2697,17 +2693,9 @@ Out.prln("NULL size");
 
       SwingUtilities.invokeLater(new NodeAdder(setData));
 
-//      DefaultMutableTreeNode setNode = new DefaultMutableTreeNode(setData, true);
-//      stylesTreeModel.insertNodeInto(setNode, stylesTreeRoot,
-//                                     stylesTreeRoot.getChildCount());
-//      stylesTree.expandPath(new TreePath(new Object[]{stylesTreeRoot, setNode}));
-      //((DefaultMutableTreeNode)stylesTreeRoot).add(setNode);
       ArrayList typesLst = new ArrayList(as.getAllTypes());
       Collections.sort(typesLst);
-//      int size = typesLst.size();
-//      int cnt = 0;
-//      int value = 0;
-//      int lastValue = 0;
+
       Iterator typesIter = typesLst.iterator();
       while(typesIter.hasNext()){
         String type = (String)typesIter.next();
@@ -2716,90 +2704,14 @@ Out.prln("NULL size");
         typeData.setAnnotations(sameType);
 
         SwingUtilities.invokeLater(new NodeAdder(typeData));
-//        DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeData,
-//                                                                     false);
-//        stylesTreeModel.insertNodeInto(typeNode, setNode,
-//                                       setNode.getChildCount());
-        //setNode.add(typeNode);
-//        value = progressStart +  (progressEnd - progressStart)* cnt/size;
-//        if(value - lastValue >= 5){
-//          progressBar.setValue(value);
-//          progressBar.paintImmediately(progressBar.getBounds());
-//          lastValue = value;
-//        }
-//        cnt ++;
       }
     }
 
     public void annotationSetRemoved(gate.event.DocumentEvent e) {
-      String setName = e.getAnnotationSetName();
-      //find the set node
-      Enumeration setNodesEnum = stylesTreeRoot.children();
-      DefaultMutableTreeNode setNode = null;
-      boolean done = false;
-      while(!done && setNodesEnum.hasMoreElements()){
-        setNode = (DefaultMutableTreeNode)setNodesEnum.nextElement();
-        done = ((TypeData)setNode.getUserObject()).getSet().
-               equals(setName);
-      }
-
-      if(!((TypeData)setNode.getUserObject()).getSet().
-               equals(setName)){
-        throw new GateRuntimeException(
-              "Could not find the tree node for the " + setName +
-              " annotation set!");
-      }
-
-      boolean tableChanged = false;
-      Enumeration typeNodesEnum = setNode.children();
-      while(typeNodesEnum.hasMoreElements()){
-        DefaultMutableTreeNode typeNode =
-          (DefaultMutableTreeNode)typeNodesEnum.nextElement();
-        TypeData tData = (TypeData)typeNode.getUserObject();
-        if(tData.getVisible()){
-          //1) update the annotations table
-          data.subList(tData.range.start, tData.range.end).clear();
-          //remove the range
-          int delta = tData.range.end - tData.range.start;
-          //1a)first shift all following ranges
-          Iterator rangesIter = ranges.
-                              subList(ranges.indexOf(tData.range) + 1,
-                              ranges.size()).
-                                iterator();
-          while(rangesIter.hasNext()){
-            Range aRange = (Range) rangesIter.next();
-            aRange.start -= delta;
-            aRange.end -= delta;
-          }//while(rangesIter.hasNext())
-          //1b)now remove the range
-          ranges.remove(tData.range);
-          tableChanged = true;
-
-          //2)update the text
-          //hide the highlights
-
-          Iterator annIter = tData.getAnnotations().iterator();
-          while(annIter.hasNext()){
-            Annotation ann = (Annotation)annIter.next();
-            SwingUtilities.invokeLater(new HighlightsRemover(ann));
-          }//while(annIter.hasNext())
-        }//if(tData.getVisible())
-      }//while(typeNodesEnum.hasMoreElements())
-
-      if(tableChanged){
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run(){
-            if(annotationsTableModel != null){
-              annotationsTableModel.fireTableDataChanged();
-            }
-          }
-        });
-      }//if(tableChanged)
-
-      //remove the node for the set
-      typeDataMap.remove(setName);
-      SwingUtilities.invokeLater(new NodeRemover(setNode));
-
+      //we access the GUI a lot here so we'll do everything from the
+      //Swing thread
+      SwingUtilities.invokeLater(
+                     new SetRemovedOperation(e.getAnnotationSetName()));
     }//public void annotationSetRemoved(gate.event.DocumentEvent e)
 
     public void annotationAdded(AnnotationSetEvent e) {
@@ -3036,6 +2948,82 @@ Out.prln("NULL size");
 
       TypeData tData;
     }//class NodeAdder implements Runnable
+
+    /**
+     * Helper class that handles the removal of a named annotation set.
+     * This runnable should only be called from the Swing thread
+     */
+    class SetRemovedOperation implements Runnable{
+      SetRemovedOperation(String setName){
+        this.setName = setName;
+      }
+
+      public void run(){
+        //find the set node
+        Enumeration setNodesEnum = stylesTreeRoot.children();
+        DefaultMutableTreeNode setNode = null;
+        boolean done = false;
+        while(!done && setNodesEnum.hasMoreElements()){
+          setNode = (DefaultMutableTreeNode)setNodesEnum.nextElement();
+          done = ((TypeData)setNode.getUserObject()).getSet().equals(setName);
+        }
+
+        if(!((TypeData)setNode.getUserObject()).getSet().equals(setName)){
+          throw new GateRuntimeException(
+                "Could not find the tree node for the " + setName +
+                " annotation set!");
+        }
+
+        boolean tableChanged = false;
+        Enumeration typeNodesEnum = setNode.children();
+        while(typeNodesEnum.hasMoreElements()){
+          DefaultMutableTreeNode typeNode =
+            (DefaultMutableTreeNode)typeNodesEnum.nextElement();
+          TypeData tData = (TypeData)typeNode.getUserObject();
+          if(tData.getVisible()){
+            //1) update the annotations table
+            data.subList(tData.range.start, tData.range.end).clear();
+            //remove the range
+            int delta = tData.range.end - tData.range.start;
+            //1a)first shift all following ranges
+            Iterator rangesIter = ranges.
+                                subList(ranges.indexOf(tData.range) + 1,
+                                ranges.size()).
+                                  iterator();
+            while(rangesIter.hasNext()){
+              Range aRange = (Range) rangesIter.next();
+              aRange.start -= delta;
+              aRange.end -= delta;
+            }//while(rangesIter.hasNext())
+            //1b)now remove the range
+            ranges.remove(tData.range);
+            tableChanged = true;
+
+            //2)update the text
+            //hide the highlights
+
+            Iterator annIter = tData.getAnnotations().iterator();
+            while(annIter.hasNext()){
+              Annotation ann = (Annotation)annIter.next();
+              new HighlightsRemover(ann).run();
+            }//while(annIter.hasNext())
+          }//if(tData.getVisible())
+        }//while(typeNodesEnum.hasMoreElements())
+
+        if(tableChanged){
+          if(annotationsTableModel != null){
+            annotationsTableModel.fireTableDataChanged();
+          }
+        }//if(tableChanged)
+
+        //remove the node for the set
+        typeDataMap.remove(setName);
+        new NodeRemover(setNode).run();
+      }//public void run()
+
+      String setName;
+    }
+
   }//class EventsHandler
 
   /**
