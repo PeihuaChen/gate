@@ -53,6 +53,14 @@ public class RtfDocumentFormat extends TextualDocumentFormat
     * what annotation type names to use.
     */
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException {
+
+    if ( (doc == null) ||
+         (doc.getSourceUrl() == null && doc.getContent() == null)){
+
+      throw new DocumentFormatException(
+               "GATE document is null or no content found. Nothing to parse!");
+    }// End if
+
     // create a RTF editor kit
     RTFEditorKit aRtfEditorkit = new RTFEditorKit();
 

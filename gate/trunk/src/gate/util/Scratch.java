@@ -63,9 +63,10 @@ public class Scratch
 
   public static void doIt() throws Exception{
     String str = new String(
-                 "<s><w>Salut</w> <w>Ba</w> <p/><w>Ce</w> <w>misto</s> </s>"
+                 "<s><w>Salut</w> <w>Ba</w> <p/><w>Ce</w> <w>misto</w> </s>"
                  );
     gate.Document doc = Factory.newDocument(str);
+    doc.setSourceUrl(null);
     gate.DocumentFormat keyDocFormat = null;
     keyDocFormat = gate.DocumentFormat.getDocumentFormat(
       doc, new MimeType("text/xml")
