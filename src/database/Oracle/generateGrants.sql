@@ -13,31 +13,40 @@
  *  $Id$
  */
 
+/*
+ *  usage:
+ *
+ *  sqlplus USER/PASS@SID @generateGrants.sql
+ *  
+ *  where USER is a user with SELECT_CATALOG_ROLE granted
+ *  so that he can access the ALL_xxx views
+ *  (use SYSTEM if u're lazy)
+ *  
+ *  the result.sql file contains all the grant statemments 
+ *  plus some junk lines (containing 'XX') that shouls be 
+ *  removed manually (or with script)
+ *  
+ */
+ 
+ 
 spool result.sql;
 /
 
  
 select 'grant select,insert,update,delete on ' || owner || '.' || table_name || ' to GATEUSER' 
-as x
+as xx
 from sys.all_tables
-where owner='GATEADMIN';
-/
-
-
-select 'grant select on ' || sequence_owner || '.' || sequence_name || ' to GATEUSER' 
-as x
+where owner='GATEADMIN'
+union select 'grant select on ' || sequence_owner || '.' || sequence_name || ' to GATEUSER' 
+as xx
 from sys.all_sequences
-where sequence_owner='GATEADMIN';
-/
-
-
-select 'grant select on ' || owner || '.' || view_name || ' to GATEUSER' 
+where sequence_owner='GATEADMIN'
+union select 'grant select on ' || owner || '.' || view_name || ' to GATEUSER' 
+as xx
 from sys.all_views
-where owner='GATEADMIN';
-/
-
-
-select 'grant execute on ' || owner || '.' || object_name || ' to GATEUSER' 
+where owner='GATEADMIN'
+union select 'grant execute on ' || owner || '.' || object_name || ' to GATEUSER' 
+as xx
 from sys.all_objects
 where owner='GATEADMIN'
       and object_type = 'PACKAGE';
