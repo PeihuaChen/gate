@@ -51,6 +51,7 @@ public class DBHelper {
   public static final int X_ORACLE_INVALID_LR_TYPE  =          X_ORACLE_START + 13 ;
   public static final int X_ORACLE_INVALID_ANNOTATION_TYPE =   X_ORACLE_START + 14 ;
   public static final int X_ORACLE_INVALID_FEATURE_TYPE =      X_ORACLE_START + 15 ;
+  public static final int X_ORACLE_INVALID_CONTENT_TYPE =      X_ORACLE_START + 16 ;
 
   public static final int TRUE = 1;
   public static final int FALSE = 0;
