@@ -37,6 +37,9 @@ public abstract class Factory
   /** The CREOLE register */
   private static CreoleRegister reg = Gate.getCreoleRegister();
 
+  /** The DataStore register */
+  private static DataStoreRegister dsReg = Gate.getDataStoreRegister();
+
   /** Create an instance of a resource using default parameter values.
     * @see #createResource(String,FeatureMap)
     */
@@ -123,7 +126,8 @@ public abstract class Factory
             throw new ResourceInstantiationException(
               "Resource cannot be (de-)serialized: " + resClass.getName()
             );
-        } else {
+        } else { // non-serialisation datastores
+
           // find an appropriate wrapper class and replace resClass
 
           /* resClass = dataStoreWrapperClass
@@ -354,4 +358,46 @@ public abstract class Factory
   public static FeatureMap newFeatureMap() {
     return new SimpleFeatureMapImpl();
   } // newFeatureMap
+
+  /** Open an existing DataStore. */
+  public static DataStore openDataStore(
+    String dataStoreClassName, URL storageUrl
+  ) throws PersistenceException {
+    DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
+    ds.open();
+    return ds;
+  } // openDataStore()
+
+  /** Create a new DataStore and open it. <B>NOTE:</B> for some data stores
+    * creation is an system administrator task; in such cases this
+    * method will throw an UnsupportedOperationException.
+    */
+  public static DataStore createDataStore(
+    String dataStoreClassName, URL storageUrl
+  ) throws PersistenceException, UnsupportedOperationException {
+    DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
+    ds.create();
+    ds.open();
+    return ds;
+  } // createDataStore()
+
+  /** Instantiate a DataStore (not open or created). */
+  protected static DataStore instantiateDataStore(
+    String dataStoreClassName, URL storageUrl
+  ) throws PersistenceException {
+    DataStore godfreyTheDataStore = null;
+    try {
+      godfreyTheDataStore =
+        (DataStore) Class.forName(dataStoreClassName).newInstance();
+    } catch(Exception e) {
+      throw new PersistenceException("Couldn't create DS class: " + e);
+    }
+
+    if(dsReg == null) // static init ran before Gate.init....
+      dsReg = Gate.getDataStoreRegister();
+    godfreyTheDataStore.setStorageUrl(storageUrl);
+    dsReg.add(godfreyTheDataStore);
+
+    return godfreyTheDataStore;
+  } // instantiateDS(URL)
 } // abstract Factory

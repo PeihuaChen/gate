@@ -28,10 +28,13 @@ import gate.util.*;
 public class SerialDataStore
 extends AbstractFeatureBearer implements DataStore {
 
-  /** Construction requires a File pointing to the storage directory used for
+  /** Construction requires a file protocol URL
+    * pointing to the storage directory used for
     * the serialised classes.
     */
-  public SerialDataStore(File storageDir) { this.storageDir = storageDir; }
+  public SerialDataStore(URL storageDirUrl) {
+    this.storageDir = new File(storageDirUrl.getFile());
+  } // construction from URL
 
   /** Default construction */
   public SerialDataStore() { };
@@ -45,6 +48,28 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Get method for storage URL */
   public File getStorageDir() { return storageDir; }
+
+  /** Set the URL for the underlying storage mechanism. */
+  public void setStorageUrl(URL storageUrl) throws PersistenceException {
+    if(! storageUrl.getProtocol().equalsIgnoreCase("file"))
+      throw new PersistenceException(
+        "A serial data store needs a file URL, not " + storageUrl
+      );
+    this.storageDir = new File(storageUrl.getFile());
+  } // setStorageUrl
+
+  /** Get the URL for the underlying storage mechanism. */
+  public URL getStorageUrl() {
+    if(storageDir == null) return null;
+
+    URL u = null;
+    try { u = storageDir.toURL(); } catch(MalformedURLException e) {
+      // we can assume that this never happens as storageUrl should always
+      // be a valid file and therefore convertable to URL
+    }
+
+    return u;
+  } // getStorageUrl()
 
   /** Create a new data store. This tries to create a directory in
     * the local file system. If the directory already exists, or is
@@ -69,8 +94,38 @@ extends AbstractFeatureBearer implements DataStore {
   public void delete() throws PersistenceException {
     if(storageDir == null || ! Files.rmdir(storageDir))
       throw new PersistenceException("couldn't delete " + storageDir);
+
+    Gate.getDataStoreRegister().remove(this);
   } // delete()
 
+  /** Delete a resource from the data store.
+    */
+  public void delete(String lrClassName, String dataStoreInstanceId)
+  throws PersistenceException {
+
+    // find the subdirectory for resources of this type
+    File resourceTypeDirectory = new File(storageDir, lrClassName);
+    if(
+      (! resourceTypeDirectory.exists()) ||
+      (! resourceTypeDirectory.isDirectory())
+    ) {
+        throw new PersistenceException("Can't find " + resourceTypeDirectory);
+    }
+
+    // create a File to representing the resource storage file
+    File resourceFile = new File(resourceTypeDirectory, dataStoreInstanceId);
+    if(! resourceFile.exists() || ! resourceFile.isFile())
+      throw new PersistenceException("Can't find file " + resourceFile);
+
+    // delete the beast
+    if(! resourceFile.delete())
+      throw new PersistenceException("Can't delete file " + resourceFile);
+
+    // if there are no more resources of this type, delete the dir too
+    if(resourceTypeDirectory.list().length == 0)
+      if(! resourceTypeDirectory.delete())
+        throw new PersistenceException("Can't delete "+resourceTypeDirectory);
+  } // delete(lr)
 
   /** Adopt a resource for persistence. */
   public LanguageResource adopt(LanguageResource lr)
@@ -207,6 +262,8 @@ extends AbstractFeatureBearer implements DataStore {
   public List getLrIds(String lrType) throws PersistenceException {
     // a File to represent the directory for this type
     File resourceTypeDir = new File(storageDir, lrType);
+    if(! resourceTypeDir.exists())
+      return Arrays.asList(new String[0]);
 
     return Arrays.asList(resourceTypeDir.list());
   } // getLrIds(lrType)

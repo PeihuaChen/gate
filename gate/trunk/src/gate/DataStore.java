@@ -16,6 +16,7 @@
 package gate;
 
 import java.util.*;
+import java.net.*;
 
 import gate.util.*;
 import gate.persist.*;
@@ -23,6 +24,12 @@ import gate.persist.*;
 /** Models all sorts of data storage.
   */
 public interface DataStore extends FeatureBearer {
+
+  /** Set the URL for the underlying storage mechanism. */
+  public void setStorageUrl(URL storageUrl) throws PersistenceException;
+
+  /** Get the URL for the underlying storage mechanism. */
+  public URL getStorageUrl();
 
   /** Create a new data store. <B>NOTE:</B> for some data stores
     * creation is an system administrator task; in such cases this
@@ -43,6 +50,11 @@ public interface DataStore extends FeatureBearer {
     */
   public void delete()
   throws PersistenceException, UnsupportedOperationException;
+
+  /** Delete a resource from the data store.
+    */
+  public void delete(String lrClassName, String lrId)
+  throws PersistenceException;
 
   /** Save: synchonise the in-memory image of the LR with the persistent
     * image.
@@ -72,6 +84,9 @@ public interface DataStore extends FeatureBearer {
 
   /** Get a list of the types of LR that are present in the data store. */
   public List getLrTypes() throws PersistenceException;
+
+  /** Get a list of the IDs of LRs of a particular type that are present. */
+  public List getLrIds(String lrType) throws PersistenceException;
 
   /** Get a list of the names of LRs of a particular type that are present. */
   public List getLrNames(String lrType) throws PersistenceException;

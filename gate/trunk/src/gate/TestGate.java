@@ -156,7 +156,7 @@ public class TestGate {
       ////////////////////////////////////////////////
       // Just copy the test suite you want to activate
 //      suite.addTest(TestPersist.suite());
-
+//*
       // Test suite
       suite.addTest(TestPersist.suite());
       suite.addTest(TestAnnotationDiff.suite());
@@ -182,7 +182,7 @@ public class TestGate {
       suite.addTest(TestDB.suite());
       suite.addTest(TestTokeniser.suite());
       suite.addTest(TestGazetteer.suite());
-
+//*/
     } catch(Exception e) {
       Out.prln("can't add tests! exception = " + e);
       throw(e);
