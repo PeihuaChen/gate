@@ -206,14 +206,20 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
 
             RepositioningInfo ampCodingInfo = new RepositioningInfo();
             if(origContent != null) {
-              collectInformationForAmpCodding(origContent, ampCodingInfo);
+              boolean shouldCorrectCR = docFormat instanceof XmlDocumentFormat;
+              collectInformationForAmpCodding(origContent, ampCodingInfo,
+                                              shouldCorrectCR);
+              if(docFormat instanceof HtmlDocumentFormat) {
+                collectInformationForWS(origContent, ampCodingInfo);
+              } // if
             } // if
 
             docFormat.unpackMarkup(this, info, ampCodingInfo);
 
-            if(origContent != null) {
+            if(origContent != null
+                && docFormat instanceof XmlDocumentFormat) {
               // CRLF correction of RepositioningInfo
-              correctRepositioningForCRLF(origContent, info);
+              correctRepositioningForCRLFInXML(origContent, info);
             } // if
 
             getFeatures().put(
@@ -239,7 +245,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   /**
    * Correct repositioning information for substitution of "\r\n" with "\n"
    */
-  private void correctRepositioningForCRLF(String content,
+  private void correctRepositioningForCRLFInXML(String content,
                                             RepositioningInfo info) {
     int index = -1;
 
@@ -260,9 +266,13 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
    * So, there is minimal chance to have &-coded symbol inside the covered by
    * repositioning records area. The new record should be created for every
    * coded symbol outside the existing records.
+   * <BR>
+   * If <code>shouldCorrectCR</code> flag is <code>true</code> the correction
+   * for CRLF substitution is performed.
    */
   private void collectInformationForAmpCodding(String content,
-                                            RepositioningInfo info) {
+                                            RepositioningInfo info,
+                                            boolean shouldCorrectCR) {
 
     if(content == null || info == null) return;
 
@@ -274,7 +284,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       if(ampIndex != -1) {
         semiIndex = content.indexOf(';', ampIndex+1);
         if(semiIndex != -1) {
-          info.addPositionInfo(ampIndex, semiIndex-ampIndex+1, 0, 0);
+          info.addPositionInfo(ampIndex, semiIndex-ampIndex+1, 0, 1);
         } // if - semicolon found
       } // if - ampersand found
     } while (ampIndex != -1);
@@ -283,13 +293,54 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     // with reported by the parser
     int index = -1;
 
-    do {
-      index = content.indexOf("\r\n", index+1);
-      if(index != -1) {
-        info.correctInformationOriginalMove(index, -1);
-      } // if
-    } while(index != -1);
+    if(shouldCorrectCR) {
+      do {
+        index = content.indexOf("\r\n", index+1);
+        if(index != -1) {
+          info.correctInformationOriginalMove(index, -1);
+        } // if
+      } while(index != -1);
+    } // if
   } // collectInformationForAmpCodding
+
+  /** HTML parser perform substitution of multiple whitespaces (WS) with
+   *  a single WS. To create correct repositioning information structure we
+   *  should keep the information for such multiple WS.
+   *  <BR>
+   *  The criteria for WS is <code>(ch <= ' ')</code>.
+   */
+  private void collectInformationForWS(String content, RepositioningInfo info) {
+
+    if(content == null || info == null) return;
+
+    // analyse the content and correct the repositioning information
+    char ch;
+    int startWS, endWS;
+
+    startWS = endWS = -1;
+    int contentLength = content.length();
+
+    for(int i=0; i<contentLength; ++i) {
+      ch = content.charAt(i);
+
+      // is whitespace
+      if(ch <= ' ') {
+        if(startWS == -1) {
+          startWS = i;
+        } // if
+        endWS = i;
+      }
+      else {
+        if(endWS - startWS > 0) {
+          // put the repositioning information about the WS substitution
+          info.addPositionInfo(
+            (long)startWS, (long)(endWS - startWS + 1), 0, 1);
+        } // if
+        // clear positions
+        startWS = endWS = -1;
+      }// if
+    } // for
+  } // collectInformationForWS
 
   /** Clear all the data members of the object. */
   public void cleanup() {
