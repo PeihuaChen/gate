@@ -39,10 +39,10 @@ public class Namematch extends AbstractProcessingResource
   protected Set annotationTypes = new HashSet();
 
   /** the organization type*/
-  protected String organizationType;
+  protected String organizationType = "Organization";
 
   /** the person type*/
-  protected String personType;
+  protected String personType = "Person";
 
   /** the type of annotation*/
   protected String annotationType;
@@ -77,11 +77,17 @@ public class Namematch extends AbstractProcessingResource
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     cbuffer = new char[BUFF_SIZE];
-    organizationType = "Organization";
-    personType = "Person";
+    //kalina
+    //commented those, because if parameters are set to
+    //other types, they should take precedence
+    //also be used below in the annotationTypes
+    //put this initialization by default, where the variables are declared
+
+    //organizationType = "Organization";
+    //personType = "Person";
     extLists = new Boolean(false);
-    annotationTypes.add("Organization");
-    annotationTypes.add("Person");
+    annotationTypes.add(organizationType);
+    annotationTypes.add(personType);
     annotationTypes.add("Location");
     annotationTypes.add("Date");
     try {
