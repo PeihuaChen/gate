@@ -52,6 +52,8 @@ public abstract class AbstractVisualResource extends JPanel
 
   /** Does nothing now, but meant to clear all internal data **/
   public void cleanup() {
+    this.handle = null;
+    features.clear();
   }//clear()
 
   /**
@@ -71,6 +73,7 @@ public abstract class AbstractVisualResource extends JPanel
    * use this information e.g. to add items to the popup for the resource.
    */
   public void setHandle(Handle handle){
+    this.handle = handle;
   }
 
   //Parameters utility methods
@@ -118,5 +121,10 @@ public abstract class AbstractVisualResource extends JPanel
 
   // Properties for the resource
   protected FeatureMap features;
+  
+  /**
+   * The handle for this visual resource
+   */
+  protected Handle handle;
 
 }//AbstractVisualResource
