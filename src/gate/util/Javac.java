@@ -46,8 +46,14 @@ public class Javac{
            new ClassWriter(Hashtable.make()).writeClassFile(os, c);
           os.flush();
           byte[] bytes = os.toByteArray();
-  //Out.pr(c.className() + "[" + os.size() + " bytes]");
-          Gate.getClassLoader().defineGateClass(c.className(),
+          String className = c.className();
+          if(c.isInner()){
+            int loc = className.lastIndexOf('.');
+            className = className.substring(0, loc) + "$" +
+                        className.substring(loc + 1);
+          }
+//Out.pr(className + "[" + os.size() + " bytes]");
+          Gate.getClassLoader().defineGateClass(className,
                                                 bytes, 0, os.size());
         }
       };
@@ -63,6 +69,7 @@ public class Javac{
 
       compiler.compile(List.make(classNames.toArray()));
     }catch(Throwable t){
+      t.printStackTrace();
       throw new GateException(t);
     }
   }
