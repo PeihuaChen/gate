@@ -6,11 +6,13 @@ annie_person_female.lst:name:firstname:german
 city.lst:location:city:german
 company.lst:organization:company:german
 company_with_ending.lst:organization:company:german
+country_adj_ending.lst:country_adj_ending::german
 country_cap.lst:location:country:german
 country.lst:location:country:german
 currency.lst:currency:money:german
 first_name.lst:name:firstname:german
 geographical_rest.lst:location:location_rest:german
+government.lst:organization:government:german
 initial.lst:name:initial:german
 location_key_external.lst:location_key:external:german
 number_letters.lst:number:letter:german

@@ -1,5 +1,4 @@
 city.lst:location:city:german
-city_caps.lst:location:city:german
 location_key.lst:location:location_key:german
 location_key_suffix.lst:location_suffix:location_key_suffix:german
 location_suffix_exception.lst:location_suffix_exception:location_key_suffix_exception:german
