@@ -31,6 +31,9 @@ import gate.security.*;
   */
 public class TestPersist extends TestCase
 {
+  private static final String JDBC_URL =
+           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -284,6 +287,9 @@ public class TestPersist extends TestCase
     sds.delete();
   } // testDelete()
 
+
+
+
   /** Test the DS register. */
   public void testDSR() throws Exception {
     DataStoreRegister dsr = Gate.getDataStoreRegister();
@@ -346,10 +352,67 @@ public class TestPersist extends TestCase
   } // testDSR()
 
 
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestPersist.class);
   } // suite
+
+
+  private Document createTestDocument()
+    throws Exception {
+
+    String server = TestDocument.getTestServerName();
+    assertNotNull(server);
+    Document doc = Factory.newDocument(new URL(server + "tests/doc0.html"));
+    assertNotNull(doc);
+
+    doc.getFeatures().put("hi there", new Integer(23232));
+    doc.getAnnotations().add(
+      new Long(0), new Long(20), "thingymajig", Factory.newFeatureMap()
+    );
+    doc.setName("DB test Document");
+
+    return doc;
+  }
+
+  /** Test the DS register. */
+  public void testDB_UseCase01() throws Exception {
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. get test document
+    Document doc = createTestDocument();
+    Assert.assertNotNull(doc);
+
+    //3. get security factory & login
+    AccessController ac = new AccessControllerImpl();
+    Assert.assertNotNull(ac);
+    ac.open(this.JDBC_URL);
+
+    User usr = ac.findUser("kalina");
+    Assert.assertNotNull(usr);
+
+    Group grp = (Group)usr.getGroups().get(0);
+    Assert.assertNotNull(grp);
+
+    Session usrSession = ac.login("kalina","sesame",grp.getID());
+    Assert.assertNotNull(usrSession);
+    Assert.assert(ac.isValidSession(usrSession));
+
+    //4. create security settings for doc
+    SecurityInfo si = new SecurityInfo(SecurityInfo.ACCESS_WR_GW,usr,grp);
+
+    //5. try adding doc to data store
+    ds.adopt(doc,si);
+
+    Out.prln("Use case 01 passed...");
+  }
+
 
   public static void main(String[] args){
     try{
@@ -375,6 +438,10 @@ public class TestPersist extends TestCase
 
       test.setUp();
       test.testSimple();
+      test.tearDown();
+
+      test.setUp();
+      test.testDB_UseCase01();
       test.tearDown();
 
     }catch(Exception e){
