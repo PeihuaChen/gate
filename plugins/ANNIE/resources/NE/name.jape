@@ -16,7 +16,7 @@
 
 Phase:	Name
 Input: Token Lookup Title FirstPerson
-Options: control = appelt
+Options: control = appelt debug = true
 
 ///////////////////////////////////////////////////////////////
 
@@ -602,7 +602,8 @@ Macro: CHURCH
 Rule:	TheGazOrganization
 Priority: 245
 (
- {Token.category == DT}
+ {Token.category == DT}|
+ {Token.category == RB}
 )
 (
 {Lookup.majorType == organization}
@@ -632,7 +633,6 @@ features);
 
 Rule:	GazOrganization
 Priority: 145
-
 (
 {Lookup.majorType == organization}
 )
@@ -952,7 +952,7 @@ Priority: 230
  )?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXBase"}
+  :orgName.TempOrganization = {kind = "unknown", rule = "TheOrgXBase"}
 
 
 Rule:	OrgXBase
