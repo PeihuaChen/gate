@@ -5,7 +5,6 @@
   <fullname>gatelibs</fullname>
   <class>
     <path>[lib/gnu-regexp-1.0.8.jar]</path>
-    <path>[lib/graph_drawing.jar]</path>
     <path>[lib/jacl.jar]</path>
     <path>[lib/JavaCC.zip]</path>
     <path>[lib/javacompiler.jar]</path>
