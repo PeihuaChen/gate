@@ -460,19 +460,22 @@ public class OracleDataStore extends JDBCDataStore {
       Node start = (Node)ann.getStartNode();
       Node end = (Node)ann.getEndNode();
       String type = ann.getType();
+      FeatureMap annFeatures = ann.getFeatures();
 
       //DB stuff
-
+      Long annID = null;
       try {
         stmt = this.jdbcConn.prepareCall(
-            "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?) }");
+            "{ call "+Gate.DB_OWNER+".persist.create_annotation(?,?,?,?,?,?) }");
         stmt.setLong(1,docID.longValue());
         stmt.setLong(2,asetID.longValue());
         stmt.setLong(3,start.getOffset().longValue());
         stmt.setLong(4,end.getOffset().longValue());
         stmt.setString(5,type);
+        stmt.registerOutParameter(6,java.sql.Types.BIGINT);
 
         stmt.execute();
+        annID = new Long(stmt.getLong(6));
       }
       catch(SQLException sqle) {
         throw new PersistenceException("can't create document [step 6] in DB: ["+ sqle.getMessage()+"]");
@@ -480,6 +483,10 @@ public class OracleDataStore extends JDBCDataStore {
       finally {
         DBHelper.cleanup(stmt);
       }
+
+      //2.1. set annotation features
+      throw new MethodNotImplementedException();
+
     }
   }
 
