@@ -13,7 +13,7 @@ import gate.util.*;
 /** Provides an implementation for the interface gate.Annotation
   */
 public class AnnotationImpl
-implements Annotation, FeatureBearer
+implements Annotation, FeatureBearer, Comparable
 {
   /** Constructor. Package access - annotations have to be constructed via
     * AnnotationSets.
