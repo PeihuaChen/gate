@@ -146,7 +146,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void registerHooks(){
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
-    textPane.addCaretListener(textCaretListener);
+//    textPane.addCaretListener(textCaretListener);
     textPane.addAncestorListener(textAncestorListener);
   }
 
@@ -159,7 +159,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void unregisterHooks(){
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
-    textPane.removeCaretListener(textCaretListener);
+//    textPane.removeCaretListener(textCaretListener);
     textPane.removeAncestorListener(textAncestorListener);
   }
   
@@ -817,26 +817,17 @@ public class AnnotationSetsView extends AbstractDocumentView
       
     }
     public void mouseMoved(MouseEvent e){
+      //this triggers select annotation leading to edit annotation or new 
+      //annotation actions
       selectAction.setTextLocation(textPane.viewToModel(e.getPoint()));
       timer.restart();
-      //get highlighted annotations
-//      //first check if there is any highlight at the location
-//      Highlighter.Highlight highlights[] = textPane.
-//      	getHighlighter().getHighlights();
-//      int i = 0;
-//      for(;
-//          i < highlights.length &&
-//          (highlights[i].getStartOffset() > textPosition ||
-//           highlights[i].getEndOffset() < textPosition);
-//          i++);
-//      if(highlights[i].getStartOffset() < textPosition &&
-//         textPosition < highlights[i].getEndOffset()){
-//        //there is a highlight going through the current point
-      //find the highlighted annotation[s]
     }
     
     public void mouseClicked(MouseEvent e){
-      
+      //this is required so we can trigger new annotation when selecting text 
+      //by double/triple clicking
+      selectAction.setTextLocation(textPane.viewToModel(e.getPoint()));
+      timer.restart();
     }
     
     public void mousePressed(MouseEvent e){
@@ -975,6 +966,13 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        new EditAnnotationAction((AnnotationHandler)annotsAtPoint.get(0)).
 	        	actionPerformed(null);
 	      }
+      }else{
+        //no highlighted annotations at point
+        //if inside selection, add new annotation.
+        if(textPane.getSelectionStart() <= textLocation &&
+           textPane.getSelectionEnd() >= textLocation){
+          new NewAnnotationAction().actionPerformed(evt);
+        }
       }
     }
     
