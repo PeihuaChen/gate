@@ -785,7 +785,4 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     JButton listButton;
     JPanel textButtonBox;
   }///class ParameterValueEditor
-
-
-
 }//class NewResourceDialog
