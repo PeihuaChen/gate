@@ -431,6 +431,9 @@
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
   COMMENT="The annotation set to be used for the generated annotations"
   OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="resolveIt" RUNTIME="true"
+  COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
+  OPTIONAL="true">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
 
