@@ -238,14 +238,16 @@ implements AnnotationSet
   /** Get the node with the smallest offset */
   public Node firstNode() {
     indexByStartOffset();
-    return (Node) nodesByOffset.get(nodesByOffset.firstKey());
+    if(nodesByOffset.isEmpty()) return null;
+    else return (Node) nodesByOffset.get(nodesByOffset.firstKey());
   } // firstNode
 
   /** Get the node with the largest offset */
   public Node lastNode() {
     indexByStartOffset();
     indexByEndOffset();
-    return (Node) nodesByOffset.get(nodesByOffset.lastKey());
+    if(nodesByOffset.isEmpty())return null;
+    else return (Node) nodesByOffset.get(nodesByOffset.lastKey());
   } // lastNode
 
   /**
