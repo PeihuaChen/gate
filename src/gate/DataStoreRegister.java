@@ -39,6 +39,14 @@ public class DataStoreRegister extends HashSet {
       "gate.persist.SerialDataStore",
       "SerialDataStore: file-based storage using Java serialisation"
     );
+    names.put(
+      "gate.persist.JdbcDataStore",
+      "JdbcDataStore: generic RDBMS storage over JDBC"
+    );
+    names.put(
+      "gate.persist.OracleDataStore",
+      "OracleDataStore: Oracle-specific RDBMS storage over JDBC"
+    );
 
     return names;
   } // getDataStoreClassNames()
@@ -102,7 +110,8 @@ public class DataStoreRegister extends HashSet {
    */
   public synchronized void addCreoleListener(CreoleListener l) {
     Vector v =
-      creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+      creoleListeners ==
+        null ? new Vector(2) : (Vector) creoleListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
