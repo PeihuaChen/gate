@@ -22,9 +22,11 @@ import junit.framework.*;
 import gate.*;
 import gate.event.*;
 import gate.persist.*;
+import gate.util.*;
 
 
-public class UserImpl implements User {
+public class UserImpl
+  implements User, ObjectModificationListener {
 
   /** --- */
   private Long    id;
@@ -168,4 +170,63 @@ public class UserImpl implements User {
 
     this.omListeners.add(l);
   }
+
+
+  //ObjectModificationListener interface
+  public void objectCreated(ObjectModificationEvent e) {
+    throw new MethodNotImplementedException();
+  }
+
+  public void objectModified(ObjectModificationEvent e) {
+
+    //only groups can disturb the user
+    Assert.assert(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
+                  e.getSubType() == Group.OBJECT_CHANGE_REMOVEUSER ||
+                  e.getSubType() == Group.OBJECT_CHANGE_NAME);
+
+    //we get this event only if a group adds/removes user to it
+    Group grp = (Group)e.getSource();
+
+    switch(e.getSubType()) {
+
+      case Group.OBJECT_CHANGE_ADDUSER:
+
+        //1.check that the groupis not already in collection
+        Assert.assert(false == this.groups.contains(grp));
+        //2.add group to collection
+        this.groups.add(grp);
+        //3. the group has laredy registered
+        //the user as listener for this group
+        ;
+        break;
+
+      case Group.OBJECT_CHANGE_REMOVEUSER:
+        //1.check that the group is in collection
+        Assert.assert(true == this.groups.contains(grp));
+        //2.remove group from collection
+        this.groups.remove(grp);
+        //3. the group has laredy UNregistered
+        //the user as listener for this group
+        ;
+        break;
+
+      case Group.OBJECT_CHANGE_NAME:
+        //do nothing
+        break;
+
+      default:
+        throw new IllegalArgumentException();
+    }
+
+
+  }
+
+  public void objectDeleted(ObjectModificationEvent e) {
+    throw new MethodNotImplementedException();
+  }
+
+  public void processGateEvent(GateEvent e){
+    throw new MethodNotImplementedException();
+  }
+
 }
