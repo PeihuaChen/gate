@@ -253,34 +253,43 @@ public class SimpleFeatureMapImpl
    * @return true if value1 subsumes value2 in the specified ontology */
   protected boolean ontologySubsume(String ontoUrl,String value1,String value2) {
     boolean result = false;
-    URL url;
     try {
-      url = new URL(ontoUrl);
-    } catch (MalformedURLException e){
-      throw new RuntimeException(
-      "\nin SimpleFeatureMapImpl on ontologySubsume()\n"
-      +e.getMessage()+"\n");
-    }
+      URL url;
+      try {
+        url = new URL(ontoUrl);
+      } catch (MalformedURLException e){
+        throw new RuntimeException(
+        "\nin SimpleFeatureMapImpl on ontologySubsume()\n"
+        +e.getMessage()+"\n");
+      }
 
-    /* GET ONTOLOGY BY URL : a bit tricky reference
-    since the behaviour behind the getOntology method is
-    certainly static.
-    : should be temporary */
-    Ontology o = new OntologyImpl().getOntology(url);
-    o = o.getOntology(url);
+      /* GET ONTOLOGY BY URL : a bit tricky reference
+      since the behaviour behind the getOntology method is
+      certainly static.
+      : should be temporary */
+      Ontology o = new OntologyImpl().getOntology(url);
+      o = o.getOntology(url);
 
-    OClass c1 = o.getClassByName(value1);
-    OClass c2 = o.getClassByName(value2);
+      OClass c1 = o.getClassByName(value1);
+      OClass c2 = o.getClassByName(value2);
 
-    if (null!= c1 && null!= c2) {
-      if (c1.equals(c2)) {
-        result = true;
-      } else {
-        Set subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
-        if (subs1.contains(c2))
+      if (null!= c1 && null!= c2) {
+        if (c1.equals(c2)) {
           result = true;
-      } // else
-    } // if not null classes
+        } else {
+          Set subs1;
+          try {
+            subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
+          } catch (com.ontotext.gate.exception.NoSuchClosureTypeException x) {
+            throw new gate.creole.ResourceInstantiationException(x);
+          }
+          if (subs1.contains(c2))
+            result = true;
+        } // else
+      } // if not null classes
+    } catch  (gate.creole.ResourceInstantiationException x) {
+      x.printStackTrace(Err.getPrintWriter());
+    }
     return result;
   } // ontologySubsume
 
