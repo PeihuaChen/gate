@@ -41,16 +41,14 @@ public class Nerc extends AbstractProcessingResource {
       FeatureMap params;
       FeatureMap features;
       Map listeners = new HashMap();
-//      if (! Main.batchMode) {//fire events if not in batch mode
-        listeners.put("gate.event.StatusListener", new StatusListener(){
-          public void statusChanged(String text){
-            fireStatusChanged(text);
-          }
-        });
+      listeners.put("gate.event.StatusListener", new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      });
 
       //tokeniser
-        fireStatusChanged("Creating a tokeniser");
-//      } //if do events if we're not in batch
+      fireStatusChanged("Creating a tokeniser");
       params = Factory.newFeatureMap();
       if(tokeniserRulesURL != null) params.put("tokeniserRulesURL",
                                                tokeniserRulesURL);
@@ -78,8 +76,7 @@ public class Nerc extends AbstractProcessingResource {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-//      if (! Main.batchMode) //fire events if not in batch mode
-        listeners.put("gate.event.ProgressListener",
+      listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(11, 50));
 
       gazetteer = (DefaultGazetteer)Factory.createResource(
@@ -101,8 +98,7 @@ public class Nerc extends AbstractProcessingResource {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-//      if (! Main.batchMode) //fire events if not in batch mode
-        listeners.put("gate.event.ProgressListener",
+      listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(50, 60));
 
       splitter = (SentenceSplitter)Factory.createResource(
@@ -124,8 +120,7 @@ public class Nerc extends AbstractProcessingResource {
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
-//      if (! Main.batchMode) //fire events if not in batch mode
-        listeners.put("gate.event.ProgressListener",
+      listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(60, 65));
 
       tagger = (POSTagger)Factory.createResource(
@@ -209,16 +204,19 @@ public class Nerc extends AbstractProcessingResource {
     }
     ProgressListener pListener = null;
     StatusListener sListener = null;
-//    if (!Main.batchMode) {
-      fireProgressChanged(5);
-      pListener = new IntervalProgressListener(5, 15);
-      sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
+    fireProgressChanged(5);
+    pListener = new IntervalProgressListener(5, 15);
+    sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
+
 
     //tokeniser
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" NERC has been abruptly interrupted!");
     tokeniser.addProgressListener(pListener);
     tokeniser.addStatusListener(sListener);
     tokeniser.execute();
@@ -226,7 +224,9 @@ public class Nerc extends AbstractProcessingResource {
     tokeniser.removeStatusListener(sListener);
 
     //gazetteer
-
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" NERC has been abruptly interrupted!");
     pListener = new IntervalProgressListener(10, 20);
     gazetteer.addProgressListener(pListener);
     gazetteer.addStatusListener(sListener);
@@ -235,6 +235,9 @@ public class Nerc extends AbstractProcessingResource {
     gazetteer.removeStatusListener(sListener);
 
     //sentence splitter
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" NERC has been abruptly interrupted!");
     pListener = new IntervalProgressListener(20, 35);
     splitter.addProgressListener(pListener);
     splitter.addStatusListener(sListener);
@@ -243,6 +246,9 @@ public class Nerc extends AbstractProcessingResource {
     splitter.removeStatusListener(sListener);
 
     //POS tagger
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" NERC has been abruptly interrupted!");
     pListener = new IntervalProgressListener(35, 40);
     tagger.addProgressListener(pListener);
     tagger.addStatusListener(sListener);
@@ -251,6 +257,9 @@ public class Nerc extends AbstractProcessingResource {
     tagger.removeStatusListener(sListener);
 
     //transducer
+    if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" NERC has been abruptly interrupted!");
     pListener = new IntervalProgressListener(40, 90);
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
@@ -258,6 +267,19 @@ public class Nerc extends AbstractProcessingResource {
     transducer.removeProgressListener(pListener);
     transducer.removeStatusListener(sListener);
   }//protected void runSystem() throws ExecutionException
+
+  /**
+   * Notifies all the PRs in this controller that they should stop their
+   * execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+    tokeniser.interrupt();
+    gazetteer.interrupt();
+    splitter.interrupt();
+    tagger.interrupt();
+    transducer.interrupt();
+  }
 
   /**
    * reads the results created by the system run and packages them in one
@@ -276,11 +298,14 @@ public class Nerc extends AbstractProcessingResource {
   }//protected void createEntitySet(){
 
   public void execute() throws ExecutionException{
+    interrupted = false;
     try{
       runSystem();
       createEntitySet();
       fireProgressChanged(100);
       fireProcessFinished();
+    }catch(ExecutionException ee){
+      throw ee;
     }catch(Exception e){
       throw new ExecutionException(e);
     }

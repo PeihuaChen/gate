@@ -80,9 +80,7 @@ public class TestJape extends TestCase
   } // testCombined()
 
   /** Batch run */
-  public void testBatch()
-  throws JapeException, ResourceInstantiationException, IOException
-  {
+  public void testBatch() throws Exception{
     Corpus c = Factory.newCorpus("TestJape corpus");
     c.add(
       Factory.newDocument(Files.getGateResourceAsString("texts/doc0.html"))

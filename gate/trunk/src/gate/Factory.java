@@ -210,10 +210,9 @@ public abstract class Factory {
         if(features != null) res.getFeatures().putAll(features);
 
         // fire the event
-//        if (!Main.batchMode)
-          creoleProxy.fireResourceLoaded(
-            new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
-          );
+        creoleProxy.fireResourceLoaded(
+          new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+        );
 
         return res;
       } // datastore was present
@@ -266,7 +265,7 @@ public abstract class Factory {
     if(listeners != null && !listeners.isEmpty()) {
       try {
         if(DEBUG) Out.prln("Setting the listeners for  " + res.toString());
-        setResourceListeners(res, listeners);
+        AbstractResource.setResourceListeners(res, listeners);
       } catch(Exception e) {
         if(DEBUG) Out.prln("Failed to set listeners for " + res.toString());
         throw new
@@ -290,7 +289,7 @@ public abstract class Factory {
     if(listeners != null && !listeners.isEmpty()) {
       try {
         if(DEBUG) Out.prln("Removing the listeners for  " + res.toString());
-        removeResourceListeners(res, listeners);
+        AbstractResource.removeResourceListeners(res, listeners);
       } catch(Exception e) {
         if (DEBUG) Out.prln(
           "Failed to remove the listeners for " + res.toString()
@@ -307,10 +306,9 @@ public abstract class Factory {
     if(features != null) res.getFeatures().putAll(features);
 
     // fire the event
-//    if (!Main.batchMode)
-      creoleProxy.fireResourceLoaded(
-        new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
-      );
+    creoleProxy.fireResourceLoaded(
+      new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+    );
 
     return res;
   } // create(resourceClassName, parameterValues, features, listeners)
@@ -347,101 +345,11 @@ public abstract class Factory {
     List instances = rd.getInstantiations();
     instances.remove(resource);
 //    resource.clear();
-//    if (!Main.batchMode)
-      creoleProxy.fireResourceUnloaded(
-        new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
-      );
+    creoleProxy.fireResourceUnloaded(
+      new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
+    );
   } // deleteResource
 
-
-  /**
-   * Adds listeners to a resource.
-   * @param listeners The listeners to be registered with the resource. A
-   * {@link java.util.Map} that maps from fully qualified class name (as a
-   * string) to listener (of the type declared by the key).
-   * @param resource the resource that listeners will be registered to.
-   */
-  public static void setResourceListeners(Resource resource, Map listeners)
-  throws
-    IntrospectionException, InvocationTargetException,
-    IllegalAccessException, GateException
-  {
-//    if (Main.batchMode)
-//      return; //no need for listeners if in batch mode
-
-    // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo = Introspector.getBeanInfo(
-      resource.getClass(), Object.class
-    );
-
-    // get all the events the bean can fire
-    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
-
-    // add the listeners
-    if (events != null) {
-      EventSetDescriptor event;
-      for(int i = 0; i < events.length; i++) {
-        event = events[i];
-
-        // did we get such a listener?
-        Object listener =
-          listeners.get(event.getListenerType().getName());
-        if(listener != null) {
-          Method addListener = event.getAddListenerMethod();
-
-          // call the set method with the parameter value
-          Object[] args = new Object[1];
-          args[0] = listener;
-          addListener.invoke(resource, args);
-        }
-      } // for each event
-    }   // if events != null
-  } // setResourceListeners()
-
-  /**
-   * Removes listeners from a resource.
-   * @param listeners The listeners to be removed from the resource. A
-   * {@link java.util.Map} that maps from fully qualified class name
-   * (as a string) to listener (of the type declared by the key).
-   * @param resource the resource that listeners will be removed from.
-   */
-  public static void removeResourceListeners(
-    Resource resource, Map listeners
-  ) throws
-    IntrospectionException, InvocationTargetException,
-    IllegalAccessException, GateException
-  {
-//    if (Main.batchMode)
-//      return;
-
-    // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo = Introspector.getBeanInfo(
-      resource.getClass(), Object.class
-    );
-
-    // get all the events the bean can fire
-    EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
-
-    // add the listeners
-    if(events != null) {
-      EventSetDescriptor event;
-      for(int i = 0; i < events.length; i++) {
-        event = events[i];
-
-        // did we get such a listener?
-        Object listener =
-          listeners.get(event.getListenerType().getName());
-        if(listener != null) {
-          Method removeListener = event.getRemoveListenerMethod();
-
-          // call the set method with the parameter value
-          Object[] args = new Object[1];
-          args[0] = listener;
-          removeListener.invoke(resource, args);
-        }
-      } // for each event
-    }   // if events != null
-  } // removeResourceListeners()
 
   /** Create a new transient Corpus. */
   public static Corpus newCorpus(String name)
@@ -512,7 +420,7 @@ public abstract class Factory {
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
-    if(dsReg.add(ds) /*&& !Main.batchMode*/)
+    if(dsReg.add(ds))
       creoleProxy.fireDatastoreOpened(
         new CreoleEvent(ds, CreoleEvent.DATASTORE_OPENED)
       );
@@ -530,7 +438,7 @@ public abstract class Factory {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
     ds.open();
-    if(dsReg.add(ds) /*&& !Main.batchMode*/)
+    if(dsReg.add(ds))
       creoleProxy.fireDatastoreCreated(
         new CreoleEvent(ds, CreoleEvent.DATASTORE_CREATED)
       );
@@ -577,7 +485,7 @@ public abstract class Factory {
 class CreoleProxy {
 
   public synchronized void removeCreoleListener(CreoleListener l) {
-    if (/*!Main.batchMode &&*/ creoleListeners != null && creoleListeners.contains(l)) {
+    if (creoleListeners != null && creoleListeners.contains(l)) {
       Vector v = (Vector) creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
@@ -585,8 +493,6 @@ class CreoleProxy {
   }// removeCreoleListener(CreoleListener l)
 
   public synchronized void addCreoleListener(CreoleListener l) {
-//    if (Main.batchMode)
-//      return;
     Vector v =
       creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
     if (!v.contains(l)) {
@@ -596,7 +502,7 @@ class CreoleProxy {
   }// addCreoleListener(CreoleListener l)
 
   protected void fireResourceLoaded(CreoleEvent e) {
-    if (/*!Main.batchMode &&*/ creoleListeners != null) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -606,7 +512,7 @@ class CreoleProxy {
   }// fireResourceLoaded(CreoleEvent e)
 
   protected void fireResourceUnloaded(CreoleEvent e) {
-    if (/*!Main.batchMode &&*/ creoleListeners != null) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -616,7 +522,7 @@ class CreoleProxy {
   }// fireResourceUnloaded(CreoleEvent e)
 
   protected void fireDatastoreOpened(CreoleEvent e) {
-    if (/*!Main.batchMode &&*/ creoleListeners != null) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -626,7 +532,7 @@ class CreoleProxy {
   }// fireDatastoreOpened(CreoleEvent e)
 
   protected void fireDatastoreCreated(CreoleEvent e) {
-    if (/*!Main.batchMode &&*/ creoleListeners != null) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -636,7 +542,7 @@ class CreoleProxy {
   }// fireDatastoreCreated(CreoleEvent e)
 
   protected void fireDatastoreClosed(CreoleEvent e) {
-    if (/*!Main.batchMode &&*/ creoleListeners != null) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

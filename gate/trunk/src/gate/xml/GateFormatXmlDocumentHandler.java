@@ -434,8 +434,6 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     * event.
   */
   protected void fireStatusChangedEvent(String text){
-//    if (Main.batchMode) //fire events if not in batch mode
-//      return;
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);

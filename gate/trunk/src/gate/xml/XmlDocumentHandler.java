@@ -174,7 +174,7 @@ public class XmlDocumentHandler extends DefaultHandler{
                                                              Attributes atts){
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
-    if ((++elements % ELEMENTS_RATE) == 0 /*&& !Main.batchMode*/)
+    if ((++elements % ELEMENTS_RATE) == 0)
         fireStatusChangedEvent("Processed elements : " + elements);
 
     Integer customObjectId = null;
@@ -426,8 +426,6 @@ public class XmlDocumentHandler extends DefaultHandler{
     * event.
   */
   protected void fireStatusChangedEvent(String text){
-//    if (Main.batchMode) //fire events if not in batch mode
-//      return;
     Iterator listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);

@@ -284,6 +284,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException{
+    interrupted = false;
     AnnotationSet annotationSet;
     //check the input
     if(document == null) {
@@ -367,6 +368,9 @@ public class DefaultGazetteer extends AbstractProcessingResource
       if(charIdx - oldCharIdx > 256) {
         fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
+        if(isInterrupted()) throw new ExecutionInterruptedException(
+            "The execution of the " + getName() +
+            " gazetteer has been abruptly interrupted!");
       }
     } // while(charIdx < length)
 

@@ -29,6 +29,7 @@ import javax.swing.table.*;
 import javax.swing.tree.*;
 import java.text.*;
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.BorderLayout;
@@ -80,6 +81,7 @@ public class ApplicationEditor extends AbstractVisualResource
   }//init
 
   protected void initLocalData() {
+    prList = (List)controller.getPRs();
     paramsForPR = new HashMap();
     runAction = new RunAction();
   }//initLocalData
@@ -257,7 +259,7 @@ public class ApplicationEditor extends AbstractVisualResource
                                           getLastPathComponent();
             Object value = ((DefaultMutableTreeNode)node).getUserObject();
             if(value instanceof ProcessingResource &&
-               controller.contains(value)){
+               prList.contains(value)){
               Action act = new RemovePRAction((ProcessingResource)value);
               if(act != null){
                 actions.add(act);
@@ -294,13 +296,13 @@ public class ApplicationEditor extends AbstractVisualResource
                                           paths[i].getLastPathComponent();
             Object value = node.getUserObject();
             if(value instanceof ProcessingResource &&
-               controller.contains(value)){
-              int index = controller.indexOf(value);
+               prList.contains(value)){
+              int index = prList.indexOf(value);
               //move the module up
               if(index > 0){
-                controller.remove(index);
+                prList.remove(index);
                 index--;
-                controller.add(index, value);
+                prList.add(index, value);
                 DefaultMutableTreeNode parent =
                       (DefaultMutableTreeNode)node.getParent();
                 boolean expanded = mainTreeTable.getTree().isExpanded(paths[i]);
@@ -341,13 +343,13 @@ public class ApplicationEditor extends AbstractVisualResource
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                                           paths[i].getLastPathComponent();
             Object value = node.getUserObject();
-            if(value instanceof ProcessingResource && controller.contains(value)){
-              int index = controller.indexOf(value);
+            if(value instanceof ProcessingResource && prList.contains(value)){
+              int index = prList.indexOf(value);
               //move the module down
-              if(index < controller.size() - 1){
-                controller.remove(index);
+              if(index < prList.size() - 1){
+                prList.remove(index);
                 index++;
-                controller.add(index, value);
+                prList.add(index, value);
                 DefaultMutableTreeNode parent =
                       (DefaultMutableTreeNode)node.getParent();
                 boolean expanded = mainTreeTable.getTree().isExpanded(paths[i]);
@@ -704,7 +706,7 @@ public class ApplicationEditor extends AbstractVisualResource
       Iterator prsIter = prsList.iterator();
       while(prsIter.hasNext()){
         Resource res = (Resource)prsIter.next();
-        if(controller.contains(res)||
+        if(prList.contains(res)||
            Gate.getHiddenAttribute(res.getFeatures())) size--;
       }
       return size;
@@ -738,7 +740,7 @@ public class ApplicationEditor extends AbstractVisualResource
       ProcessingResource pr =null;
       while(allPRsIter.hasNext() && index < rowIndex){
         pr = (ProcessingResource)allPRsIter.next();
-        if (!(controller.contains(pr)||
+        if (!(prList.contains(pr)||
               Gate.getHiddenAttribute(pr.getFeatures()))
             )  index ++;
       }
@@ -761,11 +763,11 @@ public class ApplicationEditor extends AbstractVisualResource
     AddPRAction(ProcessingResource aPR){
       super(aPR.getName());
       this.pr = aPR;
-      setEnabled(!controller.contains(aPR));
+      setEnabled(!prList.contains(aPR));
     }
 
     public void actionPerformed(ActionEvent e){
-      controller.add(pr);
+      prList.add(pr);
       DefaultMutableTreeNode root = (DefaultMutableTreeNode)mainTTModel.
                                      getRoot();
       DefaultMutableTreeNode node = new DefaultMutableTreeNode(pr, true);
@@ -780,7 +782,7 @@ public class ApplicationEditor extends AbstractVisualResource
       Iterator paramsIter = params.iterator();
       List parameterDisjunctions = new ArrayList();
       while(paramsIter.hasNext()){
-        ParameterDisjunction pDisj = new ParameterDisjunction(
+        ParameterDisjunction pDisj = new ParameterDisjunction(pr,
                                           (List)paramsIter.next());
         parameterDisjunctions.add(pDisj);
         DefaultMutableTreeNode paramNode = new DefaultMutableTreeNode(pDisj,
@@ -790,7 +792,6 @@ public class ApplicationEditor extends AbstractVisualResource
                                      mainTTModel.getRoot(), node, paramNode}));
       }
       paramsForPR.put(pr, parameterDisjunctions);
-
       modulesTableModel.fireTableDataChanged();
       this.setEnabled(false);
 //      ((Action)removeActionForPR.get(pr)).setEnabled(true);
@@ -803,11 +804,11 @@ public class ApplicationEditor extends AbstractVisualResource
     RemovePRAction(ProcessingResource pr){
       super(pr.getName());
       this.pr = pr;
-      setEnabled(controller.contains(pr));
+      setEnabled(prList.contains(pr));
     }
 
     public void actionPerformed(ActionEvent e){
-      controller.remove(pr);
+      prList.remove(pr);
       paramsForPR.remove(pr);
       modulesTableModel.fireTableDataChanged();
       //remove the PR from the PRs-and-Params tree
@@ -844,115 +845,172 @@ public class ApplicationEditor extends AbstractVisualResource
                                 mainTreeTable.getEditingRow(),
                                 mainTreeTable.getEditingColumn())));
           }
+
+          //read all the parameters: this will set all null parameters to their
+          //default values (e.g.the most recently used document)
+          Enumeration nodes = ((DefaultMutableTreeNode)mainTTModel.getRoot()).
+                              depthFirstEnumeration();
+          while(nodes.hasMoreElements())
+            mainTTModel.getValueAt(nodes.nextElement(), 3);
+
+          //set the listeners
+          StatusListener sListener = new InternalStatusListener();
+          ProgressListener pListener = new InternalProgressListener();
+
+          controller.addStatusListener(sListener);
+          controller.addProgressListener(pListener);
+
+          Gate.setExecutable(controller);
+
+          //execute the thing
           long startTime = System.currentTimeMillis();
           fireStatusChanged("Running " +
                             controller.getName());
           fireProgressChanged(0);
 
-          Iterator prsIter = controller.iterator();
-          while(prsIter.hasNext()){
-            ProcessingResource pr = (ProcessingResource)prsIter.next();
-            FeatureMap params = Factory.newFeatureMap();
-            List someParams = (List)paramsForPR.get(pr);
-            Iterator paramsIter = someParams.iterator();
-            while(paramsIter.hasNext()){
-              ParameterDisjunction pDisj =
-                                        (ParameterDisjunction)paramsIter.next();
-              if(pDisj.getValue() != null){
-                params.put(pDisj.getName(), pDisj.getValue());
-              }
+          try {
+            controller.execute();
+          }catch(ExecutionInterruptedException eie){
+            JOptionPane.showMessageDialog(
+              ApplicationEditor.this,
+              "Interrupted!\n" + eie.toString(),
+              "Gate", JOptionPane.ERROR_MESSAGE);
+            Gate.setExecutable(null);
+          }catch(ExecutionException ee) {
+            Gate.setExecutable(null);
+            ee.printStackTrace(Err.getPrintWriter());
+            Exception exc = ee.getException();
+            if(exc != null){
+              Err.prln("===> from:");
+              exc.printStackTrace(Err.getPrintWriter());
             }
-            try{
-              pr.setParameterValues(params);
-            }catch(ResourceInstantiationException ie){
-              ie.printStackTrace(Err.getPrintWriter());
-              JOptionPane.showMessageDialog(
-                ApplicationEditor.this,
-                "Could not set parameters for " + pr.getName() + ":\n" +
-                "See the \"Messages\" tab for details",
-                "Gate", JOptionPane.ERROR_MESSAGE);
-              fireProcessFinished();
-              return;
-            }
-          }
-          //run the thing
-          prsIter = controller.iterator();
-          int i = 0;
-          Map listeners = new HashMap();
-          listeners.put("gate.event.StatusListener", new StatusListener(){
-            public void statusChanged(String text){
-              fireStatusChanged(text);
-            }
-          });
+            JOptionPane.showMessageDialog(
+              ApplicationEditor.this,
+              "Execution error while running \"" + controller.getName() +
+              "\" :\nSee \"Messages\" tab for details!",
+              "Gate", JOptionPane.ERROR_MESSAGE);
+          }catch(Exception e){
+            Gate.setExecutable(null);
+            JOptionPane.showMessageDialog(ApplicationEditor.this,
+                                          "Unhandled execution error!\n " +
+                                          "See \"Messages\" tab for details!",
+                                          "Gate", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace(Err.getPrintWriter());
+          }//catch
+          Gate.setExecutable(null);
 
 
-          while(prsIter.hasNext()){
-            ProcessingResource pr = (ProcessingResource)prsIter.next();
-            fireStatusChanged("Running " + pr.getName());
-            listeners.put("gate.event.ProgressListener",
-                          new CustomProgressListener(
-                                i * 100 / controller.size(),
-                                (i + 1) * 100 / controller.size()));
-
-            //try to set this listener if the resource can fire progress events
-            try{
-
-              // get the beaninfo for the resource bean, excluding data about Object
-              BeanInfo resBeanInfo = Introspector.getBeanInfo(pr.getClass(),
-                                                              Object.class);
-              // get all the events the bean can fire
-              EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
-
-              // add the listeners
-              if(events != null) {
-                EventSetDescriptor event;
-                for(int j = 0; j < events.length; j++) {
-                  event = events[j];
-
-                  // did we get such a listener?
-                  Object listener =
-                    listeners.get(event.getListenerType().getName());
-                  if(listener != null){
-                    Method addListener = event.getAddListenerMethod();
-
-                    // call the set method with the parameter value
-                    Object[] args = new Object[1];
-                    args[0] = listener;
-                    addListener.invoke(pr, args);
-                  }
-                } // for each event
-              }   // if events != null
-            }catch(IntrospectionException ie){
-              //not really important; just ignore
-            }catch(java.lang.reflect.InvocationTargetException ite){
-              //not really important; just ignore
-            }catch(IllegalAccessException iae){
-              //not really important; just ignore
-            }
-
-            try {
-              pr.execute();
-            } catch(ExecutionException ee) {
-              ee.printStackTrace(Err.getPrintWriter());
-              Exception exc = ee.getException();
-              if(exc != null){
-                Err.prln("===> from:");
-                exc.printStackTrace(Err.getPrintWriter());
-              }
-              JOptionPane.showMessageDialog(
-                ApplicationEditor.this,
-                "Execution error while running \"" + pr.getName() + "\" :\n " +
-                "See \"Messages\" tab for details!",
-                "Gate", JOptionPane.ERROR_MESSAGE);
-            }catch(Exception e){
-              JOptionPane.showMessageDialog(ApplicationEditor.this,
-                                            "Unhandled execution error!\n " +
-                                            "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
-              e.printStackTrace(Err.getPrintWriter());
-            }//catch
-            i++;
-          }
+          //remove the listeners
+          controller.removeStatusListener(sListener);
+          controller.removeProgressListener(pListener);
+//
+//
+//
+//
+//          Iterator prsIter = prList.iterator();
+//          while(prsIter.hasNext()){
+//            ProcessingResource pr = (ProcessingResource)prsIter.next();
+//            FeatureMap params = Factory.newFeatureMap();
+//            List someParams = (List)paramsForPR.get(pr);
+//            Iterator paramsIter = someParams.iterator();
+//            while(paramsIter.hasNext()){
+//              ParameterDisjunction pDisj =
+//                                        (ParameterDisjunction)paramsIter.next();
+//              if(pDisj.getValue() != null){
+//                params.put(pDisj.getName(), pDisj.getValue());
+//              }
+//            }
+//            try{
+//              pr.setParameterValues(params);
+//            }catch(ResourceInstantiationException ie){
+//              ie.printStackTrace(Err.getPrintWriter());
+//              JOptionPane.showMessageDialog(
+//                ApplicationEditor.this,
+//                "Could not set parameters for " + pr.getName() + ":\n" +
+//                "See the \"Messages\" tab for details",
+//                "Gate", JOptionPane.ERROR_MESSAGE);
+//              fireProcessFinished();
+//              return;
+//            }
+//          }
+//          //run the thing
+//          prsIter = prList.iterator();
+//          int i = 0;
+//          Map listeners = new HashMap();
+//          listeners.put("gate.event.StatusListener", new StatusListener(){
+//            public void statusChanged(String text){
+//              fireStatusChanged(text);
+//            }
+//          });
+//
+//
+//          while(prsIter.hasNext()){
+//            ProcessingResource pr = (ProcessingResource)prsIter.next();
+//            fireStatusChanged("Running " + pr.getName());
+//            listeners.put("gate.event.ProgressListener",
+//                          new CustomProgressListener(
+//                                i * 100 / prList.size(),
+//                                (i + 1) * 100 / prList.size()));
+//
+//            //try to set this listener if the resource can fire progress events
+//            try{
+//
+//              // get the beaninfo for the resource bean, excluding data about Object
+//              BeanInfo resBeanInfo = Introspector.getBeanInfo(pr.getClass(),
+//                                                              Object.class);
+//              // get all the events the bean can fire
+//              EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+//
+//              // add the listeners
+//              if(events != null) {
+//                EventSetDescriptor event;
+//                for(int j = 0; j < events.length; j++) {
+//                  event = events[j];
+//
+//                  // did we get such a listener?
+//                  Object listener =
+//                    listeners.get(event.getListenerType().getName());
+//                  if(listener != null){
+//                    Method addListener = event.getAddListenerMethod();
+//
+//                    // call the set method with the parameter value
+//                    Object[] args = new Object[1];
+//                    args[0] = listener;
+//                    addListener.invoke(pr, args);
+//                  }
+//                } // for each event
+//              }   // if events != null
+//            }catch(IntrospectionException ie){
+//              //not really important; just ignore
+//            }catch(java.lang.reflect.InvocationTargetException ite){
+//              //not really important; just ignore
+//            }catch(IllegalAccessException iae){
+//              //not really important; just ignore
+//            }
+//
+//            try {
+//              pr.execute();
+//            } catch(ExecutionException ee) {
+//              ee.printStackTrace(Err.getPrintWriter());
+//              Exception exc = ee.getException();
+//              if(exc != null){
+//                Err.prln("===> from:");
+//                exc.printStackTrace(Err.getPrintWriter());
+//              }
+//              JOptionPane.showMessageDialog(
+//                ApplicationEditor.this,
+//                "Execution error while running \"" + pr.getName() + "\" :\n " +
+//                "See \"Messages\" tab for details!",
+//                "Gate", JOptionPane.ERROR_MESSAGE);
+//            }catch(Exception e){
+//              JOptionPane.showMessageDialog(ApplicationEditor.this,
+//                                            "Unhandled execution error!\n " +
+//                                            "See \"Messages\" tab for details!",
+//                                            "Gate", JOptionPane.ERROR_MESSAGE);
+//              e.printStackTrace(Err.getPrintWriter());
+//            }//catch
+//            i++;
+//          }
           long endTime = System.currentTimeMillis();
           fireProcessFinished();
           fireStatusChanged(controller.getName() +
@@ -971,17 +1029,19 @@ public class ApplicationEditor extends AbstractVisualResource
 
   class ParameterDisjunction {
     /**
-     * gets a list of {@link gate.creole.Parameter}
+     * @param options a list of {@link gate.creole.Parameter}
+     * @param pr the {@link ProcessingResource}
      */
-    public ParameterDisjunction(List options) {
+    public ParameterDisjunction(ProcessingResource pr, List options) {
       this.options = options;
+      this.pr = pr;
       Iterator paramsIter = options.iterator();
       names = new String[options.size()];
       int i = 0;
       while(paramsIter.hasNext()){
         names[i++] = ((Parameter)paramsIter.next()).getName();
       }
-      values = new Object[options.size()];
+//      values = new Object[options.size()];
       setSelectedIndex(0);
     }// public ParameterDisjunction(List options)
 
@@ -989,13 +1049,14 @@ public class ApplicationEditor extends AbstractVisualResource
       selectedIndex = index;
       currentParameter = (Parameter)options.get(selectedIndex);
       typeName = currentParameter.getTypeName();
-      if(values[selectedIndex] == null){
-        try {
-          values[selectedIndex] = currentParameter.getDefaultValue();
-        } catch(Exception e) {
-          values[selectedIndex] = "";
-        }
-      }
+//      if(values[selectedIndex] == null){
+//        try {
+//          values[selectedIndex] = currentParameter.getDefaultValue();
+//        } catch(Exception e) {
+//          values[selectedIndex] = "";
+//        }
+//      }
+
 //      tableModel.fireTableDataChanged();
     }// public void setSelectedIndex(int index)
 
@@ -1032,61 +1093,90 @@ public class ApplicationEditor extends AbstractVisualResource
      */
     public void clearValue(){
       try{
-        values[selectedIndex] = currentParameter.getDefaultValue();
+        setValue(currentParameter.getDefaultValue());
       }catch(ParameterException pe){
-        values[selectedIndex] = null;
+        setValue(null);
       }
     }
 
     public void setValue(Object value){
-      Object oldValue = values[selectedIndex];
-      if(value instanceof String){
-        if(typeName.equals("java.lang.String")){
-          values[selectedIndex] = value;
-        }else{
-          try{
-            values[selectedIndex] = currentParameter.
-                                    calculateValueFromString((String)value);
-          }catch(Exception e){
-            values[selectedIndex] = oldValue;
-            JOptionPane.showMessageDialog(ApplicationEditor.this,
-                                          "Invalid value!\n" +
-                                          "Is it the right type?",
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
-          }
-        }
-      }else{
-        values[selectedIndex] = value;
+      try{
+        pr.setParameterValue(currentParameter.getName(), value);
+      }catch(Exception e){
+        JOptionPane.showMessageDialog(ApplicationEditor.this,
+                                      "Invalid value!\n" +
+                                      "Is it the right type?",
+                                      "Gate", JOptionPane.ERROR_MESSAGE);
       }
+//      Object oldValue = values[selectedIndex];
+//      if(value instanceof String){
+//        if(typeName.equals("java.lang.String")){
+//          values[selectedIndex] = value;
+//        }else{
+//          try{
+//            values[selectedIndex] = currentParameter.
+//                                    calculateValueFromString((String)value);
+//          }catch(Exception e){
+//            values[selectedIndex] = oldValue;
+//            JOptionPane.showMessageDialog(ApplicationEditor.this,
+//                                          "Invalid value!\n" +
+//                                          "Is it the right type?",
+//                                          "Gate", JOptionPane.ERROR_MESSAGE);
+//          }
+//        }
+//      }else{
+//        values[selectedIndex] = value;
+//      }
     }// public void setValue(Object value)
 
     public Object getValue(){
-      if(values[selectedIndex] != null) {
-        return values[selectedIndex];
-      } else {
+      Object value = null;
+      try{
+        value = pr.getParameterValue(currentParameter.getName());
+      }catch(Exception e){
+        value = null;
+      }
+      if(value == null){
         //no value set; use the most currently used one of the given type
         if(Gate.getCreoleRegister().containsKey(getType())){
           Stack instances = ((ResourceData)
                               Gate.getCreoleRegister().get(getType())).
                                   getInstantiations();
           if(instances != null && !instances.isEmpty()){
-            return instances.peek();
+            value = instances.peek();
+            setValue(value);
           }
-          else return null;
-        } else {
-          return null;
         }
-      }// else
+      }
+      return value;
+
+//      if(values[selectedIndex] != null) {
+//        return values[selectedIndex];
+//      } else {
+//        //no value set; use the most currently used one of the given type
+//        if(Gate.getCreoleRegister().containsKey(getType())){
+//          Stack instances = ((ResourceData)
+//                              Gate.getCreoleRegister().get(getType())).
+//                                  getInstantiations();
+//          if(instances != null && !instances.isEmpty()){
+//            return instances.peek();
+//          }
+//          else return null;
+//        } else {
+//          return null;
+//        }
+//      }// else
     }// public Object getValue()
 
 
     int selectedIndex;
     List options;
+    ProcessingResource pr;
     String typeName;
     String name;
     String[] names;
     Parameter currentParameter;
-    Object[] values;
+//    Object[] values;
   }//class ParameterDisjunction
 
   class ParameterDisjunctionEditor extends DefaultCellEditor {
@@ -1272,6 +1362,7 @@ public class ApplicationEditor extends AbstractVisualResource
 */
 
   SerialController controller;
+  List prList;
   Handle handle;
   JTreeTable mainTreeTable;
   PRsAndParamsTTModel mainTTModel;
@@ -1312,7 +1403,7 @@ public class ApplicationEditor extends AbstractVisualResource
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     if(res instanceof ProcessingResource){
-      if(controller.contains(res)){
+      if(prList.contains(res)){
         new RemovePRAction((ProcessingResource)res).actionPerformed(null);
         Enumeration enum = ((DefaultMutableTreeNode)mainTTModel.getRoot()).
                            children();
@@ -1415,22 +1506,30 @@ public class ApplicationEditor extends AbstractVisualResource
     }
   }//fireProcessFinished
 
-  class CustomProgressListener implements ProgressListener{
-    CustomProgressListener(int start, int end){
-      this.start = start;
-      this.end = end;
-    }
+
+  /**
+   * A simple progress listener used to forward the events upstream.
+   */
+  protected class InternalProgressListener implements ProgressListener{
     public void progressChanged(int i){
-      fireProgressChanged(start + (end - start) * i / 100);
+      fireProgressChanged(i);
     }
 
     public void processFinished(){
-      fireProgressChanged(end);
+      fireProcessFinished();
     }
+  }//InternalProgressListener
 
-    int start;
-    int end;
-  }
+  /**
+   * A simple status listener used to forward the events upstream.
+   */
+  protected class InternalStatusListener implements StatusListener{
+    public void statusChanged(String message){
+      fireStatusChanged(message);
+    }
+  }//InternalStatusListener
+
+
 /*
   class PRListTableModel extends AbstractTableModel{
     public int getRowCount(){

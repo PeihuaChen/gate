@@ -93,8 +93,8 @@ public class TestControllers extends TestCase
     );
 
     // get the controller to encapsulate the tok and gaz
-    c1.add(tokeniser);
-    c1.add(gaz);
+    c1.getPRs().add(tokeniser);
+    c1.getPRs().add(gaz);
     c1.execute();
 
     // check the resulting annotations

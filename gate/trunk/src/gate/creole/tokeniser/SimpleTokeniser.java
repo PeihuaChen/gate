@@ -571,6 +571,7 @@ public class SimpleTokeniser extends AbstractProcessingResource{
    * The method that does the actual tokenisation.
    */
   public void execute() throws ExecutionException {
+    interrupted = false;
     AnnotationSet annotationSet;
     //check the input
     if(document == null) {
@@ -675,6 +676,7 @@ public class SimpleTokeniser extends AbstractProcessingResource{
       if((charIdx - oldCharIdx > 256)){
         fireProgressChanged((100 * charIdx )/ length );
         oldCharIdx = charIdx;
+        if(isInterrupted()) throw new ExecutionInterruptedException();
       }
 
     } // while(charIdx < length)

@@ -36,8 +36,7 @@ import gate.creole.*;
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.
   */
-public class Batch
-implements JapeConstants {
+public class Batch implements JapeConstants {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -68,7 +67,7 @@ implements JapeConstants {
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null /*&& !Main.batchMode*/){
+    if(transducer != null){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -91,12 +90,11 @@ implements JapeConstants {
   public Batch(URL url, String encoding, StatusListener sListener)
          throws JapeException {
 
-//    if (! Main.batchMode) //fire events if not in batch mode
-      this.addStatusListener(sListener);
+    this.addStatusListener(sListener);
     this.japeURL = url;
     this.encoding =  encoding;
     parseJape();
-    if(transducer != null /*&& !Main.batchMode*/){
+    if(transducer != null){
       transducer.addStatusListener(new StatusListener(){
         public void statusChanged(String text){
           fireStatusChanged(text);
@@ -115,7 +113,12 @@ implements JapeConstants {
     }
   } // full init constructor
 
-
+  /**
+   * Notifies this PR that it should stop its execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    transducer.interrupt();
+  }
   /** Create a fully initialised instance.
     * <P><CODE>japeFileName</CODE>: the name of a .jape or .ser transducer
     * file. This may be an absolute path, or may a .jar
@@ -197,17 +200,14 @@ implements JapeConstants {
         new gate.jape.parser.ParseCpsl(japeURL, encoding);
 
       StatusListener listener = null;
-//      if (! Main.batchMode) {//fire events if not in batch mode
-        listener = new StatusListener(){
-          public void statusChanged(String text){
-            fireStatusChanged(text);
-          }
-        };
-        parser.addStatusListener(listener);
-//      }
+      listener = new StatusListener(){
+        public void statusChanged(String text){
+          fireStatusChanged(text);
+        }
+      };
+      parser.addStatusListener(listener);
       transducer = parser.MultiPhaseTransducer();
-//      if (! Main.batchMode) //fire events if not in batch mode
-        parser.removeStatusListener(listener);
+      parser.removeStatusListener(listener);
     } catch (gate.jape.parser.ParseException e) {
       throw new
         JapeException("Batch: error parsing transducer: " + e.getMessage());
@@ -323,7 +323,7 @@ implements JapeConstants {
 */
 
   /** Process the given collection. */
-  public void transduce(Corpus coll) throws JapeException {
+  public void transduce(Corpus coll) throws JapeException, ExecutionException {
     // for each doc run the transducer
     Iterator iter = coll.iterator();
     while(iter.hasNext()) {
@@ -334,13 +334,14 @@ implements JapeConstants {
   } // transduce(coll)
 
   /** Process a single document. */
-  public void transduce(Document doc) throws JapeException {
+  public void transduce(Document doc) throws JapeException, ExecutionException {
     transducer.transduce(doc, doc.getAnnotations(), doc.getAnnotations());
   } // transduce(doc)
 
   /** Process a single document. */
   public void transduce(Document doc, AnnotationSet inputAS,
-                        AnnotationSet outputAS) throws JapeException {
+                        AnnotationSet outputAS) throws JapeException,
+                                                       ExecutionException {
     //no need to transduce empty document
     if (inputAS == null || inputAS.isEmpty())
       return;

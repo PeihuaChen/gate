@@ -89,12 +89,10 @@ public class Gate
     // initialisation in order for the CREOLE-DIR elements to have and effect
     initConfigData();
     // the creoleRegister acts as a proxy for datastore related events
-//    if (!Main.batchMode) {
-      dataStoreRegister.addCreoleListener(creoleRegister);
+    dataStoreRegister.addCreoleListener(creoleRegister);
 
     // some of the events are actually fired by the {@link gate.Factory}
-      Factory.addCreoleListener(creoleRegister);
-//    }
+    Factory.addCreoleListener(creoleRegister);
 
     // check we have a useable JDK
     if(System.getProperty("java.version").compareTo(MIN_JDK_VERSION) < 0) {
@@ -406,9 +404,44 @@ jar/classpath so it's the same as registerBuiltins
   /** The DataStore register */
   private static DataStoreRegister dataStoreRegister = null;
 
+  /**
+   * The current executable under execution.
+   */
+  private static gate.Executable currentExecutable;
+
   /** Get the DataStore register. */
   public static DataStoreRegister getDataStoreRegister() {
     return dataStoreRegister;
+  }
+
+  /**
+   * Sets the {@link Executable} currently under execution.
+   * At a givem time there can be only one executable set. After the executable
+   * has finished its execution this value should be set back to null.
+   * An attempt to set the executable while this value is not null will result
+   * in the method call waiting until the old executable is set to null.
+   */
+  public synchronized static void setExecutable(gate.Executable executable) {
+    if(executable == null) currentExecutable = executable;
+    else{
+      while(getExecutable() != null){
+        try{
+          Thread.currentThread().sleep(200);
+        }catch(InterruptedException ie){
+          throw new LuckyException(ie.toString());
+        }
+      }
+      currentExecutable = executable;
+    }
+  }
+
+
+  /**
+   * Returns the curently set executable.
+   * {@see setExecutable()}
+   */
+  public synchronized static gate.Executable getExecutable() {
+    return currentExecutable;
   } // getDataStoreRegister
 
 } // class Gate

@@ -23,6 +23,7 @@ import gate.util.*;
 import gate.*;
 import gate.fsm.*;
 import gate.gui.*;
+import gate.creole.*;
 import gate.event.*;
 import java.util.*;
 
@@ -131,7 +132,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     * rule application style.
     */
   public void transduce(Document doc, AnnotationSet inputAS,
-                        AnnotationSet outputAS) throws JapeException {
+                        AnnotationSet outputAS) throws JapeException,
+                                                       ExecutionException {
+    interrupted = false;
     fireProgressChanged(0);
 
     //the input annotations will be read from this map
@@ -386,9 +389,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
         }//if(oldStartNodeOff == startNodeOff)
 
         //fire the progress event
-        if(startNodeOff - oldStartNodeOff > 1024){
+        if(startNodeOff - oldStartNodeOff > 256){
           fireProgressChanged((int)(100 * startNodeOff / lastNodeOff));
           oldStartNodeOff = startNodeOff;
+          if(isInterrupted()) throw new ExecutionInterruptedException(
+            "The execution of the \"" + getName() +
+            "\" Jape transducer has been abruptly interrupted!");
         }
       }
     }//while(startNodeOff != -1)
@@ -1003,7 +1009,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
   java.util.Set input = new java.util.HashSet();
   private transient Vector progressListeners;
   protected void fireProgressChanged(int e) {
-    if (progressListeners != null /*&& !Main.batchMode*/) {
+    if (progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -1012,7 +1018,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     }
   }
   protected void fireProcessFinished() {
-    if (progressListeners != null /*&& !Main.batchMode*/) {
+    if (progressListeners != null) {
       Vector listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

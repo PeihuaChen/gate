@@ -35,24 +35,22 @@ public class Transducer extends AbstractProcessingResource {
    * via the {@link #init} method.
    */
   public Transducer() {
-//    if (! Main.batchMode){
-      //fire events if not in batch mode
-      sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
+    //fire events if not in batch mode
+    sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
 
-      pListener = new ProgressListener(){
-        public void progressChanged(int value){
-          fireProgressChanged(value);
-        }
+    pListener = new ProgressListener(){
+      public void progressChanged(int value){
+        fireProgressChanged(value);
+      }
 
-        public void processFinished(){
-          fireProcessFinished();
-        }
-      };
-//    }
+      public void processFinished(){
+        fireProcessFinished();
+      }
+    };
   }
 
   /*
@@ -97,6 +95,7 @@ public class Transducer extends AbstractProcessingResource {
    * document.
    */
   public void execute() throws ExecutionException{
+    interrupted = false;
     if(document == null) throw new ExecutionException("No document provided!");
     if(inputASName != null && inputASName.equals("")) inputASName = null;
     if(outputASName != null && outputASName.equals("")) outputASName = null;
@@ -113,6 +112,15 @@ public class Transducer extends AbstractProcessingResource {
     }
   }
 
+
+  /**
+   * Notifies all the PRs in this controller that they should stop their
+   * execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+    batch.interrupt();
+  }
   /**
    * Sets the grammar to be used for building this transducer.
    * @param newGrammarURL an URL to a file containing a Jape grammar.

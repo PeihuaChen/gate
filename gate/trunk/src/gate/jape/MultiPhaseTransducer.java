@@ -17,9 +17,12 @@
 package gate.jape;
 
 import java.util.*;
+
+
 import gate.annotation.*;
 import gate.event.*;
 import gate.util.*;
+import gate.creole.*;
 import gate.*;
 
 
@@ -40,6 +43,18 @@ implements JapeConstants, java.io.Serializable
     this();
     setName(name);
   } // constr from name
+
+  /**
+   * Notifies this PR that it should stop its execution as soon as possible.
+   */
+  public synchronized void interrupt(){
+    interrupted = true;
+    Iterator phasesIter = phases.iterator();
+    while(phasesIter.hasNext()){
+      ((Transducer)phasesIter.next()).interrupt();
+    }
+  }
+
 
   /** Anonymous construction */
   public MultiPhaseTransducer() {
@@ -94,48 +109,50 @@ implements JapeConstants, java.io.Serializable
 
   /** Transduce the document by running each phase in turn. */
   public void transduce(Document doc, AnnotationSet input,
-                        AnnotationSet output) throws JapeException {
+                        AnnotationSet output) throws JapeException,
+                                                     ExecutionException {
 
+    interrupted = false;
     ProgressListener pListener = null;
     StatusListener sListener = null;
-//    if (! Main.batchMode) {//fire events if not in batch mode
-      pListener = new ProgressListener(){
-        public void processFinished(){
-          donePhases ++;
-          if(donePhases == phasesCnt) fireProcessFinished();
-        }
+    pListener = new ProgressListener(){
+      public void processFinished(){
+        donePhases ++;
+        if(donePhases == phasesCnt) fireProcessFinished();
+      }
 
-        public void progressChanged(int i){
-          int value = (donePhases * 100 + i)/phasesCnt;
-          fireProgressChanged(value);
-        }
+      public void progressChanged(int i){
+        int value = (donePhases * 100 + i)/phasesCnt;
+        fireProgressChanged(value);
+      }
 
-        int phasesCnt = phases.size();
-        int donePhases = 0;
-      };
+      int phasesCnt = phases.size();
+      int donePhases = 0;
+    };
 
-      sListener = new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      };
-//    }//if no events
+    sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
 
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
+
+      if(isInterrupted()) throw new ExecutionInterruptedException(
+        "The execution of the \"" + getName() +
+        "\" Jape transducer has been abruptly interrupted!");
+
       try {
-//        if (! Main.batchMode) {//fire events if not in batch mode
-          fireStatusChanged("Transducing " + doc.getName() +
-                               " (Phase: " + t.getName() + ")...");
-          t.addProgressListener(pListener);
-          t.addStatusListener(sListener);
-//        }//if
+        fireStatusChanged("Transducing " + doc.getName() +
+                             " (Phase: " + t.getName() + ")...");
+        t.addProgressListener(pListener);
+        t.addStatusListener(sListener);
+
         t.transduce(doc, input, output);
-//        if (! Main.batchMode) {//fire events if not in batch mode
-          t.removeProgressListener(pListener);
-          t.removeStatusListener(sListener);
-          fireStatusChanged("");
-//        }//if
+        t.removeProgressListener(pListener);
+        t.removeStatusListener(sListener);
+        fireStatusChanged("");
       } catch(JapeException e) {
         String errorMessage = new String(
           "Error transducing document " + doc.getSourceUrl() +
@@ -187,6 +204,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.20  2001/09/28 15:45:23  valyt
+// All the PRs are now more or less interruptible
+//
+// THE STOP BUTTON shows its face when needed.
+//
 // Revision 1.19  2001/09/25 12:04:03  kalina
 // I commented out temporarily the no events in batch mode code as it was
 // not working completely correctly, so I want to reinstate it only after

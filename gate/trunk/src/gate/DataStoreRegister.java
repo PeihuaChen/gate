@@ -65,7 +65,7 @@ public class DataStoreRegister extends HashSet {
    */
   public boolean remove(Object o) {
     boolean res = super.remove(o);
-    if(res /*&& !Main.batchMode*/) fireDatastoreClosed(
+    if(res) fireDatastoreClosed(
       new CreoleEvent((DataStore)o, CreoleEvent.DATASTORE_CLOSED)
     );
     return res;
@@ -80,7 +80,7 @@ public class DataStoreRegister extends HashSet {
     super.clear();
 
     Iterator iter = datastores.iterator();
-    while(/*!Main.batchMode &&*/ iter.hasNext()) {
+    while(iter.hasNext()) {
       fireDatastoreClosed(
         new CreoleEvent((DataStore) iter.next(), CreoleEvent.DATASTORE_CLOSED)
       );
@@ -140,7 +140,7 @@ public class DataStoreRegister extends HashSet {
    * which can be obtained through {@link Gate#getCreoleRegister()}
    */
   protected void fireDatastoreOpened(CreoleEvent e) {
-    if (creoleListeners != null /*&& !Main.batchMode*/) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -156,7 +156,7 @@ public class DataStoreRegister extends HashSet {
    * which can be obtained through {@link Gate#getCreoleRegister()}
    */
   protected void fireDatastoreCreated(CreoleEvent e) {
-    if (creoleListeners != null /*&& !Main.batchMode*/) {
+    if (creoleListeners != null ) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
@@ -172,7 +172,7 @@ public class DataStoreRegister extends HashSet {
    * which can be obtained through {@link Gate#getCreoleRegister()}
    */
   protected void fireDatastoreClosed(CreoleEvent e) {
-    if (creoleListeners != null /*&& !Main.batchMode*/) {
+    if (creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {

@@ -16,6 +16,7 @@ package gate.gui;
 
 import javax.swing.*;
 import java.util.*;
+import java.awt.Window;
 
 import gate.*;
 import gate.event.*;
@@ -48,4 +49,10 @@ public interface Handle extends ProgressListener, StatusListener {
   public String getTooltipText();
 
   public Object getTarget();
+
+  /**
+   * Returns the top level GUI component that is a parent to all other GUI
+   * components
+   */
+  public Window getWindow();
 }

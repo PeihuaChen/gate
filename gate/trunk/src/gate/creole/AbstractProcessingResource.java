@@ -75,9 +75,6 @@ extends AbstractResource implements ProcessingResource
     interrupted = true;
   }
 
-  //parameters code
-
-
 
   /**
    * Removes a {@link gate.event.StatusListener} from the list of listeners for
@@ -188,7 +185,16 @@ extends AbstractResource implements ProcessingResource
 
     int start;
     int end;
-  }//CustomProgressListener
+  }//IntervalProgressListener
+
+  /**
+   * A simple status listener used to forward the events upstream.
+   */
+  protected class InternalStatusListener implements StatusListener{
+    public void statusChanged(String message){
+      fireStatusChanged(message);
+    }
+  }//InternalStatusListener
 
   /**
    * The list of {@link gate.event.StatusListener}s registered with this

@@ -23,7 +23,13 @@ import gate.creole.*;
 
 /** Models the execution of groups of ProcessingResources.
   */
-public interface Controller extends Collection, Executable, NameBearer
+public interface Controller extends Executable, NameBearer, FeatureBearer
 {
+  /**
+   * Returns all the {@link gate.ProcessingResource}s contained by this
+   * controller.
+   * The actual type of collection returned depends on the controller type.
+   */
+  public Collection getPRs();
 
 } // interface Controller

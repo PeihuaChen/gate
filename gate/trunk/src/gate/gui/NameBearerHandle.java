@@ -18,6 +18,7 @@ import javax.swing.*;
 import java.util.*;
 import java.net.*;
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.*;
 import java.text.NumberFormat;
 import java.io.*;
@@ -40,8 +41,9 @@ public class NameBearerHandle implements Handle,
                                          StatusListener,
                                          ProgressListener {
 
-  public NameBearerHandle(NameBearer target) {
+  public NameBearerHandle(NameBearer target, Window window) {
     this.target = target;
+    this.window = window;
     sListenerProxy = new ProxyStatusListener();
     String iconName = null;
     if(target instanceof Resource){
@@ -129,7 +131,7 @@ public class NameBearerHandle implements Handle,
     //build the popup
     popup = new JPopupMenu();
     popup.add(new XJMenuItem(new CloseAction(), sListenerProxy));
-    if(target instanceof Controller){
+    if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
     }
@@ -233,6 +235,10 @@ public class NameBearerHandle implements Handle,
   String title;
   String tooltipText;
   NameBearer target;
+  /**
+   * The top level GUI component this hadle belongs to.
+   */
+  Window window;
   ResourceData rData;
   Icon icon;
   JComponent smallView;
@@ -452,7 +458,7 @@ public class NameBearerHandle implements Handle,
 
             ProcessingResource res = (ProcessingResource)target;
             try{
-              Factory.setResourceListeners(res, listeners);
+              AbstractResource.setResourceListeners(res, listeners);
             }catch (Exception e){
               e.printStackTrace(Err.getPrintWriter());
             }
@@ -461,7 +467,7 @@ public class NameBearerHandle implements Handle,
             //the actual reinitialisation
             res.reInit();
             try{
-              Factory.removeResourceListeners(res, listeners);
+              AbstractResource.removeResourceListeners(res, listeners);
             }catch (Exception e){
               e.printStackTrace(Err.getPrintWriter());
             }
@@ -551,5 +557,8 @@ public class NameBearerHandle implements Handle,
   }
   public void processFinished() {
     fireProcessFinished();
+  }
+  public Window getWindow() {
+    return window;
   }
 }//class DefaultResourceHandle
