@@ -631,7 +631,11 @@
       <PARAMETER NAME="document"
 				 RUNTIME="true"
 				 COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="annotationSetName"
+      <PARAMETER NAME="inputAnnotationSetName"
+      	         RUNTIME="true"
+      	         COMMENT="The annotation set to be used for getting features from"
+      	         OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="outputAnnotationSetName"
       	         RUNTIME="true"
       	         COMMENT="The annotation set to be used for the generated annotations"
       	         OPTIONAL="true">java.lang.String</PARAMETER>
@@ -639,8 +643,7 @@
       	         COMMENT="Annotation.feature names to be considered for the gazetteer">java.util.List</PARAMETER>
       <PARAMETER NAME="gazetteerInst"
       	         COMMENT="Gazetteer Instance to be used"
-                 OPTIONAL="false"
-      	         >gate.creole.gazetteer.Gazetteer</PARAMETER>
+                 OPTIONAL="false">gate.creole.gazetteer.Gazetteer</PARAMETER>
     </RESOURCE>
 
 
