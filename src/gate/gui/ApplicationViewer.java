@@ -19,8 +19,11 @@ import gate.creole.*;
 import gate.*;
 import gate.swing.*;
 import gate.util.*;
+import gate.event.*;
+
 
 import javax.swing.*;
+import java.beans.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.tree.*;
@@ -34,7 +37,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.io.IOException;
 import java.net.URL;
-import gate.event.*;
 
 public class ApplicationViewer extends AbstractVisualResource
                                implements CreoleListener {
@@ -721,7 +723,7 @@ public class ApplicationViewer extends AbstractVisualResource
           fireStatusChanged("Running " +
                             controller.getFeatures().get("gate.NAME"));
           fireProgressChanged(0);
-//          MainFrame.getInstance().showWaitDialog();
+
           Iterator prsIter = controller.iterator();
           while(prsIter.hasNext()){
             ProcessingResource pr = (ProcessingResource)prsIter.next();
@@ -750,9 +752,58 @@ public class ApplicationViewer extends AbstractVisualResource
           //run the thing
           prsIter = controller.iterator();
           int i = 0;
+          Map listeners = new HashMap();
+          listeners.put("gate.event.StatusListener", new StatusListener(){
+            public void statusChanged(String text){
+              fireStatusChanged(text);
+            }
+          });
+
+
           while(prsIter.hasNext()){
             ProcessingResource pr = (ProcessingResource)prsIter.next();
             fireStatusChanged("Running " + pr.getFeatures().get("gate.NAME"));
+            listeners.put("gate.event.ProgressListener",
+                          new CustomProgressListener(
+                                i * 100 / controller.size(),
+                                (i + 1) * 100 / controller.size()));
+
+            //try to set this listener if the resource can fire progress events
+            try{
+
+              // get the beaninfo for the resource bean, excluding data about Object
+              BeanInfo resBeanInfo = Introspector.getBeanInfo(pr.getClass(),
+                                                              Object.class);
+              // get all the events the bean can fire
+              EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+
+              // add the listeners
+              if(events != null) {
+                EventSetDescriptor event;
+                for(int j = 0; j < events.length; j++) {
+                  event = events[j];
+
+                  // did we get such a listener?
+                  Object listener =
+                    listeners.get(event.getListenerType().getName());
+                  if(listener != null){
+                    Method addListener = event.getAddListenerMethod();
+
+                    // call the set method with the parameter value
+                    Object[] args = new Object[1];
+                    args[0] = listener;
+                    addListener.invoke(pr, args);
+                  }
+                } // for each event
+              }   // if events != null
+            }catch(IntrospectionException ie){
+              //not really important; just ignore
+            }catch(java.lang.reflect.InvocationTargetException ite){
+              //not really important; just ignore
+            }catch(IllegalAccessException iae){
+              //not really important; just ignore
+            }
+
             pr.run();
             try {
               pr.check();
@@ -763,7 +814,6 @@ public class ApplicationViewer extends AbstractVisualResource
                                             "Gate", JOptionPane.ERROR_MESSAGE);
             }
             i++;
-            fireProgressChanged(i / controller.size());
           }
           long endTime = System.currentTimeMillis();
           fireProcessFinished();
@@ -859,7 +909,6 @@ public class ApplicationViewer extends AbstractVisualResource
 
     public Object getValue(){
       if(values[selectedIndex] != null) {
-System.out.println("Using user set value " + values[selectedIndex]);
         return values[selectedIndex];
       } else {
         //no value set; use the most currently used one of the given type
@@ -868,7 +917,6 @@ System.out.println("Using user set value " + values[selectedIndex]);
                               Gate.getCreoleRegister().get(getType())).
                                   getInstantiations();
           if(instances != null && !instances.isEmpty()){
-System.out.println("Using MRU value " + instances.peek());
             return instances.peek();
           }
           else return null;
@@ -1139,6 +1187,22 @@ System.out.println("Using MRU value " + instances.peek());
     }
   }//fireProcessFinished
 
+  class CustomProgressListener implements ProgressListener{
+    CustomProgressListener(int start, int end){
+      this.start = start;
+      this.end = end;
+    }
+    public void progressChanged(int i){
+      fireProgressChanged(start + (end - start) * i / 100);
+    }
+
+    public void processFinished(){
+      fireProgressChanged(end);
+    }
+
+    int start;
+    int end;
+  }
 /*
   class PRListTableModel extends AbstractTableModel{
     public int getRowCount(){

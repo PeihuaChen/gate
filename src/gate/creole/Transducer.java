@@ -51,12 +51,11 @@ public class Transducer extends AbstractProcessingResource {
    *@return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
-    class SerialStatusListener implements StatusListener, Serializable {
+    sListener = new StatusListener(){
       public void statusChanged(String text){
         fireStatusChanged(text);
       }
     };
-    sListener = new SerialStatusListener();
 
     if(grammarURL != null && encoding != null){
       try{
@@ -69,6 +68,16 @@ public class Transducer extends AbstractProcessingResource {
         "Both the URL (was " + grammarURL + ") and the encoding (was " +
         encoding + ") are needed to create a JapeTransducer!"
       );
+
+    batch.addProgressListener(new ProgressListener(){
+      public void progressChanged(int value){
+        fireProgressChanged(value);
+      }
+
+      public void processFinished(){
+        fireProcessFinished();
+      }
+    });
 
     return this;
   }
@@ -184,6 +193,7 @@ public class Transducer extends AbstractProcessingResource {
       statusListeners = v;
     }
   }
+
   public synchronized void addStatusListener(StatusListener l) {
     Vector v =
       statusListeners == null
@@ -227,12 +237,45 @@ public class Transducer extends AbstractProcessingResource {
 
   private transient StatusListener sListener;
   private transient Vector statusListeners;
+  private transient Vector progressListeners;
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
         ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
       }
     }
   }

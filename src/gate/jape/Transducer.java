@@ -58,59 +58,78 @@ public abstract class Transducer implements Serializable
   /** Create a string representation of the object with padding. */
   public abstract String toString(String pad);
 
-  //StatusReporter Implementation
-  public void addStatusListener(StatusListener listener){
-    myStatusListeners.add(listener);
-  }
 
-  public void removeStatusListener(StatusListener listener){
-    myStatusListeners.remove(listener);
-  }
-
-  protected void fireStatusChangedEvent(String text){
-    Iterator listenersIter = myStatusListeners.iterator();
-    while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
-  }
-
-  //ProcessProgressReporter implementation
-  public void addProcessProgressListener(ProgressListener listener){
-    myProgressListeners.add(listener);
-  }
-
-  public void removeProcessProgressListener(ProgressListener listener){
-    myProgressListeners.remove(listener);
-  }
-
-  protected void fireProgressChangedEvent(int i){
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).progressChanged(i);
-  }
-
-  protected void fireProcessFinishedEvent(){
-    Iterator listenersIter = myProgressListeners.iterator();
-    while(listenersIter.hasNext())
-      ((ProgressListener)listenersIter.next()).processFinished();
-  }
   public void setBaseURL(java.net.URL newBaseURL) {
     baseURL = newBaseURL;
   }
   public java.net.URL getBaseURL() {
     return baseURL;
   }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
 
 
 
 
-
-
-  private transient List myProgressListeners = new LinkedList();
-
-  private transient List myStatusListeners = new LinkedList();
 
 
   private URL baseURL;
+
+  private transient Vector progressListeners;
+  private transient Vector statusListeners;
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
 
   //ProcessProgressReporter implementation ends here
 

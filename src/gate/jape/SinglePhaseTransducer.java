@@ -16,10 +16,6 @@
 
 package gate.jape;
 
-import java.util.Enumeration;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Iterator;
 import java.io.*;
 import com.objectspace.jgl.*;
 
@@ -28,6 +24,8 @@ import gate.util.*;
 import gate.*;
 import gate.fsm.*;
 import gate.gui.*;
+import gate.event.*;
+import java.util.*;
 
 /**
   * Represents a complete CPSL grammar, with a phase name, options and
@@ -70,7 +68,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
   } // addRule
 
   /** The values of any option settings given. */
-  private HashMap optionSettings = new HashMap();
+  private java.util.HashMap optionSettings = new java.util.HashMap();
 
   /** Add an option setting. If this option is set already, the new
     * value overwrites the previous one.
@@ -112,7 +110,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce1(Document doc, AnnotationSet annotationSet)
                                                           throws JapeException {
-    fireProgressChangedEvent(0);
+    fireProgressChanged(0);
 
     //the input annotations will be read from this set
     AnnotationSet annotations = null;
@@ -373,12 +371,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
       startNodeOff = startNode.getOffset().intValue();
 
       if(startNodeOff - oldStartNodeOff > 1024){
-        fireProgressChangedEvent(100 * startNodeOff / lastNodeOff);
+        fireProgressChanged(100 * startNodeOff / lastNodeOff);
         oldStartNodeOff = startNodeOff;
       }
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();
-    fireProcessFinishedEvent();
+    fireProcessFinished();
   } // transduce
 
   /**
@@ -387,7 +385,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
-    fireProgressChangedEvent(0);
+    fireProgressChanged(0);
 
     //the input annotations will be read from this set
     AnnotationSet annotations = null;
@@ -579,13 +577,16 @@ extends Transducer implements JapeConstants, java.io.Serializable
       acceptingFSMInstances.clear();
       startNodeOff = startNode.getOffset().intValue();
 
+      //fire the progress event
       if(startNodeOff - oldStartNodeOff > 1024){
-        fireProgressChangedEvent(100 * startNodeOff / lastNodeOff);
+        fireProgressChanged(100 * startNodeOff / lastNodeOff);
         oldStartNodeOff = startNodeOff;
       }
+
+
     } // while(startNode != lastNode)
     // FSMInstance.clearInstances();
-    fireProcessFinishedEvent();
+    fireProcessFinished();
   } // transduce
 
 
@@ -642,6 +643,20 @@ extends Transducer implements JapeConstants, java.io.Serializable
   public void addInput(String ident) {
     input.add(ident);
   }
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
 
   /**
     * Defines the types of input annotations that this transducer reads. If this
@@ -650,6 +665,25 @@ extends Transducer implements JapeConstants, java.io.Serializable
     * other types of annotations.
     */
   java.util.Set input = new java.util.HashSet();
+  private transient Vector progressListeners;
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
 
   /*
   private void writeObject(ObjectOutputStream oos) throws IOException {

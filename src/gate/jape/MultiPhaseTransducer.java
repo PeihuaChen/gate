@@ -98,12 +98,12 @@ implements JapeConstants, java.io.Serializable
     ProgressListener pListener = new ProgressListener(){
       public void processFinished(){
         donePhases ++;
-        if(donePhases == phasesCnt) fireProcessFinishedEvent();
+        if(donePhases == phasesCnt) fireProcessFinished();
       }
 
       public void progressChanged(int i){
         int value = (donePhases * 100 + i)/phasesCnt;
-        fireProgressChangedEvent(value);
+        fireProgressChanged(value);
       }
 
       int phasesCnt = phases.size();
@@ -112,21 +112,21 @@ implements JapeConstants, java.io.Serializable
 
     StatusListener sListener = new StatusListener(){
       public void statusChanged(String text){
-        fireStatusChangedEvent(text);
+        fireStatusChanged(text);
       }
     };
 
     for(ArrayIterator i = phases.begin(); ! i.atEnd(); i.advance()) {
       Transducer t = (Transducer) i.get();
       try {
-        fireStatusChangedEvent("Transducing " + doc.getSourceUrl().getFile() +
+        fireStatusChanged("Transducing " + doc.getSourceUrl().getFile() +
                                " (Phase: " + t.getName() + ")...");
-        t.addProcessProgressListener(pListener);
+        t.addProgressListener(pListener);
         t.addStatusListener(sListener);
         t.transduce(doc, input, output);
-        t.removeProcessProgressListener(pListener);
+        t.removeProgressListener(pListener);
         t.removeStatusListener(sListener);
-        fireStatusChangedEvent("");
+        fireStatusChanged("");
       } catch(JapeException e) {
         String errorMessage = new String(
           "Error transducing document " + doc.getSourceUrl() +
@@ -178,7 +178,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.13  2001/04/17 18:18:06  valyt
+// events for jape & applications
+//
 // Revision 1.12  2001/03/06 20:11:14  valyt
+//
 // <b><em><strong>DOCUMENTATION</></></> for most of the GUI classes.
 //
 // Cleaned up some obsolete classes
