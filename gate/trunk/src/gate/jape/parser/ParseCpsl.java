@@ -211,11 +211,22 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         }
         optionNameTok = jj_consume_token(ident);
         jj_consume_token(assign);
-        optionValueTok = jj_consume_token(ident);
+        switch (jj_nt.kind) {
+        case ident:
+          optionValueTok = jj_consume_token(ident);
+          break;
+        case bool:
+          optionValueTok = jj_consume_token(bool);
+          break;
+        default:
+          jj_la1[7] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
         t.setOption(optionNameTok.image, optionValueTok.image);
 
         // control
-        if(optionNameTok.image.equals("control")) {
+        if(optionNameTok.image.equalsIgnoreCase("control")) {
           if(optionValueTok.image.equalsIgnoreCase("appelt"))
             t.setRuleApplicationStyle(APPELT_STYLE);
           else if(optionValueTok.image.equalsIgnoreCase("first"))
@@ -228,11 +239,17 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
               " (should be brill, appelt or appelt-shortest)"
             );
         } // control
-
+        else if(optionNameTok.image.equalsIgnoreCase("debug")) {
+          if(optionValueTok.image.equalsIgnoreCase("true") ||
+             optionValueTok.image.equalsIgnoreCase("yes") ||
+             optionValueTok.image.equalsIgnoreCase("y"))
+            t.setDebugMode(true);
+          else t.setDebugMode(false);
+        }
       }
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[8] = jj_gen;
       ;
     }
     label_5:
@@ -243,7 +260,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[8] = jj_gen;
+        jj_la1[9] = jj_gen;
         break label_5;
       }
       switch (jj_nt.kind) {
@@ -255,7 +272,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         MacroDef();
         break;
       default:
-        jj_la1[9] = jj_gen;
+        jj_la1[10] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -293,7 +310,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       }
       break;
     default:
-      jj_la1[10] = jj_gen;
+      jj_la1[11] = jj_gen;
       ;
     }
     lhs = LeftHandSide();
@@ -331,7 +348,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         body = Action();
         break;
       default:
-        jj_la1[11] = jj_gen;
+        jj_la1[12] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -367,7 +384,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[12] = jj_gen;
+        jj_la1[13] = jj_gen;
         break label_6;
       }
     }
@@ -378,7 +395,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[13] = jj_gen;
+        jj_la1[14] = jj_gen;
         break label_7;
       }
       jj_consume_token(bar);
@@ -395,7 +412,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           ;
           break;
         default:
-          jj_la1[14] = jj_gen;
+          jj_la1[15] = jj_gen;
           break label_8;
         }
       }
@@ -440,7 +457,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       pat = ComplexPatternElement(lhs);
       break;
     default:
-      jj_la1[15] = jj_gen;
+      jj_la1[16] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -488,7 +505,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           ;
           break;
         default:
-          jj_la1[16] = jj_gen;
+          jj_la1[17] = jj_gen;
           break label_9;
         }
         jj_consume_token(comma);
@@ -505,7 +522,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       );
       break;
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[18] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -526,7 +543,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       kleeneOpTok = jj_consume_token(kleeneOp);
       break;
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[19] = jj_gen;
       ;
     }
     switch (jj_nt.kind) {
@@ -540,13 +557,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         bindingNameTok = jj_consume_token(integer);
         break;
       default:
-        jj_la1[19] = jj_gen;
+        jj_la1[20] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[21] = jj_gen;
       ;
     }
     int kleeneOp = NO_KLEENE_OP;
@@ -580,7 +597,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
              negate = true;
       break;
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[22] = jj_gen;
       ;
     }
     // the annotation type
@@ -599,7 +616,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       );
       break;
     default:
-      jj_la1[22] = jj_gen;
+      jj_la1[23] = jj_gen;
       ;
     }
     {if (true) return c;}
@@ -631,7 +648,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       attrValTok = jj_consume_token(bool);
       break;
     default:
-      jj_la1[23] = jj_gen;
+      jj_la1[24] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -696,7 +713,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[25] = jj_gen;
         break label_10;
       }
       jj_consume_token(comma);
@@ -755,7 +772,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       }
         break;
       default:
-        jj_la1[25] = jj_gen;
+        jj_la1[26] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -818,7 +835,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ParseException(":+ not a legal operator (no multi-span annots)");}
       break;
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[27] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -844,7 +861,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[27] = jj_gen;
+        jj_la1[28] = jj_gen;
         break label_11;
       }
       // the name of the attribute, and equals sign
@@ -938,7 +955,7 @@ existingAttrName + "\");" + nl +
           );
         break;
       default:
-        jj_la1[28] = jj_gen;
+        jj_la1[29] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -947,7 +964,7 @@ existingAttrName + "\");" + nl +
         jj_consume_token(comma);
         break;
       default:
-        jj_la1[29] = jj_gen;
+        jj_la1[30] = jj_gen;
         ;
       }
     }
@@ -1017,22 +1034,6 @@ existingAttrName + "\");" + nl +
     boolean retval = !jj_3_2();
     jj_save(1, xla);
     return retval;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(ident)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
   }
 
   final private boolean jj_3_2() {
@@ -1115,17 +1116,6 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
   final private boolean jj_3R_12() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1140,6 +1130,33 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(ident)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
   public ParseCpslTokenManager token_source;
   ASCII_CharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1148,9 +1165,9 @@ existingAttrName + "\");" + nl +
   public boolean lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[30];
-  final private int[] jj_la1_0 = {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x8000000,0x0,0x2000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8000000,0x0,};
-  final private int[] jj_la1_1 = {0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x0,0x0,0x0,0x0,0x41090,0x5014,0x400,0x5014,0x5014,0x800,0x1004,0x0,0x10,0x80,0x0,0x200,0x3c,0x800,0x41090,0x40080,0x10,0xbc,0x800,};
+  final private int[] jj_la1 = new int[31];
+  final private int[] jj_la1_0 = {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x8000000,0x0,0x2000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x8000000,0x0,};
+  final private int[] jj_la1_1 = {0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x18,0x0,0x0,0x0,0x0,0x41090,0x5014,0x400,0x5014,0x5014,0x800,0x1004,0x0,0x10,0x80,0x0,0x200,0x3c,0x800,0x41090,0x40080,0x10,0xbc,0x800,};
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
@@ -1161,7 +1178,7 @@ existingAttrName + "\");" + nl +
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1171,7 +1188,7 @@ existingAttrName + "\");" + nl +
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1181,7 +1198,7 @@ existingAttrName + "\");" + nl +
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1191,7 +1208,7 @@ existingAttrName + "\");" + nl +
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1200,7 +1217,7 @@ existingAttrName + "\");" + nl +
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1209,7 +1226,7 @@ existingAttrName + "\");" + nl +
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 30; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 31; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1316,7 +1333,7 @@ existingAttrName + "\");" + nl +
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 31; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

@@ -163,8 +163,13 @@ public class SerialControllerEditor extends AbstractVisualResource
       //we need to add the corpus combo
       corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
       corpusCombo.setRenderer(new ResourceRenderer());
-      if(corpusCombo.getModel().getSize() > 1) corpusCombo.setSelectedIndex(1);
-      else corpusCombo.setSelectedIndex(0);
+      if(((SerialAnalyserController)controller).getCorpus() != null){
+        corpusCombo.setSelectedItem(((SerialAnalyserController)controller).
+                                     getCorpus());
+      }else{
+        if(corpusCombo.getModel().getSize() > 1) corpusCombo.setSelectedIndex(1);
+        else corpusCombo.setSelectedIndex(0);
+      }
       Box horBox = Box.createHorizontalBox();
       horBox.add(new JLabel("Corpus:"));
       horBox.add(Box.createHorizontalStrut(5));

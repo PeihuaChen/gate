@@ -2179,16 +2179,20 @@ if(!highlights.isEmpty()){
 
       TypeData nData = (TypeData)
                             ((DefaultMutableTreeNode)value).getUserObject();
-      javax.swing.text.Document doc = textComponent.getDocument();
+//      javax.swing.text.Document doc = textComponent.getDocument();
 
       if(nData != null){
-        try{
-          doc.remove(0, doc.getLength());
-          doc.insertString(0, nData.getTitle(),
-                           nData.getAttributes());
-        }catch(BadLocationException ble){
-          ble.printStackTrace();
-        }
+        textComponent.setText(nData.getTitle());
+        textComponent.selectAll();
+        textComponent.setCharacterAttributes(nData.getAttributes(), false);
+        textComponent.select(0, 0);
+//        try{
+//          doc.remove(0, doc.getLength());
+//          doc.insertString(0, nData.getTitle(),
+//                           nData.getAttributes());
+//        }catch(BadLocationException ble){
+//          ble.printStackTrace();
+//        }
 
         if(nData.getType() != null) {
           visibleChk.setSelected(nData.getVisible());
@@ -2196,13 +2200,15 @@ if(!highlights.isEmpty()){
           width += visibleChk.getMinimumSize().width;
         }
       }else{
-        try{
-          doc.remove(0, doc.getLength());
-          doc.insertString(0, value.toString(),
-                           textComponent.getStyle("default"));
-        }catch(BadLocationException ble){
-          ble.printStackTrace();
-        }
+        textComponent.setText(((value == null || value.toString() == null) ?
+                              "" : value.toString()));
+//        try{
+//          doc.remove(0, doc.getLength());
+//          doc.insertString(0, value.toString(),
+//                           textComponent.getStyle("default"));
+//        }catch(BadLocationException ble){
+//          ble.printStackTrace();
+//        }
       }
       setTextComponentSize(textComponent);
       add(textComponent);

@@ -103,8 +103,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
       ((Rule) i.next()).finish();
     //build the finite state machine transition graph
     fsm = new FSM(this);
-    //convert it to deterministic
-    fsm.eliminateVoidTransitions();
     //clear the old style data structures
     rules.clear();
     rules = null;
@@ -172,7 +170,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     // FSM instances that have reached a final state
     // This is a sorted set and the contained objects are sorted by the length
     // of the document content covered by the matched annotations
-    java.util.SortedSet acceptingFSMInstances = new java.util.TreeSet();
+    java.util.List acceptingFSMInstances = new ArrayList();
     FSMInstance currentFSM;
 
 
@@ -204,7 +202,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   fsm.getInitialState(),//fresh start
                   startNode,//the matching starts form the current startNode
                   startNode,//current position in AG is the start position
-                  new java.util.HashMap()//no bindings yet!
+                  new java.util.HashMap(),//no bindings yet!
+                  doc
                   );
 
       // at this point ActiveFSMInstances should always be empty!
@@ -228,14 +227,14 @@ extends Transducer implements JapeConstants, java.io.Serializable
         if(currentFSM.getFSMPosition().isFinal()){
           //the current FSM is in a final state
           acceptingFSMInstances.add(currentFSM.clone());
-          //if we are in APPELT mode clear all the accepting instances
-          //apart from the longest one
-          if(ruleApplicationStyle == APPELT_STYLE &&
-             acceptingFSMInstances.size() > 1){
-            Object longestAcceptor = acceptingFSMInstances.last();
-            acceptingFSMInstances.clear();
-            acceptingFSMInstances.add(longestAcceptor);
-          }
+//          //if we are in APPELT mode clear all the accepting instances
+//          //apart from the longest one
+//          if(ruleApplicationStyle == APPELT_STYLE &&
+//             acceptingFSMInstances.size() > 1){
+//            Object longestAcceptor = acceptingFSMInstances.last();
+//            acceptingFSMInstances.clear();
+//            acceptingFSMInstances.add(longestAcceptor);
+//          }
           //if we're only looking for the shortest stop here
           if(ruleApplicationStyle == FIRST_STYLE) break whileloop2;
         }
@@ -343,7 +342,33 @@ extends Transducer implements JapeConstants, java.io.Serializable
         // AcceptingFSMInstances is an ordered structure:
         // just execute the longest (last) rule
 
-        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.last();
+        Collections.sort(acceptingFSMInstances, Collections.reverseOrder());
+
+        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.get(0);
+        if(isDebugMode()){
+          //see if we have any conflicts
+          Iterator accIter = acceptingFSMInstances.iterator();
+          FSMInstance anAcceptor;
+          List conflicts = new ArrayList();
+          while(accIter.hasNext()){
+            anAcceptor = (FSMInstance)accIter.next();
+            if(anAcceptor.equals(currentAcceptor)){
+              conflicts.add(anAcceptor);
+            }else{
+              break;
+            }
+          }
+          if(conflicts.size() > 1){
+            Out.prln("\nConflicts found during matching:" +
+                     "\n================================");
+            accIter = conflicts.iterator();
+            int i = 0;
+            while(accIter.hasNext()){
+              Out.prln(i++ + ")" + accIter.next().toString());
+            }
+          }
+        }
+
         RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
         currentRHS.transduce(doc, outputAS, currentAcceptor.getBindings());
         //advance in AG
@@ -453,9 +478,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     //build the finite state machine transition graph
     FSM fsm = new FSM(this);
 
-    //convert it to deterministic
-    fsm.eliminateVoidTransitions();
-
 
     //define data structures
     //FSM instances that haven't blocked yet
@@ -490,7 +512,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   fsm.getInitialState(),//fresh start
                   startNode,//the matching starts form the current startNode
                   startNode,//current position in AG is the start position
-                  new java.util.HashMap()//no bindings yet!
+                  new java.util.HashMap(),//no bindings yet!
+                  doc
                   );
       // at this point ActiveFSMInstances should always be empty!
       activeFSMInstances.addLast(currentFSM);
@@ -761,7 +784,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
                   fsm.getInitialState(),//fresh start
                   startNode,//the matching starts form the current startNode
                   startNode,//current position in AG is the start position
-                  new java.util.HashMap()//no bindings yet!
+                  new java.util.HashMap(),//no bindings yet!
+                  doc
                   );
       // at this point ActiveFSMInstances should always be empty!
       activeFSMInstances.clear();
@@ -1025,6 +1049,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     */
   java.util.Set input = new java.util.HashSet();
   private transient Vector progressListeners;
+
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
       Vector listeners = progressListeners;
