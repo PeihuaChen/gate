@@ -314,7 +314,7 @@ public class MainFrame extends JFrame
     fileChooser.setMultiSelectionEnabled(false);
     newResourceDialog = new NewResourceDialog(this,
                                               "Resource parameters",
-                                              false);
+                                              true);
     waitDialog = new WaitDialog(this, "");
 
     //build the Help->About dialog
@@ -632,6 +632,26 @@ public class MainFrame extends JFrame
 
   /**Called when a {@link gate.Datastore} has been closed*/
   public void datastoreClosed(CreoleEvent e){
+    DataStore ds = e.getDatastore();
+    DefaultMutableTreeNode node;
+    DefaultMutableTreeNode parent = datastoresRoot;
+    if(parent != null){
+      Enumeration children = parent.children();
+      while(children.hasMoreElements()){
+        node = (DefaultMutableTreeNode)children.nextElement();
+        if(((DSHandle)node.getUserObject()).getDataStore() == ds){
+          resourcesTreeModel.removeNodeFromParent(node);
+          DSHandle handle = (DSHandle)node.getUserObject();
+          if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1){
+            mainTabbedPane.remove(handle.getLargeView());
+          }
+          if(lowerScroll.getViewport().getView() == handle.getSmallView()){
+            lowerScroll.getViewport().setView(null);
+          }
+          return;
+        }
+      }
+    }
   }
 
   static {
@@ -1079,7 +1099,7 @@ public class MainFrame extends JFrame
           String className = (String)dsTypeByName.get(answer);
           if(className.indexOf("SerialDataStore") != -1){
             //get the URL (a file in this case)
-            fileChooser.setDialogTitle("Select a new directory");
+            fileChooser.setDialogTitle("Please create a new empty directory");
             fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
             if(fileChooser.showOpenDialog(MainFrame.this) ==
                                                   fileChooser.APPROVE_OPTION){
