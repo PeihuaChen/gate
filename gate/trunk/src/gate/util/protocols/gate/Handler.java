@@ -13,7 +13,7 @@ import gate.util.*;
 public class Handler extends URLStreamHandler {
 
   protected URLConnection openConnection(URL u) throws java.io.IOException {
-    URL actualURL = Files.class.getResource(
+    URL actualURL = Handler.class.getResource(
                       Files.getResourcePath() + u.getPath()
                     );
     if(actualURL == null) throw new FileNotFoundException(u.toExternalForm());

@@ -539,6 +539,9 @@ System.out.println(e);
               textField.setText(fileChooser.getSelectedFile().
                                 toURL().toExternalForm());
             } catch(IOException ioe){}
+            fireEditingStopped();
+          }else{
+            fireEditingCanceled();
           }
         }
       });

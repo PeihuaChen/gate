@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import gate.util.*;
+import gate.*;
 
 /**
  * The handler for the "classpath://" URLs.
