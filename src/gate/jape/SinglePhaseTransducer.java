@@ -161,6 +161,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     int startNodeOff;
     //the big while for the actual parsing
     while(startNode != lastNode){
+//System.out.println("Offset: " + startNode.getOffset());
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
 //      currentFSM = FSMInstance.getNewInstance(
@@ -188,9 +189,12 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
         //this will (should) be optimised
         State fsmPosition = currentFSM.getFSMPosition();
+//System.out.println("Current FSM from:" + currentFSM.getStartAGPosition().getOffset() +
+//                   " to " + currentFSM.getAGPosition().getOffset());
         java.util.Set transitions = fsmPosition.getTransitions();
         java.util.Iterator transIter = transitions.iterator();
         while(transIter.hasNext()){
+//System.out.print("..");
           //for each transition, check if it is possible and "DO IT!"
           Transition currentTrans = (Transition)transIter.next();
           //holds all the matched annotations. In case of success all these
@@ -228,6 +232,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           AnnotationSet matchedHere = null;
           Long offset;
           while(success && typesIter.hasNext()){
+//System.out.print("++");
             //do a query for each annotation type
             annType = (String)typesIter.next();
             newAttributes = (FeatureMap)constraintsByType.get(annType);
@@ -243,6 +248,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
             }
           }//while(success && typesIter.hasNext())
           if(success){
+//System.out.println("Success!");
             //create a new FSMInstance, make it advance in AG and in FSM,
             //take care of its bindings data structure and
             //add it to the list of active FSMs.
@@ -281,8 +287,24 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
        //FIRE THE RULE
       if(acceptingFSMInstances.isEmpty()){
+//System.out.println("\nNo match...");
         //advance to next relevant node in the Annotation Graph
         startNode = annotations.nextNode(startNode);
+//System.out.println("111111111");
+        //check to see if there are any annotations starting here
+        AnnotationSet annSet = annotations.get(startNode.getOffset());
+//System.out.println("22222222");
+        if(annSet == null || annSet.isEmpty()){
+//System.out.println("No way to advance... Bail!");
+          //no more starting annotations beyond this point
+          startNode = lastNode;
+        }else{
+//System.out.print("Advancing...");
+          //advance to the next node that has starting annotations
+          startNode = ((Annotation)annSet.iterator().next()).getStartNode();
+//System.out.println("done");
+        }
+
 /*
         AnnotationSet res = annotations.get(startNode.getOffset());
         if(!res.isEmpty())
@@ -406,6 +428,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.19  2000/10/11 16:37:40  valyt
+// Fixed the tests
+//
 // Revision 1.18  2000/10/10 16:13:53  valyt
 // Fixed a small bug in AnnotationSetImpl
 //

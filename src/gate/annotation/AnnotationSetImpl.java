@@ -2,14 +2,14 @@
  *	AnnotationSetImpl.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *  Hamish Cunningham, 7/Feb/2000
  *
  *  Developer notes:
@@ -236,14 +236,18 @@ implements AnnotationSet
 
     // find the next node at or after offset; get the annots starting there
     Node nextNode = (Node) nodesByOffset.getNextOf(offset);
-    if(nextNode == null) // no nodes beyond this offset
+    if(nextNode == null) // no nodes at or beyond this offset
       return null;
+
     AnnotationSet res = (AnnotationSet) annotsByStartNode.get(nextNode.getId());
+    //get ready for next test
+    nextNode = (Node) nodesByOffset.getNextOf(new Long(offset.longValue() + 1));
     //skip all the nodes that have no starting annotations
-    while(nextNode != null && res == null){
-      nextNode = (Node) nodesByOffset.getNextOf(new Long(offset.longValue() + 1));
+    while(res == null && nextNode != null){
       res = (AnnotationSet) annotsByStartNode.get(nextNode.getId());
-    }
+      //get ready for next test
+      nextNode = (Node) nodesByOffset.getNextOf(new Long(nextNode.getOffset().longValue() + 1));
+    };
     //res it either null (no suitable node found) or the correct result
     return res;
   } // get(offset)
