@@ -190,13 +190,14 @@ public class MainFrame extends JFrame
     this.getContentPane().setLayout(new BorderLayout());
     this.setSize(new Dimension(800, 600));
     this.setTitle(Main.name + " " + Main.version);
+/*
     try{
       this.setIconImage(Toolkit.getDefaultToolkit().getImage(
             new URL("gate:/img/gateIcon.gif")));
     }catch(MalformedURLException mue){
       mue.printStackTrace(Err.getPrintWriter());
     }
-
+*/
     resourcesTree = new JTree(resourcesTreeModel);
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
     resourcesTree.setRowHeight(0);
@@ -313,7 +314,7 @@ public class MainFrame extends JFrame
     fileChooser.setMultiSelectionEnabled(false);
     newResourceDialog = new NewResourceDialog(this,
                                               "Resource parameters",
-                                              true);
+                                              false);
     waitDialog = new WaitDialog(this, "");
 
     //build the Help->About dialog
