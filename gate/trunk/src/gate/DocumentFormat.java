@@ -27,7 +27,7 @@ import org.w3c.www.mime.*;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
-public abstract class DocumentFormat implements Resource,StatusReporter
+public abstract class DocumentFormat implements Resource, StatusReporter
 {
   /** The MIME type of this format. */
   private MimeType mimeType;
@@ -53,11 +53,11 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     * here will be converted.
     */
   protected Map markupElementsMap = null;
-  /**
-    This map is used inside uppackMarkup() method...
-    When an element from the map is encounted, The corresponding string
-    element is added to the document content
-  */
+
+  /** This map is used inside uppackMarkup() method...
+    * When an element from the map is encounted, The corresponding string
+    * element is added to the document content
+    */
   protected Map element2StringMap = null;
 
   /** The features of this resource */
@@ -66,7 +66,7 @@ public abstract class DocumentFormat implements Resource,StatusReporter
   /** Default construction */
   public DocumentFormat() {}
 
-  // listeners for status report
+  /** listeners for status report */
   protected List myStatusListeners = new LinkedList();
   
   static{
