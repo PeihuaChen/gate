@@ -428,7 +428,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
         Collections.sort(acceptingFSMInstances, Collections.reverseOrder());
 
-        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.get(0);//get(0)
+        FSMInstance currentAcceptor =(FSMInstance)acceptingFSMInstances.get(0);
         if(isDebugMode()){
           //see if we have any conflicts
           Iterator accIter = acceptingFSMInstances.iterator();
