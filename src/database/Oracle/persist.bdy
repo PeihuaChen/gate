@@ -420,7 +420,31 @@ create or replace package body persist is
 
   end;                                                                                                        
 
+  /*******************************************************************************************/
+  procedure get_id_lot(p_id1        out number,
+                       p_id2        out number,
+                       p_id3        out number,
+                       p_id4        out number,
+                       p_id5        out number,
+                       p_id6        out number,
+                       p_id7        out number,
+                       p_id8        out number,
+                       p_id9        out number,
+                       p_id10       out number)
+  is
 
+  begin
+     select seq_annotation.nextval into p_id1 from dual;
+     select seq_annotation.nextval into p_id2 from dual;
+     select seq_annotation.nextval into p_id3 from dual;
+     select seq_annotation.nextval into p_id4 from dual;
+     select seq_annotation.nextval into p_id5 from dual;
+     select seq_annotation.nextval into p_id6 from dual;
+     select seq_annotation.nextval into p_id7 from dual;
+     select seq_annotation.nextval into p_id8 from dual;
+     select seq_annotation.nextval into p_id9 from dual;
+     select seq_annotation.nextval into p_id10 from dual;
+  end;
   
 /*begin
   -- Initialization
