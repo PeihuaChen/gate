@@ -203,11 +203,10 @@ public abstract class Factory {
         resData.addInstantiation(res);
         if(features != null) res.getFeatures().putAll(features);
 
-        //fire the event
+        // fire the event
         creoleProxy.fireResourceLoaded(
-                                   new CreoleEvent(res,
-                                                   CreoleEvent.RESOURCE_LOADED)
-                                  );
+          new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
+        );
 
         return res;
       } // datastore was present

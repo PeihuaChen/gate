@@ -265,6 +265,8 @@ public class CreoleRegisterImpl extends HashMap
     */
   public Object remove(Object key) {
     ResourceData rd = (ResourceData) get(key);
+    if(rd == null) return null;
+
     if(DEBUG) {
       Out.prln(key);
       Out.prln(rd);
