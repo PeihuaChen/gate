@@ -58,10 +58,10 @@ public class PostgresDataStore extends JDBCDataStore {
     throw new MethodNotImplementedException();
   }
 
-  public LanguageResource getLr(String lrClassName, Object lrPersistenceId) throws gate.security.SecurityException, gate.persist.PersistenceException {
-    /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
+/*  public LanguageResource getLr(String lrClassName, Object lrPersistenceId) throws gate.security.SecurityException, gate.persist.PersistenceException {
     throw new MethodNotImplementedException();
   }
+*/
 
   public void delete(String lrClassName, Object lrId) throws gate.security.SecurityException, gate.persist.PersistenceException {
     /**@todo: implement this gate.persist.JDBCDataStore abstract method*/
@@ -873,6 +873,16 @@ public class PostgresDataStore extends JDBCDataStore {
 
   /** helper for sync() - never call directly */
   protected void _syncChangedAnnotations(Document doc,AnnotationSet as, Collection changes)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   *  reads the features of an entity
+   *  entities are of type LR or Annotation
+   */
+  protected FeatureMap readFeatures(Long entityID, int entityType)
     throws PersistenceException {
 
     throw new MethodNotImplementedException();
