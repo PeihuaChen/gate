@@ -69,8 +69,17 @@ public class UserGroupEditor extends JComponent {
     AccessController ac = new AccessControllerImpl();
     ac.open(JDBC_URL);
 
-    Session mySession = ac.login("kalina", "sesame",
-                              ac.findGroup("English Language Group").getID());
+    Session mySession = ac.login("ADMIN", "sesame",
+                              ac.findGroup("ADMINS").getID());
+    if (! ac.isValidSession(mySession))
+      Out.prln("Invalid session");
+    else
+      Out.prln("My session is: " + mySession);
+
+    if (!mySession.isPrivilegedSession()) {
+      Out.prln("Insufficient priviliges to edit/view groups and users!");
+      return;
+    }
 
     UserGroupEditor userGroupEditor1 = new UserGroupEditor(ac, mySession);
 
@@ -398,6 +407,9 @@ public class UserGroupEditor extends JComponent {
 
     public void actionPerformed(ActionEvent e){
       try {
+        Out.prln("Session is" + session);
+        Out.prln("is valid? " + controller.isValidSession(session));
+
         controller.createUser("myUser", "myPassword", session);
       } catch (gate.persist.PersistenceException ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
@@ -500,7 +512,17 @@ public class UserGroupEditor extends JComponent {
     }//
 
     public void actionPerformed(ActionEvent e){
-      Out.prln("I need to create a new group!");
+      try {
+        controller.createGroup("myGrop", session);
+      } catch (gate.persist.PersistenceException ex) {
+        throw new gate.util.GateRuntimeException(ex.getMessage());
+      } catch (gate.security.SecurityException ex1) {
+        throw new gate.util.GateRuntimeException(ex1.getMessage());
+      }
+      DefaultListModel model = (DefaultListModel) source.getModel();
+      model.clear();
+      readGroups(model, source);
+
     }//public void actionPerformed(ActionEvent e)
   } //AddGroupAction
 
