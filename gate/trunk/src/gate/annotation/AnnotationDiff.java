@@ -32,7 +32,7 @@ import gate.creole.*;
   * This class compare two annotation sets on annotation type given by the
   * AnnotationSchema object. It also deals with graphic representation.
   */
-public class AnnotationDiff extends JPanel implements VisualResource{
+public class AnnotationDiff extends AbstractVisualResource{
 
   /** Debug flag */
   private static final boolean DEBUG = false;
