@@ -221,29 +221,31 @@ public class XJTable extends JTable{
           if(firstRow == TableModelEvent.HEADER_ROW){
             //complete structure change -> reallocate the data
             init(sourceModel);
-            fireTableChanged(new TableModelEvent(this,  
-                    firstRow, lastRow, column, type));
+            fireTableStructureChanged();
             if(isSortable()) sort();
             newColumns();
             adjustSizes();
           }else if(lastRow == Integer.MAX_VALUE){
             //all data changed (including the number of rows)
             init(sourceModel);
-            fireTableChanged(new TableModelEvent(this,  
-                    firstRow, lastRow, column, type));
+            fireTableDataChanged();
             if(isSortable()) sort();
             adjustSizes();
           }else{
             //the rows should have normal values
             //if the sortedColumn is not affected we don't care
-            if(column == sortedColumn || column == TableModelEvent.ALL_COLUMNS){
-              if(isSortable()) sort();
+            if(isSortable() &&
+               (column == sortedColumn || 
+                column == TableModelEvent.ALL_COLUMNS)){
+                //re-sorting will also fire the event upwards
+                sort();
             }else{
               fireTableChanged(new TableModelEvent(this,  
                       sourceToTarget(firstRow), 
                       sourceToTarget(lastRow), column, type));
               
             }
+            //resize the updated column(s)
             if(column == TableModelEvent.ALL_COLUMNS){
               adjustSizes();
             }else{
@@ -263,20 +265,14 @@ public class XJTable extends JTable{
             fireTableDataChanged();
           }
           if(isSortable()) sort();
+          //resize the updated column(s)
           if(column == TableModelEvent.ALL_COLUMNS) adjustSizes();
           else ((ColumnData)columnData.get(column)).adjustColumnWidth();
           break;
         case TableModelEvent.DELETE:
           //rows were deleted -> we need to rebuild
           init(sourceModel);
-          if(firstRow == lastRow){  
-            fireTableChanged(new TableModelEvent(this,  
-                    sourceToTarget(firstRow), 
-                    sourceToTarget(lastRow), column, type));
-          }else{
-            //the real rows are not in sequence
-            fireTableDataChanged();
-          }
+          fireTableDataChanged();
           if(isSortable()) sort();
       }
     }
@@ -345,7 +341,6 @@ public class XJTable extends JTable{
           }
         }
       }
-      
       fireTableRowsUpdated(0, sourceData.size() -1);
     }
 
@@ -525,6 +520,8 @@ public class XJTable extends JTable{
         width = renderer.getTableCellRendererComponent(XJTable.this, 
                 tCol.getHeaderValue(), true, true ,0 , viewColumn).
                 getPreferredSize().width;
+        int marginWidth = getColumnModel().getColumnMargin(); 
+        if(marginWidth > 0) width += marginWidth;         
       }else{
         width = 0;
       }
