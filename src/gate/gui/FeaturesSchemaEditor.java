@@ -33,6 +33,7 @@ import gate.Resource;
 import gate.creole.*;
 import gate.creole.AnnotationSchema;
 import gate.creole.FeatureSchema;
+import gate.event.FeatureMapListener;
 import gate.swing.XJTable;
 import gate.util.*;
 import gate.util.GateRuntimeException;
@@ -40,14 +41,16 @@ import gate.util.GateRuntimeException;
 /**
  */
 public class FeaturesSchemaEditor extends AbstractVisualResource
-        implements ResizableVisualResource{
+        implements ResizableVisualResource, FeatureMapListener{
   public FeaturesSchemaEditor(){
     setBackground(UIManager.getDefaults().getColor("Table.background"));
   }
   
   public void setTargetFeatures(FeatureMap features){
+    features.removeFeatureMapListener(this);
     this.targetFeatures = features;
     populate();
+    features.addFeatureMapListener(this);
   }
   
   
@@ -66,6 +69,13 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     
   public XJTable getTable(){
     return mainTable;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.event.FeatureMapListener#featureMapUpdated()
+   */
+  public void featureMapUpdated(){
+    populate();
   }
   
   
