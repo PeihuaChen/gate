@@ -213,8 +213,8 @@ distrib:
 	GN=$${N}--BINARY; mv xxx $${GN}; \
 	$${TARZ} $${D}/$${GN}.tgz $${GN}/bin; mv $${GN} xxx; \
 	GN=$${N}--DOCS; mv xxx $${GN}; \
-	$${TARZ} $${D}/$${GN}.tgz $${GN}/doc $${GN}/*.html; mv $${GN} xxx; \
-	rm -rf xxx; \
+	$${TARZ} $${D}/$${GN}.tgz $${GN}/doc $${GN}/*.html $${GN}/*.pdf; \
+	mv $${GN} xxx; rm -rf xxx; \
 	echo '*** copy tgzs to etag & releases dirs, and unpack in latter';echo
 
 # make a pretty list of the gate source, missing class files etc.
