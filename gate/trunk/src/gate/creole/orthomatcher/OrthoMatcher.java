@@ -277,6 +277,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         else if (nameAnnot.getType().equals(organizationType))
           annotString = stripCDG(annotString, nameAnnot);
 
+        if(null == annotString || "".equals(annotString))
+          continue;
+
         //otherwise try matching with previous annotations
         matchWithPrevious(nameAnnot, annotString);
 
@@ -736,8 +739,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     // determine "Lookup" annotation set
     queryFM.clear();
     queryFM.put("majorType", "title");
+    AnnotationSet as1 = nameAllAnnots.get(startAnnot,endAnnot);
+    if (as1 == null || as1.isEmpty())
+      return annotString;
     AnnotationSet as =
-      nameAllAnnots.get(startAnnot,endAnnot).get("Lookup", queryFM);
+      as1.get("Lookup", queryFM);
     if (as !=null && ! as.isEmpty()) {
       List titles = new ArrayList((Set)as);
       Collections.sort(titles, new gate.util.OffsetComparator());
@@ -792,7 +798,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       tokens.remove(0);
 
     //no need to check for cdg if there is only 1 token or less
-    if (tokens.size()<2 && cdg.contains(((Annotation) tokens.get(tokens.size()-1)
+    if (tokens.size()>1 && cdg.contains(((Annotation) tokens.get(tokens.size()-1)
           ).getFeatures().get(STRING_FEATURE)) )
       tokens.remove(tokens.size()-1);
 
@@ -803,6 +809,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (i != tokens.size()-1)
         newString.append(" ");
     }
+    Out.prln("Strip CDG returned: " + newString + "for string " + annotString);
 
     if (caseSensitive)
       return newString.toString();
