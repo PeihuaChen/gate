@@ -55,7 +55,7 @@ public class CreoleEvent extends GateEvent {
   }
 
   /**
-   * Gets the {@link gate.Datastore} that has been created/loaded/closed.
+   * Gets the {@link gate.DataStore} that has been created/loaded/closed.
    */
   public DataStore getDatastore(){
     return datastore;

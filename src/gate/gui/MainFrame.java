@@ -898,7 +898,7 @@ public class MainFrame extends JFrame
     }
   }
 
-  /**Called when a {@link gate.Datastore} has been opened*/
+  /**Called when a {@link gate.DataStore} has been opened*/
   public void datastoreOpened(CreoleEvent e){
     DataStore ds = e.getDatastore();
     if(ds != null){
@@ -911,12 +911,12 @@ public class MainFrame extends JFrame
 
   }
 
-  /**Called when a {@link gate.Datastore} has been created*/
+  /**Called when a {@link gate.DataStore} has been created*/
   public void datastoreCreated(CreoleEvent e){
     datastoreOpened(e);
   }
 
-  /**Called when a {@link gate.Datastore} has been closed*/
+  /**Called when a {@link gate.DataStore} has been closed*/
   public void datastoreClosed(CreoleEvent e){
     DataStore ds = e.getDatastore();
     DefaultMutableTreeNode node;

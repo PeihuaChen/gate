@@ -252,7 +252,6 @@ public class Gate
     * @param path a path to append to the URL when we make a successfull
     * connection. E.g. for host xyz, port 80, path /thing, the resultant URL
     * would be <TT>http://xyz:80/thing</TT>.
-    * @see #urlBase
     */
   public static boolean tryNetServer(
     String hostName, int serverPort, String path

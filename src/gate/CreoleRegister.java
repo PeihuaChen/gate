@@ -28,7 +28,7 @@ import gate.event.*;
   * the class name of the resource.
   * <P>
   * The register is accessible from the static method
-  * <A HREF=util/Gate.html#getCreoleRegister()>gate.util.Gate.getCreoleRegister
+  * <A HREF=Gate.html#getCreoleRegister()>gate.Gate.getCreoleRegister
   * </A>;
   * there is only one per application of the GATE framework.
   * <P>
@@ -58,7 +58,7 @@ import gate.event.*;
   * whether they were initially fired by the {@link Factory}, the
   * {@link DataStoreRegister} or the {@link CreoleRegister} itself.
   *
-  * @see gate.util.Gate
+  * @see gate.Gate
   * @see gate.creole.ResourceData
   */
 public interface CreoleRegister extends Map, Serializable, CreoleListener

@@ -260,15 +260,16 @@ public class DefaultGazetteer extends AbstractProcessingResource
 
 
 
-  /** The method that does the actual input. This method should never be called
-   * by the user; the {@link doLookup()} methodshould be used instead.
+  /**
+   * This method runs the gazetteer. It assumes that all the needed parameters
+   * are set. If they are not, an exception will be fired.
    */
   public void run(){
     AnnotationSet annotationSet;
     //check the input
     if(document == null) {
       executionException = new ExecutionException(
-        "No document to parse!"
+        "No document to process!"
       );
       return;
     }

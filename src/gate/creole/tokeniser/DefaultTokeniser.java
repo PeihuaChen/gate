@@ -706,17 +706,16 @@ implements Runnable, ProcessingResource{
       ((ProgressListener)listenersIter.next()).processFinished();
   }
   /**
-   * Sets the value of the {@link #rulesURL} property which holds an URL to the file containing the rules for this tokeniser.
-   *
+   * Sets the value of the <code>rulesURL</code> property which holds an URL
+   * to the file containing the rules for this tokeniser.
    * @param newRulesURL
    */
   public void setRulesURL(java.net.URL newRulesURL) {
     rulesURL = newRulesURL;
   }
   /**
-   * Gets the value of the {@link #rulesURL} property hich holds an
+   * Gets the value of the <code>rulesURL</code> property hich holds an
    * URL to the file containing the rules for this tokeniser.
-   *
    */
   public java.net.URL getRulesURL() {
     return rulesURL;

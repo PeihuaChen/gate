@@ -17,8 +17,8 @@ package gate.event;
  * ({@link gate.event.CreoleEvent}).
  * In a Gate system there are many classes that can fire {@link CreoleEvent}s
  * but all this events are collected and fired back by the
- * {@link CreoleRegister} that can be obtained with a call to
- * {@link Gate#getCreoleRegister()}
+ * {@link gate.CreoleRegister} that can be obtained with a call to
+ * {@link gate.Gate#getCreoleRegister()}
  */
 public interface CreoleListener extends java.util.EventListener{
 
@@ -28,13 +28,13 @@ public interface CreoleListener extends java.util.EventListener{
   /**Called when a {@link gate.Resource} has been removed from the system*/
   public void resourceUnloaded(CreoleEvent e);
 
-  /**Called when a {@link gate.Datastore} has been opened*/
+  /**Called when a {@link gate.DataStore} has been opened*/
   public void datastoreOpened(CreoleEvent e);
 
-  /**Called when a {@link gate.Datastore} has been created*/
+  /**Called when a {@link gate.DataStore} has been created*/
   public void datastoreCreated(CreoleEvent e);
 
-  /**Called when a {@link gate.Datastore} has been closed*/
+  /**Called when a {@link gate.DataStore} has been closed*/
   public void datastoreClosed(CreoleEvent e);
 
 }
