@@ -1,4 +1,4 @@
-package gate.util;
+package gate.gui;
 
 /** Convenience class for implementing ProgressListener
   */
