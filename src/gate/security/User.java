@@ -1,5 +1,5 @@
 /*
- *  OracleDataStore.java
+ *  User.java
  *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
@@ -20,6 +20,9 @@ import gate.persist.PersistenceException;
 
 
 public interface User {
+
+  /** --- */
+  public Long getID();
 
   /** --- */
   public String getName();

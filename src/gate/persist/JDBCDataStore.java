@@ -307,6 +307,7 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   public Long timestamp()
     throws PersistenceException{
 
+    //implemented by the subclasses
     throw new MethodNotImplementedException();
   }
 
