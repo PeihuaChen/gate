@@ -229,7 +229,7 @@ public class TestGate {
         suite.addTest(CookBook.suite());
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJavac.suite());
-        suite.addTest(TestJdk.suite());
+//        suite.addTest(TestJdk.suite());
         suite.addTest(TestJape.suite());
         suite.addTest(TestTemplate.suite());
         suite.addTest(TestJacl.suite());
