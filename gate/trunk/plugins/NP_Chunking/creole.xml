@@ -32,7 +32,7 @@
 				OPTIONAL="true">java.lang.String</PARAMETER>
 			<PARAMETER NAME="annotationName"
 				COMMENT="The name of the annotations added to mark noun chunks."
-				DEFAULT="Noun Chunk"
+				DEFAULT="NounChunk"
 				RUNTIME="true">java.lang.String</PARAMETER>
 		</RESOURCE>
 	
