@@ -119,6 +119,13 @@ public class JapeGUI extends JFrame {
 //    typesPanel.setPreferredSize(null);
     logTextArea.setDisabledTextColor(Color.lightGray);
     logTextArea.setEditable(false);
+    tokRulesBtn.setText("Load Tokeniser Rules");
+    tokRulesBtn.addActionListener(new java.awt.event.ActionListener() {
+
+      public void actionPerformed(ActionEvent e) {
+        tokRulesBtn_actionPerformed(e);
+      }
+    });
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     southBox.add(statusBar, null);
     southBox.add(progressBar, null);
@@ -131,6 +138,7 @@ public class JapeGUI extends JFrame {
     this.getContentPane().add(northBox, BorderLayout.NORTH);
     northBox.add(collectionAddBtn, null);
     northBox.add(japeLoadBtn, null);
+    northBox.add(tokRulesBtn, null);
     northBox.add(runBtn, null);
     this.getContentPane().add(centerTabPane, BorderLayout.CENTER);
     textViewPane.setDividerLocation(400);
@@ -147,10 +155,15 @@ public class JapeGUI extends JFrame {
 //                                    textViewPane.getSize().height - 30));
     japeFilter = new ExtensionFileFilter();
     japeFilter.addExtension("jape");
-    japeFilter.setDescription(".jape Files");
+    japeFilter.setDescription("Jape grammars");
+    tokFileFilter = new ExtensionFileFilter();
+    tokFileFilter.addExtension("rules");
+    japeFilter.setDescription("Tokeniser rules");
+
 
     filer = new JFileChooser("d:/tmp");
     filer.addChoosableFileFilter(japeFilter);
+    filer.addChoosableFileFilter(tokFileFilter);
 
   }
 
@@ -240,8 +253,8 @@ public class JapeGUI extends JFrame {
         startJapeFileOpen = 0;
         startCorpusTransduce = 0;
         endProcess = 0;
-        if(corpus.isEmpty() || grammarFile == null){
-          statusBar.setText("Missing corpus or grammar!");
+        if(corpus.isEmpty() || grammarFile == null|| tokeniserRulesFile == null){
+          statusBar.setText("Missing corpus, grammar or tokeniser rules!");
           return;
         }
         logTextArea.append("Started at: " + (new Date()) + "\n");
@@ -280,8 +293,7 @@ public class JapeGUI extends JFrame {
         statusBar.setText("Tokenizing all the documents...");
         gate.creole.tokeniser.DefaultTokeniser tokeniser = null;
         try{
-          tokeniser =new gate.creole.tokeniser.DefaultTokeniser(
-            Files.getResourceAsStream("creole/tokeniser/DefaultTokeniser.rules"));
+          tokeniser =new DefaultTokeniser(tokeniserRulesFile.getAbsolutePath());
         }catch(IOException ioe){
           System.err.println("Cannot read the tokeniser rules!" +
                              "\nAre the Gate resources in place?");
@@ -623,11 +635,14 @@ public class JapeGUI extends JFrame {
   Corpus corpus = null;
   JFileChooser filer;
   ExtensionFileFilter japeFilter;
+  ExtensionFileFilter tokFileFilter;
+
   /** A set of objects of type File containing all the files that should go in
     * the corpus.
     */
   Set corpusFiles = new HashSet();
   File grammarFile;
+  File tokeniserRulesFile = null;
 
   private boolean invokedStandalone = false;
   Document currentDoc;
@@ -646,9 +661,23 @@ public class JapeGUI extends JFrame {
   FlowLayout flowLayout2 = new FlowLayout();
   JTextArea logTextArea = new JTextArea();
   JScrollPane logScrollPane = new JScrollPane();
+  JButton tokRulesBtn = new JButton();
 
   void this_windowClosing(WindowEvent e) {
     System.exit(0);
+  }
+
+  void tokRulesBtn_actionPerformed(ActionEvent e) {
+    filer.setFileFilter(tokFileFilter);
+    filer.setDialogTitle("Open Tokeniser rules file");
+    filer.setMultiSelectionEnabled(false);
+    filer.setSelectedFile(null);
+    filer.setSelectedFiles(null);
+    int res = filer.showOpenDialog(this);
+    if(res == JFileChooser.APPROVE_OPTION){
+      tokeniserRulesFile = filer.getSelectedFile();
+      grammarLbl.setText(grammarFile.getName());
+    }
   }
 
 

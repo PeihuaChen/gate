@@ -111,9 +111,13 @@ import gate.util.*;
         throw new InvalidRuleException("Invalid right hand side " + rhs);
       tokenDesc = new String[attributes.size()][2];
       for(int i = 0; i < attributes.size(); i++){
-        tokenDesc[i][0] = (String)attributes.get(0);
-        tokenDesc[i][1] = (String)values.get(0);
+        tokenDesc[i][0] = (String)attributes.get(i);
+        tokenDesc[i][1] = (String)values.get(i);
       }
+//      for(int i = 0; i < attributes.size(); i++){
+//        System.out.println(tokenDesc[i][0] + "=" +
+//                           tokenDesc[i][1]);
+//      }
     }
 
     void setRhs(String rhs){this.rhs = rhs;}

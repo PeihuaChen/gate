@@ -5,6 +5,21 @@
 #
 #Lines starting with "#" are treated as comment
 //Lines starting with "//" are treated as comment
+# Empty lines are ignored.
+
+#A rule has a left hand side (LHS) and a right hand side (RHS);
+#the RHS is a regular expression tha has to be matched on the input
+#the LHS describes the annotations to be added to the AnnotationSet.
+#LHS is separated from the RHS by '>'
+#LHS knows about the following operators:
+#	+ (1..n)
+#	* (0..n)
+#	| (boolean OR)
+#
+#RHS uses as separator ';' and has the following format
+#{LHS} > {Annotation type};{attribute1}={value1};...;{attribute n}={value n}
+
+
 #The primitive constructs are:
 #UNASSIGNED
 #UPPERCASE_LETTER
@@ -34,10 +49,10 @@
 #CURRENCY_SYMBOL
 #MODIFIER_SYMBOL
 #OTHER_SYMBOL
-#representing the corresponding enumerated Unicode category types
+#...representing the corresponding enumerated Unicode category types
 
 #------- The rules start here -----------------
-"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;type=upperInitial;
+"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;kind=upperInitial;
 "LOWERCASE_LETTER" "UPPERCASE_LETTER"|"LOWERCASE_LETTER"|OTHER_LETTER+ > Token;
 (SPACE_SEPARATOR|CONTROL)+ > SpaceToken;
 CURRENCY_SYMBOL|MODIFIER_SYMBOL|OTHER_SYMBOL + > Symbol;
