@@ -370,8 +370,6 @@ public class MainFrame extends JFrame
       parent = lrRoot;
     }else if(handle instanceof PRHandle){
       parent = prRoot;
-    }else if (handle instanceof AnnotDiffHandle){
-      parent = null;
     }
     DefaultMutableTreeNode node = null;
     if(parent != null) node = (DefaultMutableTreeNode)parent.getFirstChild();
