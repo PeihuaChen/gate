@@ -49,6 +49,7 @@ public class Scratch
     } catch (Exception e) {
       e.printStackTrace(Out.getPrintWriter());
     }
+
   } // main
 
   /** Example of using an exit-time hook. */

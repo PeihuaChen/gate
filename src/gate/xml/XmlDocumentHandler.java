@@ -408,29 +408,28 @@ public class XmlDocumentHandler extends DefaultHandler{
   // if the map is null then no string is added
   private Map element2StringMap = null;
 
-  // this object inducates what to do when the parser encounts an error
+  /**This object inducates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
-  // the content of the XML document, without any tag
-  // for internal use
+  /**The content of the XML document, without any tag for internal use*/
   private StringBuffer tmpDocContent = null;
 
-  // a stack used to remember elements and to keep the order
+  /**A stack used to remember elements and to keep the order */
   private java.util.Stack stack = null;
 
-  // a gate document
+  /**A gate document */
   private gate.Document doc = null;
 
-  // an annotation set used for creating annotation reffering the doc
+  /**An annotation set used for creating annotation reffering the doc */
   private gate.AnnotationSet basicAS = null;
 
-  // listeners for status report
+  /**Listeners for status report */
   protected List myStatusListeners = new LinkedList();
 
-  // this reports the the number of elements that have beed processed so far
+  /**This reports the the number of elements that have beed processed so far*/
   private int elements = 0;
 
-  // we need a colection to retain all the CustomObjects that will be
+  // We need a colection to retain all the CustomObjects that will be
   // transformed into annotation over the gate document...
   // the transformation will take place inside onDocumentEnd() method
   private LinkedList colector = null;
