@@ -2225,16 +2225,18 @@ public class OracleDataStore extends JDBCDataStore {
 
     //1. read from DB
     try {
-      String sql = " select v1.ft_key, " +
+      String sql = " select v2.fk_string, " +
                    "        v1.ft_value_type, " +
                    "        v1.ft_number_value, " +
                    "        v1.ft_binary_value, " +
                    "        v1.ft_character_value, " +
                    "        v1.ft_long_character_value " +
-                   " from  "+Gate.DB_OWNER+".t_feature v1 " +
+                   " from  "+Gate.DB_OWNER+".t_feature v1, " +
+                   "       "+Gate.DB_OWNER+".t_feature_key v2 " +
                    " where  v1.ft_entity_id = ? " +
                    "        and v1.ft_entity_type = ? " +
-                   " order by v1.ft_key,v1.ft_id";
+                   "        and v1.ft_key_id = v2.fk_id " +
+                   " order by v2.fk_string,v1.ft_id";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,entityID.longValue());
@@ -2320,7 +2322,7 @@ public class OracleDataStore extends JDBCDataStore {
             break;
 
           default:
-            throw new PersistenceException("Invalid feature type found in DB");
+            throw new PersistenceException("Invalid feature type found in DB, type is ["+valueType.intValue()+"]");
         }//switch
 
         //new feature or part of an array?

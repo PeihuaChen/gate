@@ -563,7 +563,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     //2. read the features from DB
     try {
       String sql = " select ann_local_id, " +
-                   "        ft_key, " +
+                   "        key, " +
                    "        ft_value_type, " +
                    "        ft_number_value, " +
                    "        ft_character_value, " +
@@ -571,7 +571,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
                    "        ft_binary_value " +
                    " from  "+Gate.DB_OWNER+".v_annotation_features " +
                    " where  set_id = ? " +
-                   " order by ann_local_id,ft_key ";
+                   " order by ann_local_id,key ";
 
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,asetID.longValue());
