@@ -28,58 +28,36 @@ import gate.util.*;
   * <P>
   * This class provides examples of using the GATE APIs.
   * Read this documentation along with a copy of the
-  * <A HREF=CookBook.txt>source code</A>.
+  * <A HREF=http://gate.ac.uk/gate/doc/java2html/gate/CookBook.java.html>source
+  * code</A>.
   *
   * <P>
   * The CookBook is set up as
-  * part of the GATE test suite (using the JUnit framework), so there's an easy
-  * way to run the examples (viz.,
-  * <A HREF=../gate/TestGate.html>gate.TestGate.main</A>, which will invoke the
-  * JUnit test runner). Also, we can use JUnit's assert methods; e.g.
+  * part of the GATE test suite (using the
+  * <A HREF="http://www.junit.org/>JUnit testing framework</A>), so there's
+  * an easy way to run the examples (viz.,
+  * <A HREF=../gate/TestGate.html>gate.TestGate</A>'s <TT>main</TT> method,
+  * which will invoke the
+  * JUnit test runner). Also, we can use JUnit's assert methods: e.g.
   * <TT>assert(corpus.isEmpty());</TT>
   * tests that a corpus object is empty, and creates a test failure report if
-  * this is not the case. To add a new test class to the suite, see the
-  * <A HREF=../gate/util/TestTemplate.html>gate.util.TestTemplate</A> class.
+  * this is not the case. (To add a new test class to the suite, see the
+  * <A HREF=../gate/util/TestTemplate.html>gate.util.TestTemplate</A> class.)
   *
   * <P>
   * Programming to the GATE Java API involves manipulating the classes and
-  * interfaces in the <A HREF=package-summary.html>gate package</A>. These are
+  * interfaces in the <A HREF=package-summary.html>gate package</A>
+  * (and to a lesser extent other packages). These are
   * often interfaces; classes there are often to do with getting
   * access to objects that implement the interfaces (without exposing those
   * implementations). In other words, there's a lot of interface-based design
   * around.
   *
   * <P>
-  * The <A HREF=Factory.html>Factory</A> class
-  * takes care of instantiating objects that implement the interfaces, via the
-  * <A HREF=Factory.html#createResource()>createResource</A> method and various
-  * other short-cut methods for popular resource types.
-  *
-  * <P>
-  * GATE breaks down the components of language processing systems into
-  * three types:
-  * <UL>
-  * <LI>
-  * <B>ProcessingResource (PR):</B><BR>
-  * a resource that is runnable, may (or may not) be invoked remotely (via
-  * RMI) or in parallel,
-  * and lives in class files.
-  * <LI>
-  * <B>LanguageResource (LR):</B><BR>
-  * a resource that consists of data, accessed via a Java abstraction
-  * layer. They typically live in relational databases or file systems, but
-  * may also be simple classes.
-  * <LI>
-  * <B>VisualResource (VR):</B><BR>
-  * a visual Java bean, component of GUIs, including of the main GATE
-  * gui. Like PRs they live in .class or .jar files. They are always local,
-  * never distributed.
-  * </UL>
-  * Each of these types is represented by an interface, e.g.
-  * <A HREF=../gate/LanguageResource.html>gate.LanguageResource</A>, and
-  * the classes that implement these interfaces are known as CREOLE resources,
-  * or CREOLE components. CREOLE resources are an extendable set which can be
-  * added to and loaded at runtime.
+  * For more details and for a conceptual view, see
+  * <A HREF=http://gate.ac.uk/sale/tao/>Developing Language Processing
+  * Components with GATE</A> (for which this class provides some of the
+  * examples).
   *
   * <P>
   * The rest of this documentation refers to methods in the code that
@@ -120,13 +98,12 @@ import gate.util.*;
   *
   * <P>
   * See also the other test classes, although note that they also use methods
-  * that are not part of the public API (which is restricted to the <TT>gate
-  * </TT>
-  * package. Test classes include:
+  * that are not part of the public API. Test classes include:
   * <A HREF=corpora/TestCreole.html>TestCreole</A>;
   * <A HREF=corpora/TestCorpus.html>TestCorpus</A>;
   * <A HREF=corpora/TestDocument.html>TestDocument</A>;
-  * <A HREF=corpora/TestAnnotation.html>TestAnnotation</A>.
+  * <A HREF=corpora/TestAnnotation.html>TestAnnotation</A>; anything
+  * else starting "Test" - about 30 of them at the last count.
   */
 public class CookBook extends TestCase
 {
@@ -254,6 +231,5 @@ public class CookBook extends TestCase
   public static Test suite() {
     return new TestSuite(CookBook.class);
   } // suite
-
 
 } // class CookBook
