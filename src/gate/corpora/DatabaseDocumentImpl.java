@@ -31,8 +31,8 @@ import gate.creole.*;
 import gate.event.*;
 
 public class DatabaseDocumentImpl extends DocumentImpl
-                                  implements  DatastoreListener,
-                                              Document,
+                                  implements  //DatastoreListener,
+                                              //Document,
                                               EventAwareDocument {
 
   private static final boolean DEBUG = false;
@@ -49,13 +49,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
   private Collection  removedAnotationSets;
   private Collection  addedAnotationSets;
 
-  //this one should be the same as the values returned
-  //in persist.get_id_lot PL/SQL package
-  //it sux actually
-  private static final int SEQUENCE_POOL_SIZE = 10;
-
-  private Integer sequencePool[];
-  private int poolMarker;
+  private Document    parentDocument;
 
   /**
    * The listener for the events coming from the features.
@@ -82,8 +76,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     this.removedAnotationSets = new Vector();
     this.addedAnotationSets = new Vector();
 
-    sequencePool = new Integer[this.SEQUENCE_POOL_SIZE];
-    poolMarker = this.SEQUENCE_POOL_SIZE;
+    parentDocument = null;
   }
 
   public DatabaseDocumentImpl(Connection _conn,
@@ -140,16 +133,22 @@ public class DatabaseDocumentImpl extends DocumentImpl
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() {
 
-    //1. assert that no one is reading from DB now
-    synchronized(this.contentLock) {
-      if (false == this.isContentRead) {
-        _readContent();
-        this.isContentRead = true;
-      }
+    //1. if this is a child document then return the content of the parent resource
+    if (null != this.parentDocument) {
+      return this.parentDocument.getContent();
     }
+    else {
+      //2. assert that no one is reading from DB now
+      synchronized(this.contentLock) {
+        if (false == this.isContentRead) {
+          _readContent();
+          this.isContentRead = true;
+        }
+      }
 
-    //return content
-    return super.getContent();
+      //return content
+      return super.getContent();
+    }
   }
 
   private void _readContent() {
@@ -750,9 +749,15 @@ public class DatabaseDocumentImpl extends DocumentImpl
   /** Set method for the document content */
   public void setContent(DocumentContent content) {
 
-    super.setContent(content);
-
-    this.contentChanged = true;
+    //if the document is a child document then setContent()is prohibited
+    if (null != this.parentDocument) {
+      Err.prln("content of document ["+this.name+"] cannot be changed!");
+      return;
+    }
+    else {
+      super.setContent(content);
+      this.contentChanged = true;
+    }
   }
 
   /** Set the feature set */
@@ -1066,5 +1071,35 @@ public class DatabaseDocumentImpl extends DocumentImpl
               this.isResourceChanged(EventAwareLanguageResource.RES_NAME) ||
                 this.isResourceChanged(EventAwareLanguageResource.DOC_MAIN);
   }
+
+
+  /**
+   * Returns the parent LR of this LR.
+   * Only relevant for LRs that support shadowing. Most do not by default.
+   */
+  public LanguageResource getParent()
+    throws PersistenceException,SecurityException {
+
+    return this.parentDocument;
+  }//getParent
+
+  /**
+   * Sets the parent LR of this LR.
+   * Only relevant for LRs that support shadowing. Most do not by default.
+   */
+  public void setParent(LanguageResource parentLR)
+    throws PersistenceException,SecurityException {
+
+    //0. preconditions
+    Assert.assertNotNull(parentLR);
+
+    if (false == parentLR instanceof DatabaseDocumentImpl) {
+      throw new IllegalArgumentException("invalid parent resource set");
+    }
+
+    //1.
+    this.parentDocument = (Document)parentLR;
+
+  }//setParent
 
 }
