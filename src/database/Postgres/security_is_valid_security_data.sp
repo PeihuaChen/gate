@@ -1,0 +1,51 @@
+/*
+ *
+ *  Copyright (c) 1998-2002, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Marin Dimitrov, 20/Mar/2002
+ *
+ *  $Id$
+ *
+ */
+
+DROP FUNCTION security_is_valid_security_data(int2,int4,int4);
+
+CREATE FUNCTION security_is_valid_security_data(int2,int4,int4) RETURNS boolean AS '
+
+   DECLARE
+      p_perm_mode alias for $1;
+      p_group_id alias for $2;
+      p_user_id alias for $3;
+
+      C_PERM_WR_GW int2 = 1;
+      C_PERM_GR_GW int2 = 2;
+      C_PERM_GR_OW int2 = 3;
+      C_PERM_OR_OW int2 = 4;
+
+   BEGIN
+
+      if (p_perm_mode = C_PERM_WR_GW or
+          p_perm_mode = C_PERM_GR_GW or
+          p_perm_mode = C_PERM_GR_OW) then
+         /* group write/read access, owner_group_id should ne NOT NULL */
+         if (p_group_id is null) then
+            return false;
+         end if;
+      end if;
+
+      if (p_perm_mode = C_PERM_GR_OW or p_perm_mode = C_PERM_OR_OW) then
+         /* owner_user_id is mandatory */
+         if (p_user_id is null) then
+            return false;
+         end if;
+      end if;
+
+      return true;
+
+   END;
+' LANGUAGE 'plpgsql'
