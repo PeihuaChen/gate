@@ -65,7 +65,7 @@ public class TestFiles extends TestCase
     BufferedReader bfr = new BufferedReader(new FileReader(f));
 
     String firstLn = bfr.readLine();
-    assert(firstLine, firstLine.equals(firstLn));
+    assert("first line from jape/combined/testloc.jape doesn't match", firstLine.equals(firstLn));
     
     f.delete ();
   } // testWriteTempFile()

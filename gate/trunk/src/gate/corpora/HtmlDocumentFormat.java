@@ -58,7 +58,6 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
 
     HTMLEditorKit.Parser parser = new ParserDelegator();
     try{
-      //url = new URL("http://www.dcs.shef.ac.uk/~hamish");
       conn = doc.getSourceURL().openConnection ();
       reader =  new InputStreamReader(conn.getInputStream ());
     } catch (Exception e){
@@ -72,8 +71,6 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
      System.out.println (e);
       e.printStackTrace (System.err);
     }
-    out.flush();
-    System.out.println("DONE!");
 
   }
 
