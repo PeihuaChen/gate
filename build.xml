@@ -317,6 +317,7 @@
            printsummary="yes">
       <classpath refid="run.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
+      <sysproperty key="gate.home" value="${basedir}"/>
       <jvmarg value="-Djava.ext.dirs=${extDir}"/>
       <formatter type="plain"
                  usefile="false"/>
