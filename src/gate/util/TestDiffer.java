@@ -64,6 +64,7 @@ public class TestDiffer extends TestCase{
      differ.setSignificantFeaturesSet(null);
      differ.calculateDiff(keySet, responseSet);
      differ.sanityCheck();
+     if(DEBUG) differ.printMissmatches();
      double value = differ.getPrecisionStrict();
      Assert.assertEquals("Precision Strict: " + value + " instead of 1!",
                          1, value, 0);
@@ -83,6 +84,7 @@ public class TestDiffer extends TestCase{
      responseSet.add(falsePositive);
      differ.calculateDiff(keySet, responseSet);
      differ.sanityCheck();
+     if(DEBUG) differ.printMissmatches();
      value = differ.getPrecisionStrict();
      Assert.assertEquals("Precision Strict: " + value + " instead of .99!",
                          .99, value, .001);
@@ -100,6 +102,7 @@ public class TestDiffer extends TestCase{
      keySet.add(falsePositive);
      differ.calculateDiff(keySet, responseSet);
      differ.sanityCheck();
+     if(DEBUG) differ.printMissmatches();
      value = differ.getRecallStrict();
      Assert.assertEquals("Recall Strict: " + value + " instead of .99!",
                          .99, value, .001);
@@ -111,5 +114,8 @@ public class TestDiffer extends TestCase{
      Assert.assertEquals("Precision Lenient: " + value + " instead of 1!",
                          1, value, 0);
    }
+
+   /** Debug flag */
+   private static final boolean DEBUG = false;
 
 }
