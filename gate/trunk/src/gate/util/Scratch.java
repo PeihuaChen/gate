@@ -330,11 +330,8 @@ public class Scratch
   public static void tokeniseFile(File file) throws Exception{
     //initialise GATE (only call it once!!)
     Gate.init();
-
-
     //create the document
     Document doc = Factory.newDocument(file.toURL());
-
     //create the tokeniser
     DefaultTokeniser tokeniser = (DefaultTokeniser)Factory.createResource(
       "gate.creole.tokeniser.DefaultTokeniser");

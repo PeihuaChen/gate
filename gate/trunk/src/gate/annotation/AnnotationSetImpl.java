@@ -935,43 +935,19 @@ implements AnnotationSet
   } // toString()
   */
 
-  /** Two AnnotationSet are equal if their name, the documents of which belong
-    *  to the AnnotationSets and annotations from the sets are the same
-    */
-  public boolean equals(Object other) {
-    if (!super.equals(other)) return false;
-    if (other instanceof AnnotationSetImpl) {
-      AnnotationSet annotSet = (AnnotationSet) other;
-      // verify the documents which belong to
-      if ((doc == null)^ (annotSet.getDocument() == null)) return false;
-      if ((doc != null)&& (doc != annotSet.getDocument())) return false;
-
-      // verify the name of the AnnotationSets
-      if ((name == null)^ (annotSet.getName() == null)) return false;
-      if ((name!=null)&& (!name.equals(annotSet.getName()))) return false;
-    } else {
-      if (!(other instanceof Set)) return false;
-    }
-    return true;
-  } // equals
-
-  /**
-   *
-   * @return
-   */
-  public int hashCode() {
-    int hash = 0;
-    Iterator i = this.iterator();
-    while (i.hasNext()) {
-        Annotation annot = (Annotation)i.next();
-        if ( annot != null)
-            hash += annot.hashCode();
-    }
-    int nameHash = (name == null ? 0 : name.hashCode());
-    //int docHash = (doc == null ? 0 : doc.hashCode());
-
-    return hash ^ nameHash;// ^ docHash;
-  }
+//  public int hashCode() {
+//    int hash = 0;
+//    Iterator i = this.iterator();
+//    while (i.hasNext()) {
+//        Annotation annot = (Annotation)i.next();
+//        if ( annot != null)
+//            hash += annot.hashCode();
+//    }
+//    int nameHash = (name == null ? 0 : name.hashCode());
+//    //int docHash = (doc == null ? 0 : doc.hashCode());
+//
+//    return hash ^ nameHash;// ^ docHash;
+//  }
 
   /** The name of this set */
   String name = null;

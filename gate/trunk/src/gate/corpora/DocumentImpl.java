@@ -1982,60 +1982,30 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   /** Is the document markup-aware? */
   protected Boolean markupAware = new Boolean(false);
 
-  /** Check: test 2 objects for equality */
-  protected boolean check(Object a, Object b) {
-    if( (a == null || b == null) )
-      return a == b;
-
-    return a.equals(b);
-  } // check(a,b)
-
-  /** Equals */
-  public boolean equals(Object other) {
-    if(other == null ||
-       !(other instanceof DocumentImpl))return false;
-    DocumentImpl doc = (DocumentImpl) other;
-
-// PENDING EQUALS IMPLS
-    if(! check(content, doc.content)) return false;
-    if(! check(defaultAnnots, doc.defaultAnnots)) return false;
-    if(! check(encoding, doc.encoding)) return false;
-    if(! check(features, doc.features)) return false;
-    if(!markupAware.equals(doc.markupAware)) return false;
-    if(! check(namedAnnotSets, doc.namedAnnotSets)) return false;
-    if(nextAnnotationId != doc.nextAnnotationId) return false;
-    if(nextNodeId != doc.nextNodeId) return false;
-    if(! check(sourceUrl, doc.sourceUrl)) return false;
-    if(! check(sourceUrlStartOffset, doc.sourceUrlStartOffset)) return false;
-    if(! check(sourceUrlEndOffset, doc.sourceUrlEndOffset)) return false;
-
-    return true;
-  } // equals
-
-  /** Hash code */
-  public int hashCode() {
-    int code = getContent().hashCode();
-    int memberCode = (defaultAnnots == null) ? 0 : defaultAnnots.hashCode();
-    code += memberCode;
-    memberCode = (encoding == null) ? 0 : encoding.hashCode();
-    code += memberCode;
-    memberCode = (features == null) ? 0 : features.hashCode();
-    code += memberCode;
-    code += (markupAware.booleanValue()) ? 0 : 1;
-    memberCode = (namedAnnotSets == null) ? 0 : namedAnnotSets.hashCode();
-    code += memberCode;
-    code += nextAnnotationId;
-    code += nextNodeId;
-    memberCode = (sourceUrl == null) ? 0 : sourceUrl.hashCode();
-    code += memberCode;
-    memberCode =
-      (sourceUrlStartOffset == null) ? 0 : sourceUrlStartOffset.hashCode();
-    code += memberCode;
-    memberCode =
-      (sourceUrlEndOffset == null) ? 0 : sourceUrlEndOffset.hashCode();
-    code += memberCode;
-    return code;
-  } // hashcode
+//  /** Hash code */
+//  public int hashCode() {
+//    int code = getContent().hashCode();
+//    int memberCode = (defaultAnnots == null) ? 0 : defaultAnnots.hashCode();
+//    code += memberCode;
+//    memberCode = (encoding == null) ? 0 : encoding.hashCode();
+//    code += memberCode;
+//    memberCode = (features == null) ? 0 : features.hashCode();
+//    code += memberCode;
+//    code += (markupAware.booleanValue()) ? 0 : 1;
+//    memberCode = (namedAnnotSets == null) ? 0 : namedAnnotSets.hashCode();
+//    code += memberCode;
+//    code += nextAnnotationId;
+//    code += nextNodeId;
+//    memberCode = (sourceUrl == null) ? 0 : sourceUrl.hashCode();
+//    code += memberCode;
+//    memberCode =
+//      (sourceUrlStartOffset == null) ? 0 : sourceUrlStartOffset.hashCode();
+//    code += memberCode;
+//    memberCode =
+//      (sourceUrlEndOffset == null) ? 0 : sourceUrlEndOffset.hashCode();
+//    code += memberCode;
+//    return code;
+//  } // hashcode
 
   /** String respresentation */
   public String toString() {
