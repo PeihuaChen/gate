@@ -575,9 +575,15 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       jj_consume_token(equals);
       attrValPair = AttrVal();
       attrValObj = attrValPair.second;
-      c.addAttribute(
-        new JdmAttribute(attrNameTok.image, attrValObj)
-      );
+      try {
+        c.addAttribute(
+          new JdmAttribute(attrNameTok.image, attrValObj)
+        );
+      } catch(JdmException e) {
+        System.err.println(
+          "couldn't create attribute " + attrNameTok.image + e.toString()
+        );
+      }
       break;
     default:
       jj_la1[22] = jj_gen;
@@ -784,9 +790,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   String existingAttrName = null;
 
   blockBuffer.append("// RHS assignment block" + nl);
-  blockBuffer.append("      JdmSpanSequence spans = null;" + nl);
-  blockBuffer.append("      JdmAttributeSequence attrs = null;" + nl);
-  blockBuffer.append("      JdmAnnotation annot = null;" + nl);
+  //blockBuffer.append("      JdmSpanSequence spans = null;" + nl);
+  blockBuffer.append("      FeatureMap attrs = null;" + nl);
+  blockBuffer.append("      Annotation annot = null;" + nl);
     switch (jj_nt.kind) {
     case colon:
       jj_consume_token(colon);
@@ -979,7 +985,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       Token special = nextTok.specialToken;
       while(special != null) {
         /*Debug.pr(
-	  this, "ParseCpsl.ConsumeBlock: special.image = " + special.image
+          this, "ParseCpsl.ConsumeBlock: special.image = " + special.image
         );*/
         block.append(special.image);
         special = special.next;
@@ -1021,26 +1027,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     return retval;
   }
 
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    Token xsp;
-    if (jj_3R_23()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-      if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
+  final private boolean jj_3R_15() {
+    if (jj_3R_17()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -1053,6 +1041,32 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     return false;
   }
 
+  final private boolean jj_3R_14() {
+    if (jj_scan_token(ident)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_12()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_14()) {
+    jj_scanpos = xsp;
+    if (jj_3R_15()) {
+    jj_scanpos = xsp;
+    if (jj_3R_16()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
   final private boolean jj_3R_17() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1061,18 +1075,6 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     if (jj_3R_20()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3_1() {
-    if (jj_3R_12()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
@@ -1092,14 +1094,14 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     return false;
   }
 
-  final private boolean jj_3R_16() {
-    if (jj_3R_18()) return true;
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
-  final private boolean jj_3R_15() {
-    if (jj_3R_17()) return true;
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
@@ -1114,23 +1116,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     return false;
   }
 
-  final private boolean jj_3R_14() {
-    if (jj_scan_token(ident)) return true;
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_12() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) {
-    jj_scanpos = xsp;
-    if (jj_3R_16()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
 
@@ -1138,6 +1126,24 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     if (jj_scan_token(leftBracket)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     if (jj_3R_21()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
+    Token xsp;
+    if (jj_3R_23()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
+      if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_3R_18()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
