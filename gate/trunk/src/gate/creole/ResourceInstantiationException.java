@@ -62,8 +62,10 @@ public class ResourceInstantiationException extends GateException {
   public void printStackTrace(java.io.PrintStream s) {
     s.flush();
     super.printStackTrace(s);
-    s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
+    if(exception != null){
+      s.print("  Caused by:\n");
+      exception.printStackTrace(s);
+    }
   }
 
   /**
@@ -72,8 +74,10 @@ public class ResourceInstantiationException extends GateException {
   public void printStackTrace(java.io.PrintWriter s) {
     s.flush();
     super.printStackTrace(s);
-    s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
+    if(exception != null){
+      s.print("  Caused by:\n");
+      exception.printStackTrace(s);
+    }
   }
 
 } // ResourceInstantiationException
