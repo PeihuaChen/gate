@@ -202,9 +202,10 @@ public class TestGate {
         suite.addTest(TestRBTreeMap.suite());
         suite.addTest(TestCorpus.suite());
         suite.addTest(TestDB.suite());
-        suite.addTest(TestTokeniser.suite());
-        suite.addTest(TestGazetteer.suite());
-        suite.addTest(TestSplitterTagger.suite());
+//no longer needed as replaced by testPR
+//        suite.addTest(TestTokeniser.suite());
+//        suite.addTest(TestGazetteer.suite());
+//        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestPR.suite());
         suite.addTest(TestWeakValueHashMap.suite());
       } // if(allTests)
