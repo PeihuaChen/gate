@@ -149,13 +149,23 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
     //0. sync all dependednt resources
     for (int i=0; i< this.dependentResources.size(); i++) {
       LanguageResource lr = (LanguageResource)this.dependentResources.elementAt(i);
-      sync(lr);
+
+      try {
+        sync(lr);
+      }
+      catch(SecurityException se) {
+        //do nothing
+        //there was an oper and modified resource for which the user has no write
+        //privileges
+        //not doing anything is perfectly ok because the resource won't bechanged in DB
+      }
+
       //unload UI component
       Factory.deleteResource(lr);
     }
 
     //1. close security factory
-    ac.close();
+      ac.close();
 
     //2. close the JDBC connection
     try {
@@ -197,7 +207,7 @@ public abstract class JDBCDataStore extends AbstractFeatureBearer
    * image.
    */
   public abstract void sync(LanguageResource lr)
-    throws PersistenceException;
+    throws PersistenceException,SecurityException;
 
 
   /**
