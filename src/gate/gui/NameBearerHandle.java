@@ -505,10 +505,11 @@ public class NameBearerHandle implements Handle,
               }while(!nameOK);
               //save the file
               try{
-                FileWriter fw = new FileWriter(docFile);
-                fw.write(currentDoc.toXml());
-                fw.flush();
-                fw.close();
+                OutputStreamWriter writer = new OutputStreamWriter(
+                              new FileOutputStream(docFile),"UTF-8");
+                writer.write(currentDoc.toXml());
+                writer.flush();
+                writer.close();
               }catch(IOException ioe){
                 JOptionPane.showMessageDialog(
                   largeView != null ? largeView : smallView,
