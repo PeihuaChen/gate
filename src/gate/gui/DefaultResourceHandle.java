@@ -161,9 +161,9 @@ class DefaultResourceHandle implements ResourceHandle{
       if(resource instanceof SerialController){
         try{
           FeatureMap params = Factory.newFeatureMap();
-          params.put("document", resource);
-          view.add("Annotations",
-                   (JComponent)Factory.createResource("gate.gui.AnnotationEditor",
+          params.put("controller", resource);
+          view.add("Design",
+                   (JComponent)Factory.createResource("gate.gui.ApplicationViewer",
                                                       params)
                   );
         }catch(ResourceInstantiationException rie){

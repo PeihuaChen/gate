@@ -19,25 +19,37 @@ import java.io.IOException;
 
 public class ApplicationViewer extends AbstractVisualResource {
 
-  public ApplicationViewer(Controller controller, ApplicationHandle handle) {
+  public ApplicationViewer() {
+  }
+
+  public ApplicationViewer(Controller controller) {
     if(controller instanceof SerialController){
       this.controller = (SerialController)controller;
       this.handle = handle;
-      this.project = handle.project;
-      this.popup = handle.popup;
-      initLocalData();
-      initGuiComponents();
-      initListeners();
+      this.popup = handle.getPopup();
+      init();
     }else{
       throw new UnsupportedOperationException(
         "Editing of controllers implemented only for serial controllers!");
     }
   }
 
+  public void setController(SerialController controller){
+    this.controller = controller;
+  }
+
+  public Resource init(){
+    initLocalData();
+    initGuiComponents();
+    initListeners();
+    return this;
+  }
+
   protected void initLocalData(){
     paramsForPR = new HashMap();
     addActionForPR = new HashMap();
     removeActionForPR = new HashMap();
+/*
     Iterator prIter = project.getPRList().iterator();
     while(prIter.hasNext()){
       ProcessingResource pr = (ProcessingResource)prIter.next();
@@ -47,6 +59,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       addActionForPR.put(pr, addAction);
       removeActionForPR.put(pr, remAction);
     }
+*/
   }
 
   protected void initGuiComponents(){
@@ -307,7 +320,7 @@ public class ApplicationViewer extends AbstractVisualResource {
   }//protected void initListeners()
 
   protected void updateActions(){
-    Iterator prIter = project.getPRList().iterator();
+    Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
     while(prIter.hasNext()){
       ProcessingResource pr = (ProcessingResource)prIter.next();
       if(!addActionForPR.containsKey(pr)){
@@ -466,21 +479,23 @@ public class ApplicationViewer extends AbstractVisualResource {
         tipText = ((ResourceData)
                    Gate.getCreoleRegister().get(pr.getClass().getName())
                    ).getComment();
-        List prList = project.getPRList();
+        List prList = Gate.getCreoleRegister().getPrInstances();
         prList.remove(controller);
         Iterator prIter = prList.iterator();
         boolean done = false;
         while(!done && prIter.hasNext()){
           if(pr == prIter.next()){
             MainFrame frame = MainFrame.getInstance();
-            PRHandle prHandle = null;// = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("gate.NAME"));
+            //PRHandle prHandle = null;// = (PRHandle)frame.handleForResourceName.get(pr.getFeatures().get("gate.NAME"));
             done = true;
+/*
             if(prHandle != null){
               Icon icon = prHandle.getIcon();
               setOpenIcon(icon);
               setClosedIcon(icon);
               setLeafIcon(icon);
             }
+*/
           }
         }
       }else if (value instanceof ParameterDisjunction){
@@ -510,7 +525,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   class ModulesTableModel extends AbstractTableModel{
     public int getRowCount(){
-      return project.getPRList().size() - controller.size() -1;
+      return Gate.getCreoleRegister().getPrInstances().size() - controller.size() -1;
     }
 
     public int getColumnCount(){
@@ -535,7 +550,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 
     public Object getValueAt(int rowIndex, int columnIndex){
       //find the right PR
-      List allPrs = project.getPRList();
+      List allPrs = Gate.getCreoleRegister().getPrInstances();
       allPrs.remove(controller);
       Iterator allPRsIter = allPrs.iterator();
       int index = -1;
@@ -611,9 +626,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
         public void run(){
-          if(handle.project.frame instanceof MainFrame){
-            ((MainFrame)handle.project.frame).showWaitDialog();
-          }
+          MainFrame.getInstance().showWaitDialog();
           Iterator prsIter = controller.iterator();
           while(prsIter.hasNext()){
             ProcessingResource pr = (ProcessingResource)prsIter.next();
@@ -660,9 +673,7 @@ public class ApplicationViewer extends AbstractVisualResource {
             }
           }
           controller.run();
-          if(handle.project.frame instanceof MainFrame){
-            ((MainFrame)handle.project.frame).hideWaitDialog();
-          }
+          MainFrame.getInstance().hideWaitDialog();
         }
       };
       Thread thread = new Thread(runnable);
@@ -825,7 +836,7 @@ public class ApplicationViewer extends AbstractVisualResource {
       button.setToolTipText("Set from file...");
       button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          JFileChooser fileChooser = handle.project.frame.fileChooser;
+          JFileChooser fileChooser = MainFrame.getInstance().fileChooser;
           int res = fileChooser.showOpenDialog(ApplicationViewer.this);
           if(res == fileChooser.APPROVE_OPTION){
             try{
@@ -901,8 +912,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 */
 
   SerialController controller;
-  ProjectData project;
-  ApplicationHandle handle;
+  ResourceHandle handle;
   JTreeTable mainTreeTable;
   PRsAndParamsTTModel mainTTModel;
   JPopupMenu popup;
