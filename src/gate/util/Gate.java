@@ -22,9 +22,6 @@ public class Gate
 {
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
-"file:/z:/tmp/creole.xml",
-    "http://gate.ac.uk/creole",
-    "http://gate.ac.uk/creole/",
     "http://gate.ac.uk/creole/creole.xml"
   };
 
