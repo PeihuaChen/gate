@@ -2,6 +2,8 @@
 # gate.sh - UNIX front-end for GATE 2. Hamish, summer 98
 # $Id$
 
+make run
+exit
 
 # what are we running on?
 case `uname -a` in

@@ -98,6 +98,7 @@ classes.jar: classes
 resources:
 	cd ../src/gate && cp -R resources ../../classes/gate
 	cd ../classes/gate/resources && rm -r `find . -name CVS -print`
+	cp version.txt ../classes/gate/resources
 
 # refresh the jar with all the class files
 jarupdate:
@@ -123,6 +124,11 @@ jaclsh:
 # run the GUK editor
 gukdemo: 
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` guk.Editor
+
+# run the main interface
+run: 
+	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
+	  -Xmx200m gate.Main
 
 # make the javadoc documentation
 docs:
