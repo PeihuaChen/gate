@@ -158,28 +158,6 @@ problem.
     <!--<TD>spare2</TD>-->
   </TR>
 
-
-  <TR>
-    <TD>00022</TD>
-    <TD>Oracle DB</TD>
-    <TD>-</TD>
-    <TD>Marin</TD>
-    <TD>-</TD>
-    <TD>-</TD>
-    <TD>
-        <p>the DatabaseCorpus implemtnation loads the documents from the corpus when the latter is read. Since the DatabaseDocuments
-        do not contain much data (everything is loaded on demand) there is no overhead but the documents appear in the GUI which is not the
-        case with the serial implementatin</p>
-    </TD>
-    <TD>-</TD>
-    <TD>-</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-
-
-
   <TR>
     <TD>00043</TD>
     <TD>gui - feature request</TD>
@@ -319,21 +297,6 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <TD>___fixed_on ___date ___Gversion</TD>
     <TD>a more intelligent saving logic for when corpora get processed, docs opened, processed, and unloaded.
     corpus.unloadDocument() should behave smarter than always saving the doc. </TD>
-    <TD>___test_method</TD>
-    <TD>___supporting_materials</TD>
-    <!--<TD>spare1</TD>-->
-    <!--<TD>spare2</TD>-->
-  </TR>
-
-<TR>
-    <TD>00069</TD>
-    <TD>Oracle DB</TD>
-    <TD>Marin</TD>
-    <TD>Marin</TD>
-    <TD>beta1</TD>
-    <TD>___fixed_on ___date ___Gversion</TD>
-    <TD>if  a document is removed from persistent corpus, the sync() won't properly detach the doc from the corpus in the database
-    i.e. if the corpus is loaded again the document will still be part of it</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
@@ -689,6 +652,25 @@ still matches them to BT, when it should not. </TD>
     <!--<TD>spare1</TD>-->
     <!--<TD>spare2</TD>-->
   </TR>
+
+  <TR>
+    <TD>00022</TD>
+    <TD>Oracle DB</TD>
+    <TD>-</TD>
+    <TD>Marin</TD>
+    <TD>Jan 21 2002 Beta1 build760</TD>
+    <TD>Mar 06 2002 rc1</TD>
+    <TD>
+        <p>the DatabaseCorpus implemtnation loads the documents from the corpus when the latter is read. Since the DatabaseDocuments
+        do not contain much data (everything is loaded on demand) there is no overhead but the documents appear in the GUI which is not the
+        case with the serial implementatin</p>
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 
 <TR>
     <TD>00023</TD>
@@ -1385,6 +1367,21 @@ gate.corpora.DocumentImpl
  at gate.persist.SerialDataStore.sync(SerialDataStore.java:370)
    </tr>
 </TD>
+    <TD>___test_method</TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
+<TR>
+    <TD>00069</TD>
+    <TD>Oracle DB</TD>
+    <TD>Marin</TD>
+    <TD>Marin</TD>
+    <TD>beta1</TD>
+    <TD>06 March 2002</TD>
+    <TD>if  a document is removed from persistent corpus, the sync() won't properly detach the doc from the corpus in the database
+    i.e. if the corpus is loaded again the document will still be part of it</TD>
     <TD>___test_method</TD>
     <TD>___supporting_materials</TD>
     <!--<TD>spare1</TD>-->
