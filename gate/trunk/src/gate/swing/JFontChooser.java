@@ -49,7 +49,7 @@ public class JFontChooser extends JPanel {
     else windowParent = SwingUtilities.getWindowAncestor(parent);
     if(windowParent == null) throw new IllegalArgumentException(
       "The supplied parent component has no window ancestor");
-    JDialog dialog;
+    final JDialog dialog;
     if(windowParent instanceof Frame) dialog = new JDialog((Frame)windowParent,
                                                            title, true);
     else dialog = new JDialog((Dialog)windowParent, title, true);
@@ -57,7 +57,7 @@ public class JFontChooser extends JPanel {
     dialog.getContentPane().setLayout(new BoxLayout(dialog.getContentPane(),
                                                     BoxLayout.Y_AXIS));
 
-    JFontChooser fontChooser = new JFontChooser(initialfont);
+    final JFontChooser fontChooser = new JFontChooser(initialfont);
     dialog.getContentPane().add(fontChooser);
 
     JButton okBtn = new JButton("OK");
@@ -71,7 +71,26 @@ public class JFontChooser extends JPanel {
     buttonsBox.add(Box.createHorizontalGlue());
     dialog.getContentPane().add(buttonsBox);
     dialog.pack();
+    fontChooser.addComponentListener(new ComponentAdapter() {
+      public void componentResized(ComponentEvent e) {
+        dialog.pack();
+      }
+    });
+    okBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        dialog.hide();
+      }
+    });
+
+    cancelBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        dialog.hide();
+        fontChooser.setFontValue(null);
+      }
+    });
+
     dialog.show();
+
     return fontChooser.getFontValue();
   }// showDialog
 
@@ -113,7 +132,8 @@ public class JFontChooser extends JPanel {
     sampleTextArea = new JTextArea("Type your sample here...");
     JPanel samplePanel = new JPanel();
     samplePanel.setLayout(new BoxLayout(samplePanel, BoxLayout.X_AXIS));
-    samplePanel.add(new JScrollPane(sampleTextArea));
+    //samplePanel.add(new JScrollPane(sampleTextArea));
+    samplePanel.add(sampleTextArea);
     samplePanel.setBorder(BorderFactory.createTitledBorder("Sample"));
     add(samplePanel);
     add(Box.createVerticalStrut(10));
@@ -124,15 +144,26 @@ public class JFontChooser extends JPanel {
     this.addPropertyChangeListener("fontValue",
                                    new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt){
-
-        familyCombo.setSelectedItem(fontValue.getName());
-        boldChk.setSelected(fontValue.isBold());
-        italicChk.setSelected(fontValue.isItalic());
-        sampleTextArea.setFont(fontValue);
+        if(fontValue == null) return;
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            familyCombo.setSelectedItem(fontValue.getName());
+            sizeCombo.setSelectedItem(Integer.toString(fontValue.getSize()));
+            boldChk.setSelected(fontValue.isBold());
+            italicChk.setSelected(fontValue.isItalic());
+            sampleTextArea.setFont(fontValue);
+          }
+        });
       }
     });
 
     familyCombo.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        updateFont();
+      }
+    });
+
+    sizeCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         updateFont();
       }
@@ -170,8 +201,16 @@ public class JFontChooser extends JPanel {
     }catch(Exception e){
       e.printStackTrace();
     }
-    JFrame frame = new JFrame("Foo frame");
+    final JFrame frame = new JFrame("Foo frame");
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    JButton btn = new JButton("Show dialog");
+    btn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        System.out.println(showDialog(frame, "Fonter",
+                                      UIManager.getFont("Button.font")));
+      }
+    });
+    frame.getContentPane().add(btn);
     frame.setSize(new Dimension(300, 300));
     frame.setVisible(true);
     System.out.println("Font: " + UIManager.getFont("Button.font"));
@@ -199,6 +238,11 @@ public class JFontChooser extends JPanel {
     propertyChangeListeners.addPropertyChangeListener(l);
   }
 
+  public synchronized void addPropertyChangeListener(String propertyName,
+                                                     PropertyChangeListener l) {
+    super.addPropertyChangeListener(propertyName, l);
+    propertyChangeListeners.addPropertyChangeListener(propertyName, l);
+  }
 
   JComboBox familyCombo;
   JCheckBox italicChk;
