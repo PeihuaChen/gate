@@ -56,7 +56,9 @@ public class Main {
     * <LI>
     * <B>-i file</B> additional initialisation file (probably called
     *   <TT>gate.xml</TT>). Used for site-wide initialisation by the
-    *   start-up scripts.
+    *   start-up scripts
+    * <LI>
+    * <B>-a</B> run the DB administration tool
     * </UL>
     */
   public static void main(String[] args) throws GateException {
@@ -84,6 +86,9 @@ public class Main {
     if(batchMode) {
       if(DEBUG) Out.prln("running batch process");
       batchProcess();
+    } else if(dbAdminMode) {
+      if(DEBUG) Out.prln("running dbAdmin");
+      dbAdmin();
     } else {
       runGui();
     }
@@ -228,6 +233,10 @@ public class Main {
       }
     });
   } // runGui()
+
+  /** Run the db admin interface. */
+  private static void dbAdmin() throws GateException {
+  } // dbAdmin()
 
   /**
    * Reads the user config data and applies the required settings.
@@ -433,6 +442,9 @@ public class Main {
   /** Are we in batch mode? */
   public static boolean batchMode = false;
 
+  /** Are we in db admin mode? */
+  public static boolean dbAdminMode = false;
+
   /** Don't save collection after batch? */
   private static boolean destroyColl = false;
 
@@ -452,10 +464,14 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hd:ei:");
+    Getopt g = new Getopt("GATE main", args, "hd:ei:a");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
+        // -a
+        case 'a':
+          dbAdminMode = true;
+          break;
         // -h
         case 'h':
           help();
@@ -492,10 +508,10 @@ public class Main {
           }
           Gate.setSiteConfigFile(f);
           if(DEBUG)
-      Out.prln(
-        "Initialisation file " + optionString +
-        " recorded for initialisation"
-      );
+            Out.prln(
+              "Initialisation file " + optionString +
+              " recorded for initialisation"
+            );
           break;
         // -e runs the CorpusBenchmarkTool (e for evaluate)
         case 'e':
