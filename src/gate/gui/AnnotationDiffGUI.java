@@ -128,9 +128,8 @@ public class AnnotationDiffGUI extends JFrame{
     diffTableModel = new DiffTableModel();
     diffTable = new XJTable(diffTableModel);
     diffTable.setDefaultRenderer(String.class, new DiffTableCellRenderer());
-    diffTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+    diffTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     scroller = new JScrollPane(diffTable);
-//    scroller.setColumnHeaderView(diffTable.getTableHeader());
     getContentPane().add(scroller, constraints);
     
     //build the results pane
@@ -366,6 +365,7 @@ public class AnnotationDiffGUI extends JFrame{
   
   public void pack(){
     super.pack();
+    
     setSize(getWidth(), getHeight() + 100);
   }
   protected void populateGUI(){
@@ -437,7 +437,7 @@ public class AnnotationDiffGUI extends JFrame{
             int row,
             int column){
       Component res = super.getTableCellRendererComponent(table,
-              value, isSelected, hasFocus, row, column);
+              value, false, true, row, column);
       res.setBackground(diffTableModel.getBackgroundAt(row, column));
       return res;
     }
