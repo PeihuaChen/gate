@@ -35,6 +35,7 @@ import gate.*;
 import gate.util.*;
 import gate.swing.*;
 import gate.creole.*;
+import gate.event.*;
 
 /**
  * Allows the editing of a set of parameters for a resource. It needs a pointer
@@ -42,7 +43,7 @@ import gate.creole.*;
  * should be displayed. The list of the parameters is actually a list of lists
  * of strings representing parameter disjunctions.
  */
-public class ResourceParametersEditor extends XJTable{
+public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
   public ResourceParametersEditor(){
     initLocalData();
@@ -104,6 +105,7 @@ public class ResourceParametersEditor extends XJTable{
 
 
   protected void initListeners(){
+    Gate.getCreoleRegister().addCreoleListener(this);
   }
 
   /**
@@ -115,6 +117,7 @@ public class ResourceParametersEditor extends XJTable{
    * from the user's edits.
    */
   public void setParameters() throws ResourceInstantiationException{
+    if(resource == null || parameterDisjunctions == null) return;
     //stop current edits
     if(getEditingColumn() != -1 && getEditingRow() != -1){
       editingStopped(new ChangeEvent(getCellEditor(getEditingRow(),
@@ -157,6 +160,19 @@ public class ResourceParametersEditor extends XJTable{
       }
     }
     return values;
+  }
+
+  public void resourceLoaded(CreoleEvent e) {
+    repaint();
+  }
+  public void resourceUnloaded(CreoleEvent e) {
+    repaint();
+  }
+  public void datastoreOpened(CreoleEvent e) {
+  }
+  public void datastoreCreated(CreoleEvent e) {
+  }
+  public void datastoreClosed(CreoleEvent e) {
   }
 
   ParametersTableModel tableModel;
@@ -326,7 +342,8 @@ public class ResourceParametersEditor extends XJTable{
 
       if(rData != null){
         //Gate type
-        combo.setModel(new DefaultComboBoxModel(new Object[]{value}));
+        combo.setModel(new DefaultComboBoxModel(new Object[]{(value==null)  ?
+                                                              "" : value}));
         return combo;
       }else{
         //non Gate type -> we'll use the text field
@@ -457,6 +474,27 @@ public class ResourceParametersEditor extends XJTable{
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
+      label = new JLabel(){
+        public boolean isFocusTraversable(){
+          return true;
+        }
+      };
+      label.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+      label.addMouseListener(new MouseAdapter() {
+        public void mouseClicked(MouseEvent e) {
+          Boolean value = new Boolean(label.getText());
+          value = new Boolean(!value.booleanValue());
+          label.setText(value.toString());
+        }
+      });
+      label.addKeyListener(new KeyAdapter() {
+        public void keyTyped(KeyEvent e) {
+          Boolean value = new Boolean(label.getText());
+          value = new Boolean(!value.booleanValue());
+          label.setText(value.toString());
+        }
+      });
+
     }//ParameterValueEditor()
 
     public Component getTableCellEditorComponent(JTable table,
@@ -465,7 +503,7 @@ public class ResourceParametersEditor extends XJTable{
                                                  int row,
                                                  int column){
 
-      String type = ((ParameterDisjunction)table.getValueAt(row, 0)).getType();
+      type = ((ParameterDisjunction)table.getValueAt(row, 0)).getType();
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
 
       if(rData != null){
@@ -480,33 +518,60 @@ public class ResourceParametersEditor extends XJTable{
         comboUsed = false;
         textField.setText((value == null) ? "" : value.toString());
         if(type.equals("java.net.URL")){
+          textField.setEditable(true);
           textButtonBox.removeAll();
           textButtonBox.add(textField);
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(button);
           return textButtonBox;
-        }else return textField;
+        }else if(type.equals("java.lang.Boolean")){
+          label.setText(value.toString());
+          return label;
+        }else {
+          textField.setEditable(true);
+          return textField;
+        }
       }
     }//getTableCellEditorComponent
 
     public Object getCellEditorValue(){
       if(comboUsed) return combo.getSelectedItem();
-      else return ((textField.getText().equals("")) ? null :
-                                                      textField.getText());
+      else{
+        if(type.equals("java.lang.Boolean")){
+          //get the value from the label
+          return new Boolean(label.getText());
+        }else{
+          //get the value from the text field
+          return ((textField.getText().equals("")) ? null :
+                                                     textField.getText());
+        }
+      }
     }//public Object getCellEditorValue()
 
+    /**
+     * The type of the value currently being edited
+     */
+    String type;
 
-    public boolean stopCellEditing(){
-      if(comboUsed) combo.hidePopup();
-      return super.stopCellEditing();
-    }
-
+    /**
+     * Combobox use as editor for Gate objects (chooses between instances)
+     */
     JComboBox combo;
+
+    /**
+     * Editor used for boolean values
+     */
+    JLabel label;
+
+    /**
+     * Generic editor for all types that are not treated special
+     */
     JTextField textField;
+
     boolean comboUsed;
     JButton button;
     JPanel textButtonBox;
-  }////class ParameterValueEditor
+  }//class ParameterValueEditor
 
 
 

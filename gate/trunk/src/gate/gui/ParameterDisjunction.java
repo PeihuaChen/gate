@@ -19,6 +19,7 @@ import gate.creole.*;
 import gate.util.*;
 
 import java.util.*;
+import gate.event.*;
 
 /**
  * Represents a list of Parameters which are alternative to each other.
@@ -26,7 +27,7 @@ import java.util.*;
  * The currently accessible (selected) parameter can be changed using the
  * {@link setSelectedIndex(int index)} method.
  */
-class ParameterDisjunction {
+public class ParameterDisjunction implements CreoleListener {
 
   /**
    * Creation from a resources and a list of names.
@@ -40,6 +41,8 @@ class ParameterDisjunction {
    * isjunction; each element is a {@link gate.creole.Parameter}.
    */
   public ParameterDisjunction(Resource resource, List parameters){
+    Gate.getCreoleRegister().addCreoleListener(this);
+    this.resource = resource;
     params = new Parameter[parameters.size()];
     names = new String[parameters.size()];
     values = new Object[parameters.size()];
@@ -55,13 +58,15 @@ class ParameterDisjunction {
       try{
         values[i] = (resource == null) ?
                     null : resource.getParameterValue(params[i].getName());
-      }catch(ResourceInstantiationException rie){
-        values[i] = null;
-      }
-      try{
         if(values[i] == null) values[i] = params[i].getDefaultValue();
+      }catch(ResourceInstantiationException rie){
+        throw new GateRuntimeException(
+          "Could not get read accessor method for \"" + names[i] +
+          "\"property of " + resource.getClass().getName());
       }catch(ParameterException pe){
-        values[i] = null;
+        throw new GateRuntimeException(
+          "Could not get default value for \"" + names[i] +
+          "\"property of " + resource.getClass().getName());
       }
       required[i] = new Boolean(!params[i].isOptional());
     }
@@ -130,6 +135,35 @@ class ParameterDisjunction {
     return params;
   }
 
+  /**
+   * Called when a resource has been unloaded from the system;
+   * If any of the parameters has this resource as value then the value will be
+   * deleted.
+   * If the resource is null then an attempt will be made to reinitialise the
+   * null values.
+   */
+  protected void updateValues(Resource res){
+    for(int i =0 ; i < values.length; i++){
+      if(values[i] == res){
+        values[i] = null;
+        try{
+          values[i] = (resource == null) ?
+                      null : resource.getParameterValue(params[i].getName());
+          if(values[i] == null) values[i] = params[i].getDefaultValue();
+        }catch(ResourceInstantiationException rie){
+          throw new GateRuntimeException(
+            "Could not get read accessor method for \"" + names[i] +
+            "\"property of " + resource.getClass().getName());
+        }catch(ParameterException pe){
+          throw new GateRuntimeException(
+            "Could not get default value for \"" + names[i] +
+            "\"property of " + resource.getClass().getName());
+        }
+      }
+    }
+  }
+
+
   int selectedIndex;
   String[] names;
   String[] comments;
@@ -137,4 +171,19 @@ class ParameterDisjunction {
   Object[] values;
   Boolean[] required;
   Parameter[] params;
+  Resource resource;
+
+  public void resourceLoaded(CreoleEvent e) {
+    updateValues(null);
+  }
+
+  public void resourceUnloaded(CreoleEvent e) {
+    updateValues(e.getResource());
+  }
+  public void datastoreOpened(CreoleEvent e) {
+  }
+  public void datastoreCreated(CreoleEvent e) {
+  }
+  public void datastoreClosed(CreoleEvent e) {
+  }
 }////// class ParameterDisjunction

@@ -124,6 +124,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setSortable(false);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
+    memberPRsTable.setDefaultRenderer(Boolean.class, new BooleanRenderer());
     memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
 
     final int width2 = new JLabel("Selected Processing resources").
@@ -321,11 +322,21 @@ public class SerialControllerEditor extends AbstractVisualResource
       public void mouseClicked(MouseEvent e) {
         int row = loadedPRsTable.rowAtPoint(e.getPoint());
         //load modules on double click
+        ProcessingResource pr = (ProcessingResource)
+                                loadedPRsTableModel.getValueAt(row, 0);
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-          ProcessingResource pr = (ProcessingResource)
-                                  loadedPRsTableModel.getValueAt(row, 0);
           new AddPRAction(pr).actionPerformed(null);
-        }
+        }else if(SwingUtilities.isRightMouseButton(e)){
+            JPopupMenu popup = new JPopupMenu();
+            popup.add(new AddPRAction(pr){
+              {
+                putValue(NAME, "Add \"" + this.pr.getName() +
+                               "\" to the \"" + controller.getName() +
+                               "\" application");
+              }
+            });
+            popup.show(loadedPRsTable, e.getPoint().x, e.getPoint().y);
+          }
       }
 
       public void mousePressed(MouseEvent e) {
@@ -454,11 +465,50 @@ public class SerialControllerEditor extends AbstractVisualResource
     SerialControllerEditor.this.repaint(100);
   }
 
+  /**
+   * Checks whether the provided PR has all the required runtime parameters set
+   */
+  protected boolean checkRuntimeParameters(ProcessingResource pr){
+    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+    if(rData != null){
+      //this is  a list of lists
+      List runtimeParams = rData.getParameterList().getRuntimeParameters();
+      Iterator disIter = runtimeParams.iterator();
+      while(disIter.hasNext()){
+        List disjunction = (List)disIter.next();
+        boolean required = !((Parameter)disjunction.get(0)).isOptional();
+        if(required){
+          //at least one parameter in the disjunction must have a value
+          boolean valueSet = false;
+          Iterator parIter = disjunction.iterator();
+          while(!valueSet && parIter.hasNext()){
+            Parameter par = (Parameter)parIter.next();
+            try{
+              valueSet = (pr.getParameterValue(par.getName()) != null);
+            }catch(ResourceInstantiationException rie){
+              throw new GateRuntimeException(
+                "Could not read \"" + par.getName() +
+                "\"property of " + pr.getClass().getName() +
+                "\n" + rie.toString());
+            }
+          }
+          if(!valueSet) return false;
+        }
+      }
+      return true;
+    }else{
+      throw new GateRuntimeException("Could not get resource data for " +
+                                     pr.getClass().getName());
+    }
+  }
+
+
   //CreoleListener implementation
   public void resourceLoaded(CreoleEvent e) {
     if(e.getResource() instanceof ProcessingResource){
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
+      repaint(100);
     }
   }// public void resourceLoaded
 
@@ -470,6 +520,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
+      repaint(100);
     }
   }//public void resourceUnloaded(CreoleEvent e)
 
@@ -580,7 +631,8 @@ public class SerialControllerEditor extends AbstractVisualResource
                               ((List)controller.getPRs()).get(row);
       switch(column){
         case 0 : return pr;
-        case 1 : {
+        case 1 : return new Boolean(checkRuntimeParameters(pr));
+        case 2 : {
           ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                                     get(pr.getClass().getName());
           if(rData == null) return pr.getClass();
@@ -591,13 +643,14 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     public int getColumnCount(){
-      return 2;
+      return 3;
     }
 
     public String getColumnName(int columnIndex){
       switch(columnIndex){
         case 0 : return "Name";
-        case 1 : return "Type";
+        case 1 : return "!";
+        case 2 : return "Type";
         default: return "?";
       }
     }
@@ -605,7 +658,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
         case 0 : return ProcessingResource.class;
-        case 1 : return String.class;
+        case 1 : return Boolean.class;
+        case 2 : return String.class;
         default: return Object.class;
       }
     }
@@ -673,7 +727,18 @@ public class SerialControllerEditor extends AbstractVisualResource
         public void run(){
 
           //stop editing the parameters
-          showParamsEditor(null);
+          try{
+            parametersEditor.setParameters();
+          }catch(ResourceInstantiationException rie){
+            JOptionPane.showMessageDialog(
+              SerialControllerEditor.this,
+              "Could not set parameters for the \"" +
+              parametersEditor.getResource().getName() +
+              "\" processing resource:\nSee \"Messages\" tab for details!",
+              "Gate", JOptionPane.ERROR_MESSAGE);
+              rie.printStackTrace(Err.getPrintWriter());
+              return;
+          }
           //set the listeners
           StatusListener sListener = new InternalStatusListener();
           ProgressListener pListener = new InternalProgressListener();
@@ -696,9 +761,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               SerialControllerEditor.this,
               "Interrupted!\n" + eie.toString(),
               "Gate", JOptionPane.ERROR_MESSAGE);
-            Gate.setExecutable(null);
           }catch(ExecutionException ee) {
-            Gate.setExecutable(null);
             ee.printStackTrace(Err.getPrintWriter());
             Exception exc = ee.getException();
             if(exc != null){
@@ -711,15 +774,14 @@ public class SerialControllerEditor extends AbstractVisualResource
               "\" :\nSee \"Messages\" tab for details!",
               "Gate", JOptionPane.ERROR_MESSAGE);
           }catch(Exception e){
-            Gate.setExecutable(null);
             JOptionPane.showMessageDialog(SerialControllerEditor.this,
                                           "Unhandled execution error!\n " +
                                           "See \"Messages\" tab for details!",
                                           "Gate", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace(Err.getPrintWriter());
+          }finally{
+            Gate.setExecutable(null);
           }//catch
-          Gate.setExecutable(null);
-
 
           //remove the listeners
           controller.removeStatusListener(sListener);

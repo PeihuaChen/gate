@@ -103,7 +103,7 @@ public class ResourceRenderer extends JLabel
       rData = (ResourceData)Gate.getCreoleRegister().
                                  get(value.getClass().getName());
     }else{
-      text = value.toString();
+      text = (value == null) ? "" : value.toString();
     }
     if(rData != null){
       toolTipText = "<HTML>Type: <b>" + rData.getName() + "</b></HTML>";
@@ -116,11 +116,12 @@ public class ResourceRenderer extends JLabel
       icon = (iconName == null) ? null : MainFrame.getIcon(iconName);
     }else{
       icon = null;
+      toolTipText = null;
     }
 
     setText(text);
     setIcon(icon);
-    setToolTipText(value.getClass().getName());
+    setToolTipText(toolTipText);
   }
 
   protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
