@@ -395,6 +395,8 @@ public class MainFrame extends JFrame
 
     JMenu fileMenu = new JMenu("File");
 
+    fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(), this));
+    fileMenu.addSeparator();
     newLrMenu = new JMenu("New language resource");
     fileMenu.add(newLrMenu);
     newPrMenu = new JMenu("New processing resource");
@@ -1226,6 +1228,73 @@ public class MainFrame extends JFrame
       bootStrapDialog.show();
     }// actionPerformed();
   }//class NewBootStrapAction
+
+
+  class LoadCreoleRepositoryAction extends AbstractAction {
+    public LoadCreoleRepositoryAction(){
+      super("Load a CREOLE repository");
+      putValue(SHORT_DESCRIPTION,"Load a CREOLE repository");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Box messageBox = Box.createHorizontalBox();
+      Box leftBox = Box.createVerticalBox();
+      JTextField urlTextField = new JTextField(40);
+      leftBox.add(new JLabel("Type an URL"));
+      leftBox.add(urlTextField);
+      messageBox.add(leftBox);
+
+      messageBox.add(Box.createHorizontalStrut(10));
+      messageBox.add(new JLabel("or"));
+      messageBox.add(Box.createHorizontalStrut(10));
+
+      class URLfromFileAction extends AbstractAction{
+        URLfromFileAction(JTextField textField){
+          super("Select a directory", getIcon("loadFile.gif"));
+          putValue(SHORT_DESCRIPTION,"Select a directory");
+          this.textField = textField;
+        }
+
+        public void actionPerformed(ActionEvent e){
+          fileChooser.setMultiSelectionEnabled(false);
+          fileChooser.setFileSelectionMode(fileChooser.DIRECTORIES_ONLY);
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          int result = fileChooser.showOpenDialog(MainFrame.this);
+          if(result == fileChooser.APPROVE_OPTION){
+            try{
+              textField.setText(fileChooser.getSelectedFile().
+                                            toURL().toExternalForm());
+            }catch(MalformedURLException mue){
+              throw new GateRuntimeException(mue.toString());
+            }
+          }
+        }
+        JTextField textField;
+      };//class URLfromFileAction extends AbstractAction
+
+      Box rightBox = Box.createVerticalBox();
+      rightBox.add(new JLabel("Select a file"));
+      JButton fileBtn = new JButton(new URLfromFileAction(urlTextField));
+      rightBox.add(fileBtn);
+      messageBox.add(rightBox);
+
+
+//JOptionPane.showInputDialog(
+//                            MainFrame.this,
+//                            "Select type of Datastore",
+//                            "Gate", JOptionPane.QUESTION_MESSAGE,
+//                            null, names,
+//                            names[0]);
+
+      int res = JOptionPane.showConfirmDialog(
+        MainFrame.this,
+        messageBox,
+        "Enter an URL to the directory containig the \"creole.xml\" file",
+        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null);
+
+    }
+  }//class LoadCreoleRepositoryAction extends AbstractAction
+
 
   class NewApplicationAction extends AbstractAction {
     public NewApplicationAction() {
