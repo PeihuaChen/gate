@@ -492,11 +492,29 @@ public class AnnotationDiff extends JPanel implements VisualResource{
                                             null,
                                             DEFAULT_TYPE,
                                             NULL_TYPE);
-        else
-          diffElement = new DiffSetElement( keyAnnot,
-                                            null,
-                                            MISSING_TYPE,
-                                            NULL_TYPE);
+        else{
+          // If keyAnnot is not in keyPartiallySet then it has to be checked
+          // agains all annotations in DiffSet to see if there is
+          // a previous annotation from response set which is partially
+          // compatible with the keyAnnot
+          Iterator respParIter = diffSet.iterator();
+          while (respParIter.hasNext()){
+            DiffSetElement diffElem = (DiffSetElement) respParIter.next();
+            Annotation respAnnot = diffElem.getRightAnnotation();
+            if (respAnnot != null && keyAnnot.isPartiallyCompatible(respAnnot)){
+                diffElement = new DiffSetElement( keyAnnot,
+                                                  null,
+                                                  DEFAULT_TYPE,
+                                                  NULL_TYPE);
+                break;
+            }// End if
+          }// End while
+          if (diffElement == null)
+            diffElement = new DiffSetElement( keyAnnot,
+                                              null,
+                                              MISSING_TYPE,
+                                              NULL_TYPE);
+        }// End if
         addToDiffset(diffElement);
       }// End if
 
