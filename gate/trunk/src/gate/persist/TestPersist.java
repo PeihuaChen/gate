@@ -136,6 +136,7 @@ public class TestPersist extends TestCase
     sds.sync(doc);
 
     // remember the persistence ID for reading back
+    // (in the normal case these ids are obtained by DataStore.getLrIds(type))
     String lrPersistenceId =
       (String) doc.getFeatures().get("DataStoreInstanceId");
 
