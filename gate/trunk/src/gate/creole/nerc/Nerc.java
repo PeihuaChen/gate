@@ -63,7 +63,7 @@ public class Nerc extends AbstractProcessingResource {
       Gate.setHiddenAttribute(features, true);
       tokeniser = (DefaultTokeniser)Factory.createResource(
                     "gate.creole.tokeniser.DefaultTokeniser",
-                    params, features, listeners);
+                    params, features, listeners, null);
       tokeniser.setName("Tokeniser " + System.currentTimeMillis());
       fireProgressChanged(10);
 
@@ -84,7 +84,7 @@ public class Nerc extends AbstractProcessingResource {
 
       gazetteer = (DefaultGazetteer)Factory.createResource(
                       "gate.creole.gazetteer.DefaultGazetteer",
-                      params, features, listeners);
+                      params, features, listeners, null);
       gazetteer.setName("Gazetteer " + System.currentTimeMillis());
       fireProgressChanged(50);
 
@@ -107,7 +107,7 @@ public class Nerc extends AbstractProcessingResource {
 
       splitter = (SentenceSplitter)Factory.createResource(
                       "gate.creole.splitter.SentenceSplitter",
-                      params, features, listeners);
+                      params, features, listeners, null);
       splitter.setName("Splitter " + System.currentTimeMillis());
 
       fireProgressChanged(60);
@@ -130,7 +130,7 @@ public class Nerc extends AbstractProcessingResource {
 
       tagger = (POSTagger)Factory.createResource(
                       "gate.creole.POSTagger",
-                      params, features, listeners);
+                      params, features, listeners, null);
       tagger.setName("Tagger " + System.currentTimeMillis());
       fireProgressChanged(65);
 
@@ -147,13 +147,12 @@ public class Nerc extends AbstractProcessingResource {
       if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
-//      if (! Main.batchMode) //fire events if not in batch mode
-        listeners.put("gate.event.ProgressListener",
+      listeners.put("gate.event.ProgressListener",
                     new IntervalProgressListener(66, 100));
       transducer = (ANNIETransducer)Factory.createResource(
                                               "gate.creole.ANNIETransducer",
                                               params, features,
-                                              listeners);
+                                              listeners, null);
       fireProgressChanged(100);
       fireProcessFinished();
       transducer.setName("Transducer " + System.currentTimeMillis());
@@ -177,34 +176,34 @@ public class Nerc extends AbstractProcessingResource {
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", tempAnnotationSetName);
-      Factory.setResourceRuntimeParameters(tokeniser, params);
+      tokeniser.setParameterValues(params);
 
       //gazetteer
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("annotationSetName", tempAnnotationSetName);
-      Factory.setResourceRuntimeParameters(gazetteer, params);
+      gazetteer.setParameterValues(params);
 
       //sentence splitter
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("inputASName", tempAnnotationSetName);
       params.put("outputASName", tempAnnotationSetName);
-      Factory.setResourceRuntimeParameters(splitter, params);
+      splitter.setParameterValues(params);
 
       //POS tagger
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("inputASName", tempAnnotationSetName);
       params.put("outputASName", tempAnnotationSetName);
-      Factory.setResourceRuntimeParameters(tagger, params);
+      tagger.setParameterValues(params);
 
       //transducer
       params = Factory.newFeatureMap();
       params.put("document", document);
       params.put("inputASName", tempAnnotationSetName);
       params.put("outputASName", tempAnnotationSetName);
-      Factory.setResourceRuntimeParameters(transducer, params);
+      transducer.setParameterValues(params);
     }catch(Exception e){
       throw new ExecutionException(e);
     }
@@ -220,60 +219,44 @@ public class Nerc extends AbstractProcessingResource {
       };
 
     //tokeniser
-      tokeniser.addProgressListener(pListener);
-      tokeniser.addStatusListener(sListener);
-//    }
-    tokeniser.run();
-    tokeniser.check();
-//    if (!Main.batchMode) {
-      tokeniser.removeProgressListener(pListener);
-      tokeniser.removeStatusListener(sListener);
+    tokeniser.addProgressListener(pListener);
+    tokeniser.addStatusListener(sListener);
+    tokeniser.execute();
+    tokeniser.removeProgressListener(pListener);
+    tokeniser.removeStatusListener(sListener);
 
     //gazetteer
 
-      pListener = new IntervalProgressListener(10, 20);
-      gazetteer.addProgressListener(pListener);
-      gazetteer.addStatusListener(sListener);
-//    }
-    gazetteer.run();
-    gazetteer.check();
-//    if (!Main.batchMode) {
-      gazetteer.removeProgressListener(pListener);
-      gazetteer.removeStatusListener(sListener);
+    pListener = new IntervalProgressListener(10, 20);
+    gazetteer.addProgressListener(pListener);
+    gazetteer.addStatusListener(sListener);
+    gazetteer.execute();
+    gazetteer.removeProgressListener(pListener);
+    gazetteer.removeStatusListener(sListener);
 
     //sentence splitter
-      pListener = new IntervalProgressListener(20, 35);
-      splitter.addProgressListener(pListener);
-      splitter.addStatusListener(sListener);
-//    }
-    splitter.run();
-    splitter.check();
-//    if (!Main.batchMode) {
-      splitter.removeProgressListener(pListener);
-      splitter.removeStatusListener(sListener);
+    pListener = new IntervalProgressListener(20, 35);
+    splitter.addProgressListener(pListener);
+    splitter.addStatusListener(sListener);
+    splitter.execute();
+    splitter.removeProgressListener(pListener);
+    splitter.removeStatusListener(sListener);
 
     //POS tagger
-      pListener = new IntervalProgressListener(35, 40);
-      tagger.addProgressListener(pListener);
-      tagger.addStatusListener(sListener);
-//    }
-    tagger.run();
-    tagger.check();
-//    if (!Main.batchMode) {
-      tagger.removeProgressListener(pListener);
-      tagger.removeStatusListener(sListener);
+    pListener = new IntervalProgressListener(35, 40);
+    tagger.addProgressListener(pListener);
+    tagger.addStatusListener(sListener);
+    tagger.execute();
+    tagger.removeProgressListener(pListener);
+    tagger.removeStatusListener(sListener);
 
     //transducer
-      pListener = new IntervalProgressListener(40, 90);
-      transducer.addProgressListener(pListener);
-      transducer.addStatusListener(sListener);
-//    }
-    transducer.run();
-    transducer.check();
-//    if (!Main.batchMode) {
-      transducer.removeProgressListener(pListener);
-      transducer.removeStatusListener(sListener);
-//    }
+    pListener = new IntervalProgressListener(40, 90);
+    transducer.addProgressListener(pListener);
+    transducer.addStatusListener(sListener);
+    transducer.execute();
+    transducer.removeProgressListener(pListener);
+    transducer.removeStatusListener(sListener);
   }//protected void runSystem() throws ExecutionException
 
   /**
@@ -292,16 +275,14 @@ public class Nerc extends AbstractProcessingResource {
     document.getFeatures().put("entitySet", entitySet);
   }//protected void createEntitySet(){
 
-  public void run(){
+  public void execute() throws ExecutionException{
     try{
       runSystem();
       createEntitySet();
       fireProgressChanged(100);
       fireProcessFinished();
-    }catch(ExecutionException ee){
-      executionException = ee;
     }catch(Exception e){
-      executionException = new ExecutionException(e);
+      throw new ExecutionException(e);
     }
   }
 

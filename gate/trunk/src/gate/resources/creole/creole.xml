@@ -73,13 +73,6 @@
 
   <!-- Processing Resources -->
   <CREOLE>
-    <!-- metadata for gate.creole.SerialController -->
-    <RESOURCE>
-      <NAME>GATE sequential control executive</NAME>
-      <CLASS>gate.creole.SerialController</CLASS>
-      <PRIVATE/>
-    </RESOURCE>
-
     <!-- creole.xml for the internal tokeniser -->
     <RESOURCE>
       <NAME>GATE internal Tokeniser</NAME>

@@ -23,11 +23,39 @@ import gate.creole.*;
 
 /** Models all sorts of resources.
   */
-public interface Resource extends FeatureBearer, Serializable
+public interface Resource extends FeatureBearer, NameBearer, Serializable
 {
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException;
   /** Clears the internal data of the resource, when it gets released **/
-  public void clear();
+  public void cleanup();
+
+
+  //Parameters utility methods
+  /**
+   * Gets the value of a parameter of this resource.
+   * @param paramaterName the name of the parameter
+   * @return the current value of the parameter
+   */
+  public Object getParameterValue(String paramaterName)
+                throws ResourceInstantiationException;
+
+  /**
+   * Sets the value for a specified parameter.
+   *
+   * @param paramaterName the name for the parameteer
+   * @param parameterValue the value the parameter will receive
+   */
+  public void setParameterValue(String paramaterName, Object parameterValue)
+              throws ResourceInstantiationException;
+
+  /**
+   * Sets the values for more parameters in one step.
+   *
+   * @param parameters a {@link FeatureMap} that has parameter names as keys and
+   * parameter values as values.
+   */
+  public void setParameterValues(FeatureMap parameters)
+              throws ResourceInstantiationException;
 
 } // interface Resource

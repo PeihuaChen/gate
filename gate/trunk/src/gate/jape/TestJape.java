@@ -182,7 +182,7 @@ public class TestJape extends TestCase
       tokeniser.setDocument(currentDoc);
       //use the default anotation set
       tokeniser.setAnnotationSetName(null);
-      tokeniser.run();
+      tokeniser.execute();
       // Verfy if all annotations from the default annotation set are consistent
       gate.corpora.TestDocument.verifyNodeIdConsistency(currentDoc);
     }
@@ -211,7 +211,7 @@ public class TestJape extends TestCase
       while(docIter.hasNext()){
         currentDoc = (Document)docIter.next();
         gazeteer.setDocument(currentDoc);
-        gazeteer.run();
+        gazeteer.execute();
         // Verfy if all annotations from the default annotation set are consistent
         gate.corpora.TestDocument.verifyNodeIdConsistency(currentDoc);
       }

@@ -125,7 +125,7 @@ public class DocumentEditor extends AbstractVisualResource{
   protected Highlighter selectionHighlighter;
 
 
-  protected ResourceHandle myHandle;
+  protected Handle myHandle;
 
   /**
    * holds the data for the  annotations table: a list of Annotation objects
@@ -225,9 +225,7 @@ public class DocumentEditor extends AbstractVisualResource{
 
       tokeniser.setDocument(doc);
       tokeniser.setAnnotationSetName("TokeniserAS");
-      tokeniser.run();
-      //check for exceptions
-      tokeniser.check();
+      tokeniser.execute();
 
       DocumentEditor editor = new DocumentEditor();
       frame.getContentPane().add(editor);
@@ -768,7 +766,7 @@ public class DocumentEditor extends AbstractVisualResource{
                                                target);
   }//public void setTarget(Object target)
 
-  public void setHandle(ResourceHandle handle){
+  public void setHandle(Handle handle){
     myHandle = handle;
   }
 

@@ -25,11 +25,8 @@ import gate.creole.*;
   * have a <CODE>check()</CODE> that will re-throw any exception
   * that was caught when <CODE>run()</CODE> was invoked.
   */
-public interface ProcessingResource extends Resource, Runnable
+public interface ProcessingResource extends Resource, Executable
 {
-  /** Trigger any exception that was caught when run() was invoked. */
-  public void check() throws ExecutionException;
-
 
   /**
    * Reinitialises the processing resource. After calling this method the
@@ -40,5 +37,16 @@ public interface ProcessingResource extends Resource, Runnable
    * resource will change too after calling reInit().
    */
   public void reInit() throws ResourceInstantiationException;
+
+  /**
+   * Checks whether this PR has been interrupted since the lsat time its
+   * {@link execute()} method was called.
+   */
+  public boolean isInterrupted();
+
+  /**
+   * Notifies this PR that it should stop its execution as soon as possible.
+   */
+  public void interrupt();
 
 } // interface ProcessingResource

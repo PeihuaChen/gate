@@ -71,7 +71,7 @@ extends AbstractResource implements LanguageResource
 
   /** Clear the internal state of the resource
     */
-  public void clear() {
+  public void cleanup() {
   } //clear()
 
 } // class AbstractLanguageResource

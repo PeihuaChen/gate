@@ -21,7 +21,7 @@ import java.util.*;
 import javax.swing.*;
 
 import gate.util.*;
-import gate.gui.ResourceHandle;
+import gate.gui.Handle;
 
 /** Models all sorts of visual resources.
   */
@@ -39,6 +39,6 @@ public interface VisualResource extends Resource{
    * Used by the main GUI to tell this VR what handle created it. The VRs can
    * use this information e.g. to add items to the popup for the resource.
    */
-  public void setHandle(ResourceHandle handle);
+  public void setHandle(Handle handle);
 
 } // interface VisualResource

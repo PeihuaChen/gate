@@ -12,13 +12,8 @@
 <CREOLE-DIRECTORY>http://somewhere.on.the.net/creole/</CREOLE-DIRECTORY> 
 
 <SYSTEM NAME="Print Out Tokens">
-  <CONTROLLER>gate.creole.SerialController</CONTROLLER>
+  <CONTROLLER>none</CONTROLLER>
   <LR sourceUrl="gate:/gate.ac.uk/tests/doc0.html">gate.corpora.DocumentImpl</LR>
-  <PR encoding="UTF-8" 
-      tokeniserRulesURL="gate:/creole/tokeniser/DefaultTokeniser.rules"
-      transducerGrammarURL="gate:/creole/tokeniser/postprocess.jape"
-      >gate.creole.tokeniser.DefaultTokeniser</PR>
-  <PR>testpkg.PrintOutTokens</PR>
 </SYSTEM>
 
 </GATE>

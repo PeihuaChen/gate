@@ -39,16 +39,14 @@ public class SentenceSplitter extends AbstractProcessingResource{
     FeatureMap features;
     Map listeners = new HashMap();
 
-//    if (! Main.batchMode){ //fire events if not in batch mode
-      listeners.put("gate.event.StatusListener", new StatusListener(){
-        public void statusChanged(String text){
-          fireStatusChanged(text);
-        }
-      });
+    listeners.put("gate.event.StatusListener", new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    });
 
     //gazetteer
-      fireStatusChanged("Creating the gazetteer");
-//    }//if
+    fireStatusChanged("Creating the gazetteer");
     params = Factory.newFeatureMap();
     if(gazetteerListsURL != null) params.put("listsURL",
                                              gazetteerListsURL);
@@ -56,20 +54,17 @@ public class SentenceSplitter extends AbstractProcessingResource{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-//    if (! Main.batchMode) //fire events if not in batch mode
-      listeners.put("gate.event.ProgressListener",
+    listeners.put("gate.event.ProgressListener",
                   new IntervalProgressListener(0, 10));
 
     gazetteer = (DefaultGazetteer)Factory.createResource(
                     "gate.creole.gazetteer.DefaultGazetteer",
-                    params, features, listeners);
+                    params, features, listeners, null);
     gazetteer.setName("Gazetteer " + System.currentTimeMillis());
-//    if (! Main.batchMode) {//fire events if not in batch mode
-      fireProgressChanged(10);
+    fireProgressChanged(10);
 
     //transducer
-      fireStatusChanged("Creating the JAPE transducer");
-//    }
+    fireStatusChanged("Creating the JAPE transducer");
 
     params = Factory.newFeatureMap();
     if(transducerURL != null) params.put("grammarURL", transducerURL);
@@ -77,13 +72,12 @@ public class SentenceSplitter extends AbstractProcessingResource{
     features = Factory.newFeatureMap();
     Gate.setHiddenAttribute(features, true);
 
-//    if (! Main.batchMode) //fire events if not in batch mode
-      listeners.put("gate.event.ProgressListener",
+    listeners.put("gate.event.ProgressListener",
                   new IntervalProgressListener(11, 100));
 
     transducer = (Transducer)Factory.createResource(
                     "gate.creole.Transducer",
-                    params, features, listeners);
+                    params, features, listeners, null);
     transducer.setName("Transducer " + System.currentTimeMillis());
 
     fireProgressChanged(100);
@@ -92,80 +86,66 @@ public class SentenceSplitter extends AbstractProcessingResource{
     return this;
   }
 
-  public void run(){
+  public void execute() throws ExecutionException{
+    //set the runtime parameters
+    FeatureMap params;
+    if(inputASName != null && inputASName.equals("")) inputASName = null;
+    if(outputASName != null && outputASName.equals("")) outputASName = null;
     try{
-      //set the runtime parameters
-      FeatureMap params;
-      if(inputASName != null && inputASName.equals("")) inputASName = null;
-      if(outputASName != null && outputASName.equals("")) outputASName = null;
-      try{
-        fireProgressChanged(0);
-        params = Factory.newFeatureMap();
-        params.put("document", document);
-        params.put("annotationSetName", inputASName);
-        Factory.setResourceRuntimeParameters(gazetteer, params);
+      fireProgressChanged(0);
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("annotationSetName", inputASName);
+      gazetteer.setParameterValues(params);
 
-        params = Factory.newFeatureMap();
-        params.put("document", document);
-        params.put("inputASName", inputASName);
-        params.put("outputASName", inputASName);
-        Factory.setResourceRuntimeParameters(transducer, params);
-      }catch(Exception e){
-        throw new ExecutionException(e);
-      }
-      ProgressListener pListener = null;
-      StatusListener sListener = null;
-//      if (!Main.batchMode) {
-        fireProgressChanged(5);
-
-      //run the gazetteer
-        pListener = new IntervalProgressListener(5, 10);
-        sListener = new StatusListener(){
-          public void statusChanged(String text){
-            fireStatusChanged(text);
-          }
-        };
-        gazetteer.addProgressListener(pListener);
-        gazetteer.addStatusListener(sListener);
-//      }//if no events
-      gazetteer.run();
-      gazetteer.check();
-//      if (!Main.batchMode) {
-        gazetteer.removeProgressListener(pListener);
-        gazetteer.removeStatusListener(sListener);
-
-      //run the transducer
-        pListener = new IntervalProgressListener(11, 90);
-        transducer.addProgressListener(pListener);
-        transducer.addStatusListener(sListener);
-//      } //if no events
-      transducer.run();
-      transducer.check();
-//      if (!Main.batchMode) {
-        transducer.removeProgressListener(pListener);
-        transducer.removeStatusListener(sListener);
-//      }//if no events
-
-      //get pointers to the annotation sets
-      AnnotationSet inputAS = (inputASName == null) ?
-                              document.getAnnotations() :
-                              document.getAnnotations(inputASName);
-
-      AnnotationSet outputAS = (outputASName == null) ?
-                               document.getAnnotations() :
-                               document.getAnnotations(outputASName);
-
-      //copy the results to the output set if they are different
-      if(inputAS != outputAS){
-        outputAS.addAll(inputAS.get("Sentence"));
-      }
-      fireProcessFinished();
-    }catch(ExecutionException ee){
-      executionException = ee;
+      params = Factory.newFeatureMap();
+      params.put("document", document);
+      params.put("inputASName", inputASName);
+      params.put("outputASName", inputASName);
+      transducer.setParameterValues(params);
     }catch(Exception e){
-      executionException = new ExecutionException(e);
+      throw new ExecutionException(e);
     }
-  }
+    ProgressListener pListener = null;
+    StatusListener sListener = null;
+    fireProgressChanged(5);
+
+    //run the gazetteer
+    pListener = new IntervalProgressListener(5, 10);
+    sListener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
+    gazetteer.addProgressListener(pListener);
+    gazetteer.addStatusListener(sListener);
+    gazetteer.execute();
+    gazetteer.removeProgressListener(pListener);
+    gazetteer.removeStatusListener(sListener);
+
+    //run the transducer
+    pListener = new IntervalProgressListener(11, 90);
+    transducer.addProgressListener(pListener);
+    transducer.addStatusListener(sListener);
+    transducer.execute();
+    transducer.removeProgressListener(pListener);
+    transducer.removeStatusListener(sListener);
+
+    //get pointers to the annotation sets
+    AnnotationSet inputAS = (inputASName == null) ?
+                            document.getAnnotations() :
+                            document.getAnnotations(inputASName);
+
+    AnnotationSet outputAS = (outputASName == null) ?
+                             document.getAnnotations() :
+                             document.getAnnotations(outputASName);
+
+    //copy the results to the output set if they are different
+    if(inputAS != outputAS){
+      outputAS.addAll(inputAS.get("Sentence"));
+    }
+    fireProcessFinished();
+  }//execute()
 
 
   public void setTransducerURL(java.net.URL newTransducerURL) {

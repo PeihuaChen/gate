@@ -62,8 +62,7 @@ public class TestSplitterTagger extends TestCase{
     //runtime stuff
     tokeniser.setDocument(doc);
     tokeniser.setAnnotationSetName("testAS");
-    tokeniser.run();
-    tokeniser.check();
+    tokeniser.execute();
 
 
     //create a splitter
@@ -75,9 +74,7 @@ public class TestSplitterTagger extends TestCase{
     splitter.setDocument(doc);
     splitter.setOutputASName("testAS");
     splitter.setInputASName("testAS");
-    splitter.run();
-    //check for exceptions
-    splitter.check();
+    splitter.execute();
     assert(!doc.getAnnotations("testAS").get("Sentence").isEmpty());
 
     //now check the tagger
@@ -90,9 +87,7 @@ public class TestSplitterTagger extends TestCase{
     tagger.setDocument(doc);
     tagger.setInputASName("testAS");
     tagger.setOutputASName("testAS");
-    tagger.run();
-    //check for exceptions
-    tagger.check();
+    tagger.execute();
     Iterator tokIter =doc.getAnnotations("testAS").get("Token").iterator();
     while(tokIter.hasNext()){
       Annotation token = (Annotation)tokIter.next();

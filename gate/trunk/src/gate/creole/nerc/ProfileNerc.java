@@ -134,11 +134,10 @@ public class ProfileNerc {
 
       nerc.setDocument(doc);
       long startTime = System.currentTimeMillis();
-      nerc.run();
+      nerc.execute();
       long endTime = System.currentTimeMillis();
       // runningTime calculated in seconds
       long runningTime = (endTime - startTime);
-      nerc.check();
       System.err.println("Collecting results from " +
                          doc.getSourceUrl().getFile() + "...");
 

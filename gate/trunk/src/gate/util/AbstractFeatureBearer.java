@@ -28,23 +28,6 @@ abstract public class AbstractFeatureBearer implements FeatureBearer
   /** Set the feature set */
   public void setFeatures(FeatureMap features) { this.features = features; }
 
-  /** Sets the name of this resource*/
-  public void setName(String name){
-    FeatureMap fm = getFeatures();
-    if(fm == null){
-      fm = Factory.newFeatureMap();
-      setFeatures(fm);
-    }
-    Gate.setName(fm, name);
-  }
-
-  /** Returns the name of this resource*/
-  public String getName(){
-    FeatureMap fm = getFeatures();
-    if(fm == null) return null;
-    else return Gate.getName(fm);
-  }
-
   /** The feature set */
   protected FeatureMap features;
 

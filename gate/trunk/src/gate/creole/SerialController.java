@@ -28,27 +28,8 @@ import gate.event.*;
 public class SerialController
 extends ArrayList implements Controller, List
 {
-  /** Initialise this resource, and return it. */
-  public Resource init() throws ResourceInstantiationException {
-    return this;
-  } // init()
-
- /**
-  * Reinitialises the processing resource. After calling this method the
-  * resource should be in the state it is after calling init.
-  * If the resource depends on external resources (such as rules files) then
-  * the resource will re-read those resources. If the data used to create
-  * the resource has changed since the resource has been created then the
-  * resource will change too after calling reInit().
-  * This method simply calls {@link #init()}. This functionality will
-  * be overriden by derived classes as necessary.
-  */
-  public void reInit() throws ResourceInstantiationException{
-    init();
-  }
-
   /** Run the Processing Resources in sequence. */
-  public void run() {
+  public void execute() throws ExecutionException{
     Iterator iter = iterator();
     while(iter.hasNext()) {
       ProcessingResource pr = (ProcessingResource) iter.next();
@@ -56,59 +37,37 @@ extends ArrayList implements Controller, List
         (ResourceData) Gate.getCreoleRegister().get(pr.getClass().getName());
       ParameterList params = rd.getParameterList();
       try {
-        Factory.setResourceRuntimeParameters(pr, params.getRuntimeDefaults());
+        pr.setParameterValues(params.getRuntimeDefaults());
       } catch(Exception e) {
-        executionException =
-          new ExecutionException("Couldn't set parameters: " + e);
-        return;
+        throw new ExecutionException("Couldn't set parameters: " + e);
       }
-
-      pr.run();
-      try {
-        pr.check();
-      } catch(ExecutionException e) {
-        executionException = e;
-        return;
-      }
+      pr.execute();
     } // for each PR in the resourceList
 
-  } // run()
+  } // execute()
 
+  public boolean isInterrupted(){
+    return interrupted;
+  }
 
-  /** Trigger any exception that was caught when <CODE>run()</CODE> was
-    * invoked. If there is an exception stored it is cleared by this call.
-    */
-  public void check() throws ExecutionException {
-    if(executionException != null) {
-      ExecutionException e = executionException;
-      executionException = null;
-      throw e;
-    }
-  } // check()
+  public void interrupt(){
+    interrupted = true;
+  }
 
-
-  /** Sets the name of this resource*/
+    /** Sets the name of this resource*/
   public void setName(String name){
-    FeatureMap fm = getFeatures();
-    if(fm == null){
-      fm = Factory.newFeatureMap();
-      setFeatures(fm);
-    }
-    Gate.setName(fm, name);
+    this.name = name;
   }
 
   /** Returns the name of this resource*/
   public String getName(){
-    FeatureMap fm = getFeatures();
-    if(fm == null) return null;
-    else return Gate.getName(fm);
+    return name;
   }
+
+  protected String name;
 
   public void setRuntimeParameters(FeatureMap parameters){
   }
-
-  /** Any exception caught during run() invocations are stored here. */
-  protected ExecutionException executionException  = null;
 
   /** Get the feature set */
   public FeatureMap getFeatures() { return features; }
@@ -128,4 +87,5 @@ extends ArrayList implements Controller, List
     return this == other;
   }
 
+  protected boolean interrupted = false;
 } // class SerialController

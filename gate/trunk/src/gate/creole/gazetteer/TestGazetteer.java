@@ -55,9 +55,7 @@ public class TestGazetteer extends TestCase {
     //runtime stuff
     gaz.setDocument(doc);
     gaz.setAnnotationSetName("GazetteerAS");
-    gaz.run();
-    //check for exceptions
-    gaz.check();
+    gaz.execute();
     assert(!doc.getAnnotations("GazetteerAS").isEmpty());
   }
 

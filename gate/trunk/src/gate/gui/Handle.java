@@ -25,7 +25,7 @@ import gate.event.*;
  * Such information will include icon to be used for tree components,
  * popup menu for right click events, etc.
  */
-public interface ResourceHandle extends ProgressListener, StatusListener {
+public interface Handle extends ProgressListener, StatusListener {
 
   public Icon getIcon();
 
@@ -47,5 +47,5 @@ public interface ResourceHandle extends ProgressListener, StatusListener {
 
   public String getTooltipText();
 
-  public Resource getResource();
+  public Object getTarget();
 }

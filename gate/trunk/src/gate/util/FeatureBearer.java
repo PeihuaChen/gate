@@ -27,10 +27,4 @@ public interface FeatureBearer
   /** Set the feature set */
   public void setFeatures(FeatureMap features);
 
-  /** Sets the name of this resource*/
-  public void setName(String name);
-
-  /** Returns the name of this resource*/
-  public String getName();
-
 } // interface FeatureBearer

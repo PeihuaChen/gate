@@ -283,14 +283,13 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * This method runs the gazetteer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
-  public void run(){
+  public void execute() throws ExecutionException{
     AnnotationSet annotationSet;
     //check the input
     if(document == null) {
-      executionException = new ExecutionException(
+      throw new ExecutionException(
         "No document to process!"
       );
-      return;
     }
 
     if(annotationSetName == null ||

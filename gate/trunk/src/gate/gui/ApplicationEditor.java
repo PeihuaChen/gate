@@ -57,7 +57,7 @@ public class ApplicationEditor extends AbstractVisualResource
   }//setController
 
 
-  public void setHandle(ResourceHandle handle) {
+  public void setHandle(Handle handle) {
     this.handle = handle;
     //add the items to the popup
     JPopupMenu popup = handle.getPopup();
@@ -408,8 +408,7 @@ public class ApplicationEditor extends AbstractVisualResource
         Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
         while(prIter.hasNext()){
           ProcessingResource pr = (ProcessingResource)prIter.next();
-          if(Gate.getApplicationAttribute(pr.getFeatures()) ||
-             Gate.getHiddenAttribute(pr.getFeatures())){
+          if(Gate.getHiddenAttribute(pr.getFeatures())){
             //ignore this resource
           }else{
             addMenu.add(new AddPRAction(pr));
@@ -430,8 +429,7 @@ public class ApplicationEditor extends AbstractVisualResource
         Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
         while(prIter.hasNext()){
           ProcessingResource pr = (ProcessingResource)prIter.next();
-          if(Gate.getApplicationAttribute(pr.getFeatures()) ||
-             Gate.getHiddenAttribute(pr.getFeatures())){
+          if(Gate.getHiddenAttribute(pr.getFeatures())){
             //ignore this resource
           }else{
             removeMenu.add(new RemovePRAction(pr));
@@ -707,8 +705,7 @@ public class ApplicationEditor extends AbstractVisualResource
       while(prsIter.hasNext()){
         Resource res = (Resource)prsIter.next();
         if(controller.contains(res)||
-           Gate.getHiddenAttribute(res.getFeatures()) ||
-           Gate.getApplicationAttribute(res.getFeatures())) size--;
+           Gate.getHiddenAttribute(res.getFeatures())) size--;
       }
       return size;
     }//public int getRowCount()
@@ -742,8 +739,7 @@ public class ApplicationEditor extends AbstractVisualResource
       while(allPRsIter.hasNext() && index < rowIndex){
         pr = (ProcessingResource)allPRsIter.next();
         if (!(controller.contains(pr)||
-              Gate.getHiddenAttribute(pr.getFeatures()) ||
-              Gate.getApplicationAttribute(pr.getFeatures()))
+              Gate.getHiddenAttribute(pr.getFeatures()))
             )  index ++;
       }
       if(index == rowIndex && pr != null){
@@ -867,7 +863,7 @@ public class ApplicationEditor extends AbstractVisualResource
               }
             }
             try{
-              Factory.setResourceRuntimeParameters(pr, params);
+              pr.setParameterValues(params);
             }catch(ResourceInstantiationException ie){
               ie.printStackTrace(Err.getPrintWriter());
               JOptionPane.showMessageDialog(
@@ -934,9 +930,8 @@ public class ApplicationEditor extends AbstractVisualResource
               //not really important; just ignore
             }
 
-            pr.run();
             try {
-              pr.check();
+              pr.execute();
             } catch(ExecutionException ee) {
               ee.printStackTrace(Err.getPrintWriter());
               Exception exc = ee.getException();
@@ -1173,9 +1168,9 @@ public class ApplicationEditor extends AbstractVisualResource
                                                int row,
                                                int column){
       //value = ((DefaultMutableTreeNode)value).getUserObject();
-      if(value instanceof FeatureBearer){
+      if(value instanceof NameBearer){
         String name = (String)
-                        ((FeatureBearer)value).getName();
+                        ((NameBearer)value).getName();
         if(name != null){
           return super.getTableCellRendererComponent(table, name, isSelected,
                                                      hasFocus, row, column);
@@ -1249,9 +1244,9 @@ public class ApplicationEditor extends AbstractVisualResource
                                                     int index,
                                                     boolean isSelected,
                                                     boolean cellHasFocus){
-        if(value instanceof FeatureBearer){
+        if(value instanceof NameBearer){
           String name = (String)(
-                          (FeatureBearer)value).getName();
+                          (NameBearer)value).getName();
           if(name != null){
             return super.getListCellRendererComponent(list, name, index,
                                                       isSelected, cellHasFocus);
@@ -1277,7 +1272,7 @@ public class ApplicationEditor extends AbstractVisualResource
 */
 
   SerialController controller;
-  ResourceHandle handle;
+  Handle handle;
   JTreeTable mainTreeTable;
   PRsAndParamsTTModel mainTTModel;
   //JPopupMenu popup;
