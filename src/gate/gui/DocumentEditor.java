@@ -16,6 +16,7 @@ package gate.gui;
 import gate.*;
 import gate.util.*;
 import gate.corpora.TestDocument;
+import gate.corpora.DocumentContentImpl;
 import gate.creole.tokeniser.DefaultTokeniser;
 import gate.creole.*;
 import gate.event.*;
@@ -870,7 +871,7 @@ public class DocumentEditor extends AbstractVisualResource
 
     //The text
     textPane = new XJTextPane();
-    textPane.setEditable(false);
+//    textPane.setEditable(false);
     textPane.setEnabled(true);
     textPane.setEditorKit(new CustomStyledEditorKit());
     Style defaultStyle = textPane.getStyle("default");
@@ -1088,6 +1089,9 @@ public class DocumentEditor extends AbstractVisualResource
     }
     if(document == null) return;
     textPane.setText(document.getContent().toString());
+
+    //listen for events from the document content editor
+    textPane.getDocument().addDocumentListener(new SwingDocumentListener());
 
     //add the default annotation set
     eventHandler.annotationSetAdded(new gate.event.DocumentEvent(
@@ -2894,6 +2898,40 @@ Out.prln("NULL size");
     }
 
   }//class EventsHandler
+
+  /**
+   *  Listens for updates from the text editor and updates the GATE document
+   *  accordingly
+   */
+  class SwingDocumentListener implements javax.swing.event.DocumentListener{
+    public void insertUpdate(javax.swing.event.DocumentEvent e) {
+      try{
+        document.edit(new Long(e.getOffset()), new Long(e.getOffset()),
+                      new DocumentContentImpl(
+                        e.getDocument().getText(e.getOffset(), e.getLength())));
+        annotationsTable.repaint();
+      }catch(BadLocationException ble){
+        ble.printStackTrace(Err.getPrintWriter());
+      }catch(InvalidOffsetException ioe){
+        ioe.printStackTrace(Err.getPrintWriter());
+      }
+    }
+
+    public void removeUpdate(javax.swing.event.DocumentEvent e) {
+      try{
+        document.edit(new Long(e.getOffset()),
+                      new Long(e.getOffset() + e.getLength()),
+                      new DocumentContentImpl(""));
+        annotationsTable.repaint();
+      }catch(InvalidOffsetException ioe){
+        ioe.printStackTrace(Err.getPrintWriter());
+      }
+    }
+
+    public void changedUpdate(javax.swing.event.DocumentEvent e) {
+      //some attributes changed: we don't care about that
+    }
+  }//class SwingDocumentListener implements javax.swing.event.DocumentListener
 
   /**
    * This class handles the blinking for the selected annotations in the
