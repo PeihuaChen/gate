@@ -17,6 +17,7 @@ package gate.fsm;
 
 import java.util.*;
 import gate.jape.*;
+import gate.util.SimpleArraySet;
 
 /**
  * This class implements a Finite State Machine state.
@@ -51,10 +52,17 @@ public class State implements JapeConstants {
    *
    * @return a Set contining objects of type gate.fsm.Transition
    */
+// >>> DAM, was Set
+/*
   public Set getTransitions() {
     return transitions;
   }
-
+*/
+// >>> DAM, TransArray optimization
+  public SimpleArraySet getTransitions() {
+    return transitions;
+  }
+// >>> DAM, end
   /** Sets the action associated to this FINAL state. An action is actually
    * a gate.jape.RightHandSide object.
    * NOTE: only a final state has an associated action so after a call to this
@@ -190,7 +198,13 @@ public class State implements JapeConstants {
    * A set of objects of type gata.fsm.Transition representing the outgoing
    * transitions.
    */
+// >>> DAM was
+/*
   private Set transitions = new HashSet();
+*/
+// >>> DAM, TransArray optimization
+  private SimpleArraySet transitions = new SimpleArraySet();
+// >>> DAM, end
 
   /**
    * Is this state a final one?
@@ -226,4 +240,5 @@ public class State implements JapeConstants {
    *
    */
   protected int priority = -1;
+
 } // State
