@@ -341,8 +341,9 @@ public class AnnotationDiff extends AbstractVisualResource{
       keyAnnotSet = keyDocument.getAnnotations().get(
                               annotationSchema.getAnnotationName());
     else
-      keyAnnotSet = keyDocument.getAnnotations(keyAnnotationSetName).get(
-                              annotationSchema.getAnnotationName());
+      keyAnnotSet = keyDocument.getAnnotations(keyAnnotationSetName).
+                                    get(annotationSchema.getAnnotationName());
+
     if (keyAnnotSet == null){
       throw new ResourceInstantiationException("No <" +
                               annotationSchema.getAnnotationName() +
@@ -355,11 +356,11 @@ public class AnnotationDiff extends AbstractVisualResource{
     keyAnnotList = new LinkedList(keyAnnotSet);
 
     if (responseAnnotationSetName == null)
-      // Get the response AnnotationSet from the resonseDocument
+      // Get the response AnnotationSet from the default set
       responseAnnotSet = responseDocument.getAnnotations().get(
                                           annotationSchema.getAnnotationName());
     else
-      responseAnnotSet = keyDocument.getAnnotations(responseAnnotationSetName).
+      responseAnnotSet = responseDocument.getAnnotations(responseAnnotationSetName).
                                     get(annotationSchema.getAnnotationName());
 
     if (responseAnnotSet == null){
@@ -759,8 +760,11 @@ public class AnnotationDiff extends AbstractVisualResource{
 
 
     int no = 0;
+    // If an annotation type for false poz was selected calculate the number of
+    // Annotations
     if (annotationTypeForFalsePositive != null)
-     if (responseAnnotationSetName == null)
+     // Was it the default set ?
+     if (responseAnnotationSetNameFalsePoz == null)
           no = responseDocument.getAnnotations().get(
                                       annotationTypeForFalsePositive).size();
      else
