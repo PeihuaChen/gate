@@ -75,9 +75,6 @@ public class Gate
       // If no exception occured then the web server is alive
       // set the gateHomeReachable
       gateAcUkReachable = true;
-
-    } catch (MalformedURLException exception1){
-      throw new GateException("The URL for gate.ac.uk is malformed !");
     } catch (IOException exception2){
       gateAcUkReachable = false;
     }
