@@ -57,19 +57,22 @@ public class TestPR extends TestCase
       if (doc1 == null)
         doc1 = Factory.newDocument(
             new URL(TestDocument.getTestServerName() +
-                    "tests/ft-bt-03-aug-2001.html")
+                    "tests/ft-bt-03-aug-2001.html"),
+            "ISO8859-1"
             );
 
       if (doc2 == null)
         doc2 = Factory.newDocument(
             new URL(TestDocument.getTestServerName() +
-                    "tests/gu-Am-Brit-4-aug-2001.html")
+                    "tests/gu-Am-Brit-4-aug-2001.html"),
+            "ISO8859-1"
             );
 
       if (doc3 == null)
         doc3 = Factory.newDocument(
             new URL(TestDocument.getTestServerName() +
-                    "tests/in-outlook-09-aug-2001.html")
+                    "tests/in-outlook-09-aug-2001.html"),
+            "ISO8859-1"
             );
     }catch(Exception e){
       e.printStackTrace();
