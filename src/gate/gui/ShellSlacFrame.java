@@ -60,6 +60,9 @@ import junit.framework.*;
  */
 public class ShellSlacFrame extends MainFrame {
 
+  /** Debug flag */
+  private static final boolean DEBUG = false;
+
   /** Shell GUI application */
   private SerialAnalyserController application = null;
 
@@ -851,9 +854,38 @@ public class ShellSlacFrame extends MainFrame {
     } // HelpAboutSlugAction()
 
     public void actionPerformed(ActionEvent e) {
+      
+      // Set about box content from Java properties
+      String aboutText = "Slug application.";
+      String aboutURL = 
+        System.getProperty(GateConstants.ABOUT_URL_JAVA_PROPERTY_NAME);
+      if(aboutURL != null) {
+        try {
+          URL url = new URL(aboutURL);
+          BufferedReader reader = new BufferedReader(
+            new InputStreamReader(url.openStream()));
+          String line = "";
+          StringBuffer content = new StringBuffer();
+          do {
+            content.append(line);
+            line = reader.readLine();
+          } while (line != null);
+          
+          if(content.length() != 0) {
+            aboutText = content.toString();
+          } // if
+        } catch (Exception ex) {
+          // do nothing on exception
+          // application just stay with a dummy text in about box
+          if(DEBUG) {
+            ex.printStackTrace();
+          }
+        } // catch
+      } // if
+    
       JOptionPane.showMessageDialog(ShellSlacFrame.this, 
-          "Slug application",
-          "Slug application about", 
+          aboutText, 
+          "Slug application about",
           JOptionPane.INFORMATION_MESSAGE);
     } // actionPerformed(ActionEvent e)
   } // class HelpAboutSlugAction extends AbstractAction
