@@ -146,6 +146,7 @@ public class CorpusBenchmarkTool {
     annotTypes.add("Money");
     annotTypes.add("Percent");
     annotTypes.add("GPE");
+    annotTypes.add("Facility");
 
   }
 
