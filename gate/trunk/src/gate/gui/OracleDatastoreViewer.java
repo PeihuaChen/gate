@@ -244,6 +244,7 @@ public class OracleDatastoreViewer extends JTree
         JOptionPane.showMessageDialog(OracleDatastoreViewer.this,
                                       "Error!\n" + pe.toString(),
                                       "Gate", JOptionPane.ERROR_MESSAGE);
+        pe.printStackTrace(Err.getPrintWriter());
       }
     }// public void actionPerformed(ActionEvent e)
     DSEntry entry;
