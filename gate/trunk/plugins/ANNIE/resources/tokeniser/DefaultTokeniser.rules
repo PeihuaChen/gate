@@ -1,6 +1,10 @@
+#DiTokeniser.rules#
+#diana 28/6/00#
+#update 9/7/00#
+
 #Tokeniser rule file
 #Each rule should be on one line
-#Lines that end with "\" are appended with the next one. This facility\
+#Lines that end with "\" are appended with the next one. This facility \
  is used for longer rules that cannot be written on a single line
 #
 #Lines starting with "#" are treated as comment
@@ -52,7 +56,47 @@
 #...representing the corresponding enumerated Unicode category types
 
 #------- The rules start here -----------------
-"UPPERCASE_LETTER" "LOWERCASE_LETTER"+ > Token;kind=upperInitial;
-"LOWERCASE_LETTER" "UPPERCASE_LETTER"|"LOWERCASE_LETTER"|OTHER_LETTER+ > Token;
-(SPACE_SEPARATOR|CONTROL)+ > SpaceToken;
-CURRENCY_SYMBOL|MODIFIER_SYMBOL|OTHER_SYMBOL + > Symbol;
+
+#words#
+// a word can be any combination of letters, including a dash,
+// but excluding other symbols or punctuation, e.g. apostrophes
+
+
+"UPPERCASE_LETTER" "LOWERCASE_LETTER"* > Token;orth=upperInitial;kind=word;
+"UPPERCASE_LETTER" "UPPERCASE_LETTER"+ > Token;orth=allCaps;kind=word;
+"LOWERCASE_LETTER" (LOWERCASE_LETTER|DASH_PUNCTUATION)* > Token;orth=lowercase;kind=word;
+
+// MixedCaps is any mixture of caps and small letters that doesn't 
+// fit in the preceding categories
+
+("UPPERCASE_LETTER" "UPPERCASE_LETTER"+ "LOWERCASE_LETTER"+ \
+(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*)|\
+("UPPERCASE_LETTER""LOWERCASE_LETTER"+ "UPPERCASE_LETTER"+ \
+(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*)|\
+("LOWERCASE_LETTER" "LOWERCASE_LETTER"+"UPPERCASE_LETTER"+ \
+(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*)|\
+("LOWERCASE_LETTER" "LOWERCASE_LETTER"*"UPPERCASE_LETTER"+\
+(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*) \
+> Token;orth=mixedCaps;kind=word;
+
+
+#numbers#
+// a number is any combination of digits
+"DECIMAL_DIGIT_NUMBER"+ >Token;kind=number;
+
+#whitespace#
+(SPACE_SEPARATOR)+ >SpaceToken;kind=space;
+(CONTROL)+ >SpaceToken;kind=control;
+
+#symbols#
+(MODIFIER_SYMBOL|MATH_SYMBOL|OTHER_SYMBOL) + > Token;kind=symbol;
+CURRENCY_SYMBOL > Token;kind=symbol;symbolkind=currency;
+
+#punctuation#
+(DASH_PUNCTUATION|CONNECTOR_PUNCTUATION|OTHER_PUNCTUATION)+ >Token;kind=punctuation;
+"START_PUNCTUATION" >Token;kind=punctuation;position=startpunct;
+"END_PUNCTUATION" >Token;kind=punctuation;position=endpunct;
+
+
+
+
