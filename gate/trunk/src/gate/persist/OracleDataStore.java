@@ -280,7 +280,6 @@ public class OracleDataStore extends JDBCDataStore {
       switch(sqle.getErrorCode()) {
         case DBHelper.X_ORACLE_INVALID_LR_TYPE:
           throw new PersistenceException("can't create LR [step 3] in DB, invalid LR Type");
-          break;
         default:
           throw new PersistenceException(
                 "can't create LR [step 3] in DB : ["+ sqle.getMessage()+"]");
@@ -434,6 +433,7 @@ public class OracleDataStore extends JDBCDataStore {
     createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
 
     //8. commit?
+    throw new MethodNotImplementedException();
   }
 
 
@@ -495,7 +495,6 @@ public class OracleDataStore extends JDBCDataStore {
           case DBHelper.X_ORACLE_INVALID_ANNOTATION_TYPE:
             throw new PersistenceException(
                 "can't create annotation in DB, [invalid annotation type]");
-            break;
           default:
             throw new PersistenceException(
                 "can't create annotation in DB: ["+ sqle.getMessage()+"]");
@@ -896,8 +895,6 @@ public class OracleDataStore extends JDBCDataStore {
         case DBHelper.X_ORACLE_INVALID_FEATURE_TYPE:
           throw new PersistenceException("can't create feature [step 1],"+
                       "[invalid feature type] in DB: ["+ sqle.getMessage()+"]");
-          break;
-
         default:
           throw new PersistenceException("can't create feature [step 1] in DB: ["+
                                                       sqle.getMessage()+"]");
