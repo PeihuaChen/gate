@@ -144,16 +144,13 @@ public class JFontChooser extends JPanel {
     this.addPropertyChangeListener("fontValue",
                                    new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt){
-        if(fontValue == null) return;
-        SwingUtilities.invokeLater(new Runnable(){
-          public void run(){
-            familyCombo.setSelectedItem(fontValue.getName());
-            sizeCombo.setSelectedItem(Integer.toString(fontValue.getSize()));
-            boldChk.setSelected(fontValue.isBold());
-            italicChk.setSelected(fontValue.isItalic());
-            sampleTextArea.setFont(fontValue);
-          }
-        });
+        Font newFont = (Font)evt.getNewValue();
+        if(newFont == null) return;
+        familyCombo.setSelectedItem(newFont.getName());
+        sizeCombo.setSelectedItem(Integer.toString(newFont.getSize()));
+        boldChk.setSelected(newFont.isBold());
+        italicChk.setSelected(newFont.isItalic());
+        sampleTextArea.setFont(newFont);
       }
     });
 
