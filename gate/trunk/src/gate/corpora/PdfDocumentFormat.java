@@ -74,20 +74,16 @@ public class PdfDocumentFormat extends DocumentFormat{
     
     //Implement the PDF unpacking.
     try {
-      //parse the original file into a text
-      String extractedContent = null;
-
       // get an Input stream from the gate document
-      InputStream in = new ByteArrayInputStream(
-              doc.getContent().toString().getBytes());
+      InputStream in = fileURL.openStream();
       // create a PDF Text Stripper
-      PDFTextStripper aPdfTextStripper = new PDFTextStripper();
-      PDFParser parser = new PDFParser(in);
-      parser.parse();
-      PDDocument pdfDoc = parser.getPDDocument();
+      PDFTextStripper pdfStripper = new PDFTextStripper();
       
-      extractedContent = aPdfTextStripper.getText(pdfDoc);
-      pdfDoc.close();
+      PDDocument document = PDDocument.load(in);
+      
+      String extractedContent = pdfStripper.getText(document);
+      
+      document.close();
       in.close();
       //set the content on the document
       doc.setContent(new DocumentContentImpl(extractedContent));
