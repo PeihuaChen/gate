@@ -908,11 +908,11 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
                  "true".equals((String)a.getFeatures().get("isEmptyAndSpan"))){
 
               // Assert: annotation a with start == end and isEmptyAndSpan
-              tmpBuff.append(writeStartTag(a, includeFeatures));
+              tmpBuff.append(writeStartTag(a, includeFeatures, false));
               stack.push(a);
             }else{
               // Assert annotation a with start == end and an empty tag
-              tmpBuff.append(writeEmptyTag(a));
+              tmpBuff.append(writeEmptyTag(a, false));
               // The annotation is removed from dumped set
               aSourceAnnotationSet.remove(a);
             }// End if
@@ -936,7 +936,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
               tmpBuff.append(writeEndTag(a1));
             }// End while
 
-            tmpBuff.append(writeStartTag(a, includeFeatures));
+            tmpBuff.append(writeStartTag(a, includeFeatures, false));
             // The annotation is removed from dumped set
             aSourceAnnotationSet.remove(a);
           }// End if ( offset.equals(a.getStartNode().getOffset()) )
@@ -952,7 +952,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       long originalPosition = -1;
       if ( a != null && offset.equals(a.getEndNode().getOffset()) ) {
         // end of the annotation correction
-        originalPosition = repositioning.getOriginalPos(offset.intValue()-1)+1;
+        originalPosition =
+          repositioning.getOriginalPos(offset.intValue(), true);
       }
       else {
         originalPosition = repositioning.getOriginalPos(offset.intValue());
@@ -1031,8 +1032,13 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     return annotationList;
   }// getAnnotationsForOffset()
 
-  /** Returns a string representing a start tag based on the input annot*/
   private String writeStartTag(Annotation annot, boolean includeFeatures){
+    return writeStartTag(annot, includeFeatures, true);
+  } // writeStartTag
+
+  /** Returns a string representing a start tag based on the input annot*/
+  private String writeStartTag(Annotation annot, boolean includeFeatures,
+                                boolean includeNamespace){
     AnnotationSet originalMarkupsAnnotSet =
             this.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
 
@@ -1042,31 +1048,68 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
       //the features are included either if desired or if that's an annotation
       //from the original markup of the document. We don't want for example to
       //spoil all links in an HTML file!
-      if (includeFeatures)
-        strBuff.append("<"+annot.getType()+
-              " xmlns:gate=\"http://www.gate.ac.uk\"" +
-              " gate:gateId=\"" + annot.getId()+"\"" +
-              " gate:annotMaxId=\"" + getNextAnnotationId() + "\""+
-                      writeFeatures(annot.getFeatures())+" >");
-      else if (originalMarkupsAnnotSet.contains(annot))
-        strBuff.append("<"+annot.getType()+
-                      writeFeatures(annot.getFeatures())+" >");
-       else
-         strBuff.append("<"+annot.getType()+">");
+      if (includeFeatures) {
+        strBuff.append("<");
+        strBuff.append(annot.getType());
+        strBuff.append(" ");
+        if(includeNamespace) {
+          strBuff.append(" xmlns:gate=\"http://www.gate.ac.uk\"");
+          strBuff.append(" gate:");
+        }
+        strBuff.append("gateId=\"");
+        strBuff.append(annot.getId());
+        strBuff.append("\"");
+        strBuff.append(" ");
+        if(includeNamespace) {
+          strBuff.append("gate:");
+        }
+        strBuff.append("annotMaxId=\"");
+        strBuff.append(getNextAnnotationId());
+        strBuff.append("\"");
+        strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
+        strBuff.append(" >");
+      }
+      else if (originalMarkupsAnnotSet.contains(annot)) {
+          strBuff.append("<");
+          strBuff.append(annot.getType());
+          strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
+          strBuff.append(" >");
+        }
+      else {
+        strBuff.append("<");
+        strBuff.append(annot.getType());
+        strBuff.append(">");
+      }
       // Once the root tag was writen then there will be no other Root tag
       isRootTag = false;
     }else{
       //the features are included either if desired or if that's an annotation
       //from the original markup of the document. We don't want for example to
       //spoil all links in an HTML file!
-      if (includeFeatures)
-        strBuff.append("<"+annot.getType()+" gate:gateId=\"" +annot.getId()+"\""+
-                      writeFeatures(annot.getFeatures())+" >");
-      else if (originalMarkupsAnnotSet.contains(annot))
-        strBuff.append("<"+annot.getType()+
-                      writeFeatures(annot.getFeatures())+" >");
-      else
-        strBuff.append("<"+annot.getType()+">");
+      if (includeFeatures) {
+        strBuff.append("<");
+        strBuff.append(annot.getType());
+        strBuff.append(" ");
+        if(includeNamespace) {
+          strBuff.append("gate:");
+        } // if
+        strBuff.append("gateId=\"");
+        strBuff.append(annot.getId());
+        strBuff.append("\"");
+        strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
+        strBuff.append(" >");
+      }
+      else if (originalMarkupsAnnotSet.contains(annot)) {
+        strBuff.append("<");
+        strBuff.append(annot.getType());
+        strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
+        strBuff.append(" >");
+      }
+      else {
+        strBuff.append("<");
+        strBuff.append(annot.getType());
+        strBuff.append(">");
+      }
     }// End if
     return strBuff.toString();
   }// writeStartTag()
@@ -1097,12 +1140,23 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     }// End while
   }//buildEntityMapFromString();
 
-  /** Returns a string representing an empty tag based on the input annot*/
   private String writeEmptyTag(Annotation annot){
+    return writeEmptyTag(annot, true);
+  } // writeEmptyTag
+
+  /** Returns a string representing an empty tag based on the input annot*/
+  private String writeEmptyTag(Annotation annot, boolean includeNamespace){
     StringBuffer strBuff = new StringBuffer("");
     if (annot == null) return strBuff.toString();
-    strBuff.append("<"+annot.getType()+" gateId=\"" +annot.getId()+"\""+
-                    writeFeatures(annot.getFeatures())+" />");
+
+    strBuff.append("<");
+    strBuff.append(annot.getType());
+    strBuff.append(" gateId=\"");
+    strBuff.append(annot.getId());
+    strBuff.append("\"");
+    strBuff.append(writeFeatures(annot.getFeatures(),includeNamespace));
+    strBuff.append(" />");
+
     return strBuff.toString();
   }// writeEmptyTag()
 
@@ -1120,7 +1174,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   }// writeEndTag()
 
   /** Returns a string representing a FeatureMap serialized as XML attributes*/
-  private String writeFeatures(FeatureMap feat){
+  private String writeFeatures(FeatureMap feat, boolean includeNamespace){
     StringBuffer strBuff = new StringBuffer("");
     if (feat == null) return strBuff.toString();
     Iterator it = feat.keySet().iterator();
@@ -1147,10 +1201,19 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
                        " from String, Number or Collection.(feature discarded)");
             continue;
         }// End if
-        if ("matches".equals(key))
-          strBuff.append(" gate:" + key + "=\"");
-        else
-          strBuff.append(" " + key + "=\"");
+        if ("matches".equals(key)) {
+          strBuff.append(" ");
+          if(includeNamespace) {
+            strBuff.append("gate:");
+          }
+          strBuff.append(key);
+          strBuff.append("=\"");
+        }
+        else {
+          strBuff.append(" ");
+          strBuff.append(key);
+          strBuff.append("=\"");
+        }
         if (java.util.Collection.class.isAssignableFrom(value.getClass())){
           Iterator valueIter = ((Collection)value).iterator();
           while(valueIter.hasNext()){
@@ -1158,7 +1221,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
             if (!(String.class.isAssignableFrom(item.getClass()) ||
                   Number.class.isAssignableFrom(item.getClass())))
                   continue;
-            strBuff.append(item +";");
+            strBuff.append(item);
+            strBuff.append(";");
           }// End while
           if (strBuff.charAt(strBuff.length()-1) == ';')
             strBuff.deleteCharAt(strBuff.length()-1);
