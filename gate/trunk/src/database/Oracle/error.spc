@@ -15,7 +15,7 @@ create or replace package error is
  *  $Id$
  */
   
-  -- Public type declarations
+  -- Public type declarations 
 /*  type <TypeName> is <Datatype>;
   
   -- Public constant declarations
@@ -53,6 +53,9 @@ create or replace package error is
   
   x_invalid_argument EXCEPTION;
   PRAGMA EXCEPTION_INIT(x_invalid_argument, -20108);
+
+  x_not_implemented EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_not_implemented, -20109);
                            
 end error;
 /

@@ -10,7 +10,7 @@
  *
  *  Marin Dimitrov, 18/Sep/2001
  *
- *      $Id$
+ *  $Id$
  *
  */
 
@@ -60,6 +60,15 @@ create or replace package body persist is
        when NO_DATA_FOUND then
           raise error.x_invalid_lr;
 
+  end;                                                                                                        
+
+  /*******************************************************************************************/
+  procedure delete_lr(p_lr_id     IN number,
+                      p_lr_type   IN varchar2)
+  is
+  
+  begin
+     raise error.x_not_implemented;
   end;                                                                                                        
 
 
