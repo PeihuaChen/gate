@@ -47,13 +47,13 @@ public class TestCreole extends TestCase
     // clear the register and the creole directory set
     reg = Gate.getCreoleRegister();
     reg.clear();
-//    reg.getDirectories().clear();
 
     // find a URL for finding test files and add to the directory set
     URL testUrl = Gate.getUrl("tests/");
+//    reg.registerDirectories(testUrl);
     reg.addDirectory(testUrl);
-
     reg.registerDirectories();
+    
     if(DEBUG) {
       Iterator iter = reg.values().iterator();
       while(iter.hasNext()) Out.println(iter.next());
