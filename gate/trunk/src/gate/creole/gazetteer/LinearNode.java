@@ -120,7 +120,17 @@ public class LinearNode {
   }
 
   public String toString() {
-    return list+':'+minor+':'+major;
+    String result = list+':'+major;
+
+    if ( null!=minor )
+      result += ':'+minor;
+
+    if ( null!=language ) {
+      if (null==minor)
+        result +=':';
+      result += ':'+minor;
+    }
+    return result;
   }
 
   /**@param o another node
