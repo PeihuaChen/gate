@@ -116,7 +116,6 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         docListModel.insertElementAt(doc, docPosition);
         //restore selection
         for(int i = 0; i < selIdxs.length; i++){
-System.out.println("Selected index " + selIdxs[i]);
           if(selIdxs[i] >= docPosition) selIdxs[i]++;
         }//for(int i = 0; i < selIdxs.length; i++)
         documentsList.setSelectedIndices(selIdxs);

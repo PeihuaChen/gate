@@ -127,8 +127,8 @@ public class CreoleRegisterImpl extends HashMap
     directories.add(directoryUrl);
 
     // directory URLs shouldn't include "creole.xml"
-    String urlName = directoryUrl.toExternalForm().toLowerCase();
-    if(urlName.endsWith("creole.xml")) {
+    String urlName = directoryUrl.toExternalForm();
+    if(urlName.toLowerCase().endsWith("creole.xml")) {
       throw new GateException(
         "CREOLE directory URLs should point to the parent location of " +
         "the creole.xml file, not the file itself; bad URL was: " + urlName
@@ -405,6 +405,37 @@ public class CreoleRegisterImpl extends HashMap
     return Collections.unmodifiableList(getPublicTypes(getVrTypes()));
   }//getPublicVrTypes()
 
+  /**
+   * Gets all the instantiations of a given type and all its public derivate
+   * types;
+   */
+  public List getAllPublicInstances(String type) throws GateException{
+    List publicTypes = getPublicTypes(keySet());
+    Iterator typesIter = publicTypes.iterator();
+    List res = new ArrayList();
+    Class targetClass;
+    try{
+      targetClass = Class.forName(type);
+    }catch(ClassNotFoundException cnfe){
+      throw new GateException("Invalid type " + type);
+    }
+    while(typesIter.hasNext()){
+      String aType = (String)typesIter.next();
+      Class aClass;
+      try{
+        aClass = Class.forName(aType);
+        if(targetClass.isAssignableFrom(aClass)){
+          res.addAll(((ResourceData)get(aType)).getInstantiations());
+        }
+      }catch(ClassNotFoundException cnfe){
+        throw new LuckyException(
+          "A type registered in the creole register does not exist in the VM!");
+      }
+
+    }//while(typesIter.hasNext())
+
+    return res;
+  }
 
   /**
    * Returns a list of strings representing class names for large VRs valid

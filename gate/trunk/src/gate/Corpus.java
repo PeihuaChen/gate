@@ -15,7 +15,9 @@
 
 package gate;
 import java.util.*;
+
 import gate.util.*;
+import gate.event.*;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url. TIPSTER equivalent: Collection.
@@ -27,5 +29,9 @@ public interface Corpus extends LanguageResource, SortedSet {
 
   /** Set the name of the corpus. */
   public void setName(String name);
+
+  public void removeCorpusListener(CorpusListener l);
+
+  public void addCorpusListener(CorpusListener l);
 
 } // interface Corpus

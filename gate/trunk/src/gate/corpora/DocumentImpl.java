@@ -1121,29 +1121,7 @@ extends AbstractLanguageResource implements Document {
       }
     }
   }
-  public synchronized void removeGateListener(GateListener l) {
-    if (gateListeners != null && gateListeners.contains(l)) {
-      Vector v = (Vector) gateListeners.clone();
-      v.removeElement(l);
-      gateListeners = v;
-    }
-  }
-  public synchronized void addGateListener(GateListener l) {
-    Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      gateListeners = v;
-    }
-  }
-  protected void fireGateEvent(GateEvent e) {
-    if (gateListeners != null) {
-      Vector listeners = gateListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((GateListener) listeners.elementAt(i)).processGateEvent(e);
-      }
-    }
-  }
+
   public void setStringContent(String newStringContent) {
     stringContent = newStringContent;
   }
