@@ -19,6 +19,7 @@ package gate;
 
 import java.util.*;
 import junit.framework.*;
+import gnu.getopt.*;
 
 import gate.annotation.*;
 import gate.corpora.*;
@@ -41,32 +42,65 @@ import gate.sgml.*;
   */
 public class TestGate
 {
-  /**
-    *  This field is "final static" because it brings in
-    *  the advantage of dead code elimination
-    *  When DEBUG is set on false the code that it guardes will be eliminated
-    *  by the compiler. This will spead up the progam a little bit.
-    */
+  /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** Main routine. */
+  /** Main routine for the GATE test suite.
+    * Command-line arguments:
+    * <UL>
+    * <LI>
+    * <B>-a</B> means run the test runner in automatic class reload mode
+    * <LI>
+    * <B>-n</B> means assume there's no net connection
+    * <LI>
+    * <B>-t</B> means run the test runner in text mode
+    * </UL>
+    */
   public static void main(String[] args) throws Exception {
+    boolean textMode = false;
+    boolean autoloadingMode = false;
 
-    String a[] = new String[1];
-    a[0] = "gate.TestGate";
+    // process command-line options
+    Getopt g = new Getopt("GATE test suite", args, "tna");
+    int c;
+    while( (c = g.getopt()) != -1 )
+      switch(c) {
+        case 't':
+          textMode = true;
+          break;
+        case 'n':
+          Gate.setNetConnected(false);
+          break;
+        case 'a':
+          autoloadingMode = true;
+          break;
+        case '?':
+          // leave the warning to getopt
+          return;
+        default:
+          Err.prln("getopt() returned " + c + "\n");
+      } // switch
+
+    // set up arguments for the JUnit test runner
+    String junitArgs[] = new String[1];
+    junitArgs[0] = "gate.TestGate";
     // use the next line if you're running with output to console in text mode:
-    // a[1] = "-wait";
-    if(args.length > 0 && args[0].equals("-t")) // text runner mode
-      junit.textui.TestRunner.main(a);
-    else {
-      junit.ui.TestRunner.main(a);
-      // the DB tests fail under this one (doesn't load oracle driver,
+    // junitArgs[1] = "-wait";
+
+    // execute the JUnit test runner
+    if(textMode) { // text runner mode
+      junit.textui.TestRunner.main(junitArgs);
+    } else if(autoloadingMode) { // autoloading mode
+      // NOTE: the DB tests fail under this one (doesn't load oracle driver,
       // even after the Class.forName call)
-      //Class c = null;
-      //c = Class.forName("oracle.jdbc.driver.OracleDriver");
-      //c = null;
-      //junit.ui.LoadingTestRunner.main(a);
+      Class clazz = null;
+      clazz = Class.forName("oracle.jdbc.driver.OracleDriver");
+      clazz = null;
+      junit.ui.LoadingTestRunner.main(junitArgs);
+    } else { // by default us the single-run GUI version
+      junit.ui.TestRunner.main(junitArgs);
     }
+
   } // main
 
   /** GATE test suite. Every test case class has to be
@@ -79,8 +113,8 @@ public class TestGate
     Gate.init();
 
     TestSuite suite = new TestSuite();
-    suite.addTest(TestCreole.suite());
-    suite.addTest(TestXSchema.suite()); //*
+    suite.addTest(TestCreole.suite());  //*
+    suite.addTest(TestXSchema.suite());
     suite.addTest(TestFiles.suite());
     suite.addTest(TestXml.suite());
     suite.addTest(TestHtml.suite());
