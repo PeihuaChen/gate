@@ -214,7 +214,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
   }//isPartiallyCompatible
 
   /**
-    *  Two Annotation are coestensive if their offsets are the
+    *  Two Annotation are coextensive if their offsets are the
     *  same.
     *  @param anAnnot A Gate annotation.
     *  @return <code>true</code> if two annotation hit the same possition and
