@@ -25,11 +25,101 @@
   GATE Releases
   </P>
 </DIV>
+
+<!-- release notes *************************************************** -->
+<H2>GATE 3.0 (build 1717, Beta 1), August 6th 2004</H2>
+
+<p>
+This release is dedicated to the memory of <a
+href=http://www.orinst.ox.ac.uk/Jeremy.pdf>Jeremy Black</a> (main instigator
+of the <a
+href=http://www.gate.ac.uk/projects/etcsl/>ETCSL projects</a>).
+
+<P>
+This is the latest release (is it <b>not</b> production quality).
+The <A HREF="http://www.gate.ac.uk/releases/gate-3.0-beta1-build1717--ALL/tao.pdf">
+user guide</A>.
+The <A HREF="http://www.gate.ac.uk/releases/gate-3.0-beta1-build1717--ALL/">
+developer documentation</A>.
+The <A HREF="http://gate.ac.uk/download">download page</A>.
+
+<P> See <a href=http://gate.ac.uk/sale/tao>chapter 2 (Change Log)</a> of
+the User Guide for full details of what has changed.
+
+<P>
+<b>Highlights</b>
+
+<P> New features include:
+<ul>
+<li>completely rewritten document viewer/editor
+<li>extensive ontology support
+<li>a new plugin management system
+<li>separate .jar
+files and a Tomcat classloading fix
+<li>lots more CREOLE components (and some more to come soon)
+</ul>
+
+<P>
+<b>Compatibility</b>
+
+<p>
+For version 3 we decided that it was worthwhile making a few
+incompatible changes in order to clean up a few things that have caused
+trouble in previous versions. For example: some recent classes have been
+renamed (particularly the ontologies support classes) and a few events added
+(see below); datastores created by version 3 will probably not read properly
+in version 2.  If you have problems use the mailing list and we'll help you
+fix your code!
+
+<P>
+<b>Contributions</b>
+
+<p>
+A big "thank you" to the following contributors of new code to this release
+(please let <a href=http://www.dcs.shef.ac.uk/~hamish>me</a>
+know if I missed you out!):
+<ul>
+<li>
+OntoText for contributing the OntoGazetteer and various other components: <a
+href=http://www.ontotext.com/>http://www.ontotext.com/</a>
+<li>
+Ontos International AG for the new JAPE debugger:
+<a href=http://www.ontosearch.com/en/company/>http://www.ontosearch.com/en/company/</a>.
+<li>
+Mark Greenwood for several CREOLE components:
+<a href=http://www.dcs.shef.ac.uk/~mark>http://www.dcs.shef.ac.uk/~mark</a>
+<li>
+Angus Roberts for several CREOLE components:
+<a href=http://www.dcs.shef.ac.uk/~angus/software.html>http://www.dcs.shef.ac.uk/~angus/software.html</a>.
+<li>
+Luc Plamondon for the Montreal transducer [not bundled in beta 1]:
+<a href=http://www.iro.umontreal.ca/~plamondl/mtltransducer/>http://www.iro.umontreal.ca/~plamondl/mtltransducer/</a>.
+<li>
+<a href=http://www.media-style.com/index.jsp?folderPK=754>Media Style</a> for
+the CoNLL ANNIE wrapper.
+<li>
+Osamu Masutani of <a href=http://www.d-itlab.co.jp>Denso IT Laboratory,
+Inc.</a> for many useful suggestions.
+</ul>
+
+<P>
+<b>See also</b>
+
+<ul>
+<li>
+<a href=http://melandra.com/>Melandra</a>, whose Peter Crowther sometimes
+helps out on the mailing list
+<li>
+<a href=http://bioinf.cs.ucl.ac.uk/biorat>David Corney's BioRAT</a>
+GATE/ANNIE/JAPE-based bio-informatics extraction tool.
+</ul>
+
+
 <!-- release notes *************************************************** -->
 <H2>GATE 2.2 (build 1350), July 29th 2003</H2>
 
 <P>
-The latest release.
+The last production quality release.
 
 <P>
 <A HREF="http://www.gate.ac.uk/releases/gate-2.2-build1350--ALL/">
@@ -37,6 +127,8 @@ Developer documentation for this release</A>.
 
 <P>
 <A HREF="http://gate.ac.uk/download">Download</A>.
+
+
 <!-- release notes *************************************************** -->
 <H2>GATE 2.1_01 (build 1170), February 14th 2003</H2>
 
