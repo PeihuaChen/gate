@@ -67,8 +67,10 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
       String line;
       MappingNode node;
       while (null != (line = mapReader.readLine())) {
-        node = new MappingNode(line);
-        this.add(node);
+        if (0 != line.trim().length()) {
+          node = new MappingNode(line);
+          this.add(node);
+        } // if
       } //while
 
       mapReader.close();
