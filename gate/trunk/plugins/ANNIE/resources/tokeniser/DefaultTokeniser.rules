@@ -58,13 +58,13 @@
 #------- The rules start here -----------------
 
 #words#
-// a word can be any combination of letters, 
-// but excluding symbols and punctuation, e.g. apostrophes, hyphens
+// a word can be any combination of letters, including hyphens,
+// but excluding symbols and punctuation, e.g. apostrophes
 
 
-"UPPERCASE_LETTER" (LOWERCASE_LETTER)* > Token;orth=upperInitial;kind=word;
-"UPPERCASE_LETTER" (UPPERCASE_LETTER)+ > Token;orth=allCaps;kind=word;
-"LOWERCASE_LETTER" (LOWERCASE_LETTER)* > Token;orth=lowercase;kind=word;
+"UPPERCASE_LETTER" (LOWERCASE_LETTER|DASH_PUNCTUATION)* > Token;orth=upperInitial;kind=word;
+"UPPERCASE_LETTER" (DASH_PUNCTUATION)? (UPPERCASE_LETTER|DASH_PUNCTUATION)+ > Token;orth=allCaps;kind=word;
+"LOWERCASE_LETTER" (DASH_PUNCTUATION)? (LOWERCASE_LETTER|DASH_PUNCTUATION)* > Token;orth=lowercase;kind=word;
 
 // MixedCaps is any mixture of caps and small letters that doesn't 
 // fit in the preceding categories
@@ -76,7 +76,7 @@
 ("LOWERCASE_LETTER" "LOWERCASE_LETTER"+"UPPERCASE_LETTER"+ \
 (UPPERCASE_LETTER|LOWERCASE_LETTER)*)|\
 ("LOWERCASE_LETTER" "LOWERCASE_LETTER"*"UPPERCASE_LETTER"+\
-(UPPERCASE_LETTER|LOWERCASE_LETTER)*) \
+(UPPERCASE_LETTER|LOWERCASE_LETTER|DASH_PUNCTUATION)*) \
 > Token;orth=mixedCaps;kind=word;
 
 
