@@ -3308,14 +3308,16 @@ Out.prln("NULL size");
 
   protected class SearchDialog extends JDialog{
     SearchDialog(Frame owner){
-      super(owner, "Find in \"" + document.getName() + "\"", false);
+      super(owner, false);
+      setTitle( "Find in \"" + document.getName() + "\"");
       initLocalData();
       initGuiComponents();
       initListeners();
     }
 
     SearchDialog(Dialog owner){
-      super(owner, "Find in \"" + document.getName() + "\"", false);
+      super(owner, false);
+      setTitle("Find in \"" + document.getName() + "\"");
       initLocalData();
       initGuiComponents();
       initListeners();
