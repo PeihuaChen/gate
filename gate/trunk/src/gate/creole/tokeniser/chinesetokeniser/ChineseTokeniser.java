@@ -62,6 +62,9 @@ public class ChineseTokeniser
   /** Instance of Simple Tokenizer */
   private SimpleTokeniser tokeniser;
 
+  /** Boolean value which states if segmenter should run */
+  private Boolean runSegmenter;
+
   /** Boolean value which says if tokeniser has to generate the spack tokens */
   private Boolean generateSpaceTokens;
 
@@ -136,10 +139,17 @@ public class ChineseTokeniser
       throw new GateRuntimeException("No document to process!");
     }
 
-    // run the segmenter on this text
-    String segmentedData = segmenter.segmentData(
-        document.getContent().toString(),
-        encoding);
+    String segmentedData = null;
+
+    // Segmenter should only run if runSegmenter value is true
+    if (runSegmenter.booleanValue()) {
+      // run the segmenter on this text
+      segmentedData = segmenter.segmentData(
+          document.getContent().toString(),
+          encoding);
+    } else {
+      segmentedData = document.getContent().toString();
+    }
 
     if(encoding.equals("UTF8")) {
       encoding = "UTF-8";
@@ -165,7 +175,12 @@ public class ChineseTokeniser
 
     // and the get the marks where the spaces in the original document
     // were added
-    ArrayList marks = segmenter.getMarks();
+    ArrayList marks = null;
+
+    // Segmenter should only run if runSegmenter value is true
+    if (runSegmenter.booleanValue()) {
+      marks = segmenter.getMarks();
+    }
 
     // we need to run the Simple Tokenizer on this
     FeatureMap features = Factory.newFeatureMap();
@@ -211,11 +226,13 @@ public class ChineseTokeniser
 
 
     // to make the process faster, lets copy all the marks into the long array
-    long[] markValues = new long[marks.size()];
-    for (int i = 0; i < marks.size(); i++) {
-      markValues[i] = ( (Long) marks.get(i)).longValue();
+    long[] markValues = (runSegmenter.booleanValue())? new long[marks.size()] : null;
+    if(markValues != null) {
+      for (int i = 0; i < marks.size(); i++) {
+        markValues[i] = ( (Long) marks.get(i)).longValue();
+      }
+      Arrays.sort(markValues);
     }
-    Arrays.sort(markValues);
 
     // and finally transfer the annotations
     while (tokenIter.hasNext()) {
@@ -226,7 +243,7 @@ public class ChineseTokeniser
           currentToken.getEndNode().getOffset().longValue();
 
       // search how many chinese splits are before the current annotation
-      int index = Arrays.binarySearch(markValues, startOffset);
+      int index = (markValues == null) ? -1 : Arrays.binarySearch(markValues, startOffset);
       if (index >= 0) {
         // it is a chinese split
         if (generateSpaceTokens.booleanValue()) {
@@ -270,6 +287,22 @@ public class ChineseTokeniser
   }
 
   // getter and setter method
+
+  /**
+   * Sets the boolean parameter which states if segmenter should run
+   * @param runSegmenter
+   */
+  public void setRunSegmenter(Boolean runSegmenter) {
+    this.runSegmenter = runSegmenter;
+  }
+
+
+  /** Gets the boolean parameter which states if segmenter should run
+   */
+  public Boolean getRunSegmenter() {
+    return this.runSegmenter;
+  }
+
   /**
    * Sets the boolean parameter which states if segmenter should produce
    * the space tokens
@@ -282,7 +315,6 @@ public class ChineseTokeniser
   /**
    * Gets the boolean parameter which states if segmenter should produce
    * the space tokens
-   * @param inputFile
    */
   public Boolean getGenerateSpaceTokens() {
     return this.generateSpaceTokens;
