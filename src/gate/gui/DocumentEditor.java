@@ -83,10 +83,20 @@ public class DocumentEditor extends AbstractVisualResource{
   protected JSplitPane leftSplit;
 
   /**
+   * The split that contains the styles tree and the coreference viewer.
+   */
+  protected JSplitPane rightSplit;
+
+  /**
    * The right hand side tree with all  the annotation sets and types of
    * annotations
    */
   protected JTree stylesTree;
+
+  /**
+   * The toolbar displayed on the top part of the component
+   */
+  protected JToolBar toolbar;
 
   /**Scroller for the styles tree*/
   protected JScrollPane stylesTreeScroll;
@@ -99,6 +109,14 @@ public class DocumentEditor extends AbstractVisualResource{
 
   /**The dialog used for editing the styles used to highlight annotations*/
   protected TextAttributesChooser styleChooser;
+
+  /**
+   * The list used to select displayed coreference information
+   */
+  protected JList corefList;
+
+  /** The scroller for the coref list*/
+  protected JScrollPane corefListScroll;
 
   /**
    * A box containing a {@link javax.swing.JProgressBar} used to keep the user
@@ -174,6 +192,16 @@ public class DocumentEditor extends AbstractVisualResource{
   /**Should this component bahave as an editor as well as an viewer*/
   private boolean editable = true;
 
+
+
+  private JToggleButton textVisibleBtn;
+  private JToggleButton typesTreeVisibleBtn;
+  private JToggleButton annotationsTableVisibleBtn;
+  private JToggleButton coreferenceVisibleBtn;
+  private boolean annotationsTableVisible = false;
+  private boolean coreferenceVisible = false;
+  private boolean textVisible = true;
+  private boolean typesTreeVisible = true;
 
   /**
    * Default constructor. Creats all the components and initialises all the
@@ -254,32 +282,40 @@ public class DocumentEditor extends AbstractVisualResource{
    */
   protected void initListeners() {
     //listen for our own properties change events
-    this.addPropertyChangeListener("visibleAnnotationSets",
-                                   new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent evt){
-      }
-    });
-    this.addPropertyChangeListener("annotationSchemas",
-                                   new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent evt){
-      }
-    });
-    //listen for component events
-    this.addComponentListener(new ComponentAdapter() {
-      public void componentResized(ComponentEvent e) {
-      }
-
-      public void componentShown(ComponentEvent e) {
-
-        Enumeration enum = stylesTreeRoot.depthFirstEnumeration();
-        while(enum.hasMoreElements()){
-          DefaultMutableTreeNode node =
-            (DefaultMutableTreeNode)enum.nextElement();
-          stylesTreeModel.nodeChanged(node);
+    this.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        if(e.getPropertyName().equals("annotationsTableVisible") ||
+           e.getPropertyName().equals("coreferenceVisible") ||
+           e.getPropertyName().equals("textVisible") ||
+           e.getPropertyName().equals("typesTreeVisible")){
+          layoutComponents();
         }
+      }
+    });
 
-        //set the slider location
-        leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
+    textVisibleBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setTextVisible(textVisibleBtn.isSelected());
+      }
+    });
+
+    annotationsTableVisibleBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setAnnotationsTableVisible(annotationsTableVisibleBtn.isSelected());
+      }
+    });
+
+
+    typesTreeVisibleBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setTypesTreeVisible(typesTreeVisibleBtn.isSelected());
+      }
+    });
+
+
+    coreferenceVisibleBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setCoreferenceVisible(coreferenceVisibleBtn.isSelected());
       }
     });
 
@@ -623,9 +659,28 @@ public class DocumentEditor extends AbstractVisualResource{
   /**Builds all the graphical components*/
   protected void initGuiComponents(){
     //initialise GUI components
-    this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-    //LEFT SPLIT
+    //the toolbar
+    toolbar = new JToolBar(JToolBar.HORIZONTAL);
+    toolbar.setFloatable(false);
+    this.add(toolbar);
+
+    textVisibleBtn = new JToggleButton("Text", textVisible);
+    toolbar.add(textVisibleBtn);
+
+    annotationsTableVisibleBtn = new JToggleButton("Annotations",
+                                                   annotationsTableVisible);
+    toolbar.add(annotationsTableVisibleBtn);
+
+    typesTreeVisibleBtn = new JToggleButton("Annotation Sets", typesTreeVisible);
+    toolbar.add(typesTreeVisibleBtn);
+
+    coreferenceVisibleBtn = new JToggleButton("Coreference", coreferenceVisible);
+//    toolbar.add(coreferenceVisibleBtn);
+    toolbar.add(Box.createHorizontalGlue());
+
+    //The text
     textPane = new XJTextPane();
     textPane.setEditable(false);
     textPane.setEnabled(true);
@@ -634,20 +689,16 @@ public class DocumentEditor extends AbstractVisualResource{
     StyleConstants.setBackground(defaultStyle, Color.white);
     StyleConstants.setFontFamily(defaultStyle, "Arial Unicode MS");
     textScroll = new JScrollPane(textPane);
+    textScroll.setAlignmentY(Component.TOP_ALIGNMENT);
 
+    //The table
     annotationsTableModel = new AnnotationsTableModel();
     annotationsTable = new XJTable(annotationsTableModel);
     annotationsTable.setIntercellSpacing(new Dimension(10, 5));
 
     tableScroll = new JScrollPane(annotationsTable);
     tableScroll.setOpaque(true);
-
-    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                               textScroll, tableScroll);
-    leftSplit.setOneTouchExpandable(true);
-    leftSplit.setOpaque(true);
-    leftSplit.setAlignmentY(Component.TOP_ALIGNMENT);
-    this.add(leftSplit);
+    tableScroll.setAlignmentY(Component.TOP_ALIGNMENT);
 
     //RIGHT SIDE - the big tree
     stylesTreeRoot = new DefaultMutableTreeNode(null, true);
@@ -670,8 +721,29 @@ public class DocumentEditor extends AbstractVisualResource{
     stylesTreeScroll.setAlignmentY(Component.TOP_ALIGNMENT);
     stylesTreeScroll.setHorizontalScrollBarPolicy(
                                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    this.add(stylesTreeScroll);
 
+    corefList = new JList();
+    corefListScroll = new JScrollPane(corefList);
+    corefListScroll.setOpaque(true);
+    corefListScroll.setAlignmentY(Component.TOP_ALIGNMENT);
+    corefListScroll.setHorizontalScrollBarPolicy(
+                                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+    //various containers
+    leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    leftSplit.setOneTouchExpandable(true);
+    leftSplit.setOpaque(true);
+    leftSplit.setDividerLocation((double)0.5);
+    leftSplit.setAlignmentY(Component.TOP_ALIGNMENT);
+
+    rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    rightSplit.setOneTouchExpandable(true);
+    rightSplit.setOpaque(true);
+    rightSplit.setDividerLocation((double)0.5);
+    rightSplit.setAlignmentY(Component.TOP_ALIGNMENT);
+
+    //put everything together
+    layoutComponents();
 
     //Extra Stuff
 
@@ -707,9 +779,8 @@ public class DocumentEditor extends AbstractVisualResource{
                  stylesTreeScroll.getInsets().top +
                  stylesTreeScroll.getInsets().bottom;
 
-    Dimension dim = new Dimension(width, height);
-    stylesTreeScroll.setMinimumSize(dim);
-    stylesTreeScroll.setPreferredSize(dim);
+    stylesTreeScroll.setMinimumSize(new Dimension(width, 20));
+    stylesTreeScroll.setPreferredSize(new Dimension(width, height));
     stylesTreeScroll.invalidate();
     validate();
   }//protected void updateTreeSize()
@@ -996,6 +1067,46 @@ public class DocumentEditor extends AbstractVisualResource{
     }
   }//protected void selectAnnotation(String set, Annotation ann)
 
+
+  /**
+   * Creates the layout of this component acording to the set of subcomponents
+   * (text display, annotations table, etc.) that need to be visible.
+   */
+  protected void layoutComponents(){
+    SwingUtilities.invokeLater(new Runnable(){
+      public void run(){
+        // this contains all the componenets apart from the toolbar
+        Box mainBox = Box.createHorizontalBox();
+        if(textVisible && annotationsTableVisible){
+          leftSplit.setTopComponent(textScroll);
+          leftSplit.setBottomComponent(tableScroll);
+          leftSplit.setDividerLocation((double)0.5);
+          mainBox.add(leftSplit);
+        }else{
+          if(textVisible) mainBox.add(textScroll);
+          else if(annotationsTableVisible) mainBox.add(tableScroll);
+        }
+
+        if(typesTreeVisible && coreferenceVisible){
+          rightSplit.setTopComponent(stylesTreeScroll);
+          rightSplit.setBottomComponent(corefListScroll);
+          rightSplit.setDividerLocation((double)0.5);
+          mainBox.add(rightSplit);
+        }else{
+          if(typesTreeVisible) mainBox.add(stylesTreeScroll);
+          else if(coreferenceVisible) mainBox.add(corefListScroll);
+        }
+
+        if(DocumentEditor.this.getComponentCount() > 1)
+          DocumentEditor.this.remove(1);
+        DocumentEditor.this.add(mainBox);
+        DocumentEditor.this.validate();
+        DocumentEditor.this.repaint();
+      }
+    });
+  }
+
+
   /**Should the editor functionality of this component be enabled*/
   public void setEditable(boolean newEditable) {
     editable = newEditable;
@@ -1004,6 +1115,49 @@ public class DocumentEditor extends AbstractVisualResource{
   /**Is the editor functionality enabled*/
   public boolean isEditable() {
     return editable;
+  }
+  public void setAnnotationsTableVisible(boolean annotationsTableVisible) {
+    boolean  oldAnnotationsTableVisible = this.annotationsTableVisible;
+    this.annotationsTableVisible = annotationsTableVisible;
+    propertyChangeListeners.firePropertyChange(
+        "annotationsTableVisible",
+        new Boolean(oldAnnotationsTableVisible),
+        new Boolean(annotationsTableVisible));
+  }
+  public boolean isAnnotationsTableVisible() {
+    return annotationsTableVisible;
+  }
+  public void setCoreferenceVisible(boolean coreferenceVisible) {
+    boolean  oldCoreferenceVisible = this.coreferenceVisible;
+    this.coreferenceVisible = coreferenceVisible;
+    propertyChangeListeners.firePropertyChange(
+      "coreferenceVisible",
+      new Boolean(oldCoreferenceVisible),
+      new Boolean(coreferenceVisible));
+  }
+
+  public boolean isCoreferenceVisible() {
+    return coreferenceVisible;
+  }
+  public void setTextVisible(boolean textVisible) {
+    boolean  oldTextVisible = this.textVisible;
+    this.textVisible = textVisible;
+    propertyChangeListeners.firePropertyChange("textVisible",
+                                               new Boolean(oldTextVisible),
+                                               new Boolean(textVisible));
+  }
+  public boolean isTextVisible() {
+    return textVisible;
+  }
+  public void setTypesTreeVisible(boolean typesTreeVisible) {
+    boolean  oldTypesTreeVisible = this.typesTreeVisible;
+    this.typesTreeVisible = typesTreeVisible;
+    propertyChangeListeners.firePropertyChange("typesTreeVisible",
+                                               new Boolean(oldTypesTreeVisible),
+                                               new Boolean(typesTreeVisible));
+  }
+  public boolean isTypesTreeVisible() {
+    return typesTreeVisible;
   }
 
   //inner classes
@@ -1080,6 +1234,28 @@ public class DocumentEditor extends AbstractVisualResource{
       return null;
     }
   }//class AnnotationsTableModel extends AbstractTableModel
+
+  protected class CorefListModel extends AbstractListModel{
+    public int getSize(){
+      java.util.List matchesList = (java.util.List)
+                                   document.getFeatures().get("MatchesAnnots");
+      return (matchesList == null) ? 0 : matchesList.size();
+    }
+
+    public Object getElementAt(int index){
+      java.util.List matchesList = (java.util.List)
+                                   document.getFeatures().get("MatchesAnnots");
+      if(matchesList == null || matchesList.size() <= index) return null;
+      java.util.List oneMatch = (java.util.List)matchesList.get(index);
+      return null;
+    }
+
+    protected String getNameForSet(java.util.List matchSet){
+      java.util.List copyList = new ArrayList(matchSet);
+      Collections.sort(copyList);
+      return "";
+    }
+  }
 
 
   /**
