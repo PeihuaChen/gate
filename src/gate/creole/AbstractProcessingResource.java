@@ -43,7 +43,7 @@ extends AbstractFeatureBearer implements ProcessingResource
   } // run()
 
   public void setRuntimeParameters(FeatureMap parameters){
-System.out.println(parameters);
+    Out.println(parameters);
   }
 
   /** Trigger any exception that was caught when <CODE>run()</CODE> was
