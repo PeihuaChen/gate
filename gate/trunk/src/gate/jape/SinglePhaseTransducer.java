@@ -106,9 +106,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
     FSMInstance currentFSM;
     //startNode: the node from the current matching attepmt starts.
     //initially startNode = leftMost node
-    Node startNode = doc.getAnnotations().firstNode();
+    gate.Node startNode = doc.getAnnotations().firstNode();
     //The last node: where the parsing will stop
-    Node lastNode = doc.getAnnotations().lastNode();
+    gate.Node lastNode = doc.getAnnotations().lastNode();
 
     //the big while for the actual parsing
     while(startNode != lastNode){
@@ -145,7 +145,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
         //...using LinkedList instead of HashSet because Annotation does not
         //implement hashCode()
 
-        //get an empty annotation set. 
+        //get an empty annotation set.
         AnnotationSet matchedAnnots = new AnnotationSetImpl(doc);
         //maps String to gate.FeatureMap
         java.util.Map constraintsByType = new java.util.HashMap();
@@ -157,9 +157,17 @@ extends Transducer implements JapeConstants, java.io.Serializable
           annType = currentConstraints[i].getAnnotType();
           newAttributes = currentConstraints[i].getAttributeSeq();
           oldAttributes = (FeatureMap)constraintsByType.get(annType);
-          if(oldAttributes != null) newAttributes.putAll(oldAttributes);
-          constraintsByType.put(annType, newAttributes);
-        }
+          if(newAttributes == null){
+            if(oldAttributes == null){
+              //no constraints about this type.
+              constraintsByType.put(annType, Transients.newFeatureMap());
+            }
+          }else{
+            //newAttributes != null
+            if(oldAttributes != null) newAttributes.putAll(oldAttributes);
+            constraintsByType.put(annType, newAttributes);
+          }
+        }//for(int i=0; i < currentConstraints.length; i++)
         //try to match all the constraints
         boolean success = true;
         java.util.Iterator typesIter = constraintsByType.keySet().iterator();
@@ -173,7 +181,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           matchedHere = doc.getAnnotations().get(annType,
                                                  newAttributes,
                                                  offset);
-          if(matchedHere.isEmpty()) success = false;
+          if(matchedHere == null || matchedHere.isEmpty()) success = false;
           else{
             //we have some matched annotations of the current type
             //let's add them to the list of matched annotations
@@ -185,6 +193,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
           //bindings data structure and add it to the list of active FSMs.
           FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
           newFSMI.setAGPosition(matchedAnnots.lastNode());
+System.out.println("New FSM at: " + matchedAnnots.lastNode().getOffset().longValue());
           //do the bindings
 
           //all the annotations matched here will be added to the sets
@@ -192,16 +201,19 @@ extends Transducer implements JapeConstants, java.io.Serializable
           java.util.Iterator labelsIter = currentTrans.getBindings().iterator();
           AnnotationSet oldSet;
           String label;
+          java.util.Map binds = newFSMI.getBindings();
           while(labelsIter.hasNext()){
             //for each label add the set of matched annotations to the set of
             //annotations currently bound to that name
             label = (String)labelsIter.next();
-            oldSet = (AnnotationSet)newFSMI.getBindings().get(label);
-            oldSet.addAll(matchedAnnots);
+            oldSet = (AnnotationSet)binds.get(label);
+            if(oldSet != null) oldSet.addAll(matchedAnnots);
+            else binds.put(label, matchedAnnots);
           }//while(labelsIter.hasNext())
           activeFSMInstances.addLast(newFSMI);
         }
       }//while(transIter.hasNext())
+System.out.println("No of active FSMs: " + activeFSMInstances.size());      
      }//while(!activeFSMInstances.isEmpty())
 
      //FIRE THE RULE
@@ -209,14 +221,29 @@ extends Transducer implements JapeConstants, java.io.Serializable
       //advance to next relevant node in the Annotation Graph
       startNode = doc.getAnnotations().nextNode(startNode);
     }else if(ruleApplicationStyle == BRILL_STYLE){
-
-
-
+      //fire the rules corresponding to all accepting FSM instances
+      java.util.Iterator accFSMs = acceptingFSMInstances.iterator();
+      FSMInstance currentAcceptor;
+      RightHandSide currentRHS;
+      long lastAGPosition = 0;
+      while(accFSMs.hasNext()){
+        currentAcceptor = (FSMInstance) accFSMs.next();
+        currentRHS = currentAcceptor.getFSMPosition().getAction();
+        currentRHS.transduce(doc,currentAcceptor.getBindings());
+        long currentAGPosition =
+             currentAcceptor.getAGPosition().getOffset().longValue();
+        if(lastAGPosition < currentAGPosition){
+          startNode =
+                doc.getAnnotations().nextNode(currentAcceptor.getAGPosition());
+          lastAGPosition = startNode.getOffset().longValue();
+        }
+      }
     }else if(ruleApplicationStyle == APPELT_STYLE){
 
     }else throw new RuntimeException("Unknown rule application style!");
 
     }//while(startNode != lastNode)
+
   } // transduce
 
 
@@ -449,6 +476,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.6  2000/05/17 17:08:49  valyt
+// First working (?) version of jape.
+//
 // Revision 1.5  2000/05/12 14:14:16  valyt
 // Done some work on jape....almost done :)
 //
