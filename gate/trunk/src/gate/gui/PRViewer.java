@@ -73,6 +73,7 @@ public class PRViewer extends AbstractVisualResource {
     }else{
       editor.init(null, null);
     }
+    editor.removeCreoleListenerLink();
   }
 
   ResourceParametersEditor editor;
