@@ -42,18 +42,167 @@ public class OracleDataStore extends JDBCDataStore {
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
-  public void sync(LanguageResource lr) throws PersistenceException {
+  public String getComment() {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Returns the name of the icon to be used when this datastore is displayed
+   * in the GUI
+   */
+  public String getIconName() {
+    throw new MethodNotImplementedException();
+  }
+
+
+  /**
+   * Removes a a previously registered {@link gate.event.DatastoreListener}
+   * from the list listeners for this datastore
+   */
+  public void removeDatastoreListener(DatastoreListener l) {
+    throw new MethodNotImplementedException();
+  }
+
+
+  /**
+   * Registers a new {@link gate.event.DatastoreListener} with this datastore
+   */
+  public void addDatastoreListener(DatastoreListener l) {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get the name of an LR from its ID. */
+  public String getLrName(String lrId)
+    throws PersistenceException {
+   throw new MethodNotImplementedException();
+/*    CallableStatement stmt = null;
 
     try {
-      jdbcConn.setAutoCommit(false);
+      stmt = this.jdbcConn.prepareCall("{ call persist.get_lr_name(?,?) }");
+      stmt.setLong(1,lrID.longValue());
+      stmt.registerOutParameter(2,java.sql.Types.VARCHAR);
+      stmt.execute();
+      String result = stmt.getInt(2);
 
-      jdbcConn.commit();
+      return result;
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("sync failed: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't get LR name from DB: ["+ sqle.getMessage()+"]");
     }
+*/
+  }
+
+  /** Set the URL for the underlying storage mechanism. */
+  public void setStorageUrl(URL storageUrl) throws PersistenceException {
+
+    super.setStorageUrl(storageUrl);
 
   }
+
+  /** Get the URL for the underlying storage mechanism. */
+  public URL getStorageUrl() {
+
+    return super.getStorageUrl();
+  }
+
+  /**
+   * Create a new data store. <B>NOTE:</B> for some data stores
+   * creation is an system administrator task; in such cases this
+   * method will throw an UnsupportedOperationException.
+   */
+  public void create()
+  throws PersistenceException, UnsupportedOperationException {
+
+    super.create();
+  }
+
+  /** Open a connection to the data store. */
+  public void open() throws PersistenceException {
+
+    super.open();
+  }
+
+  /** Close the data store. */
+  public void close() throws PersistenceException {
+
+    super.close();
+  }
+
+  /**
+   * Delete the data store. <B>NOTE:</B> for some data stores
+   * deletion is an system administrator task; in such cases this
+   * method will throw an UnsupportedOperationException.
+   */
+  public void delete()
+  throws PersistenceException, UnsupportedOperationException {
+
+    super.delete();
+  }
+
+  /**
+   * Delete a resource from the data store.
+   * @param lrId a data-store specific unique identifier for the resource
+   * @param lrClassName class name of the type of resource
+   */
+  public void delete(String lrClassName, String lrId)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Save: synchonise the in-memory image of the LR with the persistent
+   * image.
+   */
+  public void sync(LanguageResource lr) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Set method for the autosaving behaviour of the data store.
+   * <B>NOTE:</B> many types of datastore have no auto-save function,
+   * in which case this will throw an UnsupportedOperationException.
+   */
+  public void setAutoSaving(boolean autoSaving)
+  throws UnsupportedOperationException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get the autosaving behaviour of the LR. */
+  public boolean isAutoSaving() {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Adopt a resource for persistence. */
+  public LanguageResource adopt(LanguageResource lr)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /**
+   * Get a resource from the persistent store.
+   * <B>Don't use this method - use Factory.createResource with
+   * DataStore and DataStoreInstanceId parameters set instead.</B>
+   */
+  public LanguageResource getLr(String lrClassName, String dataStoreInstanceId)
+  throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get a list of the types of LR that are present in the data store. */
+  public List getLrTypes() throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get a list of the IDs of LRs of a particular type that are present. */
+  public List getLrIds(String lrType) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
+  /** Get a list of the names of LRs of a particular type that are present. */
+  public List getLrNames(String lrType) throws PersistenceException {
+    throw new MethodNotImplementedException();
+  }
+
 
   /** Gets a timestamp marker that will be used for all changes made in
    *  the database so that subsequent calls to deleteSince() could restore (partly)

@@ -169,7 +169,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    */
   public void create()
   throws PersistenceException, UnsupportedOperationException {
-    throw new MethodNotImplementedException();
+
+    throw new UnsupportedOperationException("create() is not supported for DatabaseDataStore");
   }
 
   /** Open a connection to the data store. */
@@ -193,7 +194,14 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** Close the data store. */
   public void close() throws PersistenceException {
-    throw new MethodNotImplementedException();
+
+    try {
+      this.jdbcConn.close();
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException("cannot close JDBC connection, DB error is ["+
+                                      sqle.getMessage() +"]");
+    }
   }
 
   /**
@@ -203,7 +211,8 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    */
   public void delete()
   throws PersistenceException, UnsupportedOperationException {
-    throw new MethodNotImplementedException();
+
+    throw new UnsupportedOperationException("delete() is not supported for DatabaseDataStore");
   }
 
   /**
