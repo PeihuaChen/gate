@@ -129,7 +129,7 @@ public class PersistenceManager {
     public Object createObject()throws PersistenceException{
       try{
         if(urlString.startsWith(relativePathMarker)){
-          URL context = persistenceFile.toURL();
+          URL context = persistenceURL;
           return new URL(context,
                          urlString.substring(relativePathMarker.length()));
         }else return new URL(urlString);
@@ -522,6 +522,12 @@ public class PersistenceManager {
   public static Object loadObjectFromFile(File file)
                      throws PersistenceException, IOException,
                             ResourceInstantiationException {
+    return loadObjectFromUrl(file.toURL());
+  }
+
+  public static Object loadObjectFromUrl(URL url)
+                     throws PersistenceException, IOException,
+                            ResourceInstantiationException {
     exceptionOccured = false;
     ProgressListener pListener = (ProgressListener)MainFrame.getListeners().
                                  get("gate.event.ProgressListener");
@@ -530,20 +536,20 @@ public class PersistenceManager {
                                 .get("gate.event.StatusListener");
     if(pListener != null) pListener.progressChanged(0);
     long startTime = System.currentTimeMillis();
-    persistenceFile = file;
+    persistenceURL = url;
     // Determine whether the file contains an application serialized in xml
     // format. Otherwise we will assume that it contains native serializations.
-    boolean xmlStream = isXmlApplicationFile(file);
+    boolean xmlStream = isXmlApplicationFile(url);
     ObjectInputStream ois = null;
-    java.io.FileReader fileReader = null;
+    java.io.Reader reader = null;
     com.thoughtworks.xstream.XStream xstream = null;
     // Make the appropriate kind of streams that will be used, depending on
     // whether serialization is native or xml.
     if (xmlStream) { 
-    	fileReader = new java.io.FileReader(file);
+    	reader = new java.io.InputStreamReader(url.openStream());
     	xstream = new com.thoughtworks.xstream.XStream();
     } else {
-    	ois = new ObjectInputStream(new FileInputStream(file));
+    	ois = new ObjectInputStream(url.openStream());
     }
     Object res = null;
     try{
@@ -555,8 +561,8 @@ public class PersistenceManager {
       	if (DEBUG)
       		System.out.println("About to load application");
       	// Actually load the application
-      	gateApplication = (GateApplication)xstream.fromXML(fileReader);
-      	fileReader.close();
+      	gateApplication = (GateApplication)xstream.fromXML(reader);
+      	reader.close();
       	if (DEBUG)
       		System.out.println("About to extract url list");
       	// Extract an iterator to the URLs.
@@ -622,25 +628,26 @@ public class PersistenceManager {
       if(pListener != null) pListener.processFinished();
       throw new PersistenceException(ex);
     }finally{
-      persistenceFile = null;
+      persistenceURL = null;
     }
   }
 
   /**
-   * Determine whether the file contains a GATE application serialized 
+   * Determine whether the URL contains a GATE application serialized 
    * using XML.
    * 
-   * @param file The name of the file.
-   * @return true if the file contains an xml serialized application,
+   * @param url The URL to check.
+   * @return true if the URL refers to an xml serialized application,
    * false otherwise.
    */
-  private static boolean isXmlApplicationFile(File file) 
+  private static boolean isXmlApplicationFile(URL url) 
   throws java.io.IOException {
   	if (DEBUG) {
   		System.out.println("Checking whether file is xml");
   	}
 	java.io.BufferedReader fileReader = 
-  		new java.io.BufferedReader(new java.io.FileReader(file));
+  		new java.io.BufferedReader(
+          new java.io.InputStreamReader(url.openStream()));
   	String firstLine = fileReader.readLine();
   	fileReader.close();
   	
@@ -714,10 +721,16 @@ public class PersistenceManager {
   static boolean exceptionOccured = false;
 
   /**
-   * The file currently used to write/read the persisten representation.
-   * Will only have a non-null value during storing and restorin operations.
+   * The file currently used to write the persisten representation.
+   * Will only have a non-null value during storing operations.
    */
   static File persistenceFile;
+
+  /**
+   * The URL currently used to read the persistent representation when reading
+   * from a URL.  Will only be non-null during restoring operations.
+   */
+  static URL persistenceURL;
 
   static{
     persistentReplacementTypes = new HashMap();
