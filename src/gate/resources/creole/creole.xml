@@ -423,9 +423,9 @@
 
     <!--  creole.xml for the coreferencer -->
     <RESOURCE>
-      <NAME>ANNIE Coreferencer</NAME>
+      <NAME>ANNIE Pronominal Coreferencer</NAME>
       <CLASS>gate.creole.coref.Coreferencer</CLASS>
-      <COMMENT>Coreference resolution component</COMMENT>
+      <COMMENT>Pronominal Coreference resolution component</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
   COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
@@ -433,6 +433,20 @@
   OPTIONAL="true">java.lang.String</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
+
+    <!--  creole.xml for the coreferencer -->
+    <RESOURCE>
+      <NAME>ANNIE Nominal Coreferencer</NAME>
+      <CLASS>gate.creole.coref.NominalCoref</CLASS>
+      <COMMENT>Nominal Coreference resolution component</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true"
+  COMMENT="The document to be processed">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+  COMMENT="The annotation set to be used for the generated annotations"
+  OPTIONAL="true">java.lang.String</PARAMETER>
+      <ICON>shefGazetteer.gif</ICON>
+    </RESOURCE>
+
 
     <RESOURCE>
       <NAME>Annotation Set Transfer</NAME>
