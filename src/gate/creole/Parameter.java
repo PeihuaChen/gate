@@ -50,6 +50,9 @@ public class Parameter implements Serializable
     */
   String itemClassName = null;
 
+  /** A set of strings representing suffixes for URL params*/
+  Set suffixes = null;
+
   /** Calculate and return the default value for this parameter */
   public Object calculateDefaultValue() throws ParameterException {
     // if there's no default string and this is a builtin type, return null
@@ -217,6 +220,11 @@ public class Parameter implements Serializable
   /** Get the name for this parameter */
   public String getName() { return name; }
 
+  /** Get the suffixes atached with this param. If it's null then there are
+   *  no suffices attached with it
+   */
+  public Set getSuffixes(){ return suffixes;}
+
   /** Is this a run-time parameter? */
   boolean runtime = false;
 
@@ -260,10 +268,13 @@ public class Parameter implements Serializable
   /** String representation */
   public String toString() {
     try{
-      return "Parameter: valueString=" + typeName + "; optional=" + optional +
+      return "Parameter: name="+ name+ "; valueString=" + typeName +
+             "; optional=" + optional +
              "; defaultValueString=" + defaultValueString +
              "; defaultValue=" + getDefaultValue() + "; comment=" +
-             comment + "; runtime=" + runtime + "; name=" + name;
+             comment + "; runtime=" + runtime +
+             "; itemClassName=" + itemClassName +
+             "; suffixes=" + suffixes;
     }catch(ParameterException pe){
       throw new GateRuntimeException(pe.toString());
     }

@@ -144,6 +144,17 @@ public class CreoleXmlHandler extends DefaultHandler {
         Boolean.valueOf(currentAttributes.getValue("RUNTIME")).booleanValue();
       currentParam.itemClassName =
                                 currentAttributes.getValue("ITEM_CLASS_NAME");
+      // read the suffixes and transform them to a Set of Strings
+      String suffixes = currentAttributes.getValue("SUFFIXES");
+      Set suffiexesSet = null;
+      if (suffixes != null){
+        suffiexesSet = new HashSet();
+        StringTokenizer strTokenizer = new StringTokenizer(suffixes,";");
+        while(strTokenizer.hasMoreTokens()){
+           suffiexesSet.add(strTokenizer.nextToken());
+        }// End while
+      }// End if
+      currentParam.suffixes = suffiexesSet;
     }else if(elementName.toUpperCase().equals("GUI")){
       String typeValue = currentAttributes.getValue("TYPE");
       if (typeValue != null){
