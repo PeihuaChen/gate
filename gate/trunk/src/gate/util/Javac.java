@@ -98,10 +98,19 @@ public class Javac implements GateConstants{
     PrintStream oldErr = System.err;
     System.setErr(new PrintStream(new ByteArrayOutputStream()));
     //call the compiler for all the classes at once
-    int res = Main.compile((String[])args.toArray(new String[args.size()]));
-    //restore the err stream
-    System.setErr(oldErr);
-
+    int res = -1;
+    try{
+      res = Main.compile((String[])args.toArray(new String[args.size()]));
+    }catch(Throwable t){
+      //if this throws exceptions then there's nothing else we can do.
+      //restore the err stream
+      System.setErr(oldErr);
+      throw new GateRuntimeException(t);
+    }finally{
+      //restore the err stream
+      System.setErr(oldErr);
+    }
+    
     boolean errors = res != 0;
     if(errors){
       //we got errors: call class by class
