@@ -17,6 +17,7 @@ govern_key.lst:govern_key
 government.lst:organization:government
 hour.lst:time:hour
 ident_prekey.lst:ident_key:pre
+jobtitles.lst:jobtitle
 loc_key.lst:loc_key:post
 loc_prekey.lst:loc_key:pre
 ministry.lst:organization:government
@@ -50,6 +51,5 @@ time_key.lst:time:time_key
 title.lst:title:civilian
 title_mil.lst:title:military
 title_pol.lst:title:police
-title_lower.lst:title:civilian_lower
 water.lst:location:region
 year.lst:year
