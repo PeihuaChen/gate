@@ -15,19 +15,12 @@ create or replace package security is
  *      $Id$
  */
   
-  -- Public type declarations
-/*  type <TypeName> is <Datatype>;
-  
-  -- Public constant declarations
-  <ConstantName> constant <Datatype> := <Value>;
 
-  -- Public variable declarations
-  <VariableName> <Datatype>;
-
-  -- Public function and procedure declarations
-  function <FunctionName>(<Parameter> <Datatype>) return <Datatype>;
-*/
-
+  PERM_WR_GW constant number := 1;
+  PERM_GR_GW constant number := 2;  
+  PERM_GR_OW constant number := 3;
+  PERM_OR_OW constant number := 4;
+    
   /* exceptions */
 
   

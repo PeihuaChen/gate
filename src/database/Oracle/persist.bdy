@@ -1,3 +1,5 @@
+create or replace package body persist is
+
 /*
  *  persist.bdy
  *
@@ -13,10 +15,6 @@
  *  $Id$
  *
  */
-
-
-create or replace package body persist is
-
 
   /*******************************************************************************************/
   procedure get_timestamp(p_timestamp  OUT number)
