@@ -41,7 +41,7 @@ public class AccessControllerImpl implements AccessController {
   private URL         jdbcURL;
 
   private Vector      users;
-  private Vector      groups;
+//  private Vector      groups;
 
   private HashMap     usersByID;
   private HashMap     usersByName;
@@ -178,7 +178,7 @@ public class AccessControllerImpl implements AccessController {
       new_id = new Long(stmt.getLong(1));
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't get a timestamp from DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't create a group in DB: ["+ sqle.getMessage()+"]");
     }
 
     //2. create GroupImpl for the new group and put in collections
@@ -195,14 +195,47 @@ public class AccessControllerImpl implements AccessController {
   public void deleteGroup(Long id, Session s)
     throws PersistenceException,SecurityException {
 
-    throw new MethodNotImplementedException();
+    Group grp = (Group)this.groupsByID.get(id);
+    Assert.assertNotNull(grp);
+
+    //delegate
+    deleteGroup(grp,s);
   }
 
   /** --- */
   public void deleteGroup(Group grp, Session s)
     throws PersistenceException,SecurityException {
 
+    //1. check session
+    if (false == isValidSession(s)) {
+      throw new SecurityException("invalid session supplied");
+    }
+
+    //2. is user member of group?
+    User usr = s.getUser();
+    if (false == grp.getUsers().contains(usr)) {
+      throw new SecurityException("user is not a member of the group");
+    }
+
+    //3. delete in DB
+    CallableStatement stmt = null;
+
+    try {
+      stmt = this.jdbcConn.prepareCall("{ call security.delete_group(?) } ");
+      stmt.setLong(1,grp.getID().longValue());
+      stmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete a group from DB: ["+ sqle.getMessage()+"]");
+    }
+
+    //4. delete from collections
+    this.groupsByID.remove(grp.getID());
+    this.groupsByName.remove(grp.getName());
+
+    //5. notify all other listeners
     throw new MethodNotImplementedException();
+
   }
 
   /** --- */
@@ -257,7 +290,7 @@ public class AccessControllerImpl implements AccessController {
       login_result = stmt.getLong(4);
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't get a timestamp from DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't login user, DB error is: ["+ sqle.getMessage()+"]");
     }
 
     if (LOGIN_FAILED == login_result) {
@@ -350,7 +383,9 @@ public class AccessControllerImpl implements AccessController {
 
   private Long createSessionID() {
 
-    //need comment?
-    return new Long(((System.currentTimeMillis() << 16) >> 16)*(Math.round(Math.random()*1024))*Runtime.getRuntime().freeMemory()*(Math.round(Math.random())* 1024));
+    //need a hint?
+    return new Long(((System.currentTimeMillis() << 16) >> 16)*
+                      (Math.round(Math.random()*1024))*
+                          Runtime.getRuntime().freeMemory());
   }
 }
