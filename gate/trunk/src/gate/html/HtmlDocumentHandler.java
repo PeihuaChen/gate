@@ -166,8 +166,6 @@ public class HtmlDocumentHandler extends ParserCallback {
       Iterator anIterator = colector.iterator();
       while (anIterator.hasNext()){
         obj = (CustomObject) anIterator.next();
-        // Check if an annotation can be created
-//        if ( canCreateAnnotation(obj) ){
           // Construct an annotation from this obj
           try{
             if (markupElementsMap == null){
@@ -187,11 +185,7 @@ public class HtmlDocumentHandler extends ParserCallback {
                              );
             }
           }catch (InvalidOffsetException e){
-              // If we have an exception here,
-              // that means that the error is critical
-              // We already checked if we can create an annotation
-              // throw new LuckyException(e.toString());
-              Err.prln("Error creating an annot :" + obj + " Discarding...");
+              Err.prln("Error creating an annot :" + obj + " Discarded...");
           }// end try
 //        }// end if
       }//while
@@ -367,7 +361,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * This method verifies if data contained by the CustomObject can be used
     * to create a GATE annotation.
     */
-  private boolean canCreateAnnotation(CustomObject aCustomObject){
+/*  private boolean canCreateAnnotation(CustomObject aCustomObject){
     long start            = aCustomObject.getStart().longValue();
     long end              = aCustomObject.getEnd().longValue();
     long gateDocumentSize = doc.getContent().size().longValue();
@@ -377,6 +371,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     if ((start > gateDocumentSize) || (end > gateDocumentSize)) return false;
     return true;
   }// canCreateAnnotation
+*/
 
   // HtmlDocumentHandler member data
 

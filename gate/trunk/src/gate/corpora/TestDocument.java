@@ -114,6 +114,74 @@ public class TestDocument extends TestCase
     */
   } // testLotsOfThings
 
+  /** The reason this is method begins with verify and not with test is that it
+   *  gets called by various other test methods. It is somehow a utility test
+   *  method. It should be called on all gate documents having annotation sets.
+   */
+  public static void verifyNodeIdConsistency(gate.Document doc)throws Exception{
+      if (doc == null) return;
+      Map offests2NodeId = new HashMap();
+      // Test the default annotation set
+      AnnotationSet annotSet = doc.getAnnotations();
+      verifyNodeIdConsistency(annotSet,offests2NodeId, doc);
+      // Test all named annotation sets
+      if (doc.getNamedAnnotationSets() != null){
+        Iterator namedAnnotSetsIter =
+                              doc.getNamedAnnotationSets().values().iterator();
+        while(namedAnnotSetsIter.hasNext()){
+         verifyNodeIdConsistency((gate.AnnotationSet) namedAnnotSetsIter.next(),
+                                                                 offests2NodeId,
+                                                                 doc);
+        }// End while
+      }// End if
+      // Test suceeded. The map is not needed anymore.
+      offests2NodeId = null;
+  }// verifyNodeIdConsistency();
+
+  /** This metod runs the test over an annotation Set. It is called from her
+   *  older sister. Se above.
+   *  @param annotSet is the annotation set being tested.
+   *  @param offests2NodeId is the Map used to test the consistency.
+   *  @param doc is used in composing the assert error messsage.
+   */
+  public static void verifyNodeIdConsistency(gate.AnnotationSet annotSet,
+                                             Map  offests2NodeId,
+                                             gate.Document doc)
+                                                              throws Exception{
+
+      if (annotSet == null || offests2NodeId == null) return;
+
+      Iterator iter = annotSet.iterator();
+      while(iter.hasNext()){
+        Annotation annot = (Annotation) iter.next();
+        String annotSetName = (annotSet.getName() == null)? "Default":
+                                                          annotSet.getName();
+        // check the Start node
+        if (offests2NodeId.containsKey(annot.getStartNode().getOffset())){
+             assertEquals("Found two different node IDs for the same offset( "+
+             annot.getStartNode().getOffset()+ " ).\n" +
+             "START NODE is buggy for annotation(" + annot +
+             ") from annotation set " + annotSetName + " of GATE document :" +
+             doc.getSourceUrl(),
+             annot.getStartNode().getId(),
+             (Integer) offests2NodeId.get(annot.getStartNode().getOffset()));
+        }// End if
+        // Check the End node
+        if (offests2NodeId.containsKey(annot.getEndNode().getOffset())){
+             assertEquals("Found two different node IDs for the same offset("+
+             annot.getEndNode().getOffset()+ ").\n" +
+             "END NODE is buggy for annotation(" + annot+ ") from annotation"+
+             " set " + annotSetName +" of GATE document :" + doc.getSourceUrl(),
+             annot.getEndNode().getId(),
+             (Integer) offests2NodeId.get(annot.getEndNode().getOffset()));
+        }// End if
+        offests2NodeId.put(annot.getStartNode().getOffset(),
+                                                  annot.getStartNode().getId());
+        offests2NodeId.put(annot.getEndNode().getOffset(),
+                                                    annot.getEndNode().getId());
+    }// End while
+  }//verifyNodeIdConsistency();
+
   /** Test suite routine for the test runner */
   public static Test suite() {
     return new TestSuite(TestDocument.class);

@@ -296,7 +296,6 @@ implements AnnotationSet
     //-start before the start offset and end strictly after it
     //or
     //-start at a position between the start and the end offsets
-//System.out.println("Get(" + startOffset + ", " + endOffset + ");");
     if(annotsByStartNode == null) indexByStartOffset();
     AnnotationSet resultSet = new AnnotationSetImpl(doc);
     Iterator nodesIter;
@@ -306,24 +305,19 @@ implements AnnotationSet
     //find all the annots that start strictly before the start offset and end
     //strictly after it
     nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
-//System.out.print("Nodes: [");
     while(nodesIter.hasNext()){
       currentNode = (Node)nodesIter.next();
-//System.out.print(currentNode + ", ");
       Set fromPoint = (Set)annotsByStartNode.get(currentNode.getId());
       if(fromPoint != null){
         annotsIter = (fromPoint).iterator();
         while(annotsIter.hasNext()){
           currentAnnot = (Annotation)annotsIter.next();
-//System.out.println(currentAnnot);
           if(currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0){
             resultSet.add(currentAnnot);
-//System.out.println(currentAnnot);
           }
         }
       }
     }
-//System.out.println("]");
     //find all the annots that start at or after the start offset but strictly
     //before the end offset
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values().iterator();
@@ -428,13 +422,17 @@ implements AnnotationSet
       indexByEndOffset();
     }
 
-    // find existing nodes
+    // find existing nodes if appropriate nodes don't already exist, create them
     Node startNode  = (Node) nodesByOffset.getNextOf(start);
-    Node endNode    = (Node) nodesByOffset.getNextOf(end);
-
-    // if appropriate nodes don't already exist, create them
     if(startNode == null || ! startNode.getOffset().equals(start))
       startNode = new NodeImpl(doc.getNextNodeId(), start);
+
+    Node endNode = null;
+    if(start.equals(end))
+      endNode = startNode;
+    else
+      endNode = (Node) nodesByOffset.getNextOf(end);
+
     if(endNode == null   || ! endNode.getOffset().equals(end))
       endNode = new NodeImpl(doc.getNextNodeId(), end);
 
@@ -591,10 +589,8 @@ implements AnnotationSet
     if(nodesByOffset != null) nodesByOffset.put(end, endNode);
 
     // if there's no appropriate index give up
-    if(annotsByEndNode == null){
-//System.out.println("No index boule! \n" + a);
+    if(annotsByEndNode == null)
       return;
-    }
 
     // get the annotations that start at the same node, or create new set
     AnnotationSet thisNodeAnnots =
@@ -777,7 +773,7 @@ implements AnnotationSet
   Map annotsByType = null;
 
   /** Maps offsets (Longs) to nodes */
-  RBTreeMap nodesByOffset;
+  RBTreeMap nodesByOffset = null;
 
   /** Maps node ids (Integers) to AnnotationSets representing those
     * annotations that start from that node

@@ -563,14 +563,15 @@ public abstract class Factory {
 */
     // various classes are in the habit of assuming that a document
     // inevitably has a source URL...  so give it a dummy one
-    try {
+/*    try {
       doc.setSourceUrl(new URL("http://localhost/"));
     } catch(MalformedURLException e) {
       throw new ResourceInstantiationException(
         "Couldn't create dummy URL in newDocument(String): " + e
       );
     }
-
+*/
+    doc.setSourceUrl(null);
     return doc;
   } // newDocument(String)
 

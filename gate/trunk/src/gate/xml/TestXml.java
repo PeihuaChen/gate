@@ -107,8 +107,10 @@ public class TestXml extends TestCase
 
     // Unpack the markup
     keyDocFormat.unpackMarkup(keyDocument);
+    // Verfy if all annotations from the default annotation set are consistent
+    gate.corpora.TestDocument.verifyNodeIdConsistency(keyDocument);
 
-    // Save the size of the document snd the number of annotations
+    // Save the size of the document and the number of annotations
     long keyDocumentSize = keyDocument.getContent().size().longValue();
     int keyDocumentAnnotationSetSize = keyDocument.getAnnotations().size();
 
@@ -145,6 +147,8 @@ public class TestXml extends TestCase
       " as being a Gate XML document !", gateDocFormat != null);
 
     gateDocFormat.unpackMarkup(gateDoc);
+    // Verfy if all annotations from the default annotation set are consistent
+    gate.corpora.TestDocument.verifyNodeIdConsistency(gateDoc);
 
     // Save the size of the document snd the number of annotations
     long gateDocSize = keyDocument.getContent().size().longValue();
@@ -199,6 +203,7 @@ public class TestXml extends TestCase
     AnnotationSet annotSet = doc.getAnnotations();
     assertEquals("For xcex.xml the number of annotations should be:1516",
                                                         1516,annotSet.size());
+    gate.corpora.TestDocument.verifyNodeIdConsistency(doc);
   } // testUnpackMarkup()
 
   /** Test suite routine for the test runner */
