@@ -261,7 +261,7 @@ public class OracleDataStore extends JDBCDataStore {
    * image.
    */
   public void sync(LanguageResource lr) throws PersistenceException {
-
+Out.prln("syncing LR...");
     //0. preconditions
     Assert.assertNotNull(lr);
     if (false == lr instanceof Document &&
@@ -870,29 +870,29 @@ public class OracleDataStore extends JDBCDataStore {
     while (itDocuments.hasNext()) {
       Document doc = (Document)itDocuments.next();
 
-      //3.1. ensure that the document is either transient or is from the
+      //3.1. ensure that the document is either transient or is from the ...
       // same DataStore
-      if (doc.getLRPersistenceId() == null || doc.getDataStore().equals(this)) {
+      if (doc.getLRPersistenceId() == null) {
+        //transient document
         Document dbDoc = createDocument(doc,corpusID,secInfo);
         dbDocs.add(dbDoc);
-        //let the world know
+      }
+      else if (doc.getDataStore().equals(this)) {
+        //persistent doc from the same DataStore
         fireResourceAdopted(
             new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED,
-                               dbDoc,
-                               dbDoc.getLRPersistenceId())
-        );
+                               doc,
+                               doc.getLRPersistenceId()));
 
         //6. fire also resource written event because it's now saved
         fireResourceWritten(
           new DatastoreEvent(this, DatastoreEvent.RESOURCE_WRITTEN,
-                              dbDoc,
-                              dbDoc.getLRPersistenceId()
-          )
-        );
-
+                              doc,
+                              doc.getLRPersistenceId()));
       }
       else {
-        //skip others
+        //persistent doc from other datastore
+        //skip
         gate.util.Err.prln("document ["+doc.getLRPersistenceId()+"] is adopted from another "+
                             " datastore. Skipped.");
       }
