@@ -107,7 +107,7 @@ public class PostgresDataStore extends JDBCDataStore {
     boolean lockSucceeded = false;
 
     try {
-      String sql = " select persist_unlock_lr(?,?) ";
+      String sql = " perform persist_unlock_lr(?,?) ";
       pstmt = this.jdbcConn.prepareStatement(sql);
       pstmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
       pstmt.setLong(2,this.session.getUser().getID().longValue());
