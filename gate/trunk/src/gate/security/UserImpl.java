@@ -21,7 +21,7 @@ import junit.framework.*;
 
 import gate.*;
 import gate.event.*;
-import gate.persist.PersistenceException;
+import gate.persist.*;
 
 
 public class UserImpl implements User {
@@ -84,21 +84,29 @@ public class UserImpl implements User {
     CallableStatement stmt = null;
 
     try {
-      //first check the session
+      //1.  check the session
       if (this.ac.isValidSession(s) == false || s.getID() != this.id) {
         throw new SecurityException("invalid session supplied");
       }
+
+      //2. update database
 
       stmt = this.conn.prepareCall(
               "{ call "+Gate.DB_OWNER+".security.set_user_name(?,?)} ");
       stmt.setLong(1,this.id.longValue());
       stmt.setString(2,newName);
       stmt.execute();
-      //release stmt???
     }
     catch(SQLException sqle) {
       throw new PersistenceException("can't change user name in DB: ["+ sqle.getMessage()+"]");
     }
+    finally {
+      DBHelper.cleanup(stmt);
+    }
+
+    //3. update member variable
+    this.name = newName;
+
 
   }
 
