@@ -117,6 +117,9 @@ extends AbstractFeatureBearer implements DataStore {
   /** The name of the version file */
   protected String versionFileName = "__GATE_SerialDataStore__";
 
+  /** The protocol version of this data store */
+  protected String currentProtocolVersion = null;
+
   /** Get a File for the protocol version file. */
   protected File getVersionFile() throws IOException {
     return new File(storageDir, versionFileName);
@@ -234,21 +237,22 @@ extends AbstractFeatureBearer implements DataStore {
     // check storage directory is a valid serial datastore
 // if we want to support old style:
 // String versionInVersionFile = "1.0";
-    String versionInVersionFile = null;
+// (but this means it will open *any* directory)
+    currentProtocolVersion = null;
     try {
       FileReader fis = new FileReader(getVersionFile());
       BufferedReader isr = new BufferedReader(fis);
-      versionInVersionFile = isr.readLine();
-      if(DEBUG) Out.prln("opening SDS version " + versionInVersionFile);
+      currentProtocolVersion = isr.readLine();
+      if(DEBUG) Out.prln("opening SDS version " + currentProtocolVersion);
       isr.close();
     } catch(IOException e) {
       throw new PersistenceException(
         "Invalid storage directory: " + e
       );
     }
-    if(! isValidProtocolVersion(versionInVersionFile))
+    if(! isValidProtocolVersion(currentProtocolVersion))
       throw new PersistenceException(
-        "Invalid protocol version number: " + versionInVersionFile
+        "Invalid protocol version number: " + currentProtocolVersion
       );
 
   } // open()
@@ -317,9 +321,13 @@ extends AbstractFeatureBearer implements DataStore {
 
     // dump the LR into the new File
     try {
-      ObjectOutputStream oos = new ObjectOutputStream(
-        new GZIPOutputStream(new FileOutputStream(resourceFile))
-      );
+      OutputStream os = new FileOutputStream(resourceFile);
+
+      // after 1.1 the serialised files are compressed
+      if(! currentProtocolVersion.equals("1.0"))
+        os = new GZIPOutputStream(os);
+
+      ObjectOutputStream oos = new ObjectOutputStream(os);
       oos.writeObject(lr);
       oos.close();
     } catch(IOException e) {
@@ -369,16 +377,15 @@ extends AbstractFeatureBearer implements DataStore {
     // try and read the file and deserialise it
     LanguageResource lr = null;
     try {
-      FileInputStream fis = new FileInputStream(resourceFile);
-      GZIPInputStream zis = new GZIPInputStream(fis);
-      ObjectInputStream ois = new ObjectInputStream(zis);
-      lr = (LanguageResource) ois.readObject();
+      InputStream is = new FileInputStream(resourceFile);
 
-      // think we don't need to close the nested streams, as the close
-      // methods of the outer streams cascade to the inner ones...
-      // ois.close();
-      // zis.close();
-      fis.close();
+      // after 1.1 the serialised files are compressed
+      if(! currentProtocolVersion.equals("1.0"))
+        is = new GZIPInputStream(is);
+
+      ObjectInputStream ois = new ObjectInputStream(is);
+      lr = (LanguageResource) ois.readObject();
+      ois.close();
     } catch(IOException e) {
       throw
         new PersistenceException("Couldn't read file "+resourceFile+": "+e);
