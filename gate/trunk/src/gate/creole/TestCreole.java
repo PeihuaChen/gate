@@ -268,7 +268,7 @@ public class TestCreole extends TestCase
 
     assertTrue(
       "wrong number of public LR instances",
-      publics.size() == 1 && allLrs.size() == 5
+      publics.size() == 1 && allLrs.size() == 3
     );
 
     if(DEBUG) {
