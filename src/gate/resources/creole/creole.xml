@@ -260,25 +260,25 @@
       <PARAMETER NAME="extLists" DEFAULT="true" OPTIONAL="true">java.lang.Boolean</PARAMETER>
     </RESOURCE>
 
-    <!--  creole.xml for the coreferencer --> 
+    <!--  creole.xml for the coreferencer -->
     <RESOURCE>
-    <NAME>Coreferencer</NAME> 
-    <CLASS>gate.creole.coref.Coreferencer</CLASS> 
-    <COMMENT>Coreference resolution component</COMMENT> 
-    <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER> 
-    <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER> 
-    <ICON>shefGazetteer.gif</ICON> 
+    <NAME>Coreferencer</NAME>
+    <CLASS>gate.creole.coref.Coreferencer</CLASS>
+    <COMMENT>Coreference resolution component</COMMENT>
+    <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
+    <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
+    <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
-    
-    <!--  creole.xml for pronominal coreferencer --> 
+
+    <!--  creole.xml for pronominal coreferencer -->
     <RESOURCE>
-    <NAME>Pronominal Coreferencer</NAME> 
-    <CLASS>gate.creole.coref.PronominalCoref</CLASS> 
-    <COMMENT>Pronominal coreference resolver</COMMENT> 
-    <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER> 
-    <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER> 
-    <ICON>shefGazetteer.gif</ICON> 
-    <PRIVATE /> 
+    <NAME>Pronominal Coreferencer</NAME>
+    <CLASS>gate.creole.coref.PronominalCoref</CLASS>
+    <COMMENT>Pronominal coreference resolver</COMMENT>
+    <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
+    <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
+    <ICON>shefGazetteer.gif</ICON>
+    <PRIVATE />
     </RESOURCE>
 
     <RESOURCE>
@@ -311,7 +311,7 @@
       <PARAMETER NAME="outputFileUrl" RUNTIME="true" OPTIONAL="true" COMMENT="The url of the output file" SUFFIXES="xml;html;txt">java.net.URL</PARAMETER>
       <PARAMETER NAME="includeFeatures" OPTIONAL="true" COMMENT="Whether or not to include features when exporting the GATE annotations" DEFAULT="false">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="useSuffixForDumpFiles" OPTIONAL="true" COMMENT="Whether or not to use a suffix for the dump files" DEFAULT="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="suffixForDumpFiles" OPTIONAL="true" COMMENT="The suffix used for files, if suffix adding is set to true" DEFAULT=".gate">java.lang.String</PARAMETER>      
+      <PARAMETER NAME="suffixForDumpFiles" OPTIONAL="true" COMMENT="The suffix used for files, if suffix adding is set to true" DEFAULT=".gate">java.lang.String</PARAMETER>
     </RESOURCE>
   </CREOLE>
   <!-- creole.xml for Controllers -->
@@ -343,6 +343,17 @@
         <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
+
+    <RESOURCE>
+      <NAME>Initialisation Parameters</NAME>
+      <CLASS>gate.gui.PRViewer</CLASS>
+      <!-- type values can be "large" or "small"-->
+      <GUI TYPE="large">
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.ProcessingResource</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
     <RESOURCE>
       <NAME>Annotations Editor</NAME>
       <CLASS>gate.gui.DocumentEditor</CLASS>

@@ -212,6 +212,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
   }
   public void datastoreClosed(CreoleEvent e) {
   }
+  public void setEditable(boolean editable) {
+    this.editable = editable;
+  }
+  public boolean isEditable() {
+    return editable;
+  }
 
   ParametersTableModel tableModel;
   Resource resource;
@@ -222,6 +228,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
    * A list of {@link ParameterDisjunction}
    */
   protected List parameterDisjunctions;
+  protected boolean editable = true;
 
   //inner classes
   protected class ParametersTableModel extends AbstractTableModel{
@@ -251,11 +258,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     public boolean isCellEditable(int rowIndex,
                               int columnIndex) {
       switch(columnIndex){
-        case 0: return ((ParameterDisjunction)
+        case 0: return editable &&
+                      ((ParameterDisjunction)
                         parameterDisjunctions.get(rowIndex)).size() > 1;
         case 1: return false;
         case 2: return false;
-        case 3: return true;
+        case 3: return editable;
         default: return false;
       }
     }// public boolean isCellEditable
@@ -381,11 +389,19 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
 
       if(Gate.isGateType(type)){
         //Gate type
-        combo.setModel(new DefaultComboBoxModel(new Object[]{value == null ?
-                                                             "<none>" :
-                                                             value }));
-
-        return combo;
+        if(ResourceParametersEditor.this.isEditable()){
+          combo.setModel(new DefaultComboBoxModel(new Object[]{value == null ?
+                                                               "<none>" :
+                                                               value }));
+          return combo;
+        }else{
+          //not editable; we'll just use the text field
+          //prepare the renderer
+          String text = value == null ? "<none>" : value.toString();
+          super.getTableCellRendererComponent(table, text, isSelected,
+                                                hasFocus, row, column);
+          return this;
+        }
       }else{
         Class typeClass = null;
         try{
@@ -402,17 +418,22 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
                                               hasFocus, row, column);
 
         if(type.equals("java.net.URL")){
-          textButtonBox.removeAll();
-          textButtonBox.add(this);
-          this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-                                            getPreferredSize().height));
-          textButtonBox.add(Box.createHorizontalStrut(5));
-          textButtonBox.add(fileButton);
-          return textButtonBox;
+          if(ResourceParametersEditor.this.isEditable()){
+            textButtonBox.removeAll();
+            textButtonBox.add(this);
+            this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                                              getPreferredSize().height));
+            textButtonBox.add(Box.createHorizontalStrut(5));
+            textButtonBox.add(fileButton);
+            return textButtonBox;
+          }else{
+            return this;
+          }
         }else if(typeClass != null &&
                  List.class.isAssignableFrom(typeClass)){
           //List value
           setText(textForList((List)value));
+          if(ResourceParametersEditor.this.isEditable()){
           textButtonBox.removeAll();
           textButtonBox.add(this);
           this.setMaximumSize(new Dimension(Integer.MAX_VALUE,
@@ -420,6 +441,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
           textButtonBox.add(Box.createHorizontalStrut(5));
           textButtonBox.add(listButton);
           return textButtonBox;
+          }else{
+            return this;
+          }
         }else return this;
       }
     }// public Component getTableCellRendererComponent
@@ -751,7 +775,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
     JButton fileButton;
     JButton listButton;
     JPanel textButtonBox;
-  }//class ParameterValueEditor
+  }///class ParameterValueEditor
 
 
 
