@@ -133,6 +133,11 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** If you set this flag to true the original content of the document will
+   *  be kept in the document feature. <br>
+   *  Default value is false to avoid the unnecessary waste of memory */
+  private static boolean preserveOriginalContent = false;
+
   /** Default construction. Content left empty. */
   public DocumentImpl() {
     content = new DocumentContentImpl();
@@ -148,17 +153,25 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
           "The sourceURL and document's content were null."
         );
       }
+
       content = new DocumentContentImpl(stringContent);
       getFeatures().put("gate.SourceURL", "created from String");
     } else {
       try {
+
         content = new DocumentContentImpl(
-          sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset
-        );
+          sourceUrl, encoding, sourceUrlStartOffset, sourceUrlEndOffset);
         getFeatures().put("gate.SourceURL", sourceUrl.toExternalForm());
       } catch(IOException e) {
         throw new ResourceInstantiationException("DocumentImpl.init: " + e);
       }
+
+      if(preserveOriginalContent && content != null) {
+        String originalContent = new String(
+          ((DocumentContentImpl) content).getOriginalContent());
+        getFeatures().put(GateConstants.ORIGINAL_DOCUMENT_CONTENT_FEATURE_NAME,
+                      originalContent);
+      } // if
     }
 
     // set up a DocumentFormat if markup unpacking required
@@ -216,6 +229,14 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     sourceUrlOffsets[1] = sourceUrlEndOffset;
     return sourceUrlOffsets;
   } // getSourceUrlOffsets
+
+  public static boolean getPreserveOriginalContent() {
+    return preserveOriginalContent;
+  } // isPreserveOriginalContent
+
+  public static void setPreserveOriginalContent(boolean preserveFlag) {
+    preserveOriginalContent = preserveFlag;
+  } // setPreserveOriginalContent
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document. This method gets the
@@ -809,6 +830,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
     xmlContent.append("<GateDocument>\n");
     xmlContent.append("<!-- The document's features-->\n\n");
     xmlContent.append("<GateDocumentFeatures>\n");
+
     xmlContent.append(featuresToXml(this.getFeatures()));
     xmlContent.append("</GateDocumentFeatures>\n");
     xmlContent.append("<!-- The document content area with serialized"+
@@ -899,6 +921,7 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
         String valueItemClassName = null;
         String key2String = key.toString();
         String value2String = value.toString();
+
         Object item = null;
         // Test key if it is String, Number or Collection
         if (key instanceof java.lang.String ||
