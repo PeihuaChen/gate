@@ -28,6 +28,22 @@ create or replace package security is
   function <FunctionName>(<Parameter> <Datatype>) return <Datatype>;
 */
 
+  /* exceptions */
+
+  x_duplicate_group_name EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_duplicate_group_name, -20101 );
+
+  x_duplicate_user_name EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_duplicate_user_name, -20102);
+  
+  x_invalid_user_name EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_user_name, -20103);
+
+  x_invalid_user_pass EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_user_pass, -20104);
+
+  x_invalid_user_group EXCEPTION;
+  PRAGMA EXCEPTION_INIT(x_invalid_user_group, -20104);
 
   /* Group related functionality */
   
@@ -51,6 +67,30 @@ create or replace package security is
   /*  -- */
   procedure set_user_password(p_user_id  IN number,
                               p_new_pass IN varchar2);
+
+  
+  /* AccessController related functionality */
+                                
+  /*  -- */
+  procedure create_group(p_grp_name  IN varchar2,
+                         p_grp_id    OUT number);
+
+  /*  -- */
+  procedure create_user(p_usr_name  IN varchar2,
+                        p_usr_pass IN varchar2,
+                        p_usr_id    OUT number);
+                         
+
+  /*  -- */
+  procedure delete_group(p_grp_id    IN number);
+
+  /*  -- */
+  procedure delete_user(p_usr_id    IN number);
+
+  /*  -- */
+  procedure login(p_usr_name        IN varchar2,
+                  p_usr_pass        IN varchar2,
+                  p_pref_grp_id     IN number);
                            
 end security;
 /
