@@ -262,11 +262,12 @@ public class SimpleFeatureMapImpl
       +e.getMessage()+"\n");
     }
 
-    Ontology o = OntologyPool.getOntologyByUrl(url);
-    if ( null == o ) {
-      /*not loaded yet*/
-      o = OntologyPool.loadOntology(url);
-    } // if not loaded yet
+    /* GET ONTOLOGY BY URL : a bit tricky reference
+    since the behaviour behind the getOntology method is
+    certainly static.
+    : should be temporary */
+    Ontology o = new OntologyImpl().getOntology(url);
+    o = o.getOntology(url);
 
     OClass c1 = o.getClassByName(value1);
     OClass c2 = o.getClassByName(value2);
