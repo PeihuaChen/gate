@@ -30,6 +30,17 @@ public interface Ontology extends LanguageResource{
    *  @return the retrieved or loaded ontology*/
   public Ontology getOntology(URL someUrl) throws ResourceInstantiationException;
 
+  /**
+   * @return the label of the ontology
+   */
+  public String getLabel();
+
+  /**
+   * Sets the label of the ontology.
+   * @param theLabel the label to be set
+   */
+  public void setLabel(String theLabel);
+
   /** get the url of this ontology
    * @return the url of this ontology */
   public URL getURL();
