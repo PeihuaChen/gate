@@ -87,7 +87,8 @@ extends Transducer implements JapeConstants, java.io.Serializable
   
 //#################################
 //modified versions of the old methods to account for the new style of jape-ing
-  /** Transduce a document. Defers to other methods dependent on
+  /** Transduce a document using the default annotation set.
+    * Defers to other methods dependent on
     * the current rule application style.
     */
   public void transduce(Document doc) throws JapeException {
@@ -95,8 +96,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
     FSM fsm = new FSM(this);
     //convert it to deterministic
     fsm.eliminateVoidTransitions();
+    //startNode = leftMost node
+    Node startNode = doc.getAnnotations().firstNode();
 
-    
+
     if(ruleApplicationStyle == BRILL_STYLE)
       transduceBrillStyle(doc);
     else if(ruleApplicationStyle == APPELT_STYLE)
@@ -498,6 +501,9 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.4  2000/05/08 14:14:36  valyt
+// Moved the ORACLE tests to derwent
+//
 // Revision 1.3  2000/05/05 12:51:12  valyt
 // Got rid of deprecation warnings
 //
