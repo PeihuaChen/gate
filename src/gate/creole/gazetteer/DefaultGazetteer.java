@@ -103,7 +103,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
    */
   public void reset(){
     document = null;
-    annotationSet = null;
+    annotationSetName = null;
   }
 
   /** Reads one lists (one file) of phrases
@@ -249,6 +249,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * by the user; the {@link doLookup()} methodshould be used instead.
    */
   public void run(){
+    AnnotationSet annotationSet;
     //check the input
     if(document == null) {
       executionException = new ExecutionException(
@@ -257,13 +258,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
       return;
     }
 
-    if(annotationSet == null) annotationSet = document.getAnnotations();
-    else if(annotationSet.getDocument() != document) {
-      executionException = new ExecutionException(
-        "The annotation set provided does not belong to the current document!"
-      );
-      return;
-    }
+    if(annotationSetName == null) annotationSet = document.getAnnotations();
+    else annotationSet = document.getAnnotations(annotationSetName);
 
     fireStatusChanged("Doing lookup in " +
                            document.getSourceUrl().getFile() + "...");
@@ -381,8 +377,8 @@ public class DefaultGazetteer extends AbstractProcessingResource
    * Sets the AnnotationSet that will be used at the next run for the newly
    * produced annotations.
    */
-  public void setAnnotationSet(gate.AnnotationSet newAnnotationSet) {
-    annotationSet = newAnnotationSet;
+  public void setAnnotationSetName(String newAnnotationSetName) {
+    annotationSetName = newAnnotationSetName;
   }
 
   /**    */
@@ -420,7 +416,7 @@ public class DefaultGazetteer extends AbstractProcessingResource
   /** Used to store the annotation set currently being used for the newly
    * generated annotations
    */
-  protected AnnotationSet annotationSet;
+  protected String annotationSetName;
 
   /**    */
   private transient Vector progressListeners;

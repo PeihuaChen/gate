@@ -52,13 +52,12 @@ public class TestTokeniser extends TestCase{
    DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                           "gate.creole.tokeniser.DefaultTokeniser", params);
 
-    AnnotationSet tokeniserAS = doc.getAnnotations("TokeniserAS");
     tokeniser.setDocument(doc);
-    tokeniser.setAnnotationSet(tokeniserAS);
+    tokeniser.setAnnotationSetName("TokeniserAS");
     tokeniser.run();
     //check for exceptions
     tokeniser.check();
-    assert(!tokeniserAS.isEmpty());
+    assert(! doc.getAnnotations("TokeniserAS").isEmpty());
   }
 
   /** Test suite routine for the test runner */

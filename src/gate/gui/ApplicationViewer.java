@@ -334,7 +334,6 @@ public class ApplicationViewer extends AbstractVisualResource {
   }
 
   public JPopupMenu getPopup(){
-System.out.println("Get popup");
     updateActions();
     return popup;
   }
@@ -607,9 +606,42 @@ System.out.println("Get popup");
         Iterator paramsIter = someParams.iterator();
         while(paramsIter.hasNext()){
           ParameterDisjunction pDisj = (ParameterDisjunction)paramsIter.next();
-          params.put(pDisj.getName(), pDisj.getValue());
+          if(pDisj.getValue() != null){
+            params.put(pDisj.getName(), pDisj.getValue());
+          }
         }
-        pr.setRuntimeParameters(params);
+        try{
+//System.out.println("PR:" + pr.getFeatures().get("NAME") + "\n" + params);
+          Factory.setResourceParameters(pr, params);
+        }catch(java.beans.IntrospectionException ie){
+          JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                        "Could not set parameters for " +
+                                        pr.getFeatures().get("NAME") + ":\n" +
+                                        ie.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+          return;
+        }catch(java.lang.reflect.InvocationTargetException ite){
+          JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                        "Could not set parameters for " +
+                                        pr.getFeatures().get("NAME") + ":\n" +
+                                        ite.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+          return;
+        }catch(IllegalAccessException iae){
+          JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                        "Could not set parameters for " +
+                                        pr.getFeatures().get("NAME") + ":\n" +
+                                        iae.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+          return;
+        }catch(GateException ge){
+          JOptionPane.showMessageDialog(ApplicationViewer.this,
+                                        "Could not set parameters for " +
+                                        pr.getFeatures().get("NAME") + ":\n" +
+                                        ge.toString(),
+                                        "Gate", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
       }
       controller.run();
     }

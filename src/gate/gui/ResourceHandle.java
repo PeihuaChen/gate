@@ -115,9 +115,9 @@ class ResourceHandle{
   }
   protected void buildViews(){
     JTabbedPane view = new JTabbedPane(JTabbedPane.BOTTOM);
-    ResourceViewer rView = new ResourceViewer();
-    rView.setResource(resource);
-    view.add("Features", rView);
+    FeaturesEditor fEdt = new FeaturesEditor();
+    fEdt.setResource(resource);
+    view.add("Features", fEdt);
     largeView = view;
     smallView = null;
   }

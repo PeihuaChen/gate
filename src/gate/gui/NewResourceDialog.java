@@ -185,7 +185,7 @@ public class NewResourceDialog extends JDialog {
         case 0: return ParameterDisjunction.class;
         case 1: return String.class;
         case 2: return Boolean.class;
-        case 3: return String.class;
+        case 3: return Object.class;
         default: return Object.class;
       }
     }

@@ -1,17 +1,41 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 08/03/2001
+ *
+ *  $Id$
+ */
 package gate.event;
 
 import java.util.EventObject;
 
+/**
+ * The top level event class for all the event types fired by the Gate system.
+ */
 public class GateEvent extends EventObject {
 
-  public GateEvent(Object source) {
+  /**
+   * Constructor from source and type.
+   * @param source the object that initiated this event
+   * @param type the type on the event.
+   */
+  public GateEvent(Object source, int type) {
     super(source);
+    this.type = type;
   }
-  protected int type;
+
+
+  /**
+   * Gets the type of the event.
+   */
   public int getType() {
     return type;
   }
-  public void setType(int newType) {
-    type = newType;
-  }
+
+  protected int type;
 }

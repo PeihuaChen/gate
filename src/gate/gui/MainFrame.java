@@ -39,7 +39,7 @@ import guk.im.*;
 
 
 public class MainFrame extends JFrame
-                       implements ProgressListener, StatusListener{
+                       implements ProgressListener, StatusListener, CreoleListener{
 
   MainFrame thisMainFrame = null;
   JMenuBar menuBar;
@@ -631,7 +631,7 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent e){
       CreoleRegister reg = Gate.getCreoleRegister();
-      Set lrTypes = reg.getLrTypes();
+      List lrTypes = reg.getPublicLrTypes();
       if(lrTypes != null && !lrTypes.isEmpty()){
         HashMap resourcesByName = new HashMap();
         Iterator lrIter = lrTypes.iterator();
@@ -682,7 +682,7 @@ public class MainFrame extends JFrame
 
     public void actionPerformed(ActionEvent e){
       CreoleRegister reg = Gate.getCreoleRegister();
-      Set prTypes = reg.getPrTypes();
+      List prTypes = reg.getPublicPrTypes();
       if(prTypes != null && !prTypes.isEmpty()){
         HashMap resourcesByName = new HashMap();
         Iterator lrIter = prTypes.iterator();
@@ -981,5 +981,9 @@ public class MainFrame extends JFrame
     Locale myLocale;
     JRadioButtonMenuItem me;
     JFrame frame;
+  }
+  public void resourceLoaded(CreoleEvent e) {
+  }
+  public void resourceUnloaded(CreoleEvent e) {
   }
 }

@@ -1,32 +1,62 @@
+/*
+ *  Copyright (c) 1998-2001, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan 12/12/2000
+ *
+ *  $Id$
+ */
+
 package gate.event;
 
 import java.util.EventObject;
 import gate.*;
 
+/**
+ * This class models events fired by an {@link gate.AnnotationSet}.
+ */
 public class AnnotationSetEvent extends GateEvent{
 
-  public static int ANNOTATION_ADDED = 1;
-  public static int ANNOTATION_REMOVED = 2;
+  /**Event type used for situations when a new annotation has been added*/
+  public static int ANNOTATION_ADDED = 201;
 
+  /**Event type used for situations when an annotation has been removed*/
+  public static int ANNOTATION_REMOVED = 202;
+
+
+  /**
+   * Constructor.
+   * @param source the {@link gate.AnnotationSet} that fired the event
+   * @param type the type of the event
+   * @param sourceDocument the {@link gate.Document} for wich the annotation
+   * was added or removed.
+   * @param annotation the annotation added or removed.
+   */
   public AnnotationSetEvent(AnnotationSet source,
                             int type,
                             Document sourceDocument,
                             Annotation annotation) {
-    super(source);
+    super(source, type);
     this.sourceDocument = sourceDocument;
     this.annotation = annotation;
-    this.type = type;
   }
 
-  public void setSourceDocument(gate.Document newSourceDocument) {
-    sourceDocument = newSourceDocument;
-  }
+  /**
+   * Gets the document that has had an annotation added or removed.
+   * @return a {@link gate.Document}
+   */
   public gate.Document getSourceDocument() {
     return sourceDocument;
   }
-  public void setAnnotation(gate.Annotation newAnnotation) {
-    annotation = newAnnotation;
-  }
+
+  /**
+   * Gets the annotation that has been added or removed
+   * @return a {@link gate.Annotation}
+   */
   public gate.Annotation getAnnotation() {
     return annotation;
   }
