@@ -399,6 +399,11 @@ public class JTreeTable extends XJTable {
     public void setEditable(boolean editable){
       super.setEditable(false);
     }
+
+    public void updateUI(){
+      super.updateUI();
+      setRowHeight(0);
+    }
   }
 
 /*
