@@ -121,9 +121,9 @@ implements AnnotationSet
     Annotation a = (Annotation) o;
 
     boolean wasPresent = removeFromIdIndex(a);
-    removeFromTypeIndex(a);
-    removeFromOffsetIndex(a);
     if(wasPresent){
+      removeFromTypeIndex(a);
+      removeFromOffsetIndex(a);
       AnnotationSetEvent evt = new AnnotationSetEvent(
                                     this,
                                     AnnotationSetEvent.ANNOTATION_REMOVED,
