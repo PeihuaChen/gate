@@ -72,7 +72,7 @@ public class AnnotationDiffer {
     partiallyCorrectMatches = 0;
 
     while(!possibleChoices.isEmpty()){
-      Choice bestChoice = (Choice)possibleChoices.get(0);
+      Choice bestChoice = (Choice)possibleChoices.remove(0);
       bestChoice.consume();
       finalChoices.add(bestChoice);
       switch(bestChoice.type){
@@ -258,16 +258,34 @@ public class AnnotationDiffer {
      * <tt>this</tt> gets removed from {@link #possibleChoices} as well.
      */
     public void consume(){
+      possibleChoices.remove(this);
       List sameKeyChoices = (List)keyChoices.get(keyIndex);
-      List sameResponseChoices = (List)responseChoices.get(responseIndex);
+      sameKeyChoices.remove(this);
       possibleChoices.removeAll(sameKeyChoices);
+
+      List sameResponseChoices = (List)responseChoices.get(responseIndex);
+      sameResponseChoices.remove(this);
       possibleChoices.removeAll(sameResponseChoices);
-      sameKeyChoices.clear();
-      sameKeyChoices.add(this);
-      sameResponseChoices.clear();
-      sameResponseChoices.add(this);
+
+      Iterator iter = new ArrayList(sameKeyChoices).iterator();
+      while(iter.hasNext()){
+        ((Choice)iter.next()).remove();
+      }
+      iter = new ArrayList(sameResponseChoices).iterator();
+      while(iter.hasNext()){
+        ((Choice)iter.next()).remove();
+      }
     }
 
+    /**
+     * Removes this choice from the two lists it belongs to
+     */
+    protected void remove(){
+      List fromKey = (List)keyChoices.get(keyIndex);
+      fromKey.remove(this);
+      List fromResponse = (List)responseChoices.get(responseIndex);
+      fromResponse.remove(this);
+    }
     /**
      * Compares two choices:
      * the better score is preferred;
