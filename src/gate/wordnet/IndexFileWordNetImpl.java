@@ -40,7 +40,9 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
                                   implements WordNet {
 
 
+  /** JWNL dictionary */
   private Dictionary wnDictionary;
+  /** JWNL property file  */
   private File       propertyFile;
 
 
@@ -65,6 +67,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   } // init()
 
 
+  /** helper method */
   public Dictionary getJWNLDictionary() {
     return this.wnDictionary;
   }
@@ -82,14 +85,14 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     this.propertyFile = properties;
   }
 
-
+  /** returns the WordNet version */
   public String getVersion() {
 
     JWNL.Version ver = JWNL.getVersion();
     return ver.toString();
   }
 
-
+  /** returns all synsets for specific POS */
   public Iterator getSynsets(int _pos)
     throws WordNetException {
 
@@ -107,6 +110,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
 
   }
 
+  /** returns all unique beginners */
   public Iterator getUniqueBeginners() {
     throw new MethodNotImplementedException();
   }
@@ -171,6 +175,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   }
 
 
+  /** returns list of WordSense-s for specific lemma */
   public List lookupWord(String lemma) throws WordNetException {
 
     try {
@@ -182,6 +187,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     }
   }
 
+  /** returns list of WordSense-s for specific lemma of the specified POS */
   public List lookupWord(String lemma, int pos) throws WordNetException {
 
     try {
@@ -197,7 +203,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     }
   }
 
-
+  /** helper method */
   private List _lookupWord(String lemma, IndexWord[] jwIndexWords) throws WordNetException{
 
     List result = new ArrayList();
@@ -232,6 +238,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
     return result;
   }
 
+  /** iterator for synsets - may load synsets when necessary, not all at once */
   class SynsetIterator implements java.util.Iterator {
 
     private Iterator it;

@@ -25,6 +25,7 @@ import gate.event.*;
  */
 public interface Verb extends WordSense {
 
+  /** returns the verb frames associated with this synset */
   public List getVerbFrames();
 
 }

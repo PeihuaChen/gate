@@ -43,6 +43,8 @@ public class WordImpl implements Word {
     this.wnDictionary = _wnDictionary;
   }
 
+
+  /** returns the senses of this word */
   public List getWordSenses() throws WordNetException{
 
     //do we have the list already?
@@ -77,10 +79,14 @@ public class WordImpl implements Word {
 
   }
 
+
+  /** returns the lemma of this word */
   public String getLemma(){
     return this.lemma;
   }
 
+
+  /** returns the number of senses of this word (not necessarily loading them from storage) */
   public int getSenseCount(){
     return this.senseCount;
   }

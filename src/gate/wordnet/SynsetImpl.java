@@ -112,27 +112,37 @@ public class SynsetImpl implements Synset {
 
   }
 
+
+  /** returns the part-of-speech for this synset, see WordNet::POS_XXX constants */
   public int getPOS(){
     return this.synsetPOS;
   }
 
+  /** is this synset a UB - i.e. has no hypernym */
   public boolean isUniqueBeginner() throws WordNetException {
     List parents = getSemanticRelations(Relation.REL_HYPERNYM);
     return parents.isEmpty();
   }
 
+  /** textual description of the synset */
   public String getGloss(){
     return this.gloss;
   }
 
+
+  /** WordSenses contained in this synset */
   public List getWordSenses(){
     return this.wordSenses;
   }
 
+
+  /** get specific WordSense according to its order in the synset - most important senses come first  */
   public WordSense getWordSense(int offset){
     return (WordSense)this.wordSenses.get(offset);
   }
 
+
+  /** get the SemanticRelation-s of this synset */
   public List getSemanticRelations() throws WordNetException{
 
     if (null == this.semRelations) {
@@ -142,6 +152,7 @@ public class SynsetImpl implements Synset {
     return this.semRelations;
   }
 
+  /** get the SemanticRelation-s of specific type (HYPERNYm) for this synset */
   public List getSemanticRelations(int type) throws WordNetException{
 
     List result = new ArrayList(1);
@@ -202,7 +213,7 @@ public class SynsetImpl implements Synset {
     }
   }
 
-
+  /** offset in index files */
   public long getOffset() {
 
     return this.synsetOffset;

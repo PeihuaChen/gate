@@ -25,7 +25,10 @@ import gate.event.*;
  */
 public interface SemanticRelation extends Relation {
 
+  /** returns the source (Synset) of this lexical relation */
   public Synset getSource();
+
+  /** returns the source (Synset) of this lexical relation */
   public Synset getTarget();
 
 }

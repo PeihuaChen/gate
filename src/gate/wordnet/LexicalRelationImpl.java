@@ -17,10 +17,16 @@ package gate.wordnet;
 
 import junit.framework.*;
 
+/** Represents WordNet lexical relation.
+ *  implrments LexicalRelation
+ */
+
 public class LexicalRelationImpl extends RelationImpl
                                   implements LexicalRelation {
 
+  /** relation source */
   private WordSense source;
+  /** relation target */
   private WordSense target;
 
   public LexicalRelationImpl(int _type, WordSense _src, WordSense _target) {
@@ -35,10 +41,14 @@ public class LexicalRelationImpl extends RelationImpl
     this.target = _target;
   }
 
+
+  /** returns the source (WordSense) of this lexical relation */
   public WordSense getSource() {
     return this.source;
   }
 
+
+  /** returns the target (WordSense) of this lexical relation */
   public WordSense getTarget() {
     return this.target;
   }

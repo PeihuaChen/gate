@@ -25,7 +25,10 @@ import gate.event.*;
  */
 public interface LexicalRelation extends Relation {
 
+  /** returns the source (WordSense) of this lexical relation */
   public WordSense getSource();
+
+  /** returns the target (WordSense) of this lexical relation */
   public WordSense getTarget();
 
 }

@@ -35,10 +35,13 @@ public class SemanticRelationImpl extends RelationImpl
     this.target = _target;
   }
 
+
+  /** returns the source (Synset) of this lexical relation */
   public Synset getSource() {
     return this.source;
   }
 
+  /** returns the source (Synset) of this lexical relation */
   public Synset getTarget() {
     return this.target;
   }

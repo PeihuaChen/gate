@@ -25,20 +25,28 @@ import gate.event.*;
  */
 public interface WordSense {
 
+  /** returns the Word of this WordSense */
   public Word getWord();
 
+  /** part-of-speech for this sense (inherited from the containing synset) */
   public int getPOS();
 
+  /** synset of this sense */
   public Synset getSynset();
 
+  /** order of this sense relative to the word - i.e. most important senses of the same word come first */
   public int getSenseNumber();
 
+  /** order of this sense relative to the synset- i.e. most important senses of the same synset come first */
   public int getOrderInSynset();
 
+  /** appears in SEMCOR? */
   public boolean isSemcor();
 
+  /** return the Lex relations this sense participates in */
   public List getLexicalRelations() throws WordNetException ;
 
+  /** return the Lex relations (of the specified type) this sense participates in */
   public List getLexicalRelations(int type) throws WordNetException ;
 
 }

@@ -20,6 +20,8 @@ import java.util.*;
 import junit.framework.*;
 import net.didion.jwnl.dictionary.Dictionary;
 
+/** Represents WordNet verb.
+ */
 public class VerbImpl extends WordSenseImpl
                       implements Verb {
 
@@ -45,6 +47,7 @@ public class VerbImpl extends WordSenseImpl
     }
   }
 
+  /** returns the verb frames associated with this synset */
   public List getVerbFrames() {
     return this.verbFrames;
   }
