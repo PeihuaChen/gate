@@ -58,7 +58,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
 
     if (! Main.batchMode) //fire events if not in batch mode
       listeners.put("gate.event.ProgressListener",
-                  new CustomProgressListener(0, 10));
+                  new IntervalProgressListener(0, 10));
 
     gazetteer = (DefaultGazetteer)Factory.createResource(
                     "gate.creole.gazetteer.DefaultGazetteer",
@@ -79,7 +79,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
 
     if (! Main.batchMode) //fire events if not in batch mode
       listeners.put("gate.event.ProgressListener",
-                  new CustomProgressListener(11, 100));
+                  new IntervalProgressListener(11, 100));
 
     transducer = (Transducer)Factory.createResource(
                     "gate.creole.Transducer",
@@ -122,7 +122,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
         fireProgressChanged(5);
 
       //run the gazetteer
-        pListener = new CustomProgressListener(5, 10);
+        pListener = new IntervalProgressListener(5, 10);
         sListener = new StatusListener(){
           public void statusChanged(String text){
             fireStatusChanged(text);
@@ -138,7 +138,7 @@ public class SentenceSplitter extends AbstractProcessingResource{
         gazetteer.removeStatusListener(sListener);
 
       //run the transducer
-        pListener = new CustomProgressListener(11, 90);
+        pListener = new IntervalProgressListener(11, 90);
         transducer.addProgressListener(pListener);
         transducer.addStatusListener(sListener);
       }
