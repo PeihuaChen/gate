@@ -87,7 +87,6 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
-    throw new MethodNotImplementedException();
   }
 
 
