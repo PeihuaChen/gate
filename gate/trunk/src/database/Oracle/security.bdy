@@ -217,7 +217,7 @@ create or replace package body security is
   procedure login(p_usr_name        IN varchar2,
                   p_usr_pass        IN varchar2,
                   p_pref_grp_id     IN number,
-                  p_is_privileged   OUT boolean)
+                  p_is_privileged   OUT number)
   is
     usr_cnt number;  
     l_usr_id number;
@@ -266,8 +266,12 @@ create or replace package body security is
        end if;
        
        --is privileged?
-       p_is_privileged := (l_usr_id = ADMIN_USER_ID and 
-                           p_pref_grp_id = ADMIN_GROUP_ID);
+       
+       if (l_usr_id = ADMIN_USER_ID and p_pref_grp_id = ADMIN_GROUP_ID) then
+          p_is_privileged := ORACLE_TRUE;
+       else
+          p_is_privileged := ORACLE_FALSE;
+       end if;           
        
        
   end;                                                                                                        
