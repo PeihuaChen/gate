@@ -22,6 +22,7 @@
     <path>[lib/xerces.jar]</path>
     <path>[lib/orajdbc9i.zip]</path>
     <path>[lib/ontotext.jar]</path>
+    <path>[lib/ext/nl.mpi.lookup.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>
