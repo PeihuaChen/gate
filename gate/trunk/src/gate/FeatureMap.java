@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, Jan/19/2000
  *
  *  $Id$
@@ -22,5 +22,11 @@ import gate.util.*;
   */
 public interface FeatureMap extends Map
 {
+  /** Test if <b>this</b> featureMap object is included in aFeatureMap
+    * @param aFeatureMap object which will incude or not this FeatureMap obj.
+    * @return <code>true</code> if <b>this</b> is incuded in aFeatureMap
+    * and <code>false</code> if not.
+    */
+  public boolean subsumes(FeatureMap aFeatureMap);
 
 } // interface FeatureMap

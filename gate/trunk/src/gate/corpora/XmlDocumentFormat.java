@@ -84,6 +84,12 @@ public class XmlDocumentFormat extends TextualDocumentFormat
           GateFormatXmlDocumentHandler gateXmlHandler =
                           new GateFormatXmlDocumentHandler(doc);
           // Register a status listener
+          gateXmlHandler.addStatusListener(new StatusListener(){
+            public void statusChanged(String text){
+              // This is implemented in DocumentFormat.java and inherited here
+              fireStatusChanged(text);
+            }
+          });
 
           // Parse the Gate Document
           xmlParser.parse(doc.getSourceUrl().toString(), gateXmlHandler);
