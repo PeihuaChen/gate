@@ -26,6 +26,7 @@ import gate.util.*;
 import gate.annotation.*;
 import gate.creole.*;
 import gate.persist.*;
+import gate.security.*;
 import gate.event.*;
 
 /** Provides static methods for the creation of Resources.
@@ -42,6 +43,9 @@ public abstract class Factory {
 
   /** An object to source events from. */
   private static CreoleProxy creoleProxy;
+
+  /** An object to source events from. */
+  private static HashMap accessControllerPool;
 
   /** Create an instance of a resource using default parameter values.
     * @see #createResource(String,FeatureMap)
@@ -489,9 +493,27 @@ public abstract class Factory {
   /** Static initialiser to set up the CreoleProxy event source object */
   static {
     creoleProxy = new CreoleProxy();
+    accessControllerPool = new HashMap();
   } // static initialiser
 
+
+  /**
+   * Creates and opens a new AccessController (if not available in the pool).
+  */
+  public static synchronized AccessController createAccessController(String jdbcURL)
+    throws PersistenceException {
+
+    if (false == accessControllerPool.containsKey(jdbcURL)) {
+      AccessController ac = new AccessControllerImpl();
+      ac.open(jdbcURL);
+      accessControllerPool.put(jdbcURL,ac);
+    }
+
+    return (AccessController)accessControllerPool.get(jdbcURL);
+  } // createAccessController()
+
 } // abstract Factory
+
 
 /**
  * Factory is basically a collection of static methods but events need to
@@ -566,6 +588,7 @@ class CreoleProxy {
       }// for
     }// if
   }// fireDatastoreClosed(CreoleEvent e)
+
 
   private transient Vector creoleListeners;
 }//class CreoleProxy
