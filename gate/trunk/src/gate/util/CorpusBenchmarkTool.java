@@ -871,14 +871,16 @@ ex.printStackTrace();
       Out.prln("</TD>");
 
       //check the recall now
-      if ( isVerboseMode
-           &&
-           ((annotDiff.getRecallAverage() < threshold
-             ||
-             annotDiff.getRecallAverage() < threshold)
-           )
-         )
-        printAnnotations(annotDiff, markedDoc, cleanDoc);
+      if ( isVerboseMode ) {
+        Out.prln("<TD>");
+        if (annotDiff.getRecallAverage() < threshold) {
+          printAnnotations(annotDiff, markedDoc, cleanDoc);
+        }
+        else {
+          Out.prln("&nbsp;");
+        }
+        Out.prln("</TD>");
+      }
 
 
       Out.prln("</TR>");
@@ -911,14 +913,16 @@ ex.printStackTrace();
       Out.prln("<TD>" + annotDiff.getPrecisionAverage() + "</TD>");
       Out.prln("<TD>" + annotDiff.getRecallAverage() + "</TD>");
       //check the recall now
-      if ( isVerboseMode
-           &&
-           ((annotDiff.getRecallAverage() < threshold
-             ||
-             annotDiff.getRecallAverage() < threshold)
-           )
-         )
-        printAnnotations(annotDiff, keyDoc, respDoc);
+      if ( isVerboseMode ) {
+        Out.prln("<TD>");
+        if (annotDiff.getRecallAverage() < threshold) {
+          printAnnotations(annotDiff, keyDoc, respDoc);
+        }
+        else {
+          Out.prln("&nbsp;");
+        }
+        Out.prln("</TD>");
+      }
 
       Out.prln("</TR>");
     }//for loop through annotation types
@@ -1144,7 +1148,6 @@ ex.printStackTrace();
 
   protected void printAnnotations(AnnotationDiff annotDiff,
                     Document keyDoc, Document respDoc) {
-    Out.prln("<TD>");
     Out.pr("MISSING ANNOTATIONS in the automatic texts: ");
     Set missingSet =
       annotDiff.getAnnotationsOfType(AnnotationDiff.MISSING_TYPE);
@@ -1161,8 +1164,6 @@ ex.printStackTrace();
     Set partialSet =
       annotDiff.getAnnotationsOfType(AnnotationDiff.PARTIALLY_CORRECT_TYPE);
     printAnnotations(partialSet, respDoc);
-    Out.prln("</TD>");
-
   }
 
   protected void printAnnotations(Set set, Document doc) {
