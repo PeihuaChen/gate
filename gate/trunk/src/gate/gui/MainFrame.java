@@ -2189,11 +2189,11 @@ public class MainFrame extends JFrame
                   if(OkCancelDialog.showDialog(MainFrame.this.getContentPane(),
                                                 listPanel,
                                                 "Please enter login details")){
+
                     userName = usrField.getText();
                     userPass = new String(pwdField.getPassword());
                     group = (String) grpField.getSelectedItem();
-                    if(OkCancelDialog.userHasPressedCancel)
-                      return;
+
                     if(userName.equals("") || userPass.equals("") || group.equals("")) {
                       JOptionPane.showMessageDialog(
                         MainFrame.this,
@@ -2203,6 +2203,9 @@ public class MainFrame extends JFrame
                         );
                       return;
                     }
+                  }
+                  else if(OkCancelDialog.userHasPressedCancel) {
+                      return;
                   }
 
                   grp = ac.findGroup(group);
