@@ -96,7 +96,7 @@ public class CreoleRegisterImpl extends HashMap
 
   /** Get the list of CREOLE directory URLs. */
   public Set getDirectories() {
-    return directories;
+    return Collections.unmodifiableSet(directories);
   } // getDirectories
 
   /** Register all the CREOLE directories that we know of.
@@ -295,16 +295,16 @@ public class CreoleRegisterImpl extends HashMap
   } // clear()
 
   /** Get the list of types of LR in the register. */
-  public Set getLrTypes() { return lrTypes; }
+  public Set getLrTypes() { return Collections.unmodifiableSet(lrTypes);}
 
   /** Get the list of types of PR in the register. */
-  public Set getPrTypes() { return prTypes; }
+  public Set getPrTypes() { return Collections.unmodifiableSet(prTypes);}
 
   /** Get the list of types of VR in the register. */
-  public Set getVrTypes() { return vrTypes; }
+  public Set getVrTypes() { return Collections.unmodifiableSet(vrTypes);}
 
   /** Get the list of types of TOOL respurces in the register. */
-  public Set getToolTypes() { return toolTypes; }
+  public Set getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
 
   /** Get a list of all instantiations of LR in the register. */
   public List getLrInstances() {
@@ -315,9 +315,8 @@ public class CreoleRegisterImpl extends HashMap
     while(iter.hasNext()) {
       String type = (String) iter.next();
       instances.addAll(getLrInstances(type));
-    }
-
-    return instances;
+    }// End while
+    return Collections.unmodifiableList(instances);
   } // getLrInstances()
 
   /** Get a list of all instantiations of PR in the register. */
@@ -329,9 +328,9 @@ public class CreoleRegisterImpl extends HashMap
     while(iter.hasNext()) {
       String type = (String) iter.next();
       instances.addAll(getPrInstances(type));
-    }
+    }// End while
 
-    return instances;
+    return Collections.unmodifiableList(instances);
   } // getPrInstances()
 
   /** Get a list of all instantiations of VR in the register. */
@@ -343,9 +342,9 @@ public class CreoleRegisterImpl extends HashMap
     while(iter.hasNext()) {
       String type = (String) iter.next();
       instances.addAll(getVrInstances(type));
-    }
+    }// End while
 
-    return instances;
+    return Collections.unmodifiableList(instances);
   } // getVrInstances()
 
   /** Get a list of instantiations of a type of LR in the register. */
@@ -354,7 +353,7 @@ public class CreoleRegisterImpl extends HashMap
     if(resData == null)
       return new ArrayList();
 
-    return resData.getInstantiations();
+    return Collections.unmodifiableList(resData.getInstantiations());
   } // getLrInstances
 
   /** Get a list of instantiations of a type of PR in the register. */
@@ -363,7 +362,7 @@ public class CreoleRegisterImpl extends HashMap
     if(resData == null)
       return new ArrayList();
 
-    return resData.getInstantiations();
+    return Collections.unmodifiableList(resData.getInstantiations());
   } // getPrInstances
 
   /** Get a list of instantiations of a type of VR in the register. */
@@ -372,26 +371,38 @@ public class CreoleRegisterImpl extends HashMap
     if(resData == null)
       return new ArrayList();
 
-    return resData.getInstantiations();
+    return Collections.unmodifiableList(resData.getInstantiations());
   } // getVrInstances
 
   /** Get a list of all non-private instantiations of LR in the register. */
-  public List getPublicLrInstances() { return getPublics(getLrInstances()); }
+  public List getPublicLrInstances() {
+    return Collections.unmodifiableList(getPublics(getLrInstances()));
+  }// getPublicLrInstances()
 
   /** Get a list of all non-private instantiations of PR in the register. */
-  public List getPublicPrInstances() { return getPublics(getPrInstances()); }
+  public List getPublicPrInstances() {
+    return Collections.unmodifiableList(getPublics(getPrInstances()));
+  }// getPublicPrInstances()
 
   /** Get a list of all non-private instantiations of VR in the register. */
-  public List getPublicVrInstances() { return getPublics(getVrInstances()); }
+  public List getPublicVrInstances() {
+    return Collections.unmodifiableList(getPublics(getVrInstances()));
+  }//getPublicVrInstances()
 
   /** Get a list of all non-private types of LR in the register. */
-  public List getPublicLrTypes() { return getPublicTypes(getLrTypes()); }
+  public List getPublicLrTypes() {
+    return Collections.unmodifiableList(getPublicTypes(getLrTypes()));
+  }//getPublicLrTypes()
 
   /** Get a list of all non-private types of PR in the register. */
-  public List getPublicPrTypes() { return getPublicTypes(getPrTypes()); }
+  public List getPublicPrTypes() {
+    return Collections.unmodifiableList(getPublicTypes(getPrTypes()));
+  }//getPublicPrTypes()
 
   /** Get a list of all non-private types of VR in the register. */
-  public List getPublicVrTypes() { return getPublicTypes(getVrTypes()); }
+  public List getPublicVrTypes() {
+    return Collections.unmodifiableList(getPublicTypes(getVrTypes()));
+  }//getPublicVrTypes()
 
   /** Get a list of all non-private instantiations. */
   protected List getPublics(List instances) {
@@ -406,7 +417,7 @@ public class CreoleRegisterImpl extends HashMap
       if(! rd.isPrivate()) publics.add(res);
     }
 
-    return publics;
+    return Collections.unmodifiableList(publics);
   } // getPublics
 
   /** Gets a list of all non private types from alist of types*/
@@ -418,8 +429,8 @@ public class CreoleRegisterImpl extends HashMap
       ResourceData rData = (ResourceData)get(oneType);
       if(rData != null && !rData.isPrivate()) publics.add(oneType);
     }
-    return publics;
-  }
+    return Collections.unmodifiableList(publics);
+  }//getPublicTypes
 
   public synchronized void removeCreoleListener(CreoleListener l) {
     if (creoleListeners != null && creoleListeners.contains(l)) {

@@ -46,11 +46,19 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** String representation */
   public String toString() {
+    int noInst = (instantiationStack == null) ? 0: instantiationStack.size();
+    int noSmallViews = (smallViews == null) ? 0: smallViews.size();
+    int noViews = (views == null) ? 0: views.size();
+
     StringBuffer s = new StringBuffer(
       "ResourceDataImpl, name=" + name + "; className=" + className +
       "; jarFileName=" + jarFileName + "; jarFileUrl=" + jarFileUrl +
       "; xmlFileName=" + xmlFileName + "; xmlFileUrl=" + xmlFileUrl +
-      "; autoLoading=" + autoLoading + "; interfaceName=" + interfaceName +
+      "; isAutoLoading=" + autoLoading + "; numberInstances=" + noInst +
+      "; isPrivate=" + priv +"; numberSmallViewsRegistered=" + noSmallViews +
+      "; isTool="+ tool + "; validityMessage=" + validityMessage +
+      "; numberViewsRegistered=" + noViews +
+      "; interfaceName=" + interfaceName +
       "; parameterList=" + parameterList +
       "; features=" + features
     );
