@@ -1367,6 +1367,10 @@ System.out.println("trans failed ...rollback");
     initData.put("DOC_FEATURES",doc.getFeatures());
     initData.put("DOC_MARKUP_AWARE",doc.getMarkupAware());
     initData.put("DOC_SOURCE_URL",doc.getSourceUrl());
+    if(doc instanceof DocumentImpl){
+      initData.put("DOC_STRING_CONTENT",
+                   ((DocumentImpl)doc).getStringContent());
+    }
     initData.put("DOC_SOURCE_URL_START",doc.getSourceUrlStartOffset());
     initData.put("DOC_SOURCE_URL_END",doc.getSourceUrlEndOffset());
     initData.put("DOC_DEFAULT_ANNOTATIONS",doc.getAnnotations());
