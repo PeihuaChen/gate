@@ -46,7 +46,7 @@ public class NodeImpl implements Node, Comparable
     return id.compareTo(other.getId());
   } // compareTo
 
-  private Integer id;
-  private Long offset;
+  Integer id;
+  Long offset;
 }
 

@@ -74,10 +74,10 @@ implements Annotation, FeatureBearer
     return id.compareTo(other.getId());
   } // compareTo
 
-  private Integer id;
-  private String type;
-  private FeatureMap features;
-  private Node start, end;
+  Integer id;
+  String type;
+  FeatureMap features;
+  Node start, end;
 
 } // class AnnotationImpl
 
