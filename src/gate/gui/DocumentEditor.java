@@ -1010,6 +1010,12 @@ public class DocumentEditor extends AbstractVisualResource
     propertyChangeListeners.addPropertyChangeListener(propertyName, l);
   }
 
+  
+  /** Return the current selected document */
+  public gate.Document getDocument() {
+    return document;
+  } // Document getDocument()
+  
   /**
    * Sets the document to be displayed
    */
