@@ -21,6 +21,8 @@ public class MutableLexKBWordSenseImpl implements MutableLexKBWordSense, Seriali
   MutableLexKBSynset senseSynset = null;
   int senseNumber = 0;
   int orderInSynset = 0;
+  static final long serialVersionUID = -7352179163930511415L;
+
 
   public MutableLexKBWordSenseImpl(Word myWord, MutableLexKBSynset mySynset,
                                    int mySenseNumber, int myOrderInSynset) {
