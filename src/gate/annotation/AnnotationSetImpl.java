@@ -96,7 +96,7 @@ implements AnnotationSet
 
     public boolean hasNext() { return iter.hasNext(); }
 
-    public Object next()     { return (lastNext = (Annotation) iter.next()); }
+    public Object next()     { return (lastNext = (Annotation) iter.next());}
 
     public void remove()     {
       // this takes care of the ID index
@@ -710,6 +710,42 @@ implements AnnotationSet
       ;
   } // toString()
   */
+
+  /** Two AnnotationSet are equal if their name, document and annotations
+    *  are the same
+    */
+  public boolean equals(Object other) {
+    AnnotationSet annotSet;
+
+    if (!(other instanceof AnnotationSetImpl)) return false;
+    else annotSet = (AnnotationSet) other;
+
+    if ((doc == null)^ (annotSet.getDocument() == null)) return false;
+    if ((doc != null)&& (!doc.equals(annotSet.getDocument()))) return false;
+
+    if ((name == null)^ (annotSet.getName() == null)) return false;
+    if ((name!=null)&& (!name.equals(annotSet.getName()))) return false;
+
+    if (this.size() != annotSet.size()) return false;
+
+    if (!this.containsAll(annotSet)) return false;
+
+    return true;
+  } // equals
+
+  public int hashCode() {
+    int hash = 0;
+    Iterator i = this.iterator();
+    while (i.hasNext()) {
+        Annotation annot = (Annotation)i.next();
+        if ( annot != null)
+            hash += annot.hashCode();
+    }
+    int nameHash = (name == null ? 0 : name.hashCode());
+    int docHash = (doc == null ? 0 : doc.hashCode());
+
+    return hash ^ nameHash ^ docHash;
+  }
 
   /** The name of this set */
   String name = null;
