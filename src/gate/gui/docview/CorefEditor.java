@@ -828,7 +828,7 @@ public class CorefEditor
    */
   private void initData() {
 
-    rootNode = new CorefTreeNode("Coreference Data", true,
+    rootNode = new CorefTreeNode("Co-reference Data", true,
                                  CorefTreeNode.ROOT_NODE);
     corefChains = new HashMap();
     selectionChainsMap = new HashMap();
