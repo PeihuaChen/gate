@@ -43,8 +43,9 @@ create or replace package persist is
   procedure get_lr_name(p_lr_id     IN number,
                         p_lr_name   OUT varchar2);
   
-  procedure set_lr_name(p_lr_id     IN number,
-                        p_lr_name   IN varchar2);
+  procedure update_lr(p_lr_id        IN number,
+                      p_lr_name      IN varchar2,
+                      p_lr_parent_id IN number);
   
   procedure delete_document(p_lr_id     IN number);
   
