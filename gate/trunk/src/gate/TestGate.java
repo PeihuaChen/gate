@@ -150,14 +150,18 @@ public class TestGate {
     TestSuite suite = new TestSuite();
 
     try {
-      suite.addTest(TestXml.suite());
-//*
+      // Test bench
+      // Just copy the test suite you want to activate
+//      suite.addTest(TestHtml.suite());
 
+      // Test suite
+//*
       suite.addTest(TestAnnotationDiff.suite());
       suite.addTest(TestConfig.suite());
       suite.addTest(TestBumpyStack.suite());
       suite.addTest(TestAnnotation.suite());
       suite.addTest(TestEmail.suite());
+      suite.addTest(TestXml.suite());
       suite.addTest(TestHtml.suite());
       suite.addTest(TestSgml.suite());
       suite.addTest(TestXSchema.suite());
@@ -175,7 +179,7 @@ public class TestGate {
       suite.addTest(TestDB.suite());
       suite.addTest(TestTokeniser.suite());
       suite.addTest(TestGazetteer.suite());
- //*/
+//*/
     } catch(Exception e) {
       Out.prln("can't add tests! exception = " + e);
       throw(e);
