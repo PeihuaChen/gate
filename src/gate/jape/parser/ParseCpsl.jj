@@ -31,7 +31,6 @@ package gate.jape.parser;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import com.objectspace.jgl.Pair;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
@@ -1020,6 +1019,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.23  2001/09/25 12:26:10  kalina
+// Removed the final places that used jgl.objectspace
+//
 // Revision 1.22  2001/09/25 12:04:04  kalina
 // I commented out temporarily the no events in batch mode code as it was
 // not working completely correctly, so I want to reinstate it only after
