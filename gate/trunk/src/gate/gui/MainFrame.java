@@ -122,6 +122,7 @@ public class MainFrame extends JFrame
   OpenDSAction openDSAction;
   HelpAboutAction helpAboutAction;
   NewAnnotDiffAction newAnnotDiffAction = null;
+  NewCorpusAnnotDiffAction newCorpusAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
   NewCorpusEvalAction newCorpusEvalAction = null;
   GenerateStoredCorpusEvalAction generateStoredCorpusEvalAction = null;
@@ -292,6 +293,7 @@ public class MainFrame extends JFrame
     openDSAction = new OpenDSAction();
     helpAboutAction = new HelpAboutAction();
     newAnnotDiffAction = new NewAnnotDiffAction();
+    newCorpusAnnotDiffAction = new NewCorpusAnnotDiffAction();
     newBootStrapAction = new NewBootStrapAction();
     newCorpusEvalAction = new NewCorpusEvalAction();
     storedMarkedCorpusEvalAction = new StoredMarkedCorpusEvalAction();
@@ -618,6 +620,7 @@ public class MainFrame extends JFrame
 
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.add(newAnnotDiffAction);
+    toolsMenu.add(newCorpusAnnotDiffAction);
     toolsMenu.add(newBootStrapAction);
     //temporarily disabled till the evaluation tools are made to run within
     //the GUI
@@ -1521,6 +1524,19 @@ public class MainFrame extends JFrame
     }// actionPerformed();
   }//class NewAnnotDiffAction
 
+  /** This class represent an action which brings up the Corpus Annot Diff tool*/
+  class NewCorpusAnnotDiffAction extends AbstractAction {
+    public NewCorpusAnnotDiffAction() {
+      super("Corpus Annotation Diff", getIcon("annDiff.gif"));
+      putValue(SHORT_DESCRIPTION,"Create a new Corpus Annotation Diff Tool");
+    }// NewCorpusAnnotDiffAction
+    public void actionPerformed(ActionEvent e) {
+      CorpusAnnotDiffDialog annotDiffDialog = 
+        new CorpusAnnotDiffDialog(MainFrame.this);
+      annotDiffDialog.setTitle("Corpus Annotation Diff Tool");
+      annotDiffDialog.setVisible(true);
+    }// actionPerformed();
+  }//class NewCorpusAnnotDiffAction
 
   /** This class represent an action which brings up the corpus evaluation tool*/
   class NewCorpusEvalAction extends AbstractAction {
