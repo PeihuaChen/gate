@@ -92,26 +92,28 @@ extends Transducer implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
-  public void finish(){
-    // both MPT and SPT have finish called on them by the parser...
-    if(finishedAlready) return;
-    else finishedAlready = true;
+   public void finish() {
+     // both MPT and SPT have finish called on them by the parser...
+     if (finishedAlready)
+       return;
+     else
+       finishedAlready = true;
 
-    //each rule has a RHS which has a string for java code
-    //those strings need to be compiled now
-    Map actionClasses = new HashMap(rules.size());
-    for(Iterator i = rules.iterator(); i.hasNext(); ){
-      Rule rule = (Rule)i.next();
-      rule.finish();
-      actionClasses.put(rule.getRHS().getActionClassName(),
-                        rule.getRHS().getActionClassString());
-    }
-    try{
-      gate.util.Javac.loadClasses(actionClasses);
-    }catch(Exception e){
-      Err.prln("Compile error:\n" + e.getMessage());
-//e.printStackTrace();
-    }
+       //each rule has a RHS which has a string for java code
+       //those strings need to be compiled now
+     Map actionClasses = new HashMap(rules.size());
+     for (Iterator i = rules.iterator(); i.hasNext(); ) {
+       Rule rule = (Rule) i.next();
+       rule.finish();
+       actionClasses.put(rule.getRHS().getActionClassName(),
+                         rule.getRHS().getActionClassString());
+     }
+     try{
+       gate.util.Javac.loadClasses(actionClasses);
+     }catch(Exception e){
+       throw new GateRuntimeException(
+          "Compile error while loading Jape transducer \"" + name + "\"!");
+     }
 
     //build the finite state machine transition graph
     fsm = new FSM(this);
