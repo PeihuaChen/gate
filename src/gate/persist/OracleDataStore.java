@@ -2556,13 +2556,13 @@ public class OracleDataStore extends JDBCDataStore {
     ResultSet rs = null;
     CallableStatement cstmt = null;
     Long lrID = (Long)doc.getLRPersistenceId();
-    Long docID = null;
+//    Long docID = null;
     Long asetID = null;
 
     try {
       //1. get the a-set ID in the database
-      String sql = " select as_id,  " +
-                   "        as_doc_id " +
+      String sql = " select as_id  " +
+//                   "        as_doc_id " +
                    " from  "+Gate.DB_OWNER+".v_annotation_set " +
                    " where  lr_id = ? ";
       //do we have aset name?
@@ -2586,7 +2586,8 @@ public class OracleDataStore extends JDBCDataStore {
 
       if (rs.next()) {
         asetID = new Long(rs.getLong("as_id"));
-        docID = new Long(rs.getLong("as_doc_id"));
+//        docID = new Long(rs.getLong("as_doc_id"));
+//System.out.println("syncing annots, lr_id=["+lrID+"],doc_id=["+docID+"], set_id=["+asetID+"]");
       }
       else {
         throw new PersistenceException("cannot find annotation set with" +
@@ -2611,7 +2612,7 @@ public class OracleDataStore extends JDBCDataStore {
         Node end = (Node)ann.getEndNode();
         String type = ann.getType();
 
-        cstmt.setLong(1,docID.longValue()); //annotations are linked with documents, not LRs!
+        cstmt.setLong(1,lrID.longValue());
         cstmt.setLong(2,ann.getId().longValue());
         cstmt.setLong(3,asetID.longValue());
         cstmt.setLong(4,start.getId().longValue());
