@@ -192,7 +192,7 @@
           spawn="false"
           maxmemory="200m">
        <jvmarg value="-Djava.ext.dirs=${extDir}"/>
-       <jvmarg value="-Dcom.apple.macos.useScreenMenuBar=true"/>
+       <jvmarg value="-Dapple.laf.useScreenMenuBar=true"/>
        <jvmarg value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
        <jvmarg value="-Dcom.apple.mrj.application.live-resize=true"/>
        <jvmarg value="${mac.dock.name.option}"/>
