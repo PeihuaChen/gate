@@ -49,14 +49,14 @@ extends AbstractResource implements ProcessingResource
    * the resource will re-read those resources. If the data used to create
    * the resource has changed since the resource has been created then the
    * resource will change too after calling reInit().
-   * This method simply calls {@link #init()}. This functionality will
-   * be overriden by derived classes as necessary.
+   * The implementation in this class simply calls {@link #init()}. This
+   * functionality must be overriden by derived classes as necessary.
    */
   public void reInit() throws ResourceInstantiationException{
     init();
-  }
+  } // reInit()
 
-  public void setRuntimeParameters(FeatureMap parameters){
+  public void setRuntimeParameters(FeatureMap parameters) {
     Out.println(parameters);
   }
 
