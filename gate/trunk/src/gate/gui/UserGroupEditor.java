@@ -23,8 +23,6 @@ import gate.security.*;
 import gate.*;
 import java.awt.event.*;
 import gate.util.Out;
-import com.borland.dbswing.DBPasswordDialog;
-
 
 
 public class UserGroupEditor extends JComponent {
@@ -68,30 +66,57 @@ public class UserGroupEditor extends JComponent {
   public static void main(String[] args) throws Exception {
     Gate.init();
 
+    JFrame frame = new JFrame();
+
     AccessController ac = new AccessControllerImpl();
     ac.open(JDBC_URL);
 
-    Session mySession = ac.login("ADMIN", "sesame",
-                              ac.findGroup("ADMINS").getID());
+    Session mySession = null;
+
+    try {
+      mySession = login(ac, frame.getContentPane());
+    } catch (gate.security.SecurityException ex) {
+        JOptionPane.showMessageDialog(
+          frame,
+          "To use this tool you must login as a user "
+            + "with administrative rights!",
+          "Login error",
+          JOptionPane.ERROR_MESSAGE
+          );
+      ac.close();
+      System.exit(-1);
+    }
 
     if (! ac.isValidSession(mySession)){
-      Out.prln("Incorrect session obtained. Cannot continue!");
-      return;
+      JOptionPane.showMessageDialog(
+        frame,
+        "Incorrect session obtained. "
+          + "Probably there is a problem with the database!",
+        "Login error",
+        JOptionPane.ERROR_MESSAGE
+        );
+      ac.close();
+      System.exit(-1);
     }
 
     if (!mySession.isPrivilegedSession()) {
-      Out.prln("Insufficient priviliges to edit/view groups and users!");
-      return;
+        JOptionPane.showMessageDialog(
+          frame,
+          "Insufficient priviliges to edit/view groups and users!",
+          "Login error",
+          JOptionPane.ERROR_MESSAGE
+          );
+      ac.close();
+      System.exit(-1);
     }
-
-    UserGroupEditor userGroupEditor1 = new UserGroupEditor(ac, mySession);
-
-    JFrame frame = new JFrame();
 
     //INITIALISE THE FRAME, ETC.
     frame.setEnabled(true);
     frame.setTitle("GATE User/Group Administration Tool");
     frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+
+    UserGroupEditor userGroupEditor1 = new UserGroupEditor(ac, mySession);
 
     //Put the bean in a scroll pane.
     frame.getContentPane().add(userGroupEditor1, BorderLayout.CENTER);
@@ -102,6 +127,56 @@ public class UserGroupEditor extends JComponent {
     frame.show();
 
   }
+
+  public static Session login(AccessController ac, Component parent)
+                          throws  gate.persist.PersistenceException,
+                                  gate.security.SecurityException {
+    String userName = "";
+    String userPass = "";
+    String group = "";
+
+    JPanel listPanel = new JPanel();
+    listPanel.setLayout(new BoxLayout(listPanel,BoxLayout.X_AXIS));
+
+    JPanel panel1 = new JPanel();
+    panel1.setLayout(new BoxLayout(panel1,BoxLayout.Y_AXIS));
+    panel1.add(new JLabel("User name: "));
+    panel1.add(new JLabel("Password: "));
+    panel1.add(new JLabel("Group: "));
+
+    JPanel panel2 = new JPanel();
+    panel2.setLayout(new BoxLayout(panel2,BoxLayout.Y_AXIS));
+    JTextField usrField = new JTextField(30);
+    panel2.add(usrField);
+    JPasswordField pwdField = new JPasswordField(30);
+    panel2.add(pwdField);
+    JTextField grpField = new JTextField(30);
+    panel2.add(grpField);
+
+    listPanel.add(panel1);
+    listPanel.add(Box.createHorizontalStrut(20));
+    listPanel.add(panel2);
+
+    if(OkCancelDialog.showDialog( parent,
+                                  listPanel,
+                                  "Please enter login details")){
+      userName = usrField.getText();
+      userPass = new String(pwdField.getPassword());
+      group = grpField.getText();
+      if (userName.equals("") || userPass.equals("") || group.equals("")) {
+        JOptionPane.showMessageDialog(
+          parent,
+          "You must provide non-empty user name, password and group!",
+          "Login error",
+          JOptionPane.ERROR_MESSAGE
+          );
+        System.exit(-1);
+      }
+    }
+
+    return ac.login(userName, userPass, ac.findGroup(group).getID());
+  }
+
 
   private void jbInit() throws Exception {
     this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
@@ -165,13 +240,11 @@ public class UserGroupEditor extends JComponent {
     exitButton.setText("Exit");
     exitButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-/*
         try {
           controller.close();
         } catch (gate.persist.PersistenceException ex) {
-          Out.prln("Could not close the access controller connection. Exiting...");
+          Out.prln(ex.getMessage());
         }
-*/
         System.exit(0);
       } //actionPerformed
     });
@@ -321,7 +394,6 @@ public class UserGroupEditor extends JComponent {
   void firstListItemSelected(ListSelectionEvent e) {
     int i = firstList.getSelectedIndex();
     String name = (String) firstList.getModel().getElementAt(i);
-    Out.prln("user groups to display: "+ name);
 
     if (usersFirst)
       showGroupsForUser(name);
@@ -330,7 +402,6 @@ public class UserGroupEditor extends JComponent {
   } //firstListItemSelected
 
   protected void showGroupsForUser(String name) {
-    Out.prln("user selected: " + name);
     User user = null;
     try {
       user = controller.findUser(name);
@@ -413,18 +484,20 @@ public class UserGroupEditor extends JComponent {
     }
 
     public void actionPerformed(ActionEvent e){
+      String userName= "", userPass = "";
 
-      DBPasswordDialog dbDialog =
-                    new DBPasswordDialog("Please enter user name and password");
-      dbDialog.setPasswordRequired(true);
-      dbDialog.setUserNameRequired(true);
-      dbDialog.show();
-      if (! dbDialog.isOKPressed())
+      UserPasswordDialog pwdDlg = new UserPasswordDialog();
+      boolean isOK = pwdDlg.showPasswordDialog(
+                        "Please enter user name and password",
+                        UserGroupEditor.this
+                        );
+
+      if (! isOK)
         return;
 
       try {
-        controller.createUser(dbDialog.getUserName(),
-                              dbDialog.getPassword(),
+        controller.createUser(pwdDlg.getUserName(),
+                              pwdDlg.getPassword(),
                               session);
       } catch (gate.persist.PersistenceException ex) {
         throw new gate.util.GateRuntimeException(ex.getMessage());
@@ -604,11 +677,13 @@ public class UserGroupEditor extends JComponent {
         String pass1 = new String(pwd1.getPassword());
         String pass2 = new String(pwd2.getPassword());
         if (!pass1.equals(pass2)) {
-          JOptionPane.showMessageDialog(UserGroupEditor.this,
-            "Cannot change password because you entered two different values for new password",
-            "Error changing user password!",
-            JOptionPane.ERROR_MESSAGE
-            );
+          JOptionPane.showMessageDialog(
+                        UserGroupEditor.this,
+                        "Cannot change password because you entered "
+                          + "two different values for new password",
+                        "Error changing user password!",
+                        JOptionPane.ERROR_MESSAGE
+                        );
 
           return;
         }
