@@ -188,6 +188,10 @@ jar/classpath so it's the same as registerBuiltins
     }
     if(userConfigExists)
       configProcessor.parseConfigFile(configStream, userConfigUrl);
+
+    // remember the init-time config options
+    originalUserConfig.putAll(userConfig);
+
     if(DEBUG) {
       Out.prln(
         "user config loaded; DBCONFIG=" + DataStoreRegister.getConfigData()
@@ -516,6 +520,12 @@ jar/classpath so it's the same as registerBuiltins
   /** GATE development environment configuration data (stored in gate.xml). */
   private static OptionsMap userConfig = new OptionsMap();
 
+  /**
+   * This map stores the init-time config data in case we need it later.
+   * GATE development environment configuration data (stored in gate.xml).
+   */
+  private static OptionsMap originalUserConfig = new OptionsMap();
+
   /** Name of the XML element for GATE development environment config data. */
   private static String userConfigElement = "GATECONFIG";
 
@@ -550,6 +560,15 @@ jar/classpath so it's the same as registerBuiltins
    * (initialised from <TT>gate.xml</TT>).
    */
   public static OptionsMap getUserConfig() { return userConfig; }
+
+  /**
+   * Get the original, initialisation-time,
+   * GATE development environment configuration data
+   * (initialised from <TT>gate.xml</TT>).
+   */
+  public static OptionsMap getOriginalUserConfig() {
+    return originalUserConfig;
+  } // getOriginalUserConfig
 
   /**
    * Update the GATE development environment configuration data in the
