@@ -37,13 +37,14 @@ public class ApperanceDialog extends JDialog {
     initGuiComponents();
     initListeners();
     bGroup.setSelected(menusRBtn.getModel(), true);
+    cancelBtn.getAction().actionPerformed(null);
   }
 
   protected void initLocalData(){
-    menusFont = UIManager.getFont("Menu.font");
-    componentsFont = UIManager.getFont("Button.font");
-    textComponentsFont = UIManager.getFont("TextPane.font");
-
+    oldMenusFont = menusFont = UIManager.getFont("Menu.font");
+    oldComponentsFont = componentsFont = UIManager.getFont("Button.font");
+    oldTextComponentsFont = textComponentsFont =
+                            UIManager.getFont("TextPane.font");
   }
 
   protected void initGuiComponents(){
