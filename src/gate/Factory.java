@@ -347,10 +347,10 @@ public abstract class Factory {
       (ResourceData) reg.get(resource.getClass().getName());
     if(rd!= null)
       rd.removeInstantiation(resource);
-    resource.cleanup();
     creoleProxy.fireResourceUnloaded(
       new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
     );
+    resource.cleanup();
   } // deleteResource
 
   /** Create a new transient Corpus. */
