@@ -248,37 +248,49 @@ public class AnnotationDiffGUI extends JFrame{
   protected void initListeners(){
     keyDocCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        keyDoc = (Document)documents.get(keyDocCombo.getSelectedIndex());
-        keySets = new ArrayList();
-        List keySetNames = new ArrayList();
-        keySets.add(keyDoc.getAnnotations());
-        keySetNames.add("[Default set]");
-        Iterator setIter = keyDoc.getNamedAnnotationSets().keySet().iterator();
-        while(setIter.hasNext()){
-          String name = (String)setIter.next();
-          keySetNames.add(name);
-          keySets.add(keyDoc.getAnnotations(name));
+        Document newDoc = (Document)documents.get(keyDocCombo.getSelectedIndex());
+        if(keyDoc != newDoc){
+          pairings.clear();
+          diffTableModel.fireTableDataChanged();
+          keyDoc = newDoc;
+          keySets = new ArrayList();
+          List keySetNames = new ArrayList();
+          keySets.add(keyDoc.getAnnotations());
+          keySetNames.add("[Default set]");
+          Iterator setIter = keyDoc.getNamedAnnotationSets().keySet().iterator();
+          while(setIter.hasNext()){
+            String name = (String)setIter.next();
+            keySetNames.add(name);
+            keySets.add(keyDoc.getAnnotations(name));
+          }
+          keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
+          if(!keySetNames.isEmpty())keySetCombo.setSelectedIndex(0);
+          
         }
-        keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
-        if(!keySetNames.isEmpty())keySetCombo.setSelectedIndex(0);
       }
     });
     
     resDocCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        resDoc = (Document)documents.get(resDocCombo.getSelectedIndex());
-        resSets = new ArrayList();
-        List resSetNames = new ArrayList();
-        resSets.add(resDoc.getAnnotations());
-        resSetNames.add("[Default set]");
-        Iterator setIter = resDoc.getNamedAnnotationSets().keySet().iterator();
-        while(setIter.hasNext()){
-          String name = (String)setIter.next();
-          resSetNames.add(name);
-          resSets.add(resDoc.getAnnotations(name));
+        Document newDoc = (Document)documents.get(resDocCombo.getSelectedIndex());
+        if(resDoc != newDoc){
+          resDoc = newDoc;
+          pairings.clear();
+          diffTableModel.fireTableDataChanged();
+          resSets = new ArrayList();
+          List resSetNames = new ArrayList();
+          resSets.add(resDoc.getAnnotations());
+          resSetNames.add("[Default set]");
+          Iterator setIter = resDoc.getNamedAnnotationSets().keySet().iterator();
+          while(setIter.hasNext()){
+            String name = (String)setIter.next();
+            resSetNames.add(name);
+            resSets.add(resDoc.getAnnotations(name));
+          }
+          resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
+          if(!resSetNames.isEmpty())resSetCombo.setSelectedIndex(0);
+          
         }
-        resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
-        if(!resSetNames.isEmpty())resSetCombo.setSelectedIndex(0);
       }
     });
     
@@ -384,6 +396,8 @@ public class AnnotationDiffGUI extends JFrame{
     public void actionPerformed(ActionEvent evt){
       Set keys = keySet.get((String)annTypeCombo.getSelectedItem());
       Set responses = resSet.get((String)annTypeCombo.getSelectedItem());
+      if(keys == null) keys = new HashSet();
+      if(responses == null) responses = new HashSet();
       if(someFeaturesBtn.isSelected())
         differ.setSignificantFeaturesSet(significantFeatures);
       else if(allFeaturesBtn.isSelected()) 
