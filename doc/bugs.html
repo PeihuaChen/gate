@@ -1733,6 +1733,24 @@ gate.corpora.DocumentImpl
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+    <TD>00090</TD>
+    <TD>Persistence - Database</TD>
+    <TD>Valy</TD>
+    <TD>Marin</TD>
+    <TD>-</TD>
+    <TD>07 Mar 2003 Gate 2.1 build 1191</TD>
+    <TD>The database datastore did not prperly unload transient documents, part of a transient corpus,  
+    when the later was adopted in the database datastore. The result was that each document in the corpus was duplicated in the resource pane 
+    (one transiebt and one persistent copy) which is confusing. Now transient documents get properly unloaded when they're adopted and a
+    DatabaseDocument is created instead
+    </TD>
+    <TD>-</TD>
+    <TD>-</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 </TABLE>
 
 
