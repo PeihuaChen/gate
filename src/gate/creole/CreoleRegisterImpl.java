@@ -249,6 +249,10 @@ public class CreoleRegisterImpl extends HashMap
       if(DEBUG) Out.prln("VR: " + resClass);
       if(vrTypes == null) vrTypes = new LinkedList(); // for deserialisation
       vrTypes.add(rd.getClassName());
+    }else if(Controller.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln("Controller: " + resClass);
+      if(controllerTypes == null) controllerTypes = new HashSet(); // for deserialisation
+      controllerTypes.add(rd.getClassName());
     }
 
     // maintain tool types list
@@ -305,6 +309,11 @@ public class CreoleRegisterImpl extends HashMap
 
   /** Get the list of types of VR in the register. */
   public Set getVrTypes() { return Collections.unmodifiableSet(new HashSet(vrTypes));}
+
+  /** Get the list of types of VR in the register. */
+  public Set getControllerTypes() {
+    return Collections.unmodifiableSet(controllerTypes);
+  }
 
   /** Get the list of types of TOOL respurces in the register. */
   public Set getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
@@ -406,6 +415,12 @@ public class CreoleRegisterImpl extends HashMap
   public List getPublicVrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getVrTypes()));
   }//getPublicVrTypes()
+
+  /** Get a list of all non-private types of controller in the register. */
+  public List getPublicControllerTypes() {
+    return Collections.unmodifiableList(getPublicTypes(getControllerTypes()));
+  }//getPublicPrTypes()
+
 
   /**
    * Gets all the instantiations of a given type and all its public derivate
@@ -721,6 +736,9 @@ public class CreoleRegisterImpl extends HashMap
 
   /** A list of the types of VR in the register. */
   protected List vrTypes;
+
+  /** A list of the types of VR in the register. */
+  protected Set controllerTypes;
 
   /** A list of the types of TOOL in the register. */
   protected Set toolTypes;

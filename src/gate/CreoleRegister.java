@@ -107,6 +107,9 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
   /** Get the list of types of VR in the register. */
   public Set getVrTypes();
 
+  /** Get the list of types of VR in the register. */
+  public Set getControllerTypes();
+
   /** Get a list of all instantiations of LR in the register. */
   public List getLrInstances();
 
@@ -143,6 +146,8 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
   /** Get a list of all non-private types of VR in the register. */
   public List getPublicVrTypes();
 
+  /** Get a list of all non-private types of Controller in the register. */
+  public List getPublicControllerTypes();
   /**
    * Gets all the instantiations of a given type and all its public derivate
    * types;

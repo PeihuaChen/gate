@@ -186,11 +186,11 @@ extends Transducer implements JapeConstants, java.io.Serializable
     //the value -1 marks no more annotations to parse
     long startNodeOff = startNode.getOffset().longValue();
 
+    //used to decide when to fire progress events
+    long oldStartNodeOff = 0;
+
     //the big while for the actual parsing
     while(startNodeOff != -1){
-
-      //used to decide when to fire progress events
-      long oldStartNodeOff = startNodeOff;
 
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
@@ -388,13 +388,15 @@ extends Transducer implements JapeConstants, java.io.Serializable
           }
         }//if(oldStartNodeOff == startNodeOff)
 
+
         //fire the progress event
         if(startNodeOff - oldStartNodeOff > 256){
-          fireProgressChanged((int)(100 * startNodeOff / lastNodeOff));
-          oldStartNodeOff = startNodeOff;
           if(isInterrupted()) throw new ExecutionInterruptedException(
             "The execution of the \"" + getName() +
             "\" Jape transducer has been abruptly interrupted!");
+
+          fireProgressChanged((int)(100 * startNodeOff / lastNodeOff));
+          oldStartNodeOff = startNodeOff;
         }
       }
     }//while(startNodeOff != -1)
