@@ -223,11 +223,13 @@ public class JapeGUI extends JFrame {
       tokenize(currentDoc);
     }
     //do the jape stuff
+
     try{
       InputStream japeFileStream = new FileInputStream(grammarFile);
       if(japeFileStream == null)
         throw new JapeException("couldn't open " + grammarFile.getName());
-      Batch batch = new Batch(japeFileStream);
+    //  Batch batch = new Batch(japeFileStream);
+      Batch batch = new Batch(grammarFile.getAbsolutePath());
       batch.transduce(corpus);
     }catch(FileNotFoundException fnfe){
       fnfe.printStackTrace(System.err);
