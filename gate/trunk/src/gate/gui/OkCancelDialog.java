@@ -105,6 +105,15 @@ public class OkCancelDialog extends JDialog {
     dialog.pack();
     dialog.setLocationRelativeTo(parentComponent);
 
+    //kalina: make it fit the screen
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension dialogSize = dialog.getSize();
+    if (dialogSize.height > screenSize.height)
+      dialogSize.height = screenSize.height;
+    if (dialogSize.width > screenSize.width)
+      dialogSize.width = screenSize.width;
+    //end kalina
+
     //show the dialog
     dialog.show();
     return dialog.userHasPressedOK;
