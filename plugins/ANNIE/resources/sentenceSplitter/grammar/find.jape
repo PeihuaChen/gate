@@ -1,25 +1,33 @@
 // Valentin Tablan, 17/05/2001
 
-//finds the candidates for splitting (quotes and CRs)
+//finds the candidates for splitting
 
-Phase:split2
+Phase:split1
 Input: Token SpaceToken
 Options: control = first
 
-
 Rule: r1
+ ({Token.string=="."}):left
+-->
+:left.Split = {type="."}
+
+
+Rule: r2
+ ({Token.string=="!"}|{Token.string=="?"}):left
+-->
+:left.Split = {type="punctuation"}
+
+Rule: r3
  ({Token.string=="\""}):left  
 -->
 :left.Split = {type="quote"}
 
-Rule: r2
+Rule: r4
  ({Token.string=="\'"}|{Token.string=="\`"}):left  
 -->
 :left.Split = {type="singleQuote"}
 
 Rule: r3
  (({SpaceToken.string=="\n"}|{SpaceToken.string=="\r"})+):left 
- ({Token.orth=="upperInitial"}|{Token.orth=="allCaps"}|{Token.kind=="number"}|
-  {Token.kind=="punctuation", Token.position=="startpunct"})
 -->
 :left.Split = {type="CR"}

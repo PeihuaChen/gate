@@ -1,0 +1,85 @@
+// Valentin Tablan, 17/05/2001
+
+
+Phase:split6
+Input: Token Split
+Options: control = first
+
+//generates the sentence annotations
+
+Rule: r1
+(
+ ({Token})+
+ ({Split.type=="."}|{Split.type=="punctuation"}|{Split.type=="multi"})
+ ) :left
+-->
+{
+  gate.AnnotationSet sentence = (gate.AnnotationSet)bindings.get("left");
+  //if the sentence starts with a quote it needs to be removed
+  gate.AnnotationSet fromStart = annotations.get(sentence.firstNode().getOffset());
+   
+  gate.FeatureMap constraints = Factory.newFeatureMap();
+  constraints.put("type", "quote");
+  gate.AnnotationSet innerQuotes = fromStart.get("Split", constraints);
+  gate.Node startNode;
+  if(innerQuotes != null){
+    startNode = innerQuotes.lastNode();
+  }else{
+    startNode = sentence.firstNode();
+  }
+  //create the new sentence
+  gate.FeatureMap features = Factory.newFeatureMap();
+  annotations.add(startNode, sentence.lastNode(), "Sentence", features);
+}
+
+
+Rule: r3
+(
+ ({Token})+
+ ) :left
+({Split.type=="CR"}|{Split.type=="quote"})
+-->
+{
+  gate.AnnotationSet sentence = (gate.AnnotationSet)bindings.get("left");
+  //if the sentence starts with a quote it needs to be removed
+  gate.AnnotationSet fromStart = annotations.get(sentence.firstNode().getOffset());
+   
+  gate.FeatureMap constraints = Factory.newFeatureMap();
+  constraints.put("type", "quote");
+  gate.AnnotationSet innerQuotes = fromStart.get("Split", constraints);
+  gate.Node startNode;
+  if(innerQuotes != null){
+    startNode = innerQuotes.lastNode();
+  }else{
+    startNode = sentence.firstNode();
+  }
+  //create the new sentence
+  gate.FeatureMap features = Factory.newFeatureMap();
+  annotations.add(startNode, sentence.lastNode(), "Sentence", features);
+}
+
+// blah blah."
+//the sentence will include the full stop but not the quote
+//
+//Rule: r4
+//(
+// ({Token})+
+// ) :left
+//({Split.type=="splitAndQuote"}):split
+//-->
+//{
+//	gate.AnnotationSet sentence = (gate.AnnotationSet)bindings.get("left");
+//	gate.AnnotationSet splitSet = (gate.AnnotationSet)bindings.get("split");
+//	gate.Annotation firstSplit = (gate.Annotation)
+//	                              ((gate.Annotation)splitSet.iterator().next()).
+//	                              getFeatures().get("firstSplit");
+//	sentence.add(firstSplit);
+//	gate.FeatureMap features = Factory.newFeatureMap();
+//	annotations.add(sentence.firstNode(), sentence.lastNode(), "Sentence", features);	
+// //add back the quote split
+//	splitSet.remove(firstSplit);
+//	features = Factory.newFeatureMap();
+//	features.put("type", "quote");
+//	annotations.add(firstSplit.getEndNode(), splitSet.lastNode(), "Split", features);	
+//}
+
