@@ -58,3 +58,10 @@ grant select,insert,update,delete on GATEADMIN.T_NODE to GATEUSER;
 grant select,insert,update,delete on GATEADMIN.T_USER to GATEUSER;              
 grant select,insert,update,delete on GATEADMIN.T_USER_GROUP to GATEUSER;        
 grant select,insert,update,delete on GATEADMIN.T_PARAMETER to GATEUSER;        
+
+grant select on GATEADMIN.V_ANNOTATION to GATEUSER;
+grant select on GATEADMIN.V_ANNOTATION_FEATURES to GATEUSER;
+grant select on GATEADMIN.V_ANNOTATION_SET to GATEUSER;
+grant select on GATEADMIN.V_CONTENT to GATEUSER;
+grant select on GATEADMIN.V_DOCUMENT to GATEUSER;
+grant select on GATEADMIN.V_LR to GATEUSER;
