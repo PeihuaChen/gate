@@ -72,8 +72,8 @@ public class TestEmail extends TestCase
     );
 
 
-    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      doc.getSourceURL()
+    gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
+      doc, doc.getSourceURL()
     );
     assert(docFormat instanceof gate.corpora.EmailDocumentFormat);
 
