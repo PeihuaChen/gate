@@ -148,6 +148,17 @@
       <AUTOINSTANCE><PARAM NAME ="xmlFileUrl"
         VALUE ="gate:/creole/schema/CorefSchema.xml" /></AUTOINSTANCE>
     </RESOURCE>
+
+    <!-- Ontology -->
+    <RESOURCE>
+      <NAME>Ontology</NAME>
+      <CLASS>com.ontotext.gate.ontology.DAMLOntology</CLASS>
+      <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
+      <COMMENT>Ontology</COMMENT>
+      <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
+      <ICON>controller.gif</ICON>
+    </RESOURCE>
+    
   </CREOLE>
 
   <!-- Processing Resources -->
@@ -266,6 +277,21 @@
 	NAME="encoding">java.lang.String</PARAMETER>
       <PARAMETER DEFAULT="true" NAME="caseSensitive"
         COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">java.lang.Boolean</PARAMETER>
+      <ICON>shefGazetteer.gif</ICON>
+    </RESOURCE>
+
+    <!-- creole.xml for OntoGazetteer -->
+    <RESOURCE>
+      <NAME>OntoGazetteer</NAME>
+      <CLASS>gate.creole.gazetteer.OntoGazetteerImpl</CLASS>
+      <COMMENT>A list lookup component based on mapping between ontology classes and gazetteer lists</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="listsURL" DEFAULT="gate:/creole/gazeteer/default/lists.def" COMMENT="The URL to the file with list of lists" SUFFIXES="def">java.net.URL</PARAMETER>
+      <PARAMETER DEFAULT="UTF-8" NAME="encoding" COMMENT="The encoding used for reading the definitions">java.lang.String</PARAMETER>
+      <PARAMETER DEFAULT="true" NAME="caseSensitive" COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="mappingURL" DEFAULT="gate:/creole/gazeteer/default/mapping.def" COMMENT="The URL to the file with mappings of lists vs classes" SUFFIXES="def">java.net.URL</PARAMETER>
+      <PARAMETER NAME="gazetteerName" DEFAULT="com.ontotext.gate.gazetteer.NaturalGazetteer" COMMENT="The gazetteer tobe used with this ontogazetteer. should implement Gazetteer interface">java.lang.String</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
 
@@ -582,5 +608,17 @@
         <MAIN_VIEWER/>
       </GUI>
     </RESOURCE>
+
+    <!-- VR Ontology Editor -->
+    <RESOURCE>
+      <NAME>Ontology Editor</NAME>
+      <CLASS>com.ontotext.gate.vr.OntologyEditorImpl</CLASS>
+      <GUI>
+        <MAIN_VIEWER/>
+        <RESOURCE_DISPLAYED>gate.creole.ontology.Ontology</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+    
+    
   </CREOLE>
 </CREOLE-DIRECTORY>
