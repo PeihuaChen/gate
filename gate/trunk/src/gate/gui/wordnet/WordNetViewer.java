@@ -255,7 +255,7 @@ public class WordNetViewer extends AbstractVisualResource
             verbPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
           }
           //commented because problem with WN API and Sentance Frames
-          /*if (!senatnceFrames){
+         /*if (!senatnceFrames){
             verbPopup.add(new RelationItem("Senatnce Frames", SENTANCE_FAMES, senses));
             senatnceFrames = true;
           }*/
@@ -464,12 +464,14 @@ public class WordNetViewer extends AbstractVisualResource
   private void relAntonymSeeAlso(java.util.List senses,
                                  int relType, String relRefString){
     StringBuffer display = new StringBuffer("");
+    boolean semantic_see_also = true;
     for (int i = 0; i<senses.size(); i++){
       WordSense currSense = (WordSense) senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
         java.util.List antonyms = currSense.getLexicalRelations(relType);
         if (antonyms!=null && antonyms.size()>0){
+          semantic_see_also = false;
           display.append("\n");
           display.append("Sense ");
           display.append(i+1);
@@ -496,6 +498,9 @@ public class WordNetViewer extends AbstractVisualResource
     }
 
     resultPane.setText(display.toString());
+    if (semantic_see_also){
+        relAtributeSimilarTo(senses, Relation.REL_SEE_ALSO,"=> ");
+    }
   }
 
   private void relAtributeSimilarTo(java.util.List senses, int releationType,
