@@ -65,6 +65,15 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
   }
 
   /**
+   * This method does not make sense for transient corpora, so it does
+   * nothing.
+   */
+  public void unloadDocument(Document doc) {
+    return;
+  }
+
+
+  /**
    * The underlying list that holds the documents in this corpus.
    */
   protected List supportList = null;
@@ -144,6 +153,12 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
     ArrayList data;
   }
 
+  protected void clearDocList() {
+    if (supportList == null)
+      return;
+    supportList.clear();
+  }
+
   //List methods
   //java docs will be automatically copied from the List interface.
 
@@ -204,6 +219,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
   }
 
   public boolean equals(Object o){
+    if (! (o instanceof CorpusImpl))
+      return false;
+
     return supportList.equals(o);
   }
 
@@ -261,13 +279,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
     return this;
   } // init()
 
-  /** Get the features associated with this corpus. */
-  public FeatureMap getFeatures() { return features; }
-
-  /** Set the feature set */
-  public void setFeatures(FeatureMap features) { this.features = features; }
-
-
   public synchronized void removeCorpusListener(CorpusListener l) {
     if (corpusListeners != null && corpusListeners.contains(l)) {
       Vector v = (Vector) corpusListeners.clone();
@@ -283,27 +294,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
     }
   }
 
-
-    /** Sets the name of this resource*/
-  public void setName(String name){
-    this.name = name;
-  }
-
-  /** Returns the name of this resource*/
-  public String getName(){
-    return name;
-  }
-
-  protected String name;
-
-  /** The features associated with this corpus. */
-  protected FeatureMap features;
-
-
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1113142759053898456L;
   private transient Vector corpusListeners;
-  private java.util.List documentsList;
+  private transient java.util.List documentsList;
 
 
   protected void fireDocumentAdded(CorpusEvent e) {

@@ -40,6 +40,22 @@ public interface Corpus extends LanguageResource, List, NameBearer {
   public String getDocumentName(int index);
 
   /**
+   * Unloads the document from memory. Only needed if memory
+   * preservation is an issue. Only supported for Corpus which is
+   * stored in a Datastore. To get this document back in memory,
+   * use get() on Corpus or if you have its persistent ID, request it
+   * from the Factory.
+   * <P>
+   * Transient Corpus objects do nothing,
+   * because there would be no way to get the document back
+   * again afterwards.
+   * @param Document to be unloaded from memory.
+   * @return void.
+   */
+  public void unloadDocument(Document doc);
+
+
+  /**
    * Removes one of the listeners registered with this corpus.
    * @param l the listener to be removed.
    */

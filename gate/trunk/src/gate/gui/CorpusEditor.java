@@ -84,7 +84,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
           int row = documentsList.locationToIndex(e.getPoint());
           if(row != -1){
-            corpus.get(row);
+            Resource lr = (Resource) corpus.get(row);
+            Out.prln(lr);
           }
         }
       }

@@ -15,7 +15,12 @@
 
 package gate.util;
 
-public abstract class AbstractNameBearer {
+import java.io.Serializable;
+
+public abstract class AbstractNameBearer implements Serializable {
+
+  static final long serialVersionUID = -3745118855639865521L;
+
     /** Sets the name of this resource*/
   public void setName(String name){
     this.name = name;

@@ -28,6 +28,13 @@
       <ICON>lr.gif</ICON>
     </RESOURCE>
     <RESOURCE>
+      <NAME>GATE Serial Corpus</NAME>
+      <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
+      <INTERFACE>gate.Corpus</INTERFACE>
+      <ICON>lr.gif</ICON>
+      <PRIVATE/>
+    </RESOURCE>
+    <RESOURCE>
       <NAME>GATE XML Document Format</NAME>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
       <AUTOLOAD/>

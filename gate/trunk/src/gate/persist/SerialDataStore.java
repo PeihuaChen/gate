@@ -25,6 +25,7 @@ import gate.creole.*;
 import gate.util.*;
 import gate.event.*;
 import gate.security.*;
+import gate.corpora.*;
 
 /**
  * A data store based on Java serialisation.
@@ -229,13 +230,18 @@ extends AbstractFeatureBearer implements DataStore {
     // check the LR's current DS
     DataStore currentDS = lr.getDataStore();
     if(currentDS == null) {  // an orphan - do the adoption
-      lr.setDataStore(this);
+      LanguageResource res = lr;
+
+      if (lr instanceof Corpus)
+        res = new SerialCorpusImpl((Corpus) lr);
+
+      res.setDataStore(this);
 
       // let the world know
       fireResourceAdopted(
           new DatastoreEvent(this, DatastoreEvent.RESOURCE_ADOPTED, lr, null)
       );
-      return lr;
+      return res;
     } else if(currentDS.equals(this))         // adopted already here
       return lr;
     else {                      // someone else's child
@@ -243,6 +249,7 @@ extends AbstractFeatureBearer implements DataStore {
         "Can't adopt a resource which is already in a different datastore"
       );
     }
+
 
   } // adopt(LR)
 
@@ -312,11 +319,39 @@ extends AbstractFeatureBearer implements DataStore {
     Object lrPersistenceId = null;
     lrName = lr.getName();
     lrPersistenceId = lr.getLRPersistenceId();
+
     if(lrName == null)
       lrName = lrData.getName();
     if(lrPersistenceId == null) {
       lrPersistenceId = constructPersistenceId(lrName);
       lr.setLRPersistenceId(lrPersistenceId);
+    }
+
+    //we're saving a corpus. I need to save it's documents first
+    if (lr instanceof Corpus) {
+      //check if the corpus is the one we support. CorpusImpl cannot be saved!
+      if (! (lr instanceof SerialCorpusImpl))
+        throw new PersistenceException("Can't save a corpus which " +
+                                       "is not of type SerialCorpusImpl!");
+      SerialCorpusImpl corpus = (SerialCorpusImpl) lr;
+      List docNames = corpus.getDocumentNames();
+      List docIDs = new ArrayList();
+      for (int i = 0; i < corpus.size(); i++) {
+        Document doc = (Document) corpus.get(i);
+        try {
+          LanguageResource docLR = this.adopt(doc, null);
+          this.sync(docLR);
+          Object ID = docLR.getLRPersistenceId();
+          docIDs.add(ID);
+        } catch (Exception ex) {
+          throw new PersistenceException("Error while saving corpus: "
+                                         + corpus
+                                         + "because of an error storing document"
+                                         + ex.getMessage());
+        }
+      }//for loop through documents
+
+      corpus.setDocumentData(docNames, docIDs);
     }
 
     // create a File to store the resource in

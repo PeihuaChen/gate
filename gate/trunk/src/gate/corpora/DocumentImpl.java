@@ -1067,12 +1067,6 @@ extends AbstractLanguageResource implements Document {
     }
   }
 
-  /** Get the features associated with this document. */
-  public FeatureMap getFeatures() { return features; }
-
-  /** Set the feature set */
-  public void setFeatures(FeatureMap features) { this.features = features; }
-
   /** Propagate edit changes to the document content and annotations. */
   public void edit(Long start, Long end, DocumentContent replacement)
     throws InvalidOffsetException
@@ -1165,9 +1159,6 @@ extends AbstractLanguageResource implements Document {
       statusListeners = v;
     }
   } // getOrderingString()
-
-  /** The features associated with this document. */
-  protected FeatureMap features;
 
   /** The id of the next new annotation */
   protected int nextAnnotationId = 0;
