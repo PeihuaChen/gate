@@ -87,6 +87,15 @@ public class AnnotationSetsView extends AbstractDocumentView
     textPane = (JEditorPane)((JScrollPane)textView.getGUI())
             .getViewport().getView();
     
+    //get a pointer to the list view
+    Iterator horizontalViewsIter = owner.getHorizontalViews().iterator();
+    while(listView == null && horizontalViewsIter.hasNext()){
+      DocumentView aView = (DocumentView)horizontalViewsIter.next();
+      if(aView instanceof AnnotationListView) 
+        listView = (AnnotationListView)aView;
+    }
+    
+    
     setHandlers.add(new SetHandler(document.getAnnotations()));
     List setNames = document.getNamedAnnotationSets() == null ?
             new ArrayList() :
@@ -1339,6 +1348,17 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     public void actionPerformed(ActionEvent evt){
       annotationEditor.setAnnotation(aHandler.ann, aHandler.set);
+      
+      //select the annotation being edited in the tabular view
+      if(listView != null && listView.isActive() &&
+              listView.getGUI().isVisible()){
+        TypeHandler tHandler = getTypeHandler(aHandler.set.getName(), 
+                aHandler.ann.getType());
+        if(tHandler != null){
+          Object tag = tHandler.hghltTagsForAnn.get(aHandler.ann.getId());
+          listView.selectAnnotationForTag(tag);
+        }
+      }
       annotationEditor.show(true);
     }
     
@@ -1382,6 +1402,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   JTextField newSetNameTextField;
   
   TextualDocumentView textView;
+  AnnotationListView listView;
   JEditorPane textPane;
   AnnotationEditor annotationEditor;
   NewAnnotationSetAction newSetAction;
