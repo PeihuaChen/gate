@@ -14,19 +14,20 @@
  */
 
 
-CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURNS boolean AS '
+CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int4) RETURNS boolean AS '
 
    DECLARE
       p_lr_id alias for $1;
       p_usr_id alias for $2;
       p_grp_id alias for $3;
-      p_mode alias for $4;
+      p_mode_4 alias for $4;
 
       cnt int4;
       l_owner_group int4;
       l_owner_user int4;
       l_locking_user int4;
       l_access_mode int4;
+      p_mode int2;
 
       C_READ_ACCESS constant int2 := 0;
       C_WRITE_ACCESS constant int2 := 1;
@@ -40,6 +41,9 @@ CREATE OR REPLACE FUNCTION security_has_access_to_lr(int4,int4,int4,int2) RETURN
       x_invalid_lr constant varchar := ''x_invalid_lr'';
 
    BEGIN
+      /*downcast params*/
+      p_mode = cast(p_mode_4 as int2);
+      
       /* preconditions */
       if (p_mode <> C_READ_ACCESS and p_mode <> C_WRITE_ACCESS) then
          raise exception ''%'', x_invalid_argument;
