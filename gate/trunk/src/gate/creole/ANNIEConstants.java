@@ -15,21 +15,25 @@
 
 package gate.creole;
 
-/** This interface defines ANNIE constants */
-public interface ANNIEConstants{
+/** This interface defines constants used by the ANNIE processing resources. */
+public interface ANNIEConstants {
 
   /**
    * This is an array of strings containing all class names for all ANNIE PRs
    */
   public static final String[] PR_NAMES = {
-                                      "gate.creole.tokeniser.DefaultTokeniser",
-                                      "gate.creole.gazetteer.DefaultGazetteer",
-                                      "gate.creole.splitter.SentenceSplitter",
-                                      "gate.creole.POSTagger",
-                                      "gate.creole.ANNIETransducer",
-                                      "gate.creole.orthomatcher.OrthoMatcher"};
+    "gate.creole.tokeniser.DefaultTokeniser",
+    "gate.creole.gazetteer.DefaultGazetteer",
+    "gate.creole.splitter.SentenceSplitter",
+    "gate.creole.POSTagger",
+    "gate.creole.ANNIETransducer",
+    "gate.creole.orthomatcher.OrthoMatcher"
+  };
 
-
+  /** The name of the feature on Documents that holds coreference matches. */
   public static final String DOCUMENT_COREF_FEATURE_NAME = "MatchesAnnots";
+
+  /** The name of the feature on Annotations that holds coreference matches. */
   public static final String ANNOTATION_COREF_FEATURE_NAME = "matches";
-}// AnnieConstants
+
+  } // AnnieConstants
