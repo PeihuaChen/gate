@@ -250,11 +250,136 @@ public class TestAnnotation extends TestCase
     asBuf = basicAS.get("T1", constraints, new Long(14));
     assertEquals(null, asBuf);
 
-    
     constraints.put("author", "the devil himself");
     asBuf = basicAS.get("T1", constraints, new Long(14));
     assertEquals(2, asBuf.size());
+
+    asBuf = basicAS.get("T1", constraints, new Long(5));
+    assertEquals(null, asBuf);
+
+    constraints.put("this feature isn't", "there at all");
+    asBuf = basicAS.get("T1", constraints, new Long(14));
+    assertEquals(null, asBuf);
+
   } // testComplexGet()
+
+  /** Test remove */
+  public void testRemove() {
+    AnnotationSet asBuf = basicAS.get("T1");
+    assertEquals(7, asBuf.size());
+    asBuf = basicAS.get(new Long(9));
+    assertEquals(5, asBuf.size());
+
+    basicAS.remove(basicAS.get(new Integer(0)));
+
+    assertEquals(10, basicAS.size());
+    assertEquals(10, ((AnnotationSetImpl) basicAS).annotsById.size());
+    asBuf = basicAS.get("T1");
+    assertEquals(6, asBuf.size());
+
+    asBuf = basicAS.get(new Long(9));
+    assertEquals(4, asBuf.size());
+
+    assertEquals(null, basicAS.get(new Integer(0)));
+    basicAS.remove(basicAS.get(new Integer(8)));
+
+  } // testRemove()
+
+  /** Test iterator remove */
+  public void testIteratorRemove() {
+    AnnotationSet asBuf = basicAS.get("T1");
+    assertEquals(7, asBuf.size());
+    asBuf = basicAS.get(new Long(9));
+    assertEquals(5, asBuf.size());
+
+    // remove annotation with id 0; this is returned last by the
+    // iterator, hence the integer control in the loop
+    Iterator iter = basicAS.iterator();
+    int i = 0;
+    while(iter.hasNext() && i < 11)
+      iter.next();
+    iter.remove();
+
+    assertEquals(10, basicAS.size());
+    assertEquals(10, ((AnnotationSetImpl) basicAS).annotsById.size());
+    asBuf = basicAS.get("T1");
+    assertEquals(6, asBuf.size());
+
+    asBuf = basicAS.get(new Long(9));
+    assertEquals(4, asBuf.size());
+
+    assertEquals(null, basicAS.get(new Integer(0)));
+    basicAS.remove(basicAS.get(new Integer(8)));
+
+  } // testIteratorRemove()
+
+  /** Test iterator */
+  public void testIterator() {
+    Iterator iter = basicAS.iterator();
+    Annotation[] annots = new Annotation[basicAS.size()];
+    int i = 0;
+
+    while(iter.hasNext()) {
+      Annotation a = (Annotation) iter.next();
+      annots[i++] = a;
+
+      assert(basicAS.contains(a));
+      iter.remove();
+      assert(! basicAS.contains(a));
+    } // while
+
+    i = 0;
+    while(i < annots.length) {
+      basicAS.add(annots[i++]);
+      assertEquals(i, basicAS.size());
+    } // while
+
+    AnnotationSet asBuf = basicAS.get("T1");
+    assertEquals(7, asBuf.size());
+    asBuf = basicAS.get(new Long(9));
+    assertEquals(5, asBuf.size());
+  } // testIterator
+
+  /** Test Set methods */
+  public void testSetMethods() {
+    Annotation a = basicAS.get(new Integer(6));
+    assert(basicAS.contains(a));
+
+    Annotation[] annotArray =
+      (Annotation[]) basicAS.toArray(new Annotation[0]);
+    Object[] annotObjectArray = basicAS.toArray();
+    assertEquals(11, annotArray.length); 
+    assertEquals(11, annotObjectArray.length);
+
+    SortedSet sortedAnnots = new TreeSet(basicAS);
+    annotArray = (Annotation[]) sortedAnnots.toArray(new Annotation[0]);
+    for(int i = 0, j = 10; i<11; i++, j--)
+      assert( annotArray[i].getId().equals(new Integer(i)) );
+
+    Annotation a1 = basicAS.get(new Integer(3));
+    Annotation a2 = basicAS.get(new Integer(4));
+    Set a1a2 = new HashSet();
+    a1a2.add(a1);
+    a1a2.add(a2);
+    assert(basicAS.contains(a1));
+    assert(basicAS.containsAll(a1a2));
+    basicAS.removeAll(a1a2);
+
+    assertEquals(9, basicAS.size());
+    assert(! basicAS.contains(a1));
+    assert(! basicAS.containsAll(a1a2));
+
+    basicAS.addAll(a1a2); 
+    assert(basicAS.contains(a2));
+    assert(basicAS.containsAll(a1a2));
+
+    assert(basicAS.retainAll(a1a2));
+    assert(basicAS.equals(a1a2));
+
+    basicAS.clear();
+    assert(basicAS.isEmpty());
+
+  } // testSetMethods()
 
   /** Test AnnotationSetImpl */
   public void testAnnotationSet() throws InvalidOffsetException {
