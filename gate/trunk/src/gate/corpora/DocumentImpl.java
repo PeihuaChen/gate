@@ -1550,7 +1550,8 @@ extends AbstractLanguageResource implements Document, CreoleListener, DatastoreL
   }
   public void setDataStore(DataStore dataStore) throws gate.persist.PersistenceException {
     super.setDataStore( dataStore);
-    dataStore.addDatastoreListener(this);
+    if (this.dataStore != null)
+      this.dataStore.addDatastoreListener(this);
   }
 
 } // class DocumentImpl
