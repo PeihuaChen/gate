@@ -123,9 +123,10 @@ public class MachineLearningPR extends AbstractLanguageAnalyser
           "Applying ML model to " + document.getName() + "...");
     }
     fireProgressChanged(0);
-
-    annotations = new ArrayList(annotationSet.
-                                     get(datasetDefinition.getInstanceType()));
+    AnnotationSet anns = annotationSet.
+                                     get(datasetDefinition.getInstanceType());
+    annotations = (anns == null || anns.isEmpty()) ?
+                  new ArrayList() : new ArrayList(anns);
     Collections.sort(annotations, new OffsetComparator());
     Iterator annotationIter = annotations.iterator();
     int index = 0;
