@@ -12,7 +12,9 @@
  *
  * borislav popov 02/2002
  *
- */
+ *
+ *  $Id$
+*/
 package gate.creole.ontology;
 
 import java.util.*;

@@ -11,7 +11,9 @@
  *
  * Kalina Bontcheva 03/2003
  *
- */
+ *
+ *  $Id$
+*/
 
 package gate.creole.ontology;
 
