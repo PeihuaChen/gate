@@ -180,6 +180,19 @@
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
 
+    <!-- creole.xml for OntoText gazetteer -->
+    <RESOURCE>
+      <NAME>OntoText Gazetteer</NAME>
+      <CLASS>com.ontotext.gate.gazetteer.NaturalGazetteer</CLASS>
+      <COMMENT>A list lookup component implemented by OntoText Lab.(www.ontotext.com) For documentation, download and license  agreement please refer to (www.ontotext.com/downloads/index.html#gazetteer). The licence information is also available in licence.ontotext.html in the lib folder of GATE</COMMENT>
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="listsURL" DEFAULT="gate:/creole/gazeteer/default/lists.def" COMMENT="The URL to the file with list of lists" SUFFIXES="def">java.net.URL</PARAMETER>
+      <PARAMETER DEFAULT="UTF-8" NAME="encoding" COMMENT="The encoding used for reading the definitions">java.lang.String</PARAMETER>
+      <PARAMETER DEFAULT="true" NAME="caseSensitive" COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">java.lang.Boolean</PARAMETER>
+      <ICON>shefGazetteer.gif</ICON>
+    </RESOURCE>
+
     <!-- creole.xml for JapeTransducer -->
     <RESOURCE>
       <NAME>Jape Transducer</NAME>
