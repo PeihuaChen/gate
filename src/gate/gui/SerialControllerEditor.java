@@ -395,7 +395,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       public void mouseClicked(MouseEvent e) {
         final int row = memberPRsTable.rowAtPoint(e.getPoint());
         if(row != -1){
-          //edit parameters on double click
+          //edit parameters on click
           if(SwingUtilities.isLeftMouseButton(e) /*&& e.getClickCount() == 2*/){
             ProcessingResource pr = (ProcessingResource)
                                     memberPRsTableModel.getValueAt(row, 0);
