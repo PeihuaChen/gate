@@ -821,10 +821,8 @@ public class ApplicationViewer extends AbstractVisualResource
               }
             }
             try{
-System.out.println("PR:" + pr.getName());// + "\n" + params);
               Factory.setResourceParameters(pr, params);
             }catch(ResourceInstantiationException ie){
-ie.printStackTrace();
               ie.printStackTrace(Err.getPrintWriter());
               JOptionPane.showMessageDialog(
                 ApplicationViewer.this,
