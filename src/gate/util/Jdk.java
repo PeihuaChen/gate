@@ -4,6 +4,14 @@
 	Hamish Cunningham, 04/05/00
 
 	$Id$
+
+Developer notes:
+
+It would be better to have a compile method that took two arrays
+of string for a set of classes, and to compile all in one go
+
+Also, should change gate.jape.RHS to use the methods here for
+defining and instantiating classes.
 */
 
 package gate.util;
@@ -131,7 +139,7 @@ public class Jdk {
       fis.read(classBytes, 0, (int) f.length());
       fis.close();
     } catch(IOException e) {
-      throw(new GateException("couldn't read action class bytes: " + e));
+      throw(new GateException("couldn't read class bytes: " + e));
     }
 
     return classBytes;
@@ -193,115 +201,6 @@ public class Jdk {
   } // instantiateClass
 
 } // Jdk
-
-
-
-/** Sun compiler wrapper */
-class SunCompiler extends /*BatchEnvironment*/ Main
-implements ErrorConsumer {
-
-  SunCompiler() {
-    //for Main: super(System.out, "gate.util.Jdk.SunCompiler");
-    super(System.out, "gate.util.Jdk.SunCompiler");
-    //for BEnv: super(new ClassPath(System.getProperty("java.class.path")));
-  }
-
-  /** Compile a string and return the binary image of the resultant
-    * class.
-    */
-  byte[] compile(String javaCode, String className) throws GateException {
-    boolean status = false;
-    ByteArrayOutputStream buf = new ByteArrayOutputStream(4069);
-
-    // construct the compilation environment
-    BatchEnvironment env = new BatchEnvironment(
-      System.out,
-      new ClassPath(System.getProperty("java.class.path")),
-      this
-    );
-
-    // parse the code
-    try {
-      env.parseFile(new StringClassFile(javaCode, className));
-    } catch(IOException e) {
-      throw new GateException("Couldn't parse " + className + e);
-    }
-
-    // check the class
-    Enumeration classes = env.getClasses();
-    ClassDeclaration classDecl = (ClassDeclaration)classes.nextElement();
-    SourceClass src = null;
-    try {
-      src = (SourceClass) classDecl.getClassDefinition(env);
-      src.check(env);
-    } catch(ClassNotFound e) {
-      throw new GateException("Couldn't find class " + className + e);
-    }
-//pushError("thingFile", 315, "hello", "refText", "refTextPtr");
-    if(src.getError())
-      throw new GateException("Parse errors on " + className);
-
-    // compile the class
-    classes = env.getClasses();
-    classDecl = (ClassDeclaration)classes.nextElement();
-    src = null;
-    try {
-      src = (SourceClass) classDecl.getClassDefinition(env);
-      src.compile(buf);
-    } catch(ClassNotFound e) {
-      throw new GateException("Couldn't find class " + className + e);
-    } catch(InterruptedException e) {
-      throw new GateException("Interrupted on class " + className + e);
-    } catch(IOException e) {
-      throw new GateException("IOException on class " + className + e);
-    }
-    if(src.getNestError())
-      throw new GateException("Compile errors on " + className);
-
-
-    // return the binary image of the class
-    return buf.toByteArray();
-} // compile(String javaCode)
-
-  /** Consume errors from the compiler */
-  public void pushError(
-    String errorFileName, int line, String message,
-    String referenceText, String referenceTextPointer
-  ) {
-    String nl = Strings.getNl();
-    System.out.println(
-      "Error compiling: " + errorFileName + " at line " + line + ":" + nl +
-      message + nl + "referenceText: " + referenceText + nl +
-      "referenceTextPointer: " + referenceTextPointer
-    );
-  } // pushError
-
-} // SunCompiler
-
-
-/** A wrapper for the Sun ClassFile class that adds the ability to
-  * construct from a String containing the Java code for the class
-  */
-class StringClassFile extends sun.toolsx.java.ClassFile {
-  /** The source code. */
-  private String javaCode = null;
-
-  /** Construction from string. */
-  StringClassFile(String javaCode, String className) {
-    super(new File(className)); // the File will be no use, but the
-                                // super class expects it to be non-null
-    this.javaCode = javaCode;
-  }
-
-  /** We overide this method to return a stream based on the
-    * source string.
-    */
-  public InputStream getInputStream() throws IOException {
-    return new ByteArrayInputStream(javaCode.getBytes());
-  } // getInputStream
-
-} // StringClassFile
-
 
 
 
