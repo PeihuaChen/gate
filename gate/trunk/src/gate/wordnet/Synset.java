@@ -27,7 +27,7 @@ public interface Synset {
 
   public int getPOS();
 
-  public boolean isUniqueBeginner();
+  public boolean isUniqueBeginner() throws WordNetException;
 
   public String getGloss();
 
