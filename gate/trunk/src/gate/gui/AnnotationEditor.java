@@ -209,9 +209,9 @@ public class AnnotationEditor extends AbstractVisualResource {
       params.put("markupAware", new Boolean(true));
 
       params.put("sourceUrl",
-                 //"file:///d:/tmp/help-doc.html");
+                 "file:///d:/tmp/help-doc.html");
                  //"file:///d:/tmp/F7V.xml");
-                 "http://redmires.dcs.shef.ac.uk/admin/index.html");
+                 //"http://redmires.dcs.shef.ac.uk/admin/index.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/javax/
                  //                                       swing/Action.html");
                  //"http://redmires.dcs.shef.ac.uk/java1.3docs/api/java/awt
@@ -257,11 +257,6 @@ public class AnnotationEditor extends AbstractVisualResource {
    */
   protected void initListeners() {
     //listen for our own properties change events
-    this.addPropertyChangeListener("document", new PropertyChangeListener() {
-      public void propertyChange(PropertyChangeEvent evt){
-        this_documentChanged();
-      }
-    });
     this.addPropertyChangeListener("visibleAnnotationSets",
                                    new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt){
@@ -278,6 +273,14 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
 
       public void componentShown(ComponentEvent e) {
+
+        Enumeration enum = stylesTreeRoot.depthFirstEnumeration();
+        while(enum.hasMoreElements()){
+          DefaultMutableTreeNode node =
+            (DefaultMutableTreeNode)enum.nextElement();
+          stylesTreeModel.nodeChanged(node);
+        }
+/*
         //expand all the nodes in the tree
         if(stylesTreeRoot.getChildCount() > 0){
           DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -289,6 +292,7 @@ public class AnnotationEditor extends AbstractVisualResource {
           //stylesTreeModel.reload();
         }
         stylesTree.paintImmediately(stylesTree.getBounds());
+*/
         //set the slider location
         leftSplit.setDividerLocation(leftSplit.getHeight() / 2);
       }
@@ -314,13 +318,14 @@ public class AnnotationEditor extends AbstractVisualResource {
                                                               node, false,
                                                               false, false,
                                                               0, false);
-            cellComp.setSize(cellComp.getPreferredSize());
+            //cellComp.setSize(cellComp.getPreferredSize());
+            cellComp.setBounds(cellRect);
             Component clickedComp = cellComp.getComponentAt(x, y);
 
             if(clickedComp instanceof JCheckBox){
               nData.setVisible(! nData.getVisible());
               stylesTreeModel.nodeChanged(node);
-            }else if(clickedComp instanceof JTextPane &&
+            }else if(clickedComp instanceof JTextComponent &&
                      e.getClickCount() == 2){
               if(styleChooser == null){
                 Window parent = SwingUtilities.getWindowAncestor(
@@ -747,6 +752,10 @@ public class AnnotationEditor extends AbstractVisualResource {
   public void setDocument(gate.Document newDocument) {
     gate.Document  oldDocument = document;
     document = newDocument;
+    //this needs to be executed even if the new document equals(oldDocument)
+    //in order to update the pointers
+    if(oldDocument != document) this_documentChanged();
+
     propertyChangeListeners.firePropertyChange("document", oldDocument,
                                                newDocument);
   }
@@ -834,7 +843,13 @@ public class AnnotationEditor extends AbstractVisualResource {
     Runnable runnable = new Runnable(){
       public void run(){
         initLocalData();
-        ((DefaultMutableTreeNode)stylesTreeRoot).removeAllChildren();
+        annotationsTableModel.fireTableDataChanged();
+        Enumeration enum = stylesTreeRoot.children();
+        while(enum.hasMoreElements()){
+          stylesTreeModel.removeNodeFromParent((DefaultMutableTreeNode)
+                                               enum.nextElement());
+        }
+        if(document == null) return;
         //speed things up by hiding the text display
         SwingUtilities.invokeLater(new Runnable(){
           public void run(){
@@ -1155,10 +1170,10 @@ public class AnnotationEditor extends AbstractVisualResource {
   class NodeRenderer extends JPanel implements TreeCellRenderer{
 
     public NodeRenderer(){
-      icon = new ImageIcon();
+//      icon = new ImageIcon();
       visibleChk = new JCheckBox("",false);
       visibleChk.setOpaque(false);
-      label = new JLabel(icon);
+//      label = new JLabel(icon);
       textComponent = new JTextPane();
       selectedBorder = BorderFactory.createLineBorder(Color.blue);
       setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -1173,6 +1188,8 @@ public class AnnotationEditor extends AbstractVisualResource {
                                               int row,
                                               boolean hasFocus){
       removeAll();
+      //the text pane needs to be sized for modelToView() to work
+//      textComponent.setSize(Integer.MAX_VALUE, Integer.MAX_VALUE);
       if(value instanceof DefaultMutableTreeNode){
         TypeData nData = (TypeData)
                               ((DefaultMutableTreeNode)value).getUserObject();
@@ -1181,8 +1198,6 @@ public class AnnotationEditor extends AbstractVisualResource {
           textComponent.replaceSelection(nData.getTitle());
           textComponent.selectAll();
           textComponent.setCharacterAttributes(nData.getAttributes(), true);
-          textComponent.setPreferredSize(null);
-          textComponent.setSize(textComponent.getPreferredSize());
 
           if(nData.getType() != null) {
             visibleChk.setSelected(nData.getVisible());
@@ -1195,7 +1210,35 @@ public class AnnotationEditor extends AbstractVisualResource {
         textComponent.selectAll();
         textComponent.replaceSelection(value.toString());
       }
+//      textComponent.setPreferredSize(null);
+      //textComponent.validate();
+      //textComponent.setSize(textComponent.getPreferredSize());
+
+/*
+      try{
+
+        textComponent.setPreferredSize(null);
+        textComponent.setSize(textComponent.getPreferredSize());
+
+        Rectangle rect = textComponent.modelToView(
+                            textComponent.getDocument().getLength()-1);
+        int height = rect.y + rect.height;
+        int width = rect.x + rect.width;
+        Dimension dim = new Dimension(width, height);
+//        textComponent.setSize(dim);
+        textComponent.setPreferredSize(dim);
+//        textComponent.setMinimumSize(dim);
+//        textComponent.setMaximumSize(dim);
+      }catch(BadLocationException ble){
+        //allow the component to compute its own preferred size
+//        textComponent.setPreferredSize(null);
+      }
+*/
+      textComponent.setPreferredSize(null);
+      textComponent.setSize(textComponent.getPreferredSize());
       add(textComponent);
+      setPreferredSize(null);
+      setSize(getPreferredSize());
       return this;
     }
 
@@ -1203,7 +1246,7 @@ public class AnnotationEditor extends AbstractVisualResource {
      * Overrides <code>JComponent.getPreferredSize</code> to
      * return slightly wider preferred size value.
      */
-
+/*
     public Dimension getPreferredSize() {
       Dimension retDimension = super.getPreferredSize();
       Insets borderInsets = selectedBorder.getBorderInsets(this);
@@ -1217,7 +1260,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       }
       return retDimension;
     }
-
+*/
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
@@ -1312,8 +1355,8 @@ public class AnnotationEditor extends AbstractVisualResource {
                                                             boolean newValue) {}
 
     Border selectedBorder;
-    ImageIcon icon;
-    JLabel label;
+//    ImageIcon icon;
+//    JLabel label;
     JCheckBox visibleChk;
     JTextPane textComponent;
   }
