@@ -18,7 +18,8 @@ package gate.html;
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 import javax.swing.text.html.HTMLEditorKit.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
 
 import java.util.*;
 
@@ -84,6 +85,36 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     customObjectsId = 0;
   }//HtmlDocumentHandler
+
+  /** Keep the refference to this structure */
+  private RepositioningInfo reposInfo = null;
+
+  /** Keep the refference to this structure */
+  private RepositioningInfo ampCodingInfo = null;
+
+  /** Set repositioning information structure refference. If you set this
+   *  refference to <B>null</B> information wouldn't be collected.
+   */
+  public void setRepositioningInfo(RepositioningInfo info) {
+    reposInfo = info;
+  } // setRepositioningInfo
+
+  /** Return current RepositioningInfo object */
+  public RepositioningInfo getRepositioningInfo() {
+    return reposInfo;
+  } // getRepositioningInfo
+
+  /** Set repositioning information structure refference for ampersand coding.
+   *  If you set this refference to <B>null</B> information wouldn't be used.
+   */
+  public void setAmpCodingInfo(RepositioningInfo info) {
+    ampCodingInfo = info;
+  } // setRepositioningInfo
+
+  /** Return current RepositioningInfo object for ampersand coding. */
+  public RepositioningInfo getAmpCodingInfo() {
+    return ampCodingInfo;
+  } // getRepositioningInfo
 
   /** This method is called when the HTML parser encounts the beginning
     * of a tag that means that the tag is paired by an end tag and it's
@@ -271,6 +302,13 @@ public class HtmlDocumentHandler extends ParserCallback {
             incrementStartIndex = true;
     }// End if
     // update the document content
+
+    // put the repositioning information
+    if(reposInfo != null) {
+      int extractedPos = tmpDocContent.length()+contentBuffer.length();
+      addRepositioningInfo(content, pos, extractedPos);
+    } // if
+
     contentBuffer.append(content);
     // calculate the End index for all the elements of the stack
     // the expression is : End index = Current doc length + text length
@@ -292,6 +330,57 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     tmpDocContent.append(contentBuffer.toString());
   }// end handleText();
+
+  /** For given content the list with shrink position information is searched
+   *  and on the corresponding positions the correct repositioning information
+   *  is calculated and generated.
+   */
+  public void addRepositioningInfo(String content, int pos, int extractedPos) {
+    int contentLength = content.length();
+
+    // wrong way (without correction and analysing)
+   //reposInfo.addPositionInfo(pos, contentLength, extractedPos, contentLength);
+
+    RepositioningInfo.PositionInfo pi = null;
+    long startPos = pos;
+    long correction = 0;
+    long substituteStart;
+    long remainingLen;
+    long offsetInExtracted;
+
+    for(int i = 0; i < ampCodingInfo.size(); ++i) {
+      pi = (RepositioningInfo.PositionInfo) ampCodingInfo.get(i);
+      substituteStart = pi.getOriginalPosition();
+
+      if(substituteStart >= startPos) {
+        if(substituteStart > pos + contentLength + correction) {
+          break; // outside the current text
+        } // if
+
+        // should create two repositioning information records
+        remainingLen = substituteStart - (startPos + correction);
+        offsetInExtracted = startPos - pos;
+        if(remainingLen > 0) {
+          reposInfo.addPositionInfo(startPos + correction, remainingLen,
+                            extractedPos + offsetInExtracted, remainingLen);
+        } // if
+        // record for shrank text
+        reposInfo.addPositionInfo(substituteStart, pi.getOriginalLength(),
+                          extractedPos + offsetInExtracted + remainingLen,
+                          pi.getCurrentLength());
+        startPos = startPos + remainingLen + pi.getCurrentLength();
+        correction += pi.getOriginalLength() - pi.getCurrentLength();
+      } // if
+    } // for
+
+    // there is some text remaining for repositioning
+    offsetInExtracted = startPos - pos;
+    remainingLen = contentLength - offsetInExtracted;
+    if(remainingLen > 0) {
+      reposInfo.addPositionInfo(startPos + correction, remainingLen,
+                        extractedPos + offsetInExtracted, remainingLen);
+    } // if
+  } // addRepositioningInfo
 
   /** This method analizes the tag t and adds some \n chars and spaces to the
     * tmpDocContent.The reason behind is that we need to have a readable form

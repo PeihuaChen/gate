@@ -23,7 +23,7 @@ import java.net.*;
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 import javax.swing.text.html.HTMLEditorKit.*;
-import javax.swing.text.*;
+//import javax.swing.text.*;
 
 import gate.util.*;
 import gate.*;
@@ -51,6 +51,16 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
   /** Default construction */
   public HtmlDocumentFormat() { super(); }
 
+  /** We could collect repositioning information during XML parsing */
+  public Boolean supportsRepositioning() {
+    return new Boolean(true);
+  } // supportsRepositioning
+
+  /** Old style of unpackMarkup (without collecting of RepositioningInfo) */
+  public void unpackMarkup(Document doc) throws DocumentFormatException {
+    unpackMarkup(doc, (RepositioningInfo) null, (RepositioningInfo) null);
+  } // unpackMarkup
+
   /** Unpack the markup in the document. This converts markup from the
     * native format (e.g. HTML) into annotations in GATE format.
     * Uses the markupElementsMap to determine which elements to convert, and
@@ -61,7 +71,8 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     * @param Document doc The gate document you want to parse.
     *
     */
-  public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
+  public void unpackMarkup(Document doc, RepositioningInfo repInfo,
+              RepositioningInfo ampCodingInfo) throws DocumentFormatException{
     Reader                reader = null;
     URLConnection         conn = null;
     PrintWriter           out = null;
@@ -86,6 +97,11 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
     };
     // Register the listener with htmlDocHandler
     htmlDocHandler.addStatusListener(statusListener);
+    // set repositioning object
+    htmlDocHandler.setRepositioningInfo(repInfo);
+    // set the object with ampersand coding positions
+    htmlDocHandler.setAmpCodingInfo(ampCodingInfo);
+
     try{
       // parse the HTML document
       parser.parse(reader, htmlDocHandler, true);
