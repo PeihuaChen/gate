@@ -61,6 +61,7 @@ public class BootStrap {
 
   /** determine the methods from the class that implements the resource*/
   ArrayList listMethodsResource = null;
+  Set allPackages;
 
   public BootStrap() {
 
@@ -71,24 +72,24 @@ public class BootStrap {
     buffer = new byte[BUFF_SIZE];
 
     cbuffer = new char[BUFF_SIZE];
+
+    allPackages = new HashSet();
   }
 
   /** replace with replacement in the text using regEx as a regular expression
     */
   public String regularExpressions ( String text, String replacement,
-                                      String regEx) {
+                                      String regEx) throws REException{
     String result = text;
-    try {
-      RE re = new RE(regEx);
-      result = re.substituteAll( text,replacement);
-    } catch (REException ree) {ree.printStackTrace();}
+    RE re = new RE(regEx);
+    result = re.substituteAll( text,replacement);
     return result;
   }
 
   /** Determines all the keys from the map "names" in the text and replaces them
     * with their values
     */
-  public String changeKeyValue ( String text ) {
+  public String changeKeyValue ( String text )throws REException {
 
     Set keys = names.keySet();
     Iterator iteratorKeys = keys.iterator();
@@ -108,8 +109,14 @@ public class BootStrap {
     // determine the position of the last "."
     int index = text.lastIndexOf(".");
 
-    if (index != -1)
+    if (index != -1){
+      // determine the package and add to the list of packages
+      String namePackage = (text.substring(0,index))+".*";
+      if (!allPackages.contains(namePackage))
+        allPackages.add(namePackage);
+
       text = text.substring(index+1,text.length());
+    }
 
     return text;
   }
@@ -117,8 +124,8 @@ public class BootStrap {
   /** returns all the interfaces that it implements and the class that
     * it extends as a string
     */
-  public String getInterfacesAndClass (String typeResource,
-                                    Set listInterfaces) {
+  public String getInterfacesAndClass (String typeResource, Set listInterfaces)
+                                    throws ClassNotFoundException {
 
     // a map from the interfaces to classes which implement them
     Map interfaceAndImplementClass = new HashMap();
@@ -144,52 +151,62 @@ public class BootStrap {
     Map allMethods = new HashMap();
     // add the interfaces that it implements
     if (listInterfaces!=null) {
-        interfacesAndClass = interfacesAndClass+ "\n"+ "  implements";
-        Iterator iter = listInterfaces.iterator();
-        while (iter.hasNext()) {
-          String name =(String)iter.next();
-          try{
-            Class currentClass = Class.forName("gate."+name);
-            Method[] listMethods = currentClass.getMethods();
+      interfacesAndClass = interfacesAndClass+ "\n"+ "  implements";
+      Iterator iter = listInterfaces.iterator();
+      while (iter.hasNext()) {
+        String name =(String)iter.next();
+        int lastDot = name.lastIndexOf(".");
+        Class currentClass;
 
-            for (int i=0;i<=listMethods.length-1;i++) {
-
-              ArrayList features = new ArrayList();
-              // add the type returned by the method
-              features.add(0,listMethods[i].getReturnType());
-
-              // add the types of the parameters of the method
-              features.add(1,listMethods[i].getParameterTypes());
-
-              // add the exceptions of the method
-              features.add(2,listMethods[i].getExceptionTypes());
-
-              String nameMethodInterface = listMethods[i].getName();
-              allMethods.put(nameMethodInterface,features);
-            }
-          } catch (ClassNotFoundException cnfe){cnfe.printStackTrace();}
-
-          interfacesAndClass = interfacesAndClass + " "+ name;
-          if (iter.hasNext())
-            interfacesAndClass = interfacesAndClass +",";
+        // determine the packages
+        if (lastDot != -1) {
+          String packageName =  name.substring(0,lastDot);
+          currentClass = Class.forName(name);
+          name = name.substring(lastDot+1,name.length());
+          // add the name of package in the list
+          if (!allPackages.contains(packageName))
+            allPackages.add(packageName +".*");
+        } else {
+          currentClass = Class.forName("gate."+name);
+          if (!allPackages.contains("gate.*"))
+            allPackages.add("gate.*");
         }
+        Method[] listMethods = currentClass.getMethods();
+
+        for (int i=0;i<=listMethods.length-1;i++) {
+
+          ArrayList features = new ArrayList();
+          // add the type returned by the method
+          features.add(0,listMethods[i].getReturnType());
+
+          // add the types of the parameters of the method
+          features.add(1,listMethods[i].getParameterTypes());
+
+          // add the exceptions of the method
+          features.add(2,listMethods[i].getExceptionTypes());
+
+          String nameMethodInterface = listMethods[i].getName();
+          allMethods.put(nameMethodInterface,features);
+        }
+
+        interfacesAndClass = interfacesAndClass + " "+ name;
+        if (iter.hasNext())
+          interfacesAndClass = interfacesAndClass +",";
+      }
     }
     boolean find= false;
 
     // methods from the class that extends the resource
     ArrayList methods = new ArrayList();
-    try {
-      Class currentClassExtend = Class.forName("gate.creole."+abstractClass);
-      Method[] listMethodsClassExtend = currentClassExtend.getMethods();
+    Class currentClassExtend = Class.forName("gate.creole."+abstractClass);
+    Method[] listMethodsClassExtend = currentClassExtend.getMethods();
 
-      for (int i=0;i<=listMethodsClassExtend.length-1;i++) {
-        String name = listMethodsClassExtend[i].getName();
-        methods.add(name);
-      }// for
+    for (int i=0;i<=listMethodsClassExtend.length-1;i++) {
+      String name = listMethodsClassExtend[i].getName();
+      methods.add(name);
+    }// for
 
-      shapeMethod(methods,allMethods);
-
-    } catch (ClassNotFoundException cnfe){cnfe.printStackTrace();}
+    shapeMethod(methods,allMethods);
 
     return interfacesAndClass;
   } // getInterfacesAndClass
@@ -220,6 +237,7 @@ public class BootStrap {
 
         // the form of the method
         String typeReturn = findDot(valReturn.getName());
+
         String declaration = "public "+ typeReturn +" "+
                              nameMethod +"(";
         // parameters
@@ -284,38 +302,34 @@ public class BootStrap {
     *  implement the class that it implements the resource
     * @expr helps to determine the class which implements the resource
     */
-  public String addContent(String content,String expr,String interfaces) {
+  public String addContent(String content,String expr,String interfaces)
+                          throws REException{
 
     String newContent = changeKeyValue(content);
 
     REMatch aMatch = null;
 
-    try {
-      RE regExpr = new RE(expr);
+    RE regExpr = new RE(expr);
 
-      aMatch = regExpr.getMatch(newContent);
+    aMatch = regExpr.getMatch(newContent);
 
-      if (aMatch!= null) {
+    if (aMatch!= null) {
 
-        int finalIndex = aMatch.getEndIndex();
+      int finalIndex = aMatch.getEndIndex();
 
-        // get the new content of the current file
-        String finalContent = newContent.substring(
-                                              finalIndex+2,newContent.length());
-        String nextLetter = newContent.substring(finalIndex,finalIndex+2);
+      // get the new content of the current file
+      String finalContent = newContent.substring(
+                                            finalIndex+2,newContent.length());
+      String nextLetter = newContent.substring(finalIndex,finalIndex+2);
 
-        newContent = newContent.substring(0,finalIndex)+ interfaces+nextLetter
-                      +"\n";
-        Iterator iterator = listMethodsResource.iterator();
-        while (iterator.hasNext()) {
-          String method = (String)iterator.next();
-          newContent = newContent + "\n" + method+ "\n";
-        }
-        newContent = newContent + finalContent;
+      newContent = newContent.substring(0,finalIndex)+ interfaces+nextLetter
+                    +"\n";
+      Iterator iterator = listMethodsResource.iterator();
+      while (iterator.hasNext()) {
+        String method = (String)iterator.next();
+        newContent = newContent + "\n" + method+ "\n";
       }
-
-    } catch (REException ree) {
-      ree.printStackTrace();
+      newContent = newContent + finalContent;
     }
     return newContent;
   } // addContent
@@ -342,10 +356,19 @@ public class BootStrap {
 
     return names;
   }
+  // determine all the packages
+  public String namesPackages (Set listPackages) {
+    Iterator iterator = listPackages.iterator();
+    String packages = new String();
+    while (iterator.hasNext()) {
+      packages = packages + "\n" + "import "+ iterator.next()+";";
+    }// while
+    return packages;
+  }
 
   /**  Creates the resource and dumps out a project structure using the
-    *  structure from gate/resource/meter.jar and the information provided by
-    *  the user
+    *  structure from gate/resource/creole/templateproject/Template and the
+    *  information provided by the user
     * @nameResource is the name of the new resource
     * @typeResource is the type of the resource (e.g.ProcessingResource,
     *  LanguageResource or VisualResource)
@@ -356,14 +379,18 @@ public class BootStrap {
   public void createResource( String nameResource,String typeResource,
                               String nameClass, Set listInterfaces,
                               String pathNewProject)
-  {
-      createNames(nameResource,nameClass);
+                              throws
+                              IOException,ClassNotFoundException, REException {
 
-      // determine the interfaces that the resource implements and the class
-      // that it extends
-      String interfacesAndClass = getInterfacesAndClass (typeResource,
+    createNames(nameResource,nameClass);
+
+    // determine the interfaces that the resource implements and the class
+    // that it extends
+    String interfacesAndClass = getInterfacesAndClass (typeResource,
                                                   listInterfaces);
-      try {
+    String packages = namesPackages(allPackages);
+
+
       // take the content of the file with the structure of the template project
       InputStream inputStream = Files.getGateResourceAsStream(oldResource +"/"+
                                 "file-list.properties");
@@ -380,7 +407,6 @@ public class BootStrap {
         String valKey = (String)keyProperties.nextElement();
 
         String valueKey = properties.getProperty(valKey);
-
 
         int indexEnd = valueKey.indexOf(",");
         String newValueKey = valueKey;
@@ -411,44 +437,53 @@ public class BootStrap {
 
             InputStream currentInputStream =
                 Files.getGateResourceAsStream(oldResource+"/"+nameFile);
-
-            newFile = new File(newPathFile);
+            if (extension.compareTo(".jav") == 0)
+              newFile = new File(newPathFile+"a");
+            else newFile = new File(newPathFile);
 
             if (extension.compareTo(".jar")!=0) {
 
               // the content of the current file is copied on the disk
-              try {
-                // the current file for writing characters
-                FileWriter fileWriter = new FileWriter(newFile);
 
-                InputStreamReader inputStreamReader = new InputStreamReader (
-                                                        currentInputStream);
+              // the current file for writing characters
 
-                int  charRead = 0;
-                String text = null;
+              FileWriter fileWriter = new FileWriter(newFile);
 
-                while(
-                (charRead = inputStreamReader.read(cbuffer,0,BUFF_SIZE)) != -1){
+              InputStreamReader inputStreamReader = new InputStreamReader (
+                                                      currentInputStream);
 
-                  text = new String (cbuffer,0,charRead);
+              int  charRead = 0;
+              String text = null;
 
-                  String expr = "public class " + names.get("___CLASSNAME___");
-                  String newText = addContent(text,expr,interfacesAndClass);
-                  fileWriter.write(newText ,0,newText.length());
 
-                } // while
+              while(
+              (charRead = inputStreamReader.read(cbuffer,0,BUFF_SIZE)) != -1){
 
-                inputStreamReader.close();
+                text = new String (cbuffer,0,charRead);
 
-                // close the input stream
-                currentInputStream.close();
+                String expr1 = "public class " + names.get("___CLASSNAME___");
+                String expr2 = "import ___PACKAGE___.*;";
+                String newText;
 
-                // close the file for writing
-                fileWriter.close();
+                if (packages.length() == 0){
+                  newText = regularExpressions(text,"",expr2);
+                }
+                else {
+                  newText = regularExpressions(text,packages,expr2);
+                }
 
-              } catch (IOException ioe) {
-                ioe.printStackTrace();
-              }
+                newText = addContent(newText,expr1,interfacesAndClass);
+                fileWriter.write(newText ,0,newText.length());
+
+              } // while
+
+              inputStreamReader.close();
+
+              // close the input stream
+              currentInputStream.close();
+
+              // close the file for writing
+              fileWriter.close();
 
             } // if
             else { // the current file is a jar
@@ -475,9 +510,6 @@ public class BootStrap {
         } // while
       }// while
 
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
   } // modify
 
 } // class BootStrap
