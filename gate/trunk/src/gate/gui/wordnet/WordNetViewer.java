@@ -46,6 +46,9 @@ public class WordNetViewer extends AbstractVisualResource
   private static final String propertiesFile = "D:/Gate/temp/file_properties.xml";
   private IndexFileWordNetImpl wnMain = null;
 
+  private boolean senatnceFrames = false;
+  public final static int SENTANCE_FAMES = 33001;
+
   public WordNetViewer(){
     jbInit();
     initResources();
@@ -227,23 +230,27 @@ public class WordNetViewer extends AbstractVisualResource
       SemanticRelation relation = (SemanticRelation) semRelations.get(i);
       switch (wordType) {
         case WordNet.POS_NOUN:
-          if (false == existInPopup(nounPopup, relation.getLabel()) ){
-            nounPopup.add(new RelationItem(relation.getLabel(), relation.getType(), senses));
+          if (false == existInPopup(nounPopup, getLabel(relation)) ){
+            nounPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
           }
           break;
         case WordNet.POS_VERB:
-          if (false == existInPopup(verbPopup, relation.getLabel()) ){
-            verbPopup.add(new RelationItem(relation.getLabel(), relation.getType(), senses));
+          if (false == existInPopup(verbPopup, getLabel(relation)) ){
+            verbPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
+          }
+          if (!senatnceFrames){
+            verbPopup.add(new RelationItem("Senatnce Frames", SENTANCE_FAMES, senses));
+            senatnceFrames = true;
           }
           break;
         case WordNet.POS_ADJECTIVE:
-          if (false == existInPopup(adjectivePopup, relation.getLabel()) ){
-            adjectivePopup.add(new RelationItem(relation.getLabel(), relation.getType(), senses));
+          if (false == existInPopup(adjectivePopup, getLabel(relation)) ){
+            adjectivePopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
           }
           break;
         case WordNet.POS_ADVERB:
-          if (false == existInPopup(adverbPopup, relation.getLabel()) ){
-            adverbPopup.add(new RelationItem(relation.getLabel(), relation.getType(), senses));
+          if (false == existInPopup(adverbPopup, getLabel(relation)) ){
+            adverbPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
           }
           break;
       }
@@ -319,6 +326,9 @@ public class WordNetViewer extends AbstractVisualResource
       case Relation.REL_SUBSTANCE_MERONYM:
         break;
       case Relation.REL_VERB_GROUP:
+        break;
+      case SENTANCE_FAMES:
+        sentanceFrames(ri.getSenses());
         break;
     }
   }
@@ -515,6 +525,94 @@ public class WordNetViewer extends AbstractVisualResource
       }
     }
     return wordsString.toString();
+  }
+
+  private void sentanceFrames(java.util.List senses){
+    StringBuffer display = new StringBuffer("");
+    for (int i=0; i<senses.size(); i++) {
+      WordSense currSense = (WordSense) senses.get(i);
+      Synset currSynset = currSense.getSynset();
+      Verb currVerb = (Verb) currSense;
+      java.util.List frames = currVerb.getVerbFrames();
+
+      display.append("\nSense ");
+      display.append(i+1);
+      display.append("\n  ");
+      display.append(getWords(currSynset.getWordSenses()));
+      display.append(" -- ");
+      display.append(currSynset.getGloss());
+      display.append("\n");
+
+      for (int j=0; j<frames.size(); j++){
+        display.append("        *> ");
+        display.append(((VerbFrame) frames.get(j)).getFrame());
+        display.append("\n");
+      }
+    }
+    resultPane.setText(display.toString());
+  }
+
+
+  public String getLabel(Relation r){
+
+    String result = "";
+    switch (r.getType()){
+      case Relation.REL_ANTONYM:
+        result = "Antonym";
+        break;
+      case Relation.REL_ATTRIBUTE:
+        result = "Attribute";
+        break;
+      case Relation.REL_CAUSE:
+        result = "Cause";
+        break;
+      case Relation.REL_DERIVED_FROM_ADJECTIVE:
+        result = "Derived From Adjective";
+        break;
+      case Relation.REL_ENTAILMENT:
+        result = "Entailment";
+        break;
+      case Relation.REL_HYPERNYM:
+        result = "Hypernym";
+        break;
+      case Relation.REL_HYPONYM:
+        result = "Hyponym";
+        break;
+      case Relation.REL_MEMBER_HOLONYM:
+        result = "Member Holonym";
+        break;
+      case Relation.REL_MEMBER_MERONYM:
+        result = "Member Meronym";
+        break;
+      case Relation.REL_PARTICIPLE_OF_VERB:
+        result = "Participle Of Verb";
+        break;
+      case Relation.REL_PART_HOLONYM:
+        result = "Holonym";
+        break;
+      case Relation.REL_PART_MERONYM:
+        result = "Meronym";
+        break;
+      case Relation.REL_PERTAINYM:
+        result = "Pertainym";
+        break;
+      case Relation.REL_SEE_ALSO:
+        result = "See Also";
+        break;
+      case Relation.REL_SIMILAR_TO:
+        result = "Similar To";
+        break;
+      case Relation.REL_SUBSTANCE_HOLONYM:
+        result = "Substance Holonym";
+        break;
+      case Relation.REL_SUBSTANCE_MERONYM:
+        result = "Substance Meronym";
+        break;
+      case Relation.REL_VERB_GROUP:
+        result = "Verb Group";
+        break;
+    }
+    return result;
   }
 
   private class RelationItem extends JMenuItem{
