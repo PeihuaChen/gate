@@ -52,8 +52,11 @@ public interface DataStore extends FeatureBearer {
   public void delete()
   throws PersistenceException, UnsupportedOperationException;
 
-  /** Delete a resource from the data store.
-    */
+  /**
+   * Delete a resource from the data store.
+   * @param lrId a data-store specific unique identifier for the resource
+   * @param lrClassName class name of the type of resource
+   */
   public void delete(String lrClassName, String lrId)
   throws PersistenceException;
 
