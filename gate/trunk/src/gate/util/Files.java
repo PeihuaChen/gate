@@ -451,7 +451,7 @@ public class Files {
       newElement.append(" ");newElement.append(key);
       newElement.append("=\"");
       newElement.append(value);
-      newElement.append("\"");
+      newElement.append("\"" + nl);
     }
 
     // terminate the element

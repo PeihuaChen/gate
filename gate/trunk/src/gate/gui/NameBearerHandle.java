@@ -143,16 +143,12 @@ public class NameBearerHandle implements Handle,
     closeItem.setAccelerator(KeyStroke.getKeyStroke(
                                 KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
     popup.add(closeItem);
-    popup.addSeparator();
-    popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
 
     if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-    }
-
-    //Language Resources
-    if(target instanceof LanguageResource) {
+    }else if(target instanceof LanguageResource) {
+      //Language Resources
       popup.addSeparator();
       popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
@@ -170,7 +166,11 @@ public class NameBearerHandle implements Handle,
         popup.addSeparator();
         popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(), sListenerProxy));
       }
-    }//if(resource instanceof LanguageResource)
+    }else if(target instanceof Controller){
+      //Applications
+      popup.addSeparator();
+      popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
+    }
 //    if(target instanceof Resource){
 //      popup.addSeparator();
 //      popup.add(new XJMenuItem(new ReloadClassAction(), sListenerProxy));
@@ -607,8 +607,9 @@ public class NameBearerHandle implements Handle,
 
   class DumpToFileAction extends AbstractAction {
     public DumpToFileAction(){
-      super("Store to file");
-      putValue(SHORT_DESCRIPTION, "Store resource data to a file");
+      super("Save application state");
+      putValue(SHORT_DESCRIPTION,
+               "Saves the data needed to recreate this application");
     }
 
     public void actionPerformed(ActionEvent ae){
