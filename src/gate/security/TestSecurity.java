@@ -36,6 +36,9 @@ public class TestSecurity extends TestCase
   private static final int ADMIN_GROUP_ID = 0;
   private static final int ADMIN_USER_ID = 0;
 
+  private static final int SUAHILI_GROUP_ID = 101;
+  private static final int ENGLISH_GROUP_ID = 101;
+
 
   /** JDBC URL */
   private static final String JDBC_URL =
@@ -151,6 +154,9 @@ public class TestSecurity extends TestCase
     //is the user added to the group?
     Assert.assert(myGroup.getUsers().contains(myUser));
 
+    //4.1 does the user know he's member of the group now?
+    Assert.assert(myUser.getGroups().contains(myGroup));
+
     //5. change group name
     String oldName = myGroup.getName();
     myGroup.setName("my new group", adminSession);
@@ -210,13 +216,66 @@ public class TestSecurity extends TestCase
     }
     Assert.assert(true == exceptionThrown);
 
+    //10.1 login again
+    mySession = ac.login("myUser", "myPassword",
+                              ac.findGroup("my new group again").getID());
+    //check session
+    Assert.assertNotNull(mySession);
+    //is valid session?
+    Assert.assert(true == ac.isValidSession(mySession));
+
     //11. try to delete group
     ac.deleteGroup(myGroup, adminSession);
     //is the group deleted?
-    Assert.assertNull(ac.findGroup(myGroup.getName()));
+    exceptionThrown = false;
+    try {
+      ac.findGroup(myGroup.getName());
+    }
+    catch(SecurityException se) {
+      Err.prln("++ OK, got exception");
+      exceptionThrown = true;
+    }
+    Assert.assert(exceptionThrown);
 
-    //12. check that the sessions are invalidated ig the
+    //11.1 does the user know that he's no longer member of the group?
+    Assert.assert(false == myUser.getGroups().contains(myGroup));
+
+    //11.2 is the user's sesion invalidated?
+    Assert.assert(false == ac.isValidSession(mySession));
+
+    //11.3 add the user to new group
+    Group suahiliGrp = ac.findGroup(new Long(this.SUAHILI_GROUP_ID));
+    Assert.assertNotNull(suahiliGrp);
+    suahiliGrp.addUser(myUser,adminSession);
+    //11.4 check if the group knows the user is now mmeber
+    Assert.assert(suahiliGrp.getUsers().contains(myUser));
+    //11.5 check if the user know he's member of the group
+    Assert.assert(myUser.getGroups().contains(suahiliGrp));
+    //11.6 login again [with the new group]
+    Session newSession = ac.login("myUser","myPassword",suahiliGrp.getID());
+    //11.7 check session
+    Assert.assert(ac.isValidSession(newSession));
+
+
+    //12. check that the sessions are invalidated if the
     //group/user in the session is deleted
+
+    //12.1 delete user
+    ac.deleteUser(myUser,adminSession);
+    //12.2 assert he's deleted from the Security Controller
+    exceptionThrown = false;
+    try {
+      ac.findUser(myUser.getName());
+    }
+    catch(SecurityException se) {
+      Err.prln("++ OK, got exception");
+      exceptionThrown = true;
+    }
+    Assert.assert(exceptionThrown);
+    //12.3 assert the group has deleted the user as member
+    Assert.assert(false == suahiliGrp.getUsers().contains(myUser));
+    //12.4 assert the session is invalidated
+    Assert.assert(false == ac.isValidSession(newSession));
 
     //13. check objectModification events
 
