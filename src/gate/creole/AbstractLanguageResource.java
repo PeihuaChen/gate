@@ -20,6 +20,7 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.persist.*;
+import gate.security.SecurityException;
 
 
 /** A convenience implementation of LanguageResource with some default code.
@@ -62,7 +63,8 @@ extends AbstractResource implements LanguageResource
   /** Save: synchonise the in-memory image of the LR with the persistent
     * image.
     */
-  public void sync() throws PersistenceException {
+  public void sync()
+    throws PersistenceException,SecurityException {
     if(dataStore == null)
       throw new PersistenceException("LR has no DataStore");
 
