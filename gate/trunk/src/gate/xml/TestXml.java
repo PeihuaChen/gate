@@ -82,9 +82,9 @@ public class TestXml extends TestCase
     anElement2StringMap.put("s","\n");
 
 
-    doc = gate.Transients.newDocument(Gate.getUrl("tests/xml/xces.xml"));
+    doc = gate.Factory.newDocument(Gate.getUrl("tests/xml/xces.xml"));
     /*
-    gate.Document doc = gate.Transients.newDocument(
+    gate.Document doc = gate.Factory.newDocument(
               new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/Sentence.xml")
     );
     */
@@ -92,7 +92,7 @@ public class TestXml extends TestCase
     /*
   File f = Files.writeTempFile(Files.getResourceAsStream("texts/Sentence.xml"));
     URL u = f.toURL();
-    gate.Document doc = gate.Transients.newDocument(u);
+    gate.Document doc = gate.Factory.newDocument(u);
     f.delete ();
     */
     // get the docFormat that deals with it.
@@ -103,7 +103,7 @@ public class TestXml extends TestCase
     );
     */
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, doc.getSourceURL()
+      doc, doc.getSourceUrl()
     );
     assert(docFormat instanceof gate.corpora.XmlDocumentFormat);
     //*

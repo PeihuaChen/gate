@@ -88,6 +88,17 @@ implements ResourceData {
   /** Get method for the resource class name */
   public String getClassName() { return className; }
 
+  /** The interface name of the resource */
+  private String interfaceName;
+
+  /** Set method for the resource interface name */
+  public void setInterfaceName(String interfaceName) {
+    this.interfaceName = interfaceName;
+  } // setInterfaceName
+
+  /** Get method for the resource interface name */
+  public String getInterfaceName() { return interfaceName; }
+
   /** The class of the resource */
   private Class resourceClass;
 

@@ -153,13 +153,13 @@ public class DocumentImpl implements Document
          throws IOException {
     // store the offsets if they're non-null
     if(start != null && end != null) {
-      sourceURLOffsets = new Long[2];
-      sourceURLOffsets[0] = start;
-      sourceURLOffsets[1] = end;
+      sourceUrlOffsets = new Long[2];
+      sourceUrlOffsets[0] = start;
+      sourceUrlOffsets[1] = end;
     }
 
     // store the URL
-    sourceURL = u;
+    sourceUrl = u;
 
     // get content out of the URL
     content = new DocumentContentImpl(u, encoding, start, end);
@@ -168,7 +168,7 @@ public class DocumentImpl implements Document
   /** Construction from String */
   public DocumentImpl(String str) throws IOException {
     content = new DocumentContentImpl(str);
-    sourceURL = new URL("http://no_host/From_String");
+    sourceUrl = new URL("http://no_host/From_String");
   } // DocumentImpl(string)
 
   /** Initialise this resource, and return it. */
@@ -177,12 +177,12 @@ public class DocumentImpl implements Document
   } // init()
 
   /** Documents are identified by URLs */
-  public URL getSourceURL() { return sourceURL; }
+  public URL getSourceUrl() { return sourceUrl; }
 
   /** Documents may be packed within files; in this case an optional pair of
     * offsets refer to the location of the document.
     */
-  public Long[] getSourceURLOffsets() { return sourceURLOffsets; }
+  public Long[] getSourceUrlOffsets() { return sourceUrlOffsets; }
 
   /** Get the data store the document lives in. */
   public DataStore getDataStore() {
@@ -291,21 +291,16 @@ public class DocumentImpl implements Document
     return getOrderingString().compareTo(other.getOrderingString());
   } // compareTo
 
-  /** Get the factory that created this object. */
-  public Factory getFactory() {
-    throw new LazyProgrammerException();
-  } // getFactory()
-
   /** Utility method to produce a string for comparison in ordering.
     * String is based on the source URL and offsets.
     */
   String getOrderingString() {
-    if(sourceURL == null) return toString();
+    if(sourceUrl == null) return toString();
 
-    StringBuffer orderingString = new StringBuffer(sourceURL.toString());
-    if(sourceURLOffsets != null) {
-      orderingString.append(sourceURLOffsets[0].toString());
-      orderingString.append(sourceURLOffsets[1].toString());
+    StringBuffer orderingString = new StringBuffer(sourceUrl.toString());
+    if(sourceUrlOffsets != null) {
+      orderingString.append(sourceUrlOffsets[0].toString());
+      orderingString.append(sourceUrlOffsets[1].toString());
     }
     return orderingString.toString();
   } // getOrderingString()
@@ -320,7 +315,7 @@ public class DocumentImpl implements Document
   protected int nextNodeId = 0;
 
   /** The source URL */
-  protected URL sourceURL = null;
+  protected URL sourceUrl = null;
 
   /** The content of the document */
   protected DocumentContent content;
@@ -328,7 +323,7 @@ public class DocumentImpl implements Document
   /** The range that the content comes from at the source URL
     * (or null if none).
     */
-  protected Long[] sourceURLOffsets = null;
+  protected Long[] sourceUrlOffsets = null;
 
   /** The default annotation set */
   protected AnnotationSet defaultAnnots;

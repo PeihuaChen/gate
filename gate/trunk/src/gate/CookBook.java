@@ -57,13 +57,13 @@ implementations). In other words, it's an interface-based design.
 
 <P>
 Two classes take care of instantiating objects that implement the interfaces:
-<A HREF=DataStore.html>DataStore</A> and <A HREF=Transients.html>Transients</A>.
+<A HREF=DataStore.html>DataStore</A> and <A HREF=Factory.html>Factory</A>.
 
 <A HREF=DataStore.html>DataStore</A> allows the creation of objects that
 are stored in databases
 (NOT IMPLEMENTED YET!!!).
 
-<A HREF=Transients.html>Transients</A> provides static methods that
+<A HREF=Factory.html>Factory</A> provides static methods that
 construct new transient
 objects, i.e. objects whose lifespan is bounded by the current invocation of
 the program.
@@ -124,7 +124,7 @@ public class CookBook extends TestCase
   public void testCorpusConstruction() {
 
     // corpus constructors require a name
-    corpus = Transients.newCorpus("My example corpus");
+    corpus = Factory.newCorpus("My example corpus");
 
     // the corpus interface inherits all the sorted set methods
     assert(corpus.isEmpty());
@@ -133,7 +133,7 @@ public class CookBook extends TestCase
 
   /** Adding documents to a corpus */
   public void testAddingDocuments() throws GateException {
-    corpus = Transients.newCorpus("My example corpus");
+    corpus = Factory.newCorpus("My example corpus");
 
     // document constructors may take a URL; if so you have
     // to deal with URL and net-related exceptions:
@@ -144,7 +144,7 @@ public class CookBook extends TestCase
     Iterator iter = corpus.iterator();
     while(iter.hasNext()) {
       Document doc = (Document) iter.next();
-      assert(u.equals(doc.getSourceURL()));
+      assert(u.equals(doc.getSourceUrl()));
     } // while
 
   } // testAddingDocuments
@@ -170,7 +170,7 @@ public class CookBook extends TestCase
     Integer id; // the id of new annotations
 
     // putting features on documents
-    FeatureMap fm = Transients.newFeatureMap();
+    FeatureMap fm = Factory.newFeatureMap();
     doc1.setFeatures(fm);
     assert(fm.size() == 0);
     fm.put("author", "segovia");
@@ -186,10 +186,10 @@ public class CookBook extends TestCase
 
   /** Fixture set up: initialise members before each test method */
   public void setUp() throws GateException, IOException {
-    corpus = Transients.newCorpus("My example corpus");
+    corpus = Factory.newCorpus("My example corpus");
 
-    doc1 = Transients.newDocument(Gate.getUrl("tests/doc0.html"));
-    doc2 = Transients.newDocument(Gate.getUrl("tests/doc0.html"));
+    doc1 = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
+    doc2 = Factory.newDocument(Gate.getUrl("tests/doc0.html"));
   } // setUp
 
   /** Construction */

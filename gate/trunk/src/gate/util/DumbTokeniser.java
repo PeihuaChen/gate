@@ -37,10 +37,6 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
 //    DefaultTokenizer defaultTokenizer = new DefaultTokenizer();
   }
 
-  public Factory getFactory(){
-    return new Transients();
-  }
-
   public FeatureMap getFeatures(){
     return features;
   }
@@ -100,7 +96,7 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
           }//parse gap
           //add the gap
           if(charIdx > tokenStart){
-            fm = Transients.newFeatureMap();
+            fm = Factory.newFeatureMap();
             fm.put("String", content.substring(tokenStart, charIdx));
             fm.put("kind", "gap");
             annotationSet.add(new Long(tokenStart), new Long(charIdx),
@@ -118,7 +114,7 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
           }//parse break
           //add the break
           if(charIdx > tokenStart){
-            fm = Transients.newFeatureMap();
+            fm = Factory.newFeatureMap();
             fm.put("String", content.substring(tokenStart, charIdx));
             fm.put("kind", "break");
             annotationSet.add(new Long(tokenStart), new Long(charIdx),
@@ -150,7 +146,7 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
         }//parse the text
         //add the token
         if(charIdx > tokenStart){
-          fm = Transients.newFeatureMap();
+          fm = Factory.newFeatureMap();
           if(containsDigits){
             if(containsLetters)
               if(containsDash)
@@ -221,7 +217,7 @@ implements ProcessingResource, ProcessProgressReporter, Runnable
            start = end, end = bi.next())
       {
         if(!Character.isWhitespace(content.charAt(start))){
-          fm = Transients.newFeatureMap();
+          fm = Factory.newFeatureMap();
           fm.put("string", content.substring(start, end));
           annotationSet.add(new Long(start),
                             new Long(end),

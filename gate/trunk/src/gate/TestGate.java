@@ -54,7 +54,7 @@ import gate.sgml.*;
   * the file system location that the classes came from, e.g.
   * <TT>z:\gate2\classes</TT>, or <TT>jar:....gate.jar</TT>.
   * </UL>
-  * This search order can be modified by parameters to the main 
+  * This search order can be modified by parameters to the main
   * function (see below).
   */
 public class TestGate

@@ -2,14 +2,14 @@
  *	XmlDocumentFormat.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU, 26/May/2000
  *
  *	$Id$
@@ -92,7 +92,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
         gate.xml.XmlDocumentHandler xmlDocHandler =  new
                     gate.xml.XmlDocumentHandler(doc, this.markupElementsMap,
                                                 this.element2StringMap);
-        // register a status listener with it 
+        // register a status listener with it
         xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){
             // this is implemented in DocumentFormat.java and inherited here
@@ -100,7 +100,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat
           }
         });
         // parse the document handler
-        xmlParser.parse(doc.getSourceURL().toString(), xmlDocHandler );
+        xmlParser.parse(doc.getSourceUrl().toString(), xmlDocHandler );
       }
 
 	  } catch (Exception ex) {

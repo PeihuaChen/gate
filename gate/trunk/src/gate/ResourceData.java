@@ -49,6 +49,12 @@ public interface ResourceData extends FeatureBearer {
   /** Get method for the resource class name */
   public String getClassName();
 
+  /** Set method for the resource interface name */
+  public void setInterfaceName(String className);
+
+  /** Get method for the resource interface name */
+  public String getInterfaceName();
+
   /** Set method for the resource class */
   public void setResourceClass(Class resourceClass);
 

@@ -881,7 +881,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
   blockBuffer.append("// RHS assignment block" + nl);
   blockBuffer.append(
-    "      FeatureMap features = Transients.newFeatureMap();" + nl
+    "      FeatureMap features = Factory.newFeatureMap();" + nl
   );
     switch (jj_nt.kind) {
     case colon:

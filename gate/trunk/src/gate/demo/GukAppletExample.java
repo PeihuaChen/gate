@@ -562,9 +562,9 @@ public class GukAppletExample extends JApplet implements MUTTManagerObject {
         Document doc = null;
         try{
 
-          doc = Transients.newDocument(text);
+          doc = Factory.newDocument(text);
 
-          FeatureMap attrs = Transients.newFeatureMap();
+          FeatureMap attrs = Factory.newFeatureMap();
           attrs.put("time", new Long(0));
 
           attrs.put("text", doc.getContent().toString());

@@ -78,11 +78,11 @@ public class TestHtml extends TestCase
     markupElementsMap.put ("a","link");
     */
 
-    doc = gate.Transients.newDocument(Gate.getUrl("tests/html/test1.htm"));
+    doc = gate.Factory.newDocument(Gate.getUrl("tests/html/test1.htm"));
 
     // get the docFormat that deals with it.
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat(
-      doc, doc.getSourceURL()
+      doc, doc.getSourceUrl()
     );
     assert(docFormat instanceof gate.corpora.HtmlDocumentFormat);
     // set's the map

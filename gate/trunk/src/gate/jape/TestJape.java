@@ -51,15 +51,15 @@ public class TestJape extends TestCase
   public void _testCombined() throws IOException, GateException {
     DoTestBigGrammar("AveShort");
 /*
-    Corpus c = Transients.newCorpus("TestJape corpus");
+    Corpus c = Factory.newCorpus("TestJape corpus");
     c.add(
-      Transients.newDocument(Files.getResourceAsString("texts/doc0.html"))
+      Factory.newDocument(Files.getResourceAsString("texts/doc0.html"))
     );
 
     //add some annotations on the first (only) document in corpus c
     Document doc = (Document) c.first();
     AnnotationSet defaultAS = doc.getAnnotations();
-    FeatureMap feat = Transients.newFeatureMap();
+    FeatureMap feat = Factory.newFeatureMap();
     defaultAS.add(new Long( 2), new Long( 4), "A",feat);
     defaultAS.add(new Long( 4), new Long(6), "B",feat);
     defaultAS.add(new Long(6), new Long(8), "C",feat);
@@ -81,15 +81,15 @@ public class TestJape extends TestCase
 
   /** Batch run */
   public void testBatch() throws JapeException, IOException {
-    Corpus c = Transients.newCorpus("TestJape corpus");
+    Corpus c = Factory.newCorpus("TestJape corpus");
     c.add(
-      Transients.newDocument(Files.getGateResourceAsString("texts/doc0.html"))
+      Factory.newDocument(Files.getGateResourceAsString("texts/doc0.html"))
     );
     //add some annotations on the first (only) document in corpus c
     Document doc = (Document)c.first();
     AnnotationSet defaultAS = doc.getAnnotations();
     try{
-      FeatureMap feat = Transients.newFeatureMap();
+      FeatureMap feat = Factory.newFeatureMap();
 //      defaultAS.add(new Long( 0), new Long( 2), "A",feat);
       defaultAS.add(new Long( 2), new Long( 4), "A",feat);
 //      defaultAS.add(new Long( 4), new Long( 6), "A",feat);
@@ -138,9 +138,9 @@ public class TestJape extends TestCase
                      "Started at: " + (new Date()) + "\n");
     startCorpusLoad = System.currentTimeMillis();
     Out.print("Loading corpus... ");
-    Corpus corpus = Transients.newCorpus("Jape Corpus");
+    Corpus corpus = Factory.newCorpus("Jape Corpus");
     try{
-    corpus.add(Transients.newDocument(
+    corpus.add(Factory.newDocument(
         Files.getGateResourceAsString("jape/InputTexts/" + textName)));
     }catch(IOException ioe){
       ioe.printStackTrace(Err.getPrintWriter());

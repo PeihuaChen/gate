@@ -265,7 +265,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
   /** Process a single text. */
   public Document transduce(String text) throws JapeException {
     Document doc = null;
-    try { doc = Transients.newDocument(text);
+    try { doc = Factory.newDocument(text);
     } catch (IOException e) { throw new JapeException(e.toString()); }
     transducer.transduce(doc, doc.getAnnotations());
     return doc;
@@ -282,17 +282,17 @@ public class Batch implements JapeConstants, java.io.Serializable,
 
   /** Process a set of files. */
   public Corpus transduce(String[] textFileNames) throws JapeException {
-    Corpus coll = Transients.newCorpus("JAPE batch corpus");
+    Corpus coll = Factory.newCorpus("JAPE batch corpus");
     Document doc = null;
     for(int i = 0; i < textFileNames.length; i++) {
       try {
-        doc = Transients.newDocument(textFileNames[i]);
-        doc.setFeatures(Transients.newFeatureMap());
+        doc = Factory.newDocument(textFileNames[i]);
+        doc.setFeatures(Factory.newFeatureMap());
         /*coll.createDocument(
           textFileNames[i],
           null, // the text - should get read from disk
           new AnnotationSetImpl(doc),
-          Transients.newFeatureMap(),
+          Factory.newFeatureMap(),
           Document.COPIED
         );*/
       } catch(IOException e) { throw new JapeException(e.toString()); }
@@ -370,7 +370,7 @@ public class Batch implements JapeConstants, java.io.Serializable,
       // open the collection or bomb
       coll = null;
       batch.message("opening the collection");
-      coll = Transients.newCorpus(persCollName);
+      coll = Factory.newCorpus(persCollName);
 
       // transduce
       batch.message("calling transducer");
@@ -457,6 +457,13 @@ public class Batch implements JapeConstants, java.io.Serializable,
 } // class Batch
 
 // $Log$
+// Revision 1.12  2000/10/18 13:26:47  hamish
+// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+//     parameter list fed to createResource.
+//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     moved createResource from CR to Factory
+//     removed Transients; use Factory instead
+//
 // Revision 1.11  2000/10/16 16:44:33  oana
 // Changed the comment of DEBUG variable
 //

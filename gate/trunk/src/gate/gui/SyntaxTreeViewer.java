@@ -206,10 +206,10 @@ public class SyntaxTreeViewer extends JPanel
     Gate.init();
 //    final String text = "This is a sentence. That is another one.";
     final String text = "\u0915\u0932\u094d\u0907\u0928\u0643\u0637\u0628 \u041a\u0430\u043b\u0438\u043d\u0430 Kalina";
-    final Document doc = Transients.newDocument(text);
+    final Document doc = Factory.newDocument(text);
 
 //  that works too but only use if you have the test file there.
-//    final Document doc = Transients.newDocument(new URL("file:///z:/temp/weird.txt"), "UTF-8");
+//    final Document doc = Factory.newDocument(new URL("file:///z:/temp/weird.txt"), "UTF-8");
 
 
     final SyntaxTreeViewer syntaxTreeViewer1 = new SyntaxTreeViewer("SyntaxTreeNode");
@@ -250,16 +250,16 @@ public class SyntaxTreeViewer extends JPanel
     frame.pack();
     frame.show();
 
-    FeatureMap attrs = Transients.newFeatureMap();
+    FeatureMap attrs = Factory.newFeatureMap();
     attrs.put("time", new Long(0));
     attrs.put("text", doc.getContent().toString());
 /*
-    FeatureMap attrs1 = Transients.newFeatureMap();
+    FeatureMap attrs1 = Factory.newFeatureMap();
     attrs1.put("cat", "N");
     attrs1.put("text", "This");
     attrs1.put("consists", new Vector());
 
-    FeatureMap attrs2 = Transients.newFeatureMap();
+    FeatureMap attrs2 = Factory.newFeatureMap();
     attrs2.put("cat", "V");
     attrs2.put("text", "is");
     attrs2.put("consists", new Vector());
@@ -272,7 +272,7 @@ public class SyntaxTreeViewer extends JPanel
     Integer id2 = doc.getAnnotations().add(new Long(5), new Long(7),
                               "SyntaxTreeNode", attrs2);
 
-    FeatureMap attrs3 = Transients.newFeatureMap();
+    FeatureMap attrs3 = Factory.newFeatureMap();
     attrs3.put("cat", "VP");
     attrs3.put("text", "This is");
     Vector consists = new Vector();
@@ -1202,6 +1202,13 @@ class FocusButton extends JButton {
 } //FocusButton
 
 // $Log$
+// Revision 1.10  2000/10/18 13:26:47  hamish
+// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+//     parameter list fed to createResource.
+//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     moved createResource from CR to Factory
+//     removed Transients; use Factory instead
+//
 // Revision 1.9  2000/10/16 16:44:32  oana
 // Changed the comment of DEBUG variable
 //

@@ -213,7 +213,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
             if(newAttributes == null){
               if(oldAttributes == null){
                 //no constraints about this type.
-                constraintsByType.put(annType, Transients.newFeatureMap());
+                constraintsByType.put(annType, Factory.newFeatureMap());
               }
             }else{
               //newAttributes != null
@@ -423,6 +423,13 @@ extends Transducer implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.21  2000/10/18 13:26:47  hamish
+// Factory.createResource now working, with a utility method that uses reflection (via java.beans.Introspector) to set properties on a resource from the
+//     parameter list fed to createResource.
+//     resources may now have both an interface and a class; they are indexed by interface type; the class is used to instantiate them
+//     moved createResource from CR to Factory
+//     removed Transients; use Factory instead
+//
 // Revision 1.20  2000/10/16 16:44:34  oana
 // Changed the comment of DEBUG variable
 //

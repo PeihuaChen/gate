@@ -75,7 +75,7 @@ public class EmailDocumentHandler implements StatusReporter{
     BufferedReader gateDocumentReader = null;
     try{
       gateDocumentReader = new BufferedReader(new InputStreamReader(
-              gateDocument.getSourceURL().openConnection().getInputStream()));
+              gateDocument.getSourceUrl().openConnection().getInputStream()));
     } catch (IOException e){
       e.printStackTrace();
     }
