@@ -55,7 +55,7 @@ depend:
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)
 test: japefiles
-	./jdk.sh java -Xint -classpath gate.jar \
+	./jdk.sh java -Xint -Djava.compiler=nojit -classpath gate.jar \
 	  junit.textui.TestRunner gate.TestGate
 #	  junit.ui.TestRunner gate.TestGate
 #	  junit.ui.LoadingTestRunner gate.TestGate
@@ -78,7 +78,7 @@ resources:
 
 # refresh the jar with all the class files
 jarupdate:
-	cd ../classes && ../build/jdk.sh jar uvf ../build/gate.jar gate
+	cd ../classes && ../build/jdk.sh jar uf ../build/gate.jar gate
 
 # build the Tcl script library:
 # update the list of scripts, and copy the scripts into classes
