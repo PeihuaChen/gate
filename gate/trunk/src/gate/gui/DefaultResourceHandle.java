@@ -347,7 +347,7 @@ public class DefaultResourceHandle implements ResourceHandle {
       super("Reload");
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed1(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
           if(!(resource instanceof Resource)) return;
@@ -404,7 +404,7 @@ public class DefaultResourceHandle implements ResourceHandle {
       thread.start();
     }//public void actionPerformed(ActionEvent e)
 
-    public void actionPerformed1(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable(){
         public void run(){
           Map listeners = new HashMap();
