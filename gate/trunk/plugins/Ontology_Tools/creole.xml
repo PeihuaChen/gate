@@ -9,7 +9,7 @@
       <CLASS>com.ontotext.gate.ontology.DAMLOntology</CLASS>
       <INTERFACE>gate.creole.ontology.Taxonomy</INTERFACE>
       <COMMENT>Taxonomy</COMMENT>
-      <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
+      <PARAMETER NAME="URL" DEFAULT="resources/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
       <ICON>controller.gif</ICON>
     </RESOURCE>
 
@@ -20,7 +20,7 @@
     <CLASS>com.ontotext.gate.ontology.DAMLKnowledgeBaseImpl</CLASS>
     <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
     <COMMENT>Ontology</COMMENT>
-    <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml"
+    <PARAMETER NAME="URL" DEFAULT="resources/demo.daml"
        COMMENT="The URL of the Knowledge Base">java.net.URL</PARAMETER>
     <ICON>lrs.gif</ICON>
   </RESOURCE>
@@ -35,7 +35,7 @@
         NAME="projectName"
         SUFFIXES="pprj"
         COMMENT="Protege project file name">java.net.URL</PARAMETER>
-      <PARAMETER NAME="URL" DEFAULT="gate:/creole/ontology/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
+      <PARAMETER NAME="URL" DEFAULT="resources/demo.daml" COMMENT="The URL of the Ontology">java.net.URL</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
   </CREOLE>
@@ -49,10 +49,10 @@
       <COMMENT>A list lookup component based on mapping between ontology classes and gazetteer lists</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="listsURL" DEFAULT="gate:/creole/gazeteer/default/lists.def" COMMENT="The URL to the file with list of lists" SUFFIXES="def">java.net.URL</PARAMETER>
+      <PARAMETER NAME="listsURL" DEFAULT="../ANNIE/resources/gazeteer/lists.def" COMMENT="The URL to the file with list of lists" SUFFIXES="def">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="UTF-8" NAME="encoding" COMMENT="The encoding used for reading the definitions">java.lang.String</PARAMETER>
       <PARAMETER DEFAULT="true" NAME="caseSensitive" COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="mappingURL" DEFAULT="gate:/creole/gazeteer/default/mapping.def" COMMENT="The URL to the file with mappings of lists vs classes" SUFFIXES="def">java.net.URL</PARAMETER>
+      <PARAMETER NAME="mappingURL" DEFAULT="../ANNIE/resources/gazeteer/mapping.def" COMMENT="The URL to the file with mappings of lists vs classes" SUFFIXES="def">java.net.URL</PARAMETER>
       <PARAMETER NAME="gazetteerName" DEFAULT="com.ontotext.gate.gazetteer.HashGazetteer" COMMENT="The gazetteer tobe used with this ontogazetteer. should implement Gazetteer interface">java.lang.String</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
