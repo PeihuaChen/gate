@@ -21,7 +21,11 @@ create or replace package body security is
   ORACLE_FALSE constant number := 0;
   
   
-  /*******************************************************************************************/  
+  /******************************************************************************************
+  *
+  *  check if user is member of group
+  *
+  */  
   function is_member_of_group(p_user_id number,p_grp_id number) 
      return boolean 
   is
@@ -37,7 +41,11 @@ create or replace package body security is
     return (cnt > 0);
   end;
   
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure set_group_name(p_group_id  IN number,
                            p_new_name  IN varchar2)
   is
@@ -49,7 +57,11 @@ create or replace package body security is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /*******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure add_user_to_group(p_group_id  IN number,
                               p_user_id   IN number)
   is
@@ -64,7 +76,11 @@ create or replace package body security is
   end;                                                                                                        
 
   
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guesz
+  *
+  */    
   procedure remove_user_from_group(p_group_id  IN number,
                                    p_user_id   IN number)
   is
@@ -76,7 +92,11 @@ create or replace package body security is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure set_user_name(p_user_id  IN number,
                           p_new_name IN varchar2)
   is
@@ -88,7 +108,11 @@ create or replace package body security is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure set_user_password(p_user_id  IN number,
                               p_new_pass IN varchar2)
   is
@@ -100,7 +124,11 @@ create or replace package body security is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure create_group(p_grp_name  IN varchar2,
                          p_grp_id    OUT number)
   is
@@ -124,7 +152,11 @@ create or replace package body security is
        
   end;                                                                                                        
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure delete_group(p_grp_id  IN number)
   is
     has_documents boolean;
@@ -150,7 +182,11 @@ create or replace package body security is
        where grp_id = p_grp_id;
   end;                                                                                                        
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure create_user(p_usr_name  IN varchar2,
                         p_usr_pass  IN varchar2,
                         p_usr_id    OUT number)
@@ -177,7 +213,12 @@ create or replace package body security is
        
   end;                                                                                                        
 
-  /*******************************************************************************************/
+  
+  /******************************************************************************************
+  *
+  *  guess
+  *
+  */    
   procedure delete_user(p_usr_id  IN number)
   is
      has_documents boolean;
@@ -192,13 +233,6 @@ create or replace package body security is
        delete from t_user_group
        where  ugrp_user_id = p_usr_id;
        
-/*       --set LRs owned by user as orphan
-       update t_lang_resource
-       set    lr_owner_user_id = null,
-              lr_access_mode = PERM_GR_GW
-       where  lr_owner_user_id = p_usr_id;
-*/
-
        -- unlock LRs locked by user 
        update t_lang_resource
        set    lr_locking_user_id = null
@@ -210,7 +244,14 @@ create or replace package body security is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  attempts tp log a user in, prefered role should be supplied as parameter
+  *  (role is the group the user belongs to at any moment - a suer may be member of many froups
+  *  but at any particular moment he's working on behalf on only one group, i.e. he's playing
+  *  just one role)
+  *
+  */    
   procedure login(p_usr_name        IN varchar2,
                   p_usr_pass        IN varchar2,
                   p_pref_grp_id     IN number,
@@ -273,6 +314,11 @@ create or replace package body security is
        
   end;                                                                                                        
 
+  /******************************************************************************************
+  *   
+  *   checks ig user has specified access to resource
+  *
+  */    
   procedure has_access_to_lr(p_lr_id   IN  number,
                              p_usr_id  IN  number,
                              p_grp_id  IN  number,
@@ -306,22 +352,6 @@ create or replace package body security is
        
        if (p_mode = WRITE_ACCESS) then
 
-/*       
-          --is the document locked?
-          if locking_user <> 0 then 
-             
-             if locking_user <> p_usr_id then
-                --locked by someone else, fail
-                p_result := ORACLE_FALSE;
-             else
-                --locked by me, success             
-                p_result := ORACLE_TRUE;
-             end if;
-             
-             return;
-          
-          else                       
-*/          
              --not locked but check permissions
              -- write access is granted :
              -- 1a. permissions are USER_WRITE and OWNER_USER == p_usr_id
@@ -398,7 +428,12 @@ create or replace package body security is
   
   
   
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  ensures the group does not own resources when attempt to delete the group is made
+  *
+  */    
+  
   function can_delete_group(p_grp_id     IN  number)
      return boolean
   is
@@ -415,7 +450,11 @@ create or replace package body security is
           
   end;                                                                                                        
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  see above
+  *
+  */    
   function can_delete_user(p_usr_id     IN  number)
      return boolean
   is
@@ -433,7 +472,12 @@ create or replace package body security is
   end;                                                                                                        
 
 
-  /*******************************************************************************************/
+  /******************************************************************************************
+  *
+  *  ensures permissions requested are a valid combination
+  *  i.e. [owner read / world write] does not make much sense
+  *
+  */    
   function is_valid_security_data(p_perm_mode  IN  number,
                                   p_group_id   IN  number,
                                   p_user_id    IN  number)
