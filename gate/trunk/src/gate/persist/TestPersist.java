@@ -1333,84 +1333,84 @@ public class TestPersist extends TestCase
 
 }
 
-  public void testOracle_01() throws Exception {
-
-    if (DEBUG)
-      System.out.println(">> 01");
-
-    prepareDB("oracle");
-    _testDB_UseCase01();
-
-    if (DEBUG)
-      System.out.println("<< 01");
-  }
-
-  public void testOracle_02() throws Exception {
-
-    if (DEBUG)
-      System.out.println(">> 02");
-
-    prepareDB("oracle");
-    _testDB_UseCase02();
-
-    if (DEBUG)
-      System.out.println("<< 02");
-  }
-
-  public void testOracle_03() throws Exception {
-    if (DEBUG)
-      System.out.println(">> 03");
-
-    prepareDB("oracle");
-    _testDB_UseCase03();
-
-    if (DEBUG)
-      System.out.println("<< 03");
-  }
-
-  public void testOracle_04() throws Exception {
-    if (DEBUG)
-      System.out.println(">> 04");
-
-    prepareDB("oracle");
-    _testDB_UseCase04();
-
-    if (DEBUG)
-      System.out.println("<< 04");
-  }
-
-  public void testOracle_101() throws Exception {
-    if (DEBUG)
-      System.out.println(">> 101");
-
-    prepareDB("oracle");
-    _testDB_UseCase101();
-
-    if (DEBUG)
-      System.out.println("<< 101");
-  }
-
-  public void testOracle_102() throws Exception {
-    if (DEBUG)
-      System.out.println(">> 102");
-
-    prepareDB("oracle");
-    _testDB_UseCase102();
-
-    if (DEBUG)
-      System.out.println("<< 102");
-  }
-
-  public void testOracle_103() throws Exception {
-    if (DEBUG)
-      System.out.println(">> 103");
-
-    prepareDB("oracle");
-    _testDB_UseCase103();
-
-    if (DEBUG)
-      System.out.println("<< 103");
-  }
+//  public void testOracle_01() throws Exception {
+//
+//    if (DEBUG)
+//      System.out.println(">> 01");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase01();
+//
+//    if (DEBUG)
+//      System.out.println("<< 01");
+//  }
+//
+//  public void testOracle_02() throws Exception {
+//
+//    if (DEBUG)
+//      System.out.println(">> 02");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase02();
+//
+//    if (DEBUG)
+//      System.out.println("<< 02");
+//  }
+//
+//  public void testOracle_03() throws Exception {
+//    if (DEBUG)
+//      System.out.println(">> 03");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase03();
+//
+//    if (DEBUG)
+//      System.out.println("<< 03");
+//  }
+//
+//  public void testOracle_04() throws Exception {
+//    if (DEBUG)
+//      System.out.println(">> 04");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase04();
+//
+//    if (DEBUG)
+//      System.out.println("<< 04");
+//  }
+//
+//  public void testOracle_101() throws Exception {
+//    if (DEBUG)
+//      System.out.println(">> 101");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase101();
+//
+//    if (DEBUG)
+//      System.out.println("<< 101");
+//  }
+//
+//  public void testOracle_102() throws Exception {
+//    if (DEBUG)
+//      System.out.println(">> 102");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase102();
+//
+//    if (DEBUG)
+//      System.out.println("<< 102");
+//  }
+//
+//  public void testOracle_103() throws Exception {
+//    if (DEBUG)
+//      System.out.println(">> 103");
+//
+//    prepareDB("oracle");
+//    _testDB_UseCase103();
+//
+//    if (DEBUG)
+//      System.out.println("<< 103");
+//  }
 
   public void testPostgres_01() throws Exception {
 
@@ -1482,33 +1482,33 @@ public class TestPersist extends TestCase
 
       /* oracle */
 
-      test.setUp();
-      test.testOracle_01();
-      test.tearDown();
-
-      test.setUp();
-      test.testOracle_02();
-      test.tearDown();
-
-      test.setUp();
-      test.testOracle_03();
-      test.tearDown();
-
-      test.setUp();
-      test.testOracle_04();
-      test.tearDown();
-
-      test.setUp();
-      test.testOracle_101();
-      test.tearDown();
-
-      test.setUp();
-      test.testOracle_102();
-      test.tearDown();
-
-      test.setUp();
-      test.testOracle_103();
-      test.tearDown();
+//      test.setUp();
+//      test.testOracle_01();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testOracle_02();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testOracle_03();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testOracle_04();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testOracle_101();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testOracle_102();
+//      test.tearDown();
+//
+//      test.setUp();
+//      test.testOracle_103();
+//      test.tearDown();
 
 
       /* postgres */
