@@ -239,7 +239,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  private Long createLR(Session s,
+  protected Long createLR(Session s,
                         String lrType,
                         String lrName,
                         int accessMode,
@@ -287,7 +287,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  private void updateDocumentContent(Long docContentID,DocumentContent content)
+  protected void updateDocumentContent(Long docContentID,DocumentContent content)
   throws PersistenceException {
 
     Statement stmt = null;
@@ -336,7 +336,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  private LanguageResource createDocument(Document doc)
+  protected LanguageResource createDocument(Document doc)
   throws PersistenceException {
 
     //delegate, set to Null
@@ -345,7 +345,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  private LanguageResource createDocument(Document doc, Long corpusID)
+  protected LanguageResource createDocument(Document doc, Long corpusID)
   throws PersistenceException {
 
     //1. get the data to be stored
@@ -424,8 +424,10 @@ public class OracleDataStore extends JDBCDataStore {
       createAnnotationSet(docID,currAnnSet);
     }
 
+    //7. create features
+    _createFeatures(docID,this.FEATURE_OWNER_DOCUMENT,docFeatures);
 
-    //7. commit?
+    //8. commit?
 
     throw new MethodNotImplementedException();
   }
@@ -433,7 +435,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** -- */
-  private void createAnnotationSet(Long docID, AnnotationSet aset)
+  protected void createAnnotationSet(Long docID, AnnotationSet aset)
     throws PersistenceException {
 
     //1. create a-set
@@ -500,15 +502,16 @@ public class OracleDataStore extends JDBCDataStore {
       }
 
       //2.1. set annotation features
-      throw new MethodNotImplementedException();
-
+      FeatureMap features = ann.getFeatures();
+      Assert.assertNotNull(features);
+      _createFeatures(annID,this.FEATURE_OWNER_ANNOTATION,features);
     }
   }
 
 
 
   /** -- */
-  private LanguageResource createCorpus(Corpus corp)
+  protected LanguageResource createCorpus(Corpus corp)
   throws PersistenceException {
 
     //1. create an LR entry for the corpus (T_LANG_RESOURCE table)
@@ -524,6 +527,9 @@ public class OracleDataStore extends JDBCDataStore {
 
       createDocument(doc,corpusID);
     }
+
+    //4. create features
+    _createFeatures(corpusID,this.FEATURE_OWNER_CORPUS,corp.getFeatures());
 
     throw new MethodNotImplementedException();
   }
@@ -696,7 +702,7 @@ public class OracleDataStore extends JDBCDataStore {
    * Checks if the user (identified by the sessionID)
    * has some access (read/write) to the LR
    */
-  private boolean canAccessLR(Long lrID, Session s,int mode)
+  protected boolean canAccessLR(Long lrID, Session s,int mode)
     throws PersistenceException, gate.security.SecurityException{
 
     Assert.assert(READ_ACCESS == mode || WRITE_ACCESS == mode);
@@ -793,6 +799,29 @@ public class OracleDataStore extends JDBCDataStore {
 
     //delegate
     writeCLOB(src.toString(),dest);
+  }
+
+
+  /** --- */
+  protected void createFeature(Long entityID, int entityType,String key, Object value)
+    throws PersistenceException {
+
+    throw new MethodNotImplementedException();
+  }
+
+  /** --- */
+  private void _createFeatures(Long entityID, int entityType, FeatureMap features)
+    throws PersistenceException {
+
+      /* when some day Java has macros, this will be a macro */
+      Set entries = features.entrySet();
+      Iterator itFeatures = entries.iterator();
+      while (itFeatures.hasNext()) {
+        Map.Entry entry = (Map.Entry)itFeatures.next();
+        String key = (String)entry.getKey();
+        Object value = entry.getValue();
+        createFeature(entityID,entityType,key,value);
+      }
   }
 
 }

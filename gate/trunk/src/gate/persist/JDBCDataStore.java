@@ -58,6 +58,13 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
   /** owner read/ owner write */
   public static final int ACCESS_OR_OW = 4;
 
+  /** used to store corpus' features */
+  protected static final int FEATURE_OWNER_CORPUS  = 1;
+  /** used to store document's features */
+  protected static final int FEATURE_OWNER_DOCUMENT  = 2;
+  /** used to store annotation's features */
+  protected static final int FEATURE_OWNER_ANNOTATION  = 3;
+
 
   /** Do not use this class directly - use one of the subclasses */
   protected JDBCDataStore() {
