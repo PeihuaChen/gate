@@ -28,26 +28,32 @@ import gate.util.*;
 public class UserImpl
   implements User, ObjectModificationListener {
 
-  /** --- */
+  /** user ID (must be unique) */
   private Long    id;
 
-  /** --- */
+  /** user name (must be unique) */
   private String  name;
 
-  /** --- */
+  /** list of groups the user belongs to */
   private List    groups;
 
-  /** --- */
+  /** Connection to the data store
+   *  used for updates */
   private Connection conn;
 
-  /** --- */
+  /** reference to the security factory */
   private AccessControllerImpl ac;
 
-  /** --- */
+  /** list of objects that should be modified when the state
+   *  of this object is changed */
   private Vector omModificationListeners;
-  /** --- */
+
+  /** list of objects that should be modified when
+   *  this object is created */
   private Vector omCreationListeners;
-  /** --- */
+
+  /** list of objects that should be modified when
+   *  this object is deleted */
   private Vector omDeletionListeners;
 
 
@@ -77,25 +83,36 @@ public class UserImpl
 
   /* Interface USER */
 
-  /** --- */
+  /** returns the ID of the user
+   *  user IDs are uniques in the same
+   *  data store
+   *  */
+
   public Long getID() {
 
     return id;
   }
 
-  /** --- */
+  /** returns the name of the user
+   *  user names are unique in the
+   *  same data store */
   public String getName() {
 
     return name;
   }
 
-  /** --- */
+  /** returns a list with the groups that the
+   *  user is member of  */
   public List getGroups() {
 
     return groups;
   }
 
-  /** --- */
+  /** changes user name
+   *  Only members of the ADMIN group have sufficient privileges.
+   *  fires ObjectModificationEvent
+   *  @see gate.events.ObjectModificationEvent
+   *  */
   public void setName(String newName, Session s)
     throws PersistenceException,SecurityException {
 
@@ -135,17 +152,26 @@ public class UserImpl
     fireObjectModifiedEvent(e);
   }
 
-  /** --- */
+
+  /** changes user password
+   *  Only members of the ADMIN group and the user himself
+   *  have sufficient privileges */
   public void setPassword(String newPass, Session s)
     throws PersistenceException,SecurityException {
 
     CallableStatement stmt = null;
 
     try {
-      //first check the session
-      if (this.ac.isValidSession(s) == false || s.getID() != this.id) {
+      //1. first check the session
+      if (this.ac.isValidSession(s) == false) {
         throw new SecurityException("invalid session supplied");
       }
+
+      //2. check privileges
+      if (false == s.isPrivilegedSession() && s.getID() != this.id) {
+        throw new SecurityException("insuffieicent privileges");
+      }
+
 
       stmt = this.conn.prepareCall(
               "{ call "+Gate.DB_OWNER+".security.set_user_password(?,?)} ");
@@ -178,11 +204,15 @@ public class UserImpl
     return (this.id.equals(usr2.getID()));
   }
 
+  /** registers an object fore receiving ObjectModificationEvent-s
+   *  send by this object
+   *  the only types of events sent by a user object are
+   *  OBJECT_DELETED and OBJECT_MODIFIED, so any attempt for
+   *  registering for other events is invalid  */
   public void registerObjectModificationListener(ObjectModificationListener l,
                                                  int eventType) {
 
-    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
-        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+    if (eventType != ObjectModificationEvent.OBJECT_DELETED &&
         eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
 
         throw new IllegalArgumentException();
@@ -204,11 +234,15 @@ public class UserImpl
 
   }
 
+  /** unregisters an object fore receiving ObjectModificationEvent-s
+   *  send by this object
+   *  the only types of events sent by a user object are
+   *  OBJECT_DELETED and OBJECT_MODIFIED, so any attempt for
+   *  unregistering for other events is invalid  */
   public void unregisterObjectModificationListener(ObjectModificationListener l,
                                                    int eventType) {
 
-    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
-        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+    if (eventType != ObjectModificationEvent.OBJECT_DELETED &&
         eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
 
         throw new IllegalArgumentException();
@@ -229,7 +263,8 @@ public class UserImpl
     }
   }
 
-
+  /** sends ObjectModificationEvent of type OBJECT_MODIFIED to all
+   *  who have already registered */
   private void fireObjectModifiedEvent(ObjectModificationEvent e) {
 
     //sanity check
@@ -243,18 +278,29 @@ public class UserImpl
   }
 
   //ObjectModificationListener interface
+
+  /** callback that is invoked from objects that were <b>created</b>
+   *  and this user object is interested in
+   *  <b>NOTE</b> that this events are just ignored*/
   public void objectCreated(ObjectModificationEvent e) {
     //ignore, we don't care about creations
     return;
   }
 
+  /** callback that is invoked from objects that were <b>modified</b>
+   *  and this user object is interested in
+   *  Useful when a group drops the user as member and
+   *  this user should be notified so that it will remove the
+   *  reference to the group from its internal collections
+   *  (the user is no longer member of the group)
+   *  */
   public void objectModified(ObjectModificationEvent e) {
 
     //only groups can disturb the user
-/*    Assert.assert(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
+    Assert.assert(e.getSubType() == Group.OBJECT_CHANGE_ADDUSER ||
                   e.getSubType() == Group.OBJECT_CHANGE_REMOVEUSER ||
                   e.getSubType() == Group.OBJECT_CHANGE_NAME);
-*/
+
     //we get this event only if a group adds/removes user to it
     Group grp = (Group)e.getSource();
 
@@ -292,6 +338,13 @@ public class UserImpl
 
   }
 
+  /** callback that is invoked from objects that were <b>deleted</b>
+   *  and this user object is interested in
+   *  Useful when a group is deleted from the security factory and
+   *  this user should be notified so that it will remove the
+   *  reference to the group from its internal collections
+   *  (the user is no longer member of the group)
+   *  */
   public void objectDeleted(ObjectModificationEvent e) {
 
     if (e.getSource() instanceof Group) {
@@ -305,6 +358,7 @@ public class UserImpl
     }
   }
 
+  /** huh? */
   public void processGateEvent(GateEvent e){
     throw new MethodNotImplementedException();
   }

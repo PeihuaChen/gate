@@ -22,23 +22,37 @@ import gate.persist.PersistenceException;
 
 public interface User {
 
+  /** subtype for ObjectModificationEvent of type OBJECT_MODIFIED
+   *  @see gate.event.ObjectModificationEvent
+   *  the event is sent when the name of the user is changed
+   *  */
   public static final int OBJECT_CHANGE_NAME        = 1001;
-  public static final int OBJECT_CHANGE_PASSWORD    = 1002;
 
-  /** --- */
+
+  /** returns the ID of the user
+   *  user IDs are uniques in the same
+   *  data store
+   *  */
   public Long getID();
 
-  /** --- */
+  /** returns the name of the user
+   *  user names are unique in the
+   *  same data store */
   public String getName();
 
-  /** --- */
+  /** returns a list with the groups that the
+   *  user is member of  */
   public List getGroups();
 
-  /** --- */
+  /** changes user name
+   *  Only members of the ADMIN group have sufficient privileges.
+   *  fires ObjectModificationEvent  */
   public void setName(String newName, Session s)
     throws PersistenceException,SecurityException;
 
-  /** --- */
+  /** changes user password
+   *  Only members of the ADMIN group and the user himself
+   *  have sufficient privileges */
   public void setPassword(String newPass, Session s)
     throws PersistenceException,SecurityException;
 }
