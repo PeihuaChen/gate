@@ -25,7 +25,7 @@ public class TestDocument extends TestCase
   public TestDocument(String name) { super(name); }
 
   /** Base of the test server URL */
-  protected static String testServer = "http://derwent.dcs.shef.ac.uk:8000/";
+  protected static String testServer = "http://derwent.dcs.shef.ac.uk/";
 
   /** Name of test document 1 */
   protected String testDocument1;
