@@ -85,7 +85,6 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
           int row = documentsList.locationToIndex(e.getPoint());
           if(row != -1){
             Resource lr = (Resource) corpus.get(row);
-            Out.prln(lr);
           }
         }
       }

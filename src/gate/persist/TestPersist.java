@@ -87,9 +87,9 @@ public class TestPersist extends TestCase
     doc.setName("Alicia Tonbridge, a Document");
 
     // save the document
-    doc = (Document) sds.adopt(doc,null);
-    sds.sync(doc);
-    Object lrPersistenceId = doc.getLRPersistenceId();
+    Document persDoc = (Document) sds.adopt(doc,null);
+    sds.sync(persDoc);
+    Object lrPersistenceId = persDoc.getLRPersistenceId();
 
     // test the getLrTypes method
     List lrTypes = sds.getLrTypes();
@@ -116,7 +116,7 @@ public class TestPersist extends TestCase
     //clear the parameters value from features as they will be different
 
     assert(doc3.equals(doc2));
-    assert(doc.equals(doc2));
+    assert(persDoc.equals(doc2));
 
     // delete the datastore
     sds.delete();
@@ -147,12 +147,12 @@ public class TestPersist extends TestCase
     );
 
     // save the document
-    doc = (Document) sds.adopt(doc,null);
-    sds.sync(doc);
+    Document persDoc = (Document) sds.adopt(doc,null);
+    sds.sync(persDoc);
 
     // remember the persistence ID for reading back
     // (in the normal case these ids are obtained by DataStore.getLrIds(type))
-    Object lrPersistenceId = doc.getLRPersistenceId();
+    Object lrPersistenceId = persDoc.getLRPersistenceId();
 
     // read the document back
     FeatureMap features = Factory.newFeatureMap();
@@ -163,7 +163,7 @@ public class TestPersist extends TestCase
 
     //parameters should be different
     // check that the version we read back matches the original
-    assert(doc.equals(doc2));
+    assert(persDoc.equals(doc2));
 
     // delete the datastore
     sds.delete();
@@ -265,12 +265,12 @@ public class TestPersist extends TestCase
     );
 
     // save the document
-    doc = (Document) sds.adopt(doc,null);
-    sds.sync(doc);
+    Document persDoc = (Document) sds.adopt(doc,null);
+    sds.sync(persDoc);
 
     // remember the persistence ID for reading back
     // (in the normal case these ids are obtained by DataStore.getLrIds(type))
-    Object lrPersistenceId = doc.getLRPersistenceId();
+    Object lrPersistenceId = persDoc.getLRPersistenceId();
 
     // delete document back
     sds.delete("gate.corpora.DocumentImpl", lrPersistenceId);
@@ -311,8 +311,8 @@ public class TestPersist extends TestCase
     );
 
     // save the document
-    doc = (Document) sds.adopt(doc,null);
-    sds.sync(doc);
+    Document persDoc = (Document) sds.adopt(doc,null);
+    sds.sync(persDoc);
 
     // DSR should have one member
     assert("DSR has wrong number elements", dsr.size() == 1);
