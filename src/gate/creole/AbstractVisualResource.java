@@ -15,7 +15,7 @@ public abstract class AbstractVisualResource extends JPanel
     this.features = features;
   }
 
-  public Resource init(){
+  public Resource init() throws ResourceInstantiationException {
     return this;
   }
   //properties
