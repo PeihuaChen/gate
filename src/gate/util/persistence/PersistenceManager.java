@@ -408,10 +408,10 @@ public class PersistenceManager {
       }
       //now we can read the saved object
       res = ois.readObject();
-    }catch(ClassNotFoundException cnfe){
+    }catch(Exception ex){
       if(sListener != null) sListener.statusChanged("Loading failed!");
       if(pListener != null) pListener.processFinished();
-      throw new PersistenceException(cnfe);
+      throw new PersistenceException(ex);
     }
     ois.close();
     //insure a fresh start
