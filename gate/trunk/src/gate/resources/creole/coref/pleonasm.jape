@@ -456,7 +456,7 @@ Priority: 55
    (IT)
    (ADVERB-01)?
    (MODALADJ)
-   ( (CONJ) | (TO) )
+   ( (CONJ) | (TO) )?
 ) :pleonasm
 -->
 {
