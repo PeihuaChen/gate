@@ -313,7 +313,7 @@ public class CreoleXmlHandler extends DefaultHandler {
             resourceData.makeInstantiationPersistant(res);
           } catch(ResourceInstantiationException e) {
             throw new GateSaxException(
-              "Couldn't autoinstanciate resource: " +
+              "Couldn't auto-instantiate resource: " +
               resourceData.getName() + "; problem was: " + e
             );
           }// End try
@@ -324,7 +324,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("AUTOINSTANCE")) {
       //checkStack("endElement", "AUTOINSTANCE");
-      // Cash the autoinstance into the autoins
+      // Cache the auto-instance into the autoins
       if (currentAutoinstanceParams != null)
         currentAutoinstances.add(currentAutoinstanceParams);
     // End AUTOINSTANCE processing
