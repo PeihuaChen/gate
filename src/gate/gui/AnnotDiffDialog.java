@@ -326,12 +326,15 @@ class AnnotDiffDialog extends JFrame {
                                                             BoxLayout.Y_AXIS));
     Dimension maxDimm = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension newDim = new Dimension(maxDimm.width/3, maxDimm.height/3);
-    annotDiff.setMaximumSize(newDim);
-    annotDiff.setMinimumSize(newDim);
-    annotDiff.setPreferredSize(newDim);
+    JScrollPane upperScrolPane = new JScrollPane(northBox);
+    JScrollPane lowerScrolPane = new JScrollPane(annotDiff);
+    lowerScrolPane.setMaximumSize(newDim);
+    lowerScrolPane.setMinimumSize(newDim);
+    lowerScrolPane.setPreferredSize(newDim);
+
     jSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                               new JScrollPane(northBox),
-                               new JScrollPane(annotDiff));
+                               upperScrolPane,
+                               lowerScrolPane);
     jSplit.setOneTouchExpandable(true);
     jSplit.setOpaque(true);
     jSplit.setAlignmentY(Component.TOP_ALIGNMENT);
