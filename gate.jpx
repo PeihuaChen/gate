@@ -275,7 +275,7 @@
   <property category="sys" name="ExcludeClassEnabled" value="0"/>
   <property category="sys" name="IncludeTestPath" value="1"/>
   <property category="sys" name="InstanceVisibility" value="4"/>
-  <property category="sys" name="JDK" value="java version 1.4.2-b28"/>
+  <property category="sys" name="JDK" value="java version 1.4.1_02-b06"/>
   <property category="sys" name="JbxEventListener0" value="gate.event.ProgressListener"/>
   <property category="sys" name="JbxEventListener1" value="gate.event.StatusListener"/>
   <property category="sys" name="JbxEventListener2" value="gate.event.ProgressListener"/>
