@@ -34,6 +34,11 @@ public class TestSecurity extends TestCase
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** JDBC URL */
+  private static final String JDBC_URL =
+            "jdbc:oracle:thin:GATEUSER/gate@192.168.128.207:1521:GATE03";
+//"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB"
+
   /** Construction */
   public TestSecurity(String name) throws GateException { super(name); }
 
@@ -50,7 +55,7 @@ public class TestSecurity extends TestCase
 
   public void testSecurityTables() throws Exception {
     AccessController ac = new AccessControllerImpl();
-    ac.open("jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB");
+    ac.open(JDBC_URL);
 
     User myUser = ac.findUser("kalina");
     Assert.assertNotNull(myUser);
@@ -75,18 +80,55 @@ public class TestSecurity extends TestCase
 
   } // testSecurityTables
 
+
+
   public void testUserGroupManipulation() throws Exception {
+
+    //1. open security factory
     AccessController ac = new AccessControllerImpl();
-    ac.open("jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB");
+    ac.open(JDBC_URL);
 
+    //2. log into the securoty factory
+    Session adminSession = ac.login("kalina", "sesame",
+                              ac.findGroup("English Language Group").getID());
+    //check session
+    Assert.assertNotNull(adminSession);
+    //is session valid?
+    Assert.assert(true == ac.isValidSession(adminSession));
+
+    //3. create a new user and group
     User myUser = ac.createUser("myUser", "myPassword");
+    //is the user aded to the security factory?
+    Assert.assertNotNull(ac.findUser("myUser"));
+    //is the user in the security factory equal() to what we put there?
+    Assert.assertEquals(myUser,ac.findUser("myUser"));
+    //is the key correct?
+    Assert.assertEquals(myUser.getName(),ac.findUser("myUser").getName());
+
+
+
     Group myGroup = ac.createGroup("myGroup");
-    Session mySession = ac.login("myUser", "myPassword", myGroup.getID());
+    //is the group aded to the security factory?
+    Assert.assertNotNull(ac.findGroup("myGroup"));
+    //is the group in the security factory equal() to what we put there?
+    Assert.assertEquals(myGroup,ac.findGroup("myGroup"));
+    //is the key correct?
+    Assert.assertEquals(myGroup.getName(), "myGroup");
 
-    myGroup.addUser(myUser, mySession);
-    myGroup.setName("my new group", mySession);
-    Assert.assertEquals(myGroup.getName(), "my new group");
 
+
+    //4. add user to group
+    myGroup.addUser(myUser, adminSession);
+    //is the user added to the group?
+    Assert.assert(myGroup.getUsers().contains(myUser));
+
+    //5. change group name
+    myGroup.setName("my new group", adminSession);
+    //is the name changed?
+    Assert.assertEquals("my new group",myGroup.getName());
+
+
+    //6. get users
     List myUsers = myGroup.getUsers();
     Assert.assertNotNull(myUsers);
     for (int i = 0; i< myUsers.size(); i++) {
@@ -99,14 +141,47 @@ public class TestSecurity extends TestCase
       Out.prln("are equals? " + myUser1.equals(myUser));
     }//for
 
+    //7. change name again
+    myGroup.setName("my new group again", adminSession);
+    //is the name changed?
+    Assert.assertEquals("my new group again",myGroup.getName());
+
+    //8. try to log the user in
+    Session mySession = ac.login("myUser", "myPassword",
+                              ac.findGroup("my new group again").getID());
+    //check session
+    Assert.assertNotNull(mySession);
+    //is valid session?
+    Assert.assert(true == ac.isValidSession(mySession));
+
+    //9. logout
     ac.logout(mySession);
-    myGroup.setName("my new group again", mySession);
+    //is session invalidated?
+    Assert.assert(false == ac.isValidSession(mySession));
 
-    mySession = ac.login("myUser", "myPassword",
-                              ac.findGroup("my new group").getID());
-    ac.deleteGroup(myGroup, mySession);
+    //10. try to perform an operation with invalid session
+    boolean exceptionThrown = false;
+    try {
+      myGroup.removeUser(myUser,mySession);
+    }
+    catch(SecurityException ex) {
+      exceptionThrown = true;
+      Err.prln("++++ OK, got exception ["+ex.getMessage()+"]");
+    }
+    Assert.assert(true == exceptionThrown);
 
-    Out.prln(myGroup.getName());
+    //11. try to delete group
+    ac.deleteGroup(myGroup, adminSession);
+    //is the group deleted?
+    Assert.assertNull(ac.findGroup(myGroup.getName()));
+
+    //12. check that the sessions are invalidated ig the
+    //group/user in the session is deleted
+
+    //13. check objectModification events
+
+    //14.
+
   } // testUserGroupManipulation
 
 
