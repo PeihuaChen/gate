@@ -50,14 +50,15 @@ Priority: 40
 ):person
 -->
 {
-//removes old "Person" and "Unknown" annotations and adds a new "Person" one
-gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("rule", "PersonTitle1");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
-features);
-annotations.removeAll(person);
+/*
+  //removes old "Person" and "Unknown" annotations and adds a new "Person" one
+  gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
+  gate.FeatureMap features = Factory.newFeatureMap();
+  features.put("gender", personAnn.getFeatures().get("gender"));
+  features.put("rule", "PersonTitle1");
+  annotations.add(person.firstNode(), person.lastNode(), "Person", features);
+  annotations.removeAll(person);
+*/
 }
 
 
