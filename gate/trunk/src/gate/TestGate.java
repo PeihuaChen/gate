@@ -39,6 +39,7 @@ import gate.security.*;
 import com.ontotext.gate.gazetteer.*;
 import gate.creole.ir.*;
 import gate.wordnet.*;
+import gate.creole.morph.*;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
@@ -209,8 +210,7 @@ public class TestGate {
       // set this true to run all tests; false to run the just one below
       boolean allTests = true;
       if(! allTests){
-        suite.addTest(TestPersist.suite());
-        suite.addTest(TestSecurity.suite());
+        suite.addTest(TestMorph.suite());
       } else {
         suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
