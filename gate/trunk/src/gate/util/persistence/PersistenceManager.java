@@ -622,6 +622,9 @@ public class PersistenceManager {
       registerPersitentEquivalent(Controller.class,
                                   ControllerPersistence.class);
 
+      registerPersitentEquivalent(ConditionalController.class,
+                                  ConditionalControllerPersistence.class);
+
       registerPersitentEquivalent(LanguageAnalyser.class,
                                   LanguageAnalyserPersistence.class);
 
@@ -630,6 +633,8 @@ public class PersistenceManager {
 
       registerPersitentEquivalent(gate.persist.JDBCDataStore.class,
                                   JDBCDSPersistence.class);
+      registerPersitentEquivalent(gate.creole.AnalyserRunningStrategy.class,
+                                  AnalyserRunningStrategyPersistence.class);
     }catch(PersistenceException pe){
       //builtins shouldn't raise this
       pe.printStackTrace();
