@@ -23,16 +23,17 @@ import java.net.URL;
 import java.io.*;
 
 /**
- * This class is the implementation of a processing resource which
- * deletes all annotations and sets other than 'original markups'.
- * If put at the start of an application, it'll ensure that the
- * document is restored to its clean state before being processed.
+ * This class implements a DumpingPR which exports a given set of annotation
+ * types + the original markup, back into the document's native format.
+ * The export might also include the GATE features of those annotations or
+ * not (the default). One can also control whether the export files have a
+ * new suffix (useSuffixForDumpFiles) and what this suffix is
+ * (suffixForDumpFiles). By default, a suffix is used and it is .gate.
  */
 public class DumpingPR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
   private static final boolean DEBUG = false;
-  private static final String OUTPUT_FILE_EXTENSION = ".gate";
 
   /**
    * A list of annotation types, which are to be dumped into the output file
@@ -57,6 +58,18 @@ public class DumpingPR extends AbstractLanguageAnalyser
    * Whether or not to include the annotation features during export
    */
   protected boolean includeFeatures = false;
+
+  /**
+   * What suffix to use for the dump files. .gate by default, but can be
+   * changed via the set method.
+   */
+  protected String suffixForDumpFiles = ".gate";
+
+  /**
+   * Whether or not to use the special suffix fo the dump files. True by
+   * default.
+   */
+  protected boolean useSuffixForDumpFiles = true;
 
   protected java.net.URL outputFileUrl;
 
@@ -136,9 +149,9 @@ public class DumpingPR extends AbstractLanguageAnalyser
     try {
       URL sourceURL = new URL(source);
       StringBuffer tempBuff = new StringBuffer(sourceURL.getFile());
-      tempBuff.append(this.OUTPUT_FILE_EXTENSION);
-//      tempBuff.insert(sourceURL.getFile().lastIndexOf("."), "_gate_output");
-//      tempBuff.insert(0, sourceURL.getPath());
+      //now append the special suffix if we want to use it
+      if (useSuffixForDumpFiles)
+        tempBuff.append(this.suffixForDumpFiles);
       String outputPath = tempBuff.toString();
       if (DEBUG)
         Out.prln(outputPath);
@@ -229,6 +242,32 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
   public void setOutputFileUrl(URL file) {
     outputFileUrl = file;
+  }
+
+  public void setIncludeFeatures(Boolean inclFeatures) {
+    if (inclFeatures != null)
+      includeFeatures = inclFeatures.booleanValue();
+  }
+
+  public Boolean getIncludeFeatures() {
+    return new Boolean(includeFeatures);
+  }
+
+  public String getSuffixForDumpFiles() {
+    return suffixForDumpFiles;
+  }
+
+  public void setSuffixForDumpFiles(String newSuffix) {
+    this.suffixForDumpFiles = newSuffix;
+  }
+
+  public Boolean getUseSuffixForDumpFiles() {
+    return new Boolean(this.useSuffixForDumpFiles);
+  }
+
+  public void setUseSuffixForDumpFiles(Boolean useOrNot) {
+    if (useOrNot != null)
+      this.useSuffixForDumpFiles = useOrNot.booleanValue();
   }
 
 } // class AnnotationSetTransfer
