@@ -1690,8 +1690,6 @@ System.out.println();
 
 
     //3. [optional] sync Annotations
-
-
     throw new MethodNotImplementedException();
   }
 
@@ -1725,27 +1723,42 @@ System.out.println();
   private void _syncDocument(Document doc)
     throws PersistenceException {
 
-/*    Long lrID = (Long)doc.getLRPersistenceId();
+    Long lrID = (Long)doc.getLRPersistenceId();
 
     CallableStatement stmt = null;
 
     try {
       stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+
                                                     ".persist.update_document(?,?,?,?,?) }");
-      stmt.setLong(1,ID.longValue());
-      stmt.registerOutParameter(2,java.sql.Types.VARCHAR);
-      stmt.execute();
-      String result = stmt.getString(2);
+      stmt.setLong(1,lrID.longValue());
+      stmt.setString(2,doc.getSourceUrl().toString());
+      //do we have start offset?
+      if (null==doc.getSourceUrlStartOffset()) {
+        stmt.setNull(3,java.sql.Types.NUMERIC);
+      }
+      else {
+        stmt.setLong(3,doc.getSourceUrlStartOffset().longValue());
+      }
+      //do we have end offset?
+      if (null==doc.getSourceUrlEndOffset()) {
+        stmt.setNull(4,java.sql.Types.NUMERIC);
+      }
+      else {
+        stmt.setLong(4,doc.getSourceUrlEndOffset().longValue());
+      }
 
-      return result;
+      stmt.setLong(5,true == doc.getMarkupAware().booleanValue() ? this.ORACLE_TRUE
+                                                                  : this.ORACLE_FALSE);
+
+      stmt.execute();
     }
     catch(SQLException sqle) {
-      throw new PersistenceException("can't get LR name from DB: ["+ sqle.getMessage()+"]");
+      throw new PersistenceException("can't change document data: ["+ sqle.getMessage()+"]");
     }
     finally {
       DBHelper.cleanup(stmt);
     }
-*/
+
     throw new MethodNotImplementedException();
   }
 
@@ -1787,6 +1800,27 @@ System.out.println();
     }
   }
 
+  private void _syncAnnotations(Document doc)
+    throws PersistenceException {
+
+    //0. preconditions
+    Assert.assertNotNull(doc);
+    Assert.assertTrue(doc instanceof DatabaseDataStore);
+    Assert.assertNotNull(doc.getLRPersistenceId());
+    Assert.assertEquals(((DatabaseDataStore)doc.getDataStore()).getDatabaseID(),
+                      this.getDatabaseID());
+
+    //1. iterate all the annotation sets
+    Iterator itSets = doc.getNamedAnnotationSets().values().iterator();
+    while (itSets.hasNext()) {
+      AnnotationSet aset = (AnnotationSet)itSets.next();
+//      aset.
+    }
+
+    //2. the default aset
+
+    throw new MethodNotImplementedException();
+  }
 
   private void syncCorpus(Corpus corp) throws PersistenceException {
     throw new MethodNotImplementedException();
