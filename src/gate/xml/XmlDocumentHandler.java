@@ -73,7 +73,7 @@ public class XmlDocumentHandler extends HandlerBase
     // init stack
     stack = new java.util.Stack();
     // this string contains the plain text (the text without markup)
-    tmpDocContent = new String("");
+    tmpDocContent = new StringBuffer("");
     // colector is used later to transform all custom objects into annotation
     // objects
     colector = new LinkedList();
@@ -108,7 +108,7 @@ public class XmlDocumentHandler extends HandlerBase
     */
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
-    doc.setContent(new DocumentContentImpl(tmpDocContent));
+    doc.setContent(new DocumentContentImpl(tmpDocContent.toString()));
     // fire the status listener
     fireStatusChangedEvent("Total elements: " + elements);
     // If basicAs is null then get the default AnnotationSet,
@@ -189,7 +189,7 @@ public class XmlDocumentHandler extends HandlerBase
       // if it is then get the string value and add it to the document content
       stringFromMap = (String) element2StringMap.get(elemName);
       if (stringFromMap != null)
-          tmpDocContent += stringFromMap;
+          tmpDocContent.append(stringFromMap);
     }
   }
 
@@ -219,7 +219,7 @@ public class XmlDocumentHandler extends HandlerBase
       }
     }
     // update the document content
-    tmpDocContent += content;
+    tmpDocContent.append(content);
   }
 
   /**
@@ -237,7 +237,7 @@ public class XmlDocumentHandler extends HandlerBase
       if (tmpDocContent.charAt (tmpDocContent.length () - 1) != '\n' ||
         !text.equalsIgnoreCase("\n")
       )
-         tmpDocContent += text;
+         tmpDocContent.append(text);
   }
 
   /**
@@ -365,7 +365,7 @@ public class XmlDocumentHandler extends HandlerBase
 
   // the content of the XML document, without any tag
   // for internal use
-  private String tmpDocContent = null;
+  private StringBuffer tmpDocContent = null;
 
   // a stack used to remember elements and to keep the order
   private java.util.Stack stack = null;

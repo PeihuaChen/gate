@@ -2,14 +2,14 @@
  *	HtmlDocumentHandler.java
  *
  *  Copyright (c) 2000-2001, The University of Sheffield.
- *  
+ *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June1991.
- *  
+ *
  *  A copy of this licence is included in the distribution in the file
  *  licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *  
+ *
  *	Cristian URSU,  12/June/2000
  *
  *  $Id$
@@ -45,13 +45,30 @@ public class HtmlDocumentHandler extends ParserCallback{
   private static final boolean DEBUG = false;
 
   /**
-    * Constructor initialises all the private memeber data
+    * Constructor initialises all the private memeber data.
+    * This will use the default annotation set taken from the gate document.
+    * @param aDocument The gate document that will be processed
+    * @param aMarkupElementsMap The map containing the elements that will
+    * transform into annotations
     */
   public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap){
+    this(aDocument,aMarkupElementsMap,null);
+  }
+  /**
+    * Constructor initialises all the private memeber data
+    * @param aDocument The gate document that will be processed
+    * @param aMarkupElementsMap The map containing the elements that will
+    * transform into annotations
+    * @param anAnnoatationSet The annotation set that will contain annotations
+    * resulted from the processing of the gate document
+    */
+  public HtmlDocumentHandler(gate.Document       aDocument,
+                             Map                 aMarkupElementsMap,
+                             gate.AnnotationSet  anAnnotationSet){
     // init stack
     stack = new java.util.Stack();
     // this string contains the plain text (the text without markup)
-    tmpDocContent = new String("");
+    tmpDocContent = new StringBuffer("");
     // colector is used later to transform all custom objects into
     // annotation objects
     colector = new LinkedList();
@@ -61,6 +78,8 @@ public class HtmlDocumentHandler extends ParserCallback{
     // if it's null all the elements from the XML documents will be transformed
     // into Gate annotation objects
     markupElementsMap = aMarkupElementsMap;
+    // init an annotation set for this gate document
+    basicAS = anAnnotationSet;
   }
 
   /**
@@ -106,9 +125,11 @@ public class HtmlDocumentHandler extends ParserCallback{
     // if t is the </HTML> tag then we reached the end of theHTMLdocument
     if (t == HTML.Tag.HTML){
       // replace the old content with the new one
-      doc.setContent (new DocumentContentImpl(tmpDocContent));
-      // get an annotation set from this document
-      basicAS = doc.getAnnotations();
+      doc.setContent (new DocumentContentImpl(tmpDocContent.toString()));
+      // If basicAs is null then get the default annotation
+      // set from this gate document
+      if (basicAS == null)
+        basicAS = doc.getAnnotations();
       // iterate through colector and construct annotations
       Iterator anIterator = colector.iterator();
       while (anIterator.hasNext()){
@@ -150,7 +171,7 @@ public class HtmlDocumentHandler extends ParserCallback{
        fireStatusChangedEvent("Processed elements : " + elements);
     // if the HTML tag is BR then we add a new line character to the document
     if (HTML.Tag.BR == t)
-      tmpDocContent += "\n";
+      tmpDocContent.append("\n");
     // construct a feature map from the attributes list
     // these are empty elements
     FeatureMap fm = new SimpleFeatureMapImpl();
@@ -200,7 +221,7 @@ public class HtmlDocumentHandler extends ParserCallback{
       obj.setEnd(end);
     }
     // update the document content
-    tmpDocContent += content;
+    tmpDocContent.append(content);
   }
 
   /**
@@ -255,7 +276,7 @@ public class HtmlDocumentHandler extends ParserCallback{
 
   // the content of the HTML document, without any tag
   // for internal use
-  private String tmpDocContent = null;
+  private StringBuffer tmpDocContent = null;
 
   // a stack used to remember elements and to keep the order
   private java.util.Stack stack = null;
