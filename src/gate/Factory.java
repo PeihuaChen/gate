@@ -352,13 +352,18 @@ public abstract class Factory
    * @param resource the resource that listeners will be registered to.
    */
   protected static void setResourceListeners(Resource resource, Map listeners)
-  throws    IntrospectionException, InvocationTargetException,
-            IllegalAccessException, GateException{
+  throws
+    IntrospectionException, InvocationTargetException,
+    IllegalAccessException, GateException
+  {
     // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo = Introspector.getBeanInfo(resource.getClass(),
-                                                    Object.class);
+    BeanInfo resBeanInfo = Introspector.getBeanInfo(
+      resource.getClass(), Object.class
+    );
+
     // get all the events the bean can fire
     EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+
     // add the listeners
     if(events != null) {
       EventSetDescriptor event;
@@ -378,7 +383,7 @@ public abstract class Factory
         }
       } // for each event
     }   // if events != null
-  }//protected static void setResourceListeners()
+  } // setResourceListeners()
 
   /**
    * Removes listeners from a resource.
@@ -387,16 +392,20 @@ public abstract class Factory
    * (as a string) to listener (of the type declared by the key).
    * @param resource the resource that listeners will be removed from.
    */
-  protected static void removeResourceListeners(Resource resource,
-                                                Map listeners)
-                        throws IntrospectionException,
-                               InvocationTargetException,
-                               IllegalAccessException, GateException{
+  protected static void removeResourceListeners(
+    Resource resource, Map listeners
+  ) throws 
+    IntrospectionException, InvocationTargetException,
+    IllegalAccessException, GateException
+  {
     // get the beaninfo for the resource bean, excluding data about Object
-    BeanInfo resBeanInfo = Introspector.getBeanInfo(resource.getClass(),
-                                                    Object.class);
+    BeanInfo resBeanInfo = Introspector.getBeanInfo(
+      resource.getClass(), Object.class
+    );
+
     // get all the events the bean can fire
     EventSetDescriptor[] events = resBeanInfo.getEventSetDescriptors();
+
     // add the listeners
     if(events != null) {
       EventSetDescriptor event;
@@ -416,7 +425,7 @@ public abstract class Factory
         }
       } // for each event
     }   // if events != null
-  }//protected static void removeResourceListeners()
+  } // removeResourceListeners()
 
   /** Create a new transient Corpus. */
   public static Corpus newCorpus(String name)
