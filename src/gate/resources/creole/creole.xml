@@ -538,6 +538,9 @@
       <PARAMETER DEFAULT="Organization;Person;Location;Facility;GPE" NAME="exportedTypes">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="exportFilePath"  COMMENT="Destination URL where to export" SUFFIXES="daml;rdf">java.net.URL</PARAMETER>
       <PARAMETER DEFAULT="DAML+OIL" NAME="exportFormat">java.lang.String</PARAMETER>
+      <!-- new Parameter added by Niraj -->
+      <PARAMETER NAME="annotationSetName" COMMENT="AnnotationSet that should be exported" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+
       <ICON>daml.jpg</ICON>
     </RESOURCE>
 
