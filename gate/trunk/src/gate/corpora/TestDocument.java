@@ -22,7 +22,7 @@ import gate.annotation.*;
 public class TestDocument extends TestCase
 {
   /** Construction */
-  public TestDocument(String name) { super(name); }
+  public TestDocument(String name) { super(name); setUp();}
 
   /** Base of the test server URL */
   protected static String testServer = "http://redmires.dcs.shef.ac.uk/";
@@ -32,7 +32,7 @@ public class TestDocument extends TestCase
 
   /** Fixture set up */
   public void setUp() {
-    testDocument1 = "gate/tests/doc0.html";
+    testDocument1 = "texts/doc0.html";
   } // setUp
 
   /** Get the name of the test server */
