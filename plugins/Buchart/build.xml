@@ -1,0 +1,239 @@
+<project name="BuChartWrapper" default="plcafe" basedir=".">
+
+
+<description>
+	Building the BuChart Wrapper
+</description>
+
+
+ <!-- ###################################################################
+                          USER MODIFIABLE OPTIONS
+      ################################################################### -->
+       
+<!-- Update this to point at your main GATE jar file -->
+<fileset id="gate-jar" file="z:/gate/bin/gate.jar"/>
+
+<!-- Update this to point to a compatiable tools.jar file -->
+<fileset id="tools-jar" file="z:/gate/bin/tools14.jar"/>
+
+<!-- Update this to point at your installation of GATE -->
+<property name="gate_home" location="z:/gate"/>
+
+<!-- If you are wanting to use your own installation of SWI prolog then
+     change this so that it points to the jpl.jar file in that distribution -->
+<fileset id="jpl-jar" file="./lib/jpl.jar"/>
+
+  
+  <!-- ###################################################################
+                        USER MODIFIABLE OPTIONS END HERE 
+       ################################################################### -->
+
+<available file="${gate_home}/lib" type="dir" property="gate.libs.present"/>
+
+<tstamp>
+	<format property="TODAY_UK" pattern="d-MMMM-yyyy" locale="en"/>
+</tstamp>
+
+<target name="gate3" if="gate.libs.present">
+	<echo message="Setting The path suitable for GATE 3"/>
+	<path id="use-path">
+		<fileset refid="jpl-jar"/>
+		<fileset refid="gate-jar"/>
+		<fileset refid="tools-jar"/>
+		<fileset id="gate-libs" dir="${gate_home}/lib">
+			<include name="*.jar"/>
+			<include name="*.zip"/>
+		</fileset>
+	</path>
+</target>
+
+<target name="gate2" unless="gate.libs.present">
+	<echo message="Setting The path suitable for GATE 2.x"/>
+	<path id="use-path">
+		<fileset refid="jpl-jar"/>
+		<fileset refid="gate-jar"/>
+		<fileset refid="tools-jar"/>
+	</path>
+</target>
+
+<target name="dist" depends="clean,test.plcafe">
+	<delete file="BuChart-${TODAY_UK}.zip"/>
+	<zip destfile="BuChart-${TODAY_UK}.zip" basedir="${basedir}"
+	excludes="classes/**, docs/**"/>
+</target>
+
+<property name="prolog" location="${basedir}/prolog"/>
+<property name="grammar" location="${prolog}/grammar"/>
+<property name="lib" location="lib"/>
+<property name="config" location="config"/>
+<property name="classes" location="classes"/>
+<property name="src" location="src"/>
+
+<target name="all" depends="plcafe,sicstus,swi"/>
+
+<target name="clean">
+	<delete>
+	    <fileset dir="${classes}" includes="**/*.class"/>
+  	</delete>
+	<delete file="buchart.swi"/>
+	<delete file="buchart.plcafe"/>
+	<delete file="buchart.sicstus"/>
+	<delete file="BuChart.jar"/>
+</target>
+
+
+<target name="buchart.jar" depends="plcafe.translate,plcafe.compile,buchart.compile">
+	<jar file="BuChart.jar" basedir="${classes}" update="true"/>
+</target>
+
+<target name="plcafe.translate">
+	<java fork="true" classname="jp.ac.kobe_u.cs.prolog.compiler.Compiler" dir="${prolog}">
+		<jvmarg value="-Xmx512m"/>
+		<jvmarg value="-Djava.ext.dirs=${lib}"/>
+		<arg value ="mkparser_plcafe.pl"/>
+	</java>
+</target>
+
+<target name="plcafe.compile">
+        <mkdir dir="${classes}"/>
+	<javac extdirs="${lib}" srcdir="${prolog}" destdir="${classes}"/>
+	<!--<delete>
+	    <fileset dir="${prolog}" includes="**/*.java"/>
+  	</delete>-->
+</target>
+
+<target name="buchart.compile">
+        <mkdir dir="${classes}"/>
+	<javac destdir="${classes}">
+		<src>
+			<pathelement path="${src}/shef/nlp/buchart"/>
+		</src>
+		<classpath>
+			<fileset refid="gate-jar"/>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+		</classpath>
+	</javac>
+</target>
+
+
+<target name="plcafe" depends="buchart.jar">
+	<java classname="shef.nlp.buchart.prolog.PrologCafe" dir="${grammar}" fork="true">
+		<classpath>
+			<fileset file="BuChart.jar"/>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+		</classpath>
+		<jvmarg value="-Xmx512m"/>
+		<arg value="plcafe_load.pl"/>
+		<arg value="${basedir}/buchart.plcafe"/>
+	</java>
+</target>
+
+<target name="sicstus" depends="buchart.jar">
+	<delete file="buchart.sicstus"/>
+	<exec executable="sicstus">
+		<arg value="-l"/>
+		<arg value="${prolog}/mkparser_sicstus.pl"/>
+		<arg value="-a"/>
+		<arg value="-n"/>
+	</exec>
+	<move file="${prolog}/buchart.sicstus" tofile="buchart.sicstus"/> 
+</target>
+
+<target name="swi" depends="buchart.jar">
+	<delete file="buchart.swi"/>
+	<exec executable="plcon">
+		<arg value="-L0"/>
+		<arg value="-G8M"/>
+		<arg value="-A8M"/>
+		<arg value="-g"/>
+		<arg value="parse"/>
+		<arg value="-o"/>
+		<arg value="buchart.swi"/>
+		<arg value="-c"/>
+		<arg value="${prolog}/mkparser_swi.pl"/>
+	</exec>
+</target>
+
+
+<!-- The final three targets provide routines for testing the parser using one
+     of the four Prolog interfaces provided as part of this package           -->
+
+<target name="test.sicstus" depends="buchart.jar,sicstus,gate2,gate3">
+	<java classname="shef.nlp.buchart.TestSuite" classpathref="use-path" fork="true">
+		<classpath>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset file="BuChart.jar"/>
+		</classpath>
+		<jvmarg value="-Xmx512m"/>
+		<jvmarg value="-Dgate.home=${gate_home}"/> 
+		<arg value="${basedir}"/>
+		<arg value="${config}/mapping.config"/>
+		<arg value="${config}/feature_table.config"/>
+		<arg value="${basedir}/buchart.sicstus"/>
+		<arg value="shef.nlp.buchart.prolog.SICStusProlog"/>
+	</java>
+</target>
+
+
+<target name="test.plcafe" depends="buchart.jar,plcafe,gate2,gate3">
+	<java classname="shef.nlp.buchart.TestSuite" classpathref="use-path" fork="true">
+		<classpath>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset file="BuChart.jar"/>
+		</classpath>
+		<jvmarg value="-Xmx512m"/>
+		<jvmarg value="-Dgate.home=${gate_home}"/> 
+		<arg value="${basedir}"/>
+		<arg value="${config}/mapping.config"/>
+		<arg value="${config}/feature_table.config"/>
+		<arg value="${basedir}/buchart.plcafe"/>
+		<arg value="shef.nlp.buchart.prolog.PrologCafe"/>
+	</java>
+</target>
+
+
+<target name="test.swi" depends="buchart.jar,swi,gate2,gate3">
+	<java classname="shef.nlp.buchart.TestSuite" classpathref="use-path" fork="true">
+		<classpath>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset file="BuChart.jar"/>
+		</classpath>
+		<jvmarg value="-Xmx512m"/>
+		<jvmarg value="-Dgate.home=${gate_home}"/> 
+		<arg value="${basedir}"/>
+		<arg value="${config}/mapping.config"/>
+		<arg value="${config}/feature_table.config"/>
+		<arg value="${basedir}/buchart.swi"/>
+		<arg value="shef.nlp.buchart.prolog.SWIProlog"/>
+	</java>
+</target>
+
+<target name="test.javaswi" depends="buchart.jar,swi,gate2,gate3">
+	<java classname="shef.nlp.buchart.TestSuite" classpathref="use-path" fork="true">
+		<classpath>
+			<fileset dir="${lib}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset file="BuChart.jar"/>
+		</classpath>
+		<jvmarg value="-Xmx512m"/>
+		<jvmarg value="-Dgate.home=${gate_home}"/> 
+		<arg value="${basedir}"/>
+		<arg value="${config}/mapping.config"/>
+		<arg value="${config}/feature_table.config"/>
+		<arg value="${basedir}/buchart.swi"/>
+		<arg value="shef.nlp.buchart.prolog.SWIJavaProlog"/>
+	</java>
+</target>
+
+</project>
