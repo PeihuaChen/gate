@@ -249,6 +249,52 @@ public class DatabaseCorpusImpl extends CorpusImpl
     }
   }
 
+
+  public void resourceUnloaded(CreoleEvent e) {
+
+    Assert.assertNotNull(e);
+    Assert.assertNotNull(e.getResource());
+
+    Resource res = e.getResource();
+
+    if (res instanceof Document) {
+
+      Document doc = (Document) res;
+
+      if (DEBUG) {
+        Out.prln("resource Unloaded called ");
+      }
+
+      //remove from the corpus too, if a transient one
+      if (null == doc.getLRPersistenceId()) {
+        //@FIXME - not sure we need this
+        super.remove(doc);
+      }
+      else {
+        //unload all occurences
+        //see if we can find it first. If not, then judt return
+        int index = findDocument(doc);
+        if (index == -1) {
+          //not our document
+          return;
+        }
+        else {
+          //3. unload from internal data structures
+
+          //@FIXME - not sure we need this
+          //super.remove(doc);
+
+          //remove from the list of loaded documents
+          Document oldDoc = (Document) this.supportList.remove(index);
+        }
+
+        if (DEBUG)
+          Out.prln("corpus: document "+ index + " unloaded and set to null");
+      } //if
+    }
+  }
+
+
   public boolean isResourceChanged(int changeType) {
 
     switch(changeType) {
