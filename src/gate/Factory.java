@@ -280,7 +280,6 @@ public abstract class Factory {
                   );
     }
 
-
     Map listeners = new HashMap(gate.gui.MainFrame.getListeners());
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
@@ -319,18 +318,14 @@ public abstract class Factory {
           ResourceInstantiationException("Parameterisation failure" + e);
       }
     }
-
     // record the instantiation on the resource data's stack
     resData.addInstantiation(res);
-
     // add the features specified by the user
     if(features != null) res.getFeatures().putAll(features);
-
     // fire the event
     creoleProxy.fireResourceLoaded(
       new CreoleEvent(res, CreoleEvent.RESOURCE_LOADED)
     );
-
     return res;
   } // create(resourceClassName, parameterValues, features, listeners)
 
@@ -571,7 +566,6 @@ class CreoleProxy {
       }// for
     }// if
   }// fireDatastoreClosed(CreoleEvent e)
-
 
   private transient Vector creoleListeners;
 }//class CreoleProxy

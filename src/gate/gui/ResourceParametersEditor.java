@@ -60,6 +60,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
    * parameter disjunctions.
    */
   public void init(Resource resource, List parameters){
+    cleanup();
     this.resource = resource;
     if(parameters != null){
       parameterDisjunctions = new ArrayList(parameters.size());
@@ -132,6 +133,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
    */
   public void cleanup(){
     Gate.getCreoleRegister().removeCreoleListener(this);
+    if(parameterDisjunctions != null && parameterDisjunctions.size() > 0){
+      for (int i = 0; i < parameterDisjunctions.size(); i++){
+        ((ParameterDisjunction)parameterDisjunctions.get(i)).cleanup();
+      }
+    }
+    resource = null;
   }
 
 //  /**
@@ -222,11 +229,29 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener{
   }
   public void datastoreClosed(CreoleEvent e) {
   }
+
   public void setEditable(boolean editable) {
     this.editable = editable;
   }
+
   public boolean isEditable() {
     return editable;
+  }
+
+  /**
+   * Called by other GUI classes that use this as a subcomponent that doesn't
+   * need to update with the creole register changes.
+   */
+  void removeCreoleListenerLink(){
+    //this component is only used as a viewer now; it doesn't need to update
+    //so we don't need to listen to creole events
+    Gate.getCreoleRegister().removeCreoleListener(this);
+    if(parameterDisjunctions != null && parameterDisjunctions.size() > 0){
+      for (int i = 0; i < parameterDisjunctions.size(); i++){
+        ((ParameterDisjunction)parameterDisjunctions.get(i)).removeCreoleListenerLink();
+      }
+    }
+
   }
 
   ParametersTableModel tableModel;

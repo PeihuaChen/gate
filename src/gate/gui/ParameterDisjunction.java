@@ -140,6 +140,19 @@ public class ParameterDisjunction implements CreoleListener {
     return params[selectedIndex];
   }
 
+  public void cleanup(){
+    Gate.getCreoleRegister().removeCreoleListener(this);
+    resource = null;
+  }
+
+  /**
+   * Called by other GUI classes that use this as a subcomponent that doesn't
+   * need to update with the creole register changes.
+   */
+  void removeCreoleListenerLink(){
+    Gate.getCreoleRegister().removeCreoleListener(this);
+  }
+
   /**
    * Called when a resource has been unloaded from the system;
    * If any of the parameters has this resource as value then the value will be

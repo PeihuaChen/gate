@@ -249,7 +249,7 @@
   <property category="sys" name="ExcludeClassEnabled" value="0"/>
   <property category="sys" name="IncludeTestPath" value="1"/>
   <property category="sys" name="InstanceVisibility" value="4"/>
-  <property category="sys" name="JDK" value="java version 1.3.1-b24"/>
+  <property category="sys" name="JDK" value="Sun JDK 1.4.1_02-b06"/>
   <property category="sys" name="JbxEventListener0" value="gate.event.CreoleListener"/>
   <property category="sys" name="JbxEventListener1" value="gate.event.CreoleListener"/>
   <property category="sys" name="JbxEventListener2" value="gate.event.CreoleListener"/>
@@ -259,7 +259,7 @@
   <property category="sys" name="JbxEventListener6" value="gate.gui.StatusListener"/>
   <property category="sys" name="JbxEventListener7" value="gate.gui.ProgressListener"/>
   <property category="sys" name="LastTag" value="0"/>
-  <property category="sys" name="Libraries" value="gatelibs;tools.jar"/>
+  <property category="sys" name="Libraries" value="gatelibs"/>
   <property category="sys" name="MakeStable" value="0"/>
   <property category="sys" name="OutPath" value="classes"/>
   <property category="sys" name="SourcePath" value="src;test"/>
