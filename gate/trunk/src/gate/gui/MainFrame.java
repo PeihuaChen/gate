@@ -1183,6 +1183,13 @@ public class MainFrame extends JFrame
 
   public void resourceRenamed(Resource resource, String oldName,
                               String newName){
+    for(int i = 0; i < mainTabbedPane.getTabCount(); i++){
+      if(mainTabbedPane.getTitleAt(i).equals(oldName)){
+        mainTabbedPane.setTitleAt(i, newName);
+
+        return;
+      }
+    }
   }
 
   /**
