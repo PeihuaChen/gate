@@ -21,6 +21,7 @@
     <path>[lib/GnuGetOpt.jar]</path>
     <path>[lib/docwiz.jar]</path>
     <path>[lib/guk.jar]</path>
+    <path>[lib/heptag.jar]</path>
   </class>
   <required>gatelibs</required>
 </library>

@@ -460,7 +460,8 @@ extends AbstractLanguageResource implements Document {
     return str.toString();
   }// annotationSetToXml
 
-  /** Returns a map with the named annotation sets */
+  /** Returns a map with the named annotation sets. It returns <code>null</code>
+   *  if no named annotaton set exists. */
   public Map getNamedAnnotationSets() {
     return namedAnnotSets;
   } // getNamedAnnotationSets

@@ -36,7 +36,7 @@ class AnnotDiffDialog extends JFrame {
     */
   Map  documentsMap = null;
   Map  typesMap = null;
-  Vector  falsePozTypes = null;
+  Set  falsePozTypes = null;
   MainFrame mainFrame = null;
   AnnotDiffDialog thisAnnotDiffDialog = null;
 
@@ -50,6 +50,9 @@ class AnnotDiffDialog extends JFrame {
   JLabel responseLabel = null;
   JLabel typesLabel = null;
   JLabel falsePozLabel = null;
+
+  JLabel weightLabel = null;
+  JTextField weightTextField = null;
 
   JButton evalButton = null;
   AnnotationDiff annotDiff = null;
@@ -106,12 +109,12 @@ class AnnotDiffDialog extends JFrame {
       }// while
     }else documentsMap.put("No docs found",null);
 
-    typesMap = new HashMap();
+    typesMap = new TreeMap();
     // init types map with Type,AnnotationSchema pairs
     typesMap.put("No annot.",null);
 
     // init falsePozTypes
-    falsePozTypes = new Vector();
+    falsePozTypes = new TreeSet();
     falsePozTypes.add("No annot.");
   }// initLocalData
 
@@ -125,9 +128,9 @@ class AnnotDiffDialog extends JFrame {
     //this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     this.getContentPane().setLayout(new BorderLayout());
     // init keyDocComboBox
-    Vector comboCont = new Vector(documentsMap.keySet());
-    Collections.sort(comboCont);
-    keyDocComboBox = new JComboBox(comboCont);
+    Set comboCont = new TreeSet(documentsMap.keySet());
+    keyDocComboBox = new JComboBox(comboCont.toArray());
+    keyDocComboBox.setSelectedIndex(0);
     keyDocComboBox.setEditable(false);
     keyDocComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     Dimension dim = new Dimension(150,keyDocComboBox.getPreferredSize().height);
@@ -144,7 +147,8 @@ class AnnotDiffDialog extends JFrame {
     keyLabel.setBackground(Color.green);
 
     // init responseDocComboBox
-    responseDocComboBox = new JComboBox(comboCont);
+    responseDocComboBox = new JComboBox(comboCont.toArray());
+    responseDocComboBox.setSelectedIndex(0);
     responseDocComboBox.setEditable(false);
     responseDocComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     responseDocComboBox.setPreferredSize(dim);
@@ -168,17 +172,28 @@ class AnnotDiffDialog extends JFrame {
     // init its label
     typesLabel = new JLabel("Select annot. type");
     typesLabel.setFont(typesLabel.getFont().deriveFont(Font.BOLD));
+    typesLabel.setOpaque(true);
     typesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     // init falsePozTypeComboBox
-    Collections.sort(falsePozTypes);
-    falsePozTypeComboBox = new JComboBox(falsePozTypes);
+    falsePozTypeComboBox = new JComboBox(falsePozTypes.toArray());
     falsePozTypeComboBox.setEditable(false);
     falsePozTypeComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     // init its label
     falsePozLabel = new JLabel("Select annot. type for FalsePoz");
     falsePozLabel.setFont(falsePozLabel.getFont().deriveFont(Font.BOLD));
+    falsePozLabel.setOpaque(true);
     falsePozLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    // init weightTextField
+    weightTextField = new JTextField(
+                              (new Double(AnnotationDiff.weight)).toString());
+    weightTextField.setAlignmentX(Component.LEFT_ALIGNMENT);
+    // init its label
+    weightLabel = new JLabel("Weight for F-Measure");
+    weightLabel.setFont(falsePozLabel.getFont().deriveFont(Font.BOLD));
+    weightLabel.setOpaque(true);
+    weightLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     // evaluate button
     evalButton = new JButton("Evaluate");
@@ -186,7 +201,7 @@ class AnnotDiffDialog extends JFrame {
 
     // Put all those components at their place
     Box northBox = new Box(BoxLayout.X_AXIS);
-
+    // Arange Key Document components
     Box currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(keyLabel);
     currentBox.add(keyDocComboBox);
@@ -194,6 +209,7 @@ class AnnotDiffDialog extends JFrame {
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
 
+    // Arange Response Document components
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(responseLabel);
     currentBox.add(responseDocComboBox);
@@ -201,6 +217,7 @@ class AnnotDiffDialog extends JFrame {
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
 
+    // Arange annotation types components
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(typesLabel);
     currentBox.add(typesComboBox);
@@ -208,6 +225,15 @@ class AnnotDiffDialog extends JFrame {
 
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
 
+    // Arange F-Measure weight components
+    currentBox = new Box(BoxLayout.Y_AXIS);
+    currentBox.add(weightLabel);
+    currentBox.add(weightTextField);
+    northBox.add(currentBox);
+
+    northBox.add(Box.createRigidArea(new Dimension(10,0)));
+
+    // Arange false poz components
     currentBox = new Box(BoxLayout.Y_AXIS);
     currentBox.add(falsePozLabel);
     currentBox.add(falsePozTypeComboBox);
@@ -216,9 +242,10 @@ class AnnotDiffDialog extends JFrame {
     northBox.add(Box.createRigidArea(new Dimension(10,0)));
     northBox.add(evalButton);
 
+    initAnnotTypes();
     this.getContentPane().add(northBox,BorderLayout.NORTH);
     this.getContentPane().add(annotDiff,BorderLayout.CENTER);
-    pack();
+    this.pack();
   }//initGuiComponents
 
   /** This method is called when the user want to close the tool. See
@@ -230,6 +257,16 @@ class AnnotDiffDialog extends JFrame {
 
   /** This method starts AnnotationDiff tool in a separate thread.*/
   private void doDiff(){
+    try{
+      Double d = new Double(thisAnnotDiffDialog.getCurrentWeight());
+      AnnotationDiff.weight = d.doubleValue();
+    }catch (NumberFormatException e){
+        JOptionPane.showMessageDialog(thisAnnotDiffDialog,
+                     "The weight for F-Measure should be a double !",
+                     "Annotation Diff initialization error !",
+                     JOptionPane.ERROR_MESSAGE);
+        return;
+    }// End try
     Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
                                new DiffRunner());
     thread.setPriority(Thread.MIN_PRIORITY);
@@ -274,7 +311,7 @@ class AnnotDiffDialog extends JFrame {
     gate.Document responseDocument = null;
 
     keyDocument = (gate.Document) documentsMap.get(
-                                  (String)keyDocComboBox.getSelectedItem());
+                                 (String)keyDocComboBox.getSelectedItem());
     responseDocument = (gate.Document) documentsMap.get(
                                  (String)responseDocComboBox.getSelectedItem());
 
@@ -289,15 +326,35 @@ class AnnotDiffDialog extends JFrame {
 
       // init falsePozTypes
       falsePozTypes.add("No annot.");
-      cbm = new DefaultComboBoxModel(falsePozTypes);
+      cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
       falsePozTypeComboBox.setModel(cbm);
       return;
     }//End if
 
     // Do intersection for annotation types...
+    // First add to the keySet all annotations from default set
     Set keySet = new HashSet(keyDocument.getAnnotations().getAllTypes());
+    // Now add all the annotation from the named sets
+    Map namedAnnotSets = keyDocument.getNamedAnnotationSets();
+    if (namedAnnotSets != null){
+      Iterator iter = namedAnnotSets.values().iterator();
+      while (iter.hasNext()){
+          AnnotationSet annotSet = (AnnotationSet) iter.next();
+          keySet.addAll(annotSet.getAllTypes());
+      }// End while
+    }// End if
+    // Do the same thing for the responseSet too
     Set responseSet = new HashSet(
                               responseDocument.getAnnotations().getAllTypes());
+    // Add all the annotation from the named sets
+    namedAnnotSets = responseDocument.getNamedAnnotationSets();
+    if (namedAnnotSets != null){
+      Iterator iter = namedAnnotSets.values().iterator();
+      while (iter.hasNext()){
+        AnnotationSet annotSet = (AnnotationSet) iter.next();
+        responseSet.addAll(annotSet.getAllTypes());
+      }// End while
+    }// End if
 
     keySet.retainAll(responseSet);
     Set intersectSet = keySet;
@@ -312,15 +369,18 @@ class AnnotDiffDialog extends JFrame {
       typesMap.put(annotName,schema);
     }// while
 
-    typesMap.put("No annot.",null);
+    if (typesMap.isEmpty())
+      typesMap.put("No annot.",null);
+
     DefaultComboBoxModel cbm = new DefaultComboBoxModel(
                                               typesMap.keySet().toArray());
     typesComboBox.setModel(cbm);
 
     // Init falsePozTypes
     falsePozTypes.addAll(responseSet);
-    falsePozTypes.add("No annot.");
-    cbm = new DefaultComboBoxModel(falsePozTypes);
+    if (falsePozTypes.isEmpty())
+      falsePozTypes.add("No annot.");
+    cbm = new DefaultComboBoxModel(falsePozTypes.toArray());
     falsePozTypeComboBox.setModel(cbm);
   }//initAnnotTypes();
 
@@ -341,6 +401,11 @@ class AnnotDiffDialog extends JFrame {
     return (AnnotationSchema) typesMap.get(
                                 (String)typesComboBox.getSelectedItem());
   }//getSelectedSchema
+
+  /** It returns the current weight  */
+  public String getCurrentWeight(){
+    return weightTextField.getText();
+  }//getCurrentWeight
 
   /** It returns the selected Annotation to calculate the False Pozitive  */
   public String getSelectedFalsePozAnnot(){

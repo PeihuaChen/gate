@@ -67,6 +67,12 @@ public class AnnotationDiff extends AbstractVisualResource{
   private double falsePositiveLenient = 0.0;
   private double falsePositiveAverage = 0.0;
 
+  /** The F-measure and weight (see NLP Information Extraction)*/
+  private double fMeasureStrict = 0.0;
+  private double fMeasureLenient = 0.0;
+  private double fMeasureAverage = 0.0;
+  public  static double weight = 0.5;
+
   /**  This string represents the type of annotations used to play the roll of
     *  total number of words needed to calculate the False Positive.
     */
@@ -165,6 +171,21 @@ public class AnnotationDiff extends AbstractVisualResource{
   public double getPrecisionAverage(){
     return precisionAverage;
   }// getPrecisionAverage
+
+  /** @return the fMeasureStrict field*/
+  public double getFMeasureStrict(){
+    return fMeasureStrict;
+  }// getFMeasureStrict
+
+  /** @return the fMeasureLenient field*/
+  public double getFMeasureLenient(){
+    return fMeasureLenient;
+  }// getFMeasureLenient
+
+  /** @return the fMeasureAverage field*/
+  public double getFMeasureAverage(){
+    return fMeasureAverage;
+  }// getFMeasureAverage
 
   ///////////////////////////////////////////////////
   // RECALL methods
@@ -438,6 +459,32 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Add a space
     infoBox.add(Box.createRigidArea(new Dimension(40,0)));
 
+    // F-Measure
+    //Lay out the JLabels from left to right.
+    box = new Box(BoxLayout.Y_AXIS);
+
+    jLabel = new JLabel("F-Measure strict: " +
+                                        formatter.format(fMeasureStrict));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
+    jLabel = new JLabel("F-Measure average: " +
+                                        formatter.format(fMeasureAverage));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+
+    jLabel = new JLabel("F-Measure lenient: " +
+                                        formatter.format(fMeasureLenient));
+    jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+    box.add(jLabel);
+    infoBox.add(box);
+
+    // Add a space
+    infoBox.add(Box.createRigidArea(new Dimension(40,0)));
+
     // FALSE POZITIVE measure
     //Lay out the JLabels from left to right.
     box = new Box(BoxLayout.Y_AXIS);
@@ -459,8 +506,11 @@ public class AnnotationDiff extends AbstractVisualResource{
     jLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
     box.add(jLabel);
-
     infoBox.add(box);
+
+    // Add a space
+    infoBox.add(Box.createRigidArea(new Dimension(10,0)));
+
     this.add(infoBox);
   }//arangeAllComponents
 
@@ -600,7 +650,7 @@ public class AnnotationDiff extends AbstractVisualResource{
     }// End while
 
     // CALCULATE ALL (NLP) MEASURES like:
-    // Precistion, Recall and FalsePositive
+    // Precistion, Recall, FalsePositive and F-Measure
     int possible =  typeCounter[CORRECT_TYPE] +  // this comes from Key or Resp
                     typeCounter[PARTIALLY_CORRECT_TYPE] + // this comes from Resp
                     typeCounter[MISSING_TYPE]; // this comes from Key
@@ -640,8 +690,21 @@ public class AnnotationDiff extends AbstractVisualResource{
      falsePositiveLenient = ((double)typeCounter[SPURIOUS_TYPE]) /((double) no);
      falsePositiveAverage = ((double)(falsePositiveStrict +
                                            falsePositiveLenient))/((double)2) ;
-
     }// End if
+
+    // Calculate F-Measure Strict
+    double denominator = weight * (precisionStrict + recallStrict);
+    if (denominator != 0)
+      fMeasureStrict = (precisionStrict * recallStrict) / denominator ;
+    else fMeasureStrict = 0.0;
+    // Calculate F-Measure Lenient
+    denominator = weight * (precisionLenient + recallLenient);
+    if (denominator != 0)
+      fMeasureLenient = (precisionLenient * recallLenient) / denominator ;
+    else fMeasureLenient = 0.0;
+    // Calculate F-Measure Average
+    fMeasureAverage = (fMeasureStrict + fMeasureLenient) / (double)2;
+
   }// doDiff
 
   /** Decide what type is the keyAnnotation (DEFAULT_TYPE, MISSING or NULL_TYPE)
