@@ -15,6 +15,7 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.Component;
 import java.awt.Point;
+import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import javax.swing.text.Highlighter;
 
 
 import gate.Annotation;
+import gate.AnnotationSet;
 import gate.util.GateRuntimeException;
 
 
@@ -38,13 +40,15 @@ public class TextualDocumentView extends AbstractDocumentView {
     hgTagForAnn = new HashMap();
   }
   
-  public Object addHighlight(Annotation ann, Color colour){
+  public Object addHighlight(Annotation ann, AnnotationSet set, Color colour){
     Highlighter highlighter = textView.getHighlighter();
     try{
-	    return highlighter.addHighlight(
+      Object tag = highlighter.addHighlight(
 	            ann.getStartNode().getOffset().intValue(),
 	            ann.getEndNode().getOffset().intValue(),
 	            new DefaultHighlighter.DefaultHighlightPainter(colour));
+      annotationListView.addAnnotation(tag, ann, set);
+      return tag;
     }catch(BadLocationException ble){
       //the offsets should always be OK as they come from an annotation
       throw new GateRuntimeException(ble.toString());
@@ -64,11 +68,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
-    textView = new JEditorPane(){
-//      public boolean getScrollableTracksViewportWidth(){
-//        return true;
-//      }
-    };
+    textView = new JEditorPane();
     textView.setContentType("text/plain");
     textView.setEditorKit(new StyledEditorKit());
     textView.setAutoscrolls(false);
@@ -76,8 +76,17 @@ public class TextualDocumentView extends AbstractDocumentView {
 
     textView.setText(document.getContent().toString());
     scroller.getViewport().setViewPosition(new Point(0, 0));
-    initListeners();
+    
+    //get a pointer to the annotation list view used to display
+    //the highlighted annotations 
+    Iterator horizViewsIter = owner.getHorizontalViews().iterator();
+    while(annotationListView == null && horizViewsIter.hasNext()){
+      DocumentView aView = (DocumentView)horizViewsIter.next();
+      if(aView instanceof AnnotationListView) 
+        annotationListView = (AnnotationListView)aView;
+    }
 
+    initListeners();
   }
 
   protected void unregisterHooks(){}
@@ -89,6 +98,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   public void removeHighlight(Object tag){
     Highlighter highlighter = textView.getHighlighter();
     highlighter.removeHighlight(tag);
+    annotationListView.removeAnnotation(tag);
   }
 
 
@@ -98,6 +108,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    */
   protected Map hgTagForAnn; 
   protected JScrollPane scroller;
+  protected AnnotationListView annotationListView;
 
 
   protected JEditorPane textView;
