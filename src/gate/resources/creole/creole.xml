@@ -237,8 +237,8 @@
     </RESOURCE>
     <!-- creole.xml for HepTag (Mark Hepple's POS tagger)-->
     <RESOURCE>
-      <NAME>Hepple POS Tagger</NAME>
-      <COMMENT>Mark Hepple's POS tagger</COMMENT>
+      <NAME>POS Tagger</NAME>
+      <COMMENT>Mark Hepple's Brill-style POS tagger</COMMENT>
       <CLASS>gate.creole.POSTagger</CLASS>
       <PARAMETER NAME="document" COMMENT="The document to be processed" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" COMMENT="The name of the annotation set used for input" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
