@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION persist_update_lr(int4,varchar,int4) RETURNS boolean 
 
       if not FOUND then
          raise exception ''%d'',x_invalid_lr;
-      end if
+      end if;
   
       /* 2. update it */
       update t_lang_resource
