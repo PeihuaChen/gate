@@ -1,0 +1,342 @@
+// addrex.jape
+// diana, 13 Sep 00
+// modified diana, 16 Jan 01
+
+Phase:	Addrex
+Input:  Token SpaceToken Lookup
+Options: control = appelt
+
+/////////////////////////////////////////////////////////
+
+Macro: SPACE
+// space
+// control
+// space control
+// control space
+
+( 
+ ({SpaceToken.kind == space, SpaceToken.length == "1"}
+  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
+ ({SpaceToken.kind == control, SpaceToken.length == "1"}
+  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
+)
+
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+// Email Rules
+
+
+Rule: Emailaddress1
+Priority: 50
+(	(
+	{Token.kind == word}		|
+	{Token.kind == number}		|
+	{Token.string == "."}		|
+        {Token.string == "_"}
+	)+
+	{Token.string == "@"}		
+	(
+	{Token.kind == word}		|
+	{Token.kind == symbol}		|
+	{Token.kind == punctuation}	|
+	{Token.kind == number}
+	)+
+	(
+		{Token.string == "."}		
+		(
+		{Token.kind == word}		|
+		{Token.kind == number}	
+		)+
+	)+
+):emailAddress -->
+:emailAddress.Email= {kind = "emailAddress", rule = "Emailaddress1"}
+
+///////////////////////////////////////////////////////////////////
+//Phone Rules
+
+
+Macro: PHONE_COUNTRYCODE
+// +44
+
+({Token.string == "+"}
+ {Token.kind == number,Token.length == "2"}
+)	
+
+Macro: PHONE_AREACODE
+// 081 (for the old style codes)
+// 01234
+// (0123)
+
+(
+ ({Token.kind == number,Token.length == "3"} |
+  {Token.kind == number,Token.length == "4"} |
+  {Token.kind == number,Token.length == "5"}) 
+|
+ ({Token.string == "("} 
+  ({Token.kind == number,Token.length == "3"} |
+   {Token.kind == number,Token.length == "4"} |
+   {Token.kind == number,Token.length == "5"}) 
+  ({Token.string == ")"})
+ )
+)
+
+Macro: PHONE_REG
+// 222 1481
+// 781932
+
+(
+  ({Token.kind == number,Token.length == "3"}
+  (SPACE)
+  ({Token.kind == number,Token.length == "3"} |
+   {Token.kind == number,Token.length == "4"}) 
+  )
+                                              |
+
+  ({Token.kind == number,Token.length == "5"}|
+   {Token.kind == number,Token.length == "6"})
+)
+ 
+Macro: PHONE_EXT
+// x1234
+// ext. 1234/5
+
+(
+ (({Token.string == "x"})		|
+  ({Token.string == "x"}{Token.string == "."}) |
+  ({Token.string == "ext"})	|
+  ({Token.string == "ext"}{Token.string == "."})
+ )  
+ (SPACE)?
+ {Token.kind == number}
+ ({Token.string == "/"}{Token.kind == number})?
+)
+	
+Macro: PHONE_PREFIX
+//Tel:
+
+(
+ ({Token.string == "Phone"} |
+  {Token.string == "phone"} |
+  {Token.string == "Telephone"} |
+  {Token.string == "telephone"} |
+  {Token.string == "Tel"} |
+  {Token.string == "tel"} |
+  {Token.string == "Fax"} |
+  {Token.string == "fax"})
+ ({Token.string == "."} | {Token.string == ":"})?
+ (SPACE)?
+ ({Token.string == "No"} | 
+  {Token.string == "no"})?
+ ({Token.string == "."} | {Token.string == ":"})?
+ (SPACE)?
+)
+  
+//////////////////////////////////////////////////
+Rule:PhoneReg
+Priority: 20
+// regular types of number
+// 01234 123 456
+// (01234) 123456
+
+(
+ (PHONE_PREFIX)?
+)
+(
+
+ (PHONE_AREACODE SPACE)
+ (PHONE_REG)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneReg"}
+
+Rule:PhoneFull
+Priority: 50
+// +44 161 222 1234
+// +44 (0)161 222 1234
+(
+ (PHONE_PREFIX)?
+)
+(
+ ((PHONE_COUNTRYCODE SPACE) |
+  ({Token.string == "("} 
+   (PHONE_COUNTRYCODE (SPACE)?)
+   {Token.string == ")"})
+ )
+
+ ({Token.string == "("} 
+   {Token.string == "0"} 
+   {Token.string == ")"})?
+
+ ({Token.kind == number,Token.length == "3"}|
+  {Token.kind == number,Token.length == "4"})
+      
+ (SPACE)
+ (PHONE_REG)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneFull"}
+
+Rule:PhoneExt
+Priority: 10
+
+// extension number only
+// ext. 1234
+(
+ (PHONE_EXT)
+)
+:phoneNumber --> 
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneExt"}
+
+Rule:PhoneRegExt
+Priority: 30
+
+// 01234 12345 ext. 1234
+// 01234 12345 x1234/5
+(
+ (PHONE_PREFIX)?
+)
+(
+
+ (PHONE_AREACODE SPACE)?
+ (PHONE_REG) (SPACE)
+ (PHONE_EXT)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneRegExt"}
+
+
+Rule:PhoneNumberOnly
+Priority: 20
+
+// Phone 123456
+// Fax: 123 456
+// Tel. No. 123456
+// only recognise numbers like this when preceded by clear context.
+
+(PHONE_PREFIX)
+(
+ (PHONE_REG)
+)
+:phoneNumber -->
+ :phoneNumber.Phone = {kind = "phoneNumber", rule = "PhoneNumberOnly"}
+
+
+///////////////////////////////////////////////////////////////
+// Postcode Rules
+
+
+// S1 4DP, S10 4DP, SO1 10DP, etc.
+// UK postocdes only
+
+Rule: Postcode1
+Priority: 50
+(
+ ({Token.orth == allCaps,Token.length == "2"}|
+  {Token.orth == upperInitial,Token.length == "1"}			
+ )	
+ ({Token.kind == number,Token.length == "1"}|
+  {Token.kind == number,Token.length == "2"}
+ )
+ SPACE
+ ({Token.kind == number,Token.length == "1"}|
+  {Token.kind == number,Token.length == "2"}
+ )
+ ({Token.orth == allCaps,Token.length == "2"}|
+  {Token.orth == upperInitial,Token.length == "1"}		
+ )	
+):postcode -->
+:postcode.Postcode = {kind = "postcode", rule = Postcode1}
+
+//////////////////////////////////////////////////////////
+// Url Rules
+
+
+// http://www.amazon.com
+// ftp://amazon.com
+// www.amazon.com
+
+Rule: Url1
+(	((({Token.string == "http"}	|
+	   {Token.string == "ftp"})
+	   {Token.string == ":"}
+	   {Token.string == "/"}
+           {Token.string == "/"})	|
+	 ({Token.string == "www"}
+          {Token.string == "."})	
+	)			
+	
+	({Token.orth == lowercase}	|
+        {Token.orth == upperInitial}	|
+        {Token.kind == number}		|
+        {Token.kind == punctuation}	|
+        {Token.kind == symbol}		|
+	{Token.string == "."})+ 
+	
+	({Token.orth == lowercase}	|
+        {Token.orth == upperInitial}	|
+        {Token.kind == number}		|
+        {Token.kind == punctuation}	|
+        {Token.kind == symbol}		|
+	{Token.string == "/"}		|
+        {Token.string == "."})*
+):urlAddress -->
+:urlAddress.Url = {kind = "urlAddress", rule = "Url1"}
+
+////////////////////////////////////////////////////////
+
+// IP Address Rules
+
+Rule: IPaddress1
+(	{Token.kind == number}
+	{Token.string == "."}
+	{Token.kind == number}
+	{Token.string == "."}
+	{Token.kind == number}	
+	{Token.string == "."}
+	{Token.kind == number}
+):ipAddress -->
+:ipAddress.Ip = {kind = "ipAddress", rule = "IPaddress1"}
+
+/////////////////////////////////////////////////////////////
+// Street Rules
+
+
+Rule: StreetName1
+(
+ ({Token.kind == number}
+  ({Token.string == ","})? 
+  SPACE)?
+ {Token.orth == upperInitial}
+ SPACE
+ {Lookup.minorType == "street"}
+)
+:streetAddress -->
+ :streetAddress.Street = {kind = "streetAddress", rule = StreetName1}
+
+
+Rule: POBoxAddress
+(
+ (({Token.string == "P"}
+   ({Token.string == "."})? 
+   (SPACE)?
+   {Token.string == "O"}
+   ({Token.string == "."})?
+  ) |
+  ({Token.string == "PO"})
+ )
+ (SPACE)?
+ {Token.string == "Box"}
+ (SPACE)
+ {Token.kind == number}
+)
+:address -->
+ :address.Street = {kind = "poBox", rule = POBoxAddress}
+
+
+
+
+
+
+

@@ -1,0 +1,540 @@
+// enamex.jape
+// diana, 13 Sep 00
+// last modified diana, 05 Jan 01
+
+Phase:	Enamex
+//Input: Token SpaceToken Lookup
+Options: control = appelt
+
+///////////////////////////////////////////////////////////////
+
+// Person Rules
+
+
+Macro: SPACE
+// space
+// control
+// space control
+// control space
+
+( 
+ ({SpaceToken.kind == space, SpaceToken.length == "1"}
+  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
+ ({SpaceToken.kind == control, SpaceToken.length == "1"}
+  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
+)
+
+Macro: TITLE
+(
+ {Lookup.majorType == title}
+ (SPACE)?
+)
+
+Macro: INITIALS
+(
+  ({Token.orth == upperInitial, Token.length =="1"}
+  ({Token.string == "."})
+  (SPACE)?
+  )+
+)
+
+Macro: FIRSTNAME
+(
+ {Lookup.majorType == person_first}|
+ (INITIALS)
+)
+
+Macro: LASTNAME
+(
+ {Token.orth == upperInitial} |
+  {Token.orth == allCaps} |
+ {Token.orth == mixedCaps}
+)
+
+
+Macro: PERSONENDING
+(
+ ({Token.string == "Jr"} ({Token.string == "."})? ) |
+ ({Token.string == "jr"} ({Token.string == "."})? ) |
+ ({Token.string == "Sr"} ({Token.string == "."})? ) |
+ ({Token.string == "sr"} ({Token.string == "."})? ) |
+ {Token.string == "II"} |
+ {Token.string == "III"}
+)
+
+Macro: DET
+(
+ ({Token.string == "A"} | {Token.string == "a"} |
+  {Token.string == "The"} |{Token.string == "the"}|
+  {Token.string == "One"} |{Token.string == "one"})
+)
+
+
+///////////////////////////////////////////////////////////
+// Person Rules
+
+Rule:	GazPerson
+Priority: 50
+(
+ {Lookup.majorType == person_full}
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = GazPerson}
+
+
+Rule:	GazPersonFirst
+Priority: 20
+(
+ {Lookup.majorType == person_first}
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = GazPersonFirst}
+
+
+Rule: PersonFirstContext
+Priority: 30
+// Anne and Kenton
+
+(
+ {Lookup.majorType == person_first}
+):personName1
+(
+ SPACE
+ {Token.string == "and"}
+ SPACE
+)
+({Token.orth == upperInitial})
+:personName2
+ -->
+  :personName1.TempPerson = {kind = "personName", rule = PersonFirstContext},
+:personName2.TempPerson = {kind = "personName", rule = PersonFirstContext}
+
+
+Rule: PersonFirstContext2
+Priority: 40
+// Anne and I
+
+(
+ {Lookup.majorType == person_first}
+):personName1
+(
+ SPACE
+ {Token.string == "and"}
+ SPACE
+)
+({Token.length == "1"})
+:personName2
+ -->
+  :personName1.TempPerson = {kind = "personName", rule = PersonFirstContext2}
+
+
+Rule:	PersonTitle
+Priority: 25
+// Mr. Jones
+// Mr Fred Jones
+
+(
+ (TITLE)
+ (FIRSTNAME (SPACE)? )*
+ (LASTNAME)
+ (SPACE PERSONENDING)?
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "PersonTitle"}
+
+Rule: 	NotPersonFull
+Priority: 50
+// must not contain "A" or "The" or "We"
+
+(
+ (FIRSTNAME (SPACE)? )+
+ (SPACE {Token.string == "A"} |
+  {Token.string == "The"} | 
+  {Token.string == "We"} 
+  (SPACE)?
+ )
+ (LASTNAME)*
+ (SPACE PERSONENDING)?
+)
+:person -->
+  :person.TempPerson = {kind = "negative", rule = "NotPersonFull"}
+
+
+Rule: 	PersonFull
+Priority: 10
+// F.W. Jones
+// Fred Jones
+
+(
+ (FIRSTNAME (SPACE)? )+
+ (LASTNAME)
+ (SPACE PERSONENDING)?
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "PersonFull"}
+
+
+Rule: 	PersonFullReverse
+Priority: 5
+// Jones, F.W.
+
+(
+ (LASTNAME)
+ {Token.string == ","}
+ (SPACE)?
+ (INITIALS (SPACE)? )+
+ (SPACE PERSONENDING)?
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "PersonFullReverse"}
+
+
+
+Rule:  PersonSaint
+Priority: 50
+// Note: ensure that it's not a Saints Day first
+(
+ ({Token.string == "St"} ({Token.string == "."})? |
+ {Token.string == "Saint"})
+ SPACE
+ (FIRSTNAME)
+ )
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "PersonSaint"}
+
+
+Rule: PersonLocAmbig
+Priority: 40
+// Ken London
+// Susan Hampshire
+
+// Christian name + Location --> Person's Name
+(
+ (FIRSTNAME SPACE 
+  {Lookup.majorType == location})
+)
+:person -->
+  :person.TempPerson = {kind = "personName", rule = "PersonLocAmbig"}
+
+
+///////////////////////////////////////////////////////////////////
+// Organisation Rules
+
+Macro:  CDG
+// cdg is something like "Ltd."
+ (
+  ({Token, Lookup.majorType == cdg})|
+  ({Token.string == ","} 
+  (SPACE)
+  {Token, Lookup.majorType == cdg})
+ )
+
+
+Macro: SAINT
+(
+ ({Token.string == "St"} ({Token.string == "."})? |
+ {Token.string == "Saint"})
+)
+
+Macro: CHURCH
+(
+{Token.string == "Church"}|{Token.string == "church"}|
+{Token.string == "Cathedral"}|{Token.string == "cathedral"}|
+{Token.string == "Chapel"}|{Token.string == "chapel"}
+)
+
+/////////////////////////////////////////////////////////////
+Rule:	GazOrganization
+Priority: 5
+
+(
+{Lookup.majorType == organization}
+(SPACE {Lookup.majorType == organization})?
+)
+:orgName -->  
+  :orgName.TempOrganization = {kind = "orgName", rule=GazOrganization}
+
+Rule:	XOrganization
+Priority: 10
+// Ealing Police
+(
+ ({Lookup.majorType == location} |
+  {Lookup.majorType == country_adj})
+ SPACE
+{Lookup.majorType == organization}
+(SPACE {Lookup.majorType == organization})?
+)
+:orgName -->  
+  :orgName.TempOrganization = {kind = "orgName", rule=GazOrganization}
+
+
+Rule:	OrgXandY
+Priority: 10
+
+// Bradford & Bingley
+// Bradford & Bingley Ltd
+
+(
+ ({Token.orth == upperInitial}
+  (SPACE)? )+
+
+ {Token.string == "&"}
+
+ ((SPACE)?
+  {Token.orth == upperInitial}
+  (SPACE)? )+
+
+ (SPACE)?
+
+ (CDG)?
+
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXandY"}
+
+
+Rule: OrgUni
+Priority: 10
+
+// University of Sheffield
+// Sheffield University
+// A Sheffield University
+
+(
+ {Token.string == "University"}
+ SPACE
+ {Token.string == "of"}
+ SPACE 
+ ({Token.orth == upperInitial})+
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgUni"}
+
+Rule:	OrgXKey
+Priority: 5
+
+// Aaaa Ltd.
+// Xxx Services Ltd. 
+// but NOT A XXX Services Ltd.
+(
+ {Lookup.majorType == determiner}
+ (SPACE)
+)?
+(
+  ({Token.orth == upperInitial} | 
+   {Token.orth == allCaps})
+  SPACE
+  ({Token.orth == upperInitial}
+   SPACE)*
+ {Lookup.majorType == org_key}
+ (SPACE {Lookup.majorType == org_ending})?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXKey"}
+
+Rule:	OrgXandYKey
+Priority: 5
+
+// Aaaa Ltd.
+// Xxx Services Ltd. 
+// AA and BB Services Ltd.
+// but NOT A XXX Services Ltd.
+(
+ {Lookup.majorType == determiner}
+ (SPACE)
+)?
+(
+  ({Token.orth == upperInitial} | 
+   {Token.orth == allCaps})
+  SPACE
+  (({Token.string == "and"} | 
+    {Token.string == "&"})
+   SPACE
+   ({Token.orth == upperInitial} | 
+   {Token.orth == allCaps})
+   SPACE
+  )
+  ({Token.orth == upperInitial}
+   SPACE)*
+ {Lookup.majorType == org_key}
+ (SPACE {Lookup.majorType == org_ending})?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXandYKey"}
+
+
+Rule:	OrgXsKeyBase
+Priority: 5
+ 
+// Gandy's Circus
+// Queen's Ware
+
+(
+  (({Token.orth == upperInitial} | 
+    {Token.orth == allCaps})
+   SPACE)?
+  (({Token.orth == upperInitial} | 
+    {Token.orth == allCaps})
+   SPACE)?
+  ({Token.orth == upperInitial}
+   {Token.string == "'"}
+   ({Token.string == "s"})?
+   SPACE)
+ ({Lookup.majorType == org_key}|
+  {Lookup.majorType == org_base})
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXsKeybase"}
+
+
+Rule:	OrgXBaseContext
+Priority: 30
+(
+ (DET SPACE)
+)
+(
+ ({Token.orth == upperInitial} | 
+   {Token.orth == allCaps})
+  SPACE
+ ({Lookup.majorType == org_base}|
+  {Lookup.majorType == govern_key})
+ (SPACE
+  {Token.string == "of"}
+  SPACE
+  {Token.orth == upperInitial})?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXBaseContext"}
+
+
+
+Rule:	OrgXBase
+Priority: 20
+
+// same as OrgXKey but uses base instead of key
+// includes govern_key e.g. academy
+// Barclays Bank
+// Royal Academy of Art
+// Staffordshire College of Technology
+// Staffordshire University
+// A Staffordshire University
+
+(
+ (DET SPACE)?
+)
+(
+ ({Token.orth == upperInitial} | 
+   {Token.orth == allCaps})
+  SPACE
+  ({Token.orth == upperInitial}
+   SPACE)?
+ ({Token.orth == upperInitial}
+   SPACE)?
+ ({Lookup.majorType == org_base}|
+  {Lookup.majorType == govern_key})
+ (SPACE
+  {Token.string == "of"}
+  SPACE
+  {Token.orth == upperInitial})?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgXBase"}
+
+
+Rule:	OrgPreX
+Priority: 20
+
+// Royal Tuscan
+
+(
+ {Lookup.majorType == org_pre}
+ (SPACE
+  {Token.orth == upperInitial})+
+ (SPACE {Lookup.majorType == org_ending})?
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgPreX"}
+
+
+
+
+Rule: OrgChurch
+Priority: 50
+// St. Andrew's Church
+
+(
+  (SAINT)
+  SPACE
+  {Token.orth == upperInitial}
+  {Token.string == "'"}({Token.string == "s"})?
+  SPACE
+  (CHURCH)
+)
+:orgName -->
+  :orgName.TempOrganization = {kind = "orgName", rule = "OrgChurch"}
+
+
+Rule:OrgPersonAmbig
+Priority: 20
+// Alexandra Pottery should be org not person
+// overrides PersonFull
+
+(
+ (FIRSTNAME (SPACE)? )
+ ({Lookup.majorType == org_key}|
+  {Lookup.majorType == org_base})
+ (SPACE {Lookup.majorType == org_ending})?
+)
+:org 
+-->
+ :org.TempOrganization= {kind = "orgName", rule = "OrgPersonAmbig"}
+
+
+/////////////////////////////////////////////////////////////////
+// Location rules
+
+
+Rule: 	Location1
+Priority: 25
+// Lookup = city, country, province, region, water
+
+// Western Europe
+// South China sea
+
+(
+ ({Lookup.majorType == loc_key, Lookup.minorType == pre}
+  SPACE)?
+ {Lookup.majorType == location}
+ (SPACE
+  {Lookup.majorType == loc_key, Lookup.minorType == post})?
+)
+:locName -->
+  :locName.TempLocation = {kind = "locName", rule = "Location1"}
+
+
+Rule:	GazLocation
+Priority: 20
+  (
+	({Lookup.majorType == location})
+  )
+:locName
+  --> 	
+ :locName.TempLocation = {kind = "locName", rule=GazLocation}
+
+
+/////////////////////////////////////////////////////////////////
+
+// Ambiguous Name/Location Rules
+
+Rule:AmbigNameLoc1
+
+(
+ {Token.string == "in"}
+ (SPACE)
+)
+(
+ {Lookup.majorType == location, Token.orth == allCaps}
+)
+:locName
+-->
+ :locName.TempLocation = {kind = "locName", rule = AmbigNameLoc1}
