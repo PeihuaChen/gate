@@ -70,7 +70,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                       creoleReg.getLrInstances("gate.creole.AnnotationSchema");
     // If there is no Annotation schema loaded the editor can only do nothing
     if (currentAnnotationSchemaList.isEmpty()) return;
-    name2annotSchemaMap = new HashMap();
+    name2annotSchemaMap = new TreeMap();
     Iterator annotSchemaIter = currentAnnotationSchemaList.iterator();
     // currentAnnotationSchemaList is not empty
     currentAnnotSchema = (AnnotationSchema) currentAnnotationSchemaList.get(0);
@@ -106,7 +106,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                       creoleReg.getLrInstances("gate.creole.AnnotationSchema");
     // If there is no Annotation schema loaded the editor can only do nothing
     if (currentAnnotationSchemaList.isEmpty()) return;
-    name2annotSchemaMap = new HashMap();
+    name2annotSchemaMap = new TreeMap();
     Iterator annotSchemaIter = currentAnnotationSchemaList.iterator();
     // currentAnnotationSchemaList is not empty
     currentAnnotSchema = (AnnotationSchema) currentAnnotationSchemaList.get(0);
@@ -209,7 +209,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   JButton addFeatButton = null;
   JList   featureSchemaList = null;
   JComboBox annotSchemaComboBox = null;
-  FeaturesEditor featuresEditor;
+  InnerFeaturesEditor featuresEditor;
 
   /** Init local data*/
   protected void initLocalData(){
@@ -296,7 +296,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                   ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     featuresTable.setModel(new FeaturesTableModel(new HashSet()));
     featuresTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-    featuresEditor = new FeaturesEditor();
+    featuresEditor = new InnerFeaturesEditor();
     featuresTable.setDefaultEditor(java.lang.Object.class, featuresEditor);
     featuresTableScroll = new JScrollPane(featuresTable);
 
@@ -653,23 +653,32 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   /** This inner class deals with the feature type being eddited. What it does
     * is to decide what GUI component to use (JComboBox, JTextField or JLabel)
     */
-  class FeaturesEditor extends AbstractCellEditor  implements TableCellEditor{
+  class InnerFeaturesEditor extends AbstractCellEditor  implements TableCellEditor{
     // Fields
     JComboBox cb = null;
     JTextField tf = null;
+    int thisRow = 0;
+    int thisColumn = 0;
     /** Constructor*/
-    public FeaturesEditor(){}
+    public InnerFeaturesEditor(){}
     /** The method overridden in order to implement behaviour*/
     public Component getTableCellEditorComponent( JTable table,
                                                   Object value,
                                                   boolean isSelected,
                                                   int row,
                                                   int column){
+       thisRow = row;
+       thisColumn = column;
        RowData rd = (RowData) tableModel.data.get(row);
        if (rd.getFeatureSchema().isEnumeration()){
           cb = new JComboBox(rd.getFeatureSchema().
                                             getPermissibleValues().toArray());
           cb.setSelectedItem(value);
+          cb.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+              tableModel.setValueAt(cb.getSelectedItem(),thisRow,thisColumn);
+            }// actionPerformed();
+          });//addActionListener();
           tf = null;
           return cb;
        }// End if
@@ -689,6 +698,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       if (tf != null ) return tf.getText();
       return new String("");
     }//getCellEditorValue
-  }//FeaturesEditor inner class
+  }//InnerFeaturesEditor inner class
 
 }// End class SchemaAnnotationEditor
