@@ -48,7 +48,7 @@ public class DocumentContentImpl implements DocumentContent
     }
 
     content = new String(buf);
-  } // Contruction from URL and offsets */
+  } // Contruction from URL and offsets
 
   /** Propagate changes to the document content. */
   void edit(Long start, Long end, DocumentContent replacement)
