@@ -447,12 +447,16 @@ extends Transducer implements JapeConstants, java.io.Serializable
       activeFSMInstances.addLast(currentFSM);
       whileloop2:
       while(!activeFSMInstances.isEmpty()){
+//System.out.println("Active instances " + activeFSMInstances.size());
         // while there are some "alive" FSM instances
         // take the first active FSM instance
         currentFSM = (FSMInstance)activeFSMInstances.removeFirst();
         // process the current FSM instance
         if(currentFSM.getFSMPosition().isFinal()){
           // if the current FSM is in a final state
+          //if we are in APPELT mode clear all the old accepting instances as
+          //they would be shorter than this new one
+          if(ruleApplicationStyle == APPELT_STYLE)acceptingFSMInstances.clear();
           acceptingFSMInstances.add(currentFSM.clone());
           //if we're only looking for the shortest stop here
           if(ruleApplicationStyle == FIRST_STYLE) break whileloop2;
