@@ -3361,7 +3361,7 @@ public class OracleDataStore extends JDBCDataStore {
       try {
         String sql = getSQLQuery(constraints, lrType, false, orderByConstraints, limitcount);
         stmt = this.jdbcConn.prepareCall(sql);
-        System.out.println(sql);
+        //System.out.println(sql);
         for (int i = 0; i<sqlValues.size(); i++){
           if (sqlValues.elementAt(i) instanceof String){
             stmt.setString(i+1,sqlValues.elementAt(i).toString());
@@ -3523,10 +3523,10 @@ public class OracleDataStore extends JDBCDataStore {
         expr = expr.append(" = ");
         break;
       case Restriction.OPERATOR_BIGGER:
-        expr = expr.append("  < ");
+        expr = expr.append("  > ");
         break;
       case Restriction.OPERATOR_LESS:
-        expr = expr.append(" > ");
+        expr = expr.append(" < ");
         break;
       case Restriction.OPERATOR_EQUATION_OR_BIGGER:
         expr = expr.append(" >= ");
