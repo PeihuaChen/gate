@@ -64,7 +64,7 @@ public class TestAnnotation extends TestCase
     basicAS.add(new Long(15), new Long(40), "T1", fm);    // 9
     basicAS.add(new Long(15), new Long(40), "T1", fm);    // 10
 
-    System.out.println(basicAS);
+    // System.out.println(basicAS);
   } // setUp
 
   /** Test indexing by offset */
