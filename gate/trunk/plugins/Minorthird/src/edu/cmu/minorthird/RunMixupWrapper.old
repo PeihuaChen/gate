@@ -1,0 +1,190 @@
+package edu.cmu.minorthird;
+
+import java.net.URL;
+import java.util.Iterator;
+import java.io.*;
+import java.lang.*;
+
+import gate.*;
+import gate.creole.*;
+import gate.util.GateRuntimeException;
+
+import edu.cmu.minorthird.util.gui.*;
+import edu.cmu.minorthird.ui.*;
+import edu.cmu.minorthird.text.*;
+import edu.cmu.minorthird.text.mixup.*;
+import edu.cmu.minorthird.util.*;
+
+
+ /******************************************************************
+ * This class is a wrapper for Minorthird RunMixup.                *
+ * It passes GATE documents and a mixup program.                   *
+ * Results of of RunMixup are used to annotate the GATE documents. *
+ *                                                                 *
+ * Fang Huang  27/10/2004                                          *
+ ******************************************************************/
+ 
+ 
+ 
+ public class RunMixupWrapper extends AbstractLanguageAnalyser implements ProcessingResource {
+ 
+ //Document to be processed, must be provided at Runtime.
+ private gate.Document document;
+ 
+ // File with contains the Mixup program, must be provided at Runtime.
+ private URL mixupFile;
+ 
+ //instance of RunMixup class
+ private RunMixup runMixup;
+ private MonotonicTextLabels labels=null;
+ 
+ //default constructor
+ public RunMixupWrapper(){}
+ 
+ public Resource init() throws ResourceInstantiationException{
+     return this;
+ }
+ 
+ 
+ public void execute() throws ExecutionException{
+ 
+   //if no document provided to process
+   if (document==null)
+     throw new GateRuntimeException("No document to process!");
+     
+   // if no mixup program is specified
+   if (mixupFile ==null)
+     throw new GateRuntimeException("Cannot proceed unless a valid mixup program is specified.");
+
+   //RunMixup cannot work on a single document. It works on a directory containing document(s).
+   //the problem is solved by creating a temporary directory, and putting the document in it.
+   //after running RunMixup, move the document back to its original directory, and delete the temporary directory
+   
+   String fileseparator = System.getProperty("file.separator");
+
+     
+   URL sourceUrl = document.getSourceUrl();
+   String sourceFile = sourceUrl.getFile();
+   
+      
+   int idx = sourceFile.lastIndexOf(fileseparator);
+   String sourceDir = sourceFile.substring(0,idx);
+   String sourceName = sourceFile.substring(idx);
+        
+   String tmpdir = sourceDir+fileseparator+"runmixuptmpdir";
+   File rundir = new File(tmpdir);
+   
+   //create a temporary directory
+   boolean success = rundir.mkdir();
+   if(!success){
+        System.out.println("cannot create directory");
+   }
+   
+   File tmpfile = new File(tmpdir+sourceName);
+   File source = new File(sourceFile);
+   
+   //moving the document to the temporary directory
+   boolean suc = source.renameTo(tmpfile);
+   if (!suc) {
+       System.out.println("cannot rename file");
+   }
+   
+    //run the mixup file  
+   String[] argu = {"-labels", tmpdir, "-mixup", mixupFile.getFile()};
+   runMixup = new RunMixup();
+   runMixup.callMain(argu);
+   
+   // move the document back to its original directory
+   boolean succ=tmpfile.renameTo(source);
+   if (!succ) {
+       System.out.println("cannot move the document back");
+   }
+       
+   //get the results
+   labels=runMixup.annotatedLabels;
+   
+   //annotate source documents using the result of runmixup
+   annotate(); 
+   
+   //delete the temporary working directory   
+   rundir.delete();
+ }
+ 
+ 
+ //annotate the document using results returned by RunMixup
+ public void annotate(){
+   AnnotationSet aSet = document.getAnnotations();
+   int startoffset, endoffset, start;
+   String sContent = document.getContent().toString();
+    
+   for (Iterator i=labels.getTypes().iterator(); i.hasNext(); ){
+       String type = (String) i.next();
+       for (Span.Looper j=labels.instanceIterator(type); j.hasNext(); ){
+           Span s=j.nextSpan();
+           FeatureMap map=Factory.newFeatureMap();
+           map.put("String", s.asString());         
+           
+           //RunMixup is run on the original document rather than the gate document
+           //index of the span need to be adjusted
+           //index in the original document
+           start = s.documentSpanStartIndex();
+           
+           //index in the gate document
+           startoffset = sContent.indexOf(s.asString(), start);          
+           endoffset = startoffset + s.asString().length();
+           
+           try{
+           aSet.add(new Long(startoffset), new Long(endoffset), type, map);       
+           } catch (gate.util.InvalidOffsetException ioe) {
+                  throw new GateRuntimeException("invalid offset of the annotation");
+           }
+       }
+   }
+   
+   for (Iterator i = labels.getSpanProperties().iterator(); i.hasNext(); ) {
+       String prop = (String) i.next();
+       for (Span.Looper j=labels.getSpansWithProperty(prop); j.hasNext(); ){
+           Span s=j.nextSpan();
+           String val = labels.getProperty(s,prop);
+           FeatureMap map = Factory.newFeatureMap();
+           map.put ("String", s.asString());
+           
+           start = s.documentSpanStartIndex();
+           
+           startoffset = sContent.indexOf(s.asString(), start);
+           endoffset = startoffset + s.asString().length();
+           
+           
+           try{
+           aSet.add(new Long(startoffset), new Long(endoffset), prop + " "+val, map);
+           } catch (gate.util.InvalidOffsetException ioe){
+                   throw new GateRuntimeException("invalid offset of the annotation");
+           }
+       }
+   }
+ }
+ 
+
+ // getter and setter methods
+ 
+  //set the source document
+ public void setDocument(gate.Document document){
+      this.document = document;
+ }
+ 
+ //return the source documents
+ public gate.Document getDocument(){
+      return this.document;
+ }
+ 
+ //set the mixup file
+ public void setMixupFile(URL mixupFile){
+       this.mixupFile = mixupFile; 
+ }
+ 
+ //return the mixup file
+ public URL getMixupFile(){
+     return this.mixupFile;
+ }
+ 
+ }
