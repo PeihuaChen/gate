@@ -1,5 +1,6 @@
 package gate.creole.morph;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -44,6 +45,16 @@ public class TestMorph
    */
   protected void setUp() {
     try{
+      //make sure the right plugin is loaded
+      File pluginsHome = new File(System.getProperty(
+              GateConstants.GATE_HOME_SYSPROP_KEY), 
+              "plugins");
+      try{
+        Gate.getCreoleRegister().registerDirectories(
+                new File(pluginsHome, "Tools").toURL());
+      }catch(Exception e){
+        throw new GateRuntimeException(e);
+      }
       // creating documents
       verbDocumentToTest = Factory.newDocument(
         Gate.class.getResource(Files.getResourcePath() +
