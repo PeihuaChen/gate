@@ -86,7 +86,8 @@ Rule:	MoneySymbolUnit
 
 
 (   
- ({Token.symbolkind == currency})
+ ({Token.symbolkind == currency}|
+  {Lookup.majorType == currency_unit})
  (SPACE)?
  (AMOUNT_NUMBER)
  ((SPACE)?

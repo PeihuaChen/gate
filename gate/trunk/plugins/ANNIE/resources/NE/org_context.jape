@@ -211,6 +211,9 @@ Priority: 10
 (SPACE)
 {Token.category == CC}
 (SPACE)
+({Token.category == DT}
+ SPACE
+)?
 {Organization}
 )
 -->
@@ -232,6 +235,9 @@ Priority: 10
  (SPACE)
  {Token.category == CC}
  (SPACE)
+ ({Token.category == DT}
+  SPACE
+ )?
 )
 
 (
