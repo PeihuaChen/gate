@@ -1,5 +1,10 @@
 #!/bin/sh
 # jdk.sh - crossplatform jdk invocation
+
+
+# REDUNDANT: replaced with CYGPATH stuff in Makefile
+
+
 #
 # This is a bit of a mess; it would best be replaced with some
 # judicious use of "cygpath". But it works, so....

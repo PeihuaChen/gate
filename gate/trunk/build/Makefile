@@ -1,6 +1,7 @@
+# Generated automatically from Makefile.in by configure.
 ############################################################################
 #
-#	Makefile for GATE2
+#	Makefile.in for GATE2
 #
 #	Hamish Cunningham, 8/Jan/99
 #
@@ -16,6 +17,17 @@
 #
 ############################################################################
 
+JAVA=		//w/jdk/jdk1.3/bin/java
+JAVAC=		//w/jdk/jdk1.3/bin/javac
+JAR=		//w/jdk/jdk1.3/bin/jar
+JAVADOC=	//w/jdk/jdk1.3/bin/javadoc
+ECHON=		-n
+ECHOC=		
+LONG_OS=	i686-pc-cygwin
+OS=		CYGWIN
+CYGPATH=	/usr/bin/cygpath -w
+CYGPATHP=	/usr/bin/cygpath -w -p
+
 # a list of packages used in documentation generation. including a
 # package that contains no classes causes javadoc to bomb
 PKGS=	gate gate.annotation gate.corpora gate.creole \
@@ -26,14 +38,15 @@ PKGS=	gate gate.annotation gate.corpora gate.creole \
 
 # classpath to build compile commands from
 CP=	-classpath \
-../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar
+`$(CYGPATHP) ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc2.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/jaxp.jar:../lib/SunXmlParser.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar`
 
 # sourcepath to build compile commands from
-SP=	-sourcepath ../src
+SP=	-sourcepath `$(CYGPATHP) ../src`
 
-# compile command
-#COMPILE=./jdk.sh -s -g:none javac -Xdepend -Xstdout -O
-COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
+# compile and run commands
+#COMPILE=./jdk.sh -s -g:none javac -O -d ../classes $(SP) $(CP)
+COMPILE=$(JAVAC) -O -d `$(CYGPATH) ../classes` $(SP) $(CP)
+RUN=$(JAVA)
 
 # "all" builds the .class files. 
 # having the main test class as first target, and -Xdepend in the (1.2)
@@ -58,9 +71,9 @@ depend:
 # run the test suite (swap the last line for one of the commented ones to get
 # the JUnit GUI test runner)
 test: japefiles
-	./jdk.sh java -Xint -Xmx150m \
+	$(RUN) -Xint -Djava.compiler=nojit -Xmx150m \
 	  -classpath gate.jar \
-	  -Djava.ext.dirs=../lib/ext -Djava.compiler=nojit \
+	  -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` \
 	  junit.textui.TestRunner gate.TestGate
 #	  junit.ui.TestRunner gate.TestGate
 #	  junit.ui.LoadingTestRunner gate.TestGate
@@ -68,19 +81,19 @@ test: japefiles
 # build gate.jar. recursively includes all the .jar and .zip from lib too
 jar: tcl japefiles resources classes.jar
 	rm -f gate.jar
-	./jdk.sh java -cp classes.jar gate.util.JarFiles gate.jar \
-	  classes.jar ../lib/*.jar ../lib/*.zip
+	$(RUN) -cp classes.jar gate.util.JarFiles gate.jar classes.jar \
+	  `for f in ../lib/*.jar ../lib/*.zip; do echo \`$(CYGPATH) $$f\`; done`
 
 # create guk.jar and put in the lib/ext directory
 gukjar: classes.jar ../classes/guk/Editor.class
 	rm -f ../lib/ext/guk.jar
-	cd ../classes && ../build/jdk.sh jar cf ../lib/ext/guk.jar guk
-	cd ../src/guk/resources && ../../../build/jdk.sh \
-	  jar uf ../../../lib/ext/guk.jar `ls |grep -v CVS`
+	cd ../classes && $(JAR) cf `$(CYGPATH) ../lib/ext/guk.jar` guk
+	cd ../src/guk/resources && \
+	  $(JAR) uf `$(CYGPATH)` ../../../lib/ext/guk.jar` `ls |grep -v CVS`
 
 # just the gate classes in a jar
 classes.jar: classes
-	cd ../classes && ../build/jdk.sh jar cf ../build/classes.jar gate
+	cd ../classes && $(JAR) cf `$(CYGPATH) ../build/classes.jar` gate
 
 # copy the resources directory into "classes"
 resources:
@@ -89,8 +102,8 @@ resources:
 
 # refresh the jar with all the class files
 jarupdate:
-	cd ../classes && ../build/jdk.sh jar uf ../build/classes.jar gate
-	cd ../classes && ../build/jdk.sh jar uf ../build/gate.jar gate
+	cd ../classes && $(JAR) uf `$(CYGPATH) ../build/classes.jar` gate
+	cd ../classes && $(JAR) uf `$(CYGPATH) ../build/gate.jar` gate
 
 # build the Tcl script library:
 # update the list of scripts, and copy the scripts into classes
@@ -106,26 +119,26 @@ tcl:
 
 # run the Jacl Tcl shell
 jaclsh:
-	./jdk.sh java -Djava.compiler=none $(CP) tcl.lang.Shell
+	$(RUN) -Djava.compiler=none $(CP) tcl.lang.Shell
 
 # run the GUK editor
 gukdemo: 
-	./jdk.sh java -Djava.ext.dirs=../lib/ext guk.Editor
+	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` guk.Editor
 
 # make the javadoc documentation
 docs:
-	./jdk.sh \
-	  -s '-link http://java.sun.com/products/jdk/1.3/docs/api/' \
-	  javadoc $(SP) $(CP) -J-Xmx200m -public \
-	  -d ../doc/javadoc $(PKGS)
+	$(JAVADOC) \
+	  -link http://java.sun.com/products/jdk/1.3/docs/api/ \
+	  $(SP) $(CP) -J-Xmx200m -public \
+	  -d `$(CYGPATH) ../doc/javadoc` $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/gate/CookBook.txt
 
 # make the developer Javadocs (inc. private members)
 internaldocs: 
-	./jdk.sh \
-	  -s '-link http://redmires.dcs.shef.ac.uk/java1.3docs/api/' \
-	  javadoc $(SP) $(CP) -J-Xmx200m -private -use \
-	  -d ../doc/javadoc/internal $(PKGS)
+	$(JAVADOC) \
+	  -link http://redmires.dcs.shef.ac.uk/java1.3docs/api/ \
+	  $(SP) $(CP) -J-Xmx200m -private -use \
+	  -d `$(CYGPATH) ../doc/javadoc/internal` $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
 
 # convert the source to HTML using the java2html utility (if installed)
@@ -161,7 +174,7 @@ jape: japefiles ../src/gate/jape/parser/ParseCpsl.java \
   ../src/gate/jape/parser/ParseCpslPlain.html
 ../src/gate/jape/parser/ParseCpsl.java: ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
-	../../../../build/jdk.sh java -cp ../../../../lib/JavaCC.zip \
+	$(RUN) -cp `$(CYGPATH) ../../../../lib/JavaCC.zip` \
 	  COM.sun.labs.javacc.Main ParseCpsl.jj
 
 # put .japes into the classes, and hence the jar file
@@ -174,27 +187,31 @@ japefiles:
   ../src/gate/jape/parser/ParseCpslPlain.html
 	cd ../src/gate/jape/parser; \
 	mv ParseCpsl.html ParseCpslPlain.html || :; \
-	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
+	$(RUN) -cp `$(CYGPATH) ../../../../build/JavaCC-071.zip` \
 	  COM.sun.labs.jjdoc.JJDocMain -ONE_TABLE=false ParseCpsl.jj
 
 # jape grammar documentation
 ../src/gate/jape/parser/ParseCpslPlain.html: \
   ../src/gate/jape/parser/ParseCpsl.jj
 	cd ../src/gate/jape/parser; \
-	../../../../build/jdk.sh java -cp ../../../../build/JavaCC-071.zip \
+	$(RUN) -cp `$(CYGPATH) ../../../../build/JavaCC-071.zip` \
 	  COM.sun.labs.jjdoc.JJDocMain  ParseCpsl.jj
 
 # make the resources test jar
 TestResources.jar: testpkg/TestPR1.java testpkg/TestPR2.java \
 	testpkg/creole.xml testpkg/PrintOutTokens.java
-	./jdk.sh javac -classpath ../classes -d testpkg testpkg/*.java
-	cd testpkg && ../jdk.sh jar cvf ../TestResources.jar \
-	  testpkg/*.class creole.xml
+	$(JAVAC) -classpath `$(CYGPATH) ../classes` -d testpkg \
+	  `for f in testpkg/*.java; do echo \`$(CYGPATH) $$f\`; done`
+	cd testpkg && \
+	$(JAR) cvf `$(CYGPATH) ../TestResources.jar` creole.xml \
+	  `for f in testpkg/*.class; do echo \`$(CYGPATH) $$f\`; done`
 
 # make the testpkg.Dummy jar used by TestJdk to test class reloading
 TestJdk.jar: testpkg/Dummy.java
-	./jdk.sh javac -classpath ../classes -d testpkg testpkg/Dummy.java
-	cd testpkg && ../jdk.sh jar cvf ../TestJdk.jar testpkg/Dummy.class
+	$(JAVAC) -classpath `$(CYGPATH) ../classes` -d testpkg \
+	  `$(CYGPATH) testpkg/Dummy.java`
+	cd testpkg && $(JAR) cvf `$(CYGPATH) ../TestJdk.jar` \
+	  `$(CYGPATH) testpkg/Dummy.class`
 
 # make a list of gate packages
 gatepackages:
