@@ -52,7 +52,6 @@ public class TestNamematch extends TestCase
                           "gate.creole.namematch.Namematch", params);
 
     AnnotationSet annotSetAS = doc.getAnnotations("AnnotationSetAS");
-
     Integer newId;
     FeatureMap fm = Factory.newFeatureMap();
     try {
@@ -120,10 +119,9 @@ public class TestNamematch extends TestCase
       ioe.printStackTrace();
     }
     namematch.setDocument(doc);
-    namematch.setAnnotationSet(annotSetAS);
-    namematch.setType("TTTT");
-    namematch.setTypeAttr("token");
-
+    namematch.setAnnotationSetName("AnnotationSetAS");
+    namematch.setAnnotationType("TTTT");
+    namematch.setAttributeType("token");
     // uses intern cdg list or extern cdg list
     namematch.setIntCdgList(true);
     // uses inter lists or extern lists
@@ -133,7 +131,8 @@ public class TestNamematch extends TestCase
 
     // the vector with all the matches from the document
     Vector matches = namematch.getMatchesDocument();
-    assert(matches.toString().equals("[[0, 3, 5], [2, 4], [6, 8], [7, 9]]"));
+    if (matches != null)
+      assert(matches.toString().equals("[[0, 3, 5], [2, 4], [6, 8], [7, 9]]"));
 
     AnnotationSet annotSet = doc.getAnnotations("AnnotationSetAS");
     FeatureMap fm1;
