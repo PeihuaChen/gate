@@ -131,7 +131,7 @@
       <PARAMETER NAME="document" COMMENT="The document to be exported" RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="dtdFileName" COMMENT="The path to the DTD for the APF file" DEFAULT="ace-pilot-ref.dtd">java.lang.String</PARAMETER>
       <PARAMETER NAME="exportFilePath" COMMENT="Source URL where to export" SUFFIXES="xml">java.net.URL</PARAMETER>
-      <PARAMETER NAME="exportedTypes" DEFAULT="Organization;Person;Location;Date;Address">java.util.ArrayList</PARAMETER>
+      <PARAMETER NAME="exportedTypes" DEFAULT="Organization;Person;Location;Facility;GPE">java.util.ArrayList</PARAMETER>
     </RESOURCE>
 
     <!-- creole.xml for the internal tokeniser -->
