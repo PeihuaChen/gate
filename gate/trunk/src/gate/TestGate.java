@@ -42,6 +42,8 @@ public class TestGate
     suite.addTest(TestDocument.suite());
     suite.addTest(TestAnnotation.suite());
     suite.addTest(TestRBTreeMap.suite());
+    suite.addTest(TestCorpus.suite());
+    suite.addTest(CookBook.suite());
     return suite;
   } // suite
 

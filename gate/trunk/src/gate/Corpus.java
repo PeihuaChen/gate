@@ -11,12 +11,11 @@ import java.util.*;
 import gate.util.*;
 
 /** Corpora are sets of Document. They are ordered by lexicographic collation
-  * on Url.
-  * <P>
-  * TIPSTER equivalent: Collection.
-  *
+  * on Url. TIPSTER equivalent: Collection.
   */
 public interface Corpus extends LanguageResource, SortedSet
 {
+  /** Get the name of the corpus. */
+  public String getName();
    
 } // interface Corpus

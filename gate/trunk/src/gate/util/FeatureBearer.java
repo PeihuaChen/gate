@@ -12,11 +12,12 @@ import gate.*;
 
 /** Classes that have features.
   */
-public interface FeatureBearer 
+public interface FeatureBearer
 {
-  /** The features, or content of this arc (corresponds to TIPSTER
-    * "attributes", and to LDC "label", which is the simplest case).
-    */
+  /** Get the feature set */
   public FeatureMap getFeatures();
+
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features);
 
 } // interface FeatureBearer
