@@ -3,8 +3,8 @@ package gate.jape.parser;
 
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
-import com.objectspace.jgl.*;
+import java.util.*;
+import com.objectspace.jgl.Pair;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
@@ -473,7 +473,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   // PatternElement
   final public BasicPatternElement BasicPatternElement() throws ParseException {
   Token shortTok = null; // string shorthand token
-  Array constraints = new Array();
+  ArrayList constraints = new ArrayList();
   Token constrTok = null;
   Constraint c = null;
   BasicPatternElement bpe = new BasicPatternElement();
@@ -686,7 +686,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     block = Action();
     // did we get a non-existent block name?
     if(block[0] != null)
-      if(bindingNameSet.get(block[0]) == null) {
+      if(! bindingNameSet.contains(block[0])) {
         {if (true) throw(new ParseException("unknown label in RHS action: " + block[0]));}
       }
     rhs.addBlock(block[0], block[1]);
@@ -704,7 +704,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       block = Action();
       // did we get a non-existent block name?
       if(block[0] != null)
-        if(bindingNameSet.get(block[0]) == null) {
+        if(! bindingNameSet.contains(block[0])) {
           {if (true) throw(new ParseException("unknown label in RHS action: " + block[0]));}
         }
       rhs.addBlock(block[0], block[1]);
@@ -905,7 +905,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         jj_consume_token(colon);
         nameTok = jj_consume_token(ident);
           existingAnnotSetName = nameTok.image + "ExistingAnnots";
-          if(bindingNameSet.get(nameTok.image) == null)
+          if(! bindingNameSet.contains(nameTok.image))
             {if (true) throw(
               new ParseException(
                 "unknown label in RHS action(2): " + nameTok.image

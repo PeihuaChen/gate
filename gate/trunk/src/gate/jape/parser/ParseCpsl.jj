@@ -30,8 +30,8 @@ package gate.jape.parser;
 
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
-import com.objectspace.jgl.*;
+import java.util.*;
+import com.objectspace.jgl.Pair;
 import gate.util.*;
 import gate.*;
 import gate.jape.*;
@@ -540,7 +540,7 @@ PatternElement PatternElement(LeftHandSide lhs) :
 BasicPatternElement BasicPatternElement() :
 {
   Token shortTok = null; // string shorthand token
-  Array constraints = new Array();
+  ArrayList constraints = new ArrayList();
   Token constrTok = null;
   Constraint c = null;
   BasicPatternElement bpe = new BasicPatternElement();
@@ -708,7 +708,7 @@ RightHandSide RightHandSide(
   block=Action() {
     // did we get a non-existent block name?
     if(block[0] != null)
-      if(bindingNameSet.get(block[0]) == null) {
+      if(! bindingNameSet.contains(block[0])) {
         throw(new ParseException("unknown label in RHS action: " + block[0]));
       }
     rhs.addBlock(block[0], block[1]);
@@ -717,7 +717,7 @@ RightHandSide RightHandSide(
     <comma> block=Action() {
       // did we get a non-existent block name?
       if(block[0] != null)
-        if(bindingNameSet.get(block[0]) == null) {
+        if(! bindingNameSet.contains(block[0])) {
           throw(new ParseException("unknown label in RHS action: " + block[0]));
         }
       rhs.addBlock(block[0], block[1]);
@@ -914,7 +914,7 @@ String[] AssignmentExpression() :
       (
         <colon> nameTok=<ident> {
           existingAnnotSetName = nameTok.image + "ExistingAnnots";
-          if(bindingNameSet.get(nameTok.image) == null)
+          if(! bindingNameSet.contains(nameTok.image))
             throw(
               new ParseException(
                 "unknown label in RHS action(2): " + nameTok.image
@@ -1020,6 +1020,13 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.20  2001/09/12 11:59:34  kalina
+// Changed the old JAPE stuff to use the new Collections API,
+// instead of com.objectspace stuff. Will eliminate that library
+// completely very soon! Just one class left to re-implement,
+//
+// ParseCPSL.jj changed accordingly. All tested and no smoke.
+//
 // Revision 1.19  2001/05/18 16:30:00  hamish
 // now supports paths in phase names
 //

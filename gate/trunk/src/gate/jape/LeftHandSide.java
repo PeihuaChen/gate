@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -18,7 +18,7 @@ package gate.jape;
 
 import java.util.Enumeration;
 import java.io.Serializable;
-import com.objectspace.jgl.*;
+import java.util.*;
 import gate.annotation.*;
 import gate.util.*;
 import gate.*;
@@ -62,14 +62,14 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
       throw new JapeException(
         "LeftHandSide.addBinding: " + bindingName + " already bound"
       );
-    bindingTable.add(bindingName, binding);
- 	  bindingNameSet.add(bindingName);
+    bindingTable.put(bindingName, binding);
+    bindingNameSet.add(bindingName);
 
     // if it was a macro ref, we need to recursively set up bindings
     // in any CPEs that this one contains
     if(macroRef) {
-      for(ArrayIterator i = binding.getCPEs(); ! i.atEnd(); i.advance()) {
-        binding = (ComplexPatternElement) i.get();
+      for(Iterator i = binding.getCPEs(); i.hasNext(); ) {
+        binding = (ComplexPatternElement) i.next();
         bindingName = binding.getBindingName();
         if(bindingName == null) // not all CPEs have binding names
           continue;
@@ -77,8 +77,8 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
           throw new JapeException(
             "LeftHandSide.addBinding: " + bindingName + " already bound"
           );
-        bindingTable.add(bindingName, binding);
- 	      bindingNameSet.add(bindingName);
+        bindingTable.put(bindingName, binding);
+        bindingNameSet.add(bindingName);
       } // for each binding
     } // macroRef
 
@@ -99,7 +99,7 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
     return pat.getMatchedAnnots();
   } // getBoundAnnots
 
-  /** For debugging only. 
+  /** For debugging only.
     * Return a set of all annotations matched by the LHS during the
     * last call to matches. (May be null.)
     */
@@ -122,7 +122,7 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
   ) {
      boolean status = constraintGroup.matches(doc, position, newPosition);
      //Debug.pr(this, "LHS: status(" + status + "); this: " + this.toString());
-     
+
      if(! status) { // purge caches of matched annotations
        constraintGroup.reset();
        hasMatched = false;
@@ -146,9 +146,10 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
       "); bindingTable(" + newline + pad
     );
 
-    for(HashMapIterator i = bindingTable.begin(); ! i.atEnd(); i.advance()) {
-      String bName = ((String) i.key());
-      ComplexPatternElement cpe = ((ComplexPatternElement) i.value());
+    for(Iterator i = bindingTable.keySet().iterator(); i.hasNext(); ) {
+      String bName = ((String) i.next());
+      ComplexPatternElement cpe = ((ComplexPatternElement)
+                                        bindingTable.get(bName));
       buf.append(
         pad + "bT.bn(" + bName + "), cpe.bn(" + cpe.getBindingName() + ")"
       );
@@ -163,11 +164,18 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
   public ConstraintGroup getConstraintGroup(){
     return constraintGroup;
   }
-  
+
 } // class LeftHandSide
 
 
 // $Log$
+// Revision 1.7  2001/09/12 11:59:33  kalina
+// Changed the old JAPE stuff to use the new Collections API,
+// instead of com.objectspace stuff. Will eliminate that library
+// completely very soon! Just one class left to re-implement,
+//
+// ParseCPSL.jj changed accordingly. All tested and no smoke.
+//
 // Revision 1.6  2000/11/08 16:35:03  hamish
 // formatting
 //
