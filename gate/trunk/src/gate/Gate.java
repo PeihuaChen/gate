@@ -1121,5 +1121,25 @@ jar/classpath so it's the same as registerBuiltins
 
   /** Tell GATE whether to enable Jape Debugger. */
   public static void setEnableJapeDebug(boolean b) { enableJapeDebug = b; }
-
+  
+  /**
+   * Flag for whether to use native serialization or xml serialization when
+   * saving applications.
+   */
+  private static boolean useXMLSerialization = true;
+  
+  /**
+   * Tell GATE whether to use XML serialization for applications.
+   */
+  public static void setUseXMLSerialization(boolean useXMLSerialization) {
+  	Gate.useXMLSerialization = useXMLSerialization;
+  }
+  
+  /**
+   * Should we use XML serialization for applications.
+   */
+  public static boolean getUseXMLSerialization() {
+  	return useXMLSerialization;
+  }
+  
 } // class Gate
