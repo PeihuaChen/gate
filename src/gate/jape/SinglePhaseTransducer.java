@@ -133,7 +133,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
        gate.util.Javac.loadClasses(actionClasses);
      }catch(Exception e){
        throw new GateRuntimeException(
-          "Compile error while loading Jape transducer \"" + name + "\"!");
+          "Compile error while loading Jape transducer \"" + name + "\"!", e);
      }
 
     //build the finite state machine transition graph
