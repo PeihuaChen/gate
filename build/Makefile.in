@@ -46,7 +46,7 @@ PKGS=	\
 # NOTE that some cygpath versions are buggy and can't take long paths, so
 # this list is split
 CP=	-classpath \
-`$(CYGPATHP) ../classes:$(TOOLSJAR):../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc9i.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/xerces.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar:../lib/heptag.jar:``$(CYGPATHP) :../lib/ontotext.jar:../lib/protege.jar:../lib/ext/nl.mpi.lookup.jar:../lib/jena.jar`
+`$(CYGPATHP) ../classes:$(TOOLSJAR):../lib/lucene-1.2-rc4.jar:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc9i.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/xerces.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar:../lib/heptag.jar:``$(CYGPATHP) :../lib/ontotext.jar:../lib/protege.jar:../lib/ext/nl.mpi.lookup.jar:../lib/jena.jar`
 
 # sourcepath to build compile commands from
 SP=	-sourcepath `$(CYGPATHP) ../src`
