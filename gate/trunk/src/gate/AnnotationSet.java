@@ -64,6 +64,14 @@ public interface AnnotationSet extends Set, Cloneable, Serializable
   /** Select annotations by type and features */
   public AnnotationSet get(String type, FeatureMap constraints);
 
+  /** Select annotations by type and feature names
+   *  It returns all annotations of the given type that
+   *  have the given set of features, regardless of their
+   *  concrete values
+   *  If the type == null, then select regardless of type
+   *  */
+  public AnnotationSet get(String type, Set featureNames);
+
   /** Select annotations by type, features and offset */
   public AnnotationSet get(String type, FeatureMap constraints, Long offset);
 
