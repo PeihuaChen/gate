@@ -118,6 +118,16 @@ public class XJTable extends JTable{
   public boolean isAscending() {
     return ascending;
   }
+  
+  /**
+   * Gets the hidden state for a column
+   * @param columnIndex the column
+   * @return the hidden state
+   */
+  public boolean isColumnHidden(int columnIndex){
+    return ((ColumnData)columnData.get(columnIndex)).isHidden();
+  }
+  
   /**
    * @param ascending The ascending to set.
    */
