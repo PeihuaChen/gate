@@ -65,13 +65,6 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         LinearNode node = (LinearNode)inodes.next();
 
         GazetteerList list = new GazetteerList();
-        String path = url.getPath();
-        int slash = path.lastIndexOf("/");
-        if (-1 == slash ) {
-          slash = 0;
-        } else {
-          path = path.substring(0,slash+1);
-        }
         URL lurl = new URL(url,node.getList());
         list.setURL(lurl);
         list.load();
