@@ -117,12 +117,14 @@ public class DatabaseDocumentImpl extends DocumentImpl
     //1. default
     _setAnnotations(null,_default);
 
-    //2. named
-    Iterator itNamed = _named.values().iterator();
-    while (itNamed.hasNext()){
-      AnnotationSet currSet = (AnnotationSet)itNamed.next();
-      //add them all to the DBAnnotationSet
-      _setAnnotations(currSet.getName(),currSet);
+    //2. named (if any)
+    if (null != _named) {
+      Iterator itNamed = _named.values().iterator();
+      while (itNamed.hasNext()){
+        AnnotationSet currSet = (AnnotationSet)itNamed.next();
+        //add them all to the DBAnnotationSet
+        _setAnnotations(currSet.getName(),currSet);
+      }
     }
 
     //3. add the listeners for the features
