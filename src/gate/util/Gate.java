@@ -202,7 +202,7 @@ public class Gate
   } // tryNetServer()
 
   /** Try to find GATE files in the local file system */
-  private static boolean tryFileSystem() throws MalformedURLException {
+  protected static boolean tryFileSystem() throws MalformedURLException {
     String aGateResourceName = "gate/resources/creole/creole.xml";
     urlBase = Gate.getClassLoader().getResource(aGateResourceName);
     StringBuffer basePath = new StringBuffer(urlBase.toExternalForm());
