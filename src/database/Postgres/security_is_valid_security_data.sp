@@ -49,3 +49,4 @@ CREATE FUNCTION security_is_valid_security_data(int2,int4,int4) RETURNS boolean 
 
    END;
 ' LANGUAGE 'plpgsql'
+WITH (iscachable);
