@@ -153,6 +153,29 @@ public class CorpusBenchmarkTool {
   }
 
   public void init() {
+    //first read the corpus_tool.properties file
+    File propFile = new File("corpus_tool.properties");
+    Out.prln(propFile.getAbsolutePath());
+    if (propFile.exists()) {
+      try {
+        InputStream inputStream = new FileInputStream(propFile);
+        this.configs.load(inputStream);
+        String thresholdString = this.configs.getProperty("threshold");
+        if (thresholdString != null && !thresholdString.equals("")) {
+          this.threshold = (new Double(thresholdString)).doubleValue();
+          Out.prln("New threshold is: " + this.threshold + "<P>\n");
+        }
+        String setName = this.configs.getProperty("annotSetName");
+        if (setName != null && !setName.equals(""))
+          this.annotSetName = setName;
+      } catch (IOException ex) {
+        //just ignore the file and go on with the defaults
+        this.configs = new Properties();
+      }
+    } else
+      this.configs = new Properties();
+
+
     //we only initialise the PRs if they are going to be used
     //for processing unprocessed documents
     if (!this.isMarkedStored)
@@ -252,27 +275,6 @@ public class CorpusBenchmarkTool {
     File dir = new File(dirName);
     if (!dir.isDirectory())
       throw new GateException(usage);
-
-    File propFile = new File("corpus_tool.properties");
-    Out.prln(propFile.getAbsolutePath());
-    if (propFile.exists()) {
-      try {
-        InputStream inputStream = new FileInputStream(propFile);
-        corpusTool.configs.load(inputStream);
-        String thresholdString = corpusTool.configs.getProperty("threshold");
-        if (thresholdString != null && !thresholdString.equals("")) {
-          corpusTool.threshold = (new Double(thresholdString)).doubleValue();
-          Out.prln("new threshold is: " + corpusTool.threshold);
-        }
-        String setName = corpusTool.configs.getProperty("annotSetName");
-        if (setName != null && !setName.equals(""))
-          corpusTool.annotSetName = setName;
-      } catch (IOException ex) {
-        //just ignore the file and go on with the defaults
-        corpusTool.configs = new Properties();
-      }
-    } else
-      corpusTool.configs = new Properties();
 
     corpusTool.init();
 
