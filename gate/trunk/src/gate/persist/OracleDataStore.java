@@ -1998,6 +1998,7 @@ public class OracleDataStore extends JDBCDataStore {
       String sql = " select lr_name, " +
                    "        lrtp_type, " +
                    "        lr_id, " +
+                   "        lr_parent_id, " +
                    "        doc_id, " +
                    "        doc_url, " +
                    "        doc_start, " +
@@ -2018,10 +2019,25 @@ public class OracleDataStore extends JDBCDataStore {
 
       //4. fill data
 
-      //4.1 name
+      //4.0 name
       String lrName = rs.getString("lr_name");
       Assert.assertNotNull(lrName);
       result.setName(lrName);
+
+      //4.1 parent
+      Long parentID = null;
+      long parent_id = rs.getLong("lr_parent_id");
+      if (false == rs.wasNull()) {
+        parentID = new Long(parent_id);
+
+        //read parent resource
+        LanguageResource parentLR = this.getLr(DBHelper.DOCUMENT_CLASS,parentID);
+        Assert.assertNotNull(parentLR);
+        Assert.assertTrue(parentLR instanceof DatabaseDocumentImpl);
+
+        result.setParent(parentLR);
+      }
+
 
       //4.2. markup aware
       long markup = rs.getLong("doc_is_markup_aware");
@@ -2372,7 +2388,8 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - saves a Document in the database */
-  private void syncDocument(Document doc) throws PersistenceException {
+  private void syncDocument(Document doc)
+    throws PersistenceException, SecurityException {
 
     Assert.assertTrue(doc instanceof DatabaseDocumentImpl);
     Assert.assertTrue(doc.getLRPersistenceId() instanceof Long);
@@ -2382,12 +2399,12 @@ public class OracleDataStore extends JDBCDataStore {
     //1. sync LR
     // only name can be changed here
     if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
-      _syncLR(lrID,doc.getName());
+      _syncLR(doc);
     }
 
     //2. sync Document
     if (true == dbDoc.isResourceChanged(EventAwareLanguageResource.DOC_MAIN)) {
-      _syncDocument(doc);
+      _syncDocumentHeader(doc);
     }
 
     //3. [optional] sync Content
@@ -2417,15 +2434,29 @@ public class OracleDataStore extends JDBCDataStore {
    *  helper for sync()
    *  NEVER call directly
    */
-  private void _syncLR(Long lrID, String newName)
-    throws PersistenceException {
+  private void _syncLR(LanguageResource lr)
+    throws PersistenceException,SecurityException {
+
+    //0.preconditions
+    Assert.assertTrue(lr instanceof DatabaseDocumentImpl ||
+                      lr instanceof DatabaseCorpusImpl);;
+    Assert.assertNotNull(lr.getLRPersistenceId());
 
     CallableStatement stmt = null;
 
     try {
-      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.set_lr_name(?,?) }");
-      stmt.setLong(1,lrID.longValue());
-      stmt.setString(2,newName);
+      stmt = this.jdbcConn.prepareCall("{ call "+Gate.DB_OWNER+".persist.update_lr(?,?,?) }");
+      stmt.setLong(1,((Long)lr.getLRPersistenceId()).longValue());
+      stmt.setString(2,lr.getName());
+      //do we have a parent resource?
+      if (lr instanceof Document &&
+          null != lr.getParent()) {
+        stmt.setLong(3,((Long)lr.getParent().getLRPersistenceId()).longValue());
+      }
+      else {
+        stmt.setNull(3,java.sql.Types.BIGINT);
+      }
+
       stmt.execute();
     }
     catch(SQLException sqle) {
@@ -2447,7 +2478,7 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - never call directly */
-  private void _syncDocument(Document doc)
+  private void _syncDocumentHeader(Document doc)
     throws PersistenceException {
 
     Long lrID = (Long)doc.getLRPersistenceId();
@@ -2904,7 +2935,8 @@ public class OracleDataStore extends JDBCDataStore {
 
 
   /** helper for sync() - saves a Corpus in the database */
-  private void syncCorpus(Corpus corp) throws PersistenceException {
+  private void syncCorpus(Corpus corp)
+    throws PersistenceException,SecurityException {
 
     //0. preconditions
     Assert.assertNotNull(corp);
@@ -2916,7 +2948,7 @@ public class OracleDataStore extends JDBCDataStore {
 
     //1. sync the corpus name?
     if (dbCorpus.isResourceChanged(EventAwareLanguageResource.RES_NAME)) {
-      _syncLR((Long)corp.getLRPersistenceId(),corp.getName());
+      _syncLR(corp);
     }
 
     //2. sync the corpus features?
