@@ -456,9 +456,9 @@ public class DatabaseDocumentImpl extends DocumentImpl
           Long startOffset = new Long(rs.getLong(3));
           Long endOffset = new Long(rs.getLong(4));
 
-          if (DEBUG) Out.println("annID=["+annID+"]");
-          if (DEBUG) Out.println("start=["+startOffset+"]");
-          if (DEBUG) Out.println("end=["+endOffset+"]");
+          if (DEBUG) Out.println("ann_local_id=["+annID+"]");
+          if (DEBUG) Out.println("start_off=["+startOffset+"]");
+          if (DEBUG) Out.println("end_off=["+endOffset+"]");
 
           //2. get the features
           FeatureMap fm = (FeatureMap)featuresByAnnotationID.get(annID);
@@ -852,6 +852,12 @@ public class DatabaseDocumentImpl extends DocumentImpl
     }
   }
 */
+
+  public void setNextNodeId(int nextID){
+    Assert.assertTrue(nextID >= 0);
+    this.nextNodeId = nextID;
+  }
+
 
   public boolean isResourceChanged(int changeType) {
 
