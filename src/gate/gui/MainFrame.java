@@ -1525,9 +1525,14 @@ public class MainFrame extends JFrame
       putValue(SHORT_DESCRIPTION,"Create a new Annotation Diff Tool");
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e) {
-      AnnotDiffDialog annotDiffDialog = new AnnotDiffDialog(MainFrame.this);
-      annotDiffDialog.setTitle("Annotation Diff Tool");
-      annotDiffDialog.setVisible(true);
+//      AnnotDiffDialog annotDiffDialog = new AnnotDiffDialog(MainFrame.this);
+//      annotDiffDialog.setTitle("Annotation Diff Tool");
+//      annotDiffDialog.setVisible(true);
+      AnnotationDiffGUI frame = new AnnotationDiffGUI("Annotation Diff Tool");
+      frame.pack();
+      frame.setIconImage(((ImageIcon)getIcon("annDiff.gif")).getImage());
+      frame.setLocationRelativeTo(MainFrame.this);
+      frame.setVisible(true);
     }// actionPerformed();
   }//class NewAnnotDiffAction
 
