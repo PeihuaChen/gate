@@ -22,6 +22,7 @@ import java.io.*;
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
+import gate.event.*;
 
 /** A data store based on Java serialisation.
   */
@@ -128,7 +129,12 @@ extends AbstractFeatureBearer implements DataStore {
     // if there are no more resources of this type, delete the dir too
     if(resourceTypeDirectory.list().length == 0)
       if(! resourceTypeDirectory.delete())
-        throw new PersistenceException("Can't delete "+resourceTypeDirectory);
+        throw new PersistenceException("Can't delete " + resourceTypeDirectory);
+
+    //let the world know about it
+    fireResourceDeleted(new DatastoreEvent(this,
+                                           DatastoreEvent.RESOURCE_DELETED,
+                                           null, dataStoreInstanceId));
   } // delete(lr)
 
   /** Adopt a resource for persistence. */
@@ -141,6 +147,10 @@ extends AbstractFeatureBearer implements DataStore {
       return lr;
     else if(currentDS == null) {  // an orphan - do the adoption
       lr.setDataStore(this);
+      //let the world know
+      fireResourceAdopted(new DatastoreEvent(this,
+                                             DatastoreEvent.RESOURCE_ADOPTED,
+                                             lr, null));
       return lr;
     } else {                      // someone else's child
       throw new PersistenceException(
@@ -251,6 +261,11 @@ extends AbstractFeatureBearer implements DataStore {
     //that have been added or changed
     originalFeatures.putAll(persistentFeatures);
     lr.setFeatures(originalFeatures);
+
+    //let the world know about it
+    fireResourceWritten(new DatastoreEvent(this,
+                                         DatastoreEvent.RESOURCE_WRITTEN,
+                                         lr, lrPersistenceId));
   } // sync(LR)
 
   /** Get a resource from the persistent store.
@@ -363,6 +378,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Random number generator */
   protected static Random randomiser = new Random();
+  private transient Vector datastoreListeners;
 
   /** String representation */
   public String toString() {
@@ -383,6 +399,47 @@ extends AbstractFeatureBearer implements DataStore {
     return other instanceof SerialDataStore
            &&
            ((SerialDataStore)other).storageDir.equals(storageDir);
+  }
+  public synchronized void removeDatastoreListener(DatastoreListener l) {
+    if (datastoreListeners != null && datastoreListeners.contains(l)) {
+      Vector v = (Vector) datastoreListeners.clone();
+      v.removeElement(l);
+      datastoreListeners = v;
+    }
+  }
+  public synchronized void addDatastoreListener(DatastoreListener l) {
+    Vector v = datastoreListeners == null ? new Vector(2) : (Vector) datastoreListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      datastoreListeners = v;
+    }
+  }
+  protected void fireResourceAdopted(DatastoreEvent e) {
+    if (datastoreListeners != null) {
+      Vector listeners = datastoreListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DatastoreListener) listeners.elementAt(i)).resourceAdopted(e);
+      }
+    }
+  }
+  protected void fireResourceDeleted(DatastoreEvent e) {
+    if (datastoreListeners != null) {
+      Vector listeners = datastoreListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DatastoreListener) listeners.elementAt(i)).resourceDeleted(e);
+      }
+    }
+  }
+  protected void fireResourceWritten(DatastoreEvent e) {
+    if (datastoreListeners != null) {
+      Vector listeners = datastoreListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((DatastoreListener) listeners.elementAt(i)).resourceWritten(e);
+      }
+    }
   }
 
 } // class SerialDataStore

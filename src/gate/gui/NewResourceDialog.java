@@ -350,15 +350,12 @@ public class NewResourceDialog extends JDialog {
                                                            isSelected, hasFocus,
                                                            row, column);
       if (comp instanceof JLabel){
-        try {
-          JLabel label = (JLabel)comp;
-          if(((Boolean)value).booleanValue()){
-            label.setIcon(new ImageIcon(getClass().
-                          getResource("/gate/resources/img/tick.gif")));
-          } else {
-            label.setIcon(null);
-          }
-        } catch(Exception e){}
+        JLabel label = (JLabel)comp;
+        if(((Boolean)value).booleanValue()){
+          label.setIcon(MainFrame.getIcon("tick.gif"));
+        } else {
+          label.setIcon(null);
+        }
       }
       return comp;
     }//public Component getTableCellRendererComponent
@@ -383,9 +380,7 @@ public class NewResourceDialog extends JDialog {
           label.setToolTipText(pDisj.getComment());
           label.setHorizontalTextPosition(JLabel.LEFT);
           if(pDisj.size() > 1){
-            label.setIcon(new ImageIcon(getClass().
-                          getResource("/gate/resources/img/down.gif")));
-
+            label.setIcon(MainFrame.getIcon("down.gif"));
           }else{
             label.setIcon(null);
           }
@@ -398,8 +393,7 @@ public class NewResourceDialog extends JDialog {
 
   class CustomObjectRenderer extends ObjectRenderer {
     CustomObjectRenderer() {
-      button = new JButton(new ImageIcon(getClass().getResource(
-                               "/gate/resources/img/loadFile.gif")));
+      button = new JButton(MainFrame.getIcon("loadFile.gif"));
       button.setToolTipText("Set from file...");
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
@@ -470,8 +464,7 @@ public class NewResourceDialog extends JDialog {
       super(new JTextField(10));
       setClickCountToStart(1);
       textField = (JTextField)getComponent();
-      button = new JButton(new ImageIcon(getClass().getResource(
-                               "/gate/resources/img/loadFile.gif")));
+      button = new JButton(MainFrame.getIcon("loadFile.gif"));
       button.setToolTipText("Set from file...");
       textButtonBox = Box.createHorizontalBox();
 

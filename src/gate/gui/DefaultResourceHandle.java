@@ -45,18 +45,10 @@ public class DefaultResourceHandle implements ResourceHandle {
         if(resource instanceof LanguageResource) iconName = "lr.gif";
         else if(resource instanceof ProcessingResource) iconName = "pr.gif";
       }
-      try {
-        this.icon = new ImageIcon(new URL("gate:/img/" + iconName));
-      } catch(MalformedURLException mue){
-        mue.printStackTrace(Err.getPrintWriter());
-      }
+      this.icon = MainFrame.getIcon(iconName);
       tooltipText = "Type : " + rData.getName();
     } else {
-      try {
-        this.icon = new ImageIcon(new URL("gate:/img/lr.gif"));
-      } catch(MalformedURLException mue) {
-        mue.printStackTrace(Err.getPrintWriter());
-      }
+      this.icon = MainFrame.getIcon("lr.gif");
     }
 
     popup = null;

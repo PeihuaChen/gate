@@ -116,17 +116,6 @@ public class JTreeTable extends XJTable {
    * Will use the {@link tree} to paint the nodes.
    */
   public class TreeTableCellRenderer extends DefaultTableCellRenderer {
-/*
-    public TreeTableCellRenderer() {
-
-      icon = new ImageIcon();
-      setText(null);
-      setIcon(icon);
-      setIconTextGap(0);
-      setHorizontalTextPosition(RIGHT);
-      setHorizontalAlignment(LEFT);
-    }
-*/
     public Component getTableCellRendererComponent(JTable table,
                      Object value,
                      boolean isSelected,

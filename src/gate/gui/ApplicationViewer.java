@@ -112,31 +112,18 @@ public class ApplicationViewer extends AbstractVisualResource
     mainBox.add(scroller);
 
     Box buttonsBox = Box.createVerticalBox();
-    addModuleBtn = new JButton("Add component",
-                               new ImageIcon(
-                                 ApplicationViewer.class.getResource(
-                                 "/gate/resources/img/left2.gif"))
-                               );
+    addModuleBtn = new JButton("Add component", MainFrame.getIcon("left2.gif"));
     addModuleBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
     removeModuleBtn = new JButton("Remove component",
-                                  new ImageIcon(
-                                    ApplicationViewer.class.getResource(
-                                    "/gate/resources/img/right2.gif"))
-                                  );
+                                  MainFrame.getIcon("right2.gif"));
     removeModuleBtn.setAlignmentX(JComponent.CENTER_ALIGNMENT);
     buttonsBox.add(Box.createVerticalStrut(30));
     buttonsBox.add(addModuleBtn);
     buttonsBox.add(Box.createVerticalStrut(5));
     buttonsBox.add(removeModuleBtn);
     buttonsBox.add(Box.createVerticalGlue());
-    upBtn = new JButton("Move up",
-                new ImageIcon(
-                    ApplicationViewer.class.getResource(
-                    "/gate/resources/img/up.gif")));
-    downBtn = new JButton("Move down",
-              new ImageIcon(
-                  ApplicationViewer.class.getResource(
-                  "/gate/resources/img/down.gif")));
+    upBtn = new JButton("Move up", MainFrame.getIcon("up.gif"));
+    downBtn = new JButton("Move down", MainFrame.getIcon("down.gif"));
     Box horBox = Box.createHorizontalBox();
     Box verBox = Box.createVerticalBox();
     verBox.add(upBtn);
@@ -565,24 +552,10 @@ public class ApplicationViewer extends AbstractVisualResource
                                                           expanded, leaf,
                                                           row, hasFocus);
       setToolTipText(tipText);
-      setIcon(getIcon(iconName));
+      setIcon(MainFrame.getIcon(iconName));
       return this;
     }//public Component getTreeCellRendererComponent
 
-    private Icon getIcon(String name){
-      Icon res = (Icon)iconForName.get(name);
-      if(res == null){
-        try{
-          res = new ImageIcon(new URL("gate:/img/" + name));
-          iconForName.put(name, res);
-        }catch(java.net.MalformedURLException mue){
-          mue.printStackTrace(Err.getPrintWriter());
-        }
-      }
-      return res;
-    }//private Icon getIcon(String name)
-
-    private Map iconForName = new HashMap();
   }//class CustomTreeCellRenderer extends DefaultTreeCellRenderer
 
   class ModulesTableModel extends AbstractTableModel{
