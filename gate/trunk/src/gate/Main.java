@@ -88,8 +88,21 @@ public class Main {
     }
   } // registerCreoleUrls()
 
-  /** Run the user interface */
-  private static void runGui() throws GateException{
+  /** Main Frame of the GUI; null when no GUI running */
+  private static MainFrame frame;
+
+  /**
+   * Get the main frame of the GUI. If the GUI isn't running, it
+   * is started.
+   */
+  public static MainFrame getMainFrame() throws GateException {
+    if(frame == null)
+      runGui();
+    return frame;
+  } // getMainFrame()
+
+  /** Run the user interface. */
+  private static void runGui() throws GateException {
     //build the Spash
     JPanel splashBox = new JPanel();
     splashBox.setLayout(new BoxLayout(splashBox, BoxLayout.Y_AXIS));
@@ -118,13 +131,13 @@ public class Main {
     registerCreoleUrls();
 
 
-    MainFrame frame = new MainFrame();
+    frame = new MainFrame();
     long startTime = System.currentTimeMillis();
 
     if(DEBUG) Out.prln("constructing GUI");
 
     // run the GUI
-    frame.setTitle(name + " " + version);
+    frame.setTitle(name + " " + version + " build " + build);
 
     // Validate frames that have preset sizes
     frame.validate();
