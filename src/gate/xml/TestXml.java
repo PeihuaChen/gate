@@ -60,13 +60,30 @@ public class TestXml extends TestCase
     // create a new gate document
     //gate.Document doc = gate.Transients.newDocument(
     //          new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
+
+
     gate.Document doc = gate.Transients.newDocument(
               new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
     );
+
+
     /*
     gate.Document doc = gate.Transients.newDocument(
-      Files.getResourceAsString("texts/xces/xces.xml")
-    );*/
+              new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/Sentence.xml")
+    );
+    */
+
+    /*
+    File f = Files.writeTempFile(Files.getResourceAsStream("texts/Sentence.xml"));
+    URL u = f.toURL();
+    gate.Document doc = gate.Transients.newDocument(u);
+    f.delete ();
+    */
+   /*
+    gate.Document doc = gate.Transients.newDocument(
+      Files.getResourceAsString("texts/Sentence.xml")
+    );
+    */
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
@@ -75,11 +92,12 @@ public class TestXml extends TestCase
 
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
-    docFormat.unpackMarkup (doc,"DocumentContent");
+
+    //docFormat.unpackMarkup (doc,"DocumentContent");
 
     // graphic visualisation
 
-    /*
+
     System.out.println("Timer started...");
     if (docFormat != null){
         // timing the operation
@@ -106,7 +124,8 @@ public class TestXml extends TestCase
         System.out.println("Total time : " + (time1 + time2) / 1000 + "." +
                             (time1 + time2) % 1000 + " seconds.");
     }
-    */
+
+    
   } // testSomething()
 
   /** Test suite routine for the test runner */

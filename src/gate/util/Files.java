@@ -9,6 +9,9 @@ import java.util.*;
 /** Some utilities for use with Files. */
 public class Files {
 
+  /** Used to generate temporary resources names*/
+  static long resourceIndex = 0;
+
   /** Get a string representing the contents of a text file. */
   public static String getString(String fileName) throws IOException {
     return getString(new File(fileName));
@@ -53,6 +56,34 @@ public class Files {
     resourceReader.close();
     return resourceBuffer.toString();
   } // getResourceAsString(String)
+
+  /**
+    * Writes a temporary file into the default temporary directory, form an InputStream
+    * a unique ID is generated and associated automaticaly with the file name...
+    */
+  public static File writeTempFile(InputStream contentStream)
+  throws IOException {
+    // create a temporary file name
+    File resourceFile  = null;
+    FileWriter resourceFileWriter = null;
+    BufferedReader resourceReader = null;
+
+    resourceFile = File.createTempFile ("gateResource", ".tmp");
+    resourceFileWriter = new FileWriter(resourceFile);
+    resourceFile.deleteOnExit ();
+    resourceReader = new BufferedReader(new InputStreamReader(contentStream));
+    int i = 0;
+
+    while( (i = resourceReader.read()) != -1 )
+                                resourceFileWriter.write (i);
+
+   resourceFileWriter.close();
+   resourceReader.close ();
+   contentStream.close ();
+   return resourceFile;
+  }
+
+
 
   /** Get a resource from the GATE resources directory as a byte array.
     * The resource name should be relative to <TT>gate/resources</TT>; e.g.
