@@ -18,6 +18,7 @@ make sure *.bat are in DOS format
 
 
 build installers using gate\build\deploy\gate2.iap
+replace the install.htm page with the one from build/deploy
 
 
 TEST THE INSTALLERS ON WINDOWS AND LINUX (at least)
