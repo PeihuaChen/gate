@@ -20,6 +20,7 @@ import java.util.*;
 import gate.*;
 import gate.util.*;
 import gate.corpora.*;
+import gate.event.*;
 
 /** Provides an implementation for the interface gate.Annotation
  *
@@ -50,6 +51,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     this.end      = end;
     this.type     = type;
     this.features = features;
+
   } // AnnotationImpl
 
 
@@ -64,17 +66,6 @@ public class AnnotationImpl extends AbstractFeatureBearer
   public String getType() {
     return type;
   } // getType()
-
-  /** The features, or content of this arc (corresponds to TIPSTER
-   * "attributes", and to LDC "label", which is the simplest case).
-   */
-  public FeatureMap getFeatures() {
-    return features;
-  } // getFeatures()
-
-  /** Set the feature set
-   */
-  public void setFeatures(FeatureMap features) { this.features = features; }
 
   /** The start node.
    */
@@ -175,6 +166,29 @@ public class AnnotationImpl extends AbstractFeatureBearer
       return false;
     return true;
   }// equals
+
+  /** Set the feature set. Overriden from the implementation in
+   *  AbstractFeatureBearer because it needs to fire events
+   */
+  public void setFeatures(FeatureMap features) {
+    //I need to remove first the old features listener if any
+    if (eventHandler != null)
+      this.features.removeGateListener(eventHandler);
+
+    this.features = features;
+
+    //if someone cares about the annotation changes, then we need to
+    //track the events from the new feature
+    if (! annotationListeners.isEmpty())
+      this.features.addGateListener(eventHandler);
+
+    //finally say that the annotation features have been updated
+    fireAnnotationUpdated(new AnnotationEvent(
+                            this,
+                            AnnotationEvent.FEATURES_UPDATED));
+
+
+  }
 
 
   /** This verifies if <b>this</b> annotation is compatible with another one.
@@ -334,6 +348,73 @@ public class AnnotationImpl extends AbstractFeatureBearer
     return true;
   }//overlaps
 
+//////////////////THE EVENT HANDLING CODE/////////////////////
+//Needed so an annotation set can listen to its annotations//
+//and update correctly the database/////////////////////////
+
+  /**
+   * The set of listeners of the annotation update events. At present there
+   * are two event types supported:
+   * <UL>
+   *   <LI> ANNOTATION_UPDATED event
+   *   <LI> FEATURES_UPDATED event
+   * </UL>
+   */
+  private transient Vector annotationListeners;
+  /**
+   * The listener for the events coming from the features.
+   */
+  protected EventsHandler eventHandler;
+
+
+  /**
+   *
+   * Removes an annotation listener
+   */
+  public synchronized void removeAnnotationListener(AnnotationListener l) {
+    if (annotationListeners != null && annotationListeners.contains(l)) {
+      Vector v = (Vector) annotationListeners.clone();
+      v.removeElement(l);
+      annotationListeners = v;
+    }
+  }
+  /**
+   *
+   * Adds an annotation listener
+   */
+  public synchronized void addAnnotationListener(AnnotationListener l) {
+    Vector v = annotationListeners == null ? new Vector(2) : (Vector) annotationListeners.clone();
+
+    //now check and if this is the first listener added,
+    //start listening to all features, so their changes can
+    //also be propagated
+    if (v.isEmpty()) {
+      FeatureMap features = getFeatures();
+      if (eventHandler == null)
+        eventHandler = new EventsHandler();
+      features.addGateListener(eventHandler);
+    }
+
+    if (!v.contains(l)) {
+      v.addElement(l);
+      annotationListeners = v;
+    }
+  }
+  /**
+   *
+   * @param e
+   */
+  protected void fireAnnotationUpdated(AnnotationEvent e) {
+    if (annotationListeners != null) {
+      Vector listeners = annotationListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((AnnotationListener) listeners.elementAt(i)).annotationUpdated(e);
+      }
+    }
+  }//fireAnnotationUpdated
+
+
   /**
    * The id of this annotation (for persitency resons)
    *
@@ -345,10 +426,10 @@ public class AnnotationImpl extends AbstractFeatureBearer
    */
   String type;
   /**
-   * The features of the annotation
-   *
+   * The features of the annotation are inherited from Abstract feature bearer
+   * so no need to define here
    */
-  FeatureMap features;
+
   /**
    * The start node
    */
@@ -361,4 +442,21 @@ public class AnnotationImpl extends AbstractFeatureBearer
 
   /** @link dependency */
   /*#AnnotationImpl lnkAnnotationImpl;*/
+
+  /**
+   * All the events from the features are handled by
+   * this inner class.
+   */
+  class EventsHandler implements gate.event.GateListener {
+    public void processGateEvent(GateEvent e){
+      if (e.getType() != GateEvent.FEATURES_UPDATED)
+        return;
+      //tell the annotation listeners that my features have been updated
+      fireAnnotationUpdated(new AnnotationEvent(
+                                  AnnotationImpl.this,
+                                  AnnotationEvent.FEATURES_UPDATED));
+    }
+  }//inner class EventsHandler
+
+
 } // class AnnotationImpl

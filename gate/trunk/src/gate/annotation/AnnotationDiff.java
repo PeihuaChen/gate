@@ -1057,6 +1057,8 @@ public class AnnotationDiff extends AbstractVisualResource{
         // Features - Key
         case 3:{
            if (diffSetElement.getLeftAnnotation() == null) return null;
+           if (diffSetElement.getLeftAnnotation().getFeatures() == null)
+             return null;
            return diffSetElement.getLeftAnnotation().getFeatures().toString();
         }
         // Empty column

@@ -17,6 +17,7 @@ package gate.util;
 
 import java.util.*;
 import gate.*;
+import gate.event.*;
 
 /** Simple case of features.
   */
@@ -110,6 +111,81 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
     }// End while
     return true;
   }// subsumes()
+
+
+  /**
+   * Overriden to fire events, so that the persistent objects
+   *  can keep track of what's updated
+   */
+  public Object put(Object key, Object value) {
+    //first tell the world if they're listening
+    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
+    return super.put( key,  value);
+  }
+
+  /**
+   * Overriden to fire events, so that the persistent objects
+   *  can keep track of what's updated
+   */
+  public Object remove(Object key) {
+    //first tell the world if they're listening
+    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
+    return super.remove( key);
+  }
+
+  /**
+   * Overriden to fire events, so that the persistent objects
+   *  can keep track of what's updated
+   */
+  public void clear() {
+    //first tell the world if they're listening
+    fireGateEvent(new GateEvent(this, GateEvent.FEATURES_UPDATED));
+    super.clear();
+  }
+
+
+//////////////////THE EVENT HANDLING CODE//////////////
+//Needed so an annotation can listen to its features//
+//and update correctly the database//////////////////
+  private transient Vector gateListeners;
+
+  /**
+   *
+   * Removes a gate listener
+   */
+  public synchronized void removeGateListener(GateListener l) {
+    if (gateListeners != null && gateListeners.contains(l)) {
+      Vector v = (Vector) gateListeners.clone();
+      v.removeElement(l);
+      gateListeners = v;
+    }
+  }
+  /**
+   *
+   * Adds a gate listener
+   */
+  public synchronized void addGateListener(GateListener l) {
+    Vector v = gateListeners == null ? new Vector(2) : (Vector) gateListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      gateListeners = v;
+    }
+  }
+  /**
+   *
+   * @param e
+   */
+  protected void fireGateEvent (GateEvent e) {
+    if (gateListeners != null) {
+      Vector listeners = gateListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((GateListener) listeners.elementAt(i)).processGateEvent(e);
+      }
+    }
+  }//fireAnnotationUpdated
+
+
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -2747241616127229116L;
