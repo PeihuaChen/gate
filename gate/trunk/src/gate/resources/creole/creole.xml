@@ -51,9 +51,9 @@
       <ICON>lrs.gif</ICON>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE Oracle Document</NAME>
+      <NAME>GATE Database Document</NAME>
       <CLASS>gate.corpora.DatabaseDocumentImpl</CLASS>
-      <COMMENT>GATE persistent document (Oracle)</COMMENT>
+      <COMMENT>GATE persistent document (Oracle or PostgreSQL)</COMMENT>
       <INTERFACE>gate.Document</INTERFACE>
       <ICON>lr.gif</ICON>
       <PRIVATE/>
@@ -67,9 +67,9 @@
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE Oracle Corpus</NAME>
+      <NAME>GATE Database Corpus</NAME>
       <CLASS>gate.corpora.DatabaseCorpusImpl</CLASS>
-      <COMMENT>GATE persistent corpus (Oracle)</COMMENT>
+      <COMMENT>GATE persistent corpus (Oracle or PostgreSQL)</COMMENT>
       <INTERFACE>gate.Corpus</INTERFACE>
       <ICON>lrs.gif</ICON>
       <PRIVATE/>
