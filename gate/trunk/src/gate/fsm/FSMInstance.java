@@ -285,6 +285,8 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
 
   /** The list of existing instances of type FSMInstance */
   private static LinkedList myInstances;
+
+  /** The offset in the input List where the last matched annotation was*/
   static{
     myInstances = new LinkedList();
   }

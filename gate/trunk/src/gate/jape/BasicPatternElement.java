@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Hamish Cunningham, 24/07/98
  *
  *  $Id$
@@ -78,8 +78,8 @@ extends PatternElement implements JapeConstants, java.io.Serializable
       newPE.constraints1.add(
         ((Constraint) constraints1.at(i)).clone()
       );
-    newPE.matchedAnnots = new AnnotationSetImpl((Document) null);
-    newPE.matchedAnnots.addAll(matchedAnnots);
+//    newPE.matchedAnnots = new AnnotationSetImpl((Document) null);
+//    newPE.matchedAnnots.addAll(matchedAnnots);
     return newPE;
   } // clone
 
@@ -100,7 +100,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
       FeatureMap newAttrs = newConstraint.getAttributeSeq();
       FeatureMap existingAttrs =
         existingConstraint.getAttributeSeq();
-				existingAttrs.putAll(newAttrs);
+        existingAttrs.putAll(newAttrs);
       if(newConstraint.isNegated())
         existingConstraint.negate();
     }
@@ -116,7 +116,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     for(ArrayIterator i=constraints1.begin(); !i.atEnd(); i.advance()) {
       constraints2[j] = (Constraint) i.get();
       constraints2[j++].finish();
-		}
+    }
     constraints1 = null;
   } // finish
 

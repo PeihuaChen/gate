@@ -142,6 +142,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     //sort the input by start offset
     Collections.sort(annotations, new OffsetComparator());
 
+//System.out.println("Input:" + annotations);
     //the next input annotation will be read from the annotations list at
     //this offset
     int inputIndex = 0;
@@ -212,19 +213,25 @@ extends Transducer implements JapeConstants, java.io.Serializable
         //get all the annotations that start where the current FSM finishes
         Annotation someAnn;
         int localInputIndex = inputIndex;
+        //skip what was recognised already
         while(localInputIndex < annotations.size() &&
               (someAnn = (Annotation)annotations.get(localInputIndex)).
               getStartNode().getOffset().
               compareTo(currentFSM.getAGPosition().getOffset()) < 0 ){
           localInputIndex++;
         }
-        List paths = new ArrayList();
-        while(localInputIndex < annotations.size() &&
-              (someAnn = (Annotation)annotations.get(localInputIndex++)).
-              getStartNode() == currentFSM.getAGPosition()){
-          paths.add(someAnn);
-        }
 
+        List paths = new ArrayList();
+        if(localInputIndex < annotations.size()){
+          Node nextNode = ((Annotation)annotations.get(localInputIndex)).
+                          getStartNode();
+          while(localInputIndex < annotations.size() &&
+                (someAnn = (Annotation)annotations.get(localInputIndex++)).
+                getStartNode() == nextNode){
+            paths.add(someAnn);
+          }
+        }
+//System.out.println("Paths: " + paths + "\n^localInputIndex: " + localInputIndex);
         if(!paths.isEmpty()){
           Iterator pathsIter = paths.iterator();
           Annotation onePath;
@@ -364,6 +371,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
       //eliminate the possibility for infinite looping
       if(inputIndex < annotations.size() &&
          ((Annotation)annotations.get(inputIndex)).getStartNode() == startNode){
+        Out.prln("Jape warning: recovered from infinite looping!");
         //advance to the next offset
         while(inputIndex < annotations.size() &&
               ((Annotation)annotations.get(inputIndex)).
