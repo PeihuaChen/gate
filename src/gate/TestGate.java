@@ -67,7 +67,7 @@ public class TestGate {
   private static final String
                 defOracleDriver = "jdbc:oracle:thin:@derwent:1521:dbgate";
   private static final String
-                saiOracleDriver = "jdbc:oracle:thin:@sirma:1521:dbgate";
+                saiOracleDriver = "jdbc:oracle:thin:gateusr/gate@ontotext.sirma.bg:1521:gate02";
   private static final String
                 defPSQLDriver = "jdbc:postgresql://redmires/gate";
   private static final String
