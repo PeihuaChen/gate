@@ -53,7 +53,6 @@ public class Gate
     // and canReachGateAcUk appropriately
 
     // DERWENT
-    /*
     try{
       // ask the web server from derwent if it's alive
       URL url = new URL("http://derwent.dcs.shef.ac.uk");
@@ -65,7 +64,7 @@ public class Gate
       throw new GateException("The URL for derwent is malformed !");
     } catch (IOException exception2){
       gateHomeReachable = false;
-    }*/
+    }
 
     //GATE.AC.UK
     try{
