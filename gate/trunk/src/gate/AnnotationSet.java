@@ -68,16 +68,26 @@ public interface AnnotationSet extends Set, Cloneable, Serializable
   public AnnotationSet get(String type, FeatureMap constraints, Long offset);
 
   /** Select annotations by offset. This returns the set of annotations
-    * whose start node is the least such that it is less than or equal
+    * whose start node is the least such that it is greater than or equal
     * to offset. If a positional index doesn't exist it is created.
     */
   public AnnotationSet get(Long offset);
 
   /** Select annotations by offset. This returns the set of annotations
-    * that overlap totaly or partially with the interval defined by the two
+    * that overlap totaly or partially the interval defined by the two
     * provided offsets
     */
   public AnnotationSet get(Long startOffset, Long endOffset);
+
+  /** Select annotations by offset. This returns the set of annotations
+    * that are contained in the interval defined by the two
+    * provided offsets. The difference with get(startOffset, endOffset) is
+    * that the latter also provides annotations that have a span which
+    * covers completely and is bigger than the given one. Here we only get
+    * the annotations between the two offsets.
+    */
+  public AnnotationSet getContained(Long startOffset, Long endOffset);
+
 
   /** Get the node with the smallest offset */
   public Node firstNode();
