@@ -55,8 +55,8 @@ public class HelpFrame extends JFrame implements StatusListener {
           String title = (String)textPane.getDocument().
                                           getProperty("title");
           setTitle((title == null) ?
-                   "Gate help browser" :
-                   title + " - Gate help browser");
+                   "GATE help browser" :
+                   title + " - GATE help browser");
         }
       }
     });
@@ -69,8 +69,8 @@ public class HelpFrame extends JFrame implements StatusListener {
     String title = (String)textPane.getDocument().
                                     getProperty(Document.TitleProperty);
     setTitle((title == null) ?
-             "Gate help browser" :
-             title + " - Gate help browser");
+             "GATE help browser" :
+             title + " - GATE help browser");
   }
 
   XJEditorPane textPane;

@@ -88,7 +88,7 @@ public class UserGroupEditor extends JComponent {
       Object answer = JOptionPane.showInputDialog(
                           frame,
                           "Select a database",
-                          "Gate", JOptionPane.QUESTION_MESSAGE,
+                          "GATE", JOptionPane.QUESTION_MESSAGE,
                           null, paths,
                           paths[0]);
       if (answer != null)

@@ -1157,19 +1157,19 @@ public class ShellSlacFrame extends MainFrame {
               JOptionPane.showMessageDialog(ShellSlacFrame.this,
                                             "Invalid URL!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               mue.printStackTrace(Err.getPrintWriter());
             }catch(IOException ioe){
               JOptionPane.showMessageDialog(ShellSlacFrame.this,
                                             "I/O error!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }catch(ResourceInstantiationException rie){
               JOptionPane.showMessageDialog(ShellSlacFrame.this,
                                             "Could not create document!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }
           }

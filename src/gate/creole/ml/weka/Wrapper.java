@@ -605,7 +605,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
               JOptionPane.showMessageDialog(null,
                               "Error!\n"+
                               e.toString(),
-                              "Gate", JOptionPane.ERROR_MESSAGE);
+                              "GATE", JOptionPane.ERROR_MESSAGE);
               e.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
@@ -644,7 +644,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
               JOptionPane.showMessageDialog(null,
                               "Error!\n"+
                                ioe.toString(),
-                               "Gate", JOptionPane.ERROR_MESSAGE);
+                               "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();
@@ -680,7 +680,7 @@ public class Wrapper implements MLEngine, ActionsPublisher {
               JOptionPane.showMessageDialog(null,
                               "Error!\n"+
                                ioe.toString(),
-                               "Gate", JOptionPane.ERROR_MESSAGE);
+                               "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }finally{
               MainFrame.unlockGUI();

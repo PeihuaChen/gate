@@ -127,7 +127,7 @@ public class JDBCDSPersistence extends DSPersistence {
             } catch (gate.persist.PersistenceException ex) {
               JOptionPane.showMessageDialog(null, "Persistence error!\n " +
                                             ex.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
             }
             throw new PersistenceException("User cancelled!");
           }
@@ -160,7 +160,7 @@ public class JDBCDSPersistence extends DSPersistence {
       }catch(gate.security.SecurityException se) {
         JOptionPane.showMessageDialog(null, "User identification error!\n " +
                                       se.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
         securityOK = false;
         continue securityLoop;
       }
@@ -188,7 +188,7 @@ public class JDBCDSPersistence extends DSPersistence {
     } catch(PersistenceException pe) {
       JOptionPane.showMessageDialog(null, "Datastore open error!\n " +
                                     pe.toString(),
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
     }
 
     return ds;

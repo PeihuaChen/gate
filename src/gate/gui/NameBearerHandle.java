@@ -490,7 +490,7 @@ public class NameBearerHandle implements Handle,
           JOptionPane.showMessageDialog(largeView != null ?
                                                      largeView : smallView,
                                         "Error!\n" + pe.toString(),
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
+                                        "GATE", JOptionPane.ERROR_MESSAGE);
         }
       }
 
@@ -736,7 +736,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                   JOptionPane.showMessageDialog(
                     largeView != null ?largeView : smallView,
                     "Could not create top directory!",
-                    "Gate", JOptionPane.ERROR_MESSAGE);
+                    "GATE", JOptionPane.ERROR_MESSAGE);
                   return;
                 }
               }
@@ -775,7 +775,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                       largeView != null ? largeView : smallView,
                       "File " + docFile.getName() + " already exists!\n" +
                       "Overwrite?" ,
-                      "Gate", JOptionPane.DEFAULT_OPTION,
+                      "GATE", JOptionPane.DEFAULT_OPTION,
                       JOptionPane.WARNING_MESSAGE, null, options, options[2]);
                     MainFrame.lockGUI("Saving...");
                     switch(answer){
@@ -794,7 +794,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                         fileName = (String)JOptionPane.showInputDialog(
                             largeView != null ? largeView : smallView,
                             "Please provide an alternative file name",
-                            "Gate", JOptionPane.QUESTION_MESSAGE,
+                            "GATE", JOptionPane.QUESTION_MESSAGE,
                             null, null, fileName);
                         if(fileName == null){
                           fireProcessFinished();
@@ -866,7 +866,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                     largeView != null ? largeView : smallView,
                     "Could not create write file:" +
                     ioe.toString(),
-                    "Gate", JOptionPane.ERROR_MESSAGE);
+                    "GATE", JOptionPane.ERROR_MESSAGE);
                   ioe.printStackTrace(Err.getPrintWriter());
                   return;
                 }
@@ -911,7 +911,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                 "This is an advanced option!\n" +
                 "You should not use this unless your name is Hamish.\n" +
                 "Are you sure you want to do this?" ,
-                "Gate", JOptionPane.YES_NO_OPTION,
+                "GATE", JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE, null, null, null);
       if(answer == JOptionPane.OK_OPTION){
         try{
@@ -924,7 +924,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                                         "Look what you've done: \n" +
                                         ex.toString() +
                                         "\nI told you not to do it...",
-                                        "Gate", JOptionPane.ERROR_MESSAGE);
+                                        "GATE", JOptionPane.ERROR_MESSAGE);
           ex.printStackTrace(Err.getPrintWriter());
         }
       }
@@ -961,13 +961,13 @@ if(preserveFormat) System.out.println("Preserve option set!");
               JOptionPane.showMessageDialog(getLargeView(),
                                             "Save failed!\n " +
                                             pe.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
             } catch(SecurityException se) {
               MainFrame.unlockGUI();
               JOptionPane.showMessageDialog(getLargeView(),
                                             "Save failed!\n " +
                                             se.toString(),
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
             }finally{
               MainFrame.unlockGUI();
             }
@@ -975,7 +975,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
             JOptionPane.showMessageDialog(getLargeView(),
                             "This resource has not been loaded from a datastore.\n"+
                              "Please use the \"Save to\" option!\n",
-                             "Gate", JOptionPane.ERROR_MESSAGE);
+                             "GATE", JOptionPane.ERROR_MESSAGE);
 
           }
         }
@@ -1010,7 +1010,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                 JOptionPane.showMessageDialog(getLargeView(),
                                 "Error!\n"+
                                  e.toString(),
-                                 "Gate", JOptionPane.ERROR_MESSAGE);
+                                 "GATE", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace(Err.getPrintWriter());
               }
             }
@@ -1057,13 +1057,13 @@ if(preserveFormat) System.out.println("Preserve option set!");
               JOptionPane.showMessageDialog(getLargeView(),
                                             "There are no open datastores!\n " +
                                             "Please open a datastore first!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
 
             } else {
               Object answer = JOptionPane.showInputDialog(
                                   getLargeView(),
                                   "Select the datastore",
-                                  "Gate", JOptionPane.QUESTION_MESSAGE,
+                                  "GATE", JOptionPane.QUESTION_MESSAGE,
                                   null, dsNames.toArray(),
                                   dsNames.get(0));
               if(answer == null) return;
@@ -1137,13 +1137,13 @@ if(preserveFormat) System.out.println("Preserve option set!");
             JOptionPane.showMessageDialog(getLargeView(),
                                           "Save failed!\n " +
                                           pe.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
           }catch(gate.security.SecurityException se) {
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(getLargeView(),
                                           "Save failed!\n " +
                                           se.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
           }finally{
             MainFrame.unlockGUI();
           }
@@ -1214,7 +1214,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
             JOptionPane.showMessageDialog(getLargeView(),
                                           "Reload failed!\n " +
                                           "See \"Messages\" tab for details!",
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
             fireProcessFinished();
           }
         }//public void run()
@@ -1272,19 +1272,19 @@ if(preserveFormat) System.out.println("Preserve option set!");
               JOptionPane.showMessageDialog(getLargeView(),
                                             "Invalid URL!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               mue.printStackTrace(Err.getPrintWriter());
             }catch(IOException ioe){
               JOptionPane.showMessageDialog(getLargeView(),
                                             "I/O error!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             }catch(ResourceInstantiationException rie){
               JOptionPane.showMessageDialog(getLargeView(),
                                             "Could not create document!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               rie.printStackTrace(Err.getPrintWriter());
             }
           }
@@ -1373,7 +1373,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                                             getLargeView() : getSmallView(),
                                             "Could not create index!\n " +
                                             "See \"Messages\" tab for details!",
-                                            "Gate", JOptionPane.ERROR_MESSAGE);
+                                            "GATE", JOptionPane.ERROR_MESSAGE);
               ie.printStackTrace(Err.getPrintWriter());
             }finally{
               fireProcessFinished();
@@ -1416,7 +1416,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
             JOptionPane.showMessageDialog(getLargeView() != null ?
                                           getLargeView() : getSmallView(),
                                           "Errors during optimisation!",
-                                          "Gate",
+                                          "GATE",
                                           JOptionPane.PLAIN_MESSAGE);
             ie.printStackTrace(Err.getPrintWriter());
           }finally{
@@ -1458,7 +1458,7 @@ if(preserveFormat) System.out.println("Preserve option set!");
                                      getLargeView() :
                                      getSmallView(),
                                      "There is no index to delete!",
-                                     "Gate", JOptionPane.PLAIN_MESSAGE);
+                                     "GATE", JOptionPane.PLAIN_MESSAGE);
           }
         } catch (gate.creole.ir.IndexException ie) {
           ie.printStackTrace();

@@ -539,7 +539,7 @@ public class MaxentWrapper
               javax.swing.JOptionPane.showMessageDialog(null,
                   "Error!\n" +
                   ioe.toString(),
-                  "Gate", javax.swing.JOptionPane.ERROR_MESSAGE);
+                  "GATE", javax.swing.JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(gate.util.Err.getPrintWriter());
             }
             finally {
@@ -592,7 +592,7 @@ public class MaxentWrapper
               javax.swing.JOptionPane.showMessageDialog(null,
                   "Error!\n" +
                   ioe.toString(),
-                  "Gate", javax.swing.JOptionPane.ERROR_MESSAGE);
+                  "GATE", javax.swing.JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(gate.util.Err.getPrintWriter());
             }
             finally {

@@ -209,7 +209,7 @@ public class NewResourceDialog extends JDialog {
             JOptionPane.showMessageDialog(getOwner(),
                                           "Resource could not be created!\n" +
                                           rie.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
             rie.printStackTrace(Err.getPrintWriter());
             res = null;
             if(sListener != null) sListener.statusChanged("Error loading " +

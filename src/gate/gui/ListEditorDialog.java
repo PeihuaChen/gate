@@ -161,7 +161,7 @@ public class ListEditorDialog extends JDialog {
           JOptionPane.showMessageDialog(
               ListEditorDialog.this,
               "Please select some items to be moved ",
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
         }else{
           //we need to make sure the rows are sorted
           Arrays.sort(rows);
@@ -194,7 +194,7 @@ public class ListEditorDialog extends JDialog {
           JOptionPane.showMessageDialog(
               ListEditorDialog.this,
               "Please select some items to be moved ",
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
         } else {
           //we need to make sure the rows are sorted
           Arrays.sort(rows);
@@ -285,7 +285,7 @@ public class ListEditorDialog extends JDialog {
             JOptionPane.showMessageDialog(
                 ListEditorDialog.this,
                 "Invalid value!\nIs it the right type?",
-                "Gate", JOptionPane.ERROR_MESSAGE);
+                "GATE", JOptionPane.ERROR_MESSAGE);
             return;
           }
         }

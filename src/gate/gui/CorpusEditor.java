@@ -199,7 +199,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
               CorpusEditor.this,
               "There are no documents available in the system!\n" +
               "Please load some and try again!" ,
-              "Gate", JOptionPane.ERROR_MESSAGE);
+              "GATE", JOptionPane.ERROR_MESSAGE);
           return;
         }
 

@@ -562,7 +562,7 @@ class AnnotDiffDialog extends JFrame {
     if (keyDocument == null){
       JOptionPane.showMessageDialog(this,
                                     "Select a key document first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }//End if
@@ -581,7 +581,7 @@ class AnnotDiffDialog extends JFrame {
     if (keySet == null){
       JOptionPane.showMessageDialog(this,
                                     "Select some annotation sets first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }// End if
@@ -590,7 +590,7 @@ class AnnotDiffDialog extends JFrame {
     if (annotSchema == null){
       JOptionPane.showMessageDialog(this,
                                     "Select some annotation types first !",
-                                    "Gate", JOptionPane.ERROR_MESSAGE);
+                                    "GATE", JOptionPane.ERROR_MESSAGE);
       featureSelectionDialog = null;
       return;
     }// End if

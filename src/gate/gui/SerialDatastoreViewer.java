@@ -240,7 +240,7 @@ public class SerialDatastoreViewer extends JScrollPane
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(SerialDatastoreViewer.this,
                                           "Error!\n" + rie.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
             rie.printStackTrace(Err.getPrintWriter());
             fireProgressChanged(0);
             fireProcessFinished();
@@ -271,12 +271,12 @@ public class SerialDatastoreViewer extends JScrollPane
       }catch(gate.persist.PersistenceException pe){
         JOptionPane.showMessageDialog(SerialDatastoreViewer.this,
                                       "Error!\n" + pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
         pe.printStackTrace(Err.getPrintWriter());
       } catch(SecurityException se){
         JOptionPane.showMessageDialog(SerialDatastoreViewer.this,
                                       "Error!\n" + se.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
         se.printStackTrace(Err.getPrintWriter());
       }
     }// public void actionPerformed(ActionEvent e)

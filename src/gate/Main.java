@@ -170,8 +170,8 @@ public class Main {
       int selection = JOptionPane.showOptionDialog(
         null,
         "Error during initialisation:\n" + t.toString() +
-        "\nDo you still want to start Gate?",
-        "Gate", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE,
+        "\nDo you still want to start GATE?",
+        "GATE", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE,
         null, new String[]{"Cancel", "Start anyway"},
         "Cancel");
       if(selection != 1){
@@ -499,7 +499,7 @@ public class Main {
 
   private static boolean runCorpusBenchmarkTool = false;
 
-  public static String name = "Gate";
+  public static String name = "GATE";
   public static String version;
   public static String build;
 

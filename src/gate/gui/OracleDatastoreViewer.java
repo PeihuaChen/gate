@@ -234,7 +234,7 @@ public class OracleDatastoreViewer extends JTree
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(OracleDatastoreViewer.this,
                                           "Error!\n" + rie.toString(),
-                                          "Gate", JOptionPane.ERROR_MESSAGE);
+                                          "GATE", JOptionPane.ERROR_MESSAGE);
             rie.printStackTrace(Err.getPrintWriter());
             fireProgressChanged(0);
             fireProcessFinished();
@@ -265,12 +265,12 @@ public class OracleDatastoreViewer extends JTree
       }catch(gate.persist.PersistenceException pe){
         JOptionPane.showMessageDialog(OracleDatastoreViewer.this,
                                       "Error!\n" + pe.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
         pe.printStackTrace(Err.getPrintWriter());
       }catch(gate.security.SecurityException se){
         JOptionPane.showMessageDialog(OracleDatastoreViewer.this,
                                       "Error!\n" + se.toString(),
-                                      "Gate", JOptionPane.ERROR_MESSAGE);
+                                      "GATE", JOptionPane.ERROR_MESSAGE);
         se.printStackTrace(Err.getPrintWriter());
       }
     }// public void actionPerformed(ActionEvent e)
