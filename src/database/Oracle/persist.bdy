@@ -811,6 +811,11 @@ create or replace package body persist is
     from   t_annot_set
     where  as_id = l_as_id;
     
+    exception
+    
+       when NO_DATA_FOUND then
+          raise error.x_invalid_annotation_set;
+    
   end;
 
 
