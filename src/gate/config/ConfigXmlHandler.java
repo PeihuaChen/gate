@@ -126,6 +126,8 @@ public class ConfigXmlHandler extends DefaultHandler {
       }
     } else if(elementName.toUpperCase().equals("DBCONFIG")) {
       DataStoreRegister.addConfig(currentAttributeMap);
+    } else if(elementName.toUpperCase().equals(Gate.getGateConfigElement())) {
+      Gate.getGateConfig().putAll(currentAttributeMap);
     }
 
   } // startElement
@@ -179,6 +181,10 @@ public class ConfigXmlHandler extends DefaultHandler {
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("DBCONFIG")) {
+      // these are empty elements with attributes; nothing to do here
+
+    //////////////////////////////////////////////////////////////////
+    }else if(elementName.toUpperCase().equals("GATECONFIG")) {
       // these are empty elements with attributes; nothing to do here
 
     //////////////////////////////////////////////////////////////////

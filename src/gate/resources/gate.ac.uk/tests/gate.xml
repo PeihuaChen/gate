@@ -16,4 +16,7 @@
   <LR sourceUrl="gate:/gate.ac.uk/tests/doc0.html">gate.corpora.DocumentImpl</LR>
 </SYSTEM>
 
+<!-- The next element may be overwritten by the development environment -->
+<GATECONFIG FULLSIZE="yes"/>
+
 </GATE>
