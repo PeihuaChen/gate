@@ -44,6 +44,5 @@ public class AnnotationSetsView extends AbstractDocumentView {
   JTable mainTable;
   JScrollPane scroller;
   
-  Document document;
   
 }
