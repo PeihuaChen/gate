@@ -123,10 +123,9 @@ public class NewResourceDialog extends JDialog {
 
   /** This method is intended to be used in conjunction with
     * getSelectedParameters(). The method will not instantiate the resource
-    * like the
-    * other show() method but it is intended to colect the params required to
-    * instantiate a resource. Returns true if the user pressed Ok and false
-    * if the used pressed Cancel;
+    * like {@link show(ResourceData)} but it is intended to colect the params
+    * required to instantiate a resource. Returns true if the user pressed Ok
+    * and false otherwise.
     */
   public synchronized boolean show(ResourceData rData, String aTitle) {
     this.resourceData = rData;
@@ -170,7 +169,7 @@ public class NewResourceDialog extends JDialog {
     requestFocus();
     nameField.requestFocus();
     userCanceled = true;
-    setModal(true);
+//    setModal(true);
     super.show();
     if(userCanceled) return;
     else{
