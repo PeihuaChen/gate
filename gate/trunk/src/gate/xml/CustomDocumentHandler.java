@@ -9,18 +9,19 @@ package gate.xml;
 
 import org.xml.sax.*;
 import com.sun.xml.parser.LexicalEventListener;
+import gate.corpora.*;
+import gate.util.*;
 
 /**
   * Implements the behaviour of the XML reader
   */
-public class CustomDocumentHandler extends HandlerBase implements
-     LexicalEventListener{
+public class CustomDocumentHandler extends HandlerBase implements LexicalEventListener{
 
   // member data
 
-  // the markupElementsMap 
+  // the markupElementsMap
   private java.util.Map markupElementsMap = null;
-  
+
   // error handler
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
@@ -43,19 +44,12 @@ public class CustomDocumentHandler extends HandlerBase implements
   /**
     * Constructor
     */
-  public CustomDocumentHandler(gate.Document doc, java.util.Map markupElementsMap)
-     throws NullPointerException {
-    // init stack, tmpDocContent and XML doc name
+  public CustomDocumentHandler(gate.Document doc, java.util.Map markupElementsMap){
+    // init stack, tmpDocContent, doc
     stack = new java.util.Stack();
     tmpDocContent = new String("");
-
-    if (doc == null) throw new NullPointerException(" Gate document is null.");
-    if (stack == null) throw new NullPointerException("Couldn't create the stack");
-    if (tmpDocContent == null) throw new NullPointerException("Couldn't create a tmp Document");
-
     this.doc = doc ;
     this.markupElementsMap = markupElementsMap;
-
   }
 
   /**
@@ -64,7 +58,6 @@ public class CustomDocumentHandler extends HandlerBase implements
     */
   public void startDocument() throws org.xml.sax.SAXException {
     // gets AnnotationSet based on the gate document
-    // beacause the constructor succeded, I know for sure that doc != null
     basicAS = doc.getAnnotations();
   }
 
@@ -73,17 +66,21 @@ public class CustomDocumentHandler extends HandlerBase implements
     * XML document
     */
   public void endDocument() throws org.xml.sax.SAXException {
-    // replace the document content with the markless one
+    // replace the document content with the one without markups
+    doc.setContent(new DocumentContentImpl(tmpDocContent));
+
+    /*
     try{
       doc.edit (new Long(0),doc.getContent ().size () ,
                 new gate.corpora.DocumentContentImpl(tmpDocContent));
+
 
     //doc.edit (new Long(0),doc.getContent ().size () ,
     //            new gate.corpora.DocumentContentImpl(tmpDocContent.substring (0,30000)));
     }catch(Exception e){
       e.printStackTrace(System.err);
     }
-
+    */
 
   }
 
@@ -93,26 +90,20 @@ public class CustomDocumentHandler extends HandlerBase implements
     */
   public void startElement(String elemName, AttributeList atts){
     // construct a SimpleFeatureMapImpl from the list of attributes
-    gate.util.SimpleFeatureMapImpl fm = new gate.util.SimpleFeatureMapImpl();
+    SimpleFeatureMapImpl fm = new SimpleFeatureMapImpl();
     // for all attributes do
     for (int i = 0; i < atts.getLength(); i++) {
-     String name = atts.getName(i);
+     String attName = atts.getName(i);
      //String type = atts.getType(i);
-     String value = atts.getValue(i);
-     fm.put(name,value);
+     String attValue = atts.getValue(i);
+     fm.put(attName,attValue);
     }
-
-    // create the START index
+    // create the START index of the annotation
     Long startIndex = new Long(tmpDocContent.length ());
-
-    // new custom object
     // initialy the Start index is equal with End index
-
-    MyCustomObject obj = null ;
-    obj = new MyCustomObject(elemName,fm, startIndex, startIndex );
-    if (obj != null)
-      // put it into the stack
-      stack.push (obj);
+    MyCustomObject obj = new MyCustomObject(elemName,fm, startIndex, startIndex);
+    // put it into the stack
+    stack.push (obj);
   }
 
   /**
@@ -129,17 +120,20 @@ public class CustomDocumentHandler extends HandlerBase implements
     }
     // create a new annotation and add it to the annotation set
     try{
-        // the annotation type will be conforming towith markupElementsMap
+        // the annotation type will be conforming with markupElementsMap
         //add the annotation to the Annotation Set
         if (markupElementsMap == null)
-          basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(), obj.GetFM ());
+          basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(),
+              obj.GetFM ()
+          );
         else {
-          String annotationType = (String ) markupElementsMap.get(obj.getElemName());
+          // get the type of the annotation from Map
+          String annotationType = (String) markupElementsMap.get(obj.getElemName());
           if (annotationType != null)
             basicAS.add(obj.getStart (),obj.getEnd(), annotationType, obj.GetFM());
         }
     }catch (gate.util.InvalidOffsetException e){
-      System.out.println(e);
+      e.printStackTrace(System.err);
     }
   }
 
@@ -149,7 +143,7 @@ public class CustomDocumentHandler extends HandlerBase implements
   public void characters( char[] text, int start, int length) throws SAXException{
 
     // some internal objects
-    String content = new String(text,start, length);
+    String content = new String(text, start, length);
 
     // if u don't want '\n' inside your document decoment the line below
     //content = content.replace('\n',' ');

@@ -63,27 +63,15 @@ public class XmlDocumentFormat extends TextualDocumentFormat
 		  SAXParser parser = saxParserFactory.newSAXParser();
 
       // use it
-		  //parser.parse(new File("D:\\CURSU\\jw.xml"),
-      //     new CustomDocumentHandler("file:///D://CURSU//jw.xml"));
-
       if (null != doc){
         // parse and construct the gate annotations
-		    //parser.parse(new InputSource(in),new gate.xml.CustomDocumentHandler(doc));
-        try{
-          parser.parse(doc.getSourceURL().toString(),
-                       new gate.xml.CustomDocumentHandler(doc, this.markupElementsMap));
-        } catch (NullPointerException e){
-          e.printStackTrace();
-
-        }
+        parser.parse(doc.getSourceURL().toString(),
+                new gate.xml.CustomDocumentHandler(doc, this.markupElementsMap)
+        );
       }
-		  //parser.parse("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml",
-      //     new CustomDocumentHandler("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml"));
-
 
 	  } catch (Exception ex) {
-		  System.err.println("Exception : " + ex);
-      ex.printStackTrace();
+      ex.printStackTrace(System.err);
 		  //System.exit(2);
 	  }
   }

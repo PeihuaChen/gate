@@ -25,7 +25,7 @@ public class TestXml extends TestCase
   public void setUp() {
   } // setUp
 
-
+ /*
   public static void main(String args[]){
     TestXml app = new TestXml("TestXml");
     try{
@@ -34,15 +34,17 @@ public class TestXml extends TestCase
       System.out.println(e);
     }
   }
-  
+ */ 
 
   /** A test */
   public void testSomething() throws Exception{
     assert(true);
 
     // create the markupElementsMap map
-    Map markupElementsMap = new HashMap();
-
+    Map markupElementsMap = null;
+    /*
+    markupElementsMap = new HashMap();
+    // populate it
     markupElementsMap.put ("S","Sentence");
     markupElementsMap.put ("s","Sentence");
     markupElementsMap.put ("W","Word");
@@ -52,17 +54,19 @@ public class TestXml extends TestCase
     markupElementsMap.put ("H1","Header 1");
     markupElementsMap.put ("A","link");
     markupElementsMap.put ("a","link");
-
+    */
     // create a new gate document
     gate.Document doc = gate.Transients.newDocument(
-              "http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml");
+              "http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml"
+    );
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
-      (new MimeType("text","xml")).toString());
+      (new MimeType("text","xml")).toString()
+    );
 
     // set's the map
-    //docFormat.setMarkupElementsMap(markupElementsMap);
+    docFormat.setMarkupElementsMap(markupElementsMap);
 
     // graphic visualisation
     if (docFormat != null){

@@ -65,5 +65,10 @@ class ExtendedMimeType extends MimeType{
     return false;
   }
 
+  public int hashCode(){
+    System.out.println(this.toString () + " HASH code = " + this.toString ().hashCode());
+    return this.toString ().hashCode();
+  }
+
 
 } // class Scratch

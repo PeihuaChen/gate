@@ -168,6 +168,10 @@ public class DocumentImpl implements Document
   /** The content of the document: a String for text; MPEG for video; etc. */
   public DocumentContent getContent() { return content; }
 
+  /** mutator method*/
+  // added by Cristian URSU on 7/June/2000 
+  public void setContent(DocumentContent newContent){content = newContent;}
+
   /** Get the default set of annotations. The set is created if it
     * doesn't exist yet.
     */
