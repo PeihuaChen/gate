@@ -251,14 +251,14 @@ public class WordNetViewer extends AbstractVisualResource
           }
           break;
         case WordNet.POS_VERB:
+          //commented because problem with WN API and Sentance Frames
+          if (!senatnceFrames){
+            verbPopup.add(new RelationItem("Senatnce Frames", SENTANCE_FAMES, senses));
+            senatnceFrames = true;
+          }
           if (false == existInPopup(verbPopup, getLabel(relation)) ){
             verbPopup.add(new RelationItem(getLabel(relation), relation.getType(), senses));
           }
-          //commented because problem with WN API and Sentance Frames
-         /*if (!senatnceFrames){
-            verbPopup.add(new RelationItem("Senatnce Frames", SENTANCE_FAMES, senses));
-            senatnceFrames = true;
-          }*/
           break;
         case WordNet.POS_ADJECTIVE:
           if (false == existInPopup(adjectivePopup, getLabel(relation)) ){
@@ -369,6 +369,7 @@ public class WordNetViewer extends AbstractVisualResource
   private void relHypernym(java.util.List senses){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
+      //display.append(getDescription(Relation.REL_HYPERNYM));
       display.append("\n");
       display.append("Sense ");
       display.append(i+1);
@@ -415,6 +416,7 @@ public class WordNetViewer extends AbstractVisualResource
       Synset currSynset = currSense.getSynset();
       try {
         if (currSynset.getSemanticRelations(relationType).size()>0){
+          //display.append(getDescription(relationType));
           display.append("\n");
           display.append("Sense ");
           display.append(i+1);
@@ -474,6 +476,7 @@ public class WordNetViewer extends AbstractVisualResource
         java.util.List antonyms = currSense.getLexicalRelations(relType);
         if (antonyms!=null && antonyms.size()>0){
           semantic_see_also = false;
+          //display.append(getDescription(relType));
           display.append("\n");
           display.append("Sense ");
           display.append(i+1);
@@ -514,6 +517,7 @@ public class WordNetViewer extends AbstractVisualResource
       try {
         java.util.List atributes = currSynset.getSemanticRelations(releationType);
         if (atributes!=null && atributes.size()>0){
+          //display.append(getDescription(releationType));
           display.append("\n");
           display.append("Sense ");
           display.append(i+1);
@@ -572,11 +576,11 @@ public class WordNetViewer extends AbstractVisualResource
       display.append(currSynset.getGloss());
       display.append("\n");
 
-      for (int j=0; j<frames.size(); j++){
-        display.append("        *> ");
-        display.append(((VerbFrame) frames.get(j)).getFrame());
-        display.append("\n");
-      }
+        for (int j=0; j<frames.size(); j++){
+          display.append("        *> ");
+          display.append(((VerbFrame) frames.get(j)).getFrame());
+          display.append("\n");
+        }
     }
     resultPane.setText(display.toString());
   }
@@ -643,6 +647,69 @@ public class WordNetViewer extends AbstractVisualResource
     }
     return result;
   }
+
+  public String getDescription(int rel){
+
+    String result = "";
+    switch (rel){
+      case Relation.REL_ANTONYM:
+        result = "Antonyms:";
+        break;
+      case Relation.REL_ATTRIBUTE:
+        result = "Attributes:";
+        break;
+      case Relation.REL_CAUSE:
+        result = "Cause:";
+        break;
+      case Relation.REL_DERIVED_FROM_ADJECTIVE:
+        result = "Derived From Adjective:";
+        break;
+      case Relation.REL_ENTAILMENT:
+        result = "Entailments:";
+        break;
+      case Relation.REL_HYPERNYM:
+        result = "Hypernyms:";
+        break;
+      case Relation.REL_HYPONYM:
+        result = "Hyponyms:";
+        break;
+      case Relation.REL_MEMBER_HOLONYM:
+        result = "Member Holonyms:";
+        break;
+      case Relation.REL_MEMBER_MERONYM:
+        result = "Member Meronyms:";
+        break;
+      case Relation.REL_PARTICIPLE_OF_VERB:
+        result = "Participle Of Verb:";
+        break;
+      case Relation.REL_PART_HOLONYM:
+        result = "Holonyms:";
+        break;
+      case Relation.REL_PART_MERONYM:
+        result = "Meronyms:";
+        break;
+      case Relation.REL_PERTAINYM:
+        result = "Pertainyms:";
+        break;
+      case Relation.REL_SEE_ALSO:
+        result = "See Also:";
+        break;
+      case Relation.REL_SIMILAR_TO:
+        result = "Similar To:";
+        break;
+      case Relation.REL_SUBSTANCE_HOLONYM:
+        result = "Substance Holonyms:";
+        break;
+      case Relation.REL_SUBSTANCE_MERONYM:
+        result = "Substance Meronyms:";
+        break;
+      case Relation.REL_VERB_GROUP:
+        result = "Verb Group:";
+        break;
+    }
+    return result;
+  }
+
 
   /**
    * Called by the GUI when this viewer/editor has to initialise itself for a
