@@ -50,10 +50,6 @@ public class SerialCorpusImpl extends
   //which defines the document order) and Documents as value
   private transient List documents = null;
 
-  public SerialCorpusImpl() {
-
-  }
-
   /**
    * Constructor to create a SerialCorpus from a transient one.
    * This is called by adopt() to store the transient corpus

@@ -241,18 +241,6 @@ public class TestPersist extends TestCase
     assert("doc from disk not equal to memory version",
           doc.equals(diskDoc));
 
-    List allLRs =
-      Gate.getCreoleRegister().getLrInstances("gate.corpora.DocumentImpl");
-    assert("gc() dependent test: Wrong number of documents in Creole register."
-      + " I found "+ allLRs.size() + " and expected 3.", allLRs.size() == 3);
-    Iterator iter = allLRs.iterator();
-    while (iter.hasNext()) {
-      LanguageResource lr = (LanguageResource)iter.next();
-      if (DEBUG) Out.prln("Gate knows about resource: " + lr.getName() +
-                          " of type " + lr.getClass().getName());
-
-    }
-
     Iterator corpusIter = diskCorp.iterator();
     while(corpusIter.hasNext()){
       if (DEBUG)
@@ -553,13 +541,6 @@ public class TestPersist extends TestCase
       test.testSimple();
       test.tearDown();
 
-      //I put this last because its failure is dependent on the gc() and
-      //there's nothing I can do about it. Maybe I'll remove this from the
-      //test
-      test.setUp();
-      test.testMultipleLrs();
-      test.tearDown();
-
       test.setUp();
       test.testDB_UseCase01();
       test.tearDown();
@@ -568,6 +549,12 @@ public class TestPersist extends TestCase
       test.testDB_UseCase02();
       test.tearDown();
 
+      //I put this last because its failure is dependent on the gc() and
+      //there's nothing I can do about it. Maybe I'll remove this from the
+      //test
+      test.setUp();
+      test.testMultipleLrs();
+      test.tearDown();
 
     }catch(Exception e){
       e.printStackTrace();
