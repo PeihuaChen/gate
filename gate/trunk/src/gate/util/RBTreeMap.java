@@ -25,6 +25,9 @@ public class RBTreeMap extends AbstractMap
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = -1454324265766936618L;
+
   /**
     * The Comparator used to maintain order in this RBTreeMap, or
     * null if this RBTreeMap uses its elements natural ordering.
@@ -1631,5 +1634,5 @@ public class RBTreeMap extends AbstractMap
         level++;
     return level;
   }
-  
+
 } // class RBTreeMap

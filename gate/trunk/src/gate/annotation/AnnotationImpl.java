@@ -30,6 +30,8 @@ public class AnnotationImpl
   /** Debug flag
    */
   private static final boolean DEBUG = false;
+  /** Freeze the serialization UID. */
+  static final long serialVersionUID = -5658993256574857725L;
 
   /** Constructor. Package access - annotations have to be constructed via
    * AnnotationSets.

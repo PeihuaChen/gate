@@ -26,6 +26,8 @@ import gate.util.*;
 abstract public class AbstractResource
 extends AbstractFeatureBearer implements Resource
 {
+  static final long serialVersionUID = -9196293927841163321L;
+
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     return this;
