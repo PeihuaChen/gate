@@ -1518,7 +1518,7 @@ System.out.println();
         }//switch
 
         //new feature or part of an array?
-        if (currKey != prevKey && prevKey != null) {
+        if (currKey == prevKey && prevKey != null) {
           //part of array
           arrFeatures.add(currFeature);
         }
@@ -1612,7 +1612,7 @@ System.out.println();
 
 
   public boolean equals(Object obj) {
-System.out.println("EQUALS called...");
+
     if (false == obj instanceof OracleDataStore) {
       return false;
     }
