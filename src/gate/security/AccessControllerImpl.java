@@ -453,14 +453,17 @@ public class AccessControllerImpl
 
     //2. check user/pass in DB
     CallableStatement stmt = null;
+    boolean isPrivilegedUser = false;
 
     try {
       stmt = this.jdbcConn.prepareCall(
-                "{ call "+Gate.DB_OWNER+".security.login(?,?,?)} ");
+                "{ call "+Gate.DB_OWNER+".security.login(?,?,?,?)} ");
       stmt.setString(1,usr_name);
       stmt.setString(2,passwd);
       stmt.setLong(3,prefGroupID.longValue());
+      stmt.registerOutParameter(4,java.sql.Types.NUMERIC);
       stmt.execute();
+      isPrivilegedUser = stmt.getBoolean(4);
     }
     catch(SQLException sqle) {
       switch(sqle.getErrorCode())
@@ -490,7 +493,8 @@ public class AccessControllerImpl
     SessionImpl s = new SessionImpl(sessionID,
                                     usr,
                                     grp,
-                                    DEFAULT_SESSION_TIMEOUT_MIN);
+                                    DEFAULT_SESSION_TIMEOUT_MIN,
+                                    isPrivilegedUser);
 
     //4. add session to sessions collection
     this.sessions.put(s.getID(),s);
