@@ -1022,8 +1022,7 @@ public class AccessControllerImpl
 
       //the name of the user could be different now (IDs are fixed)
 
-      Assert.assert(subtype == User.OBJECT_CHANGE_NAME ||
-                    subtype == User.OBJECT_CHANGE_PASSWORD);
+      Assert.assert(subtype == User.OBJECT_CHANGE_NAME);
 
       //the name of the group could be different now (IDs are fixed)
       if (subtype == User.OBJECT_CHANGE_NAME) {
