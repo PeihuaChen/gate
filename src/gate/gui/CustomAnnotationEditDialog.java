@@ -41,6 +41,7 @@ public class CustomAnnotationEditDialog extends JDialog {
   // internal data
   private Annotation annot = null;
   private MyCustomFeatureBearer data = null;
+  private Set annotationSchemaSet = null;
 
   int buttonPressed = CANCEL;
 
@@ -58,18 +59,20 @@ public class CustomAnnotationEditDialog extends JDialog {
     * @param aFram the parent frame of this dialog
     * @param aModal (wheter or not this dialog is modal)
     */
-  public CustomAnnotationEditDialog(Frame aFrame, boolean aModal){
+  public CustomAnnotationEditDialog(Frame aFrame, boolean aModal,
+                                                    Set anAnnotationSchemaSet){
     super(aFrame,aModal);
     this.setLocationRelativeTo(aFrame);
     this.setTitle("Custom Annotation Editor");
     data = new MyCustomFeatureBearer(null);
+    annotationSchemaSet = anAnnotationSchemaSet;
   }//CustomAnnotationEditDialog
 
   /** Constructs a CustomAnnotationEditDialog.The parent frame is null and the
     * dialog is modal.
     */
-  public CustomAnnotationEditDialog(){
-    this(null, true);
+  public CustomAnnotationEditDialog(Set anAnnotationSchemaSet){
+    this(null, true, anAnnotationSchemaSet);
   }// End CustomAnnotationEditDialog
 
   /** Init local data*/
@@ -186,15 +189,28 @@ public class CustomAnnotationEditDialog extends JDialog {
     */
   private void doOk(){
     buttonPressed = OK;
-    if (!"".equals(annotTypeTextField.getText())){
-      data.setAnnotType(annotTypeTextField.getText());
-      this.hide();
-    }else{
+
+    if ("".equals(annotTypeTextField.getText())){
       JOptionPane.showMessageDialog(this,
                                     "You need to provide an annotation type!",
                                     "Gate", JOptionPane.ERROR_MESSAGE);
-
+      return;
     }// End if
+    if (annotationSchemaSet != null){
+      Iterator iter = annotationSchemaSet.iterator();
+      while (iter.hasNext()){
+        AnnotationSchema schema = (AnnotationSchema) iter.next();
+        if ((schema.getAnnotationName()).equals(annotTypeTextField.getText())){
+          JOptionPane.showMessageDialog(this,
+                               "Choose another annotation type!\n" +
+                               "This type already exists in predefined types.",
+                               "Gate", JOptionPane.ERROR_MESSAGE);
+          return;
+        }// End if
+      }// End while
+    }// End if
+    data.setAnnotType(annotTypeTextField.getText());
+    this.hide();
   }//doOk();
 
   /** This method is called when the user press the CANCEL button*/

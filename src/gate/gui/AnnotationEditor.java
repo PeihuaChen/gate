@@ -1759,7 +1759,8 @@ public class AnnotationEditor extends AbstractVisualResource {
 
     private void editWithCustomEditor(){
       CustomAnnotationEditDialog customAnnotEditor =
-                                        new CustomAnnotationEditDialog();
+                                        new CustomAnnotationEditDialog(
+                                            getAnnotationSchemas());
       // Creates a new annotation
       if (customAnnotEditor.show(ann) == JFileChooser.APPROVE_OPTION){
         String annotType = customAnnotEditor.getAnnotType();
@@ -1875,7 +1876,8 @@ public class AnnotationEditor extends AbstractVisualResource {
           }// End if
 
           CustomAnnotationEditDialog customAnnotEditor =
-                                        new CustomAnnotationEditDialog();
+                                        new CustomAnnotationEditDialog(
+                                                  getAnnotationSchemas());
           // Creates a new annotation
           if (customAnnotEditor.show(null) == JFileChooser.APPROVE_OPTION){
             String annotType = customAnnotEditor.getAnnotType();
