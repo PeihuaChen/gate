@@ -324,17 +324,18 @@ class AnnotDiffDialog extends JFrame {
 
     this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
                                                             BoxLayout.Y_AXIS));
+    Dimension maxDimm = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension newDim = new Dimension(2*maxDimm.width/3, 2*maxDimm.height/3);
+    annotDiff.setMaximumSize(newDim);
+    annotDiff.setMinimumSize(newDim);
+    annotDiff.setPreferredSize(newDim);
     jSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                new JScrollPane(northBox),
                                new JScrollPane(annotDiff));
     jSplit.setOneTouchExpandable(true);
     jSplit.setOpaque(true);
     jSplit.setAlignmentY(Component.TOP_ALIGNMENT);
-    JPanel mainBox = new JPanel();
-    mainBox.setLayout(new BoxLayout(mainBox,BoxLayout.Y_AXIS));
-    mainBox.add(jSplit);
-    mainBox.setMaximumSize(Toolkit.getDefaultToolkit().getScreenSize());
-    this.getContentPane().add(mainBox);
+    this.getContentPane().add(jSplit);
     this.pack();
     ////////////////////////////////
     // Center it on screen
