@@ -350,6 +350,40 @@ Valentin's note: how often do we set parameters on resources? Is it worth the wh
     <!--<TD>spare2</TD>-->
   </TR>
 
+  <TR>
+    <TD>00073</TD>
+    <TD>core Java HTML parsing</TD>
+    <TD>Angel</TD>
+    <TD>Angel</TD>
+    <TD>13/march/2002 <br>WinNT4<br>JDK 1.3/1.4</TD>
+    <TD>13/march/2002 <br> Should be fixed in JDK, not in GATE<br> :-)</TD>
+    <TD>In javax.swing.text.html.parser.Parser there is one wrong IF statement <br>
+    on line 1653 for JDK 1.3 and on line 1712 for JDK 1.4.<br><br>
+    This statement is: <b>if (elemName.equals("center")) {</b> <br><br>
+    The wrong IF statement should be removed but the body of the statement should stay.<br>
+    You have in code above a less restrictive IF and in some cases <br>
+    the "font" tag will be processed incorrect.<br><br>
+    You could get the Parser.java file from  src.zip (in JDK directory)<br><br>
+    You should put the fixed Parser.class file in the JDK_dir\jre\lib\rt.jar<br>
+    </TD>
+    <TD>If you parse the HTML file:<br><br>
+	&lt;HTML&gt; <br>
+	&lt;FONT SIZE = 2&gt;<br>
+	&lt;P&gt;<br>
+	Text with wrong position.<br>
+	&lt;/FONT&gt;<br>
+	The wrong position start.<br>
+	&lt;/HTML&gt;    <br><br>
+	You will have an error in the callback handler of HTML parser:<br>
+	"end.missingfont??"<br>
+	two pieces of text will be connected in one and the reported position<br>
+	of text will be wrong - will be the position of second piece of text.
+    </TD>
+    <TD>___supporting_materials</TD>
+    <!--<TD>spare1</TD>-->
+    <!--<TD>spare2</TD>-->
+  </TR>
+
 <!------------------------------------------------------------------------->
 </TABLE>
 
