@@ -37,7 +37,7 @@ org_ending.lst:org_ending
 org_pre.lst:org_pre
 org_spur.lst:spur
 organization.lst:organization
-organization_nouns.lst:organization
+organization_nouns.lst:organization_noun
 person_ambig.lst:person_first:ambig
 person_ending.lst:person_ending
 person_female.lst:person_first:female
