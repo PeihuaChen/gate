@@ -52,7 +52,7 @@ public class Scratch
 
     CreoleRegister reg = Gate.getCreoleRegister();
 System.out.println("Instances for " + reg.getLrInstances("gate.creole.AnnotationSchema"));
-System.out.println("Instances for " + reg.getAllPublicInstances ("gate.creole.AnnotationSchema"));
+System.out.println("Instances for " + reg.getAllInstances ("gate.creole.AnnotationSchema"));
 
 //System.out.println("VRs for " + reg.getAnnotationVRs("Tree"));
 //System.out.println("VRs for " + reg.getAnnotationVRs());

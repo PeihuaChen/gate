@@ -423,12 +423,11 @@ public class CreoleRegisterImpl extends HashMap
 
 
   /**
-   * Gets all the instantiations of a given type and all its public derivate
-   * types;
+   * Gets all the instantiations of a given type and all its derivate types;
+   * It doesn't return instances that have the hidden attribute set to "true"
    */
-  public List getAllPublicInstances(String type) throws GateException{
-    List publicTypes = getPublicTypes(keySet());
-    Iterator typesIter = publicTypes.iterator();
+  public List getAllInstances(String type) throws GateException{
+    Iterator typesIter = keySet().iterator();
     List res = new ArrayList();
     Class targetClass;
     try{
@@ -442,7 +441,15 @@ public class CreoleRegisterImpl extends HashMap
       try{
         aClass = Class.forName(aType);
         if(targetClass.isAssignableFrom(aClass)){
-          res.addAll(((ResourceData)get(aType)).getInstantiations());
+          //filter out hidden instances
+          Iterator newInstancesIter = ((ResourceData)get(aType)).
+                                      getInstantiations().iterator();
+          while(newInstancesIter.hasNext()){
+            Resource instance = (Resource)newInstancesIter.next();
+            if(!Gate.getHiddenAttribute(instance.getFeatures())){
+              res.add(instance);
+            }
+          }
         }
       }catch(ClassNotFoundException cnfe){
         throw new LuckyException(

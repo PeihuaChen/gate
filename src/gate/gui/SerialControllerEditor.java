@@ -616,7 +616,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       java.util.List loadedDocuments = null;
       try{
         loadedDocuments = Gate.getCreoleRegister().
-                               getAllPublicInstances("gate.Corpus");
+                               getAllInstances("gate.Corpus");
       }catch(GateException ge){
         ge.printStackTrace(Err.getPrintWriter());
       }
@@ -629,7 +629,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       java.util.List loadedDocuments = null;
       try{
         loadedDocuments = Gate.getCreoleRegister().
-                               getAllPublicInstances("gate.Corpus");
+                               getAllInstances("gate.Corpus");
       }catch(GateException ge){
         ge.printStackTrace(Err.getPrintWriter());
       }

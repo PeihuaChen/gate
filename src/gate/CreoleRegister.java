@@ -148,11 +148,12 @@ public interface CreoleRegister extends Map, Serializable, CreoleListener
 
   /** Get a list of all non-private types of Controller in the register. */
   public List getPublicControllerTypes();
+
   /**
-   * Gets all the instantiations of a given type and all its public derivate
-   * types;
+   * Gets all the instantiations of a given type and all its derivate types;
+   * It doesn't return instances that have the hidden attribute set to "true"
    */
-  public List getAllPublicInstances(String type)throws GateException;
+  public List getAllInstances(String type) throws GateException;
 
   /**
    * Returns a list of strings representing class names for large VRs valid

@@ -58,11 +58,6 @@ public class DocumentEditor extends AbstractVisualResource{
   private gate.Document document;
 
   /**
-   * The new document; it will become active when the component is displayed
-   */
-  private gate.Document newDocument;
-
-  /**
    * A random colour generator used to generate initial default colours for
    * highlighting various types of annotations.
    */
@@ -319,23 +314,6 @@ public class DocumentEditor extends AbstractVisualResource{
       }
     });
 
-//    addComponentListener(new ComponentAdapter() {
-//      public void componentHidden(ComponentEvent e) {
-//
-//      }
-//
-//      public void componentMoved(ComponentEvent e) {
-//      }
-//
-//      public void componentResized(ComponentEvent e) {
-//        this_documentChanged();
-//      }
-//
-//      public void componentShown(ComponentEvent e) {
-//        this_documentChanged();
-//      }
-//    });
-
     textVisibleBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         setTextVisible(textVisibleBtn.isSelected());
@@ -388,8 +366,8 @@ public class DocumentEditor extends AbstractVisualResource{
 
             if(clickedComp instanceof JCheckBox){
               nData.setVisible(! nData.getVisible());
-              stylesTree.repaint(cellRect);
-//              stylesTreeModel.nodeChanged(node);
+//              stylesTree.repaint(cellRect);
+              stylesTreeModel.nodeChanged(node);
             // Check if the click indicates a shortcut to create an annotation
             }else if( e.getClickCount() == 1 &&
                       clickedComp instanceof JTextComponent &&
@@ -448,6 +426,7 @@ public class DocumentEditor extends AbstractVisualResource{
               nData.setAttributes(
                     styleChooser.show(nData.getAttributes().copyAttributes()));
               stylesTreeModel.nodeChanged(node);
+//              stylesTree.repaint(cellRect);
             }
           }
         }
@@ -459,6 +438,7 @@ public class DocumentEditor extends AbstractVisualResource{
         updateTreeSize();
       }
       public void componentShown(ComponentEvent e) {
+        stylesTreeModel.nodeStructureChanged(stylesTreeRoot);
         updateTreeSize();
       }
     });
@@ -720,6 +700,30 @@ public class DocumentEditor extends AbstractVisualResource{
         }
       }
     });
+
+    corefList.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        int row = corefList.locationToIndex(e.getPoint());
+        if(row != -1){
+          if(SwingUtilities.isLeftMouseButton(e)){
+            corefListModel.setVisible(row, !corefListModel.getVisible(row));
+            corefListModel.fireDataChanged();
+          }
+        }
+      }
+
+      public void mousePressed(MouseEvent e) {
+      }
+
+      public void mouseReleased(MouseEvent e) {
+      }
+
+      public void mouseEntered(MouseEvent e) {
+      }
+
+      public void mouseExited(MouseEvent e) {
+      }
+    });
   }//protected void initListeners()
 
   /**
@@ -809,6 +813,7 @@ public class DocumentEditor extends AbstractVisualResource{
     corefCombo = new JComboBox(corefComboModel = new CorefComboModel());
     corefCombo.setAlignmentX(Component.LEFT_ALIGNMENT);
     corefList = new JList(corefListModel = new CorefListModel());
+    corefList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     corefList.setCellRenderer(new CorefListRenderer());
     corefList.setAlignmentX(Component.LEFT_ALIGNMENT);
     corefListScroll = new JScrollPane(corefList);
@@ -866,14 +871,16 @@ public class DocumentEditor extends AbstractVisualResource{
 
   /**Updates the size of the styles tree so it gets all the width it needs*/
   protected void updateTreeSize(){
-    int width = stylesTree.getPreferredScrollableViewportSize().width +
+    javax.swing.plaf.basic.BasicTreeUI ui;
+    stylesTree.setPreferredSize(null);
+    int width = stylesTree.getPreferredSize().width +
                 stylesTreeScroll.getInsets().left +
                 stylesTreeScroll.getInsets().right;
 
     JComponent comp = stylesTreeScroll.getVerticalScrollBar();
     if(comp.isVisible()) width += comp.getPreferredSize().width;
 
-    int height = stylesTree.getPreferredScrollableViewportSize().height +
+    int height = stylesTree.getPreferredSize().height +
                  stylesTreeScroll.getInsets().top +
                  stylesTreeScroll.getInsets().bottom;
 
@@ -881,6 +888,7 @@ public class DocumentEditor extends AbstractVisualResource{
     stylesTreeScroll.setPreferredSize(new Dimension(width, height));
     stylesTreeScroll.invalidate();
     validate();
+
   }//protected void updateTreeSize()
 
 
@@ -929,7 +937,6 @@ public class DocumentEditor extends AbstractVisualResource{
         "The provided resource is not a document but a: " +
         target.getClass().toString() + "!");
     }
-//    newDocument = (gate.Document)target;
     gate.Document  oldDocument = document;
     document = (gate.Document)target;
     //this needs to be executed even if the new document equals(oldDocument)
@@ -953,72 +960,46 @@ public class DocumentEditor extends AbstractVisualResource{
    * events {@see #DelayedListener}.
    */
   protected void this_documentChanged(){
-//    if(document == newDocument) return;
-//    else document = newDocument;
-    Runnable runnable = new Runnable(){
-      public void run(){
-        initLocalData();
-        annotationsTableModel.fireTableDataChanged();
-        corefComboModel.fireDataChanged();
-        corefListModel.fireDataChanged();
-        Enumeration enum = stylesTreeRoot.children();
-        while(enum.hasMoreElements()){
-          stylesTreeModel.removeNodeFromParent((DefaultMutableTreeNode)
-                                               enum.nextElement());
-        }
-        if(document == null) return;
-        //speed things up by hiding the text display
-        SwingUtilities.invokeLater(new Runnable(){
-          public void run(){
-            progressBar.setValue(0);
-            textScroll.getViewport().setView(progressBox);
-          }
-        });
-        //register the for this new document's events
-        document.addDocumentListener(eventHandler);
-        textPane.setText(document.getContent().toString());
-        //add the default annotation set
-        Map namedASs = document.getNamedAnnotationSets();
-        AnnotationSet currentAS = document.getAnnotations();
-        int size = (namedASs == null) ? 1 : (namedASs.size() + 1);
-        int oneASprogress = 100 / size;
+    initLocalData();
+    annotationsTableModel.fireTableDataChanged();
+    corefComboModel.fireDataChanged();
+    corefListModel.fireDataChanged();
+    Enumeration enum = stylesTreeRoot.children();
+    while(enum.hasMoreElements()){
+      stylesTreeModel.removeNodeFromParent((DefaultMutableTreeNode)
+                                           enum.nextElement());
+    }
+    if(document == null) return;
+    textPane.setText(document.getContent().toString());
+
+    //add the default annotation set
+    eventHandler.annotationSetAdded(new gate.event.DocumentEvent(
+                  document,
+                  gate.event.DocumentEvent.ANNOTATION_SET_ADDED, null));
+
+    //register the for this new document's events
+    document.addDocumentListener(eventHandler);
+
+    //add all the other annotation sets
+    Map namedASs = document.getNamedAnnotationSets();
+    if(namedASs != null){
+      Iterator setsIter = namedASs.values().iterator();
+      while(setsIter.hasNext()){
+        AnnotationSet currentAS = (AnnotationSet)setsIter.next();
         if(currentAS != null){
-          addAnnotationSet(currentAS, 0, oneASprogress);
+          eventHandler.annotationSetAdded(new gate.event.DocumentEvent(
+                        document,
+                        gate.event.DocumentEvent.ANNOTATION_SET_ADDED,
+                        currentAS.getName()));
         }
-        //add all the other annotation sets
-        if(namedASs != null){
-          int cnt = 1;
-          Iterator setsIter = namedASs.values().iterator();
-          while(setsIter.hasNext()){
-            currentAS = (AnnotationSet)setsIter.next();
-            if(currentAS != null){
-              addAnnotationSet(currentAS,
-                               cnt * oneASprogress,
-                               (cnt + 1) * oneASprogress);
-            }
-            cnt ++;
-          }
-        }
-        //restore the text display
-        SwingUtilities.invokeLater(new Runnable(){
-          public void run(){
-            textPane.select(0, 0);
-            textScroll.getViewport().setView(textPane);
-          }
-        });
       }
-    };
-    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                               runnable,
-                               "AnnotationEditor3");
-    thread.setPriority(Thread.MIN_PRIORITY);
-    thread.start();
+    }
   }//protected void this_documentChanged()
 
   /**
    * Used to register with the GUI a new annotation set on the current document.
    */
-  protected void addAnnotationSet(AnnotationSet as, int progressStart,
+  protected void addAnnotationSet11(AnnotationSet as, int progressStart,
                                   int progressEnd){
     as.addAnnotationSetListener(eventHandler);
     String setName = as.getName();
@@ -1359,6 +1340,9 @@ public class DocumentEditor extends AbstractVisualResource{
         }
       });
       coloursList = new ArrayList();
+      visibleList = new ArrayList();
+      highlights = new ArrayList();
+      lastReturnedSize = 0;
     }
 
     public int getSize(){
@@ -1367,11 +1351,17 @@ public class DocumentEditor extends AbstractVisualResource{
       try{
         matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
       }catch(Exception e){
+        e.printStackTrace();
       }
       if(matchesMap == null) return 0;
       java.util.List matchesList = (java.util.List)
                                    matchesMap.get(corefCombo.getSelectedItem());
-      return (matchesList == null) ? 0 : matchesList.size();
+      int size = (matchesList == null) ? 0 : matchesList.size();
+      if(lastReturnedSize != size){
+        lastReturnedSize = size;
+        fireDataChanged();
+      }
+      return lastReturnedSize;
     }
 
     public Object getElementAt(int index){
@@ -1380,6 +1370,7 @@ public class DocumentEditor extends AbstractVisualResource{
       try{
         matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
       }catch(Exception e){
+        e.printStackTrace();
       }
       if(matchesMap == null) return null;
       java.util.List matchesList = (java.util.List)
@@ -1393,17 +1384,108 @@ public class DocumentEditor extends AbstractVisualResource{
       fireContentsChanged(this, 0, getSize());
     }
 
-    Color getColor(int row){
+    Color getColour(int row){
       if(row >= coloursList.size()){
         for(int i = coloursList.size(); i <= row; i++){
           coloursList.add(i, colGenerator.getNextColor());
         }
       }
       return (Color)coloursList.get(row);
-
     }
 
+    void setColour(int row, Color color){
+      if(row >= coloursList.size()){
+        for(int i = coloursList.size(); i <= row; i++){
+          coloursList.add(i, colGenerator.getNextColor());
+        }
+      }
+      coloursList.set(row, color);
+    }
+
+    boolean getVisible(int row){
+      if(row >= visibleList.size()){
+        for(int i = visibleList.size(); i <= row; i++){
+          visibleList.add(i, new Boolean(false));
+        }
+      }
+      return ((Boolean)visibleList.get(row)).booleanValue();
+    }
+
+    void setVisible(int row, boolean visible){
+      if(row >= visibleList.size()){
+        for(int i = visibleList.size(); i <= row; i++){
+          visibleList.add(i, new Boolean(false));
+        }
+      }
+      visibleList.set(row, new Boolean(visible));
+      java.util.List highlightsForRow = getHighlights(row);
+      if(visible){
+        //add new highlights and store them
+        java.util.List ids = (java.util.List)getElementAt(row);
+        String setName = (String)corefCombo.getSelectedItem();
+        AnnotationSet set = setName.equals("Default") ?
+                            document.getAnnotations() :
+                            document.getAnnotations(setName);
+        Iterator idIter = ids.iterator();
+        while(idIter.hasNext()){
+          Integer id = (Integer)idIter.next();
+          Annotation ann = set.get(id);
+          try{
+            highlightsForRow.add(highlighter.addHighlight(
+              ann.getStartNode().getOffset().intValue(),
+              ann.getEndNode().getOffset().intValue(),
+              new DefaultHighlighter.DefaultHighlightPainter(getColour(row))));
+          }catch(BadLocationException ble){
+            ble.printStackTrace();
+          }
+        }
+      }else{
+        //remove the highlights
+        if(!highlightsForRow.isEmpty()){
+          Iterator hlIter = highlightsForRow.iterator();
+          while(hlIter.hasNext()){
+            Object tag = hlIter.next();
+            highlighter.removeHighlight(tag);
+            hlIter.remove();
+          }
+        }
+      }
+    }//void setVisible(int row, boolean visible){
+
+    java.util.List getHighlights(int row){
+      if(row >= highlights.size()){
+        for(int i = highlights.size(); i <= row; i++){
+          highlights.add(i, new ArrayList());
+        }
+      }
+      return ((java.util.List)highlights.get(row));
+    }
+
+    void setHighlights(int row, java.util.List highlightsForRow ){
+      if(row >= highlights.size()){
+        for(int i = highlights.size(); i <= row; i++){
+          highlights.add(i, new ArrayList());
+        }
+      }
+      highlights.set(row, highlightsForRow);
+    }
+
+    /**
+     * Holds the <b>visible</b> attribute for each row in the list
+     */
+    ArrayList visibleList;
+
+    /**
+     * Holds the <b>colour</b> attribute for each row in the list
+     */
     ArrayList coloursList;
+
+    /**
+     * A list of lists; holds the currently showing highlights for each row
+     */
+    ArrayList highlights;
+
+    int lastReturnedSize;
   }
 
   class CorefListRenderer extends JCheckBox implements ListCellRenderer{
@@ -1416,13 +1498,14 @@ public class DocumentEditor extends AbstractVisualResource{
                                                   int index,
                                                   boolean isSelected,
                                                   boolean cellHasFocus){
-      if (isSelected) {
-        setForeground(list.getSelectionForeground());
-        setBackground(list.getSelectionBackground());
-      }else{
+//      if (isSelected) {
+//        setForeground(list.getSelectionForeground());
+//        setBackground(list.getSelectionBackground());
+//      }else{
         setForeground(list.getForeground());
         setBackground(list.getBackground());
-      }
+//      }
+      setBackground(((CorefListModel)list.getModel()).getColour(index));
       setFont(list.getFont());
       if (cellHasFocus) {
         setBorder( UIManager.getBorder("Table.focusCellHighlightBorder") );
@@ -1430,6 +1513,7 @@ public class DocumentEditor extends AbstractVisualResource{
         setBorder(noFocusBorder);
       }
       setText(getNameForCorefList((java.util.List) value));
+      setSelected(((CorefListModel)list.getModel()).getVisible(index));
       return this;
     }
 
@@ -1455,17 +1539,39 @@ public class DocumentEditor extends AbstractVisualResource{
   }
 
 
+  protected class CorefData{
+//    CorefData(boolean visible, ){
+//    }
+    boolean visible;
+    String setName;
+    Color colour;
+    java.util.List highlights;
+
+  }
+
   protected class CorefComboModel extends AbstractListModel
                                   implements ComboBoxModel{
+
+    CorefComboModel(){
+      lastReturnedSize = 0;
+    }
+
     public int getSize(){
       if(document == null || document.getFeatures() == null) return 0;
       Map matchesMap = null;
       try{
         matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
       }catch(Exception e){
+        e.printStackTrace();
       }
-      return (matchesMap == null) ? 0 : matchesMap.size();
+      int size = (matchesMap == null) ? 0 : matchesMap.size();
+      if(lastReturnedSize != size){
+        lastReturnedSize = size;
+        fireDataChanged();
+      }
+      return lastReturnedSize;
     }
+
 
     public Object getElementAt(int index){
       if(document == null || document.getFeatures() == null) return null;
@@ -1473,6 +1579,7 @@ public class DocumentEditor extends AbstractVisualResource{
       try{
         matchesMap = (Map)document.getFeatures().get("MatchesAnnots");
       }catch(Exception e){
+        e.printStackTrace();
       }
       if(matchesMap == null) return null;
       java.util.List setsList = new ArrayList(matchesMap.keySet());
@@ -1497,6 +1604,7 @@ public class DocumentEditor extends AbstractVisualResource{
     }
 
     Object selectedItem = null;
+    int lastReturnedSize;
   }
 
   /**
@@ -1534,6 +1642,8 @@ public class DocumentEditor extends AbstractVisualResource{
       removeAll();
       add(spacer);
 
+      int width = spacer.getWidth();
+
       //the text pane needs to be sized for modelToView() to work
       textComponent.setSize(1000, 1000);
 
@@ -1544,7 +1654,7 @@ public class DocumentEditor extends AbstractVisualResource{
       if(nData != null){
         try{
           doc.remove(0, doc.getLength());
-          doc.insertString(0, " " + nData.getTitle() + " ",
+          doc.insertString(0, nData.getTitle(),
                            nData.getAttributes());
         }catch(BadLocationException ble){
           ble.printStackTrace();
@@ -1553,11 +1663,12 @@ public class DocumentEditor extends AbstractVisualResource{
         if(nData.getType() != null) {
           visibleChk.setSelected(nData.getVisible());
           add(visibleChk);
+          width += visibleChk.getMinimumSize().width;
         }
       }else{
         try{
           doc.remove(0, doc.getLength());
-          doc.insertString(0, " " + value.toString() + " ",
+          doc.insertString(0, value.toString(),
                            textComponent.getStyle("default"));
         }catch(BadLocationException ble){
           ble.printStackTrace();
@@ -1565,27 +1676,40 @@ public class DocumentEditor extends AbstractVisualResource{
       }
       setTextComponentSize(textComponent);
       add(textComponent);
+      width += textComponent.getPreferredSize().width;
       if(selected) setBorder(selectedBorder);
       else setBorder(normalBorder);
+      width += getInsets().left + getInsets().right;
+      setPreferredSize(null);
+      setPreferredSize(new Dimension(width, super.getPreferredSize().height));
       return this;
     }//public Component getTreeCellRendererComponent
 
    protected void setTextComponentSize(JTextComponent comp){
       try{
+        if(comp.getDocument() == null || comp.getDocument().getLength() == 0){
+          return;
+        }
+        int width = 0;
         Rectangle rect = comp.modelToView(0);
+        int height = rect.height;
         int length = comp.getDocument().getLength();
         if(length > 0){
-          Rectangle rect2 = comp.modelToView(length - 1);
+          Rectangle rect2 = comp.modelToView(length );
           if(rect2 != null){
-            //this mutates rect
-            rect = SwingUtilities.computeUnion(rect2.x, rect2.y, rect2.width,
-                                        rect2.height, rect);
+            if(rect.x < rect2.x){
+              //left to right
+              width = rect2.x + rect2.width - rect.x;
+            }else{
+              //RtL
+              width = rect.x +rect.width - rect2.x;
+            }
+            height = Math.max(height, rect2.height);
           }
         }
         Insets insets = comp.getInsets();
-        Dimension dim = new Dimension(rect.width + insets.left +
-                                      insets.right + 5,
-                                      rect.height + insets.top + insets.bottom);
+        Dimension dim = new Dimension(width + insets.left + insets.right + 5,
+                                      height + insets.top + insets.bottom);
         comp.setPreferredSize(dim);
       }catch(BadLocationException ble){
         ble.printStackTrace();
@@ -2005,9 +2129,53 @@ Out.prln("NULL size");
                                  AnnotationSetListener{
 
     public void annotationSetAdded(gate.event.DocumentEvent e) {
-      if(e.getAnnotationSetName() == null) return;
-      addAnnotationSet(document.getAnnotations(e.getAnnotationSetName()),
-                       0,0);
+//      if(e.getAnnotationSetName() == null) return;
+//      addAnnotationSet(document.getAnnotations(e.getAnnotationSetName()),
+//                       0,0);
+
+      String setName = e.getAnnotationSetName();
+      AnnotationSet as = setName == null ? document.getAnnotations() :
+                             document.getAnnotations(setName);
+
+      as.addAnnotationSetListener(this);
+      if(setName == null) setName = "Default";
+      TypeData setData = new TypeData(setName, null, false);
+      setData.setAnnotations(as);
+
+      SwingUtilities.invokeLater(new NodeAdder(setData));
+
+//      DefaultMutableTreeNode setNode = new DefaultMutableTreeNode(setData, true);
+//      stylesTreeModel.insertNodeInto(setNode, stylesTreeRoot,
+//                                     stylesTreeRoot.getChildCount());
+//      stylesTree.expandPath(new TreePath(new Object[]{stylesTreeRoot, setNode}));
+      //((DefaultMutableTreeNode)stylesTreeRoot).add(setNode);
+      ArrayList typesLst = new ArrayList(as.getAllTypes());
+      Collections.sort(typesLst);
+//      int size = typesLst.size();
+//      int cnt = 0;
+//      int value = 0;
+//      int lastValue = 0;
+      Iterator typesIter = typesLst.iterator();
+      while(typesIter.hasNext()){
+        String type = (String)typesIter.next();
+        TypeData typeData = new TypeData(setName, type, false);
+        AnnotationSet sameType = as.get(type);
+        typeData.setAnnotations(sameType);
+
+        SwingUtilities.invokeLater(new NodeAdder(typeData));
+//        DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeData,
+//                                                                     false);
+//        stylesTreeModel.insertNodeInto(typeNode, setNode,
+//                                       setNode.getChildCount());
+        //setNode.add(typeNode);
+//        value = progressStart +  (progressEnd - progressStart)* cnt/size;
+//        if(value - lastValue >= 5){
+//          progressBar.setValue(value);
+//          progressBar.paintImmediately(progressBar.getBounds());
+//          lastValue = value;
+//        }
+//        cnt ++;
+      }
     }
 
     public void annotationSetRemoved(gate.event.DocumentEvent e) {
@@ -2259,8 +2427,7 @@ Out.prln("NULL size");
     }//class NodeRemover implements Runnable
 
     /**
-     * Helper class that adds a specified tree node to a specified parent node
-     * at a specified index.
+     * Helper class that adds a specified tree node
      */
     class NodeAdder implements Runnable{
       NodeAdder(TypeData tData){
@@ -2268,27 +2435,49 @@ Out.prln("NULL size");
       }
       public void run(){
         //create the new node
-        DefaultMutableTreeNode typeNode =
-                  new DefaultMutableTreeNode(tData, false);
+        DefaultMutableTreeNode newNode =
+                  new DefaultMutableTreeNode(tData, tData.getType() == null);
 
         //find its parent
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-          ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
-        while(node != null &&
-          !((TypeData)node.getUserObject()).getSet().equals(tData.getSet()))
-          node = node.getNextSibling();
+        DefaultMutableTreeNode node = null;
+        if(tData.getType() == null){
+          //set node
+          node = (DefaultMutableTreeNode)stylesTreeRoot;
+//System.out.println("Set node " + tData.getSet());
+        }else{
+//System.out.println("Type node " + tData.getSet() + ":" + tData.getType());
+          node = (DefaultMutableTreeNode)
+            ((DefaultMutableTreeNode)stylesTreeRoot).getFirstChild();
+          while(node != null &&
+            !((TypeData)node.getUserObject()).getSet().equals(tData.getSet()))
+            node = node.getNextSibling();
+        }
 
         //we have to add typeNode to node
         //find the right place
         int i = 0;
-        while (i < node.getChildCount() &&
-              ((TypeData)
-                ((DefaultMutableTreeNode)node.getChildAt(i)).
-                getUserObject()
-              ).getType().compareTo(tData.getType())<0) i++;
+        if(tData.getType() == null){
+          while (i < node.getChildCount() &&
+                ((TypeData)
+                  ((DefaultMutableTreeNode)node.getChildAt(i)).
+                  getUserObject()
+                ).getSet().compareTo(tData.getSet())<0) i++;
+        }else{
+          while (i < node.getChildCount() &&
+                ((TypeData)
+                  ((DefaultMutableTreeNode)node.getChildAt(i)).
+                  getUserObject()
+                ).getType().compareTo(tData.getType())<0) i++;
+        }
 
         //insert it!
-        stylesTreeModel.insertNodeInto(typeNode, node, i);
+        stylesTreeModel.insertNodeInto(newNode, node, i);
+
+        if(tData.getType() == null){
+          //set node, expand it!
+          stylesTree.expandPath(new TreePath(new Object[]{stylesTreeRoot,
+                                                          newNode}));
+        }
       }
 
       TypeData tData;

@@ -323,7 +323,7 @@ public class ListEditorDialog extends JDialog {
       java.util.List loadedResources = null;
       try{
         loadedResources = Gate.getCreoleRegister().
-                               getAllPublicInstances(itemType);
+                               getAllInstances(itemType);
       }catch(GateException ge){
         ge.printStackTrace(Err.getPrintWriter());
       }
@@ -336,7 +336,7 @@ public class ListEditorDialog extends JDialog {
       java.util.List loadedResources = null;
       try{
         loadedResources = Gate.getCreoleRegister().
-                               getAllPublicInstances(itemType);
+                               getAllInstances(itemType);
       }catch(GateException ge){
         ge.printStackTrace(Err.getPrintWriter());
       }
