@@ -1,0 +1,35 @@
+// date1.jape
+// diana, 05 April 01
+// last modified diana 05 Apr 01
+
+
+Phase:	Date1
+Input: Token SpaceToken Lookup
+Options: control = appelt
+
+///////
+// Note: this muse come before the timex phase,  because it includes extra context
+// to prevent dates being recognised erroneously in the middle of longer things
+//////
+
+
+
+/////////////////////////////////////////////////
+
+
+Rule: GazDate
+(SPACE | {Token.kind == punctuation})
+(
+ ({Lookup.minorType == day}) |
+ ({Lookup.minorType == month}) |
+ ({Lookup.minorType == festival})
+)
+:date
+(SPACE | {Token.kind == punctuation})
+-->
+ :date.TempDate = {rule = "GazDate"}
+
+
+
+
+

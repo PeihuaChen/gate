@@ -1,23 +1,13 @@
 // final.jape
 // diana, 05 Jan 01
-// last modified diana, 14 Jan 01
+// last modified diana, 17 Apr 01
+
+//note: organization should be included as part of the address
 
 Phase:	Final
 Options: control = appelt
 
 
-Macro: SPACE
-// space
-// control
-// space control
-// control space
-
-( 
- ({SpaceToken.kind == space, SpaceToken.length == "1"}
-  ({SpaceToken.kind == control, SpaceToken.length == "1"})?) |
- ({SpaceToken.kind == control, SpaceToken.length == "1"}
-  ({SpaceToken.kind == space, SpaceToken.length == "1"})?)
-)
 ///////////////////////////////////////////////////////////////
 
 
@@ -97,8 +87,12 @@ Rule: DateYearFinal
 Priority: 10
 (
  {TempDate}
+ (
+ ({Token.string == ","})?
+ SPACE {TempDate})?
  SPACE
  {TempYear}
+ (SPACE {TempDate})?
 )
 :date
 -->
@@ -138,6 +132,21 @@ Priority: 10
 :date
 -->
  :date.Date = {kind = "dateTime", rule = "TimeDateFinal"}
+
+
+Rule: TimeYearFinal
+Priority: 10
+// 21:00:00 2000 +0400
+
+(
+ {TempTime}
+ (SPACE | {Token.string == ":"})? 
+ (SPACE {TempYear})
+ (SPACE {TempZone})?
+)
+:date
+-->
+ :date.Date = {kind = "dateTime", rule = "TimeYearFinal"}
 
 
 Rule: SeasonYearFinal
@@ -191,6 +200,20 @@ Priority: 10
  :date.Date = {kind = "date", rule = "TimeContextFinal"},
  :time.Date = {kind = "time", rule = "TimeContextFinal"}
 
+Rule: TimeWordsContextFinal
+Priority: 50
+
+//seven to nine o'clock
+(
+ {TempTime.kind == timeWords}
+ (SPACE)
+ {Token.string == "to"}
+ (SPACE)
+ {TempTime.kind == positive}
+)
+:time
+-->
+  :time.Date = {kind = "time", rule = TimeWordsContextFinal}
 
 Rule: TimeOnlyFinal
 Priority: 10
@@ -206,8 +229,8 @@ Priority: 10
 Rule: AddressFull
 Priority: 100
 (
- {Street}
- ({Token.string == ","})? (SPACE)*
+ ({Street}
+ {Token.string == ","})? (SPACE)*
  ({TempLocation} 
   ({Token.string == ","})? (SPACE)*
  )+
@@ -217,7 +240,7 @@ Priority: 100
 )
 :address
 -->
- :address.Address = {rule = "AddressFull"}
+ :address.Address = {kind = "complete", rule = "AddressFull"}
 
 
 Rule: EmailFinal
