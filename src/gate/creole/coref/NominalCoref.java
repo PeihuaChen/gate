@@ -53,7 +53,7 @@ public class NominalCoref extends AbstractCoreferencer
 
   /** --- */
   public NominalCoref() {
-    super("NOUN");
+    super("NOMINAL");
     this.anaphor2antecedent = new HashMap();
   }
 
