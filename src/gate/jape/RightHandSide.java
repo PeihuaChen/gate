@@ -195,7 +195,12 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
         actionClassJavaFileName
       );
     } catch(GateException e) {
-      throw new JapeException("Couldn't create action class: " + e);
+      String nl = Strings.getNl();
+      String actionWithNumbers = addLineNumbers(actionClassString.toString());
+      throw new JapeException(
+        "Couldn't create action class: " + nl + e + nl +
+        "offending code was: " + nl + actionWithNumbers + nl
+      );
     }
     defineActionClass();
     instantiateActionClass();
@@ -411,30 +416,34 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     // full description of the problem, inc. stack trace and the RHS
     // action class code
     } catch (Exception e) {
-      // get the action class string
-      BufferedReader reader = new BufferedReader(
-        new StringReader(actionClassString.toString())
-      );
-      String line = null;
-      StringBuffer actionPrint = new StringBuffer();
-
-      try {
-        for(int lineNum = 1; ( line = reader.readLine() ) != null; lineNum++) {
-          String pad;
-          if(lineNum < 10) pad = " ";
-          else pad = "";
-          actionPrint.append(pad + lineNum + "  " + line + Strings.getNl());
-        }
-      } catch(IOException ie) { }
-
       StringWriter stackTraceWriter = new StringWriter();
       e.printStackTrace(new PrintWriter(stackTraceWriter));
       throw new JapeException(
         "Couldn't run RHS action: " + Strings.getNl() +
-        stackTraceWriter.getBuffer().toString() + actionPrint.toString()
+        stackTraceWriter.getBuffer().toString() +
+        addLineNumbers(actionClassString.toString())
       );
     }
   } // transduce
+
+  /** Helper method to add line numbers to a string */
+  String addLineNumbers(String text) {
+    // construct a line reader for the text
+    BufferedReader reader = new BufferedReader(new StringReader(text));
+    String line = null;
+    StringBuffer result = new StringBuffer();
+
+    try {
+      for(int lineNum = 1; ( line = reader.readLine() ) != null; lineNum++) {
+        String pad;
+        if(lineNum < 10) pad = " ";
+        else pad = "";
+        result.append(pad + lineNum + "  " + line + Strings.getNl());
+      }
+    } catch(IOException ie) { }
+
+    return result.toString();
+  } // addLineNumbers
 
   /** Create a string representation of the object. */
   public String toString() { return toString(""); }
@@ -483,6 +492,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.18  2001/11/16 10:29:45  hamish
+// JAPE RHS compiler errors now include the RHS code; test added
+//
 // Revision 1.17  2001/11/15 14:05:09  hamish
 // better error messages from JAPE RHS problems
 //
