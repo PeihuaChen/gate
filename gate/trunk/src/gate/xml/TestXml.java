@@ -9,9 +9,11 @@
 package gate.xml;
 
 import java.util.*;
+import java.net.*;
 import java.io.*;
 import junit.framework.*;
 import org.w3c.www.mime.*;
+import gate.util.*;
 
 /** Test class for XML facilities
   *
@@ -31,7 +33,7 @@ public class TestXml extends TestCase
     try{
       app.testSomething ();
     }catch (Exception e){
-      System.out.println(e);
+      e.printStackTrace (System.err);
     }
   }
  
@@ -56,9 +58,15 @@ public class TestXml extends TestCase
     markupElementsMap.put ("a","link");
     */
     // create a new gate document
+    //gate.Document doc = gate.Transients.newDocument(
+    //          new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
     gate.Document doc = gate.Transients.newDocument(
-              "http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml"
+              new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/xces/xces.xml")
     );
+    /*
+    gate.Document doc = gate.Transients.newDocument(
+      Files.getResourceAsString("texts/xces/xces.xml")
+    );*/
     // get the docFormat that deals with it.
     // the parameter MimeType doesn't affect right now the behaviour
     gate.DocumentFormat docFormat = gate.DocumentFormat.getDocumentFormat (
@@ -70,13 +78,33 @@ public class TestXml extends TestCase
     docFormat.unpackMarkup (doc,"DocumentContent");
 
     // graphic visualisation
+
     /*
+    System.out.println("Timer started...");
     if (docFormat != null){
+        // timing the operation
+        Date startTime = new Date();
+
         docFormat.unpackMarkup (doc);
+
+        Date endTime = new Date();
+        long  time1 = endTime.getTime () - startTime.getTime ();
+        System.out.println("unpacMarkup time for " + doc.getSourceURL () +
+          ": " + time1 / 1000 + "." + time1 % 1000 + " seconds.");
+
+        startTime = new Date();
+
         gate.jape.gui.JapeGUI japeGUI = new gate.jape.gui.JapeGUI();
         gate.Corpus corpus = gate.Transients.newCorpus("XML Test");
         corpus.add(doc);
         japeGUI.setCorpus(corpus);
+
+        endTime = new Date();
+        long time2 = endTime.getTime () - startTime.getTime ();
+        System.out.println("Graphic initialization time : " + time2 / 1000 +
+                            "." + time1 % 1000 + " seconds.");
+        System.out.println("Total time : " + (time1 + time2) / 1000 + "." +
+                            (time1 + time2) % 1000 + " seconds.");
     }
     */
   } // testSomething()

@@ -33,7 +33,6 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
   // a stack used to remember elements
   private java.util.Stack stack = null;
 
-  private java.io.PrintWriter out = null;
 
   /** a gate document */
   protected gate.Document doc = null;
@@ -69,20 +68,6 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
   public void endDocument() throws org.xml.sax.SAXException {
     // replace the document content with the one without markups
     doc.setContent(new DocumentContentImpl(tmpDocContent));
-
-    /*
-    try{
-      doc.edit (new Long(0),doc.getContent ().size () ,
-                new gate.corpora.DocumentContentImpl(tmpDocContent));
-
-
-    //doc.edit (new Long(0),doc.getContent ().size () ,
-    //            new gate.corpora.DocumentContentImpl(tmpDocContent.substring (0,30000)));
-    }catch(Exception e){
-      e.printStackTrace(System.err);
-    }
-    */
-
   }
 
   /**
@@ -123,6 +108,7 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
     try{
         // the annotation type will be conforming with markupElementsMap
         //add the annotation to the Annotation Set
+
         if (markupElementsMap == null)
           basicAS.add(obj.getStart (), obj.getEnd(), obj.getElemName(),
               obj.GetFM ()
@@ -133,6 +119,7 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
           if (annotationType != null)
             basicAS.add(obj.getStart (),obj.getEnd(), annotationType, obj.GetFM());
         }
+
     }catch (gate.util.InvalidOffsetException e){
       e.printStackTrace(System.err);
     }
@@ -178,12 +165,14 @@ public class CustomDocumentHandler extends HandlerBase implements LexicalEventLi
     // internal String object
     String  text = new String(ch, start, length);
 
-    // if the white space is not equal with \n then add it to the content
-    // of the document
-    //if (!text.equalsIgnoreCase("\n")){
-        // if not \n then add it to the document
-        tmpDocContent += text;
-    //}
+    // if the last character in tmpDocContent is \n and the read whitespace is \n
+    // then don't add it to tmpDocContent...
+
+    if (tmpDocContent.length () != 0)
+      if (tmpDocContent.charAt (tmpDocContent.length () - 1) != '\n' ||
+        !text.equalsIgnoreCase("\n")
+      ) 
+         tmpDocContent += text;
   }
 
   /**
