@@ -15,8 +15,31 @@ import gate.jape.*;
   */
 public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
-  /**
-    * Construct from a file name and macros map
+  /** Construct from a resource path, jape name and macros map. The resource
+    * path is relative to the gate resources directory. E.g. resourcePath
+    * might be "jape/combined/" and japeName "main.jape".
+    */
+  public ParseCpsl(
+    String resourcePath, String japeName, HashMap existingMacrosMap
+  ) throws IOException {
+    this(new InputStreamReader(
+      Files.getResourceAsStream(resourcePath + japeName)
+    ));
+    this.macrosMap = existingMacrosMap;
+    fileName = japeName;
+    dirName = resourcePath;
+    fromResource = true;
+  } // resource path, resource name and macros constructor
+
+  /** Construct from a resource path and jape name. The resource
+    * path is relative to the gate resources directory. E.g. resourcePath
+    * might be "jape/combined/" and japeName "main.jape".
+    */
+  public ParseCpsl(String resourcePath, String japeName) throws IOException {
+    this(resourcePath, japeName, new HashMap());
+  } // resource path and resource name constructor
+
+  /** Construct from a file name and macros map
     */
   public ParseCpsl(String cpslFileName, HashMap existingMacrosMap)
   throws IOException {
@@ -24,8 +47,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     this.macrosMap = existingMacrosMap;
   } // file and macros constructor
 
-  /**
-    * Construct from a file name
+  /** Construct from a file name
     */
   public ParseCpsl(String cpslFileName) throws IOException {
     this(
@@ -38,8 +60,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     dirName = f.getParent();
   } // ParseCpsl filename constructor
 
-  /**
-    * Construct from a grammar name and input stream
+  /** Construct from a grammar name and input stream
     */
   public ParseCpsl(String cpslFileName, InputStream cpslStream)
   throws IOException {
@@ -60,12 +81,15 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   private int ruleNumber;
 
   /** A list of all the bindings we made this time, for checking
-    * the RHS during parsing. 
+    * the RHS during parsing.
     */
   private HashSet bindingNameSet = null;
 
   /** A table of macro definitions. */
   private HashMap macrosMap;
+
+  /** Are we compiling from a resource? */
+  private boolean fromResource = false;
 
 //////////////
 // the grammar
@@ -107,29 +131,44 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       label_2:
       while (true) {
         phaseNameTok = jj_consume_token(ident);
-          // check file exists
-          String fileName = dirName + File.separatorChar + phaseNameTok.image;
-          File phaseFile = new File(fileName);
-          if(!phaseFile.exists())
-            phaseFile = new File(fileName + ".jape");
-          if(!phaseFile.exists())
-            {if (true) throw(
-              new ParseException(
-                "Can't find file " + phaseFile.getAbsolutePath()
-              )
-            );}
-
-          // construct a parser and parse it, adding the resultant spt to m
           ParseCpsl parser = null;
-          try {
-            parser = new ParseCpsl(phaseFile.getAbsolutePath(), macrosMap);
-          } catch (IOException e) {
-            {if (true) throw(
-              new ParseException(
-                "Can't open file " + phaseFile.getAbsolutePath()
-              )
-            );}
-          }
+
+          if(fromResource) { // the grammar is from a resource file
+            String resName = phaseNameTok.image + ".jape";
+
+            // construct a parser and parse it
+            try {
+              parser = new ParseCpsl(dirName, resName, macrosMap);
+            } catch (IOException e) {
+              {if (true) throw(new ParseException("Can't open resource "+dirName+resName));}
+            }
+
+          } else { // not from resource
+            // check file exists
+            String fileName = dirName + File.separatorChar + phaseNameTok.image;
+            File phaseFile = new File(fileName);
+            if(!phaseFile.exists())
+              phaseFile = new File(fileName + ".jape");
+            if(!phaseFile.exists())
+              {if (true) throw(
+                new ParseException(
+                  "Can't find file " + phaseFile.getAbsolutePath()
+                )
+              );}
+
+            // construct a parser and parse it
+            try {
+              parser = new ParseCpsl(phaseFile.getAbsolutePath(), macrosMap);
+            } catch (IOException e) {
+              {if (true) throw(
+                new ParseException(
+                  "Can't open file " + phaseFile.getAbsolutePath()
+                )
+              );}
+            }
+          } // not from resource
+
+          // adding the resultant spt to m
           if(parser != null) {
             s = parser.SinglePhaseTransducer();
             if(s != null)
@@ -1012,6 +1051,47 @@ existingAttrName + "\");" + nl +
     return retval;
   }
 
+  final private boolean jj_3R_17() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_20()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_14()) {
+    jj_scanpos = xsp;
+    if (jj_3R_15()) {
+    jj_scanpos = xsp;
+    if (jj_3R_16()) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    if (jj_scan_token(ident)) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
+    return false;
+  }
+
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
@@ -1088,47 +1168,6 @@ existingAttrName + "\");" + nl +
 
   final private boolean jj_3_1() {
     if (jj_3R_12()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_12() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) {
-    jj_scanpos = xsp;
-    if (jj_3R_16()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    } else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    else if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
-    if (jj_scan_token(ident)) return true;
     if (jj_la == 0 && jj_scanpos == jj_lastpos) return false;
     return false;
   }
