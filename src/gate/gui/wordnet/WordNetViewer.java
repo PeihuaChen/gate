@@ -298,7 +298,9 @@ public class WordNetViewer extends AbstractVisualResource
   }
 
   void adverbButton_actionPerformed(ActionEvent e) {
-    adverbPopup.show(adverbButton, 0, adverbButton.getHeight());
+    if (adverbPopup.getComponentCount()>0){
+      adverbPopup.show(adverbButton, 0, adverbButton.getHeight());
+    }
   }
 
   public void actionPerformed(ActionEvent e){
