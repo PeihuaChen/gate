@@ -504,6 +504,15 @@ public class NameBearerHandle implements Handle,
                                     (Group) securityData.get("group"));
             LanguageResource lr = ds.adopt((LanguageResource)target,si);
             ds.sync(lr);
+
+            //check whether the new LR is different from the transient one and
+            //if so, unload the transient LR, so the user realises
+            //it is no longer valid. Don't do this in the adopt() code itself
+            //because the batch code might wish to keep the transient
+            //resource for some purpose.
+            if (lr != target) {
+              Factory.deleteResource((LanguageResource)target);
+            }
           }
         }
       } catch(PersistenceException pe) {

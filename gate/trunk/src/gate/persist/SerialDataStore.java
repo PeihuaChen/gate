@@ -237,13 +237,13 @@ extends AbstractFeatureBearer implements DataStore {
         features1.put("transientSource", lr);
         try {
           //here we create the persistent LR via Factory, so it's registered
-          //in GATE and we remove the transient resource from which it has
-          //been created
+          //in GATE
           res = (LanguageResource)
             Factory.createResource("gate.corpora.SerialCorpusImpl", features1);
-          Factory.deleteResource(lr);
-
-//        res = new SerialCorpusImpl((Corpus) lr);
+          //Here the transient corpus is not deleted from the CRI, because
+          //this might not always be the desired behaviour
+          //since we chose that it is for the GUI, this functionality is
+          //now move to the 'Save to' action code in NameBearerHandle
         } catch (gate.creole.ResourceInstantiationException ex) {
           throw new GateRuntimeException(ex.getMessage());
         }
