@@ -57,13 +57,28 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
 
 
   /** --- */
-  protected void cleanup(ResultSet rs) {
-    throw new MethodNotImplementedException();
+  protected void cleanup(ResultSet rs)
+    throws PersistenceException {
+
+    try {
+      if (rs!=null)
+        rs.close();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("an SQL exception occured ["+ sqle.getMessage()+"]");
+    }
   }
 
   /** --- */
-  protected void cleanup(Statement stmt) {
-    throw new MethodNotImplementedException();
+  protected void cleanup(Statement stmt)
+    throws PersistenceException {
+    try {
+      if (stmt!=null)
+        stmt.close();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("an SQL exception occured ["+ sqle.getMessage()+"]");
+    }
   }
 
   /** --- */

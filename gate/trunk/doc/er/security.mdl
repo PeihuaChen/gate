@@ -225,7 +225,45 @@
 			result     	"void"
 			concurrency 	"Sequential"
 			opExportControl 	"Public"
-			uid        	0))))
+			uid        	0)
+		    (object Operation "login"
+			quid       	"3BA75736025C"
+			parameters 	(list Parameters
+			    (object Parameter "username"
+				type       	"String")
+			    (object Parameter "password"
+				type       	"String"))
+			result     	"Long"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "logout"
+			quid       	"3BA7573E0113"
+			parameters 	(list Parameters
+			    (object Parameter "sessionID"
+				type       	"Long"))
+			result     	"void"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "Session"
+		quid       	"3BA75DEC019E"
+		stereotype 	"Interface"
+		operations 	(list Operations
+		    (object Operation "getID"
+			quid       	"3BA75E25031D"
+			result     	"Long"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)
+		    (object Operation "getUser"
+			quid       	"3BA75E2B0163"
+			result     	"User"
+			concurrency 	"Sequential"
+			opExportControl 	"Public"
+			uid        	0)))
+	    (object Class "SecurityException"
+		quid       	"3BA75EBC00DF"))
 	logical_presentations 	(list unit_reference_list
 	    (object ClassDiagram "Main"
 		quid       	"3BA604E802D1"
@@ -241,10 +279,10 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(528, 496)
+			location   	(528, 624)
 			label      	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(194, 337)
+			    location   	(194, 465)
 			    fill_color 	13434879
 			    nlines     	1
 			    max_width  	668
@@ -252,7 +290,7 @@
 			    label      	"Group")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@1
-			    location   	(194, 287)
+			    location   	(194, 415)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
@@ -266,12 +304,12 @@
 			quidu      	"3BA60505005C"
 			compartment 	(object Compartment
 			    Parent_View 	@1
-			    location   	(194, 398)
+			    location   	(194, 526)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	6
-			    max_width  	666)
+			    max_width  	675)
 			width      	686
 			height     	442
 			annotation 	8
@@ -311,7 +349,7 @@
 			    fill_color 	13434879
 			    anchor     	2
 			    nlines     	5
-			    max_width  	753)
+			    max_width  	762)
 			width      	774
 			height     	392
 			annotation 	8
@@ -321,22 +359,22 @@
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
 			ShowOperationSignature 	TRUE
-			location   	(1552, 624)
+			location   	(1552, 768)
 			label      	(object ItemLabel
 			    Parent_View 	@3
-			    location   	(1090, 340)
+			    location   	(1077, 434)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	924
+			    max_width  	950
 			    justify    	0
 			    label      	"SecurityFactory")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@3
-			    location   	(1090, 290)
+			    location   	(1077, 384)
 			    fill_color 	13434879
 			    anchor     	10
 			    nlines     	1
-			    max_width  	924
+			    max_width  	950
 			    justify    	0
 			    label      	"<<Interface>>")
 			icon       	"Interface"
@@ -346,14 +384,87 @@
 			quidu      	"3BA60569024A"
 			compartment 	(object Compartment
 			    Parent_View 	@3
-			    location   	(1090, 401)
+			    location   	(1077, 495)
 			    icon_style 	"Icon"
 			    fill_color 	13434879
 			    anchor     	2
-			    nlines     	11
-			    max_width  	922)
-			width      	942
-			height     	692
+			    nlines     	13
+			    max_width  	956)
+			width      	968
+			height     	792
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::Session" @4
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(304, 1584)
+			label      	(object ItemLabel
+			    Parent_View 	@4
+			    location   	(176, 1500)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	256
+			    justify    	0
+			    label      	"Session")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@4
+			    location   	(176, 1450)
+			    fill_color 	13434879
+			    anchor     	10
+			    nlines     	1
+			    max_width  	253
+			    justify    	0
+			    label      	"<<Interface>>")
+			icon       	"Interface"
+			icon_style 	"Label"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA75DEC019E"
+			compartment 	(object Compartment
+			    Parent_View 	@4
+			    location   	(176, 1558)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	3
+			    max_width  	225)
+			width      	274
+			height     	292
+			annotation 	8
+			autoResize 	TRUE)
+		    (object NoteView @5
+			location   	(416, 128)
+			label      	(object ItemLabel
+			    Parent_View 	@5
+			    location   	(210, 47)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	377
+			    label      	"Security related classes")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	437
+			height     	175)
+		    (object ClassView "Class" "Logical View::SecurityException" @6
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1536, 1552)
+			label      	(object ItemLabel
+			    Parent_View 	@6
+			    location   	(1351, 1501)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	370
+			    justify    	0
+			    label      	"SecurityException")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"3BA75EBC00DF"
+			width      	388
+			height     	126
 			annotation 	8
 			autoResize 	TRUE)))))
     root_subsystem 	(object SubSystem "Component View"
