@@ -45,6 +45,7 @@ implements JapeConstants, java.io.Serializable
     */
   private Array phases;
 
+
   /** Add phase. */
   public void addPhase(String name, Transducer phase) {
     //Debug.pr(this, "MPT: adding " + name + Debug.getNl());
@@ -161,6 +162,9 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.5  2000/07/12 14:19:19  valyt
+// Testing CVS
+//
 // Revision 1.4  2000/07/04 14:37:39  valyt
 // Added some support for Jape-ing in a different annotations et than the default one;
 // Changed the L&F for the JapeGUI to the System default
