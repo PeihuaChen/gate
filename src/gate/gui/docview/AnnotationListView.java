@@ -124,7 +124,7 @@ public class AnnotationListView extends AbstractDocumentView
           textView.removeAllBlinkingHighlights();
           int[] rows = table.getSelectedRows();
           for(int i = 0; i < rows.length; i++){
-            Object tag = tagList.get(rows[i]);
+            Object tag = tagList.get(table.rowViewToModel(rows[i]));
             AnnotationHandler aHandler = (AnnotationHandler)
               annotationHandlerByTag.get(tag);
             textView.addBlinkingHighlight(aHandler.ann);
