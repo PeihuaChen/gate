@@ -61,13 +61,18 @@ public class CorpusBenchmarkTool {
              +" "+ isVerboseMode +" "+ isMoreInfoMode);
 */
     execute(startDir);
-/*    if (application != null) {
-      Iterator iter = new ArrayList(application.getPRs()).iterator();
-      while (iter.hasNext())
-        Factory.deleteResource((Resource) iter.next());
+    if (application != null) {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
 
-      Factory.deleteResource(application);
-    }*/
+          Iterator iter = new ArrayList(application.getPRs()).iterator();
+          while (iter.hasNext())
+            Factory.deleteResource( (Resource) iter.next());
+
+          Factory.deleteResource(application);
+         }
+       });
+    }
   }
 
   public void init() {
