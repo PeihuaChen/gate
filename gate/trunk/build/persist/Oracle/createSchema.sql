@@ -1,46 +1,72 @@
 
-@createTable.sql
-pause >>>>>> Tables successfully  created. Press ENTER to continue...
+spool install.log
+whenever sqlerror continue
+
+set termout     off
+start createTable.sql
+set termout     on
+prompt >>>>>> Tables successfully  created...
 clear buffer
 
+set termout     off
 @createSequence.sql
-pause >>>>>> Sequences successfully  created. Press ENTER to continue...
+set termout     on
+prompt  >>>>>> Sequences successfully  created...
 clear buffer
 
+set termout     off
 @createIndex.sql
-pause >>>>>> Indexes successfully  created. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Indexes successfully  created...
 clear buffer
  
+set termout     off 
 @createView.sql
-pause >>>>>> Views successfully  created. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Views successfully  created...
 clear buffer
 
+set termout     off
 @../../../src/database/Oracle/error.spc 
-pause >>>>>> Package ERROR successfully  created. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Package ERROR successfully  created...
 clear buffer
 
+set termout     off
 @../../../src/database/Oracle/security.spc 
 @../../../src/database/Oracle/security.bdy
-pause >>>>>> Package SECURITY successfully  created. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Package SECURITY successfully  created...
 clear buffer
 
+set termout     off
 @../../../src/database/Oracle/persist.spc 
 @../../../src/database/Oracle/persist.bdy
-pause >>>>>> Package PERSIST successfully  created. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Package PERSIST successfully  created...
 clear buffer
 
+set termout     off
 @../../../src/database/Oracle/triggers.trg 
-pause >>>>>> Triggers successfully  created. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Triggers successfully  created...
 clear buffer
 
+set termout     off
 @initData_Oracle.sql 
-pause >>>>>> Lookup tables successfully  initialized. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Lookup tables successfully  initialized...
 clear buffer
 
+set termout     off
 @grants.sql 
-pause >>>>>> Access to GATEADMIN objects successfully  granted to GATEUSER. Press ENTER to continue...
+set termout     on
+prompt >>>>>> Access to GATEADMIN objects successfully  granted to GATEUSER...
 clear buffer
+
+spool off
 
 PROMPT
 PROMPT DONE!
 PROMPT
+
