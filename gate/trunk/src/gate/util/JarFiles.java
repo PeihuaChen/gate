@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- * 
+ *
  *  Oana Hamza, 09/06/00
  *
  *  $Id$
@@ -29,6 +29,7 @@ public class JarFiles {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
+  private StringBuffer dbgString = new StringBuffer();
 
   private final static int BUFF_SIZE = 65000;
 
@@ -36,7 +37,7 @@ public class JarFiles {
 
   private byte buffer[] = null;
 
-  public JarFiles() {
+  public JarFiles(){
     directorySet = new HashSet();
     buffer = new byte[BUFF_SIZE];
   }
@@ -59,6 +60,7 @@ public class JarFiles {
       jarFileDestination =
         new JarOutputStream(new FileOutputStream(destinationJarName));
 
+      dbgString.append("Creating " + destinationJarName + " from these JARs:\n");
       // iterate through the Jar files set
       Iterator jarFileNamesIterator = jarFileNames.iterator();
 
@@ -71,7 +73,7 @@ public class JarFiles {
         // Out.println("Adding " + sourceJarName + " to "
         // + destinationJarName);
         addJar(jarFileDestination, jarFileSource);
-
+        dbgString.append(sourceJarName + " added OK ! \n");
         jarFileSource.close();
       }
 
@@ -152,9 +154,11 @@ public class JarFiles {
           destinationJar.closeEntry();
 
         } catch (java.util.zip.ZipException ze) {
-          if(!currentJarEntry.isDirectory())
+          if(!currentJarEntry.isDirectory()){
+            dbgString.append("ERROR while adding " + sourceJar.getName()+ "file !\n");
             throw new GateException("FATAL ERROR: Duplicate file entry " +
-                                  currentJarEntry.getName() + " !");
+                                currentJarEntry.getName() + " !\n" + dbgString);
+          }// End if
         }
       }// while(jarFileEntriesEnum.hasMoreElements())
     } catch (java.io.IOException e) {
