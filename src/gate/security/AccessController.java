@@ -85,7 +85,7 @@ public interface AccessController {
 
   /** --- */
   public void open(URL jdbcUrl)
-    throws PersistenceException, SecurityException;
+    throws PersistenceException;
 
   /** --- */
   public void close()
