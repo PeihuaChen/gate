@@ -359,7 +359,7 @@ SinglePhaseTransducer SinglePhaseTransducer() :
           else
             System.err.println(
               "ignoring unknown control strategy " + option +
-              " (should be brill, appelt or appelt-shortest)"
+              " (should be brill, appelt or first)"
             );
         } // control
         else if(optionNameTok.image.equalsIgnoreCase("debug")) {
@@ -1028,7 +1028,11 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.25  2002/02/26 13:27:13  valyt
+// Error messages from the compiler
+//
 // Revision 1.24  2001/11/01 15:49:10  valyt
+//
 // DEBUG mode for Japes
 //
 // Revision 1.23  2001/09/25 12:26:10  kalina

@@ -186,22 +186,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 //    instantiateActionClass();
   } // createActionClass
 
-  /** Write out the action class file. */
-  public void writeActionClass() throws JapeException {
-
-    File actionClassJavaFile = new File(actionClassJavaFileName);
-    try {
-      FileWriter writer = new FileWriter(actionClassJavaFile);
-      writer.write(actionClassString.toString());
-      writer.close();
-    } catch(IOException e) {
-      throw new JapeException(
-        "problem writing to " + actionClassJavaFileName + ": " + e.getMessage()
-      );
-    }
-  } // writeActionClass
-
-
   /** Create an instance of the action class. */
   public void instantiateActionClass() throws JapeException {
 
@@ -306,7 +290,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.23  2002/02/26 13:27:12  valyt
+// Error messages from the compiler
+//
 // Revision 1.22  2002/02/26 10:30:07  valyt
+//
 // new compile solution
 //
 // Revision 1.21  2002/02/12 11:39:03  valyt

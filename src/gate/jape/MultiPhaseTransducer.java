@@ -101,7 +101,7 @@ implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
-  public void finish() {
+  public void finish(){
     for(Iterator i = phases.iterator(); i.hasNext(); )
       ((Transducer) i.next()).finish();
   } // finish
@@ -204,7 +204,11 @@ implements JapeConstants, java.io.Serializable
 
 
 // $Log$
+// Revision 1.21  2002/02/26 13:27:12  valyt
+// Error messages from the compiler
+//
 // Revision 1.20  2001/09/28 15:45:23  valyt
+//
 // All the PRs are now more or less interruptible
 //
 // THE STOP BUTTON shows its face when needed.

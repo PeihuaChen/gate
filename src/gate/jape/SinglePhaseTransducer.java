@@ -92,12 +92,10 @@ extends Transducer implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
-  public void finish() {
+  public void finish(){
     // both MPT and SPT have finish called on them by the parser...
-    if(finishedAlready)
-      return;
-    else
-      finishedAlready = true;
+    if(finishedAlready) return;
+    else finishedAlready = true;
 
     //each rule has a RHS which has a string for java code
     //those strings need to be compiled now
@@ -111,7 +109,7 @@ extends Transducer implements JapeConstants, java.io.Serializable
     try{
       Javac.loadClasses(actionClasses);
     }catch(Exception e){
-      e.printStackTrace();
+      Err.prln("Compile error:\n" + e.getMessage());
     }
 
     //build the finite state machine transition graph
