@@ -162,7 +162,7 @@ scratch:
 	rm userguide.html.bak
 
 # make the javadoc documentation
-docs: ../doc/userguide.html build.txt version.txt
+docs: ../doc/userguide.html build.txt version.txt java2html
 	VERSION=`cat version.txt`-`cat build.txt`; \
 	DATE=`date +%b-%d-%Y`; \
 	sed -e "s,__VERSION__,$$VERSION," -e "s,__DATE__,$$DATE," \
@@ -181,19 +181,12 @@ internaldocs:
 	  -d `$(CYGPATH) ../doc/javadoc/internal` $(PKGS)
 	cp ../src/gate/CookBook.java ../doc/javadoc/internal/gate/CookBook.txt
 
-# convert the source to HTML using the java2html utility (if installed)
+# convert the source to HTML using the java2html utility
 java2html:
-	rm -f ../doc/internal/java2html/*.html
-	echo '<!--AUTOGEN!--><HTML><HEAD><TITLE>GATE code</TITLE></HEAD><BODY>' \
-	  >../doc/internal/java2html/index.html
-	cd ../src && for f in \
-	  `find . -name '*.java' -print |sed 's,^..,,' |sort`; \
-	do NAME=`echo $$f |sed 's,\/,\.,g'`; \
-	java2html -i $$f -o ../doc/internal/java2html/$$NAME.html; \
-	echo "<P><A HREF=$$NAME.html>$$NAME</A>" \
-	  >> ../doc/internal/java2html/index.html; done
-	echo '</BODY></HTML>' \
-	  >> ../doc/internal/java2html/index.html
+	rm -rf ../doc/internal/java2html/[a-zA]*
+	$(RUN) -classpath `$(CYGPATH) ../lib/j2h.jar` j2h \
+	  -d `$(CYGPATH) ../doc/java2html` -js `$(CYGPATH) ../src` \
+	  -jd `$(CYGPATH) ../doc/javadoc` -m 4 -t 2 -n "GATE source"
 
 
 # delete all the class files etc. (doesn't delete gate.jar)
