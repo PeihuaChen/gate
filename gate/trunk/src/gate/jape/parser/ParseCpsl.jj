@@ -861,7 +861,7 @@ String[] AssignmentExpression() :
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
             "        AnnotationSet " + existingAnnotSetName +
-            " = lhs.getBoundAnnots(\"" + nameTok.image + "\"); " + nl
+            " = (AnnotationSet)bindings.get(\"" + nameTok.image + "\"); " + nl
           );
         }
         <period> nameTok=<ident> { existingAnnotType = nameTok.image; }
@@ -957,6 +957,9 @@ String ConsumeBlock() {
 
 
 // $Log$
+// Revision 1.6  2000/05/05 12:51:12  valyt
+// Got rid of deprecation warnings
+//
 // Revision 1.5  2000/05/05 11:16:51  hamish
 // added stream constructor to the parser
 //
