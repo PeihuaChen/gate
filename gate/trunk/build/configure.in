@@ -30,6 +30,7 @@ AC_PATH_PROG(JAVAC, javac javac.exe, javac, /bin:/usr/bin://w/jdk/jdk1.3/bin)
 AC_PATH_PROG(JAVA, java java.exe, java, /bin:/usr/bin://w/jdk/jdk1.3/bin)
 AC_PATH_PROG(JAR, jar jar.exe, jar, /bin:/usr/bin://w/jdk/jdk1.3/bin)
 AC_PATH_PROG(JAVADOC, javadoc javadoc.exe, javadoc, /bin:/usr/bin://w/jdk/jdk1.3/bin)
+CYGPATH=echo
 AC_PATH_PROG(CYGPATH, cygpath, echo)
 CYGPATHP=$CYGPATH
 
@@ -100,5 +101,6 @@ AC_OUTPUT(Makefile)
 
 # now go home and have a nice cup of tea
 echo '***' 1>&2
-echo '*** you may think you\'re clever, but plenty more can go wrong yet' 1>&2
+echo "*** you may think you're clever" 1>&2
+echo '***   but plenty more can go wrong yet' 1>&2
 echo '***' 1>&2
