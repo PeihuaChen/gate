@@ -1085,8 +1085,16 @@ System.out.println("trans failed ...rollback");
     }
 
     //7. create features
-//    createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
-    createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+    if (this.dbType == DBHelper.ORACLE_DB) {
+      createFeaturesBulk(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+    }
+    else if (this.dbType == DBHelper.POSTGRES_DB) {
+      createFeatures(lrID,DBHelper.FEATURE_OWNER_DOCUMENT,docFeatures);
+    }
+    else {
+      Assert.fail();
+    }
+
 
     //9. create a DatabaseDocument wrapper and return it
 
@@ -1540,8 +1548,16 @@ System.out.println("trans failed ...rollback");
           //3.3. set annotation features
           FeatureMap features = ann.getFeatures();
           Assert.assertNotNull(features);
-  //        createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
-          createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+
+          if (this.dbType == DBHelper.ORACLE_DB) {
+            createFeaturesBulk(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+          }
+          else if (this.dbType == DBHelper.POSTGRES_DB) {
+            createFeatures(annGlobalID,DBHelper.FEATURE_OWNER_ANNOTATION,features);
+          }
+          else {
+            Assert.fail();
+          }
         }
       }
       else if (this.dbType == DBHelper.POSTGRES_DB) {
