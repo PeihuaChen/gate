@@ -57,4 +57,4 @@ grant select,insert,update,delete on GATEADMIN.T_LR_TYPE to GATEUSER;
 grant select,insert,update,delete on GATEADMIN.T_NODE to GATEUSER;              
 grant select,insert,update,delete on GATEADMIN.T_USER to GATEUSER;              
 grant select,insert,update,delete on GATEADMIN.T_USER_GROUP to GATEUSER;        
-
+grant select,insert,update,delete on GATEADMIN.T_PARAMETER to GATEUSER;        

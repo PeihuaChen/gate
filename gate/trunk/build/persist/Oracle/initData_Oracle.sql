@@ -13,6 +13,14 @@
  *  $Id$
  *
  */
+ 
+    --init the DB GUID
+     insert into t_parameter(par_id,
+                                                  par_key,
+                                                  par_value_string)
+     values (1,
+                    'DB_GUID',
+                    rawtohex(sys_guid()));
 
      -- init the LR_TYPE table
      
