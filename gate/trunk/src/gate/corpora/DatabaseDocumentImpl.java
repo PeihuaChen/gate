@@ -697,4 +697,17 @@ public class DatabaseDocumentImpl extends DocumentImpl {
 
   }
 
+  public void setAnnotations(String setName,Collection annotations) {
+
+    if (null == setName) {
+      Assert.assert(0 == this.defaultAnnots.size());
+      this.defaultAnnots.addAll(annotations);
+    }
+    else {
+      Assert.assert(false == this.namedAnnotSets.containsKey(setName));
+      AnnotationSet annSet = new DatabaseAnnotationSetImpl(this,setName);
+      annSet.addAll(annotations);
+      this.namedAnnotSets.put(setName,annSet);
+    }
+  }
 }
