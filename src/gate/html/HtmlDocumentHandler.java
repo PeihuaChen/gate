@@ -304,6 +304,12 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // create a string object based on the reported text
     String content = new String(text);
+
+    // remove the difference between JDK 1.3 and JDK 1.4
+    if(content.trim().length() == 0) {
+      return;
+    } // if
+
     StringBuffer contentBuffer = new StringBuffer("");
     int tmpDocContentSize = tmpDocContent.length();
     boolean incrementStartIndex = false;
