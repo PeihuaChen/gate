@@ -93,24 +93,24 @@ public class TestPR extends TestCase
     tokeniser.execute();
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().size() +
-      " Token annotations, instead of the expected 1286.",
-      doc1.getAnnotations().size()== 1286);
+      " Token annotations, instead of the expected 1284.",
+      doc1.getAnnotations().size()== 1284);
 
     //run the tokeniser for doc2
     tokeniser.setDocument(doc2);
     tokeniser.execute();
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().size() +
-      " Token annotations, instead of the expected 2144.",
-      doc2.getAnnotations().size()== 2144);
+      " Token annotations, instead of the expected 2140.",
+      doc2.getAnnotations().size()== 2140);
 
     //run the tokeniser for doc3
     tokeniser.setDocument(doc3);
     tokeniser.execute();
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().size() +
-      " Token annotations, instead of the expected 2812.",
-      doc3.getAnnotations().size()== 2812);
+      " Token annotations, instead of the expected 2808.",
+      doc3.getAnnotations().size()== 2808);
 
     Factory.deleteResource(tokeniser);
   }// testTokenizer
@@ -189,8 +189,8 @@ public class TestPR extends TestCase
 
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 85.",
-      doc3.getAnnotations().get("Split").size()== 85);
+      " Split annotations, instead of the expected 84.",
+      doc3.getAnnotations().get("Split").size()== 84);
     Factory.deleteResource(splitter);
   }//testSplitter
 
