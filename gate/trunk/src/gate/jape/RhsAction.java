@@ -29,8 +29,8 @@ public interface RhsAction extends Serializable {
   /**
    * Fires the RHS action for a particular LHS match.
    * @param doc the document the RHS action will be run on
-   * @param bindings A map containing the matc results from the LHS in the form
-   * label(String) -> matched annotations (AnnotationSet)
+   * @param bindings A map containing the matching results from the LHS in 
+   * the form label(String) -> matched annotations (AnnotationSet)
    * @param annotations copy of the outputAS value provided for backward
    * compatibility
    * @param inputAS the input annotation set
