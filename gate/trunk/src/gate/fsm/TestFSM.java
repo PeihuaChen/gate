@@ -12,6 +12,8 @@ import gate.jape.*;
 import java.util.*;
 import java.io.*;
 
+import junit.framework.*;
+
 import EDU.auburn.VGJ.graph.*;
 import EDU.auburn.VGJ.gui.*;
 import EDU.auburn.VGJ.examplealg.ExampleAlg2;
@@ -21,10 +23,10 @@ import EDU.auburn.VGJ.algorithm.shawn.Spring;
 import EDU.auburn.VGJ.algorithm.cartegw.BiconnectGraph;
 
 
-public class TestFSM {
+public class TestFSM extends TestCase {
 
-  public TestFSM() {
-  }
+  /** Construction */
+  public TestFSM(String name) { super(name); }
 
   public void setUp() throws JapeException{
     batch = new Batch("z:/gate2/src/gate/fsm/fsmtestgrammar.jape");
@@ -81,7 +83,7 @@ public class TestFSM {
 
   public static void main(String[] args) {
     try{
-      TestFSM testFSM = new TestFSM();
+      TestFSM testFSM = new TestFSM("TestFSM");
       testFSM.setUp();
       testFSM.graphTest();
       testFSM.tearDown();
@@ -89,6 +91,12 @@ public class TestFSM {
       e.printStackTrace(System.err);
     }
   }
+  
+  /** Test suite routine for the test runner */
+  public static Test suite() {
+    return new TestSuite(TestFSM.class);
+  } // suite
+
   private Batch batch;
   private MultiPhaseTransducer transducer;
 }
