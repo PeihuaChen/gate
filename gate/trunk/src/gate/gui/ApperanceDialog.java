@@ -22,13 +22,17 @@ import gate.swing.*;
 
 public class ApperanceDialog extends JDialog {
 
-  public ApperanceDialog(Frame owner, String title, boolean modal) {
+  public ApperanceDialog(Frame owner, String title, boolean modal,
+                         Component[] targets) {
     super(owner, title, modal);
+    this.targets = targets;
     init();
   }
 
-  public ApperanceDialog(Dialog owner, String title, boolean modal) {
+  public ApperanceDialog(Dialog owner, String title, boolean modal,
+                         Component[] targets) {
     super(owner, title, modal);
+    this.targets = targets;
     init();
   }
 
@@ -128,7 +132,8 @@ public class ApperanceDialog extends JDialog {
     });
   }
 
-  public void show() {
+  public void show(Component[] targets) {
+    this.targets = targets;
     oldMenusFont = menusFont = UIManager.getFont("Menu.font");
     oldComponentsFont = componentsFont = UIManager.getFont("Button.font");
     oldTextComponentsFont = textComponentsFont =
@@ -154,7 +159,8 @@ public class ApperanceDialog extends JDialog {
     JFrame frame = new JFrame("Foo frame");
     final ApperanceDialog apperanceDialog1 = new ApperanceDialog(frame,
                                                            "Font appearance",
-                                                           true);
+                                                           true,
+                                                           new Component[]{frame});
     apperanceDialog1.pack();
 
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -188,6 +194,7 @@ public class ApperanceDialog extends JDialog {
   Font oldComponentsFont;
   Font oldTextComponentsFont;
 
+  Component[] targets;
 
   static String[] menuKeys = new String[]{"CheckBoxMenuItem.acceleratorFont",
                                           "CheckBoxMenuItem.font",
@@ -241,7 +248,13 @@ public class ApperanceDialog extends JDialog {
       setUIDefaults(componentsKeys, new FontUIResource(componentsFont));
       setUIDefaults(textComponentsKeys, new FontUIResource(textComponentsFont));
       SwingUtilities.updateComponentTreeUI(ApperanceDialog.this);
-      SwingUtilities.updateComponentTreeUI(ApperanceDialog.this.getOwner());
+      for(int i = 0; i< targets.length; i++){
+        if(targets[i] instanceof Window){
+          SwingUtilities.updateComponentTreeUI(targets[i]);
+        }else{
+          SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
+        }
+      }
     }
   }
 
@@ -266,7 +279,13 @@ public class ApperanceDialog extends JDialog {
       setUIDefaults(componentsKeys, new FontUIResource(oldComponentsFont));
       setUIDefaults(textComponentsKeys, new FontUIResource(oldTextComponentsFont));
       SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(ApperanceDialog.this));
-      SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(ApperanceDialog.this.getOwner()));
+      for(int i = 0; i< targets.length; i++){
+        if(targets[i] instanceof Window){
+          SwingUtilities.updateComponentTreeUI(targets[i]);
+        }else{
+          SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
+        }
+      }
       hide();
     }
   }

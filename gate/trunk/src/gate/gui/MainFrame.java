@@ -18,6 +18,7 @@ import java.awt.Component;
 import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.Dimension;
@@ -109,6 +110,11 @@ public class MainFrame extends JFrame
   NewAnnotDiffAction newAnnotDiffAction = null;
   NewBootStrapAction newBootStrapAction = null;
 
+  /**
+   * all the top level contianers of this application; needed for changes of
+   * look and feel
+   */
+  Component[] targets;
 
   static private MainFrame instance;
 /*
@@ -117,9 +123,11 @@ public class MainFrame extends JFrame
     return instance;
   }
 */
+
   static public JFileChooser getFileChooser(){
     return fileChooser;
   }
+
   protected void select(ResourceHandle handle){
     if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       //select
@@ -202,9 +210,15 @@ public class MainFrame extends JFrame
       mue.printStackTrace(Err.getPrintWriter());
     }
 
-    resourcesTree = new JTree(resourcesTreeModel);
+    resourcesTree = new JTree(resourcesTreeModel){
+      public void updateUI(){
+        super.updateUI();
+        setRowHeight(0);
+      }
+    };
+
     resourcesTree.setCellRenderer(new ResourceTreeCellRenderer());
-    resourcesTree.setRowHeight(0);
+//    resourcesTree.setRowHeight(0);
     //expand all nodes
     resourcesTree.expandRow(0);
     resourcesTree.expandRow(1);
@@ -290,112 +304,6 @@ while(listIter.hasNext()){
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
 
-    //MENUS
-    menuBar = new JMenuBar();
-
-    newLrMenu = new JMenu("New Language Resource");
-
-
-
-    JMenu fileMenu = new JMenu("File");
-    //fileMenu.add(new JGateMenuItem(newProjectAction));
-    fileMenu.add(new XJMenuItem(newLRAction, this));
-    fileMenu.add(new XJMenuItem(newPRAction, this));
-    fileMenu.add(new XJMenuItem(newDSAction, this));
-    fileMenu.add(new XJMenuItem(openDSAction, this));
-    fileMenu.add(new XJMenuItem(newApplicationAction, this));
-    menuBar.add(fileMenu);
-
-
-    JMenu optionsMenu = new JMenu("Options");
-    appearanceDialog = new ApperanceDialog(this, "Fonts", true);
-    optionsMenu.add(new AbstractAction("Fonts"){
-      public void actionPerformed(ActionEvent evt){
-        appearanceDialog.setLocationRelativeTo(MainFrame.this);
-        appearanceDialog.show();
-      }
-    });
-
-    JMenu lnfMenu = new JMenu("Look & Feel");
-    ButtonGroup lnfBg = new ButtonGroup();
-
-    UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
-    class SetLNFAction extends AbstractAction{
-      SetLNFAction(UIManager.LookAndFeelInfo info){
-        super(info.getName());
-        this.info = info;
-      }
-      public void actionPerformed(ActionEvent evt) {
-        try{
-          UIManager.setLookAndFeel(info.getClassName());
-          SwingUtilities.updateComponentTreeUI(MainFrame.this);
-        }catch(Exception e){
-          e.printStackTrace(Err.getPrintWriter());
-        }
-      }
-      UIManager.LookAndFeelInfo info;
-    };
-
-    for(int i = 0; i < lnfs.length; i++){
-      UIManager.LookAndFeelInfo lnf = lnfs[i];
-      JRadioButtonMenuItem item = new JRadioButtonMenuItem(new SetLNFAction(lnf));
-      if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
-        item.setSelected(true);
-      }
-      lnfBg.add(item);
-      lnfMenu.add(item);
-    }
-
-    SwingUtilities utt;
-    optionsMenu.add(lnfMenu);
-
-    try{
-      JMenu imMenu = null;
-      Locale locale = new Locale("en", "GB");
-      Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
-      JMenuItem item;
-      if(availableLocales != null && availableLocales.length > 1){
-        imMenu = new JMenu("Input methods");
-        ButtonGroup bg = new ButtonGroup();
-        item = new LocaleSelectorMenuItem(this);
-        imMenu.add(item);
-        item.setSelected(true);
-        imMenu.addSeparator();
-        bg.add(item);
-        for(int i = 0; i < availableLocales.length; i++){
-          locale = availableLocales[i];
-          item = new LocaleSelectorMenuItem(locale, this);
-          imMenu.add(item);
-          bg.add(item);
-        }
-      }
-      if(imMenu != null) optionsMenu.add(imMenu);
-    }catch(AWTException awte){}
-
-    menuBar.add(optionsMenu);
-
-
-    JMenu toolsMenu = new JMenu("Tools");
-    toolsMenu.add(newAnnotDiffAction);
-    toolsMenu.add(newBootStrapAction);
-    try{
-      toolsMenu.add(
-        new AbstractAction("Unicode editor",
-                           new ImageIcon(new URL("gate:/img/unicode.gif"))){
-        public void actionPerformed(ActionEvent evt){
-          new guk.Editor();
-        }
-      });
-    }catch(MalformedURLException mue){
-      mue.printStackTrace(Err.getPrintWriter());
-    }
-    menuBar.add(toolsMenu);
-
-    JMenu helpMenu = new JMenu("Help");
-    helpMenu.add(helpAboutAction);
-    menuBar.add(helpMenu);
-
-    this.setJMenuBar(menuBar);
 
     //TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
@@ -466,6 +374,120 @@ while(listIter.hasNext()){
     splashBox.add(box);
     splashBox.add(Box.createVerticalStrut(10));
     splash = new Splash(this, splashBox);
+
+
+    targets = new Component[]{this, newResourceDialog, splash};
+
+    //MENUS
+    menuBar = new JMenuBar();
+
+    newLrMenu = new JMenu("New Language Resource");
+
+
+
+    JMenu fileMenu = new JMenu("File");
+    //fileMenu.add(new JGateMenuItem(newProjectAction));
+    fileMenu.add(new XJMenuItem(newLRAction, this));
+    fileMenu.add(new XJMenuItem(newPRAction, this));
+    fileMenu.add(new XJMenuItem(newDSAction, this));
+    fileMenu.add(new XJMenuItem(openDSAction, this));
+    fileMenu.add(new XJMenuItem(newApplicationAction, this));
+    menuBar.add(fileMenu);
+
+    JMenu optionsMenu = new JMenu("Options");
+    appearanceDialog = new ApperanceDialog(this, "Fonts", true, targets);
+    optionsMenu.add(new AbstractAction("Fonts"){
+      public void actionPerformed(ActionEvent evt){
+        appearanceDialog.setLocationRelativeTo(MainFrame.this);
+        appearanceDialog.show(targets);
+      }
+    });
+
+    JMenu lnfMenu = new JMenu("Look & Feel");
+    ButtonGroup lnfBg = new ButtonGroup();
+
+    UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
+    class SetLNFAction extends AbstractAction{
+      SetLNFAction(UIManager.LookAndFeelInfo info){
+        super(info.getName());
+        this.info = info;
+      }
+      public void actionPerformed(ActionEvent evt) {
+        try{
+          UIManager.setLookAndFeel(info.getClassName());
+          for(int i = 0; i< targets.length; i++){
+            if(targets[i] instanceof Window){
+              SwingUtilities.updateComponentTreeUI(targets[i]);
+            }else{
+              SwingUtilities.updateComponentTreeUI(SwingUtilities.getRoot(targets[i]));
+            }
+          }
+        }catch(Exception e){
+          e.printStackTrace(Err.getPrintWriter());
+        }
+      }
+      UIManager.LookAndFeelInfo info;
+    };
+
+    for(int i = 0; i < lnfs.length; i++){
+      UIManager.LookAndFeelInfo lnf = lnfs[i];
+      JRadioButtonMenuItem item = new JRadioButtonMenuItem(new SetLNFAction(lnf));
+      if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
+        item.setSelected(true);
+      }
+      lnfBg.add(item);
+      lnfMenu.add(item);
+    }
+
+    optionsMenu.add(lnfMenu);
+
+    try{
+      JMenu imMenu = null;
+      Locale locale = new Locale("en", "GB");
+      Locale[] availableLocales = new GateIMDescriptor().getAvailableLocales();
+      JMenuItem item;
+      if(availableLocales != null && availableLocales.length > 1){
+        imMenu = new JMenu("Input methods");
+        ButtonGroup bg = new ButtonGroup();
+        item = new LocaleSelectorMenuItem(this);
+        imMenu.add(item);
+        item.setSelected(true);
+        imMenu.addSeparator();
+        bg.add(item);
+        for(int i = 0; i < availableLocales.length; i++){
+          locale = availableLocales[i];
+          item = new LocaleSelectorMenuItem(locale, this);
+          imMenu.add(item);
+          bg.add(item);
+        }
+      }
+      if(imMenu != null) optionsMenu.add(imMenu);
+    }catch(AWTException awte){}
+
+    menuBar.add(optionsMenu);
+
+
+    JMenu toolsMenu = new JMenu("Tools");
+    toolsMenu.add(newAnnotDiffAction);
+    toolsMenu.add(newBootStrapAction);
+    try{
+      toolsMenu.add(
+        new AbstractAction("Unicode editor",
+                           new ImageIcon(new URL("gate:/img/unicode.gif"))){
+        public void actionPerformed(ActionEvent evt){
+          new guk.Editor();
+        }
+      });
+    }catch(MalformedURLException mue){
+      mue.printStackTrace(Err.getPrintWriter());
+    }
+    menuBar.add(toolsMenu);
+
+    JMenu helpMenu = new JMenu("Help");
+    helpMenu.add(helpAboutAction);
+    menuBar.add(helpMenu);
+
+    this.setJMenuBar(menuBar);
   }
 
   protected void initListeners(){
@@ -758,8 +780,10 @@ while(listIter.hasNext()){
     } catch(Exception e) {
       throw new gate.util.GateRuntimeException(e.toString());
     }
-    fileChooser = new JFileChooser();
-    fileChooser.setMultiSelectionEnabled(false);
+    if(fileChooser == null){
+      fileChooser = new JFileChooser();
+      fileChooser.setMultiSelectionEnabled(false);
+    }
   }
 
 /*
