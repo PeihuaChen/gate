@@ -69,7 +69,7 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(257), new Long(274), "Organization", fm);
+      annotSetAS.add(new Long(257), new Long(274), "Lookup", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","person");
@@ -87,7 +87,7 @@ public class TestNamematch extends TestCase
       fm.put("token","org");
       fm.put("country","USA");
 
-      annotSetAS.add(new Long(307), new Long(326), "Organization", fm);
+      annotSetAS.add(new Long(307), new Long(326), "Lookup", fm);
 
       fm = Factory.newFeatureMap();
       fm.put("token","org");
@@ -130,11 +130,11 @@ public class TestNamematch extends TestCase
     }
     namematch.setDocument(doc);
     namematch.setAnnotationSetName("AnnotationSetAS");
-    namematch.setPersonType("Person");
+//    namematch.setPersonType("Person");
     // uses intern cdg list or extern cdg list
-    namematch.setIntCdgList(new Boolean(true));
+//    namematch.setIntCdgList(new Boolean(true));
     // uses inter lists or extern lists
-    namematch.setIntExtLists(new Boolean(false));
+    namematch.setExtLists(new Boolean(false));
     namematch.run();
     namematch.check();
 
