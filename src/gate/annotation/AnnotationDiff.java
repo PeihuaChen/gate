@@ -126,23 +126,27 @@ public class AnnotationDiff extends AbstractVisualResource{
   /** This list is created from responseAnnotationSet at init() time*/
   private java.util.List responseAnnotList = null;
 
+  /** This field indicates wheter or not the annot diff should run int the text
+   *  mode*/
+  private boolean textMode = false;
+
   /**  Field designated to represent the max nr of annot types and coolors for
     *  each type
     **/
-  public final int MAX_TYPES = 5;
+  public static final int MAX_TYPES = 5;
   /** A default type when all annotation are the same represented by White color*/
-  public final int DEFAULT_TYPE = 0;
+  public static final int DEFAULT_TYPE = 0;
   /** A correct type when all annotation are corect represented by Green color*/
-  public final int CORRECT_TYPE = 1;
+  public static final int CORRECT_TYPE = 1;
   /** A partially correct type when all annotation are corect represented
    *  by Blue color*/
-  public final int PARTIALLY_CORRECT_TYPE = 2;
+  public static final int PARTIALLY_CORRECT_TYPE = 2;
   /** A spurious type when annotations in response were not present in key.
    *  Represented by Red color*/
-  public final int SPURIOUS_TYPE = 3;
+  public static final int SPURIOUS_TYPE = 3;
   /** A missing type when annotations in key were not present in response
    *  Represented by Yellow color*/
-  public final int MISSING_TYPE = 4;
+  public static final int MISSING_TYPE = 4;
 
   /** Red used for SPURIOUS_TYPE*/
   private  final Color RED = new Color(255,173,181);
@@ -156,7 +160,7 @@ public class AnnotationDiff extends AbstractVisualResource{
   private  final Color YELLOW = new Color(255,231,173);
 
   /** Used in DiffSetElement to represent an empty raw in the table*/
-  public final int NULL_TYPE = -1;
+  private final int NULL_TYPE = -1;
   /** Used in some setForeground() methods*/
   private  final Color BLACK = new Color(0,0,0);
   /** The array holding the colours according to the annotation types*/
@@ -272,8 +276,52 @@ public class AnnotationDiff extends AbstractVisualResource{
     return responseAnnotationSetNameFalsePoz;
   } // getResponseAnnotationSetNamefalsePoz()
 
+  /**  Sets the annot diff to work in the text mode.This would not initiate the
+    *  GUI part of annot diff but it would calculate precision etc
+    */
+  public void setTextMode(boolean aTextMode){
+    textMode = aTextMode;
+  }// End setTextMode();
 
-    //Prameters utility methods
+  /** Gets the annot diff textmode.True means that the text mode is activated.*/
+  public boolean isTextMode(){
+    return textMode;
+  }// End setTextMode();
+
+  /** Returns a set with all annotations of a specific type*/
+  public Set getAnnotationsOfType(int annotType){
+    HashSet results = new HashSet();
+    if (diffSet == null) return results;
+    Iterator diffIter = diffSet.iterator();
+    while(diffIter.hasNext()){
+      DiffSetElement diffElem = (DiffSetElement)diffIter.next();
+      switch(annotType){
+        case CORRECT_TYPE:{
+          if (diffElem.getRightType() == CORRECT_TYPE)
+            results.add(diffElem.getRightAnnotation());
+        }break;
+        case PARTIALLY_CORRECT_TYPE:{
+          if (diffElem.getRightType() == PARTIALLY_CORRECT_TYPE)
+            results.add(diffElem.getRightAnnotation());
+        }break;
+        case SPURIOUS_TYPE:{
+          if (diffElem.getRightType() == SPURIOUS_TYPE)
+            results.add(diffElem.getRightAnnotation());
+        }break;
+        case MISSING_TYPE:{
+          if (diffElem.getLeftType() == MISSING_TYPE)
+            results.add(diffElem.getLeftAnnotation());
+        }break;
+        case DEFAULT_TYPE:{
+          if (diffElem.getLeftType() == DEFAULT_TYPE)
+            results.add(diffElem.getLeftAnnotation());
+        }break;
+      }// End switch
+    }// End while
+    return results;
+  }//getAnnotationsOfType
+
+  //Prameters utility methods
   /**
    * Gets the value of a parameter of this resource.
    * @param paramaterName the name of the parameter
@@ -434,16 +482,12 @@ public class AnnotationDiff extends AbstractVisualResource{
       keyAnnotSet = keyDocument.getAnnotations(keyAnnotationSetName).
                                     get(annotationSchema.getAnnotationName());
 
-    if (keyAnnotSet == null){
-      throw new ResourceInstantiationException("No <" +
-                              annotationSchema.getAnnotationName() +
-                              "> annotations found in the KeyDocument");
-
-    } //if (keyAnnotSet == null)
-
-    // The alghoritm will modify this annotation set. It is better to make a
-    // separate copy of them.
-    keyAnnotList = new LinkedList(keyAnnotSet);
+    if (keyAnnotSet == null)
+      keyAnnotList = new LinkedList();
+    else
+      // The alghoritm will modify this annotation set. It is better to make a
+      // separate copy of them.
+      keyAnnotList = new LinkedList(keyAnnotSet);
 
     if (responseAnnotationSetName == null)
       // Get the response AnnotationSet from the default set
@@ -453,15 +497,12 @@ public class AnnotationDiff extends AbstractVisualResource{
       responseAnnotSet = responseDocument.getAnnotations(responseAnnotationSetName).
                                     get(annotationSchema.getAnnotationName());
 
-    if (responseAnnotSet == null){
-      throw new ResourceInstantiationException("No <" +
-                              annotationSchema.getAnnotationName() +
-                              "> annotations found in the ResponseDocument");
-
-    } //if (responseAnnotSet == null)
-
-    // The same thing applies here.
-    responseAnnotList = new LinkedList(responseAnnotSet);
+    if (responseAnnotSet == null)
+        responseAnnotList = new LinkedList();
+    else
+      // The alghoritm will modify this annotation set. It is better to make a
+      // separate copy of them.
+      responseAnnotList = new LinkedList(responseAnnotSet);
 
     // Sort them ascending on Start offset (the comparator does that)
     AnnotationSetComparator asComparator = new AnnotationSetComparator();
@@ -474,6 +515,9 @@ public class AnnotationDiff extends AbstractVisualResource{
     // Calculate the diff Set. This set will be used later with graphic
     // visualisation.
     doDiff(keyAnnotList, responseAnnotList);
+
+    // If it runs under text mode just stop here.
+    if (textMode) return this;
 
     //Show it
     // Configuring the formatter object. It will be used later to format
@@ -492,9 +536,6 @@ public class AnnotationDiff extends AbstractVisualResource{
     diffTable.setDefaultRenderer(java.lang.String.class,cellRenderer);
     diffTable.setDefaultRenderer(java.lang.Long.class,cellRenderer);
     // Put the table into a JScroll
-//    scrollPane = new JScrollPane(diffTable);
-//    scrollPane.getViewport().
-//                    putClientProperty("EnableWindowBlit", new Boolean(true));
 
     // Arange all components on a this JPanel
     SwingUtilities.invokeLater(new Runnable(){
@@ -1193,14 +1234,17 @@ public class AnnotationDiff extends AbstractVisualResource{
     * table.
     */
   protected class DiffSetElement {
-
+    /** This field represent a key annotation*/
     private Annotation leftAnnotation = null;
+    /** This field represent a response annotation*/
     private Annotation rightAnnotation = null;
+    /** Default initialization of the key type*/
     private int leftType = DEFAULT_TYPE;
+    /** Default initialization of the response type*/
     private int rightType = DEFAULT_TYPE;
 
     /** Constructor for DiffSetlement*/
-    public DiffSetElement() { }
+    public DiffSetElement() {}
 
     /** Constructor for DiffSetlement*/
     public DiffSetElement( Annotation aLeftAnnotation,
