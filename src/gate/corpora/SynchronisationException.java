@@ -20,6 +20,13 @@ import gate.util.GateRuntimeException;
 
 public class SynchronisationException extends GateRuntimeException {
 
-  public SynchronisationException() {
-  }
+  /** Default construction */
+  public SynchronisationException() { super(); }
+
+  /** Construction from string */
+  public SynchronisationException(String s) { super(s); }
+
+  /** Construction from exception */
+  public SynchronisationException(Exception e) { super(e.toString()); }
+
 }
