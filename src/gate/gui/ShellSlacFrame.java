@@ -15,6 +15,7 @@
 package gate.gui;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.Font;
@@ -847,6 +848,40 @@ public class ShellSlacFrame extends MainFrame {
     }
   } // ANNIERunnable
   
+  class AboutPaneDialog extends JDialog {
+    public AboutPaneDialog(Frame frame, String title, boolean modal) {
+      super(frame, title, modal);
+    } // AboutPaneDialog
+    
+    public boolean setURL(URL url) {
+      boolean success = false;
+      // try to show in JEditorPane
+      try {
+        Container pane = getContentPane();
+        
+        JScrollPane scroll = new JScrollPane();
+        JEditorPane editor = new JEditorPane(url);
+        editor.setEditable(false);
+        scroll.getViewport().add(editor);
+        pane.add(scroll, BorderLayout.CENTER);
+        
+        JButton ok = new JButton("Close");
+        ok.addActionListener( new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            AboutPaneDialog.this.hide();
+          }
+        });
+        pane.add(ok, BorderLayout.SOUTH);
+        success = true;
+      } catch (Exception ex) {
+        if(DEBUG) {
+          ex.printStackTrace();
+        }
+      } // catch
+      return success;
+    } // setURL
+  } // class AboutPaneDialog
+  
   /** Dummy Help About dialog */
   class HelpAboutSlugAction extends AbstractAction {
     public HelpAboutSlugAction() {
@@ -859,21 +894,37 @@ public class ShellSlacFrame extends MainFrame {
       String aboutText = "Slug application.";
       String aboutURL = 
         System.getProperty(GateConstants.ABOUT_URL_JAVA_PROPERTY_NAME);
+        
+      boolean canShowInPane = false;
+      
       if(aboutURL != null) {
         try {
           URL url = new URL(aboutURL);
-          BufferedReader reader = new BufferedReader(
-            new InputStreamReader(url.openStream()));
-          String line = "";
-          StringBuffer content = new StringBuffer();
-          do {
-            content.append(line);
-            line = reader.readLine();
-          } while (line != null);
-          
-          if(content.length() != 0) {
-            aboutText = content.toString();
+
+          AboutPaneDialog dlg = 
+            new AboutPaneDialog(ShellSlacFrame.this, 
+                                "Slug application about", true);
+          canShowInPane = dlg.setURL(url);
+          if(canShowInPane) {
+            dlg.setSize(300, 200);
+            dlg.setLocationRelativeTo(ShellSlacFrame.this);
+            dlg.show();
           } // if
+          else {
+            BufferedReader reader = new BufferedReader(
+              new InputStreamReader(url.openStream()));
+            String line = "";
+            StringBuffer content = new StringBuffer();
+            do {
+              content.append(line);
+              line = reader.readLine();
+            } while (line != null);
+            
+            if(content.length() != 0) {
+              aboutText = content.toString();
+            } // if
+          } // if
+
         } catch (Exception ex) {
           // do nothing on exception
           // application just stay with a dummy text in about box
@@ -882,8 +933,9 @@ public class ShellSlacFrame extends MainFrame {
           }
         } // catch
       } // if
-    
-      JOptionPane.showMessageDialog(ShellSlacFrame.this, 
+
+          
+      if(!canShowInPane) JOptionPane.showMessageDialog(ShellSlacFrame.this, 
           aboutText, 
           "Slug application about",
           JOptionPane.INFORMATION_MESSAGE);
