@@ -129,8 +129,13 @@ public class ShellSlacFrame extends MainFrame {
     } // if
 
     fileMenu.add(new XJMenuItem(new CloseSelectedDocumentAction(), this));
+    fileMenu.add(new XJMenuItem(new CloseAllDocumentAction(), this));
 
     fileMenu.addSeparator();
+
+    action = new ExportDocumentAction();
+    fileMenu.add(new XJMenuItem(action, this));
+    
     
 /*
     action = new StoreAllDocumentAction();
@@ -416,7 +421,7 @@ public class ShellSlacFrame extends MainFrame {
     } // RunApplicationAction()
 
     public void actionPerformed(ActionEvent e) {
-      if (application != null) {
+      if (application != null && corpus != null && corpus.size() > 0) {
         application.setCorpus(corpus);
         SerialControllerEditor editor = new SerialControllerEditor();
         editor.setTarget(application);
@@ -482,6 +487,26 @@ public class ShellSlacFrame extends MainFrame {
       }// End if
     } // actionPerformed(ActionEvent e)
   } // class CloseSelectedDocumentAction extends AbstractAction
+
+  class CloseAllDocumentAction extends AbstractAction {
+    public CloseAllDocumentAction() {
+      super("Close All");
+      putValue(SHORT_DESCRIPTION, "Closes all documents");
+    } // CloseAllDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+      JComponent resource;
+      for(int i=mainTabbedPane.getTabCount()-1; i>0; --i) {
+    
+        resource = (JComponent) mainTabbedPane.getComponentAt(i);
+        if (resource != null){
+          Action act = resource.getActionMap().get("Close resource");
+          if (act != null)
+            act.actionPerformed(null);
+        }// End if
+      } // for
+    } // actionPerformed(ActionEvent e)
+  } // class CloseAllDocumentAction extends AbstractAction
 
   class StoreAllDocumentAsAction extends AbstractAction {
     public StoreAllDocumentAsAction() {
@@ -610,15 +635,22 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class TestStoreAction extends AbstractAction
 
-/* Save as XML current document
-          JComponent resource = (JComponent)
-                                        mainTabbedPane.getSelectedComponent();
-          if (resource != null){
-            Action act = resource.getActionMap().get("Save As XML");
-            if (act != null)
-              act.actionPerformed(null);
-          }// End if
-*/  
+  class ExportDocumentAction extends AbstractAction {
+    public ExportDocumentAction() {
+      super("Export");
+      putValue(SHORT_DESCRIPTION, "Save the selected document in XML format");
+    } // ExportDocumentAction()
+
+    public void actionPerformed(ActionEvent e) {
+      JComponent resource = (JComponent)
+                                  mainTabbedPane.getSelectedComponent();
+      if (resource != null){
+        Action act = resource.getActionMap().get("Save As XML");
+        if (act != null)
+          act.actionPerformed(null);
+      }// End if
+    } // actionPerformed(ActionEvent e)
+  } // class ExportDocumentAction extends AbstractAction
   
   class HelpAboutSlugAction extends AbstractAction {
     public HelpAboutSlugAction() {
