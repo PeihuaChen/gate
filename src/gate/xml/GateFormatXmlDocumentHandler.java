@@ -382,9 +382,49 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
   /** This method deals with a Text belonging to TextWithNodes element. */
   private void processTextOfTextWithNodesElement(String text){
+    text = recoverNewLineSequence(text);
     tmpDocContent.append(text);
   }//processTextOfTextWithNodesElement
 
+  /** Restore new line as in the original document if needed */
+  private String recoverNewLineSequence(String text) {
+    String result = text;
+
+    // check for new line
+    if(text.indexOf('\n') != -1) {
+      String newLineType = 
+        (String) doc.getFeatures().get(GateConstants.DOCUMENT_NEW_LINE_TYPE);
+
+      if("LF".equalsIgnoreCase(newLineType)) {
+        newLineType = null;
+      }
+      
+      // exit with the same text if the change isn't necessary
+      if(newLineType == null) return result;
+      
+      String newLine = "\n";
+      if("CRLF".equalsIgnoreCase(newLineType)) {
+        newLine = "\r\n";
+      }
+      if("CR".equalsIgnoreCase(newLineType)) {
+        newLine = "\r";
+      }
+      if("LFCR".equalsIgnoreCase(newLineType)) {
+        newLine = "\n\r";
+      }
+
+      StringBuffer buff = new StringBuffer(text);      
+      int index = text.lastIndexOf('\n');
+      while(index != -1) {
+        buff.replace(index, index+1, newLine);
+        index = text.lastIndexOf('\n', index-1);
+      } // while
+      result = buff.toString();
+    } // if
+    
+    return result;
+  } // recoverNewLineSequence(String text)
+  
   /** This method deals with a Text belonging to Name element. */
   private void processTextOfNameElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)
