@@ -75,4 +75,7 @@ public interface AccessControler {
   public void setSessionTimeout(Session s, int timeoutMins)
     throws PersistenceException,SecurityException;
 
+  /** --- */
+  public boolean isValidSession(Session s);
+
 }
