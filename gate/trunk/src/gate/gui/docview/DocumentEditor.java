@@ -103,41 +103,59 @@ public class DocumentEditor extends AbstractVisualResource
     topBar.setFloatable(false);
     add(topBar, BorderLayout.NORTH);
 
-    bottomBar = new JToolBar(JToolBar.HORIZONTAL);
-    bottomBar.setFloatable(false);
-    add(bottomBar, BorderLayout.SOUTH);
+//    bottomBar = new JToolBar(JToolBar.HORIZONTAL);
+//    bottomBar.setFloatable(false);
+//    add(bottomBar, BorderLayout.SOUTH);
 
-    leftBar = new JToolBar(JToolBar.VERTICAL);
-    leftBar.setFloatable(false);
-    add(leftBar, BorderLayout.WEST);
+//    leftBar = new JToolBar(JToolBar.VERTICAL);
+//    leftBar.setFloatable(false);
+//    add(leftBar, BorderLayout.WEST);
 
-    rightBar = new JToolBar(JToolBar.VERTICAL);
-    rightBar.setFloatable(false);
-    add(rightBar, BorderLayout.EAST);
+//    rightBar = new JToolBar(JToolBar.VERTICAL);
+//    rightBar.setFloatable(false);
+//    add(rightBar, BorderLayout.EAST);
 
     progressBar.setValue(40);
-    //parse all Creole resources and look for document views
-    Set vrSet = Gate.getCreoleRegister().getVrTypes();
-    Iterator vrIter = vrSet.iterator();
+
+    
     centralViews = new ArrayList();
     verticalViews = new ArrayList();
     horizontalViews = new ArrayList();
 
+    //parse all Creole resources and look for document views
+    Set vrSet = Gate.getCreoleRegister().getVrTypes();
+    List viewTypes = new ArrayList();
+    Iterator vrIter = vrSet.iterator();
     while(vrIter.hasNext()){
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                            get(vrIter.next());
       try{
         if(DocumentView.class.isAssignableFrom(rData.getResourceClass())){
-          //create the resource
-          DocumentView aView = (DocumentView)Factory.
-                               createResource(rData.getClassName());
-          aView.setTarget(document);
-          aView.setOwner(this);
-          //add the view
-          addView(aView, rData.getName());
+          viewTypes.add(rData);
         }
       }catch(ClassNotFoundException cnfe){
         cnfe.printStackTrace();
+      }
+    }
+    //sort view types by label
+    Collections.sort(viewTypes, new Comparator(){
+      public int compare(Object o1, Object o2){
+        ResourceData rd1 = (ResourceData)o1;
+        ResourceData rd2 = (ResourceData)o2;
+        return rd1.getName().compareTo(rd2.getName());
+      }
+    });
+    Iterator viewIter = viewTypes.iterator();
+    while(viewIter.hasNext()){
+      ResourceData rData = (ResourceData)viewIter.next();
+      try{
+        //create the resource
+        DocumentView aView = (DocumentView)Factory.
+                             createResource(rData.getClassName());
+        aView.setTarget(document);
+        aView.setOwner(this);
+        //add the view
+        addView(aView, rData.getName());
       }catch(ResourceInstantiationException rie){
             rie.printStackTrace();
       }
@@ -170,19 +188,22 @@ public class DocumentEditor extends AbstractVisualResource
    * @param view
    */
   protected void addView(DocumentView view, String name){
+    topBar.add(Box.createHorizontalStrut(5));
     switch(view.getType()){
       case DocumentView.CENTRAL :
         centralViews.add(view);
-      	leftBar.add(new ViewButton(view, name));
+//      	leftBar.add(new ViewButton(view, name));
+        topBar.add(new ViewButton(view, name));
         break;
       case DocumentView.VERTICAL :
         verticalViews.add(view);
-      	rightBar.add(new ViewButton(view, name));
+//      	rightBar.add(new ViewButton(view, name));
+        topBar.add(new ViewButton(view, name));
         break;
       case DocumentView.HORIZONTAL :
         horizontalViews.add(view);
       	topBar.add(new ViewButton(view, name));
-      	bottomBar.add(new ViewButton(view, name));
+//      	bottomBar.add(new ViewButton(view, name));
       	break;
       default :
         throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
@@ -283,7 +304,8 @@ public class DocumentEditor extends AbstractVisualResource
   protected void setCentralView(DocumentView view){
     topSplit.setBottomComponent(view == null ? null : view.getGUI());
     topSplit.resetToPreferredSizes();
-    updateBar(leftBar);
+//    updateBar(leftBar);
+    updateBar(topBar);
     validate();
   }
   
@@ -336,7 +358,8 @@ public class DocumentEditor extends AbstractVisualResource
   protected void setBottomView(DocumentView view){
     bottomSplit.setBottomComponent(view == null ? null : view.getGUI());
     bottomSplit.resetToPreferredSizes();
-    updateBar(bottomBar);
+//    updateBar(bottomBar);
+    updateBar(topBar);
     validate();
   }
   
@@ -382,7 +405,8 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void setRightView(DocumentView view){
     horizontalSplit.setRightComponent(view == null ? null : view.getGUI());
-    updateBar(rightBar);
+//    updateBar(rightBar);
+    updateBar(topBar);
     validate();
   }  
   
@@ -421,7 +445,8 @@ public class DocumentEditor extends AbstractVisualResource
     Component btns[] = toolbar.getComponents();
     if(btns != null){
       for(int i = 0; i < btns.length; i++){
-        ((ViewButton)btns[i]).updateSelected();
+        if(btns[i] instanceof ViewButton) 
+          ((ViewButton)btns[i]).updateSelected();
       }
     }
   }
@@ -430,16 +455,18 @@ public class DocumentEditor extends AbstractVisualResource
     public ViewButton(DocumentView aView, String name){
       super();
       setSelected(false);
-      setBorder(null);
+//      setBorder(null);
       this.view = aView;
-      if(aView.getType() == DocumentView.HORIZONTAL){
-        setText(name);
-      }else if(aView.getType() == DocumentView.CENTRAL){
-        setIcon(new VerticalTextIcon(this, name, VerticalTextIcon.ROTATE_LEFT));
-      }else if(aView.getType() == DocumentView.VERTICAL){
-        setIcon(new VerticalTextIcon(this, name, 
-                										 VerticalTextIcon.ROTATE_RIGHT));
-      }
+      setText(name);
+      
+//      if(aView.getType() == DocumentView.HORIZONTAL){
+//        setText(name);
+//      }else if(aView.getType() == DocumentView.CENTRAL){
+//        setIcon(new VerticalTextIcon(this, name, VerticalTextIcon.ROTATE_LEFT));
+//      }else if(aView.getType() == DocumentView.VERTICAL){
+//        setIcon(new VerticalTextIcon(this, name, 
+//                										 VerticalTextIcon.ROTATE_RIGHT));
+//      }
       
       addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
@@ -507,9 +534,9 @@ public class DocumentEditor extends AbstractVisualResource
   protected JSplitPane bottomSplit;
 
   protected JToolBar topBar;
-  protected JToolBar rightBar;
-  protected JToolBar leftBar;
-  protected JToolBar bottomBar;
+//  protected JToolBar rightBar;
+//  protected JToolBar leftBar;
+//  protected JToolBar bottomBar;
 
   protected Document document;
 
