@@ -26,7 +26,8 @@ import gate.persist.*;
 import gate.util.MethodNotImplementedException;
 
 
-public class GroupImpl implements Group{
+public class GroupImpl
+  implements Group, ObjectModificationListener {
 
   /** --- */
   private Long    id;
@@ -41,14 +42,18 @@ public class GroupImpl implements Group{
   private Connection conn;
 
   /** --- */
-  private AccessController ac;
+  private AccessControllerImpl ac;
 
   /** --- */
-  private Vector omListeners;
+  private Vector omModificationListeners;
+  /** --- */
+  private Vector omCreationListeners;
+  /** --- */
+  private Vector omDeletionListeners;
 
 
 
-  public GroupImpl(Long id, String name, List users,AccessController ac,Connection conn) {
+  public GroupImpl(Long id, String name, List users,AccessControllerImpl ac,Connection conn) {
 
     this.id = id;
     this.name = name;
@@ -56,7 +61,18 @@ public class GroupImpl implements Group{
     this.ac = ac;
     this.conn = conn;
 
-    this.omListeners = new Vector();
+    this.omModificationListeners = new Vector();
+    this.omCreationListeners = new Vector();
+    this.omDeletionListeners = new Vector();
+
+    //register self as listener for the security factory events
+    //of type OBJECT_DELETED (users)
+    //don't forget that only AC can delete users, so he's the only
+    //source of such events
+    this.ac.registerObjectModificationListener(
+                                this,
+                                ObjectModificationEvent.OBJECT_DELETED);
+
   }
 
   /** --- */
@@ -116,9 +132,7 @@ public class GroupImpl implements Group{
 
 
     //4. fire ObjectModificationEvent for all who care
-    for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
-    }
+    this.fireObjectModifiedEvent(e);
 
   }
 
@@ -169,17 +183,11 @@ public class GroupImpl implements Group{
     //5. update usr collection
     this.users.add(usr);
 
-    //6. register the user as listener for the group, so that
-    // he can be modified in step 7
-    registerObjectModificationListener((ObjectModificationListener)usr); //yes, it sux
+    //6. notify user about the change
+    ((ObjectModificationListener)usr).objectModified(e);
 
-    //7. fire ObjectModificationEvent for all who care
-    for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
-    }
-
-
-
+    //7. fire ObjectModificationEvent for all other who care
+    fireObjectModifiedEvent(e);
   }
 
 
@@ -231,16 +239,42 @@ public class GroupImpl implements Group{
     //5. update usr collection
     this.users.remove(usr);
 
-    //6. fire ObjectModificationEvent for all who care
-    for (int i=0; i< this.omListeners.size(); i++) {
-      ((ObjectModificationListener)this.omListeners.elementAt(i)).objectModified(e);
+    //6. notify user about the change
+    ((ObjectModificationListener)usr).objectModified(e);
+
+    //7. fire ObjectModificationEvent for all other who care
+    fireObjectModifiedEvent(e);
+  }
+
+
+  //ObjectModificationListener interface
+  public void objectCreated(ObjectModificationEvent e) {
+
+    //ignore, we don't care about creations
+    return;
+  }
+
+  public void objectModified(ObjectModificationEvent e) {
+
+    //ignore, we don't care about modifications
+    return;
+  }
+
+  public void objectDeleted(ObjectModificationEvent e) {
+
+    if (e.getSource() instanceof User) {
+
+      User usr = (User)e.getSource();
+      //check if the user being deleted is one we contain
+      if (true == this.users.contains(usr)) {
+        this.users.remove(usr);
+      }
+
     }
+  }
 
-    //7. UNregister the user as listener for the group
-    //he's already notified in [step6] and no longer cares
-    //about the group
-    unregisterObjectModificationListener((ObjectModificationListener)usr); //yes, it sux
-
+  public void processGateEvent(GateEvent e){
+    throw new MethodNotImplementedException();
   }
 
 
@@ -263,14 +297,71 @@ public class GroupImpl implements Group{
   }
 
 
-  public void registerObjectModificationListener(ObjectModificationListener l) {
+  public void registerObjectModificationListener(ObjectModificationListener l,
+                                                 int eventType) {
 
-    this.omListeners.add(l);
+    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
+        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+        eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
+
+        throw new IllegalArgumentException();
+    }
+
+    switch(eventType) {
+      case ObjectModificationEvent.OBJECT_CREATED :
+        //we never generate such events
+        Assert.fail();
+//        this.omCreationListeners.add(l);
+        break;
+      case ObjectModificationEvent.OBJECT_DELETED :
+        //we never generate such events
+        Assert.fail();
+//        this.omDeletionListeners.add(l);
+        break;
+      case ObjectModificationEvent.OBJECT_MODIFIED :
+        this.omModificationListeners.add(l);
+        break;
+      default:
+        Assert.fail();
+    }
+
   }
 
-  public void unregisterObjectModificationListener(ObjectModificationListener l) {
+  private void fireObjectModifiedEvent(ObjectModificationEvent e) {
 
-    this.omListeners.remove(l);
+    //sanity check
+    if (e.getType() != ObjectModificationEvent.OBJECT_MODIFIED) {
+      throw new IllegalArgumentException();
+    }
+
+    for (int i=0; i< this.omModificationListeners.size(); i++) {
+      ((ObjectModificationListener)omModificationListeners.elementAt(i)).objectModified(e);
+    }
+  }
+
+  public void unregisterObjectModificationListener(ObjectModificationListener l,
+                                                   int eventType) {
+
+    if (eventType != ObjectModificationEvent.OBJECT_CREATED &&
+        eventType != ObjectModificationEvent.OBJECT_DELETED &&
+        eventType != ObjectModificationEvent.OBJECT_MODIFIED) {
+
+        throw new IllegalArgumentException();
+    }
+
+    switch(eventType) {
+      case ObjectModificationEvent.OBJECT_CREATED :
+        this.omCreationListeners.remove(l);
+        break;
+      case ObjectModificationEvent.OBJECT_DELETED :
+        this.omDeletionListeners.remove(l);
+        break;
+      case ObjectModificationEvent.OBJECT_MODIFIED :
+        this.omModificationListeners.remove(l);
+        break;
+      default:
+        Assert.fail();
+    }
   }
 
 }
