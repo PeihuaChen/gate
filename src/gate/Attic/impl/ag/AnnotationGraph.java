@@ -4,12 +4,16 @@ import gate.Node;
 import java.util.*;
 import gate.Annotation;
 import gate.FeatureSet;
+import calsavara.strucs.AVLTree;
+
 
 public class AnnotationGraph
 extends TreeSet implements gate.AnnotationGraph
 {
 
-  public AnnotationGraph() {
+  public AnnotationGraph(gate.Document document) {
+    this.document=document;
+    nodeSet=new AVLTree();
   }
   /** find a node by ID */
   public Node getNode(String id){
@@ -76,4 +80,26 @@ extends TreeSet implements gate.AnnotationGraph
     return null;
   }//getAnnotations(String type,String equivalenceClass,Long offset)
 
+  /**Creates a new node with the offset offset
+  @param offset the offset in document where the node will point*/
+  public void putNodeAt(int id,double offset)throws gate.util.InvalidOffsetException{
+    if (offset > document.getLength())
+      throw(new gate.util.InvalidOffsetException("Offset out of bounds: "
+                                                  +offset+">"
+                                                  +document.getLength()));
+    if (document instanceof gate.TextualDocument){
+      if(! (((offset*10)%10)>0) )
+        throw(new gate.util.InvalidOffsetException("Offset is not an integer value: "
+                                                    +offset
+                                                    +". Textual documents only accept integer offsets!"));
+    };
+    gate.Node newNode=new gate.impl.ag.Node(id, new Double(offset));
+    if(nodeSet.containsKey(newNode.getOffset()))
+      throw(new gate.util.InvalidOffsetException("There is already a node at the given offset:"
+                                                    +offset));
+    nodeSet.put(newNode.getOffset(),newNode);
+  };
+
+  private AVLTree nodeSet;
+  private gate.Document document;
 }//gate.impl.ag.AnnotationGraph

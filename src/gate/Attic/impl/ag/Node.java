@@ -10,10 +10,9 @@ public class Node implements gate.Node{
   /** Contructor
   @param id the Id of the new node
   @param offset the (temporal) offset of the Node; Should be -1 for not anchored nodes*/
-  public Node(int id, long offset){
+  public Node(int id, Double offset){
     this.id=new Integer(id);
-    if(offset==-1)this.offset=null;
-    else this.offset=new Long(offset);
+    this.offset=offset;
   }//Node(int i)
 
   /**returns the Id of the Node */
@@ -22,7 +21,7 @@ public class Node implements gate.Node{
   }
 
   /** Offset (will be null when the node is not anchored)*/
-  public Long getOffset(){
+  public Double getOffset(){
     return offset;
   }
 
@@ -41,5 +40,5 @@ public class Node implements gate.Node{
     return sPrecedes(n)||tPrecedes(n);
   }
   private Integer id;
-  private Long offset;
+  private Double offset;
 }

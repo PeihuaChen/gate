@@ -24,4 +24,8 @@ public interface Document
   /** The features of this document */
   public FeatureSet getFeatureSet();
 
+  /** The length of the underlying document, e.g. the number of bytes for textual documents*/
+  public double getLength();
+
+
 } // interface Document

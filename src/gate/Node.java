@@ -18,7 +18,7 @@ public interface Node
   public Integer getId();
 
   /** Offset (will be null when the node is not anchored) */
-  public Long getOffset();
+  public Double getOffset();
 
   /** Does this node structurally precede n? */
   public boolean sPrecedes(Node n);
