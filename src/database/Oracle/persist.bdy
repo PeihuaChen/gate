@@ -16,7 +16,8 @@ create or replace package body persist is
  *
  */
  
-   
+  ORACLE_TRUE  constant number := 1;
+  ORACLE_FALSE constant number := 0;
  
  
   /*******************************************************************************************/
@@ -702,7 +703,80 @@ create or replace package body persist is
            raise error.x_invalid_annotation;
   end;
 
+  /*******************************************************************************************/
+  procedure lock_lr(p_lr_id     IN  number,
+                    p_usr_id    IN number,
+                    p_grp_id    IN number,
+                    p_success   OUT number)
+  is
+    l_can_write_lr boolean;
+    l_locking_user_id number;
+  begin
+
+    --1. check if the user has write access to the LR
+    security.has_access_to_lr(p_lr_id,p_usr_id,p_grp_id,security.WRITE_ACCESS,l_can_write_lr);
+
+    if (false = l_can_write_lr) then
+       raise error.x_insufficient_privileges;
+    end if;
+    
+    --2. get the locking user if any
+    select lr_locking_user_id
+    into   l_locking_user_id
+    from   t_lang_resource    
+    where  lr_id = p_lr_id;
+    
+    if (l_locking_user_id is null) then
+       --2a resource unlocked - lock it
+       update t_lang_resource
+       set    lr_locking_user_id = p_usr_id
+       where  lr_id = p_lr_id;
+       
+       p_success := ORACLE_TRUE;       
+    else
+       -- 2b resource already locked
+       p_success := ORACLE_FALSE;
+    end if;
+    
+    exception
+    
+       when NO_DATA_FOUND then
+          raise error.x_invalid_lr;
+    
+  end;
+
+
+  /*******************************************************************************************/
+  procedure unlock_lr(p_lr_id     IN  number,
+                      p_usr_id    IN number)
+  is
+    l_locking_user_id number;
+  begin
+   
+    --1. get the locking user if any
+    select lr_locking_user_id
+    into   l_locking_user_id
+    from   t_lang_resource    
+    where  lr_id = p_lr_id;
+    
+    -- is the reource locked by us?
+    if (l_locking_user_id = p_usr_id or 
+        l_locking_user_id = security.ADMIN_USER_ID) then
+        
+       update t_lang_resource
+       set    lr_locking_user_id = null
+       where  lr_id = p_lr_id;          
+       
+    end if;
+    
   
+    exception
+    
+       when NO_DATA_FOUND then
+          raise error.x_invalid_lr;
+     
+  end;  
+    
 /*begin
   -- Initialization
   <Statement>; */
