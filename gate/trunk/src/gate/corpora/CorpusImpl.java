@@ -29,7 +29,8 @@ import gate.creole.*;
 /** Corpora are sets of Document. They are ordered by lexicographic collation
   * on Url.
   */
-public class CorpusImpl extends AbstractLanguageResource implements Corpus, CreoleListener {
+public class CorpusImpl extends AbstractLanguageResource
+                        implements Corpus, CreoleListener {
 
   /** Debug flag */
   private static final boolean DEBUG = false;

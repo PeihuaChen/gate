@@ -140,12 +140,12 @@ public class NameBearerHandle implements Handle,
     closeItem.setAccelerator(KeyStroke.getKeyStroke(
                                 KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
     popup.add(closeItem);
+    popup.addSeparator();
+    popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
+
     if(target instanceof ProcessingResource){
       popup.addSeparator();
       popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-
-//      popup.addSeparator();
-//      popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
     }
 
     //Language Resources
@@ -402,34 +402,41 @@ public class NameBearerHandle implements Handle,
     }//public void actionPerformed(ActionEvent e)
   }//class SaveAction
 
-//  class DumpToFileAction extends AbstractAction {
-//    public DumpToFileAction(){
-//      super("Save to file");
-//      putValue(SHORT_DESCRIPTION, "Save resource into a");
-//    }
-//
-//    public void actionPerformed(ActionEvent ae){
-//      JFileChooser fileChooser = MainFrame.getFileChooser();
-//
-//      fileChooser.setDialogTitle("Select a file for this resource");
-//      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
-//      if (fileChooser.showSaveDialog(largeView) ==
-//                                            fileChooser.APPROVE_OPTION){
-//        File file = fileChooser.getSelectedFile();
-//        try{
-//          PersistentResourceData.saveResourceToFile((Resource)target, file);
-//        }catch(Exception e){
-//          JOptionPane.showMessageDialog(getLargeView(),
-//                          "Error!\n"+
-//                           e.toString(),
-//                           "Gate", JOptionPane.ERROR_MESSAGE);
-//          e.printStackTrace(Err.getPrintWriter());
-//        }
-//      }
-//    }
-//
-//  }
-//
+  class DumpToFileAction extends AbstractAction {
+    public DumpToFileAction(){
+      super("Store to file");
+      putValue(SHORT_DESCRIPTION, "Store resource data to a file");
+    }
+
+    public void actionPerformed(ActionEvent ae){
+      JFileChooser fileChooser = MainFrame.getFileChooser();
+
+      fileChooser.setDialogTitle("Select a file for this resource");
+      fileChooser.setFileSelectionMode(fileChooser.FILES_AND_DIRECTORIES);
+      if (fileChooser.showSaveDialog(largeView) ==
+                                            fileChooser.APPROVE_OPTION){
+        final File file = fileChooser.getSelectedFile();
+          Runnable runnable = new Runnable(){
+            public void run(){
+              try{
+                gate.util.persistence.PersistenceManager.
+                                      saveObjectToFile((Resource)target, file);
+              }catch(Exception e){
+                JOptionPane.showMessageDialog(getLargeView(),
+                                "Error!\n"+
+                                 e.toString(),
+                                 "Gate", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace(Err.getPrintWriter());
+              }
+            }
+          };
+          Thread thread = new Thread(runnable);
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+      }
+    }
+
+  }
 
   class SaveToAction extends AbstractAction {
     public SaveToAction(){

@@ -233,7 +233,6 @@ public class PersistenceManager {
    * {@link gate.LanguageResource}.
    */
   protected static Class getMostSpecificPersistentType(Class type){
-Out.pr(type.getName() + " -> ");
     //this list will contain all the types we need to expand to superclass +
     //implemented interfaces. We start with the provided type and work our way
     //up the ISA hierarchy
@@ -255,7 +254,6 @@ Out.pr(type.getName() + " -> ");
       while(typesIter.hasNext()){
         Class result = (Class)persistentReplacementTypes.get(typesIter.next());
         if(result != null){
-Out.prln(result.getName());
           return result;
         }
       }
@@ -293,7 +291,6 @@ Out.prln(result.getName());
       expansionSet.addAll(gateInterfaces);
       expansionSet.addAll(javaInterfaces);
     }
-Out.prln("null");
     //we got out the while loop without finding anything; return null;
     return null;
 
