@@ -15,6 +15,7 @@
 package gate.creole.ml.weka;
 
 import java.util.*;
+import java.io.Serializable;
 
 import weka.core.*;
 import weka.filters.*;
@@ -184,6 +185,35 @@ public class StringToNominalFilter extends Filter implements OptionHandler{
         }
 System.out.println("Values count" + values.size());
       }else if(aData.method.equalsIgnoreCase(TFIDF)){
+        int classCount = getInputFormat().classAttribute().numValues();
+        List wordTFIDFValues = new ArrayList(wordData.size());
+        Iterator entryIter = wordData.entrySet().iterator();
+        while(entryIter.hasNext()){
+          Map.Entry entry = (Map.Entry)entryIter.next();
+          String word = (String)entry.getKey();
+          Map w_aMap = (Map)((Map)entry.getValue()).get(new Integer(aData.index));
+          if(w_aMap == null || w_aMap.isEmpty()) continue;
+          int count = addLeaves(w_aMap);
+          int classFreq = w_aMap.size();
+          double tfidf = count * Math.log(classCount/classFreq);
+          wordTFIDFValues.add(new WordCount(word, count, tfidf));
+        }
+        int start = 0;
+        if(wordTFIDFValues.size() > aData.maxCount){
+          Collections.sort(wordTFIDFValues, new Comparator(){
+            public int compare(Object o1, Object o2){
+              double value = ((WordCount)o1).tfidf - ((WordCount)o2).tfidf;
+              if(value > Utils.SMALL) return 1;
+              else if(value < -Utils.SMALL) return -1;
+              else return 0;
+            }
+          });
+          start = wordTFIDFValues.size() - aData.maxCount;
+        }
+        for(int i = wordTFIDFValues.size() -1; i >= start; i--){
+          values.addElement(((WordCount)wordTFIDFValues.get(i)).word);
+        }
+
       }
       Attribute oldAttr = (Attribute)newAtts.elementAt(aData.index);
       Attribute newAttribute = new Attribute(oldAttr.name(), values);
@@ -200,10 +230,12 @@ System.out.println("Atribute \"" + newAttribute.name() + "\":" + values.size());
   public static void main(String[] args){
     try{
       StringToNominalFilter filter = new StringToNominalFilter();
-      filter.setOptions(new String[]{"-A", "13,100,FREQ"});
+      filter.setOptions(new String[]{"-A", "10,200,TFIDF",
+                                     "-A", "11,200,TFIDF",
+                                     "-A", "12,200,TFIDF"});
       Instances input = new Instances(
-        new java.io.FileReader("c:/tmp/ML/dataset.arff"));
-      input.setClassIndex(17);
+        new java.io.FileReader("D:\\tmp\\ML-Weka\\Strings\\MUC7dataset.arff"));
+      input.setClassIndex(18);
       filter.setInputFormat(input);
       for(int i = 0; i < input.numInstances(); i++){
         filter.input(input.instance(i));
@@ -215,7 +247,7 @@ System.out.println("Atribute \"" + newAttribute.name() + "\":" + values.size());
         output.add(instance);
         instance = filter.output();
       }
-      java.io.FileWriter fw = new java.io.FileWriter("c:/tmp/ML/dataset.filtered.arff");
+      java.io.FileWriter fw = new java.io.FileWriter("D:\\tmp\\ML-Weka\\Strings\\MUC7dataset.filtered.arff");
       fw.write(output.toString());
       fw.flush();
       fw.close();
@@ -324,7 +356,7 @@ System.out.print(": " + maxCnt);
   /**
    * Stores data about one attribute to be converted.
    */
-  protected static class AttributeData{
+  protected static class AttributeData implements Serializable{
     public AttributeData(int index, int count, String method){
       this.index = index;
       this.maxCount = count;
@@ -357,13 +389,22 @@ System.out.print(": " + maxCnt);
     public WordCount(String word, int count){
       this.word = word;
       this.count = count;
+      tfidf = -1;
+    }
+
+    public WordCount(String word, int count, double tfidf){
+      this.word = word;
+      this.count = count;
+      this.tfidf = tfidf;
+    }
+
+    public int compareTo(Object other){
+      return count - ((WordCount)other).count;
     }
 
     String word;
     int count;
-    public int compareTo(Object other){
-      return count - ((WordCount)other).count;
-    }
+    double tfidf;
   }
 
   /**
