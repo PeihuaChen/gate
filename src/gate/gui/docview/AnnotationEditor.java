@@ -293,26 +293,36 @@ public class AnnotationEditor{
       Point topLeft = textPane.getLocationOnScreen();
       int x = topLeft.x + startRect.x;
       int y = topLeft.y + endRect.y + endRect.height;
-      //ensure window doesn't get off the screen
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      bottomWindow.pack();
+
+      //make sure the window doesn't start lower 
+      //than the end of the visible rectangle
+      Rectangle visRect = textPane.getVisibleRect();
+      int maxY = topLeft.y + visRect.y + visRect.height;      
       
-      boolean widthReduced = false;
-      if(x + bottomWindow.getSize().width > screenSize.width){
-        int newWidth = screenSize.width - x;
-        bottomWindow.setSize(newWidth, 
-                bottomWindow.getSize().height + 
-                scroller.getHorizontalScrollBar().getPreferredSize().height);
-        widthReduced = true;
+      //make sure window doesn't get off-screen
+      bottomWindow.pack();
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      boolean revalidate = false;
+      if(bottomWindow.getSize().width > screenSize.width){
+        bottomWindow.setSize(screenSize.width, bottomWindow.getSize().height);
+        revalidate = true;
       }
-      if(y + bottomWindow.getSize().height > screenSize.height){
-        int newHeight = screenSize.height - y;
-        bottomWindow.setSize(bottomWindow.getSize().width + 
-                (widthReduced ? 0 : 
-                 scroller.getVerticalScrollBar().getPreferredSize().width), 
-                newHeight);
+      if(bottomWindow.getSize().height > screenSize.height){
+        bottomWindow.setSize(bottomWindow.getSize().width, screenSize.height);
+        revalidate = true;
       }
-      bottomWindow.validate();
+      
+      if(revalidate) bottomWindow.validate();
+      //calculate max X
+      int maxX = screenSize.width - bottomWindow.getSize().width;
+      //calculate max Y
+      if(maxY + bottomWindow.getSize().height > screenSize.height){
+        maxY = screenSize.height - bottomWindow.getSize().height;
+      }
+      
+      //correct position
+      if(y > maxY) y = maxY;
+      if(x > maxX) x = maxX;
       bottomWindow.setLocation(x, y);
       
     }catch(BadLocationException ble){
