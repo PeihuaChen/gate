@@ -36,9 +36,6 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
     * and <code>false</code> if not.
     */
   public boolean subsumes(FeatureMap aFeatureMap){
-// Disable feature comparison in AnnotDiff (temporary)
-/*
-
     // null is included in everything
     if (aFeatureMap == null) return true;
 
@@ -63,7 +60,6 @@ public class SimpleFeatureMapImpl extends HashMap implements FeatureMap
       if (keyValueFromThis != null && keyValueFromAFeatureMap != null)
         if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
     }// End while
-*/
     return true;
   }//includedIn
 
