@@ -24,6 +24,7 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 import gate.event.*;
+import gate.security.SecurityException;
 
 /**
  * A data store based on Java serialisation.
@@ -546,5 +547,25 @@ extends AbstractFeatureBearer implements DataStore {
   public String getComment(){
     return "GATE serial datastore";
   }
+
+  /**
+   * Checks if the user (identified by the sessionID)
+   *  has read access to the LR
+   */
+  public boolean canReadLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException{
+
+    throw new MethodNotImplementedException();
+  }
+  /**
+   * Checks if the user (identified by the sessionID)
+   * has write access to the LR
+   */
+  public boolean canWriteLR(Long lrID, Long SessionID)
+    throws PersistenceException, SecurityException{
+
+    throw new MethodNotImplementedException();
+  }
+
 
 } // class SerialDataStore
