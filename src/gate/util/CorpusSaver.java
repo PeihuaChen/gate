@@ -126,7 +126,6 @@ public class CorpusSaver {
 //      if (rulesURL != null && !rulesURL.equals(""))
 //        params.put("rulesURL", rulesURL);
       params.put(POSTagger.TAG_INPUT_AS_PARAMETER_NAME, annotSetName);
-      params.put(POSTagger.TAG_OUTPUT_AS_PARAMETER_NAME, annotSetName);
       tagger = (POSTagger) Factory.createResource(
                       "gate.creole.POSTagger", params);
 
