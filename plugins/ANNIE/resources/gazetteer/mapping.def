@@ -1,0 +1,6 @@
+person_male.lst:gate:/creole/ontology/demo.daml:male_person_first_name
+person_male_cap.lst:gate:/creole/ontology/demo.daml:male_person_first_name_upper_case
+person_male_lower.lst:gate:/creole/ontology/demo.daml:male_person_first_name_lower_case
+person_female.lst:gate:/creole/ontology/demo.daml:female_person_first_name
+person_female_cap.lst:gate:/creole/ontology/demo.daml:female_person_first_name_upper_case
+person_female_lower.lst:gate:/creole/ontology/demo.daml:female_person_first_name_lower_case
