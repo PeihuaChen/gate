@@ -30,7 +30,8 @@ import gate.annotation.*;
 import gate.creole.*;
 import gate.event.*;
 
-public class DatabaseDocumentImpl extends DocumentImpl {
+public class DatabaseDocumentImpl extends DocumentImpl
+                                  implements DatastoreListener{
 
   private static final boolean DEBUG = false;
 
@@ -124,6 +125,10 @@ public class DatabaseDocumentImpl extends DocumentImpl {
     if (eventHandler == null)
       eventHandler = new EventsHandler();
     this.features.addGateListener(eventHandler);
+
+    //4. add self as listener for the data store, so that we'll know when the DS is
+    //synced and we'll clear the isXXXChanged flags
+    this.dataStore.addDatastoreListener(this);
   }
 
   /** The content of the document: a String for text; MPEG for video; etc. */
@@ -896,4 +901,27 @@ public class DatabaseDocumentImpl extends DocumentImpl {
   }///inner class EventsHandler
 
 
+  /**
+   * Called by a datastore when a new resource has been adopted
+   */
+  public void resourceAdopted(DatastoreEvent evt){
+  }
+
+  /**
+   * Called by a datastore when a resource has been deleted
+   */
+  public void resourceDeleted(DatastoreEvent evt){
+  }//resourceDeleted
+
+  /**
+   * Called by a datastore when a resource has been wrote into the datastore
+   */
+  public void resourceWritten(DatastoreEvent evt){
+
+    //clear all flags, the content is synced with the DB
+    this.contentChanged =
+      this.documentChanged =
+        this.featuresChanged =
+          this.nameChanged = false;
+  }
 }
