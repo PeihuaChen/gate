@@ -240,12 +240,12 @@ public class TestCreole extends TestCase
     }
 
     assert("param0 was null", param != null);
-    assert(param.typeName.equals("param0"));
-    assert(! param.optional);
-    assert(param.runtime);
+    assert(param.typeName.equals("java.lang.String"));
+    assert(param.optional);
+    assert(! param.runtime);
     assert(param.comment == null);
     assert(param.defaultValue == null);
-    assert(param.name.equals("HOOPY DOOPY"));
+    assert(param.name.equals("thing"));
 
     reg.clear();
   } // testMetadata()

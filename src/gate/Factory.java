@@ -238,7 +238,9 @@ public abstract class Factory
       setResourceParameters(res, parameters);
     } catch(Exception e) {
       if(DEBUG) Out.prln("Failed to set the parameters for " + res.toString());
-      throw new ResourceInstantiationException("Parameterisation failure" + e);
+      throw new ResourceInstantiationException(
+        "Parameterisation failure:" + Strings.getNl() + e
+      );
     }
 
     //set the listeners if any
@@ -350,6 +352,10 @@ public abstract class Factory
     BeanInfo resBeanInfo =
       Introspector.getBeanInfo(resource.getClass(), Object.class);
     PropertyDescriptor[] properties = resBeanInfo.getPropertyDescriptors();
+
+    // keep a list of those params that we manage to set, for error messages
+    List paramsThatGotSet = new ArrayList();
+
     // for each property of the resource bean
     if(properties != null)
       for(int i = 0; i<properties.length; i++) {
@@ -365,24 +371,30 @@ public abstract class Factory
         if(paramValue == null)  {
           continue;
         }
+        String paramName = prop.getName();
 
-        //convert the parameter to the right type eg String -> URL
+        // convert the parameter to the right type eg String -> URL
         Class propertyType = prop.getPropertyType();
         Class paramType = paramValue.getClass();
         try{
-          if(!propertyType.isAssignableFrom(paramType)){
+          if(!propertyType.isAssignableFrom(paramType)) {
             if(DEBUG) Out.pr("Converting " + paramValue.getClass());
-            paramValue = propertyType.getConstructor(new Class[]{paramType}).
-                         newInstance(new Object[]{paramValue});
+            paramValue =
+              propertyType.getConstructor(
+                new Class[]{paramType}
+              ).newInstance( new Object[]{paramValue} );
             if(DEBUG) Out.prln(" to " + paramValue.getClass());
           }
-        }catch(NoSuchMethodException nsme){
-          if(DEBUG) Out.prln("...Error while converting: " + nsme.toString());
-          continue;
-        }catch(InstantiationException ie){
-          if(DEBUG) Out.prln("...Error while converting: " + ie.toString());
-          continue;
+        } catch(NoSuchMethodException nsme) {
+          throw new ResourceInstantiationException(
+            "Error while converting: " + nsme.toString()
+          );
+        } catch(InstantiationException ie) {
+          throw new ResourceInstantiationException(
+            "Error while converting: " + ie.toString()
+          );
         }
+
         // call the set method with the parameter value
         Object[] args = new Object[1];
         args[0] = paramValue;
@@ -394,17 +406,21 @@ public abstract class Factory
 
         setMethod.invoke(resource, args);
         numParametersSet++;
+        paramsThatGotSet.add(paramName);
       } // for each property
 
     // did we set all the parameters?
     // Where the number of parameters that
     // are successfully set on the resource != the number of parameter
     // values, throw an exception
-    if(numParametersSet != parameterValues.size())
+    if(numParametersSet != parameterValues.size()) {
+      String n = Strings.getNl();
       throw new GateException(
         "couldn't set all the parameters of resource " +
-        resource.getClass().getName()
+        resource.getClass().getName() + n + "params that were set are: " +
+        paramsThatGotSet + n + "param values passed: " + parameterValues
       );
+    }
   } // setResourceParameters
 
   /**
