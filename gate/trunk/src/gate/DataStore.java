@@ -79,7 +79,7 @@ public interface DataStore extends FeatureBearer, NameBearer {
    * in which case this will throw an UnsupportedOperationException.
    */
   public void setAutoSaving(boolean autoSaving)
-  throws UnsupportedOperationException;
+  throws UnsupportedOperationException,PersistenceException;
 
   /** Get the autosaving behaviour of the LR. */
   public boolean isAutoSaving();

@@ -205,8 +205,9 @@ public class OracleDataStore extends JDBCDataStore {
    * in which case this will throw an UnsupportedOperationException.
    */
   public void setAutoSaving(boolean autoSaving)
-  throws UnsupportedOperationException {
-    throw new MethodNotImplementedException();
+  throws UnsupportedOperationException,PersistenceException {
+
+    super.setAutoSaving(autoSaving);
   }
 
   /** Get the autosaving behaviour of the LR. */
@@ -431,7 +432,13 @@ public class OracleDataStore extends JDBCDataStore {
       stmt.setLong(5,(null==docEndOffset)? 0 : docEndOffset.longValue());
       stmt.setBoolean(6,docIsMarkupAware.booleanValue());
       //is the document part of a corpus?
-      stmt.setLong(7,null == corpusID ? 0 : corpusID.longValue());
+      if (null == corpusID) {
+        stmt.setNull(7,java.sql.Types.BIGINT);
+      }
+      else {
+        stmt.setLong(7,corpusID.longValue());
+      }
+
       //results
       stmt.registerOutParameter(8,java.sql.Types.BIGINT);
       stmt.registerOutParameter(9,java.sql.Types.BIGINT);

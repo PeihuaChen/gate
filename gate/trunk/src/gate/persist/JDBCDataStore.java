@@ -237,8 +237,14 @@ extends AbstractFeatureBearer implements DatabaseDataStore{
    * in which case this will throw an UnsupportedOperationException.
    */
   public void setAutoSaving(boolean autoSaving)
-  throws UnsupportedOperationException {
-    throw new MethodNotImplementedException();
+  throws UnsupportedOperationException,PersistenceException {
+    try {
+      this.jdbcConn.setAutoCommit(true);
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("cannot change autosave mode ["+sqle.getMessage()+"]");
+    }
+
   }
 
   /** Get the autosaving behaviour of the LR. */
