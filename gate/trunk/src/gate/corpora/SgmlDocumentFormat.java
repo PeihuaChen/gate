@@ -79,7 +79,8 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
       if (null != doc){
         // create a new Xml document handler
         XmlDocumentHandler xmlDocHandler = new
-                            XmlDocumentHandler(doc, this.markupElementsMap);
+                            XmlDocumentHandler(doc, this.markupElementsMap,
+                                               this.element2StringMap);
         // register a status listener with it
         xmlDocHandler.addStatusListener(new StatusListener(){
           public void statusChanged(String text){

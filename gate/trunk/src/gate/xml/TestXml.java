@@ -61,6 +61,14 @@ public class TestXml extends TestCase
     markupElementsMap.put ("A","link");
     markupElementsMap.put ("a","link");
     */
+    // create the element2String map
+    Map anElement2StringMap = null;
+    anElement2StringMap = new HashMap();
+    // populate it
+    anElement2StringMap.put("S","\n");
+    anElement2StringMap.put("s","\n");
+
+
     // create a new gate document
     //gate.Document doc = gate.Transients.newDocument(
     //          new URL("http://www.dcs.shef.ac.uk/~cursu/xml/input/bnc.xml")
@@ -107,6 +115,7 @@ public class TestXml extends TestCase
     //*
     // set's the map
     docFormat.setMarkupElementsMap(markupElementsMap);
+    docFormat.setElement2StringMap(anElement2StringMap);
     // register a progress listener with it
       /*
       docFormat.addStatusListener(new StatusListener(){

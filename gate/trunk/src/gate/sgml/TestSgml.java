@@ -32,7 +32,7 @@ public class TestSgml extends TestCase
 
 
   public static void main(String args[]){
-    TestSgml app = new TestSgml("TestHtml");
+    TestSgml app = new TestSgml("TestSgml");
     try{
       app.testSgmlLoading ();
     }catch (Exception e){
