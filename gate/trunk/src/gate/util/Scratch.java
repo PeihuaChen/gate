@@ -17,6 +17,9 @@
 package gate.util;
 
 import java.util.*;
+import java.net.*;
+import java.io.*;
+
 import gate.*;
 import gate.creole.*;
 
@@ -32,12 +35,61 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) {
-   doIt();
+    try{
+      Gate.init();
+      //doIt();
+/*
+      URL url = null;
+      url = new URL("file:///d:/tmp/testXml.xml");
+
+        // Load the xml Key Document and unpack it
+        gate.Document keyDocument = null;
+        keyDocument = gate.Factory.newDocument(url);
+
+      gate.DocumentFormat keyDocFormat = null;
+      keyDocFormat = gate.DocumentFormat.getDocumentFormat(
+        keyDocument, keyDocument.getSourceUrl()
+      );
+      Out.prln(keyDocFormat);
+      // Unpack the markup
+      keyDocFormat.unpackMarkup(keyDocument);
+      Out.prln(keyDocument.getContent().toString());
+*/
+    }catch (Exception e){
+      e.printStackTrace(System.out);
+    }
+
   } // main
 
-  public static void doIt() {
-    for(int i = 0; i < 100; i++)
-     Out.prln(random());
+  public static void doIt() throws Exception{
+    URL url = null;
+
+      Gate.init();
+      url = new URL("http://www.dcs.shef.ac.uk/~hamish");
+
+    // Load the xml Key Document and unpack it
+    gate.Document keyDocument = null;
+    keyDocument = gate.Factory.newDocument(url);
+
+    gate.DocumentFormat keyDocFormat = null;
+    keyDocFormat = gate.DocumentFormat.getDocumentFormat(
+      keyDocument, keyDocument.getSourceUrl()
+    );
+
+    // Unpack the markup
+    keyDocFormat.unpackMarkup(keyDocument);
+
+
+    // Export the Gate document called keyDocument as  XML, into a temp file,
+    // using UTF-8 encoding
+    File xmlFile = new File("d:/tmp/testXml.xml");
+
+    // Prepare to write into the xmlFile using UTF-8 encoding
+    OutputStreamWriter writer = new OutputStreamWriter(
+                    new FileOutputStream(xmlFile),"UTF-8");
+    // Write (test the toXml() method)
+    writer.write(keyDocument.toXml());
+    writer.flush();
   } // doIt
 
   /** Generate a random integer for file naming. */

@@ -7,7 +7,7 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *  
+ *
  *  Hamish Cunningham, 10/June/00
  *
  *  $Id$
@@ -89,7 +89,7 @@ public class TestFiles extends TestCase
   public static void main(String args[]){
     TestFiles app = new TestFiles("TestFiles");
     try {
-      //app.testJarFiles ();
+      app.testJarFiles ();
       app.testGetResources();
     } catch (Exception e) {
       e.printStackTrace (Err.getPrintWriter());

@@ -322,17 +322,18 @@ extends AbstractLanguageResource implements Document{
   public String toXml(){
     StringBuffer xmlContent = new StringBuffer("");
     // Add xml header
-//    xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-      xmlContent.append("<?xml version=\"1.0\" ?>\n");
+    xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+//      xmlContent.append("<?xml version=\"1.0\" ?>\n");
     // Add the root element
     xmlContent.append("<GateDocument" +
         featuresToXml(this.getFeatures()) + ">\n");
     // Add plain text element
-    xmlContent.append("<PlainText>");
+    xmlContent.append("<TextWithNodes>");
     xmlContent.append("<![CDATA[");
-    xmlContent.append(this.getContent().toString());
+    xmlContent.append(textWithNodes(this.getContent().toString(),
+                                              this.getAnnotations()));
     xmlContent.append("]]>");
-    xmlContent.append("</PlainText>\n");
+    xmlContent.append("</TextWithNodes>\n");
     // Save the AnnotationSet element
     xmlContent.append(annotationSetToXml(this.getAnnotations()));
     // Add the end of GateDocument
@@ -361,6 +362,47 @@ extends AbstractLanguageResource implements Document{
     return str.toString();
   }//featuresToXml
 
+  /** This method creates Node XML elements and inserts them at the
+    * corresponding offset inside the text.
+    * @param aText The text representing the document's plain text.
+    * @param AnnotationSet The annotation set containing the nodes that must
+    * be inserted into the text.
+    * @return The text with empty <Node id="NodeId"/> elements.
+    */
+  private String textWithNodes(String aText, AnnotationSet anAnnotationSet){
+
+    if (aText == null) return new String("");
+    if (anAnnotationSet == null) return aText;
+
+    StringBuffer textWithNodes = new StringBuffer(aText);
+    Set offsetsSet = new TreeSet();
+
+    // Construct the id2Offset map from the AnnotSet
+    Iterator annotSetIter = anAnnotationSet.iterator();
+    while (annotSetIter.hasNext()){
+      Annotation annot = (Annotation) annotSetIter.next();
+      offsetsSet.add(annot.getStartNode().getOffset());
+      offsetsSet.add(annot.getEndNode().getOffset());
+    }// end While
+
+    // Iterate through all nodes from anAnnotSet and transform them to
+    // XML elements. Then insert those elements at the node's offset into the
+    // textWithNodes .
+    List keyList = new ArrayList(offsetsSet);
+    // Sorts the list ascending
+    Collections.sort(keyList);
+    // create an iterator at the end of the list
+    ListIterator keyIter = keyList.listIterator(keyList.size());
+    // Iterate the list in reverse order and make the modifications
+    while (keyIter.hasPrevious()){
+      Long offset = (Long) keyIter.previous();
+      String strNode = "]]><Node id=\"" + offset + "\"/><![CDATA[";
+      int offsetValue = offset.intValue();
+      textWithNodes.insert(offsetValue,strNode);
+    }// end while
+    return textWithNodes.toString();
+  }//textWithNodes()
+
   /** This method saves an AnnotationSet as XML.
     * @param anAnnotationSet The annotation set that has to be saved as XML.
     * @return a String like this: <AnnotationSet> <Annotation>....
@@ -379,9 +421,9 @@ extends AbstractLanguageResource implements Document{
     Iterator iterator = anAnnotationSet.iterator();
     while (iterator.hasNext()){
       Annotation annot = (Annotation) iterator.next();
-      str.append("<Annotation " + "Type=\"" + annot.getType() + "\" Start=\"" +
-      annot.getStartNode().getOffset() + "\" End=\"" +
-      annot.getEndNode().getOffset() + "\">\n");
+      str.append("<Annotation " + "Type=\"" + annot.getType() +
+                  "\" StartNode=\"" + annot.getStartNode().getOffset() +
+                   "\" EndNode=\"" + annot.getEndNode().getOffset() + "\">\n");
       str.append("<Features" + featuresToXml(annot.getFeatures()) + "/>\n");
       str.append("</Annotation>\n");
     }// End while
