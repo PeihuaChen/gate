@@ -274,9 +274,9 @@
     </RESOURCE>
 
 
-  <!-- Creole for Annotatation Exporter -->
+  <!-- Creole for Database Exporter -->
   <RESOURCE>
-      <NAME>Annotation Exporter </NAME>
+      <NAME>Database Exporter </NAME>
       <CLASS>gate.creole.ExportAnnotations</CLASS>
       <COMMENT>exports the specified annotations to the MS-Access Database</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
