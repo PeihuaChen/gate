@@ -155,20 +155,7 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   public java.net.URL getTransducerGrammarURL() {
     return transducerGrammarURL;
   }
-  public synchronized void removeStatusListener(StatusListener l) {
-    if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
-      v.removeElement(l);
-      statusListeners = v;
-    }
-  }
-  public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      statusListeners = v;
-    }
-  } // init()
+ // init()
 
   private static final boolean DEBUG = false;
 
@@ -180,71 +167,11 @@ public class DefaultTokeniser extends AbstractProcessingResource {
   private java.net.URL tokeniserRulesURL;
   private String encoding;
   private java.net.URL transducerGrammarURL;
-  private transient Vector statusListeners;
-  private transient Vector progressListeners;
   private gate.Document document;
   private String annotationSetName;
 
-  /**
-   * A progress listener used to convert a 0..100 interval into a smaller one
-   */
-  class CustomProgressListener implements ProgressListener{
-    CustomProgressListener(int start, int end){
-      this.start = start;
-      this.end = end;
-    }
-    public void progressChanged(int i){
-      fireProgressChanged(start + (end - start) * i / 100);
-    }
 
-    public void processFinished(){
-      fireProgressChanged(end);
-    }
 
-    int start;
-    int end;
-  }
-  protected void fireStatusChanged(String e) {
-    if (statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
-      }
-    }
-  }
-  public synchronized void removeProgressListener(ProgressListener l) {
-    if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
-      v.removeElement(l);
-      progressListeners = v;
-    }
-  }
-  public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
-    if (!v.contains(l)) {
-      v.addElement(l);
-      progressListeners = v;
-    }
-  }
-  protected void fireProgressChanged(int e) {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
-      }
-    }
-  }
-  protected void fireProcessFinished() {
-    if (progressListeners != null) {
-      Vector listeners = progressListeners;
-      int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
-      }
-    }
-  }
   public void setDocument(gate.Document document) {
     this.document = document;
   }

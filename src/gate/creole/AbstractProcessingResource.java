@@ -19,6 +19,7 @@ import java.util.*;
 
 import gate.*;
 import gate.util.*;
+import gate.event.*;
 
 /** A convenience implementation of ProcessingResource with some default
   * code.
@@ -70,6 +71,91 @@ extends AbstractResource implements ProcessingResource
 /** should clear all internal data of the resource. Does nothing now **/
   public void clear() {
   }
+
+  public synchronized void removeStatusListener(StatusListener l) {
+    if (statusListeners != null && statusListeners.contains(l)) {
+      Vector v = (Vector) statusListeners.clone();
+      v.removeElement(l);
+      statusListeners = v;
+    }
+  }
+
+  public synchronized void addStatusListener(StatusListener l) {
+    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      statusListeners = v;
+    }
+  }
+
+  protected void fireStatusChanged(String e) {
+    if (statusListeners != null) {
+      Vector listeners = statusListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+      }
+    }
+  }
+
+  public synchronized void addProgressListener(ProgressListener l) {
+    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    if (!v.contains(l)) {
+      v.addElement(l);
+      progressListeners = v;
+    }
+  }
+
+  public synchronized void removeProgressListener(ProgressListener l) {
+    if (progressListeners != null && progressListeners.contains(l)) {
+      Vector v = (Vector) progressListeners.clone();
+      v.removeElement(l);
+      progressListeners = v;
+    }
+  }
+
+  protected void fireProgressChanged(int e) {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+      }
+    }
+  }
+
+  protected void fireProcessFinished() {
+    if (progressListeners != null) {
+      Vector listeners = progressListeners;
+      int count = listeners.size();
+      for (int i = 0; i < count; i++) {
+        ((ProgressListener) listeners.elementAt(i)).processFinished();
+      }
+    }
+  }
+
+  /**
+   * A progress listener used to convert a 0..100 interval into a smaller one
+   */
+  protected class CustomProgressListener implements ProgressListener{
+    public CustomProgressListener(int start, int end){
+      this.start = start;
+      this.end = end;
+    }
+    public void progressChanged(int i){
+      fireProgressChanged(start + (end - start) * i / 100);
+    }
+
+    public void processFinished(){
+      fireProgressChanged(end);
+    }
+
+    int start;
+    int end;
+  }//CustomProgressListener
+
+  private transient Vector statusListeners;
+  private transient Vector progressListeners;
 
   /** Any exception caught during run() invocations are stored here. */
   protected ExecutionException executionException  = null;
