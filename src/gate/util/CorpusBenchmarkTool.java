@@ -1020,7 +1020,6 @@ ex.printStackTrace();
   public void printStatistics() {
 
     Out.prln("<H2> Statistics </H2>");
-/*
     Out.prln("<H3> Precision </H3>");
     if (precisionByType != null && !precisionByType.isEmpty()) {
       Iterator iter = precisionByType.keySet().iterator();
@@ -1050,7 +1049,7 @@ ex.printStackTrace();
 
     Out.prln("Overall recall: " + getRecallAverage()
              + "<P>");
-*/
+/*
     if (annotTypes == null) {
       Out.prln("No types given for evaluation, cannot obtain precision/recall");
       return;
@@ -1114,6 +1113,7 @@ ex.printStackTrace();
 
       Out.prln("<TD>" + fmeasure + "</TD>");
       Out.prln("</TR>");
+*/
   }
 
   protected AnnotationDiff measureDocs(
