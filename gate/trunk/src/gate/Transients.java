@@ -37,6 +37,13 @@ public class Transients extends Factory
     return new DocumentImpl(u);
   } // newDocument(URL)
 
+  /** Create a new Document from a URL. */
+  public static Document newDocument(URL u,
+                                     String encoding) throws IOException {
+    return new DocumentImpl(u, encoding);
+  } // newDocument(URL)
+
+
   /** Create a new Document from a String. */
   public static Document newDocument(String s) throws IOException {
     return new DocumentImpl(s);
