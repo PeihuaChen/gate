@@ -608,9 +608,8 @@ public class DocumentEditor extends AbstractVisualResource
               popup.add(menu);
               while(annIter.hasNext()){
                 Annotation ann = (Annotation)annIter.next();
-                JMenuItem item = new SelectAnnotationPopupItem(ann,
-                                                                  "Default");
-                menu.add(item);
+                menu.add(new HighlightAnnotationMenu(ann,
+                                                     document.getAnnotations()));
               }
             }
             Map namedASs = document.getNamedAnnotationSets();
@@ -626,9 +625,7 @@ public class DocumentEditor extends AbstractVisualResource
                   popup.add(menu);
                   while(annIter.hasNext()){
                     Annotation ann = (Annotation)annIter.next();
-                    JMenuItem item = new SelectAnnotationPopupItem(ann,
-                                                                set.getName());
-                    menu.add(item);
+                    menu.add(new HighlightAnnotationMenu(ann,set));
                   }
                 }
               }
@@ -2937,16 +2934,17 @@ Out.prln("NULL size");
    * Apart from the normal {@link javax.swing.JMenuItem} behaviour, this menu
    * item also highlits the annotation which it would select if pressed.
    */
-  protected class SelectAnnotationPopupItem extends JMenuItem {
-    public SelectAnnotationPopupItem(Annotation ann, String setName) {
+  protected class HighlightAnnotationMenu extends JMenu {
+    public HighlightAnnotationMenu(Annotation ann, AnnotationSet aSet) {
       super(ann.getType());
       setToolTipText("<html><b>Features:</b><br>" +
                      (ann.getFeatures() == null ? "" :
                      ann.getFeatures().toString()) + "</html>");
-      annotation = ann;
+      this.annotation = ann;
+      this.set = aSet;
+      this.setName = (set.getName() == null) ? "Default" : set.getName();
       start = ann.getStartNode().getOffset().intValue();
       end = ann.getEndNode().getOffset().intValue();
-      set = setName;
       this.addMouseListener(new MouseAdapter() {
         public void mouseEntered(MouseEvent e) {
           try {
@@ -2965,7 +2963,10 @@ Out.prln("NULL size");
         }
       });
 
-      this.addActionListener(new ActionListener() {
+      this.add(new AbstractAction(){
+        {
+          putValue(NAME, "Select");
+        }
         public void actionPerformed(ActionEvent e) {
           Runnable runnable = new Runnable(){
             public void run(){
@@ -2973,7 +2974,7 @@ Out.prln("NULL size");
                 highlighter.removeHighlight(highlight);
                 highlight = null;
               }
-             selectAnnotation(set, annotation);
+              selectAnnotation(setName, annotation);
             }
           };
           Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
@@ -2982,14 +2983,38 @@ Out.prln("NULL size");
           thread.start();
         }
       });
+
+      this.add(new AbstractAction(){
+        {
+          putValue(NAME, "Delete");
+        }
+        public void actionPerformed(ActionEvent e) {
+          Runnable runnable = new Runnable(){
+            public void run(){
+              if(highlight != null){
+                highlighter.removeHighlight(highlight);
+                highlight = null;
+              }
+              set.remove(annotation);
+            }
+          };
+          Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                     runnable,
+                                     "AnnotationEditor5");
+          thread.start();
+        }
+      });
+
     }
 
     int start;
     int end;
-    String set;
+    AnnotationSet set;
+    String setName;
     Annotation annotation;
     Object highlight;
   }
+
 
   protected class DeleteSelectedAnnotationsAction extends AbstractAction {
     public DeleteSelectedAnnotationsAction(JComponent source){
