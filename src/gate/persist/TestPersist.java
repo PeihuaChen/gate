@@ -639,6 +639,29 @@ public class TestPersist extends TestCase
 
   }
 
+  public void testDB_UseCase05() throws Exception {
+
+    //delete a document
+    LanguageResource lr = null;
+
+    //1. open data storage
+    DatabaseDataStore ds = new OracleDataStore();
+    Assert.assertNotNull(ds);
+    ds.setStorageUrl(this.JDBC_URL);
+    ds.open();
+
+    //2. read LR
+    lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+
+    //3. try to delete it
+    ds.delete(DBHelper.DOCUMENT_CLASS,lr.getLRPersistenceId());
+
+    if(DEBUG) {
+      Err.prln("Use case 05 passed...");
+    }
+
+  }
+
   public void testDB_UseCase04() throws Exception {
 
     //sync a document
@@ -652,14 +675,20 @@ public class TestPersist extends TestCase
 
     //2. read LR
     lr = ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Document dbDoc = (Document)lr;
+    Document doc2 = null;
 
     //3. change name
-    String oldName = lr.getName();
-    lr.setName(oldName + "__UPD");
-    lr.sync();
+    String oldName = dbDoc.getName();
+    String newName = oldName + "__UPD";
+    dbDoc.setName(newName);
+    dbDoc.sync();
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Assert.assertEquals(newName,dbDoc.getName());
+    Assert.assertEquals(newName,doc2.getName());
 
     //4. change features
-    FeatureMap fm = lr.getFeatures();
+    FeatureMap fm = dbDoc.getFeatures();
     Iterator keys = fm.keySet().iterator();
 
     //4.1 change the value of the first feature
@@ -678,26 +707,58 @@ public class TestPersist extends TestCase
       }
       fm.put(currKey,newVal);
     }
-    lr.sync();
-    //4.3 add feature
-    //delete feature
+    dbDoc.sync();
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Assert.assertEquals(fm,dbDoc.getFeatures());
+    Assert.assertEquals(fm,doc2.getFeatures());
 
-/*
     //6. URL
-    Document dbDoc = (Document)lr;
-    Assert.assertEquals(dbDoc.getSourceUrl(),((Document)this.uc01_LR).getSourceUrl());
+    URL docURL = dbDoc.getSourceUrl();
+    URL newURL = null;
+    newURL = new URL(docURL.toString()+".UPDATED");
+    dbDoc.setSourceUrl(newURL);
+    dbDoc.sync();
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Assert.assertEquals(newURL,dbDoc.getSourceUrl());
+    Assert.assertEquals(newURL,doc2.getSourceUrl());
 
     //5.start/end
-    Assert.assertEquals(dbDoc.getSourceUrlStartOffset(),((Document)this.uc01_LR).getSourceUrlStartOffset());
-    Assert.assertEquals(dbDoc.getSourceUrlEndOffset(),((Document)this.uc01_LR).getSourceUrlEndOffset());
+    Long newStart = new Long(123);
+    Long newEnd = new Long(789);
+    dbDoc.setSourceUrlStartOffset(newStart);
+    dbDoc.setSourceUrlEndOffset(newEnd);
+    dbDoc.sync();
+
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Assert.assertEquals(newStart,dbDoc.getSourceUrlStartOffset());
+    Assert.assertEquals(newStart,doc2.getSourceUrlStartOffset());
+    Assert.assertEquals(newEnd,dbDoc.getSourceUrlEndOffset());
+    Assert.assertEquals(newEnd,doc2.getSourceUrlEndOffset());
+
 
     //6.markupAware
-    Assert.assertEquals(dbDoc.getMarkupAware(),((Document)this.uc01_LR).getMarkupAware());
+    Boolean oldMA = dbDoc.getMarkupAware();
+    Boolean newMA = oldMA.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
+    dbDoc.setMarkupAware(newMA);
+    dbDoc.sync();
+
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Assert.assertEquals(newMA,doc2.getMarkupAware());
+    Assert.assertEquals(newMA,dbDoc.getMarkupAware());
+
 
     //7. content
-    DocumentContent cont = dbDoc.getContent();
-    Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
+    DocumentContent contOld = dbDoc.getContent();
+    DocumentContent contNew = new DocumentContentImpl(new String("UPDATED__").concat(contOld.toString().concat("__UPDATED")));
+    dbDoc.setContent(contNew);
+    dbDoc.sync();
 
+    doc2 = (Document)ds.getLr(DBHelper.DOCUMENT_CLASS,this.uc01_lrID);
+    Assert.assertEquals(contNew,dbDoc.getContent());
+    Assert.assertEquals(contNew,doc2.getContent());
+
+
+/*
     //7. access the contect again and assure it's not read from the DB twice
     Assert.assertEquals(cont,((Document)this.uc01_LR).getContent());
 
@@ -790,7 +851,11 @@ public class TestPersist extends TestCase
       test.setUp();
       test.testDB_UseCase01();
       test.tearDown();
-
+/*
+      test.setUp();
+      test.testDB_UseCase01();
+      test.tearDown();
+*/
       test.setUp();
       test.testDB_UseCase02();
       test.tearDown();
@@ -803,6 +868,11 @@ public class TestPersist extends TestCase
       test.testDB_UseCase04();
       test.tearDown();
 
+/*
+      test.setUp();
+      test.testDB_UseCase05();
+      test.tearDown();
+*/
     }catch(Exception e){
       e.printStackTrace();
     }
