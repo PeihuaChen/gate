@@ -38,7 +38,7 @@ public class AnnotDiffHandle extends ResourceHandle{
     annotDiff = new AnnotationDiff();
     smallView = new SmallView();
     this.setSmallIcon(new ImageIcon(
-           getClass().getResource("/gate/resources/img/lr.gif")));
+           getClass().getResource("/gate/resources/img/annDiff.gif")));
     popup = new JPopupMenu();
     popup.add(new CloseAction());
     this.setPopup(popup);
@@ -53,6 +53,12 @@ public class AnnotDiffHandle extends ResourceHandle{
     return smallView;
   }// getSmallView()
 
+
+  private void doDiff(){
+    Thread thread = new Thread(new DiffRunner());
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
+  }//doDiff();
 
   class CloseAction extends AbstractAction{
     public CloseAction(){
@@ -253,7 +259,8 @@ public class AnnotDiffHandle extends ResourceHandle{
     public void initListeners(){
 
       evalButton.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e){
+          myself.doDiff();
         }
       });
 
@@ -382,5 +389,37 @@ public class AnnotDiffHandle extends ResourceHandle{
     }//MyCellRenderer
 
   }// SmallView
+
+  /**Class used to run an annot. diff in a new thread*/
+  class DiffRunner implements Runnable{
+
+    public DiffRunner(){
+    }// DiffRuner
+
+    public void run(){
+      annotDiff.setKeyDocument(smallView.getSelectedKeyDocument());
+      annotDiff.setResponseDocument(smallView.getSelectedResponseDocument());
+      annotDiff.setAnnotationSchema(smallView.getSelectedSchema());
+      String falsePozAnnot = smallView.getSelectedFalsePozAnnot();
+      if ("No annot.".equals(falsePozAnnot))
+            falsePozAnnot = null;
+      annotDiff.setAnnotationTypeForFalsePositive(falsePozAnnot);
+      try{
+        annotDiff.init();
+      } catch (ResourceInstantiationException e){
+        JOptionPane.showMessageDialog(mainFrame,
+                     e.getMessage() + "\n Annotation diff stopped !",
+                     "Annotation Diff initialization error !",
+                     JOptionPane.ERROR_MESSAGE);
+      } finally {
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            annotDiff.repaint();
+          }
+        });
+      }
+
+    }// run();
+  }//EvaluationRunner
 
 }//AnnotDiffHandle

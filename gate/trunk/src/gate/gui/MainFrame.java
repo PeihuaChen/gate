@@ -518,13 +518,15 @@ public class MainFrame extends JFrame {
 
   class NewAnnotDiffAction extends AbstractAction{
     public NewAnnotDiffAction(){
-      super("New AnnotDiff",new ImageIcon(MainFrame.class.getResource("/gate/resources/img/genericPr.gif")));
+      super("Annotation Diff",
+      new ImageIcon(MainFrame.class.getResource("/gate/resources/img/annDiff.gif")));
 
     }// NewAnnotDiffAction
     public void actionPerformed(ActionEvent e){
       AnnotDiffHandle handle = new AnnotDiffHandle(myself);
       handle.setTooltipText("<html><b>Tool:</b> " +
-                            "Cristi" + "</html>");
+                            "Annotation diff" + "</html>");
+      handle.setTitle("Annotation Diff");
       toolsRoot.add(new DefaultMutableTreeNode(handle, false));
       projectTreeModel.nodeStructureChanged(toolsRoot);
       projectTree.expandPath(new TreePath(projectTreeModel.getPathToRoot(toolsRoot)));

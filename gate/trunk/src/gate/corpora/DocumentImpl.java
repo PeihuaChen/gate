@@ -323,8 +323,8 @@ extends AbstractLanguageResource implements Document, StatusReporter
   public String toXml(){
     StringBuffer xmlContent = new StringBuffer("");
     // Add xml header
-    xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-
+//    xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+      xmlContent.append("<?xml version=\"1.0\" ?>\n");
     // Add the root element
     xmlContent.append("<GateDocument" +
         featuresToXml(this.getFeatures()) + ">\n");
@@ -599,10 +599,10 @@ extends AbstractLanguageResource implements Document, StatusReporter
     code += memberCode;
 //    memberCode = (sourceUrlName == null) ? 0 : sourceUrlName.hashCode();
 //    code += memberCode;
+
     memberCode =
       (sourceUrlEndOffset == null) ? 0 : sourceUrlEndOffset.hashCode();
     code += memberCode;
-Out.prln("hashcode: " + code);
     return code;
   } // hashcode
 
