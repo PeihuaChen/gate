@@ -149,29 +149,34 @@ public class TestGate {
 
     TestSuite suite = new TestSuite();
 
-   // suite.addTest(TestAnnotationDiff.suite());
-    suite.addTest(TestBumpyStack.suite());
-    suite.addTest(TestConfig.suite());                //*
-    suite.addTest(TestAnnotation.suite());
-    suite.addTest(TestEmail.suite());
-    suite.addTest(TestXml.suite());
-    suite.addTest(TestHtml.suite());
-    suite.addTest(TestSgml.suite());
-    suite.addTest(TestXSchema.suite());
-    suite.addTest(TestCreole.suite());
-    suite.addTest(CookBook.suite());
-    suite.addTest(TestFiles.suite());
-    suite.addTest(TestJdk.suite());
-    suite.addTest(TestJape.suite());
-    suite.addTest(TestFSM.suite());
-    suite.addTest(TestTemplate.suite());
-    suite.addTest(TestJacl.suite());
-    suite.addTest(TestDocument.suite());
-    suite.addTest(TestRBTreeMap.suite());
-    suite.addTest(TestCorpus.suite());
-    suite.addTest(TestDB.suite());
-    suite.addTest(TestTokeniser.suite());
-    suite.addTest(TestGazetteer.suite());   //*/
+    try {
+      // suite.addTest(TestAnnotationDiff.suite());
+      suite.addTest(TestBumpyStack.suite());
+      suite.addTest(TestConfig.suite());                //*
+      suite.addTest(TestAnnotation.suite());
+      suite.addTest(TestEmail.suite());
+      suite.addTest(TestXml.suite());
+      suite.addTest(TestHtml.suite());
+      suite.addTest(TestSgml.suite());
+      suite.addTest(TestXSchema.suite());
+      suite.addTest(TestCreole.suite());
+      suite.addTest(CookBook.suite());
+      suite.addTest(TestFiles.suite());
+      suite.addTest(TestJdk.suite());
+      suite.addTest(TestJape.suite());
+      suite.addTest(TestFSM.suite());
+      suite.addTest(TestTemplate.suite());
+      suite.addTest(TestJacl.suite());
+      suite.addTest(TestDocument.suite());
+      suite.addTest(TestRBTreeMap.suite());
+      suite.addTest(TestCorpus.suite());
+      suite.addTest(TestDB.suite());
+      suite.addTest(TestTokeniser.suite());
+      suite.addTest(TestGazetteer.suite());   //*/
+    } catch(Exception e) {
+      Out.prln("can't add tests! exception = " + e);
+      throw(e);
+    }
 
     return suite;
   } // suite
