@@ -173,7 +173,11 @@ public class AnnotationListView extends AbstractDocumentView
           while(keyIter.hasNext()){
             Object key = keyIter.next();
             Object value = features.get(key);
-            if(!first)strBuf.append(" ,");
+            if(first){
+              first = false;
+            }else{
+              strBuf.append(", ");
+            }
             strBuf.append(key.toString());
             strBuf.append("=");
             strBuf.append(value == null ? "[null]" : value.toString());
