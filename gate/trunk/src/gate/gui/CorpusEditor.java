@@ -157,7 +157,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   public void documentRemoved(final CorpusEvent e) {
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        docListModel.removeElement(e.getDocument().getName());
+        docListModel.removeElementAt(e.getDocumentIndex());
       }
     });
   }
@@ -235,8 +235,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
     public void actionPerformed(ActionEvent e){
       int[] selectedIndexes = documentsList.getSelectedIndices();
-      for(int i = 0; i < selectedIndexes.length; i++){
-        corpus.remove(i);
+      for(int i = selectedIndexes.length-1; i >= 0; i--){
+        corpus.remove(selectedIndexes[i]);
       }
       documentsList.clearSelection();
     }

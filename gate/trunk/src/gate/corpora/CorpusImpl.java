@@ -109,9 +109,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
         //fire the 2 events
         fireDocumentRemoved(new CorpusEvent(CorpusImpl.this,
                                             oldDoc,
+                                            index,
                                             CorpusEvent.DOCUMENT_REMOVED));
         fireDocumentAdded(new CorpusEvent(CorpusImpl.this,
                                           newDoc,
+                                          index,
                                           CorpusEvent.DOCUMENT_ADDED));
         return oldDoc;
       }else{
@@ -129,6 +131,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
         //fire the event
         fireDocumentAdded(new CorpusEvent(CorpusImpl.this,
                                           (Document)element,
+                                          index,
                                           CorpusEvent.DOCUMENT_ADDED));
       }else{
         throw new UnsupportedOperationException(
@@ -143,6 +146,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus, Creo
 
       fireDocumentRemoved(new CorpusEvent(CorpusImpl.this,
                                           oldDoc,
+                                          index,
                                           CorpusEvent.DOCUMENT_REMOVED));
       return oldDoc;
     }

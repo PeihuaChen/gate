@@ -73,6 +73,10 @@ public class SerialCorpusImpl extends
     this.setFeatures(tCorpus.getFeatures());
 
     docDataList = new ArrayList();
+    //now cache the names of all docs for future use
+    Iterator iter = tCorpus.getDocumentNames().iterator();
+    while (iter.hasNext())
+      docDataList.add(new DocumentData((String) iter.next(), null));
 
     //make sure we fire events when docs are added/removed/etc
     documents = new VerboseHashMap();
@@ -100,13 +104,9 @@ public class SerialCorpusImpl extends
   /**
    * This method should only be used by the Serial Datastore to set
    */
-  public void setDocumentData(List docNames, List IDs){
-    Iterator iter1 = docNames.iterator();
-    Iterator iter2 = IDs.iterator();
-    while (iter1.hasNext() && iter2.hasNext()) {
-      DocumentData data = new DocumentData((String) iter1.next(), iter2.next());
-      docDataList.add(data);
-    }
+  public void setDocumentPersistentID(int index, Object persID){
+    if (index >= docDataList.size()) return;
+    ((DocumentData)docDataList.get(index)).setPersistentID(persID);
   }
 
   /**
@@ -129,6 +129,22 @@ public class SerialCorpusImpl extends
     throw new MethodNotImplementedException();
   }
 
+  /**
+   * This method returns true when the document is already loaded in memory
+   */
+  public boolean isDocumentLoaded(int index) {
+    if (documents == null || documents.isEmpty()) return false;
+    return (documents.get(new Integer(index)) != null);
+  }
+
+  /**
+   * This method returns true when the document is already stored on disk
+   * i.e., is not transient
+   */
+  public boolean isPersistentDocument(int index) {
+    if (documents == null || documents.isEmpty()) return false;
+    return (((DocumentData)docDataList.get(index)).getPersistentID() != null);
+  }
 
   public synchronized void removeCorpusListener(CorpusListener l) {
     if (corpusListeners != null && corpusListeners.contains(l)) {
@@ -280,10 +296,11 @@ public class SerialCorpusImpl extends
     //in this case, since it's going to be added to the end
     //the index will be the size of the docDataList before
     //the addition
-    documents.put(new Integer(docDataList.size()), doc);
     DocumentData docData = new DocumentData(doc.getName(),
                                             doc.getLRPersistenceId());
-    return docDataList.add(docData);
+    boolean result = docDataList.add(docData);
+    documents.put(new Integer(docDataList.size()), doc);
+    return result;
   }
 
   public boolean remove(Object o){
@@ -444,6 +461,7 @@ public class SerialCorpusImpl extends
    * that fires events when elements are added/removed/set
    */
   protected class VerboseHashMap extends HashMap{
+    static final long serialVersionUID = -3320104879514836097L;
 
     public void clear() {
       //override, so events are fired
@@ -466,15 +484,18 @@ public class SerialCorpusImpl extends
         //fire the 2 events
         fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
                                             oldDoc,
+                                            ((Integer) key).intValue(),
                                             CorpusEvent.DOCUMENT_REMOVED));
         fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
                                           newDoc,
+                                          ((Integer) key).intValue(),
                                           CorpusEvent.DOCUMENT_ADDED));
       } else { //we're adding a document
         Document newDoc = (Document)value;
 
         fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this,
                                           newDoc,
+                                          ((Integer) key).intValue(),
                                           CorpusEvent.DOCUMENT_ADDED));
       }
 
@@ -483,10 +504,10 @@ public class SerialCorpusImpl extends
 
     public Object remove(Object key){
       Document oldDoc = (Document) super.remove(key);
-      if(oldDoc != null)
-        fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
-                                            oldDoc,
-                                            CorpusEvent.DOCUMENT_REMOVED));
+      fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+                                          oldDoc,
+                                          ((Integer) key).intValue(),
+                                          CorpusEvent.DOCUMENT_REMOVED));
 
       return oldDoc;
     }//public Object remove(Object key)
@@ -522,6 +543,9 @@ public class SerialCorpusImpl extends
   }//protected class VerboseHashMap extends HashMap
 
   protected class DocumentData implements Serializable {
+    //fix the ID for serialisation
+    static final long serialVersionUID = 4192762901421847525L;
+
     DocumentData(String name, Object ID){
       docName = name;
       persistentID = ID;
@@ -533,6 +557,10 @@ public class SerialCorpusImpl extends
 
     public Object getPersistentID() {
       return persistentID;
+    }
+
+    public void setPersistentID(Object newID) {
+      persistentID = newID;
     }
 
     public String toString() {
