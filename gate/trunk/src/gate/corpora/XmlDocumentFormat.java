@@ -164,7 +164,6 @@ Angel */
       newxmlParser.setErrorHandler(xmlDocHandler);
       newxmlParser.setDTDHandler(xmlDocHandler);
       newxmlParser.setEntityResolver(xmlDocHandler);
-      newxmlParser.setReaderFactory(new StreamingCharFactory());
       newxmlParser.parse(doc.getSourceUrl().toString());
 // Angel - end
         ((DocumentImpl) doc).setNextAnnotationId(
@@ -270,7 +269,6 @@ Angel */
       newxmlParser.setErrorHandler(xmlDocHandler);
       newxmlParser.setDTDHandler(xmlDocHandler);
       newxmlParser.setEntityResolver(xmlDocHandler);
-      newxmlParser.setReaderFactory(new StreamingCharFactory());
       newxmlParser.parse(is);
 // Angel - end
 

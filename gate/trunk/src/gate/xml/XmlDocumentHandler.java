@@ -45,6 +45,14 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Keep the refference to this structure */
   private RepositioningInfo ampCodingInfo = null;
 
+
+  /** This is used to capture all data within two tags before calling the actual characters method */
+  private StringBuffer contentBuffer = new StringBuffer("");
+
+  /** This is a variable that shows if characters have been read */
+  private boolean readCharacterStatus = false;
+
+
   /** Set repositioning information structure refference. If you set this
    *  refference to <B>null</B> information wouldn't be collected.
    */
@@ -68,6 +76,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   public RepositioningInfo getAmpCodingInfo() {
     return ampCodingInfo;
   } // getRepositioningInfo
+
 
   /**
     * Constructs a XmlDocumentHandler object. The annotationSet set will be the
@@ -204,7 +213,14 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     * XML element.
     */
   public void startElement (String uri, String qName, String elemName,
-                                                             Attributes atts){
+                                                             Attributes atts) throws SAXException {
+
+     // call characterActions
+     if(readCharacterStatus) {
+       readCharacterStatus = false;
+       charactersAction(new String(contentBuffer).toCharArray(),0,contentBuffer.length());
+     }
+
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -258,6 +274,12 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     */
   public void endElement (String uri, String qName, String elemName )
                                                          throws SAXException{
+     // call characterActions
+     if(readCharacterStatus) {
+       readCharacterStatus = false;
+       charactersAction(new String(contentBuffer).toCharArray(),0,contentBuffer.length());
+     }
+
     // obj is for internal use
     CustomObject obj = null;
 
@@ -298,7 +320,19 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     * stack and update with the new values. For entities, this method is called
     * separatley regardless of the text sourinding the entity.
     */
-  public void characters( char[] text,int start,int length) throws SAXException{
+   public void characters(char [] text,int start,int length) throws SAXException {
+     if(!readCharacterStatus) {
+       contentBuffer = new StringBuffer(new String(text,start,length));
+     } else {
+       contentBuffer.append(new String(text,start,length));
+     }
+     readCharacterStatus = true;
+   }
+
+   /**
+     * This method is called when all characters between specific tags have been read completely
+     */
+  public void charactersAction( char[] text,int start,int length) throws SAXException{
     // correction of real offset. Didn't affect on other data.
     super.characters(text, start, length);
     // create a string object based on the reported text

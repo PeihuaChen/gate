@@ -35,6 +35,12 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  /** This is used to capture all data within two tags before calling the actual characters method */
+  private StringBuffer contentBuffer = new StringBuffer("");
+
+  /** This is a variable that shows if characters have been read */
+  private boolean readCharacterStatus = false;
+
   /**
     */
   public GateFormatXmlDocumentHandler(gate.Document aDocument){
@@ -81,7 +87,13 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     * XML element.
     */
   public void startElement (String uri, String qName, String elemName,
-                                                             Attributes atts){
+                                                             Attributes atts) throws SAXException {
+
+    // call characterActions
+    if(readCharacterStatus) {
+      readCharacterStatus = false;
+      charactersAction(new String(contentBuffer).toCharArray(),0,contentBuffer.length());
+    }
 
     // Inform the progress listener to fire only if no of elements processed
     // so far is a multiple of ELEMENTS_RATE
@@ -116,6 +128,12 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     */
     public void endElement (String uri, String qName, String elemName )
                                                            throws SAXException{
+
+      // call characterActions
+      if(readCharacterStatus) {
+        readCharacterStatus = false;
+        charactersAction(new String(contentBuffer).toCharArray(),0,contentBuffer.length());
+      }
 
     currentElementStack.pop();
     // Deal with Annotation
@@ -211,7 +229,19 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
     * Here we calculate the end indices for all the elements present inside the
     * stack and update with the new values.
     */
-  public void characters( char[] text,int start,int length) throws SAXException{
+   public void characters(char [] text,int start,int length) throws SAXException {
+     if(!readCharacterStatus) {
+       contentBuffer = new StringBuffer(new String(text,start,length));
+     } else {
+       contentBuffer.append(new String(text,start,length));
+     }
+     readCharacterStatus = true;
+   }
+
+   /**
+     * This method is called when all characters between specific tags have been read completely
+     */
+  public void charactersAction( char[] text,int start,int length) throws SAXException{
     // Create a string object based on the reported text
     String content = new String(text, start, length);
     if ("TextWithNodes".equals((String)currentElementStack.peek())){
@@ -390,16 +420,16 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
 
     // check for new line
     if(text.indexOf('\n') != -1) {
-      String newLineType = 
+      String newLineType =
         (String) doc.getFeatures().get(GateConstants.DOCUMENT_NEW_LINE_TYPE);
 
       if("LF".equalsIgnoreCase(newLineType)) {
         newLineType = null;
       }
-      
+
       // exit with the same text if the change isn't necessary
       if(newLineType == null) return result;
-      
+
       String newLine = "\n";
       if("CRLF".equalsIgnoreCase(newLineType)) {
         newLine = "\r\n";
@@ -411,7 +441,7 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
         newLine = "\n\r";
       }
 
-      StringBuffer buff = new StringBuffer(text);      
+      StringBuffer buff = new StringBuffer(text);
       int index = text.lastIndexOf('\n');
       while(index != -1) {
         buff.replace(index, index+1, newLine);
@@ -419,10 +449,10 @@ public class GateFormatXmlDocumentHandler extends DefaultHandler{
       } // while
       result = buff.toString();
     } // if
-    
+
     return result;
   } // recoverNewLineSequence(String text)
-  
+
   /** This method deals with a Text belonging to Name element. */
   private void processTextOfNameElement(String text) throws GateSaxException{
     if (currentFeatureMap == null)

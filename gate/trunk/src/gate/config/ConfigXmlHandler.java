@@ -58,6 +58,14 @@ public class ConfigXmlHandler extends DefaultHandler {
   /** This object indicates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
 
+
+  /** This is used to capture all data within two tags before calling the actual characters method */
+  private StringBuffer contentBuffer = new StringBuffer("");
+
+  /** This is a variable that shows if characters have been read */
+  private boolean readCharacterStatus = false;
+
+
   /** Construction */
   public ConfigXmlHandler(URL configUrl) {
     this.register = Gate.getCreoleRegister();
@@ -103,7 +111,14 @@ public class ConfigXmlHandler extends DefaultHandler {
   /** Called when the SAX parser encounts the beginning of an XML element */
   public void startElement (
     String uri, String qName, String elementName, Attributes atts
-  ) {
+  ) throws SAXException {
+
+    // call characterActions
+    if(readCharacterStatus) {
+      readCharacterStatus = false;
+      charactersAction(new String(contentBuffer).toCharArray(),0,contentBuffer.length());
+    }
+
     if(DEBUG) {
       Out.pr("startElement: ");
       Out.println(
@@ -144,7 +159,14 @@ public class ConfigXmlHandler extends DefaultHandler {
     * This is actions happen.
     */
   public void endElement (String uri, String qName, String elementName)
-                                                      throws GateSaxException {
+                                                      throws GateSaxException, SAXException {
+
+     // call characterActions
+     if(readCharacterStatus) {
+       readCharacterStatus = false;
+       charactersAction(new String(contentBuffer).toCharArray(),0,contentBuffer.length());
+     }
+
     if(DEBUG) Out.prln("endElement: " + elementName);
 
     //////////////////////////////////////////////////////////////////
@@ -198,7 +220,20 @@ public class ConfigXmlHandler extends DefaultHandler {
   } // endElement
 
   /** Called when the SAX parser encounts text (PCDATA) in the XML doc */
-  public void characters(char[] text, int start, int length)
+  public void characters(char [] text,int start,int length) throws SAXException {
+    if(!readCharacterStatus) {
+      contentBuffer = new StringBuffer(new String(text,start,length));
+    } else {
+      contentBuffer.append(new String(text,start,length));
+    }
+    readCharacterStatus = true;
+  }
+
+  /**
+    * This method is called when all characters between specific tags have been read completely
+    */
+
+  public void charactersAction(char[] text, int start, int length)
   throws SAXException {
     // Get the trimmed text between elements
     String content = new String(text, start, length).trim();
