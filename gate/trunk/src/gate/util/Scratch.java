@@ -39,10 +39,15 @@ public class Scratch
   private static final boolean DEBUG = false;
 
   public static void main(String args[]) throws Exception {
-    String a = "aaaa";
-    String A = a.toUpperCase();
-    System.out.println("a: " + a);
-    System.out.println("A: " + A);
+    URL anURL = new URL("file:/z:/a/b/c/d.txt");
+//    URL anotherURL = new URL(anURL, "../x/y/z.txt");
+    URL anotherURL = new URL("file:/z:/a/b/c/d.txt");
+    String relPath = gate.util.persistence.PersistenceManager.
+                     getRelativePath(anURL, anotherURL);
+    Out.prln("Context: " + anURL);
+    Out.prln("Target: " + anotherURL);
+    Out.prln("Relative path: " + relPath);
+    Out.prln("Result " + new URL(anURL, relPath));
 //    javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
 //    Map uidefaults  = (Map)javax.swing.UIManager.getDefaults();
 //    List keys = new ArrayList(uidefaults.keySet());

@@ -90,7 +90,9 @@ public class PersistenceManager {
 
   /**
    * URLs get upset when serialised and deserialised so we need to convert them
-   * to strings for storage
+   * to strings for storage.
+   * In the case of &quot;file:&quot; URLs the relative path to the persistence
+   * file will actually be stored.
    */
   public static class URLHolder implements Persistence{
     /**
@@ -99,7 +101,17 @@ public class PersistenceManager {
      */
     public void extractDataFromSource(Object source)throws PersistenceException{
       try{
-        urlString = ((URL)source).toExternalForm();
+        URL url = (URL)source;
+        if(url.getProtocol().equals("file")){
+          try{
+            urlString = relativePathMarker +
+                        getRelativePath(persistenceFile.toURL(), url);
+          }catch(MalformedURLException mue){
+            urlString = ((URL)source).toExternalForm();
+          }
+        }else{
+          urlString = ((URL)source).toExternalForm();
+        }
       }catch(ClassCastException cce){
         throw new PersistenceException(cce);
       }
@@ -111,12 +123,21 @@ public class PersistenceManager {
      */
     public Object createObject()throws PersistenceException{
       try{
-        return new URL(urlString);
+        if(urlString.startsWith(relativePathMarker)){
+          URL context = persistenceFile.toURL();
+          return new URL(context,
+                         urlString.substring(relativePathMarker.length()));
+        }else return new URL(urlString);
       }catch(MalformedURLException mue){
         throw new PersistenceException(mue);
       }
     }
     String urlString;
+    /**
+     * This string will be used to start the serialisation of URL that represent
+     * relative paths.
+     */
+    private static final String relativePathMarker = "$relpath$";
     static final long serialVersionUID = 7943459208429026229L;
   }
 
@@ -339,6 +360,87 @@ public class PersistenceManager {
 //    return result;
   }
 
+  /**
+   * Calculates the relative path for a file: URL starting from a given context
+   * which is also a file: URL.
+   * @param context the URL to be used as context.
+   * @param target the URL for which the relative path is computed.
+   * @return a String value representing the relative path. Constructing a URL
+   * from the context URL and the relative path should result in the target URL.
+   */
+  public static String getRelativePath(URL context, URL target){
+    if(context.getProtocol().equals("file") &&
+       target.getProtocol().equals("file")){
+
+      //normalise the two file URLS
+      try{
+        context = new File(context.getPath()).toURL();
+      }catch(MalformedURLException mue){
+        throw new GateRuntimeException("Could not normalise the file URL:\n"+
+                                       context + "\nThe problem was:\n" +mue);
+      }
+      try{
+        target = new File(target.getPath()).toURL();
+      }catch(MalformedURLException mue){
+        throw new GateRuntimeException("Could not normalise the file URL:\n"+
+                                       target + "\nThe problem was:\n" +mue);
+      }
+      List targetPathComponents = new ArrayList();
+      File aFile = new File(target.getPath()).getParentFile();
+      while(aFile != null){
+        targetPathComponents.add(0, aFile);
+        aFile = aFile.getParentFile();
+      }
+      List contextPathComponents = new ArrayList();
+      aFile = new File(context.getPath()).getParentFile();
+      while(aFile != null){
+        contextPathComponents.add(0, aFile);
+        aFile = aFile.getParentFile();
+      }
+      //the two lists can have 0..n common elements (0 when the files are
+      //on separate roots
+      int commonPathElements = 0;
+      while(commonPathElements < targetPathComponents.size() &&
+            commonPathElements < contextPathComponents.size() &&
+            targetPathComponents.get(commonPathElements).
+            equals(contextPathComponents.get(commonPathElements)))
+        commonPathElements++;
+      //construct the string for the relative URL
+      String relativePath = "";
+      for(int i = commonPathElements;
+          i < contextPathComponents.size(); i++){
+        if(relativePath.length() == 0) relativePath += "..";
+        else relativePath += "/..";
+      }
+      for(int i = commonPathElements; i < targetPathComponents.size(); i++){
+        String aDirName = ((File)targetPathComponents.get(i)).getName();
+        if(aDirName.length() == 0){
+          aDirName = ((File)targetPathComponents.get(i)).getAbsolutePath();
+          if(aDirName.endsWith(File.separator)){
+            aDirName = aDirName.substring(0, aDirName.length() -
+                                             File.separator.length());
+          }
+        }
+//Out.prln("Adding \"" + aDirName + "\" name for " + targetPathComponents.get(i));
+        if(relativePath.length() == 0){
+          relativePath += aDirName;
+        }else{
+          relativePath += "/" + aDirName;
+        }
+      }
+      //we have the directory; add the file name
+      if(relativePath.length() == 0){
+        relativePath += new File(target.getPath()).getName();
+      }else{
+        relativePath += "/" + new File(target.getPath()).getName();
+      }
+
+      return relativePath;
+    }else{
+      throw new GateRuntimeException("Both the target and the context URLs " +
+                                     "need to be \"file:\" URLs!");
+    }
+  }
 
   public static void saveObjectToFile(Object obj, File file)
                      throws PersistenceException, IOException {
@@ -350,6 +452,7 @@ public class PersistenceManager {
     long startTime = System.currentTimeMillis();
     if(pListener != null) pListener.progressChanged(0);
     ObjectOutputStream oos = null;
+    persistenceFile = file;
     try{
       //insure a clean start
       existingPersitentReplacements.clear();
@@ -366,6 +469,7 @@ public class PersistenceManager {
       Object persistentObject = getPersistentRepresentation(obj);
       oos.writeObject(persistentObject);
     }finally{
+      persistenceFile = null;
       if(oos != null){
         oos.flush();
         oos.close();
@@ -389,6 +493,7 @@ public class PersistenceManager {
                                 .get("gate.event.StatusListener");
     if(pListener != null) pListener.progressChanged(0);
     long startTime = System.currentTimeMillis();
+    persistenceFile = file;
     ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
     Object res = null;
     try{
@@ -429,6 +534,8 @@ public class PersistenceManager {
       if(sListener != null) sListener.statusChanged("Loading failed!");
       if(pListener != null) pListener.processFinished();
       throw new PersistenceException(ex);
+    }finally{
+      persistenceFile = null;
     }
   }
 
@@ -480,6 +587,12 @@ public class PersistenceManager {
   private static Map existingTransientValues;
 
   private static ClassComparator classComparator = new ClassComparator();
+
+  /**
+   * The file currently used to write/read the persisten representation.
+   * Will only have a non-null value during storing and restorin operations.
+   */
+  static File persistenceFile;
 
   static{
     persistentReplacementTypes = new HashMap();
