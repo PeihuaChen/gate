@@ -1,4 +1,5 @@
-/*
+/*  AnnotationEditor.java
+ *
  *  Copyright (c) 1998-2001, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -240,7 +241,7 @@ public class AnnotationEditor extends AbstractVisualResource {
       annotationSchemas.add(annotSchema);
 
     }catch(Exception e){
-      e.printStackTrace(System.err);
+      e.printStackTrace(Err.getPrintWriter());
     }
   }
 
@@ -1136,7 +1137,7 @@ public class AnnotationEditor extends AbstractVisualResource {
               icon.setImage(image);
             }
           } catch(BadLocationException ble) {
-            ble.printStackTrace(System.err);
+            ble.printStackTrace(Err.getPrintWriter());
           }
 
           removeAll();

@@ -66,7 +66,6 @@ public class BootStrapDialog extends JDialog{
     mainFrame = aMainFrame;
     thisBootStrapDialog = this;
     this.setTitle("BootStrap Wizard");
-    this.setLocationRelativeTo(aMainFrame);
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -347,7 +346,7 @@ public class BootStrapDialog extends JDialog{
                                     JOptionPane.DEFAULT_OPTION);
         thisBootStrapDialog.hide();
       }catch (Exception e){
-        e.printStackTrace(System.err);
+        e.printStackTrace(Err.getPrintWriter());
         JOptionPane.showMessageDialog(mainFrame,
                      e.getMessage() + "\n Resource creation stopped !",
                      "BootStrap error !",

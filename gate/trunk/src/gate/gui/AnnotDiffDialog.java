@@ -81,7 +81,8 @@ class AnnotDiffDialog extends JFrame {
     documentsMap = new HashMap();
 
     CreoleRegister registry =  Gate.getCreoleRegister();
-    ResourceData resourceData = (ResourceData)registry.get("gate.corpora.DocumentImpl");
+    ResourceData resourceData =
+                        (ResourceData)registry.get("gate.corpora.DocumentImpl");
 
     if(resourceData != null && !resourceData.getInstantiations().isEmpty()){
       java.util.List instantiations = resourceData.getInstantiations();

@@ -33,8 +33,6 @@ public class LogArea extends JTextPane {
 
   /** Constructs a LogArea object and captures the output from Err and Out*/
   public LogArea(){
-    this.setEditable(false);
-
     LogAreaOutputStream err = new LogAreaOutputStream(true);
     LogAreaOutputStream out = new LogAreaOutputStream(false);
 
@@ -84,15 +82,14 @@ public class LogArea extends JTextPane {
       char c = (char)charCode;
       // Simulate an Append with insertString. We need the last possition in
       // document.
-      //int startPosition = styledDoc.getLength();
-      int startPosition = 0;
+      int startPosition = styledDoc.getLength();
       // Append it to the log area
       try{
           synchronized(styledDoc){
             styledDoc.insertString(startPosition,String.valueOf(c),style);
           }// End synchronize
       } catch(BadLocationException e){
-        e.printStackTrace(System.err);
+        e.printStackTrace(Err.getPrintWriter());
       }// End try
     }// write(int charCode)
 
@@ -100,8 +97,7 @@ public class LogArea extends JTextPane {
      *  using the style specified in constructor.
      */
     public synchronized void write(byte[] data, int offset, int length){
-      //int startPosition = styledDoc.getLength();
-      int startPosition = 0;
+      int startPosition = styledDoc.getLength();
       // Append the string to the log area
       try{
           synchronized(styledDoc){
@@ -110,7 +106,7 @@ public class LogArea extends JTextPane {
                                     style);
           } // End synchronize
       } catch(BadLocationException e){
-          e.printStackTrace(System.err);
+          e.printStackTrace(Err.getPrintWriter());
       }// End try
     }// write(byte[] data, int offset, int length)
   }//End class LogAreaOutputStream

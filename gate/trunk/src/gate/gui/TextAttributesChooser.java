@@ -13,6 +13,7 @@
  */
 
 package gate.gui;
+import gate.util.*;
 
 import java.awt.*;
 import java.awt.font.*;
@@ -417,7 +418,7 @@ public class TextAttributesChooser extends JDialog {
         public void actionPerformed(ActionEvent e){
           Style style = new StyleContext().addStyle(null,null);
           StyleConstants.setBackground(style, Color.white);
-          System.out.println(dialog.show(style));
+          Out.println(dialog.show(style));
         }
       });
       frame.getContentPane().add(btn);
