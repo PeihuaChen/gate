@@ -152,6 +152,10 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
   // method to update the Document-Coref-data
   private void removeAnnotationsFromCorefData(AnnotationSet annotations, String setName, Map matchesMap) {
+    if(matchesMap == null) {
+      return;
+    }
+
     java.util.List matches = (java.util.List) matchesMap.get(setName);
     if(matches == null)
       return;
