@@ -46,6 +46,9 @@ public class NodeImpl implements Node, Comparable
     return id.compareTo(other.getId());
   } // compareTo
 
+  /** To allow AnnotationSet to revise offsets during editing */
+  void setOffset(Long offset) { this.offset = offset; }
+
   Integer id;
   Long offset;
 }

@@ -193,10 +193,22 @@ public class DocumentImpl implements Document
   /** Get the features associated with this document. */
   public FeatureMap getFeatures() { return features; }
 
-  /** Propagate changes to the document content. */
+  /** Propagate edit changes to the document content and annotations. */
   public void edit(Long start, Long end, DocumentContent replacement)
-  throws InvalidOffsetException {
-    throw new LazyProgrammerException();
+    throws InvalidOffsetException
+  {
+    if(! isValidOffsetRange(start, end))
+      throw new InvalidOffsetException();
+
+    if(content != null)
+      ((DocumentContentImpl) content).edit(start, end, replacement);
+    if(defaultAnnots != null)
+      ((AnnotationSetImpl) defaultAnnots).edit(start, end, replacement);
+    if(namedAnnotSets != null) {
+      Iterator iter = namedAnnotSets.values().iterator();
+      while(iter.hasNext())
+        ((AnnotationSetImpl) iter.next()).edit(start, end, replacement);
+    }
   } // edit(start,end,replacement)
 
   /** Check that an offset is valid */
