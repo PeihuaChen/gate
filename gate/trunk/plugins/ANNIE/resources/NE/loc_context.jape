@@ -62,3 +62,21 @@ annotations.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
 annotations.removeAll(loc);
 }
+
+
+Rule: UnknownLocRegion
+Priority: 50
+(
+ ({Token.string == "at"}|
+  {Token.string == "in"}
+ )
+)
+( 
+ {Unknown}
+):loc
+(
+ {Token.string == ","}
+ {Location.kind == region}
+)
+-->
+ :loc.Location = {rule = "UnknownLocRegion"}
