@@ -21,7 +21,8 @@ import java.beans.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
@@ -29,7 +30,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.*;
 import javax.swing.tree.*;
-
 import gate.*;
 import gate.corpora.DocumentContentImpl;
 import gate.creole.*;
@@ -37,8 +37,6 @@ import gate.event.*;
 import gate.print.JComponentPrinter;
 import gate.swing.*;
 import gate.util.*;
-
-import gnu.regexp.*;
 
 /**
  * This class implements a viewer/editor for the annotations on a document.
@@ -3487,7 +3485,7 @@ Out.prln("NULL size");
       initListeners();
     }
     protected void initLocalData(){
-      patternRE = null;
+      pattern = null;
       nextMatchStartsFrom = 0;
       content = document.getContent().toString();
 
@@ -3501,41 +3499,39 @@ Out.prln("NULL size");
           refresh();
           //remove selection
           textPane.setCaretPosition(textPane.getCaretPosition());
-          boolean done = false;
-          REMatch match;
-          int start = -1;
+          boolean found = false;
+          int start = nextMatchStartsFrom - 1;
           int end = -1;
-          do{
-            match = patternRE.getMatch(content, start +1);
-
-            if(match == null) break;
-            start = match.getStartIndex();
-            end = match.getEndIndex();
-
-            if(wholeWordsChk.isSelected()){
-              //validate the result
-              done = (start == 0 ||
-                      !Character.isLetterOrDigit(content.charAt(start - 1)))
-                            &&
-                     (end == content.length() ||
-                      !Character.isLetterOrDigit(content.charAt(end)));
-            }else done = true;
-          }while(!done);
-          if(match != null){
-            nextMatchStartsFrom = start + 1;
-            //display the result
-            SwingUtilities.getWindowAncestor(textPane).requestFocus();
-            textPane.requestFocus();
-
-            textPane.setCaretPosition(start);
-            textPane.moveCaretPosition(end);
-          }else{
-            JOptionPane.showMessageDialog(
-              searchDialog,
-              "String not found!",
-              "GATE", JOptionPane.INFORMATION_MESSAGE);
-          }
-        }
+          
+          Matcher matcher = pattern.matcher(content);
+          while (matcher.find() && (found == false))
+              {
+                  start = matcher.start();
+                  end = matcher.end();
+                  if (wholeWordsChk.isSelected())
+                      {
+                          //validate the result
+                          found = (start == 0 || !Character.isLetterOrDigit(content.charAt(start - 1)))
+                                  && (end == content.length() || !Character.isLetterOrDigit(content.charAt(end)));
+                      }
+                  else
+                      found = true;
+              }
+                             
+          if (found)
+              {
+                  nextMatchStartsFrom = start + 1;
+                  //display the result
+                  SwingUtilities.getWindowAncestor(textPane).requestFocus();
+                  textPane.requestFocus();
+                  textPane.setCaretPosition(start);
+                  textPane.moveCaretPosition(end);
+              }
+          else
+              {
+                  JOptionPane.showMessageDialog(searchDialog, "String not found!", "GATE", JOptionPane.INFORMATION_MESSAGE);
+              }
+         }
       };
 
 
@@ -3548,43 +3544,40 @@ Out.prln("NULL size");
           refresh();
           //remove selection
           textPane.setCaretPosition(textPane.getCaretPosition());
-          boolean done = false;
-          REMatch match;
-          int start = nextMatchStartsFrom -1;
+          boolean found = false;
+          int start = nextMatchStartsFrom - 1;
           int end = -1;
-
-          do{
-            match = patternRE.getMatch(content, start +1);
-
-            if(match == null) break;
-            start = match.getStartIndex();
-            end = match.getEndIndex();
-
-            if(wholeWordsChk.isSelected()){
-              //validate the result
-              done = (start == 0 ||
-                      !Character.isLetterOrDigit(content.charAt(start - 1)))
-                            &&
-                     (end == content.length() ||
-                      !Character.isLetterOrDigit(content.charAt(end)));
-            }else done = true;
-          }while(!done);
-          if(match != null){
-            nextMatchStartsFrom = start + 1;
-            //display the result
-            SwingUtilities.getWindowAncestor(textPane).requestFocus();
-            textPane.requestFocus();
-
-            textPane.setCaretPosition(start);
-            textPane.moveCaretPosition(end);
-          }else{
-            JOptionPane.showMessageDialog(
-              searchDialog,
-              "String not found!",
-              "GATE", JOptionPane.INFORMATION_MESSAGE);
-          }
-        }
-      };
+          
+          Matcher matcher = pattern.matcher(content);
+          while (matcher.find() && (found == false))
+              {
+                  start = matcher.start();
+                  end = matcher.end();
+                  if (wholeWordsChk.isSelected())
+                      {
+                          //validate the result
+                          found = (start == 0 || !Character.isLetterOrDigit(content.charAt(start - 1)))
+                                  && (end == content.length() || !Character.isLetterOrDigit(content.charAt(end)));
+                      }
+                  else
+                      found = true;
+              }
+                             
+          if (found)
+              {
+                  nextMatchStartsFrom = start + 1;
+                  //display the result
+                  SwingUtilities.getWindowAncestor(textPane).requestFocus();
+                  textPane.requestFocus();
+                  textPane.setCaretPosition(start);
+                  textPane.moveCaretPosition(end);
+              }
+          else
+              {
+                  JOptionPane.showMessageDialog(searchDialog, "String not found!", "GATE", JOptionPane.INFORMATION_MESSAGE);
+              }
+            }
+           };
 
       cancelAction = new AbstractAction("Cancel"){
         {
@@ -3676,29 +3669,27 @@ Out.prln("NULL size");
         findNextAction.setEnabled(true);
 
         //update patternRE
-        try{
-          patternRE = ignoreCaseChk.isSelected() ?
-                      new RE(patternText,  RE.REG_ICASE) :
-                      new RE(patternText);
-        }catch(REException ree){
-          JOptionPane.showMessageDialog(
-            searchDialog,
-            "Invalid pattern!\n" +
-            ree.toString(),
-            "GATE", JOptionPane.ERROR_MESSAGE);
-        }
+        try
+		    {
+		        pattern = ignoreCaseChk.isSelected() ? Pattern.compile(patternText, Pattern.CASE_INSENSITIVE) : Pattern
+		                .compile(patternText);
+		    }
+		catch (Exception ree)
+		    {
+		        JOptionPane.showMessageDialog(searchDialog, "Invalid pattern!\n" + ree.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+		    }
       }else{
         findFirstAction.setEnabled(false);
         findNextAction.setEnabled(false);
       }
 
-      if(patternRE == null){
+      if(pattern == null){
       }
     }
     JTextField patternTextField;
     JCheckBox ignoreCaseChk;
     JCheckBox wholeWordsChk;
-    RE patternRE;
+    Pattern pattern;
     int nextMatchStartsFrom;
     String content;
 

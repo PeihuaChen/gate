@@ -14,8 +14,9 @@
 package gate.util;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import gnu.regexp.*;
 
 /** Some utilities for use with Files and with resources.
   * <P>
@@ -340,32 +341,29 @@ public class Files {
       file = new File(pathFile);
     } catch(NullPointerException npe) {
       npe.printStackTrace(Err.getPrintWriter());
-      //System.exit(1);
     }
-    //generate a regular expression
-    try {
-      RE regexp = new RE("^"+regex);
+      
+      Pattern pattern = Pattern.compile("^"+regex);
+      
       if (file.isDirectory()){
         tab = file.list();
         for (int i=0;i<=tab.length-1;i++){
           String finalPath = pathFile+"/"+tab[i];
-          REMatch m1 = regexp.getMatch(finalPath);
-          if (regexp.getMatch(finalPath) != null){
-            regexfinal.add(finalPath);
-          }
+          Matcher matcher = pattern.matcher(finalPath);
+          if (matcher.matches()){
+              regexfinal.add(finalPath);
+          }         
         }
       }
       else {
         if (file.isFile()){
-          if (regexp.getMatch(pathFile) != null) {
-            regexfinal.add(file.getAbsolutePath());
+            Matcher matcher = pattern.matcher(pathFile);
+            if (matcher.matches()){
+                regexfinal.add(pathFile);
+            }         
         }
       }
-    }
-    } catch(REException ree) {
-      ree.printStackTrace(Err.getPrintWriter());
-      //System.exit(1);
-    }
+
     return regexfinal;
   } //find
 
