@@ -25,6 +25,10 @@ public class DocumentEvent extends GateEvent {
   /**Event type used to mark the removal of an {@link gate.AnnotationSet}*/
   public static final int ANNOTATION_SET_REMOVED = 102;
 
+  /**Event type used to mark the editing of the document content
+   */
+  public static final int CONTENT_EDITED = 103;
+  
   /**
    * Constructor.
    * @param source the document that has been changed
@@ -38,6 +42,19 @@ public class DocumentEvent extends GateEvent {
   }
 
   /**
+   * Constructor.
+   * @param source the document that has been changed
+   * @param type the type of the event
+   * @param editStart the offset where the edit operation started
+   * @param editEnd the offset where the edit operation ended
+   */
+  public DocumentEvent(Document source, int type, Long editStart, Long editEnd) {
+    super(source, type);
+    this.editStart = editStart;
+    this.editEnd = editEnd;
+  }
+  
+  /**
    * Gets the name of the {@link gate.AnnotationSet} that has been added or
    * removed.
    */
@@ -45,6 +62,20 @@ public class DocumentEvent extends GateEvent {
     return annotationSetName;
   }
 
+  /**
+   * @return Returns the editEnd.
+   */
+  public Long getEditEnd(){
+    return editEnd;
+  }
+  
+  /**
+   * @return Returns the editStart.
+   */
+  public Long getEditStart(){
+    return editStart;
+  }
   private String annotationSetName;
-
+  private Long editStart;
+  private Long editEnd;
 }
