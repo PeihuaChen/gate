@@ -36,6 +36,7 @@ public class NewResourceDialog extends JDialog {
     initLocalData();
     initGuiComponents();
     initListeners();
+    setLocationRelativeTo(frame);
   }// public NewResourceDialog(Frame frame, String title, boolean modal)
 
   public void dispose(){
@@ -129,7 +130,6 @@ public class NewResourceDialog extends JDialog {
   public synchronized boolean show(ResourceData rData, String aTitle) {
     this.resourceData = rData;
     if (aTitle != null) setTitle(aTitle);
-    setLocationRelativeTo(getParent());
     nameField.setText("");
     parametersEditor.init(null,
                           rData.getParameterList().getInitimeParameters());
@@ -140,6 +140,7 @@ public class NewResourceDialog extends JDialog {
     userCanceled = true;
     setModal(true);
     super.setVisible(true);
+    setLocationRelativeTo(getParent());
     if(userCanceled) return false;
     else return true;
   }//show();
@@ -156,7 +157,6 @@ public class NewResourceDialog extends JDialog {
 
   public synchronized void show(ResourceData rData) {
     this.resourceData = rData;
-    setLocationRelativeTo(getParent());
     nameField.setText("");
     parametersEditor.init(null,
                           rData.getParameterList().getInitimeParameters());
@@ -169,6 +169,7 @@ public class NewResourceDialog extends JDialog {
     userCanceled = true;
 //    setModal(true);
     super.setVisible(true);
+    setLocationRelativeTo(getParent());
     if(userCanceled) return;
     else{
       Runnable runnable = new Runnable(){
