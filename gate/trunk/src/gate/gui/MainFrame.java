@@ -1149,6 +1149,7 @@ public class MainFrame extends JFrame
     }
     if(fileChooser == null){
       fileChooser = new JFileChooser();
+javax.swing.plaf.basic.BasicFileChooserUI uiii;
       fileChooser.setMultiSelectionEnabled(false);
     }
     iconByName = new HashMap();
