@@ -375,20 +375,17 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
 // >>> DAM: TransArray optimization
     while(charIdx < length) {
       currentChar = content.charAt(charIdx);
-      if(Character.isWhitespace(currentChar))
-        currentChar = ' ';
-      else currentChar = (caseSensitive.booleanValue()) ?
-                         currentChar :
-                         Character.toUpperCase(currentChar);
+      if(Character.isWhitespace(currentChar)) currentChar = ' ';
+      else currentChar = caseSensitive.booleanValue() ?
+                          currentChar :
+                          Character.toUpperCase(currentChar);
 // >>> DAM, end
       nextState = currentState.next(currentChar);
       if(nextState == null) {
         //the matching stopped
-        if(null != lastMatchingState &&
-           !Character.isLetter(content.charAt(matchedRegionEnd + 1)) &&
-           (matchedRegionStart == 0 ||
-           !Character.isLetter(content.charAt(matchedRegionStart - 1))
-           )){
+
+        //if we had a successful match then act on it;
+        if(lastMatchingState != null){
           //let's add the new annotation(s)
           Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
 
@@ -409,23 +406,61 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
             } catch(InvalidOffsetException ioe) {
               throw new LuckyException(ioe.toString());
             }
-
           }//while(lookupIter.hasNext())
-
+          lastMatchingState = null;
         }
 
-        lastMatchingState = null;
+        //reset the FSM
         charIdx = matchedRegionStart + 1;
         matchedRegionStart = charIdx;
         currentState = initialState;
 
       } else{//go on with the matching
         currentState = nextState;
-        if(currentState.isFinal()) {
+        //if we have a successful state then store it
+        if(currentState.isFinal() &&
+           (matchedRegionStart == 0 ||
+            !Character.isLetter(content.charAt(matchedRegionStart - 1))) &&
+           (charIdx + 1 >= content.length()   ||
+            !Character.isLetter(content.charAt(charIdx + 1)))
+          ){
           matchedRegionEnd = charIdx;
           lastMatchingState = currentState;
         }
         charIdx ++;
+        if(charIdx == content.length()){
+          //we can't go on, use the last matching state and restart matching
+          //from the next char
+          if(lastMatchingState != null){
+            //let's add the new annotation(s)
+            Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
+
+            while(lookupIter.hasNext()) {
+              currentLookup = (Lookup)lookupIter.next();
+              fm = Factory.newFeatureMap();
+              fm.put("majorType", currentLookup.majorType);
+              if(null != currentLookup.minorType) {
+                fm.put("minorType", currentLookup.minorType);
+                if(null != currentLookup.languages)
+                  fm.put("language", currentLookup.languages);
+              }
+              try {
+                annotationSet.add(new Long(matchedRegionStart),
+                                new Long(matchedRegionEnd + 1),
+                                "Lookup",
+                                fm);
+              } catch(InvalidOffsetException ioe) {
+                throw new LuckyException(ioe.toString());
+              }
+            }//while(lookupIter.hasNext())
+            lastMatchingState = null;
+          }
+
+          //reset the FSM
+          charIdx = matchedRegionStart + 1;
+          matchedRegionStart = charIdx;
+          currentState = initialState;
+        }
       }
       if(charIdx - oldCharIdx > 256) {
         fireProgressChanged((100 * charIdx )/ length );
@@ -436,13 +471,7 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
       }
     } // while(charIdx < length)
 
-    if(null != lastMatchingState &&
-       (  matchedRegionEnd +1 == content.length()   ||
-          !Character.isLetter(content.charAt(matchedRegionEnd + 1))
-        )  &&
-       (  matchedRegionStart == 0 ||
-          !Character.isLetter(content.charAt(matchedRegionStart - 1))
-        )) {
+    if(lastMatchingState != null) {
       Iterator lookupIter = lastMatchingState.getLookupSet().iterator();
       while(lookupIter.hasNext()) {
         currentLookup = (Lookup)lookupIter.next();
@@ -461,8 +490,8 @@ public class DefaultGazetteer extends AbstractLanguageAnalyser
       }//while(lookupIter.hasNext())
     }
     fireProcessFinished();
-    fireStatusChanged("Tokenisation complete!");
-  } // run
+    fireStatusChanged("Lookup complete!");
+  } // execute
 
 
   /**
