@@ -11,7 +11,7 @@ clear buffer
 pause >>>>>> Indexes successfully  created. Press ENTER to continue...
 clear buffer
  
-@../../../src/database/Oracle/views.sql
+@createView.sql
 pause >>>>>> Views successfully  created. Press ENTER to continue...
 clear buffer
 
