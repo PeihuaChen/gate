@@ -42,7 +42,7 @@ Rule: Ldots
  THREEDOTS (FULLSTOP)+
 ):fake
 -->
-:fake.Ldots = {rule = Ldots}
+{}
 
 Rule: Split1
 (
@@ -73,7 +73,7 @@ Rule:Fake
  ({Token.kind == word}|{Token.kind == number})
 ):fake
 -->
-:fake.Fake = {rule = "Fake"}
+{}
 
 
 Rule: Abbrev1
