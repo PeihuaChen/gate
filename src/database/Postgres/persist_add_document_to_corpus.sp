@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION persist_add_document_to_corpus(int4,int4) RETURNS boo
          insert into t_corpus_document(cd_id,
                                        cd_corp_id,
                                        cd_doc_id)
-         values (nextval(''SEQ_CD_ID''),
+         values (nextval(''seq_corpus_document''),
                  l_corp_id,
                  l_doc_id);
       end if;

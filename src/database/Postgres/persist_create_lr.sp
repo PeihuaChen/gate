@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4
                                  lr_name,
                                  lr_access_mode,
                                  lr_parent_id)
-     values (nextval(''SEC_LR_ID''),
+     values (nextval(''seq_lang_resource''),
             l_lr_type,
             p_usr_id,
             null,
@@ -67,8 +67,8 @@ CREATE OR REPLACE FUNCTION persist_create_lr(int4,int4,varchar,varchar,int2,int4
             p_lr_permissions,
             p_lr_parent_id);
 
-            /* get ID */
-     select currval(''SEC_LR_ID'')
+     /* get ID */
+     select currval(''seq_lang_resource'')
      into l_lr_id;
 
      return l_lr_id;

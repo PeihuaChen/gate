@@ -34,12 +34,12 @@ CREATE OR REPLACE FUNCTION security_create_user(varchar,varchar) RETURNS int4 AS
       insert into t_user(usr_id,
                          usr_login,
                          usr_pass)
-      values(nextval(''SEQ_USR_ID''),
+      values(nextval(''seq_user''),
              p_usr_name,
              p_usr_pass);
 
       /* get ID */
-      return currval(''SEQ_USR_ID'');
+      return currval(''seq_user'');
 
    END;
 '

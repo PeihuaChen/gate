@@ -43,10 +43,10 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
          /* 2. if there is no such key then create one and get the id */
          insert into t_feature_key(fk_id,
                                    fk_string)
-         values(nextval(''SEQ_FK_ID''),
+         values(nextval(''seq_feature_key''),
                 p_key);
 
-         l_feature_key_id := currval(''SEQ_FK_ID'');
+         l_feature_key_id := currval(''seq_feature_key'');
 
       end if;
 
@@ -59,7 +59,7 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
                             ft_character_value,
                             ft_long_character_value,
                             ft_value_type)
-      values(nextval(''SEQ_FT_ID''),
+      values(nextval(''seq_feature''),
              p_entity_id,
              p_entity_type,
              l_feature_key_id,
@@ -69,7 +69,7 @@ CREATE OR REPLACE FUNCTION persist_create_feature(int4,int2,varchar,int4,varchar
              null /*empty_clob()*/,
              p_value_type);
 
-      return currval(''SEQ_FT_ID'');
+      return currval(''seq_feature_key'');
 
    END;
 '

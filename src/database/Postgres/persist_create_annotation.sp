@@ -76,13 +76,13 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
                                node_doc_id,
                                node_local_id,
                                node_offset)
-            values (nextval(''SEQ_NODE_GLOBAL_ID''),
+            values (nextval(''seq_node''),
                     l_doc_id,
                     p_node_start_lid,
                     p_node_start_offset);
 
             /* get ID */
-            l_start_node_gid := currval(''SEQ_NODE_GLOBAL_ID'');
+            l_start_node_gid := currval(''seq_node'');
 
          end if;
 
@@ -101,12 +101,12 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
                                node_doc_id,
                                node_local_id,
                                node_offset)
-            values (nextval(''SEQ_NODE_GLOBAL_ID''),
+            values (nextval(''seq_node''),
                     l_doc_id,
                     p_node_end_lid,
                     p_node_end_offset)
             /* get ID */
-            l_end_node_gid := currval(''SEQ_NODE_GLOBAL_ID'');
+            l_end_node_gid := currval(''seq_node'');
 
          end if;
 
@@ -125,11 +125,11 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
             */
             insert into t_annotation_type(at_id,
                                           at_name)
-            values (nextval(''SEQ_AT_ID''),
+            values (nextval(''seq_annotation_type''),
                     p_ann_type);
 
             /* get ID */
-            l_ann_type_id := currval(''SEQ_AT_ID'');
+            l_ann_type_id := currval(''seq_annotation_type'');
 
          end if;
 
@@ -140,14 +140,14 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
                                   ann_at_id,
                                   ann_startnode_id,
                                   ann_endnode_id)
-         values (nextval(''SEQ_ANN_GLOBAL_ID''),
+         values (nextval(''seq_annotation''),
                  l_doc_id,
                  p_ann_local_id,
                  l_ann_type_id,
                  l_start_node_gid,
                  l_end_node_gid);
 
-         l_ann_global_id :=curval(''SEQ_ANN_GLOBAL_ID'');
+         l_ann_global_id :=curval(''seq_annotation'');
 
       end if;
 
@@ -155,7 +155,7 @@ CREATE OR REPLACE FUNCTION persist_create_annotation(int4,int4,int4,int4,int4,in
      insert into t_as_annotation(asann_id,
                                  asann_ann_id,
                                  asann_as_id)
-     values (nextval(''SEQ_ASANN_ID''),
+     values (nextval(''seq_annotation''),
              p_ann_global_id,
              p_as_id);
 

@@ -32,12 +32,12 @@ CREATE OR REPLACE FUNCTION security_create_group(varchar) RETURNS int4 AS '
     
       insert into t_group(grp_id,
                           grp_name)
-      values(nextval(''SEQ_GRP_ID''),
+      values(nextval(''seq_group''),
              p_grp_name);
 
       /* get ID */
-      
-      return currval(''SEQ_GRP_ID'');
+
+      return currval(''seq_group'');
 
    END;
 ' LANGUAGE 'plpgsql'

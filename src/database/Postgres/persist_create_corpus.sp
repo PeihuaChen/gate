@@ -21,10 +21,10 @@ CREATE OR REPLACE FUNCTION persist_create_corpus(int4) RETURNS int4 AS '
    BEGIN
       insert into t_corpus(corp_id,
                            corp_lr_id)
-      values (nextval(''SEQ_CORP_ID''),
+      values (nextval(''seq_corpus''),
               p_lr_id);
 
-      return currval(''SEQ_CORP_ID'');
+      return currval(''seq_corpus'');
 
    END;
 '

@@ -58,10 +58,10 @@ RETURNS int4 AS   '
          add it */
          insert into t_doc_encoding(enc_id,
                                       enc_name)
-         values (nextval(''SEQ_ENC_ID''),l_encoding);
+         values (nextval(''seq_doc_encoding''),l_encoding);
 
          /* get the ID */
-         select currval(''SEQ_ENC_ID'')
+         select currval(''seq_doc_encoding'')
          into l_encoding_id;
 
       else
@@ -80,14 +80,14 @@ RETURNS int4 AS   '
                                dc_character_content,
                                dc_binary_content,
                                dc_content_type)
-      values(nextval(''SEQ_DC_ID''),
+      values(nextval(''seq_doc_content''),
              l_encoding_id,
              null /*empty_clob()*/,
              null /*empty_blob()*/,
              0 /*persist.EMPTY_CONTENT*/);
 
       /* get the ID */
-      select currval(''SEQ_DC_ID'')
+      select currval(''seq_doc_content'')
       into l_content_id;
 
       /* --2. create a document entry */
@@ -98,7 +98,7 @@ RETURNS int4 AS   '
                              doc_start,
                              doc_end,
                              doc_is_markup_aware)
-      values(nextval(''SEQ_DOC_ID''),
+      values(nextval(''seq_document''),
              l_content_id,
              p_lr_id,
              p_url,
@@ -106,7 +106,7 @@ RETURNS int4 AS   '
              p_end_offset,
              p_is_mrk_aware);
       /* get the ID */
-      select currval(''SEQ_DOC_ID'')
+      select currval(''seq_document'')
       into l_doc_id;
 
       /* --3. if part of a corpus create a corpus_document entry */
@@ -114,7 +114,7 @@ RETURNS int4 AS   '
          insert into t_corpus_document(cd_id,
                                        cd_corp_id,
                                        cd_doc_id)
-         values (nextval(''SEQ_CD_ID''),
+         values (nextval(''seq_document''),
                  p_corpus_id,
                  l_doc_id);
       end if;
