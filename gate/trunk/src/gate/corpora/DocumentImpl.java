@@ -1239,7 +1239,7 @@ extends AbstractLanguageResource implements Document {
   private transient Vector documentListeners;
   private transient Vector gateListeners;
   private String stringContent;
-  private Boolean markupAware = new Boolean(false);
+  protected Boolean markupAware = new Boolean(false);
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
       Vector listeners = statusListeners;
