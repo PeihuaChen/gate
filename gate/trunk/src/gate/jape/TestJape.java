@@ -76,8 +76,8 @@ public class TestJape extends TestCase
     batch.transduce(c);
     // check the results
     doc = (Document)c.first();
-    defaultAS = doc.getAnnotations();
-    System.out.println(defaultAS);
+//    defaultAS = doc.getAnnotations();
+//    System.out.println(defaultAS);
   } // testBatch()
 
   /** Test suite routine for the test runner */
