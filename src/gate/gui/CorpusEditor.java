@@ -90,6 +90,12 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
           int row = documentsList.locationToIndex(e.getPoint());
           if(row != -1){
             Document doc = (Document) corpus.get(row);
+            //try to select the document in the main frame
+            Component root = SwingUtilities.getRoot(CorpusEditor.this);
+            if(root instanceof MainFrame){
+              MainFrame mainFrame = (MainFrame)root;
+              mainFrame.select(doc);
+            }
           }
         }
       }
