@@ -101,6 +101,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
     * feature name.It will return null if the feature name is not found.
     */
   public FeatureSchema getFeatureSchema(String featureName) {
+    if(featureSchemaSet == null) return null;
     Iterator fsIterator = featureSchemaSet.iterator();
     while (fsIterator.hasNext()) {
       FeatureSchema fs = (FeatureSchema) fsIterator.next();
