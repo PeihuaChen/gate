@@ -430,7 +430,6 @@ extends Transducer implements JapeConstants, java.io.Serializable
     int lastNodeOff = lastNode.getOffset().intValue();
     int startNodeOff;
     //the big while for the actual parsing
-    // Cristi's comment : Shouldn't we check for !startNode.equals(lastNode) ?
     while(startNode != lastNode){
       //while there are more annotations to parse
       //create initial active FSM instance starting parsing from new startNode
