@@ -1909,7 +1909,7 @@ extends AbstractLanguageResource implements TextualDocument, CreoleListener,
   protected DocumentContent content;
 
   /** The encoding of the source of the document content */
-  protected String encoding = "UTF-8";
+  protected String encoding = null;
 
   // Data needed in toXml(AnnotationSet) methos
 
