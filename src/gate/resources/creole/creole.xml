@@ -506,6 +506,9 @@
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true"
       OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="useStandOffXML" OPTIONAL="true" DEFAULT="false"
+        COMMENT="Whether to export to stand-off XML rather than inline annotations">
+        java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="annotationTypes" RUNTIME="true"
       DEFAULT="Person;Location;Date">java.util.ArrayList</PARAMETER>
       <PARAMETER NAME="dumpTypes" RUNTIME="true" OPTIONAL="true"
