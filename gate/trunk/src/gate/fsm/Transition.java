@@ -28,7 +28,13 @@ import java.io.*;
   * A transition can also hold information about the label that should be bound
   * to the symbols (annotations) consumed during the state transition.
   */
+// >>> DAM
+/*
 public class Transition implements Serializable {
+*/
+// >>> DAM, TransArray optimzation, now implements the Comparable interface
+public class Transition implements Serializable, Comparable {
+// >>> DAM, end
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -130,4 +136,12 @@ public class Transition implements Serializable {
     * Transition*/
   private static int index = 0;
 
+// >>> DAM, TransArray optimzation, now implements the Comparable interface
+  public int compareTo(Object o)
+  throws ClassCastException
+  {
+    if (!(o instanceof Transition)) throw new ClassCastException("gate.frm.Transition(compareTo)");
+    return myIndex - ((Transition)o).myIndex;
+  }
+// >>> DAM, end
 } // Transition
