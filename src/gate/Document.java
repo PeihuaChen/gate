@@ -34,16 +34,6 @@ public interface Document extends LanguageResource, Comparable {
    */
   public void setSourceUrl(URL sourceUrl);
 
-  /** Get method for the document's URL name (i.e. the string that
-   *  describes the URL).
-   */
-  public String getSourceUrlName();
-
-  /** Set method for the document's URL name (i.e. the string that
-   *  describes the URL).
-   */
-  public void setSourceUrlName(String sourceUrlName);
-
   /** Documents may be packed within files; in this case an optional pair of
    *  offsets refer to the location of the document.
    */

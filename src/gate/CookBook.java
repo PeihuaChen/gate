@@ -151,10 +151,7 @@ public class CookBook extends TestCase
 
     // to create a document we need a sourceUrlName parameter giving
     // the location of the source for the document content
-    params.put(
-      "sourceUrlName",
-      Gate.getUrl("tests/doc0.html").toExternalForm()
-    );
+    params.put("sourceUrl", Gate.getUrl("tests/doc0.html"));
     params.put("markupAware", new Boolean(true));
     Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
 
@@ -202,8 +199,8 @@ public class CookBook extends TestCase
       Document doc = (Document) iter.next();
       assert(
         "document url not as expected",
-        doc.getSourceUrlName().endsWith("doc0.html") ||
-          doc.getSourceUrlName().endsWith("test1.htm")
+        doc.getSourceUrl().toExternalForm().endsWith("doc0.html") ||
+          doc.getSourceUrl().toExternalForm().endsWith("test1.htm")
       );
     } // while
 

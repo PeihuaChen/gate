@@ -326,7 +326,7 @@ public abstract class Factory
   throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
-    parameterValues.put("sourceUrlName", sourceUrl.toExternalForm());
+    parameterValues.put("sourceUrl", sourceUrl);
     return
       (Document) createResource("gate.corpora.DocumentImpl", parameterValues);
   } // newDocument(URL)
@@ -336,7 +336,7 @@ public abstract class Factory
   throws ResourceInstantiationException
   {
     FeatureMap parameterValues = newFeatureMap();
-    parameterValues.put("sourceUrlName", sourceUrl.toExternalForm());
+    parameterValues.put("sourceUrl", sourceUrl);
     parameterValues.put("encoding", encoding);
     return
       (Document) createResource("gate.corpora.DocumentImpl", parameterValues);
@@ -346,13 +346,15 @@ public abstract class Factory
   public static Document newDocument(String content)
   throws ResourceInstantiationException
   {
+    FeatureMap params = newFeatureMap();
+    params.put("stringContent", content);
     Document doc =
-      (Document) createResource("gate.corpora.DocumentImpl", newFeatureMap());
-
+      (Document) createResource("gate.corpora.DocumentImpl", params);
+/*
     // laziness: should fit this into createResource by adding a new
     // document parameter, but haven't time right now...
     doc.setContent(new DocumentContentImpl(content));
-
+*/
     // various classes are in the habit of assuming that a document
     // inevitably has a source URL...  so give it a dummy one
     try {
