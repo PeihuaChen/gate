@@ -237,7 +237,8 @@ create or replace package body test is
      delete from t_as_annotation;
      delete from t_annotation;
      delete from t_annot_set;
-     
+     delete from t_annotation_type;
+          
      --delete nodes
      delete from t_node;
      
