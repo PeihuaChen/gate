@@ -4,6 +4,7 @@
 
 package gate.util;
 import java.io.*;
+import java.util.*;
 
 /** Some utilities for use with Files. */
 public class Files {
@@ -63,10 +64,28 @@ public class Files {
     InputStream resourceInputStream = getResourceAsStream(resourceName);
     BufferedInputStream resourceStream =
       new BufferedInputStream(resourceInputStream);
-    int len = resourceStream.available();
-    byte[] bytes = new byte[len];
-    resourceStream.read(bytes, 0, len);
-    resourceStream.close();
+    byte b;
+    final int bufSize = 1024;
+    byte[] buf = new byte[bufSize];
+    int i = 0;
+
+    // get the whole resource into buf (expanding the array as needed)
+    while( (b = (byte) resourceStream.read()) != -1 ) {
+      if(i == buf.length) {
+        byte[] newBuf = new byte[buf.length * 2];
+
+        for(int j=0; j<i; j++)
+          newBuf[j] = buf[j];
+        buf = newBuf;
+      }
+
+      buf[i++] = b;
+    }
+
+    // copy the contents of buf to an array of the correct size
+    byte[] bytes = new byte[i];
+    for(int j=0; j<i; j++)
+      bytes[j] = buf[j];
 
     return bytes;
   } // getResourceAsByteArray(String)
