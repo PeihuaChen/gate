@@ -545,45 +545,6 @@ public class PostgresDataStore extends JDBCDataStore {
   }
 
 
-  /** writes the content of a String into the specified CLOB object */
-  public static void writeCLOB(String src,java.sql.Clob dest)
-    throws SQLException, IOException {
-
-    throw new MethodNotImplementedException();
-/*    //preconditions
-    Assert.assertNotNull(src);
-
-    //1. get Oracle CLOB
-    CLOB clo = (CLOB)dest;
-
-    //2. get Unicode stream
-    Writer output = clo.getCharacterOutputStream();
-
-    //3. write
-    BufferedWriter buffOutput = new BufferedWriter(output,INTERNAL_BUFFER_SIZE);
-    buffOutput.write(src.toString());
-
-    //4. flushing is a good idea [although BufferedWriter::close() calls it this is
-    //implementation specific]
-    buffOutput.flush();
-    output.flush();
-
-    //5.close streams
-    buffOutput.close();
-    output.close();
-*/
-  }
-
-
-
-  /** writes the content of a StringBuffer into the specified CLOB object */
-  public static void writeCLOB(StringBuffer src,java.sql.Clob dest)
-    throws SQLException, IOException {
-
-    //delegate
-    writeCLOB(src.toString(),dest);
-  }
-
 
 
   /**
@@ -1203,13 +1164,30 @@ public class PostgresDataStore extends JDBCDataStore {
     return fm;
   }
 
+
   /**
    *  helper method for delete()
    *  never call it directly beause proper events will not be fired
    */
   protected void deleteDocument(Long lrId)
   throws PersistenceException {
-    throw new MethodNotImplementedException();
+    //0. preconditions
+    Assert.assertNotNull(lrId);
+
+    PreparedStatement pstmt = null;
+
+    //1. delete from DB
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_delete_document(?) ");
+      pstmt.setLong(1,lrId.longValue());
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
   }
 
   /**
@@ -1218,8 +1196,24 @@ public class PostgresDataStore extends JDBCDataStore {
    */
   protected void deleteCorpus(Long lrId)
     throws PersistenceException {
-    throw new MethodNotImplementedException();
+
+    Long ID = (Long)lrId;
+
+    PreparedStatement pstmt = null;
+
+    try {
+      pstmt = this.jdbcConn.prepareStatement("select persist_delete_corpus(?)");
+      pstmt.setLong(1,ID.longValue());
+      pstmt.execute();
+    }
+    catch(SQLException sqle) {
+      throw new PersistenceException("can't delete LR from DB: ["+ sqle.getMessage()+"]");
+    }
+    finally {
+      DBHelper.cleanup(pstmt);
+    }
   }
+
 
 
 }
