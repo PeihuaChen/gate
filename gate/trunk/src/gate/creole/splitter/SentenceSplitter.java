@@ -151,6 +151,13 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     if(inputAS != outputAS){
       outputAS.addAll(inputAS.get("Sentence"));
     }
+
+    //create one big sentence if none were found
+    AnnotationSet sentences = outputAS.get("Sentence");
+    if(sentences == null || sentences.isEmpty()){
+      outputAS.add(outputAS.firstNode(), outputAS.lastNode(),
+                   "Sentence", Factory.newFeatureMap());;
+    }
     fireProcessFinished();
   }//execute()
 
