@@ -261,42 +261,6 @@ public class ShellSlacFrame extends MainFrame {
     SwingUtilities.invokeLater(run);
   } // createDefaultApplication
 
-  /** Load application from file */  
-  public class ApplicationLoadRun implements Runnable {
-    private String appURL;
-    public ApplicationLoadRun(String url) {
-      appURL = url;
-    }
-    
-    public void run(){
-      File file = new File(appURL);  
-      
-      if( file.exists() ) 
-        try {
-          gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
-        } catch (PersistenceException pex) {
-          pex.printStackTrace();
-        } catch (ResourceInstantiationException riex) {
-          riex.printStackTrace();
-        } catch (IOException ioex) {
-          ioex.printStackTrace();
-        } // catch
-    } // run
-  } // class ApplicationLoadRun implements Runnable 
-
-  /** Create default ANNIE */
-  public class ANNIERunnable implements Runnable {
-    MainFrame parentFrame;
-    ANNIERunnable(MainFrame parent) {
-      parentFrame = parent;
-    }
-    
-    public void run(){
-      AbstractAction action = new LoadANNIEWithDefaultsAction();
-      action.actionPerformed(new ActionEvent(parentFrame, 1, "Load ANNIE"));
-    }
-  } // ANNIERunnable
-  
   /** Create corpus for application */
   private void createCorpus() {
     try {
@@ -798,6 +762,58 @@ public class ShellSlacFrame extends MainFrame {
     } // run()
   } // ExportAllRunnable
 
+  /** Load application from file */  
+  private class ApplicationLoadRun implements Runnable {
+    private String appURL;
+    public ApplicationLoadRun(String url) {
+      appURL = url;
+    }
+    
+    public void run(){
+      File file = new File(appURL);
+      boolean appLoaded = false;  
+      
+      if( file.exists() ) {
+        try {
+          gate.util.persistence.PersistenceManager.loadObjectFromFile(file);
+          appLoaded = true;
+        } catch (PersistenceException pex) {
+          pex.printStackTrace();
+        } catch (ResourceInstantiationException riex) {
+          riex.printStackTrace();
+        } catch (IOException ioex) {
+          ioex.printStackTrace();
+        } // catch
+      } // if
+
+      if(!appLoaded) {
+        // file do not exist. Show a message
+        JOptionPane.showMessageDialog(ShellSlacFrame.this, 
+            "The application file '"+appURL+"'\n"
+            +"from parameter -Dgate.slug.app\n"
+            +"is missing or corrupted."
+            +"Create default application.", 
+            "Load application error",
+            JOptionPane.WARNING_MESSAGE);
+            
+        createDefaultApplication();
+      } // if
+    } // run
+  } // class ApplicationLoadRun implements Runnable 
+
+  /** Create default ANNIE */
+  public class ANNIERunnable implements Runnable {
+    MainFrame parentFrame;
+    ANNIERunnable(MainFrame parent) {
+      parentFrame = parent;
+    }
+    
+    public void run(){
+      AbstractAction action = new LoadANNIEWithDefaultsAction();
+      action.actionPerformed(new ActionEvent(parentFrame, 1, "Load ANNIE"));
+    }
+  } // ANNIERunnable
+  
   /** Dummy Help About dialog */
   class HelpAboutSlugAction extends AbstractAction {
     public HelpAboutSlugAction() {
