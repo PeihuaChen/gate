@@ -247,15 +247,55 @@ public class ResourceData extends AbstractFeatureBearer {
     * TYPE and TITLE).
     */
   public void addView(FeatureMap viewFeatures) {
-    views.add(viewFeatures);
+    String small = (String) viewFeatures.get("SMALL");
+    if(small != null && small.toUpperCase().equals("TRUE"))
+      smallViews.add(viewFeatures);
+    else
+      views.add(viewFeatures);
   } // addView(FeatureMap)
 
   /** Get the views registered for this resource. Each member of the
     * list is a FeatureMap with a TYPE attribute giving the class name
     * of the viewer. Other data to be passed to the viewer is present as
     * other features on the map.
+    * <P>
+    * This list excludes views that have the SMALL attribute set true.
     */
   public List getViews() { return views; }
+
+  /** Get the views registered for this resource. Each member of the
+    * list is a FeatureMap with a TYPE attribute giving the class name
+    * of the viewer. Other data to be passed to the viewer is present as
+    * other features on the map.
+    * <P>
+    * This list contains only those views that have the SMALL attribute
+    * set true.
+    */
+  public List getSmallViews() { return smallViews; }
+
+  /** Get all the (not small) views of this resource and those Resource classes
+    * that it inherits from. The method uses reflection to traverse the
+    * inheritance tree as far as gate.Resource; for each inherited class,
+    * if it is itself a resource, its views are added to the list.
+    * <P>
+    * Each member of the
+    * list is a FeatureMap with a TYPE attribute giving the class name
+    * of the vcvs upiewer. Other data to be passed to the viewer is present as
+    * other features on the map.
+    */
+  public List getAllViews() { return getAllViews(false); }
+
+  /** Get all the small views of this resource and those Resource classes that
+    * it inherits from. The method uses reflection to traverse the
+    * inheritance tree as far as gate.Resource; for each inherited class,
+    * if it is itself a resource, its views are added to the list.
+    * <P>
+    * Each member of the
+    * list is a FeatureMap with a TYPE attribute giving the class name
+    * of the vcvs upiewer. Other data to be passed to the viewer is present as
+    * other features on the map.
+    */
+  public List getAllSmallViews() { return getAllViews(true); }
 
   /** Get all the views of this resource and those Resource classes that
     * it inherits from. The method uses reflection to traverse the
@@ -266,13 +306,17 @@ public class ResourceData extends AbstractFeatureBearer {
     * list is a FeatureMap with a TYPE attribute giving the class name
     * of the vcvs upiewer. Other data to be passed to the viewer is present as
     * other features on the map.
+    * @param small If true then small views are returned; else non-small views
     */
-  public List getAllViews() {
+  public List getAllViews(boolean small) {
     List allViews = new ArrayList();
     CreoleRegister reg = Gate.getCreoleRegister();
 
     // add all the views for the current class
-    allViews.addAll(views);
+    if(small)
+      allViews.addAll(smallViews);
+    else
+      allViews.addAll(views);
 
     // get the class for this resource or give up
     Class resClass = null;
@@ -293,15 +337,21 @@ public class ResourceData extends AbstractFeatureBearer {
           (ResourceData) reg.get(superClass.getName());
         if(superResData == null) continue;
 
-        allViews.addAll(superResData.getViews());
+        if(small)
+          allViews.addAll(superResData.getSmallViews());
+        else
+          allViews.addAll(superResData.getViews());
       }
     } // for
 
     return allViews;
-  } // getAllViews()
+  } // getAllViews(boolean)
 
   /** The list of views registered for this resource */
   protected List views = new ArrayList();
+
+  /** The list of small views registered for this resource */
+  protected List smallViews = new ArrayList();
 
   /** Is this a valid resource data configuration? If not, leave an
     * error message that can be returned by <TT>getValidityMessage()</TT>.
