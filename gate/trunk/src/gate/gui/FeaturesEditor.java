@@ -86,6 +86,10 @@ public class FeaturesEditor extends AbstractVisualResource{
 
     addNewBtn = new JButton("Add feature");
     box.add(addNewBtn);
+    box.add(Box.createHorizontalStrut(5));
+
+    delBtn = new JButton("Delete");
+    box.add(delBtn);
 
     this.add(box);
     this.add(Box.createVerticalGlue());
@@ -99,6 +103,19 @@ public class FeaturesEditor extends AbstractVisualResource{
         String value = newValueField.getText();
         if(name != null){
           features.put(name, value);
+          tableModel.fireTableDataChanged();
+          newFeatureField.setText("");
+          newValueField.setText("");
+        }
+      }
+    });
+
+    delBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        String name = newFeatureField.getText();
+        String value = newValueField.getText();
+        if(name != null){
+          features.remove(name);
           tableModel.fireTableDataChanged();
           newFeatureField.setText("");
           newValueField.setText("");
@@ -151,6 +168,7 @@ public class FeaturesEditor extends AbstractVisualResource{
   JTextField newValueField;
 
   JButton addNewBtn;
+  JButton delBtn;
 
   class FeaturesTableModel extends AbstractTableModel{
     public int getColumnCount(){
