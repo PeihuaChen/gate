@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import gate.util.*;
+
 /**
  * The handler for the "gate://" URLs.
  * All this class does is to transparently transform a "gate://" URL into
