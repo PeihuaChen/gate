@@ -9,6 +9,7 @@
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Hamish Cunningham, 7/Feb/2000
+ *  borislav popov, 25/Mar/2002
  *
  *  $Id$
  */
@@ -16,8 +17,15 @@
 package gate.util;
 
 import java.util.*;
+import java.net.*;
+
 import gate.*;
 import gate.event.*;
+//import gate.creole.*;
+import gate.creole.ontology.*;
+
+import com.ontotext.gate.ontology.*;
+
 /** Simple case of features. */
 //>>> DAM: was (derived from HashMap)
 /*
@@ -32,6 +40,11 @@ public class SimpleFeatureMapImpl
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
+
+  /** ontology in the feature maps */
+  private static final String ONTOLOGY = "ONTOLOGY";
+  /** ontology class in the feature maps */
+  private static final String CLASS = "CLASS";
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -2747241616127229116L;
@@ -65,8 +78,31 @@ public class SimpleFeatureMapImpl
             (keyValueFromThis != null && keyValueFromAFeatureMap == null)
           ) return false;
 
-      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
-        if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
+      /*ontology aware subsume implementation
+      ontotext.bp*/
+      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
+
+        if ( key.equals(CLASS) ) {
+          /* ontology aware processing */
+          Object sfmOntoObj = sfm.get(ONTOLOGY);
+          Object thisOntoObj = this.get(ONTOLOGY);
+          if (null!=sfmOntoObj && null!= thisOntoObj) {
+            if (sfmOntoObj.equals(thisOntoObj)) {
+              boolean doSubsume = ontologySubsume(
+                          sfmOntoObj.toString(),
+                          keyValueFromAFeatureMap.toString(),
+                          keyValueFromThis.toString());
+              if (!doSubsume ) {
+                return false;
+              }
+            } // if ontologies are with the same url
+          } //if not null objects
+        } else {
+          /* processing without ontology awareness */
+          if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
+        }  // else
+
+      } // if
     } // for
 
     return true;
@@ -110,8 +146,28 @@ public class SimpleFeatureMapImpl
             (keyValueFromThis != null && keyValueFromAFeatureMap == null)
           ) return false;
 
-      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null))
-        if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
+      if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
+        if ( key.equals(CLASS) ) {
+          /* ontology aware processing */
+          if (!aFeatureNamesSet.contains(ONTOLOGY))
+            continue;
+
+          Object sfmOntoObj = sfm.get(ONTOLOGY);
+          Object thisOntoObj = this.get(ONTOLOGY);
+          if (null!=sfmOntoObj && null!= thisOntoObj) {
+            if (sfmOntoObj.equals(thisOntoObj)) {
+              if (! ontologySubsume(
+                          sfmOntoObj.toString(),
+                          keyValueFromAFeatureMap.toString(),
+                          keyValueFromThis.toString()))
+                return false;
+            } // if ontologies are with the same url
+          } //if not null objects
+        } else {
+          /*processing without ontology awareness*/
+          if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
+        } //else
+      } // if values not null
     } // for
 
     return true;
@@ -190,5 +246,42 @@ public class SimpleFeatureMapImpl
         ((FeatureMapListener) listeners.elementAt(i)).featureMapUpdated();
     }
   }//fireMapUpdatedEvent
+
+
+  /**ontology enhanced subsume
+   * @param ontoUrl the url of the ontology to be used
+   * @return true if value1 subsumes value2 in the specified ontology */
+  protected boolean ontologySubsume(String ontoUrl,String value1,String value2) {
+    boolean result = false;
+    URL url;
+    try {
+      url = new URL(ontoUrl);
+    } catch (MalformedURLException e){
+      throw new RuntimeException(
+      "\nin SimpleFeatureMapImpl on ontologySubsume()\n"
+      +e.getMessage()+"\n");
+    }
+
+    Ontology o = OntologyPool.getOntologyByUrl(url);
+    if ( null == o ) {
+      /*not loaded yet*/
+      o = OntologyPool.loadOntology(url);
+    } // if not loaded yet
+
+    OClass c1 = o.getClassByName(value1);
+    OClass c2 = o.getClassByName(value2);
+
+    if (null!= c1 && null!= c2) {
+      if (c1.equals(c2)) {
+        result = true;
+      } else {
+        Set subs1 = c1.getSubClasses(OClass.TRANSITIVE_CLOSURE);
+        if (subs1.contains(c2))
+          result = true;
+      } // else
+    } // if not null classes
+    return result;
+  } // ontologySubsume
+
 } // class SimpleFeatureMapImpl
 
