@@ -41,7 +41,7 @@ PKGS=	\
 
 # classpath to build compile commands from
 CP=	-classpath \
-`$(CYGPATHP) ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc9i.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/xerces.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar:../lib/heptag.jar:../lib/ontotext.jar`
+`$(CYGPATHP) ../classes:../lib/junit.jar:../lib/jgl3.1.0.jar:../lib/orajdbc9i.zip:../lib/jacl.jar:../lib/oro.jar:../lib/postgres6.5-jdbc1.2.jar:../lib/graph_drawing.jar:../lib/javacompiler.jar:../lib/xerces.jar:../lib/jigsaw.jar:../lib/gnu-regexp-1.0.8.jar:../lib/ext/guk.jar:../lib/jdom.jar:../lib/GnuGetOpt.jar:../lib/heptag.jar:../lib/ontotext.jar:../lib/ext/nl.mpi.lookup.jar`
 
 # sourcepath to build compile commands from
 SP=	-sourcepath `$(CYGPATHP) ../src`
@@ -51,7 +51,7 @@ SP=	-sourcepath `$(CYGPATHP) ../src`
 COMPILE=$(JAVAC) -O -d `$(CYGPATH) ../classes` $(SP) $(CP)
 RUN=$(JAVA)
 
-# "all" builds the .class files. 
+# "all" builds the .class files.
 # having the main test class as first target, and -Xdepend in the (1.2)
 # javac options, means that most classes get compiled by a single call
 # to javac
@@ -141,7 +141,7 @@ tcl:
 	cp ../src/gate/util/ScriptsList.tcl ../classes/gate/util/ScriptsList.tcl
 
 # run the main interface
-run: 
+run:
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
 	  -Duser.home='Z:\' -Xmx200m gate.Main &
 
@@ -150,11 +150,11 @@ jaclsh:
 	$(RUN) -Djava.compiler=none $(CP) tcl.lang.Shell
 
 # run the GUK editor
-gukdemo: 
+gukdemo:
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` guk.Editor
 
 # run Scratch.main
-scratch: 
+scratch:
 	$(RUN) -Djava.ext.dirs=`$(CYGPATH) ../lib/ext` $(CP) \
 	  -Duser.home='Z:\' -Xmx200m gate.util.Scratch
 
@@ -177,7 +177,7 @@ docs: ../doc/userguide.html build.txt version.txt java2html
 	  -d `$(CYGPATH) ../doc/javadoc` $(PKGS)
 
 # make the developer Javadocs (inc. private members)
-internaldocs: 
+internaldocs:
 	$(JAVADOC) \
 	  -link http://redmires.dcs.shef.ac.uk/java1.3docs/api/ \
 	  $(SP) $(CP) -J-Xmx200m -private -use \
@@ -205,7 +205,7 @@ bindistrib:
 	mkdir $$N; cp -R ../bin/* $$N; rm -rf `find $$N -name CVS -print`; \
 	cd $$N; cp ../gate.jar ../../lib/ext/guk.jar .; mv guk.jar ext; \
 	cd ..; tar czvf $$N.tgz $$N
-	
+
 
 # create distributions
 # don't think this is working...
