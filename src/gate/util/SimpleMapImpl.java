@@ -40,7 +40,6 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
    * to one and the same entry
    */
   Object m_keys[];
-
   /**
    * Array keeping the values of the entries in the map. It is "synchrnized"
    * with the m_keys array - the Nth position in both arrays correspond
@@ -71,22 +70,21 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
   {
     HashSet s = new HashSet(size());
     Object k;
-    for (int i=0; i<m_capacity; i++) {
+    for (int i=0; i<m_size; i++) {
       k = m_keys[i];
-      if (k !=null) {
-        if (k.equals(nullKey))
-            s.add(null);
+      if (k == nullKey)
+           s.add(null);
         else
-            s.add(k);
-      }
+           s.add(k);
     } //for
     return s;
   } // keySet
 
   public void clear()
   {
-    for (int i=0; i<m_capacity; i++) {
-      m_keys[i] = m_values[i] = null;
+    for (int i=0; i<m_size; i++) {
+      m_keys[i] = null;
+      m_values[i] = null;
     } // for
     m_size =0;
   } // clear
@@ -113,42 +111,34 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
       return oldVal;
     }
 
-    if (m_size == m_capacity) {
+    if (m_size == m_capacity)
       increaseCapacity();
-    }
 
-    Object ak;
-    int i;
-    for (i=0; i<m_capacity; i++) {
-      if (m_keys[i] != null)
-          continue;
-
-      if (key == null)
-        key = nullKey;
-      m_keys[i] = key;
-      m_values[i] = value;
-      m_size++;
-      break;
-    } // for
-
-    if (i==m_capacity) {
-      // more specific and correct exception should ne thrwon!!! Naso
-      throw new IllegalArgumentException(
-      "System error! Map implementation does not work correctly!");
-    }
+    if (g_akey == null)
+        theKeysHere.put(key, key);
+    else
+        key = g_akey;
+    m_keys[m_size] = key;
+    m_values[m_size] = value;
+    m_size++;
     return null;
   } // put
 
   public Object remove(Object key)
   {
-    int pos = getPostionByKey(key);
+    int pos = getSubsumeKey((key==null)?nullKey:key);//getPostionByKey(key);
     if (pos == -1)
         return null;
 
     Object oldVal = m_values[pos];
-    m_keys[pos] = null;
-    m_values[pos] = null;
     m_size--;
+    if (m_size != 0)
+    {
+        m_keys[pos] = m_keys[m_size];
+        m_values[pos] = m_values[m_size];
+    }
+    m_keys[m_size] = null;
+    m_values[m_size] = null;
 
     return oldVal;
   } // remove
@@ -163,10 +153,8 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     if (t instanceof SimpleMapImpl) {
       SimpleMapImpl sfm = (SimpleMapImpl)t;
       Object key;
-      for (int i=0; i<sfm.m_capacity; i++) {
+      for (int i=0; i<sfm.m_size; i++) {
           key = sfm.m_keys[i];
-          if (key == null)
-              continue;
           put(key, sfm.m_values[i]);
       } //for
     } else {
@@ -179,20 +167,24 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     } // if
   } // putAll
 
-
+transient Object g_akey = null;
   private int getPostionByKey(Object key) {
-    Object ak;
-    if (key == null) {
-//      return -1;
+    if (key == null)
         key = nullKey;
-    }
+    g_akey = theKeysHere.get(key);
+    if (g_akey == null)
+        return -1;
 
-    for (int i=0; i<m_capacity; i++) {
-      ak = m_keys[i];
-      if (ak == null)
-          continue;
+    for (int i=0; i<m_size; i++) {
+      if (g_akey.equals(m_keys[i]))
+          return i;
+    } // for
+    return -1;
+  } // getPostionByKey
 
-      if (key.equals(ak))
+  protected int getSubsumeKey(Object key) {
+    for (int i=0; i<m_size; i++) {
+      if (key == m_keys[i])
           return i;
     } // for
     return -1;
@@ -200,9 +192,7 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
 
   private int getPostionByValue(Object value) {
     Object av;
-    for (int i=0; i<m_capacity; i++) {
-      if (m_keys[i] == null)
-        continue;
+    for (int i=0; i<m_size; i++) {
       av = m_values[i];
       if (value == null) {
         if (av == null)
@@ -285,10 +275,8 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
   public Set entrySet() {
     HashSet s = new HashSet(size());
     Object v, k;
-    for (int i=0; i<m_capacity; i++) {
+    for (int i=0; i<m_size; i++) {
       k = m_keys[i];
-      if (k == null)
-        continue;
       s.add(new Entry(k.hashCode(), ((k==nullKey)?null:k), m_values[i]));
     } //for
     return s;
@@ -307,10 +295,8 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     }
 
     Object v, k;
-    for (int i=0; i<m_capacity; i++) {
+    for (int i=0; i<m_size; i++) {
       k = m_keys[i];
-      if (k == null)
-        continue;
       v = m.get(k);
       if (v==null) {
         if (m_values[i]!=null)
@@ -368,25 +354,16 @@ class SimpleMapImpl implements Map, java.lang.Cloneable, java.io.Serializable {
     return newMap;
   } // clone
 
-  public String toString() {
-    int max = size() - 1;
-    StringBuffer buf = new StringBuffer();
-    Iterator i = entrySet().iterator();
-
-    buf.append("{");
-    for (int j = 0; j <= max; j++) {
-        Entry e = (Entry) (i.next());
-        buf.append(e.getKey() + "=" + e.getValue());
-        if (j < max)
-      buf.append(", ");
-    }
-    buf.append("}");
-    return buf.toString();
-  }
 
  /** Freeze the serialization UID. */
   static final long serialVersionUID = -6747241616127229116L;
 
  /** the Object instance that will represent the NULL keys in the map */
-  static Object nullKey = new Object();
+  transient static Object nullKey = new Object();
+  transient public static HashMap theKeysHere = new HashMap();
+  static {
+    theKeysHere.put(nullKey, nullKey);
+  }
+
+  /** the static keys colleaction */
 } //SimpleMapImpl
