@@ -122,10 +122,14 @@ public class DBHelper {
 
 
   private static boolean  driversLoaded;
+  private static HashMap pools;
+
+  private static final int POOL_SIZE = 5;
 
   static {
     DUMMY_ID = new Long(Long.MIN_VALUE);
     driversLoaded = false;
+    pools = new HashMap();
   }
 
 
@@ -189,6 +193,68 @@ public class DBHelper {
     }
 
     return conn;
+  }
+
+  /** --- */
+  public static void disconnect(Connection conn)
+    throws PersistenceException{
+
+    //2. close the JDBC connection
+    try {
+      //rollback uncommited transactions
+      conn.rollback();
+      conn.close();
+    }
+    catch (SQLException sqle) {
+      throw new PersistenceException("cannot close JDBC connection, DB error is ["+
+                                      sqle.getMessage() +"]");
+    }
+  }
+
+  /** --- */
+  public static Connection connect(String connectURL,boolean usePool)
+    throws SQLException,ClassNotFoundException{
+
+    if (false == usePool) {
+      return connect(connectURL);
+    }
+    else {
+      ObjectPool currPool = null;
+
+      synchronized(pools) {
+        if (false == pools.containsKey(connectURL)) {
+          currPool = new ObjectPool(POOL_SIZE);
+          pools.put(connectURL, currPool);
+        }
+        else {
+          currPool = (ObjectPool)pools.get(connectURL);
+        }
+      }
+
+      return (Connection)currPool.get();
+    }
+  }
+
+  /** --- */
+  public static void disconnect(Connection conn, boolean usePool)
+    throws PersistenceException{
+
+    if (false == usePool) {
+      disconnect(conn);
+    }
+    else {
+      String jdbcURL = null;
+
+      try {
+        jdbcURL = conn.getMetaData().getURL();
+      }
+      catch(SQLException sqle) {
+        throw new PersistenceException(sqle);
+      }
+
+      ObjectPool currPool = (ObjectPool)pools.get(jdbcURL);
+      currPool.put(conn);
+    }
   }
 
   /** --- */
