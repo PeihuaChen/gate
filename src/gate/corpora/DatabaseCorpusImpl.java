@@ -33,6 +33,11 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
 
   private boolean featuresChanged;
+  private boolean nameChanged;
+  /**
+   * The listener for the events coming from the features.
+   */
+  protected EventsHandler eventHandler;
 
 
   public DatabaseCorpusImpl(String _name,
@@ -50,6 +55,13 @@ public class DatabaseCorpusImpl extends CorpusImpl
     this.documentsList = _dbDocs;
 
     this.featuresChanged = false;
+    this.nameChanged = false;
+
+    //3. add the listeners for the features
+    if (eventHandler == null)
+      eventHandler = new EventsHandler();
+    this.features.addGateListener(eventHandler);
+
 
     //4. add self as listener for the data store, so that we'll know when the DS is
     //synced and we'll clear the isXXXChanged flags
@@ -195,6 +207,16 @@ public class DatabaseCorpusImpl extends CorpusImpl
   }
 
   public void resourceWritten(DatastoreEvent evt){
+    Assert.assertNotNull(evt);
+    Assert.assertNotNull(evt.getResourceID());
+
+    //is the event for us?
+    if (evt.getResourceID().equals(this.getLRPersistenceId())) {
+      //wow, the event is for me
+      //clear all flags, the content is synced with the DB
+          this.featuresChanged =
+            this.nameChanged = false;
+    }
   }
 
   public boolean isResourceChanged(int changeType) {
@@ -203,10 +225,60 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
       case EventAwareLanguageResource.RES_FEATURES:
         return this.featuresChanged;
+      case EventAwareLanguageResource.RES_NAME:
+        return this.nameChanged;
       default:
         throw new IllegalArgumentException();
     }
 
   }
+
+  /** Sets the name of this resource*/
+  public void setName(String name){
+    super.setName(name);
+
+    this.nameChanged = true;
+  }
+
+
+  /** Set the feature set */
+  public void setFeatures(FeatureMap features) {
+    //1. save them first, so we can remove the listener
+    FeatureMap oldFeatures = this.features;
+
+    super.setFeatures(features);
+
+    this.featuresChanged = true;
+
+    //4. sort out the listeners
+    if (eventHandler != null)
+      oldFeatures.removeGateListener(eventHandler);
+    else
+      eventHandler = new EventsHandler();
+    this.features.addGateListener(eventHandler);
+  }
+
+
+  /**
+   * All the events from the features are handled by
+   * this inner class.
+   */
+  class EventsHandler implements gate.event.GateListener {
+    public void processGateEvent(GateEvent e){
+      if (e.getType() != GateEvent.FEATURES_UPDATED)
+        return;
+      //tell the document that its features have been updated
+      featuresChanged = true;
+    }
+  }
+
+  /**
+   * Overriden to remove the features listener, when the document is closed.
+   */
+  public void cleanup() {
+    super.cleanup();
+    if (eventHandler != null)
+      this.features.removeGateListener(eventHandler);
+  }///inner class EventsHandler
 
 }
