@@ -13,15 +13,10 @@
  */
 package gate.util;
 
-
-import com.sun.tools.javac.v8.util.*;
-import com.sun.tools.javac.v8.comp.*;
-import com.sun.tools.javac.v8.code.*;
-import com.sun.tools.javac.v8.*;
+import com.sun.tools.javac.Main;
 
 import java.io.*;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 
 import gate.util.*;
 import gate.*;
@@ -31,114 +26,7 @@ import gate.*;
  * from tools.jar file in the jdk.
  * All processing is done without touching the disk.
  */
-public class Javac{
-
-  protected static class MemoryLog extends Log{
-    MemoryLog(Map sources){
-      super();
-      this.sources = sources;
-      errorsString = new StringBuffer();
-    }
-
-    public void error(int pos, String key, String arg0, String arg1,
-                      String arg2, String arg3, String arg4, String arg5,
-                      String arg6) {
-      if(nerrors < MaxErrors){
-        String msg = getText("compiler.err." + key, arg0, arg1, arg2, arg3,
-                arg4, arg5, arg6);
-
-        if (pos == Position.NOPOS) {
-          errorsString.append(getText("compiler.err.error", null, null, null,
-                                  null, null, null, null));
-          errorsString.append(msg + Strings.getNl());
-        }else{
-          int line = Position.line(pos);
-          int col = Position.column(pos);
-          errorsString.append("Compilation error in " +
-                              className + ":" + line + ": " + msg +
-                              Strings.getNl() + Strings.getNl());
-
-          String sourceCode = (String)sources.get(className);
-          errorsString.append("The offending input was :" + Strings.getNl() +
-                              (sourceCode == null || sourceCode.equals("") ?
-                               "<not available>" :
-                               Strings.addLineNumbers(sourceCode)) +
-                              Strings.getNl());
-        }
-        prompt();
-        nerrors++;
-      }
-    }
-
-    //redirect automatic error reporting from System.err to memory
-    public void print(String s) {
-      errorsString.append(s);
-    }//print
-    Map sources;
-    StringBuffer errorsString;
-    String className;
-  }
-
-  protected static class GJC extends JavaCompiler{
-    GJC(MemoryLog log, Symtab syms, Hashtable options, Map sources){
-      super(log, syms, options);
-      this.sources = sources;
-      this.memLog = log;
-    }
-
-    /**
-     * Overidden so that it reads the sources from the provided Map rather than
-     * from the disk.
-     * @param fileName the name of the file that should contain the source.
-     * @return an input stream for the java source.
-     */
-    public InputStream openSource(String fileName) {
-//Out.prln("Read request for: " + fileName);
-      String className = fileName.substring(0, fileName.lastIndexOf(".java"));
-      className = className.replace('/', '.');
-      className = className.replace('\\', '.');
-      String classSource = (String)sources.get(className);
-      memLog.className = className;
-//Out.prln("Source for: " + className + "\n" + classSource);
-      return new ByteArrayInputStream(classSource.getBytes());
-    }
-
-    void printCount(String kind, int count) {
-      System.out.println("Count: " + count);
-    }
-
-    /**
-     * Overidden so it loads the compiled class in the gate classloader rather
-     * than writting it on the disk.
-     * @param c the class symbol
-     * @throws IOException
-     */
-    public void writeClass(com.sun.tools.javac.v8.code.Symbol.ClassSymbol c)
-                throws IOException {
-      //the compiler will try to write the class file too;
-      //we'll just load the class instead
-      ByteArrayOutputStream os = new ByteArrayOutputStream(4000);
-      new ClassWriter(Hashtable.make()).writeClassFile(os, c);
-      os.flush();
-      byte[] bytes = os.toByteArray();
-//      String className = c.className();
-      //this is the full name with all the $ signs in the right place
-      String className = c.flatName().toJava();
-
-//      //replace the final '.' with '$' for inner classes
-//      if(c.isInner()){
-//        int loc = className.lastIndexOf('.');
-//        if(loc != -1) className = className.substring(0, loc) + "$" +
-//                                  className.substring(loc + 1);
-//      }
-//Out.pr(className + "[" + os.size() + " bytes]");
-      Gate.getClassLoader().defineGateClass(className,
-                                            bytes, 0, os.size());
-    }
-
-    Map sources;
-    MemoryLog memLog;
-  }
+public class Javac implements GateConstants{
 
   /**
    * Compiles a set of java sources and loads the compiled classes in the gate
@@ -148,40 +36,148 @@ public class Javac{
    * In the case of warnings the compiled classes are loaded before the error is
    * raised.
    */
-  public static void loadClasses(Map sources)
-    throws GateException{
-    //build the compiler
-    Hashtable options = Hashtable.make();
-    MemoryLog log = new MemoryLog(sources);
-
-    options.put("-classpath", System.getProperty("java.class.path"));
-
-
-    JavaCompiler compiler = new GJC(log,
-                                    new Symtab(new ClassReader(options),
-                                               new ClassWriter(options)),
-                                    options,
-                                    sources);
-
-    //we have the compiler, let's put it to work
-    ArrayList classNames = new ArrayList(sources.keySet());
-    for(int i = 0; i < classNames.size(); i++){
-      String className = (String)classNames.get(i);
-      String filename = className.replace('.',
-                                          Strings.getFileSep().charAt(0));
-      classNames.set(i, filename + ".java" );
+  public static void loadClasses(Map sources)throws GateException{
+    if(classLoader == null) classLoader = Gate.getClassLoader();
+    File workDir;
+    File srcDir;
+    File classesDir;
+    try{
+      workDir = File.createTempFile("gate", "");
+      if(!workDir.delete()) throw new GateRuntimeException(
+            "Cannot delete a temporary file!");
+      if(! workDir.mkdir())throw new GateRuntimeException(
+            "Cannot create a temporary directory!");
+      srcDir = new File(workDir, "src");
+      if(! srcDir.mkdir())throw new GateRuntimeException(
+            "Cannot create a temporary directory!");
+      classesDir = new File(workDir, "classes");
+      if(! classesDir.mkdir())throw new GateRuntimeException(
+            "Cannot create a temporary directory!");
+    }catch(IOException ioe){
+      throw new GateRuntimeException("Cannot create a temporary file!");
     }
+
+    List sourceFiles = new ArrayList();
+
+    Iterator fileIter = sources.keySet().iterator();
+    while(fileIter.hasNext()){
+      String className = (String)fileIter.next();
+      List pathComponents = getPathComponents(className);
+      String source = (String)sources.get(className);
+      File directory = getDirectory(srcDir, pathComponents);
+      String fileName = (String) pathComponents.get(pathComponents.size() - 1);
+      File srcFile = new File(directory, fileName + ".java");
+      try{
+        FileWriter fw = new FileWriter(srcFile);
+        fw.write(source);
+        fw.flush();fw.close();
+        sourceFiles.add(srcFile.getCanonicalPath());
+      }catch(IOException ioe){
+        throw new GateException(ioe);
+      }
+    }
+    //all source files have now been saved to disk
+    //Prepare the arguments for the javac invocation
+    List args = new ArrayList();
+    args.add("-sourcepath");
+    args.add(srcDir.getAbsolutePath());
+    args.add("-d");
+    args.add(classesDir.getAbsolutePath());
+    args.addAll(sourceFiles);
+    //call the compiler
+    Main.compile((String[])args.toArray(new String[args.size()]));
+
+    //load the newly compiled classes
+    //load all classes from the classes directory
 
     try{
-      compiler.compile(List.make(classNames.toArray()));
-    }catch(Throwable t){
-      throw new GateException(t);
+      loadAllClasses(classesDir, null);
+    }catch(IOException ioe){
+      throw new GateException(ioe);
     }
 
-    //check for errors and warnings
-    if(log.errorsString != null && log.errorsString.length() > 0){
-      throw new GateException(log.errorsString.toString());
-    }
+    //delete the work directory
+    Files.rmdir(workDir);
   }
 
+  /**
+   * Breaks a class name into path components.
+   * @param classname
+   * @return
+   */
+  protected static List getPathComponents(String classname){
+    //break the classname into pieces
+    StringTokenizer strTok = new StringTokenizer(classname, ".", false);
+    List pathComponents = new ArrayList();
+    while(strTok.hasMoreTokens()){
+      String pathComponent = strTok.nextToken();
+      pathComponents.add(pathComponent);
+    }
+    return pathComponents;
+  }
+
+  /**
+   * Gets a file inside a parent directory from a list of path components.
+   * @param workDir
+   * @param pathComponents
+   * @return
+   */
+  protected static File getDirectory(File workDir, List pathComponents){
+    File currentDir = workDir;
+    for(int i = 0; i < pathComponents.size() - 1; i++){
+      String dirName = (String)pathComponents.get(i);
+      //create a new dir in the current directory
+      currentDir = new File(currentDir, dirName);
+      if(currentDir.exists()){
+        if(currentDir.isDirectory()){
+          //nothing to do
+        }else{
+          throw new GateRuntimeException(
+            "Path exists but is not a directory ( " +
+            currentDir.toString() + ")!");
+        }
+      }else{
+        if (!currentDir.mkdir())
+          throw new GateRuntimeException(
+              "Cannot create a temporary directory!");
+      }
+    }
+    return currentDir;
+  }
+
+  /**
+   * Loads the entire hierarchy of classes found in a parent directory.
+   * @param classesDirectory
+   */
+  protected static void loadAllClasses(File classesDirectory,
+                                       String packageName) throws IOException{
+    File[] files = classesDirectory.listFiles();
+    //adjust the package name
+    if(packageName == null){
+      //top level directory -> not a package name
+      packageName = "";
+    }else{
+      //internal directory -> a package name
+      packageName += packageName.length() == 0 ?
+                     classesDirectory.getName() :
+                     "." + classesDirectory.getName();
+    }
+
+    for(int i = 0; i < files.length; i++){
+      if(files[i].isDirectory()) loadAllClasses(files[i], packageName);
+      else{
+        String filename = files[i].getName();
+        if(filename.endsWith(".class")){
+          String className = packageName + "." +
+                             filename.substring(0, filename.length() - 6);
+System.out.println(className);
+          //load the class from the file
+          byte[] bytes = Files.getByteArray(files[i]);
+          classLoader.defineGateClass(className, bytes, 0, bytes.length);
+        }
+      }
+    }
+
+  }
+  protected static GateClassLoader classLoader;
 }

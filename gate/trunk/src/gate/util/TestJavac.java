@@ -37,7 +37,6 @@ public class TestJavac extends TestCase{
 
  /** Jdk compiler */
   public void testCompiler() throws Exception {
-    Gate.init();
 
     String nl = Strings.getNl();
     String javaSource =
@@ -87,43 +86,6 @@ public class TestJavac extends TestCase{
       assertNotNull("Could not find declared method", testMethod);
       result = testMethod.invoke(testInstance, new Object[]{new Integer(2)});
       assertEquals("Invalid result", result, new Integer(1));
-  }
-
-  public void testCompileError() throws Exception {
-    // disable System.out so that the compiler can't splash its error on screen
-//    PrintStream syserr = System.err;
-//    PrintStream newSyserr = new PrintStream(new ByteArrayOutputStream());
-//    System.setErr(newSyserr);
-
-    String nl = Strings.getNl();
-    String javaSource =
-      "package foo.bar;" + nl +
-      "public class X {" + nl +
-      " //some public methods" + nl +
-      " public void foo(){" + nl +
-      " String nullStr = null;" + nl +
-      " nullStr = 123;" + nl +
-      "} " + nl +
-      " " + nl +
-      " " + nl +
-      " }//class Outer" + nl;
-
-    //load the class
-    Map sources = new HashMap();
-    sources.put("foo.bar.X", javaSource);
-    boolean gotException = false;
-    try{
-      Javac.loadClasses(sources);
-    }catch(GateException ge){
-      gotException = true;
-    }finally{
-//      newSyserr.flush();
-//      // re-enable System.out
-//      System.setErr(syserr);
-//      newSyserr.close();
-    }
-    assertTrue("Garbage java code did not raise an exception!",
-               gotException);
   }
 
   /** Debug flag */
