@@ -14,20 +14,16 @@
 */
 
 
-
-Phase:quoted_text
-Input: Token //Split
-Options: control = appelt
+Phase:quoted
+Input: tempNonQuoteMark tempQuoteMark
+Options: control = first
 
 //adds the qouted attribute to the sentence annotations
 
+/*
 Macro: QUOTE
 (
-   {Token.kind=="punctuation",Token.string == "\""} |
-   (
-      {Token.kind=="punctuation",Token.string == "`"}
-      {Token.kind=="punctuation",Token.string == "`"}
-   )
+   {Token.kind=="punctuation",Token.string == "\""}
 )
 
 Macro: NON_QUOTE
@@ -63,22 +59,41 @@ Macro: NON_QUOTE
    {Token.kind=="punctuation",Token.string=="}"} |
    {Token.kind=="punctuation",Token.string==">>"}
 )
+*/
+/*
+Rule: rule_Q1
+Priority:99
+(
+   ((NON_QUOTE)*)
+   (QUOTE)
+   ((NON_QUOTE)+) :quoted
+   (QUOTE)
+   ((NON_QUOTE)*)
+)
+-->
+{
+   gate.AnnotationSet quoted = (gate.AnnotationSet)bindings.get("quoted");
+
+   gate.FeatureMap features = Factory.newFeatureMap();
+   features.put("firedBy","rule_Q1");
+   annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
+}
+*/
 
 
 Rule: rule_Q1
 Priority:99
 (
-//   {Split}
-   ((NON_QUOTE)*) :left
-   (QUOTE)
-   ((NON_QUOTE)*) :quoted
-   (QUOTE)
-   ((NON_QUOTE)*) :right
-//   {Split}
+   ( {tempNonQuoteMark} )*
+   ( {tempQuoteMark} )
+   ( {tempNonQuoteMark} )+ :quoted
+   ( {tempQuoteMark} )
+   ( {tempNonQuoteMark} )*
 )
 -->
 {
    gate.AnnotationSet quoted = (gate.AnnotationSet)bindings.get("quoted");
+
    gate.FeatureMap features = Factory.newFeatureMap();
    features.put("firedBy","rule_Q1");
    annotations.add(quoted.firstNode(), quoted.lastNode(), "Quoted Text", features);
