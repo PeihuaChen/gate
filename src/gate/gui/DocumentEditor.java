@@ -840,7 +840,7 @@ public class DocumentEditor extends AbstractVisualResource
 
     //printing
     toolbar.add(Box.createHorizontalStrut(20));
-    toolbar.add(new PrintAction());
+//    toolbar.add(new PrintAction());
     toolbar.add(new SearchAction());
 
 
