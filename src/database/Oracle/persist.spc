@@ -16,7 +16,7 @@ create or replace package persist is
  *
  */  
 
-  ENCODING_UTF constant varchar2(16) := 'UTF8';
+  ENCODING_DEFAULT constant varchar2(16) := '-!-';
   
   DOCUMENT_CLASS constant varchar2(128) := 'gate.corpora.DatabaseDocumentImpl';
   CORPUS_CLASS constant varchar2(128) :=  'gate.corpora.DatabaseCorpusImpl';
@@ -37,6 +37,9 @@ create or replace package persist is
   BINARY_CONTENT        constant number := 2;
   EMPTY_CONTENT         constant number := 3;  
   
+  type INTARRAY is varray(10) of number;
+  type CHARARRAY is varray(10) of varchar2(4000);
+    
   procedure get_timestamp(p_timestamp  OUT number);
 
   
@@ -102,6 +105,15 @@ create or replace package persist is
                            p_value_type          IN number,
                            p_feat_id             OUT number);
                       
+  procedure create_feature_bulk(p_entity_ids           IN INTARRAY,
+                                p_entity_types         IN INTARRAY,
+                                p_keys                 IN CHARARRAY,  
+                                p_value_numbers        IN INTARRAY,                                
+                                p_value_varchars       IN CHARARRAY,
+                                p_value_types          IN INTARRAY,
+                                p_feat_ids             OUT INTARRAY,
+                                p_count                IN number);
+
   
   function is_valid_feature_type(p_type          IN number)
      return boolean
