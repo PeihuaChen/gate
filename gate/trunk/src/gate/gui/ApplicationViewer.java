@@ -36,7 +36,7 @@ public class ApplicationViewer extends AbstractVisualResource {
 
   public ApplicationViewer() {
   }
-
+/*
   public ApplicationViewer(Controller controller) {
     if(controller instanceof SerialController){
       this.controller = (SerialController)controller;
@@ -48,7 +48,7 @@ public class ApplicationViewer extends AbstractVisualResource {
         "Editing of controllers implemented only for serial controllers!");
     }
   }
-
+*/
   public void setController(SerialController controller){
     this.controller = controller;
   }
@@ -64,6 +64,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     paramsForPR = new HashMap();
     addActionForPR = new HashMap();
     removeActionForPR = new HashMap();
+    runAction = new RunAction();
 /*
     Iterator prIter = project.getPRList().iterator();
     while(prIter.hasNext()){
@@ -148,10 +149,10 @@ public class ApplicationViewer extends AbstractVisualResource {
 
     this.add(mainBox, BorderLayout.CENTER);
 
+    popup = new JPopupMenu();
     popup.add(new RunAction());
     addMenu = new JMenu("Add");
     removeMenu = new JMenu("Remove");
-    updateActions();
     popup.add(addMenu);
     popup.add(removeMenu);
   }
@@ -337,20 +338,32 @@ public class ApplicationViewer extends AbstractVisualResource {
     });
   }//protected void initListeners()
 
-  protected void updateActions(){
+  public MenuElement[] getPopupElements(){
     Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
     while(prIter.hasNext()){
       ProcessingResource pr = (ProcessingResource)prIter.next();
-      if(!addActionForPR.containsKey(pr)){
-        AddPRAction addAction = new AddPRAction(pr);
-        RemovePRAction remAction = new RemovePRAction(pr);
-        remAction.setEnabled(false);
-        addActionForPR.put(pr, addAction);
-        removeActionForPR.put(pr, remAction);
+      if(pr == controller ||
+         ( pr.getFeatures().get("gate.HIDDEN") != null &&
+           ((String)pr.getFeatures().
+                       get("gate.HIDDEN")).equalsIgnoreCase("true"))
+        ){
+        //ignore this resource
+      }else{
+        if(!addActionForPR.containsKey(pr)){
+          AddPRAction addAction = new AddPRAction(pr);
+          RemovePRAction remAction = new RemovePRAction(pr);
+          remAction.setEnabled(false);
+          addActionForPR.put(pr, addAction);
+          removeActionForPR.put(pr, remAction);
+        }
       }
     }
-    addMenu.removeAll();
-    removeMenu.removeAll();
+    popup.removeAll();
+    popup.add(runAction);
+    addMenu = new JMenu("Add");
+    removeMenu = new JMenu("Remove");
+    popup.add(addMenu);
+    popup.add(removeMenu);
     Iterator addActionsIter = addActionForPR.values().iterator();
     while(addActionsIter.hasNext()){
       addMenu.add((Action)addActionsIter.next());
@@ -360,11 +373,7 @@ public class ApplicationViewer extends AbstractVisualResource {
     while(remActionsIter.hasNext()){
       removeMenu.add((Action)remActionsIter.next());
     }
-  }
-
-  public JPopupMenu getPopup(){
-    updateActions();
-    return popup;
+    return popup.getSubElements();
   }
 
   protected String getResourceName(Resource res){
@@ -948,6 +957,7 @@ public class ApplicationViewer extends AbstractVisualResource {
   JButton removeModuleBtn;
   JButton upBtn;
   JButton downBtn;
+  Action runAction;
 
   /**
    * maps from ProcessingResource to List of ParameterDisjunction
