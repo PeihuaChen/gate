@@ -5,6 +5,7 @@ import gate.*;
 
 public abstract class AbstractVisualResource extends JPanel
                                              implements VisualResource{
+
   //no doc required: javadoc will copy it from the interface
   public FeatureMap getFeatures(){
     return features;

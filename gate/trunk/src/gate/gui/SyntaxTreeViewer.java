@@ -34,7 +34,7 @@ import javax.swing.event.PopupMenuEvent;
 import gate.util.*;
 import gate.*;
 
-import guk.uekit.*;
+import guk.*;
 
 /**
   * The SyntaxTreeViewer works by getting an annotation set of all annotations
@@ -1289,6 +1289,10 @@ class FocusButton extends JButton {
 } // class SyntaxTreeViewer
 
 // $Log$
+// Revision 1.14  2000/12/04 12:29:29  valyt
+// Done some work on the visual resources
+// Added the smart XJTable
+//
 // Revision 1.13  2000/11/08 16:35:00  hamish
 // formatting
 //
