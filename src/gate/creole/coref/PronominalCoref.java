@@ -264,21 +264,24 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     //2. delegate processing to the appropriate methods
     if (strPronoun.equalsIgnoreCase("HE") ||
         strPronoun.equalsIgnoreCase("HIM") ||
-        strPronoun.equalsIgnoreCase("HIS")) {
-      return _resolve$HE$HIM$HIS$(currPronoun,prnSentIndex);
+        strPronoun.equalsIgnoreCase("HIS") ||
+        strPronoun.equalsIgnoreCase("HIMSELF")) {
+      return _resolve$HE$HIM$HIS$HIMSELF$(currPronoun,prnSentIndex);
     }
     else if (strPronoun.equalsIgnoreCase("SHE") ||
               strPronoun.equalsIgnoreCase("HER")) {
       return _resolve$SHE$HER$(currPronoun,prnSentIndex);
     }
     else if (strPronoun.equalsIgnoreCase("IT") ||
-              strPronoun.equalsIgnoreCase("ITS")) {
-      return _resolve$IT$ITS$(currPronoun,prnSentIndex);
+              strPronoun.equalsIgnoreCase("ITS") ||
+              strPronoun.equalsIgnoreCase("ITSELF")) {
+      return _resolve$IT$ITS$ITSELF$(currPronoun,prnSentIndex);
     }
     else if (strPronoun.equalsIgnoreCase("I") ||
               strPronoun.equalsIgnoreCase("ME") ||
-              strPronoun.equalsIgnoreCase("MY")) {
-      return _resolve$I$ME$MY$(currPronoun,prnSentIndex);
+              strPronoun.equalsIgnoreCase("MY") ||
+              strPronoun.equalsIgnoreCase("MYSELF")) {
+      return _resolve$I$ME$MY$MYSELF$(currPronoun,prnSentIndex);
     }
     else {
 //      throw new MethodNotImplementedException();
@@ -329,7 +332,7 @@ System.out.println("is pleon=["+result+"]");
   }
 
 
-  private Annotation _resolve$HE$HIM$HIS$(Annotation pronoun, int sentenceIndex) {
+  private Annotation _resolve$HE$HIM$HIS$HIMSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
     Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
@@ -338,7 +341,8 @@ System.out.println("is pleon=["+result+"]");
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("HE") ||
                       pronounString.equalsIgnoreCase("HIM") ||
-                      pronounString.equalsIgnoreCase("HIS"));
+                      pronounString.equalsIgnoreCase("HIS") ||
+                      pronounString.equalsIgnoreCase("HIMSELF"));
 
     //1.
     boolean antecedentFound = false;
@@ -367,7 +371,7 @@ System.out.println("is pleon=["+result+"]");
             bestAntecedent = currPerson;
           }
           else {
-            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$(bestAntecedent,currPerson,pronoun);
+            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(bestAntecedent,currPerson,pronoun);
           }
         }
       }
@@ -417,7 +421,7 @@ System.out.println("is pleon=["+result+"]");
             bestAntecedent = currPerson;
           }
           else {
-            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$(bestAntecedent,currPerson,pronoun);
+            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(bestAntecedent,currPerson,pronoun);
           }
         }
       }
@@ -431,7 +435,7 @@ System.out.println("is pleon=["+result+"]");
   }
 
 
-  private Annotation _resolve$IT$ITS$(Annotation pronoun, int sentenceIndex) {
+  private Annotation _resolve$IT$ITS$ITSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
     Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
@@ -439,7 +443,8 @@ System.out.println("is pleon=["+result+"]");
                       pronoun.getFeatures().get(TOKEN_CATEGORY).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
-                      pronounString.equalsIgnoreCase("ITS"));
+                      pronounString.equalsIgnoreCase("ITS") ||
+                      pronounString.equalsIgnoreCase("ITSELF"));
 
     //0.5 check if the IT is pleonastic
     if (pronounString.equalsIgnoreCase("IT") &&
@@ -476,7 +481,7 @@ System.out.println("PLEONASM...");
           }
         }
         else {
-          bestAntecedent = this._chooseAntecedent$IT$ITS$(bestAntecedent,currOrgLoc,pronoun);
+          bestAntecedent = this._chooseAntecedent$IT$ITS$ITSELF$(bestAntecedent,currOrgLoc,pronoun);
         }
       }
 
@@ -490,7 +495,7 @@ System.out.println("PLEONASM...");
   }
 
 
-  private Annotation _resolve$I$ME$MY$(Annotation pronoun, int sentenceIndex) {
+  private Annotation _resolve$I$ME$MY$MYSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
     Assert.assertTrue(pronoun.getType().equals(TOKEN_TYPE));
@@ -499,7 +504,8 @@ System.out.println("PLEONASM...");
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
     Assert.assertTrue(pronounString.equalsIgnoreCase("I") ||
                       pronounString.equalsIgnoreCase("MY") ||
-                      pronounString.equalsIgnoreCase("ME"));
+                      pronounString.equalsIgnoreCase("ME") ||
+                      pronounString.equalsIgnoreCase("MYSELF"));
 
     //0.5 sanity check
     //if there are not quotes at all in the text then exit
@@ -786,7 +792,7 @@ System.out.println("PLEONASM...");
   }
 
 
-  private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$(Annotation ant1, Annotation ant2, Annotation pronoun) {
+  private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
     Assert.assertNotNull(ant1);
@@ -799,54 +805,43 @@ System.out.println("PLEONASM...");
                       pronounString.equalsIgnoreCase("HER") ||
                       pronounString.equalsIgnoreCase("HE") ||
                       pronounString.equalsIgnoreCase("HIM") ||
-                      pronounString.equalsIgnoreCase("HIS"));
+                      pronounString.equalsIgnoreCase("HIS") ||
+                      pronounString.equalsIgnoreCase("HIMSELF"));
 
-    if (pronounString.equalsIgnoreCase("HE") ||
-        pronounString.equalsIgnoreCase("HIS")||
-        pronounString.equalsIgnoreCase("HIM") ||
-        pronounString.equalsIgnoreCase("SHE") ||
-        pronounString.equalsIgnoreCase("HER")) {
+    Long offset1 = ant1.getStartNode().getOffset();
+    Long offset2 = ant2.getStartNode().getOffset();
+    Long offsetPrn = pronoun.getStartNode().getOffset();
 
-      Long offset1 = ant1.getStartNode().getOffset();
-      Long offset2 = ant2.getStartNode().getOffset();
-      Long offsetPrn = pronoun.getStartNode().getOffset();
+    long diff1 = offsetPrn.longValue() - offset1.longValue();
+    long diff2 = offsetPrn.longValue() - offset2.longValue();
+    Assert.assertTrue(diff1 != 0 && diff2 != 0);
 
-      long diff1 = offsetPrn.longValue() - offset1.longValue();
-      long diff2 = offsetPrn.longValue() - offset2.longValue();
-      Assert.assertTrue(diff1 != 0 && diff2 != 0);
-
-      //get the one CLOSEST AND PRECEDING the pronoun
-      if (diff1 > 0 && diff2 > 0) {
-        //we have [...antecedentA...AntecedentB....pronoun...] ==> choose B
-        if (diff1 < diff2)
-          return ant1;
-        else
+    //get the one CLOSEST AND PRECEDING the pronoun
+    if (diff1 > 0 && diff2 > 0) {
+      //we have [...antecedentA...AntecedentB....pronoun...] ==> choose B
+      if (diff1 < diff2)
+        return ant1;
+      else
+        return ant2;
+    }
+    else if (diff1 < 0 && diff2 < 0) {
+      //we have [...pronoun ...antecedentA...AntecedentB.......] ==> choose A
+      if (Math.abs(diff1) < Math.abs(diff2))
+        return ant1;
+      else
           return ant2;
-      }
-      else if (diff1 < 0 && diff2 < 0){
-        //we have [...pronoun ...antecedentA...AntecedentB.......] ==> choose A
-        if (Math.abs(diff1) < Math.abs(diff2))
-          return ant1;
-        else
-          return ant2;
-      }
-      else {
-        Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
-        //we have [antecedentA...pronoun...AntecedentB] ==> choose A
-        if (diff1 > 0)
-          return ant1;
-        else
-          return ant2;
-      }
-
     }
     else {
-      throw new MethodNotImplementedException();
+      Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+      //we have [antecedentA...pronoun...AntecedentB] ==> choose A
+      if (diff1 > 0)
+        return ant1;
+      else
+        return ant2;
     }
   }
 
-
-  private Annotation _chooseAntecedent$IT$ITS$(Annotation ant1, Annotation ant2, Annotation pronoun) {
+  private Annotation _chooseAntecedent$IT$ITS$ITSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
     Assert.assertNotNull(ant1);
@@ -857,7 +852,8 @@ System.out.println("PLEONASM...");
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING);
 
     Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
-                      pronounString.equalsIgnoreCase("ITS"));
+                      pronounString.equalsIgnoreCase("ITS") ||
+                      pronounString.equalsIgnoreCase("ITSELF"));
 
     Long offset1 = ant1.getStartNode().getOffset();
     Long offset2 = ant2.getStartNode().getOffset();
