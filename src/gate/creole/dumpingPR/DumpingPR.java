@@ -18,6 +18,7 @@ package gate.creole.dumpingPR;
 import java.util.*;
 import gate.*;
 import gate.creole.*;
+import gate.corpora.DocumentImpl;
 import gate.util.*;
 import java.net.URL;
 import java.io.*;
@@ -189,9 +190,18 @@ public class DumpingPR extends AbstractLanguageAnalyser
     }
 
     try {
-      // Prepare to write into the xmlFile using UTF-8 encoding
-      OutputStreamWriter writer = new OutputStreamWriter(
-                            new FileOutputStream(outputFile),"UTF-8");
+      // Prepare to write into the xmlFile using the doc's encoding if there
+      OutputStreamWriter writer;
+      if (document instanceof DocumentImpl) {
+        String encoding = ((DocumentImpl) document).getEncoding();
+        if (encoding == null || "".equals(encoding))
+          writer = new OutputStreamWriter(new FileOutputStream(outputFile));
+        else
+          writer = new OutputStreamWriter(
+                            new FileOutputStream(outputFile), encoding);
+      } else
+          writer = new OutputStreamWriter(
+                            new FileOutputStream(outputFile));
 
       // Write (test the toXml() method)
       // This Action is added only when a gate.Document is created.
