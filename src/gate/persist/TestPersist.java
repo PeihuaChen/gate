@@ -34,7 +34,7 @@ public class TestPersist extends TestCase
   private static final String JDBC_URL =
 //           "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
 //           "jdbc:oracle:oci8:GATEUSER/gate@GATE04.SIRMA.BG";
-"jdbc:oracle:thin:GATEUSER/gate2@hope.dcs.shef.ac.uk:1521:GateDB";
+"jdbc:oracle:thin:GATEUSER/gate2@grindleford.dcs.shef.ac.uk:1521:GateDB2";
 
 
   /** Debug flag */
