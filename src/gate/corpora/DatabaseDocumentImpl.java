@@ -918,10 +918,19 @@ public class DatabaseDocumentImpl extends DocumentImpl
    */
   public void resourceWritten(DatastoreEvent evt){
 
-    //clear all flags, the content is synced with the DB
-    this.contentChanged =
-      this.documentChanged =
-        this.featuresChanged =
-          this.nameChanged = false;
+    Assert.assertNotNull(evt);
+    Assert.assertNotNull(evt.getResourceID());
+
+//System.out.println("synced ID=["+evt.getResourceID()+"], my ID=["+this.getLRPersistenceId()+"]");
+    //is the event for us?
+    if (evt.getResourceID().equals(this.getLRPersistenceId())) {
+      //wow, the event is for me
+      //clear all flags, the content is synced with the DB
+      this.contentChanged =
+        this.documentChanged =
+          this.featuresChanged =
+            this.nameChanged = false;
+//System.out.println("dirty flags cleared...");
+    }
   }
 }
