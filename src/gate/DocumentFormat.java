@@ -271,5 +271,4 @@ public abstract class DocumentFormat implements Resource,StatusReporter
     while(listenersIter.hasNext())
       ((StatusListener)listenersIter.next()).statusChanged(text);
   }
-
 } // class DocumentFormat
