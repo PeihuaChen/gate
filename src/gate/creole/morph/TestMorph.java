@@ -46,16 +46,16 @@ public class TestMorph
     try{
       // creating documents
       verbDocumentToTest = Factory.newDocument(
-        Gate.class.getResource(Files.getResourcePath() + 
+        Gate.class.getResource(Files.getResourcePath() +
         "/gate.ac.uk/tests/morph/verbTest.dat"));
       verbDocumentWithAnswers = Factory.newDocument(
-              Gate.class.getResource(Files.getResourcePath() + 
+              Gate.class.getResource(Files.getResourcePath() +
               "/gate.ac.uk/tests/morph/verbAnswer.dat"));
       nounDocumentToTest = Factory.newDocument(
-              Gate.class.getResource(Files.getResourcePath() + 
+              Gate.class.getResource(Files.getResourcePath() +
               "/gate.ac.uk/tests/morph/nounTest.dat"));
       nounDocumentWithAnswers = Factory.newDocument(
-              Gate.class.getResource(Files.getResourcePath() + 
+              Gate.class.getResource(Files.getResourcePath() +
               "/gate.ac.uk/tests/morph/nounAnswer.dat"));
       // create the instance of (Morphological analyzer)
       morpher = (Morph)Factory.createResource("gate.creole.morph.Morph");
@@ -79,7 +79,6 @@ public class TestMorph
     catch (ResourceInstantiationException rie) {
       fail("Resources cannot be created fpr tokenizers");
     }
-
   }
 
   /**
@@ -158,9 +157,8 @@ public class TestMorph
       String answerTokenValue = (String) (currentAnswerToken.getFeatures().
                                           get(ANNIEConstants.
                                               TOKEN_STRING_FEATURE_NAME));
-
       // run the morpher
-      String rootWord = morpher.findBaseWord(queryTokenValue);
+      String rootWord = morpher.findBaseWord(queryTokenValue, "VB");
 
       // compare it with the answerTokenValue
       assertEquals(rootWord, answerTokenValue);
@@ -244,10 +242,10 @@ public class TestMorph
       String answerTokenValue = (String) (currentAnswerToken.getFeatures().
                                           get(ANNIEConstants.
                                               TOKEN_STRING_FEATURE_NAME));
-
+      //String category = (String) (currentAnswerToken.getFeatures().get(ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME));
 //      System.out.println(morpher+"  "+queryTokenValue);
       // run the morpher
-      String rootWord = morpher.findBaseWord(queryTokenValue);
+      String rootWord = morpher.findBaseWord(queryTokenValue, "NN");
 
       // compare it with the answerTokenValue
       assertEquals(rootWord, answerTokenValue);
