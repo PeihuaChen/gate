@@ -359,8 +359,16 @@ public class CorefEditor
     Annotation delAnnot = ase.getAnnotation();
     Integer id = delAnnot.getId();
     Map matchesMap = null;
-    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                                                  DOCUMENT_COREF_FEATURE_NAME);
+    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    if(!(matchesMapObject instanceof Map)) {
+      // no need to do anything
+      // and return
+      return;
+    }
+
+
+    matchesMap = (Map) matchesMapObject;
+
     if(matchesMap == null)
       return;
 
@@ -419,8 +427,18 @@ public class CorefEditor
 
     // there is some change in the featureMap
     Map matchesMap = null;
-    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                                                  DOCUMENT_COREF_FEATURE_NAME);
+    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    if(!(matchesMapObject instanceof Map)) {
+      // no need to do anything
+      // and return
+      reinitAllVariables();
+      explicitCall = false;
+      annotSets.setSelectedIndex(0);
+      return;
+    }
+
+    matchesMap = (Map) matchesMapObject;
+
     if (matchesMap == null) {
       reinitAllVariables();
       explicitCall = false;
@@ -1019,8 +1037,11 @@ public class CorefEditor
 
     // map for all the annotations with matches feature in it
     Map matchesMap = null;
-    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                                                  DOCUMENT_COREF_FEATURE_NAME);
+    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    if(matchesMapObject instanceof Map) {
+      matchesMap = (Map) matchesMapObject;
+    }
+
 
     // what if this map is null
     if (matchesMap == null) {
@@ -1102,15 +1123,24 @@ public class CorefEditor
     ArrayList ids = (ArrayList) ( (HashMap)
                                  corefChains.get(corefAnnotationSetNodesMap.get(
         annotSets.getSelectedItem()))).get(chainHead);
+
+   String currentSet = (String) annotSets.getSelectedItem();
+   currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null : currentSet;
+
     // we need to update the Co-reference document feature
     Map matchesMap = null;
-    matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                                                  DOCUMENT_COREF_FEATURE_NAME);
-    String currentSet = (String) annotSets.getSelectedItem();
-    currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null : currentSet;
-    java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+    java.util.List matches = null;
+    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    if(matchesMapObject instanceof Map) {
+      matchesMap = (Map) matchesMapObject;
+      matches = (java.util.List) matchesMap.get(currentSet);
+    } else {
+      matchesMap = new HashMap();
+    }
+
     if (matches == null)
       matches = new ArrayList();
+
     int index = matches.indexOf(ids);
     if (index != -1) {
       // yes found
@@ -1599,15 +1629,20 @@ public class CorefEditor
 
               popupWindow.setVisible(false);
 
-              Map matchesMap = null;
-              matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                  DOCUMENT_COREF_FEATURE_NAME);
               String currentSet = (String) annotSets.getSelectedItem();
               currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null :
                            currentSet;
+
+              Map matchesMap = null;
+              Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+              if(matchesMapObject instanceof Map) {
+                matchesMap = (Map) matchesMapObject;
+              }
+
               if (matchesMap == null) {
                 matchesMap = new HashMap();
               }
+
               java.util.List matches = (java.util.List) matchesMap.get(
                   currentSet);
               ArrayList tempList = new ArrayList();
@@ -1642,8 +1677,11 @@ public class CorefEditor
             ArrayList ids = (ArrayList) chains.get(chainNode);
 
             Map matchesMap = null;
-            matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                DOCUMENT_COREF_FEATURE_NAME);
+            Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+            if(matchesMapObject instanceof Map) {
+              matchesMap = (Map) matchesMapObject;
+            }
+
             if (matchesMap == null) {
               matchesMap = new HashMap();
             }
@@ -1885,17 +1923,27 @@ public class CorefEditor
                                corefChains.get(corefAnnotationSetNodesMap.get(
                   annotSets.getSelectedItem()));
               ArrayList ids = (ArrayList) chains.get(node);
+
+              String currentSet = (String) annotSets.getSelectedItem();
+              currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null : currentSet;
+
               // now search this in the document feature map
               Map matchesMap = null;
-              matchesMap = (Map) document.getFeatures().get(ANNIEConstants.
-                  DOCUMENT_COREF_FEATURE_NAME);
-              String currentSet = (String) annotSets.getSelectedItem();
-              currentSet = (currentSet.equals(DEFAULT_ANNOTSET_NAME)) ? null :
-                           currentSet;
-              java.util.List matches = (java.util.List) matchesMap.get(
-                  currentSet);
+              java.util.List matches = null;
+
+              Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+              if(matchesMapObject instanceof Map) {
+                matchesMap = (Map) matchesMapObject;
+                matches = (java.util.List) matchesMap.get(currentSet);
+              }
+
+              if(matchesMap == null) {
+                matchesMap = new HashMap();
+              }
+
               if (matches == null)
                 matches = new ArrayList();
+
               int index = matches.indexOf(ids);
               if (index != -1) {
                 // yes found
